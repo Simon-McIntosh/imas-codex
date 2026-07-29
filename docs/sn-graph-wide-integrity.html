@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -482,7 +482,7 @@ Done-when
   5. Full SN suite no worse than baseline; committed and pushed; outcomes
      recorded and the next followup queued.</pre>
     </article>
-<article class="r-fu" data-id="f-sgwi-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T10:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §6b" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T10:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §6b" data-resolved-at="2026-07-29T19:12:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Unit authority: lock D-parent-units, close the null-unit validator gap, repair the eight, exorcise the ghost disposition</h4>
     <div class="r-fu-body"><p>Eight accepted derived parents carry unit=None on inherently-dimensional bases and validate 'valid' — the ISN validator flags unit='1' but not null. The shipped 'intentional unit-less' verdict on effective_particle_energy / perturbed_particle_energy is challenged (the normalized_* child owns the dimensionless role) and the latter name is a ghost — recorded as intentional yet absent from the graph. Lock D-parent-units with the lead, close the validator gap ISN-side (coordinated), repair the eight per policy, and trace the ghost.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -525,6 +525,7 @@ Done-when
      validates &#x27;valid&#x27; with a null unit on a dimensional base.
   3. The ghost traced and every stale disposition corrected with a dated note.
 </pre>
+    <p class="r-fu-outcome">Unit authority is fully closed. Codex commit f026e0a4 made derived-parent minting require an explicit parent-owned unit and a green ISN identity check; the live repair left 65 accepted derived parents with zero null units and zero identity failures. The coordinated ISN line is now tagged v0.8.0rc60 and pinned by Codex commit 288b3e69. The full ISN suite passed 1,866 tests with 28 skips and 83 expected failures, and the full Codex standard-name suite exited 0 on sun_debug. The ghost disposition already carries its dated correction.</p>
     </article>
 <article class="r-fu" data-id="f-sgwi-003" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T12:50:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §4b" data-resolved-at="2026-07-29T14:34:20+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Close the deletion side of the ledger: every delete path writes its record; explain the 296 ghost rows</h4>
@@ -578,6 +579,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s6b" data-id="unit-authority-live-20260729" data-who="reckon-ship" data-when="2026-07-29T19:20:00+02:00">
     <div class="r-comment-body"><p><strong>Unit authority landed and live state repaired.</strong> Commit <code>f026e0a4</code> requires an explicit unit and a green ISN identity check before a derived parent can materialize, and adds a reviewed, ledgered unit-stamp instrument. Six live parents were stamped with parent-owned units (energy J; four density-family parents m^-3; antenna-strap current A), each with a matching <code>HAS_UNIT</code> edge and one change record. <code>flux_due_to_e_cross_b_drift</code> and <code>square_toroidal_flux_radius_gradient</code> were under-specified and removed through the deletion ledger. Seven invalid bare-state parents were likewise removed. Final live audit: 65 accepted derived parents, zero null units, zero ISN identity failures. ISN full suite: 1,866 passed, 28 skipped, 83 expected failures, zero failures. The dated ghost-disposition correction already exists in <code>docs/sn-dd-unit-curation.html</code>. Record: <code>docs/archive/sn-derived-parent-unit-authority-landed.html</code>. Followup f-sgwi-002 remains open only until the coordinated ISN rotation is tagged and pinned in Codex.</p></div>
+</div>
+<div class="r-comment" data-section="s6b" data-id="unit-authority-closure-20260729" data-who="reckon-ship" data-when="2026-07-29T21:10:00+02:00">
+    <div class="r-comment-body"><p><strong>Coordinated unit-authority closure.</strong> ISN <code>v0.8.0rc60</code> is pinned in Codex by <code>288b3e69</code>; the ISN suite passed 1,866 tests with 28 skips and 83 expected failures, and the Codex standard-name suite exited zero on <code>sun_debug</code>. Followup <code>f-sgwi-002</code> is resolved: all eight original null-unit dispositions are accounted for, the mint path enforces explicit parent-owned units, and the accepted-derived-parent audit remains zero null units.</p></div>
 </div>
 </section>
 </main>

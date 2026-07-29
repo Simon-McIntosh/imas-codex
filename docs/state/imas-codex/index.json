@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-29T14:28:21",
+  "updated": "2026-07-29T21:13:18",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -18,21 +18,33 @@
         "items": [
           {
             "slug": "sn-architectural-pivot",
-            "tier": "opus",
             "why_now": "Highest-ROI upstream blocker; it explicitly blocks sn-quality-bootstrap-v2 and sets the grammar/graph architecture for the rest of the SN roadmap.",
-            "done_when": "Generate/enrich split and lifecycle pivot are landed, bounded drain proof is recorded, and the grammar-as-graph tail is explicitly carved out of S1 closure."
+            "done_when": "Generate/enrich split and lifecycle pivot are landed, bounded drain proof is recorded, and the grammar-as-graph tail is explicitly carved out of S1 closure.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "sn-quality-bootstrap-v2",
-            "tier": "opus",
             "why_now": "Follows directly from sn-architectural-pivot and gates downstream compose, search, and quality work.",
-            "done_when": "Bootstrap hard blockers on the current release line are cleared, the three governance decisions are locked, and export hard failures are gone with only advisory link/divergence/score tails deferred."
+            "done_when": "Bootstrap hard blockers on the current release line are cleared, the three governance decisions are locked, and export hard failures are gone with only advisory link/divergence/score tails deferred.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "sn-closed-physical-base",
-            "tier": "opus",
             "why_now": "Stabilizes the grammar and vocabulary before broader export, parity, and search work.",
-            "done_when": "The upstream closed physical-base redesign is confirmed present in rc31, codex-side audit/graph drift blockers are cleared, and preview/render grouping validation is explicitly handed to later quality work rather than blocking S1."
+            "done_when": "The upstream closed physical-base redesign is confirmed present in rc31, codex-side audit/graph drift blockers are cleared, and preview/render grouping validation is explicitly handed to later quality work rather than blocking S1.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           }
         ]
       },
@@ -47,15 +59,23 @@
         "items": [
           {
             "slug": "sn-search-facility",
-            "tier": "opus",
             "why_now": "Already more than half landed and it explicitly blocks sn-structured-fanout.",
-            "done_when": "Phase 4 call-site migration is complete, temporary aliases are removed on schedule, and the seven-tool surface is backed by unified functions."
+            "done_when": "Phase 4 call-site migration is complete, temporary aliases are removed on schedule, and the seven-tool surface is backed by unified functions.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "sn-structured-fanout",
-            "tier": "opus",
             "why_now": "Depends on sn-quality-bootstrap-v2, sn-search-facility, and sn-extraction-prompt-overhaul; it should start only after those surfaces stabilize.",
-            "done_when": "Phase 0 helper extraction plus Phase 1 refine-name fan-out, telemetry, and tests all land while preserving the baseline no-op fallback."
+            "done_when": "Phase 0 helper extraction plus Phase 1 refine-name fan-out, telemetry, and tests all land while preserving the baseline no-op fallback.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           }
         ]
       },
@@ -70,27 +90,43 @@
         "items": [
           {
             "slug": "sn-benchmark-evolution",
-            "tier": "opus",
             "why_now": "Explicit blocker for sn-benchmark-v1 and the path to meaningful production-quality benchmark gates.",
-            "done_when": "The production reviewer panel, expanded anchors, finer grammar scoring, and baseline storage policy are all locked."
+            "done_when": "The production reviewer panel, expanded anchors, finer grammar scoring, and baseline storage policy are all locked.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "sn-benchmark-v1",
-            "tier": "opus",
             "why_now": "Should follow sn-benchmark-evolution so the benchmark set and pass/fail gates are aligned with the actual reviewer stack.",
-            "done_when": "The full 50-positive and 20-negative set exists, consensus policy is resolved, and the gates are meaningful on production runs."
+            "done_when": "The full 50-positive and 20-negative set exists, consensus policy is resolved, and the gates are meaningful on production runs.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "sn-catalog-quality-refactor",
-            "tier": "opus",
             "why_now": "High-ROI release blocker; derived-parent lifecycle, validation loop, and export safety remain open.",
-            "done_when": "Phase 4 validation runs on live graph data, derived-parent delete/rewire exists for real, and export/publish invariants are green."
+            "done_when": "Phase 4 validation runs on live graph data, derived-parent delete/rewire exists for real, and export/publish invariants are green.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           },
           {
             "slug": "sn-quality-parity",
-            "tier": "opus",
             "why_now": "Umbrella quality plan that should advance only once benchmarking and export/link lifecycle work are credible.",
-            "done_when": "Benchmark harness, richer DD context, docs template rewrite, async link resolution, and the A/B validation loop are all landed."
+            "done_when": "Benchmark harness, richer DD context, docs template rewrite, async link resolution, and the A/B validation loop are all landed.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
           }
         ]
       },
@@ -105,15 +141,23 @@
         "items": [
           {
             "slug": "33-cli-harmonization",
-            "tier": "sonnet",
             "why_now": "Mid-ROI cleanup that should follow stabilization of the SN command surface.",
-            "done_when": "Deferred sn generate renames, -f cleanup, discover-limit aliases, and subcommand consolidation/deprecation planning are complete."
+            "done_when": "Deferred sn generate renames, -f cleanup, discover-limit aliases, and subcommand consolidation/deprecation planning are complete.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {}
+            }
           },
           {
             "slug": "docs-refresh",
-            "tier": "sonnet",
             "why_now": "This work is safest after the code and plan migration dust settles.",
-            "done_when": "README inventory, stale CLI/API references, service-port errors, and historical-doc disposition are all corrected."
+            "done_when": "README inventory, stale CLI/API references, service-port errors, and historical-doc disposition are all corrected.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {}
+            }
           }
         ]
       },
@@ -160,7 +204,8 @@
         ],
         "starts": "2026-07-29",
         "ends": "2026-08-12",
-        "description": "Stability and correctness BEFORE the release (lead decision 2026-07-29: 'I value stability and correctness over a rushed release'). All grammar-moving and validation work lands here so the batch the human reviews is the stable one: the vocabulary rotation, the grammar/prompt truth pass, unit authority, the deletion-ledger invariant, the pipeline mechanics, and the DD-gaps foundation. EXIT CRITERIA (hard, so the RC does not recede again): all five convergence gates re-measured HOLDS at the post-rotation pin, the WEST batch parse-check green at that pin, suites green, and a fresh gate-ledger row recorded."
+        "description": "Stability and correctness BEFORE the release (lead decision 2026-07-29: 'I value stability and correctness over a rushed release'). All grammar-moving and validation work lands here so the batch the human reviews is the stable one: the vocabulary rotation, the grammar/prompt truth pass, unit authority, the deletion-ledger invariant, the pipeline mechanics, and the DD-gaps foundation. EXIT CRITERIA (hard, so the RC does not recede again): all five convergence gates re-measured HOLDS at the post-rotation pin, the WEST batch parse-check green at that pin, suites green, and a fresh gate-ledger row recorded.",
+        "summary": "Unit authority and deletion-ledger work are closed; the DDGap foundation is live; the newly eligible canonical-name cohort is drained. IMAS-DD-grounded correction keeps toroidal_flux_coordinate canonical in ISN v0.8.0rc60. Fifteen bad-order/radius-labelled families now have accepted canonical targets, all 2,158 accepted names parse canonically, the full SN suite is green, and paid spend was $2.539308 of the authorized $50. S6 remains active for the 159-token vocabulary rotation, the remaining grammar/prompt truth pass and rung-6 work, post-rotation gate replay, and the open DDGap storage decision."
       },
       {
         "id": "S7",
@@ -214,9 +259,14 @@
         "when": "2026-07-29",
         "who": "Simon McIntosh",
         "what": "Sprint order inverted by the lead: stability and correctness before the release. S6 is now active and S5 (WEST RC) follows, entering only on the S6 exit criteria: all five gates re-measured HOLDS at the post-rotation pin with the batch parse-check green. The deletion-ledger invariant pulled forward into S6. Rationale: S6 deliberately moves the grammar, so cutting first would rename the reviewed batch under the reviewer, and the reviewer-facing ISN docs carry wrong guidance until the truth pass lands."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "reckon-ship",
+        "what": "S6 canonical cleanup used IMAS-DD metadata to reverse the proposed rho_tor alias direction: toroidal_flux_coordinate stays canonical in v0.8.0rc60. Fifteen exact canonical transitions earned review acceptance; all 2,158 accepted graph names parse canonically; the full SN suite exited zero; exact campaign spend was $2.539308. The graph-wide unit-authority S6 item is now closed. S6 remains active for the vocabulary rotation, grammar/prompt truth tail, gate replay, and DDGap storage decision."
       }
     ],
     "blockers": [],
-    "_version": 14
+    "_version": 15
   }
 }

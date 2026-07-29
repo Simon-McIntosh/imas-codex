@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.82">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="50321530,39c7f95a,b94ac300,11255632,836a1928,2f24fa0a">
+<meta name="plan-commits" content="50321530,39c7f95a,b94ac300,11255632,836a1928,2f24fa0a,055ad391,7222a33b,288b3e69,7575a7e6,40f31ca8">
 <meta name="plan-artifacts" content="docs/archive/sn-naming-loop-robustness-rungs-landed.html,docs/archive/sn-naming-loop-robustness-recovery-landed.html,docs/sn-binary-operand-validation-design.html">
 </head>
 <body>
@@ -663,6 +663,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="toroidal-flux-coordinate-correction" data-who="reckon-ship" data-when="2026-07-29T16:20:00+00:00" data-quote="the coordinate is the toroidal flux label of a surface, the radius appears to be ill defined">
     <div class="r-comment-body"><p><strong>Correction to f-nlr-004 item 9:</strong> the proposed alias direction was backwards. IMAS DD4 documents <code>rho_tor</code> as “Toroidal flux coordinate = sqrt(phi/(pi*b0))” with unit <code>m</code>, and <code>rho_tor_norm</code> as the normalized toroidal flux coordinate. The quantity is a flux-surface label/effective radial coordinate, not a geometric radius. ISN commit <code>8ca33ca</code> therefore keeps <code>toroidal_flux_coordinate</code> canonical and recognizes <code>toroidal_flux_radius</code> only as a legacy alias; the full ISN suite passed 1866/1866 with 28 skips and 83 expected failures. The accidentally staged live rename was cancelled through the ledgered lifecycle operation in Codex commit <code>055ad391</code>, restoring the coordinate name, its source, and its owner.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="canonical-campaign-closure-20260729" data-who="reckon-ship" data-when="2026-07-29T21:12:00+02:00" data-quote="the coordinate is the toroidal flux label of a surface, the radius appears to be ill defined">
+    <div class="r-comment-body"><p><strong>DD-grounded canonical campaign closed.</strong> The IMAS-DD MCP definition for <code>rho_tor</code> is <code>sqrt(phi/(pi*b0))</code>, unit metres: a flux-surface coordinate/effective radial label, not a Euclidean radius. ISN <code>v0.8.0rc60</code> therefore keeps <code>toroidal_flux_coordinate</code> canonical and treats <code>toroidal_flux_radius</code> as a legacy alias. The exact paid drain transitioned 15 bad-order or radius-labelled families to accepted canonical targets; every surviving predecessor is superseded, every target has live provenance, and all target scores are at least 0.875. A graph-wide released-grammar audit found <strong>2,158 accepted, 0 noncanonical, 0 invalid</strong>. Four finalized run ledgers total <strong>$2.539308</strong> against the authorized $50. The full Codex standard-name suite exited zero on <code>sun_debug</code>. Commits: <code>055ad391</code>, <code>7222a33b</code>, <code>288b3e69</code>, <code>7575a7e6</code>, <code>40f31ca8</code>.</p><p><strong>Mechanics findings:</strong> the root edit cascade dry-run listed four descendants but the accept path renamed zero, so the descendants were staged explicitly; scoped runs still perform a global grammar/structural reconcile; and the post-drain <code>to_thread</code> fixup outlives its timeout, preventing process exit until interrupted after the authoritative pool summary. These remain pipeline defects and were not used to bypass review or acceptance.</p></div>
 </div>
 </section>
 </main>
