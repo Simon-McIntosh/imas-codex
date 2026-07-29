@@ -688,9 +688,9 @@ def _division_at(words: list[str]) -> int | None:
 #: ``n`` a density and a mode number, and an honest ``absent`` that asks for the
 #: token the composer needs costs less than a wrong expansion it will follow.
 #:
-#: - ``rho`` — the DD's ``rho_tor``, ISN's ``toroidal_flux_radius``.  ISN also
-#:   carries ``toroidal_flux_coordinate``; the radius is the metres-valued
-#:   carrier a quotient of gradients is written against.
+#: - ``rho`` — the DD's ``rho_tor``, ISN's ``toroidal_flux_coordinate``. The
+#:   dimensionful unnormalized coordinate is the carrier a quotient of
+#:   gradients is written against.
 #: - ``b``, ``b_field`` — the magnetic field, in the magnitude sense a scalar
 #:   quotient uses.
 #: - ``r`` — the major radius, the only radius a ``_over_r`` quotient of
@@ -701,7 +701,7 @@ def _division_at(words: list[str]) -> int | None:
 #: Keys may span several words; the longest match at a position wins, so
 #: ``b_field`` is read whole rather than as ``b`` followed by a stray ``field``.
 _SYMBOL_EXPANSION_CANDIDATES: dict[str, str] = {
-    "rho": "toroidal_flux_radius",
+    "rho": "toroidal_flux_coordinate",
     "b": "magnetic_field",
     "b_field": "magnetic_field",
     "r": "major_radius",

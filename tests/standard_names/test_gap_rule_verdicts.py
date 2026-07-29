@@ -180,12 +180,12 @@ class TestSymbolShorthandInAQuotient:
         [
             (
                 "gradient_rho_squared_over_B_squared",
-                "gradient_toroidal_flux_radius_squared",
+                "gradient_toroidal_flux_coordinate_squared",
                 "magnetic_field_squared",
             ),
             (
                 "grad_rho_squared_over_R_squared",
-                "gradient_toroidal_flux_radius_squared",
+                "gradient_toroidal_flux_coordinate_squared",
                 "major_radius_squared",
             ),
             ("velocity_over_b_field", "velocity", "magnetic_field"),
@@ -211,7 +211,7 @@ class TestSymbolShorthandInAQuotient:
         guidance = describe_gap(
             "physical_base", "gradient_rho_squared_over_B_squared"
         ).guidance
-        assert "'rho' as 'toroidal_flux_radius'" in guidance
+        assert "'rho' as 'toroidal_flux_coordinate'" in guidance
         assert "'B' as 'magnetic_field'" in guidance
 
     @pytest.mark.parametrize(

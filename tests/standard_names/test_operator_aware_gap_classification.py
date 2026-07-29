@@ -129,7 +129,7 @@ OPERATOR_EXPRESSIBLE = [
 RATIO_EXPRESSIBLE = [
     ("qualifier", "gradient_squared_over_magnetic_field_squared"),
     # Symbol shorthand in both operands, read as the registered tokens it
-    # abbreviates (`rho` -> toroidal_flux_radius, `B` -> magnetic_field).
+    # abbreviates (`rho` -> toroidal_flux_coordinate, `B` -> magnetic_field).
     ("physical_base", "gradient_rho_squared_over_B_squared"),
 ]
 
