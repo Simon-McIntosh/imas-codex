@@ -183,6 +183,23 @@ def test_bare_prefix_with_projection_fuses_compound_axis() -> None:
     )
 
 
+def test_projection_and_transformation_follow_public_canonical_order() -> None:
+    """A transformation follows a component when no fused component exists."""
+    seg = GrammarSegments(
+        base_token="flux",
+        base_kind="quantity",
+        projection_axis="perpendicular",
+        qualifiers=["momentum"],
+        process_token="e_cross_b_drift",
+        operators=[{"token": "normalized"}],
+    )
+
+    produced = seg.compose_name()
+
+    assert produced == ("perpendicular_normalized_momentum_flux_due_to_e_cross_b_drift")
+    assert _public_round_trips(produced)
+
+
 def test_operator_schema_does_not_ask_model_for_registry_kind() -> None:
     """The LLM selects a token; the live registry owns its attachment kind."""
     schema = GrammarSegments.model_json_schema()

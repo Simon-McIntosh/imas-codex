@@ -494,6 +494,7 @@ class GrammarSegments(BaseModel):
     def compose_name(self) -> str:
         """Compose the ordered expression and require a strict ISN round-trip."""
         from imas_standard_names.grammar import (
+            NonCanonicalNameError,
             StandardNameIR,
             compose,
             compose_standard_name,
@@ -561,6 +562,20 @@ class GrammarSegments(BaseModel):
 
         try:
             canonical = compose_standard_name(parse_standard_name(name))
+        except NonCanonicalNameError as exc:
+            # ISN owns canonical segment order. Structured operator composition
+            # can produce an equivalent but non-canonical surface order when a
+            # projection and transformation coexist; adopt the canonical form
+            # supplied by the public grammar and verify it independently.
+            name = exc.canonical_form
+            try:
+                canonical = compose_standard_name(parse_standard_name(name))
+            except Exception as canonical_exc:
+                chain = " -> ".join(op.token for op in self.operators) or "(none)"
+                raise ValueError(
+                    f"ISN canonical form '{name}' for operator chain {chain} "
+                    f"failed its own round-trip: {canonical_exc}."
+                ) from canonical_exc
         except Exception as exc:
             chain = " -> ".join(op.token for op in self.operators) or "(none)"
             raise ValueError(
