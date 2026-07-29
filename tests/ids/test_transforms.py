@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import pytest
 
 from imas_codex.ids.transforms import (
@@ -86,8 +88,64 @@ class TestConvertUnits:
 class TestCocosSign:
     """Tests for cocos_sign factor computation."""
 
-    def test_same_cocos_returns_one(self):
-        assert cocos_sign("ip_like", cocos_in=17, cocos_out=17) == 1
+    @pytest.mark.parametrize(
+        "label",
+        [
+            "ip_like",
+            "b0_like",
+            "tor_angle_like",
+            "pol_angle_like",
+            "q_like",
+            "psi_like",
+            "dodpsi_like",
+            "one_like",
+        ],
+    )
+    def test_same_cocos_returns_one(self, label):
+        assert cocos_sign(label, cocos_in=17, cocos_out=17) == 1
+
+    @pytest.mark.parametrize(
+        ("label", "expected"),
+        [
+            pytest.param("ip_like", 1, id="plasma-current"),
+            pytest.param("b0_like", 1, id="toroidal-field-or-f"),
+            pytest.param("tor_angle_like", 1, id="toroidal-angle"),
+            pytest.param("pol_angle_like", -1, id="poloidal-angle"),
+            pytest.param("q_like", -1, id="safety-factor"),
+            pytest.param("psi_like", 2 * math.pi, id="poloidal-flux"),
+            pytest.param(
+                "dodpsi_like",
+                1 / (2 * math.pi),
+                id="poloidal-flux-derivative",
+            ),
+            pytest.param("one_like", 1, id="invariant"),
+        ],
+    )
+    def test_cocos_3_to_17_factor_matrix(self, label, expected):
+        assert cocos_sign(label, cocos_in=3, cocos_out=17) == pytest.approx(expected)
+
+    @pytest.mark.parametrize(
+        "label",
+        [
+            "ip_like",
+            "b0_like",
+            "tor_angle_like",
+            "pol_angle_like",
+            "q_like",
+            "psi_like",
+            "dodpsi_like",
+            "one_like",
+        ],
+    )
+    def test_cocos_3_and_17_factors_are_reciprocal(self, label):
+        forward = cocos_sign(label, cocos_in=3, cocos_out=17)
+        inverse = cocos_sign(label, cocos_in=17, cocos_out=3)
+
+        assert forward * inverse == pytest.approx(1)
+
+    def test_probe_orientation_angles_3_to_17(self):
+        assert cocos_sign("pol_angle_like", cocos_in=3, cocos_out=17) == -1
+        assert cocos_sign("tor_angle_like", cocos_in=3, cocos_out=17) == 1
 
     def test_ip_like_11_to_17(self):
         # σ_Bp flips between COCOS 11 and 17, so ip_like = -1
@@ -117,14 +175,9 @@ class TestCocosSign:
         assert cocos_sign("psi_like", cocos_in=11, cocos_out=17) == -1
 
     def test_psi_like_1_to_11(self):
-        # e_Bp changes (0→1), σ_Bp same → factor = (2π)^(0-1) = 1/(2π)
-        import math
-
+        # e_Bp changes (0→1), σ_Bp is unchanged.
         result = cocos_sign("psi_like", cocos_in=1, cocos_out=11)
-        # 1→11: σ_Bp_out=+1, σ_Bp_in=+1, e_Bp changes 0→1
-        # factor = (σ_Bp_out/σ_Bp_in) * (2π)^((1-e_out)-(1-e_in))
-        #        = 1 * (2π)^(0-1) = 1/(2π)
-        assert result == pytest.approx(1.0 / (2 * math.pi))
+        assert result == pytest.approx(2 * math.pi)
 
     def test_dodpsi_like_11_to_17(self):
         # Inverse of psi_like(11→17) = inverse of -1 = -1
