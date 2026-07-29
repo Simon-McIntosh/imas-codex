@@ -8,15 +8,17 @@
   <meta name="plan-slug" content="sn-dd-gaps">
   <meta name="plan-title" content="DD gaps — first-class authority for the pipeline to flag Data-Dictionary defects">
   <meta name="plan-summary" content="Give the pipeline and its agents a first-class channel to flag errors in the DD itself — a DDGap mechanism mirroring vocab_gaps: flagged by any seat or audit, triaged into registered-exception / upstream-issue / rejected, reconciled against new DD releases, and surfaced in release reporting.">
-  <meta name="plan-status" content="proposed">
+  <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-informs" content="sn-naming-loop-robustness, sn-graph-wide-integrity">
+  <meta name="plan-informs" content="sn-naming-loop-robustness,sn-graph-wide-integrity">
   <title>DD gaps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-07-29">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -141,13 +143,13 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="ddgap-authority" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">D-ddgap-authority — what may an agent's DD flag change by itself?</p>
+<div class="r-dec" data-key="ddgap-authority" data-choice="flag-only" data-by="Simon McIntosh" data-when="2026-07-29T12:33:52+00:00">
+    <p class="r-dec-q">D-ddgap-authority — what may an agent&#x27;s DD flag change by itself?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="flag-only">Nothing: a flag is evidence; behaviour changes only through the existing registry/reconcile instruments after human triage (Recommended — mirrors vocab_gaps, keeps the DD authoritative until a human rules)</button>
+      <button class="r-opt chosen" data-value="flag-only">Nothing: a flag is evidence; behaviour changes only through the existing registry/reconcile instruments after human triage (Recommended — mirrors vocab_gaps, keeps the DD authoritative until a human rules)</button>
       <button class="r-opt" data-value="auto-suppress">A flag may auto-suppress the specific SN↔DD mismatch it documents, pending triage</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-07-29: flag only. A DD-gap flag is evidence; pipeline behaviour changes only through the existing registry/reconcile instruments after human triage. Mirrors the vocab_gaps model and keeps the DD authoritative until a human rules.</p>
     </div>
 <div class="r-dec" data-key="ddgap-storage" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">D-ddgap-storage — where does DD-gap truth live?</p>
@@ -193,7 +195,7 @@ CONSTRAINTS
   - Pre-stage naming checks on every staged path; no AI attribution anywhere.
 
 Done-when
-  1. DDGap write path TDD'd; CLI verb works; flags visible in sn status.
+  1. DDGap write path TDD&#x27;d; CLI verb works; flags visible in sn status.
   2. Registry back-filled with provenance nodes; enforcement unchanged.
   3. Both decisions surfaced to the lead; step 3 queued as the next followup.</pre>
     </article>

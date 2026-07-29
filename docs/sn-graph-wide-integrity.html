@@ -18,7 +18,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-impl" content="0.0">
 </head>
 <body>
@@ -351,15 +351,15 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
-<div class="r-dec" data-key="parent-units" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="parent-units" data-choice="dimensional-unit-required" data-by="Simon McIntosh" data-when="2026-07-29T12:33:28+00:00">
     <p class="r-dec-q">D-parent-units — must an accepted derived structural parent on an inherently-dimensional base carry a unit?</p>
     <p class="r-dec-ctx">Eight accepted derived parents carry unit=None; the ISN validator flags unit=&#x27;1&#x27; on inherently-dimensional bases but not unit=None. The shipped sn-dd-unit-curation §4 verdict recorded two of them as &#x27;intentional unit-less normalised-coordinate parents&#x27; — challenged by the lead 2026-07-29: the dimensionless role belongs to the normalized_* child, and one cited name (perturbed_particle_energy) no longer exists in the graph.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="dimensional-unit-required">A name asserting a dimensional base carries that base&#x27;s unit (J, m^-3, A, …) even as an unrealized parent; null fails validation (Recommended — matches the lead&#x27;s reading; the normalized child carries the dimensionless role)</button>
+      <button class="r-opt chosen" data-value="dimensional-unit-required">A name asserting a dimensional base carries that base&#x27;s unit (J, m^-3, A, …) even as an unrealized parent; null fails validation (Recommended — matches the lead&#x27;s reading; the normalized child carries the dimensionless role)</button>
       <button class="r-opt" data-value="unitless-until-realized">Structural parents stay unit-less until a DD realization injects a unit; the validator gains an explicit &#x27;awaiting-realization&#x27; state instead of silent null</button>
       <button class="r-opt" data-value="per-name">Adjudicate the eight individually</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-07-29: parent units are REQUIRED, and the unit must match the PARENT&#x27;S OWN quantity — not blind child inheritance. A parent can have a normalized_* child, so parent and child units will not always match: the unit is derived from what the parent&#x27;s name asserts (its base semantics), with child-sourcing valid only when the child is not a dimension-transforming variant (exempt the dimensionless / dimension-transforming operator sets, e.g. normalized, perturbed). Consequences: the derived-parent mint runs the validity oracle and this unit rule (a dimensional base with no derivable unit is un-mintable, not silently null); the ISN canonicalizer gains the None guard so a missing unit raises the promised validation error; the eight null-unit parents are repaired to their own dimensional units (energy J or eV per catalog convention, density m^-3, current A, the operator-transformed and binary cases per their own semantics).</p>
     </div>
 </section>
 
