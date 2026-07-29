@@ -261,9 +261,9 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
             MATCH (node:IMASNode {id: b.source_path})
             MATCH (gap:DDGap {id: b.gap_id})
             MERGE (node)-[report:HAS_DD_GAP]->(gap)
+            ON CREATE SET report.observed_at = datetime(b.observed_at)
             SET report.reason = b.reason,
-                report.reporter = b.reporter,
-                report.observed_at = datetime(b.observed_at)
+                report.reporter = b.reporter
             """,
             batch=relationships,
         )

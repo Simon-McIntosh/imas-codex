@@ -183,9 +183,12 @@ def test_registry_write_uses_create_only_example_count() -> None:
         sync_dd_unit_exception_gaps()
 
     node_query = mock_gc.query.call_args_list[1].args[0]
+    edge_query = mock_gc.query.call_args_list[2].args[0]
     assert "ON CREATE SET" in node_query
     assert "gap.example_count = 1" in node_query
     assert "gap.example_count =" not in node_query.split("SET gap.path", 1)[1]
+    assert "ON CREATE SET report.observed_at" in edge_query
+    assert "report.observed_at" not in edge_query.split("SET report.reason", 1)[1]
 
 
 def test_status_counts_are_grouped_on_both_axes() -> None:
