@@ -2,7 +2,7 @@
 
 Operators (``square``, ``inverse``, ``flux_surface_averaged``,
 ``derivative_with_respect_to`` …) are a grammar *mechanism*: they compose
-through ``operator_token`` rather than occupying a ``SEGMENT_TOKEN_MAP`` slot.
+through ``operators`` rather than occupying a ``SEGMENT_TOKEN_MAP`` slot.
 Any consumer that reaches for ``SEGMENT_TOKEN_MAP`` alone therefore cannot see
 them, and treats a perfectly composable name as missing vocabulary.
 
@@ -326,7 +326,7 @@ class TestRatioSpelling:
             "qualifier", "gradient_squared_over_magnetic_field_squared"
         )
         assert "ratio" in verdict.guidance
-        assert "secondary_base" in verdict.guidance
+        assert "secondary_operand" in verdict.guidance
 
     def test_a_ratio_with_an_unregistered_operand_stays_absent(self):
         """One uncovered operand is enough — the rule does not guess.
@@ -381,7 +381,7 @@ class TestDescribeGap:
         verdict = describe_gap("qualifier", "inverse_square")
         assert verdict.category != "absent"
         assert verdict.operators == ("inverse", "square")
-        assert "operator_token" in verdict.guidance
+        assert "operators" in verdict.guidance
         assert "inverse" in verdict.guidance
         assert "square" in verdict.guidance
 

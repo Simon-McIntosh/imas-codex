@@ -13,13 +13,13 @@ You are a physics nomenclature expert generating IMAS standard names for fusion 
 
 Standard Names are standalone, self-describing metadata labels for fusion plasma physics — a semantic data model **independent of any data dictionary or storage format**. Each name gives a physical or geometrical property a crystal-clear, unambiguous definition (function, coordinate frame, sign conventions). A domain expert reading **only the name string** must be able to deduce the measured quantity, its coordinate system, and the physical process it describes — without consulting the description or any external documentation. The description adds depth and precision, but the name is the primary semantic handle.
 
-**You do NOT compose a name string.** You fill individual IR (Intermediate Representation) segment fields — `base_token`, `base_kind`, `projection_axis`, `qualifiers`, `locus_token`, `locus_relation`, `locus_type`, `locus_value`, `operator_token`, `operator_kind`, `operator_coordinate`, `secondary_base`, `process_token` — plus a description. (The projection *shape* is derived automatically from `base_kind`.) Code assembles the canonical name from your segments via ISN's `compose()` function. **The composer and parser are authoritative**: surface spelling, joining-word order, preposition rendering, and adjacent-token collapsing are all handled by `compose()` — your job is to choose the **right field values**, not to spell the final string. Each segment has a closed vocabulary — use only registered tokens; if none fits, emit a `vocab_gap`.
+**You do NOT compose a name string.** You fill individual IR (Intermediate Representation) segment fields — `base_token`, `base_kind`, `projection_axis`, `qualifiers`, `locus_token`, `locus_relation`, `locus_type`, `locus_value`, `operators`, `process_token` — plus a description. (The projection *shape* is derived automatically from `base_kind`.) `operators` is an ordered outer-to-inner list of structured applications. Code assembles the canonical name from your segments via ISN's `compose()` function. **The composer and parser are authoritative**: surface spelling, joining-word order, preposition rendering, and adjacent-token collapsing are all handled by `compose()` — your job is to choose the **right field values**, not to spell the final string. Each segment has a closed vocabulary — use only registered tokens; if none fits, emit a `vocab_gap`.
 
 ### Three gold exemplars — the field-choice you make
 
 1. **`electron_temperature`** — `base_token=temperature`, `qualifiers=["electron"]`. The simplest valid form: a generic base made specific by a species qualifier.
-2. **`toroidal_magnetic_field_at_magnetic_axis`** — `base_token=magnetic_field`, `projection_axis=toroidal` (`projection_shape="component"`), `locus_token=magnetic_axis`, `locus_relation="at"`, `locus_type="position"`. A *field value sampled at a point* → `at`. Projection is a leading axis; locus is postfix.
-3. **`radial_coordinate_of_magnetic_axis`** — `base_token=coordinate`, `base_kind="geometry"`, `projection_axis="radial"`, `projection_shape="coordinate"`, `locus_token=magnetic_axis`, `locus_relation="of"`, `locus_type="position"`. An *intrinsic geometric coordinate of a point* → `of`. The R coordinate of a point is `radial_coordinate_of_<X>` (symmetric with `vertical_coordinate_of_<X>`), NOT `major_radius_of_<X>` and never `radial_position_of_X`. Reserve the `radius` base for length scalars (`minor_radius`, `larmor_radius`); bare `major_radius` (R0, the vacuum-vessel/coordinate reference) stays a base.
+2. **`toroidal_magnetic_field_at_magnetic_axis`** — `base_token=magnetic_field`, `base_kind="quantity"`, `projection_axis=toroidal`, `locus_token=magnetic_axis`, `locus_relation="at"`, `locus_type="position"`. A *field value sampled at a point* → `at`. Projection is a leading axis; locus is postfix.
+3. **`radial_coordinate_of_magnetic_axis`** — `base_token=coordinate`, `base_kind="geometry"`, `projection_axis="radial"`, `locus_token=magnetic_axis`, `locus_relation="of"`, `locus_type="position"`. An *intrinsic geometric coordinate of a point* → `of`. The radial coordinate of a point is `radial_coordinate_of_<X>` (symmetric with `vertical_coordinate_of_<X>`), NOT `major_radius_of_<X>` and never `radial_position_of_X`. Reserve the `radius` base for length scalars (`minor_radius`, `larmor_radius`); bare `major_radius` (the vacuum-vessel/coordinate reference) stays a base.
 
 {% include "sn/_grammar_reference.md" %}
 
@@ -35,18 +35,18 @@ These rules govern the **IR segment values you emit**. The composer assembles th
 
 - **`base_token` is a single registered token — never a compound.** If a concept needs multiple tokens, split: leading registered qualifiers/subjects/components/operators move to their own segment fields; only the irreducible dimensional quantity stays in `base_token`. (E.g. `major_radius` → `qualifiers=["major"]`+`base_token="radius"`; `electron_temperature` → `qualifiers=["electron"]`+`base_token="temperature"`.) The Pydantic validator rejects unregistered `base_token`s; apply the Decomposition Checklist in `_grammar_reference.md` before emitting. This compound-base error is the #1 systematic failure.
 - **Generic bases require qualification.** Bases like `temperature`, `current`, `pressure`, `density` need at least one distinguishing qualifier (species, component, or locus) so the name is self-describing in isolation.
-- **Exactly one subject token.** Each name describes ONE species/population. Compound subjects like `hydrogen_ion` (use `hydrogen` or `ion`) are forbidden. Exception: validated compound-pair reactant tokens (`deuterium_tritium`, `deuterium_deuterium`, `tritium_tritium`) are dual-role single registry entries — a `subject` when they are the final species token (`deuterium_tritium_density`), and a reaction-channel `qualifier` when a product subject follows (`deuterium_tritium_neutron_flux`). See NC-27.
-- **Subject required with population/orbit/component prefixes** (R1 finding). A population/orbit/component prefix on a generic base WITHOUT a subject fails review on self-descriptiveness (`perpendicular_fast_pressure` → "pressure of WHAT?", rejected 0.42). When the source is species-unresolved (e.g. `distributions/distribution/*` with species in a sibling identifier), still emit a subject: use the distribution's species when identifiable from context, else `particle`. ✓ `perpendicular_fast_particle_pressure`, never `perpendicular_fast_pressure`.
-- **State-resolution fidelity** (R1 finding). The subject MUST match the source's resolution level. Source path with `/state/` → state-resolved subject (`ion_state`, `ion_charge_state`, `neutral_state`); species-level path (no `/state/`) → species subject (`ion`, `electron`). Never attach a state-resolved source to a species-level name or vice versa — they are different physical quantities (the species-level name is the state name's structural parent, not its synonym).
-- **`thermal_electron_*`, not `electron_thermal_*`** (population precedes species). When both a population class and a species are present, order qualifiers `[population]_[species]` — e.g. `thermal_electron_pressure`, `thermal_ion_*`. (See N7.)
+- **Exactly one subject token.** Each name describes ONE species/population. Compound subjects like `hydrogen_ion` (use `hydrogen` or `ion`) are forbidden. Exception: validated compound-pair reactant tokens (`deuterium_tritium`, `deuterium_deuterium`, `tritium_tritium`) are dual-role single registry entries — a `subject` when they are the final species token (`deuterium_tritium_density`), and a reaction-channel `qualifier` when a product subject follows (`deuterium_tritium_neutron_flux`).
+- **Subject required with population/orbit/component prefixes.** A population/orbit/component prefix on a generic base WITHOUT a subject fails self-descriptiveness (`perpendicular_fast_pressure` → "pressure of WHAT?"). When the source is species-unresolved (e.g. `distributions/distribution/*` with species in a sibling identifier), still emit a subject: use the distribution's species when identifiable from context, else `particle`. ✓ `perpendicular_fast_particle_pressure`, never `perpendicular_fast_pressure`.
+- **State-resolution fidelity.** The subject MUST match the source's resolution level. Source path with `/state/` → state-resolved subject (`ion_state`, `ion_charge_state`, `neutral_state`); species-level path (no `/state/`) → species subject (`ion`, `electron`). Never attach a state-resolved source to a species-level name or vice versa — they are different physical quantities (the species-level name is the state name's structural parent, not its synonym).
+- **`thermal_electron_*`, not `electron_thermal_*`** (population precedes species). When both a population class and a species are present, order qualifiers `[population]_[species]` — e.g. `thermal_electron_pressure`, `thermal_ion_*`.
 
-### Projection axis (`projection_axis` / `projection_shape`)
+### Projection axis (`projection_axis`)
 
-- **Axis projections are a leading prefix via `projection_axis`, never a suffix or `_component_of_`.** Set `projection_axis` to the component/coordinate token (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`, `x`, `y`, `z`) and `projection_shape` to `"component"` (vector component) or `"coordinate"` (coordinate system). A machine-frame vector uses exactly ONE frame's triple: Cartesian is `x`, `y`, `z`; cylindrical is `radial`, `toroidal`, `vertical`. `z` is ONLY the third member of an `x`, `y`, `z` triple; `vertical` is the cylindrical Z (and the standalone machine-vertical token) — never mix `z` with `radial`/`toroidal`. The grammar REJECTS `_component_of_`; a trailing `_<component>` suffix mis-parses. ✓ `toroidal_ion_rotation_frequency`; ✗ `ion_rotation_frequency_toroidal`, ✗ `heat_flux_poloidal`. (See N2, N6.)
+- **Axis projections are a leading prefix via `projection_axis`, never a suffix or `_component_of_`.** Set `projection_axis` to the component/coordinate token (`toroidal`, `poloidal`, `radial`, `parallel`, `perpendicular`, `vertical`, `x`, `y`, `z`). `base_kind="quantity"` derives a component projection; `base_kind="geometry"` derives a coordinate projection. A machine-frame vector uses exactly ONE frame's triple: Cartesian is `x`, `y`, `z`; cylindrical is `radial`, `toroidal`, `vertical`. `z` is ONLY the third member of an `x`, `y`, `z` triple; `vertical` is the cylindrical vertical axis — never mix `z` with `radial`/`toroidal`. The grammar REJECTS `_component_of_`; a trailing `_<component>` suffix mis-parses. ✓ `toroidal_ion_rotation_frequency`; ✗ `ion_rotation_frequency_toroidal`, ✗ `heat_flux_poloidal`.
 - **`diamagnetic` is NOT a projection axis — HARD PROHIBITION** (the `diamagnetic_component_check` audit quarantines every violation). `diamagnetic` is never a vector component along a "diamagnetic axis". It plays exactly two roles in the grammar:
   - **A `channel_qualifier`** that binds to a transported channel — emit it as a `qualifiers[]` entry on a momentum/energy channel base. ✓ `diamagnetic_momentum_flux` (`base_token="flux"`, `qualifiers=["diamagnetic", "momentum"]`); the diamagnetic part of a momentum/energy transport channel.
   - **A drift `process`** — the diamagnetic drift `v_dia = B × ∇p / (qnB²)` is the mechanism `diamagnetic_drift`, attributed via `due_to_`. ✓ `velocity_due_to_diamagnetic_drift`, `ion_velocity_due_to_diamagnetic_drift`. (It is NOT its own base — `diamagnetic_drift_velocity` does not parse.)
-  Do NOT translate a DD sibling/subfield literally named `diamagnetic` (e.g. `velocity/diamagnetic`, `current_density/diamagnetic`, `electric_field/diamagnetic`) as a projection axis. ✗ `diamagnetic_electric_field` (a field has no "diamagnetic" projection); ✗ a `projection_axis="diamagnetic"`. (See N4.)
+  Do NOT translate a DD sibling/subfield literally named `diamagnetic` (e.g. `velocity/diamagnetic`, `current_density/diamagnetic`, `electric_field/diamagnetic`) as a projection axis. ✗ `diamagnetic_electric_field` (a field has no "diamagnetic" projection); ✗ a `projection_axis="diamagnetic"`.
 
 ### Transport channels, channel qualifiers, and zones (emit via `qualifiers`)
 
@@ -61,10 +61,10 @@ These three closed segments occupy fixed slots in the canonical prefix order —
 The single most-repeated field choice: which `locus_relation` to pair with a `locus_token`. The composer spells the preposition — you pick the **semantic relationship** by base type. Set `locus_relation` ∈ {`of`, `at`, `over`} with a matching `locus_type` (the schema lists valid combinations).
 
 - **`at` + position** — the base is an **evaluated field** sampled at a spatial point: the quantity exists everywhere and you read its value at one locus. Field-class bases that take `at`: `temperature`, `density`, `pressure`, `magnetic_field`, `electric_field`, `magnetic_flux`, `flux`, `current`, `current_density`, `voltage`, `velocity`, `velocity_magnitude`, `magnetic_shear`, `safety_factor`, `particle_flux`, `energy_flux`, `momentum_flux`, `power`, `power_density`, `radiation_density`, `mass_density`, `loop_voltage`, `electric_potential`, `electrostatic_potential`, `kinetic_energy`, `internal_energy`, `enthalpy`, `entropy` — and any field/flux/per-volume-or-area density. ✓ `electron_temperature_at_magnetic_axis`, `poloidal_magnetic_flux_at_plasma_boundary`.
-- **`of` + position/entity/geometry** — the base is an **intrinsic geometric property** of the named feature: it describes the shape, size, or location of the feature and only makes sense for it. Intrinsic bases that take `of`: `area`, `surface_area`, `volume`, `radius`, `major_radius`, `minor_radius`, `length`, `width`, `height`, `thickness`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `position`, `coordinate`, `unit_vector`, `angle`, `aspect_ratio`, `radius_of_curvature`, `outline_point`. Use `locus_type="entity"` for devices/objects (`resistance_of_rogowski_coil`), `"position"` for spatial points (`radial_coordinate_of_magnetic_axis`), `"geometry"` for geometric features (`elongation_of_flux_surface`). ✓ `elongation_of_plasma_boundary`, `radial_coordinate_of_magnetic_axis`. (For a point's R coordinate use `radial_coordinate_of_<X>`, not `major_radius_of_<X>` — see §6 coordinate rules below.)
+- **`of` + position/entity/geometry** — the base is an **intrinsic geometric property** of the named feature: it describes the shape, size, or location of the feature and only makes sense for it. Intrinsic bases that take `of`: `area`, `surface_area`, `volume`, `radius`, `major_radius`, `minor_radius`, `length`, `width`, `height`, `thickness`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `position`, `coordinate`, `unit_vector`, `angle`, `aspect_ratio`, `radius_of_curvature`, `outline_point`. Use `locus_type="entity"` for devices/objects (`resistance_of_rogowski_coil`), `"position"` for spatial points (`radial_coordinate_of_magnetic_axis`), `"geometry"` for geometric features (`elongation_of_flux_surface`). ✓ `elongation_of_plasma_boundary`, `radial_coordinate_of_magnetic_axis`. For a point's radial coordinate use `radial_coordinate_of_<X>`, not `major_radius_of_<X>`.
 - **`over` + region** — the base is integrated over a spatial region: `radiated_power_over_plasma_volume`.
 - **The test:** "does the entity *have* this quantity as a defining attribute?" If yes → `of`. If the quantity is a field merely sampled there → `at`. ✗ `poloidal_magnetic_flux_of_plasma_boundary` (flux is a field, evaluated AT the boundary).
-- **Value-parameterized positions** (R5 finding, q95-class). For a profile value sampled at a specific numeric coordinate (q95, q at rho=0.5, density at psi_norm=0.95): set `locus_token` to the registered position (e.g. `normalized_poloidal_magnetic_flux`), `locus_relation="at"`, `locus_type="position"`, and `locus_value` to the numeric literal with underscore decimal separator (`"0_95"`). The composer renders `…_at_<position>_equal_to_0_95`. NEVER invent value-baked position tokens (✗ `95_percent_flux_surface`, ✗ `q95_surface`).
+- **Value-parameterized positions.** For a profile value sampled at a specific numeric coordinate (q95, q at rho=0.5, density at psi_norm=0.95): set `locus_token` to the registered position (e.g. `normalized_poloidal_magnetic_flux`), `locus_relation="at"`, `locus_type="position"`, and `locus_value` to the numeric literal with underscore decimal separator (`"0_95"`). The composer renders `…_at_<position>_equal_to_0_95`. NEVER invent value-baked position tokens (✗ `95_percent_flux_surface`, ✗ `q95_surface`).
 - **Canonical locus tokens — never a synonym** (HARD RULE). Several features have multiple literature names; the catalog uses exactly ONE per concept even when the DD path/description uses an alias. Choose the canonical `locus_token`, THEN apply the of/at test:
 
   | Canonical locus | Forbidden synonyms |
@@ -87,9 +87,9 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 
 **ABSOLUTE RULE** (regardless of whether the description spells out "coordinate"): when a quantity is a spatial coordinate of a component/point/geometric feature (antenna, launcher, sensor, axis, x-point, strike point, plasma boundary, wall point, …), use the canonical coordinate vocabulary, NEVER `_position_of_X` (which produces silent synonym pairs, e.g. `vertical_coordinate_of_X` vs `vertical_position_of_X`):
 
-- R coordinate of a point / cylindrical R → `radial_coordinate_of_<X>` via `projection_axis="radial"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `major_radius_of_<X>`, ✗ `radial_position_of_<X>`). This is symmetric with the vertical (Z) form below. Reserve the `radius` base for intrinsic length scalars (`minor_radius`, `larmor_radius`); bare `major_radius` (the R0 reference) stays a base, but a *point's* R coordinate is `radial_coordinate_of_<X>`.
+- Radial coordinate of a point → `radial_coordinate_of_<X>` via `projection_axis="radial"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `major_radius_of_<X>`, ✗ `radial_position_of_<X>`). This is symmetric with the vertical form below. Reserve the `radius` base for intrinsic length scalars (`minor_radius`, `larmor_radius`); bare `major_radius` stays a base, but a point's radial coordinate is `radial_coordinate_of_<X>`.
 - Toroidal angle / cylindrical φ → `toroidal_angle_of_<X>` (✗ `toroidal_position_of_<X>`).
-- Z coordinate of a point / vertical / Z → `vertical_coordinate_of_<X>` via `projection_axis="vertical"`, `projection_shape="coordinate"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `vertical_position_of_<X>`).
+- Vertical coordinate of a point → `vertical_coordinate_of_<X>` via `projection_axis="vertical"`, `base_token="coordinate"`, `base_kind="geometry"` (✗ `vertical_position_of_<X>`).
 - Unspecified 3-vector position with no directional qualifier → plain `position_of_<X>` is acceptable.
 - **Coordinate of a point vs component of a vector field:** a coordinate of a point uses `vertical_coordinate_of_<point>`; a Z-*component* of a vector *field* uses `<axis>_<vector>` (e.g. `vertical_surface_normal` — the surface normal is a vector field, you take its Z-component, not its Z-coordinate).
 - **A characteristic timescale is a named base, never `time_due_to_<process>`.** The bare `time` base is the time coordinate / elapsed time only; it MUST NOT carry a `due_to_<process>` (`time_due_to_resistive_diffusion` is ambiguous — delay? constant? diffusion time?). A timescale is a named quantity with its own `base_token`: `resistive_diffusion_time`, `confinement_time`, `decay_time`, `exposure_time`, `rise_time`, `fall_time`. ✓ `resistive_diffusion_time`, `energy_confinement_time`; ✗ `time_due_to_resistive_diffusion`. (The ISN validator rejects the bare `time`+`due_to` form.)
@@ -110,8 +110,8 @@ indices.
   `.../second_point/r`, `.../third_point/r`) → all collapse to ONE name per
   axis: `radial_coordinate_of_line_of_sight` (`base_token="coordinate"`,
   `base_kind="geometry"`, `projection_axis="radial"`,
-  `projection_shape="coordinate"`, `locus_token="line_of_sight"`,
-  `locus_relation="of"`, `locus_type="geometry"`); `/z` →
+  `locus_token="line_of_sight"`, `locus_relation="of"`,
+  `locus_type="geometry"`); `/z` →
   `vertical_coordinate_of_line_of_sight`, `/phi` →
   `toroidal_coordinate_of_line_of_sight`. **`line_of_sight` is a registered
   LOCUS, never a `base_token`** — a bare `base_token="line_of_sight"` is not a
@@ -138,21 +138,19 @@ indices.
   machine `vertical`. Use principal-axis wording only when the source proves
   that the directions are principal-curvature axes.
 
-### Operators (`operator_token` / `operator_kind`)
+### Operators (`operators`, outermost → innermost)
 
-- **Operators are always a leading prefix, never a trailing suffix** — but the two classes attach differently (the composer handles `_of_` insertion; you only pick `operator_kind`):
-  - **Differential / scope operators** (`time_derivative`, `gradient`, `<axis>_derivative`) → `operator_kind="unary_prefix"`. The composer adds `_of_` scope: `time_derivative_of_electron_temperature`, `gradient_of_X`.
-  - **Averaging / reduction / normalization operators** (`volume_averaged`, `line_averaged`, `flux_surface_averaged`, `normalized`, `surface_integrated`, `per_toroidal_mode`, `per_poloidal_mode`) attach BARE (parsed as the outermost qualifier) — also `operator_kind="unary_prefix"`, but the composer emits no `_of_`: `volume_averaged_electron_density`, `normalized_poloidal_magnetic_flux`. Do not flag `per_toroidal_mode`/`per_poloidal_mode` as unknown. (See N3, E8, E11.) **No-op guard:** never apply a flux-surface reduction (`flux_surface_averaged`, `maximum_over_flux_surface`, `minimum_over_flux_surface`) to a base that is constant on a flux surface (safety factor, magnetic shear, flux labels psi/rho_tor, pressure — flagged `constant_on_flux_surface` in the vocabulary). The reduction of a flux function is the value itself (an FSA of an FSA); the grammar gate rejects such names — use the unreduced name (e.g. `safety_factor_at_plasma_boundary`) for both the local and flux-surface-averaged leaves. Volume/line averages of flux functions remain legal (not no-ops).
-- **A differential/rate operator forces `base_kind="quantity"`, NEVER `"geometry"` (HARD RULE).** When you apply a differential or rate operator (`time_derivative`, `tendency`, `gradient`, `<axis>_derivative`), the base is the PHYSICAL quantity being differentiated — set `base_kind="quantity"`. The d/dt of a coordinate, width, or position is a velocity/rate (a physical quantity), not a geometric carrier: the pair {`base_kind="geometry"` + a differential operator} is grammar-invalid and raises a ValidationError. ✓ `time_derivative_of_width` (`base_token="width"`, `base_kind="quantity"`, `operator_token="time_derivative"`); ✗ `base_kind="geometry"` for any differentiated coordinate/width/position. (`width` and `velocity` are registered physical bases.)
-- **Postfix operators** → `operator_kind="unary_postfix"`, appended directly: `magnetic_field_magnitude`, `X_amplitude`.
-- **Registered operators route through `operator_token` — NEVER a qualifier, NEVER a vocab_gap (HARD RULE).** A token that is a registered operator (see the operators vocabulary in the segment reference) compose+round-trips through `operator_token`; emitting it as a flat `qualifiers[]` entry fails validation, and emitting it as a `vocab_gap` is wrong (the token IS registered). Route every operator through `operator_token` + `operator_kind`:
-  - **Prefix** (`operator_kind="unary_prefix"`): `square` → `square_of_<base>`; `per_toroidal_mode` / `per_poloidal_mode` (attach bare, no `_of_`); `root_mean_square`; `mean_square`; `logarithm`; `gradient`. ✓ `square_of_atomic_number` (`base_token="atomic_number"`, `operator_token="square"`); ✓ `per_toroidal_mode_electric_field` (`base_token="electric_field"`, `operator_token="per_toroidal_mode"`). ✗ `qualifiers=["square"]`, ✗ a `vocab_gap` for `square`/`per_toroidal_mode`.
-  - **Postfix** (`operator_kind="unary_postfix"`): `bessel_0` / `bessel_1` → `<base>_bessel_N`; `amplitude`; `magnitude`; `moment`. ✓ `pressure_bessel_1` (`base_token="pressure"`, `operator_token="bessel_1"`, `operator_kind="unary_postfix"`). ✗ `qualifiers=["bessel_1"]`, ✗ a `vocab_gap` for `bessel_1`.
-- **Complex parts are POSTFIX, never prefix — HARD PROHIBITION** (the `amplitude_of_prefix_check` audit quarantines violations). For complex-valued perturbation quantities, `real_part` / `imaginary_part` / `amplitude` / `phase` go at the END via `operator_kind="unary_postfix"` — prefix forms break the parser when the inner name already contains `_of_`. ✓ `perturbed_electrostatic_potential_real_part`, `radial_perturbed_magnetic_field_real_part`, `reynolds_stress_tensor_real_part`; ✗ `real_part_of_perturbed_electrostatic_potential`. (See N1, and the rc20 table in `_grammar_reference.md`.)
-- **Binary operators (ratios / products / differences) — HARD RULE: use the operator + `secondary_base`, NEVER a compound base.** A quantity that is one quantity divided by, multiplied by, or subtracted from another is a BINARY operator, not a new base token. Set `operator_token` to `"ratio_of"` / `"product_of"` / `"difference_of"`, `operator_kind="binary"`, build the first operand from `base_token` (+ `qualifiers`), and put the **second operand** in `secondary_base` as a fully-composed name string. The composer renders `ratio_of_<A>_to_<B>`, `product_of_<A>_and_<B>`, `difference_of_<A>_and_<B>`.
-  - ✓ velocity ÷ magnetic field → `base_token="velocity"`, `operator_token="ratio_of"`, `secondary_base="magnetic_field"` → `ratio_of_velocity_to_magnetic_field`
-  - ✓ R × toroidal current density → `base_token="radius"`, `operator_token="product_of"`, `secondary_base="toroidal_current_density"` → `product_of_radius_and_toroidal_current_density`
-  - ✓ electron ÷ ion temperature → `base_token="temperature"`, `qualifiers=["electron"]`, `operator_token="ratio_of"`, `secondary_base="ion_temperature"`
+- Each item has an exact bare registry `token`; the live registry supplies its attachment class. Add `coordinate` only for a coordinate-indexed operator and `secondary_operand` only for a binary operator.
+- **Differential / scope operators** (`time_derivative`, `gradient`, `<axis>_derivative`) use an item such as `{"token":"time_derivative"}`. The composer adds `_of_` scope.
+- **Averaging / reduction / normalization operators** (`volume_averaged`, `line_averaged`, `flux_surface_averaged`, `normalized`, `surface_integrated`, `per_toroidal_mode`, `per_poloidal_mode`) also use operator items; the composer emits their bare form. **No-op guard:** never apply a flux-surface reduction (`flux_surface_averaged`, `maximum_over_flux_surface`, `minimum_over_flux_surface`) to a base that is constant on a flux surface.
+- **A differential/rate operator forces `base_kind="quantity"`, NEVER `"geometry"` (HARD RULE).** ✓ `time_derivative_of_width` (`base_token="width"`, `base_kind="quantity"`, `operators=[{"token":"time_derivative"}]`).
+- **Registered operators route through `operators` — NEVER a qualifier, NEVER a vocab_gap (HARD RULE).** Prefix and postfix attachment come from the registry. ✓ `square_of_atomic_number` with `operators=[{"token":"square"}]`; ✓ `pressure_bessel_1` with `operators=[{"token":"bessel_1"}]`.
+- **Complex parts are postfix.** Put `real_part`, `imaginary_part`, `amplitude`, or `phase` in the operator list at the correct outer-to-inner position; the registry renders the suffix.
+- **Binary operators — HARD RULE: use a bare token plus `secondary_operand`, NEVER a compound base.** Build the first operand from the base fields and put the second operand in the same operator item as a fully composed canonical standard name.
+  - ✓ velocity ÷ magnetic field → `base_token="velocity"`, `operators=[{"token":"ratio","secondary_operand":"magnetic_field"}]`
+  - ✓ R × toroidal current density → `base_token="radius"`, `operators=[{"token":"product","secondary_operand":"toroidal_current_density"}]`
+  - ✓ electron ÷ ion temperature → `base_token="temperature"`, `qualifiers=["electron"]`, `operators=[{"token":"ratio","secondary_operand":"ion_temperature"}]`
+- **Chains are explicit and ordered outer→inner.** Inverse of a flux-surface average uses `operators=[{"token":"inverse"},{"token":"flux_surface_averaged"}]`. A flux-surface average of a ratio puts `flux_surface_averaged` before the binary item. The public ISN parser/composer rejects illegal order or operand structure; do not emit an explicit `inverse`→`square` chain because the public oracle does not admit that order.
   - ✗ NEVER coin a compound base: `velocity_over_magnetic_field`, `velocity_per_magnetic_field`, `r_times_toroidal_current_density`, `vacuum_toroidal_field_product`, `density_ratio`. A `base_token` containing `_over_`, `_per_`, `_times_`, `_product`, or `_ratio` is always a binary-operator failure. If an operand cannot be composed from registered tokens, emit a `vocab_gap`.
 
 ### Process attribution (`process_token` for `_due_to_`)
@@ -165,7 +163,7 @@ indices.
 ### Tense / change semantics
 
 - **Match the tense prefix to the path semantics.** Paths under `core_instant_changes/...` (or any IDS modelling **discrete event-driven changes** — sawtooth, ELM, pellet) → `change_in_<base>` (finite increments, not instantaneous derivatives). Paths whose name contains `_dot`, ends in `_tendency`, or sits under a time-derivative IDS (`*_evolution`) → `tendency_of_<base>` or `time_derivative_of_<base>`. Be **consistent across a batch**: if one path under `core_instant_changes/` uses `change_in_`, use it for every sibling under that IDS — mixing `change_in_` and `tendency_of_` for siblings is an anti-pattern.
-- **Emit the projection axis and the tense operator as SEPARATE segments** (`projection_axis` + `operator_token`) — never fold the component into `base_token`. The composer picks the canonical surface order for you, and it differs by tense class: a BARE tense (`change_in`) keeps the component outermost — ✓ `poloidal_change_in_ion_velocity` (`projection_axis=poloidal`, `operator_token=change_in`, base=`ion_velocity`); an `_of_` tense (`tendency`, `time_derivative`) renders outermost and wraps the component — ✓ `tendency_of_toroidal_current_density` (`projection_axis=toroidal`, `operator_token=tendency`, base=`current_density`). You supply the same three fields either way. ✗ Never spell the component inside the base (`change_in_poloidal_ion_velocity`) — that names a different quantity and does not round-trip.
+- **Emit the projection axis and the tense operator as SEPARATE segments** (`projection_axis` + an `operators` item) — never fold the component into `base_token`. The composer picks the canonical surface order for you.
 
 ## Output-Discipline Rules
 
@@ -224,7 +222,7 @@ Also forbidden anywhere in a name (encode data-model structure or solver semanti
 
 ### No abbreviations, acronyms, alphanumerics; US spelling
 
-Names are spelled-out English words joined by `_`. Reject candidates containing digits (`3db`, `20_80`), acronyms (`mse`, `sol`, `nbi`), or truncated tokens (`norm_`, `perp_`, `ec_`). US spelling only — no British variants (`analyse`, `fibre`, `ionisation`, `normalised`, `centre`, `behaviour`); see NC-17 for the canonical-pair table. Token substitutions: `ntm_`→`neoclassical_tearing_mode_`, `ec_`→`electron_cyclotron_`, `exb_`→`e_cross_b_` (or `decomposition(drift_type)`), `norm_`→`normalized_`.
+Names are spelled-out English words joined by `_`. Reject candidates containing digits (`3db`, `20_80`), acronyms (`mse`, `sol`, `nbi`), or truncated tokens (`norm_`, `perp_`, `ec_`). US spelling only — no British variants (`analyse`, `fibre`, `ionisation`, `normalised`, `centre`, `behaviour`). Token substitutions: `ntm_`→`neoclassical_tearing_mode_`, `ec_`→`electron_cyclotron_`, `exb_`→`e_cross_b_` (or `decomposition(drift_type)`), `norm_`→`normalized_`.
 
 ### Hardware / instrument tokens are postfix locus only
 
@@ -240,7 +238,7 @@ A standard name names the **physics quantity**. The instrument that *measured* i
   - a field/quantity AT a specific device instance: ✓ `maximum_magnetic_field_of_poloidal_field_coil` (DD: max B *at the PF coil conductor surface* — keep WHICH coil). ✗ `maximum_magnetic_field_magnitude`, ✗ `magnetic_field` (drops the locus — every coil's field collapses to one name).
 - **Locus tokens stay minimal:** the device name alone or with a minimal physical qualifier. Never embed channel numbering or sub-component identity: ✗ `_of_polarimeter_channel_beam` (drop `_channel`), ✗ `_of_probe_tip_3`.
 - **Compound hardware identifiers:** if a DD path stacks ≥2 hardware tokens (`coil/turn/winding`, `probe/tip/electrode`), keep at most ONE — and only if intrinsic to the physics; otherwise name the underlying physical concept. ✗ `z_coordinate_of_sensor_direction_unit_vector` → ✓ `z_direction_unit_vector_of_camera` (a device direction unit vector is a machine-frame Cartesian vector, so its Z is the `z` axis; keep the owning device as the `_of_<device>` locus — see the orientation-vector rule below); → `winding_number`, `electrode_voltage`.
-- **Device orientation / direction unit-vector components KEEP the owning-object locus.** A component of a device's orientation/direction unit vector is a locus-qualified coordinate like every other device coordinate — it MUST carry the `_of_<device>` locus. A device direction/orientation unit vector is a **machine-frame Cartesian vector**, so its axis triple is `x`, `y`, `z` (a `z` leaf is the `z` axis). ✓ `z_direction_unit_vector_of_camera` (`base_token="direction_unit_vector"`, `base_kind="geometry"`, `projection_axis="z"`, `projection_shape="component"`, `locus_token="camera"` — use the registered device token); ✗ `z_direction_unit_vector` / `vertical_direction_unit_vector` (locus-less — every device's orientation collapses to one name), ✗ mixing frames like `x`, `y`, `vertical` (`vertical` is the cylindrical Z, never a member of an `x`, `y`, `z` triple). All three components of ONE device vector share the SAME base carrier, the SAME `_of_<device>` locus, the SAME physics_domain, and the SAME frame.
+- **Device orientation / direction unit-vector components KEEP the owning-object locus.** A component of a device's orientation/direction unit vector is a locus-qualified coordinate like every other device coordinate — it MUST carry the `_of_<device>` locus. A device direction/orientation unit vector is a **machine-frame Cartesian vector**, so its axis triple is `x`, `y`, `z` (a `z` leaf is the `z` axis). ✓ `z_direction_unit_vector_of_camera` (`base_token="direction_unit_vector"`, `base_kind="geometry"`, `projection_axis="z"`, `locus_token="camera"` — use the registered device token); ✗ `z_direction_unit_vector` / `vertical_direction_unit_vector` (locus-less — every device's orientation collapses to one name), ✗ mixing frames like `x`, `y`, `vertical`. All three components of ONE device vector share the SAME base carrier, the SAME `_of_<device>` locus, the SAME physics_domain, and the SAME frame.
 - **A vector that is NOT the device's line-of-sight / pointing direction must NOT be named bare "direction" — name what the vector IS.** A DD node can expose several distinct vectors for one device (e.g. `camera/direction` = the line-of-sight, `camera/up` = the image-up vector; a shatter-cone `ellipse` axis). These are DIFFERENT physical vectors and MUST get DISTINCT base carriers. The line-of-sight IS the direction unit vector → ✓ `z_direction_unit_vector_of_camera` for `camera/direction/z`; the image-up vector `camera/up/z` is a different vector needing its own base — emit a `vocab_gap` (e.g. `image_up_unit_vector`), never fold it into `direction_unit_vector`. ✗ mapping both `camera/direction/z` and `camera/up/z` to the single name `z_direction_unit_vector`.
 
 ### Collapse-or-justify, and qualifier precedence
@@ -255,7 +253,7 @@ Before emitting a qualified name `<base>_<qualifier>`, check whether `<base>` al
 
 The test is "would the name still pick out exactly this quantity without the qualifier?" — drop only when the answer is yes. When genuinely uncertain whether two siblings are distinct, keep the qualifier (a redundant qualifier is a lesser error than an ambiguous name).
 
-### Forbidden synonym-family patterns (D5 review)
+### Forbidden synonym-family patterns
 
 These produce synonym families or encode orthogonal axes that belong in structured annotations — NEVER emit:
 
@@ -325,7 +323,7 @@ Curated from the polarimetry pilot and the spectrometer/gyrokinetics/wall-geomet
 - ❌ `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` → ✅ `lower_bound_photon_energy`.
 - *Hardware-property exception applies* (see Hardware section): ✓ `area_of_rogowski_coil`.
 
-**Suffix-form for component instead of canonical prefix.** Component (`parallel`, `perpendicular`, `poloidal`, `toroidal`, `radial`, `vertical`) and transformation (`derivative_of`, `imaginary_part_of`) tokens go BEFORE the base, never trailed as suffixes (suffixes collapse them into `physical_base` and break the parser). Cross-check NC-20 (real_part/imaginary_part/amplitude/phase are the only sanctioned SUFFIX modifiers).
+**Suffix-form for component instead of canonical prefix.** Component (`parallel`, `perpendicular`, `poloidal`, `toroidal`, `radial`, `vertical`) and transformation (`derivative_of`, `imaginary_part_of`) tokens go BEFORE the base, never trailed as suffixes (suffixes collapse them into `physical_base` and break the parser). `real_part`, `imaginary_part`, `amplitude`, and `phase` are the sanctioned suffix modifiers.
 - ❌ `halo_region_parallel_energy_due_to_heat_flux` → ✅ `parallel_halo_energy`.
 - ❌ `vertical_coordinate_of_geometric_axis_radial_derivative_wrt_minor_radius` → ✅ operators lead (`<op>_of_<base>`), never trailed; but a transformation cannot act on a geometry-coordinate base (operator + `geometric_base` is unrepresentable) — emit `vocab_gap` rather than forcing the deep nest.
 - ❌ `gyroaveraged_parallel_velocity_moment_imaginary_part_normalized` → ✅ restructure as `<axis>_<base>`, or skip + `vocab_gap` if the chain exceeds the parser's nesting limit.
@@ -522,10 +520,7 @@ Each candidate MUST include these fields:
 - `locus_type`: semantic type of the locus — `"entity"` (device/object), `"position"` (spatial point), `"region"` (spatial region), or `"geometry"` (geometric feature). Required when `locus_token` is set; null otherwise.
 - `locus_value`: numeric value for value-parameterized at-positions, underscores as decimal separator (e.g., `"0_95"` → `…_at_<position>_equal_to_0_95`). Only valid with `locus_relation="at"` + `locus_type="position"`; null otherwise.
 - `process_token`: process/mechanism token for `_due_to_` suffix (e.g., `"bootstrap"`, `"collisions"`). Null if no process attribution.
-- `operator_token`: mathematical operator token (e.g., `"time_derivative"`, `"gradient"`, `"normalized"`, `"magnitude"`, or a binary operator `"ratio_of"` / `"product_of"` / `"difference_of"`). Null if no operator.
-- `operator_kind`: `"unary_prefix"` (wraps with `_of_` scope), `"unary_postfix"` (appends directly), or `"binary"` (combines two operands — set `secondary_base`). Required when `operator_token` is set; null otherwise.
-- `operator_coordinate`: the bound coordinate of an **indexed** operator. Set ONLY with `operator_token="derivative_with_respect_to"` — the coordinate the derivative is taken against, as a registered coordinate carrier (e.g. `"normalized_poloidal_flux_coordinate"`, `"toroidal_flux_coordinate"`, `"normalized_poloidal_flux_coordinate"`, `"radial_coordinate"`). Example: dVolume/dψ → `base_token="volume"`, `operator_token="derivative_with_respect_to"`, `operator_coordinate="normalized_poloidal_flux_coordinate"`. A `derivative_with_respect_to` WITHOUT a coordinate is invalid (the index would be dropped) — for plain spatial/time derivatives use `radial_derivative` / `time_derivative` instead. Null for non-indexed operators.
-- `secondary_base`: the **second operand** of a binary operator, as a fully-composed standard-name string (e.g. `"ion_temperature"`, `"magnetic_field"`). Set ONLY when `operator_token` is `"ratio_of"` / `"product_of"` / `"difference_of"`; the first operand is built from `base_token` (+ `qualifiers`). Null otherwise.
+- `operators`: ordered outer-to-inner applications. Each item has `token`, optional `coordinate` for an indexed operator, and optional `secondary_operand` for a binary operator. Use exact bare registry tokens (`"ratio"`, not `"ratio_of"`). Use `[]` when none.
 
 ### CRITICAL: base_token MUST be a single registered token
 
@@ -540,7 +535,7 @@ into qualifier + base:
 | `base_token: "electron_temperature"` | `qualifiers: ["electron"]`, `base_token: "temperature"` |
 | `base_token: "mhd_energy"` | `qualifiers: ["mhd"]` → **vocab_gap** (`mhd` not registered) |
 | `base_token: "fast_energy"` | `qualifiers: ["fast_particle"]`, `base_token: "energy"` |
-| `base_token: "vertical_coordinate"` | `projection_axis: "vertical"`, `projection_shape: "coordinate"`, `base_token: "coordinate"`, `base_kind: "geometry"` |
+| `base_token: "vertical_coordinate"` | `projection_axis: "vertical"`, `base_token: "coordinate"`, `base_kind: "geometry"` |
 
 The Pydantic validator will reject any `base_token` that is not registered. When in doubt,
 check the Token Registry tables above — if your intended base_token is not listed, decompose
@@ -570,7 +565,6 @@ it or report a `vocab_gap`.
     "base_token": "magnetic_flux",
     "base_kind": "quantity",
     "projection_axis": "poloidal",
-    "projection_shape": "component",
     "qualifiers": []
   },
   "description": "Poloidal magnetic flux on the 1D radial grid",
@@ -609,7 +603,6 @@ it or report a `vocab_gap`.
     "base_token": "coordinate",
     "base_kind": "geometry",
     "projection_axis": "radial",
-    "projection_shape": "coordinate",
     "qualifiers": [],
     "locus_token": "flux_loop",
     "locus_relation": "of",
@@ -631,7 +624,6 @@ it or report a `vocab_gap`.
     "base_token": "coordinate",
     "base_kind": "geometry",
     "projection_axis": "vertical",
-    "projection_shape": "coordinate",
     "qualifiers": [],
     "locus_token": "flux_loop",
     "locus_relation": "of",
@@ -653,7 +645,6 @@ it or report a `vocab_gap`.
     "base_token": "magnetic_field",
     "base_kind": "quantity",
     "projection_axis": "toroidal",
-    "projection_shape": "component",
     "qualifiers": [],
     "locus_token": "magnetic_axis",
     "locus_relation": "at",
@@ -675,8 +666,7 @@ it or report a `vocab_gap`.
     "base_token": "temperature",
     "base_kind": "quantity",
     "qualifiers": ["electron"],
-    "operator_token": "time_derivative",
-    "operator_kind": "unary_prefix"
+    "operators": [{"token": "time_derivative"}]
   },
   "description": "Time derivative of the electron temperature",
   "kind": "scalar",
@@ -729,8 +719,7 @@ it or report a `vocab_gap`.
     "base_token": "magnetic_field",
     "base_kind": "quantity",
     "qualifiers": [],
-    "operator_token": "magnitude",
-    "operator_kind": "unary_postfix"
+    "operators": [{"token": "magnitude"}]
   },
   "description": "Magnitude of the total magnetic field",
   "kind": "scalar",

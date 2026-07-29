@@ -132,10 +132,10 @@ ordinal siblings so the multiple DD paths attach to the ONE name:
 
 | DD leaves (ordinal siblings) | ✅ ONE name | Segments |
 |---|---|---|
-| `.../line_of_sight/first_point/r` + `.../second_point/r` + `.../third_point/r` | `radial_coordinate_of_line_of_sight` | `base_token=coordinate`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate`, `locus_token=line_of_sight`, `locus_relation=of`, `locus_type=geometry` |
+| `.../line_of_sight/first_point/r` + `.../second_point/r` + `.../third_point/r` | `radial_coordinate_of_line_of_sight` | `base_token=coordinate`, `base_kind=geometry`, `projection_axis=radial`, `locus_token=line_of_sight`, `locus_relation=of`, `locus_type=geometry` |
 | `.../line_of_sight/*_point/z` | `vertical_coordinate_of_line_of_sight` | …`projection_axis=vertical` |
 | `.../line_of_sight/*_point/phi` | `toroidal_coordinate_of_line_of_sight` | …`projection_axis=toroidal` |
-| `<entity>/outline/r` (vertex array) | `radial_outline` | `base_token=outline`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate` |
+| `<entity>/outline/r` (vertex array) | `radial_outline` | `base_token=outline`, `base_kind=geometry`, `projection_axis=radial` |
 | `<entity>/outline/z` (vertex array) | `vertical_outline` | …`projection_axis=vertical` |
 
 `dd_paths` for `radial_coordinate_of_line_of_sight` MUST list every
@@ -148,7 +148,7 @@ wall) — name it by that entity:
 
 | Entity-distinguished point | Segments |
 |---|---|
-| `radial_position_of_aperture` | `base_token=position`, `base_kind=geometry`, `projection_axis=radial`, `projection_shape=coordinate`, `locus_token=aperture`, `locus_relation=of`, `locus_type=entity` |
+| `radial_position_of_aperture` | `base_token=position`, `base_kind=geometry`, `projection_axis=radial`, `locus_token=aperture`, `locus_relation=of`, `locus_type=entity` |
 | `radial_position_of_first_wall` | …`locus_token=first_wall`, `locus_relation=of`, `locus_type=position` |
 
 Never name such a point by its ordinal (no `first_point`/`second_point` in the name).
@@ -471,7 +471,7 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.
   - **Sibling derivatives:** {% for sib in item.family_siblings %}`{{ sib }}`{% if not loop.last %}, {% endif %}{% endfor %}
 
-  - **ISN naming convention:** a derivative is an OPERATOR applied to the numerator quantity X — never a coined compound base. Common cases use a dedicated operator with `operator_kind="unary_prefix"` and `base_token`=X: time derivative → `operator_token="time_derivative"`; radial derivative → `operator_token="radial_derivative"`; spatial gradient → `operator_token="gradient"`. For a derivative with respect to a flux coordinate Y (e.g. dV/dψ, dp/dψ), if no operator yet expresses it, emit a `vocab_gap` (segment `operator`) — do NOT coin `derivative_of_X_with_respect_to_Y` as a `base_token`.
+  - **ISN naming convention:** a derivative is an OPERATOR applied to the numerator quantity X — never a coined compound base. Common cases use a dedicated item in `operators` with `base_token`=X: time derivative → `{"token":"time_derivative"}`; radial derivative → `{"token":"radial_derivative"}`; spatial gradient → `{"token":"gradient"}`. For a derivative with respect to a flux coordinate Y, use `{"token":"derivative_with_respect_to","coordinate":"<registered coordinate carrier>"}`. If no operator expresses it, emit a `vocab_gap` (segment `operator`) — do NOT coin `derivative_of_X_with_respect_to_Y` as a `base_token`.
   - All siblings sharing the same denominator should use the consistent operator + base form.
 {% endif %}{% endif %}
 
@@ -503,22 +503,22 @@ This is not optional — it is how downstream tooling assembles and validates th
 - `base_kind`: `"quantity"` or `"geometry"`
 
 **Optional segment fields** (omit or set null when not applicable):
-- `projection_axis` + `projection_shape`: for vector/coordinate projections
+- `projection_axis`: for vector/coordinate projections; `base_kind` derives the shape
 - `qualifiers`: list of species/population/modifier tokens
 - `locus_token` + `locus_relation` + `locus_type`: for postfix locus
 - `process_token`: for `_due_to_` mechanism
-- `operator_token` + `operator_kind`: for mathematical operators
+- `operators`: ordered outer-to-inner mathematical operator applications
 
 **Examples:**
 
 - `electron_temperature` →
   `segments: {base_token: "temperature", base_kind: "quantity", qualifiers: ["electron"]}`
 - `radial_magnetic_field` →
-  `segments: {base_token: "magnetic_field", base_kind: "quantity", projection_axis: "radial", projection_shape: "component"}`
+  `segments: {base_token: "magnetic_field", base_kind: "quantity", projection_axis: "radial"}`
 - `minor_radius_of_plasma_boundary` →
   `segments: {base_token: "minor_radius", base_kind: "geometry", locus_token: "plasma_boundary", locus_relation: "of", locus_type: "geometry"}`
 - `time_derivative_of_electron_density` →
-  `segments: {base_token: "density", base_kind: "quantity", qualifiers: ["electron"], operator_token: "time_derivative", operator_kind: "unary_prefix"}`
+  `segments: {base_token: "density", base_kind: "quantity", qualifiers: ["electron"], operators: [{token: "time_derivative"}]}`
 
 If you cannot decompose into valid IR segments, the concept is wrong — revise
 rather than emit empty segments.

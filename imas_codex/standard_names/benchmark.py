@@ -1369,7 +1369,7 @@ def _apply_review_metrics(result: ModelResult, reviews: list[dict]) -> None:
         "projection_axis",
         "locus_token",
         "process_token",
-        "operator_token",
+        "operators",
     }
     field_counts = []
     for c in result.candidates:

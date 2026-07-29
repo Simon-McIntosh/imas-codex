@@ -123,14 +123,13 @@ For each signal that represents a distinct physics quantity, generate IR segment
   - **base_token**: The irreducible base quantity from the closed registry
   - **base_kind**: `"quantity"` or `"geometry"`
   - **projection_axis**: Axis projection (e.g., `"radial"`, `"toroidal"`). Null if none.
-  - **projection_shape**: `"component"` or `"coordinate"`. Required when `projection_axis` is set.
+  - `base_kind` determines projection shape automatically: quantity → component, geometry → coordinate.
   - **qualifiers**: List of qualifier tokens (species, population). Empty list if none.
   - **locus_token**: Entity/position/region token for postfix locus. Null if none.
   - **locus_relation**: `"of"`, `"at"`, or `"over"`. Required when `locus_token` is set.
   - **locus_type**: `"entity"`, `"position"`, `"region"`, or `"geometry"`. Required when `locus_token` is set.
   - **process_token**: Process token for `_due_to_`. Null if none.
-  - **operator_token**: Operator token. Null if none.
-  - **operator_kind**: `"unary_prefix"` or `"unary_postfix"`. Required when `operator_token` is set.
+  - **operators**: Ordered outer-to-inner operator items. Each item has a bare registry `token`, optional indexed `coordinate`, and optional binary `secondary_operand`. Use `[]` if none.
 - **description**: A 1-line ≤120 char plain-English summary of the physical quantity (do NOT repeat the name verbatim)
 - **reason**: Brief justification for the segment choices
 - **skipped**: List of signal IDs that are not distinct physics quantities

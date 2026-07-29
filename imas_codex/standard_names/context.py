@@ -264,7 +264,7 @@ def _load_operators_full() -> dict[str, list[dict[str, Any]]] | None:
 
     Operators (``line_integrated``, ``flux_surface_averaged``, ``square``,
     ``inverse``, ``change_in``, ``variation`` …) compose through
-    ``operator_token`` + ``operator_kind`` rather than occupying a
+    the ordered ``operators`` expression list rather than occupying a
     ``SEGMENT_TOKEN_MAP`` slot, so they never appear in
     :func:`_load_closed_vocab_full`.  The compose prompt otherwise sees only a
     hand-written prose subset of operators and mis-slots the rest — reporting a

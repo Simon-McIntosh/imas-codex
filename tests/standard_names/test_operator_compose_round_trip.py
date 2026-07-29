@@ -1,9 +1,8 @@
-"""Round-trip tests for operator joining in GrammarSegments.compose_name.
+"""Round-trip tests for ordered operator expressions in GrammarSegments.
 
-The compose model emits grammar SEGMENTS (operator_token + operator_kind).
-``GrammarSegments.compose_name()`` delegates to the ISN model-layer composer,
-which produces the CANONICAL standard name — the one the public ISN parser
-accepts and round-trips. The grammar has three operator-join classes:
+The compose model emits an outer-to-inner structured ``operators`` list.
+``GrammarSegments.compose_name()`` delegates spelling and validation to public
+ISN APIs. The grammar has three operator-join classes:
 
 * bare-prefix transformations (volume_averaged, line_averaged, normalized,
   surface_integrated, per_toroidal_mode, ...) render BARE: ``op_<base>``. The
@@ -43,20 +42,17 @@ def _public_round_trips(name: str) -> bool:
 
 def _compose(
     base_token: str,
-    operator_token: str,
-    operator_kind: str,
+    operator: str,
     *,
     base_kind: str = "quantity",
     qualifiers: list[str] | None = None,
-    operator_coordinate: str | None = None,
+    coordinate: str | None = None,
 ) -> str:
     seg = GrammarSegments(
         base_token=base_token,
         base_kind=base_kind,
         qualifiers=qualifiers or [],
-        operator_token=operator_token,
-        operator_kind=operator_kind,
-        operator_coordinate=operator_coordinate,
+        operators=[{"token": operator, "coordinate": coordinate}],
     )
     return seg.compose_name()
 
@@ -65,7 +61,7 @@ def _compose(
 # Class 1: averaging / integrating / per-mode prefixes -> BARE join
 # ---------------------------------------------------------------------------
 
-# (operator_token, base_token, qualifiers, expected canonical name)
+# (operator, base_token, qualifiers, expected canonical name)
 _BARE_CASES = [
     (
         "volume_averaged",
@@ -81,8 +77,18 @@ _BARE_CASES = [
         "flux_surface_averaged_electron_density",
     ),
     ("normalized", "temperature", ["electron"], "normalized_electron_temperature"),
-    ("surface_integrated", "pressure", [], "surface_integrated_pressure"),
-    ("volume_integrated", "pressure", [], "volume_integrated_pressure"),
+    (
+        "surface_integrated",
+        "pressure",
+        ["electron"],
+        "surface_integrated_electron_pressure",
+    ),
+    (
+        "volume_integrated",
+        "pressure",
+        ["electron"],
+        "volume_integrated_electron_pressure",
+    ),
     (
         "per_toroidal_mode",
         "temperature",
@@ -95,7 +101,7 @@ _BARE_CASES = [
 @pytest.mark.parametrize("op,base,quals,expected", _BARE_CASES)
 def test_bare_prefix_operators_compose_bare(op, base, quals, expected) -> None:
     """Averaging/integrating/per-mode prefixes render bare, never with _of_."""
-    produced = _compose(base, op, "unary_prefix", qualifiers=quals)
+    produced = _compose(base, op, qualifiers=quals)
     assert produced == expected, f"{op}: expected bare {expected!r}, got {produced!r}"
     assert "_of_" not in produced, f"{op} wrongly composed with _of_: {produced!r}"
     assert _public_round_trips(produced), (
@@ -122,7 +128,7 @@ _OF_CASES = [
 @pytest.mark.parametrize("op,base,quals,expected", _OF_CASES)
 def test_of_prefix_operators_compose_with_scope(op, base, quals, expected) -> None:
     """Differential-class prefixes render with explicit _of_ scope."""
-    produced = _compose(base, op, "unary_prefix", qualifiers=quals)
+    produced = _compose(base, op, qualifiers=quals)
     assert produced == expected, f"{op}: expected {expected!r}, got {produced!r}"
     assert _public_round_trips(produced), (
         f"{op}: produced {produced!r} does not round-trip through the public parser"
@@ -146,7 +152,7 @@ _POSTFIX_CASES = [
 
 @pytest.mark.parametrize("op,base,expected", _POSTFIX_CASES)
 def test_postfix_operators_compose_as_suffix(op, base, expected) -> None:
-    produced = _compose(base, op, "unary_postfix")
+    produced = _compose(base, op)
     assert produced == expected, f"{op}: expected {expected!r}, got {produced!r}"
     assert _public_round_trips(produced), (
         f"{op}: produced {produced!r} does not round-trip through the public parser"
@@ -166,9 +172,7 @@ def test_bare_prefix_with_projection_fuses_compound_axis() -> None:
         base_token="electric_field",
         base_kind="quantity",
         projection_axis="radial",
-        projection_shape="component",
-        operator_token="normalized",
-        operator_kind="unary_prefix",
+        operators=[{"token": "normalized"}],
     )
     produced = seg.compose_name()
     assert produced == "normalized_radial_electric_field", (
@@ -179,17 +183,16 @@ def test_bare_prefix_with_projection_fuses_compound_axis() -> None:
     )
 
 
-def test_mislabeled_operator_kind_does_not_misroute() -> None:
-    """A registered op routes by its registry kind, not the LLM's operator_kind.
+def test_operator_schema_does_not_ask_model_for_registry_kind() -> None:
+    """The LLM selects a token; the live registry owns its attachment kind."""
+    schema = GrammarSegments.model_json_schema()
+    operator_schema = schema["$defs"]["GrammarOperator"]["properties"]
+    assert "kind" not in operator_schema
 
-    Postfix `magnitude` mislabeled as unary_prefix must still render as a
-    suffix, never `magnitude_of_...`.
-    """
     seg = GrammarSegments(
         base_token="magnetic_field",
         base_kind="quantity",
-        operator_token="magnitude",
-        operator_kind="unary_prefix",  # deliberately wrong
+        operators=[{"token": "magnitude"}],
     )
     produced = seg.compose_name()
     assert produced == "magnetic_field_magnitude", (
@@ -231,7 +234,7 @@ def test_every_prefix_operator_round_trips(op) -> None:
     """compose_name() for any registered unary_prefix op must round-trip.
 
     Coordinate-indexed prefix operators (``derivative_with_respect_to``) bind a
-    coordinate via ``operator_coordinate``; the bare form is intentionally
+    coordinate via the operator item's ``coordinate``; the bare form is intentionally
     rejected (it would drop the index), so they are tested with a registered
     coordinate carrier.
     """
@@ -243,9 +246,8 @@ def test_every_prefix_operator_round_trips(op) -> None:
     produced = _compose(
         "temperature",
         op,
-        "unary_prefix",
         qualifiers=["electron"],
-        operator_coordinate=coord,
+        coordinate=coord,
     )
     assert _public_round_trips(produced), (
         f"{op}: compose_name produced {produced!r}, which is not canonical "
@@ -254,12 +256,8 @@ def test_every_prefix_operator_round_trips(op) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Composed (nested) operator names — an outer differential/postfix operator
-# over an inner bare-prefix transformation — are valid physics and must
-# round-trip. codex composes one operator per candidate (GrammarSegments has a
-# single operator_token), so these names arise when PARSING catalog/source
-# names; the grammar (ISN) must round-trip them. These are the cases a prior
-# session dropped instead of fixing the grammar.
+# Composed operator names must both parse from source strings and be generatable
+# from the structured outer-to-inner expression list.
 # ---------------------------------------------------------------------------
 
 _NESTED_NAMES = [
@@ -276,3 +274,65 @@ def test_nested_operator_names_round_trip(name) -> None:
     assert _public_round_trips(name), (
         f"nested name {name!r} does not round-trip — ISN grammar regression"
     )
+
+
+def test_generates_outer_inverse_over_inner_flux_surface_average() -> None:
+    seg = GrammarSegments(
+        base_token="temperature",
+        base_kind="quantity",
+        qualifiers=["electron"],
+        operators=[
+            {"token": "inverse"},
+            {"token": "flux_surface_averaged"},
+        ],
+    )
+    produced = seg.compose_name()
+    assert produced == "inverse_of_flux_surface_averaged_electron_temperature"
+    assert _public_round_trips(produced)
+
+
+def test_generates_flux_surface_average_over_binary_ratio() -> None:
+    seg = GrammarSegments(
+        base_token="radius",
+        base_kind="quantity",
+        qualifiers=["major"],
+        operators=[
+            {"token": "flux_surface_averaged"},
+            {
+                "token": "ratio",
+                "secondary_operand": "square_minor_radius",
+            },
+            {"token": "square"},
+        ],
+    )
+    produced = seg.compose_name()
+    assert produced == (
+        "flux_surface_averaged_ratio_of_square_of_major_radius_to_square_minor_radius"
+    )
+    assert _public_round_trips(produced)
+
+
+def test_invalid_inverse_square_order_reports_actionable_chain_error() -> None:
+    seg = GrammarSegments(
+        base_token="temperature",
+        base_kind="quantity",
+        qualifiers=["electron"],
+        operators=[
+            {"token": "inverse"},
+            {"token": "square"},
+        ],
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"ISN rejected operator chain inverse -> square.*Reorder",
+    ):
+        seg.compose_name()
+
+
+def test_no_operator_preserves_plain_composition() -> None:
+    seg = GrammarSegments(
+        base_token="temperature",
+        base_kind="quantity",
+        qualifiers=["electron"],
+    )
+    assert seg.compose_name() == "electron_temperature"
