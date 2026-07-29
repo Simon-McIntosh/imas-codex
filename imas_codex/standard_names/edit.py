@@ -1183,6 +1183,18 @@ def _apply_hint(
             "successor instead",
         )
 
+    if axis in ("name", "both") and name_stage in ("accepted", "exhausted"):
+        return _blocked(
+            target,
+            "hint",
+            axis,
+            scope,
+            f"{target!r} is name_stage={name_stage!r} and cannot re-enter name "
+            "generation from a hint. Use `--rename` to propose the complete "
+            "replacement name. For an exhausted but otherwise sound name, use "
+            "`sn rescore` to request a fresh review of the same name.",
+        )
+
     # A name-axis hint steers regeneration, which is driven by the target's
     # producing StandardNameSource(s). A derived/structural name has none —
     # resetting zero sources is a silent no-op that leaves edit_status stuck

@@ -542,6 +542,8 @@ def _startup_patches(revive_mock: MagicMock, retry_mock: MagicMock) -> list:
         patch(f"{_GO}.revive_unit_skipped_sources", new=revive_mock),
         patch(f"{_GO}.retry_vocab_gap_sources_on_grammar_change", new=retry_mock),
         patch(f"{_GO}.reconcile_provenance", return_value={}),
+        patch(f"{_GO}.reconcile_source_status_liveness", return_value={}),
+        patch(f"{_GO}.retire_unreachable_hint_edits", return_value=0),
         patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
         patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
         patch(

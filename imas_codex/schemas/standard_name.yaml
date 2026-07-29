@@ -1277,7 +1277,7 @@ classes:
         description: >-
           Geometry token (grammar decomposition column). Written by
           `_write_grammar_decomposition`.
-      # --- Qualifier fields (R2 A.1 — wave_absorbed_power collapse) ---
+      # --- Qualifier fields for wave and geometric decomposition ---
       toroidal_mode:
         description: >-
           Toroidal mode number qualifier. Used for Fourier-decomposed
@@ -1871,6 +1871,17 @@ classes:
       attempt_count:
         description: Number of composition attempts (for durable retry)
         range: integer
+      retry_events:
+        description: >-
+          Durable operator-requested releases of a terminal composition failure.
+          Each event records the source state and error before the attempt budget
+          was reset, so restoring claimability never erases why the source was
+          parked.
+        multivalued: true
+        range: StandardNameSourceRetry
+        inlined: false
+        annotations:
+          relationship_type: HAS_RETRY_EVENT
       last_error:
         description: Error message from most recent failed attempt
       failed_at:
@@ -2008,6 +2019,38 @@ classes:
           the batch_key grouping and is promoted onto the produced
           StandardName. Set in batch_create_sources (see graph_ops.py).
 
+  StandardNameSourceRetry:
+    description: >-
+      Audit event written before a failed or attempt-capped StandardNameSource
+      is returned to the composition queue. The source keeps a scalar event-id
+      mirror and a HAS_RETRY_EVENT relationship to every event.
+    class_uri: sn:StandardNameSourceRetry
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Composite key: source-retry:{uuid}"
+      source_id:
+        required: true
+        description: The StandardNameSource id released for another attempt.
+      previous_status:
+        required: true
+        range: StandardNameSourceStatus
+        description: Source lifecycle status immediately before release.
+      previous_attempt_count:
+        required: true
+        range: integer
+        description: Composition-attempt count immediately before release.
+      previous_error:
+        description: Most recent composition error retained from the source.
+      reason:
+        required: true
+        description: Operator-supplied reason for granting another attempt.
+      retried_at:
+        required: true
+        range: datetime
+        description: Timestamp when the source was returned to extracted.
+
   SNRun:
     description: >-
       A single invocation of ``sn run``. Records budget, counts,
@@ -2083,8 +2126,8 @@ classes:
         description: >-
           Count of error-sibling StandardName nodes deterministically
           minted during the generate phase via uncertainty modifier
-          grammar (B9). Each parent with HAS_ERROR edges produces up
-          to 3 siblings (upper_uncertainty, lower_uncertainty,
+          grammar. Each parent with HAS_ERROR edges produces up to
+          three siblings (upper_uncertainty, lower_uncertainty,
           uncertainty_index). These skip LLM compose and review.
         range: integer
         ifabsent: int(0)
