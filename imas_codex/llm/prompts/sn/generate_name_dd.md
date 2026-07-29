@@ -64,19 +64,19 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `electron_temp` | `electron_temperature` | No abbreviations in `physical_base` |
 | `langmuir_probe_electron_temperature` | `electron_temperature` | Method independence — measurement device is metadata, not name |
 | `filtered_electron_density` | `electron_density` | Processing is metadata — `filtered_` is not a name segment |
-| `core_electron_temperature` | `electron_temperature_core` | Position goes after physical_base per grammar |
+| `electron_temperature_core` | `core_electron_temperature` | A zone is a canonical prefix segment |
 | `Te` | `electron_temperature` | No symbol abbreviations |
 | `electron_temperature_in_eV` | `electron_temperature` | Unit is never part of the name |
 | `safety_factor_q` | `safety_factor` | No symbol suffixes |
 | `plasma_current_IP` | `plasma_current` | No symbol suffixes |
 | `current_from_passive_loop` | `passive_loop_current` | `_from_` implies causation — use device prefix for signals |
 | `poloidal_flux` | `poloidal_magnetic_flux` | Use controlled vocabulary term; no synonymous short forms |
-| `reconstructed_faraday_rotation_angle` | `faraday_rotation_angle` | Processing method is metadata, not part of the name |
+| `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Drop provenance; use the registered Faraday-polarization quantity |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking into standard name |
 | `flux_surface_averaged_elongation` | `elongation` | Elongation is a geometric property of a contour, not a flux-surface average |
 | `energy_flux_at_wall_surface` | `energy_flux_at_wall` | Position token is `wall`, not `wall_surface` — the `_surface` suffix is redundant |
 | `energy_due_to_recombination_at_ion_state` | `energy_due_to_recombination` | Process tokens are bare vocabulary entries — never append `_at_X` / `_in_X` / `_on_X` qualifiers |
-| `energy_due_to_impurity_radiation_in_halo_region` | `halo_region_radiated_energy_due_to_impurity_radiation` | Region qualifiers go in the subject prefix, not after `due_to_<process>` |
+| `energy_due_to_impurity_radiation_in_halo_region` | `radiated_energy_over_halo_region_due_to_impurity_radiation` | A region is a postfix `_over_` locus before the process suffix |
 | `vertical_coordinate_of_outline_point` | `vertical_outline` | **Enumeration is a coordinate, not a name** — outline vertices are an ordinal array of ONE geometry; collapse to `radial_outline` / `vertical_outline` (`base_token=outline`, axis as `coordinate` projection). The vertex index lives in the DD path; emit every vertex path in `dd_paths`. Never encode `outline_point` |
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
 | `x1_coordinate_of_neutron_detector_geometry_outline` | `first_local_tangential_coordinate_of_neutron_detector` | **Local tangent axes are DISTINCT semantic directions, not storage labels** — map source-local X1/X2 to the REGISTERED carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` (`base_kind=geometry`), retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` |
@@ -99,10 +99,10 @@ component is being described. Generic geometric primitives alone are useless.
 
 | ❌ Too generic (SKIP these) | ✅ Specific enough | Why |
 |-----------------------------|-------------------|-----|
-| `radius_of_annulus` | `inner_radius_of_poloidal_field_coil_cross_section` | Names which annular geometry |
-| `alpha_of_oblique` | `oblique_angle_of_poloidal_field_coil_element` | Names the engineering context |
+| `radius_of_annulus` | `inner_radius_of_poloidal_field_coil` | Names the owning coil with registered zone/base/locus segments |
+| `alpha_of_oblique` | `angle_of_poloidal_field_coil` | Names the engineering owner without inventing a primitive token |
 | `radius_of_circle` | SKIP — no tokamak-universal meaning | Pure geometric primitive |
-| `height_of_rectangle` | `height_of_poloidal_field_coil_cross_section` | Rectangle alone is meaningless |
+| `height_of_rectangle` | `height_of_poloidal_field_coil` | Rectangle alone is meaningless; the owning coil is registered |
 | `outline_r` | `radial_outline` | Outline vertices are an ordinal array of ONE geometry → collapse (`base_token=outline`, radial `coordinate` projection); the vertex index lives in the DD path |
 | `first_point_r` | `radial_coordinate_of_line_of_sight` | **Enumeration is a coordinate, not a name** — `first_point`/`second_point`/`third_point` are endpoints of ONE line-of-sight; collapse ALL to `radial_coordinate_of_line_of_sight` (`base_token=coordinate`, radial `coordinate` projection, `locus_token=line_of_sight`, `locus_relation=of`). `line_of_sight` is a LOCUS, never a base. List every endpoint path in `dd_paths`. NEVER encode the ordinal (`first_point`) in the name |
 
@@ -312,12 +312,12 @@ These names already exist in the catalog. Reuse them if they match your source, 
 > `poloidal`, `toroidal`, `radial`, `diamagnetic`) MUST be placed OUTSIDE
 > the rate marker, wrapping the rate phrase:
 >   ✅ `parallel_change_in_fast_electron_pressure`
->   ✅ `poloidal_tendency_of_electron_velocity`
+>   ✅ `tendency_of_poloidal_electron_velocity`
 >   ❌ `change_in_parallel_fast_electron_pressure` (grammar rejects)
 >   ❌ `change_in_poloidal_electron_velocity` (grammar rejects)
-> The grammar parses `{orientation}_X` as a unit — the rate
-> marker must modify the base quantity X, not intrude between orientation
-> and the base.
+> The `_of_` tendency operator is outermost and wraps the projected quantity;
+> bare `change_in` keeps the component outermost. The composer determines the
+> surface order from the two fields.
 {% endif %}
 {% if item.value_provenance %}
 > ⚠️ **HARD CONSTRAINT — {{ item.value_provenance | upper }} ESTIMATOR:** this

@@ -340,8 +340,8 @@ When you have a concrete alternative, populate the suggestion fields:
 
 ```json
 {
-  "revised_name": "electron_temperature_core",
-  "suggested_name": "electron_temperature_core",
+  "revised_name": "core_electron_temperature",
+  "suggested_name": "core_electron_temperature",
   "suggestion_justification": "Original name lacked a locus distinguisher; the cluster siblings show all related paths use _core for inner-flux-surface quantities."
 }
 ```

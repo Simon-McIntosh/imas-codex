@@ -18,6 +18,7 @@ carries the reason and the owner of the fix.
 from __future__ import annotations
 
 import inspect
+import re
 
 import pytest
 
@@ -36,17 +37,7 @@ MIN_TOKEN_LEN = 3
 #: and where the fix belongs.  Exemptions are per TOKEN, never per vocabulary: a
 #: whole-vocabulary exemption would hide real drift in the other 171 tokens, which
 #: is exactly the failure this test exists to catch.
-UNREACHED: dict[str, tuple[frozenset[str], str]] = {
-    # ISN-side. These loci are in the locus registry but in no SEGMENT_TOKEN_MAP
-    # segment, so codex's injection — which walks the segment map — has nothing to
-    # emit them from. Same shape as the `normalizing_qualifiers` token
-    # `gyrocenter`. Fix belongs in imas-standard-names: a registry entry reachable
-    # by the parser should be reachable by a consumer enumerating the vocabulary.
-    "locus_registry": (
-        frozenset({"active_wall_point", "beam_path", "primary"}),
-        "locus registry entries absent from every SEGMENT_TOKEN_MAP segment",
-    ),
-}
+UNREACHED: dict[str, tuple[frozenset[str], str]] = {}
 
 
 def _isn_available() -> bool:
@@ -221,7 +212,9 @@ def _missing(tokens: frozenset[str], text: str, *, vocabulary: str = "") -> list
     return sorted(
         t
         for t in tokens
-        if len(t) >= MIN_TOKEN_LEN and t not in exempt and t not in text
+        if len(t) >= MIN_TOKEN_LEN
+        and t not in exempt
+        and re.search(rf"(?<![a-z0-9_]){re.escape(t)}(?![a-z0-9_])", text) is None
     )
 
 

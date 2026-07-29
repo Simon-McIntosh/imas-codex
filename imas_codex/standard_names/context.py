@@ -300,7 +300,22 @@ def _load_operators_full() -> dict[str, list[dict[str, Any]]] | None:
             else "unary_prefix"
         )
         separator = spec.get("separator") if isinstance(spec, dict) else None
-        grouped.setdefault(kind, []).append({"token": token, "separator": separator})
+        grouped.setdefault(kind, []).append(
+            {
+                "token": token,
+                "separator": separator,
+                "precedence": spec.get("precedence")
+                if isinstance(spec, dict)
+                else None,
+            }
+        )
+    for entries in grouped.values():
+        entries.sort(
+            key=lambda entry: (
+                -int(entry["precedence"] or 0),
+                str(entry["token"]),
+            )
+        )
     return grouped
 
 
