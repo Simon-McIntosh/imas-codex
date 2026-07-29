@@ -658,9 +658,8 @@ def _seed_gc_with_row(row):
     return gc, call_log
 
 
-def test_seed_parent_sources_ignores_normalized_child_unit():
-    """A normalization-peel child's dimensionless unit must not become the
-    physical parent's unit — the parent seeds unit-less instead."""
+def test_seed_parent_sources_rejects_unitless_normalization_peel():
+    """A normalization peel cannot mint a quantitative parent by guesswork."""
     gc, call_log = _seed_gc_with_row(
         {
             "parent_id": "particle_mass",
@@ -682,7 +681,7 @@ def test_seed_parent_sources_ignores_normalized_child_unit():
     from imas_codex.standard_names.graph_ops import seed_parent_sources
 
     count = seed_parent_sources(gc)
-    assert count == 1
+    assert count == 0
     unit_writes = [c for c, _ in call_log if "MERGE (u:Unit" in c]
     assert not unit_writes, "normalized child unit must not seed the parent"
 

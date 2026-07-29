@@ -2102,6 +2102,41 @@ def _derived_parent_source_metadata(
     }
 
 
+def _validate_derived_parent_identity(
+    parent_id: str,
+    *,
+    kind: str,
+    unit: str,
+) -> list[str]:
+    """Validate a parent name and unit through ISN's public authority surface."""
+    try:
+        from imas_standard_names.grammar import (
+            compose_standard_name,
+            parse_standard_name,
+        )
+        from imas_standard_names.models import create_standard_name_entry
+        from imas_standard_names.validation.semantic import run_semantic_checks
+
+        from imas_codex.standard_names.kind_derivation import to_isn_kind
+
+        compose_standard_name(parse_standard_name(parent_id))
+        entry = create_standard_name_entry(
+            {
+                "name": parent_id,
+                "kind": to_isn_kind(kind),
+                "unit": unit,
+            },
+            name_only=True,
+        )
+        return [
+            issue
+            for issue in run_semantic_checks({parent_id: entry})
+            if " ERROR - " in issue
+        ]
+    except Exception as exc:  # ISN reports heterogeneous parse/model failures.
+        return [str(exc)]
+
+
 def _materialize_derived_parent_rows(
     gc: Any,
     parents: list[dict[str, Any]],
@@ -2230,6 +2265,32 @@ def _materialize_derived_parent_rows(
                 parent_dd_path=parent_dd_path,
             )
         )
+
+        # A derived parent is quantitative catalog data, even when it has no
+        # DD realization of its own.  It must therefore carry an explicit unit
+        # and pass the same validity oracle as a pipeline-authored name before
+        # it can enter an accepted lifecycle.  A normalization or binary child
+        # may erase the only useful unit signal; in that case the parent is
+        # unresolved and must not be minted from guesswork.
+        if not unit:
+            logger.warning(
+                "Parent %s has no authoritative unit — skipping materialization",
+                parent_id,
+            )
+            continue
+
+        validation_issues = _validate_derived_parent_identity(
+            parent_id,
+            kind=kind,
+            unit=unit,
+        )
+        if validation_issues:
+            logger.warning(
+                "Parent %s failed the name-validity oracle — skipping: %s",
+                parent_id,
+                "; ".join(validation_issues),
+            )
+            continue
 
         gc.query(
             """
@@ -2411,6 +2472,83 @@ def repair_normalization_peel_parent_units(gc: Any) -> list[str]:
             ", ".join(repaired),
         )
     return repaired
+
+
+def stamp_standard_name_units(
+    gc: Any,
+    unit_by_name: dict[str, str],
+    *,
+    reason: str,
+    origin: str = "unit_authority_repair",
+) -> list[str]:
+    """Apply reviewed unit corrections with one durable ledger row per name.
+
+    This is the sanctioned repair instrument for a small, explicitly
+    adjudicated set.  It does not infer units: callers supply the reviewed
+    mapping, and ISN canonicalizes every value before any graph write.  The
+    scalar, ``HAS_UNIT`` edge, and ``StandardNameChange`` record are updated in
+    one transaction.  Missing targets are rejected before mutation.
+    """
+    if not unit_by_name:
+        return []
+    if not reason.strip():
+        raise ValueError("a non-empty unit-repair reason is required")
+
+    from imas_standard_names import canonical_unit
+
+    rows = [
+        {"id": name, "unit": canonical_unit(unit)}
+        for name, unit in sorted(unit_by_name.items())
+    ]
+    existing = {
+        str(row["id"])
+        for row in gc.query(
+            """
+            UNWIND $ids AS id
+            MATCH (sn:StandardName {id: id})
+            RETURN sn.id AS id
+            """,
+            ids=[row["id"] for row in rows],
+        )
+    }
+    missing = [row["id"] for row in rows if row["id"] not in existing]
+    if missing:
+        raise ValueError(
+            "cannot stamp units on missing StandardName nodes: " + ", ".join(missing)
+        )
+
+    changed = list(
+        gc.query(
+            """
+            UNWIND $rows AS row
+            MATCH (sn:StandardName {id: row.id})
+            OPTIONAL MATCH (sn)-[old_unit:HAS_UNIT]->(:Unit)
+            WITH sn, row, collect(old_unit) AS old_units
+            FOREACH (edge IN old_units | DELETE edge)
+            CREATE (change:StandardNameChange {
+              id: 'sn-change:' + randomUUID(),
+              from_name: sn.id,
+              to_name: sn.id,
+              operation: 'repair_unit_authority',
+              reason: $reason,
+              origin: $origin,
+              changed_at: datetime(),
+              internal: true
+            })
+            MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+            SET sn.unit = row.unit,
+                sn.updated_at = datetime()
+            MERGE (unit:Unit {id: row.unit})
+            MERGE (sn)-[:HAS_UNIT]->(unit)
+            RETURN sn.id AS id
+            ORDER BY id
+            """,
+            rows=rows,
+            reason=reason,
+            origin=origin,
+        )
+    )
+    return [str(row["id"]) for row in changed]
 
 
 def seed_parent_sources(gc: Any | None = None) -> int:

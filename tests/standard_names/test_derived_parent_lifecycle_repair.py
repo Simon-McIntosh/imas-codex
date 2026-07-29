@@ -27,7 +27,7 @@ class _StatefulDerivedParentGraph:
         description: str = "",
         chain_length: int | None = None,
         docs_chain_length: int | None = None,
-        child_units: tuple[str | None, ...] = (None,),
+        child_units: tuple[str | None, ...] = ("T",),
         child_domains: tuple[str | None, ...] = (None,),
         dd_paths: tuple[str, ...] = (),
         edge_kinds: tuple[str, ...] = ("projection",),
@@ -332,7 +332,7 @@ def test_legacy_accepted_null_docs_repair_uses_derived_source_when_needed() -> N
         name_stage="accepted",
         docs_stage=None,
         description="   ",
-        child_units=(None,),
+        child_units=("A",),
         child_domains=(None,),
     )
 
