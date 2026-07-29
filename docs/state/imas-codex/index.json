@@ -1,11 +1,11 @@
 {
-  "updated": "2026-07-29T14:07:51",
+  "updated": "2026-07-29T14:28:21",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": "S5",
+    "active_sprint_id": "S6",
     "sprints": [
       {
         "id": "S1",
@@ -119,7 +119,7 @@
       },
       {
         "id": "S5",
-        "status": "active",
+        "status": "planned",
         "theme": "WEST RC dress rehearsal",
         "items": [
           {
@@ -133,34 +133,34 @@
             "done_when": "Scoped to f-nlr-003 items 1-2 only: the failed-retry instrument exists with a ledger trail and gm1/gm5/gm6 are claimable again; a pooled compose demonstrably uses the --compose-model override. The rest of f-nlr-003 stays in S6."
           }
         ],
-        "starts": "2026-07-29",
-        "ends": "2026-08-05",
-        "description": "Cut the fork-PR review-batch RC at the frozen pin and run the full human-in-the-loop cycle: PR review, fold-back with the graph-merged: tag, freeze-check, undo. All five convergence gates hold (measured 2026-07-29); the batch parses clean at pin 937ea94, so the cut happens BEFORE the grammar moves again under any vocabulary rotation."
+        "starts": "2026-08-12",
+        "ends": "2026-08-19",
+        "description": "Cut the fork-PR review-batch RC at the POST-S6 pin and run the full human-in-the-loop cycle: PR review, fold-back with the graph-merged: tag, freeze-check, undo. Runs after the stability tail so the reviewed nameset survives the rotation unchanged and the reviewer-facing ISN docs are correct. Entry condition = S6's exit criteria (gates re-measured HOLDS at the new pin)."
       },
       {
         "id": "S6",
-        "status": "planned",
+        "status": "active",
         "theme": "SN pipeline stability tail",
         "items": [
           {
             "slug": "sn-naming-loop-robustness",
-            "why_now": "Rungs 1-4 landed with all gates holding; the remaining rungs (5: rotation from the 159-token triaged list; 6: operand-validation prerequisites per the design record) keep the loop convergent, and the composer's chained-operator incapacity plus the --compose-model override need closing.",
-            "done_when": "The 159 adjudicated add/fold/reject with stated reasons; adds in an ISN RC with the codex pin bumped and the batch parse-check re-verified; rung-6 prerequisite steps green; a fresh gate-ledger row recorded."
+            "why_now": "Owns the loop's remaining stability work: the pipeline mechanics (failed-retry instrument, pooled compose-model threading, pending scoping, edit reachability, status mirrors), the grammar/prompt truth pass from the ISN sweep, the rung-5 vocabulary rotation from the 159-token triaged list, and the rung-6 design landing including chained operators.",
+            "done_when": "f-nlr-003 and f-nlr-004 resolved with numbers; the 159 adjudicated add/fold/reject; adds in an ISN RC with the codex pin bumped; rung-6 prerequisites green; all five gates re-measured HOLDS at the post-rotation pin with the WEST batch parse-check green (the sprint exit)."
           },
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "Scoped to the unit-authority section only (lead-raised): eight accepted derived parents carry null units on inherently-dimensional bases and validate 'valid'; the shipped 'intentional unit-less' verdict is challenged and one cited name is a ghost.",
-            "done_when": "D-parent-units locked by the lead; the ISN validator treats null like '1' on dimensional bases; the eight repaired through sanctioned instruments; the perturbed_particle_energy ghost traced and stale dispositions corrected with dated notes."
+            "why_now": "Lead-raised correctness items pulled forward of the release: unit authority (D-parent-units, the mint-path validation hole, the 8 null-unit parents, the ghost dispositions) and the deletion-ledger invariant (no StandardName leaves the graph without a ledger row; 296 ghost rows reconciled; a catalog-vs-graph diff quantifies any accepted losses).",
+            "done_when": "f-sgwi-002 and f-sgwi-003 resolved: D-parent-units locked and the eight repaired; every delete path ledgered with the graph-quality test green; the 296 attributed or stamped; the 35 regenerated provenance orphans healed with the self-heal hole closed."
           },
           {
             "slug": "sn-dd-gaps",
-            "why_now": "Lead direction 2026-07-29: the pipeline and its agents should have the authority to flag DD errors first-class, mirroring vocab_gaps. Steps 1-2 are zero-behaviour-change foundation (schema, write path, CLI, registry back-fill).",
+            "why_now": "Lead direction 2026-07-29: first-class authority for the pipeline to flag DD errors, mirroring vocab_gaps. Steps 1-2 are zero-behaviour-change foundation (schema, write path, CLI, registry back-fill).",
             "done_when": "DDGap write path TDD'd with the sn ddgap CLI and sn status surface; the unit-exception registry back-filled as pre-triaged gaps with zero enforcement change; D-ddgap-authority and D-ddgap-storage surfaced to the lead."
           }
         ],
-        "starts": "2026-08-05",
-        "ends": "2026-08-14",
-        "description": "Stability work that deliberately follows the RC snapshot because it moves the grammar or the validation surface: the class-D vocabulary rotation, the operand-validation prerequisites, the unit-authority policy with the null-unit validator gap, and the DD-gaps mechanism foundation."
+        "starts": "2026-07-29",
+        "ends": "2026-08-12",
+        "description": "Stability and correctness BEFORE the release (lead decision 2026-07-29: 'I value stability and correctness over a rushed release'). All grammar-moving and validation work lands here so the batch the human reviews is the stable one: the vocabulary rotation, the grammar/prompt truth pass, unit authority, the deletion-ledger invariant, the pipeline mechanics, and the DD-gaps foundation. EXIT CRITERIA (hard, so the RC does not recede again): all five convergence gates re-measured HOLDS at the post-rotation pin, the WEST batch parse-check green at that pin, suites green, and a fresh gate-ledger row recorded."
       },
       {
         "id": "S7",
@@ -209,9 +209,14 @@
         "when": "2026-07-29",
         "who": "Simon McIntosh",
         "what": "June sprint set (S2-S4) retired as superseded; S5 (WEST RC dress rehearsal) started with S6 (stability tail: vocabulary rotation, unit authority, DD-gaps foundation) and S7 (graph-wide integrity) queued behind it. Basis: all five D-release-standard convergence gates measured HOLDS on 2026-07-29."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "Simon McIntosh",
+        "what": "Sprint order inverted by the lead: stability and correctness before the release. S6 is now active and S5 (WEST RC) follows, entering only on the S6 exit criteria: all five gates re-measured HOLDS at the post-rotation pin with the batch parse-check green. The deletion-ledger invariant pulled forward into S6. Rationale: S6 deliberately moves the grammar, so cutting first would rename the reviewed batch under the reviewer, and the reviewer-facing ISN docs carry wrong guidance until the truth pass lands."
       }
     ],
     "blockers": [],
-    "_version": 11
+    "_version": 14
   }
 }
