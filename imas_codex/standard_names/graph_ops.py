@@ -7088,6 +7088,107 @@ def reconcile_vocab_gaps() -> dict[str, int]:
     return stats
 
 
+def triage_vocab_gaps(
+    gc: Any | None = None,
+    *,
+    stale_before: str,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Sort every stored ``VocabGap`` into one lifecycle bucket, with provenance.
+
+    Run AFTER :func:`reconcile_vocab_gaps` (categories current) and after the
+    mechanical reuse verdicts are stamped — this pass only reads what those
+    wrote and derives the bucket:
+
+    - ``reuse`` — a mechanical check resolved the token to a registered one
+      (``dedup_decision = 'reuse_confirmed'``);
+    - ``rule_violation`` — the grammar already forbids the construction
+      (ordinal sample points, bare DD field spellings);
+    - ``composable`` — expressible from registered grammar
+      (``decomposable`` / ``wrong_slot_placement`` / ``ambiguous_known_token``);
+    - ``retired_stale`` — still ``absent`` but last proposed before
+      ``stale_before``: no current composer reproduces it, so it is history,
+      not demand;
+    - ``genuine`` — ``absent`` and recently reproduced: the real vocabulary
+      demand a rotation decision reads.
+
+    Nothing is deleted; each node gets ``triage`` + ``triaged_at`` and keeps
+    every field that led to its bucket. Returns the counts and the ``genuine``
+    (segment, token, example_count) list, newest first.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (vg:VocabGap)
+            RETURN vg.id AS id, vg.segment AS segment, vg.token AS token,
+                   vg.category AS category, vg.dedup_decision AS dedup,
+                   toString(vg.last_seen_at) AS last_seen,
+                   vg.example_count AS n
+            """
+        )
+        buckets: dict[str, list[dict[str, Any]]] = {
+            "reuse": [],
+            "rule_violation": [],
+            "composable": [],
+            "retired_stale": [],
+            "genuine": [],
+        }
+        for r in rows:
+            if r.get("dedup") == "reuse_confirmed":
+                bucket = "reuse"
+            elif r.get("category") == "rule_violation":
+                bucket = "rule_violation"
+            elif r.get("category") in (
+                "decomposable",
+                "wrong_slot_placement",
+                "ambiguous_known_token",
+            ):
+                bucket = "composable"
+            elif (r.get("last_seen") or "") < stale_before:
+                bucket = "retired_stale"
+            else:
+                bucket = "genuine"
+            buckets[bucket].append(r)
+
+        if not dry_run:
+            client.query(
+                """
+                UNWIND $items AS it
+                MATCH (vg:VocabGap {id: it.id})
+                SET vg.triage = it.bucket, vg.triaged_at = datetime()
+                """,
+                items=[
+                    {"id": r["id"], "bucket": b}
+                    for b, rs in buckets.items()
+                    for r in rs
+                ],
+            )
+        genuine = sorted(
+            (
+                {
+                    "segment": r["segment"],
+                    "token": r["token"],
+                    "example_count": r.get("n") or 0,
+                    "last_seen": r.get("last_seen"),
+                }
+                for r in buckets["genuine"]
+            ),
+            key=lambda x: (x["last_seen"] or "", x["example_count"]),
+            reverse=True,
+        )
+        return {
+            "checked": len(rows),
+            "counts": {b: len(rs) for b, rs in buckets.items()},
+            "genuine": genuine,
+            "dry_run": dry_run,
+        }
+    finally:
+        if own:
+            client.close()
+
+
 # Skip classifications produced by the DD unit resolution leg. Everything else
 # on ``skip_reason`` is a permanent eligibility exclusion (a temporal or local
 # coordinate, configurable meaning, …) that no resolver change can lift, so the
