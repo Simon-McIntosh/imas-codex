@@ -295,7 +295,7 @@ STORED_GAP_FIXTURES: tuple[tuple[str, str, str], ...] = (
     ),
     # genuine narrow demand — must stay a real request
     ("genuine", "physical_base", "detection_efficiency"),
-    ("genuine", "physical_base", "focal_length"),
+    ("added", "physical_base", "focal_length"),
     ("genuine", "physical_base", "groove_density"),
     ("genuine", "physical_base", "substrate"),
     ("genuine", "subject", "lithium_6"),

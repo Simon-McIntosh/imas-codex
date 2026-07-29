@@ -71,11 +71,11 @@ path measures the same quantity — do not invent a synonym.
 | ❌ Wrong | ✅ Correct | Why |
 |----------|-----------|-----|
 | `electron_temp` | `electron_temperature` | No abbreviations |
-| `core_electron_temperature` | `electron_temperature_core` | Position after physical_base |
+| `electron_temperature_core` | `core_electron_temperature` | Zone prefix before the subject/base |
 | `Te` | `electron_temperature` | No symbol abbreviations |
 | `electron_temperature_in_eV` | `electron_temperature` | Unit is never part of the name |
 | `current_from_passive_loop` | `passive_loop_current` | No `_from_` causation |
-| `reconstructed_faraday_rotation_angle` | `faraday_rotation_angle` | Processing method is metadata |
+| `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Processing method is metadata |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking in |
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `cross_sectional_area_of_rogowski_coil`) |
 | `power_of_bolometer` | `radiated_power` | **Observable vs hardware** — a diagnostic MEASURES a physical observable; name the observable, not the device. A bolometer measures the radiated power reaching it (not "power of the bolometer"), an interferometer the line-integrated density (not "phase of the interferometer"). BUT a *geometric/hardware* property genuinely OF the instrument keeps the instrument locus: `vertical_coordinate_of_bolometer` (where the detector is), `lower_bound_wavelength_of_visible_camera` (the camera's spectral range), `radial_coordinate_of_detector_pixel`. Test: is it the physics being probed (drop the device) or a fact about the device itself (keep it)? |

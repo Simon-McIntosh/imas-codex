@@ -112,7 +112,9 @@ class FakeGraph:
             }
         )
 
-    def add_source(self, source_id: str, *, sn_id: str, status: str = "extracted") -> None:
+    def add_source(
+        self, source_id: str, *, sn_id: str, status: str = "extracted"
+    ) -> None:
         self.sources[source_id] = {
             "status": status,
             "claimed_at": None,
@@ -394,7 +396,9 @@ class FakeGraph:
             token = params.get("token")
             if node is None or node.get("name_stage") != "drafted":
                 return []
-            if not (node.get("claim_token") == token or node.get("claim_token") is None):
+            if not (
+                node.get("claim_token") == token or node.get("claim_token") is None
+            ):
                 return []
             return [
                 {
@@ -411,7 +415,9 @@ class FakeGraph:
             token = params.get("token")
             if node is None or node.get("name_stage") != "drafted":
                 return []
-            if not (node.get("claim_token") == token or node.get("claim_token") is None):
+            if not (
+                node.get("claim_token") == token or node.get("claim_token") is None
+            ):
                 return []
             node["reviewer_score_name"] = params["score"]
             node["reviewer_scores_name"] = params.get("scores_json")
@@ -444,9 +450,14 @@ class FakeGraph:
             token = params.get("token")
             if node is None:
                 return []
-            if not (node.get("claim_token") == token or node.get("claim_token") is None):
+            if not (
+                node.get("claim_token") == token or node.get("claim_token") is None
+            ):
                 return []
-            if node.get("docs_stage") != "drafted" or node.get("name_stage") != "accepted":
+            if (
+                node.get("docs_stage") != "drafted"
+                or node.get("name_stage") != "accepted"
+            ):
                 return []
             return [
                 {
@@ -461,9 +472,14 @@ class FakeGraph:
             token = params.get("token")
             if node is None:
                 return []
-            if not (node.get("claim_token") == token or node.get("claim_token") is None):
+            if not (
+                node.get("claim_token") == token or node.get("claim_token") is None
+            ):
                 return []
-            if node.get("name_stage") != "accepted" or node.get("docs_stage") != "drafted":
+            if (
+                node.get("name_stage") != "accepted"
+                or node.get("docs_stage") != "drafted"
+            ):
                 return []
             node["reviewer_score_docs"] = params["score"]
             node["docs_stage"] = params["target_stage"]
@@ -571,7 +587,10 @@ class FakeGraph:
                 return []
             if node.get("claim_token") != token:
                 return []
-            if node.get("docs_stage") != "refining" or node.get("name_stage") != "accepted":
+            if (
+                node.get("docs_stage") != "refining"
+                or node.get("name_stage") != "accepted"
+            ):
                 return []
             cur_chain = node.get("docs_chain_length", 0) or 0
             revision_id = f"{sn_id}#rev-{cur_chain}"
@@ -628,9 +647,7 @@ class TestValidation:
     def test_two_modes_at_once_raises(self) -> None:
         fake = FakeGraph()
         with pytest.raises(ValueError, match="exactly one of"):
-            apply_edit(
-                target="x", hint="a", rename="b", reason="because", gc=fake
-            )
+            apply_edit(target="x", hint="a", rename="b", reason="because", gc=fake)
 
     def test_no_mode_raises(self) -> None:
         fake = FakeGraph()
@@ -650,9 +667,7 @@ class TestValidation:
     def test_invalid_origin_raises(self) -> None:
         fake = FakeGraph()
         with pytest.raises(ValueError, match="origin"):
-            apply_edit(
-                target="x", hint="steer", reason="why", origin="robot", gc=fake
-            )
+            apply_edit(target="x", hint="steer", reason="why", origin="robot", gc=fake)
 
     def test_invalid_scope_raises(self) -> None:
         fake = FakeGraph()
@@ -664,7 +679,9 @@ class TestValidation:
     def test_unknown_target_is_blocked_not_raised(self) -> None:
         fake = FakeGraph()
         with _patched_graph(fake):
-            plan = apply_edit(target="does_not_exist", hint="steer", reason="why", gc=fake)
+            plan = apply_edit(
+                target="does_not_exist", hint="steer", reason="why", gc=fake
+            )
         assert plan.blocked is not None
         assert "not found" in plan.blocked
         assert plan.applied is False
@@ -675,8 +692,11 @@ class TestValidation:
         fake.add_source("dd:x", sn_id="electron_temperature")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", hint="steer", reason="why",
-                dry_run=True, gc=fake,
+                target="electron_temperature",
+                hint="steer",
+                reason="why",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.axis == "name"
         assert plan.entry == "generate"
@@ -684,17 +704,19 @@ class TestValidation:
     def test_hint_invalid_axis_raises(self) -> None:
         fake = FakeGraph()
         with pytest.raises(ValueError, match="axis"):
-            apply_edit(
-                target="x", hint="steer", reason="why", axis="bogus", gc=fake
-            )
+            apply_edit(target="x", hint="steer", reason="why", axis="bogus", gc=fake)
 
     def test_rename_axis_forced_to_name(self) -> None:
         fake = FakeGraph()
         fake.add_node("electron_temperature", name_stage="accepted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", rename="electron_density",
-                reason="why", axis="docs", dry_run=True, gc=fake,
+                target="electron_temperature",
+                rename="electron_density",
+                reason="why",
+                axis="docs",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.axis == "name"
 
@@ -703,8 +725,11 @@ class TestValidation:
         fake.add_node("electron_temperature", name_stage="accepted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", rename="electron_density",
-                reason="why", dry_run=True, gc=fake,
+                target="electron_temperature",
+                rename="electron_density",
+                reason="why",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.scope == "only_self"
 
@@ -715,8 +740,11 @@ class TestValidation:
         fake.add_edge("electron_temperature", "temperature", "electron", "qualifier")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="temperature", rename="density", reason="why",
-                dry_run=True, gc=fake,
+                target="temperature",
+                rename="density",
+                reason="why",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.scope == "subtree"
 
@@ -727,16 +755,16 @@ class TestValidation:
 
 
 class TestRenameEligibility:
-    @pytest.mark.parametrize(
-        "stage", ["accepted", "reviewed", "exhausted", "drafted"]
-    )
+    @pytest.mark.parametrize("stage", ["accepted", "reviewed", "exhausted", "drafted"])
     def test_eligible_stage_rename_applies(self, stage: str) -> None:
         fake = FakeGraph()
         fake.add_node("plasma_current", name_stage=stage)
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="clarify component", gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="clarify component",
+                gc=fake,
             )
         assert plan.blocked is None
         assert plan.applied is True
@@ -750,8 +778,10 @@ class TestRenameEligibility:
         fake.add_node("plasma_current", name_stage="superseded")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="resurrect with a clearer name", gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="resurrect with a clearer name",
+                gc=fake,
             )
         assert plan.blocked is None
         assert plan.applied is True
@@ -763,8 +793,10 @@ class TestRenameEligibility:
         fake.refined_from["toroidal_plasma_current"] = "plasma_current"
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="ion_pressure",
-                reason="try again", gc=fake,
+                target="plasma_current",
+                rename="ion_pressure",
+                reason="try again",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert "successor" in plan.blocked
@@ -775,8 +807,10 @@ class TestRenameEligibility:
         fake.add_node("plasma_current", name_stage="pending")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="why", gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert "not eligible" in plan.blocked
@@ -788,7 +822,8 @@ class TestRenameEligibility:
             plan = apply_edit(
                 target="plasma_current",
                 rename="totally_bogus_not_a_real_isn_name_zzz",
-                reason="why", gc=fake,
+                reason="why",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert "ISN grammar" in plan.blocked
@@ -801,8 +836,10 @@ class TestRenameEligibility:
         fake.add_node("toroidal_plasma_current", name_stage="accepted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="why", gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert "already exists" in plan.blocked
@@ -812,8 +849,11 @@ class TestRenameEligibility:
         fake.add_node("plasma_current", name_stage="accepted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="why", dry_run=True, gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.applied is False
         assert plan.blocked is None
@@ -825,8 +865,11 @@ class TestRenameEligibility:
         fake.add_node("plasma_current", name_stage="accepted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="clarify component", origin="agent", gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="clarify component",
+                origin="agent",
+                gc=fake,
             )
         succ = fake.nodes[plan.successor]
         assert succ["edit_mode"] == "rename"
@@ -841,8 +884,10 @@ class TestRenameEligibility:
         fake.add_node("plasma_current", name_stage="accepted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="clarify component", gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="clarify component",
+                gc=fake,
             )
         assert plan.run_id is not None
         assert plan.run_id.startswith("sn-edit-")
@@ -853,8 +898,10 @@ class TestRenameEligibility:
         fake.add_node("plasma_current", name_stage="pending")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="why", gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert plan.run_id is None
@@ -864,8 +911,11 @@ class TestRenameEligibility:
         fake.add_node("plasma_current", name_stage="accepted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_current", rename="toroidal_plasma_current",
-                reason="why", dry_run=True, gc=fake,
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.run_id is None
 
@@ -1094,8 +1144,10 @@ class TestDocsMode:
         fake.add_node("electron_temperature", name_stage="drafted")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", docs="new docs",
-                reason="why", gc=fake,
+                target="electron_temperature",
+                docs="new docs",
+                reason="why",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert "accepted" in plan.blocked
@@ -1103,13 +1155,18 @@ class TestDocsMode:
     def test_docs_dry_run_zero_writes(self) -> None:
         fake = FakeGraph()
         fake.add_node(
-            "electron_temperature", name_stage="accepted", docs_stage="accepted",
+            "electron_temperature",
+            name_stage="accepted",
+            docs_stage="accepted",
             documentation="old docs",
         )
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", docs="new docs", reason="why",
-                dry_run=True, gc=fake,
+                target="electron_temperature",
+                docs="new docs",
+                reason="why",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.applied is False
         assert plan.run_id is None
@@ -1119,7 +1176,7 @@ class TestDocsMode:
 class TestHintMode:
     def test_hint_name_axis_resets_sources(self) -> None:
         fake = FakeGraph()
-        fake.add_node("electron_temperature", name_stage="accepted")
+        fake.add_node("electron_temperature", name_stage="reviewed")
         fake.add_source(
             "dd:core_profiles/electrons/temperature",
             sn_id="electron_temperature",
@@ -1127,8 +1184,10 @@ class TestHintMode:
         )
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", hint="prefer core-region wording",
-                reason="reviewer flagged ambiguity", gc=fake,
+                target="electron_temperature",
+                hint="prefer core-region wording",
+                reason="reviewer flagged ambiguity",
+                gc=fake,
             )
         assert plan.applied is True
         assert plan.entry == "generate"
@@ -1147,13 +1206,18 @@ class TestHintMode:
     def test_hint_docs_axis_resets_docs_stage(self) -> None:
         fake = FakeGraph()
         fake.add_node(
-            "electron_temperature", name_stage="accepted", docs_stage="accepted",
+            "electron_temperature",
+            name_stage="accepted",
+            docs_stage="accepted",
             documentation="old docs",
         )
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", hint="mention Thomson scattering",
-                axis="docs", reason="missing measurement context", gc=fake,
+                target="electron_temperature",
+                hint="mention Thomson scattering",
+                axis="docs",
+                reason="missing measurement context",
+                gc=fake,
             )
         assert plan.applied is True
         node = fake.nodes["electron_temperature"]
@@ -1167,8 +1231,11 @@ class TestHintMode:
         fake.add_source("dd:x", sn_id="electron_temperature")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", hint="steer", reason="why",
-                dry_run=True, gc=fake,
+                target="electron_temperature",
+                hint="steer",
+                reason="why",
+                dry_run=True,
+                gc=fake,
             )
         assert plan.applied is False
         assert plan.run_id is None
@@ -1179,11 +1246,13 @@ class TestHintMode:
         hint cannot regenerate it, so it must be a hard block (not a silent
         applied=True that strands edit_status='open')."""
         fake = FakeGraph()
-        fake.add_node("plasma_boundary", name_stage="accepted", origin="derived")
+        fake.add_node("plasma_boundary", name_stage="reviewed", origin="derived")
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_boundary", hint="steer the base",
-                reason="reviewer flagged it", gc=fake,
+                target="plasma_boundary",
+                hint="steer the base",
+                reason="reviewer flagged it",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert "no producing" in plan.blocked
@@ -1197,13 +1266,19 @@ class TestHintMode:
         the name, so the zero-sources block does not apply."""
         fake = FakeGraph()
         fake.add_node(
-            "plasma_boundary", name_stage="accepted", docs_stage="accepted",
-            origin="derived", documentation="old docs",
+            "plasma_boundary",
+            name_stage="accepted",
+            docs_stage="accepted",
+            origin="derived",
+            documentation="old docs",
         )
         with _patched_graph(fake):
             plan = apply_edit(
-                target="plasma_boundary", hint="mention the LCFS",
-                axis="docs", reason="clarify", gc=fake,
+                target="plasma_boundary",
+                hint="mention the LCFS",
+                axis="docs",
+                reason="clarify",
+                gc=fake,
             )
         assert plan.blocked is None
         assert plan.applied is True
@@ -1216,7 +1291,10 @@ class TestHintMode:
         fake.refined_from["ion_temperature"] = "electron_temperature"
         with _patched_graph(fake):
             plan = apply_edit(
-                target="electron_temperature", hint="steer", reason="why", gc=fake,
+                target="electron_temperature",
+                hint="steer",
+                reason="why",
+                gc=fake,
             )
         assert plan.blocked is not None
         assert "successor" in plan.blocked
@@ -1402,9 +1480,7 @@ class TestRenameCascadeProtections:
         # Acceptance refused — the protected (accepted, non-opted-in)
         # descendant cannot ride the cascade.
         assert stage == "reviewed"
-        assert (
-            fake.nodes["temperature_of_plasma_boundary"]["edit_status"] == "open"
-        )
+        assert fake.nodes["temperature_of_plasma_boundary"]["edit_status"] == "open"
         # Nothing renamed: the accepted descendant is untouched.
         assert "ion_temperature" in fake.nodes
         assert "ion_temperature_of_plasma_boundary" not in fake.nodes
