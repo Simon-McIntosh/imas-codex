@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-binary-operand-validation-design">
+  <meta name="plan-title" content="Binary-operand vocabulary validation — design record">
+  <meta name="plan-summary" content="Why ratio_of_wibble_frobnicator_to_square_major_radius parses today, why closing the hole naively turns the ISN suite red, four design options measured against the pinned tests and the 2223-name catalog, and a recommended layered oracle with its migration order.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort" content="M">
+  <meta name="plan-tier" content="sonnet">
+  <meta name="plan-informs" content="sn-naming-loop-robustness">
+  <title>Binary-operand vocabulary validation — design record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <header>
+      <p>ISN's grammar accepts binary-operator forms whose operands are never
+      checked against the closed vocabulary. Closing that by making the operand
+      parse strict turns nine ISN tests red. This record explains the mechanics,
+      measures four options against the real pinned tests and the real stored
+      catalog, and recommends a layered oracle plus the order its pieces land in.</p>
+      <dl>
+        <dt>Measured against</dt>
+        <dd>ISN working tree at <code>937ea94</code> (the commit imas-codex pins),
+            catalog export of 2026-07-21 (2223 published names)</dd>
+        <dt>Deliverable</dt>
+        <dd>Design record. No parser, oracle, or vocabulary change is made here —
+            every ISN-side item below is a coordinated proposal.</dd>
+      </dl>
+    </header>
+
+    <section class="sec">
+      <h2>1 — The hole, reproduced</h2>
+
+      <p>A binary form is <code>&lt;op&gt;_of_&lt;A&gt;_&lt;sep&gt;_&lt;B&gt;</code>,
+      where the separator comes from the operator's own registry entry
+      (<code>to</code> for <code>ratio</code>, <code>and</code> for
+      <code>product</code> and <code>difference</code>). Operand <code>A</code> may
+      be any snake_case string at all:</p>
+
+<pre><code>&gt;&gt;&gt; from imas_standard_names.grammar import parse_standard_name
+&gt;&gt;&gt; parse_standard_name("ratio_of_wibble_frobnicator_to_square_major_radius")
+{"physical_base": "wibble_frobnicator",
+ "binary_operator": "ratio_of",
+ "secondary_base": "square_major_radius", ...}</code></pre>
+
+      <p><code>wibble_frobnicator</code> is the deliberate nonsense control the
+      convergence gates use, and it passes the single validity oracle. Standing
+      alone it is refused, with a good message:</p>
+
+<pre><code>&gt;&gt;&gt; parse("wibble_frobnicator")
+ParseError: residue 'wibble_frobnicator' does not match any physical_base
+            or geometry_carrier; nearest candidates: (none)</code></pre>
+
+      <p>The escape is a literal fallback that only exists inside the binary peel.
+      <code>parser._try_parse_or_literal</code> tries a full recursive parse of the
+      operand and, on <code>ParseError</code>, returns a synthetic
+      <code>QuantityOrCarrier(token=&lt;the whole string&gt;, kind=QUANTITY)</code>
+      as long as the string is snake_case. Its docstring names the motivating case:
+      binary operands with unregistered compound bases such as
+      <code>magnetic_pressure</code>. The fallback is silent — no
+      <code>Diagnostic</code> is emitted, so nothing downstream can tell a resolved
+      operand from a fabricated one. There is a second, independent fallback of the
+      same shape on the compose side, <code>model._parse_simple_base</code>.</p>
+
+      <p>The IR makes the structure explicit. Note that the outer IR carries a
+      synthetic <code>placeholder</code> base — the binary application occupies the
+      operator stack, and the operands are <em>full nested
+      <code>StandardNameIR</code> objects</em>, so the recursion this design needs
+      already exists in the data model:</p>
+
+<pre><code>ratio_of_wibble_frobnicator_to_square_major_radius
+  operators: [ binary ratio, separator "to", args:
+      [ { qualifiers: [],                        base: wibble_frobnicator }   &lt;-- fabricated
+        { qualifiers: [square, major(geometry)], base: radius            } ] ]
+  base: placeholder</code></pre>
+
+      <h3>What must keep parsing</h3>
+
+      <p>The forms below are legitimate and every one of them resolves its operands
+      strictly, so none of them needs the fallback. They are the acceptance floor
+      any gate has to clear.</p>
+
+      <table>
+        <thead><tr><th>Form</th><th>Why it is load-bearing</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>ratio_of_electron_temperature_to_ion_temperature</code></td>
+            <td>The ordinary case. Both operands resolve as
+                qualifier&nbsp;+&nbsp;base (<code>electron</code>&nbsp;+&nbsp;<code>temperature</code>).</td>
+          </tr>
+          <tr>
+            <td><code>flux_surface_averaged_ratio_of_square_toroidal_flux_radius_gradient_magnitude_to_square_major_radius</code></td>
+            <td>The equilibrium metric coefficient
+                <span>&lt;|grad&nbsp;rho|<sup>2</sup>/R<sup>2</sup>&gt;</span> — a
+                flux-surface average <em>of a ratio</em>, which is a different
+                quantity from the ratio of averages. Landed as
+                <code>331ef7a</code>.</td>
+          </tr>
+          <tr>
+            <td><code>flux_surface_averaged_ratio_of_square_toroidal_flux_radius_gradient_magnitude_to_square_magnetic_field_magnitude</code></td>
+            <td>Its <span>&lt;|grad&nbsp;rho|<sup>2</sup>/B<sup>2</sup>&gt;</span>
+                twin. Both operands carry a postfix
+                <code>magnitude</code> and still resolve.</td>
+          </tr>
+          <tr>
+            <td><code>ratio_of_electron_to_ion_temperature</code></td>
+            <td><strong>Base elision.</strong> Operand&nbsp;A is the bare qualifier
+                <code>electron</code>; it has no base of its own and borrows
+                operand&nbsp;B's. This is the form the naive gate destroys — see
+                §2.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>How much of the stored catalog is exposed</h3>
+
+      <p>Of the 2223 published names in the catalog export, 23 carry a binary
+      operator. Walking each one's operand IRs and asking whether the operand's
+      base token is a registered <code>physical_base</code> or
+      <code>geometry_carrier</code>, <strong>22 of 23 resolve cleanly and exactly
+      one does not</strong>:</p>
+
+<pre><code>product_of_poloidal_current_function
+  _and_derivative_with_respect_to_poloidal_magnetic_flux_coordinate
+  _of_poloidal_current_function
+
+  operand B -&gt; 'derivative_with_respect_to_poloidal_magnetic_flux_coordinate
+                _of_poloidal_current_function'   (fabricated by the fallback)</code></pre>
+
+      <p>That single exposure is a genuine parser defect rather than a bad name.
+      The operand is an indexed-derivative application, and it fails to parse
+      standalone because the coordinate index universe
+      (<code>parser._coordinate_universe</code> = geometry carriers ∪ coordinate
+      axes) does not contain <code>poloidal_magnetic_flux_coordinate</code>. It
+      holds <code>normalized_poloidal_flux_coordinate</code>,
+      <code>toroidal_flux_coordinate</code>,
+      <code>normalized_toroidal_flux_coordinate</code> and
+      <code>toroidal_flux_radius</code> — but not the un-normalized poloidal one.
+      The consequence is that a stored, exported, published name reaches the
+      catalog with a fabricated operand, and <em>no layer notices</em>. That is the
+      concrete cost of the silent fallback, independent of any gate.</p>
+    </section>
+
+    <section class="sec">
+      <h2>2 — Why the naive gate fails</h2>
+
+      <p>The naive gate is one edit: make the operand parse strict. Measured by
+      monkeypatching <code>parser._try_parse_or_literal</code> to return
+      <code>None</code> on <code>ParseError</code> and running the full ISN
+      suite.</p>
+
+      <table>
+        <thead><tr><th>Run</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Baseline, unpatched</td>
+              <td>1 failed, 1855 passed, 28 skipped, 83 xfailed</td></tr>
+          <tr><td>Gate at the parse-side fallback only</td>
+              <td>6 failed, 1850 passed — 5 gate-induced, plus the baseline one</td></tr>
+          <tr><td>Gate at <em>both</em> fallbacks (parse and compose side)</td>
+              <td>9 failed, 1847 passed — 8 gate-induced, plus the baseline one</td></tr>
+        </tbody>
+      </table>
+
+      <p>The "10 pinned tests" figure recorded in the robustness plan reconciles as
+      the whole red suite of the both-fallbacks variant (9) plus one more from a
+      slightly different patch point; the gate-attributable count is 8 at both
+      layers and 5 at one. The baseline failure is
+      <code>tests/test_json_schema_contract.py::test_write_entry_schema_to_custom_path</code>,
+      caused by an uncommitted <code>imas_standard_names/schemas/entry_schema.json</code>
+      in the ISN working tree — unrelated to operands, and not touched here.</p>
+
+      <p>The failures fall into three mechanically distinct classes, and only the
+      first is about vocabulary at all.</p>
+
+      <h3>Class 1 — the operand is a fragment, not a name</h3>
+
+      <p><code>tests/grammar/test_nested_operator_round_trip.py::test_already_working_names_still_round_trip[ratio_of_electron_to_ion_temperature]</code></p>
+
+      <p>This is the mechanic the plan flagged. The IR is:</p>
+
+<pre><code>ratio_of_electron_to_ion_temperature
+  operators: [ binary ratio, separator "to", args:
+      [ { qualifiers: [],     base: electron          }
+        { qualifiers: [ion],  base: temperature       } ] ]</code></pre>
+
+      <p>Operand&nbsp;A is the single token <code>electron</code>, which is a
+      registered <em>qualifier</em> (one of 333) and is not a base at all — it is
+      not in the 160 <code>physical_bases</code> nor the 34
+      <code>geometry_carriers</code>. Parsing it as a standalone name is correctly
+      an error:</p>
+
+<pre><code>&gt;&gt;&gt; parse("electron")
+ParseError: residue 'electron' does not match any physical_base or
+            geometry_carrier; nearest candidates: (none)</code></pre>
+
+      <p>So "operands must parse as names" is a <em>category error</em>, not a
+      strictness dial. An operand of an elided binary form is a fragment by
+      construction: the base is written once and shared. The test pins the full
+      model round-trip, i.e. that
+      <code>compose_standard_name(parse_standard_name(name)) == name</code> — the
+      elision is part of the canonical spelling, not an accident of it. Under the
+      gate the failure surfaces as
+      <code>UnknownBaseTokenError: Unknown physical_base token
+      'ratio_of_electron_to_ion_temperature'</code> raised out of
+      <code>parse_standard_name</code> itself: the whole name collapses to an unrecognised
+      base, because with the operand parse refused there is no binary peel and the
+      residue is the entire string.</p>
+
+      <h3>Class 2 — the operand names a quantity the vocabulary lacks</h3>
+
+      <p>Four tests, all in
+      <code>test_nested_operator_round_trip.py::TestUnaryOverBinary</code>:
+      <code>test_ir_round_trip_preserves_outer_operator</code>,
+      <code>test_validate_round_trip</code>,
+      <code>test_postfix_over_binary_ir_round_trip</code>,
+      <code>test_flat_model_raises_explicit_error</code>. All four are built on
+      <code>gradient_of_ratio_of_electron_pressure_to_magnetic_pressure</code> and
+      its postfix sibling. <code>electron_pressure</code> resolves;
+      <code>magnetic_pressure</code> does not:</p>
+
+<pre><code>ParseError: residue 'magnetic_pressure' does not match any physical_base or
+            geometry_carrier; nearest candidates:
+            ['magnetic_shear', 'magnetic_flux', 'magnetic_field']</code></pre>
+
+      <p>What these tests protect has nothing to do with the operand. They pin the
+      parser path that <em>terminates operator peeling at a binary</em>: a prefix
+      operator peeled before the binary terminator must stay on the IR operator
+      stack rather than being silently discarded, and the postfix
+      <code>magnitude</code> must bind to operand&nbsp;B rather than to the whole
+      ratio (the trap where postfix operators peel at two sites). They use an
+      unregistered operand incidentally, as a convenient two-word compound. So
+      these four are not evidence against a gate — they are evidence that the
+      fixture must change, or <code>magnetic_pressure</code> must be registered,
+      before a gate can land.</p>
+
+      <h3>Class 3 — the pinned artifact is an error message, not an acceptance</h3>
+
+      <p><code>tests/test_binary_operators.py::TestBinaryOperatorEdgeCases::test_compound_base_with_and_in_name</code>
+      asserts that <code>product_of_supply_and_demand_and_output</code> raises with
+      a message matching <code>"reserved connector word"</code>. The rightmost
+      separator split yields <code>physical_base='supply_and_demand'</code>, and
+      the model validator refuses it because an operand may not contain the
+      operator's own connector word — a genuine ambiguity rule. Under the gate the
+      name is <em>still rejected</em>, but earlier and with a different message
+      (<code>ParseError</code> on the unresolvable operand), so the regex misses.
+      <code>test_flat_model_raises_explicit_error</code> (match
+      <code>"not representable"</code>) breaks the same way. Both are error-contract
+      tests: the verdict is unchanged, the diagnosis regresses from specific to
+      generic.</p>
+
+      <p>Adding the compose-side gate to <code>model._parse_simple_base</code>
+      breaks three more — <code>TestBinaryOperatorConnectors::test_product_uses_and</code>,
+      <code>test_ratio_uses_to</code>, <code>test_difference_uses_and</code> — which
+      compose from placeholder operands <code>"a"</code> and <code>"b"</code> purely
+      to assert which connector word the renderer emits. Same class: a fixture
+      convenience, not a semantic claim.</p>
+
+      <p>The conclusion that shapes every option below: <strong>of the eight
+      gate-attributable failures, exactly one (class 1) describes a form the gate
+      must not reject. The other seven are fixture and error-message contracts.</strong>
+      The design problem is therefore narrow — admit the elided-operand shape,
+      and decide where the check lives so that a rejection arrives with a usable
+      message.</p>
+    </section>
+
+    <section class="sec">
+      <h2>3 — Where the validation surface can sit</h2>
+
+      <p>Four candidate placements in the parse → validate → compose → persist
+      flow. The diagram marks each option's surface; the shaded band is the ISN
+      package boundary.</p>
+
+      <svg viewBox="0 0 900 430" width="100%" role="img"
+           aria-labelledby="flow-title flow-desc"
+           style="max-width:900px;font-family:system-ui,sans-serif">
+        <title id="flow-title">Validation surface placement for the four design
+          options</title>
+        <desc id="flow-desc">A left-to-right flow from a candidate name string
+          through the ISN permissive parser, the ISN validity oracle, and the
+          imas-codex mint and accept stages into the graph and catalog export.
+          Option a replaces the parser's operand handling; option b adds a check
+          inside the ISN validity oracle; option c adds a gate at the codex accept
+          stage; option d adds no gate and strengthens only the codex gap
+          classifier that feeds retry guidance.</desc>
+
+        <rect x="8" y="52" width="470" height="150" rx="10"
+              fill="currentColor" opacity="0.05"/>
+        <text x="18" y="46" font-size="13" font-weight="600"
+              fill="currentColor" opacity="0.65">imas-standard-names</text>
+        <text x="496" y="46" font-size="13" font-weight="600"
+              fill="currentColor" opacity="0.65">imas-codex</text>
+
+        <!-- pipeline boxes -->
+        <g fill="none" stroke="currentColor" stroke-width="1.6">
+          <rect x="24" y="96" width="140" height="62" rx="6"/>
+          <rect x="204" y="96" width="150" height="62" rx="6"/>
+          <rect x="392" y="96" width="130" height="62" rx="6"/>
+          <rect x="560" y="96" width="140" height="62" rx="6"/>
+          <rect x="738" y="96" width="140" height="62" rx="6"/>
+        </g>
+        <g font-size="13" fill="currentColor" text-anchor="middle">
+          <text x="94" y="122">permissive</text><text x="94" y="140">parser</text>
+          <text x="279" y="122">validity oracle</text>
+          <text x="279" y="140" font-size="11" opacity="0.75">parse_standard_name</text>
+          <text x="457" y="122">compose /</text><text x="457" y="140">mint</text>
+          <text x="630" y="122">review +</text><text x="630" y="140">accept</text>
+          <text x="808" y="122">graph +</text><text x="808" y="140">catalog export</text>
+        </g>
+
+        <!-- arrows -->
+        <g stroke="currentColor" stroke-width="1.6" fill="currentColor">
+          <path d="M164 127 h34" /><path d="M198 127 l-8 -4 v8 z"/>
+          <path d="M354 127 h32" /><path d="M386 127 l-8 -4 v8 z"/>
+          <path d="M522 127 h32" /><path d="M554 127 l-8 -4 v8 z"/>
+          <path d="M700 127 h32" /><path d="M732 127 l-8 -4 v8 z"/>
+        </g>
+        <text x="8" y="83" font-size="12" fill="currentColor" opacity="0.75">
+          candidate name string
+        </text>
+
+        <!-- option markers -->
+        <g stroke-width="2.4" fill="none">
+          <circle cx="94"  cy="127" r="30" stroke="currentColor"
+                  stroke-dasharray="5 4" opacity="0.85"/>
+          <circle cx="279" cy="127" r="30" stroke="currentColor" opacity="0.95"/>
+          <circle cx="630" cy="127" r="30" stroke="currentColor"
+                  stroke-dasharray="5 4" opacity="0.85"/>
+        </g>
+        <g font-size="15" font-weight="700" fill="currentColor"
+           text-anchor="middle">
+          <text x="94"  y="184">a</text>
+          <text x="279" y="184">b</text>
+          <text x="630" y="184">c</text>
+        </g>
+
+        <!-- option d: feedback loop, no gate -->
+        <g fill="none" stroke="currentColor" stroke-width="1.6"
+           stroke-dasharray="5 4">
+          <path d="M457 158 v72 h-118"/>
+          <path d="M339 230 h-95"/>
+          <path d="M244 230 v-72"/>
+        </g>
+        <path d="M457 152 l-4 8 h8 z" fill="currentColor"/>
+        <path d="M244 164 l-4 -8 h8 z" fill="currentColor"/>
+        <rect x="339" y="212" width="118" height="36" rx="6"
+              fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <text x="398" y="235" font-size="12" fill="currentColor"
+              text-anchor="middle">gap classifier</text>
+        <text x="398" y="268" font-size="15" font-weight="700"
+              fill="currentColor" text-anchor="middle">d</text>
+        <text x="470" y="235" font-size="12" fill="currentColor" opacity="0.75">
+          retry guidance only — no gate
+        </text>
+
+        <!-- legend of the two operand shapes -->
+        <g font-size="12" fill="currentColor">
+          <text x="24" y="322" font-weight="600">Operand shapes the oracle must
+            tell apart</text>
+          <text x="24" y="346">RESOLVED — base token is a registered
+            physical_base or geometry_carrier</text>
+          <text x="140" y="364" opacity="0.75">ratio_of_electron_temperature_to_ion_temperature</text>
+          <text x="24" y="388">ELIDED — no base of its own; every word is a
+            registered qualifier, sibling supplies the base</text>
+          <text x="140" y="406" opacity="0.75">ratio_of_electron_to_ion_temperature</text>
+        </g>
+      </svg>
+
+      <h3>(a) Recursive operand grammar — operands are full names</h3>
+
+      <p>Make the operand a recursive non-terminal validated by construction, and
+      delete both literal fallbacks.</p>
+      <ul>
+        <li><strong>Pinned tests:</strong> worst of the four. It is the naive gate
+        plus a grammar change — 8 gate-attributable failures, and class 1 cannot be
+        fixed by relaxing the gate because the elided operand is <em>not</em> a
+        full name and never will be. Admitting it means the operand non-terminal
+        is not "a name" after all, which is exactly the premise this option
+        rests on.</li>
+        <li><strong>Stored names:</strong> 1 of 23 binary catalog names invalidated
+        until the coordinate-universe defect is repaired.</li>
+        <li><strong>Reduction over binary:</strong> compatible. Both metric
+        coefficients resolve their operands strictly already.</li>
+        <li><strong>Prompts:</strong> largest change. The elision form would have
+        to be removed from guidance and the ~15 ratio-class compose paths retaught
+        to spell both bases in full, which lengthens names for no semantic gain.</li>
+        <li><strong>Verdict:</strong> rejected. It buys correctness-by-construction
+        at the price of a spelling the grammar deliberately supports.</li>
+      </ul>
+
+      <h3>(b) Parse-then-validate — permissive parser, fragment-aware oracle</h3>
+
+      <p>Leave the parser's structural job alone; move the vocabulary question to
+      the layer that already owns it. Two parts:</p>
+      <ol>
+        <li>The parse-side fallback stops being silent. When
+        <code>_try_parse_or_literal</code> fabricates an operand base it emits a
+        <code>Diagnostic(category="vocab_gap", layer="parser", severity="warning")</code>
+        naming the operand token. The mechanism exists and is already used for
+        <code>_at_</code>-locus gaps; <code>ParseResult.diagnostics</code> is the
+        channel. Acceptance is unchanged, so this part is provably zero-blast-radius.</li>
+        <li><code>parse_standard_name</code> — the single validity oracle — walks
+        binary operand IRs and admits exactly two shapes, <strong>RESOLVED</strong>
+        and <strong>ELIDED</strong> as defined in the diagram legend, rejecting
+        everything else with <code>UnknownBaseTokenError(token=&lt;the operand&gt;)</code>.</li>
+      </ol>
+      <p>The ELIDED rule is mechanically checkable and needs no new vocabulary:
+      the operand carries no operators, every underscore-delimited word of its
+      base token is in the 333-token qualifier set, and the sibling operand is
+      itself RESOLVED. A prototype of exactly this rule, run over the real
+      populations, gives:</p>
+
+      <table>
+        <thead><tr><th>Population</th><th>Oracle verdict</th></tr></thead>
+        <tbody>
+          <tr><td>2223 catalog names</td>
+              <td>1 rejected — the <code>poloidal_magnetic_flux_coordinate</code>
+                  operand from §1. Every other name clean.</td></tr>
+          <tr><td><code>ratio_of_electron_to_ion_temperature</code></td>
+              <td><strong>accepted</strong> — the class-1 failure does not occur</td></tr>
+          <tr><td>Both metric coefficients
+                  (<span>&lt;|grad&nbsp;rho|<sup>2</sup>/R<sup>2</sup>&gt;</span>,
+                  <span>&lt;|grad&nbsp;rho|<sup>2</sup>/B<sup>2</sup>&gt;</span>)</td>
+              <td><strong>accepted</strong></td></tr>
+          <tr><td><code>ratio_of_wibble_frobnicator_to_square_major_radius</code></td>
+              <td>rejected, naming <code>wibble_frobnicator</code></td></tr>
+          <tr><td><code>ratio_of_substrate_to_electron_density</code></td>
+              <td>rejected, naming <code>substrate</code></td></tr>
+          <tr><td>class-2 fixtures
+                  (<code>…_to_magnetic_pressure</code>)</td>
+              <td>rejected, naming <code>magnetic_pressure</code> — the four tests
+                  still need their fixture decided (§4)</td></tr>
+          <tr><td>class-3 fixture
+                  (<code>product_of_supply_and_demand_and_output</code>)</td>
+              <td>rejected, naming <code>supply_and_demand</code> — but from the
+                  oracle, so the connector-word message can be kept ahead of it</td></tr>
+        </tbody>
+      </table>
+
+      <ul>
+        <li><strong>Pinned tests:</strong> class 1 eliminated by the ELIDED rule.
+        Class 3 preserved by ordering: the connector-word check already lives in
+        the model validator and can run before the operand walk, so its message
+        stays first. The three <code>TestBinaryOperatorConnectors</code> tests are
+        untouched because they exercise <code>compose</code>, and the compose-side
+        fallback is not the gate. Residual: the four class-2 tests.</li>
+        <li><strong>Stored names:</strong> 1, and it is a bug the gate <em>should</em>
+        surface.</li>
+        <li><strong>Reduction over binary:</strong> unaffected. The walk descends
+        the operator stack, so a reduction wrapping a binary is transparent to it.</li>
+        <li><strong>Prompts:</strong> no guidance change required. The rejection
+        reaches the composer through machinery that already exists — see below.</li>
+        <li><strong>Consumer wiring:</strong> free.
+        codex's <code>workers._grammar_round_trip_failures</code>
+        already calls <code>parse_standard_name</code>
+        on every composed candidate, catches <code>UnknownBaseTokenError</code>,
+        and routes <code>exc.segment</code>/<code>exc.token</code> into
+        <code>describe_gap(...).guidance</code>. An operand rejection raised as that
+        exception type flows into retry guidance with no codex change at all.</li>
+      </ul>
+
+      <h3>(c) Consumer-side gate only — validate at mint/accept in codex</h3>
+
+      <p>Leave ISN entirely alone; add the operand walk to codex and call it before
+      a name is minted or accepted.</p>
+      <ul>
+        <li><strong>Pinned tests:</strong> zero. Nothing in ISN changes.</li>
+        <li><strong>Stored names:</strong> the one exposure is caught at the codex
+        boundary, but only for names minted after the gate lands; the already-stored
+        one needs a separate audit pass.</li>
+        <li><strong>Reduction over binary / prompts:</strong> unaffected.</li>
+        <li><strong>Cost:</strong> it reintroduces the failure mode the attachment
+        guard was built to avoid — a vocabulary rule hardcoded in codex, drifting
+        from ISN. It also leaves ISN's stated single validity oracle wrong: a name
+        the oracle accepts would be refused by a consumer, so "valid" would mean
+        two different things depending on who asks. Any other consumer (the SPA
+        grammar composer, a direct ISN user) keeps the hole.</li>
+        <li><strong>Verdict:</strong> viable only as a stopgap if the ISN
+        coordination window is long, and then only with a drift test asserting the
+        codex rule matches the ISN vocabulary.</li>
+      </ul>
+
+      <h3>(d) No gate — strengthen the classifier verdicts only</h3>
+
+      <p>Accept the permissive parser as correct and invest entirely in making the
+      composer not want to write a bad operand. Codex's <code>_ratio_composition</code>
+      already refuses to guess: a division whose operands do not both cover
+      completely stays <code>absent</code> rather than emitting confident wrong
+      guidance, on the explicit reasoning that a wrong composition costs more than
+      an honest gap.</p>
+      <ul>
+        <li><strong>Everything:</strong> zero blast radius, by construction.</li>
+        <li><strong>Cost:</strong> it treats a soft signal as a hard one. Guidance
+        biases a model; it does not stop one. The single stored catalog exposure was
+        produced <em>with</em> this machinery in place, which is the direct
+        counter-evidence — and nothing here would have flagged it, because the
+        composer never saw a gap: the name parsed.</li>
+        <li><strong>Verdict:</strong> necessary, not sufficient. Keep the
+        classifier work; it is what makes a rejection actionable rather than merely
+        blocking. But it is the complement of a gate, not a substitute.</li>
+      </ul>
+    </section>
+
+    <section class="sec">
+      <h2>4 — Recommendation and migration order</h2>
+
+      <p><strong>Option (b), staged, with (d) retained as the guidance half.</strong>
+      The parser stays the liberal structural layer it is documented to be, the
+      oracle becomes the single place where "is this name valid" is answered
+      completely, and the rejection reaches the composer through wiring that is
+      already in place. The staging matters more than the choice: two of the four
+      steps are prerequisites, and landing the gate before them is what turns the
+      suite red.</p>
+
+      <table>
+        <thead><tr><th>Step</th><th>Where</th><th>What lands</th><th>What pins it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>1 — make the hole observable</td>
+            <td>ISN <code>grammar/parser.py</code></td>
+            <td>The literal fallback emits a <code>vocab_gap</code>
+                <code>Diagnostic</code> naming the fabricated operand token.
+                Acceptance unchanged.</td>
+            <td>A test asserting the diagnostic appears for
+                <code>ratio_of_wibble_frobnicator_to_…</code> and is absent for
+                <code>ratio_of_electron_temperature_to_ion_temperature</code> and
+                both metric coefficients. Full ISN suite stays at its baseline.</td>
+          </tr>
+          <tr>
+            <td>2 — repair the coordinate universe</td>
+            <td>ISN vocabularies</td>
+            <td>Admit the un-normalized poloidal flux coordinate as an indexed
+                operator's coordinate index, so the one exposed catalog name's
+                operand resolves. This is a vocabulary rotation, not a code
+                change.</td>
+            <td>A test that
+                <code>derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_poloidal_current_function</code>
+                parses standalone, and that the stored
+                <code>product_of_…</code> name's operands are both RESOLVED.</td>
+          </tr>
+          <tr>
+            <td>3 — decide the class-2 fixture</td>
+            <td>ISN tests, or ISN vocabularies</td>
+            <td>Either register <code>magnetic_pressure</code> as a
+                <code>physical_base</code> (it is an ordinary plasma quantity and
+                the parser's own nearest-candidate list has no equivalent), or
+                rewrite the four <code>TestUnaryOverBinary</code> cases onto a
+                registered operand. Rewriting is cheaper and keeps the tests about
+                what they actually pin — peel order and postfix binding — but
+                registering is the better answer if the quantity is wanted.</td>
+            <td>The four <code>TestUnaryOverBinary</code> cases, unchanged in
+                intent: outer operator preserved on the IR stack, postfix bound to
+                operand B, flat model raising <code>"not representable"</code>.</td>
+          </tr>
+          <tr>
+            <td>4 — the gate</td>
+            <td>ISN <code>grammar/model.py</code>
+                (<code>parse_standard_name</code>)</td>
+            <td>The operand walk: admit RESOLVED and ELIDED, reject otherwise with
+                <code>UnknownBaseTokenError</code>. Runs <em>after</em> the
+                connector-word check so the class-3 message ordering is
+                preserved.</td>
+            <td>Positive: the four §1 must-parse forms plus all 23 binary catalog
+                names. Negative: <code>wibble_frobnicator</code> and
+                <code>substrate</code> controls rejected, each naming its own
+                operand token. Contract:
+                <code>product_of_supply_and_demand_and_output</code> still raises
+                <code>"reserved connector word"</code>.</td>
+          </tr>
+          <tr>
+            <td>5 — pin and reconcile</td>
+            <td>imas-codex</td>
+            <td>Bump the ISN pin. No gate code:
+                <code>workers._grammar_round_trip_failures</code> already
+                routes <code>UnknownBaseTokenError</code> into
+                <code>describe_gap</code>. Add the binary-operand case to
+                <code>describe_gap</code>'s guidance so the message names the
+                operand slot, and run a catalog reconcile so any stored name the
+                new oracle refuses is quarantined rather than re-exported.</td>
+            <td>A codex test that a composed candidate with an unregistered operand
+                produces non-empty retry guidance naming the operand; the export
+                pre-validation pass over the full catalog.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Steps 1 and 2 are independently valuable and carry no acceptance change,
+      so they can land immediately and in either order. Step 4 must not land before
+      2 and 3. Nothing here is unilateral: steps 1–4 are all ISN-side and go
+      through the coordinated rotation (verify, add, grammar suite, RC, pin bump).</p>
+    </section>
+
+    <section class="sec">
+      <h2>5 — The other grammar-stability holes</h2>
+
+      <p>Inventory only. Each is a coordinated ISN-side item; none is fixed here.</p>
+
+      <h3>Unsegmented registry tokens</h3>
+
+      <p>A token in a vocabulary but in no segment cannot be emitted by any
+      enumerator, so no prompt gallery or composer surface ever offers it.
+      Measured against <code>SEGMENT_TOKEN_MAP</code> (653 tokens across 20 keys)
+      the list is shorter than previously recorded and worth restating precisely.
+      Of the 169 registered loci, exactly <strong>two</strong> appear in no
+      segment: <code>active_wall_point</code> and <code>beam_path</code>, both
+      <code>type: geometry</code> entries in <code>locus_registry.yml</code> whose
+      <code>geometry</code>/<code>position</code>/<code>path</code> segment keys all
+      resolve to the <code>Position</code> enum, which does not contain them. Of the
+      six <code>locus_qualifiers</code>, <code>upper</code>, <code>lower</code>,
+      <code>inner</code> and <code>outer</code> are reachable through other
+      segments but <code>primary</code> and <code>secondary</code> are in no segment
+      at all — there is no <code>locus_qualifier</code> key in the map. Two
+      corrections to the earlier note: <code>gyrocenter</code> is now segmented (as
+      a <code>subject</code>), and the 36 qualifier tokens that appear in no
+      <code>SEGMENT_TOKEN_MAP</code> key are all bare-prefix operators
+      (<code>square</code>, <code>volume_averaged</code>,
+      <code>time_derivative</code>, …) that live in <code>v.qualifiers</code> by the
+      known IR-qualifier convention and are correctly segmented as
+      <code>operator</code> through the operator registry — not a hole.
+      <strong>Recommended fix:</strong> add the two geometry loci to the
+      <code>Position</code> enum and add a <code>locus_qualifier</code> segment key,
+      with a drift test asserting that every token in every ISN vocabulary appears
+      in at least one segment or the operator registry — the test is what stops the
+      class recurring.</p>
+
+      <h3>The qualifier category ordering the prompts cannot see</h3>
+
+      <p><code>vocab_loaders.load_qualifier_categories()</code> reads
+      <code>qualifier_categories.yml</code>, which assigns every one of the 333
+      qualifier tokens to exactly one of 12 categories in file order, and
+      <code>model.py</code> uses that file order to decide canonical qualifier
+      placement. <code>get_grammar_context()</code> — the single context surface the
+      compose prompts are built from — exposes
+      <code>grammar.vocabularies</code> with exactly five keys:
+      <code>coordinate_axes</code>, <code>geometry_carriers</code>,
+      <code>locus_registry</code>, <code>operators</code>,
+      <code>physical_bases</code>. There is no <code>qualifiers</code> key and no
+      <code>qualifier_categories</code> key. So the prompts ask a model to honour a
+      canonical qualifier ordering whose defining structure is absent from the
+      context it is given; the model can only infer the order from the scored
+      examples. This is the same information the canonical-qualifier-order
+      decomposition depends on, so exposing it is a prerequisite for that work
+      rather than a parallel nicety. <strong>Recommended fix:</strong> add the
+      category→ordered-token-list structure to <code>get_grammar_context()</code>
+      preserving file order, and pin it with a test asserting the exposed order
+      matches the order <code>model.py</code> applies — the two must not be allowed
+      to drift, or the prompt will teach a stacking the validator rejects.</p>
+
+      <h3>The rho_tor twin carriers</h3>
+
+      <p><code>toroidal_flux_coordinate</code> and
+      <code>toroidal_flux_radius</code> are both registered
+      <code>geometry_carriers</code>, both flagged
+      <code>constant_on_flux_surface: true</code>, and both describe rho_tor — the
+      second's own comment says so (<code>toroidal flux radius coordinate
+      (rho_tor)</code>). Both are live in the catalog with overlapping derivatives,
+      which is the concrete cost: <code>toroidal_flux_radius_of_magnetic_axis</code>
+      sits beside <code>normalized_toroidal_flux_coordinate_at_magnetic_axis</code>,
+      and <code>toroidal_flux_coordinate_of_neoclassical_tearing_mode_center</code>
+      beside <code>toroidal_flux_radius_at_pedestal_top</code> — the same physical
+      coordinate, two carriers, and an inconsistent <code>_of_</code> versus
+      <code>_at_</code> relation on top. Because each carrier accretes its own
+      derivative family, the duplication compounds rather than staying at two.
+      <code>toroidal_flux_radius</code> is the one the equilibrium metric
+      coefficients are built on, via the
+      <code>toroidal_flux_radius_gradient</code> base.
+      <strong>Recommended fix:</strong> pick one carrier as canonical — the metric
+      coefficient dependency argues for <code>toroidal_flux_radius</code> — retire
+      the other to an alias, and let the existing deprecation-stub mechanism carry
+      the stored names across. The retirement must be a single rotation covering
+      the normalized variants too, or the twin simply reappears one level up.</p>
+    </section>
+
+    <section class="sec">
+      <h2>6 — Reproducing the measurements</h2>
+
+      <p>Every number above comes from the ISN checkout at <code>937ea94</code>
+      with the catalog export of 2026-07-21. The blast-radius runs patch the
+      fallback from a pytest plugin rather than editing the parser, so the ISN
+      working tree stays clean:</p>
+
+      <ul>
+        <li>Baseline and gated suite runs: <code>uv run pytest tests/ -q</code>,
+        and the same with a plugin that rebinds
+        <code>parser._try_parse_or_literal</code> (and, for the both-layers
+        variant, <code>model._parse_simple_base</code>) to a strict parse.</li>
+        <li>Catalog exposure and oracle prototype: walk every
+        <code>standard_names/*.yml</code> entry through
+        <code>grammar.parser.parse</code>, descend the operator stack for
+        <code>OperatorKind.BINARY</code> applications, and test each operand's base
+        token against <code>v.bases | v.carriers</code>, then against the ELIDED
+        rule (<code>all(word in v.qualifiers)</code> and no operators, with a
+        RESOLVED sibling).</li>
+        <li>Segment coverage: union <code>SEGMENT_TOKEN_MAP.values()</code> and
+        difference it against <code>v.loci</code>,
+        <code>v.locus_qualifiers</code> and <code>v.qualifiers</code>.</li>
+      </ul>
+
+      <p>No timing figures are quoted. ISN measurements on a login node are
+      dominated by filesystem latency and would be meaningless; nothing in this
+      design turns on performance.</p>
+    </section>
+
+  </main>
+</body>
+</html>
