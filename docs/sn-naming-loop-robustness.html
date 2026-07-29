@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-impl" content="0.82">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
@@ -660,6 +660,9 @@ Done-when
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="recovery-live-reconcile" data-who="reckon-ship" data-when="2026-07-29T13:45:00+00:00">
     <div class="r-comment-body">Live recovery instruments executed after the mechanics merge: source-liveness reconcile realigned 114 sources with live targets, rewound 599 completion-status sources without live targets, and removed 606 terminal target edges; the second pass was all zero. The terminal-hint instrument rejected 12 unreachable accepted/exhausted hints and then returned zero. After confirming no `sn run` process or job was active, the start-time fallback marked the heartbeat-less run stale at a one-hour threshold; its second pass returned zero.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="toroidal-flux-coordinate-correction" data-who="reckon-ship" data-when="2026-07-29T16:20:00+00:00" data-quote="the coordinate is the toroidal flux label of a surface, the radius appears to be ill defined">
+    <div class="r-comment-body"><p><strong>Correction to f-nlr-004 item 9:</strong> the proposed alias direction was backwards. IMAS DD4 documents <code>rho_tor</code> as “Toroidal flux coordinate = sqrt(phi/(pi*b0))” with unit <code>m</code>, and <code>rho_tor_norm</code> as the normalized toroidal flux coordinate. The quantity is a flux-surface label/effective radial coordinate, not a geometric radius. ISN commit <code>8ca33ca</code> therefore keeps <code>toroidal_flux_coordinate</code> canonical and recognizes <code>toroidal_flux_radius</code> only as a legacy alias; the full ISN suite passed 1866/1866 with 28 skips and 83 expected failures. The accidentally staged live rename was cancelled through the ledgered lifecycle operation in Codex commit <code>055ad391</code>, restoring the coordinate name, its source, and its owner.</p></div>
 </div>
 </section>
 </main>
