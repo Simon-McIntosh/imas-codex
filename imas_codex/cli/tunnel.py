@@ -408,12 +408,23 @@ def _build_foreground_tunnel_command(
                 ["-L", local_forward_spec(local_port, bind_addr, remote_port)]
             )
 
+    # A rejected reverse bind otherwise leaves ssh running without the remote
+    # listener.  autossh then sees a healthy connection and never retries,
+    # while the clipboard bridge remains unreachable until a manual restart.
+    # Place this after the shared options so it overrides their permissive
+    # default when this connection owns a reverse forward.
+    reverse_forward_options = (
+        ["-o", "ExitOnForwardFailure=yes"]
+        if any(direction == "R" for *_rest, direction in ports)
+        else []
+    )
     cmd = [
         autossh,
         "-M",
         "0",
         "-N",
         *SSH_TUNNEL_OPTS,
+        *reverse_forward_options,
         *forward_args,
         host,
     ]
@@ -586,6 +597,11 @@ def _build_systemd_service_content(
         neo4j_only, embed_only, llm_only, vllm_only, docs_only, ink_only, clipboard_only
     )
     manifest_line = SERVICE_MANIFEST_PREFIX + " ".join(sorted(services))
+    clipboard_dependencies = (
+        "\nAfter=wsl-clip-server.service\nWants=wsl-clip-server.service"
+        if "wsl-clip" in services
+        else ""
+    )
 
     log_dir = Path.home() / ".local" / "share" / "imas-codex" / "logs"
     autossh_log = log_dir / f"autossh-{host}.log"
@@ -602,6 +618,7 @@ Description=IMAS Codex SSH tunnels to {host}
 Documentation=https://github.com/iterorganization/imas-codex
 After=network-online.target
 Wants=network-online.target
+{clipboard_dependencies}
 StartLimitIntervalSec=600
 StartLimitBurst=10
 
