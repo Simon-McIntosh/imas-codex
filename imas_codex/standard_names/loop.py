@@ -125,6 +125,7 @@ def _build_pool_specs(
     mgr: Any,
     stop_event: asyncio.Event,
     *,
+    compose_model: str | None = None,
     min_score: float | None = None,
     rotation_cap: int | None = None,
     escalation_model: str | None = None,
@@ -272,6 +273,7 @@ def _build_pool_specs(
         ],
         *,
         heartbeat: bool = False,
+        process_kwargs: dict[str, Any] | None = None,
     ) -> Callable[[dict[str, Any]], Awaitable[int]]:
         """Wrap a batch processor as a ``ProcessFn``.
 
@@ -282,19 +284,24 @@ def _build_pool_specs(
         """
 
         async def _adapter(batch: dict[str, Any]) -> int:
+            kwargs = process_kwargs or {}
             if not heartbeat:
                 return await process_fn(
-                    batch["items"], mgr, stop_event, on_event=on_event
+                    batch["items"], mgr, stop_event, on_event=on_event, **kwargs
                 )
             items = batch.get("items", [])
             sn_ids = [it["id"] for it in items if it.get("id")]
             token = items[0].get("claim_token") if items else None
             if not (sn_ids and token):
-                return await process_fn(items, mgr, stop_event, on_event=on_event)
+                return await process_fn(
+                    items, mgr, stop_event, on_event=on_event, **kwargs
+                )
             beat_stop = asyncio.Event()
             beat = asyncio.create_task(_heartbeat_loop(sn_ids, token, beat_stop))
             try:
-                return await process_fn(items, mgr, stop_event, on_event=on_event)
+                return await process_fn(
+                    items, mgr, stop_event, on_event=on_event, **kwargs
+                )
             finally:
                 beat_stop.set()
                 beat.cancel()
@@ -402,7 +409,10 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_generate_name_batch),
+            process=_make_process_adapter(
+                process_generate_name_batch,
+                process_kwargs={"compose_model": compose_model},
+            ),
             release=_make_release_adapter(
                 release_generate_name_claims, ids_kwarg="source_ids"
             ),
@@ -741,6 +751,7 @@ async def run_sn_pools(
     *,
     turn_number: int = 1,
     time_limit_s: float | None = None,
+    compose_model: str | None = None,
     min_score: float | None = None,
     rotation_cap: int | None = None,
     escalation_model: str | None = None,
@@ -794,6 +805,9 @@ async def run_sn_pools(
 
     Args:
         cost_limit: Maximum LLM spend in USD.
+        compose_model: Optional configured model override for pooled name
+            composition. When absent, the production ``sn-compose`` seat is
+            resolved by the worker.
         time_limit_s: Maximum wall-clock time in seconds.  When set,
             a background timer fires ``stop_event`` after this duration
             for a graceful shutdown.  ``None`` (default) means no time
@@ -943,13 +957,13 @@ async def run_sn_pools(
 
     cost_is_exact = True
 
-    # ── A3: LLM routing observability ─────────────────────────────
+    # ── Compose-model routing observability ───────────────────────
     import os
 
     from imas_codex.discovery.base.llm import _supports_cache_control
     from imas_codex.settings import get_model
 
-    _a3_model = get_model("sn-compose")
+    _a3_model = compose_model or get_model("sn-compose")
     _a3_cache = _supports_cache_control(_a3_model)
     _a3_or_key = os.environ.get("OPENROUTER_API_KEY_STANDARD_NAMES") or ""
     _a3_or_key_src = "OPENROUTER_API_KEY_STANDARD_NAMES"
@@ -1048,6 +1062,8 @@ async def run_sn_pools(
         from imas_codex.standard_names.graph_ops import (
             reconcile_grammar_segments,
             reconcile_provenance,
+            reconcile_source_status_liveness,
+            retire_unreachable_hint_edits,
         )
         from imas_codex.standard_names.ledger import find_provenance_orphans
 
@@ -1064,6 +1080,24 @@ async def run_sn_pools(
                 prov_result.get("edges_reattached", 0),
                 prov_result.get("scalars_cleared", 0),
                 prov_result.get("orphan_sources_deleted", 0),
+            )
+
+        source_status = await asyncio.to_thread(reconcile_source_status_liveness)
+        if source_status.get("live_realigned", 0) or source_status.get(
+            "orphaned_reset", 0
+        ):
+            logger.info(
+                "run_sn_pools: source-status reconcile — %d aligned to a live "
+                "target, %d returned to extracted",
+                source_status.get("live_realigned", 0),
+                source_status.get("orphaned_reset", 0),
+            )
+
+        retired_hints = await asyncio.to_thread(retire_unreachable_hint_edits)
+        if retired_hints:
+            logger.info(
+                "run_sn_pools: retired %d terminal name-hint edit(s)",
+                retired_hints,
             )
 
         # Realign grammar segment columns with each name's canonical id, so a
@@ -1272,7 +1306,7 @@ async def run_sn_pools(
                 ", ".join(v["id"] for v in removed_srcs[:5]),
             )
 
-        # ── B2d: DD source-drift refresh ──────────────────────────────
+        # ── DD source-drift refresh ───────────────────────────────────
         # Idempotent, always on: names record the DD-source snapshot
         # (unit/documentation) they were built against; any that no longer match
         # the live IMASNode (e.g. after a new DD version corrects a unit) are
@@ -1296,7 +1330,7 @@ async def run_sn_pools(
                     len(sr.get("blocked", [])),
                 )
 
-        # ── B2e: stranded-reviewed promotion ──────────────────────────
+        # ── Stranded-reviewed promotion ───────────────────────────────
         # Idempotent, always on: a name is scored once and staged against the
         # threshold in force at review time. When the acceptance threshold is
         # later lowered, names that scored between the old and new thresholds
@@ -1319,7 +1353,7 @@ async def run_sn_pools(
                 _promote_min,
             )
 
-        # ── B3: Domain extract (auto-seed) ────────────────────────
+        # ── Domain extract and auto-seeding ───────────────────────
         # Skip auto-seeding in focus mode — sources are pre-seeded by CLI.
         # Skip auto-seeding in flush / docs-only mode — only drain existing.
         # Skip auto-seeding when the generate phase is excluded (skip_generate,
@@ -1375,7 +1409,7 @@ async def run_sn_pools(
                 seeded = await _seed_all_domains(source=source, max_sources=max_sources)
                 logger.info("Auto-seeded %d sources from all eligible domains", seeded)
 
-        # ── B3b: Rederive structural edges, seed parents, repair legacy drift ─
+        # ── Structural-edge derivation and parent-source repair ────────────────
         # Backfill any missing HAS_PARENT / HAS_ERROR edges first so
         # ``seed_parent_sources`` can see every legitimate placeholder.
         # This catches two failure modes:
@@ -1451,6 +1485,7 @@ async def run_sn_pools(
         specs = _build_pool_specs(
             shared_mgr,
             stop_event,
+            compose_model=compose_model,
             min_score=min_score,
             rotation_cap=rotation_cap,
             escalation_model=escalation_model,
@@ -1590,7 +1625,7 @@ async def run_sn_pools(
             await asyncio.gather(*_gather_tasks, return_exceptions=True)
         logger.info("run_sn_pools: all pools exited — %s", health_map)
 
-        # ── A3: per-pool cost observability ────────────────────────
+        # ── Per-pool cost observability ────────────────────────────
         # NB: ``processed`` here is ``PoolHealth.total_processed`` — the number
         # of batch items a pool ATTEMPTED (each ``spec.process`` return value),
         # not the number that persisted. Paid LLM calls whose persist no-oped on

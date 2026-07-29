@@ -232,6 +232,7 @@ def _compute_pool_progress(
     rotation_cap: int,
     min_score: float,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> dict[str, dict[str, int]]:
     """Return per-pool ``{"pending": int, "done": int}`` from one query.
 
@@ -270,26 +271,47 @@ def _compute_pool_progress(
         pending count can see stale sources from previous runs that
         the scoped claim query will never pick up, causing the exit
         watchdog to spin forever.
+    edits_only:
+        Restrict pending StandardName work to ``edit_status='open'`` and report
+        no pending source-generation work, matching the claim adapters used by
+        ``sn run --edits``.
     """
     domain_filter_sn = "AND sn.physics_domain IN $domains" if domains else ""
     domain_filter_src = "AND s.physics_domain IN $domains" if domains else ""
     scope_filter_src = "AND s.run_id = $scope_run_id" if scope_run_id else ""
     scope_filter_sn = "AND sn.run_id = $scope_run_id" if scope_run_id else ""
+    pending_filter_src = scope_filter_src + (" AND false" if edits_only else "")
+    pending_filter_sn = scope_filter_sn + (
+        " AND coalesce(sn.edit_status, '') = 'open'" if edits_only else ""
+    )
+    docs_score_gate = (
+        ""
+        if (scope_run_id or edits_only)
+        else (
+            "AND (sn.reviewer_score_name IS NOT NULL"
+            " OR (coalesce(sn.origin, '') = 'derived'"
+            " AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+            " WHERE NOT (coalesce(kid.name_stage, '') IN"
+            " ['superseded', 'exhausted', 'contested']) }))"
+        )
+    )
 
     query = f"""
     CALL {{
       MATCH (s:StandardNameSource {{status: 'extracted'}})
-      WHERE NOT (s)-[:PRODUCED_NAME]->(:StandardName)
+      WHERE coalesce(s.attempt_count, 0) < $max_compose_attempts
         {domain_filter_src}
-        {scope_filter_src}
+        {pending_filter_src}
       RETURN count(s) AS generate_name
     }}
     CALL {{
       MATCH (sn:StandardName)
       WHERE sn.name_stage = 'drafted'
-        AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
+        AND sn.description IS NOT NULL
+        AND sn.description <> $parent_desc_placeholder
+        AND coalesce(sn.origin, '') <> 'derived'
         {domain_filter_sn}
-        {scope_filter_sn}
+        {pending_filter_sn}
       RETURN count(sn) AS review_name
     }}
     CALL {{
@@ -298,26 +320,29 @@ def _compute_pool_progress(
         AND sn.reviewer_score_name IS NOT NULL
         AND sn.reviewer_score_name < $min_score
         AND coalesce(sn.chain_length, 0) < $rotation_cap
-        AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
+        AND coalesce(sn.origin, '') <> 'derived'
+        AND NOT (coalesce(sn.edit_mode, '') = 'rename'
+                 AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)
         {domain_filter_sn}
-        {scope_filter_sn}
+        {pending_filter_sn}
       RETURN count(sn) AS refine_name
     }}
     CALL {{
       MATCH (sn:StandardName)
       WHERE sn.name_stage = 'accepted'
         AND sn.docs_stage = 'pending'
-        AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
+        {docs_score_gate}
         {domain_filter_sn}
-        {scope_filter_sn}
+        {pending_filter_sn}
       RETURN count(sn) AS generate_docs
     }}
     CALL {{
       MATCH (sn:StandardName)
       WHERE sn.docs_stage = 'drafted'
-        AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
+        AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
+        {docs_score_gate}
         {domain_filter_sn}
-        {scope_filter_sn}
+        {pending_filter_sn}
       RETURN count(sn) AS review_docs
     }}
     CALL {{
@@ -326,9 +351,10 @@ def _compute_pool_progress(
         AND sn.reviewer_score_docs IS NOT NULL
         AND sn.reviewer_score_docs < $min_score
         AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
-        AND NOT (sn.name_stage IN ['superseded', 'exhausted'])
+        AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
+        {docs_score_gate}
         {domain_filter_sn}
-        {scope_filter_sn}
+        {pending_filter_sn}
       RETURN count(sn) AS refine_docs
     }}
     CALL {{
@@ -336,9 +362,10 @@ def _compute_pool_progress(
       WHERE sn.origin = 'derived'
         AND sn.description = $parent_desc_placeholder
         AND EXISTS {{ MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
-            WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted'] }}
+            WHERE NOT (coalesce(child.name_stage, '') IN
+                       ['superseded', 'exhausted', 'contested']) }}
         {domain_filter_sn}
-        {scope_filter_sn}
+        {pending_filter_sn}
       RETURN count(sn) AS enrich_parents
     }}
     CALL {{
@@ -406,6 +433,9 @@ def _compute_pool_progress(
         "min_score": min_score,
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     }
+    from imas_codex.standard_names.graph_ops import _MAX_COMPOSE_CLAIM_ATTEMPTS
+
+    params["max_compose_attempts"] = _MAX_COMPOSE_CLAIM_ATTEMPTS
     if domains:
         params["domains"] = list(domains)
     if scope_run_id:
@@ -435,6 +465,7 @@ def _compute_pool_pending(
     rotation_cap: int,
     min_score: float,
     scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> dict[str, int]:
     """Per-pool pending counts mirroring ``claim_*_batch`` predicates.
 
@@ -448,6 +479,7 @@ def _compute_pool_pending(
         rotation_cap=rotation_cap,
         min_score=min_score,
         scope_run_id=scope_run_id,
+        edits_only=edits_only,
     )
     return {k: v["pending"] for k, v in progress.items()}
 
@@ -456,6 +488,7 @@ def _run_sn_cmd(
     *,
     cost_limit: float,
     time_limit: float | None = None,
+    compose_model: str | None = None,
     per_domain_limit: int | None,
     dry_run: bool,
     quiet: bool,
@@ -558,6 +591,7 @@ def _run_sn_cmd(
                         rotation_cap=_rc,
                         min_score=_ms,
                         scope_run_id=_scope_run_id,
+                        edits_only=edits_only,
                     )
             except Exception:
                 val = {k: {"pending": 0, "done": 0} for k in _POOLS}
@@ -666,6 +700,7 @@ def _run_sn_cmd(
         summary = await run_sn_pools(
             cost_limit=cost_limit,
             time_limit_s=time_limit * 60 if time_limit else None,
+            compose_model=compose_model,
             min_score=min_score,
             rotation_cap=rotation_cap,
             escalation_model=escalation_model,
@@ -1160,8 +1195,8 @@ def _reject_unscoped_accepted_reset(
     help=(
         "Include StandardNameSource records with status=skipped in re-extraction "
         "(their underlying DD paths get re-queued). Useful after unit override "
-        "table updates. (status='skipped' will be added in Phase B — it is OK "
-        "for this flag to be a no-op today; Phase B will wire it up.)"
+        "table updates. This selector is currently accepted but does not yet "
+        "change source eligibility."
     ),
 )
 @click.option(
@@ -1826,6 +1861,7 @@ def sn_run(
         _run_sn_cmd(
             cost_limit=cost_limit,
             time_limit=time_limit,
+            compose_model=compose_model,
             per_domain_limit=limit,
             dry_run=dry_run,
             quiet=quiet,
@@ -2021,6 +2057,7 @@ def sn_run(
             row = _run_sn_cmd(
                 cost_limit=batch_cost_cap,
                 time_limit=time_limit,
+                compose_model=compose_model,
                 per_domain_limit=None,
                 dry_run=False,
                 quiet=quiet,
@@ -2169,6 +2206,7 @@ def sn_run(
         _run_sn_cmd(
             cost_limit=cost_limit,
             time_limit=time_limit,
+            compose_model=compose_model,
             per_domain_limit=limit,
             dry_run=dry_run,
             quiet=quiet,
@@ -2208,11 +2246,11 @@ def sn_run(
     if from_model:
         force = True
 
-    # Log Phase B/C flags that are pending wire-up
+    # Surface accepted selectors that do not yet change source eligibility.
     if retry_skipped:
-        logger.info("--retry-skipped set (pending Phase B wire-up)")
+        logger.info("--retry-skipped set (source eligibility unchanged)")
     if retry_vocab_gap:
-        logger.info("--retry-vocab-gap set (pending Phase B wire-up)")
+        logger.info("--retry-vocab-gap set (source eligibility unchanged)")
 
     from imas_codex.discovery.base.llm import set_litellm_offline_env
 
@@ -2945,7 +2983,7 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
     Prints a three-section report:
 
     \b
-      1. DD extract eligibility — leaves admitted by the B3' invariant.
+      1. DD extract eligibility — leaves admitted by the naming rules.
       2. Already-minted coverage — existing StandardName catalog.
       3. Work remaining — uncovered paths + rough LLM cost estimate.
 
@@ -2978,17 +3016,13 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
     console.print(f"\n[bold]SN Coverage Report[/bold] — scope: {scope_label}\n")
 
     # Section 1: DD eligibility
-    elig_table = Table(
-        title="1 · DD Extract Eligibility (B3' invariant)", show_header=True
-    )
+    elig_table = Table(title="1 · DD Extract Eligibility", show_header=True)
     elig_table.add_column("Metric", style="cyan")
     elig_table.add_column("Count", justify="right")
     elig_table.add_row(
         "[bold]Total eligible leaves[/bold]", f"[bold]{report.eligible_total:,}[/bold]"
     )
-    elig_table.add_row(
-        "  … with HAS_ERROR edges (B9 parents)", f"{report.eligible_with_errors:,}"
-    )
+    elig_table.add_row("  … with HAS_ERROR edges", f"{report.eligible_with_errors:,}")
     console.print(elig_table)
 
     cat_table = Table(title="By node_category", show_header=True)
@@ -4732,7 +4766,7 @@ def sn_clear(
                 abort=True,
             )
 
-        # Pre-clear comment export (Phase F)
+        # Preserve review feedback before clearing its graph nodes.
         if not no_comment_export and preview.get("StandardNameReview", 0) > 0:
             import pathlib
 
@@ -5683,8 +5717,8 @@ def sn_edit(
     if dry_run or stage_only or not plan.applied:
         return
 
-    # Inline review (default): land this edit in one command. Same gates a
-    # pooled review runs (P2 parity) — a failed review is surfaced, never
+    # Inline review (default): land this edit in one command. The same gates as
+    # pooled review runs apply — a failed review is surfaced, never
     # force-accepted. Scoped to the edit's run_id so only this edit's
     # successor(s) are claimed, never the backlog.
     _require_embed_ready("sn edit")
@@ -5829,6 +5863,58 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
         click.echo(
             f"  consistency guard rejected {result['attachments_rejected']} "
             f"carried attachment(s), detached {result.get('attachments_detached', 0)}"
+        )
+
+
+@sn.command("retry")
+@click.option(
+    "--failed",
+    "retry_failed",
+    is_flag=True,
+    help=(
+        "Release failed and extracted-at-cap sources for another composition "
+        "attempt. A durable retry event is written before counters are reset."
+    ),
+)
+@click.option(
+    "--reason",
+    required=True,
+    help="Why another composition attempt is warranted (stored in the audit event).",
+)
+@click.option("--dry-run", is_flag=True, help="Show eligible sources without writing.")
+@click.argument("paths", nargs=-1, required=True)
+def sn_retry(
+    retry_failed: bool,
+    reason: str,
+    dry_run: bool,
+    paths: tuple[str, ...],
+) -> None:
+    """Return explicitly selected blocked sources to the composition queue.
+
+    \b
+    Examples:
+      imas-codex sn retry --failed equilibrium/path --reason "grammar now supports it"
+      imas-codex sn retry --failed dd:path/a dd:path/b --reason "retry after repair"
+    """
+    if not retry_failed:
+        raise click.UsageError("select a retry mode; currently supported: --failed")
+
+    from imas_codex.standard_names.graph_ops import retry_failed_sources
+
+    result = retry_failed_sources(list(paths), reason=reason, dry_run=dry_run)
+    verb = "eligible" if dry_run else "retried"
+    click.echo(
+        f"{verb}: {result['retried'] if not dry_run else result['eligible']} "
+        f"of {result['requested']} requested source(s)"
+    )
+    if result["source_ids"]:
+        for source_id in result["source_ids"]:
+            click.echo(f"  {source_id}")
+    if result["refused"]:
+        click.echo(
+            f"refused: {result['refused']} source path(s) were missing or not "
+            "failed/attempt-capped",
+            err=True,
         )
 
 

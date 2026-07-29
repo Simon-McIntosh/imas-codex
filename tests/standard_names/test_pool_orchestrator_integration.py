@@ -31,6 +31,9 @@ _DGO = "imas_codex.graph.dd_graph_ops"
 def _stub_parent_lifecycle_startup():
     """Stub the graph-backed derived-parent startup sweeps of run_sn_pools."""
     with (
+        patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
+        patch(f"{_GO}.reconcile_source_status_liveness", return_value={}),
+        patch(f"{_GO}.retire_unreachable_hint_edits", return_value=0),
         patch(f"{_GO}.rederive_structural_edges", return_value={}),
         patch(f"{_GO}.seed_parent_sources", return_value=0),
         patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),

@@ -6226,6 +6226,141 @@ def mark_sources_failed(
         return result[0]["affected"] if result else 0
 
 
+def retry_failed_sources(
+    source_paths: list[str],
+    *,
+    reason: str,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Return terminal or attempt-capped sources to the composition queue.
+
+    This is the sanctioned recovery operation for two otherwise-unclaimable
+    source states:
+
+    * ``status='failed'`` after the composition retry budget was spent;
+    * ``status='extracted'`` with ``attempt_count`` already at the claim cap.
+
+    Before resetting the source, the operation creates one
+    ``StandardNameSourceRetry`` audit event containing the prior status,
+    attempt count, error, and operator reason. The source stores both the
+    event-id scalar mirror and the ``HAS_RETRY_EVENT`` relationship. The write
+    uses the read status and attempt count as a compare-and-set guard, so a
+    concurrent worker cannot be rewound after it has already advanced.
+
+    ``source_paths`` accepts either full ``StandardNameSource.id`` values
+    (``dd:<path>`` / ``signals:<id>``) or their bare ``source_id`` values.
+    Returns requested/eligible/retried/refused counts plus the eligible source
+    ids and created event ids.
+    """
+    requested = sorted(
+        {str(path).strip() for path in source_paths if str(path).strip()}
+    )
+    if not requested:
+        raise ValueError("at least one source path is required")
+    reason = reason.strip()
+    if not reason:
+        raise ValueError("a non-empty retry reason is required")
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        candidates = list(
+            client.query(
+                """
+                MATCH (sns:StandardNameSource)
+                WHERE sns.id IN $requested OR sns.source_id IN $requested
+                WITH sns, coalesce(sns.attempt_count, 0) AS attempts
+                WHERE sns.status = 'failed'
+                   OR (sns.status = 'extracted' AND attempts >= $attempt_cap)
+                RETURN sns.id AS id, sns.source_id AS source_path,
+                       sns.status AS status,
+                       attempts AS attempt_count, sns.last_error AS last_error
+                ORDER BY sns.id
+                """,
+                requested=requested,
+                attempt_cap=_MAX_COMPOSE_CLAIM_ATTEMPTS,
+            )
+        )
+        eligible_ids = [row["id"] for row in candidates]
+        matched_requests = {
+            requested_path
+            for requested_path in requested
+            for row in candidates
+            if requested_path
+            in {
+                row["id"],
+                row.get("source_path") or row["id"].partition(":")[2],
+            }
+        }
+        result: dict[str, Any] = {
+            "requested": len(requested),
+            "eligible": len(candidates),
+            "retried": 0,
+            "refused": len(requested) - len(matched_requests),
+            "source_ids": eligible_ids,
+            "event_ids": [],
+            "dry_run": dry_run,
+        }
+        if dry_run or not candidates:
+            return result
+
+        items = [
+            {
+                "source_id": row["id"],
+                "previous_status": row["status"],
+                "previous_attempt_count": int(row["attempt_count"]),
+                "previous_error": row.get("last_error"),
+                "event_id": f"source-retry:{uuid.uuid4()}",
+            }
+            for row in candidates
+        ]
+        rows = list(
+            client.query(
+                """
+                UNWIND $items AS item
+                MATCH (sns:StandardNameSource {id: item.source_id})
+                WHERE sns.status = item.previous_status
+                  AND coalesce(sns.attempt_count, 0)
+                      = item.previous_attempt_count
+                  AND (
+                    sns.status = 'failed'
+                    OR (sns.status = 'extracted'
+                        AND coalesce(sns.attempt_count, 0) >= $attempt_cap)
+                  )
+                CREATE (event:StandardNameSourceRetry {id: item.event_id})
+                SET event.source_id = sns.id,
+                    event.previous_status = item.previous_status,
+                    event.previous_attempt_count = item.previous_attempt_count,
+                    event.previous_error = item.previous_error,
+                    event.reason = $reason,
+                    event.retried_at = datetime()
+                MERGE (sns)-[:HAS_RETRY_EVENT]->(event)
+                SET sns.retry_events =
+                        coalesce(sns.retry_events, []) + item.event_id,
+                    sns.status = 'extracted',
+                    sns.attempt_count = 0,
+                    sns.claimed_at = null,
+                    sns.claim_token = null,
+                    sns.failed_at = null,
+                    sns.last_error = null
+                RETURN sns.id AS source_id, event.id AS event_id
+                """,
+                items=items,
+                reason=reason,
+                attempt_cap=_MAX_COMPOSE_CLAIM_ATTEMPTS,
+            )
+        )
+        result["retried"] = len(rows)
+        result["refused"] += len(candidates) - len(rows)
+        result["source_ids"] = [row["source_id"] for row in rows]
+        result["event_ids"] = [row["event_id"] for row in rows]
+        return result
+    finally:
+        if own:
+            client.close()
+
+
 def mark_source_skipped(
     gc: GraphClient,
     source_id: str,
@@ -6951,6 +7086,125 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
         "revived": revived_count,
         "relinked": relinked_count,
     }
+
+
+def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
+    """Make source lifecycle status agree with its current live target.
+
+    ``composed`` and ``attached`` are terminal only while the source still
+    points at a non-terminal ``StandardName``. A refine/supersede/delete path
+    that loses the target can otherwise leave the source permanently excluded
+    from generation. Conversely, a source with a live ``PRODUCED_NAME`` edge
+    may still say ``extracted``/``failed`` after an interrupted write.
+
+    The repair preserves the historical ``composed`` versus ``attached``
+    distinction whenever it is already valid. Sources with a live target but
+    another non-stale status become ``attached``; sources claiming completion
+    with no live target return to ``extracted`` with a fresh attempt budget.
+    Terminal target edges and the scalar mirror are cleared in the latter
+    case. Upstream-stale sources are never revived here.
+
+    Idempotent once status, edge, and scalar liveness agree.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        live_rows = client.query(
+            """
+            MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
+            WHERE NOT (coalesce(sn.name_stage, '') IN
+                       ['superseded', 'exhausted', 'contested'])
+              AND NOT (sns.status IN ['composed', 'attached', 'stale'])
+            SET sns.status = 'attached',
+                sns.produced_sn_id = sn.id,
+                sns.claimed_at = null,
+                sns.claim_token = null
+            RETURN count(DISTINCT sns) AS n
+            """
+        )
+        live_realigned = live_rows[0]["n"] if live_rows else 0
+
+        orphan_rows = client.query(
+            """
+            MATCH (sns:StandardNameSource)
+            WHERE sns.status IN ['composed', 'attached']
+              AND NOT EXISTS {
+                MATCH (sns)-[:PRODUCED_NAME]->(live:StandardName)
+                WHERE NOT (coalesce(live.name_stage, '') IN
+                           ['superseded', 'exhausted', 'contested'])
+              }
+            OPTIONAL MATCH (sns)-[r:PRODUCED_NAME]->(:StandardName)
+            WITH sns, collect(r) AS stale_edges
+            FOREACH (edge IN stale_edges | DELETE edge)
+            SET sns.status = 'extracted',
+                sns.attempt_count = 0,
+                sns.claimed_at = null,
+                sns.claim_token = null,
+                sns.produced_sn_id = null
+            RETURN count(DISTINCT sns) AS n,
+                   sum(size(stale_edges)) AS edges
+            """
+        )
+        orphaned_reset = orphan_rows[0]["n"] if orphan_rows else 0
+        terminal_edges_dropped = (
+            int(orphan_rows[0].get("edges") or 0) if orphan_rows else 0
+        )
+    finally:
+        if own:
+            client.close()
+
+    if live_realigned or orphaned_reset:
+        logger.info(
+            "reconcile_source_status_liveness: realigned %d source(s) with a "
+            "live target; returned %d source(s) without one to extracted "
+            "(%d stale edge(s) dropped)",
+            live_realigned,
+            orphaned_reset,
+            terminal_edges_dropped,
+        )
+    return {
+        "live_realigned": live_realigned,
+        "orphaned_reset": orphaned_reset,
+        "terminal_edges_dropped": terminal_edges_dropped,
+    }
+
+
+def retire_unreachable_hint_edits(gc: Any | None = None) -> int:
+    """Reject name hints whose target cannot re-enter name generation.
+
+    A name-axis hint is generation steering, not a replacement name. On an
+    already accepted or exhausted target no name-stage claim consumes that
+    hint, so leaving ``edit_status='open'`` creates a permanent edit backlog.
+    New requests are refused by :func:`imas_codex.standard_names.edit._apply_hint`;
+    this startup repair closes rows written before that gate existed.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.edit_status = 'open'
+              AND sn.name_hint IS NOT NULL
+              AND sn.name_stage IN ['accepted', 'exhausted']
+            SET sn.edit_status = 'rejected',
+                sn.reviewer_comments_name =
+                    trim(coalesce(sn.reviewer_comments_name, '')
+                    + ' [edit_rejected] name hints require a target that can '
+                    + 're-enter generation; use a full rename proposal')
+            RETURN count(sn) AS n
+            """
+        )
+        retired = rows[0]["n"] if rows else 0
+    finally:
+        if own:
+            client.close()
+    if retired:
+        logger.info(
+            "retire_unreachable_hint_edits: rejected %d terminal name-hint edit(s)",
+            retired,
+        )
+    return retired
 
 
 def reconcile_vocab_gaps() -> dict[str, int]:
@@ -8087,7 +8341,7 @@ def write_run_provenance(
 
 
 # =============================================================================
-# Review comment export (Phase F — anti-pattern feedback loop)
+# Review comment export for the anti-pattern feedback loop
 # =============================================================================
 
 
@@ -8457,8 +8711,8 @@ def mark_orphaned_standard_name_runs_stale(
     This sweep marks such rows ``status='stale'`` with
     ``stop_reason='orphaned_no_finalize'`` so ``sn status`` and provenance
     stop reporting them as in-flight. A run is only considered orphaned when
-    its most recent liveness signal (``last_heartbeat``, else ``created_at``)
-    is older than *max_age_hours* — an active run heartbeats via
+    its most recent liveness signal (``last_heartbeat``, then ``created_at``,
+    then ``started_at``) is older than *max_age_hours* — an active run heartbeats via
     :func:`update_sn_run_progress`, so a generous threshold never touches a
     genuinely-running peer. The current run (``current_run_id``) is always
     excluded.
@@ -8472,7 +8726,9 @@ def mark_orphaned_standard_name_runs_stale(
             MATCH (rr:SNRun)
             WHERE rr.status IN ['started', 'running']
               AND ($current_run_id IS NULL OR rr.id <> $current_run_id)
-              AND coalesce(rr.last_heartbeat, rr.created_at, rr.stopped_at)
+              AND coalesce(
+                    rr.last_heartbeat, rr.created_at, rr.started_at, rr.stopped_at
+                  )
                   < datetime() - duration({hours: $max_age})
             SET rr.status = 'stale',
                 rr.stop_reason = 'orphaned_no_finalize',
@@ -8746,7 +9002,7 @@ def aggregate_spend_per_name(run_id: str) -> dict[str, float]:
 
     Per-name cost share is ``llm_cost / size(sn_ids)`` — each name
     in the ``sn_ids`` list gets an equal share.  Rows with an empty
-    ``sn_ids`` list are skipped (e.g. L7 audit calls with no names).
+    ``sn_ids`` list are skipped (for example, audit calls with no names).
     """
     with GraphClient() as gc:
         rows = gc.query(
@@ -9474,8 +9730,9 @@ def claim_review_names_seed_and_expand(
     Eligibility: ``reviewed_name_at IS NULL`` AND
     ``validation_status = 'valid'``.
 
-    B3 exclusivity: names with ``reviewer_score_name < min_score`` are
-    reserved for the regen pool and excluded here via
+    Review/refine exclusivity: names with
+    ``reviewer_score_name < min_score`` are reserved for the regeneration pool
+    and excluded here via
     ``coalesce(sn.reviewer_score_name, 1.0) >= $min_score``.
     """
     where = (
@@ -11190,7 +11447,7 @@ def tombstone_supersede_into(
 
     Mirrors the supersede semantics: stamps ``old.name_stage='superseded'``,
     ``old.superseded_from_stage = coalesce(old.superseded_from_stage,
-    'accepted')`` (so the P1 export emits a ``status: deprecated`` stub for it),
+    'accepted')`` (so catalog export emits a ``status: deprecated`` stub for it),
     clears its claim, and MERGEs ``(into)-[:REFINED_FROM]->(old)`` so the stub
     resolves to the live successor. Historical ``HAS_STANDARD_NAME`` /
     ``PRODUCED_NAME`` edges on ``old`` are left intact as the provenance record.
@@ -13217,12 +13474,15 @@ def pool_pending_counts(
     *,
     min_score: float = 0.75,
     rotation_cap: int = 3,
+    domain: str | None = None,
+    scope_run_id: str | None = None,
+    edits_only: bool = False,
 ) -> dict[str, int]:
     """Return pending-work counts for all six worker pools in one query.
 
-    The six predicates mirror the eligibility criteria in the
-    corresponding ``claim_*_seed_and_expand`` functions but do NOT
-    filter on ``claimed_at`` — the counts reflect total eligible work,
+    The six predicates mirror the eligibility criteria and optional scope in
+    the corresponding ``claim_*_batch`` functions but do NOT filter on
+    ``claimed_at`` — the counts reflect total eligible work,
     including items currently being processed.  This is correct for
     both throttle decisions (total queue depth matters) and display
     (users want to see total pending, not just unclaimed).
@@ -13239,38 +13499,88 @@ def pool_pending_counts(
         }
     """
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.defaults import (
+        DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    )
 
-    cypher = """
-    CALL { MATCH (s:StandardNameSource {status: 'extracted'})
+    source_scope = ""
+    name_scope = ""
+    params: dict[str, Any] = {
+        "min_score": min_score,
+        "rotation_cap": rotation_cap,
+        "max_compose_attempts": _MAX_COMPOSE_CLAIM_ATTEMPTS,
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    }
+    if domain:
+        source_scope += " AND s.physics_domain = $domain"
+        name_scope += " AND sn.physics_domain = $domain"
+        params["domain"] = domain
+    if scope_run_id:
+        source_scope += " AND s.run_id = $scope_run_id"
+        name_scope += " AND sn.run_id = $scope_run_id"
+        params["scope_run_id"] = scope_run_id
+    if edits_only:
+        # Name-generation claims intentionally have no edits-only source path:
+        # rename/docs edits start from an already-composed StandardName.
+        source_scope += " AND false"
+        name_scope += " AND coalesce(sn.edit_status, '') = 'open'"
+
+    score_gate = (
+        ""
+        if (scope_run_id or edits_only)
+        else (
+            " AND (sn.reviewer_score_name IS NOT NULL"
+            " OR (coalesce(sn.origin, '') = 'derived'"
+            " AND EXISTS { MATCH (kid:StandardName)-[:HAS_PARENT]->(sn)"
+            " WHERE NOT (coalesce(kid.name_stage, '') IN"
+            " ['superseded', 'exhausted', 'contested']) }))"
+        )
+    )
+
+    cypher = f"""
+    CALL {{ MATCH (s:StandardNameSource {{status: 'extracted'}})
            WHERE coalesce(s.attempt_count, 0) < $max_compose_attempts
-           RETURN count(s) AS generate_name }
-    CALL { MATCH (sn:StandardName {name_stage: 'drafted'})
-           RETURN count(sn) AS review_name }
-    CALL { MATCH (sn:StandardName {name_stage: 'reviewed'})
+             {source_scope}
+           RETURN count(s) AS generate_name }}
+    CALL {{ MATCH (sn:StandardName {{name_stage: 'drafted'}})
+           WHERE sn.description IS NOT NULL
+             AND sn.description <> $parent_desc_placeholder
+             AND coalesce(sn.origin, '') <> 'derived'
+             {name_scope}
+           RETURN count(sn) AS review_name }}
+    CALL {{ MATCH (sn:StandardName {{name_stage: 'reviewed'}})
            WHERE sn.reviewer_score_name < $min_score
              AND coalesce(sn.chain_length, 0) < $rotation_cap
              AND coalesce(sn.origin, '') <> 'derived'
-           RETURN count(sn) AS refine_name }
-    CALL { MATCH (sn:StandardName {name_stage: 'accepted', docs_stage: 'pending'})
-           RETURN count(sn) AS generate_docs }
-    CALL { MATCH (sn:StandardName {docs_stage: 'drafted'})
-           RETURN count(sn) AS review_docs }
-    CALL { MATCH (sn:StandardName {docs_stage: 'reviewed'})
+             AND NOT (coalesce(sn.edit_mode, '') = 'rename'
+                      AND coalesce(sn.review_resubmit_count, 0)
+                          >= $rotation_cap)
+             {name_scope}
+           RETURN count(sn) AS refine_name }}
+    CALL {{ MATCH (sn:StandardName
+                   {{name_stage: 'accepted', docs_stage: 'pending'}})
+           WHERE true {score_gate}
+             {name_scope}
+           RETURN count(sn) AS generate_docs }}
+    CALL {{ MATCH (sn:StandardName {{docs_stage: 'drafted'}})
+           WHERE NOT (sn.name_stage IN
+                      ['superseded', 'exhausted', 'contested'])
+             {score_gate}
+             {name_scope}
+           RETURN count(sn) AS review_docs }}
+    CALL {{ MATCH (sn:StandardName {{docs_stage: 'reviewed'}})
            WHERE sn.reviewer_score_docs < $min_score
              AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
-           RETURN count(sn) AS refine_docs }
+             AND NOT (sn.name_stage IN
+                      ['superseded', 'exhausted', 'contested'])
+             {score_gate}
+             {name_scope}
+           RETURN count(sn) AS refine_docs }}
     RETURN generate_name, review_name, refine_name,
            generate_docs, review_docs, refine_docs
     """
     with GraphClient() as gc:
-        rows = list(
-            gc.query(
-                cypher,
-                min_score=min_score,
-                rotation_cap=rotation_cap,
-                max_compose_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
-            )
-        )
+        rows = list(gc.query(cypher, **params))
 
     if not rows:
         return {

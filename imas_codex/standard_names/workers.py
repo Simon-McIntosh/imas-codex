@@ -4948,6 +4948,7 @@ async def compose_batch(
     stop_event: asyncio.Event,
     *,
     regen: bool = False,
+    compose_model: str | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
 ) -> int:
     """Shared implementation for compose and regen pool batch processors.
@@ -4970,6 +4971,8 @@ async def compose_batch(
         mgr: Shared :class:`BudgetManager` for cost tracking.
         stop_event: Cooperative shutdown signal.
         regen: If True, set ``regen_increment`` on persisted candidates.
+        compose_model: Optional configured model override for this run. When
+            absent, the production ``sn-compose`` seat is resolved normally.
 
     Returns:
         Count of successfully composed/regenerated candidates.
@@ -4988,7 +4991,7 @@ async def compose_batch(
     if not batch:
         return 0
 
-    model = get_model("sn-compose")
+    model = compose_model or get_model("sn-compose")
     context = build_compose_context()
 
     # ── Batch-scope domain context ─────────────────────────────────────
@@ -5862,6 +5865,7 @@ async def process_generate_name_batch(
     mgr: BudgetManager,
     stop_event: asyncio.Event,
     *,
+    compose_model: str | None = None,
     on_event: Callable[[dict[str, Any]], None] | None = None,
 ) -> int:
     """Pool-mode generate-name batch processor.
@@ -5871,7 +5875,14 @@ async def process_generate_name_batch(
 
     Returns count of items successfully processed.
     """
-    return await compose_batch(batch, mgr, stop_event, regen=False, on_event=on_event)
+    return await compose_batch(
+        batch,
+        mgr,
+        stop_event,
+        regen=False,
+        compose_model=compose_model,
+        on_event=on_event,
+    )
 
 
 # Substrings that identify a deterministic grammar / vocab / schema failure
