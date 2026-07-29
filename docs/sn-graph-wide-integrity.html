@@ -8,18 +8,20 @@
   <meta name="plan-slug" content="sn-graph-wide-integrity">
   <meta name="plan-title" content="Graph-wide name integrity (everything outside the release batch)">
   <meta name="plan-summary" content="Close the provenance and attachment defects in the exploratory half of the corpus — the deliberately-broad generation across ~half the DD catalog — plus the write-path gaps and carried findings that the WEST release does not depend on.">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-west-review-rehearsal">
+  <meta name="plan-depends-on" content="">
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="0.0">
+<meta name="plan-sprint" content="S6">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -365,7 +367,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sgwi-001" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T07:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28T07:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Settle the fan-out invariant, fix the embed dimension, then gate the write paths</h4>
     <div class="r-fu-body"><p>The first three steps of §7, in order, because each is cheap and each changes how much work the rest is. Settling the fan-out question is free and decides whether 240 of the 1458 ledger violations exist at all; the embed-dimension mismatch is independent and breaks semantic search outright; finding the supersede-without-retarget path likely collapses the largest violation class in one fix. Only then gate the write paths, so the defect classes stop regenerating before any money is spent on review. <strong>Do not start the graph-wide review pass, and do not touch anything in the WEST manifest — that is the parent plan's release set.</strong></p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -479,7 +481,7 @@ Done-when
   5. Full SN suite no worse than baseline; committed and pushed; outcomes
      recorded and the next followup queued.</pre>
     </article>
-<article class="r-fu" data-id="f-sgwi-002" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T10:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §6b" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T10:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §6b" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Unit authority: lock D-parent-units, close the null-unit validator gap, repair the eight, exorcise the ghost disposition</h4>
     <div class="r-fu-body"><p>Eight accepted derived parents carry unit=None on inherently-dimensional bases and validate 'valid' — the ISN validator flags unit='1' but not null. The shipped 'intentional unit-less' verdict on effective_particle_energy / perturbed_particle_energy is challenged (the normalized_* child owns the dimensionless role) and the latter name is a ghost — recorded as intentional yet absent from the graph. Lock D-parent-units with the lead, close the validator gap ISN-side (coordinated), repair the eight per policy, and trace the ghost.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -523,7 +525,7 @@ Done-when
   3. The ghost traced and every stale disposition corrected with a dated note.
 </pre>
     </article>
-<article class="r-fu" data-id="f-sgwi-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T12:50:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §4b" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T12:50:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §4b" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Close the deletion side of the ledger: every delete path writes its record; explain the 296 ghost rows</h4>
     <div class="r-fu-body"><p>296 StandardNameChange rows cite names with no surviving node, and perturbed_particle_energy left mid-campaign via an unledgered bulk DETACH DELETE (reset paths at graph_ops.py:5199/:5052/:5066/:3108). Establish the invariant that no StandardName leaves the graph without a ledger row, add the graph-quality test, and reconcile the existing 296 (attribute each to its deleting operation or mark it unexplained-legacy with a dated note). Also fold in the sweep's orphan findings: 35 live names with no PRODUCED_NAME source regenerated after the ledger was rebuilt to zero — the always-on self-heal has a hole (first offenders: the co/counter-passing torque-density family).</p></div>
     <pre class="r-fu-prompt">Project: imas-codex

@@ -8,17 +8,19 @@
   <meta name="plan-slug" content="sn-dd-gaps">
   <meta name="plan-title" content="DD gaps — first-class authority for the pipeline to flag Data-Dictionary defects">
   <meta name="plan-summary" content="Give the pipeline and its agents a first-class channel to flag errors in the DD itself — a DDGap mechanism mirroring vocab_gaps: flagged by any seat or audit, triaged into registered-exception / upstream-issue / rejected, reconciled against new DD releases, and surfaced in release reporting.">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-informs" content="sn-naming-loop-robustness,sn-graph-wide-integrity">
   <title>DD gaps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-sprint" content="S6">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -163,7 +165,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ddg-001" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T10:00:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ddg-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T10:00:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Land §4 steps 1–2: the DDGap schema/write path/CLI, then the registry back-fill</h4>
     <div class="r-fu-body"><p>Build the mechanism's foundation exactly on the vocab_gaps template (node + report edge + write instrument + CLI verb), then import the known record (~90 unit-exception entries, the #272 filing) as pre-triaged gaps so the mechanism starts with real content and zero behaviour change. Lock D-ddgap-authority and D-ddgap-storage with the lead before step 3 gives agents the flagging authority.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex

@@ -11,15 +11,17 @@
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-informs" content="sn-west-review-rehearsal,sn-graph-wide-integrity">
   <title>A robust naming loop on a stable grammar | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-impl" content="0.75">
+<meta name="plan-sprint" content="S6">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -386,7 +388,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-nlr-001" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-28T18:50:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="2026-07-29T09:08:47+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-nlr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28T18:50:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="2026-07-29T09:08:47+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Rungs 1–2: measure the loop with feedback on, then make the dedup verdict trustworthy</h4>
     <div class="r-fu-body"><p><strong>The retry-feedback change (<code>b7a51fdc</code>) has never been measured live.</strong> Run one free scoped compose pass to baseline the gap-production rate now that failures carry a diagnosis, then attack mechanism B: re-run dedup over the 345 never-checked tokens and re-audit the 139 <code>distinct_confirmed</code> — the structural-suffix cases (<code>…antenna_module ~ …antenna</code> 0.97) and canonical-order variants (<code>methane_deuterated ~ deuterated_methane</code> 0.96) are mechanically detectable and plainly wrong verdicts. No RC language: the release is gated on §5, not asserted.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -460,7 +462,7 @@ Done-when
      numbers, and rung-3 work queued as the next followup.</pre>
     <p class="r-fu-outcome">Rungs 1-4 landed 2026-07-29 (commits 50321530, 39c7f95a, b94ac300, 11255632; rung-6 design 836a1928). Gate 2: gap rate 14.4/100 composes (before, 104 tokens/724 composes) -&gt; 2/9 (drain 1, hardest residual, both reasons substantive) -&gt; 0/5 (drain 2) — falling across consecutive drains, every new gap diagnosed on the report edge. Gate 3: 0 tokens unchecked (was 389); 388 measured + stamped checked_no_reuse with nearest/similarity; 10 mechanical reuse_confirmed superseding 7 wrong distinct_confirmed; lithium_6~lithium pinned as a genuine distinction. Gate 1: replay absent 484-&gt;418, every mechanism-A/C token actionable, controls stay absent. Rung 4: all 566 stored tokens triaged {reuse 10, rule_violation 49, composable 87, retired_stale 261, genuine 159}, 0 unchecked; D-vocab-scope locked rotation-after-triage on the genuine list. Two plan premises corrected by the replay: 174 not 139 distinct_confirmed (49 at &gt;=0.90, 30 genuine judgement calls); mechanism A is 49 tokens — the other ~94 position absents are unregistered geometry primitives (class-D demand). All five §5 gates carry measured HOLDS. Record: docs/archive/sn-naming-loop-robustness-rungs-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-nlr-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-29T09:00:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nlr-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-29T09:00:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Rung 5: the class-D vocabulary rotation from the triaged genuine list; rung 6 design lands coordinated</h4>
     <div class="r-fu-body"><p>The triaged genuine list (159 tokens, scratch-saved and reproducible via <code>triage_vocab_gaps</code>) is the rotation's input: adjudicate add-vs-fold per token (instrument-side vocabulary and the position-axis geometry primitives dominate), add the survivors to ISN with definitions, run the grammar suite, RC, pin bump. Separately, the <a href="/imas-codex/sn-binary-operand-validation-design.html">operand-validation design</a> is ready to land as coordinated ISN work (two prerequisite steps before any gate). Also queued: the composer cannot emit chained-operator forms (fuses flux_surface_averaged_inverse_square into one token — gm1/gm5/gm6 sit at the attempt cap) and the --compose-model override needs verification.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -515,7 +517,7 @@ Done-when
   2. Rung-6 prerequisite steps green in ISN; the codex guidance half landed.
   3. A fresh §5 ledger row recorded; this followup resolved with numbers.</pre>
     </article>
-<article class="r-fu" data-id="f-nlr-003" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T12:40:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nlr-003" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T12:40:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Pipeline mechanics: the failed-retry instrument, the broken --compose-model, pool pending scoping, edit reachability, status mirrors</h4>
     <div class="r-fu-body"><p>The deep sweep verified six pipeline-mechanics defects, two of them gating the WEST RC tail: (1) NO sanctioned retry exists for status='failed' sources at the attempt cap (gate at graph_ops.py:9246/9259; the two revival instruments cover only dd_unit skips and grammar-signature changes) — gm1/gm5/gm6 are stuck on this; (2) --compose-model is silently discarded in pooled mode — compose_batch (workers.py:4945) takes no state and hardcodes the model at :4991. Also: pool_pending_counts has no scope filter (a --edits run spins on 321 phantom pending while claiming 0; 316 non-WEST drafts accumulate unreviewed); 69 hint edits on accepted names are unreachable by construction (+10 on terminal exhausted); source status mirrors lag liveness on 593 sources; one stuck SNRun has no heartbeat property for the sweep to time out against; and the startup reconcile_vocab_gaps now blows a 30s test timeout unstubbed in the harnesses.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -570,7 +572,7 @@ Done-when
      status mirrors realigned by a reconcile with measured before/after; the
      harness stub in place; this followup resolved with numbers.</pre>
     </article>
-<article class="r-fu" data-id="f-nlr-004" data-status="open" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-29T13:10:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-nlr-004" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T13:10:00+00:00" data-recommends-skill="/reckon-ship sn-naming-loop-robustness §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Grammar/prompt truth pass: the ISN-sweep rotation-sized shortlist</h4>
     <div class="r-fu-body"><p>The ISN sweep (2026-07-29) verified every item with reproduced parser output. Prompt-side: the DECOMPOSITION RULE table mis-assigns the segment of ALL FIVE of its worked tokens; 9 endorsed example names do not parse (one block mandates an ordering the parser inverts); the reference declares the registered 'variation' operator unregistered (minting false gaps); operator 'precedence' is dropped before rendering. ISN-side: shipped docs teach an unsupported vector syntax (axis_component_of, 0/2177 instances) including as a prescribed fix; the scoping/kind-forming split force-reorders natural phrases (reclassifying 'breakdown' out of scoping_qualifiers closes fork issue #39); 4 registry tokens remain unsegmented while a prompt instructs their use; the rho_tor twin carriers are TRUE synonyms (both unit m) with sibling metrics disagreeing; 8 accepted names need canonical renames; the test suite dirties the tracked entry_schema.json on every run. The prompt fixes marked SAFE-PRE-RC below move no grammar and de-risk the residual-14 composes.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex (+ coordinated ISN edits in ~/Code/imas-standard-names)
