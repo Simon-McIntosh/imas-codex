@@ -152,6 +152,10 @@ def test_source_status_reconcile_repairs_both_liveness_directions() -> None:
     live_query = gc.query.call_args_list[0].args[0]
     orphan_query = gc.query.call_args_list[1].args[0]
     assert "sns.status = 'attached'" in live_query
+    assert "hint.edit_mode, '') = 'hint'" in live_query
+    assert "hint.edit_status, '') = 'open'" in live_query
+    assert "hint.name_hint IS NOT NULL" in live_query
+    assert "NOT EXISTS" in live_query
     assert "sns.status = 'extracted'" in orphan_query
     assert "sns.produced_sn_id = null" in orphan_query
 
