@@ -706,6 +706,87 @@ def test_childless_derived_placeholder_is_retired() -> None:
     ]
 
 
+@pytest.mark.parametrize(
+    "snapshot",
+    [
+        "seedable",
+        "legacy",
+        "accepted_seedable_unit_gap",
+        "accepted_legacy_unit_gap",
+    ],
+)
+def test_reaped_snapshot_candidate_is_not_rematerialized(snapshot: str) -> None:
+    """A childless parent cannot return through an earlier candidate snapshot."""
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    parent_id = "momentum_flux_limiter_coefficient_over_edge_region"
+    candidate = {
+        "parent_id": parent_id,
+        "origin": "derived",
+        "name_stage": "pending",
+        "child_data": [
+            {
+                "id": "detached_child",
+                "unit": None,
+                "cocos": None,
+                "physics_domain": "core_transport",
+                "kind": "scalar",
+                "op_kind": "qualifier",
+            }
+        ],
+        "dd_paths": [],
+        "edge_kinds": ["qualifier"],
+    }
+    seedable_results = [
+        [candidate] if snapshot == "seedable" else [],
+        [candidate] if snapshot == "accepted_seedable_unit_gap" else [],
+    ]
+    legacy_results = [
+        [candidate] if snapshot == "legacy" else [],
+        [candidate] if snapshot == "accepted_legacy_unit_gap" else [],
+    ]
+    gc = MagicMock()
+
+    def query(cypher: str, **_kwargs):
+        if "NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }" in cypher:
+            return [{"id": parent_id}]
+        if "MATCH (dr:DocsRevision)" in cypher:
+            return [{"n": 0}]
+        raise AssertionError(f"unexpected query: {cypher}")
+
+    gc.query.side_effect = query
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            side_effect=seedable_results,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            side_effect=legacy_results,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+            side_effect=[0, 1],
+        ) as delete_nodes,
+        patch(
+            "imas_codex.standard_names.graph_ops._materialize_derived_parent_rows",
+            side_effect=AssertionError("reaped parent was rematerialized"),
+        ) as materialize,
+    ):
+        changed = normalize_derived_parent_lifecycle(gc)
+
+    assert changed == 1
+    assert delete_nodes.call_args_list == [
+        call(gc, []),
+        call(gc, [parent_id]),
+    ]
+    materialize.assert_not_called()
+
+
 def test_semantically_valid_derived_parent_survives_cleanup() -> None:
     """A species-qualified state parent remains structurally admissible."""
     from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
