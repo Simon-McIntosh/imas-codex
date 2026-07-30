@@ -16,8 +16,8 @@
   <title>A robust naming loop on a stable grammar | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="9">
+<meta name="plan-modified" content="2026-07-30">
+<meta name="plan-version" content="10">
 <meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
@@ -666,6 +666,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="canonical-campaign-closure-20260729" data-who="reckon-ship" data-when="2026-07-29T21:12:00+02:00" data-quote="the coordinate is the toroidal flux label of a surface, the radius appears to be ill defined">
     <div class="r-comment-body"><p><strong>DD-grounded canonical campaign closed.</strong> The IMAS-DD MCP definition for <code>rho_tor</code> is <code>sqrt(phi/(pi*b0))</code>, unit metres: a flux-surface coordinate/effective radial label, not a Euclidean radius. ISN <code>v0.8.0rc60</code> therefore keeps <code>toroidal_flux_coordinate</code> canonical and treats <code>toroidal_flux_radius</code> as a legacy alias. The exact paid drain transitioned 15 bad-order or radius-labelled families to accepted canonical targets; every surviving predecessor is superseded, every target has live provenance, and all target scores are at least 0.875. A graph-wide released-grammar audit found <strong>2,158 accepted, 0 noncanonical, 0 invalid</strong>. Four finalized run ledgers total <strong>$2.539308</strong> against the authorized $50. The full Codex standard-name suite exited zero on <code>sun_debug</code>. Commits: <code>055ad391</code>, <code>7222a33b</code>, <code>288b3e69</code>, <code>7575a7e6</code>, <code>40f31ca8</code>.</p><p><strong>Mechanics findings:</strong> the root edit cascade dry-run listed four descendants but the accept path renamed zero, so the descendants were staged explicitly; scoped runs still perform a global grammar/structural reconcile; and the post-drain <code>to_thread</code> fixup outlives its timeout, preventing process exit until interrupted after the authoritative pool summary. These remain pipeline defects and were not used to bypass review or acceptance.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="toroidal-flux-coordinate-removal" data-who="reckon-ship" data-when="2026-07-30T01:55:11+02:00" data-quote="remove toroidal flux radius completely; this should not be a catalog entry">
+    <div class="r-comment-body"><p><strong>Final correction: radius is not an alias or catalog entry.</strong> IMAS-DD MCP metadata defines <code>rho_tor</code> as the toroidal flux coordinate <code>sqrt(phi/(pi*b0))</code> and <code>rho_tor_norm</code> as its normalized coordinate. ISN <code>v0.8.0rc61</code> therefore removes the <code>toroidal_flux_radius</code> alias entirely and renames the active gradient base to <code>toroidal_flux_coordinate_gradient</code>. Codex pins the exact release commit; the full Standard Names suite passed <strong>5,167</strong> tests. Fresh quorum review accepted the gm2/gm3/gm7 coordinate-gradient successors at 0.919, 1.000, and 0.881. The sanctioned provenance compactor removed all nine radius-named graph nodes while preserving one audit event per deletion; zero live StandardName ids now contain the token, and source/owner edges remain on the coordinate successors. Incremental review spend was <strong>$0.526032</strong>; cumulative canonical-campaign spend is <strong>$3.065340</strong> of the authorized $50. A 2,540-name audit found zero round-trip mismatches and 17 older unrelated parse failures; timestamps and the rc61 diff prove none was introduced or made eligible by this correction.</p></div>
 </div>
 </section>
 </main>

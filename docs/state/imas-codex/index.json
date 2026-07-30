@@ -1,5 +1,5 @@
 {
-  "updated": "2026-07-29T21:13:18",
+  "updated": "2026-07-30T01:55:13",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -205,7 +205,7 @@
         "starts": "2026-07-29",
         "ends": "2026-08-12",
         "description": "Stability and correctness BEFORE the release (lead decision 2026-07-29: 'I value stability and correctness over a rushed release'). All grammar-moving and validation work lands here so the batch the human reviews is the stable one: the vocabulary rotation, the grammar/prompt truth pass, unit authority, the deletion-ledger invariant, the pipeline mechanics, and the DD-gaps foundation. EXIT CRITERIA (hard, so the RC does not recede again): all five convergence gates re-measured HOLDS at the post-rotation pin, the WEST batch parse-check green at that pin, suites green, and a fresh gate-ledger row recorded.",
-        "summary": "Unit authority and deletion-ledger work are closed; the DDGap foundation is live; the newly eligible canonical-name cohort is drained. IMAS-DD-grounded correction keeps toroidal_flux_coordinate canonical in ISN v0.8.0rc60. Fifteen bad-order/radius-labelled families now have accepted canonical targets, all 2,158 accepted names parse canonically, the full SN suite is green, and paid spend was $2.539308 of the authorized $50. S6 remains active for the 159-token vocabulary rotation, the remaining grammar/prompt truth pass and rung-6 work, post-rotation gate replay, and the open DDGap storage decision."
+        "summary": "Unit authority and deletion-ledger work are closed; the DDGap foundation is live; the newly eligible canonical-name cohort is drained. ISN v0.8.0rc61 removes toroidal_flux_radius entirely and makes toroidal_flux_coordinate_gradient canonical. Fresh quorum accepted the gm2/gm3/gm7 successors; all nine radius-named graph nodes were safely compacted with audit events, zero such live nodes remain, and the full SN suite passed 5,167 tests. Incremental spend was $0.526032 and cumulative canonical-campaign spend is $3.065340 of the authorized $50. S6 remains active for the 159-token vocabulary rotation, remaining grammar/prompt truth pass and rung-6 work, post-rotation gate replay, and the open DDGap storage decision."
       },
       {
         "id": "S7",
@@ -264,9 +264,14 @@
         "when": "2026-07-29",
         "who": "reckon-ship",
         "what": "S6 canonical cleanup used IMAS-DD metadata to reverse the proposed rho_tor alias direction: toroidal_flux_coordinate stays canonical in v0.8.0rc60. Fifteen exact canonical transitions earned review acceptance; all 2,158 accepted graph names parse canonically; the full SN suite exited zero; exact campaign spend was $2.539308. The graph-wide unit-authority S6 item is now closed. S6 remains active for the vocabulary rotation, grammar/prompt truth tail, gate replay, and DDGap storage decision."
+      },
+      {
+        "when": "2026-07-30",
+        "who": "reckon-ship",
+        "what": "S6 toroidal-flux correction closed: IMAS-DD metadata established coordinate semantics; ISN v0.8.0rc61 removed the radius alias and renamed the gradient base; Codex pinned the release, fresh quorum accepted gm2/gm3/gm7, and sanctioned provenance cleanup removed all nine radius-named graph nodes while preserving audit events. Full SN suite: 5,167 passed; incremental review spend $0.526032."
       }
     ],
     "blockers": [],
-    "_version": 15
+    "_version": 16
   }
 }
