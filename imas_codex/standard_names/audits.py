@@ -48,10 +48,13 @@ def _isn_process_tokens() -> frozenset[str]:
 def _isn_locus_tokens() -> frozenset[str]:
     """Return the canonical set of locus tokens registered in installed ISN."""
     try:
-        from imas_standard_names.grammar import vocab_loaders
+        from imas_standard_names import get_grammar_context
 
-        registry = vocab_loaders.load_locus_registry()
-        return frozenset(registry.loci)
+        context = get_grammar_context()
+        registry = (
+            context.get("grammar", {}).get("vocabularies", {}).get("locus_registry", {})
+        )
+        return frozenset(registry)
     except Exception as exc:  # pragma: no cover - defensive
         logger.debug("Could not load ISN locus registry: %s", exc)
     return frozenset()

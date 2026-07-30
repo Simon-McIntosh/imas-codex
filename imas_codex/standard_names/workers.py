@@ -756,21 +756,20 @@ def _grammar_round_trip_failures(candidates: list[Any]) -> tuple[list[str], list
     name, or the source id when even composing it raises).  ``advice`` holds one
     actionable line per diagnosable failure.
 
-    The diagnosis comes from ISN's :class:`UnknownBaseTokenError`, which carries
-    the offending token and its segment; ``describe_gap`` turns that into the slot
-    to use instead — that ``square`` is an operator rather than a qualifier, say.
+    The diagnosis comes from the public parser's structured residue. For an
+    unresolved base, ``describe_gap`` turns that residue into the slot to use
+    instead — that ``square`` is an operator rather than a qualifier, say.
     Reporting only the failed name gives the composer nothing to change, so it
     re-proposes the same token on every retry.
 
-    The error's ``known_tokens`` is deliberately NOT surfaced: it is the entire
-    base vocabulary, the seat's prompt already carries it in full, and repeating
-    ~200 tokens per failure would crowd out the part that is new information —
-    which token, and which slot.
+    Vocabulary suggestions are deliberately NOT surfaced: the seat's prompt
+    already carries the full vocabulary, and repeating it would crowd out the
+    part that is new information — which token, and which slot.
     """
     names: list[str] = []
     advice: list[str] = []
     try:
-        from imas_standard_names.grammar.support import UnknownBaseTokenError
+        from imas_standard_names import ParseError
 
         from imas_codex.standard_names.grammar_adapter import parse_canonical_name
         from imas_codex.standard_names.segments import describe_gap
@@ -779,35 +778,28 @@ def _grammar_round_trip_failures(candidates: list[Any]) -> tuple[list[str], list
 
     for candidate in candidates:
         candidate_name: str | None = None
+        parse_error: ParseError | None = None
         try:
             candidate_name = candidate.compose_name()
             parse_canonical_name(candidate_name)
             continue
+        except ParseError as exc:
+            parse_error = exc
         except Exception:
             pass
 
-        try:
-            # The strict parser intentionally normalizes all failures to its
-            # ordered-grammar ParseError. Use the flat facade only to recover
-            # structured unknown-token diagnostics after validity has already
-            # failed; it never decides whether the candidate is valid.
-            from imas_standard_names.grammar import parse_standard_name
-
-            parse_standard_name(candidate_name or candidate.compose_name())
-        except UnknownBaseTokenError as exc:
-            diagnosis: str | None = None
+        if parse_error is not None and parse_error.residue:
             try:
-                diagnosis = describe_gap(exc.segment, exc.token).guidance
+                diagnosis = describe_gap("physical_base", parse_error.residue).guidance
             except Exception:  # noqa: BLE001 — advice is best-effort
                 logger.debug(
                     "could not describe grammar failure for %s",
                     getattr(candidate, "source_id", "?"),
                     exc_info=True,
                 )
-            if diagnosis:
-                advice.append(diagnosis)
-        except Exception:
-            pass
+            else:
+                if diagnosis:
+                    advice.append(diagnosis)
 
         try:
             names.append(candidate_name or candidate.compose_name())

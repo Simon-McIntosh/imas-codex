@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import logging
 import re
+from functools import cache, lru_cache
 
 logger = logging.getLogger(__name__)
 
@@ -58,35 +59,46 @@ def _load_valid_kinds() -> frozenset[str]:
 
 # --- ISN structural classification -----------------------------------------
 #
-# ISN is the single source of truth for whether a base token is a scalar,
-# vector, or tensor.  We cache the base→kind map once (per process) so the
-# per-name cost is a dict lookup after a parse.
+# ISN is the single source of truth for whether a base token has vector-like
+# structure. We ask its strict public grammar whether the registered magnitude
+# reduction accepts the base and cache that behavioral result per token.
+
 
 # Decomposition operators that collapse a vector/tensor to a scalar, so the
 # result is scalar regardless of the underlying base's kind.
-_SCALAR_REDUCING_DECOMPOSITIONS = frozenset({"magnitude"})
-
-_PHYSICAL_BASE_KINDS: dict[str, str] | None = None
-
-
-def _physical_base_kinds() -> dict[str, str]:
-    """Return the ISN ``physical_base`` token → declared kind map.
-
-    Loaded once and cached.  Returns an empty dict if ISN is unavailable so
-    callers fall through to the codex default rather than crashing.
-    """
-    global _PHYSICAL_BASE_KINDS
-    if _PHYSICAL_BASE_KINDS is not None:
-        return _PHYSICAL_BASE_KINDS
+@lru_cache(maxsize=1)
+def _magnitude_operator() -> str | None:
+    """Return the registered scalar-reducing postfix used for kind probing."""
     try:
-        from imas_standard_names.grammar.vocab_loaders import load_physical_bases
+        from imas_standard_names import get_grammar_context
 
-        _PHYSICAL_BASE_KINDS = {
-            token: entry.kind for token, entry in load_physical_bases().bases.items()
-        }
+        operators = (
+            get_grammar_context()
+            .get("grammar", {})
+            .get("vocabularies", {})
+            .get("operators", {})
+        )
+        metadata = operators.get("magnitude")
+        if metadata and metadata.get("kind") == "unary_postfix":
+            return "magnitude"
     except Exception:
-        _PHYSICAL_BASE_KINDS = {}
-    return _PHYSICAL_BASE_KINDS
+        pass
+    return None
+
+
+@cache
+def _base_accepts_magnitude(base: str) -> bool:
+    """Ask the public strict grammar whether *base* has vector-like structure."""
+    operator = _magnitude_operator()
+    if not operator:
+        return False
+    try:
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+
+        parse_canonical_name(f"{base}_{operator}")
+    except Exception:
+        return False
+    return True
 
 
 def _isn_structural_kind(name: str) -> str | None:
@@ -114,15 +126,16 @@ def _isn_structural_kind(name: str) -> str | None:
     # parent vector/tensor, not the vector itself.
     if parsed.component is not None or parsed.coordinate is not None:
         return "scalar"
-    # A magnitude / norm collapses a vector or tensor to a scalar.
-    if getattr(parsed, "decomposition", None) in _SCALAR_REDUCING_DECOMPOSITIONS:
+    # Magnitude collapses vector/tensor structure to a scalar. Complex-valued
+    # parts are promoted by the higher-priority caller rule.
+    if getattr(parsed, "decomposition", None) == _magnitude_operator():
         return "scalar"
     base = parsed.physical_base
     if base is None:
         # Geometry carriers (position, coordinate, unit_vector, …) have no
         # declared base kind in ISN; codex treats them as scalar-valued.
         return "scalar"
-    return _physical_base_kinds().get(base)
+    return "vector" if _base_accepts_magnitude(str(base)) else "scalar"
 
 
 def derive_kind(name: str) -> str:

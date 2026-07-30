@@ -18,8 +18,6 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-from imas_standard_names.grammar import compose_standard_name
-
 from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 from imas_codex.standard_names.models import StandardNameComposeBatch
 from imas_codex.standard_names.physics_judge import PhysicsVerdict
@@ -1642,11 +1640,7 @@ async def _run_model(
                 for c_idx, c in enumerate(llm_result.candidates):
                     candidate = c.model_dump()
                     # Compose the standard name from segments
-                    try:
-                        segs = _get_segment_fields(candidate)
-                        candidate["standard_name"] = compose_standard_name(segs)
-                    except Exception:
-                        candidate["standard_name"] = ""
+                    candidate["standard_name"] = _resolve_name(candidate)
                     # Carry forward extraction context for docs generation
                     if c_idx < len(items):
                         src = items[c_idx]

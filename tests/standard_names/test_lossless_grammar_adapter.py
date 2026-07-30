@@ -172,3 +172,22 @@ def test_ordered_intermediate_parent_passes_admission_identity() -> None:
 
     assert _has_valid_standard_name_identity(name)[0]
     assert _has_structural_specificity(name)[0]
+
+
+def test_benchmark_resolves_ordered_segments_losslessly() -> None:
+    from imas_codex.standard_names.benchmark import _resolve_name
+
+    candidate = {
+        "segments": {
+            "base_token": "radius",
+            "base_kind": "quantity",
+            "qualifiers": ["major"],
+            "operators": [
+                {"token": "flux_surface_averaged"},
+                {"token": "inverse"},
+                {"token": "square"},
+            ],
+        }
+    }
+
+    assert _resolve_name(candidate) == METRIC_NAMES[0]
