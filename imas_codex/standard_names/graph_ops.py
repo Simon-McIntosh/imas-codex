@@ -147,9 +147,23 @@ def _segments_from_ir(ir: Any) -> dict[str, str | None]:
     if operators:
         outer = operators[0]
         columns["transformation"] = _coerce_segment_value(getattr(outer, "op", None))
-        args = list(getattr(outer, "args", ()) or ())
-        if args:
-            primary = args[0]
+        # A binary operator can sit below any number of unary wrappers, and a
+        # binary's primary operand can itself be another binary expression.
+        # Follow the first argument at every such node until the compatibility
+        # view reaches a real leaf instead of the IR's structural placeholder.
+        while True:
+            primary_operators = list(getattr(primary, "operators", ()) or ())
+            primary_binary = next(
+                (
+                    operator
+                    for operator in primary_operators
+                    if getattr(operator, "args", None)
+                ),
+                None,
+            )
+            if primary_binary is None:
+                break
+            primary = primary_binary.args[0]
 
     base = getattr(primary, "base", None)
     base_token = _coerce_segment_value(getattr(base, "token", None))

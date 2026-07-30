@@ -18,6 +18,11 @@ GRADIENT_FIELD_RATIO = (
     "ratio_of_square_of_toroidal_flux_coordinate_gradient"
     "_to_square_of_magnetic_field_magnitude"
 )
+UNARY_WRAPPED_RATIO = "maximum_of_ratio_of_electron_density_to_ion_density"
+NESTED_RATIO = (
+    "ratio_of_ratio_of_electron_density_to_ion_density"
+    "_to_square_of_magnetic_field_magnitude"
+)
 
 
 def _operator_batch(gc: MagicMock) -> list[dict]:
@@ -50,6 +55,24 @@ def test_binary_ir_uses_primary_operand_instead_of_placeholder() -> None:
 
     assert projected["transformation"] == "ratio"
     assert projected["physical_base"] == "toroidal_flux_coordinate_gradient"
+    assert projected["physical_base"] != "placeholder"
+
+
+def test_unary_over_binary_projects_primary_leaf() -> None:
+    projected = _parse_grammar(UNARY_WRAPPED_RATIO)
+
+    assert projected["transformation"] == "maximum"
+    assert projected["physical_base"] == "density"
+    assert projected["subject"] == "electron"
+    assert projected["physical_base"] != "placeholder"
+
+
+def test_nested_binary_projects_recursive_primary_leaf() -> None:
+    projected = _parse_grammar(NESTED_RATIO)
+
+    assert projected["transformation"] == "ratio"
+    assert projected["physical_base"] == "density"
+    assert projected["subject"] == "electron"
     assert projected["physical_base"] != "placeholder"
 
 
