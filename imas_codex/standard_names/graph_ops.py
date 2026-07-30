@@ -2309,6 +2309,7 @@ def _materialize_derived_parent_rows(
         gc.query(
             """
             MATCH (parent:StandardName {id: $parent_id})
+            WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }
             SET parent.name_stage = CASE
                     // Already name-reviewed → stays accepted (idempotent).
                     WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'
@@ -2419,6 +2420,7 @@ def _materialize_derived_parent_rows(
             gc.query(
                 """
                 MATCH (sn:StandardName {id: $parent_id})
+                WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(sn) }
                 OPTIONAL MATCH (sn)-[r:HAS_UNIT]->(:Unit)
                 DELETE r
                 WITH sn
@@ -2717,18 +2719,23 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
         # parent every startup. Scoped to ``origin='derived'`` so pipeline- and
         # catalog-authored names are never touched, even when momentarily
         # orphaned. Delete docs/reviews/derived-source scaffolding too.
-        childless = [
-            r["id"]
-            for r in gc.query(
-                """
-                MATCH (p:StandardName {origin: 'derived'})
-                WHERE NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }
-                RETURN p.id AS id
-                """
-            )
-            or []
-        ]
-        if childless:
+        reaped_parent_ids: set[str] = set()
+        while True:
+            childless = [
+                r["id"]
+                for r in gc.query(
+                    """
+                    MATCH (p:StandardName {origin: 'derived'})
+                    WHERE NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }
+                    RETURN p.id AS id
+                    """
+                )
+                or []
+                if r["id"] not in reaped_parent_ids
+            ]
+            if not childless:
+                break
+            reaped_parent_ids.update(childless)
             reaped = _delete_derived_parent_nodes(gc, childless)
             if reaped:
                 deleted += reaped
@@ -2737,27 +2744,30 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
                     "derived parents",
                     reaped,
                 )
-            # Candidate rows were snapshotted before admission cleanup and
-            # childless reaping. Deleting one parent can detach the last edge
-            # from another candidate, so a row that was childful when queried
-            # may now name a reaped node. Never let that stale row materialize
-            # the childless shell again.
-            childless_set = set(childless)
+        if reaped_parent_ids:
+            # Candidate rows are snapshotted before admission cleanup. Reaping
+            # a childless node can detach the last edge from its own parent, so
+            # iterate to closure and exclude every removed identity from the
+            # earlier candidate sets.
             seedable_parents = [
-                row for row in seedable_parents if row["parent_id"] not in childless_set
+                row
+                for row in seedable_parents
+                if row["parent_id"] not in reaped_parent_ids
             ]
             legacy_parents = [
-                row for row in legacy_parents if row["parent_id"] not in childless_set
+                row
+                for row in legacy_parents
+                if row["parent_id"] not in reaped_parent_ids
             ]
             accepted_seedable_unit_gaps = [
                 row
                 for row in accepted_seedable_unit_gaps
-                if row["parent_id"] not in childless_set
+                if row["parent_id"] not in reaped_parent_ids
             ]
             accepted_legacy_unit_gaps = [
                 row
                 for row in accepted_legacy_unit_gaps
-                if row["parent_id"] not in childless_set
+                if row["parent_id"] not in reaped_parent_ids
             ]
 
         # Automatic orphaned-content cleanup: clear any DocsRevision left
