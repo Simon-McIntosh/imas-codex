@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="50321530,39c7f95a,b94ac300,11255632,836a1928,2f24fa0a,055ad391,7222a33b,288b3e69,7575a7e6,40f31ca8,75c183d6,382cbe7f">
+<meta name="plan-commits" content="50321530,39c7f95a,b94ac300,11255632,836a1928,2f24fa0a,055ad391,7222a33b,288b3e69,7575a7e6,40f31ca8,75c183d6,382cbe7f,6e645e07,56c032c1">
 <meta name="plan-artifacts" content="docs/archive/sn-naming-loop-robustness-rungs-landed.html,docs/archive/sn-naming-loop-robustness-recovery-landed.html,docs/sn-binary-operand-validation-design.html">
 </head>
 <body>
@@ -681,6 +681,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="fold-effectiveness-audit-20260730" data-who="reckon-ship" data-when="2026-07-30T12:11:19+02:00">
     <div class="r-comment-body"><p><strong>The fold ledger is not yet runtime policy.</strong> Codex merge <code>f18bf462</code> removes the handwritten physical-base snapshot and now derives compound coverage through the lightweight ISN segment accessor; <code>heat_flux</code> correctly decomposes to channel <code>heat</code> plus base <code>flux</code>. Independent focused validation passed <strong>7</strong> cases after proving the full grammar context is not loaded.</p><p>A live read-only audit of all <strong>27</strong> adjudicated folds found the deeper boundary: all are durable in the JSON evidence, but none carries a runtime editorial disposition. The pre-fix graph held 26 <code>absent</code> plus one <code>ambiguous_known_token</code>; 22 were <code>checked_no_reuse</code>, four <code>distinct_confirmed</code>, one <code>unchecked</code>, and zero <code>reuse_confirmed</code>. Ordinary observations can overwrite every settled decision except <code>distinct_confirmed</code>; 18 fold nodes still affect 32 active unresolved sources. Work is active on a typed graph adjudication contract and sanctioned dry-run/apply command, while ISN separately exposes only true segment-scoped advisory aliases. Do not resolve <code>f-nlr-002</code> until the 159-row ledger is applied, retry guidance consumes it, and a fresh live replay proves zero unchecked.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="durable-adjudication-and-alias-contract-20260730" data-who="reckon-ship" data-when="2026-07-30T13:10:00+02:00">
+    <div class="r-comment-body"><p><strong>Vocabulary adjudication is now durable and explicit.</strong> Codex merge <code>6e645e07</code> adds typed add/fold/reject editorial state, immutable evidence, grammar-signature invalidation, retry feedback, and an atomic dry-run-by-default <code>sn vocab-adjudicate</code> command. Independent audit confirmed all 159 reviewed rows parse as 18 add, 27 fold, and 114 reject, including the exact empty-token identity; 160 worker tests plus 33 changed-slice regressions passed, and a real Neo4j transaction-closure mismatch was corrected before integration. External ISN merge <code>2d7faec</code> exposes four segment-scoped advisory aliases; Codex merge <code>56c032c1</code> consumes only that public contract with exact segment/target checks and clean fallback on older grammars.</p><p>The first live dry-run failed closed without writes because 19 reviewed identities are absent from the current graph. Most are add decisions already represented by current grammar vocabulary; one is a rejected obsolete position proposal. No gap nodes were fabricated and no row was silently dropped. Apply is deferred until the final ISN release/pin establishes the grammar signature; the live subset and the 19 resolved/absent historical rows must be reported separately.</p></div>
 </div>
 </section>
 </main>
