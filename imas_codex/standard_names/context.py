@@ -40,6 +40,8 @@ def build_compose_context() -> dict[str, Any]:
     with codex-specific data (curated examples, tokamak ranges, enum lists).
 
     Returns keys needed by both system and user prompts:
+    - grammar: structured public ISN contract (IR groups, operator metadata,
+      ordered qualifier categories, templates, and parse API)
     - grammar_rules: canonical pattern, order constraint, template rules
     - vocabulary: per-segment token lists with descriptions
     - segment_descriptions: detailed segment usage guidance
@@ -66,6 +68,7 @@ def build_compose_context() -> dict[str, Any]:
     ctx["segment_order"] = isn["segment_order"]
     ctx["template_rules"] = isn["template_rules"]
     ctx["exclusive_pairs"] = isn["exclusive_pairs"]
+    ctx["grammar"] = isn["grammar"]
 
     # Vocabulary with descriptions (from ISN)
     ctx["vocabulary_sections"] = isn["vocabulary_sections"]

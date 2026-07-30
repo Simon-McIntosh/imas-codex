@@ -2,11 +2,12 @@
 shared includes must round-trip through the public ISN parser.
 
 The compose model is taught by example. If the prompt endorses a name
-(``✓ `name``` / ``✅ `name```) that the public ISN grammar cannot parse and
-re-compose unchanged, the model is being trained on non-ISN vocabulary — the
-exact drift this guard prevents. The public parser is the oracle:
+(``✓ `name``` / ``✅ `name```) that the public ISN grammar cannot strictly
+parse and re-compose unchanged, the model is being trained on non-ISN
+vocabulary — the exact drift this guard prevents. The lossless public
+parser/composer is the oracle:
 
-    compose_standard_name(parse_standard_name(name)) == name
+    compose(parse(name, strict=True).ir) == name
 
 Extraction is deliberately high-precision: only a backtick token IMMEDIATELY
 following a ✓/✅ marker counts as an *endorsed name*. This excludes vocabulary
@@ -30,10 +31,7 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
-from imas_standard_names.grammar import (  # noqa: E402
-    compose_standard_name,
-    parse_standard_name,
-)
+from imas_standard_names import compose, parse  # noqa: E402
 
 from imas_codex.llm.prompt_loader import PROMPTS_DIR  # noqa: E402
 
@@ -62,7 +60,7 @@ _VOCAB_GAP_ALLOWLIST: dict[str, str] = {}
 
 def _round_trips(name: str) -> bool:
     try:
-        return compose_standard_name(parse_standard_name(name)) == name
+        return compose(parse(name, strict=True).ir) == name
     except Exception:
         return False
 
