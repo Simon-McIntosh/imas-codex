@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
@@ -690,6 +690,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="c-nlr-vocab-history-receipt" data-who="Codex" data-when="2026-07-30" data-quote="The full 159-row adjudication can now be validated and receipted without inventing graph nodes.">
     <div class="r-comment-body"><p>Worker commit <code>86f647bb</code> adds an explicit opt-in historical-resolution mode while preserving fail-closed default behavior. It prevalidates all 159 rows before any graph write, applies only the 140 extant <code>VocabGap</code> rows transactionally, classifies 18 reviewed additions as <code>satisfied_by_grammar</code> only at the exact registered segment, and classifies the absent rejected <code>oblique_reference_point</code> proposal as <code>resolved_reject</code> only when absent from both public grammar and graph. An atomic machine-readable receipt covers every row and the exact grammar signature. Focused validation passed 173 tests; independent review and final-pin live dry-run/apply remain before this outcome is landed.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-nlr-rotation-applied" data-who="Codex" data-when="2026-07-30" data-quote="The vocabulary rotation is released, pinned, and applied with a complete receipt.">
+    <div class="r-comment-body"><p>ISN <code>v0.8.0rc62</code> was cut from exact green commit <code>e9f7f72</code> after the full external suite passed 1,968 tests and both fork CI matrices passed. Codex merge <code>4b4aee94</code> pins both dependency declarations and <code>uv.lock</code> to that exact release; gm1/gm5/gm6 strictly parse and losslessly round-trip through the public API.</p><p>The final 159-row adjudication ran first as an explicit dry-run and then as a separate atomic apply at grammar signature <code>55d7008ecac96b13</code>. Outcome: <strong>140</strong> extant graph decisions active (27 fold, 113 reject), <strong>18</strong> additions <code>satisfied_by_grammar</code>, and one absent obsolete proposal <code>resolved_reject</code>. All 27 folds are returned by the runtime retry-guidance path with a non-empty target and reason. Immutable receipt: <code>docs/evidence/sn-vocabulary-adjudication-receipt.json</code> (commit <code>06c7fbc1</code>). Ordered-tree Codex validity/graph/prompt integration and post-pin gate replay remain before resolving the followup.</p></div>
 </div>
 </section>
 </main>
