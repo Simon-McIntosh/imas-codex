@@ -103,3 +103,75 @@ def test_vocab_adjudicate_reset_requires_a_reason() -> None:
     )
     assert result.exit_code != 0
     assert "--reason is required" in result.output
+
+
+def test_vocab_adjudicate_resolves_history_to_explicit_receipt(
+    tmp_path: Path,
+) -> None:
+    from imas_codex.cli.sn import sn
+
+    artifact = tmp_path / "decisions.json"
+    artifact.write_text("{}")
+    receipt = tmp_path / "receipt.json"
+    payload = {
+        "rows": 159,
+        "changed": 140,
+        "unchanged": 0,
+        "counts": {"add": 18, "fold": 27, "reject": 114},
+        "resolution_counts": {
+            "applied": 140,
+            "satisfied_by_grammar": 18,
+            "resolved_reject": 1,
+        },
+        "grammar_signature": "abc123",
+        "grammar_version": "0.8",
+        "dry_run": True,
+    }
+    with (
+        patch(
+            "imas_codex.standard_names.vocab_adjudication.load_vocab_gap_adjudications",
+            return_value=MagicMock(),
+        ),
+        patch(
+            "imas_codex.standard_names.vocab_adjudication.apply_vocab_gap_adjudications",
+            return_value=payload,
+        ) as apply,
+    ):
+        result = CliRunner().invoke(
+            sn,
+            [
+                "vocab-adjudicate",
+                "--actor",
+                "catalog review",
+                "--resolve-missing-from-grammar",
+                "--receipt",
+                str(receipt),
+                str(artifact),
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert "applied=140 satisfied_by_grammar=18 resolved_reject=1" in result.output
+    assert f"receipt: {receipt}" in result.output
+    assert apply.call_args.kwargs["resolve_missing_from_grammar"] is True
+    assert apply.call_args.kwargs["receipt_path"] == receipt
+
+
+def test_vocab_adjudicate_resolution_requires_receipt(tmp_path: Path) -> None:
+    from imas_codex.cli.sn import sn
+
+    artifact = tmp_path / "decisions.json"
+    artifact.write_text("{}")
+    result = CliRunner().invoke(
+        sn,
+        [
+            "vocab-adjudicate",
+            "--actor",
+            "catalog review",
+            "--resolve-missing-from-grammar",
+            str(artifact),
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "--receipt is required" in result.output
