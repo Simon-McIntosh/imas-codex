@@ -5946,6 +5946,106 @@ def sn_retry(
         )
 
 
+@sn.command("vocab-adjudicate")
+@click.argument(
+    "input_file",
+    required=False,
+    type=click.Path(exists=True, dir_okay=False, path_type=str),
+)
+@click.option(
+    "--actor",
+    required=True,
+    help="Operator or review authority recorded with the editorial action.",
+)
+@click.option(
+    "--apply",
+    "apply_changes",
+    is_flag=True,
+    help="Write the validated batch. Without this flag the command is read-only.",
+)
+@click.option(
+    "--reset-signature",
+    help="Deactivate active decisions made against exactly this grammar signature.",
+)
+@click.option(
+    "--reason",
+    help="Why a grammar-signature reset requires fresh editorial review.",
+)
+def sn_vocab_adjudicate(
+    input_file: str | None,
+    actor: str,
+    apply_changes: bool,
+    reset_signature: str | None,
+    reason: str | None,
+) -> None:
+    """Validate and apply reviewed vocabulary-gap actions atomically.
+
+    INPUT_FILE is an explicit JSON batch. Dry-run is the default; pass
+    ``--apply`` only after the deterministic summary has been reviewed.
+    """
+    from pathlib import Path
+
+    from imas_codex.standard_names.vocab_adjudication import (
+        apply_vocab_gap_adjudications,
+        load_vocab_gap_adjudications,
+        reset_vocab_gap_adjudications,
+    )
+
+    if reset_signature:
+        if input_file is not None:
+            raise click.UsageError(
+                "INPUT_FILE and --reset-signature are mutually exclusive"
+            )
+        if not reason or not reason.strip():
+            raise click.UsageError("--reason is required with --reset-signature")
+        try:
+            result = reset_vocab_gap_adjudications(
+                reset_signature,
+                actor=actor,
+                reason=reason,
+                dry_run=not apply_changes,
+            )
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+        mode = "dry-run" if result["dry_run"] else "applied"
+        click.echo(
+            f"{mode}: eligible={result['eligible']} reset={result['reset']} "
+            f"signature={result['grammar_signature']}"
+        )
+        return
+
+    if input_file is None:
+        raise click.UsageError(
+            "INPUT_FILE is required unless --reset-signature is used"
+        )
+    if reason is not None:
+        raise click.UsageError("--reason is only valid with --reset-signature")
+
+    try:
+        batch = load_vocab_gap_adjudications(Path(input_file))
+        result = apply_vocab_gap_adjudications(
+            batch,
+            actor=actor,
+            dry_run=not apply_changes,
+        )
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    counts = result["counts"]
+    mode = "dry-run" if result["dry_run"] else "applied"
+    click.echo(
+        f"{mode}: rows={result['rows']} changed={result['changed']} "
+        f"unchanged={result['unchanged']}"
+    )
+    click.echo(
+        f"dispositions: add={counts['add']} fold={counts['fold']} "
+        f"reject={counts['reject']}"
+    )
+    click.echo(
+        f"grammar: {result['grammar_version']} signature={result['grammar_signature']}"
+    )
+
+
 @sn.command("ddgap")
 @click.argument("path", required=False)
 @click.option(

@@ -165,6 +165,19 @@ enums:
           resolved the token — the reuse question was asked and answered
           with a measurement rather than left unchecked.
 
+  VocabGapDisposition:
+    description: >-
+      Editorial resolution of a vocabulary proposal. Observation categories
+      describe what the composer reported; this independent field records what
+      a reviewed vocabulary rotation decided to do.
+    permissible_values:
+      add:
+        description: Add the approved token to the owning grammar vocabulary.
+      fold:
+        description: Express the proposal with registered grammar instead.
+      reject:
+        description: Do not add the proposal to grammar vocabulary.
+
   VocabGapTriage:
     description: >-
       Lifecycle bucket assigned by triage_vocab_gaps to every stored gap:
@@ -187,6 +200,12 @@ enums:
         description: >-
           Absent and recently reproduced — the real vocabulary demand a
           rotation decision reads.
+      add:
+        description: Editorially approved for addition to the grammar.
+      fold:
+        description: Editorially resolved to a canonical registered expression.
+      reject:
+        description: Editorially rejected as grammar vocabulary.
 
   DDGapKind:
     description: >-
@@ -1835,6 +1854,42 @@ classes:
           distinct_confirmed = the agent re-emitted the gap after being shown
           the near-token; unchecked = no check fired.
         range: VocabGapDedupDecision
+      editorial_disposition:
+        description: >-
+          Reviewed vocabulary action, independent of observation category and
+          compose-time dedup evidence.
+        range: VocabGapDisposition
+      editorial_target:
+        description: >-
+          Canonical token or composed expression for add and fold decisions.
+      editorial_reason:
+        description: Evidence-backed rationale for the editorial decision.
+      editorial_actor:
+        description: Operator or review authority that applied the decision.
+      editorial_at:
+        description: When the active editorial decision was applied.
+        range: datetime
+      editorial_grammar_signature:
+        description: >-
+          Digest of the complete grammar vocabulary against which the decision
+          was made. Used to identify decisions that need explicit invalidation
+          after grammar changes.
+      editorial_grammar_version:
+        description: ISN package version installed when the decision was applied.
+      editorial_active:
+        description: >-
+          Whether the editorial decision is active. Explicit signature reset
+          deactivates a decision without erasing its audit fields.
+        range: boolean
+      editorial_invalidated_at:
+        description: When an explicit grammar-signature reset deactivated it.
+        range: datetime
+      editorial_invalidation_actor:
+        description: Operator or review authority that invalidated the decision.
+      editorial_invalidation_reason:
+        description: Why the grammar change requires fresh editorial review.
+      editorial_invalidation_grammar_signature:
+        description: Grammar signature in force when the decision was invalidated.
       reconciled_at:
         description: >-
           Timestamp when reconcile_vocab_gaps last reclassified this gap
@@ -1859,6 +1914,50 @@ classes:
       triaged_at:
         description: When the triage pass last stamped this node.
         range: datetime
+      evidence:
+        description: Immutable observations that reported this gap.
+        multivalued: true
+        range: VocabGapEvidence
+        annotations:
+          relationship_type: HAS_EVIDENCE
+
+  VocabGapEvidence:
+    description: >-
+      One source observation of a vocabulary gap. Repeated reports create
+      distinct evidence nodes so reasons and timestamps remain auditable even
+      when the normalized VocabGap is observed again.
+    class_uri: sn:VocabGapEvidence
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Composite key: vocab-gap-evidence:{uuid}"
+      source_id:
+        required: true
+        description: Source entity identifier that reported the gap.
+      vocab_gap_id:
+        required: true
+        description: Normalized gap identity observed by this evidence record.
+      segment:
+        required: true
+        description: Grammar segment reported by the observation.
+      token:
+        required: true
+        description: Proposed grammar token reported by the observation.
+      source_type:
+        required: true
+        range: StandardNameSourceType
+        description: Source namespace, currently dd or signals.
+      description:
+        required: true
+        description: Human-readable source-specific explanation of the observation.
+      reason:
+        required: true
+        description: Source-specific explanation supplied with the observation.
+      observed_at:
+        required: true
+        range: datetime
+        description: When this observation was recorded.
 
   DDGap:
     description: >-
