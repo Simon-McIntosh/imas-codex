@@ -356,6 +356,39 @@ class TestSingleChildShadowVeto:
         assert result.clause is None
         assert "suppressed" in result.reason
 
+    def test_operator_decomposition_is_not_a_semantic_shadow(self):
+        """A strict operator peel is graph structure, not duplicate semantics."""
+        gc = _StubGraph(
+            rows=[
+                self._shadow_row(
+                    child_id="inverse_of_square_of_major_radius",
+                    child_sources=["dd:major_radius"],
+                )
+            ]
+        )
+
+        suppress, reason = is_single_child_shadow("square_of_major_radius", gc)
+
+        assert suppress is False
+        assert "algebraic decomposition" in reason
+
+    def test_bare_algebraic_leaf_is_admissible(self):
+        """A canonical bare vector leaf remains part of the strict tree."""
+        gc = _StubGraph(
+            rows=[
+                self._shadow_row(
+                    child_id="magnetic_field_magnitude",
+                    child_sources=[],
+                    child_origin="derived",
+                )
+            ]
+        )
+
+        result = is_admissible_parent_name("magnetic_field", gc)
+
+        assert result.admit is True
+        assert "algebraic decomposition" in result.reason
+
     def test_no_children_not_suppressed(self):
         """A candidate with no single child is not a shadow."""
         gc = _StubGraph(rows=[])
@@ -452,13 +485,13 @@ class TestFilterAdmissibleParentsShadowVeto:
         kept = _filter_admissible_parents(co_batch, gc)
         assert kept == [], "single-child shadow parent edge must be dropped"
 
-    def test_new_single_batch_child_is_source_probed_before_parent_creation(self):
-        """A newly derived parent must not bypass the shadow veto.
+    def test_new_single_batch_projection_is_source_probed_and_preserved(self):
+        """A strict projection target is structural despite one sourced child.
 
         The child already has authoritative DD ownership when the structural
         edge pass runs, but the parent has no graph child until that pass writes
-        the first HAS_PARENT edge. The batch child therefore needs an explicit
-        source probe rather than being treated as necessarily unsourced.
+        the first HAS_PARENT edge. The batch source probe must not confuse this
+        public-IR projection with a duplicate semantic shadow.
         """
         from imas_codex.standard_names.graph_ops import _filter_admissible_parents
 
@@ -514,7 +547,7 @@ class TestFilterAdmissibleParentsShadowVeto:
 
         kept = _filter_admissible_parents(co_batch, gc)
 
-        assert kept == []
+        assert kept == co_batch
         assert gc.query.call_count == 2
 
     def test_semantically_invalid_parent_cannot_be_rederived(self):

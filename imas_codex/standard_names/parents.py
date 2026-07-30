@@ -30,7 +30,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+from imas_codex.standard_names.grammar_adapter import (
+    compose_canonical_ir,
+    parse_canonical_name,
+)
 
 
 @dataclass(frozen=True)
@@ -70,6 +73,65 @@ def _has_valid_standard_name_identity(name: str) -> tuple[bool, str]:
     except Exception as exc:
         return False, f"ISN identity invalid: {exc}"
     return True, "valid ISN identity"
+
+
+def is_algebraic_decomposition_edge(child_name: str, parent_name: str) -> bool:
+    """Return whether strict public IR requires ``child_name → parent_name``.
+
+    Operator and projection applications are lossless expression-tree nodes,
+    even when only one source-backed name currently uses them.  They must not
+    be mistaken for semantic shadows merely because their graph fan-in is one.
+    Qualifier and locus peels deliberately do not qualify here.
+    """
+    try:
+        ir = parse_canonical_name(child_name).ir
+        if ir.operators:
+            outer = ir.operators[0]
+            if len(outer.args) == 2:
+                candidates = outer.args
+            else:
+                candidates = [ir.model_copy(update={"operators": ir.operators[1:]})]
+        elif ir.projection is not None:
+            candidates = [ir.model_copy(update={"projection": None})]
+        else:
+            return False
+        return any(
+            compose_canonical_ir(candidate) == parent_name for candidate in candidates
+        )
+    except (TypeError, ValueError):
+        return False
+
+
+def _has_algebraic_decomposition_child(
+    name: str, gc: _TopologyProbe
+) -> tuple[bool, str]:
+    """Return whether graph topology proves *name* is a strict algebraic node."""
+    try:
+        rows = list(
+            gc.query(
+                """
+                MATCH (child:StandardName)-[:HAS_PARENT]->
+                      (:StandardName {id: $name})
+                RETURN collect(DISTINCT child.id) AS child_ids
+                """,
+                name=name,
+            )
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        return False, f"algebraic child probe failed: {exc.__class__.__name__}: {exc}"
+
+    child_ids = {
+        child_id
+        for row in rows
+        for child_id in (
+            list(row.get("child_ids") or [])
+            + ([row["child_id"]] if row.get("child_id") else [])
+        )
+    }
+    for child_id in child_ids:
+        if is_algebraic_decomposition_edge(child_id, name):
+            return True, f"required algebraic decomposition of {child_id}"
+    return False, "no strict algebraic decomposition child"
 
 
 def _has_structural_specificity(name: str) -> tuple[bool, str]:
@@ -196,6 +258,8 @@ def is_single_child_shadow(name: str, gc: _TopologyProbe) -> tuple[bool, str]:
 
     if not child_id:
         return False, "single child but missing id"
+    if is_algebraic_decomposition_edge(child_id, name):
+        return False, "single child requires this algebraic decomposition target"
     if not child_sources:
         # The lone child carries no DD source — cannot claim source-equivalence.
         return False, "single child has no DD source"
@@ -240,6 +304,18 @@ def is_admissible_parent_name(
         )
 
     admit_a, reason_a = _has_structural_specificity(name)
+
+    # A strict, lossless operator/projection peel is itself the structural
+    # reason for this target to exist. This also covers canonical bare leaves,
+    # whose parent identity carries no standalone qualifier or projection.
+    if gc is not None:
+        algebraic, algebraic_reason = _has_algebraic_decomposition_child(name, gc)
+        if algebraic:
+            return AdmissionResult(
+                admit=True,
+                reason=algebraic_reason,
+                clause="A",
+            )
 
     # Suppression veto (Class-B): even a structurally-specific candidate is
     # rejected when it is merely a less-specific shadow of a single accepted

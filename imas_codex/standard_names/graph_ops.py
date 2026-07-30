@@ -1325,7 +1325,10 @@ def _filter_admissible_parents(
     the sole source of truth, the verdict is a pure function of the live-name
     set, so the re-derivation reaches a fixpoint.
     """
-    from imas_codex.standard_names.parents import is_admissible_parent_name
+    from imas_codex.standard_names.parents import (
+        is_admissible_parent_name,
+        is_algebraic_decomposition_edge,
+    )
 
     if not co_batch:
         return co_batch
@@ -1480,6 +1483,8 @@ def _filter_admissible_parents(
         info = shadow_info.get(target)
         if not info:
             return False, "single child source probe returned no match"
+        if is_algebraic_decomposition_edge(info["child_id"], target):
+            return False, "single child requires this algebraic decomposition target"
         if info["child_stage"] in ("superseded", "exhausted"):
             return False, "lone child superseded/exhausted"
         if info["child_origin"] == "derived":
@@ -1496,6 +1501,17 @@ def _filter_admissible_parents(
         # Legacy protection: don't disturb catalog-authoritative entries.
         if target in legacy_protected:
             return True, "legacy (catalog_edit or accepted)"
+        # An exact strict-IR operator/projection peel is a required expression
+        # tree edge. The lossless compose equality proves the target is itself
+        # a canonical identity, including otherwise-bare vector leaves.
+        algebraic_children = graph_children.get(target, set()) | batch_children.get(
+            target, set()
+        )
+        if any(
+            is_algebraic_decomposition_edge(child, target)
+            for child in algebraic_children
+        ):
+            return True, "strict algebraic decomposition target"
         # Suppression veto (Class-B): a less-specific shadow of a single
         # accepted sibling sourced from the same DD path is dropped even if it
         # would otherwise admit on Clause A/B.
