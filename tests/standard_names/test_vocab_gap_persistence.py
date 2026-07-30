@@ -14,16 +14,32 @@ from pydantic import ValidationError
 
 
 class _Transaction:
-    def __init__(self, rows: list[dict]) -> None:
+    def __init__(
+        self,
+        rows: list[dict],
+        token_rows: list[dict] | None = None,
+        applied_count: int | None = None,
+    ) -> None:
         self.rows = rows
+        self.token_rows = token_rows or []
+        self.applied_count = applied_count
         self._closed = False
         self.committed = False
         self.calls: list[tuple[str, dict]] = []
 
     def run(self, query: str, **params):
         self.calls.append((query, params))
+        if "graph_token_ids" in query:
+            return [dict(row) for row in self.token_rows]
         if "requested_id" in query:
             return [dict(row) for row in self.rows]
+        if "RETURN count(vg) AS applied" in query:
+            applied = (
+                len(params["items"])
+                if self.applied_count is None
+                else self.applied_count
+            )
+            return [{"applied": applied}]
         return []
 
     def commit(self) -> None:
@@ -38,8 +54,13 @@ class _Transaction:
 
 
 class _Client:
-    def __init__(self, rows: list[dict]) -> None:
-        self.tx = _Transaction(rows)
+    def __init__(
+        self,
+        rows: list[dict],
+        token_rows: list[dict] | None = None,
+        applied_count: int | None = None,
+    ) -> None:
+        self.tx = _Transaction(rows, token_rows, applied_count)
 
     @contextmanager
     def session(self):
@@ -92,6 +113,82 @@ def _existing_row(**overrides) -> dict:
     }
     row.update(overrides)
     return row
+
+
+def _resolution_batch():
+    from imas_codex.standard_names.vocab_adjudication import (
+        VocabGapAdjudicationFile,
+    )
+
+    decisions = [
+        {
+            "segment": "physical_base",
+            "token": f"live_token_{index}",
+            "decision": "reject",
+            "rationale": "This observed term is not grammar vocabulary.",
+        }
+        for index in range(140)
+    ]
+    decisions.extend(
+        {
+            "segment": "physical_base",
+            "token": f"registered_add_{index}",
+            "decision": "add",
+            "canonical_target": f"registered_add_{index}",
+            "rationale": "The grammar now registers this reviewed addition.",
+        }
+        for index in range(18)
+    )
+    decisions.append(
+        {
+            "segment": "position",
+            "token": "retired_reject",
+            "decision": "reject",
+            "rationale": "The grammar no longer carries this rejected term.",
+        }
+    )
+    return VocabGapAdjudicationFile.model_validate({"decisions": decisions})
+
+
+def _resolution_graph_rows(batch) -> list[dict]:
+    rows = []
+    for index, decision in enumerate(batch.decisions):
+        rows.append(
+            {
+                "requested_id": decision.gap_id,
+                "id": decision.gap_id if index < 140 else None,
+                "segment": decision.segment if index < 140 else None,
+                "token": decision.token if index < 140 else None,
+                "editorial_disposition": None,
+                "editorial_target": None,
+                "editorial_reason": None,
+                "editorial_actor": None,
+                "editorial_grammar_signature": None,
+                "editorial_grammar_version": None,
+                "editorial_active": None,
+            }
+        )
+    return rows
+
+
+def _resolution_context(
+    *,
+    extra_tokens: list[str] | None = None,
+    aliases=None,
+    vocabularies=None,
+):
+    tokens = [f"registered_add_{index}" for index in range(18)]
+    tokens.extend(extra_tokens or [])
+    return {
+        "vocabulary_sections": [
+            {"segment": "physical_base", "tokens": tokens},
+            {"segment": "position", "tokens": ["center"]},
+        ],
+        "grammar": {
+            "advisory_aliases": aliases or {},
+            "vocabularies": vocabularies or {},
+        },
+    }
 
 
 def test_schema_separates_editorial_state_from_observation_state() -> None:
@@ -224,6 +321,25 @@ def test_apply_uses_one_transaction_and_dry_run_never_writes() -> None:
     assert params["items"][0]["disposition"] == "fold"
 
 
+def test_apply_aborts_when_an_extant_node_is_not_written() -> None:
+    from imas_codex.standard_names.vocab_adjudication import (
+        apply_vocab_gap_adjudications,
+    )
+
+    client = _Client([_existing_row()], applied_count=0)
+    with pytest.raises(ValueError, match="did not apply every extant"):
+        apply_vocab_gap_adjudications(
+            _single_batch(),
+            actor="catalog review",
+            dry_run=False,
+            grammar_signature="abc",
+            grammar_version="1.0",
+            gc=client,
+        )
+    assert client.tx.committed is False
+    assert client.tx.closed() is True
+
+
 def test_second_apply_is_idempotent() -> None:
     from imas_codex.standard_names.vocab_adjudication import (
         apply_vocab_gap_adjudications,
@@ -255,6 +371,216 @@ def test_second_apply_is_idempotent() -> None:
     assert result["unchanged"] == 1
     assert len(client.tx.calls) == 1
     assert client.tx.committed is True
+
+
+def test_resolved_history_classifies_complete_batch_and_writes_receipt(
+    tmp_path: Path,
+) -> None:
+    from imas_codex.standard_names.vocab_adjudication import (
+        apply_vocab_gap_adjudications,
+    )
+
+    batch = _resolution_batch()
+    rows = _resolution_graph_rows(batch)
+    token_rows = [
+        {"requested_id": row["requested_id"], "graph_token_ids": []}
+        for row in rows
+        if row["id"] is None
+    ]
+    receipt_path = tmp_path / "adjudication-receipt.json"
+    client = _Client(rows, token_rows)
+
+    result = apply_vocab_gap_adjudications(
+        batch,
+        actor="catalog review",
+        grammar_signature="abc",
+        grammar_version="1.0",
+        resolve_missing_from_grammar=True,
+        grammar_context=_resolution_context(),
+        receipt_path=receipt_path,
+        gc=client,
+    )
+
+    assert result["resolution_counts"] == {
+        "applied": 140,
+        "satisfied_by_grammar": 18,
+        "resolved_reject": 1,
+    }
+    assert len(result["receipt"]["decisions"]) == 159
+    assert result["receipt"]["grammar_signature"] == "abc"
+    assert result["receipt"]["actor"] == "catalog review"
+    assert result["receipt"]["dry_run"] is True
+    assert json.loads(receipt_path.read_text()) == result["receipt"]
+    assert len(client.tx.calls) == 2
+    assert client.tx.committed is False
+
+    apply_receipt_path = tmp_path / "applied-receipt.json"
+    apply_client = _Client(rows, token_rows)
+    applied = apply_vocab_gap_adjudications(
+        batch,
+        actor="catalog review",
+        dry_run=False,
+        grammar_signature="abc",
+        grammar_version="1.0",
+        resolve_missing_from_grammar=True,
+        grammar_context=_resolution_context(),
+        receipt_path=apply_receipt_path,
+        gc=apply_client,
+    )
+
+    assert applied["resolution_counts"] == result["resolution_counts"]
+    assert applied["receipt"]["dry_run"] is False
+    assert len(apply_client.tx.calls) == 3
+    write_query, params = apply_client.tx.calls[2]
+    assert "SET vg.editorial_disposition" in write_query
+    assert len(params["items"]) == 140
+    assert apply_client.tx.committed is True
+
+
+def test_resolved_history_requires_an_explicit_receipt_path() -> None:
+    from imas_codex.standard_names.vocab_adjudication import (
+        apply_vocab_gap_adjudications,
+    )
+
+    batch = _single_batch(decision="add")
+    client = _Client(
+        [{"requested_id": batch.decisions[0].gap_id, "id": None}],
+        [{"requested_id": batch.decisions[0].gap_id, "graph_token_ids": []}],
+    )
+    with pytest.raises(ValueError, match="receipt path"):
+        apply_vocab_gap_adjudications(
+            batch,
+            actor="catalog review",
+            grammar_signature="abc",
+            grammar_version="1.0",
+            resolve_missing_from_grammar=True,
+            grammar_context={
+                "vocabulary_sections": [
+                    {"segment": "physical_base", "tokens": ["heat_flux"]}
+                ]
+            },
+            gc=client,
+        )
+    assert client.tx.calls == []
+
+
+@pytest.mark.parametrize(
+    ("batch", "context", "token_ids", "message"),
+    [
+        (
+            _single_batch(decision="add", target="heat_flux"),
+            _resolution_context(),
+            [],
+            "add target is not registered",
+        ),
+        (
+            _single_batch(decision="reject", target=None),
+            _resolution_context(extra_tokens=["heat_flux"]),
+            [],
+            "reject token remains registered",
+        ),
+        (
+            _single_batch(decision="reject", target=None),
+            _resolution_context(vocabularies={"operators": {"heat_flux": {}}}),
+            [],
+            "reject token remains registered",
+        ),
+        (
+            _single_batch(decision="reject", target=None),
+            _resolution_context(),
+            ["vocab_gap:subject:heat_flux"],
+            "reject token remains in the graph",
+        ),
+        (
+            _single_batch(decision="fold", target="heat_flux"),
+            _resolution_context(extra_tokens=["heat_flux"]),
+            [],
+            "fold has no exact advisory alias",
+        ),
+        (
+            _single_batch(decision="fold", target="heat_flux"),
+            _resolution_context(
+                extra_tokens=["heat_flux", "thermal_flux"],
+                aliases={
+                    "physical_base": {
+                        "heat_flux": {
+                            "canonical": "thermal_flux",
+                            "reason": "Use the grammar-owned spelling.",
+                        }
+                    }
+                },
+            ),
+            [],
+            "fold advisory alias targets",
+        ),
+    ],
+)
+def test_resolved_history_fails_closed_on_grammar_or_graph_mismatch(
+    batch,
+    context,
+    token_ids,
+    message: str,
+    tmp_path: Path,
+) -> None:
+    from imas_codex.standard_names.vocab_adjudication import (
+        apply_vocab_gap_adjudications,
+    )
+
+    gap_id = batch.decisions[0].gap_id
+    client = _Client(
+        [{"requested_id": gap_id, "id": None}],
+        [{"requested_id": gap_id, "graph_token_ids": token_ids}],
+    )
+    with pytest.raises(ValueError, match=message):
+        apply_vocab_gap_adjudications(
+            batch,
+            actor="catalog review",
+            dry_run=False,
+            grammar_signature="abc",
+            grammar_version="1.0",
+            resolve_missing_from_grammar=True,
+            grammar_context=context,
+            receipt_path=tmp_path / "receipt.json",
+            gc=client,
+        )
+    assert client.tx.committed is False
+    assert len(client.tx.calls) == 2
+
+
+def test_missing_fold_is_satisfied_only_by_matching_segment_alias(
+    tmp_path: Path,
+) -> None:
+    from imas_codex.standard_names.vocab_adjudication import (
+        apply_vocab_gap_adjudications,
+    )
+
+    batch = _single_batch(decision="fold", target="thermal_flux")
+    gap_id = batch.decisions[0].gap_id
+    client = _Client(
+        [{"requested_id": gap_id, "id": None}],
+        [{"requested_id": gap_id, "graph_token_ids": []}],
+    )
+    result = apply_vocab_gap_adjudications(
+        batch,
+        actor="catalog review",
+        grammar_signature="abc",
+        grammar_version="1.0",
+        resolve_missing_from_grammar=True,
+        grammar_context=_resolution_context(
+            extra_tokens=["thermal_flux"],
+            aliases={
+                "physical_base": {
+                    "heat_flux": {
+                        "canonical": "thermal_flux",
+                        "reason": "Use the grammar-owned spelling.",
+                    }
+                }
+            },
+        ),
+        receipt_path=tmp_path / "receipt.json",
+        gc=client,
+    )
+    assert result["resolution_counts"]["satisfied_by_grammar"] == 1
 
 
 def test_observation_write_preserves_editorial_and_dedup_state() -> None:

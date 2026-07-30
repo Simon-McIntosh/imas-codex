@@ -5971,12 +5971,27 @@ def sn_retry(
     "--reason",
     help="Why a grammar-signature reset requires fresh editorial review.",
 )
+@click.option(
+    "--resolve-missing-from-grammar",
+    is_flag=True,
+    help=(
+        "Accept missing historical gap nodes only when the installed grammar "
+        "mechanically proves the reviewed decision is already resolved."
+    ),
+)
+@click.option(
+    "--receipt",
+    type=click.Path(dir_okay=False, path_type=str),
+    help="Explicit path for the complete machine-readable decision receipt.",
+)
 def sn_vocab_adjudicate(
     input_file: str | None,
     actor: str,
     apply_changes: bool,
     reset_signature: str | None,
     reason: str | None,
+    resolve_missing_from_grammar: bool,
+    receipt: str | None,
 ) -> None:
     """Validate and apply reviewed vocabulary-gap actions atomically.
 
@@ -5995,6 +6010,11 @@ def sn_vocab_adjudicate(
         if input_file is not None:
             raise click.UsageError(
                 "INPUT_FILE and --reset-signature are mutually exclusive"
+            )
+        if resolve_missing_from_grammar or receipt is not None:
+            raise click.UsageError(
+                "--reset-signature cannot be combined with missing-history "
+                "resolution or --receipt"
             )
         if not reason or not reason.strip():
             raise click.UsageError("--reason is required with --reset-signature")
@@ -6020,14 +6040,22 @@ def sn_vocab_adjudicate(
         )
     if reason is not None:
         raise click.UsageError("--reason is only valid with --reset-signature")
+    if resolve_missing_from_grammar and receipt is None:
+        raise click.UsageError(
+            "--receipt is required with --resolve-missing-from-grammar"
+        )
 
     try:
         batch = load_vocab_gap_adjudications(Path(input_file))
-        result = apply_vocab_gap_adjudications(
-            batch,
-            actor=actor,
-            dry_run=not apply_changes,
-        )
+        apply_options: dict[str, object] = {
+            "actor": actor,
+            "dry_run": not apply_changes,
+        }
+        if resolve_missing_from_grammar:
+            apply_options["resolve_missing_from_grammar"] = True
+        if receipt is not None:
+            apply_options["receipt_path"] = Path(receipt)
+        result = apply_vocab_gap_adjudications(batch, **apply_options)
     except ValueError as exc:
         raise click.ClickException(str(exc)) from exc
 
@@ -6044,6 +6072,15 @@ def sn_vocab_adjudicate(
     click.echo(
         f"grammar: {result['grammar_version']} signature={result['grammar_signature']}"
     )
+    if resolve_missing_from_grammar:
+        resolutions = result["resolution_counts"]
+        click.echo(
+            f"resolution: applied={resolutions['applied']} "
+            f"satisfied_by_grammar={resolutions['satisfied_by_grammar']} "
+            f"resolved_reject={resolutions['resolved_reject']}"
+        )
+    if receipt is not None:
+        click.echo(f"receipt: {receipt}")
 
 
 @sn.command("ddgap")

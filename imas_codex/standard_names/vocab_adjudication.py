@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import json
+import os
+import tempfile
 from collections import Counter
+from collections.abc import Mapping
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -138,6 +141,8 @@ def _decision_payload(
     return [
         {
             "id": row.gap_id,
+            "segment": row.segment,
+            "token": row.token,
             "disposition": row.disposition.value,
             "target": row.canonical_target,
             "reason": row.reason,
@@ -163,6 +168,229 @@ def _substantive_change(existing: dict[str, Any], desired: dict[str, Any]) -> bo
     )
 
 
+def _public_grammar_contract(
+    grammar_context: Mapping[str, Any] | None = None,
+) -> tuple[dict[str, frozenset[str]], frozenset[str], Mapping[str, Any]]:
+    """Load exact segment vocabulary and optional aliases from ISN's public API."""
+    if grammar_context is None:
+        try:
+            from imas_standard_names import get_grammar_context
+
+            grammar_context = get_grammar_context()
+        except Exception as exc:
+            raise ValueError("ISN grammar vocabulary is unavailable") from exc
+    if not isinstance(grammar_context, Mapping):
+        raise ValueError("ISN grammar context is not a mapping")
+
+    sections = grammar_context.get("vocabulary_sections")
+    if not isinstance(sections, list) or not sections:
+        raise ValueError("ISN grammar context has no vocabulary sections")
+    tokens_by_segment: dict[str, frozenset[str]] = {}
+    for section in sections:
+        if not isinstance(section, Mapping):
+            raise ValueError("ISN vocabulary section is not a mapping")
+        segment = section.get("segment")
+        tokens = section.get("tokens")
+        if not isinstance(segment, str) or not segment:
+            raise ValueError("ISN vocabulary section has no segment")
+        if not isinstance(tokens, list) or not all(
+            isinstance(token, str) for token in tokens
+        ):
+            raise ValueError(f"ISN vocabulary section {segment!r} has invalid tokens")
+        tokens_by_segment[segment] = frozenset(tokens)
+
+    grammar = grammar_context.get("grammar")
+    if not isinstance(grammar, Mapping):
+        raise ValueError("ISN grammar context has no grammar registry")
+    aliases: Any = grammar.get("advisory_aliases", {})
+    all_tokens = {
+        token
+        for segment_tokens in tokens_by_segment.values()
+        for token in segment_tokens
+    }
+    vocabularies = grammar.get("vocabularies")
+    if not isinstance(vocabularies, Mapping):
+        raise ValueError("ISN grammar context has no vocabulary registry")
+    for vocabulary in vocabularies.values():
+        if isinstance(vocabulary, Mapping):
+            all_tokens.update(token for token in vocabulary if isinstance(token, str))
+        elif isinstance(vocabulary, list):
+            if not all(isinstance(token, str) for token in vocabulary):
+                raise ValueError("ISN grammar vocabulary contains invalid tokens")
+            all_tokens.update(vocabulary)
+    if aliases is None:
+        aliases = {}
+    if not isinstance(aliases, Mapping):
+        raise ValueError("ISN advisory aliases are not a mapping")
+    return tokens_by_segment, frozenset(all_tokens), aliases
+
+
+def _missing_graph_token_rows(
+    tx: Any,
+    missing_items: list[dict[str, Any]],
+) -> dict[str, list[str]]:
+    """Find any graph observation carrying each missing decision's token."""
+    records = tx.run(
+        """
+        UNWIND $items AS item
+        OPTIONAL MATCH (other:VocabGap {token: item.token})
+        RETURN item.id AS requested_id,
+               collect(other.id) AS graph_token_ids
+        ORDER BY requested_id
+        """,
+        items=[{"id": item["id"], "token": item["token"]} for item in missing_items],
+    )
+    rows = {
+        row["requested_id"]: list(row.get("graph_token_ids") or [])
+        for record in records
+        if (row := _record_dict(record)).get("requested_id") is not None
+    }
+    expected_ids = {item["id"] for item in missing_items}
+    if set(rows) != expected_ids:
+        unresolved = sorted(expected_ids - set(rows))
+        unexpected = sorted(set(rows) - expected_ids)
+        raise ValueError(
+            "graph token audit did not return every missing identity: "
+            f"unresolved={unresolved} unexpected={unexpected}"
+        )
+    return rows
+
+
+def _missing_resolution(
+    item: dict[str, Any],
+    *,
+    tokens_by_segment: Mapping[str, frozenset[str]],
+    all_grammar_tokens: frozenset[str],
+    aliases: Mapping[str, Any],
+    graph_token_ids: list[str],
+) -> str:
+    """Classify one absent graph identity only when grammar proves it resolved."""
+    segment = item["segment"]
+    token = item["token"]
+    target = item["target"]
+    disposition = VocabGapDisposition(item["disposition"])
+    segment_tokens = tokens_by_segment.get(segment, frozenset())
+
+    if disposition is VocabGapDisposition.add:
+        if target not in segment_tokens:
+            raise ValueError(
+                f"{item['id']}: add target is not registered in exact "
+                f"segment {segment!r}: {target!r}"
+            )
+        return "satisfied_by_grammar"
+
+    if disposition is VocabGapDisposition.reject:
+        if token in all_grammar_tokens:
+            raise ValueError(
+                f"{item['id']}: reject token remains registered in grammar"
+            )
+        if graph_token_ids:
+            raise ValueError(
+                f"{item['id']}: reject token remains in the graph at "
+                + ", ".join(sorted(graph_token_ids))
+            )
+        return "resolved_reject"
+
+    segment_aliases = aliases.get(segment)
+    definition = (
+        segment_aliases.get(token) if isinstance(segment_aliases, Mapping) else None
+    )
+    if not isinstance(definition, Mapping):
+        raise ValueError(
+            f"{item['id']}: fold has no exact advisory alias in segment {segment!r}"
+        )
+    alias_target = definition.get("canonical")
+    if alias_target != target:
+        raise ValueError(
+            f"{item['id']}: fold advisory alias targets {alias_target!r}, "
+            f"not reviewed target {target!r}"
+        )
+    if target not in segment_tokens:
+        raise ValueError(
+            f"{item['id']}: fold target is not registered in exact "
+            f"segment {segment!r}: {target!r}"
+        )
+    return "satisfied_by_grammar"
+
+
+def _receipt(
+    batch: VocabGapAdjudicationFile,
+    *,
+    payload: list[dict[str, Any]],
+    existing_by_id: Mapping[str, dict[str, Any]],
+    changed_ids: set[str],
+    missing_resolutions: Mapping[str, str],
+    actor: str,
+    applied_at: str,
+    grammar_signature: str,
+    grammar_version: str,
+    dry_run: bool,
+) -> dict[str, Any]:
+    """Build one complete machine-readable record for every reviewed row."""
+    decisions: list[dict[str, Any]] = []
+    for row, item in zip(batch.decisions, payload, strict=True):
+        resolution = missing_resolutions.get(item["id"], "applied")
+        decisions.append(
+            {
+                "id": item["id"],
+                "segment": row.segment,
+                "token": row.token,
+                "disposition": row.disposition.value,
+                "canonical_target": row.canonical_target,
+                "reason": row.reason,
+                "resolution": resolution,
+                "graph_node_exists": item["id"] in existing_by_id,
+                "changed": item["id"] in changed_ids,
+            }
+        )
+    resolution_counts = Counter(item["resolution"] for item in decisions)
+    stable_counts = {
+        key: resolution_counts.get(key, 0)
+        for key in ("applied", "satisfied_by_grammar", "resolved_reject")
+    }
+    return {
+        "format": "imas-codex-vocab-gap-adjudication-receipt",
+        "format_version": 1,
+        "source": batch.source,
+        "actor": actor,
+        "recorded_at": applied_at,
+        "grammar_signature": grammar_signature,
+        "grammar_version": grammar_version,
+        "dry_run": dry_run,
+        "rows": len(decisions),
+        "disposition_counts": batch.disposition_counts(),
+        "resolution_counts": stable_counts,
+        "decisions": decisions,
+    }
+
+
+def _write_receipt(path: Path, receipt: Mapping[str, Any]) -> None:
+    """Atomically replace one explicit receipt path with formatted JSON."""
+    output = path.expanduser()
+    if not output.parent.is_dir():
+        raise ValueError(f"receipt directory does not exist: {output.parent}")
+    temporary_path: Path | None = None
+    try:
+        fd, temporary_name = tempfile.mkstemp(
+            prefix=f".{output.name}.",
+            suffix=".tmp",
+            dir=output.parent,
+        )
+        temporary_path = Path(temporary_name)
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(receipt, handle, indent=2, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, output)
+        temporary_path = None
+    except OSError as exc:
+        raise ValueError(f"cannot write adjudication receipt {output}: {exc}") from exc
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
 def apply_vocab_gap_adjudications(
     batch: VocabGapAdjudicationFile,
     *,
@@ -170,17 +398,30 @@ def apply_vocab_gap_adjudications(
     dry_run: bool = True,
     grammar_signature: str | None = None,
     grammar_version: str | None = None,
+    resolve_missing_from_grammar: bool = False,
+    grammar_context: Mapping[str, Any] | None = None,
+    receipt_path: Path | None = None,
     gc: Any | None = None,
 ) -> dict[str, Any]:
     """Validate existence and atomically apply a complete editorial batch.
 
     The transaction reads every requested node before any write. A missing
-    identity aborts the entire operation. Reapplying the same substantive
-    decisions changes nothing and preserves the first application timestamp.
+    identity aborts the entire operation by default. The explicit grammar
+    resolution mode accepts only mechanically proven historical resolutions.
+    Reapplying the same substantive decisions changes nothing and preserves
+    the first application timestamp.
     """
     actor = actor.strip()
     if not actor:
         raise ValueError("a nonempty editorial actor is required")
+    if resolve_missing_from_grammar and receipt_path is None:
+        raise ValueError(
+            "an explicit receipt path is required when resolving missing history"
+        )
+    if receipt_path is not None and not receipt_path.expanduser().parent.is_dir():
+        raise ValueError(
+            f"receipt directory does not exist: {receipt_path.expanduser().parent}"
+        )
 
     if grammar_signature is None:
         from imas_codex.standard_names.graph_ops import isn_vocabulary_signature
@@ -197,6 +438,13 @@ def apply_vocab_gap_adjudications(
         grammar_version=grammar_version,
         applied_at=applied_at,
     )
+    tokens_by_segment: dict[str, frozenset[str]] = {}
+    all_grammar_tokens: frozenset[str] = frozenset()
+    aliases: Mapping[str, Any] = {}
+    if resolve_missing_from_grammar:
+        tokens_by_segment, all_grammar_tokens, aliases = _public_grammar_contract(
+            grammar_context
+        )
 
     own = gc is None
     client = GraphClient() if own else gc
@@ -224,28 +472,80 @@ def apply_vocab_gap_adjudications(
                     ids=[item["id"] for item in payload],
                 )
                 existing_rows = [_record_dict(record) for record in records]
+                expected_ids = {item["id"] for item in payload}
+                returned_ids = {
+                    row["requested_id"]
+                    for row in existing_rows
+                    if row.get("requested_id") is not None
+                }
+                if returned_ids != expected_ids:
+                    unresolved = sorted(expected_ids - returned_ids)
+                    unexpected = sorted(returned_ids - expected_ids)
+                    raise ValueError(
+                        "graph existence audit did not return every decision: "
+                        f"unresolved={unresolved} unexpected={unexpected}"
+                    )
                 missing = sorted(
                     row["requested_id"]
                     for row in existing_rows
                     if row.get("id") is None
                 )
-                if missing:
+                if missing and not resolve_missing_from_grammar:
                     raise ValueError(
                         "adjudication references missing VocabGap nodes: "
                         + ", ".join(missing)
                     )
 
-                existing_by_id = {row["id"]: row for row in existing_rows}
+                existing_by_id = {
+                    row["id"]: row for row in existing_rows if row.get("id") is not None
+                }
+                payload_by_id = {item["id"]: item for item in payload}
+                missing_resolutions: dict[str, str] = {}
+                if missing:
+                    missing_items = [payload_by_id[gap_id] for gap_id in missing]
+                    graph_tokens_by_id = _missing_graph_token_rows(tx, missing_items)
+                    resolution_errors: list[str] = []
+                    for item in missing_items:
+                        try:
+                            missing_resolutions[item["id"]] = _missing_resolution(
+                                item,
+                                tokens_by_segment=tokens_by_segment,
+                                all_grammar_tokens=all_grammar_tokens,
+                                aliases=aliases,
+                                graph_token_ids=graph_tokens_by_id.get(item["id"], []),
+                            )
+                        except ValueError as exc:
+                            resolution_errors.append(str(exc))
+                    if resolution_errors:
+                        raise ValueError(
+                            "missing adjudications are not resolved by grammar: "
+                            + "; ".join(resolution_errors)
+                        )
+
                 changed = [
                     item
                     for item in payload
-                    if _substantive_change(existing_by_id[item["id"]], item)
+                    if item["id"] in existing_by_id
+                    and _substantive_change(existing_by_id[item["id"]], item)
                 ]
+                changed_ids = {item["id"] for item in changed}
+                receipt = _receipt(
+                    batch,
+                    payload=payload,
+                    existing_by_id=existing_by_id,
+                    changed_ids=changed_ids,
+                    missing_resolutions=missing_resolutions,
+                    actor=actor,
+                    applied_at=applied_at,
+                    grammar_signature=grammar_signature,
+                    grammar_version=grammar_version,
+                    dry_run=dry_run,
+                )
                 if dry_run:
                     tx.close()
                 else:
                     if changed:
-                        tx.run(
+                        write_records = tx.run(
                             """
                             UNWIND $items AS item
                             MATCH (vg:VocabGap {id: item.id})
@@ -259,9 +559,18 @@ def apply_vocab_gap_adjudications(
                                 vg.editorial_grammar_version =
                                     item.grammar_version,
                                 vg.editorial_active = true
+                            RETURN count(vg) AS applied
                             """,
                             items=changed,
                         )
+                        write_rows = [_record_dict(record) for record in write_records]
+                        applied = write_rows[0].get("applied", 0) if write_rows else 0
+                        if applied != len(changed):
+                            raise ValueError(
+                                "transaction did not apply every extant "
+                                f"adjudication: expected={len(changed)} "
+                                f"applied={applied}"
+                            )
                     tx.commit()
             except BaseException:
                 if tx.closed() is False:
@@ -271,15 +580,21 @@ def apply_vocab_gap_adjudications(
         if own:
             client.close()
 
-    return {
+    if receipt_path is not None:
+        _write_receipt(receipt_path, receipt)
+
+    result = {
         "rows": len(payload),
         "changed": len(changed),
-        "unchanged": len(payload) - len(changed),
+        "unchanged": len(existing_by_id) - len(changed),
         "counts": batch.disposition_counts(),
+        "resolution_counts": receipt["resolution_counts"],
         "grammar_signature": grammar_signature,
         "grammar_version": grammar_version,
         "dry_run": dry_run,
+        "receipt": receipt,
     }
+    return result
 
 
 def reset_vocab_gap_adjudications(
