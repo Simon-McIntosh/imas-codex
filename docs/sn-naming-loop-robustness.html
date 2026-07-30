@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
@@ -684,6 +684,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="durable-adjudication-and-alias-contract-20260730" data-who="reckon-ship" data-when="2026-07-30T13:10:00+02:00">
     <div class="r-comment-body"><p><strong>Vocabulary adjudication is now durable and explicit.</strong> Codex merge <code>6e645e07</code> adds typed add/fold/reject editorial state, immutable evidence, grammar-signature invalidation, retry feedback, and an atomic dry-run-by-default <code>sn vocab-adjudicate</code> command. Independent audit confirmed all 159 reviewed rows parse as 18 add, 27 fold, and 114 reject, including the exact empty-token identity; 160 worker tests plus 33 changed-slice regressions passed, and a real Neo4j transaction-closure mismatch was corrected before integration. External ISN merge <code>2d7faec</code> exposes four segment-scoped advisory aliases; Codex merge <code>56c032c1</code> consumes only that public contract with exact segment/target checks and clean fallback on older grammars.</p><p>The first live dry-run failed closed without writes because 19 reviewed identities are absent from the current graph. Most are add decisions already represented by current grammar vocabulary; one is a rejected obsolete position proposal. No gap nodes were fabricated and no row was silently dropped. Apply is deferred until the final ISN release/pin establishes the grammar signature; the live subset and the 19 resolved/absent historical rows must be reported separately.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-nlr-isn-ordered-release-gate" data-who="Codex" data-when="2026-07-30" data-quote="Ordered-tree grammar is release-ready; the RC tag waits only for the exact fork CI gate.">
+    <div class="r-comment-body"><p>Coordinated ISN work is integrated on fork main at <code>e9f7f72</code>: strict <code>parse(..., strict=True)</code> authority, recursive ordered operator trees, public grammar/context truth, advisory aliases, and removal of the rejected storage-specific oblique locus. The final external suite passed <strong>1,968</strong> tests with 28 skipped and 83 expected failures in 329.77 s on <code>sun_debug</code>. Python 3.13 fork CI is green; the coverage-enabled Python 3.12 job is still running, so the release CLI correctly refused to create <code>v0.8.0rc62</code>. No tag or Codex pin has been changed yet.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-nlr-vocab-history-receipt" data-who="Codex" data-when="2026-07-30" data-quote="The full 159-row adjudication can now be validated and receipted without inventing graph nodes.">
+    <div class="r-comment-body"><p>Worker commit <code>86f647bb</code> adds an explicit opt-in historical-resolution mode while preserving fail-closed default behavior. It prevalidates all 159 rows before any graph write, applies only the 140 extant <code>VocabGap</code> rows transactionally, classifies 18 reviewed additions as <code>satisfied_by_grammar</code> only at the exact registered segment, and classifies the absent rejected <code>oblique_reference_point</code> proposal as <code>resolved_reject</code> only when absent from both public grammar and graph. An atomic machine-readable receipt covers every row and the exact grammar signature. Focused validation passed 173 tests; independent review and final-pin live dry-run/apply remain before this outcome is landed.</p></div>
 </div>
 </section>
 </main>
