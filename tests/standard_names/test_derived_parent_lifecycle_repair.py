@@ -665,6 +665,88 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
     delete_nodes.assert_called_once_with(gc, ["pressure"])
 
 
+def test_childless_derived_placeholder_is_retired() -> None:
+    """A derived placeholder without children is not a durable abstraction."""
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    gc = MagicMock()
+
+    def query(cypher: str, **_kwargs):
+        if "NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }" in cypher:
+            return [{"id": "impurity_ion_velocity", "unit": None}]
+        if "MATCH (dr:DocsRevision)" in cypher:
+            return [{"n": 0}]
+        raise AssertionError(f"unexpected query: {cypher}")
+
+    gc.query.side_effect = query
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+            side_effect=[0, 1],
+        ) as delete_nodes,
+    ):
+        changed = normalize_derived_parent_lifecycle(gc)
+
+    assert changed == 1
+    assert delete_nodes.call_args_list == [
+        call(gc, []),
+        call(gc, ["impurity_ion_velocity"]),
+    ]
+
+
+def test_semantically_valid_derived_parent_survives_cleanup() -> None:
+    """A species-qualified state parent remains structurally admissible."""
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    parent_id = "neutral_internal_state_momentum_source"
+    gc = MagicMock()
+
+    def query(cypher: str, **_kwargs):
+        if "RETURN child.id AS child_id" in cypher:
+            return []
+        if "NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }" in cypher:
+            return []
+        if "MATCH (dr:DocsRevision)" in cypher:
+            return [{"n": 0}]
+        raise AssertionError(f"unexpected query: {cypher}")
+
+    gc.query.side_effect = query
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
+            return_value=[parent_id],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+            return_value=0,
+        ) as delete_nodes,
+    ):
+        changed = normalize_derived_parent_lifecycle(gc)
+
+    assert changed == 0
+    delete_nodes.assert_called_once_with(gc, [])
+
+
 def test_cleanup_query_rechecks_pending_and_accepted_parents() -> None:
     """Admission cleanup covers both creation leaks and accepted residue."""
     from imas_codex.standard_names.graph_ops import (

@@ -30,7 +30,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from imas_standard_names.grammar import parser as _isn_parser
+from imas_standard_names.grammar import (
+    compose_standard_name as _compose_standard_name,
+    parse_standard_name as _parse_standard_name,
+    parser as _isn_parser,
+)
 from imas_standard_names.grammar.parser import ParseError as _ParseError
 
 
@@ -62,6 +66,15 @@ class _TopologyProbe(Protocol):
     """
 
     def query(self, cypher: str, **params): ...  # pragma: no cover
+
+
+def _has_valid_standard_name_identity(name: str) -> tuple[bool, str]:
+    """Validate *name* through ISN's public semantic model."""
+    try:
+        _compose_standard_name(_parse_standard_name(name))
+    except Exception as exc:
+        return False, f"ISN identity invalid: {exc}"
+    return True, "valid ISN identity"
 
 
 def _has_structural_specificity(name: str) -> tuple[bool, str]:
@@ -224,6 +237,14 @@ def is_admissible_parent_name(
     AdmissionResult
         Decision plus reason and which clause matched.
     """
+    valid_identity, identity_reason = _has_valid_standard_name_identity(name)
+    if not valid_identity:
+        return AdmissionResult(
+            admit=False,
+            reason=identity_reason,
+            clause=None,
+        )
+
     admit_a, reason_a = _has_structural_specificity(name)
 
     # Suppression veto (Class-B): even a structurally-specific candidate is

@@ -84,6 +84,25 @@ class TestClauseA_StructuralSpecificity:
         assert r.admit is False
         assert r.clause is None
 
+    @pytest.mark.parametrize(
+        ("name", "expected_admit"),
+        [
+            ("internal_state_momentum_source", False),
+            ("neutral_internal_state_momentum_source", True),
+            ("electron_density", True),
+        ],
+    )
+    def test_high_level_semantics_gate_structural_parents(
+        self,
+        name: str,
+        expected_admit: bool,
+    ) -> None:
+        result = is_admissible_parent_name(name, gc=None)
+
+        assert result.admit is expected_admit
+        if not expected_admit:
+            assert "identity invalid" in result.reason
+
 
 # ---------------------------------------------------------------------------
 # Clause B — vector-like topology (graph probe required)
@@ -497,6 +516,47 @@ class TestFilterAdmissibleParentsShadowVeto:
 
         assert kept == []
         assert gc.query.call_count == 2
+
+    def test_semantically_invalid_parent_cannot_be_rederived(self):
+        """Full structural rebuilds cannot recreate an invalid state parent."""
+        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+
+        target = "internal_state_momentum_source"
+        gc = self._probe_rows([])
+
+        def query(cypher: str, **_params):
+            if "UNWIND $names AS nm" in cypher:
+                return [
+                    {
+                        "name": target,
+                        "axes": [],
+                        "child_ids": [],
+                        "lone_child_id": None,
+                        "lone_child_stage": None,
+                        "lone_child_origin": None,
+                        "parent_sources": [],
+                        "lone_child_sources": [],
+                        "origin": None,
+                        "name_stage": None,
+                    }
+                ]
+            if "UNWIND $pairs AS pr" in cypher:
+                return []
+            raise AssertionError(f"unexpected query: {cypher}")
+
+        gc.query.side_effect = query
+        batch = [
+            {
+                "from_name": "neutral_internal_state_momentum_source",
+                "to_name": target,
+                "operator_kind": "qualifier",
+                "axis": None,
+            }
+        ]
+
+        kept = _filter_admissible_parents(batch, gc, full_rebuild=True)
+
+        assert kept == []
 
     def test_shared_parent_edge_kept(self):
         from imas_codex.standard_names.graph_ops import _filter_admissible_parents

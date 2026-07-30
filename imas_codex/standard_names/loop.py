@@ -1838,38 +1838,39 @@ async def run_sn_pools(
             )
 
         # ── Post-drain structural fixups ──────────────────────────
-        # Re-derive structural edges (catches any new HAS_PARENT /
-        # HAS_ERROR derivations from names composed during this run),
-        # seed any parent placeholders whose children are now composed,
-        # then resolve stale documentation links.  All non-LLM graph
-        # operations — safe to run at shutdown.
+        # Re-derive structural edges from names composed during this run,
+        # normalize the resulting parent lifecycle, and repair structural
+        # provenance. Maintenance-only mode already completed this sequence
+        # before its control-flow boundary, so it must not repeat mutating
+        # work during shutdown.
         FIXUP_TIMEOUT = 30.0
-        try:
-            from imas_codex.standard_names.graph_ops import (
-                rederive_structural_edges,
-                seed_parent_sources,
-            )
-
-            await asyncio.wait_for(
-                asyncio.to_thread(rederive_structural_edges),
-                timeout=FIXUP_TIMEOUT,
-            )
-            _post_parents = await asyncio.wait_for(
-                asyncio.to_thread(seed_parent_sources),
-                timeout=FIXUP_TIMEOUT,
-            )
-            if _post_parents:
-                logger.info(
-                    "run_sn_pools: post-drain seeded %d parent SNs", _post_parents
+        if not reconcile_only:
+            try:
+                from imas_codex.standard_names.graph_ops import (
+                    normalize_derived_parent_lifecycle,
+                    reconcile_orphan_parent_sources,
+                    rederive_structural_edges,
                 )
-        except TimeoutError:
-            logger.warning(
-                "run_sn_pools: post-drain seed_parent_sources timed out (non-fatal)"
-            )
-        except Exception as _seed_exc:  # noqa: BLE001
-            logger.warning(
-                "run_sn_pools: post-drain seed_parent_sources failed: %s", _seed_exc
-            )
+
+                await asyncio.to_thread(rederive_structural_edges)
+                _normalized_parents = await asyncio.to_thread(
+                    normalize_derived_parent_lifecycle
+                )
+                _reconciled_parent_sources = await asyncio.to_thread(
+                    reconcile_orphan_parent_sources
+                )
+                if _normalized_parents or _reconciled_parent_sources:
+                    logger.info(
+                        "run_sn_pools: post-drain normalized %d parent node(s) "
+                        "and reconciled %d parent source(s)",
+                        _normalized_parents,
+                        _reconciled_parent_sources,
+                    )
+            except Exception as _structural_exc:  # noqa: BLE001
+                logger.warning(
+                    "run_sn_pools: post-drain structural maintenance failed: %s",
+                    _structural_exc,
+                )
 
         try:
             from imas_codex.standard_names.graph_ops import resolve_doc_links
