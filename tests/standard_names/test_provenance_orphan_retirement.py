@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -45,3 +45,39 @@ def test_retirement_is_list_scoped_and_ledgered_atomically() -> None:
     assert "CREATE (change:StandardNameChange" in cypher
     assert "DETACH DELETE sn" in cypher
     assert write.kwargs["deletion_operation"] == "remove_provenance_orphan"
+
+
+def test_parent_source_reconcile_refuses_inadmissible_scaffold() -> None:
+    """Provenance recovery must not legitimize an invalid structural parent."""
+    from imas_codex.standard_names.graph_ops import (
+        reconcile_orphan_parent_sources,
+    )
+    from imas_codex.standard_names.parents import AdmissionResult
+
+    gc = MagicMock()
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.find_orphan_parent_source_candidates",
+            return_value=[
+                {
+                    "parent_id": "line_integrated_impurity_ion_velocity",
+                    "dd_paths": [
+                        "spectrometer_x_ray_crystal/channel/"
+                        "profiles_line_integrated/velocity_tor"
+                    ],
+                }
+            ],
+        ),
+        patch(
+            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            return_value=AdmissionResult(
+                admit=False,
+                reason="suppressed: single-child shadow",
+                clause=None,
+            ),
+        ),
+    ):
+        seeded = reconcile_orphan_parent_sources(gc=gc)
+
+    assert seeded == 0
+    gc.query.assert_not_called()

@@ -433,6 +433,71 @@ class TestFilterAdmissibleParentsShadowVeto:
         kept = _filter_admissible_parents(co_batch, gc)
         assert kept == [], "single-child shadow parent edge must be dropped"
 
+    def test_new_single_batch_child_is_source_probed_before_parent_creation(self):
+        """A newly derived parent must not bypass the shadow veto.
+
+        The child already has authoritative DD ownership when the structural
+        edge pass runs, but the parent has no graph child until that pass writes
+        the first HAS_PARENT edge. The batch child therefore needs an explicit
+        source probe rather than being treated as necessarily unsourced.
+        """
+        from imas_codex.standard_names.graph_ops import _filter_admissible_parents
+
+        gc = self._probe_rows([])
+
+        def query(cypher: str, **params):
+            if "UNWIND $names AS nm" in cypher:
+                return [
+                    {
+                        "name": "line_integrated_impurity_ion_velocity",
+                        "axes": [],
+                        "child_ids": [],
+                        "lone_child_id": None,
+                        "lone_child_stage": None,
+                        "lone_child_origin": None,
+                        "parent_sources": [],
+                        "lone_child_sources": [],
+                        "origin": None,
+                        "name_stage": None,
+                    }
+                ]
+            if "UNWIND $pairs AS pr" in cypher:
+                assert params["pairs"] == [
+                    {
+                        "target": "line_integrated_impurity_ion_velocity",
+                        "child": "toroidal_line_integrated_impurity_ion_velocity",
+                    }
+                ]
+                return [
+                    {
+                        "target": "line_integrated_impurity_ion_velocity",
+                        "child": "toroidal_line_integrated_impurity_ion_velocity",
+                        "child_stage": "drafted",
+                        "child_origin": "pipeline",
+                        "child_sources": [
+                            "spectrometer_x_ray_crystal/channel/"
+                            "profiles_line_integrated/velocity_tor"
+                        ],
+                        "parent_sources": [],
+                    }
+                ]
+            raise AssertionError(f"unexpected query: {cypher}")
+
+        gc.query.side_effect = query
+        co_batch = [
+            {
+                "from_name": "toroidal_line_integrated_impurity_ion_velocity",
+                "to_name": "line_integrated_impurity_ion_velocity",
+                "operator_kind": "projection",
+                "axis": "toroidal",
+            }
+        ]
+
+        kept = _filter_admissible_parents(co_batch, gc)
+
+        assert kept == []
+        assert gc.query.call_count == 2
+
     def test_shared_parent_edge_kept(self):
         from imas_codex.standard_names.graph_ops import _filter_admissible_parents
 
