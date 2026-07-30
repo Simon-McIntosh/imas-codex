@@ -7305,10 +7305,12 @@ def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
 
     The repair preserves the historical ``composed`` versus ``attached``
     distinction whenever it is already valid. Sources with a live target but
-    another non-stale status become ``attached``; sources claiming completion
-    with no live target return to ``extracted`` with a fresh attempt budget.
-    Terminal target edges and the scalar mirror are cleared in the latter
-    case. Upstream-stale sources are never revived here.
+    another non-stale status become ``attached``, except when any live target
+    carries an open name hint: that source must stay eligible for the
+    regeneration requested by the edit. Sources claiming completion with no
+    live target return to ``extracted`` with a fresh attempt budget. Terminal
+    target edges and the scalar mirror are cleared in the latter case.
+    Upstream-stale sources are never revived here.
 
     Idempotent once status, edge, and scalar liveness agree.
     """
@@ -7321,6 +7323,14 @@ def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
             WHERE NOT (coalesce(sn.name_stage, '') IN
                        ['superseded', 'exhausted', 'contested'])
               AND NOT (sns.status IN ['composed', 'attached', 'stale'])
+              AND NOT EXISTS {
+                MATCH (sns)-[:PRODUCED_NAME]->(hint:StandardName)
+                WHERE NOT (coalesce(hint.name_stage, '') IN
+                           ['superseded', 'exhausted', 'contested'])
+                  AND coalesce(hint.edit_mode, '') = 'hint'
+                  AND coalesce(hint.edit_status, '') = 'open'
+                  AND hint.name_hint IS NOT NULL
+              }
             SET sns.status = 'attached',
                 sns.produced_sn_id = sn.id,
                 sns.claimed_at = null,

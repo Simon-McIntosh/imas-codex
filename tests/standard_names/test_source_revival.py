@@ -68,7 +68,13 @@ def _clean(_gc):
     def _wipe() -> None:
         # A StandardNameSource id carries the ``dd:`` source-type prefix, so
         # match anywhere in the id rather than only at the start.
-        for label in ("StandardNameSource", "IMASNode", "Unit", "VocabGap"):
+        for label in (
+            "StandardNameSource",
+            "StandardName",
+            "IMASNode",
+            "Unit",
+            "VocabGap",
+        ):
             _gc.query(
                 f"MATCH (n:{label}) WHERE n.id CONTAINS $p DETACH DELETE n",
                 p=_PREFIX,
@@ -174,9 +180,90 @@ def _source(gc, sns_id: str) -> dict:
     return rows[0]["p"] if rows else {}
 
 
+def _link_source_to_name(
+    gc,
+    *,
+    source_id: str,
+    name_id: str,
+    edit_mode: str | None = None,
+    edit_status: str | None = None,
+    name_hint: str | None = None,
+) -> None:
+    """Create a live name target for a source-liveness regression."""
+    gc.query(
+        """
+        MATCH (sns:StandardNameSource {id: $source_id})
+        MERGE (sn:StandardName {id: $name_id})
+        SET sn.name_stage = 'drafted',
+            sn.edit_mode = $edit_mode,
+            sn.edit_status = $edit_status,
+            sn.name_hint = $name_hint
+        MERGE (sns)-[:PRODUCED_NAME]->(sn)
+        """,
+        source_id=source_id,
+        name_id=name_id,
+        edit_mode=edit_mode,
+        edit_status=edit_status,
+        name_hint=name_hint,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Part A — stale unit skips are revived against the current resolver
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.graph
+def test_open_hint_source_stays_generation_eligible_with_multiple_targets(_gc, _clean):
+    """An open hint keeps its source extracted despite another live target."""
+    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+
+    sns_id = _create_dd_source(
+        _gc,
+        path=_uid("hint_source"),
+        unit="1",
+        status="extracted",
+        skip_reason=None,
+    )
+    _link_source_to_name(
+        _gc,
+        source_id=sns_id,
+        name_id=_uid("hint_target"),
+        edit_mode="hint",
+        edit_status="open",
+        name_hint="regenerate this name",
+    )
+    _link_source_to_name(
+        _gc,
+        source_id=sns_id,
+        name_id=_uid("ordinary_target"),
+    )
+
+    reconcile_source_status_liveness(gc=_gc)
+
+    assert _source(_gc, sns_id)["status"] == "extracted"
+
+
+@pytest.mark.graph
+def test_ordinary_live_target_still_realigns_source(_gc, _clean):
+    """A live target without an open hint repairs an interrupted source."""
+    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+
+    sns_id = _create_dd_source(
+        _gc,
+        path=_uid("ordinary_source"),
+        unit="1",
+        status="failed",
+        skip_reason=None,
+    )
+    name_id = _uid("ordinary_target")
+    _link_source_to_name(_gc, source_id=sns_id, name_id=name_id)
+
+    reconcile_source_status_liveness(gc=_gc)
+
+    props = _source(_gc, sns_id)
+    assert props["status"] == "attached"
+    assert props["produced_sn_id"] == name_id
 
 
 def test_revive_unit_skipped_sources_returns_counts():
