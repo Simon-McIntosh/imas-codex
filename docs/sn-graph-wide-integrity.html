@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
@@ -585,6 +585,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s7" data-id="provenance-orphan-recheck-20260730" data-who="reckon-ship" data-when="2026-07-30T12:07:35+02:00">
     <div class="r-comment-body"><p><strong>The historical 35→0 provenance-orphan result was not durable.</strong> A fresh live audit found one invalid one-child shadow, <code>line_integrated_impurity_ion_velocity</code>. The creation/lifecycle/provenance guards landed in worker commits <code>8ef762c6</code> and <code>d44fcb32</code>, integrated on <code>main</code> by <code>2d6034ee</code>; the focused worker receipt passed <strong>74</strong> tests. One maintenance-only reconcile then ledger-retired that node as <code>remove_derived_parent</code>, preserved its child and DD source, created no LLM cost, and exited zero.</p><p>The same run exposed <strong>six</strong> pending derived orphans, so the global invariant is not yet green: five <code>internal_state_*</code> parents are deleted by high-level semantic normalization and then recreated by lower-level admission during post-drain rederive; <code>impurity_ion_velocity</code> is childless, source-less, and has no authoritative unit. The repair is active: align admission with the high-level semantic oracle and make ordinary post-drain maintenance an awaited rederive→normalize→reconcile fixpoint, while reconcile-only mode skips that duplicate finalizer. Do not report the provenance hole closed until one subsequent maintenance pass proves zero.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-sgwi-provenance-closure-live" data-who="Codex" data-when="2026-07-30" data-quote="The reopened provenance invariant is closed on the live graph.">
+    <div class="r-comment-body"><p>Final cascading-parent code at <code>8e5969e3</code> was exercised through maintenance-only run <code>81f22918</code> on the live graph. The run completed in 566.00 s at <strong>$0.0000</strong>, deleted 11 orphaned derived-parent sources, reaped two additional childless derived parents after structural rederivation, and seeded 17 legitimate missing parent sources. Two independent post-run calls to <code>find_provenance_orphans()</code> both returned <strong>0</strong>. This closes the S6 provenance-repair slice; the fan-out, embedding, supersede-retarget, scalar-disagreement, and write-path work in <code>f-sgwi-001</code> remains later graph-wide scope and was not pulled into this sprint.</p></div>
 </div>
 </section>
 </main>
