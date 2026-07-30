@@ -774,6 +774,7 @@ async def run_sn_pools(
     skip_review: bool = False,
     skip_generate: bool = False,
     attach_only: bool = False,
+    reconcile_only: bool = False,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
@@ -847,6 +848,9 @@ async def run_sn_pools(
             rather than the systematically undercounted sum of emitted
             ``on_event`` payloads (fanout / retry sub-charges emit no
             display event).
+        reconcile_only: Run the complete graph-maintenance sequence, including
+            structural parent lifecycle repair, then return before constructing
+            any operational worker pool.
     """
     from imas_codex.standard_names.budget import BudgetManager
     from imas_codex.standard_names.pools import run_pools
@@ -1479,6 +1483,16 @@ async def run_sn_pools(
                 "Seeded %d missing parent provenance source(s)",
                 _parent_sources,
             )
+
+        # Maintenance-only runs include the structural parent lifecycle work
+        # above, then stop at the control-flow boundary before any claim-capable
+        # pool or auxiliary worker is constructed.
+        if reconcile_only:
+            logger.info(
+                "run_sn_pools: reconciliation and structural maintenance complete"
+            )
+            summary.stop_reason = "completed"
+            return summary
 
         # ── Build pool specs ──────────────────────────────────────
         _only_domain_for_pools = _domains[0] if len(_domains) == 1 else None

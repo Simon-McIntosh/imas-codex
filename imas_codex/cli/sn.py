@@ -724,6 +724,7 @@ def _run_sn_cmd(
             skip_review=skip_review,
             skip_generate=skip_generate,
             attach_only=(only == "attach"),
+            reconcile_only=(only == "reconcile"),
         )
         return {"summary": summary}
 
