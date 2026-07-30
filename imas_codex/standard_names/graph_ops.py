@@ -109,45 +109,111 @@ def normalize_name_id(name: str) -> str:
     return name.lower()
 
 
-def _segments_from_model(parsed: Any) -> dict[str, str | None]:
-    """Extract all bare-name segment columns from an ISN pydantic StandardName.
+@functools.lru_cache(maxsize=1)
+def _public_segment_token_index() -> dict[str, tuple[str, ...]]:
+    """Return the public grammar's token-to-segment index.
 
-    Single extraction authority shared by the persist path
-    (:func:`_parse_grammar`), the decomposition writer
-    (:func:`_write_grammar_decomposition`), and the derived-parent seeding
-    path (:func:`_parse_parent_grammar`). Graph column names equal the ISN
-    pydantic ``StandardName`` segment attribute names, so the mapping is a
-    direct ``model_dump`` projection over ``_GRAMMAR_SEGMENT_COLUMNS``.
-
-    Args:
-        parsed: Result of ``imas_standard_names.grammar.parse_standard_name``.
-
-    Returns:
-        Dict with one entry per segment in ``_GRAMMAR_SEGMENT_COLUMNS``;
-        absent segments are ``None``, enum values are coerced to ``str``.
+    ``StandardNameIR.qualifiers`` deliberately preserve authored order without
+    imposing the legacy flat segment model.  The graph's compatibility columns
+    still need the narrower segment labels for search filters, so this derives
+    them from ``get_grammar_context()`` instead of duplicating grammar
+    vocabulary in codex.
     """
-    dump = parsed.model_dump() if hasattr(parsed, "model_dump") else dict(parsed)
-    return {
-        seg: _coerce_segment_value(dump.get(seg)) for seg in _GRAMMAR_SEGMENT_COLUMNS
-    }
+    from imas_standard_names.grammar import get_grammar_context
+
+    index: dict[str, list[str]] = {}
+    for section in get_grammar_context().get("vocabulary_sections", []):
+        segment = section.get("segment")
+        if segment not in _GRAMMAR_SEGMENT_COLUMNS:
+            continue
+        for token in section.get("tokens") or []:
+            index.setdefault(str(token), []).append(str(segment))
+    return {token: tuple(segments) for token, segments in index.items()}
+
+
+def _segments_from_ir(ir: Any) -> dict[str, str | None]:
+    """Project a strict ISN IR into legacy scalar graph columns.
+
+    The IR is the structural authority.  For a binary root, the first operand
+    supplies compatibility base/qualifier/projection/locus/mechanism columns;
+    the binary expression itself remains losslessly represented by
+    ``HAS_PARENT`` edges.  ``transformation`` is the outermost operator only,
+    so consumers that still expect one scalar can inspect it without mistaking
+    that projection for the complete operator tree.
+    """
+    columns: dict[str, str | None] = dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
+    operators = list(getattr(ir, "operators", ()) or ())
+    primary = ir
+    if operators:
+        outer = operators[0]
+        columns["transformation"] = _coerce_segment_value(getattr(outer, "op", None))
+        args = list(getattr(outer, "args", ()) or ())
+        if args:
+            primary = args[0]
+
+    base = getattr(primary, "base", None)
+    base_token = _coerce_segment_value(getattr(base, "token", None))
+    base_kind = _coerce_segment_value(getattr(base, "kind", None))
+    if base_token:
+        column = (
+            "geometric_base" if base_kind == "geometry_carrier" else "physical_base"
+        )
+        columns[column] = base_token
+
+    projection = getattr(primary, "projection", None)
+    if projection is not None:
+        shape = _coerce_segment_value(getattr(projection, "shape", None))
+        column = "coordinate" if shape == "coordinate" else "component"
+        columns[column] = _coerce_segment_value(getattr(projection, "axis", None))
+
+    token_index = _public_segment_token_index()
+    qualifier_values: dict[str, list[str]] = {}
+    qualifiers = list(getattr(primary, "qualifiers", ()) or ())
+
+    locus = getattr(primary, "locus", None)
+    if locus is not None:
+        qualifiers.extend(list(getattr(locus, "qualifiers", ()) or ()))
+        locus_token = _coerce_segment_value(getattr(locus, "token", None))
+        locus_type = _coerce_segment_value(getattr(locus, "type", None))
+        locus_column = {
+            "position": "position",
+            "region": "region",
+            "geometry": "geometry",
+            "entity": "object",
+        }.get(locus_type)
+        if locus_column and locus_token:
+            columns[locus_column] = locus_token
+
+    for qualifier in qualifiers:
+        token = _coerce_segment_value(getattr(qualifier, "token", None))
+        if not token:
+            continue
+        for segment in token_index.get(token, ()):
+            qualifier_values.setdefault(segment, []).append(token)
+            break
+    for segment, tokens in qualifier_values.items():
+        columns[segment] = "_".join(tokens)
+
+    mechanism = getattr(primary, "mechanism", None)
+    if mechanism is not None:
+        columns["process"] = _coerce_segment_value(getattr(mechanism, "token", None))
+
+    return columns
 
 
 def _parse_grammar(name: str) -> dict[str, Any]:
     """Parse ``name`` with the ISN grammar API.
 
-    Accept/reject and segment extraction are owned by the ISN pydantic
-    ``parse_standard_name()`` — the same authority
-    ``_write_grammar_decomposition`` uses, so persist-time columns and
-    decomposition-time columns always agree. The lower-level IR ``parse()``
-    is retained ONLY to produce ``validation_diagnostics_json`` (the one
-    artefact the pydantic layer does not provide).
+    Accept/reject and segment extraction use the public strict ``parse`` /
+    ``compose`` contract.  Scalar columns are a compatibility projection of
+    the lossless IR; failure of the optional flat Pydantic projection is never
+    treated as invalid and cannot clear a valid ordered operator expression.
 
     Returns a dict with ``grammar_parse_version`` (ISN package version
     string), ``validation_diagnostics_json`` (JSON array of diagnostic
     objects, ``"[]"`` when the IR parser rejects the name), and all
-    bare-name segment columns. When the ISN pydantic model rejects the name
-    (stacked tokens, bare generic base, unknown token, non-canonical order)
-    the segment columns are all ``None``; the name's non-compliance is
+    bare-name segment columns. When strict parsing rejects the name the segment
+    columns are all ``None``; the name's non-compliance is
     recorded authoritatively by ``validation_status='quarantined'`` at
     validate time (:func:`validate_worker`), not by a separate flag.
     """
@@ -155,8 +221,7 @@ def _parse_grammar(name: str) -> dict[str, Any]:
         import dataclasses
 
         import imas_standard_names
-        from imas_standard_names.grammar import parse_standard_name
-        from imas_standard_names.grammar.parser import parse
+        from imas_standard_names.grammar import compose, parse
 
         version: str = imas_standard_names.__version__
     except ImportError:
@@ -166,33 +231,32 @@ def _parse_grammar(name: str) -> dict[str, Any]:
             **dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS),
         }
 
-    # IR parse — diagnostics only, never segments.
     try:
-        result = parse(name)
-        diags = json.dumps([dataclasses.asdict(d) for d in result.diagnostics])
-    except Exception:
-        logger.debug(
-            "ISN grammar parse rejected '%s' — storing empty diagnostics", name
-        )
-        diags = "[]"
-
-    # Pydantic model — accept/reject + segment authority.
-    try:
-        parsed = parse_standard_name(name)
-    except Exception:
-        logger.debug(
-            "ISN model rejected '%s' — fallback, segment columns cleared", name
-        )
+        result = parse(name, strict=True)
+        rendered = compose(result.ir)
+        if rendered != name:
+            raise ValueError(f"strict grammar round-trip produced {rendered!r}")
+        diagnostics = []
+        for diagnostic in result.diagnostics:
+            if dataclasses.is_dataclass(diagnostic):
+                diagnostics.append(dataclasses.asdict(diagnostic))
+            elif hasattr(diagnostic, "model_dump"):
+                diagnostics.append(diagnostic.model_dump(mode="json"))
+            else:
+                diagnostics.append(str(diagnostic))
+        diags = json.dumps(diagnostics)
+    except Exception as exc:
+        logger.debug("ISN strict grammar rejected '%s': %s", name, exc)
         return {
             "grammar_parse_version": version,
-            "validation_diagnostics_json": diags,
+            "validation_diagnostics_json": "[]",
             **dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS),
         }
 
     return {
         "grammar_parse_version": version,
         "validation_diagnostics_json": diags,
-        **_segments_from_model(parsed),
+        **_segments_from_ir(result.ir),
     }
 
 
@@ -1503,6 +1567,12 @@ def _write_standard_name_edges(
     full properties arrive in the same batch, a later batch, or via
     catalog import.
 
+    Ordered operator trees are expanded to closure in this pass.  Each
+    ``derive_edges`` call peels exactly one outer layer; newly discovered
+    structural parents are queued until every ordered unary/binary branch has
+    been projected.  This makes the graph lossless even when intermediate
+    parent nodes have not yet appeared in a source batch.
+
     Handles the following edge types:
 
     - ``HAS_PARENT``: derived from the ISN grammar parser (one layer
@@ -1529,10 +1599,13 @@ def _write_standard_name_edges(
     he_batch: list[dict[str, Any]] = []  # HAS_ERROR
     geo_batch: list[dict[str, Any]] = []  # HAS_LOCUS
 
-    for n in names:
-        name_id = n.get("id")
-        if not name_id:
+    pending = [n["id"] for n in names if n.get("id")]
+    processed: set[str] = set()
+    while pending:
+        name_id = pending.pop()
+        if name_id in processed:
             continue
+        processed.add(name_id)
         for edge in derive_edges(name_id):
             if edge.edge_type == "HAS_PARENT":
                 co_batch.append(
@@ -1547,6 +1620,8 @@ def _write_standard_name_edges(
                         "shape": edge.props.get("shape"),
                     }
                 )
+                if edge.to_name not in processed:
+                    pending.append(edge.to_name)
             elif edge.edge_type == "HAS_ERROR":
                 he_batch.append(
                     {
@@ -1555,6 +1630,8 @@ def _write_standard_name_edges(
                         "error_type": edge.props.get("error_type"),
                     }
                 )
+                if edge.from_name not in processed:
+                    pending.append(edge.from_name)
             elif edge.edge_type == "HAS_LOCUS":
                 geo_batch.append(
                     {
@@ -1587,9 +1664,8 @@ def _write_standard_name_edges(
         if e.get("from_name"):
             desired_by_child.setdefault(e["from_name"], set()).add(e["to_name"])
     recon = [
-        {"child": n["id"], "keep": sorted(desired_by_child.get(n["id"], set()))}
-        for n in names
-        if n.get("id")
+        {"child": child, "keep": sorted(desired_by_child.get(child, set()))}
+        for child in sorted(processed)
     ]
     if recon:
         gc.query(
@@ -1630,7 +1706,7 @@ def _write_standard_name_edges(
         # name matches "magnitude_of_<X>" and X is an admitted vector
         # parent in the graph, emit (this)-[:MAGNITUDE_OF]->(X). Never
         # create the magnitude node speculatively — only links existing.
-        _emit_magnitude_of_edges(names, gc)
+        _emit_magnitude_of_edges([{"id": name_id} for name_id in processed], gc)
 
     if he_batch:
         gc.query(
@@ -1877,19 +1953,21 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
 def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     """Attempt ISN parse on a parent name to extract grammar fields.
 
-    Returns a dict with bare-name segment keys. On parse/model failure, all
-    values are None. Uses the same ``parse_standard_name`` +
-    ``_segments_from_model`` authority as ``_parse_grammar`` and
-    ``_write_grammar_decomposition``.
+    Returns a dict with compatibility segment keys. On strict parse failure,
+    all values are None. Uses the same lossless IR authority as
+    ``_parse_grammar`` and ``_write_grammar_decomposition``.
     """
     try:
-        from imas_standard_names.grammar import parse_standard_name
+        from imas_standard_names.grammar import compose, parse
 
-        return _segments_from_model(parse_standard_name(name_id))
+        result = parse(name_id, strict=True)
+        if compose(result.ir) != name_id:
+            return dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
+        return _segments_from_ir(result.ir)
     except ImportError:
         logger.debug("ISN unavailable — no grammar for parent %s", name_id)
     except Exception:  # noqa: BLE001
-        logger.debug("ISN model rejected parent %s", name_id)
+        logger.debug("ISN strict grammar rejected parent %s", name_id)
     return dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)
 
 
@@ -2117,16 +2195,15 @@ def _validate_derived_parent_identity(
 ) -> list[str]:
     """Validate a parent name and unit through ISN's public authority surface."""
     try:
-        from imas_standard_names.grammar import (
-            compose_standard_name,
-            parse_standard_name,
-        )
+        from imas_standard_names.grammar import compose, parse
         from imas_standard_names.models import create_standard_name_entry
         from imas_standard_names.validation.semantic import run_semantic_checks
 
         from imas_codex.standard_names.kind_derivation import to_isn_kind
 
-        compose_standard_name(parse_standard_name(parent_id))
+        parsed = parse(parent_id, strict=True)
+        if compose(parsed.ir) != parent_id:
+            return ["strict grammar round-trip changed the parent name"]
         entry = create_standard_name_entry(
             {
                 "name": parent_id,
@@ -2879,19 +2956,23 @@ def write_standard_names(
     if not names:
         return 0
 
-    # Grammar parse gate — reject names that ISN cannot parse.
+    # Strict grammar identity gate — reject names that ISN cannot parse and
+    # losslessly recompose.  The legacy flat projection is not an authority:
+    # it intentionally cannot represent every valid ordered operator tree.
     # This is a hard invariant: if a name fails grammar round-trip, it is
     # invalid by definition and must not enter the graph.
     try:
-        from imas_standard_names.grammar import parse_standard_name
+        from imas_standard_names.grammar import compose, parse
     except ImportError:
-        parse_standard_name = None  # type: ignore[assignment]
+        parse = None  # type: ignore[assignment]
 
-    if parse_standard_name is not None:
+    if parse is not None:
         valid_names: list[dict[str, Any]] = []
         for n in names:
             try:
-                parse_standard_name(n["id"])
+                parsed = parse(n["id"], strict=True)
+                if compose(parsed.ir) != n["id"]:
+                    raise ValueError("strict grammar round-trip changed the name")
                 valid_names.append(n)
             except Exception as exc:
                 logger.warning(
@@ -3928,12 +4009,14 @@ def _write_grammar_decomposition(
     """Write per-segment columns and typed grammar edges on StandardName nodes.
 
     Replaces ``_write_segment_edges``. Always populates
-    bare-name per-segment columns (``sn.physical_base``, ``sn.subject``, …)
-    from the ISN parser, regardless of whether a closed-vocabulary
+    compatibility per-segment columns (``sn.physical_base``, ``sn.subject``,
+    …) from the strict ISN IR, regardless of whether a closed-vocabulary
     GrammarToken exists for the value. Conditionally writes typed edges
-    only when a GrammarToken does exist; on parser error clears all
-    per-segment columns and edges (leaving the node unparseable). Such a
-    name is quarantined authoritatively at validate time
+    only when a GrammarToken does exist.  The flat Pydantic projection is not a
+    validity gate: ordered unary chains and binary trees remain valid and keep
+    their IR-derived columns. On strict parser error all columns and edges are
+    cleared (leaving the node unparseable). Such a name is quarantined at
+    validate time
     (``validation_status='quarantined'``) — the single-pipeline gate — so
     no separate fallback flag is recorded.
 
@@ -3953,8 +4036,7 @@ def _write_grammar_decomposition(
 
     try:
         from imas_standard_names import __version__ as isn_version
-        from imas_standard_names.grammar import parse_standard_name
-        from imas_standard_names.graph.spec import segment_edge_specs
+        from imas_standard_names.grammar import compose, parse
     except ImportError:
         logger.debug("ISN grammar not available — skipping grammar decomposition")
         return all_gaps
@@ -3989,10 +4071,12 @@ def _write_grammar_decomposition(
 
     for sn_id in name_ids:
         try:
-            parsed = parse_standard_name(sn_id)
-        except Exception:
-            logger.warning("Grammar parse failed for '%s' — recording fallback", sn_id)
-            # Clear columns + typed/segment edges, set fallback=true
+            parsed = parse(sn_id, strict=True)
+            if compose(parsed.ir) != sn_id:
+                raise ValueError("strict grammar round-trip changed the name")
+        except Exception as exc:
+            logger.warning("Grammar parse failed for '%s': %s", sn_id, exc)
+            # Clear columns and typed/segment edges for genuinely invalid names.
             gc.query(
                 f"""
                 MATCH (sn:StandardName {{id: $sn_id}})
@@ -4007,8 +4091,8 @@ def _write_grammar_decomposition(
 
         # ---- Always-on column write ------------------
         # Shared extraction authority — identical to the persist path
-        # (_parse_grammar), so columns can never diverge between the two.
-        column_values = _segments_from_model(parsed)
+        # (_parse_grammar), so columns cannot diverge between the two.
+        column_values = _segments_from_ir(parsed.ir)
 
         gc.query(
             f"""
@@ -4024,16 +4108,6 @@ def _write_grammar_decomposition(
             # No GrammarToken corpus — column write is enough; skip edges.
             continue
 
-        try:
-            edge_specs = segment_edge_specs(parsed)
-        except Exception:
-            logger.debug(
-                "segment_edge_specs failed for '%s' — columns set, skipping edges",
-                sn_id,
-                exc_info=True,
-            )
-            continue
-
         # Idempotent: drop existing typed/segment edges before re-writing.
         gc.query(
             f"""
@@ -4043,17 +4117,18 @@ def _write_grammar_decomposition(
             sn_id=sn_id,
         )
 
-        if not edge_specs:
-            continue
-
         edges_param = [
             {
-                "position": s.position,
-                "segment": s.segment,
-                "token": s.token,
+                "position": position,
+                "segment": segment,
+                "token": token,
             }
-            for s in edge_specs
+            for position, segment in enumerate(_GRAMMAR_SEGMENT_COLUMNS)
+            if (token := column_values.get(segment)) is not None
+            and segment in synced_segments
         ]
+        if not edges_param:
+            continue
 
         results = list(
             gc.query(

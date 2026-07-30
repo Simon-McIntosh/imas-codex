@@ -314,14 +314,19 @@ def _run_gate_b(
                 }
             )
 
-    # Gate: grammar parse check — validate each name parses
+    # Gate: strict public grammar identity.  The flat Pydantic projection is a
+    # compatibility view and can reject lossless ordered operator trees, so it
+    # is never an export validity oracle.
     try:
-        from imas_standard_names.grammar import parse_name
+        from imas_standard_names.grammar import compose, parse
 
         for cand in candidates:
             name = cand["id"]
             try:
-                parse_name(name)
+                result = parse(name, strict=True)
+                rendered = compose(result.ir)
+                if rendered != name:
+                    raise ValueError(f"strict grammar round-trip produced {rendered!r}")
             except Exception as exc:
                 issues.append(
                     {
