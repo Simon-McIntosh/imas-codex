@@ -50,6 +50,38 @@ requires_isn = pytest.mark.skipif(
 class TestGrammarTokensBySegment:
     """The single accessor every consumer reads its vocabulary from."""
 
+    def test_physical_base_view_uses_the_lightweight_canonical_accessor(
+        self, monkeypatch
+    ):
+        import imas_standard_names
+
+        import imas_codex.standard_names.segments as seg_mod
+
+        real_accessor = seg_mod.grammar_tokens_by_segment
+        calls: list[bool] = []
+
+        def tracked_accessor(*, include_operators: bool = True):
+            calls.append(include_operators)
+            return real_accessor(include_operators=include_operators)
+
+        def reject_full_context():
+            raise AssertionError("physical-base membership must not load full context")
+
+        monkeypatch.setattr(seg_mod, "grammar_tokens_by_segment", tracked_accessor)
+        monkeypatch.setattr(seg_mod, "_operator_tokens", reject_full_context)
+        monkeypatch.setattr(
+            imas_standard_names, "get_grammar_context", reject_full_context
+        )
+        seg_mod._registered_physical_bases.cache_clear()
+        real_accessor.cache_clear()
+        try:
+            bases = seg_mod._registered_physical_bases()
+            assert "magnetic_field" in bases
+            assert calls == [False]
+        finally:
+            seg_mod._registered_physical_bases.cache_clear()
+            real_accessor.cache_clear()
+
     def test_carries_the_operator_class(self):
         by_seg = grammar_tokens_by_segment()
         assert OPERATOR_SEGMENT in by_seg
@@ -232,7 +264,7 @@ class TestOperatorComposition:
     def test_atomic_compounds_are_not_decomposed(self):
         from imas_codex.standard_names.segments import ATOMIC_COMPOUNDS
 
-        for compound in ("magnetic_field", "poloidal_magnetic_flux", "safety_factor"):
+        for compound in ("magnetic_field", "current_density", "safety_factor"):
             assert compound in ATOMIC_COMPOUNDS
             assert operator_composition(compound) is None
 

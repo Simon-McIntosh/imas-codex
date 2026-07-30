@@ -966,8 +966,8 @@ class TestClassifyGap:
             pytest.skip("Need magnetic_flux as registered token")
 
         cat, actual = classify_gap("physical_base", "poloidal_magnetic_flux")
-        # This is an ATOMIC_COMPOUND — should be absent (preserved)
-        assert cat == "absent"
+        assert cat == "decomposable"
+        assert {"component", "physical_base"} <= set(actual)
 
     def test_atomic_compound_not_decomposed(self):
         """Atomic compounds in whitelist must NOT be classified as decomposable."""
