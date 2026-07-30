@@ -29,6 +29,7 @@ def test_grammar_context_contract():
         "base_requirements",
         "type_specific_requirements",
         "documentation_guidance",
+        "grammar",
     }
     assert required <= set(ctx.keys()), f"Missing keys: {required - set(ctx.keys())}"
 
@@ -44,6 +45,7 @@ def test_grammar_context_types():
     assert isinstance(ctx["vocabulary_sections"], list)
     assert isinstance(ctx["segment_descriptions"], dict)
     assert isinstance(ctx["exclusive_pairs"], list)
+    assert isinstance(ctx["grammar"], dict)
 
 
 def test_standard_name_entry_import():
@@ -68,6 +70,7 @@ def test_build_compose_context_has_isn_keys():
     assert "segment_order" in ctx
     assert "vocabulary_sections" in ctx
     assert "segment_descriptions" in ctx
+    assert "grammar" in ctx
     # New ISN-provided keys
     assert "naming_guidance" in ctx
     assert "kind_definitions" in ctx
@@ -86,6 +89,22 @@ def test_build_compose_context_has_isn_keys():
     assert "field_guidance" in ctx
     assert "applicability" in ctx
     assert "exclusive_pairs" in ctx
+    grammar = ctx["grammar"]
+    assert grammar["ir_groups"] == [
+        "operators",
+        "projection",
+        "qualifiers",
+        "base",
+        "locus",
+        "mechanism",
+    ]
+    assert grammar["parse_api"]["validity_oracle"] == {
+        "call": "imas_standard_names:parse",
+        "arguments": {"strict": True},
+    }
+    assert grammar["parse_api"]["operator_chain_order"] == "outermost_first"
+    assert grammar["vocabularies"]["operators"]["inverse"]["precedence"] is not None
+    assert list(grammar["vocabularies"]["qualifier_categories"])
     clear_context_cache()
 
 

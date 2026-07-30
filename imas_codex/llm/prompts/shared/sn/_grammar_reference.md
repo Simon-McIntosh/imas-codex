@@ -131,7 +131,7 @@ Examples:
 - `parallel_viscosity_current_density` → viscosity is a process, not an axis →
   `current_density_due_to_parallel_viscosity`.
 
-{% for vs in closed_vocab_full %}
+{% for vs in closed_vocab_full if vs.segment != "qualifier" %}
 #### `{{ vs.segment }}`{% if vs.aliases %} (alias{{ "es" if vs.aliases|length > 1 else "" }}: {{ vs.aliases | join(', ') }}){% endif %} — {{ vs.tokens | length }} tokens
 
 ```
@@ -139,6 +139,16 @@ Examples:
 ```
 
 {% endfor %}
+{% if grammar and grammar.vocabularies.qualifier_categories %}
+#### `qualifier` — closed tokens grouped in canonical binding order
+
+The category order below is the ISN validator/composer order. Choose tokens
+semantically; the composer canonicalizes qualifier placement.
+
+{% for category, tokens in grammar.vocabularies.qualifier_categories.items() %}
+- **{{ category }}**: `{{ tokens | join('`, `') }}`
+{% endfor %}
+{% endif %}
 {% if operators_full %}
 #### `operator` — the FULL operator registry (a grammar mechanism, NOT a `SEGMENT_TOKEN_MAP` segment)
 
@@ -148,7 +158,10 @@ coordinate-indexed operator or `secondary_operand` only for a binary operator.
 Any token in the lists below that a composer reports as a "missing" segment
 token is a **mis-slot**, not a gap. Use ONLY these exact bare registry tokens;
 nested operators are legal. The registry display is ordered by registry precedence;
-write the expression list **outer→inner**.
+write the expression list **outer→inner**. Precedence constrains whether an
+authored nesting is legal; it never sorts or rewrites the authored chain.
+Operators with equal precedence retain their authored order, so `inverse` of
+`square` and `square` of `inverse` are distinct expressions.
 
 - **Prefix**: supply the exact registry token. ISN decides whether its canonical
   spelling is scoped (`<op>_of_<base>`) or bare (`<op>_<base>`); do not encode
@@ -180,8 +193,17 @@ write the expression list **outer→inner**.
 **Composed-quantity worked examples** (name via operators — long descriptive
 names are fine, there is no length cap):
 
-- flux-surface-averaged $\langle B^2\rangle$ → `flux_surface_averaged` of
-  `square` of `magnetic_field` (nested prefix, outer→inner).
+- DD `gm1` — ✓ `flux_surface_averaged_inverse_of_square_of_major_radius`
+  → `base_token="radius"`, `base_kind="quantity"`, `qualifiers=["major"]`,
+  `operators=[{"token":"flux_surface_averaged"},{"token":"inverse"},{"token":"square"}]`.
+- DD `gm5` — ✓ `flux_surface_averaged_square_of_magnetic_field_magnitude`
+  → `base_token="magnetic_field"`, `base_kind="quantity"`, `qualifiers=[]`,
+  `operators=[{"token":"flux_surface_averaged"},{"token":"square"},{"token":"magnitude"}]`.
+- DD `gm6` — ✓ `flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude`
+  → `base_token="toroidal_flux_coordinate_gradient"`, `base_kind="quantity"`,
+  `qualifiers=[]`, `operators=[{"token":"flux_surface_averaged"},{"token":"ratio","secondary_operand":"square_of_magnetic_field_magnitude"},{"token":"square"},{"token":"magnitude"}]`.
+  The root is a ratio; its numerator and denominator each contain the authored
+  `square` → `magnitude` chain.
 - inverse of a flux-surface-averaged quantity → `inverse` of
   `flux_surface_averaged` of the base.
 - flux-surface average of a ratio → `flux_surface_averaged` of a `ratio`
