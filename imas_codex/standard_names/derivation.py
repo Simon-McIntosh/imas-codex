@@ -15,7 +15,12 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from imas_standard_names.grammar import ir as isn_ir, parser
+from imas_standard_names import StandardNameIR, compose, parse
+
+from imas_codex.standard_names.grammar_adapter import (
+    compose_canonical_ir,
+    parse_canonical_name,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -37,29 +42,7 @@ class DerivedEdge:
     props: dict  # edge properties (operator, operator_kind, …)
 
 
-def _canonicalize(name: str) -> str:
-    """Return the canonical spelling of a composed inner name.
-
-    ``parser.compose`` renders an IR fragment in segment-slot order, but the
-    model-level canonical form can differ: a bare-prefix transformation
-    qualifier (``perturbed``, ``normalized``, …) renders adjacent to the base
-    inside an operator fold yet outermost as a standalone name. A derived
-    parent id must always be the STANDALONE canonical spelling, otherwise the
-    seeded parent node is born non-canonical.
-    """
-    from imas_standard_names.grammar import parse_standard_name
-    from imas_standard_names.grammar.model import NonCanonicalNameError
-
-    try:
-        parse_standard_name(name)
-    except NonCanonicalNameError as exc:
-        return exc.canonical_form
-    except Exception:
-        pass
-    return name
-
-
-def _strip_outer(ir: isn_ir.StandardNameIR) -> isn_ir.StandardNameIR:
+def _strip_outer(ir: StandardNameIR) -> StandardNameIR:
     """Return *ir* with the outermost operator removed.
 
     All other fields (projection, qualifiers, base, locus, mechanism)
@@ -68,13 +51,42 @@ def _strip_outer(ir: isn_ir.StandardNameIR) -> isn_ir.StandardNameIR:
     return ir.model_copy(update={"operators": ir.operators[1:]})
 
 
-def _strip_projection(ir: isn_ir.StandardNameIR) -> isn_ir.StandardNameIR:
+def _strip_projection(ir: StandardNameIR) -> StandardNameIR:
     """Return *ir* with the projection cleared.
 
     All other fields (operators, qualifiers, base, locus, mechanism)
     are preserved unchanged.
     """
     return ir.model_copy(update={"projection": None})
+
+
+def _parse_structural_ir(name: str) -> StandardNameIR:
+    """Parse exact structure, tolerating legacy names only for graph inspection.
+
+    Strict parsing remains the validity authority. Existing graph identities
+    can predate a semantic gate (for example an unqualified generic base), so
+    edge derivation falls back to the public non-strict parser while still
+    requiring exact lossless compose equality. This fallback never admits,
+    persists, or validates a candidate.
+    """
+    try:
+        return parse_canonical_name(name).ir
+    except ValueError:
+        result = parse(name)
+        if compose(result.ir) != name:
+            raise ValueError(f"legacy structural parse changed {name!r}") from None
+        return result.ir
+
+
+def _compose_structural_ir(ir: StandardNameIR) -> str:
+    """Compose an edge endpoint with strict-first legacy structural fallback."""
+    try:
+        return compose_canonical_ir(ir)
+    except ValueError:
+        name = compose(ir)
+        if compose(parse(name).ir) != name:
+            raise ValueError(f"legacy structural compose changed {name!r}") from None
+        return name
 
 
 def derive_edges(name: str) -> list[DerivedEdge]:
@@ -118,14 +130,12 @@ def derive_edges(name: str) -> list[DerivedEdge]:
     upstream parser version is in use.
     """
     try:
-        result = parser.parse(name)
+        ir = _parse_structural_ir(name)
     except Exception:
-        edges = _regex_fallback(name)
-        return _drop_self_loops(name, edges + _locus_check(name))
+        return []
 
-    ir = result.ir
     structural = _derive_structural(name, ir)
-    locus = _locus_check(name)
+    locus = _locus_check(name, ir)
     return _drop_self_loops(name, structural + locus)
 
 
@@ -144,18 +154,18 @@ def _drop_self_loops(name: str, edges: list[DerivedEdge]) -> list[DerivedEdge]:
     return out
 
 
-def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge]:
+def _derive_structural(name: str, ir: StandardNameIR) -> list[DerivedEdge]:
     """Derive HAS_PARENT / HAS_ERROR edges from the IR parse tree."""
 
     # --- Outermost operator ---
     if ir.operators:
         op = ir.operators[0]
 
-        if op.kind == isn_ir.OperatorKind.BINARY:
+        if op.kind.value == "binary":
             # Binary: two HAS_PARENT edges, one per argument
             try:
-                a = _canonicalize(parser.compose(op.args[0]))
-                b = _canonicalize(parser.compose(op.args[1]))
+                a = _compose_structural_ir(op.args[0])
+                b = _compose_structural_ir(op.args[1])
             except Exception as exc:
                 logger.debug("derive_edges compose failed for %r: %s", name, exc)
                 return []
@@ -187,12 +197,12 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
         # Unary prefix / postfix: strip outer and compose inner
         stripped = _strip_outer(ir)
         try:
-            inner = _canonicalize(parser.compose(stripped))
+            inner = _compose_structural_ir(stripped)
         except Exception as exc:
             logger.debug("derive_edges compose failed for %r: %s", name, exc)
             return []
 
-        if op.kind == isn_ir.OperatorKind.UNARY_PREFIX and op.op in _UNCERTAINTY_OPS:
+        if op.kind.value == "unary_prefix" and op.op in _UNCERTAINTY_OPS:
             # Uncertainty prefix — direction inverts: inner → name
             return [
                 DerivedEdge(
@@ -219,7 +229,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     if ir.projection is not None:
         stripped = _strip_projection(ir)
         try:
-            inner = _canonicalize(parser.compose(stripped))
+            inner = _compose_structural_ir(stripped)
         except Exception as exc:
             logger.debug("derive_edges compose failed for %r: %s", name, exc)
             return []
@@ -236,20 +246,10 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
         #    geometric base produces edges to generic parents that group
         #    unrelated names together.
         try:
-            inner_parsed = parser.parse(inner)
-            inner_rt = parser.compose(inner_parsed.ir)
-            if inner_rt != inner:
-                logger.debug(
-                    "derive_edges projection round-trip mismatch for %r: "
-                    "inner=%r → rt=%r",
-                    name,
-                    inner,
-                    inner_rt,
-                )
-                return []
+            inner_ir = _parse_structural_ir(inner)
             # Reject if inner has a locus (qualifier) — the edge would
             # point to a compound parent like "coordinate_of_measurement_position"
-            if inner_parsed.ir.locus is not None:
+            if inner_ir.locus is not None:
                 logger.debug(
                     "derive_edges rejecting projection edge for %r: "
                     "inner=%r has locus qualifier",
@@ -297,7 +297,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     if ir.qualifiers:
         stripped = ir.model_copy(update={"qualifiers": ir.qualifiers[1:]})
         try:
-            inner = _canonicalize(parser.compose(stripped))
+            inner = _compose_structural_ir(stripped)
         except Exception as exc:
             logger.debug(
                 "derive_edges qualifier-peel compose failed for %r: %s", name, exc
@@ -328,7 +328,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     if ir.locus is not None:
         stripped = ir.model_copy(update={"locus": None})
         try:
-            inner = _canonicalize(parser.compose(stripped))
+            inner = _compose_structural_ir(stripped)
         except Exception as exc:
             logger.debug("derive_edges locus-peel compose failed for %r: %s", name, exc)
             return []
@@ -349,7 +349,7 @@ def _derive_structural(name: str, ir: isn_ir.StandardNameIR) -> list[DerivedEdge
     return _geometric_coordinate_check(name)
 
 
-def _locus_check(name: str) -> list[DerivedEdge]:
+def _locus_check(name: str, ir: StandardNameIR | None = None) -> list[DerivedEdge]:
     """Detect locus-qualified names and emit HAS_LOCUS grouping edges.
 
     Uses the structured IR parser to extract locus information from names
@@ -364,15 +364,13 @@ def _locus_check(name: str) -> list[DerivedEdge]:
 
     Returns ``[]`` when the name has no locus qualifier.
     """
-    try:
-        result = parser.parse(name)
-    except Exception:
-        return []
+    if ir is None:
+        try:
+            ir = _parse_structural_ir(name)
+        except Exception:
+            return []
 
-    if result is None or result.ir is None:
-        return []
-
-    locus = result.ir.locus
+    locus = ir.locus
     if locus is None or not locus.token:
         return []
 
@@ -467,107 +465,3 @@ def _geometric_coordinate_check(name: str) -> list[DerivedEdge]:
             },
         )
     ]
-
-
-def _regex_fallback(name: str) -> list[DerivedEdge]:
-    """Pattern-based structural decomposition when IR parser fails.
-
-    Handles two patterns:
-
-    1. ``{axis}_{inner}`` → HAS_PARENT (projection, short form)
-    2. ``{operator}_of_{inner}`` → HAS_PARENT (unary operator)
-
-    Returns ``[]`` if no pattern matches (leaf treatment).
-    """
-
-    # Pattern 1: Axis projection (short form)
-    # e.g., "toroidal_magnetic_field" → axis=toroidal, inner=magnetic_field
-    #        "radial_electron_heat_flux" → axis=radial, inner=electron_heat_flux
-    _AXIS_TOKENS = (
-        "radial",
-        "toroidal",
-        "poloidal",
-        "parallel",
-        "perpendicular",
-        "normal",
-        "tangential",
-        "vertical",
-        "horizontal",
-        "binormal",
-        "x",
-        "y",
-        "z",
-        "r",
-        "phi",
-    )
-    for axis in _AXIS_TOKENS:
-        prefix = f"{axis}_"
-        if name.startswith(prefix):
-            inner = name[len(prefix) :]
-            if inner:
-                # Guard: verify inner name is a genuine standalone name.
-                # Compound fragments like "coordinate_of_first_point_of_line_of_sight"
-                # are not meaningful parent names.
-                try:
-                    inner_parsed = parser.parse(inner)
-                    inner_rt = parser.compose(inner_parsed.ir)
-                    if inner_rt != inner:
-                        continue  # try next axis or fall through
-                    if inner_parsed.ir.locus is not None:
-                        continue  # inner has qualifier — skip
-                except Exception:
-                    continue  # unparseable inner — skip
-
-                return [
-                    DerivedEdge(
-                        "HAS_PARENT",
-                        name,
-                        inner,
-                        {
-                            "operator": "component",
-                            "operator_kind": "projection",
-                            "axis": axis,
-                            "shape": "component",
-                        },
-                    )
-                ]
-
-    # Pattern 2: Unary operators
-    # e.g., "time_derivative_of_poloidal_flux"
-    #        "gradient_of_pressure"
-    #        "maximum_of_temperature"
-    _UNARY_OPS = (
-        "time_derivative",
-        "second_time_derivative",
-        "gradient",
-        "divergence",
-        "curl",
-        "laplacian",
-        "maximum",
-        "minimum",
-        "mean",
-        "integral",
-        "amplitude",
-        "rate_of_change",
-        "second_radial_derivative",
-        "radial_derivative",
-    )
-    for op in _UNARY_OPS:
-        prefix = f"{op}_of_"
-        if name.startswith(prefix):
-            inner = name[len(prefix) :]
-            if inner:  # don't match empty inner
-                return [
-                    DerivedEdge(
-                        "HAS_PARENT",
-                        name,
-                        inner,
-                        {
-                            "operator": op,
-                            "operator_kind": "unary_prefix",
-                        },
-                    )
-                ]
-
-    # No regex matched — try geometric coordinate as last resort
-    return _geometric_coordinate_check(name)

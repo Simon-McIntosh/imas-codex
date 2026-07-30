@@ -13,9 +13,9 @@ ISN APIs. The grammar has three operator-join classes:
   ``<base>_op``.
 
 The single binding contract is the ROUND-TRIP GATE: every name a composed
-candidate produces must satisfy
-``compose_standard_name(parse_standard_name(name)) == name``. The public ISN
-parser is the oracle here — not any classification logic inside codex.
+candidate produces must satisfy strict lossless parse followed by
+``compose(result.ir) == name``. The public ISN parser is the oracle here — not
+the lossy flat facade or any classification logic inside codex.
 """
 
 from __future__ import annotations
@@ -24,20 +24,15 @@ import pytest
 
 pytest.importorskip("imas_standard_names")
 
-from imas_standard_names.grammar import (  # noqa: E402
-    compose_standard_name,
-    parse_standard_name,
+from imas_codex.standard_names.grammar_adapter import (  # noqa: E402
+    is_canonical_name,
 )
-
 from imas_codex.standard_names.models import GrammarSegments  # noqa: E402
 
 
 def _public_round_trips(name: str) -> bool:
-    """True iff ``name`` survives the public parse -> compose round-trip."""
-    try:
-        return compose_standard_name(parse_standard_name(name)) == name
-    except Exception:
-        return False
+    """True iff ``name`` survives the lossless public grammar round-trip."""
+    return is_canonical_name(name)
 
 
 def _compose(
@@ -278,10 +273,13 @@ def test_every_prefix_operator_round_trips(op) -> None:
 # ---------------------------------------------------------------------------
 
 _NESTED_NAMES = [
-    "time_derivative_of_volume_averaged_electron_density",
-    "gradient_of_normalized_electron_temperature",
-    "volume_averaged_electron_density_magnitude",
-    "time_derivative_of_volume_averaged_electron_density_at_magnetic_axis",
+    "flux_surface_averaged_inverse_of_square_of_major_radius",
+    "flux_surface_averaged_square_of_magnetic_field_magnitude",
+    (
+        "flux_surface_averaged_ratio_of"
+        "_square_of_toroidal_flux_coordinate_gradient_magnitude"
+        "_to_square_of_magnetic_field_magnitude"
+    ),
 ]
 
 
@@ -293,7 +291,7 @@ def test_nested_operator_names_round_trip(name) -> None:
     )
 
 
-def test_generates_outer_inverse_over_inner_flux_surface_average() -> None:
+def test_inverse_cannot_wrap_inner_flux_surface_average() -> None:
     seg = GrammarSegments(
         base_token="temperature",
         base_kind="quantity",
@@ -303,9 +301,11 @@ def test_generates_outer_inverse_over_inner_flux_surface_average() -> None:
             {"token": "flux_surface_averaged"},
         ],
     )
-    produced = seg.compose_name()
-    assert produced == "inverse_of_flux_surface_averaged_electron_temperature"
-    assert _public_round_trips(produced)
+    with pytest.raises(
+        ValueError,
+        match=r"ISN rejected operator chain inverse -> flux_surface_averaged.*precedence",
+    ):
+        seg.compose_name()
 
 
 def test_generates_flux_surface_average_over_binary_ratio() -> None:
@@ -317,19 +317,20 @@ def test_generates_flux_surface_average_over_binary_ratio() -> None:
             {"token": "flux_surface_averaged"},
             {
                 "token": "ratio",
-                "secondary_operand": "square_minor_radius",
+                "secondary_operand": "square_of_minor_radius",
             },
             {"token": "square"},
         ],
     )
     produced = seg.compose_name()
     assert produced == (
-        "flux_surface_averaged_ratio_of_square_of_major_radius_to_square_minor_radius"
+        "flux_surface_averaged_ratio_of_square_of_major_radius"
+        "_to_square_of_minor_radius"
     )
     assert _public_round_trips(produced)
 
 
-def test_invalid_inverse_square_order_reports_actionable_chain_error() -> None:
+def test_inverse_over_square_is_a_valid_authored_order() -> None:
     seg = GrammarSegments(
         base_token="temperature",
         base_kind="quantity",
@@ -339,11 +340,10 @@ def test_invalid_inverse_square_order_reports_actionable_chain_error() -> None:
             {"token": "square"},
         ],
     )
-    with pytest.raises(
-        ValueError,
-        match=r"ISN rejected operator chain inverse -> square.*Reorder",
-    ):
-        seg.compose_name()
+    produced = seg.compose_name()
+
+    assert produced == "inverse_of_square_of_electron_temperature"
+    assert _public_round_trips(produced)
 
 
 def test_no_operator_preserves_plain_composition() -> None:

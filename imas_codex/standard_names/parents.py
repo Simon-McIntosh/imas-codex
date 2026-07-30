@@ -30,12 +30,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 
-from imas_standard_names.grammar import (
-    compose_standard_name as _compose_standard_name,
-    parse_standard_name as _parse_standard_name,
-    parser as _isn_parser,
-)
-from imas_standard_names.grammar.parser import ParseError as _ParseError
+from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
 
 @dataclass(frozen=True)
@@ -71,7 +66,7 @@ class _TopologyProbe(Protocol):
 def _has_valid_standard_name_identity(name: str) -> tuple[bool, str]:
     """Validate *name* through ISN's public semantic model."""
     try:
-        _compose_standard_name(_parse_standard_name(name))
+        parse_canonical_name(name)
     except Exception as exc:
         return False, f"ISN identity invalid: {exc}"
     return True, "valid ISN identity"
@@ -84,9 +79,8 @@ def _has_structural_specificity(name: str) -> tuple[bool, str]:
     are rejected (no specificity claim possible).
     """
     try:
-        parsed = _isn_parser.parse(name)
-        ir = parsed.ir
-    except _ParseError as exc:
+        ir = parse_canonical_name(name).ir
+    except ValueError as exc:
         return False, f"ISN parse failed: {exc}"
     except Exception as exc:  # pragma: no cover - defensive
         return False, f"ISN parse failed: {exc.__class__.__name__}: {exc}"

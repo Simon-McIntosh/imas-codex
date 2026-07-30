@@ -48,10 +48,13 @@ def _isn_process_tokens() -> frozenset[str]:
 def _isn_locus_tokens() -> frozenset[str]:
     """Return the canonical set of locus tokens registered in installed ISN."""
     try:
-        from imas_standard_names.grammar import vocab_loaders
+        from imas_standard_names import get_grammar_context
 
-        registry = vocab_loaders.load_locus_registry()
-        return frozenset(registry.loci)
+        context = get_grammar_context()
+        registry = (
+            context.get("grammar", {}).get("vocabularies", {}).get("locus_registry", {})
+        )
+        return frozenset(registry)
     except Exception as exc:  # pragma: no cover - defensive
         logger.debug("Could not load ISN locus registry: %s", exc)
     return frozenset()
@@ -1044,8 +1047,8 @@ def name_unit_consistency_check(
 def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
     """Detect names combining two different subject segments.
 
-    Uses ``parse_standard_name`` from ISN grammar to check whether
-    multiple ``subject_*`` segments are detected in the name.
+    Uses the flat compatibility projection only to detect a binary expression;
+    validity remains the lossless grammar adapter's responsibility.
     """
     issues: list[str] = []
     name = candidate.get("id") or candidate.get("standard_name") or ""
@@ -1055,6 +1058,8 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
     try:
         from imas_standard_names.grammar import parse_standard_name
 
+        # Intentional flat projection: this audit inspects only the legacy
+        # binary-operator field and does not establish validity.
         parsed = parse_standard_name(name)
         # Binary operator implies two operands — this is legitimate
         if hasattr(parsed, "binary_operator") and parsed.binary_operator is not None:
@@ -2482,6 +2487,8 @@ def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
     try:
         from imas_standard_names.grammar import parse_standard_name
 
+        # Intentional flat projection: this audit inspects a malformed legacy
+        # physical-base field after parsing and does not establish validity.
         parsed = parse_standard_name(name)
     except Exception:
         # Parse failure is handled by other checks
@@ -2610,11 +2617,10 @@ def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
 
     issues: list[str] = []
     try:
-        from imas_standard_names.grammar.parser import parse as ir_parse
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
-        result = ir_parse(name)
-        ir = getattr(result, "ir", None)
-        if ir is None or ir.locus is None or ir.base is None:
+        ir = parse_canonical_name(name).ir
+        if ir.locus is None or ir.base is None:
             return []
 
         locus_token = ir.locus.token
@@ -3245,11 +3251,10 @@ def find_flux_surface_reduction_violations(*, gc=None) -> list[dict[str, Any]]:
     a no-op composition the grammar can no longer mint; any survivor in the
     graph is legacy debt to supersede. Read-only diagnostic.
     """
-    from imas_standard_names.grammar.model import (  # noqa: PLC0415
-        parse_standard_name,
-    )
-
     from imas_codex.graph.client import GraphClient  # noqa: PLC0415
+    from imas_codex.standard_names.grammar_adapter import (  # noqa: PLC0415
+        parse_canonical_name,
+    )
 
     owns = gc is None
     gc = gc or GraphClient()
@@ -3274,7 +3279,7 @@ def find_flux_surface_reduction_violations(*, gc=None) -> list[dict[str, Any]]:
     violations: list[dict[str, Any]] = []
     for row in rows:
         try:
-            parse_standard_name(row["id"])
+            parse_canonical_name(row["id"])
         except ValueError as exc:
             if "constant on a flux surface" in str(exc):
                 violations.append(

@@ -18,11 +18,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-from imas_standard_names.grammar import (
-    compose_standard_name,
-    parse_standard_name,
-)
-
+from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 from imas_codex.standard_names.models import StandardNameComposeBatch
 from imas_codex.standard_names.physics_judge import PhysicsVerdict
 
@@ -367,9 +363,9 @@ def validate_candidate(candidate: dict) -> tuple[bool, bool]:
 
     # Check grammar round-trip
     try:
-        parsed = parse_standard_name(name)
-        normalized = compose_standard_name(parsed)
-        grammar_valid = True  # parse+compose succeeded
+        parse_canonical_name(name)
+        normalized = name
+        grammar_valid = True
     except Exception:
         return False, False
 
@@ -426,14 +422,12 @@ def compare_to_reference(
             gen_name = generated[path]
             ref_name = ref_entry["name"]
             try:
-                gen_parsed = parse_standard_name(gen_name)
-                gen_normalized = compose_standard_name(gen_parsed)
+                gen_normalized = parse_canonical_name(gen_name).name
             except Exception:
                 gen_normalized = gen_name
 
             try:
-                ref_parsed = parse_standard_name(ref_name)
-                ref_normalized = compose_standard_name(ref_parsed)
+                ref_normalized = parse_canonical_name(ref_name).name
             except Exception:
                 ref_normalized = ref_name
 
@@ -1646,11 +1640,7 @@ async def _run_model(
                 for c_idx, c in enumerate(llm_result.candidates):
                     candidate = c.model_dump()
                     # Compose the standard name from segments
-                    try:
-                        segs = _get_segment_fields(candidate)
-                        candidate["standard_name"] = compose_standard_name(segs)
-                    except Exception:
-                        candidate["standard_name"] = ""
+                    candidate["standard_name"] = _resolve_name(candidate)
                     # Carry forward extraction context for docs generation
                     if c_idx < len(items):
                         src = items[c_idx]

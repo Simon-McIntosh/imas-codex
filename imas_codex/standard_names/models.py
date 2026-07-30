@@ -161,25 +161,17 @@ class GrammarOperator(BaseModel):
                 "secondary_operand must be null."
             )
         if self.secondary_operand:
-            from imas_standard_names.grammar import (
-                compose_standard_name,
-                parse_standard_name,
+            from imas_codex.standard_names.grammar_adapter import (
+                parse_canonical_name,
             )
 
             try:
-                canonical = compose_standard_name(
-                    parse_standard_name(self.secondary_operand)
-                )
+                parse_canonical_name(self.secondary_operand)
             except Exception as exc:
                 raise ValueError(
                     f"secondary_operand '{self.secondary_operand}' for operator "
                     f"'{self.token}' is not a valid standard name: {exc}"
                 ) from exc
-            if canonical != self.secondary_operand:
-                raise ValueError(
-                    f"secondary_operand '{self.secondary_operand}' is not "
-                    f"canonical; use '{canonical}'."
-                )
         return self
 
 
@@ -493,17 +485,16 @@ class GrammarSegments(BaseModel):
 
     def compose_name(self) -> str:
         """Compose the ordered expression and require a strict ISN round-trip."""
-        from imas_standard_names.grammar import (
-            NonCanonicalNameError,
-            StandardNameIR,
-            compose,
-            compose_standard_name,
-            parse,
-            parse_standard_name,
+        from imas_standard_names import StandardNameIR
+        from imas_standard_names.grammar import compose_standard_name
+
+        from imas_codex.standard_names.grammar_adapter import (
+            compose_canonical_ir,
+            parse_canonical_name,
         )
 
         base_name = compose_standard_name(self._to_model_dict())
-        current = parse(base_name).ir
+        current = parse_canonical_name(base_name).ir
         current_data = current.model_dump(mode="python")
         locus = current_data.pop("locus", None)
         mechanism = current_data.pop("mechanism", None)
@@ -520,7 +511,7 @@ class GrammarSegments(BaseModel):
             )
             if kind == "binary":
                 separator = str(metadata.get("separator") or "").strip("_")
-                secondary = parse(operator.secondary_operand or "").ir
+                secondary = parse_canonical_name(operator.secondary_operand or "").ir
                 current = StandardNameIR.model_validate(
                     {
                         "operators": [
@@ -558,37 +549,14 @@ class GrammarSegments(BaseModel):
         if mechanism is not None:
             current_data["mechanism"] = mechanism
         current = StandardNameIR.model_validate(current_data)
-        name = compose(current)
-
         try:
-            canonical = compose_standard_name(parse_standard_name(name))
-        except NonCanonicalNameError as exc:
-            # ISN owns canonical segment order. Structured operator composition
-            # can produce an equivalent but non-canonical surface order when a
-            # projection and transformation coexist; adopt the canonical form
-            # supplied by the public grammar and verify it independently.
-            name = exc.canonical_form
-            try:
-                canonical = compose_standard_name(parse_standard_name(name))
-            except Exception as canonical_exc:
-                chain = " -> ".join(op.token for op in self.operators) or "(none)"
-                raise ValueError(
-                    f"ISN canonical form '{name}' for operator chain {chain} "
-                    f"failed its own round-trip: {canonical_exc}."
-                ) from canonical_exc
+            return compose_canonical_ir(current)
         except Exception as exc:
             chain = " -> ".join(op.token for op in self.operators) or "(none)"
             raise ValueError(
-                f"ISN rejected operator chain {chain} composed as '{name}': {exc}. "
+                f"ISN rejected operator chain {chain}: {exc}. "
                 "Reorder the outer-to-inner operators or correct their operands."
             ) from exc
-        if canonical != name:
-            chain = " -> ".join(op.token for op in self.operators) or "(none)"
-            raise ValueError(
-                f"operator chain {chain} composed non-canonically as '{name}'; "
-                f"ISN requires '{canonical}'."
-            )
-        return name
 
     def to_ir(self) -> Any:
         """Return the ISN IR for this segment set's canonical name.
@@ -597,9 +565,9 @@ class GrammarSegments(BaseModel):
         with :meth:`compose_name`. Raises if the segments do not form an
         expressible canonical name (callers already guard ``compose_name``).
         """
-        from imas_standard_names.grammar import parse
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
-        return parse(self.compose_name()).ir
+        return parse_canonical_name(self.compose_name()).ir
 
 
 # Module-level constant: segment field names used by flat-wrap validators.
