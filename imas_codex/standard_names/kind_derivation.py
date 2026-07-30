@@ -103,8 +103,10 @@ def _isn_structural_kind(name: str) -> str | None:
     caller applies its default).
     """
     try:
-        from imas_standard_names.grammar.model import parse_standard_name
+        from imas_standard_names.grammar import parse_standard_name
 
+        # The flat facade is intentional here: this function reads legacy
+        # component/decomposition/base fields and does not decide validity.
         parsed = parse_standard_name(name)
     except Exception:
         return None

@@ -677,7 +677,9 @@ def _auto_detect_physical_base_gaps(
             elif isinstance(c, dict):
                 base = c.get("id", "")  # dict candidates use 'id' for name
                 source_id = c.get("source_id", "")
-                # For dicts, parse the name to extract base
+                # This is an explicit legacy-field projection for gap
+                # classification, not a validity decision. Ordered-expression
+                # validity is handled by the lossless grammar adapter.
                 try:
                     from imas_standard_names.grammar import parse_standard_name
 
@@ -768,17 +770,30 @@ def _grammar_round_trip_failures(candidates: list[Any]) -> tuple[list[str], list
     names: list[str] = []
     advice: list[str] = []
     try:
-        from imas_standard_names.grammar import parse_standard_name
         from imas_standard_names.grammar.support import UnknownBaseTokenError
 
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
         from imas_codex.standard_names.segments import describe_gap
     except ImportError:
         return names, advice  # ISN not installed — skip check
 
     for candidate in candidates:
+        candidate_name: str | None = None
         try:
-            parse_standard_name(candidate.compose_name())
+            candidate_name = candidate.compose_name()
+            parse_canonical_name(candidate_name)
             continue
+        except Exception:
+            pass
+
+        try:
+            # The strict parser intentionally normalizes all failures to its
+            # ordered-grammar ParseError. Use the flat facade only to recover
+            # structured unknown-token diagnostics after validity has already
+            # failed; it never decides whether the candidate is valid.
+            from imas_standard_names.grammar import parse_standard_name
+
+            parse_standard_name(candidate_name or candidate.compose_name())
         except UnknownBaseTokenError as exc:
             diagnosis: str | None = None
             try:
@@ -792,10 +807,10 @@ def _grammar_round_trip_failures(candidates: list[Any]) -> tuple[list[str], list
             if diagnosis:
                 advice.append(diagnosis)
         except Exception:
-            pass  # undiagnosable parse failure — the name alone is the signal
+            pass
 
         try:
-            names.append(candidate.compose_name())
+            names.append(candidate_name or candidate.compose_name())
         except Exception:  # noqa: BLE001 — fall back to identifying the source
             names.append(candidate.source_id)
     return names, advice
@@ -2810,7 +2825,7 @@ async def _self_refine_candidate(
     is **improve-or-no-op**: it never rejects.
 
     Safety: the suggested name is re-validated via the grammar round-trip
-    (``parse_standard_name`` → ``compose_standard_name``). If the rewrite
+    (strict lossless parse → compose). If the rewrite
     fails grammar parsing, or loses canonical order (round-trips to a
     different string), or fails the well-formedness gate, the **original**
     ``(name, description)`` is returned unchanged. The local model is free
@@ -2857,21 +2872,12 @@ async def _self_refine_candidate(
     # "round-trip OK"; we surface a couple of cheap structural observations.
     diagnostics: list[str] = []
     try:
-        from imas_standard_names.grammar import (
-            compose_standard_name,
-            parse_standard_name,
-        )
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
-        _parsed = parse_standard_name(name)
-        _canon = compose_standard_name(_parsed)
-        if _canon == name:
-            diagnostics.append(
-                "Round-trip: OK — name parses and re-composes to canonical form."
-            )
-        else:
-            diagnostics.append(
-                f"Round-trip: canonical form is `{_canon}` (composed `{name}`)."
-            )
+        parse_canonical_name(name)
+        diagnostics.append(
+            "Round-trip: OK — name parses and re-composes to canonical form."
+        )
     except Exception:
         diagnostics.append(
             "Round-trip: WARNING — name did not parse cleanly; prefer the closest "
@@ -2932,23 +2938,9 @@ async def _self_refine_candidate(
         return name, description
 
     try:
-        from imas_standard_names.grammar import (
-            compose_standard_name,
-            parse_standard_name,
-        )
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
-        _parsed = parse_standard_name(new_name)
-        _canon = compose_standard_name(_parsed)
-        if _canon != new_name:
-            # The "improvement" lost canonical order — discard it.
-            logger.debug(
-                "Self-refine suggestion %r lost canonical order (→ %r) — "
-                "keeping original %r",
-                new_name,
-                _canon,
-                name,
-            )
-            return name, description
+        parse_canonical_name(new_name)
     except Exception:
         logger.debug(
             "Self-refine suggestion %r failed grammar round-trip — keeping %r",
@@ -3715,40 +3707,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
             grammar_failed = False
             try:
-                from imas_standard_names.grammar import (
-                    compose_standard_name,
-                    parse_standard_name,
+                from imas_codex.standard_names.grammar_adapter import (
+                    parse_canonical_name,
                 )
 
-                try:
-                    parsed = parse_standard_name(name_id)
-                except Exception as _order_exc:
-                    # ISN ≥rc35 strict-order rejections carry the unique
-                    # canonical spelling — adopt it deterministically instead
-                    # of spending an LLM retry. Anything else re-raises to
-                    # the grammar-retry path below.
-                    _canonical = getattr(_order_exc, "canonical_form", None)
-                    if not _canonical:
-                        raise
-                    wlog.debug(
-                        "Canonical-order normalization: %r → %r",
-                        name_id,
-                        _canonical,
-                    )
-                    name_id = _canonical
-                    parsed = parse_standard_name(name_id)
-                normalized = compose_standard_name(parsed)
-                if normalized != name_id:
-                    wlog.debug(
-                        "Pre-persist normalization: %r → %r", name_id, normalized
-                    )
-                    name_id = normalized
-
-                # Fix grammar library bug where parse→compose doubles
-                # adjacent tokens (e.g. magnetic_field_probe →
-                # magnetic_magnetic_field_probe).  Safe because no
-                # legitimate standard name has adjacent duplicate tokens.
-                name_id = _dedup_adjacent_tokens(name_id, wlog)
+                parse_canonical_name(name_id)
             except Exception as gram_exc:
                 grammar_failed = True
                 wlog.debug("Grammar parse failed for %r — attempting retry", name_id)
@@ -3790,9 +3753,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                             )
                     if retry_name and retry_name != name_id:
                         # Verify the retry result actually parses
-                        parsed = parse_standard_name(retry_name)
-                        normalized = compose_standard_name(parsed)
-                        name_id = _dedup_adjacent_tokens(normalized, wlog)
+                        parse_canonical_name(retry_name)
+                        name_id = retry_name
                         grammar_failed = False
                         state.grammar_retries_succeeded += 1
                         wlog.info(
@@ -4352,12 +4314,12 @@ def validate_name_candidate(entry: dict[str, Any]) -> tuple[list[str], dict, str
         from imas_standard_names.grammar import (
             StandardName,
             compose_standard_name,
-            parse_standard_name,
         )
 
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+
         # Grammar round-trip validates parsability.
-        parsed = parse_standard_name(name)
-        compose_standard_name(parsed)
+        parse_canonical_name(name)
 
         # Fields-consistency check (best-effort — never rejects here).
         fields_dict = {}
@@ -5537,16 +5499,11 @@ async def compose_batch(
 
             grammar_failed = False
             try:
-                from imas_standard_names.grammar import (
-                    compose_standard_name,
-                    parse_standard_name,
+                from imas_codex.standard_names.grammar_adapter import (
+                    parse_canonical_name,
                 )
 
-                parsed = parse_standard_name(name_id)
-                normalized = compose_standard_name(parsed)
-                if normalized != name_id:
-                    name_id = normalized
-                name_id = _dedup_adjacent_tokens(name_id)
+                parse_canonical_name(name_id)
             except Exception as gram_exc:
                 grammar_failed = True
                 wlog.debug(
@@ -5577,9 +5534,8 @@ async def compose_batch(
                         lease.charge_event(_r_cost, _r_event)
                     if retry_name and retry_name != name_id:
                         try:
-                            parsed = parse_standard_name(retry_name)
-                            normalized = compose_standard_name(parsed)
-                            name_id = _dedup_adjacent_tokens(normalized)
+                            parse_canonical_name(retry_name)
+                            name_id = retry_name
                             grammar_failed = False
                             wlog.info(
                                 "Pool %s: grammar retry succeeded %r → %r",

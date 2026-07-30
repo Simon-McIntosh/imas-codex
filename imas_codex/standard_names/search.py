@@ -1039,6 +1039,8 @@ def _levenshtein_suggest(query: str, catalog: dict[str, str | None]) -> dict[str
     try:
         from imas_standard_names.grammar import parse_standard_name
 
+        # Intentional flat projection: this tiebreak inspects only the legacy
+        # physical-base field and makes no validity or canonicality decision.
         parsed = parse_standard_name(query)
         q_pb = getattr(parsed, "physical_base", None)
         q_pb = getattr(q_pb, "value", q_pb)
