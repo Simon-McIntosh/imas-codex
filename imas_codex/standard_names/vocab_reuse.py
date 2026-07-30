@@ -10,8 +10,11 @@ registered ``lower_hybrid_antenna`` at 0.97 and ``methane_deuterated`` against
 
 The checks here are not similarity: each one *derives* the registered token the
 proposal spells, so a hit is reuse by construction and overrides any embedding
-verdict.  Three mechanisms:
+verdict.  Four mechanisms:
 
+- **advisory_alias** — ISN publishes a segment-scoped source spelling and the
+  registered canonical token to use instead.  These are retry hints, not parser
+  aliases: consuming one never makes the source spelling grammatical.
 - **structural_suffix** — the DD subdivides an assembly by appending a
   structural noun (``_module``, ``_component``, ``_channel``, ``_element``,
   ``_image``).  The subdivision is DD structure, not a distinct quantity, so the
@@ -74,7 +77,8 @@ class ReuseFinding:
         target: The registered token to use instead.
         target_segments: Every grammar class admitting ``target`` — the slot
             guidance names, which need not be ``segment``.
-        mechanism: ``structural_suffix``, ``word_order`` or ``settled_synonym``.
+        mechanism: ``advisory_alias``, ``structural_suffix``, ``word_order`` or
+            ``settled_synonym``.
         detail: One clause explaining the derivation, for retry guidance.
     """
 
@@ -111,6 +115,53 @@ def _registered() -> dict[str, tuple[str, ...]]:
     from imas_codex.standard_names.segments import grammar_token_index
 
     return grammar_token_index()
+
+
+@lru_cache(maxsize=1)
+def _advisory_aliases() -> Mapping[str, Any]:
+    """Return ISN's segment-scoped retry aliases, or an empty mapping.
+
+    Older supported ISN releases do not expose this optional contract.  The
+    absence of the key therefore disables only this mechanism and leaves the
+    existing mechanical checks unchanged.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+    except ImportError:
+        return {}
+
+    try:
+        aliases = get_grammar_context()["grammar"].get("advisory_aliases", {})
+    except (AttributeError, KeyError, TypeError):
+        return {}
+    return aliases if isinstance(aliases, Mapping) else {}
+
+
+def _advisory_alias(
+    segment: str,
+    token: str,
+    registered: Mapping[str, tuple[str, ...]],
+) -> tuple[str, str] | None:
+    """Resolve one exact ISN advisory alias within its declared segment."""
+    segment_aliases = _advisory_aliases().get(segment)
+    if not isinstance(segment_aliases, Mapping):
+        return None
+    definition = segment_aliases.get(token)
+    if not isinstance(definition, Mapping):
+        return None
+
+    target = definition.get("canonical")
+    reason = definition.get("reason")
+    if (
+        not isinstance(target, str)
+        or not target
+        or not isinstance(reason, str)
+        or not reason
+        or target not in registered
+        or segment not in registered[target]
+    ):
+        return None
+    return target, reason
 
 
 @lru_cache(maxsize=1)
@@ -171,6 +222,18 @@ def registered_reuse(segment: str, token: str) -> ReuseFinding | None:
     registered = _registered()
     if not registered or token in registered:
         return None
+
+    alias_hit = _advisory_alias(segment, token, registered)
+    if alias_hit is not None:
+        target, reason = alias_hit
+        return ReuseFinding(
+            token=token,
+            segment=segment,
+            target=target,
+            target_segments=registered[target],
+            mechanism="advisory_alias",
+            detail=reason,
+        )
 
     target = settled_synonyms().get(token)
     if target is not None:
@@ -308,6 +371,7 @@ def apply_reuse_verdicts(
 
 def clear_reuse_caches() -> None:
     """Drop the cached views of the registered vocabulary held in this module."""
+    _advisory_aliases.cache_clear()
     settled_synonyms.cache_clear()
     _tokens_by_word_multiset.cache_clear()
 

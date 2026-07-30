@@ -18,6 +18,8 @@ these checks must NOT claim, and it is pinned here as a negative.
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 import pytest
 
 from imas_codex.standard_names.segments import grammar_token_index
@@ -34,6 +36,186 @@ def _isn_available() -> bool:
 requires_isn = pytest.mark.skipif(
     not _isn_available(), reason="imas-standard-names not installed"
 )
+
+ADVISORY_ALIASES = {
+    "position": {
+        "rectangle_centre": {
+            "canonical": "rectangle_center",
+            "reason": "British spelling of the registered rectangular reference point.",
+        },
+        "rectangular_cross_section_centre": {
+            "canonical": "rectangle_center",
+            "reason": "Explicit cross-section wording denotes the same geometric center.",
+        },
+        "annulus_centre": {
+            "canonical": "annulus_center",
+            "reason": "British spelling of the registered annular reference point.",
+        },
+    },
+    "physical_base": {
+        "strain_tensor": {
+            "canonical": "strain",
+            "reason": (
+                "The registered strain base is tensor-valued, so the suffix "
+                "repeats its kind."
+            ),
+        },
+    },
+}
+
+
+def _grammar_context(aliases=ADVISORY_ALIASES):
+    return {"grammar": {"advisory_aliases": aliases}}
+
+
+@requires_isn
+class TestAdvisoryAlias:
+    """ISN-owned guidance resolves exact, segment-scoped source terms."""
+
+    @pytest.mark.parametrize(
+        ("segment", "source", "canonical"),
+        [
+            ("position", "rectangle_centre", "rectangle_center"),
+            (
+                "position",
+                "rectangular_cross_section_centre",
+                "rectangle_center",
+            ),
+            ("position", "annulus_centre", "annulus_center"),
+            ("physical_base", "strain_tensor", "strain"),
+        ],
+    )
+    def test_public_contract_resolves_the_accepted_aliases(
+        self, segment, source, canonical
+    ):
+        from imas_codex.standard_names.vocab_reuse import (
+            clear_reuse_caches,
+            registered_reuse,
+        )
+
+        with patch(
+            "imas_standard_names.get_grammar_context",
+            return_value=_grammar_context(),
+        ):
+            clear_reuse_caches()
+            finding = registered_reuse(segment, source)
+            clear_reuse_caches()
+
+        assert finding is not None
+        assert finding.target == canonical
+        assert finding.mechanism == "advisory_alias"
+        assert finding.detail == ADVISORY_ALIASES[segment][source]["reason"]
+        assert source not in grammar_token_index()
+
+    @pytest.mark.parametrize(
+        "source",
+        [
+            "rectangle",
+            "oblique",
+            "oblique_geometry",
+            "arcs_of_circle",
+            "arc_of_circle",
+            "annular_centreline",
+            "annulus",
+        ],
+    )
+    def test_context_dependent_shape_curve_and_orientation_terms_are_excluded(
+        self, source
+    ):
+        from imas_codex.standard_names.vocab_reuse import (
+            clear_reuse_caches,
+            registered_reuse,
+        )
+
+        with patch(
+            "imas_standard_names.get_grammar_context",
+            return_value=_grammar_context(),
+        ):
+            clear_reuse_caches()
+            finding = registered_reuse("position", source)
+            clear_reuse_caches()
+
+        assert finding is None
+
+    def test_alias_is_scoped_to_its_declared_segment(self):
+        from imas_codex.standard_names.vocab_reuse import (
+            clear_reuse_caches,
+            registered_reuse,
+        )
+
+        with patch(
+            "imas_standard_names.get_grammar_context",
+            return_value=_grammar_context(),
+        ):
+            clear_reuse_caches()
+            finding = registered_reuse("physical_base", "rectangle_centre")
+            clear_reuse_caches()
+
+        assert finding is None
+
+    def test_advisory_alias_precedes_word_order_detection(self):
+        from imas_codex.standard_names.vocab_reuse import (
+            clear_reuse_caches,
+            registered_reuse,
+        )
+
+        aliases = {
+            "subject": {
+                "methane_deuterated": {
+                    "canonical": "deuterated_methane",
+                    "reason": "The grammar owns the canonical modifier order.",
+                }
+            }
+        }
+        with patch(
+            "imas_standard_names.get_grammar_context",
+            return_value=_grammar_context(aliases),
+        ):
+            clear_reuse_caches()
+            finding = registered_reuse("subject", "methane_deuterated")
+            clear_reuse_caches()
+
+        assert finding is not None
+        assert finding.mechanism == "advisory_alias"
+        assert finding.detail == "The grammar owns the canonical modifier order."
+
+    def test_missing_contract_preserves_existing_reuse_behavior(self):
+        from imas_codex.standard_names.vocab_reuse import (
+            clear_reuse_caches,
+            registered_reuse,
+        )
+
+        with patch(
+            "imas_standard_names.get_grammar_context",
+            return_value={"grammar": {}},
+        ):
+            clear_reuse_caches()
+            assert registered_reuse("position", "rectangle_centre") is None
+            suffix = registered_reuse("device", "lower_hybrid_antenna_module")
+            order = registered_reuse("subject", "methane_deuterated")
+            clear_reuse_caches()
+
+        assert suffix is not None
+        assert suffix.mechanism == "structural_suffix"
+        assert order is not None
+        assert order.mechanism == "word_order"
+
+    def test_grammar_cache_clear_reloads_the_public_contract(self):
+        from imas_codex.standard_names.segments import clear_grammar_caches
+        from imas_codex.standard_names.vocab_reuse import registered_reuse
+
+        context = _grammar_context()
+        with patch(
+            "imas_standard_names.get_grammar_context",
+            return_value=context,
+        ):
+            clear_grammar_caches()
+            assert registered_reuse("position", "rectangle_centre") is not None
+            context["grammar"]["advisory_aliases"] = {}
+            assert registered_reuse("position", "rectangle_centre") is not None
+            clear_grammar_caches()
+            assert registered_reuse("position", "rectangle_centre") is None
+            clear_grammar_caches()
 
 
 @requires_isn
@@ -284,7 +466,7 @@ class TestApplyReuseVerdicts:
         gc = MagicMock()
         n = apply_reuse_verdicts(gc, self._audits())
         assert n == 1
-        (query, ), kwargs = gc.query.call_args
+        (query,), kwargs = gc.query.call_args
         assert "reuse_confirmed" in query
         items = kwargs["items"]
         assert items[0]["id"] == "vocab_gap:object:lower_hybrid_antenna_module"
