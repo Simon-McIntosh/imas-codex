@@ -2737,6 +2737,28 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
                     "derived parents",
                     reaped,
                 )
+            # Candidate rows were snapshotted before admission cleanup and
+            # childless reaping. Deleting one parent can detach the last edge
+            # from another candidate, so a row that was childful when queried
+            # may now name a reaped node. Never let that stale row materialize
+            # the childless shell again.
+            childless_set = set(childless)
+            seedable_parents = [
+                row for row in seedable_parents if row["parent_id"] not in childless_set
+            ]
+            legacy_parents = [
+                row for row in legacy_parents if row["parent_id"] not in childless_set
+            ]
+            accepted_seedable_unit_gaps = [
+                row
+                for row in accepted_seedable_unit_gaps
+                if row["parent_id"] not in childless_set
+            ]
+            accepted_legacy_unit_gaps = [
+                row
+                for row in accepted_legacy_unit_gaps
+                if row["parent_id"] not in childless_set
+            ]
 
         # Automatic orphaned-content cleanup: clear any DocsRevision left
         # dangling by a past reap (idempotent backstop — no orphaned docs
