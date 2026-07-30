@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
@@ -672,6 +672,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="reconcile-maintenance-only-20260730" data-who="reckon-ship" data-when="2026-07-30T10:40:17+02:00">
     <div class="r-comment-body"><p><strong>Reconcile-only mode is now maintenance-only.</strong> Commit <code>75c183d6</code>, integrated on <code>main</code> by <code>382cbe7f</code>, returns after startup and structural reconciliation before pool construction, so <code>sn run --only reconcile</code> cannot start orphan-sweep, embedding, or LLM-capable workers. Independent verification passed Ruff, formatting, all <strong>13</strong> focused regressions, and the neighboring ordinary <code>--only review</code> regression. This provides the safe execution surface for the post-rotation gate replay; it does not itself satisfy the still-required fresh gate ledger or WEST manifest parse-check.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="isn-contract-and-schema-20260730" data-who="reckon-ship" data-when="2026-07-30T11:11:14+02:00">
+    <div class="r-comment-body"><p><strong>External ISN contract and artifact repairs landed on the fork.</strong> Merge <code>c51da6f</code> removes volatile hatch-vcs development metadata from the committed entry schema; exact regeneration is byte-clean and the independently repeated schema run passed <strong>29</strong> tests. Merge <code>05e9ef0</code> exposes ordered qualifier categories from the validator-owned registry and documents package-level <code>parse</code>/<code>compose</code>/<code>StandardNameIR</code> as the stable outermost-first lossless operator contract; independent validation passed <strong>96</strong> tests. Both merges were pushed to external <code>origin/main</code>.</p><p>The stale fork-issue audit then closed resolved issues <code>#3</code>, <code>#4</code>, <code>#5</code>, <code>#6</code>, and <code>#39</code> with current canonical-name evidence. Issues <code>#7</code> and <code>#8</code> remain open with exact publication/export gates recorded; they were not falsely closed. The chained metric grammar and full documentation-truth sweep remain active and must land before the final ISN release/pin and gate replay.</p></div>
 </div>
 </section>
 </main>
