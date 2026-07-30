@@ -61,6 +61,7 @@ def test_parent_source_reconcile_refuses_inadmissible_scaffold() -> None:
             return_value=[
                 {
                     "parent_id": "line_integrated_impurity_ion_velocity",
+                    "origin": "derived",
                     "dd_paths": [
                         "spectrometer_x_ray_crystal/channel/"
                         "profiles_line_integrated/velocity_tor"

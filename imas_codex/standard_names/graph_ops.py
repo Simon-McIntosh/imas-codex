@@ -14206,7 +14206,9 @@ def find_orphan_parent_source_candidates(
                 WITH parent,
                      [p IN collect(DISTINCT imas.id) WHERE p IS NOT NULL]
                        AS dd_paths
-                RETURN parent.id AS parent_id, dd_paths
+                RETURN parent.id AS parent_id,
+                       parent.origin AS origin,
+                       dd_paths
                 ORDER BY parent.id
                 """
             )
@@ -14216,10 +14218,51 @@ def find_orphan_parent_source_candidates(
             client.close()
 
 
+def classify_orphan_parent_source_candidates(
+    gc: Any,
+    candidates: list[dict[str, Any]] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Partition parent-source candidates by structural admission.
+
+    Only ``origin='derived'`` nodes are structural scaffolds owned by the
+    parent admission gate. Pipeline and catalog nodes can also be HAS_PARENT
+    targets after refinement, but their identity and lifecycle remain owned by
+    those origin-specific paths; provenance recovery must not reinterpret or
+    retire them as derived scaffolds.
+
+    Returns the exact ``repairable`` rows safe to pass to source seeding and the
+    ``rejected_derived`` rows that must remain visible to fallback/unresolved
+    classification until lifecycle normalization retires them.
+    """
+    rows = (
+        find_orphan_parent_source_candidates(gc=gc)
+        if candidates is None
+        else list(candidates)
+    )
+    from imas_codex.standard_names.parents import is_admissible_parent_name
+
+    repairable: list[dict[str, Any]] = []
+    rejected_derived: list[dict[str, Any]] = []
+    for row in rows:
+        if row.get("origin") != "derived":
+            repairable.append(row)
+            continue
+        result = is_admissible_parent_name(row["parent_id"], gc)
+        if result.admit:
+            repairable.append(row)
+        else:
+            rejected_derived.append({**row, "admission_reason": result.reason})
+    return {
+        "repairable": repairable,
+        "rejected_derived": rejected_derived,
+    }
+
+
 def reconcile_orphan_parent_sources(
     gc: Any | None = None,
     *,
     dry_run: bool = False,
+    classification: dict[str, list[dict[str, Any]]] | None = None,
 ) -> int:
     """Seed the missing structural provenance source for childful parents.
 
@@ -14248,10 +14291,11 @@ def reconcile_orphan_parent_sources(
     passed admission; this only records provenance and NEVER mutates the parent's
     ``name_stage`` / ``origin`` / ``description``. Idempotent: a parent that gains a
     source drops out of the selector. Childless sourceless names are not parents
-    and are left untouched (a distinct stranded-name concern). Every candidate
-    is re-checked against the current admission gate before seeding; an invalid
-    scaffold remains source-less for ledgered lifecycle retirement rather than
-    being legitimized by synthetic provenance.
+    and are left untouched (a distinct stranded-name concern). Every derived
+    candidate is re-checked against the current admission gate before seeding;
+    an invalid scaffold remains source-less for ledgered lifecycle retirement
+    rather than being legitimized by synthetic provenance. Non-derived parents
+    bypass structural admission and retain their origin-owned recovery path.
 
     With ``dry_run=True``, returns the number eligible without writing.
     Otherwise returns the number of parent sources seeded.
@@ -14259,22 +14303,16 @@ def reconcile_orphan_parent_sources(
     own = gc is None
     client = GraphClient() if own else gc
     try:
-        rows = find_orphan_parent_source_candidates(gc=client)
-        from imas_codex.standard_names.parents import is_admissible_parent_name
-
-        admissible_rows = []
-        for row in rows:
-            result = is_admissible_parent_name(row["parent_id"], client)
-            if result.admit:
-                admissible_rows.append(row)
-            else:
-                logger.warning(
-                    "reconcile_orphan_parent_sources: refusing to seed "
-                    "inadmissible parent %s: %s",
-                    row["parent_id"],
-                    result.reason,
-                )
-        rows = admissible_rows
+        if classification is None:
+            classification = classify_orphan_parent_source_candidates(client)
+        for row in classification["rejected_derived"]:
+            logger.warning(
+                "reconcile_orphan_parent_sources: refusing to seed "
+                "inadmissible derived parent %s: %s",
+                row["parent_id"],
+                row["admission_reason"],
+            )
+        rows = classification["repairable"]
         if dry_run:
             return len(rows)
         seeded = 0

@@ -34,6 +34,7 @@ import yaml
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.graph_ops import (
+    classify_orphan_parent_source_candidates,
     find_orphan_parent_source_candidates,
     normalize_derived_parent_lifecycle,
     reconcile_orphan_parent_sources,
@@ -493,13 +494,25 @@ def rebuild_provenance(
             reattached = reattach_produced_name_edges(gc=gc)
             _run_deterministic_fixpoints()
         parent_candidate_rows = find_orphan_parent_source_candidates(gc=gc)
+        parent_classification = classify_orphan_parent_source_candidates(
+            gc,
+            parent_candidate_rows,
+        )
         repairable_parent_ids = {
             row["parent_id"]
-            for row in parent_candidate_rows
+            for row in parent_classification["repairable"]
+            if row.get("parent_id") in initial_orphan_ids
+        }
+        rejected_parent_ids = {
+            row["parent_id"]
+            for row in parent_classification["rejected_derived"]
             if row.get("parent_id") in initial_orphan_ids
         }
         if not dry_run:
-            parent_sources_reconciled = reconcile_orphan_parent_sources(gc=gc)
+            parent_sources_reconciled = reconcile_orphan_parent_sources(
+                gc=gc,
+                classification=parent_classification,
+            )
 
         orphans = find_provenance_orphans(gc=gc)
         orphan_ids = [
@@ -525,6 +538,8 @@ def rebuild_provenance(
             "reattached": reattached if not dry_run else len(desync_ids),
             "parent_source_candidates": len(repairable_parent_ids),
             "parent_source_candidate_names": sorted(repairable_parent_ids),
+            "parent_source_rejected": len(rejected_parent_ids),
+            "parent_source_rejected_names": sorted(rejected_parent_ids),
             "parent_sources_reconciled": parent_sources_reconciled,
             "bound_from_map": 0,
             "bound_from_scalar": 0,
