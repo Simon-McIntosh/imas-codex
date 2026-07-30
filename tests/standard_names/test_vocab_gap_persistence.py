@@ -16,7 +16,7 @@ from pydantic import ValidationError
 class _Transaction:
     def __init__(self, rows: list[dict]) -> None:
         self.rows = rows
-        self.closed = False
+        self._closed = False
         self.committed = False
         self.calls: list[tuple[str, dict]] = []
 
@@ -28,10 +28,13 @@ class _Transaction:
 
     def commit(self) -> None:
         self.committed = True
-        self.closed = True
+        self._closed = True
 
     def close(self) -> None:
-        self.closed = True
+        self._closed = True
+
+    def closed(self) -> bool:
+        return self._closed
 
 
 class _Client:
@@ -181,7 +184,7 @@ def test_missing_graph_node_aborts_before_any_write() -> None:
             gc=client,
         )
 
-    assert client.tx.closed is True
+    assert client.tx.closed() is True
     assert client.tx.committed is False
     assert len(client.tx.calls) == 1
 

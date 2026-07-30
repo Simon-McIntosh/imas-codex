@@ -264,7 +264,7 @@ def apply_vocab_gap_adjudications(
                         )
                     tx.commit()
             except BaseException:
-                if tx.closed is False:
+                if tx.closed() is False:
                     tx.close()
                 raise
     finally:
