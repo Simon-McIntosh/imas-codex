@@ -90,22 +90,49 @@ class TestSettledFoldCoverage:
             assert f"'{part}'" in verdict.guidance
         assert not is_actionable_gap("physical_base", token)
 
-    def test_every_reviewed_fold_is_machine_resolved_or_fully_specified(self):
+    def test_reviewed_fold_artifact_has_complete_targets_and_rationales(self):
         decisions = _settled_fold_decisions()
         assert len(decisions) == 27
 
         for decision in decisions:
-            category, _segments = classify_gap(
-                str(decision["segment"]), str(decision["token"])
-            )
-            if category != "absent":
-                assert category in NON_ACTIONABLE_GAP_CATEGORIES
-                continue
-
             target = decision["canonical_target"]
             rationale = decision["rationale"]
             assert isinstance(target, str) and target.strip()
             assert isinstance(rationale, str) and rationale.strip().endswith(".")
+
+    def test_only_grammar_resolved_folds_are_non_actionable(self):
+        expected = {
+            ("physical_base", "heat_flux"): "decomposable",
+            ("position", "detector"): "ambiguous_known_token",
+        }
+        actual: dict[tuple[str, str], str] = {}
+        for decision in _settled_fold_decisions():
+            segment = str(decision["segment"])
+            token = str(decision["token"])
+            category, _segments = classify_gap(segment, token)
+            if category != "absent":
+                actual[(segment, token)] = category
+                assert category in NON_ACTIONABLE_GAP_CATEGORIES
+                assert not is_actionable_gap(segment, token)
+
+        assert actual == expected
+
+    def test_contextual_folds_remain_explicitly_unresolved_and_actionable(self):
+        mechanically_resolved = {
+            ("physical_base", "heat_flux"),
+            ("position", "detector"),
+        }
+        unresolved = 0
+        for decision in _settled_fold_decisions():
+            segment = str(decision["segment"])
+            token = str(decision["token"])
+            if (segment, token) in mechanically_resolved:
+                continue
+            assert classify_gap(segment, token) == ("absent", [])
+            assert is_actionable_gap(segment, token)
+            unresolved += 1
+
+        assert unresolved == 25
 
 
 @requires_isn

@@ -216,8 +216,10 @@ def is_open_segment(segment: str | None) -> bool:
     return segment in open_segments()
 
 
-@lru_cache(maxsize=1)
-def grammar_tokens_by_segment() -> dict[str, tuple[str, ...]]:
+@lru_cache(maxsize=2)
+def grammar_tokens_by_segment(
+    *, include_operators: bool = True
+) -> dict[str, tuple[str, ...]]:
     """Every ISN grammar token, keyed by the class that admits it.
 
     This is the vocabulary accessor for the whole module family.  It is the
@@ -237,6 +239,12 @@ def grammar_tokens_by_segment() -> dict[str, tuple[str, ...]]:
     legal, and where does it belong" must come through here so the two halves
     can never drift apart again.
 
+    ``include_operators=False`` returns the declared segment vocabularies
+    without loading the separate operator context.  This is the lightweight
+    path for a consumer that needs one segment class rather than the whole
+    compositional grammar.  The default retains the complete vocabulary
+    contract for general consumers.
+
     Returns an empty dict when ISN is unavailable — the rules built on it then
     turn off rather than falling back to a vocabulary snapshot that would rot.
     """
@@ -252,9 +260,10 @@ def grammar_tokens_by_segment() -> dict[str, tuple[str, ...]]:
         except Exception:  # pragma: no cover — defensive
             out = {}
 
-    operators = _operator_tokens()
-    if operators:
-        out[OPERATOR_SEGMENT] = tuple(sorted(operators))
+    if include_operators:
+        operators = _operator_tokens()
+        if operators:
+            out[OPERATOR_SEGMENT] = tuple(sorted(operators))
 
     return out
 
@@ -591,13 +600,9 @@ def is_actionable_gap(segment: str | None, token: str) -> bool:
 @lru_cache(maxsize=1)
 def _registered_physical_bases() -> frozenset[str]:
     """Return the physical-base vocabulary declared by the installed grammar."""
-    try:
-        from imas_standard_names import get_grammar_context
-
-        bases = get_grammar_context()["grammar"]["vocabularies"]["physical_bases"]
-    except Exception:
-        return frozenset()
-    return frozenset(bases)
+    return frozenset(
+        grammar_tokens_by_segment(include_operators=False).get("physical_base", ())
+    )
 
 
 class _RegisteredPhysicalBaseSet(Set[str]):
