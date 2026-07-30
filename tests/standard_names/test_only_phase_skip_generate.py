@@ -58,6 +58,68 @@ def test_attach_is_a_valid_phase_that_skips_generate() -> None:
     assert flags["skip_review"] is True
 
 
+def test_only_reconcile_disables_every_pipeline_producer() -> None:
+    from imas_codex.standard_names.turn import skip_flags_from_only
+
+    flags = skip_flags_from_only("reconcile")
+    assert flags == {
+        "skip_generate": True,
+        "skip_enrich": True,
+        "skip_review": True,
+        "skip_regen": True,
+    }
+
+
+@pytest.mark.parametrize(
+    ("only_phase", "attach_only", "reconcile_only"),
+    [
+        ("reconcile", False, True),
+        ("attach", True, False),
+        ("link", False, False),
+    ],
+)
+def test_cli_forwards_explicit_maintenance_mode(
+    only_phase: str,
+    attach_only: bool,
+    reconcile_only: bool,
+) -> None:
+    """The selected maintenance command reaches the orchestrator unchanged."""
+    from imas_codex.cli.sn import _run_sn_cmd
+
+    run_pools = AsyncMock(return_value=MagicMock())
+
+    def _run_discovery(_config, async_main):
+        return asyncio.run(async_main(asyncio.Event(), MagicMock()))
+
+    with (
+        patch("imas_codex.cli.sn._require_embed_ready"),
+        patch(
+            "imas_codex.cli.discover.common.use_rich_output",
+            return_value=False,
+        ),
+        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch(
+            "imas_codex.cli.discover.common.run_discovery",
+            side_effect=_run_discovery,
+        ),
+        patch("imas_codex.standard_names.loop.run_sn_pools", new=run_pools),
+        patch(
+            "imas_codex.standard_names.loop.summary_table",
+            return_value={"stop_reason": "completed"},
+        ),
+    ):
+        _run_sn_cmd(
+            cost_limit=5.0,
+            per_domain_limit=None,
+            dry_run=False,
+            quiet=True,
+            only=only_phase,
+        )
+
+    assert run_pools.await_args.kwargs["attach_only"] is attach_only
+    assert run_pools.await_args.kwargs["reconcile_only"] is reconcile_only
+
+
 # ---------------------------------------------------------------------------
 # pool specs
 # ---------------------------------------------------------------------------
@@ -148,6 +210,7 @@ def _run_sn_pools_patches(seed_mock: AsyncMock):
         patch(f"{_GO}.seed_parent_sources", return_value=0),
         patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
         patch(f"{_GO}.structural_accept_derived_parents", return_value=0),
+        patch(f"{_GO}.reconcile_orphan_parent_sources", return_value=0),
         patch(f"{_GO}.resolve_doc_links", return_value={}),
         # The always-on stranded-reviewed promotion builds its own GraphClient;
         # mock it so the startup path stays graph-free.
@@ -211,6 +274,72 @@ async def test_run_sn_pools_without_skip_generate_autoseeds() -> None:
     """Control: without skip_generate, the auto-seed sweep runs (domains=())."""
     seed_mock = await _run(skip_generate=False)
     assert seed_mock.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_reconcile_only_finishes_parent_maintenance_without_pools() -> None:
+    """Reconciliation includes parent repair but has no operational workers."""
+    from imas_codex.standard_names.loop import run_sn_pools
+
+    seed_mock = AsyncMock(return_value=0)
+    patches = _run_sn_pools_patches(seed_mock)
+    normalize_parent_lifecycle = MagicMock(return_value=5)
+    build_specs = MagicMock(side_effect=AssertionError("pool specs constructed"))
+    run_pools = AsyncMock(side_effect=AssertionError("worker pools started"))
+    run_orphan_sweep = AsyncMock(side_effect=AssertionError("worker started"))
+    embed_descriptions = AsyncMock(side_effect=AssertionError("worker started"))
+    call_llm = MagicMock(side_effect=AssertionError("LLM called"))
+    acall_llm = AsyncMock(side_effect=AssertionError("LLM called"))
+    patches.extend(
+        [
+            patch(
+                f"{_GO}.normalize_derived_parent_lifecycle",
+                new=normalize_parent_lifecycle,
+            ),
+            patch(f"{_LOOP}._build_pool_specs", new=build_specs),
+            patch("imas_codex.standard_names.pools.run_pools", new=run_pools),
+            patch(
+                "imas_codex.standard_names.orphan_sweep.run_orphan_sweep_loop",
+                new=run_orphan_sweep,
+            ),
+            patch(
+                "imas_codex.discovery.base.embed_worker.embed_description_worker",
+                new=embed_descriptions,
+            ),
+            patch(
+                "imas_codex.discovery.base.llm.call_llm_structured",
+                new=call_llm,
+            ),
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new=acall_llm,
+            ),
+        ]
+    )
+    for item in patches:
+        item.start()
+    try:
+        summary = await run_sn_pools(
+            cost_limit=5.0,
+            domains=(),
+            skip_generate=True,
+            skip_review=True,
+            reconcile_only=True,
+        )
+    finally:
+        for item in reversed(patches):
+            item.stop()
+
+    normalize_parent_lifecycle.assert_called_once()
+    seed_mock.assert_not_awaited()
+    build_specs.assert_not_called()
+    run_pools.assert_not_awaited()
+    run_orphan_sweep.assert_not_awaited()
+    embed_descriptions.assert_not_awaited()
+    call_llm.assert_not_called()
+    acall_llm.assert_not_awaited()
+    assert summary.cost_spent == 0.0
+    assert summary.stop_reason == "completed"
 
 
 @pytest.mark.asyncio
