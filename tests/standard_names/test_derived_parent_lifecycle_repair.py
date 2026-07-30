@@ -155,11 +155,10 @@ class _StatefulDerivedParentGraph:
             )
 
         if (
-            "parent.name_stage = 'accepted'" in cypher
+            "parent.name_stage IN ['pending', 'accepted']" in cypher
             and "RETURN DISTINCT parent.id AS parent_id" in cypher
         ):
-            # Accepted-derived cleanup re-check (admission gate). Not gated
-            # on docs_stage — any accepted derived parent is re-checked.
+            # Admission cleanup is covered independently with the real query.
             return []
 
         if "seedable_edges = 0" in cypher and "RETURN parent.id AS parent_id" in cypher:
@@ -450,7 +449,7 @@ def test_identity_rejection_reaps_only_the_invalid_pending_parent() -> None:
             side_effect=[[invalid, valid, no_unit, heterogeneous], []],
         ),
         patch(
-            "imas_codex.standard_names.graph_ops._query_accepted_derived_parents_for_cleanup",
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch(
@@ -483,6 +482,78 @@ def test_identity_rejection_reaps_only_the_invalid_pending_parent() -> None:
         if "SET parent.name_stage" in item.args[0]
     ]
     assert materialized_ids == [valid["parent_id"]]
+
+
+def test_pending_single_child_shadow_is_retired_with_deletion_ledger() -> None:
+    """A source-less shadow scaffold is retired instead of being materialized."""
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+    from imas_codex.standard_names.parents import AdmissionResult
+
+    parent_id = "line_integrated_impurity_ion_velocity"
+    candidate = {
+        "parent_id": parent_id,
+        "origin": "derived",
+        "name_stage": "pending",
+        "child_data": [
+            {
+                "id": "toroidal_line_integrated_impurity_ion_velocity",
+                "unit": "m.s^-1",
+                "cocos": "one_like",
+                "physics_domain": "radiation_measurement_diagnostics",
+                "kind": "scalar",
+                "op_kind": "projection",
+            }
+        ],
+        "dd_paths": [
+            "spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor"
+        ],
+        "edge_kinds": ["projection"],
+    }
+    gc = MagicMock()
+
+    def query(cypher: str, **_kwargs):
+        if "DETACH DELETE sn" in cypher:
+            return [{"deleted": 1}]
+        if "MATCH (p:StandardName {origin: 'derived'})" in cypher:
+            return []
+        if "MATCH (dr:DocsRevision)" in cypher:
+            return [{"n": 0}]
+        raise AssertionError(f"unexpected query: {cypher}")
+
+    gc.query.side_effect = query
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            side_effect=[[candidate], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
+            return_value=[parent_id],
+        ),
+        patch(
+            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            return_value=AdmissionResult(
+                admit=False,
+                reason="suppressed: single-child shadow",
+                clause=None,
+            ),
+        ),
+    ):
+        changed = normalize_derived_parent_lifecycle(gc)
+
+    assert changed == 1
+    delete_call = next(
+        item for item in gc.query.call_args_list if "DETACH DELETE sn" in item.args[0]
+    )
+    assert "CREATE (change:StandardNameChange" in delete_call.args[0]
+    assert delete_call.kwargs["deletion_operation"] == "remove_derived_parent"
+    assert not any(
+        "SET parent.name_stage" in item.args[0] for item in gc.query.call_args_list
+    )
 
 
 def test_derived_parent_lifecycle_repair_is_idempotent() -> None:
@@ -572,7 +643,7 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
             return_value=[],
         ),
         patch(
-            "imas_codex.standard_names.graph_ops._query_accepted_derived_parents_for_cleanup",
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
             return_value=["pressure"],
         ),
         patch(
@@ -594,11 +665,10 @@ def test_inadmissible_accepted_derived_parent_is_deleted() -> None:
     delete_nodes.assert_called_once_with(gc, ["pressure"])
 
 
-def test_cleanup_query_rechecks_accepted_parents_regardless_of_docs_stage() -> None:
-    """A names-only single-child shadow (accepted name, drafted docs) must be
-    re-checked for admission — the cleanup query must NOT gate on docs_stage."""
+def test_cleanup_query_rechecks_pending_and_accepted_parents() -> None:
+    """Admission cleanup covers both creation leaks and accepted residue."""
     from imas_codex.standard_names.graph_ops import (
-        _query_accepted_derived_parents_for_cleanup,
+        _query_derived_parents_for_admission_cleanup,
     )
 
     captured: dict[str, str] = {}
@@ -608,12 +678,10 @@ def test_cleanup_query_rechecks_accepted_parents_regardless_of_docs_stage() -> N
             captured["cypher"] = cypher
             return [{"parent_id": "radius_of_magnetic_axis"}]
 
-    result = _query_accepted_derived_parents_for_cleanup(_Probe())
+    result = _query_derived_parents_for_admission_cleanup(_Probe())
     assert result == ["radius_of_magnetic_axis"]
-    # Regression: the predicate must select accepted derived parents without
-    # requiring docs_stage='accepted' (which let drafted-docs shadows escape).
-    assert "parent.name_stage = 'accepted'" in captured["cypher"]
-    assert "parent.docs_stage = 'accepted'" not in captured["cypher"]
+    assert "parent.name_stage IN ['pending', 'accepted']" in captured["cypher"]
+    assert "parent.docs_stage" not in captured["cypher"]
 
 
 def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
@@ -645,7 +713,7 @@ def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
             side_effect=[[], [candidate]],
         ),
         patch(
-            "imas_codex.standard_names.graph_ops._query_accepted_derived_parents_for_cleanup",
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
             return_value=[],
         ),
         patch(

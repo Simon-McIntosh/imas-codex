@@ -293,7 +293,11 @@ def test_rebuild_routes_orphans_by_anchor_authority():
                 {"parent_id": "parent_b", "dd_paths": []},
             ],
         ),
-        patch.object(pr, "reconcile_orphan_parent_sources", return_value=2),
+        patch.object(
+            pr,
+            "reconcile_orphan_parent_sources",
+            return_value=2,
+        ) as reconcile_parents,
         patch.object(pr, "_fetch_dd_source_paths", return_value=scalar_specs),
         patch.object(
             pr,
@@ -326,6 +330,104 @@ def test_rebuild_routes_orphans_by_anchor_authority():
     assert summary["parent_source_candidates"] == 2
     assert summary["parent_sources_reconciled"] == 2
     assert summary["unresolved"] == 1
+    shared_classification = reconcile_parents.call_args.kwargs["classification"]
+    assert [row["parent_id"] for row in shared_classification["repairable"]] == [
+        "parent_a",
+        "parent_b",
+    ]
+
+
+def test_rejected_derived_parent_remains_in_unresolved_classification():
+    """Admission rejection must not hide a derived orphan from fallback."""
+    import imas_codex.standard_names.provenance_rebuild as pr
+    from imas_codex.standard_names.parents import AdmissionResult
+
+    parent_id = "line_integrated_impurity_ion_velocity"
+    orphans = [
+        {
+            "sn_id": parent_id,
+            "name_stage": "pending",
+            "origin": "derived",
+        }
+    ]
+    gc = MagicMock()
+
+    with (
+        patch.object(pr, "find_provenance_orphans", return_value=orphans),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(
+            pr,
+            "find_orphan_parent_source_candidates",
+            return_value=[
+                {
+                    "parent_id": parent_id,
+                    "origin": "derived",
+                    "dd_paths": [
+                        "spectrometer_x_ray_crystal/channel/"
+                        "profiles_line_integrated/velocity_tor"
+                    ],
+                }
+            ],
+        ),
+        patch(
+            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            return_value=AdmissionResult(
+                admit=False,
+                reason="suppressed: single-child shadow",
+                clause=None,
+            ),
+        ),
+        patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_change_history_sources", return_value={}),
+        patch.object(pr, "_fetch_pending_source_names", return_value=set()),
+    ):
+        summary = pr.rebuild_provenance(gc=gc, recovery_map={}, dry_run=True)
+
+    assert summary["parent_source_candidates"] == 0
+    assert summary["parent_source_rejected_names"] == [parent_id]
+    assert summary["unresolved_names"] == [parent_id]
+
+
+def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
+    """Pipeline refinement parents retain structural provenance recovery."""
+    from imas_codex.standard_names.graph_ops import (
+        reconcile_orphan_parent_sources,
+    )
+    from imas_codex.standard_names.parents import AdmissionResult
+
+    parent_id = "line_integrated_impurity_ion_velocity"
+    gc = MagicMock()
+    gc.query.return_value = []
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.find_orphan_parent_source_candidates",
+            return_value=[
+                {
+                    "parent_id": parent_id,
+                    "origin": "pipeline",
+                    "dd_paths": [],
+                }
+            ],
+        ),
+        patch(
+            "imas_codex.standard_names.parents.is_admissible_parent_name",
+            return_value=AdmissionResult(
+                admit=False,
+                reason="would be rejected if structural admission applied",
+                clause=None,
+            ),
+        ) as admission,
+    ):
+        seeded = reconcile_orphan_parent_sources(gc=gc)
+
+    assert seeded == 1
+    admission.assert_not_called()
+    write = next(
+        item
+        for item in gc.query.call_args_list
+        if "MERGE (sns:StandardNameSource" in item.args[0]
+    )
+    assert write.kwargs["parent_id"] == parent_id
 
 
 def test_rebuild_dry_run_binds_nothing():

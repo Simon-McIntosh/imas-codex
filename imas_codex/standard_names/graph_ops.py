@@ -1343,43 +1343,49 @@ def _filter_admissible_parents(
         graph_axes = {t: set() for t in targets}
         graph_children = {t: set() for t in targets}
         shadow_info = {}
-        lone_pairs = [
-            {"target": t, "child": next(iter(ch))}
-            for t, ch in batch_children.items()
-            if len(ch) == 1
-        ]
-        if lone_pairs:
-            try:
-                srows = list(
-                    gc.query(
-                        """
-                        UNWIND $pairs AS pr
-                        MATCH (child:StandardName {id: pr.child})
-                        OPTIONAL MATCH (csrc:IMASNode)-[:HAS_STANDARD_NAME]->(child)
-                        OPTIONAL MATCH (psrc:IMASNode)-[:HAS_STANDARD_NAME]->
-                              (:StandardName {id: pr.target})
-                        RETURN pr.target AS target, pr.child AS child,
-                               coalesce(child.name_stage, '') AS child_stage,
-                               coalesce(child.origin, 'pipeline') AS child_origin,
-                               collect(DISTINCT csrc.id) AS child_sources,
-                               collect(DISTINCT psrc.id) AS parent_sources
-                        """,
-                        pairs=lone_pairs,
-                    )
+
+    # The child node and its DD ownership are written before this structural
+    # edge pass. A target receiving its first HAS_PARENT edge therefore has no
+    # graph child yet, but its lone batch child can already prove the target is
+    # a source-equivalent shadow. Probe that child explicitly. The same probe
+    # makes full rebuilds batch-authoritative after graph topology is discarded.
+    lone_pairs = []
+    for target in targets:
+        all_children = graph_children.get(target, set()) | batch_children.get(
+            target, set()
+        )
+        if len(all_children) == 1 and target not in shadow_info:
+            lone_pairs.append({"target": target, "child": next(iter(all_children))})
+    if lone_pairs:
+        try:
+            srows = list(
+                gc.query(
+                    """
+                    UNWIND $pairs AS pr
+                    MATCH (child:StandardName {id: pr.child})
+                    OPTIONAL MATCH (csrc:IMASNode)-[:HAS_STANDARD_NAME]->(child)
+                    OPTIONAL MATCH (psrc:IMASNode)-[:HAS_STANDARD_NAME]->
+                          (:StandardName {id: pr.target})
+                    RETURN pr.target AS target, pr.child AS child,
+                           coalesce(child.name_stage, '') AS child_stage,
+                           coalesce(child.origin, 'pipeline') AS child_origin,
+                           collect(DISTINCT csrc.id) AS child_sources,
+                           collect(DISTINCT psrc.id) AS parent_sources
+                    """,
+                    pairs=lone_pairs,
                 )
-            except Exception as exc:  # pragma: no cover - defensive
-                logger.warning(
-                    "Batch shadow-source probe failed: %s; skipping veto", exc
-                )
-                srows = []
-            for r in srows:
-                shadow_info[r["target"]] = {
-                    "child_id": r["child"],
-                    "child_stage": r.get("child_stage") or "",
-                    "child_origin": r.get("child_origin") or "pipeline",
-                    "child_sources": {s for s in (r.get("child_sources") or []) if s},
-                    "parent_sources": {s for s in (r.get("parent_sources") or []) if s},
-                }
+            )
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.warning("Batch shadow-source probe failed: %s; skipping veto", exc)
+            srows = []
+        for r in srows:
+            shadow_info[r["target"]] = {
+                "child_id": r["child"],
+                "child_stage": r.get("child_stage") or "",
+                "child_origin": r.get("child_origin") or "pipeline",
+                "child_sources": {s for s in (r.get("child_sources") or []) if s},
+                "parent_sources": {s for s in (r.get("parent_sources") or []) if s},
+            }
 
     def _is_single_child_shadow(target: str) -> tuple[bool, str]:
         """Batch-aware single-child shadow veto (mirrors parents.is_single_child_shadow).
@@ -1395,9 +1401,7 @@ def _filter_admissible_parents(
             return False, "not a single-child parent"
         info = shadow_info.get(target)
         if not info:
-            # Lone child exists only in this batch (not yet in graph) — no DD
-            # source attached yet, so source-equivalence cannot be asserted.
-            return False, "single batch child not yet sourced"
+            return False, "single child source probe returned no match"
         if info["child_stage"] in ("superseded", "exhausted"):
             return False, "lone child superseded/exhausted"
         if info["child_origin"] == "derived":
@@ -1989,25 +1993,24 @@ def _query_legacy_repairable_derived_parents(
     )
 
 
-def _query_accepted_derived_parents_for_cleanup(gc: Any) -> list[str]:
-    """Return accepted derived-parent ids that should be re-checked for admission.
+def _query_derived_parents_for_admission_cleanup(gc: Any) -> list[str]:
+    """Return materialized derived-parent ids to re-check for admission.
 
-    These nodes predate the current admission gate and may have drifted into an
-    exportable state even though the gate would now reject them. Restrict to
-    ``origin='derived'`` so catalog-authoritative and pipeline-authored names
-    are never touched by this cleanup.
+    Accepted nodes can predate the current admission gate. Pending nodes can be
+    born before their first batch child has a graph edge, when the shadow veto
+    has no topology to inspect. Both states must pass the current gate before
+    lifecycle materialization or structural acceptance can promote them.
+    Restrict to ``origin='derived'`` so catalog-authoritative and
+    pipeline-authored names are never touched by this cleanup.
 
-    Any ``name_stage='accepted'`` derived parent is re-checked regardless of
-    ``docs_stage``. A single-child-shadow parent minted in ``--names-only`` mode
-    is ``name_stage='accepted'`` with ``docs_stage`` still ``drafted``/``null``;
-    gating on ``docs_stage='accepted'`` let those escape the admission re-check
-    even though :func:`is_admissible_parent_name` rejects them.
+    Re-check regardless of ``docs_stage``. A single-child shadow can otherwise
+    survive either pending materialization or an accepted names-only run.
     """
     rows = gc.query(
         """
         MATCH (parent:StandardName)
         WHERE parent.origin = 'derived'
-          AND parent.name_stage = 'accepted'
+          AND parent.name_stage IN ['pending', 'accepted']
         MATCH (:StandardName)-[:HAS_PARENT]->(parent)
         RETURN DISTINCT parent.id AS parent_id
         """
@@ -2663,20 +2666,42 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
             gc,
             state_where=accepted_unit_gap_where,
         )
-        cleanup_candidates = _query_accepted_derived_parents_for_cleanup(gc)
-        invalid_accepted = []
+        cleanup_candidates = _query_derived_parents_for_admission_cleanup(gc)
+        invalid_parents = []
         for parent_id in cleanup_candidates:
             result = is_admissible_parent_name(parent_id, gc)
             if not result.admit:
-                invalid_accepted.append(parent_id)
+                invalid_parents.append(parent_id)
 
-        deleted = _delete_derived_parent_nodes(gc, invalid_accepted)
+        deleted = _delete_derived_parent_nodes(gc, invalid_parents)
         if deleted:
             logger.info(
                 "normalize_derived_parent_lifecycle: deleted %d inadmissible "
-                "accepted derived parents",
+                "derived parents",
                 deleted,
             )
+        if invalid_parents:
+            invalid_parent_set = set(invalid_parents)
+            seedable_parents = [
+                row
+                for row in seedable_parents
+                if row["parent_id"] not in invalid_parent_set
+            ]
+            legacy_parents = [
+                row
+                for row in legacy_parents
+                if row["parent_id"] not in invalid_parent_set
+            ]
+            accepted_seedable_unit_gaps = [
+                row
+                for row in accepted_seedable_unit_gaps
+                if row["parent_id"] not in invalid_parent_set
+            ]
+            accepted_legacy_unit_gaps = [
+                row
+                for row in accepted_legacy_unit_gaps
+                if row["parent_id"] not in invalid_parent_set
+            ]
 
         # Reap childless derived "zombie" parents. A derived parent is a
         # structural abstraction over its children; once it has no incoming
@@ -14181,7 +14206,9 @@ def find_orphan_parent_source_candidates(
                 WITH parent,
                      [p IN collect(DISTINCT imas.id) WHERE p IS NOT NULL]
                        AS dd_paths
-                RETURN parent.id AS parent_id, dd_paths
+                RETURN parent.id AS parent_id,
+                       parent.origin AS origin,
+                       dd_paths
                 ORDER BY parent.id
                 """
             )
@@ -14191,10 +14218,51 @@ def find_orphan_parent_source_candidates(
             client.close()
 
 
+def classify_orphan_parent_source_candidates(
+    gc: Any,
+    candidates: list[dict[str, Any]] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Partition parent-source candidates by structural admission.
+
+    Only ``origin='derived'`` nodes are structural scaffolds owned by the
+    parent admission gate. Pipeline and catalog nodes can also be HAS_PARENT
+    targets after refinement, but their identity and lifecycle remain owned by
+    those origin-specific paths; provenance recovery must not reinterpret or
+    retire them as derived scaffolds.
+
+    Returns the exact ``repairable`` rows safe to pass to source seeding and the
+    ``rejected_derived`` rows that must remain visible to fallback/unresolved
+    classification until lifecycle normalization retires them.
+    """
+    rows = (
+        find_orphan_parent_source_candidates(gc=gc)
+        if candidates is None
+        else list(candidates)
+    )
+    from imas_codex.standard_names.parents import is_admissible_parent_name
+
+    repairable: list[dict[str, Any]] = []
+    rejected_derived: list[dict[str, Any]] = []
+    for row in rows:
+        if row.get("origin") != "derived":
+            repairable.append(row)
+            continue
+        result = is_admissible_parent_name(row["parent_id"], gc)
+        if result.admit:
+            repairable.append(row)
+        else:
+            rejected_derived.append({**row, "admission_reason": result.reason})
+    return {
+        "repairable": repairable,
+        "rejected_derived": rejected_derived,
+    }
+
+
 def reconcile_orphan_parent_sources(
     gc: Any | None = None,
     *,
     dry_run: bool = False,
+    classification: dict[str, list[dict[str, Any]]] | None = None,
 ) -> int:
     """Seed the missing structural provenance source for childful parents.
 
@@ -14223,7 +14291,11 @@ def reconcile_orphan_parent_sources(
     passed admission; this only records provenance and NEVER mutates the parent's
     ``name_stage`` / ``origin`` / ``description``. Idempotent: a parent that gains a
     source drops out of the selector. Childless sourceless names are not parents
-    and are left untouched (a distinct stranded-name concern).
+    and are left untouched (a distinct stranded-name concern). Every derived
+    candidate is re-checked against the current admission gate before seeding;
+    an invalid scaffold remains source-less for ledgered lifecycle retirement
+    rather than being legitimized by synthetic provenance. Non-derived parents
+    bypass structural admission and retain their origin-owned recovery path.
 
     With ``dry_run=True``, returns the number eligible without writing.
     Otherwise returns the number of parent sources seeded.
@@ -14231,7 +14303,16 @@ def reconcile_orphan_parent_sources(
     own = gc is None
     client = GraphClient() if own else gc
     try:
-        rows = find_orphan_parent_source_candidates(gc=client)
+        if classification is None:
+            classification = classify_orphan_parent_source_candidates(client)
+        for row in classification["rejected_derived"]:
+            logger.warning(
+                "reconcile_orphan_parent_sources: refusing to seed "
+                "inadmissible derived parent %s: %s",
+                row["parent_id"],
+                row["admission_reason"],
+            )
+        rows = classification["repairable"]
         if dry_run:
             return len(rows)
         seeded = 0
