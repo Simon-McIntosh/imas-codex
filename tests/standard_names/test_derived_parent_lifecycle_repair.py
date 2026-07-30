@@ -168,6 +168,10 @@ class _StatefulDerivedParentGraph:
             return [self._candidate_row()] if self._eligible_for_seed_repair() else []
 
         if "MERGE (sns:StandardNameSource {id: $source_node_id})" in cypher:
+            assert (
+                "WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }"
+                in cypher
+            )
             desc = str(self.parent.get("description") or "")
             if not desc.strip():
                 self.parent["description"] = kwargs["description"]
@@ -198,6 +202,9 @@ class _StatefulDerivedParentGraph:
             return []
 
         if "MERGE (sn)-[:HAS_UNIT]->(u)" in cypher:
+            assert (
+                "WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(sn) }" in cypher
+            )
             self.parent["unit"] = kwargs["unit"]
             return []
 
@@ -784,6 +791,81 @@ def test_reaped_snapshot_candidate_is_not_rematerialized(snapshot: str) -> None:
         call(gc, []),
         call(gc, [parent_id]),
     ]
+    materialize.assert_not_called()
+
+
+def test_childless_parent_chain_is_reaped_to_fixpoint() -> None:
+    """Deleting one shell must expose and reap every childless ancestor."""
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    parent_ids = [
+        "momentum_flux_limiter_coefficient_over_edge_region",
+        "flux_limiter_coefficient_over_edge_region",
+        "limiter_coefficient_over_edge_region",
+    ]
+    candidates = [
+        {
+            "parent_id": parent_id,
+            "origin": "derived",
+            "name_stage": "pending",
+            "child_data": [
+                {
+                    "id": f"detached_child_{index}",
+                    "unit": None,
+                    "cocos": None,
+                    "physics_domain": "core_transport",
+                    "kind": "scalar",
+                    "op_kind": "qualifier",
+                }
+            ],
+            "dd_paths": [],
+            "edge_kinds": ["qualifier"],
+        }
+        for index, parent_id in enumerate(parent_ids)
+    ]
+    childless_batches = [[parent_id] for parent_id in parent_ids] + [[]]
+    gc = MagicMock()
+
+    def query(cypher: str, **_kwargs):
+        if "NOT EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(p) }" in cypher:
+            return [{"id": parent_id} for parent_id in childless_batches.pop(0)]
+        if "MATCH (dr:DocsRevision)" in cypher:
+            return [{"n": 0}]
+        raise AssertionError(f"unexpected query: {cypher}")
+
+    gc.query.side_effect = query
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            side_effect=[candidates, []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_derived_parents_for_admission_cleanup",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+            side_effect=lambda _gc, ids: len(ids),
+        ) as delete_nodes,
+        patch(
+            "imas_codex.standard_names.graph_ops._materialize_derived_parent_rows",
+            side_effect=AssertionError("childless ancestor was rematerialized"),
+        ) as materialize,
+    ):
+        changed = normalize_derived_parent_lifecycle(gc)
+
+    assert changed == 3
+    assert delete_nodes.call_args_list == [
+        call(gc, []),
+        call(gc, [parent_ids[0]]),
+        call(gc, [parent_ids[1]]),
+        call(gc, [parent_ids[2]]),
+    ]
+    assert childless_batches == []
     materialize.assert_not_called()
 
 
