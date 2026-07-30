@@ -12,7 +12,7 @@ All graph interaction is mocked (no live Neo4j).
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
@@ -283,7 +283,11 @@ async def test_reconcile_only_finishes_parent_maintenance_without_pools() -> Non
 
     seed_mock = AsyncMock(return_value=0)
     patches = _run_sn_pools_patches(seed_mock)
+    rederive_structural_edges = MagicMock(return_value={})
+    seed_parent_sources = MagicMock(return_value=0)
     normalize_parent_lifecycle = MagicMock(return_value=5)
+    structural_accept_parents = MagicMock(return_value=0)
+    reconcile_orphan_parents = MagicMock(return_value=0)
     build_specs = MagicMock(side_effect=AssertionError("pool specs constructed"))
     run_pools = AsyncMock(side_effect=AssertionError("worker pools started"))
     run_orphan_sweep = AsyncMock(side_effect=AssertionError("worker started"))
@@ -293,8 +297,21 @@ async def test_reconcile_only_finishes_parent_maintenance_without_pools() -> Non
     patches.extend(
         [
             patch(
+                f"{_GO}.rederive_structural_edges",
+                new=rederive_structural_edges,
+            ),
+            patch(f"{_GO}.seed_parent_sources", new=seed_parent_sources),
+            patch(
                 f"{_GO}.normalize_derived_parent_lifecycle",
                 new=normalize_parent_lifecycle,
+            ),
+            patch(
+                f"{_GO}.structural_accept_derived_parents",
+                new=structural_accept_parents,
+            ),
+            patch(
+                f"{_GO}.reconcile_orphan_parent_sources",
+                new=reconcile_orphan_parents,
             ),
             patch(f"{_LOOP}._build_pool_specs", new=build_specs),
             patch("imas_codex.standard_names.pools.run_pools", new=run_pools),
@@ -330,7 +347,11 @@ async def test_reconcile_only_finishes_parent_maintenance_without_pools() -> Non
         for item in reversed(patches):
             item.stop()
 
+    rederive_structural_edges.assert_called_once()
+    seed_parent_sources.assert_called_once()
     normalize_parent_lifecycle.assert_called_once()
+    structural_accept_parents.assert_called_once()
+    reconcile_orphan_parents.assert_called_once()
     seed_mock.assert_not_awaited()
     build_specs.assert_not_called()
     run_pools.assert_not_awaited()
@@ -340,6 +361,61 @@ async def test_reconcile_only_finishes_parent_maintenance_without_pools() -> Non
     acall_llm.assert_not_awaited()
     assert summary.cost_spent == 0.0
     assert summary.stop_reason == "completed"
+
+
+@pytest.mark.asyncio
+async def test_operational_run_repeats_structural_maintenance_after_drain() -> None:
+    """Operational runs repair structures both before and after pool work."""
+    from imas_codex.standard_names.loop import run_sn_pools
+
+    seed_mock = AsyncMock(return_value=0)
+    patches = _run_sn_pools_patches(seed_mock)
+    maintenance = MagicMock()
+    maintenance.rederive.return_value = {}
+    maintenance.seed.return_value = 0
+    maintenance.normalize.return_value = 0
+    maintenance.reconcile_orphans.return_value = 0
+    patches.extend(
+        [
+            patch(
+                f"{_GO}.rederive_structural_edges",
+                new=maintenance.rederive,
+            ),
+            patch(f"{_GO}.seed_parent_sources", new=maintenance.seed),
+            patch(
+                f"{_GO}.normalize_derived_parent_lifecycle",
+                new=maintenance.normalize,
+            ),
+            patch(
+                f"{_GO}.reconcile_orphan_parent_sources",
+                new=maintenance.reconcile_orphans,
+            ),
+        ]
+    )
+    for item in patches:
+        item.start()
+    try:
+        stop = asyncio.Event()
+        stop.set()
+        await run_sn_pools(
+            cost_limit=5.0,
+            domains=(),
+            stop_event=stop,
+            skip_generate=True,
+        )
+    finally:
+        for item in reversed(patches):
+            item.stop()
+
+    assert maintenance.mock_calls == [
+        call.rederive(),
+        call.seed(),
+        call.normalize(),
+        call.reconcile_orphans(),
+        call.rederive(),
+        call.normalize(),
+        call.reconcile_orphans(),
+    ]
 
 
 @pytest.mark.asyncio
