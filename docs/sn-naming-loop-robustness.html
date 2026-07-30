@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-impl" content="0.86">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="50321530,39c7f95a,b94ac300,11255632,836a1928,2f24fa0a,055ad391,7222a33b,288b3e69,7575a7e6,40f31ca8">
+<meta name="plan-commits" content="50321530,39c7f95a,b94ac300,11255632,836a1928,2f24fa0a,055ad391,7222a33b,288b3e69,7575a7e6,40f31ca8,75c183d6,382cbe7f">
 <meta name="plan-artifacts" content="docs/archive/sn-naming-loop-robustness-rungs-landed.html,docs/archive/sn-naming-loop-robustness-recovery-landed.html,docs/sn-binary-operand-validation-design.html">
 </head>
 <body>
@@ -669,6 +669,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s4" data-id="toroidal-flux-coordinate-removal" data-who="reckon-ship" data-when="2026-07-30T01:55:11+02:00" data-quote="remove toroidal flux radius completely; this should not be a catalog entry">
     <div class="r-comment-body"><p><strong>Final correction: radius is not an alias or catalog entry.</strong> IMAS-DD MCP metadata defines <code>rho_tor</code> as the toroidal flux coordinate <code>sqrt(phi/(pi*b0))</code> and <code>rho_tor_norm</code> as its normalized coordinate. ISN <code>v0.8.0rc61</code> therefore removes the <code>toroidal_flux_radius</code> alias entirely and renames the active gradient base to <code>toroidal_flux_coordinate_gradient</code>. Codex pins the exact release commit; the full Standard Names suite passed <strong>5,167</strong> tests. Fresh quorum review accepted the gm2/gm3/gm7 coordinate-gradient successors at 0.919, 1.000, and 0.881. The sanctioned provenance compactor removed all nine radius-named graph nodes while preserving one audit event per deletion; zero live StandardName ids now contain the token, and source/owner edges remain on the coordinate successors. Incremental review spend was <strong>$0.526032</strong>; cumulative canonical-campaign spend is <strong>$3.065340</strong> of the authorized $50. A 2,540-name audit found zero round-trip mismatches and 17 older unrelated parse failures; timestamps and the rc61 diff prove none was introduced or made eligible by this correction.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="reconcile-maintenance-only-20260730" data-who="reckon-ship" data-when="2026-07-30T12:00:00+02:00">
+    <div class="r-comment-body"><p><strong>Reconcile-only mode is now maintenance-only.</strong> Commit <code>75c183d6</code>, integrated on <code>main</code> by <code>382cbe7f</code>, returns after startup and structural reconciliation before pool construction, so <code>sn run --only reconcile</code> cannot start orphan-sweep, embedding, or LLM-capable workers. Independent verification passed Ruff, formatting, all <strong>13</strong> focused regressions, and the neighboring ordinary <code>--only review</code> regression. This provides the safe execution surface for the post-rotation gate replay; it does not itself satisfy the still-required fresh gate ledger or WEST manifest parse-check.</p></div>
 </div>
 </section>
 </main>
