@@ -5,7 +5,7 @@ from __future__ import annotations
 import inspect
 from contextlib import contextmanager
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, call, patch
 
 import pytest
 
@@ -399,6 +399,90 @@ def test_legacy_heterogeneous_unit_parent_is_skipped() -> None:
     assert graph.parent["name_stage"] == "pending"
     assert graph.parent["docs_stage"] is None
     assert graph.sources == {}
+
+
+def test_identity_rejection_reaps_only_the_invalid_pending_parent() -> None:
+    """The identity oracle reaps invalid scaffolds but preserves unresolved ones."""
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    def candidate(parent_id: str, *units: str | None) -> dict:
+        return {
+            "parent_id": parent_id,
+            "origin": "derived",
+            "name_stage": "pending",
+            "child_data": [
+                {
+                    "id": f"{parent_id}_child_{index}",
+                    "unit": unit,
+                    "cocos": None,
+                    "physics_domain": "core_transport",
+                    "kind": "scalar",
+                    "op_kind": "qualifier",
+                }
+                for index, unit in enumerate(units)
+            ],
+            "dd_paths": [],
+            "edge_kinds": ["qualifier"],
+        }
+
+    invalid = candidate("internal_state_momentum_source", "kg.m^-1.s^-2")
+    valid = candidate("electron_density", "m^-3")
+    no_unit = candidate("flux_at_wall", None)
+    heterogeneous = candidate("inductance", "1", "H")
+    gc = MagicMock()
+    gc.query.return_value = []
+
+    def validate(parent_id: str, **_kwargs) -> list[str]:
+        if parent_id == invalid["parent_id"]:
+            return ["state requires a species subject"]
+        return []
+
+    def delete(_gc, parent_ids: list[str]) -> int:
+        return len(parent_ids)
+
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops._query_seedable_derived_parents",
+            side_effect=[[], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_legacy_repairable_derived_parents",
+            side_effect=[[invalid, valid, no_unit, heterogeneous], []],
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._query_accepted_derived_parents_for_cleanup",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.parents.recompute_parent_kind",
+            return_value="scalar",
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._validate_derived_parent_identity",
+            side_effect=validate,
+        ) as identity_oracle,
+        patch(
+            "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+            side_effect=delete,
+        ) as delete_nodes,
+    ):
+        changed = normalize_derived_parent_lifecycle(gc)
+
+    assert changed == 2
+    assert delete_nodes.call_args_list == [
+        call(gc, []),
+        call(gc, [invalid["parent_id"]]),
+    ]
+    assert [item.args[0] for item in identity_oracle.call_args_list] == [
+        invalid["parent_id"],
+        valid["parent_id"],
+    ]
+    materialized_ids = [
+        item.kwargs["parent_id"]
+        for item in gc.query.call_args_list
+        if "SET parent.name_stage" in item.args[0]
+    ]
+    assert materialized_ids == [valid["parent_id"]]
 
 
 def test_derived_parent_lifecycle_repair_is_idempotent() -> None:

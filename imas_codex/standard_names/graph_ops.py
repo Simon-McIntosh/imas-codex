@@ -1929,6 +1929,8 @@ def _query_seedable_derived_parents(
                  }}) AS child_data,
                  collect(DISTINCT imas.id) AS dd_paths
             RETURN parent.id AS parent_id,
+                   parent.origin AS origin,
+                   parent.name_stage AS name_stage,
                    child_data,
                    dd_paths,
                    edge_kinds
@@ -1977,6 +1979,8 @@ def _query_legacy_repairable_derived_parents(
                  }}) AS child_data,
                  collect(DISTINCT imas.id) AS dd_paths
             RETURN parent.id AS parent_id,
+                   parent.origin AS origin,
+                   parent.name_stage AS name_stage,
                    child_data,
                    dd_paths,
                    edge_kinds
@@ -2142,6 +2146,7 @@ def _materialize_derived_parent_rows(
     parents: list[dict[str, Any]],
     *,
     infer_kind_from_existing_topology: bool = False,
+    rejected_pending_parent_ids: list[str] | None = None,
 ) -> int:
     """Materialize structurally eligible derived parents onto the docs lifecycle."""
     from imas_codex.standard_names.defaults import (
@@ -2290,6 +2295,12 @@ def _materialize_derived_parent_rows(
                 parent_id,
                 "; ".join(validation_issues),
             )
+            if (
+                rejected_pending_parent_ids is not None
+                and row.get("origin") == "derived"
+                and row.get("name_stage") == "pending"
+            ):
+                rejected_pending_parent_ids.append(parent_id)
             continue
 
         gc.query(
@@ -2714,21 +2725,39 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
             and not accepted_legacy_unit_gaps
         ):
             return deleted
-        repaired = _materialize_derived_parent_rows(gc, seedable_parents)
+        rejected_pending_parent_ids: list[str] = []
+        repaired = _materialize_derived_parent_rows(
+            gc,
+            seedable_parents,
+            rejected_pending_parent_ids=rejected_pending_parent_ids,
+        )
         repaired += _materialize_derived_parent_rows(
             gc,
             legacy_parents,
             infer_kind_from_existing_topology=True,
+            rejected_pending_parent_ids=rejected_pending_parent_ids,
         )
         repaired += _materialize_derived_parent_rows(
             gc,
             accepted_seedable_unit_gaps,
+            rejected_pending_parent_ids=rejected_pending_parent_ids,
         )
         repaired += _materialize_derived_parent_rows(
             gc,
             accepted_legacy_unit_gaps,
             infer_kind_from_existing_topology=True,
+            rejected_pending_parent_ids=rejected_pending_parent_ids,
         )
+        rejected_pending_parent_ids = list(dict.fromkeys(rejected_pending_parent_ids))
+        if rejected_pending_parent_ids:
+            rejected = _delete_derived_parent_nodes(gc, rejected_pending_parent_ids)
+            deleted += rejected
+            if rejected:
+                logger.info(
+                    "normalize_derived_parent_lifecycle: deleted %d "
+                    "identity-invalid pending derived parents",
+                    rejected,
+                )
         logger.info(
             "normalize_derived_parent_lifecycle: repaired %d derived parent SNs",
             repaired,
