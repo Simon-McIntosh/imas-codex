@@ -4391,7 +4391,7 @@ def _finalize_generated_name_stage(
 
 @retry_on_deadlock()
 def write_vocab_gaps(
-    gaps: list[dict[str, str]],
+    gaps: list[dict[str, Any]],
     source_type: str = "dd",
     *,
     skip_segment_filter: bool = False,
@@ -4438,11 +4438,18 @@ def write_vocab_gaps(
     now = datetime.now(UTC).isoformat()
 
     # Classify gaps using the ISN-backed classify_gap() function
+    from imas_codex.graph.models import VocabGapDedupDecision
     from imas_codex.standard_names.segments import (
         NON_ACTIONABLE_GAP_CATEGORIES,
         classify_gap,
         is_valid_segment,
     )
+
+    settled_dedup_decisions = [
+        VocabGapDedupDecision.reuse_confirmed.value,
+        VocabGapDedupDecision.distinct_confirmed.value,
+        VocabGapDedupDecision.checked_no_reuse.value,
+    ]
 
     # Build deduplicated gap nodes and relationship batch
     gap_nodes: dict[str, dict] = {}
@@ -4492,20 +4499,24 @@ def write_vocab_gaps(
             }
         gap_nodes[gap_id]["example_count"] += 1
 
-        # Carry the compose-time token-reuse adjudication (Task 5).  A node may
-        # be observed many times; prefer a distinct_confirmed stamp (with its
-        # nearest token + score) over an unchecked one so the strongest signal
-        # wins and the ISN rotation sees the adjudication.
+        # Carry the compose-time token-reuse adjudication. A settled decision
+        # from an earlier observation in this batch is monotonic.
         _decision = g.get("dedup_decision")
-        if _decision and gap_nodes[gap_id]["dedup_decision"] != "distinct_confirmed":
+        _current_decision = gap_nodes[gap_id]["dedup_decision"]
+        if _decision == VocabGapDedupDecision.reuse_confirmed.value or (
+            _decision and _current_decision not in settled_dedup_decisions
+        ):
             gap_nodes[gap_id]["dedup_decision"] = _decision
-            if _decision == "distinct_confirmed":
+            if _decision == VocabGapDedupDecision.distinct_confirmed.value:
                 gap_nodes[gap_id]["nearest_token"] = g.get("nearest_token")
                 gap_nodes[gap_id]["nearest_similarity"] = g.get("nearest_similarity")
 
         rel_batch.append(
             {
                 "gap_id": gap_id,
+                "evidence_id": f"vocab-gap-evidence:{uuid.uuid4()}",
+                "segment": segment,
+                "token": token,
                 "source_id": g["source_id"],
                 "reason": g.get("reason", ""),
                 "observed_at": now,
@@ -4525,21 +4536,49 @@ def write_vocab_gaps(
                 vg.actual_segments = b.actual_segments,
                 vg.first_seen_at = coalesce(vg.first_seen_at, datetime()),
                 vg.last_seen_at = datetime()
-            // Token-reuse adjudication: distinct_confirmed is sticky — never
-            // let a later unchecked observation overwrite it; carry the
-            // nearest token + score only on a confirming stamp.
+            // Settled token-reuse decisions are monotonic. A fresh observation
+            // may fill an unset/unchecked decision, but cannot erase a
+            // mechanical reuse verdict or a completed distinctness check.
             FOREACH (_ IN CASE
                 WHEN b.dedup_decision IS NOT NULL
-                     AND coalesce(vg.dedup_decision, '') <> 'distinct_confirmed'
+                     AND NOT (coalesce(vg.dedup_decision, '')
+                              IN $settled_dedup_decisions)
                 THEN [1] ELSE [] END |
                 SET vg.dedup_decision = b.dedup_decision)
             FOREACH (_ IN CASE
-                WHEN b.dedup_decision = 'distinct_confirmed'
+                WHEN b.dedup_decision = $distinct_decision
+                     AND vg.dedup_decision = $distinct_decision
                 THEN [1] ELSE [] END |
                 SET vg.nearest_token = b.nearest_token,
                     vg.nearest_similarity = b.nearest_similarity)
             """,
             batch=list(gap_nodes.values()),
+            settled_dedup_decisions=settled_dedup_decisions,
+            distinct_decision=VocabGapDedupDecision.distinct_confirmed.value,
+        )
+
+        # Preserve every observation independently of the normalized node and
+        # the convenience relationship properties below.
+        gc.query(
+            """
+            UNWIND $batch AS b
+            MATCH (vg:VocabGap {id: b.gap_id})
+            CREATE (e:VocabGapEvidence {
+                id: b.evidence_id,
+                source_id: b.source_id,
+                vocab_gap_id: b.gap_id,
+                segment: b.segment,
+                token: b.token,
+                source_type: $source_type,
+                description: b.reason,
+                reason: b.reason,
+                observed_at: datetime(b.observed_at)
+            })
+            MERGE (vg)-[:HAS_EVIDENCE]->(e)
+            SET vg.evidence = coalesce(vg.evidence, []) + b.evidence_id
+            """,
+            batch=rel_batch,
+            source_type=source_type,
         )
 
         # Create HAS_STANDARD_NAME_VOCAB_GAP relationships from the underlying
@@ -4576,6 +4615,44 @@ def write_vocab_gaps(
     written = len(gap_nodes)
     logger.info("Wrote %d VocabGap nodes from %d gap reports", written, len(gaps))
     return written
+
+
+def fetch_vocab_gap_adjudications(
+    gaps: list[dict[str, Any]],
+    gc: Any | None = None,
+) -> list[dict[str, Any]]:
+    """Read active editorial decisions for the exact gaps in one compose result."""
+    identities = sorted(
+        {
+            f"vocab_gap:{gap.get('segment')}:{gap.get('token')}"
+            for gap in gaps
+            if gap.get("segment") and gap.get("token") is not None
+        }
+    )
+    if not identities:
+        return []
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            UNWIND $ids AS gap_id
+            MATCH (vg:VocabGap {id: gap_id, editorial_active: true})
+            RETURN vg.id AS id, vg.segment AS segment, vg.token AS token,
+                   vg.editorial_disposition AS disposition,
+                   vg.editorial_target AS target,
+                   vg.editorial_reason AS reason,
+                   vg.editorial_grammar_signature AS grammar_signature,
+                   vg.editorial_grammar_version AS grammar_version
+            ORDER BY vg.segment, vg.token
+            """,
+            ids=identities,
+        )
+        return [dict(row) for row in rows]
+    finally:
+        if own:
+            client.close()
 
 
 # =============================================================================
@@ -7595,6 +7672,8 @@ def triage_vocab_gaps(
     mechanical reuse verdicts are stamped — this pass only reads what those
     wrote and derives the bucket:
 
+    - ``add`` / ``fold`` / ``reject`` — an active editorial disposition,
+      projected directly without changing the observation category;
     - ``reuse`` — a mechanical check resolved the token to a registered one
       (``dedup_decision = 'reuse_confirmed'``);
     - ``rule_violation`` — the grammar already forbids the construction
@@ -7611,6 +7690,9 @@ def triage_vocab_gaps(
     every field that led to its bucket. Returns the counts and the ``genuine``
     (segment, token, example_count) list, newest first.
     """
+    from imas_codex.graph.models import VocabGapDisposition
+
+    editorial_buckets = tuple(item.value for item in VocabGapDisposition)
     own = gc is None
     client = GraphClient() if own else gc
     try:
@@ -7619,11 +7701,15 @@ def triage_vocab_gaps(
             MATCH (vg:VocabGap)
             RETURN vg.id AS id, vg.segment AS segment, vg.token AS token,
                    vg.category AS category, vg.dedup_decision AS dedup,
+                   CASE WHEN vg.editorial_active = true
+                        THEN vg.editorial_disposition ELSE null END
+                       AS editorial_disposition,
                    toString(vg.last_seen_at) AS last_seen,
                    vg.example_count AS n
             """
         )
         buckets: dict[str, list[dict[str, Any]]] = {
+            **{value: [] for value in editorial_buckets},
             "reuse": [],
             "rule_violation": [],
             "composable": [],
@@ -7631,7 +7717,9 @@ def triage_vocab_gaps(
             "genuine": [],
         }
         for r in rows:
-            if r.get("dedup") == "reuse_confirmed":
+            if r.get("editorial_disposition") in editorial_buckets:
+                bucket = r["editorial_disposition"]
+            elif r.get("dedup") == "reuse_confirmed":
                 bucket = "reuse"
             elif r.get("category") == "rule_violation":
                 bucket = "rule_violation"
@@ -7675,7 +7763,11 @@ def triage_vocab_gaps(
         )
         return {
             "checked": len(rows),
-            "counts": {b: len(rs) for b, rs in buckets.items()},
+            "counts": {
+                b: len(rs)
+                for b, rs in buckets.items()
+                if rs or b not in editorial_buckets
+            },
             "genuine": genuine,
             "dry_run": dry_run,
         }

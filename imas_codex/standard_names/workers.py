@@ -842,6 +842,34 @@ def _build_token_reuse_retry_reason(hits: dict[tuple[str, str], Any]) -> str:
     )
 
 
+def _active_editorial_gap_guidance(
+    vocab_gaps: list[Any],
+) -> tuple[str, bool]:
+    """Read reviewed decisions for only this result and render exact guidance."""
+    if not vocab_gaps:
+        return "", False
+    gap_dicts = [
+        {
+            "segment": getattr(gap, "segment", None),
+            "token": getattr(gap, "token", None),
+        }
+        for gap in vocab_gaps
+    ]
+    try:
+        from imas_codex.standard_names.graph_ops import (
+            fetch_vocab_gap_adjudications,
+        )
+        from imas_codex.standard_names.vocab_adjudication import (
+            editorial_retry_guidance,
+        )
+
+        rows = fetch_vocab_gap_adjudications(gap_dicts)
+        return editorial_retry_guidance(rows)
+    except Exception:
+        logger.debug("Editorial vocabulary guidance lookup failed", exc_info=True)
+        return "", False
+
+
 def _stamp_dedup_decision(
     gap_dicts: list[dict],
     hits: dict[tuple[str, str], Any],
@@ -855,14 +883,26 @@ def _stamp_dedup_decision(
     prompt — "reused" — are no longer in ``result.vocab_gaps`` and so are never
     written.)
     """
+    from imas_codex.graph.models import VocabGapDedupDecision
+
+    settled = {
+        VocabGapDedupDecision.reuse_confirmed.value,
+        VocabGapDedupDecision.distinct_confirmed.value,
+        VocabGapDedupDecision.checked_no_reuse.value,
+    }
     for g in gap_dicts:
+        if g.get("dedup_decision") in settled:
+            continue
         hit = hits.get((g.get("segment"), g.get("token")))
         if hit is not None:
             g["nearest_token"] = hit.nearest_token
             g["nearest_similarity"] = hit.similarity
-            g["dedup_decision"] = "distinct_confirmed"
+            g["dedup_decision"] = VocabGapDedupDecision.distinct_confirmed.value
         else:
-            g["dedup_decision"] = "unchecked"
+            g.setdefault(
+                "dedup_decision",
+                VocabGapDedupDecision.unchecked.value,
+            )
 
 
 # =============================================================================
@@ -3299,6 +3339,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         # agent re-emitted after being shown a near-synonym registered token.
         # Carried to the post-loop VocabGap stamp as distinct_confirmed.
         _token_reuse_hits: dict[tuple[str, str], Any] = {}
+        _editorial_guidance = ""
+        _editorial_should_retry = False
         for _compose_attempt in range(_max_retries + 1):
             try:
                 llm_out = await acall_llm_structured(
@@ -3413,21 +3455,28 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             _token_reuse_hits = await asyncio.to_thread(
                 _compute_token_reuse_hits, result.vocab_gaps
             )
+            _editorial_guidance, _editorial_should_retry = await asyncio.to_thread(
+                _active_editorial_gap_guidance, result.vocab_gaps
+            )
 
-            if (not _grammar_failures and not _token_reuse_hits) or (
-                _compose_attempt >= _max_retries
-            ):
+            if (
+                not _grammar_failures
+                and not _token_reuse_hits
+                and not _editorial_should_retry
+            ) or (_compose_attempt >= _max_retries):
                 break
 
             # Re-enrich items with expanded hybrid search for retry
             wlog.info(
                 "Composition retry %d/%d: %d grammar failures (%s), "
-                "%d token-reuse hits — re-composing with expanded DD context",
+                "%d token-reuse hits, editorial_retry=%s — "
+                "re-composing with expanded DD context",
                 _compose_attempt + 1,
                 _max_retries,
                 len(_grammar_failures),
                 ", ".join(_grammar_failures[:3]),
                 len(_token_reuse_hits),
+                _editorial_should_retry,
             )
 
             def _re_enrich_expanded():
@@ -3469,6 +3518,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 )
             if _token_reuse_hits:
                 _reason_parts.append(_build_token_reuse_retry_reason(_token_reuse_hits))
+            if _editorial_guidance:
+                _reason_parts.append(_editorial_guidance)
             _retry_reason = "\n\n".join(_reason_parts)
             retry_render_ctx = {
                 **context,
@@ -5145,6 +5196,8 @@ async def compose_batch(
     _max_retries = _retry_attempts()
     # Token-reuse hits from the FINAL attempt (carried to the VocabGap stamp).
     _token_reuse_hits: dict[tuple[str, str], Any] = {}
+    _editorial_guidance = ""
+    _editorial_should_retry = False
     estimated = len(batch) * 0.20 * (_max_retries + 1)
     phase_tag = "regen" if regen else "generate_name"
     lease = mgr.reserve(estimated, phase=phase_tag)
@@ -5237,22 +5290,29 @@ async def compose_batch(
             _token_reuse_hits = await asyncio.to_thread(
                 _compute_token_reuse_hits, result.vocab_gaps
             )
+            _editorial_guidance, _editorial_should_retry = await asyncio.to_thread(
+                _active_editorial_gap_guidance, result.vocab_gaps
+            )
 
-            if (not _grammar_failures and not _token_reuse_hits) or (
-                _compose_attempt >= _max_retries
-            ):
+            if (
+                not _grammar_failures
+                and not _token_reuse_hits
+                and not _editorial_should_retry
+            ) or (_compose_attempt >= _max_retries):
                 break
 
             # Re-enrich items with expanded hybrid search for retry
             logger.info(
                 "Pool %s: composition retry %d/%d: %d grammar failures (%s), "
-                "%d token-reuse hits — re-composing with expanded DD context",
+                "%d token-reuse hits, editorial_retry=%s — "
+                "re-composing with expanded DD context",
                 phase_tag,
                 _compose_attempt + 1,
                 _max_retries,
                 len(_grammar_failures),
                 ", ".join(_grammar_failures[:3]),
                 len(_token_reuse_hits),
+                _editorial_should_retry,
             )
 
             def _re_enrich_expanded():
@@ -5294,6 +5354,8 @@ async def compose_batch(
                 )
             if _token_reuse_hits:
                 _reason_parts.append(_build_token_reuse_retry_reason(_token_reuse_hits))
+            if _editorial_guidance:
+                _reason_parts.append(_editorial_guidance)
             _retry_reason = "\n\n".join(_reason_parts)
             retry_render_ctx = {
                 **context,
