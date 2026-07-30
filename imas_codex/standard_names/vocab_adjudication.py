@@ -211,13 +211,16 @@ def _public_grammar_contract(
     vocabularies = grammar.get("vocabularies")
     if not isinstance(vocabularies, Mapping):
         raise ValueError("ISN grammar context has no vocabulary registry")
-    for vocabulary in vocabularies.values():
-        if isinstance(vocabulary, Mapping):
-            all_tokens.update(token for token in vocabulary if isinstance(token, str))
-        elif isinstance(vocabulary, list):
-            if not all(isinstance(token, str) for token in vocabulary):
-                raise ValueError("ISN grammar vocabulary contains invalid tokens")
-            all_tokens.update(vocabulary)
+    operators = vocabularies.get("operators", {})
+    if isinstance(operators, Mapping):
+        operator_tokens = operators.keys()
+    elif isinstance(operators, list):
+        operator_tokens = operators
+    else:
+        raise ValueError("ISN operator vocabulary contains invalid tokens")
+    if not all(isinstance(token, str) for token in operator_tokens):
+        raise ValueError("ISN operator vocabulary contains invalid tokens")
+    all_tokens.update(operator_tokens)
     if aliases is None:
         aliases = {}
     if not isinstance(aliases, Mapping):

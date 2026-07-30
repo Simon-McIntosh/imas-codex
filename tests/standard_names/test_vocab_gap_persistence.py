@@ -71,7 +71,12 @@ def _artifact_path() -> Path:
     return Path(__file__).parents[2] / "docs/evidence/sn-vocabulary-adjudication.json"
 
 
-def _single_batch(*, decision: str = "fold", target: str | None = "heat_flux"):
+def _single_batch(
+    *,
+    decision: str = "fold",
+    target: str | None = "heat_flux",
+    token: str = "heat_flux",
+):
     from imas_codex.standard_names.vocab_adjudication import (
         VocabGapAdjudicationFile,
     )
@@ -87,7 +92,7 @@ def _single_batch(*, decision: str = "fold", target: str | None = "heat_flux"):
             "decisions": [
                 {
                     "segment": "physical_base",
-                    "token": "heat_flux",
+                    "token": token,
                     "decision": decision,
                     "canonical_target": target,
                     "rationale": "Express the quantity with registered grammar.",
@@ -581,6 +586,54 @@ def test_missing_fold_is_satisfied_only_by_matching_segment_alias(
         gc=client,
     )
     assert result["resolution_counts"]["satisfied_by_grammar"] == 1
+
+
+@pytest.mark.parametrize(
+    "token",
+    [
+        "diagnostic",
+        "engineering",
+        "geometry",
+        "normalized",
+        "reaction_channel",
+        "species",
+        "temporal",
+        "transport",
+    ],
+)
+def test_missing_reject_ignores_grammar_vocabulary_metadata_keys(
+    token: str,
+    tmp_path: Path,
+) -> None:
+    from imas_codex.standard_names.vocab_adjudication import (
+        apply_vocab_gap_adjudications,
+    )
+
+    batch = _single_batch(decision="reject", target=None, token=token)
+    gap_id = batch.decisions[0].gap_id
+    client = _Client(
+        [{"requested_id": gap_id, "id": None}],
+        [{"requested_id": gap_id, "graph_token_ids": []}],
+    )
+    result = apply_vocab_gap_adjudications(
+        batch,
+        actor="catalog review",
+        grammar_signature="abc",
+        grammar_version="1.0",
+        resolve_missing_from_grammar=True,
+        grammar_context=_resolution_context(
+            vocabularies={
+                "operators": {"gradient": {}},
+                "qualifier_categories": {
+                    token: ["metadata category"],
+                },
+            }
+        ),
+        receipt_path=tmp_path / "receipt.json",
+        gc=client,
+    )
+
+    assert result["resolution_counts"]["resolved_reject"] == 1
 
 
 def test_observation_write_preserves_editorial_and_dedup_state() -> None:
