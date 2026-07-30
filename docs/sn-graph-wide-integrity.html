@@ -16,8 +16,8 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-29">
-<meta name="plan-version" content="9">
+<meta name="plan-modified" content="2026-07-30">
+<meta name="plan-version" content="10">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S6">
 <meta name="plan-capability-version" content="1.0">
@@ -582,6 +582,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s6b" data-id="unit-authority-closure-20260729" data-who="reckon-ship" data-when="2026-07-29T21:10:00+02:00">
     <div class="r-comment-body"><p><strong>Coordinated unit-authority closure.</strong> ISN <code>v0.8.0rc60</code> is pinned in Codex by <code>288b3e69</code>; the ISN suite passed 1,866 tests with 28 skips and 83 expected failures, and the Codex standard-name suite exited zero on <code>sun_debug</code>. Followup <code>f-sgwi-002</code> is resolved: all eight original null-unit dispositions are accounted for, the mint path enforces explicit parent-owned units, and the accepted-derived-parent audit remains zero null units.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="provenance-orphan-recheck-20260730" data-who="reckon-ship" data-when="2026-07-30T12:07:35+02:00">
+    <div class="r-comment-body"><p><strong>The historical 35→0 provenance-orphan result was not durable.</strong> A fresh live audit found one invalid one-child shadow, <code>line_integrated_impurity_ion_velocity</code>. The creation/lifecycle/provenance guards landed in worker commits <code>8ef762c6</code> and <code>d44fcb32</code>, integrated on <code>main</code> by <code>2d6034ee</code>; the focused worker receipt passed <strong>74</strong> tests. One maintenance-only reconcile then ledger-retired that node as <code>remove_derived_parent</code>, preserved its child and DD source, created no LLM cost, and exited zero.</p><p>The same run exposed <strong>six</strong> pending derived orphans, so the global invariant is not yet green: five <code>internal_state_*</code> parents are deleted by high-level semantic normalization and then recreated by lower-level admission during post-drain rederive; <code>impurity_ion_velocity</code> is childless, source-less, and has no authoritative unit. The repair is active: align admission with the high-level semantic oracle and make ordinary post-drain maintenance an awaited rederive→normalize→reconcile fixpoint, while reconcile-only mode skips that duplicate finalizer. Do not report the provenance hole closed until one subsequent maintenance pass proves zero.</p></div>
 </div>
 </section>
 </main>
