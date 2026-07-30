@@ -232,7 +232,7 @@ class TestOperatorComposition:
     def test_atomic_compounds_are_not_decomposed(self):
         from imas_codex.standard_names.segments import ATOMIC_COMPOUNDS
 
-        for compound in ("magnetic_field", "poloidal_magnetic_flux", "safety_factor"):
+        for compound in ("magnetic_field", "current_density", "safety_factor"):
             assert compound in ATOMIC_COMPOUNDS
             assert operator_composition(compound) is None
 

@@ -19,6 +19,9 @@ token is never called a rule violation.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import pytest
 
 from imas_codex.standard_names.segments import (
@@ -43,6 +46,66 @@ def _isn_available() -> bool:
 requires_isn = pytest.mark.skipif(
     not _isn_available(), reason="imas-standard-names not installed"
 )
+
+
+def _settled_fold_decisions() -> list[dict[str, object]]:
+    """Load the reviewed folds that constrain gap classification."""
+    evidence_path = (
+        Path(__file__).parents[2] / "docs/evidence/sn-vocabulary-adjudication.json"
+    )
+    evidence = json.loads(evidence_path.read_text())
+    return [
+        decision for decision in evidence["decisions"] if decision["decision"] == "fold"
+    ]
+
+
+@requires_isn
+class TestSettledFoldCoverage:
+    """A settled fold is grammar-derived or carries a complete reviewed resolution."""
+
+    @pytest.mark.parametrize(
+        ("token", "expected_segments", "expected_parts"),
+        [
+            ("heat_flux", {"channel", "physical_base"}, {"heat", "flux"}),
+            ("particle_flux", {"channel", "physical_base"}, {"particle", "flux"}),
+            (
+                "poloidal_magnetic_flux",
+                {"component", "coordinate", "physical_base"},
+                {"poloidal", "magnetic_flux"},
+            ),
+        ],
+    )
+    def test_registered_modifier_and_base_compose_without_an_atomic_exception(
+        self,
+        token: str,
+        expected_segments: set[str],
+        expected_parts: set[str],
+    ):
+        category, segments = classify_gap("physical_base", token)
+        assert category == "decomposable"
+        assert expected_segments <= set(segments)
+
+        verdict = describe_gap("physical_base", token)
+        for part in expected_parts:
+            assert f"'{part}'" in verdict.guidance
+        assert not is_actionable_gap("physical_base", token)
+
+    def test_every_reviewed_fold_is_machine_resolved_or_fully_specified(self):
+        decisions = _settled_fold_decisions()
+        assert len(decisions) == 27
+
+        for decision in decisions:
+            category, _segments = classify_gap(
+                str(decision["segment"]), str(decision["token"])
+            )
+            if category != "absent":
+                assert category in NON_ACTIONABLE_GAP_CATEGORIES
+                continue
+
+            target = decision["canonical_target"]
+            rationale = decision["rationale"]
+            assert isinstance(target, str) and target.strip()
+            assert isinstance(rationale, str) and rationale.strip().endswith(".")
 
 
 @requires_isn

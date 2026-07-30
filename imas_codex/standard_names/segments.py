@@ -25,6 +25,7 @@ therefore no longer in the fallback.
 from __future__ import annotations
 
 import re
+from collections.abc import Iterator, Set
 from dataclasses import dataclass
 from functools import lru_cache
 
@@ -587,36 +588,35 @@ def is_actionable_gap(segment: str | None, token: str) -> bool:
     return classify_gap(segment, token)[0] == "absent"
 
 
-# Lexicalized physics compounds that must NOT be decomposed even though
-# their prefixes match registered tokens.  These are single, irreducible
-# physical concepts in the ISN physical_base registry.
-ATOMIC_COMPOUNDS: frozenset[str] = frozenset(
-    {
-        "poloidal_flux",
-        "poloidal_magnetic_flux",
-        "magnetic_flux",
-        "minor_radius",
-        "major_radius",
-        "cross_sectional_area",
-        "safety_factor",
-        "polarization_angle",
-        "ellipticity_angle",
-        "loop_voltage",
-        "internal_inductance",
-        "magnetic_field",
-        "electric_field",
-        "current_density",
-        "power_density",
-        "energy_density",
-        "particle_flux",
-        "heat_flux",
-        "rotation_frequency",
-        "magnetic_shear",
-        "torque_density",
-        "collisionality",
-        "bootstrap_current",
-    }
-)
+@lru_cache(maxsize=1)
+def _registered_physical_bases() -> frozenset[str]:
+    """Return the physical-base vocabulary declared by the installed grammar."""
+    try:
+        from imas_standard_names import get_grammar_context
+
+        bases = get_grammar_context()["grammar"]["vocabularies"]["physical_bases"]
+    except Exception:
+        return frozenset()
+    return frozenset(bases)
+
+
+class _RegisteredPhysicalBaseSet(Set[str]):
+    """Read-only view over ISN's public physical-base vocabulary."""
+
+    def __contains__(self, value: object) -> bool:
+        return isinstance(value, str) and value in _registered_physical_bases()
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(_registered_physical_bases())
+
+    def __len__(self) -> int:
+        return len(_registered_physical_bases())
+
+
+# Registered bases are indivisible during a cover walk.  The exported set lets
+# callers check that classifier boundary directly; its contents come entirely
+# from ISN rather than a second vocabulary snapshot in codex.
+ATOMIC_COMPOUNDS: Set[str] = _RegisteredPhysicalBaseSet()
 
 
 #: Widest span, in underscore-delimited words, a single registered token may
@@ -1042,9 +1042,8 @@ def operator_composition(token: str) -> OperatorComposition | None:
     vocabulary deficiency — routing the operators through ``operators``
     composes the name today.
 
-    Returns ``None`` when the token is a lexicalized compound listed in
-    :data:`ATOMIC_COMPOUNDS`, when any part is unregistered, when no part is an
-    operator, or when ISN is unavailable.
+    Returns ``None`` when the token is a registered base, when any part is
+    unregistered, when no part is an operator, or when ISN is unavailable.
     """
     if not token or token in ATOMIC_COMPOUNDS:
         return None
@@ -1087,8 +1086,7 @@ def _check_decomposable(token: str) -> list[str]:
     list of classes where parts were found, or an empty list if the token
     cannot be covered.
 
-    Skips tokens in :data:`ATOMIC_COMPOUNDS` to avoid false negatives on
-    lexicalized physics terms.
+    Skips registered bases because they are already complete grammar tokens.
     """
     if token in ATOMIC_COMPOUNDS:
         return []
@@ -1326,10 +1324,13 @@ def describe_gap(segment: str, token: str) -> GapVerdict:
     elif category == "decomposable" and operators:
         guidance = f"'{token}' is not a single token: {_operator_routing_advice(operators, bases)}."
     elif category == "decomposable":
-        where = ", ".join(segments_found)
+        cover = _cover_token(token) or []
+        parts = ", ".join(
+            f"'{span}' ({' or '.join(classes)})" for span, classes in cover
+        )
         guidance = (
-            f"'{token}' decomposes into tokens already registered across "
-            f"{where} — compose it from those rather than requesting a new token."
+            f"'{token}' decomposes into the registered tokens {parts} — "
+            f"compose it from those rather than requesting a new token."
         )
     else:
         # Absent, and the fallback for a derived category whose deriving check
@@ -1370,6 +1371,7 @@ def clear_grammar_caches() -> None:
         _grammar_connectives,
         _infix_operator_splits,
         _registered_binary_operator,
+        _registered_physical_bases,
         _symbol_expansions,
         _cover_index,
         grammar_tokens_by_segment,
