@@ -7,6 +7,7 @@ import pytest
 pytest.importorskip("imas_standard_names")
 
 from imas_codex.standard_names.grammar_adapter import (  # noqa: E402
+    ParsedCanonicalName,
     compose_canonical_ir,
     is_canonical_name,
     parse_canonical_name,
@@ -22,6 +23,123 @@ METRIC_NAMES = (
         "_to_square_of_magnetic_field_magnitude"
     ),
 )
+
+ISOTOPE_RATIO = (
+    "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density"
+    "_and_neutral_density_of_isotope"
+)
+DOUBLED_ISOTOPE_LOCUS = (
+    "ratio_of_neutral_density_to_difference_of_total_neutral_density"
+    "_and_neutral_density_of_isotope_of_isotope"
+)
+
+
+def _binary_ir(operator: str, left: str, right: str, separator: str):
+    """Build a binary public IR from two strict canonical operand names."""
+    from imas_standard_names import StandardNameIR
+
+    return StandardNameIR.model_validate(
+        {
+            "operators": [
+                {
+                    "kind": "binary",
+                    "op": operator,
+                    "args": [
+                        parse_canonical_name(left).ir,
+                        parse_canonical_name(right).ir,
+                    ],
+                    "separator": separator,
+                }
+            ],
+            "base": {"token": "placeholder", "kind": "quantity"},
+        }
+    )
+
+
+def _nested_isotope_ratio_ir():
+    """Return the intended n_i / (n_total - n_i) recursive expression."""
+    from imas_standard_names import StandardNameIR
+
+    difference = _binary_ir(
+        "difference",
+        "total_neutral_density",
+        "neutral_density_of_isotope",
+        "and",
+    )
+    return StandardNameIR.model_validate(
+        {
+            "operators": [
+                {
+                    "kind": "binary",
+                    "op": "ratio",
+                    "args": [
+                        parse_canonical_name("neutral_density_of_isotope").ir,
+                        difference,
+                    ],
+                    "separator": "to",
+                }
+            ],
+            "base": {"token": "placeholder", "kind": "quantity"},
+        }
+    )
+
+
+def _normalized_radial_ir():
+    """Return the public IR before its flat normalized-axis canonicalization."""
+    from imas_standard_names import StandardNameIR
+
+    data = parse_canonical_name("radial_electric_field").ir.model_dump(mode="python")
+    data["operators"] = [
+        {
+            "kind": "unary_prefix",
+            "op": "normalized",
+            "bare_prefix": True,
+        }
+    ]
+    return StandardNameIR.model_validate(data)
+
+
+def _with_inverse(ir, *, outer: bool):
+    """Add inverse outside or inside an existing public operator chain."""
+    from imas_standard_names import StandardNameIR
+
+    data = ir.model_dump(mode="python")
+    inverse = {
+        "kind": "unary_prefix",
+        "op": "inverse",
+        "bare_prefix": False,
+    }
+    data["operators"] = (
+        [inverse, *data["operators"]] if outer else [*data["operators"], inverse]
+    )
+    return StandardNameIR.model_validate(data)
+
+
+def _strict_parser_preserves(ir) -> bool:
+    """Report whether the installed public parser preserves this exact tree."""
+    from imas_standard_names import compose, parse
+
+    try:
+        parsed = parse(compose(ir), strict=True).ir
+    except ValueError:
+        return False
+    return parsed.model_dump(mode="json") == ir.model_dump(mode="json")
+
+
+def _strict_parser_rejects(name: str) -> bool:
+    """Report rejection using only the installed public ISN grammar."""
+    from imas_standard_names import compose, parse
+
+    try:
+        parsed = parse(name, strict=True)
+    except ValueError:
+        return True
+    return compose(parsed.ir) != name
+
+
+_INTENDED_ISOTOPE_IR = _nested_isotope_ratio_ir()
+_ISN_PRESERVES_NESTED_ISOTOPE_SCOPE = _strict_parser_preserves(_INTENDED_ISOTOPE_IR)
+_ISN_REJECTS_DOUBLED_ISOTOPE_LOCUS = _strict_parser_rejects(DOUBLED_ISOTOPE_LOCUS)
 
 
 @pytest.mark.parametrize("name", METRIC_NAMES)
@@ -55,6 +173,246 @@ def test_binary_operands_retain_their_nested_operator_order() -> None:
         "square",
         "magnitude",
     ]
+
+
+def test_structured_locus_stays_on_binary_operand_a(monkeypatch) -> None:
+    """The candidate's base fields qualify operand A, not the expression."""
+    from imas_codex.standard_names import grammar_adapter
+
+    captured = {}
+
+    def capture(ir) -> str:
+        captured["ir"] = ir
+        return "captured_binary_expression"
+
+    monkeypatch.setattr(grammar_adapter, "compose_canonical_ir", capture)
+    segments = GrammarSegments(
+        base_token="density",
+        base_kind="quantity",
+        qualifiers=["neutral"],
+        locus_token="isotope",
+        locus_relation="of",
+        locus_type="entity",
+        operators=[{"token": "ratio", "secondary_operand": "density"}],
+    )
+
+    assert segments.compose_name() == "captured_binary_expression"
+    binary = captured["ir"].operators[0]
+    assert captured["ir"].locus is None
+    assert binary.args[0].locus.token == "isotope"
+    assert binary.args[1].locus is None
+
+
+def test_surface_round_trip_cannot_change_binary_operand_scope(monkeypatch) -> None:
+    """Equal spelling is insufficient when parsing moves a leaf locus."""
+    from imas_codex.standard_names import grammar_adapter
+
+    intended = _binary_ir(
+        "ratio",
+        "neutral_density_of_isotope",
+        "total_neutral_density_of_isotope",
+        "to",
+    )
+    shifted = _binary_ir(
+        "ratio", "neutral_density_of_isotope", "total_neutral_density", "to"
+    )
+    shifted_data = shifted.model_dump(mode="python")
+    shifted_data["locus"] = parse_canonical_name("density_of_isotope").ir.locus
+    from imas_standard_names import StandardNameIR, compose
+
+    shifted = StandardNameIR.model_validate(shifted_data)
+    name = compose(intended)
+    assert compose(shifted) == name
+
+    monkeypatch.setattr(
+        grammar_adapter,
+        "parse_canonical_name",
+        lambda candidate: ParsedCanonicalName(name=candidate, ir=shifted),
+    )
+
+    with pytest.raises(ValueError, match="changes the semantic IR"):
+        grammar_adapter.compose_canonical_ir(intended)
+
+
+def test_public_flat_projection_normalization_remains_supported() -> None:
+    assert compose_canonical_ir(_normalized_radial_ir()) == (
+        "normalized_radial_electric_field"
+    )
+
+
+def test_innermost_flat_projection_normalization_preserves_outer_operator() -> None:
+    intended = _with_inverse(_normalized_radial_ir(), outer=True)
+
+    assert compose_canonical_ir(intended) == (
+        "inverse_of_normalized_radial_electric_field"
+    )
+
+
+def test_flat_normalization_cannot_cross_an_inner_operator(monkeypatch) -> None:
+    """Absorbing an outer token across an inner operator changes precedence."""
+    from imas_standard_names import StandardNameIR
+
+    from imas_codex.standard_names import grammar_adapter
+
+    intended = _with_inverse(_normalized_radial_ir(), outer=False)
+    parsed_data = intended.model_dump(mode="python")
+    parsed_data["operators"] = parsed_data["operators"][1:]
+    parsed_data["projection"]["axis"] = "normalized_radial"
+    parsed = StandardNameIR.model_validate(parsed_data)
+    monkeypatch.setattr(
+        grammar_adapter,
+        "parse_canonical_name",
+        lambda name: ParsedCanonicalName(name=name, ir=parsed),
+    )
+
+    with pytest.raises(ValueError, match="changes the semantic IR"):
+        grammar_adapter.compose_canonical_ir(intended)
+
+
+@pytest.mark.parametrize("drift", ["operator", "projection", "qualifier"])
+def test_unrelated_flat_semantic_drift_is_rejected(monkeypatch, drift) -> None:
+    """The compatibility path cannot erase or invent unrelated semantics."""
+    from imas_standard_names import StandardNameIR, compose
+
+    from imas_codex.standard_names import grammar_adapter
+
+    intended = _normalized_radial_ir()
+    parsed_data = intended.model_dump(mode="python")
+    if drift == "operator":
+        parsed_data["operators"] = [
+            {
+                "kind": "unary_prefix",
+                "op": "inverse",
+                "bare_prefix": False,
+            }
+        ]
+    elif drift == "projection":
+        parsed_data["operators"] = []
+        parsed_data["projection"]["axis"] = "normalized_toroidal"
+    else:
+        parsed_data["operators"] = []
+        parsed_data["projection"]["axis"] = "normalized_radial"
+        parsed_data["qualifiers"] = [{"token": "electron"}]
+    parsed = StandardNameIR.model_validate(parsed_data)
+
+    monkeypatch.setattr(
+        grammar_adapter,
+        "parse_canonical_name",
+        lambda name: ParsedCanonicalName(name=name, ir=parsed),
+    )
+
+    with pytest.raises(ValueError, match="changes the semantic IR"):
+        grammar_adapter.compose_canonical_ir(intended)
+    assert compose(intended) == "normalized_radial_electric_field"
+
+
+def test_numerator_only_locus_composes_on_operand_a() -> None:
+    segments = GrammarSegments(
+        base_token="density",
+        base_kind="quantity",
+        qualifiers=["neutral"],
+        locus_token="isotope",
+        locus_relation="of",
+        locus_type="entity",
+        operators=[{"token": "ratio", "secondary_operand": "density"}],
+    )
+
+    assert segments.compose_name() == "ratio_of_neutral_density_of_isotope_to_density"
+
+
+@pytest.mark.xfail(
+    condition=not _strict_parser_preserves(
+        _binary_ir(
+            "ratio",
+            "neutral_density_of_isotope",
+            "total_neutral_density_of_isotope",
+            "to",
+        )
+    ),
+    reason="installed ISN does not yet preserve the terminal operand locus",
+    strict=True,
+)
+def test_loci_on_both_binary_leaves_round_trip_semantically() -> None:
+    segments = GrammarSegments(
+        base_token="density",
+        base_kind="quantity",
+        qualifiers=["neutral"],
+        locus_token="isotope",
+        locus_relation="of",
+        locus_type="entity",
+        operators=[
+            {
+                "token": "ratio",
+                "secondary_operand": "total_neutral_density_of_isotope",
+            }
+        ],
+    )
+
+    assert segments.compose_name() == (
+        "ratio_of_neutral_density_of_isotope_to_total_neutral_density_of_isotope"
+    )
+
+
+@pytest.mark.xfail(
+    condition=not _ISN_PRESERVES_NESTED_ISOTOPE_SCOPE,
+    reason="installed ISN does not yet preserve nested terminal operand scope",
+    strict=True,
+)
+def test_nested_ratio_difference_round_trips_semantically() -> None:
+    segments = GrammarSegments(
+        base_token="density",
+        base_kind="quantity",
+        qualifiers=["neutral"],
+        locus_token="isotope",
+        locus_relation="of",
+        locus_type="entity",
+        operators=[
+            {
+                "token": "ratio",
+                "secondary_operand": (
+                    "difference_of_total_neutral_density_and_neutral_density_of_isotope"
+                ),
+            }
+        ],
+    )
+
+    assert segments.compose_name() == ISOTOPE_RATIO
+
+
+@pytest.mark.xfail(
+    condition=not _ISN_REJECTS_DOUBLED_ISOTOPE_LOCUS,
+    reason="installed ISN does not yet reject repeated terminal locus scope",
+    strict=True,
+)
+def test_doubled_terminal_locus_is_not_canonical() -> None:
+    assert not is_canonical_name(DOUBLED_ISOTOPE_LOCUS)
+
+
+@pytest.mark.parametrize(
+    ("segments", "expected"),
+    [
+        (
+            {
+                "base_token": "temperature",
+                "base_kind": "quantity",
+                "qualifiers": ["electron"],
+                "operators": [{"token": "inverse"}],
+            },
+            "inverse_of_electron_temperature",
+        ),
+        (
+            {
+                "base_token": "radius",
+                "base_kind": "quantity",
+                "qualifiers": ["major"],
+                "operators": [{"token": "ratio", "secondary_operand": "minor_radius"}],
+            },
+            "ratio_of_major_radius_to_minor_radius",
+        ),
+    ],
+)
+def test_ordinary_operator_composition_is_unchanged(segments, expected) -> None:
+    assert GrammarSegments(**segments).compose_name() == expected
 
 
 def test_invalid_operator_precedence_is_rejected() -> None:
