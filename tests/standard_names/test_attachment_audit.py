@@ -848,6 +848,170 @@ def test_gate_detaches_a_laundered_migration() -> None:
 # ---------------------------------------------------------------------------
 
 
+def _terminal_recovery_client(*, eligible: bool = True) -> tuple[MagicMock, MagicMock]:
+    gc = MagicMock()
+    tx = MagicMock()
+    tx.closed = False
+    tx.run.return_value = (
+        [
+            {
+                "source_node_id": "dd:spectrometer/channel/isotope_ratio",
+                "sn_id": "hydrogen_fraction",
+                "name_stage": "superseded",
+                "retry_event_id": "source-retry:test",
+                "change_event_id": "sn-change:test",
+            }
+        ]
+        if eligible
+        else []
+    )
+    session = MagicMock()
+    session.begin_transaction.return_value = tx
+    gc.session.return_value.__enter__.return_value = session
+    gc.query.return_value = (
+        [
+            {
+                "source_node_id": "dd:spectrometer/channel/isotope_ratio",
+                "source_status": "composed",
+                "attempt_count": 3,
+                "last_error": None,
+                "name_stage": "superseded",
+            }
+        ]
+        if eligible
+        else []
+    )
+    return gc, tx
+
+
+def test_terminal_recovery_is_one_exact_transaction() -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        recover_terminal_attachment,
+    )
+
+    path = "spectrometer/channel/isotope_ratio"
+    gc, tx = _terminal_recovery_client()
+    result = recover_terminal_attachment(
+        path,
+        "hydrogen_fraction",
+        reason="the candidate resolved to historical lineage",
+        gc=gc,
+    )
+
+    assert result == {
+        "ok": True,
+        "dd_path": path,
+        "sn_id": "hydrogen_fraction",
+        "source_node_id": f"dd:{path}",
+        "dry_run": False,
+        "name_stage": "superseded",
+        "retry_event_id": "source-retry:test",
+        "change_event_id": "sn-change:test",
+    }
+    assert tx.run.call_count == 1
+    cypher = tx.run.call_args.args[0]
+    assert "src.status = 'composed'" in cypher
+    assert "src.produced_sn_id = sn.id" in cypher
+    assert "COUNT { (src)-[:PRODUCED_NAME]->(:StandardName) } = 1" in cypher
+    assert "MATCH (dd)-[hsn:HAS_STANDARD_NAME]->(sn)" in cypher
+    assert "DELETE pn, hsn" in cypher
+    assert "src.status = 'extracted'" in cypher
+    assert "src.attempt_count = 0" in cypher
+    assert "CREATE (retry:StandardNameSourceRetry" in cypher
+    assert "MERGE (src)-[:HAS_RETRY_EVENT]->(retry)" in cypher
+    assert "CREATE (change:StandardNameChange" in cypher
+    assert "MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)" in cypher
+    assert "terminal_stage" in cypher
+    params = tx.run.call_args.kwargs
+    assert params["source_node_id"] == f"dd:{path}"
+    assert params["dd_path"] == path
+    assert params["sn_id"] == "hydrogen_fraction"
+    tx.commit.assert_called_once()
+
+
+def test_terminal_recovery_dry_run_has_no_write_transaction() -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        recover_terminal_attachment,
+    )
+
+    gc, tx = _terminal_recovery_client()
+    result = recover_terminal_attachment(
+        "spectrometer/channel/isotope_ratio",
+        "hydrogen_fraction",
+        reason="inspect exact historical target",
+        gc=gc,
+        dry_run=True,
+    )
+
+    assert result["ok"] is True
+    assert result["dry_run"] is True
+    assert result["name_stage"] == "superseded"
+    assert "DELETE" not in gc.query.call_args.args[0]
+    gc.session.assert_not_called()
+    tx.run.assert_not_called()
+
+
+def test_terminal_recovery_fails_closed_without_partial_events() -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        recover_terminal_attachment,
+    )
+
+    gc, tx = _terminal_recovery_client(eligible=False)
+    result = recover_terminal_attachment(
+        "spectrometer/channel/isotope_ratio",
+        "hydrogen_fraction",
+        reason="target must remain terminal and exact",
+        gc=gc,
+    )
+
+    assert result["ok"] is False
+    assert "changed or is ineligible" in result["reason"]
+    assert tx.run.call_count == 1
+    tx.commit.assert_called_once()
+    assert tx.close.call_count == 0
+
+
+def test_terminal_recovery_exception_rolls_back_edges_and_events() -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        recover_terminal_attachment,
+    )
+
+    gc, tx = _terminal_recovery_client()
+    tx.run.side_effect = RuntimeError("transaction failed")
+    with pytest.raises(RuntimeError, match="transaction failed"):
+        recover_terminal_attachment(
+            "spectrometer/channel/isotope_ratio",
+            "hydrogen_fraction",
+            reason="recover exact historical target",
+            gc=gc,
+        )
+
+    tx.commit.assert_not_called()
+    tx.close.assert_called_once()
+
+
+def test_detach_terminal_recovery_routes_to_exact_transaction() -> None:
+    from imas_codex.standard_names.attachment_audit import detach_one_attachment
+
+    gc, tx = _terminal_recovery_client()
+    result = detach_one_attachment(
+        "spectrometer/channel/isotope_ratio",
+        "hydrogen_fraction",
+        reason="historical collision",
+        gc=gc,
+        terminal_recovery=True,
+    )
+
+    assert result["ok"] is True
+    assert result["retry_event_id"] == "source-retry:test"
+    tx.commit.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Ordinary targeted detach — semantic mis-shares on live names
+# ---------------------------------------------------------------------------
+
+
 def _detach_client(
     *,
     exists: bool = True,

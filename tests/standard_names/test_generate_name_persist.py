@@ -293,13 +293,12 @@ class TestFinalizeGeneratedNameStage:
         tx.commit.assert_not_called()
 
 
-def test_candidate_stage_replaces_orphan_pending_reservation_under_fence() -> None:
+def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
     from imas_codex.standard_names.graph_ops import (
         stage_claimed_generated_candidates,
     )
 
-    gc = _mock_gc_query()
-    gc.query.return_value = [{"id": "dd:equilibrium/time_slice/q"}]
+    gc, tx = _mock_gc_tx()
     with _patch_gc(gc):
         winners = stage_claimed_generated_candidates(
             [
@@ -316,14 +315,147 @@ def test_candidate_stage_replaces_orphan_pending_reservation_under_fence() -> No
         )
 
     assert winners == ["dd:equilibrium/time_slice/q"]
-    cypher = gc.query.call_args.args[0]
-    assert "sns.claim_token = b.claim_token" in cypher
-    assert "sns.claim_seq = b.claim_seq" in cypher
-    assert "sns.status = 'extracted'" in cypher
-    assert "stale.id <> b.sn_id" in cypher
-    assert "stale.name_stage = 'pending'" in cypher
-    assert "DETACH DELETE stale" in cypher
-    assert "sn.name_stage = 'pending'" in cypher
+    lock_cypher = tx.run.call_args_list[0].args[0]
+    assert "sns.claim_token = b.claim_token" in lock_cypher
+    assert "sns.claim_seq = b.claim_seq" in lock_cypher
+    assert "sns.status = 'extracted'" in lock_cypher
+    assert "MERGE (target:StandardName {id: b.sn_id})" in lock_cypher
+    assert "ON CREATE SET target.created_at = datetime()" in lock_cypher
+    assert "target.name_stage = $pending_stage" in lock_cypher
+    assert "WITH b, sns, target\n        FOREACH" in lock_cypher
+    assert "SET target.binding_lock_token = b.claim_token" in lock_cypher
+    assert "REMOVE target.binding_lock_token, target.binding_lock_seq" in lock_cypher
+    assert "MERGE (sns)-[reservation:PRODUCED_NAME]->(target)" in lock_cypher
+    assert "reservation.provisional = true" in lock_cypher
+    assert "reservation.claim_token = b.claim_token" in lock_cypher
+    assert "reservation.claim_seq = b.claim_seq" in lock_cypher
+    assert "reservation.created_target = true" in lock_cypher
+    assert "HAS_STANDARD_NAME" not in lock_cypher
+    cleanup_cypher = tx.run.call_args_list[1].args[0]
+    assert "b.preserve_current = true" in cleanup_cypher
+    assert tx.run.call_count == 2
+    tx.commit.assert_called_once()
+
+
+class TestClaimedAttachmentPersistence:
+    """Claimed attachments share the stable-target lifecycle fence."""
+
+    @staticmethod
+    def _attachment() -> dict:
+        return {
+            "sns_id": "dd:spectrometer/channel/isotope_ratio",
+            "source_id": "spectrometer/channel/isotope_ratio",
+            "standard_name": "hydrogen_fraction",
+            "claim_token": "attachment-winner",
+            "claim_seq": 5,
+        }
+
+    def test_terminal_target_releases_without_attachment_mutation(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        gc, tx = _mock_gc_tx()
+
+        def _collision(cypher, **_params):
+            if "AS outcome" not in cypher:
+                return []
+            return [
+                {
+                    "id": "dd:spectrometer/channel/isotope_ratio",
+                    "outcome": "lifecycle_collision",
+                    "candidate_id": "hydrogen_fraction",
+                    "target_stage": "superseded",
+                    "attempt_count": 4,
+                }
+            ]
+
+        tx.run.side_effect = _collision
+        with _patch_gc(gc):
+            winners = persist_claimed_attachments([self._attachment()])
+
+        assert winners == []
+        assert tx.run.call_count == 3
+        cypher = tx.run.call_args_list[0].args[0]
+        assert "sns.claim_token = b.claim_token" in cypher
+        assert "sns.claim_seq = b.claim_seq" in cypher
+        release = tx.run.call_args_list[2].args[0]
+        assert "sns.last_error = CASE" in release
+        assert "MERGE (source)-[:HAS_STANDARD_NAME]" not in release
+        tx.commit.assert_called_once()
+
+    def test_accepted_target_attaches_under_same_transaction(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        gc, tx = _mock_gc_tx()
+
+        def _winner(cypher, **params):
+            batch = params.get("batch", [])
+            if "AS outcome" in cypher:
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": "accepted",
+                        "attempt_count": 1,
+                    }
+                ]
+            return [{"id": item["sns_id"]} for item in batch]
+
+        tx.run.side_effect = _winner
+        with _patch_gc(gc):
+            winners = persist_claimed_attachments([self._attachment()])
+
+        assert winners == ["dd:spectrometer/channel/isotope_ratio"]
+        cleanup = tx.run.call_args_list[1].args[0]
+        mutation = tx.run.call_args_list[2].args[0]
+        assert "b.preserve_current = true" in cleanup
+        assert "WHERE sn.name_stage IN $stable_stages" in mutation
+        assert "MERGE (sns)-[produced:PRODUCED_NAME]->(sn)" in mutation
+        assert "REMOVE produced.provisional" in mutation
+        assert "produced.claim_token" in mutation
+        assert "produced.claim_seq" in mutation
+        assert "MERGE (src)-[:HAS_STANDARD_NAME]->(sn)" in mutation
+        tx.commit.assert_called_once()
+
+    def test_missing_fence_never_opens_graph(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        attachment = self._attachment()
+        attachment["claim_token"] = None
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as graph:
+            assert persist_claimed_attachments([attachment]) == []
+        graph.assert_not_called()
+
+    def test_final_write_failure_rolls_back_lifecycle_fence(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        gc, tx = _mock_gc_tx()
+
+        def _fail_after_lock(cypher, **params):
+            if "AS outcome" in cypher:
+                batch = params["batch"]
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": "accepted",
+                        "attempt_count": 1,
+                    }
+                ]
+            if "[stale:PRODUCED_NAME]" in cypher:
+                return []
+            raise RuntimeError("attachment write failed")
+
+        tx.run.side_effect = _fail_after_lock
+        with (
+            _patch_gc(gc),
+            pytest.raises(RuntimeError, match="attachment write failed"),
+        ):
+            persist_claimed_attachments([self._attachment()])
+
+        tx.commit.assert_not_called()
+        tx.close.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -619,6 +751,629 @@ class TestPersistGeneratedNameBatch:
         assert result == 0
         write.assert_not_called()
         self.atomic_tx.commit.assert_called_once()
+
+    def test_terminal_same_id_releases_source_without_rich_mutation(self):
+        """A terminal same-id node is a diagnosed retry, never a success."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="hydrogen_fraction")
+
+        def _terminal_collision(cypher, **params):
+            assert params["batch"][0]["claim_token"] == "winner"
+            assert params["batch"][0]["claim_seq"] == 7
+            if "AS outcome" not in cypher:
+                return []
+            return [
+                {
+                    "id": "dd:core_profiles/profiles_1d/electrons/temperature",
+                    "outcome": "lifecycle_collision",
+                    "candidate_id": "hydrogen_fraction",
+                    "target_stage": "superseded",
+                    "attempt_count": 3,
+                }
+            ]
+
+        self.atomic_tx.run.side_effect = _terminal_collision
+        with (
+            patch("imas_codex.standard_names.graph_ops.write_standard_names") as write,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names"
+            ) as supersede,
+            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+        ):
+            winners = persist_generated_name_batch(
+                [candidate],
+                compose_model="test/model",
+                return_winner_ids=True,
+            )
+
+        assert winners == []
+        write.assert_not_called()
+        backfill.assert_not_called()
+        supersede.assert_not_called()
+        counter.assert_not_called()
+        self.atomic_tx.commit.assert_called_once()
+        assert self.atomic_tx.run.call_count == 3
+        cypher = self.atomic_tx.run.call_args_list[0].args[0]
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        release_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        assert "SET sns.claimed_at = datetime()" in cypher
+        assert "stale.provisional = true" in cleanup_cypher
+        assert "sns.last_error = CASE" in release_cypher
+        assert 'candidate "' in release_cypher
+        assert "target_stage" in cypher
+        assert "attempt_count" in cypher
+        assert "HAS_STANDARD_NAME" not in cypher
+
+    @pytest.mark.parametrize("target_stage", ["accepted", "approved"])
+    def test_existing_stable_same_id_is_provenance_only(self, target_stage):
+        """Catalog-stable same-id reuse cannot rewrite target content."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+
+        def _accepted_winner(cypher, **params):
+            batch = params.get("batch", [])
+            if "AS outcome" in cypher:
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": target_stage,
+                        "attempt_count": 2,
+                    }
+                ]
+            return [{"id": item["sns_id"]} for item in batch]
+
+        self.atomic_tx.run.side_effect = _accepted_winner
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ) as write,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ) as supersede,
+        ):
+            winners = persist_generated_name_batch(
+                [candidate],
+                compose_model="test/model",
+                return_winner_ids=True,
+            )
+
+        assert winners == ["dd:core_profiles/profiles_1d/electrons/temperature"]
+        write.assert_not_called()
+        backfill.assert_not_called()
+        supersede.assert_not_called()
+        lock_cypher = self.atomic_tx.run.call_args_list[0].args[0]
+        assert "SET target.binding_lock_token = b.claim_token" in lock_cypher
+        assert "target.binding_lock_seq = b.claim_seq" in lock_cypher
+        assert (
+            "REMOVE target.binding_lock_token, target.binding_lock_seq" in lock_cypher
+        )
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "b.preserve_current = true" in cleanup_cypher
+        finalize_cypher = _transaction_call(
+            self.atomic_tx, "sns.status = 'composed'"
+        ).args[0]
+        assert "WHERE sn.name_stage IN $stable_stages" in finalize_cypher
+        assert "MERGE (source)-[:HAS_STANDARD_NAME]->(sn)" in finalize_cypher
+        assert "SET sn.source_paths = CASE" in finalize_cypher
+        immutable_fields = (
+            "description",
+            "documentation",
+            "source_types",
+            "validation_status",
+            "model",
+            "grammar_parse_version",
+            "review_input_hash",
+            "name_stage",
+            "docs_stage",
+            "unit",
+        )
+        for field in immutable_fields:
+            assert not any(
+                line.lstrip().startswith(f"sn.{field} =")
+                for line in finalize_cypher.splitlines()
+            )
+
+    @pytest.mark.parametrize(
+        ("binding_kind", "target_stage", "rich_write_expected"),
+        [
+            ("owned_reservation", "pending", True),
+            ("stable_reuse", "accepted", False),
+        ],
+    )
+    def test_winner_prunes_stale_different_candidate_before_finalize(
+        self,
+        binding_kind,
+        target_stage,
+        rich_write_expected,
+    ):
+        """Both winner modes prune old provisional state before composing once."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="electron_temperature")
+
+        def _winner(cypher, **params):
+            if "AS outcome" in cypher:
+                item = params["batch"][0]
+                return [
+                    {
+                        "id": item["sns_id"],
+                        "outcome": "winner",
+                        "binding_kind": binding_kind,
+                        "candidate_id": item["sn_id"],
+                        "target_stage": target_stage,
+                        "attempt_count": 3,
+                    }
+                ]
+            if "[stale:PRODUCED_NAME]" in cypher:
+                return []
+            return [{"id": row["sns_id"]} for row in params.get("batch", [])]
+
+        self.atomic_tx.run.side_effect = _winner
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ) as write,
+            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ),
+        ):
+            winners = persist_generated_name_batch(
+                [candidate], compose_model="test/model", return_winner_ids=True
+            )
+
+        assert winners == ["dd:core_profiles/profiles_1d/electrons/temperature"]
+        assert write.called is rich_write_expected
+        cleanup_call = self.atomic_tx.run.call_args_list[1]
+        cleanup_cypher = cleanup_call.args[0]
+        cleanup_item = cleanup_call.kwargs["batch"][0]
+        assert cleanup_item["preserve_current"] is True
+        assert "old.id = b.sn_id" in cleanup_cypher
+        assert "stale.claim_token = b.claim_token" in cleanup_cypher
+        assert "stale.claim_seq = b.claim_seq" in cleanup_cypher
+        assert "HAS_STANDARD_NAME" not in cleanup_cypher
+        assert "source_paths =" not in cleanup_cypher
+        finalize_cypher = _transaction_call(
+            self.atomic_tx, "sns.status = 'composed'"
+        ).args[0]
+        assert finalize_cypher.count("sns.status = 'composed'") == 1
+        if binding_kind == "owned_reservation":
+            assert "reservation.claim_token = b.claim_token" in finalize_cypher
+            assert "reservation.claim_seq = b.claim_seq" in finalize_cypher
+        else:
+            assert "WHERE sn.name_stage IN $stable_stages" in finalize_cypher
+
+    def test_terminal_transition_after_rich_write_rolls_back_every_effect(self):
+        """A reservation that turns terminal before finalize cannot commit."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+
+        def _transition(cypher, **params):
+            if "AS outcome" in cypher:
+                item = params["batch"][0]
+                return [
+                    {
+                        "id": item["sns_id"],
+                        "outcome": "winner",
+                        "binding_kind": "owned_reservation",
+                        "candidate_id": item["sn_id"],
+                        "target_stage": "pending",
+                        "attempt_count": 1,
+                    }
+                ]
+            if "reservation.provisional = true" in cypher:
+                return []
+            return [{"id": row["sns_id"]} for row in params.get("batch", [])]
+
+        self.atomic_tx.run.side_effect = _transition
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ) as write,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+            pytest.raises(RuntimeError, match="source claim changed"),
+        ):
+            persist_generated_name_batch([candidate], compose_model="test/model")
+
+        write.assert_called_once()
+        backfill.assert_not_called()
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "b.preserve_current = true" in cleanup_cypher
+        finalize_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        assert "sn.name_stage = $pending_stage" in finalize_cypher
+        assert "reservation.provisional = true" in finalize_cypher
+        assert "reservation.claim_token = b.claim_token" in finalize_cypher
+        assert "reservation.claim_seq = b.claim_seq" in finalize_cypher
+        assert "MERGE (source)-[:HAS_STANDARD_NAME]->(sn)" in finalize_cypher
+        self.atomic_tx.commit.assert_not_called()
+        self.atomic_tx.close.assert_called_once()
+
+    def test_reclaimed_collision_cleans_only_stamped_provisional_artifacts(self):
+        """A reclaimed source drops stale staging residue, not real history."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="hydrogen_fraction")
+
+        def _collision(cypher, **params):
+            if "AS outcome" not in cypher:
+                return []
+            item = params["batch"][0]
+            return [
+                {
+                    "id": item["sns_id"],
+                    "outcome": "lifecycle_collision",
+                    "binding_kind": "collision",
+                    "candidate_id": item["sn_id"],
+                    "target_stage": "superseded",
+                    "attempt_count": 4,
+                }
+            ]
+
+        self.atomic_tx.run.side_effect = _collision
+        with patch("imas_codex.standard_names.graph_ops.write_standard_names") as write:
+            assert (
+                persist_generated_name_batch(
+                    [candidate],
+                    compose_model="test/model",
+                    return_winner_ids=True,
+                )
+                == []
+            )
+
+        write.assert_not_called()
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "stale.provisional = true" in cleanup_cypher
+        assert "stale.claim_token IS NOT NULL" in cleanup_cypher
+        assert "stale.claim_seq IS NOT NULL" in cleanup_cypher
+        assert "collect(DISTINCT stale) AS stale_edges" in cleanup_cypher
+        assert "edge.created_target = true" in cleanup_cypher
+        assert "old.name_stage = $pending_stage" in cleanup_cypher
+        assert "NOT EXISTS { MATCH (old)--() }" in cleanup_cypher
+        assert "DELETE stale_edge" in cleanup_cypher
+        assert "DELETE owned_target" in cleanup_cypher
+        assert "HAS_STANDARD_NAME" not in cleanup_cypher
+        assert "SET old.source_paths" not in cleanup_cypher
+        release_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        assert "sns.status = 'extracted'" in release_cypher
+        assert "sns.claim_token = null" in release_cypher
+
+    def test_unstamped_projection_and_source_paths_survive_stale_cleanup(self):
+        """Provisional ownership never implies ownership of unstamped mirrors."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="hydrogen_fraction")
+
+        def _collision(cypher, **params):
+            if "AS outcome" not in cypher:
+                return []
+            item = params["batch"][0]
+            return [
+                {
+                    "id": item["sns_id"],
+                    "outcome": "lifecycle_collision",
+                    "binding_kind": "collision",
+                    "candidate_id": item["sn_id"],
+                    "target_stage": "superseded",
+                    "attempt_count": 3,
+                }
+            ]
+
+        self.atomic_tx.run.side_effect = _collision
+        assert (
+            persist_generated_name_batch(
+                [candidate], compose_model="test/model", return_winner_ids=True
+            )
+            == []
+        )
+
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "stale.provisional = true" in cleanup_cypher
+        assert "DELETE stale_edge" in cleanup_cypher
+        assert "HAS_STANDARD_NAME" not in cleanup_cypher
+        assert "source_paths =" not in cleanup_cypher
+        assert "coalesce(old.source_paths, []) = []" in cleanup_cypher
+
+    def test_reclaimed_same_candidate_can_reserve_after_owned_orphan_cleanup(self):
+        """An exact-owned pending orphan cannot wedge the next source claim."""
+        from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+
+        batch = [
+            {
+                "sns_id": "dd:core_profiles/electrons/temperature",
+                "source_id": "core_profiles/electrons/temperature",
+                "sn_id": "electron_temperature",
+                "unit": "eV",
+                "claim_token": "reclaimed",
+                "claim_seq": 8,
+            }
+        ]
+        gc = MagicMock()
+        calls = {"lock": 0}
+
+        def _query(cypher, **_params):
+            if "AS outcome" in cypher:
+                calls["lock"] += 1
+                if calls["lock"] == 1:
+                    return [
+                        {
+                            "id": batch[0]["sns_id"],
+                            "outcome": "lifecycle_collision",
+                            "binding_kind": "collision",
+                            "candidate_id": batch[0]["sn_id"],
+                            "target_stage": "pending",
+                            "attempt_count": 2,
+                        }
+                    ]
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "binding_kind": "owned_reservation",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": "pending",
+                        "attempt_count": 3,
+                    }
+                ]
+            return []
+
+        gc.query.side_effect = _query
+        first = _lock_claimed_name_bindings(
+            gc,
+            batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+        second = _lock_claimed_name_bindings(
+            gc,
+            batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+
+        assert first[0]["outcome"] == "lifecycle_collision"
+        assert second[0]["binding_kind"] == "owned_reservation"
+        cleanup_cypher = gc.query.call_args_list[1].args[0]
+        assert "edge.created_target = true" in cleanup_cypher
+        assert "DELETE owned_target" in cleanup_cypher
+        retry_lock = gc.query.call_args_list[3].args[0]
+        assert "MERGE (target:StandardName {id: b.sn_id})" in retry_lock
+        assert "reservation.created_target = true" in retry_lock
+
+    def test_cleanup_reaps_multi_edge_owned_target_after_edge_deletion(self):
+        """A target-owned stale group is reaped only after every edge is gone."""
+        from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+
+        current_source = "dd:core_profiles/electrons/temperature"
+        retry_source = "dd:core_profiles/ions/temperature"
+        nodes = {
+            "hydrogen_fraction": {"stage": "pending", "source_paths": []},
+            "electron_temperature": {"stage": "pending", "source_paths": []},
+            "deuterium_fraction": {"stage": "pending", "source_paths": []},
+        }
+        edges = {
+            "owned-first": {
+                "source": current_source,
+                "target": "hydrogen_fraction",
+                "token": "abandoned-first",
+                "seq": 5,
+                "provisional": True,
+                "created_target": True,
+            },
+            "owned-second": {
+                "source": current_source,
+                "target": "hydrogen_fraction",
+                "token": "abandoned-second",
+                "seq": 6,
+                "provisional": True,
+                "created_target": False,
+            },
+            "current-winner": {
+                "source": current_source,
+                "target": "electron_temperature",
+                "token": "winner",
+                "seq": 7,
+                "provisional": True,
+                "created_target": True,
+            },
+            "current-stale": {
+                "source": current_source,
+                "target": "electron_temperature",
+                "token": "abandoned-current",
+                "seq": 2,
+                "provisional": True,
+                "created_target": True,
+            },
+            "unowned-false": {
+                "source": current_source,
+                "target": "deuterium_fraction",
+                "token": "unowned-first",
+                "seq": 3,
+                "provisional": True,
+                "created_target": False,
+            },
+            "unowned-unset": {
+                "source": current_source,
+                "target": "deuterium_fraction",
+                "token": "unowned-second",
+                "seq": 4,
+                "provisional": True,
+                "created_target": None,
+            },
+        }
+        deleted_edges = []
+        deleted_targets = []
+
+        def _query(cypher, **params):
+            if "AS outcome" in cypher:
+                results = []
+                for item in params["batch"]:
+                    target = nodes.get(item["sn_id"])
+                    exact_edge = next(
+                        (
+                            edge
+                            for edge in edges.values()
+                            if edge["source"] == item["sns_id"]
+                            and edge["target"] == item["sn_id"]
+                            and edge["token"] == item["claim_token"]
+                            and edge["seq"] == item["claim_seq"]
+                        ),
+                        None,
+                    )
+                    if target is None:
+                        nodes[item["sn_id"]] = {
+                            "stage": "pending",
+                            "source_paths": [],
+                        }
+                        edge_id = f"reserved:{item['sns_id']}:{item['sn_id']}"
+                        edges[edge_id] = {
+                            "source": item["sns_id"],
+                            "target": item["sn_id"],
+                            "token": item["claim_token"],
+                            "seq": item["claim_seq"],
+                            "provisional": True,
+                            "created_target": True,
+                        }
+                        exact_edge = edges[edge_id]
+                    results.append(
+                        {
+                            "id": item["sns_id"],
+                            "outcome": "winner",
+                            "binding_kind": "owned_reservation",
+                            "candidate_id": item["sn_id"],
+                            "target_stage": nodes[item["sn_id"]]["stage"],
+                            "attempt_count": 1,
+                        }
+                    )
+                    assert exact_edge is not None
+                return results
+
+            if "[stale:PRODUCED_NAME]" not in cypher:
+                return []
+
+            assert "collect(DISTINCT stale) AS stale_edges" in cypher
+            assert "any(edge IN stale_edges" in cypher
+            assert "FOREACH (stale_edge IN stale_edges" in cypher
+            assert "NOT EXISTS { MATCH (old)--() }" in cypher
+            assert cypher.index("DELETE stale_edge") < cypher.index(
+                "NOT EXISTS { MATCH (old)--() }"
+            )
+            for item in params["batch"]:
+                stale_groups = {}
+                for edge_id, edge in list(edges.items()):
+                    if edge["source"] != item["sns_id"]:
+                        continue
+                    if not edge["provisional"]:
+                        continue
+                    if edge["token"] is None or edge["seq"] is None:
+                        continue
+                    is_current = (
+                        item["preserve_current"]
+                        and edge["target"] == item["sn_id"]
+                        and edge["token"] == item["claim_token"]
+                        and edge["seq"] == item["claim_seq"]
+                    )
+                    if not is_current:
+                        stale_groups.setdefault(edge["target"], []).append(edge_id)
+
+                for target_id, edge_ids in stale_groups.items():
+                    owns_target = any(
+                        edges[edge_id]["created_target"] is True for edge_id in edge_ids
+                    )
+                    for edge_id in edge_ids:
+                        deleted_edges.append(edge_id)
+                        del edges[edge_id]
+                    target = nodes[target_id]
+                    has_relationship = any(
+                        edge["target"] == target_id for edge in edges.values()
+                    )
+                    if (
+                        owns_target
+                        and target["stage"] == params["pending_stage"]
+                        and target["source_paths"] == []
+                        and not has_relationship
+                    ):
+                        deleted_targets.append(target_id)
+                        del nodes[target_id]
+            return []
+
+        gc = MagicMock()
+        gc.query.side_effect = _query
+        current_batch = [
+            {
+                "sns_id": current_source,
+                "source_id": "core_profiles/electrons/temperature",
+                "source_type": "dd",
+                "sn_id": "electron_temperature",
+                "unit": "eV",
+                "claim_token": "winner",
+                "claim_seq": 7,
+            }
+        ]
+        current = _lock_claimed_name_bindings(
+            gc,
+            current_batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+
+        assert current[0]["binding_kind"] == "owned_reservation"
+        assert {"owned-first", "owned-second"} <= set(deleted_edges)
+        assert "hydrogen_fraction" in deleted_targets
+        assert "hydrogen_fraction" not in nodes
+        assert "current-stale" in deleted_edges
+        assert "current-winner" in edges
+        assert "electron_temperature" in nodes
+        assert "electron_temperature" not in deleted_targets
+        assert "deuterium_fraction" in nodes
+        assert not any(
+            edge["target"] == "deuterium_fraction" for edge in edges.values()
+        )
+
+        retry_batch = [
+            {
+                "sns_id": retry_source,
+                "source_id": "core_profiles/ions/temperature",
+                "source_type": "dd",
+                "sn_id": "hydrogen_fraction",
+                "unit": "1",
+                "claim_token": "retry",
+                "claim_seq": 9,
+            }
+        ]
+        retry = _lock_claimed_name_bindings(
+            gc,
+            retry_batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+
+        assert retry[0]["binding_kind"] == "owned_reservation"
+        assert "hydrogen_fraction" in nodes
+        assert any(
+            edge["source"] == retry_source
+            and edge["target"] == "hydrogen_fraction"
+            and edge["token"] == "retry"
+            and edge["seq"] == 9
+            for edge in edges.values()
+        )
 
     def test_rich_write_and_finalize_share_transaction(self):
         """The rich writer and source outcome use the locked transaction."""
