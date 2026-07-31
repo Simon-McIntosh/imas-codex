@@ -7,7 +7,7 @@ import pytest
 
 def test_grammar_context_contract():
     """Verify get_grammar_context() returns all keys codex depends on."""
-    from imas_standard_names.grammar.context import get_grammar_context
+    from imas_standard_names import get_grammar_context
 
     ctx = get_grammar_context()
     required = {
@@ -36,7 +36,7 @@ def test_grammar_context_contract():
 
 def test_grammar_context_types():
     """Verify key types from get_grammar_context()."""
-    from imas_standard_names.grammar.context import get_grammar_context
+    from imas_standard_names import get_grammar_context
 
     ctx = get_grammar_context()
     assert isinstance(ctx["canonical_pattern"], str)
@@ -244,18 +244,18 @@ def _decomposition_write(name: str) -> tuple[bool, dict | None]:
 )
 def test_persist_and_decomposition_parity(name: str, expect_rejected: bool):
     """The persist path (_parse_grammar) and the decomposition writer
-    (_write_grammar_decomposition) share the same pydantic accept/reject
+    (_write_grammar_decomposition) share the same strict IR accept/reject
     authority: for ANY name string a rejected name clears all segment
     columns to None in both paths and, on success, the columns equal the
-    pydantic model fields. Non-compliance is recorded by validation_status,
-    not a fallback flag.
+    IR compatibility projection. Non-compliance is recorded by
+    validation_status, not a fallback flag.
     """
-    from imas_standard_names.grammar import parse_standard_name
+    from imas_standard_names import parse
 
     from imas_codex.standard_names.graph_ops import (
         _GRAMMAR_SEGMENT_COLUMNS,
         _parse_grammar,
-        _segments_from_model,
+        _segments_from_ir,
     )
 
     pg = _parse_grammar(name)
@@ -276,8 +276,8 @@ def test_persist_and_decomposition_parity(name: str, expect_rejected: bool):
         assert persist_cols == decomp_cols, (
             f"persist and decomposition columns diverge for {name!r}"
         )
-        assert persist_cols == _segments_from_model(parse_standard_name(name)), (
-            f"columns must equal the pydantic model fields for {name!r}"
+        assert persist_cols == _segments_from_ir(parse(name, strict=True).ir), (
+            f"columns must equal the strict IR projection for {name!r}"
         )
 
 

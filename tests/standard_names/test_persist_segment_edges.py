@@ -119,6 +119,18 @@ def _find_merge_segment_calls(mock_gc: MagicMock) -> list:
     ]
 
 
+def _public_segment_positions() -> dict[str, int]:
+    """Return segment positions from the public ordered grammar vocabulary."""
+    from imas_standard_names import get_grammar_context
+
+    sections = get_grammar_context()["vocabulary_sections"]
+    return {
+        str(section["segment"]): position
+        for position, section in enumerate(sections)
+        if section.get("segment")
+    }
+
+
 # ---------------------------------------------------------------------------
 # Tests: segment edge writing
 # ---------------------------------------------------------------------------
@@ -445,28 +457,26 @@ class TestSegmentEdgeRoundTrip:
         # Reconstruct segment list sorted by position
         sorted_edges = sorted(edges_param, key=lambda e: e["position"])
 
-        # Verify exact field values. Positions are ISN SEGMENT_ORDER indices —
-        # derive them from the installed grammar so vocabulary-driven segment
-        # insertions (zone, qualifier, channel, ...) never stale this fixture.
-        from imas_standard_names.grammar.constants import SEGMENT_ORDER
+        # Derive exact positions from the public ordered grammar vocabulary so
+        # segment insertions never stale this fixture.
+        segment_positions = _public_segment_positions()
 
         assert sorted_edges[0] == {
-            "position": SEGMENT_ORDER.index("subject"),
+            "position": segment_positions["subject"],
             "segment": "subject",
             "token": "electron",
         }
         assert sorted_edges[1] == {
-            "position": SEGMENT_ORDER.index("physical_base"),
+            "position": segment_positions["physical_base"],
             "segment": "physical_base",
             "token": "temperature",
         }
 
     def test_round_trip_multi_segment_name(self, mock_gc: MagicMock) -> None:
         """A name with 3+ segments should produce edges with monotonically
-        increasing positions matching ISN SEGMENT_ORDER."""
-        # poloidal_electron_temperature → component(0), subject(5), physical_base(8)
-        # (ISN ≥0.8.0rc32 SEGMENT_ORDER; aggregation/orbit/population reserve
-        # the earlier slots)
+        increasing positions matching the public grammar order."""
+        # The public vocabulary order reserves slots for qualifier classes
+        # that are absent from this particular name.
         mock_gc.query.side_effect = [
             [],  # column SET
             [],  # DELETE
@@ -493,6 +503,14 @@ class TestSegmentEdgeRoundTrip:
         positions = [e["position"] for e in sorted_edges]
         assert positions == sorted(positions)
         assert len(set(positions)) == len(positions), "Positions must be unique"
+
+        segment_positions = _public_segment_positions()
+
+        assert {edge["segment"]: edge["position"] for edge in edges_param} == {
+            "component": segment_positions["component"],
+            "subject": segment_positions["subject"],
+            "physical_base": segment_positions["physical_base"],
+        }
 
         # Each edge must have all three fields
         for edge in sorted_edges:

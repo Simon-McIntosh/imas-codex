@@ -119,7 +119,7 @@ def _public_segment_token_index() -> dict[str, tuple[str, ...]]:
     them from ``get_grammar_context()`` instead of duplicating grammar
     vocabulary in codex.
     """
-    from imas_standard_names.grammar import get_grammar_context
+    from imas_standard_names import get_grammar_context
 
     index: dict[str, list[str]] = {}
     for section in get_grammar_context().get("vocabulary_sections", []):
@@ -129,6 +129,18 @@ def _public_segment_token_index() -> dict[str, tuple[str, ...]]:
         for token in section.get("tokens") or []:
             index.setdefault(str(token), []).append(str(segment))
     return {token: tuple(segments) for token, segments in index.items()}
+
+
+@functools.lru_cache(maxsize=1)
+def _public_grammar_segment_order() -> tuple[str, ...]:
+    """Return segment names in their public grammar render order."""
+    from imas_standard_names import get_grammar_context
+
+    return tuple(
+        str(section["segment"])
+        for section in get_grammar_context().get("vocabulary_sections", [])
+        if section.get("segment")
+    )
 
 
 def _segments_from_ir(ir: Any) -> dict[str, str | None]:
@@ -4153,7 +4165,8 @@ def _write_grammar_decomposition(
                 "segment": segment,
                 "token": token,
             }
-            for position, segment in enumerate(_GRAMMAR_SEGMENT_COLUMNS)
+            for position, segment in enumerate(_public_grammar_segment_order())
+            if segment in _GRAMMAR_SEGMENT_COLUMNS
             if (token := column_values.get(segment)) is not None
             and segment in synced_segments
         ]
