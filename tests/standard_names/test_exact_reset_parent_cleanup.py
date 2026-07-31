@@ -102,6 +102,8 @@ def test_parent_requires_null_pending_lifecycle_and_no_other_relationship() -> N
     call = _parent_cleanup_call(graph)
     query = call.args[0]
     assert "parent.origin = 'derived'" in query
+    assert "parent.origin IS NULL" in query
+    assert "parent.transformation IS NOT NULL" in query
     assert "coalesce(parent.name_stage, '') IN ['', 'pending']" in query
     assert "NOT (parent.id IN reset_candidate_ids)" in query
     assert "all(key IN keys(parent)" in query
@@ -114,6 +116,22 @@ def test_parent_requires_null_pending_lifecycle_and_no_other_relationship() -> N
         "needs_composition",
         "claimed_at",
         "claim_token",
+        "physical_base",
+        "aggregation",
+        "orbit",
+        "population",
+        "subject",
+        "state",
+        "transformation",
+        "component",
+        "coordinate",
+        "process",
+        "position",
+        "region",
+        "device",
+        "geometric_base",
+        "object",
+        "geometry",
     ]
     assert "docs_stage" not in call.kwargs["reset_skeleton_parent_keys"]
     assert "catalog_approved_at" not in call.kwargs["reset_skeleton_parent_keys"]
@@ -133,12 +151,23 @@ def test_parent_and_exact_derived_source_are_claim_and_identity_fenced() -> None
     assert "derived_source.source_type = 'derived'" in query
     assert "derived_source.source_id = parent.id" in query
     assert "derived_source.status IS NULL" in query
+    assert "derived_source.status = 'composed'" in query
+    assert "derived_source.created_at IS NOT NULL" in query
+    assert "derived_source.composed_at IS NOT NULL" in query
     assert "derived_source.claimed_at IS NULL" in query
     assert "derived_source.claim_token IS NULL" in query
+    assert "derived_source.produced_sn_id = parent.id" in query
     assert "mirror_source.produced_sn_id = parent.id" in query
     assert "mirror_source.id <> 'derived:' + parent.id" in query
-    assert "FROM_DD_PATH" not in call.kwargs["reset_skeleton_source_keys"]
+    assert "FROM_DD_PATH" not in call.kwargs["reset_skeleton_composed_source_keys"]
     assert "all(key IN keys(derived_source)" in query
+
+    assert call.kwargs["reset_skeleton_composed_source_keys"] == [
+        *call.kwargs["reset_skeleton_minimal_source_keys"],
+        "status",
+        "created_at",
+        "composed_at",
+    ]
 
 
 def test_only_structural_parent_edges_enter_cleanup() -> None:
@@ -154,6 +183,39 @@ def test_only_structural_parent_edges_enter_cleanup() -> None:
         assert "candidate_parent_edge.operator_kind IS NOT NULL" in query
     assert "parent_rel.operator_kind IS NOT NULL" in count_query
     assert "parent_rel.operator_kind IS NOT NULL" in mutation_query
+
+
+def test_normalized_parent_allows_only_writer_owned_outgoing_edges() -> None:
+    """Grammar decomposition may survive only with exact typed identities."""
+    graph = _graph()
+
+    _clear(graph, path_allowlist=["equilibrium/exact/path"])
+
+    call = _parent_cleanup_call(graph)
+    query = call.args[0]
+    assert "startNode(parent_rel) = parent" in query
+    assert "endNode(parent_rel) = other" in query
+    assert "type(parent_rel) = 'HAS_LOCUS'" in query
+    assert "parent_rel.locus_token = other.id" in query
+    assert "type(parent_rel) = 'HAS_SEGMENT'" in query
+    assert "parent[parent_rel.segment] = other.value" in query
+    assert "type(parent_rel) IN $reset_skeleton_segment_edge_types" in query
+    assert "toLower(substring(type(parent_rel), 4))" in query
+    assert call.kwargs["reset_skeleton_segment_edge_types"] == [
+        "HAS_PHYSICAL_BASE",
+        "HAS_SUBJECT",
+        "HAS_TRANSFORMATION",
+        "HAS_COMPONENT",
+        "HAS_COORDINATE",
+        "HAS_PROCESS",
+        "HAS_POSITION",
+        "HAS_REGION",
+        "HAS_DEVICE",
+        "HAS_GEOMETRIC_BASE",
+        "HAS_AGGREGATION",
+        "HAS_ORBIT",
+        "HAS_POPULATION",
+    ]
 
 
 def test_dry_run_and_mutation_use_the_same_exact_source_scope() -> None:
