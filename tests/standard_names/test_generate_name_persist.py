@@ -293,7 +293,7 @@ class TestFinalizeGeneratedNameStage:
         tx.commit.assert_not_called()
 
 
-def test_candidate_stage_replaces_orphan_pending_reservation_under_fence() -> None:
+def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
     from imas_codex.standard_names.graph_ops import (
         stage_claimed_generated_candidates,
     )
@@ -316,21 +316,18 @@ def test_candidate_stage_replaces_orphan_pending_reservation_under_fence() -> No
 
     assert winners == ["dd:equilibrium/time_slice/q"]
     lock_cypher = tx.run.call_args_list[0].args[0]
-    stage_cypher = tx.run.call_args_list[1].args[0]
     assert "sns.claim_token = b.claim_token" in lock_cypher
     assert "sns.claim_seq = b.claim_seq" in lock_cypher
     assert "sns.status = 'extracted'" in lock_cypher
-    assert "existing.name_stage = $pending_stage" in lock_cypher
-    assert "MATCH (sns)-[reservation:PRODUCED_NAME]->(existing)" in lock_cypher
+    assert "MERGE (target:StandardName {id: b.sn_id})" in lock_cypher
+    assert "ON CREATE SET target.created_at = datetime()" in lock_cypher
+    assert "target.name_stage = $pending_stage" in lock_cypher
+    assert "MERGE (sns)-[reservation:PRODUCED_NAME]->(target)" in lock_cypher
+    assert "reservation.provisional = true" in lock_cypher
     assert "reservation.claim_token = b.claim_token" in lock_cypher
     assert "reservation.claim_seq = b.claim_seq" in lock_cypher
-    assert "stale.id <> b.sn_id" in stage_cypher
-    assert "stale.name_stage = $pending_stage" in stage_cypher
-    assert "DETACH DELETE stale" in stage_cypher
-    assert "sn.name_stage = $pending_stage" in stage_cypher
-    assert "MERGE (sns)-[reservation:PRODUCED_NAME]->(sn)" in stage_cypher
-    assert "reservation.claim_token = b.claim_token" in stage_cypher
-    assert "reservation.claim_seq = b.claim_seq" in stage_cypher
+    assert "HAS_STANDARD_NAME" not in lock_cypher
+    assert tx.run.call_count == 1
     tx.commit.assert_called_once()
 
 
@@ -351,25 +348,32 @@ class TestClaimedAttachmentPersistence:
         from imas_codex.standard_names.graph_ops import persist_claimed_attachments
 
         gc, tx = _mock_gc_tx()
-        tx.run.side_effect = lambda _cypher, **_params: [
-            {
-                "id": "dd:spectrometer/channel/isotope_ratio",
-                "outcome": "lifecycle_collision",
-                "candidate_id": "hydrogen_fraction",
-                "target_stage": "superseded",
-                "attempt_count": 4,
-            }
-        ]
+
+        def _collision(cypher, **_params):
+            if "AS outcome" not in cypher:
+                return []
+            return [
+                {
+                    "id": "dd:spectrometer/channel/isotope_ratio",
+                    "outcome": "lifecycle_collision",
+                    "candidate_id": "hydrogen_fraction",
+                    "target_stage": "superseded",
+                    "attempt_count": 4,
+                }
+            ]
+
+        tx.run.side_effect = _collision
         with _patch_gc(gc):
             winners = persist_claimed_attachments([self._attachment()])
 
         assert winners == []
-        assert tx.run.call_count == 1
-        cypher = tx.run.call_args.args[0]
+        assert tx.run.call_count == 3
+        cypher = tx.run.call_args_list[0].args[0]
         assert "sns.claim_token = b.claim_token" in cypher
         assert "sns.claim_seq = b.claim_seq" in cypher
-        assert "sns.last_error = CASE" in cypher
-        assert "MERGE (src)-[:HAS_STANDARD_NAME]" not in cypher
+        release = tx.run.call_args_list[2].args[0]
+        assert "sns.last_error = CASE" in release
+        assert "MERGE (source)-[:HAS_STANDARD_NAME]" not in release
         tx.commit.assert_called_once()
 
     def test_accepted_target_attaches_under_same_transaction(self) -> None:
@@ -399,7 +403,9 @@ class TestClaimedAttachmentPersistence:
         mutation = tx.run.call_args_list[1].args[0]
         assert "WHERE sn.name_stage IN $stable_stages" in mutation
         assert "MERGE (sns)-[produced:PRODUCED_NAME]->(sn)" in mutation
-        assert "REMOVE produced.claim_token, produced.claim_seq" in mutation
+        assert "REMOVE produced.provisional" in mutation
+        assert "produced.claim_token" in mutation
+        assert "produced.claim_seq" in mutation
         assert "MERGE (src)-[:HAS_STANDARD_NAME]->(sn)" in mutation
         tx.commit.assert_called_once()
 
@@ -745,6 +751,8 @@ class TestPersistGeneratedNameBatch:
         def _terminal_collision(cypher, **params):
             assert params["batch"][0]["claim_token"] == "winner"
             assert params["batch"][0]["claim_seq"] == 7
+            if "AS outcome" not in cypher:
+                return []
             return [
                 {
                     "id": "dd:core_profiles/profiles_1d/electrons/temperature",
@@ -778,19 +786,21 @@ class TestPersistGeneratedNameBatch:
         supersede.assert_not_called()
         counter.assert_not_called()
         self.atomic_tx.commit.assert_called_once()
-        cypher = self.atomic_tx.run.call_args.args[0]
-        assert (
-            "sns.status = CASE WHEN bindable THEN sns.status ELSE 'extracted'" in cypher
-        )
-        assert "sns.claim_token = CASE WHEN bindable" in cypher
-        assert "sns.last_error = CASE" in cypher
-        assert 'candidate "' in cypher
+        assert self.atomic_tx.run.call_count == 3
+        cypher = self.atomic_tx.run.call_args_list[0].args[0]
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        release_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        assert "SET sns.claimed_at = datetime()" in cypher
+        assert "stale.provisional = true" in cleanup_cypher
+        assert "sns.last_error = CASE" in release_cypher
+        assert 'candidate "' in release_cypher
         assert "target_stage" in cypher
         assert "attempt_count" in cypher
-        assert "MERGE (sns)-[" not in cypher
+        assert "HAS_STANDARD_NAME" not in cypher
 
-    def test_existing_accepted_same_id_is_reused_without_demotion(self):
-        """An accepted same-id candidate remains accepted and can gain a source."""
+    @pytest.mark.parametrize("target_stage", ["accepted", "approved"])
+    def test_existing_stable_same_id_is_provenance_only(self, target_stage):
+        """Catalog-stable same-id reuse cannot rewrite target content."""
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         candidate = _make_candidate()
@@ -803,7 +813,7 @@ class TestPersistGeneratedNameBatch:
                         "id": batch[0]["sns_id"],
                         "outcome": "winner",
                         "candidate_id": batch[0]["sn_id"],
-                        "target_stage": "accepted",
+                        "target_stage": target_stage,
                         "attempt_count": 2,
                     }
                 ]
@@ -814,7 +824,10 @@ class TestPersistGeneratedNameBatch:
             patch(
                 "imas_codex.standard_names.graph_ops.write_standard_names",
                 return_value=[candidate["id"]],
-            ),
+            ) as write,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
             patch(
                 "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
                 return_value=0,
@@ -827,11 +840,124 @@ class TestPersistGeneratedNameBatch:
             )
 
         assert winners == ["dd:core_profiles/profiles_1d/electrons/temperature"]
+        write.assert_not_called()
+        backfill.assert_not_called()
         finalize_cypher = _transaction_call(
             self.atomic_tx, "sns.status = 'composed'"
         ).args[0]
-        assert "THEN 'drafted' ELSE sn.name_stage END" in finalize_cypher
-        assert "sn.name_stage = 'accepted'" not in finalize_cypher
+        assert "WHERE sn.name_stage IN $stable_stages" in finalize_cypher
+        assert "MERGE (source)-[:HAS_STANDARD_NAME]->(sn)" in finalize_cypher
+        assert "SET sn.source_paths = CASE" in finalize_cypher
+        immutable_fields = (
+            "description",
+            "documentation",
+            "source_types",
+            "validation_status",
+            "model",
+            "grammar_parse_version",
+            "review_input_hash",
+            "name_stage",
+            "docs_stage",
+            "unit",
+        )
+        for field in immutable_fields:
+            assert not any(
+                line.lstrip().startswith(f"sn.{field} =")
+                for line in finalize_cypher.splitlines()
+            )
+
+    def test_terminal_transition_after_rich_write_rolls_back_every_effect(self):
+        """A reservation that turns terminal before finalize cannot commit."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+
+        def _transition(cypher, **params):
+            if "AS outcome" in cypher:
+                item = params["batch"][0]
+                return [
+                    {
+                        "id": item["sns_id"],
+                        "outcome": "winner",
+                        "binding_kind": "owned_reservation",
+                        "candidate_id": item["sn_id"],
+                        "target_stage": "pending",
+                        "attempt_count": 1,
+                    }
+                ]
+            if "reservation.provisional = true" in cypher:
+                return []
+            return [{"id": row["sns_id"]} for row in params.get("batch", [])]
+
+        self.atomic_tx.run.side_effect = _transition
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ) as write,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+            pytest.raises(RuntimeError, match="source claim changed"),
+        ):
+            persist_generated_name_batch([candidate], compose_model="test/model")
+
+        write.assert_called_once()
+        backfill.assert_not_called()
+        finalize_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "sn.name_stage = $pending_stage" in finalize_cypher
+        assert "reservation.provisional = true" in finalize_cypher
+        assert "reservation.claim_token = b.claim_token" in finalize_cypher
+        assert "reservation.claim_seq = b.claim_seq" in finalize_cypher
+        assert "MERGE (source)-[:HAS_STANDARD_NAME]->(sn)" in finalize_cypher
+        self.atomic_tx.commit.assert_not_called()
+        self.atomic_tx.close.assert_called_once()
+
+    def test_reclaimed_collision_cleans_only_stamped_provisional_artifacts(self):
+        """A reclaimed source drops stale staging residue, not real history."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="hydrogen_fraction")
+
+        def _collision(cypher, **params):
+            if "AS outcome" not in cypher:
+                return []
+            item = params["batch"][0]
+            return [
+                {
+                    "id": item["sns_id"],
+                    "outcome": "lifecycle_collision",
+                    "binding_kind": "collision",
+                    "candidate_id": item["sn_id"],
+                    "target_stage": "superseded",
+                    "attempt_count": 4,
+                }
+            ]
+
+        self.atomic_tx.run.side_effect = _collision
+        with patch("imas_codex.standard_names.graph_ops.write_standard_names") as write:
+            assert (
+                persist_generated_name_batch(
+                    [candidate],
+                    compose_model="test/model",
+                    return_winner_ids=True,
+                )
+                == []
+            )
+
+        write.assert_not_called()
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "stale.provisional = true" in cleanup_cypher
+        assert "stale.claim_token IS NOT NULL" in cleanup_cypher
+        assert "stale.claim_seq IS NOT NULL" in cleanup_cypher
+        assert "DELETE stale" in cleanup_cypher
+        assert "HAS_STANDARD_NAME" in cleanup_cypher
+        assert "SET old.source_paths = CASE" in cleanup_cypher
+        assert "coalesce(binding.provisional, false) = false" in cleanup_cypher
+        assert "DELETE binding" not in cleanup_cypher
+        release_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        assert "sns.status = 'extracted'" in release_cypher
+        assert "sns.claim_token = null" in release_cypher
 
     def test_rich_write_and_finalize_share_transaction(self):
         """The rich writer and source outcome use the locked transaction."""

@@ -4476,6 +4476,18 @@ def persist_generated_name_winners(
                     for row in locked_rows
                     if row.get("outcome", "winner") == "winner"
                 }
+                binding_kinds = {
+                    row["id"]: (
+                        row.get("binding_kind")
+                        or (
+                            "stable_reuse"
+                            if row.get("target_stage") in _STABLE_BINDING_NAME_STAGES
+                            else "owned_reservation"
+                        )
+                    )
+                    for row in locked_rows
+                    if row.get("outcome", "winner") == "winner"
+                }
                 locked_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id in candidate_by_sns
@@ -4485,20 +4497,33 @@ def persist_generated_name_winners(
                     tx.commit()
                     return []
 
-                written_names = write_standard_names(
-                    locked_candidates,
-                    gc=tx_gc,
-                    return_written_ids=True,
-                )
-                if isinstance(written_names, int):
-                    if written_names != len(locked_candidates):
-                        raise RuntimeError(
-                            "rich standard-name write rejected an exact-claim winner"
-                        )
-                    written_names = [entry["id"] for entry in locked_candidates]
-                written_name_ids = set(written_names)
+                reserved_candidates = [
+                    candidate_by_sns[sns_id]
+                    for sns_id, kind in binding_kinds.items()
+                    if kind == "owned_reservation"
+                ]
+                stable_candidates = [
+                    candidate_by_sns[sns_id]
+                    for sns_id, kind in binding_kinds.items()
+                    if kind == "stable_reuse"
+                ]
+                written_name_ids = {entry["id"] for entry in stable_candidates}
+                if reserved_candidates:
+                    written_names = write_standard_names(
+                        reserved_candidates,
+                        gc=tx_gc,
+                        return_written_ids=True,
+                    )
+                    if isinstance(written_names, int):
+                        if written_names != len(reserved_candidates):
+                            raise RuntimeError(
+                                "rich standard-name write rejected an exact-claim "
+                                "winner"
+                            )
+                        written_names = [entry["id"] for entry in reserved_candidates]
+                    written_name_ids.update(written_names)
                 finalize_batch = [
-                    item
+                    {**item, "binding_kind": binding_kinds[item["sns_id"]]}
                     for item in write_batch
                     if item["sns_id"] in locked_ids
                     and item["sn_id"] in written_name_ids
@@ -4508,17 +4533,44 @@ def persist_generated_name_winners(
                         "rich standard-name write rejected an exact-claim winner"
                     )
 
-                finalized_rows = tx_gc.query(
-                    """
+                reserved_finalize_batch = [
+                    item
+                    for item in finalize_batch
+                    if item["binding_kind"] == "owned_reservation"
+                ]
+                stable_finalize_batch = [
+                    item
+                    for item in finalize_batch
+                    if item["binding_kind"] == "stable_reuse"
+                ]
+                finalized_rows: list[dict[str, Any]] = []
+                if reserved_finalize_batch:
+                    finalized_rows.extend(
+                        tx_gc.query(
+                            """
                     UNWIND $batch AS b
                     MATCH (sns:StandardNameSource {id: b.sns_id})
                     WHERE sns.claim_token = b.claim_token
                       AND sns.claim_seq = b.claim_seq
                       AND sns.status = 'extracted'
-                    MATCH (sn:StandardName {id: b.sn_id})
-                    SET sn.name_stage = CASE
-                            WHEN sn.name_stage IS NULL OR sn.name_stage = 'pending'
-                            THEN 'drafted' ELSE sn.name_stage END,
+                    MATCH (sns)-[reservation:PRODUCED_NAME]->(
+                        sn:StandardName {id: b.sn_id})
+                    WHERE sn.name_stage = $pending_stage
+                      AND reservation.provisional = true
+                      AND reservation.claim_token = b.claim_token
+                      AND reservation.claim_seq = b.claim_seq
+                    CALL (b) {
+                      WITH b
+                      WHERE b.source_type = 'dd'
+                      MATCH (source:IMASNode {id: b.source_id})
+                      RETURN source
+                      UNION
+                      WITH b
+                      WHERE b.source_type = 'signals'
+                      MATCH (source:FacilitySignal {id: b.source_id})
+                      RETURN source
+                    }
+                    SET sn.name_stage = 'drafted',
                         sn.chain_length = coalesce(sn.chain_length, 0),
                         sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
                         sn.docs_chain_length = coalesce(sn.docs_chain_length, 0),
@@ -4530,12 +4582,65 @@ def persist_generated_name_winners(
                         sns.status = 'composed',
                         sns.composed_at = datetime(),
                         sns.produced_sn_id = sn.id
-                    MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
-                    REMOVE produced.claim_token, produced.claim_seq
+                    REMOVE reservation.provisional,
+                           reservation.claim_token,
+                           reservation.claim_seq
+                    MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
+                    WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
+                    SET sn.source_paths = CASE
+                      WHEN uri IN coalesce(sn.source_paths, [])
+                      THEN sn.source_paths
+                      ELSE coalesce(sn.source_paths, []) + uri END
                     RETURN sns.id AS id
                     """,
-                    batch=finalize_batch,
-                )
+                            batch=reserved_finalize_batch,
+                            pending_stage=NameStage.pending.value,
+                        )
+                    )
+                if stable_finalize_batch:
+                    finalized_rows.extend(
+                        tx_gc.query(
+                            """
+                    UNWIND $batch AS b
+                    MATCH (sns:StandardNameSource {id: b.sns_id})
+                    WHERE sns.claim_token = b.claim_token
+                      AND sns.claim_seq = b.claim_seq
+                      AND sns.status = 'extracted'
+                    MATCH (sn:StandardName {id: b.sn_id})
+                    WHERE sn.name_stage IN $stable_stages
+                      AND (b.unit IS NULL OR sn.unit IS NULL OR sn.unit = b.unit)
+                    CALL (b) {
+                      WITH b
+                      WHERE b.source_type = 'dd'
+                      MATCH (source:IMASNode {id: b.source_id})
+                      RETURN source
+                      UNION
+                      WITH b
+                      WHERE b.source_type = 'signals'
+                      MATCH (source:FacilitySignal {id: b.source_id})
+                      RETURN source
+                    }
+                    SET sns.claim_token = null,
+                        sns.claimed_at = null,
+                        sns.status = 'composed',
+                        sns.composed_at = datetime(),
+                        sns.produced_sn_id = sn.id
+                    MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
+                    REMOVE produced.provisional,
+                           produced.claim_token,
+                           produced.claim_seq
+                    MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
+                    WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
+                    SET sn.source_paths = CASE
+                      WHEN uri IN coalesce(sn.source_paths, [])
+                      THEN sn.source_paths
+                      ELSE coalesce(sn.source_paths, []) + uri END
+                    RETURN sns.id AS id
+                    """,
+                            batch=stable_finalize_batch,
+                            stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
+                        )
+                    )
                 finalized_ids = [row["id"] for row in finalized_rows]
                 if set(finalized_ids) != {item["sns_id"] for item in finalize_batch}:
                     raise RuntimeError(
@@ -4545,9 +4650,15 @@ def persist_generated_name_winners(
                 finalized_candidates = [
                     candidate_by_sns[sns_id] for sns_id in finalized_ids
                 ]
-                _backfill_cluster_from_sources(
-                    finalized_candidates, gc=tx_gc, strict=True
-                )
+                finalized_reserved_candidates = [
+                    candidate_by_sns[sns_id]
+                    for sns_id in finalized_ids
+                    if binding_kinds[sns_id] == "owned_reservation"
+                ]
+                if finalized_reserved_candidates:
+                    _backfill_cluster_from_sources(
+                        finalized_reserved_candidates, gc=tx_gc, strict=True
+                    )
                 supersede_pairs = [
                     {"new_name": entry["id"], "source_id": entry["source_id"]}
                     for entry in finalized_candidates
@@ -4695,7 +4806,9 @@ def _finalize_generated_name_stage(
                         sns.produced_sn_id = sn.id,
                         sn.run_id        = coalesce(sns.run_id, sn.run_id)
                     MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
-                    REMOVE produced.claim_token, produced.claim_seq
+                    REMOVE produced.provisional,
+                           produced.claim_token,
+                           produced.claim_seq
                     RETURN sns.id AS id
                     """,
                         batch=batch,
@@ -6790,10 +6903,11 @@ def _lock_claimed_name_bindings(
     """Lock source claims and classify their proposed name bindings.
 
     Stable lifecycle stages can be reused monotonically. A pending name is a
-    private reservation: only the source whose exact claim already staged the
-    ``PRODUCED_NAME`` edge may finish it. Missing targets are allowed only for
-    composition, where the rich writer creates the candidate; attachments
-    require an existing stable target.
+    private reservation: only the source whose exact claim created its
+    token-and-sequence stamped ``PRODUCED_NAME`` edge may finish it. In compose
+    mode a missing target is created and reserved here, while the source claim
+    and target identity are locked by the same caller-owned transaction.
+    Attachments require an existing stable target and never create a name.
 
     A non-bindable target releases the exact source claim back to
     ``extracted`` without resetting ``attempt_count``. The retained attempt
@@ -6802,75 +6916,172 @@ def _lock_claimed_name_bindings(
     query runs through the caller's transaction, a later rich-write failure
     rolls the release back with every other graph effect.
     """
-    rows = gc.query(
+    target_clause = (
         """
+        MERGE (target:StandardName {id: b.sn_id})
+        ON CREATE SET target.created_at = datetime(),
+                      target.name_stage = $pending_stage,
+                      target.reservation_source_id = sns.id,
+                      target.reservation_claim_token = b.claim_token,
+                      target.reservation_claim_seq = b.claim_seq
+        """
+        if allow_missing
+        else "OPTIONAL MATCH (target:StandardName {id: b.sn_id})"
+    )
+    binding_query = """
         UNWIND $batch AS b
         MATCH (sns:StandardNameSource {id: b.sns_id})
         WHERE sns.claim_token = b.claim_token
           AND sns.claim_seq = b.claim_seq
           AND sns.status = 'extracted'
-        OPTIONAL MATCH (existing:StandardName {id: b.sn_id})
-        WITH b, sns, existing,
+        __TARGET_CLAUSE__
+        CALL (b, sns, target) {
+          WITH b, sns, target
+          WHERE $allow_own_pending
+            AND target.name_stage = $pending_stage
+            AND target.reservation_source_id = sns.id
+            AND target.reservation_claim_token = b.claim_token
+            AND target.reservation_claim_seq = b.claim_seq
+          MERGE (sns)-[reservation:PRODUCED_NAME]->(target)
+          SET reservation.provisional = true,
+              reservation.claim_token = b.claim_token,
+              reservation.claim_seq = b.claim_seq
+          REMOVE target.reservation_source_id,
+                 target.reservation_claim_token,
+                 target.reservation_claim_seq
+          RETURN count(*) AS reservations
+        }
+        OPTIONAL MATCH (sns)-[owned:PRODUCED_NAME]->(target)
+        WITH b, sns, target, owned,
              CASE
-               WHEN existing IS NULL THEN $allow_missing
-               WHEN existing.name_stage IN $stable_stages THEN true
+               WHEN target.name_stage IN $stable_stages THEN true
                WHEN $allow_own_pending
-                    AND existing.name_stage = $pending_stage
-                    AND EXISTS {
-                      MATCH (sns)-[reservation:PRODUCED_NAME]->(existing)
-                      WHERE reservation.claim_token = b.claim_token
-                        AND reservation.claim_seq = b.claim_seq
-                    }
+                    AND target.name_stage = $pending_stage
+                    AND owned.provisional = true
+                    AND owned.claim_token = b.claim_token
+                    AND owned.claim_seq = b.claim_seq
                THEN true
                ELSE false
              END AS lifecycle_bindable
-        WITH b, sns, existing, lifecycle_bindable,
+        WITH b, sns, target, owned, lifecycle_bindable,
              CASE
-               WHEN existing IS NULL OR b.unit IS NULL
-                    OR existing.unit IS NULL OR existing.unit = b.unit
+               WHEN target IS NULL OR b.unit IS NULL
+                    OR target.unit IS NULL OR target.unit = b.unit
                THEN true ELSE false
              END AS unit_bindable,
              CASE
-               WHEN existing IS NULL THEN '<missing>'
-               ELSE coalesce(existing.name_stage, '<unset>')
+               WHEN target IS NULL THEN '<missing>'
+               ELSE coalesce(target.name_stage, '<unset>')
              END AS target_stage
-        WITH b, sns, existing, lifecycle_bindable, unit_bindable, target_stage,
+        WITH b, sns, target, owned, lifecycle_bindable, unit_bindable,
+             target_stage,
              lifecycle_bindable AND unit_bindable AS bindable
-        SET sns.claimed_at = CASE WHEN bindable THEN datetime() ELSE null END,
-            sns.claim_token = CASE WHEN bindable THEN sns.claim_token ELSE null END,
-            sns.status = CASE WHEN bindable THEN sns.status ELSE 'extracted' END,
-            sns.composed_at = CASE WHEN bindable THEN sns.composed_at ELSE null END,
-            sns.last_error = CASE
-              WHEN NOT lifecycle_bindable THEN
-                'standard-name binding collision: candidate "' + b.sn_id +
-                '" has non-bindable name_stage "' + target_stage +
-                '" at composition attempt ' +
-                toString(coalesce(sns.attempt_count, 0))
-              WHEN NOT unit_bindable THEN
-                'standard-name binding collision: candidate "' + b.sn_id +
-                '" unit "' + coalesce(b.unit, '<unset>') +
-                '" conflicts with existing unit "' +
-                coalesce(existing.unit, '<unset>') +
-                '" at composition attempt ' +
-                toString(coalesce(sns.attempt_count, 0))
-              ELSE sns.last_error
-            END
+        SET sns.claimed_at = datetime()
         RETURN sns.id AS id,
                CASE
                  WHEN bindable THEN 'winner'
                  WHEN NOT lifecycle_bindable THEN 'lifecycle_collision'
                  ELSE 'unit_collision'
                END AS outcome,
+               CASE
+                 WHEN target.name_stage IN $stable_stages THEN 'stable_reuse'
+                 WHEN owned.provisional = true
+                      AND owned.claim_token = b.claim_token
+                      AND owned.claim_seq = b.claim_seq
+                 THEN 'owned_reservation'
+                 ELSE 'collision'
+               END AS binding_kind,
                b.sn_id AS candidate_id,
                target_stage,
                coalesce(sns.attempt_count, 0) AS attempt_count
-        """,
+        """.replace("__TARGET_CLAUSE__", target_clause)
+    rows = gc.query(
+        binding_query,
         batch=batch,
-        allow_missing=allow_missing,
         allow_own_pending=allow_own_pending_reservation,
         stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
         pending_stage=NameStage.pending.value,
     )
+
+    collision_ids = {
+        row["id"] for row in rows if row.get("outcome", "winner") != "winner"
+    }
+    collision_batch = [item for item in batch if item["sns_id"] in collision_ids]
+    if collision_batch:
+        # A reclaimed source can still carry projections from an abandoned
+        # provisional reservation. Remove only relationships explicitly
+        # stamped as provisional for this source; ordinary provenance is never
+        # eligible. The current stamp is eligible too because releasing its
+        # claim makes that reservation stale in this transaction.
+        gc.query(
+            """
+            UNWIND $batch AS b
+            MATCH (sns:StandardNameSource {id: b.sns_id})
+            WHERE sns.claim_token = b.claim_token
+              AND sns.claim_seq = b.claim_seq
+              AND sns.status = 'extracted'
+            MATCH (sns)-[:FROM_DD_PATH]->(dd:IMASNode)
+            MATCH (sns)-[stale:PRODUCED_NAME]->(old:StandardName)
+            WHERE stale.provisional = true
+              AND stale.claim_token IS NOT NULL
+              AND stale.claim_seq IS NOT NULL
+            WITH b, sns, dd, old, stale
+            OPTIONAL MATCH (dd)-[projection:HAS_STANDARD_NAME]->(old)
+            WITH b, sns, dd, old, stale, projection,
+                 EXISTS {
+                   MATCH (other:StandardNameSource)-[:FROM_DD_PATH]->(dd)
+                   MATCH (other)-[binding:PRODUCED_NAME]->(old)
+                   WHERE binding <> stale
+                     AND coalesce(binding.provisional, false) = false
+                 } AS preserve_projection
+            DELETE stale
+            CALL (projection, preserve_projection) {
+              WITH projection, preserve_projection
+              WHERE projection IS NOT NULL AND NOT preserve_projection
+              DELETE projection
+              RETURN count(*) AS projections_removed
+            }
+            WITH dd, old, preserve_projection
+            SET old.source_paths = CASE
+                  WHEN NOT preserve_projection THEN [
+                    path IN coalesce(old.source_paths, [])
+                    WHERE NOT (path = 'dd:' + dd.id OR path = dd.id)
+                  ]
+                  ELSE old.source_paths
+                END
+            """,
+            batch=collision_batch,
+        )
+        gc.query(
+            """
+            UNWIND $batch AS b
+            MATCH (sns:StandardNameSource {id: b.sns_id})
+            WHERE sns.claim_token = b.claim_token
+              AND sns.claim_seq = b.claim_seq
+              AND sns.status = 'extracted'
+            OPTIONAL MATCH (target:StandardName {id: b.sn_id})
+            SET sns.claimed_at = null,
+                sns.claim_token = null,
+                sns.status = 'extracted',
+                sns.composed_at = null,
+                sns.last_error = CASE
+                  WHEN target IS NULL OR NOT (target.name_stage IN $stable_stages)
+                  THEN 'standard-name binding collision: candidate "' + b.sn_id +
+                       '" has non-bindable name_stage "' +
+                       coalesce(target.name_stage, '<missing>') +
+                       '" at composition attempt ' +
+                       toString(coalesce(sns.attempt_count, 0))
+                  ELSE 'standard-name binding collision: candidate "' + b.sn_id +
+                       '" unit "' + coalesce(b.unit, '<unset>') +
+                       '" conflicts with existing unit "' +
+                       coalesce(target.unit, '<unset>') +
+                       '" at composition attempt ' +
+                       toString(coalesce(sns.attempt_count, 0))
+                END
+            """,
+            batch=collision_batch,
+            stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
+        )
     for row in rows:
         if row.get("outcome", "winner") == "winner":
             continue
@@ -7069,7 +7280,9 @@ def persist_claimed_attachments(
                             sns.claim_token = null,
                             sns.produced_sn_id = sn.id
                         MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
-                        REMOVE produced.claim_token, produced.claim_seq
+                        REMOVE produced.provisional,
+                               produced.claim_token,
+                               produced.claim_seq
                         MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                         WITH sns, sn, b, 'dd:' + b.source_id AS uri
                         SET sn.source_paths = CASE
@@ -7127,76 +7340,7 @@ def stage_claimed_generated_candidates(
                     for row in locked_rows
                     if row.get("outcome", "winner") == "winner"
                 }
-                winner_batch = [item for item in batch if item["sns_id"] in locked_ids]
-                if winner_batch:
-                    rows = tx_gc.query(
-                        """
-                        UNWIND $batch AS b
-                        MATCH (sns:StandardNameSource {id: b.sns_id})
-                        WHERE sns.claim_token = b.claim_token
-                          AND sns.claim_seq = b.claim_seq
-                          AND sns.status = 'extracted'
-                        OPTIONAL MATCH (existing:StandardName {id: b.sn_id})
-                        WITH b, sns, existing
-                        WHERE existing IS NULL
-                           OR existing.name_stage IN $stable_stages
-                           OR (
-                             existing.name_stage = $pending_stage
-                             AND EXISTS {
-                               MATCH (sns)-[reservation:PRODUCED_NAME]->(existing)
-                               WHERE reservation.claim_token = b.claim_token
-                                 AND reservation.claim_seq = b.claim_seq
-                             }
-                           )
-                        MATCH (src:IMASNode {id: b.source_id})
-                        CALL (sns, b) {
-                            OPTIONAL MATCH
-                                (sns)-[:PRODUCED_NAME]->(stale:StandardName)
-                            WHERE stale.id <> b.sn_id
-                              AND stale.name_stage = $pending_stage
-                              AND NOT EXISTS {
-                                  MATCH (other:StandardNameSource)
-                                        -[:PRODUCED_NAME]->(stale)
-                                  WHERE other <> sns
-                              }
-                              AND NOT EXISTS {
-                                  MATCH (other_source:IMASNode)
-                                        -[:HAS_STANDARD_NAME]->(stale)
-                                  WHERE other_source.id <> b.source_id
-                              }
-                            DETACH DELETE stale
-                            RETURN count(stale) AS stale_reservations_removed
-                        }
-                        MERGE (sn:StandardName {id: b.sn_id})
-                        ON CREATE SET sn.created_at = datetime(),
-                                      sn.name_stage = $pending_stage
-                        SET sn.name_stage = coalesce(
-                                sn.name_stage, $pending_stage),
-                            sn.chain_length = coalesce(sn.chain_length, 0),
-                            sn.docs_stage = coalesce(
-                                sn.docs_stage, $pending_stage),
-                            sn.docs_chain_length = coalesce(
-                                sn.docs_chain_length, 0),
-                            sn.generated_at = coalesce(
-                                sn.generated_at, datetime()),
-                            sn.model = coalesce(sn.model, b.model),
-                            sn.run_id = coalesce(sns.run_id, sn.run_id)
-                        MERGE (sns)-[reservation:PRODUCED_NAME]->(sn)
-                        SET reservation.claim_token = b.claim_token,
-                            reservation.claim_seq = b.claim_seq
-                        MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
-                        RETURN sns.id AS id
-                        """,
-                        batch=winner_batch,
-                        stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
-                        pending_stage=NameStage.pending.value,
-                    )
-                    winner_ids = [row["id"] for row in rows]
-                    if set(winner_ids) != locked_ids:
-                        raise RuntimeError(
-                            "source claim or target lifecycle changed during "
-                            "transactional candidate staging"
-                        )
+                winner_ids = list(locked_ids)
                 tx.commit()
             except BaseException:
                 if tx.closed is False:
