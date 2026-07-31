@@ -496,7 +496,6 @@ class GrammarSegments(BaseModel):
         base_name = compose_standard_name(self._to_model_dict())
         current = parse_canonical_name(base_name).ir
         current_data = current.model_dump(mode="python")
-        locus = current_data.pop("locus", None)
         mechanism = current_data.pop("mechanism", None)
         current = StandardNameIR.model_validate(current_data)
 
@@ -544,8 +543,6 @@ class GrammarSegments(BaseModel):
             current = StandardNameIR.model_validate(current_data)
 
         current_data = current.model_dump(mode="python")
-        if locus is not None:
-            current_data["locus"] = locus
         if mechanism is not None:
             current_data["mechanism"] = mechanism
         current = StandardNameIR.model_validate(current_data)
