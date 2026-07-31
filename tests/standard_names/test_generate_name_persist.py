@@ -298,8 +298,7 @@ def test_candidate_stage_replaces_orphan_pending_reservation_under_fence() -> No
         stage_claimed_generated_candidates,
     )
 
-    gc = _mock_gc_query()
-    gc.query.return_value = [{"id": "dd:equilibrium/time_slice/q"}]
+    gc, tx = _mock_gc_tx()
     with _patch_gc(gc):
         winners = stage_claimed_generated_candidates(
             [
@@ -316,14 +315,131 @@ def test_candidate_stage_replaces_orphan_pending_reservation_under_fence() -> No
         )
 
     assert winners == ["dd:equilibrium/time_slice/q"]
-    cypher = gc.query.call_args.args[0]
-    assert "sns.claim_token = b.claim_token" in cypher
-    assert "sns.claim_seq = b.claim_seq" in cypher
-    assert "sns.status = 'extracted'" in cypher
-    assert "stale.id <> b.sn_id" in cypher
-    assert "stale.name_stage = 'pending'" in cypher
-    assert "DETACH DELETE stale" in cypher
-    assert "sn.name_stage = 'pending'" in cypher
+    lock_cypher = tx.run.call_args_list[0].args[0]
+    stage_cypher = tx.run.call_args_list[1].args[0]
+    assert "sns.claim_token = b.claim_token" in lock_cypher
+    assert "sns.claim_seq = b.claim_seq" in lock_cypher
+    assert "sns.status = 'extracted'" in lock_cypher
+    assert "existing.name_stage = $pending_stage" in lock_cypher
+    assert "MATCH (sns)-[reservation:PRODUCED_NAME]->(existing)" in lock_cypher
+    assert "reservation.claim_token = b.claim_token" in lock_cypher
+    assert "reservation.claim_seq = b.claim_seq" in lock_cypher
+    assert "stale.id <> b.sn_id" in stage_cypher
+    assert "stale.name_stage = $pending_stage" in stage_cypher
+    assert "DETACH DELETE stale" in stage_cypher
+    assert "sn.name_stage = $pending_stage" in stage_cypher
+    assert "MERGE (sns)-[reservation:PRODUCED_NAME]->(sn)" in stage_cypher
+    assert "reservation.claim_token = b.claim_token" in stage_cypher
+    assert "reservation.claim_seq = b.claim_seq" in stage_cypher
+    tx.commit.assert_called_once()
+
+
+class TestClaimedAttachmentPersistence:
+    """Claimed attachments share the stable-target lifecycle fence."""
+
+    @staticmethod
+    def _attachment() -> dict:
+        return {
+            "sns_id": "dd:spectrometer/channel/isotope_ratio",
+            "source_id": "spectrometer/channel/isotope_ratio",
+            "standard_name": "hydrogen_fraction",
+            "claim_token": "attachment-winner",
+            "claim_seq": 5,
+        }
+
+    def test_terminal_target_releases_without_attachment_mutation(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        gc, tx = _mock_gc_tx()
+        tx.run.side_effect = lambda _cypher, **_params: [
+            {
+                "id": "dd:spectrometer/channel/isotope_ratio",
+                "outcome": "lifecycle_collision",
+                "candidate_id": "hydrogen_fraction",
+                "target_stage": "superseded",
+                "attempt_count": 4,
+            }
+        ]
+        with _patch_gc(gc):
+            winners = persist_claimed_attachments([self._attachment()])
+
+        assert winners == []
+        assert tx.run.call_count == 1
+        cypher = tx.run.call_args.args[0]
+        assert "sns.claim_token = b.claim_token" in cypher
+        assert "sns.claim_seq = b.claim_seq" in cypher
+        assert "sns.last_error = CASE" in cypher
+        assert "MERGE (src)-[:HAS_STANDARD_NAME]" not in cypher
+        tx.commit.assert_called_once()
+
+    def test_accepted_target_attaches_under_same_transaction(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        gc, tx = _mock_gc_tx()
+
+        def _winner(cypher, **params):
+            batch = params.get("batch", [])
+            if "AS outcome" in cypher:
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": "accepted",
+                        "attempt_count": 1,
+                    }
+                ]
+            return [{"id": item["sns_id"]} for item in batch]
+
+        tx.run.side_effect = _winner
+        with _patch_gc(gc):
+            winners = persist_claimed_attachments([self._attachment()])
+
+        assert winners == ["dd:spectrometer/channel/isotope_ratio"]
+        mutation = tx.run.call_args_list[1].args[0]
+        assert "WHERE sn.name_stage IN $stable_stages" in mutation
+        assert "MERGE (sns)-[produced:PRODUCED_NAME]->(sn)" in mutation
+        assert "REMOVE produced.claim_token, produced.claim_seq" in mutation
+        assert "MERGE (src)-[:HAS_STANDARD_NAME]->(sn)" in mutation
+        tx.commit.assert_called_once()
+
+    def test_missing_fence_never_opens_graph(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        attachment = self._attachment()
+        attachment["claim_token"] = None
+        with patch("imas_codex.standard_names.graph_ops.GraphClient") as graph:
+            assert persist_claimed_attachments([attachment]) == []
+        graph.assert_not_called()
+
+    def test_final_write_failure_rolls_back_lifecycle_fence(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+        gc, tx = _mock_gc_tx()
+
+        def _fail_after_lock(cypher, **params):
+            if "AS outcome" in cypher:
+                batch = params["batch"]
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": "accepted",
+                        "attempt_count": 1,
+                    }
+                ]
+            raise RuntimeError("attachment write failed")
+
+        tx.run.side_effect = _fail_after_lock
+        with (
+            _patch_gc(gc),
+            pytest.raises(RuntimeError, match="attachment write failed"),
+        ):
+            persist_claimed_attachments([self._attachment()])
+
+        tx.commit.assert_not_called()
+        tx.close.assert_called_once()
 
 
 # ---------------------------------------------------------------------------
@@ -619,6 +735,103 @@ class TestPersistGeneratedNameBatch:
         assert result == 0
         write.assert_not_called()
         self.atomic_tx.commit.assert_called_once()
+
+    def test_terminal_same_id_releases_source_without_rich_mutation(self):
+        """A terminal same-id node is a diagnosed retry, never a success."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="hydrogen_fraction")
+
+        def _terminal_collision(cypher, **params):
+            assert params["batch"][0]["claim_token"] == "winner"
+            assert params["batch"][0]["claim_seq"] == 7
+            return [
+                {
+                    "id": "dd:core_profiles/profiles_1d/electrons/temperature",
+                    "outcome": "lifecycle_collision",
+                    "candidate_id": "hydrogen_fraction",
+                    "target_stage": "superseded",
+                    "attempt_count": 3,
+                }
+            ]
+
+        self.atomic_tx.run.side_effect = _terminal_collision
+        with (
+            patch("imas_codex.standard_names.graph_ops.write_standard_names") as write,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names"
+            ) as supersede,
+            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+        ):
+            winners = persist_generated_name_batch(
+                [candidate],
+                compose_model="test/model",
+                return_winner_ids=True,
+            )
+
+        assert winners == []
+        write.assert_not_called()
+        backfill.assert_not_called()
+        supersede.assert_not_called()
+        counter.assert_not_called()
+        self.atomic_tx.commit.assert_called_once()
+        cypher = self.atomic_tx.run.call_args.args[0]
+        assert (
+            "sns.status = CASE WHEN bindable THEN sns.status ELSE 'extracted'" in cypher
+        )
+        assert "sns.claim_token = CASE WHEN bindable" in cypher
+        assert "sns.last_error = CASE" in cypher
+        assert 'candidate "' in cypher
+        assert "target_stage" in cypher
+        assert "attempt_count" in cypher
+        assert "MERGE (sns)-[" not in cypher
+
+    def test_existing_accepted_same_id_is_reused_without_demotion(self):
+        """An accepted same-id candidate remains accepted and can gain a source."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+
+        def _accepted_winner(cypher, **params):
+            batch = params.get("batch", [])
+            if "AS outcome" in cypher:
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": "accepted",
+                        "attempt_count": 2,
+                    }
+                ]
+            return [{"id": item["sns_id"]} for item in batch]
+
+        self.atomic_tx.run.side_effect = _accepted_winner
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ),
+        ):
+            winners = persist_generated_name_batch(
+                [candidate],
+                compose_model="test/model",
+                return_winner_ids=True,
+            )
+
+        assert winners == ["dd:core_profiles/profiles_1d/electrons/temperature"]
+        finalize_cypher = _transaction_call(
+            self.atomic_tx, "sns.status = 'composed'"
+        ).args[0]
+        assert "THEN 'drafted' ELSE sn.name_stage END" in finalize_cypher
+        assert "sn.name_stage = 'accepted'" not in finalize_cypher
 
     def test_rich_write_and_finalize_share_transaction(self):
         """The rich writer and source outcome use the locked transaction."""

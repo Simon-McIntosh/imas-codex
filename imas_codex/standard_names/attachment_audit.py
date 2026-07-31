@@ -83,8 +83,11 @@ attachment the guard accepts is never touched, so a second pass acts on nothing.
 from __future__ import annotations
 
 import logging
+import uuid
 from dataclasses import dataclass, field
 from typing import Any
+
+from imas_codex.graph.models import NameStage
 
 logger = logging.getLogger(__name__)
 
@@ -93,8 +96,17 @@ __all__ = [
     "AttachmentAuditResult",
     "NameLevelDefect",
     "audit_attachments",
+    "recover_terminal_attachment",
     "reconcile_attachment_consistency",
 ]
+
+_TERMINAL_RECOVERY_STAGES: frozenset[str] = frozenset(
+    {
+        NameStage.superseded.value,
+        NameStage.exhausted.value,
+        NameStage.contested.value,
+    }
+)
 
 #: Name stages whose attachments are catalog-authoritative. Detaching a source
 #: from one of these is gated behind ``include_accepted``, mirroring how the
@@ -201,6 +213,89 @@ SET sn.source_paths = [
       WHERE NOT (p = 'dd:' + $dd_path OR p = $dd_path)
     ]
 RETURN count(*) AS detached
+"""
+
+
+_TERMINAL_RECOVERY_ELIGIBILITY_QUERY = """
+MATCH (src:StandardNameSource {id: $source_node_id})
+      -[:FROM_DD_PATH]->(dd:IMASNode {id: $dd_path})
+MATCH (src)-[:PRODUCED_NAME]->(sn:StandardName {id: $sn_id})
+MATCH (dd)-[:HAS_STANDARD_NAME]->(sn)
+WHERE src.source_type = 'dd'
+  AND src.source_id = $dd_path
+  AND src.status = 'composed'
+  AND src.produced_sn_id = sn.id
+  AND sn.name_stage IN $terminal_stages
+  AND COUNT { (src)-[:PRODUCED_NAME]->(:StandardName) } = 1
+  AND (
+    'dd:' + $dd_path IN coalesce(sn.source_paths, [])
+    OR $dd_path IN coalesce(sn.source_paths, [])
+  )
+RETURN src.id AS source_node_id,
+       src.status AS source_status,
+       coalesce(src.attempt_count, 0) AS attempt_count,
+       src.last_error AS last_error,
+       sn.name_stage AS name_stage
+"""
+
+
+_TERMINAL_RECOVERY_QUERY = """
+MATCH (src:StandardNameSource {id: $source_node_id})
+      -[:FROM_DD_PATH]->(dd:IMASNode {id: $dd_path})
+MATCH (src)-[pn:PRODUCED_NAME]->(sn:StandardName {id: $sn_id})
+MATCH (dd)-[hsn:HAS_STANDARD_NAME]->(sn)
+WHERE src.source_type = 'dd'
+  AND src.source_id = $dd_path
+  AND src.status = 'composed'
+  AND src.produced_sn_id = sn.id
+  AND sn.name_stage IN $terminal_stages
+  AND COUNT { (src)-[:PRODUCED_NAME]->(:StandardName) } = 1
+  AND (
+    'dd:' + $dd_path IN coalesce(sn.source_paths, [])
+    OR $dd_path IN coalesce(sn.source_paths, [])
+  )
+WITH src, dd, sn, pn, hsn,
+     src.status AS previous_status,
+     coalesce(src.attempt_count, 0) AS previous_attempt_count,
+     src.last_error AS previous_error,
+     sn.name_stage AS terminal_stage
+DELETE pn, hsn
+SET sn.source_paths = [
+      path IN coalesce(sn.source_paths, [])
+      WHERE NOT (path = 'dd:' + $dd_path OR path = $dd_path)
+    ]
+CREATE (retry:StandardNameSourceRetry {id: $retry_event_id})
+SET retry.source_id = src.id,
+    retry.previous_status = previous_status,
+    retry.previous_attempt_count = previous_attempt_count,
+    retry.previous_error = previous_error,
+    retry.reason = $reason + ' [terminal target "' + sn.id +
+                   '" at name_stage "' + terminal_stage + '"]',
+    retry.retried_at = datetime()
+MERGE (src)-[:HAS_RETRY_EVENT]->(retry)
+SET src.retry_events = coalesce(src.retry_events, []) + retry.id,
+    src.status = 'extracted',
+    src.produced_sn_id = null,
+    src.composed_at = null,
+    src.attempt_count = 0,
+    src.claimed_at = null,
+    src.claim_token = null,
+    src.failed_at = null,
+    src.last_error = null
+CREATE (change:StandardNameChange {id: $change_event_id})
+SET change.from_name = sn.id,
+    change.operation = 'recover_terminal_source_binding',
+    change.reason = $reason + ' [terminal target "' + sn.id +
+                    '" at name_stage "' + terminal_stage + '"]',
+    change.origin = 'terminal_binding_recovery',
+    change.changed_at = datetime(),
+    change.internal = true
+MERGE (sn)-[:HAS_INTERNAL_CHANGE]->(change)
+RETURN src.id AS source_node_id,
+       sn.id AS sn_id,
+       terminal_stage AS name_stage,
+       retry.id AS retry_event_id,
+       change.id AS change_event_id
 """
 
 
@@ -545,6 +640,120 @@ def reconcile_attachment_consistency(
     return result
 
 
+def recover_terminal_attachment(
+    dd_path: str,
+    sn_id: str,
+    *,
+    reason: str,
+    gc: Any | None = None,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Recover one source finalized against a terminal name collision.
+
+    This is deliberately narrower than ordinary semantic detachment. The
+    source must be the exact DD provenance node for *dd_path*, be finalized as
+    ``composed`` with both realization edges and scalar mirror pointing only to
+    *sn_id*, and the target must still be terminal. Any mismatch refuses the
+    operation without mutation.
+
+    The live write is one transaction: it removes both realization edges and
+    the target's source-path projection, returns the source to a fresh
+    composition attempt, and records both a source retry event and a name
+    change event carrying the terminal identity, stage, and operator reason.
+    """
+    reason = reason.strip()
+    if not reason:
+        raise ValueError("a non-empty recovery reason is required")
+
+    own = gc is None
+    if own:
+        from imas_codex.graph.client import GraphClient
+
+        client: Any = GraphClient()
+    else:
+        client = gc
+    source_node_id = f"dd:{dd_path}"
+    terminal_stages = sorted(_TERMINAL_RECOVERY_STAGES)
+    result: dict[str, Any] = {
+        "ok": False,
+        "dd_path": dd_path,
+        "sn_id": sn_id,
+        "source_node_id": source_node_id,
+        "dry_run": dry_run,
+    }
+    try:
+        if dry_run:
+            rows = list(
+                client.query(
+                    _TERMINAL_RECOVERY_ELIGIBILITY_QUERY,
+                    source_node_id=source_node_id,
+                    dd_path=dd_path,
+                    sn_id=sn_id,
+                    terminal_stages=terminal_stages,
+                )
+            )
+            if not rows:
+                return {
+                    **result,
+                    "reason": "exact terminal source binding is not recoverable",
+                }
+            row = rows[0]
+            return {
+                **result,
+                "ok": True,
+                "name_stage": row["name_stage"],
+                "previous_attempt_count": row["attempt_count"],
+            }
+
+        with client.session() as session:
+            tx = session.begin_transaction()
+            try:
+                rows = [
+                    dict(row)
+                    for row in tx.run(
+                        _TERMINAL_RECOVERY_QUERY,
+                        source_node_id=source_node_id,
+                        dd_path=dd_path,
+                        sn_id=sn_id,
+                        terminal_stages=terminal_stages,
+                        reason=reason,
+                        retry_event_id=f"source-retry:{uuid.uuid4()}",
+                        change_event_id=f"sn-change:{uuid.uuid4()}",
+                    )
+                ]
+                tx.commit()
+            except BaseException:
+                if tx.closed is False:
+                    tx.close()
+                raise
+        if not rows:
+            return {
+                **result,
+                "reason": "exact terminal source binding changed or is ineligible",
+            }
+        row = rows[0]
+        result.update(
+            {
+                "ok": True,
+                "name_stage": row["name_stage"],
+                "retry_event_id": row["retry_event_id"],
+                "change_event_id": row["change_event_id"],
+            }
+        )
+        logger.info(
+            "recover_terminal_attachment: returned %s to composition after "
+            "detaching terminal target %s at %s (%s)",
+            source_node_id,
+            sn_id,
+            row["name_stage"],
+            reason,
+        )
+        return result
+    finally:
+        if own:
+            client.close()
+
+
 def detach_one_attachment(
     dd_path: str,
     sn_id: str,
@@ -552,6 +761,7 @@ def detach_one_attachment(
     reason: str,
     gc: Any | None = None,
     dry_run: bool = False,
+    terminal_recovery: bool = False,
 ) -> dict[str, Any]:
     """Detach ONE source→name realization the consistency guard cannot judge.
 
@@ -576,8 +786,22 @@ def detach_one_attachment(
     accepted derived parents routinely carry no realization at all, so the
     detach returns it to that designed state instead of orphaning it.
 
+    ``terminal_recovery=True`` selects the stricter transactional recovery for
+    a source finalized against a terminal target. It bypasses the ordinary
+    would-orphan refusal only after proving the exact corrupted binding and
+    writes the retry/change ledgers atomically.
+
     Returns ``{"ok": bool, ...}``; never raises on a refusal.
     """
+    if terminal_recovery:
+        return recover_terminal_attachment(
+            dd_path,
+            sn_id,
+            reason=reason,
+            gc=gc,
+            dry_run=dry_run,
+        )
+
     own = gc is None
     if own:
         from imas_codex.graph.client import GraphClient
