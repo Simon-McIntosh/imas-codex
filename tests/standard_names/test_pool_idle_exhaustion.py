@@ -8,8 +8,9 @@ running after their work is exhausted:
    that still has pending work has exceeded the consecutive
    reserve-failure threshold (idle pools, whose counters freeze below
    threshold, do not veto the gate).
-3. ``_idle_exhaustion_watchdog`` sets ``stop_event`` after a sustained
-   window of zero pending counts and zero progress.
+3. ``_idle_exhaustion_watchdog`` sets ``stop_event`` only after a sustained
+   fresh observation of zero pending counts, zero in-flight batches, and zero
+   progress.
 4. ``run_pools`` exits with the supplied ``idle_exhausted_event`` set
    when the idle watchdog fires.
 """
@@ -102,6 +103,88 @@ class TestIdleExhaustionWatchdog:
         assert stop_event.is_set()
 
     @pytest.mark.asyncio
+    async def test_run_pools_without_pending_callback_exits_after_batch(self) -> None:
+        """A completed batch must not disable natural idle shutdown."""
+        mgr = BudgetManager(total_budget=5.0)
+        stop_event = asyncio.Event()
+        idle_exhausted = asyncio.Event()
+        state = {"available": True}
+
+        async def claim() -> dict[str, str] | None:
+            if not state["available"]:
+                return None
+            state["available"] = False
+            return {"id": "candidate"}
+
+        async def process(batch: dict[str, str]) -> int:
+            return 1
+
+        spec = PoolSpec(name="generate", claim=claim, process=process)
+        await asyncio.wait_for(
+            run_pools(
+                [spec],
+                mgr,
+                stop_event,
+                grace_period=0.5,
+                weights={"generate": 1.0},
+                idle_exhausted_event=idle_exhausted,
+                idle_exhaustion_poll=0.01,
+                idle_exhaustion_polls=3,
+                free_pool_set={"generate"},
+            ),
+            timeout=1.0,
+        )
+
+        assert spec.health.total_processed == 1
+        assert idle_exhausted.is_set()
+
+    @pytest.mark.asyncio
+    async def test_initial_pending_failure_requires_successful_refresh(self) -> None:
+        """A failed initial pending query cannot certify an empty run."""
+        mgr = BudgetManager(total_budget=5.0)
+        stop_event = asyncio.Event()
+        idle_exhausted = asyncio.Event()
+        spec = _make_idle_spec("generate", pending=0)
+        calls = 0
+
+        def pending_fn() -> dict[str, int]:
+            nonlocal calls
+            calls += 1
+            if calls == 1:
+                raise RuntimeError("pending query unavailable")
+            return {"generate": 0}
+
+        run_task = asyncio.create_task(
+            run_pools(
+                [spec],
+                mgr,
+                stop_event,
+                pending_fn=pending_fn,
+                pending_poll_interval=0.2,
+                grace_period=0.5,
+                weights={"generate": 1.0},
+                idle_exhausted_event=idle_exhausted,
+                idle_exhaustion_poll=0.01,
+                idle_exhaustion_polls=3,
+                free_pool_set={"generate"},
+            )
+        )
+        try:
+            await asyncio.sleep(0.1)
+            assert calls == 1
+            assert not stop_event.is_set(), (
+                "a failed pending query must leave quiescence unproven"
+            )
+            await asyncio.wait_for(run_task, timeout=1.0)
+        finally:
+            if not run_task.done():
+                stop_event.set()
+                await asyncio.gather(run_task, return_exceptions=True)
+
+        assert calls >= 2
+        assert idle_exhausted.is_set()
+
+    @pytest.mark.asyncio
     async def test_idle_watchdog_does_not_fire_with_pending_work(self) -> None:
         """Pools with pending_count > 0 must NOT be considered idle —
         external stop_event is the only exit path here."""
@@ -182,6 +265,110 @@ class TestIdleExhaustionWatchdog:
         assert not idle_exhausted.is_set(), (
             "idle watchdog must reset on progress and never fire here"
         )
+
+    @pytest.mark.parametrize(
+        ("producer_name", "consumer_name"),
+        [
+            ("refine_docs", "review_docs"),
+            ("refine_name", "review_name"),
+        ],
+    )
+    @pytest.mark.asyncio
+    async def test_refine_handoff_reaches_review_before_idle_shutdown(
+        self,
+        producer_name: str,
+        consumer_name: str,
+    ) -> None:
+        """A slow refine batch may create review work after the idle window."""
+        mgr = BudgetManager(total_budget=5.0)
+        stop_event = asyncio.Event()
+        idle_exhausted = asyncio.Event()
+        producer_started = asyncio.Event()
+        finish_producer = asyncio.Event()
+        downstream_ready = asyncio.Event()
+        review_processed = asyncio.Event()
+        state = {"refine": True, "drafted": False}
+
+        async def claim_refine() -> dict[str, str] | None:
+            if not state["refine"]:
+                return None
+            state["refine"] = False
+            return {"id": "candidate"}
+
+        async def process_refine(batch: dict[str, str]) -> int:
+            producer_started.set()
+            await finish_producer.wait()
+            state["drafted"] = True
+            downstream_ready.set()
+            return 1
+
+        async def claim_review() -> dict[str, str] | None:
+            await downstream_ready.wait()
+            if not state["drafted"]:
+                return None
+            state["drafted"] = False
+            return {"id": "candidate"}
+
+        async def process_review(batch: dict[str, str]) -> int:
+            review_processed.set()
+            return 1
+
+        producer = PoolSpec(
+            name=producer_name,
+            claim=claim_refine,
+            process=process_refine,
+        )
+        consumer = PoolSpec(
+            name=consumer_name,
+            claim=claim_review,
+            process=process_review,
+        )
+
+        def pending_fn() -> dict[str, int]:
+            return {
+                producer_name: int(state["refine"]),
+                consumer_name: int(state["drafted"]),
+            }
+
+        run_task = asyncio.create_task(
+            run_pools(
+                [producer, consumer],
+                mgr,
+                stop_event,
+                pending_fn=pending_fn,
+                pending_poll_interval=0.4,
+                grace_period=0.5,
+                weights={producer_name: 0.5, consumer_name: 0.5},
+                idle_exhausted_event=idle_exhausted,
+                idle_exhaustion_poll=0.01,
+                idle_exhaustion_polls=3,
+                free_pool_set={producer_name, consumer_name},
+            )
+        )
+        try:
+            await asyncio.wait_for(producer_started.wait(), timeout=1.0)
+            await asyncio.sleep(0.08)
+            assert not stop_event.is_set(), (
+                "idle shutdown must not fire while refine work is in flight"
+            )
+
+            finish_producer.set()
+            await asyncio.wait_for(review_processed.wait(), timeout=1.0)
+            await asyncio.sleep(0.08)
+            assert not stop_event.is_set(), (
+                "a stale pending snapshot must not authorize idle shutdown"
+            )
+
+            await asyncio.wait_for(run_task, timeout=2.0)
+        finally:
+            finish_producer.set()
+            if not run_task.done():
+                stop_event.set()
+                await asyncio.gather(run_task, return_exceptions=True)
+
+        assert idle_exhausted.is_set()
+        assert producer.health.total_processed == 1
+        assert consumer.health.total_processed == 1
 
 
 # ---------------------------------------------------------------------------

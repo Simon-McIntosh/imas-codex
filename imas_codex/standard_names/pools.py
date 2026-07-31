@@ -241,6 +241,8 @@ class PoolHealth:
     consecutive_empty_claims: int = 0
     total_processed: int = 0
     _last_pending_count: int = 0
+    _completion_epoch: int = 0
+    _pending_observation_epoch: int | None = None
 
     def mark_progress(self) -> None:
         self.last_progress_at = time.time()
@@ -428,7 +430,6 @@ async def pool_loop(
                         tag,
                         rel_exc,
                     )
-            spec.health.in_flight = max(0, spec.health.in_flight - 1)
             break
         except Exception as exc:  # noqa: BLE001
             spec.health.error_count += 1
@@ -445,6 +446,10 @@ async def pool_loop(
                     )
         finally:
             spec.health.in_flight = max(0, spec.health.in_flight - 1)
+            # A pending-count snapshot taken before this batch completed or
+            # released cannot prove quiescence: the batch may have created
+            # downstream work or made its own claim eligible again.
+            spec.health._completion_epoch += 1
     logger.info("%s exiting cleanly", tag)
 
 
@@ -554,13 +559,17 @@ async def _idle_exhaustion_watchdog(
     poll: float = 1.0,
     idle_polls: int = 30,
     stall_seconds: float = 600.0,
+    require_pending_observation: bool = False,
 ) -> None:
     """Set ``stop_event`` after sustained genuine idleness across all pools.
 
     Watches every pool every *poll* seconds.  A poll is considered
     "globally idle" iff **all** pools simultaneously satisfy:
 
-    * ``pending_count == 0`` (no eligible work in scope), AND
+    * ``pending_count == 0`` (no eligible work in scope),
+    * ``in_flight == 0`` (no claimed batch can still produce work), AND
+    * when a pending callback is installed, pending counts were refreshed after
+      the latest batch completion or release, AND
     * ``total_processed`` did not increase since the last poll (no
       pool is currently making progress).
 
@@ -601,9 +610,13 @@ async def _idle_exhaustion_watchdog(
         except TimeoutError:
             pass
 
-        all_idle = True
+        completion_epoch = sum(p.health._completion_epoch for p in pools)
+        pending_is_fresh = not require_pending_observation or all(
+            p.health._pending_observation_epoch == completion_epoch for p in pools
+        )
+        all_idle = pending_is_fresh
         for p in pools:
-            if p.health.pending_count > 0:
+            if p.health.pending_count > 0 or p.health.in_flight > 0:
                 all_idle = False
             current = p.health.total_processed
             if current > snapshots.get(p.name, 0):
@@ -668,6 +681,10 @@ async def _pending_count_watchdog(
     pool_by_name = {p.name: p for p in pools}
 
     def _refresh() -> None:
+        # Capture the completion frontier before querying.  If a claimed batch
+        # completes or releases while the query runs, its epoch advances and
+        # this observation remains deliberately stale until the next refresh.
+        observed_epoch = sum(p.health._completion_epoch for p in pools)
         try:
             counts = pending_fn()
         except Exception as exc:  # noqa: BLE001
@@ -675,6 +692,7 @@ async def _pending_count_watchdog(
             return
         for name, pool in pool_by_name.items():
             pool.health.pending_count = counts.get(name, 0)
+            pool.health._pending_observation_epoch = observed_epoch
         logger.debug(
             "pending_count_watchdog: updated pending counts — %s",
             {n: pool_by_name[n].health.pending_count for n in pool_by_name},
@@ -836,6 +854,7 @@ async def run_pools(
             idle_event,
             poll=idle_exhaustion_poll,
             idle_polls=idle_exhaustion_polls,
+            require_pending_observation=pending_fn is not None,
         ),
         name="idle_exhaustion_watchdog",
     )
