@@ -6507,6 +6507,200 @@ async def process_refine_name_batch(
 # =============================================================================
 
 
+_NAME_REVIEW_SOURCE_CONTEXT_LIMIT = 8
+
+
+def _review_source_binding_sort_key(binding: dict[str, Any]) -> tuple[str, ...]:
+    """Return a stable order for exact-source review context."""
+    return tuple(
+        str(binding.get(field) or "")
+        for field in (
+            "id",
+            "source_id",
+            "dd_path",
+            "dd_version",
+            "dd_documentation",
+            "dd_parent_path",
+            "dd_parent_documentation",
+        )
+    )
+
+
+def _enrich_name_review_items(items: list[dict[str, Any]]) -> None:
+    """Attach exact source, canonical DD, and lossless grammar review context.
+
+    Immutable leaf and parent definitions come from each exact
+    ``StandardNameSource`` binding projected by the claim.  Rich relational
+    context is added through the same batch enrichment used by composition;
+    mutable graph enrichment never replaces the pinned source text.
+    """
+    from imas_codex.standard_names.graph_ops import strict_review_grammar_context
+
+    stubs: list[dict[str, Any]] = []
+    owners: list[dict[str, Any]] = []
+
+    for item in items:
+        try:
+            item.update(strict_review_grammar_context(item["id"]))
+        except (KeyError, TypeError, ValueError):
+            logger.debug(
+                "review_name: strict grammar context unavailable for %s",
+                item.get("id"),
+                exc_info=True,
+            )
+
+        raw_bindings = item.get("source_bindings")
+        # Claim results always carry this key.  Its absence identifies direct
+        # unit-test/legacy callers and avoids an unnecessary graph round-trip.
+        if raw_bindings is None:
+            continue
+        ordered_bindings = sorted(
+            (dict(binding) for binding in (raw_bindings or []) if binding),
+            key=_review_source_binding_sort_key,
+        )
+        bindings: list[dict[str, Any]] = []
+        seen_binding_ids: set[str] = set()
+        for binding in ordered_bindings:
+            binding_id = str(
+                binding.get("id")
+                or binding.get("source_id")
+                or binding.get("dd_path")
+                or ""
+            )
+            if binding_id in seen_binding_ids:
+                continue
+            seen_binding_ids.add(binding_id)
+            bindings.append(binding)
+        item["source_bindings"] = bindings
+        dd_bindings = [
+            binding for binding in bindings if binding.get("source_type") == "dd"
+        ]
+        if not dd_bindings:
+            continue
+
+        item["unpinned_source_count"] = sum(
+            binding.get("dd_snapshot_pinned") is not True for binding in dd_bindings
+        )
+        context_bindings = dd_bindings[:_NAME_REVIEW_SOURCE_CONTEXT_LIMIT]
+        omitted_count = len(dd_bindings) - len(context_bindings)
+        if omitted_count:
+            item["source_context_omitted"] = omitted_count
+
+        source_paths = list(
+            dict.fromkeys(
+                strip_dd_prefix(
+                    binding.get("dd_path") or binding.get("source_id") or ""
+                )
+                for binding in context_bindings
+                if binding.get("dd_path") or binding.get("source_id")
+            )
+        )
+        if source_paths:
+            item["source_paths"] = source_paths
+            item["source_id"] = source_paths[0]
+
+        source_doc_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
+        for binding in context_bindings:
+            source_id = strip_dd_prefix(
+                binding.get("dd_path") or binding.get("source_id") or ""
+            )
+            pinned = binding.get("dd_snapshot_pinned") is True
+            unit = binding.get("dd_unit") or item.get("unit") or ""
+            description = (
+                binding.get("enhanced_description") or binding.get("description") or ""
+            )
+            documentation = binding.get("dd_documentation") or ""
+            dd_version = binding.get("dd_version") or ""
+            group_key = (
+                pinned,
+                dd_version,
+                unit,
+                documentation,
+                description,
+            )
+            group = source_doc_groups.setdefault(
+                group_key,
+                {
+                    "id": source_id,
+                    "ids": [],
+                    "unit": unit,
+                    "description": description,
+                    "documentation": documentation,
+                    "dd_version": dd_version,
+                    "snapshot_pinned": pinned,
+                },
+            )
+            if source_id and source_id not in group["ids"]:
+                group["ids"].append(source_id)
+        item["dd_source_docs"] = list(source_doc_groups.values())
+
+        parent_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
+        for binding in context_bindings:
+            parent_path = binding.get("dd_parent_path") or ""
+            documentation = binding.get("dd_parent_documentation") or ""
+            if not parent_path and not documentation:
+                continue
+            pinned = binding.get("dd_snapshot_pinned") is True
+            dd_version = binding.get("dd_version") or ""
+            group_key = (pinned, dd_version, documentation)
+            group = parent_groups.setdefault(
+                group_key,
+                {
+                    "path": parent_path,
+                    "paths": [],
+                    "documentation": documentation,
+                    "source_ids": [],
+                    "dd_version": dd_version,
+                    "snapshot_pinned": pinned,
+                },
+            )
+            if parent_path and parent_path not in group["paths"]:
+                group["paths"].append(parent_path)
+            source_id = binding.get("source_id") or ""
+            if source_id and source_id not in group["source_ids"]:
+                group["source_ids"].append(source_id)
+        parent_contexts = list(parent_groups.values())
+        if parent_contexts:
+            item["dd_parent_contexts"] = parent_contexts
+        source_hints = [
+            {
+                "source_id": binding.get("source_id") or "",
+                "hint": binding.get("compose_hint") or "",
+                "reason": binding.get("compose_hint_reason") or "",
+            }
+            for binding in context_bindings
+            if binding.get("compose_hint")
+        ]
+        if source_hints:
+            item["source_hints"] = source_hints
+
+        if source_paths:
+            stubs.append(
+                {
+                    "path": source_paths[0],
+                    "description": item.get("description"),
+                    "documentation": item["dd_source_docs"][0]["documentation"],
+                    "unit": item["dd_source_docs"][0]["unit"],
+                    "physics_domain": item.get("physics_domain"),
+                }
+            )
+            owners.append(item)
+
+    if not stubs:
+        return
+    try:
+        _enrich_batch_items(stubs)
+    except Exception:
+        logger.debug("review_name: compose-parity DD enrichment failed", exc_info=True)
+        return
+
+    protected = {"path", "description", "documentation", "unit", "physics_domain"}
+    for item, stub in zip(owners, stubs, strict=True):
+        for key, value in stub.items():
+            if key not in protected and key not in item:
+                item[key] = value
+
+
 # In-process tally of RD-quorum reviews deferred because a ≥2-model quorum did
 # NOT complete — a secondary reviewer failed (throttled or empty response), so
 # only cycle 0 (or nothing) survived. Keyed by (run_id, review_axis). Accepting
@@ -6557,6 +6751,7 @@ async def _run_rd_quorum_cycles(
     reasoning_effort: str | None = None,
     escalation_reasoning_effort: str | None = None,
     run_id: str | None = None,
+    escalation_prompt_factory: Callable[[list[dict[str, Any]]], str] | None = None,
 ) -> dict[str, Any] | None:
     """Run the configured RD-quorum reviewer chain for a single StandardName.
 
@@ -6607,7 +6802,12 @@ async def _run_rd_quorum_cycles(
     total_tokens_in = 0
     total_tokens_out = 0
 
-    async def _run_cycle(cycle_idx: int, model: str) -> dict[str, Any] | None:
+    async def _run_cycle(
+        cycle_idx: int,
+        model: str,
+        *,
+        cycle_user_prompt: str | None = None,
+    ) -> dict[str, Any] | None:
         """Single LLM call. Returns parsed cycle dict or None on failure."""
         nonlocal total_cost, total_tokens_in, total_tokens_out
         # The escalator cycle (idx >= 2) fires only on a flagged disagreement,
@@ -6624,7 +6824,7 @@ async def _run_rd_quorum_cycles(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
+                    {"role": "user", "content": cycle_user_prompt or user_prompt},
                 ],
                 response_model=response_model,
                 service="standard-names",
@@ -6792,7 +6992,37 @@ async def _run_rd_quorum_cycles(
     # ── Cycle 2 (escalator) ────────────────────────────────────────────
     c2 = None
     if disagreement and len(models) >= 3:
-        c2 = await _run_cycle(2, models[2])
+        prior_reviews = [
+            {
+                "role": role,
+                "model": review["model"],
+                "score": review["score"],
+                "scores_json": json.dumps(review["scores"], sort_keys=True),
+                "reasoning": review["comments"],
+                "comments_per_dim_json": json.dumps(
+                    review["comments_per_dim"] or {}, sort_keys=True
+                ),
+            }
+            for role, review in (("primary", c0), ("secondary", c1))
+            if review is not None
+        ]
+        if escalation_prompt_factory is not None:
+            escalation_user_prompt = escalation_prompt_factory(prior_reviews)
+        else:
+            critique_text = "\n".join(
+                f"- {review['role']} ({review['model']}): "
+                f"scores={review['scores_json']}; {review['reasoning']}"
+                for review in prior_reviews
+            )
+            escalation_user_prompt = (
+                f"{user_prompt}\n\n## Prior reviewer critiques for authoritative "
+                f"escalation\n{critique_text}"
+            )
+        c2 = await _run_cycle(
+            2,
+            models[2],
+            cycle_user_prompt=escalation_user_prompt,
+        )
         if c2 is not None:
             cycles.append(c2)
 
@@ -6988,6 +7218,8 @@ async def process_review_name_batch(
         disagreement_threshold = get_sn_review_disagreement_threshold()
     except Exception:
         disagreement_threshold = 0.20
+
+    await _asyncio.to_thread(_enrich_name_review_items, batch)
 
     processed = 0
 
@@ -7280,30 +7512,6 @@ async def process_review_name_batch(
             )
             review_scored_examples = []
 
-        # ── DD path context for reviewer (keywords, clusters, version history) ─
-        _source_paths = item.get("source_paths") or []
-        if _source_paths:
-            _first_src = (
-                _source_paths[0] if isinstance(_source_paths, list) else _source_paths
-            )
-            if isinstance(_first_src, str):
-                _first_src = strip_dd_prefix(_first_src)
-            if _first_src:
-                try:
-                    from imas_codex.graph.client import GraphClient as _GCDD
-
-                    def _do_dd_ctx(_p=_first_src, _it=item) -> None:
-                        with _GCDD() as _gc:
-                            _enrich_dd_path_context(_gc, _it, _p)
-
-                    await _asyncio.to_thread(_do_dd_ctx)
-                except Exception:
-                    logger.debug(
-                        "review_name: dd_path_context failed for %s",
-                        sn_id,
-                        exc_info=True,
-                    )
-
         # The reviewer must see the SAME closed token registry the composer
         # sees (closed_vocab_full + operators_full): a valid name built on a
         # less-common but registered base (etendue, opacity, …) otherwise reads
@@ -7317,6 +7525,7 @@ async def process_review_name_batch(
             **neighbours,
             **_build_enum_lists(),
             "review_scored_examples": review_scored_examples,
+            "prior_reviews": [],
         }
         try:
             user_prompt = render_prompt("sn/review_names_user", prompt_context)
@@ -7330,6 +7539,15 @@ async def process_review_name_batch(
             system_prompt = (
                 "You are a quality reviewer for IMAS standard names in "
                 "fusion plasma physics."
+            )
+
+        def _render_escalation_prompt(
+            prior_reviews: list[dict[str, Any]],
+            base_context: dict[str, Any] = prompt_context,
+        ) -> str:
+            return render_prompt(
+                "sn/review_names_user",
+                {**base_context, "prior_reviews": prior_reviews},
             )
 
         # ── Budget reservation (cover all cycles) ──────────────────────
@@ -7358,6 +7576,7 @@ async def process_review_name_batch(
                 reasoning_effort=get_sn_review_reasoning_effort(),
                 escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
                 run_id=mgr.run_id,
+                escalation_prompt_factory=_render_escalation_prompt,
             )
 
             if quorum is None:
