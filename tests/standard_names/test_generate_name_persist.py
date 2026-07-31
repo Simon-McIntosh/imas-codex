@@ -322,10 +322,14 @@ def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
     assert "MERGE (target:StandardName {id: b.sn_id})" in lock_cypher
     assert "ON CREATE SET target.created_at = datetime()" in lock_cypher
     assert "target.name_stage = $pending_stage" in lock_cypher
+    assert "WITH b, sns, target\n        FOREACH" in lock_cypher
+    assert "SET target.binding_lock_token = b.claim_token" in lock_cypher
+    assert "REMOVE target.binding_lock_token, target.binding_lock_seq" in lock_cypher
     assert "MERGE (sns)-[reservation:PRODUCED_NAME]->(target)" in lock_cypher
     assert "reservation.provisional = true" in lock_cypher
     assert "reservation.claim_token = b.claim_token" in lock_cypher
     assert "reservation.claim_seq = b.claim_seq" in lock_cypher
+    assert "reservation.created_target = true" in lock_cypher
     assert "HAS_STANDARD_NAME" not in lock_cypher
     assert tx.run.call_count == 1
     tx.commit.assert_called_once()
@@ -843,6 +847,12 @@ class TestPersistGeneratedNameBatch:
         write.assert_not_called()
         backfill.assert_not_called()
         supersede.assert_not_called()
+        lock_cypher = self.atomic_tx.run.call_args_list[0].args[0]
+        assert "SET target.binding_lock_token = b.claim_token" in lock_cypher
+        assert "target.binding_lock_seq = b.claim_seq" in lock_cypher
+        assert (
+            "REMOVE target.binding_lock_token, target.binding_lock_seq" in lock_cypher
+        )
         finalize_cypher = _transaction_call(
             self.atomic_tx, "sns.status = 'composed'"
         ).args[0]
@@ -951,14 +961,118 @@ class TestPersistGeneratedNameBatch:
         assert "stale.provisional = true" in cleanup_cypher
         assert "stale.claim_token IS NOT NULL" in cleanup_cypher
         assert "stale.claim_seq IS NOT NULL" in cleanup_cypher
+        assert "stale.created_target = true" in cleanup_cypher
+        assert "old.name_stage = $pending_stage" in cleanup_cypher
+        assert "NOT EXISTS" in cleanup_cypher
         assert "DELETE stale" in cleanup_cypher
-        assert "HAS_STANDARD_NAME" in cleanup_cypher
-        assert "SET old.source_paths = CASE" in cleanup_cypher
-        assert "coalesce(binding.provisional, false) = false" in cleanup_cypher
-        assert "DELETE binding" not in cleanup_cypher
+        assert "DELETE owned_target" in cleanup_cypher
+        assert "HAS_STANDARD_NAME" not in cleanup_cypher
+        assert "SET old.source_paths" not in cleanup_cypher
         release_cypher = self.atomic_tx.run.call_args_list[2].args[0]
         assert "sns.status = 'extracted'" in release_cypher
         assert "sns.claim_token = null" in release_cypher
+
+    def test_unstamped_projection_and_source_paths_survive_stale_cleanup(self):
+        """Provisional ownership never implies ownership of unstamped mirrors."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="hydrogen_fraction")
+
+        def _collision(cypher, **params):
+            if "AS outcome" not in cypher:
+                return []
+            item = params["batch"][0]
+            return [
+                {
+                    "id": item["sns_id"],
+                    "outcome": "lifecycle_collision",
+                    "binding_kind": "collision",
+                    "candidate_id": item["sn_id"],
+                    "target_stage": "superseded",
+                    "attempt_count": 3,
+                }
+            ]
+
+        self.atomic_tx.run.side_effect = _collision
+        assert (
+            persist_generated_name_batch(
+                [candidate], compose_model="test/model", return_winner_ids=True
+            )
+            == []
+        )
+
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "stale.provisional = true" in cleanup_cypher
+        assert "DELETE stale" in cleanup_cypher
+        assert "HAS_STANDARD_NAME" not in cleanup_cypher
+        assert "source_paths =" not in cleanup_cypher
+        assert "coalesce(old.source_paths, []) = []" in cleanup_cypher
+
+    def test_reclaimed_same_candidate_can_reserve_after_owned_orphan_cleanup(self):
+        """An exact-owned pending orphan cannot wedge the next source claim."""
+        from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+
+        batch = [
+            {
+                "sns_id": "dd:core_profiles/electrons/temperature",
+                "source_id": "core_profiles/electrons/temperature",
+                "sn_id": "electron_temperature",
+                "unit": "eV",
+                "claim_token": "reclaimed",
+                "claim_seq": 8,
+            }
+        ]
+        gc = MagicMock()
+        calls = {"lock": 0}
+
+        def _query(cypher, **_params):
+            if "AS outcome" in cypher:
+                calls["lock"] += 1
+                if calls["lock"] == 1:
+                    return [
+                        {
+                            "id": batch[0]["sns_id"],
+                            "outcome": "lifecycle_collision",
+                            "binding_kind": "collision",
+                            "candidate_id": batch[0]["sn_id"],
+                            "target_stage": "pending",
+                            "attempt_count": 2,
+                        }
+                    ]
+                return [
+                    {
+                        "id": batch[0]["sns_id"],
+                        "outcome": "winner",
+                        "binding_kind": "owned_reservation",
+                        "candidate_id": batch[0]["sn_id"],
+                        "target_stage": "pending",
+                        "attempt_count": 3,
+                    }
+                ]
+            return []
+
+        gc.query.side_effect = _query
+        first = _lock_claimed_name_bindings(
+            gc,
+            batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+        second = _lock_claimed_name_bindings(
+            gc,
+            batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+
+        assert first[0]["outcome"] == "lifecycle_collision"
+        assert second[0]["binding_kind"] == "owned_reservation"
+        cleanup_cypher = gc.query.call_args_list[1].args[0]
+        assert "stale.created_target = true" in cleanup_cypher
+        assert "DELETE owned_target" in cleanup_cypher
+        retry_lock = gc.query.call_args_list[3].args[0]
+        assert "MERGE (target:StandardName {id: b.sn_id})" in retry_lock
+        assert "reservation.created_target = true" in retry_lock
 
     def test_rich_write_and_finalize_share_transaction(self):
         """The rich writer and source outcome use the locked transaction."""

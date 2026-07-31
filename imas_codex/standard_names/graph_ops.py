@@ -4584,7 +4584,8 @@ def persist_generated_name_winners(
                         sns.produced_sn_id = sn.id
                     REMOVE reservation.provisional,
                            reservation.claim_token,
-                           reservation.claim_seq
+                           reservation.claim_seq,
+                           reservation.created_target
                     MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
                     WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
                     SET sn.source_paths = CASE
@@ -4628,7 +4629,8 @@ def persist_generated_name_winners(
                     MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
                     REMOVE produced.provisional,
                            produced.claim_token,
-                           produced.claim_seq
+                           produced.claim_seq,
+                           produced.created_target
                     MERGE (source)-[:HAS_STANDARD_NAME]->(sn)
                     WITH sns, sn, b, b.source_type + ':' + b.source_id AS uri
                     SET sn.source_paths = CASE
@@ -4805,7 +4807,8 @@ def _finalize_generated_name_stage(
                     MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
                     REMOVE produced.provisional,
                            produced.claim_token,
-                           produced.claim_seq
+                           produced.claim_seq,
+                           produced.created_target
                     RETURN sns.id AS id
                     """,
                         batch=batch,
@@ -6932,6 +6935,12 @@ def _lock_claimed_name_bindings(
           AND sns.claim_seq = b.claim_seq
           AND sns.status = 'extracted'
         __TARGET_CLAUSE__
+        WITH b, sns, target
+        FOREACH (_ IN CASE WHEN target IS NULL THEN [] ELSE [1] END |
+          SET target.binding_lock_token = b.claim_token,
+              target.binding_lock_seq = b.claim_seq
+        )
+        WITH b, sns, target
         CALL (b, sns, target) {
           WITH b, sns, target
           WHERE $allow_own_pending
@@ -6942,7 +6951,8 @@ def _lock_claimed_name_bindings(
           MERGE (sns)-[reservation:PRODUCED_NAME]->(target)
           SET reservation.provisional = true,
               reservation.claim_token = b.claim_token,
-              reservation.claim_seq = b.claim_seq
+              reservation.claim_seq = b.claim_seq,
+              reservation.created_target = true
           REMOVE target.reservation_source_id,
                  target.reservation_claim_token,
                  target.reservation_claim_seq
@@ -6974,6 +6984,14 @@ def _lock_claimed_name_bindings(
              target_stage,
              lifecycle_bindable AND unit_bindable AS bindable
         SET sns.claimed_at = datetime()
+        WITH b, sns, target, owned, target_stage, bindable,
+             lifecycle_bindable, unit_bindable
+        FOREACH (_ IN CASE
+          WHEN target.binding_lock_token = b.claim_token
+           AND target.binding_lock_seq = b.claim_seq
+          THEN [1] ELSE [] END |
+          REMOVE target.binding_lock_token, target.binding_lock_seq
+        )
         RETURN sns.id AS id,
                CASE
                  WHEN bindable THEN 'winner'
@@ -7005,11 +7023,11 @@ def _lock_claimed_name_bindings(
     }
     collision_batch = [item for item in batch if item["sns_id"] in collision_ids]
     if collision_batch:
-        # A reclaimed source can still carry projections from an abandoned
-        # provisional reservation. Remove only relationships explicitly
-        # stamped as provisional for this source; ordinary provenance is never
-        # eligible. The current stamp is eligible too because releasing its
-        # claim makes that reservation stale in this transaction.
+        # A reclaimed source can carry an abandoned provisional reservation.
+        # Only that directly stamped relationship is deletable. Projections
+        # and source-path mirrors are never inferred to belong to it: older
+        # writers created those assertions without ownership metadata, and a
+        # projection-only assertion can be legitimate.
         gc.query(
             """
             UNWIND $batch AS b
@@ -7017,37 +7035,27 @@ def _lock_claimed_name_bindings(
             WHERE sns.claim_token = b.claim_token
               AND sns.claim_seq = b.claim_seq
               AND sns.status = 'extracted'
-            MATCH (sns)-[:FROM_DD_PATH]->(dd:IMASNode)
             MATCH (sns)-[stale:PRODUCED_NAME]->(old:StandardName)
             WHERE stale.provisional = true
               AND stale.claim_token IS NOT NULL
               AND stale.claim_seq IS NOT NULL
-            WITH b, sns, dd, old, stale
-            OPTIONAL MATCH (dd)-[projection:HAS_STANDARD_NAME]->(old)
-            WITH b, sns, dd, old, stale, projection,
-                 EXISTS {
-                   MATCH (other:StandardNameSource)-[:FROM_DD_PATH]->(dd)
-                   MATCH (other)-[binding:PRODUCED_NAME]->(old)
-                   WHERE binding <> stale
-                     AND coalesce(binding.provisional, false) = false
-                 } AS preserve_projection
+            WITH b, sns, old, stale,
+                 stale.created_target = true
+                   AND old.name_stage = $pending_stage
+                   AND coalesce(old.source_paths, []) = []
+                   AND NOT EXISTS {
+                     MATCH (old)-[reference]-()
+                     WHERE reference <> stale
+                   } AS delete_owned_orphan
             DELETE stale
-            CALL (projection, preserve_projection) {
-              WITH projection, preserve_projection
-              WHERE projection IS NOT NULL AND NOT preserve_projection
-              DELETE projection
-              RETURN count(*) AS projections_removed
-            }
-            WITH dd, old, preserve_projection
-            SET old.source_paths = CASE
-                  WHEN NOT preserve_projection THEN [
-                    path IN coalesce(old.source_paths, [])
-                    WHERE NOT (path = 'dd:' + dd.id OR path = dd.id)
-                  ]
-                  ELSE old.source_paths
-                END
+            WITH old, delete_owned_orphan
+            FOREACH (owned_target IN CASE
+              WHEN delete_owned_orphan THEN [old] ELSE [] END |
+              DELETE owned_target
+            )
             """,
             batch=collision_batch,
+            pending_stage=NameStage.pending.value,
         )
         gc.query(
             """
@@ -7279,7 +7287,8 @@ def persist_claimed_attachments(
                         MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
                         REMOVE produced.provisional,
                                produced.claim_token,
-                               produced.claim_seq
+                               produced.claim_seq,
+                               produced.created_target
                         MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                         WITH sns, sn, b, 'dd:' + b.source_id AS uri
                         SET sn.source_paths = CASE
