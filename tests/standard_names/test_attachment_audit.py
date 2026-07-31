@@ -20,6 +20,7 @@ against a live graph (``@pytest.mark.graph``).
 from __future__ import annotations
 
 import uuid
+from copy import deepcopy
 from unittest.mock import MagicMock
 
 import pytest
@@ -1005,6 +1006,483 @@ def test_detach_terminal_recovery_routes_to_exact_transaction() -> None:
     assert result["ok"] is True
     assert result["retry_event_id"] == "source-retry:test"
     tx.commit.assert_called_once()
+
+
+def _terminal_graph_state(
+    *,
+    source_paths: list[str] | None = None,
+    extra_target_sources: int = 0,
+    extra_target_projections: int = 0,
+    from_dd_path: bool = True,
+    produced_edge: bool = True,
+    projected_edge: bool = True,
+    scalar_matches: bool = True,
+    source_status: str = "composed",
+    name_stage: str = "superseded",
+) -> dict:
+    """Small graph model for exercising the recovery predicate and mutation."""
+    path = "spectrometer/channel/isotope_ratio"
+    source_id = f"dd:{path}"
+    target_id = "hydrogen_fraction"
+    target_sources = [source_id] if produced_edge else []
+    target_sources.extend(f"dd:other/source/{i}" for i in range(extra_target_sources))
+    target_projections = [path] if projected_edge else []
+    target_projections.extend(
+        f"other/projection/{i}" for i in range(extra_target_projections)
+    )
+    return {
+        "path": path,
+        "source_id": source_id,
+        "target_id": target_id,
+        "from_dd_path": from_dd_path,
+        "source_outputs": [target_id] if produced_edge else [],
+        "target_sources": target_sources,
+        "target_projections": target_projections,
+        "source": {
+            "source_type": "dd",
+            "source_id": path,
+            "status": source_status,
+            "produced_sn_id": target_id if scalar_matches else "another_name",
+            "attempt_count": 7,
+            "last_error": "candidate collided with terminal lineage",
+            "composed_at": "2026-07-31T12:00:00Z",
+            "claimed_at": "2026-07-31T11:59:00Z",
+            "claim_token": "claim:test",
+            "failed_at": "2026-07-31T11:58:00Z",
+            "retry_events": ["source-retry:earlier"],
+        },
+        "target": {
+            "name_stage": name_stage,
+            "source_paths": None if source_paths is None else list(source_paths),
+            "unit": "1",
+            "reviewer_score_name": 0.73125,
+            "grammar_version": "0.8.0rc63",
+            "physics_domain": "spectroscopy",
+            "cocos": 17,
+            "refined_from": "hydrogen_fraction_legacy",
+            "vocab_gap_ids": ["gap:preserved"],
+        },
+        "retries": [],
+        "changes": [],
+        "source_retry_links": [],
+        "name_change_links": [],
+    }
+
+
+def _state_is_terminal_recovery_eligible(state: dict, params: dict) -> bool:
+    """Evaluate the Cypher predicate against the small graph model."""
+    source = state["source"]
+    target = state["target"]
+    path = params["dd_path"]
+    target_id = params["sn_id"]
+    source_id = params["source_node_id"]
+    paths = target["source_paths"] or []
+    mirror_exact = path in paths or f"dd:{path}" in paths
+    mirror_missing_but_isolated = (
+        not paths
+        and len(state["target_sources"]) == 1
+        and len(state["target_projections"]) == 1
+    )
+    return all(
+        (
+            source_id == state["source_id"],
+            target_id == state["target_id"],
+            state["from_dd_path"],
+            source["source_type"] == "dd",
+            source["source_id"] == path,
+            source["status"] == "composed",
+            source["produced_sn_id"] == target_id,
+            target["name_stage"] in params["terminal_stages"],
+            state["source_outputs"] == [target_id],
+            source_id in state["target_sources"],
+            path in state["target_projections"],
+            mirror_exact or mirror_missing_but_isolated,
+        )
+    )
+
+
+class _StatefulTerminalTransaction:
+    """Transaction model that exposes partial-write and commit rollback defects."""
+
+    def __init__(
+        self,
+        client: _StatefulTerminalClient,
+        *,
+        fail_statement: bool,
+        fail_commit: bool,
+    ) -> None:
+        self.client = client
+        self.fail_statement = fail_statement
+        self.fail_commit = fail_commit
+        self.closed = False
+        self.committed = False
+        self.rolled_back = False
+        self.run_count = 0
+        self.working = deepcopy(client.state)
+
+    def run(self, _query: str, **params):
+        self.run_count += 1
+        if self.fail_statement:
+            raise RuntimeError("transaction statement failed")
+        if not _state_is_terminal_recovery_eligible(self.working, params):
+            return []
+
+        source = self.working["source"]
+        target = self.working["target"]
+        previous_status = source["status"]
+        previous_attempt_count = source["attempt_count"]
+        previous_error = source["last_error"]
+        terminal_stage = target["name_stage"]
+        target_id = self.working["target_id"]
+        path = self.working["path"]
+        source_id = self.working["source_id"]
+
+        self.working["source_outputs"].remove(target_id)
+        self.working["target_sources"].remove(source_id)
+        self.working["target_projections"].remove(path)
+        target["source_paths"] = [
+            item
+            for item in target["source_paths"] or []
+            if item not in (path, f"dd:{path}")
+        ]
+
+        event_reason = (
+            f'{params["reason"]} [terminal target "{target_id}" '
+            f'at name_stage "{terminal_stage}"]'
+        )
+        retry = {
+            "id": params["retry_event_id"],
+            "source_id": source_id,
+            "previous_status": previous_status,
+            "previous_attempt_count": previous_attempt_count,
+            "previous_error": previous_error,
+            "reason": event_reason,
+        }
+        change = {
+            "id": params["change_event_id"],
+            "from_name": target_id,
+            "operation": "recover_terminal_source_binding",
+            "reason": event_reason,
+            "origin": "terminal_binding_recovery",
+            "internal": True,
+        }
+        self.working["retries"].append(retry)
+        self.working["changes"].append(change)
+        self.working["source_retry_links"].append(retry["id"])
+        self.working["name_change_links"].append(change["id"])
+        source["retry_events"].append(retry["id"])
+        source.update(
+            {
+                "status": "extracted",
+                "produced_sn_id": None,
+                "composed_at": None,
+                "attempt_count": 0,
+                "claimed_at": None,
+                "claim_token": None,
+                "failed_at": None,
+                "last_error": None,
+            }
+        )
+        return [
+            {
+                "source_node_id": source_id,
+                "sn_id": target_id,
+                "name_stage": terminal_stage,
+                "retry_event_id": retry["id"],
+                "change_event_id": change["id"],
+            }
+        ]
+
+    def commit(self) -> None:
+        if self.fail_commit:
+            raise RuntimeError("transaction commit failed")
+        self.client.state = self.working
+        self.committed = True
+        self.closed = True
+
+    def close(self) -> None:
+        self.closed = True
+        self.rolled_back = not self.committed
+
+
+class _StatefulTerminalSession:
+    def __init__(self, client: _StatefulTerminalClient) -> None:
+        self.client = client
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_exc) -> None:
+        return None
+
+    def begin_transaction(self) -> _StatefulTerminalTransaction:
+        tx = _StatefulTerminalTransaction(
+            self.client,
+            fail_statement=self.client.fail_statement,
+            fail_commit=self.client.fail_commit,
+        )
+        self.client.last_tx = tx
+        return tx
+
+
+class _StatefulTerminalClient:
+    def __init__(
+        self,
+        state: dict,
+        *,
+        fail_statement: bool = False,
+        fail_commit: bool = False,
+    ) -> None:
+        self.state = deepcopy(state)
+        self.fail_statement = fail_statement
+        self.fail_commit = fail_commit
+        self.query_count = 0
+        self.session_count = 0
+        self.last_tx: _StatefulTerminalTransaction | None = None
+
+    def query(self, _query: str, **params):
+        self.query_count += 1
+        if not _state_is_terminal_recovery_eligible(self.state, params):
+            return []
+        source = self.state["source"]
+        return [
+            {
+                "source_node_id": self.state["source_id"],
+                "source_status": source["status"],
+                "attempt_count": source["attempt_count"],
+                "last_error": source["last_error"],
+                "name_stage": self.state["target"]["name_stage"],
+            }
+        ]
+
+    def session(self) -> _StatefulTerminalSession:
+        self.session_count += 1
+        return _StatefulTerminalSession(self)
+
+
+def _recover_with_state(client: _StatefulTerminalClient, *, dry_run: bool = False):
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachment
+
+    return recover_terminal_attachment(
+        client.state["path"],
+        client.state["target_id"],
+        reason="retry the exact source after a terminal collision",
+        gc=client,
+        dry_run=dry_run,
+    )
+
+
+@pytest.mark.parametrize("source_paths", [None, []])
+def test_terminal_recovery_empty_mirror_dry_run_is_read_only(
+    source_paths: list[str] | None,
+) -> None:
+    client = _StatefulTerminalClient(_terminal_graph_state(source_paths=source_paths))
+    before = deepcopy(client.state)
+
+    result = _recover_with_state(client, dry_run=True)
+
+    assert result["ok"] is True
+    assert result["previous_attempt_count"] == 7
+    assert client.state == before
+    assert client.query_count == 1
+    assert client.session_count == 0
+
+
+def test_terminal_recovery_empty_mirror_resets_exact_isolated_binding() -> None:
+    client = _StatefulTerminalClient(_terminal_graph_state(source_paths=[]))
+    protected = {
+        key: deepcopy(value)
+        for key, value in client.state["target"].items()
+        if key != "source_paths"
+    }
+
+    result = _recover_with_state(client)
+
+    assert result["ok"] is True
+    assert client.state["source_outputs"] == []
+    assert client.state["target_sources"] == []
+    assert client.state["target_projections"] == []
+    assert client.state["target"]["source_paths"] == []
+    assert client.state["source"]["status"] == "extracted"
+    assert client.state["source"]["produced_sn_id"] is None
+    assert client.state["source"]["attempt_count"] == 0
+    assert client.state["source"]["claimed_at"] is None
+    assert len(client.state["retries"]) == 1
+    assert len(client.state["changes"]) == 1
+    assert {
+        key: value
+        for key, value in client.state["target"].items()
+        if key != "source_paths"
+    } == protected
+
+
+def test_terminal_recovery_exact_mirror_preserves_unrelated_entries() -> None:
+    path = "spectrometer/channel/isotope_ratio"
+    client = _StatefulTerminalClient(
+        _terminal_graph_state(source_paths=[f"dd:{path}", "dd:unrelated/path", path])
+    )
+
+    assert _recover_with_state(client)["ok"] is True
+    assert client.state["target"]["source_paths"] == ["dd:unrelated/path"]
+
+
+@pytest.mark.parametrize(
+    "source_path_entry",
+    ["spectrometer/channel/isotope_ratio", "dd:spectrometer/channel/isotope_ratio"],
+)
+def test_terminal_recovery_accepts_each_exact_mirror_form(
+    source_path_entry: str,
+) -> None:
+    client = _StatefulTerminalClient(
+        _terminal_graph_state(source_paths=[source_path_entry])
+    )
+
+    assert _recover_with_state(client, dry_run=True)["ok"] is True
+
+
+def test_terminal_recovery_queries_share_the_isolated_empty_mirror_guard() -> None:
+    from imas_codex.standard_names import attachment_audit as mod
+
+    guard = """OR (
+      size(coalesce(sn.source_paths, [])) = 0
+      AND COUNT { (:StandardNameSource)-[:PRODUCED_NAME]->(sn) } = 1
+      AND COUNT { (:IMASNode)-[:HAS_STANDARD_NAME]->(sn) } = 1
+    )"""
+    assert mod._TERMINAL_RECOVERY_ELIGIBILITY_QUERY.count(guard) == 1
+    assert mod._TERMINAL_RECOVERY_QUERY.count(guard) == 1
+
+
+def test_terminal_recovery_nonempty_unrelated_mirror_is_blocked() -> None:
+    client = _StatefulTerminalClient(
+        _terminal_graph_state(source_paths=["dd:unrelated/path"])
+    )
+    before = deepcopy(client.state)
+
+    result = _recover_with_state(client, dry_run=True)
+
+    assert result["ok"] is False
+    assert client.state == before
+    assert client.session_count == 0
+
+
+@pytest.mark.parametrize(
+    ("state_changes", "description"),
+    [
+        ({"extra_target_sources": 1}, "multiple target sources"),
+        ({"extra_target_projections": 1}, "multiple target projections"),
+    ],
+)
+def test_terminal_recovery_empty_mirror_requires_isolated_target(
+    state_changes: dict, description: str
+) -> None:
+    client = _StatefulTerminalClient(
+        _terminal_graph_state(source_paths=[], **state_changes)
+    )
+    before = deepcopy(client.state)
+
+    result = _recover_with_state(client, dry_run=True)
+
+    assert result["ok"] is False, description
+    assert client.state == before
+
+
+@pytest.mark.parametrize(
+    "state_changes",
+    [
+        {"from_dd_path": False},
+        {"produced_edge": False},
+        {"projected_edge": False},
+        {"scalar_matches": False},
+        {"name_stage": "accepted"},
+        {"source_status": "extracted"},
+    ],
+)
+def test_terminal_recovery_still_requires_every_authoritative_predicate(
+    state_changes: dict,
+) -> None:
+    client = _StatefulTerminalClient(
+        _terminal_graph_state(source_paths=[], **state_changes)
+    )
+    before = deepcopy(client.state)
+
+    result = _recover_with_state(client, dry_run=True)
+
+    assert result["ok"] is False
+    assert client.state == before
+
+
+@pytest.mark.parametrize(
+    ("failure", "message"),
+    [
+        ("statement", "transaction statement failed"),
+        ("commit", "transaction commit failed"),
+    ],
+)
+def test_terminal_recovery_transaction_failures_roll_back_all_state(
+    failure: str, message: str
+) -> None:
+    client = _StatefulTerminalClient(
+        _terminal_graph_state(source_paths=[]),
+        fail_statement=failure == "statement",
+        fail_commit=failure == "commit",
+    )
+    before = deepcopy(client.state)
+
+    with pytest.raises(RuntimeError, match=message):
+        _recover_with_state(client)
+
+    assert client.state == before
+    assert client.last_tx is not None
+    assert client.last_tx.rolled_back is True
+    assert client.last_tx.committed is False
+
+
+def test_terminal_recovery_ledgers_capture_previous_source_state_and_links() -> None:
+    client = _StatefulTerminalClient(_terminal_graph_state(source_paths=[]))
+
+    result = _recover_with_state(client)
+
+    retry = client.state["retries"][0]
+    change = client.state["changes"][0]
+    assert retry == {
+        "id": result["retry_event_id"],
+        "source_id": client.state["source_id"],
+        "previous_status": "composed",
+        "previous_attempt_count": 7,
+        "previous_error": "candidate collided with terminal lineage",
+        "reason": (
+            "retry the exact source after a terminal collision [terminal target "
+            '"hydrogen_fraction" at name_stage "superseded"]'
+        ),
+    }
+    assert change == {
+        "id": result["change_event_id"],
+        "from_name": "hydrogen_fraction",
+        "operation": "recover_terminal_source_binding",
+        "reason": retry["reason"],
+        "origin": "terminal_binding_recovery",
+        "internal": True,
+    }
+    assert client.state["source_retry_links"] == [retry["id"]]
+    assert client.state["name_change_links"] == [change["id"]]
+    assert client.state["source"]["retry_events"] == [
+        "source-retry:earlier",
+        retry["id"],
+    ]
+
+
+def test_terminal_recovery_repeat_refuses_without_duplicate_events() -> None:
+    client = _StatefulTerminalClient(_terminal_graph_state(source_paths=[]))
+
+    first = _recover_with_state(client)
+    second = _recover_with_state(client)
+
+    assert first["ok"] is True
+    assert second["ok"] is False
+    assert len(client.state["retries"]) == 1
+    assert len(client.state["changes"]) == 1
+    assert client.state["source_retry_links"] == [first["retry_event_id"]]
+    assert client.state["name_change_links"] == [first["change_event_id"]]
 
 
 # ---------------------------------------------------------------------------

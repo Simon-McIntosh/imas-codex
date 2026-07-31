@@ -230,6 +230,11 @@ WHERE src.source_type = 'dd'
   AND (
     'dd:' + $dd_path IN coalesce(sn.source_paths, [])
     OR $dd_path IN coalesce(sn.source_paths, [])
+    OR (
+      size(coalesce(sn.source_paths, [])) = 0
+      AND COUNT { (:StandardNameSource)-[:PRODUCED_NAME]->(sn) } = 1
+      AND COUNT { (:IMASNode)-[:HAS_STANDARD_NAME]->(sn) } = 1
+    )
   )
 RETURN src.id AS source_node_id,
        src.status AS source_status,
@@ -253,6 +258,11 @@ WHERE src.source_type = 'dd'
   AND (
     'dd:' + $dd_path IN coalesce(sn.source_paths, [])
     OR $dd_path IN coalesce(sn.source_paths, [])
+    OR (
+      size(coalesce(sn.source_paths, [])) = 0
+      AND COUNT { (:StandardNameSource)-[:PRODUCED_NAME]->(sn) } = 1
+      AND COUNT { (:IMASNode)-[:HAS_STANDARD_NAME]->(sn) } = 1
+    )
   )
 WITH src, dd, sn, pn, hsn,
      src.status AS previous_status,
