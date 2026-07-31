@@ -328,6 +328,7 @@ def retarget_standard_name_sources(
            OR (sns)-[:PRODUCED_NAME]->(new)
         WITH new, old, collect(DISTINCT sns) AS sources
         SET new.source_paths = []
+        WITH new, old, sources
         UNWIND sources AS source
         WITH new, old, source WHERE source IS NOT NULL
         OPTIONAL MATCH (source)-[prior:PRODUCED_NAME]->(:StandardName)
