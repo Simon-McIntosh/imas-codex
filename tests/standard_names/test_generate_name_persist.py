@@ -164,6 +164,7 @@ class TestFinalizeGeneratedNameStage:
         assert "sn.docs_stage = coalesce(sn.docs_stage, 'pending')" in cypher
         assert "sns.claim_token = b.claim_token" in cypher
         assert "sns.claim_seq = b.claim_seq" in cypher
+        assert "sns.last_error   = null" in cypher
 
     def test_finalize_batch_carries_exact_source_fence(self):
         """Persistence threads the source token and sequence through one tx."""
@@ -414,6 +415,7 @@ class TestClaimedAttachmentPersistence:
         assert "REMOVE produced.provisional" in mutation
         assert "produced.claim_token" in mutation
         assert "produced.claim_seq" in mutation
+        assert "sns.last_error = null" in mutation
         assert "MERGE (src)-[:HAS_STANDARD_NAME]->(sn)" in mutation
         tx.commit.assert_called_once()
 
@@ -951,6 +953,7 @@ class TestPersistGeneratedNameBatch:
             self.atomic_tx, "sns.status = 'composed'"
         ).args[0]
         assert finalize_cypher.count("sns.status = 'composed'") == 1
+        assert "sns.last_error = null" in finalize_cypher
         if binding_kind == "owned_reservation":
             assert "reservation.claim_token = b.claim_token" in finalize_cypher
             assert "reservation.claim_seq = b.claim_seq" in finalize_cypher

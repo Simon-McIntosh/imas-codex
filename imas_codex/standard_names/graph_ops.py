@@ -4593,7 +4593,8 @@ def persist_generated_name_winners(
                         sns.claimed_at = null,
                         sns.status = 'composed',
                         sns.composed_at = datetime(),
-                        sns.produced_sn_id = sn.id
+                        sns.produced_sn_id = sn.id,
+                        sns.last_error = null
                     REMOVE reservation.provisional,
                            reservation.claim_token,
                            reservation.claim_seq,
@@ -4642,7 +4643,8 @@ def persist_generated_name_winners(
                         sns.claimed_at = null,
                         sns.status = 'composed',
                         sns.composed_at = datetime(),
-                        sns.produced_sn_id = sn.id
+                        sns.produced_sn_id = sn.id,
+                        sns.last_error = null
                     MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
                     REMOVE produced.provisional,
                            produced.claim_token,
@@ -4820,6 +4822,7 @@ def _finalize_generated_name_stage(
                         sns.status       = 'composed',
                         sns.composed_at  = datetime(),
                         sns.produced_sn_id = sn.id,
+                        sns.last_error   = null,
                         sn.run_id        = coalesce(sns.run_id, sn.run_id)
                     MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
                     REMOVE produced.provisional,
@@ -7760,7 +7763,8 @@ def persist_claimed_attachments(
                             sns.composed_at = datetime(),
                             sns.claimed_at = null,
                             sns.claim_token = null,
-                            sns.produced_sn_id = sn.id
+                            sns.produced_sn_id = sn.id,
+                            sns.last_error = null
                         MERGE (sns)-[produced:PRODUCED_NAME]->(sn)
                         REMOVE produced.provisional,
                                produced.claim_token,
@@ -11200,7 +11204,9 @@ def claim_generate_name_batch(
 
     All three steps (seed, expand, read-back) execute inside a **single**
     Neo4j transaction so that no partial claim state leaks on deadlock
-    retry.
+    retry. Each selected source takes a write lock through a transient
+    property before claim eligibility is re-checked; only the transaction
+    that still sees an eligible source increments its durable counters.
 
     Parameters
     ----------
@@ -11309,6 +11315,14 @@ def claim_generate_name_batch(
                           {facility_where_sns2}
                           {scope_sns2_where}
                         WITH sns2 ORDER BY rand() LIMIT 1
+                        SET sns2._claim_lock = true
+                        REMOVE sns2._claim_lock
+                        WITH sns2
+                        WHERE sns2.status = 'extracted'
+                          AND coalesce(sns2.attempt_count, 0) < $max_attempts
+                          AND (sns2.claimed_at IS NULL
+                               OR sns2.claimed_at < datetime()
+                                    - duration($cutoff))
                         SET sns2.claimed_at = datetime(),
                             sns2.claim_token = $token,
                             sns2.claim_seq = coalesce(sns2.claim_seq, 0) + 1,
@@ -11371,7 +11385,16 @@ def claim_generate_name_batch(
                                     {{id: $cluster_id}})
                             MATCH (imas)-[:HAS_UNIT]
                                 ->(:Unit {{id: $unit}})
-                            WITH sns LIMIT $expand_limit
+                            WITH sns ORDER BY rand() LIMIT $expand_limit
+                            WITH sns ORDER BY sns.id
+                            SET sns._claim_lock = true
+                            REMOVE sns._claim_lock
+                            WITH sns
+                            WHERE sns.status = 'extracted'
+                              AND coalesce(sns.attempt_count, 0) < $max_attempts
+                              AND (sns.claimed_at IS NULL
+                                   OR sns.claimed_at < datetime()
+                                        - duration($cutoff))
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token,
                                 sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
@@ -11381,6 +11404,7 @@ def claim_generate_name_batch(
                             cluster_id=cluster_id,
                             unit=unit,
                             expand_limit=expand_limit,
+                            cutoff=cutoff,
                             max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
@@ -11402,7 +11426,16 @@ def claim_generate_name_batch(
                                 = $fallback_domain
                             MATCH (imas)-[:HAS_UNIT]
                                 ->(:Unit {{id: $unit}})
-                            WITH sns LIMIT $expand_limit
+                            WITH sns ORDER BY rand() LIMIT $expand_limit
+                            WITH sns ORDER BY sns.id
+                            SET sns._claim_lock = true
+                            REMOVE sns._claim_lock
+                            WITH sns
+                            WHERE sns.status = 'extracted'
+                              AND coalesce(sns.attempt_count, 0) < $max_attempts
+                              AND (sns.claimed_at IS NULL
+                                   OR sns.claimed_at < datetime()
+                                        - duration($cutoff))
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token,
                                 sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
@@ -11412,6 +11445,7 @@ def claim_generate_name_batch(
                             fallback_domain=physics_domain,
                             unit=unit,
                             expand_limit=expand_limit,
+                            cutoff=cutoff,
                             max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )
@@ -11428,7 +11462,16 @@ def claim_generate_name_batch(
                               AND sns.batch_key = $batch_key
                               {facility_where}
                               {scope_sns_where}
-                            WITH sns LIMIT $expand_limit
+                            WITH sns ORDER BY rand() LIMIT $expand_limit
+                            WITH sns ORDER BY sns.id
+                            SET sns._claim_lock = true
+                            REMOVE sns._claim_lock
+                            WITH sns
+                            WHERE sns.status = 'extracted'
+                              AND coalesce(sns.attempt_count, 0) < $max_attempts
+                              AND (sns.claimed_at IS NULL
+                                   OR sns.claimed_at < datetime()
+                                        - duration($cutoff))
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token,
                                 sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
@@ -11437,6 +11480,7 @@ def claim_generate_name_batch(
                             token=token,
                             batch_key=batch_key,
                             expand_limit=expand_limit,
+                            cutoff=cutoff,
                             max_attempts=_MAX_COMPOSE_CLAIM_ATTEMPTS,
                             **extra_params,
                         )

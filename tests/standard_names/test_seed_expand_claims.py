@@ -73,6 +73,33 @@ def _patch_gc(mock_gc):
     )
 
 
+def _assert_source_claim_post_lock_contract(cypher: str, alias: str) -> None:
+    """Require every claim gate to precede both durable counter increments."""
+    normalized = " ".join(cypher.split())
+    unlock = f"REMOVE {alias}._claim_lock"
+    assert unlock in normalized
+    suffix = normalized.split(unlock, 1)[1]
+
+    predicates = (
+        f"{alias}.status = 'extracted'",
+        f"coalesce({alias}.attempt_count, 0) < $max_attempts",
+        (
+            f"AND ({alias}.claimed_at IS NULL OR {alias}.claimed_at < datetime() "
+            "- duration($cutoff))"
+        ),
+    )
+    increments = (
+        f"{alias}.claim_seq = coalesce({alias}.claim_seq, 0) + 1",
+        f"{alias}.attempt_count = coalesce({alias}.attempt_count, 0) + 1",
+    )
+    for increment in increments:
+        assert increment in suffix
+        increment_offset = suffix.index(increment)
+        for predicate in predicates:
+            assert predicate in suffix
+            assert suffix.index(predicate) < increment_offset
+
+
 # ---------------------------------------------------------------------------
 # 1. test_seed_is_random
 # ---------------------------------------------------------------------------
@@ -585,10 +612,76 @@ class TestClaimTokenTwoStep:
         seed_query = tx.run.call_args_list[0].args[0]
         expand_query = tx.run.call_args_list[1].args[0]
         readback_query = tx.run.call_args_list[2].args[0]
-        for query in (seed_query, expand_query):
-            assert "claim_seq = coalesce" in query
+        for query, alias in ((seed_query, "sns2"), (expand_query, "sns")):
+            lock = f"SET {alias}._claim_lock = true"
+            unlock = f"REMOVE {alias}._claim_lock"
+            assert lock in query
+            assert unlock in query
+            assert query.index(lock) < query.index(unlock)
+            _assert_source_claim_post_lock_contract(query, alias)
+            assert "ORDER BY rand()" in query
         assert "sns.claim_seq AS claim_seq" in readback_query
         assert items[0]["claim_seq"] == 1
+
+    @pytest.mark.parametrize(
+        "seed",
+        [
+            {
+                "_cluster_id": "cluster",
+                "_unit": "V",
+                "_physics_domain": "equilibrium",
+                "_batch_key": "equilibrium",
+            },
+            {
+                "_cluster_id": None,
+                "_unit": "V",
+                "_physics_domain": "equilibrium",
+                "_batch_key": "equilibrium",
+            },
+            {
+                "_cluster_id": None,
+                "_unit": None,
+                "_physics_domain": None,
+                "_batch_key": "equilibrium",
+            },
+        ],
+    )
+    def test_compose_expansion_paths_recheck_after_lock(self, seed):
+        from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+
+        gc, tx = _mock_gc_tx()
+        tx.run = MagicMock(
+            side_effect=[
+                [seed],
+                None,
+                [
+                    {
+                        "id": "dd:equilibrium/q",
+                        "source_id": "equilibrium/q",
+                        "source_type": "dd",
+                        "claim_token": "token",
+                        "claim_seq": 1,
+                    }
+                ],
+            ]
+        )
+
+        with (
+            _patch_gc(gc),
+            patch(
+                "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                side_effect=lambda items: items,
+            ),
+        ):
+            claim_generate_name_batch(batch_size=2)
+
+        query = tx.run.call_args_list[1].args[0]
+        lock = "SET sns._claim_lock = true"
+        unlock = "REMOVE sns._claim_lock"
+        assert query.index(lock) < query.index(unlock)
+        _assert_source_claim_post_lock_contract(query, "sns")
+        assert "WITH sns ORDER BY rand() LIMIT $expand_limit" in query
+        assert "WITH sns ORDER BY sns.id" in query
 
     def test_enrich_two_step(self):
         from imas_codex.standard_names.graph_ops import (
