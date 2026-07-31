@@ -5715,7 +5715,13 @@ def clear_standard_names(
         out_scope_where = src_where.replace("src.", "o.")
 
         exact_reset_parent_where = """
-            parent.origin = 'derived'
+            (
+                parent.origin = 'derived'
+                OR (
+                    parent.origin IS NULL
+                    AND parent.transformation IS NOT NULL
+                )
+            )
             AND coalesce(parent.name_stage, '') IN ['', 'pending']
             AND NOT (parent.id IN reset_candidate_ids)
             AND parent.claimed_at IS NULL
@@ -5739,6 +5745,38 @@ def clear_standard_names(
                         AND startNode(parent_rel) = other
                         AND endNode(parent_rel) = parent
                     )
+                    OR (
+                        type(parent_rel) = 'HAS_PARENT'
+                        AND parent_rel.operator_kind IS NOT NULL
+                        AND other:StandardName
+                        AND startNode(parent_rel) = parent
+                        AND endNode(parent_rel) = other
+                    )
+                    OR (
+                        type(parent_rel) = 'HAS_LOCUS'
+                        AND other:Locus
+                        AND startNode(parent_rel) = parent
+                        AND endNode(parent_rel) = other
+                        AND parent_rel.locus_token = other.id
+                        AND parent_rel.locus_relation IS NOT NULL
+                    )
+                    OR (
+                        type(parent_rel) = 'HAS_SEGMENT'
+                        AND other:GrammarToken
+                        AND startNode(parent_rel) = parent
+                        AND endNode(parent_rel) = other
+                        AND parent_rel.segment = other.segment
+                        AND parent[parent_rel.segment] = other.value
+                    )
+                    OR (
+                        type(parent_rel) IN $reset_skeleton_segment_edge_types
+                        AND other:GrammarToken
+                        AND startNode(parent_rel) = parent
+                        AND endNode(parent_rel) = other
+                        AND parent[
+                            toLower(substring(type(parent_rel), 4))
+                        ] = other.value
+                    )
                 )
             }
             AND NOT EXISTS {
@@ -5753,13 +5791,26 @@ def clear_standard_names(
                 AND derived_source.source_id = parent.id
                 AND coalesce(derived_source.batch_key, 'derived_parent') =
                     'derived_parent'
-                AND derived_source.status IS NULL
                 AND coalesce(derived_source.attempt_count, 0) = 0
                 AND derived_source.claimed_at IS NULL
                 AND derived_source.claim_token IS NULL
-                AND coalesce(derived_source.produced_sn_id, parent.id) = parent.id
-                AND all(key IN keys(derived_source)
-                        WHERE key IN $reset_skeleton_source_keys)
+                AND derived_source.produced_sn_id = parent.id
+                AND (
+                    (
+                        derived_source.status IS NULL
+                        AND all(key IN keys(derived_source)
+                                WHERE key IN
+                                      $reset_skeleton_minimal_source_keys)
+                    )
+                    OR (
+                        derived_source.status = 'composed'
+                        AND derived_source.created_at IS NOT NULL
+                        AND derived_source.composed_at IS NOT NULL
+                        AND all(key IN keys(derived_source)
+                                WHERE key IN
+                                      $reset_skeleton_composed_source_keys)
+                    )
+                )
                 AND NOT EXISTS {
                     MATCH (derived_source)-[source_rel]-()
                     WHERE NOT (
@@ -5777,8 +5828,12 @@ def clear_standard_names(
                 "needs_composition",
                 "claimed_at",
                 "claim_token",
+                *_GRAMMAR_SEGMENT_COLUMNS,
             ]
-            params["reset_skeleton_source_keys"] = [
+            params["reset_skeleton_segment_edge_types"] = [
+                rel_type for _segment, rel_type in _SEGMENT_EDGE_TYPES
+            ]
+            params["reset_skeleton_minimal_source_keys"] = [
                 "id",
                 "source_type",
                 "source_id",
@@ -5787,6 +5842,12 @@ def clear_standard_names(
                 "produced_sn_id",
                 "claimed_at",
                 "claim_token",
+            ]
+            params["reset_skeleton_composed_source_keys"] = [
+                *params["reset_skeleton_minimal_source_keys"],
+                "status",
+                "created_at",
+                "composed_at",
             ]
 
         if use_src_join:
