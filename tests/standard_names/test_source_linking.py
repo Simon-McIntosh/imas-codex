@@ -1,18 +1,9 @@
-"""Guardrail tests for StandardNameSource → StandardName linking.
+"""Guardrail tests for fenced StandardNameSource-to-name linking.
 
-These tests enforce the invariant introduced by the linking fix
-(commit: ``fix(sn): gate source linking on StandardName match``):
-
-1. The Cypher used by ``_update_sources_after_compose`` /
-   ``_update_sources_after_attach`` and by ``mark_sources_composed`` /
-   ``mark_sources_attached`` must MATCH the target ``StandardName`` before
-   it SETs the ``status`` / ``composed_at`` fields, so a missing SN never
-   produces a composed/attached source without a ``PRODUCED_NAME`` edge.
-
-2. The same Cypher must write a scalar ``produced_sn_id`` mirror property
-   on the source for recoverability.
-
-All tests use mocked ``GraphClient`` — no Neo4j instance is required.
+Compatibility helpers without ownership fences must not mutate the graph.
+Claim-aware graph helpers must match the exact source fence and target name
+before changing source state, mirror ``produced_sn_id``, and create the
+``PRODUCED_NAME`` relationship.
 """
 
 from __future__ import annotations
@@ -70,7 +61,7 @@ def _assert_merges_produced_edge(cypher: str) -> None:
 
 
 class TestWorkerHelpers:
-    """Cover _update_sources_after_compose and _update_sources_after_attach."""
+    """Unfenced compatibility helpers reject source-id-only mutations."""
 
     def _fake_candidates(self) -> list[dict]:
         return [
@@ -84,22 +75,15 @@ class TestWorkerHelpers:
             },
         ]
 
-    def test_compose_cypher_matches_sn_before_set(self) -> None:
+    def test_compose_without_fence_does_not_open_graph(self) -> None:
         log = logging.getLogger("test")
         adapter = logging.LoggerAdapter(log, {})
         with patch("imas_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
-            MockGC.return_value.__enter__.return_value.query.return_value = [
-                {"linked": 2}
-            ]
             _update_sources_after_compose(self._fake_candidates(), "dd", adapter)
 
-        cypher = _captured_query(MockGC)
-        _assert_match_before_set(cypher)
-        _assert_writes_produced_sn_id(cypher)
-        _assert_merges_produced_edge(cypher)
-        assert "'composed'" in cypher
+        assert not MockGC.called
 
-    def test_attach_cypher_matches_sn_before_set(self) -> None:
+    def test_attach_without_fence_does_not_open_graph(self) -> None:
         log = logging.getLogger("test")
         adapter = logging.LoggerAdapter(log, {})
 
@@ -112,33 +96,19 @@ class TestWorkerHelpers:
             A("equilibrium/time_slice/global_quantities/ip", "plasma_current")
         ]
         with patch("imas_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
-            MockGC.return_value.__enter__.return_value.query.return_value = [
-                {"linked": 1}
-            ]
             _update_sources_after_attach(attachments, "dd", adapter)
 
-        cypher = _captured_query(MockGC)
-        _assert_match_before_set(cypher)
-        _assert_writes_produced_sn_id(cypher)
-        _assert_merges_produced_edge(cypher)
-        assert "'attached'" in cypher
+        assert not MockGC.called
 
-    def test_compose_warns_on_partial_linking(self, caplog) -> None:
-        """If the Cypher reports fewer linked sources than the batch size,
-        the helper must log a warning so operators can spot lost edges."""
+    def test_compose_warns_when_fence_is_missing(self, caplog) -> None:
         log = logging.getLogger("test_linking")
         adapter = logging.LoggerAdapter(log, {})
         with patch("imas_codex.graph.client.GraphClient") as MockGC:  # noqa: N806
-            MockGC.return_value.__enter__.return_value.query.return_value = [
-                {"linked": 1}
-            ]
             with caplog.at_level(logging.WARNING, logger="test_linking"):
                 _update_sources_after_compose(self._fake_candidates(), "dd", adapter)
 
-        assert any("Compose-linking gap" in r.message for r in caplog.records), (
-            "Expected a WARNING about partial linking when the DB reports "
-            f"fewer linked sources than batch size. Got: {[r.message for r in caplog.records]}"
-        )
+        assert any("unfenced" in r.message for r in caplog.records)
+        assert not MockGC.called
 
 
 class TestGraphOpsHelpers:
@@ -151,6 +121,7 @@ class TestGraphOpsHelpers:
             ]
             affected = mark_sources_composed(
                 token="tok-123",
+                claim_seq=3,
                 source_ids=["dd:a", "dd:b"],
                 standard_name_id="electron_temperature",
             )
@@ -159,6 +130,7 @@ class TestGraphOpsHelpers:
         _assert_match_before_set(cypher)
         _assert_writes_produced_sn_id(cypher)
         _assert_merges_produced_edge(cypher)
+        assert "sns.claim_seq = $claim_seq" in cypher
 
     def test_mark_sources_attached_cypher_invariants(self) -> None:
         with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:  # noqa: N806
@@ -167,6 +139,7 @@ class TestGraphOpsHelpers:
             ]
             affected = mark_sources_attached(
                 token="tok-abc",
+                claim_seq=4,
                 source_ids=["dd:x"],
                 standard_name_id="plasma_current",
             )
@@ -175,6 +148,7 @@ class TestGraphOpsHelpers:
         _assert_match_before_set(cypher)
         _assert_writes_produced_sn_id(cypher)
         _assert_merges_produced_edge(cypher)
+        assert "sns.claim_seq = $claim_seq" in cypher
 
 
 # =====================================================================
@@ -182,12 +156,7 @@ class TestGraphOpsHelpers:
 # =====================================================================
 
 
-def test_update_sources_skips_error_siblings():
-    """Candidates with model='deterministic:dd_error_modifier' must NOT
-    be passed to the linking Cypher — their source IMASNodes are never
-    extracted as StandardNameSource, so the MATCH would always miss and
-    produce false-positive 'linking gap' warnings.
-    """
+def test_update_sources_rejects_unfenced_error_siblings():
     wlog = logging.LoggerAdapter(logging.getLogger("test"), {})
     candidates = [
         # Regular candidate — should be linked
@@ -209,17 +178,9 @@ def test_update_sources_skips_error_siblings():
         },
     ]
     with patch("imas_codex.graph.client.GraphClient") as mock_gc:
-        mock_gc.return_value.__enter__.return_value.query.return_value = [{"linked": 1}]
         _update_sources_after_compose(candidates, "dd", wlog)
 
-    call = mock_gc.return_value.__enter__.return_value.query.call_args
-    batch = call.kwargs.get("batch") or (call.args[1] if len(call.args) > 1 else None)
-    assert batch is not None, "batch param not passed to query"
-    assert len(batch) == 1, (
-        f"Expected 1 linking candidate (error siblings skipped), got {len(batch)}: "
-        f"{batch}"
-    )
-    assert batch[0]["sn_id"] == "elongation"
+    assert not mock_gc.called
 
 
 def test_update_sources_all_error_siblings_no_query():

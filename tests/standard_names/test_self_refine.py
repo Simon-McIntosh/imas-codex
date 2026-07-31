@@ -232,7 +232,10 @@ def _make_batch_item(
     path: str = "equilibrium/time_slice/profiles_1d/psi", **kw: Any
 ) -> dict[str, Any]:
     base = {
+        "id": f"dd:{path}",
         "path": path,
+        "claim_token": "winner",
+        "claim_seq": 3,
         "description": "Poloidal flux",
         "physics_domain": "equilibrium",
         "unit": "Wb",
@@ -349,6 +352,10 @@ def _patch_compose_deps():
         patch(
             "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
             return_value=1,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+            side_effect=lambda items, **_kwargs: items,
         ),
         patch(
             "imas_codex.standard_names.audits.run_audits",

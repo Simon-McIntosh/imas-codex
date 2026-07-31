@@ -29,8 +29,16 @@ def _mock_gc_tx():
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
 
+    def _run(_cypher, **params):
+        return [
+            {"id": item["sns_id"]}
+            for item in params.get("batch", [])
+            if item.get("sns_id")
+        ]
+
     tx = MagicMock()
     tx.closed = False
+    tx.run = MagicMock(side_effect=_run)
     tx.commit = MagicMock()
     tx.close = MagicMock()
 
@@ -62,10 +70,19 @@ def _patch_gc(mock_gc):
     )
 
 
+def _transaction_call(tx, fragment: str):
+    """Return the first transaction call whose Cypher contains *fragment*."""
+    return next(
+        call_item
+        for call_item in tx.run.call_args_list
+        if fragment in call_item.args[0]
+    )
+
+
 def _make_candidate(
     *,
     name: str = "electron_temperature",
-    source_id: str = "dd:core_profiles/profiles_1d/electrons/temperature",
+    source_id: str = "core_profiles/profiles_1d/electrons/temperature",
     model: str = "test/model",
 ) -> dict:
     return {
@@ -78,6 +95,8 @@ def _make_candidate(
         "model": model,
         "llm_model": model,
         "llm_service": "standard-names",
+        "source_claim_token": "winner",
+        "source_claim_seq": 7,
     }
 
 
@@ -122,6 +141,59 @@ class TestFinalizeGeneratedNameStage:
         assert "name_stage" in cypher
         assert "'drafted'" in cypher
 
+    def test_existing_accepted_name_is_not_demoted(self):
+        """Finalize only initializes pending state and preserves later lifecycle."""
+        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+
+        gc, tx = _mock_gc_tx()
+        with _patch_gc(gc):
+            _finalize_generated_name_stage(
+                [
+                    {
+                        "sn_id": "electron_temperature",
+                        "sns_id": "dd:core_profiles/temperature",
+                        "model": "test/model",
+                        "claim_token": "winner",
+                        "claim_seq": 9,
+                    }
+                ]
+            )
+
+        cypher = tx.run.call_args.args[0]
+        assert "ELSE sn.name_stage" in cypher
+        assert "sn.docs_stage = coalesce(sn.docs_stage, 'pending')" in cypher
+        assert "sns.claim_token = b.claim_token" in cypher
+        assert "sns.claim_seq = b.claim_seq" in cypher
+
+    def test_finalize_batch_carries_exact_source_fence(self):
+        """Persistence threads the source token and sequence through one tx."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        gc, tx = _mock_gc_tx()
+        candidate = _make_candidate()
+        candidate["source_claim_token"] = "winner"
+        candidate["source_claim_seq"] = 12
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=1,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.GraphClient",
+                return_value=gc,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ),
+        ):
+            persist_generated_name_batch([candidate], compose_model="test/model")
+
+        item = tx.run.call_args_list[0].kwargs["batch"][0]
+        assert item["claim_token"] == "winner"
+        assert item["claim_seq"] == 12
+
     def test_sets_chain_length_zero(self):
         """The Cypher query sets chain_length = 0."""
         from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
@@ -134,7 +206,7 @@ class TestFinalizeGeneratedNameStage:
 
         cypher = tx.run.call_args.args[0]
         assert "chain_length" in cypher
-        assert "= 0" in cypher
+        assert "coalesce(sn.chain_length, 0)" in cypher
 
     def test_sets_docs_stage_pending(self):
         """The Cypher query sets docs_stage = 'pending'."""
@@ -221,6 +293,39 @@ class TestFinalizeGeneratedNameStage:
         tx.commit.assert_not_called()
 
 
+def test_candidate_stage_replaces_orphan_pending_reservation_under_fence() -> None:
+    from imas_codex.standard_names.graph_ops import (
+        stage_claimed_generated_candidates,
+    )
+
+    gc = _mock_gc_query()
+    gc.query.return_value = [{"id": "dd:equilibrium/time_slice/q"}]
+    with _patch_gc(gc):
+        winners = stage_claimed_generated_candidates(
+            [
+                {
+                    "sns_id": "dd:equilibrium/time_slice/q",
+                    "source_id": "equilibrium/time_slice/q",
+                    "sn_id": "safety_factor",
+                    "unit": "1",
+                    "model": "test/model",
+                    "claim_token": "new-winner",
+                    "claim_seq": 9,
+                }
+            ]
+        )
+
+    assert winners == ["dd:equilibrium/time_slice/q"]
+    cypher = gc.query.call_args.args[0]
+    assert "sns.claim_token = b.claim_token" in cypher
+    assert "sns.claim_seq = b.claim_seq" in cypher
+    assert "sns.status = 'extracted'" in cypher
+    assert "stale.id <> b.sn_id" in cypher
+    assert "stale.name_stage = 'pending'" in cypher
+    assert "DETACH DELETE stale" in cypher
+    assert "sn.name_stage = 'pending'" in cypher
+
+
 # ---------------------------------------------------------------------------
 # Integration tests for persist_generated_name_batch
 # ---------------------------------------------------------------------------
@@ -228,6 +333,16 @@ class TestFinalizeGeneratedNameStage:
 
 class TestPersistGeneratedNameBatch:
     """End-to-end tests for persist_generated_name_batch."""
+
+    @pytest.fixture(autouse=True)
+    def _stage_exact_claims(self):
+        gc, tx = _mock_gc_tx()
+        self.atomic_tx = tx
+        with patch(
+            "imas_codex.standard_names.graph_ops.GraphClient",
+            return_value=gc,
+        ):
+            yield
 
     def _make_persist_patches(self, gc_query, gc_tx):
         """Return combined patches: query client for write_standard_names,
@@ -268,7 +383,8 @@ class TestPersistGeneratedNameBatch:
                 return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage",
+                return_value=["dd:core_profiles/profiles_1d/electrons/temperature"],
             ) as mock_finalize,
             patch(
                 "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
@@ -281,8 +397,10 @@ class TestPersistGeneratedNameBatch:
         ):
             persist_generated_name_batch(candidates, compose_model="test/model")
 
-        mock_finalize.assert_called_once()
-        finalize_batch = mock_finalize.call_args.args[0]
+        mock_finalize.assert_not_called()
+        finalize_batch = _transaction_call(
+            self.atomic_tx, "sns.status = 'composed'"
+        ).kwargs["batch"]
         assert len(finalize_batch) == 1
         assert finalize_batch[0]["sn_id"] == "electron_temperature"
         assert finalize_batch[0]["model"] == "test/model"
@@ -310,8 +428,7 @@ class TestPersistGeneratedNameBatch:
         ):
             persist_generated_name_batch(candidates, compose_model="test/model")
 
-        tx.run.assert_called_once()
-        cypher = tx.run.call_args.args[0]
+        cypher = _transaction_call(tx, "sns.status = 'composed'").args[0]
         assert "name_stage" in cypher and "'drafted'" in cypher
 
     def test_persist_sets_chain_length_zero(self):
@@ -337,8 +454,8 @@ class TestPersistGeneratedNameBatch:
         ):
             persist_generated_name_batch(candidates, compose_model="test/model")
 
-        cypher = tx.run.call_args.args[0]
-        assert "chain_length" in cypher and "= 0" in cypher
+        cypher = _transaction_call(tx, "sns.status = 'composed'").args[0]
+        assert "coalesce(sn.chain_length, 0)" in cypher
 
     def test_persist_sets_docs_stage_pending(self):
         """persist_generated_name_batch sets docs_stage='pending' on new SN."""
@@ -363,7 +480,7 @@ class TestPersistGeneratedNameBatch:
         ):
             persist_generated_name_batch(candidates, compose_model="test/model")
 
-        cypher = tx.run.call_args.args[0]
+        cypher = _transaction_call(tx, "sns.status = 'composed'").args[0]
         assert "docs_stage" in cypher and "'pending'" in cypher
 
     def test_persist_clears_claim_on_source(self):
@@ -389,7 +506,7 @@ class TestPersistGeneratedNameBatch:
         ):
             persist_generated_name_batch(candidates, compose_model="test/model")
 
-        cypher = tx.run.call_args.args[0]
+        cypher = _transaction_call(tx, "sns.status = 'composed'").args[0]
         assert "claim_token" in cypher
         assert "null" in cypher
 
@@ -416,7 +533,7 @@ class TestPersistGeneratedNameBatch:
         ):
             persist_generated_name_batch(candidates, compose_model="test/model")
 
-        cypher = tx.run.call_args.args[0]
+        cypher = _transaction_call(tx, "sns.status = 'composed'").args[0]
         assert "PRODUCED_NAME" in cypher
 
     def test_persist_idempotent_merge_semantics(self):
@@ -460,6 +577,145 @@ class TestPersistGeneratedNameBatch:
         assert result == 0
         tx.run.assert_not_called()
 
+    def test_missing_source_fence_has_no_graph_side_effects(self):
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+        candidate["source_claim_token"] = None
+        with (
+            patch("imas_codex.standard_names.graph_ops.write_standard_names") as write,
+            patch(
+                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+            ) as finalize,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names"
+            ) as supersede,
+            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+        ):
+            result = persist_generated_name_batch(
+                [candidate], compose_model="test/model"
+            )
+
+        assert result == 0
+        write.assert_not_called()
+        finalize.assert_not_called()
+        backfill.assert_not_called()
+        supersede.assert_not_called()
+        counter.assert_not_called()
+
+    def test_claim_turnover_before_lock_has_no_rich_write(self):
+        """A claim lost before the tx lock cannot write a candidate."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        self.atomic_tx.run.side_effect = lambda _cypher, **_params: []
+        with patch("imas_codex.standard_names.graph_ops.write_standard_names") as write:
+            result = persist_generated_name_batch(
+                [_make_candidate()], compose_model="test/model"
+            )
+
+        assert result == 0
+        write.assert_not_called()
+        self.atomic_tx.commit.assert_called_once()
+
+    def test_rich_write_and_finalize_share_transaction(self):
+        """The rich writer and source outcome use the locked transaction."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        seen = {}
+
+        def _write(names, *, gc, return_written_ids, **_kwargs):
+            seen["write_gc"] = gc
+            assert return_written_ids is True
+            return [name["id"] for name in names]
+
+        def _backfill(_names, *, gc, strict):
+            seen["backfill_gc"] = gc
+            assert strict is True
+
+        def _supersede(_pairs, *, gc):
+            seen["supersede_gc"] = gc
+            return 0
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                side_effect=_write,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources",
+                side_effect=_backfill,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                side_effect=_supersede,
+            ),
+        ):
+            result = persist_generated_name_batch(
+                [_make_candidate()], compose_model="test/model"
+            )
+
+        assert result == 1
+        assert seen["write_gc"] is seen["backfill_gc"] is seen["supersede_gc"]
+        assert seen["write_gc"]._transaction is self.atomic_tx
+        self.atomic_tx.commit.assert_called_once()
+
+    def test_rich_write_failure_keeps_reservation_unfinalized(self):
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                side_effect=RuntimeError("rich write failed"),
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+            ) as finalize,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names"
+            ) as supersede,
+            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+        ):
+            with pytest.raises(RuntimeError, match="rich write failed"):
+                persist_generated_name_batch([candidate], compose_model="test/model")
+
+        finalize.assert_not_called()
+        backfill.assert_not_called()
+        supersede.assert_not_called()
+        counter.assert_not_called()
+        self.atomic_tx.commit.assert_not_called()
+        self.atomic_tx.close.assert_called_once()
+
+    def test_partial_rich_write_keeps_reservation_unfinalized(self):
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=0,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+            ) as finalize,
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"
+            ) as backfill,
+        ):
+            with pytest.raises(RuntimeError, match="rich standard-name write"):
+                persist_generated_name_batch([candidate], compose_model="test/model")
+
+        finalize.assert_not_called()
+        backfill.assert_not_called()
+        self.atomic_tx.commit.assert_not_called()
+        self.atomic_tx.close.assert_called_once()
+
     def test_persist_error_sibling_excluded_from_finalize(self):
         """Error-sibling candidates (no source node) are excluded from finalize."""
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
@@ -472,10 +728,11 @@ class TestPersistGeneratedNameBatch:
         with (
             patch(
                 "imas_codex.standard_names.graph_ops.write_standard_names",
-                return_value=2,
+                return_value=1,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage"
+                "imas_codex.standard_names.graph_ops._finalize_generated_name_stage",
+                return_value=["dd:core_profiles/profiles_1d/electrons/temperature"],
             ) as mock_finalize,
             patch(
                 "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
@@ -488,7 +745,10 @@ class TestPersistGeneratedNameBatch:
         ):
             persist_generated_name_batch(candidates, compose_model="test/model")
 
-        finalize_batch = mock_finalize.call_args.args[0]
+        mock_finalize.assert_not_called()
+        finalize_batch = _transaction_call(
+            self.atomic_tx, "sns.status = 'composed'"
+        ).kwargs["batch"]
         ids = [item["sn_id"] for item in finalize_batch]
         assert "error_sibling" not in ids
         assert "electron_temperature" in ids
@@ -632,7 +892,7 @@ class TestSupersedePriorSourceNames:
         # Track which names the persist path asked to supersede.
         captured: dict[str, object] = {}
 
-        def _fake_supersede(pairs):
+        def _fake_supersede(pairs, **_kwargs):
             captured["pairs"] = pairs
             # Simulate: the source already had 'old_name'; it is now retired,
             # leaving only the freshly-composed name live.
@@ -645,12 +905,16 @@ class TestSupersedePriorSourceNames:
             )
         ]
 
+        gc, _tx = _mock_gc_tx()
         with (
             patch(
                 "imas_codex.standard_names.graph_ops.write_standard_names",
                 return_value=1,
             ),
-            patch("imas_codex.standard_names.graph_ops._finalize_generated_name_stage"),
+            patch(
+                "imas_codex.standard_names.graph_ops.GraphClient",
+                return_value=gc,
+            ),
             patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
             patch(
                 "imas_codex.standard_names.graph_ops.supersede_prior_source_names",

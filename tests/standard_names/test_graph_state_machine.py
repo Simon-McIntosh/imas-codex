@@ -16,6 +16,7 @@ and claim/release protocol, not actual Neo4j behavior.
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -35,6 +36,10 @@ def sample_candidates() -> list[dict]:
             "documentation": "The electron temperature $T_e$.",
             "kind": "scalar",
             "unit": "eV",
+            "source_id": "core_profiles/profiles_1d/electrons/temperature",
+            "source_types": ["dd"],
+            "source_claim_token": "winner",
+            "source_claim_seq": 4,
             "fields": {
                 "physical_base": "temperature",
                 "subject": "electron",
@@ -46,6 +51,10 @@ def sample_candidates() -> list[dict]:
             "documentation": "Total ion density $n_i$.",
             "kind": "scalar",
             "unit": "m^-3",
+            "source_id": "core_profiles/profiles_1d/ion/density",
+            "source_types": ["dd"],
+            "source_claim_token": "winner",
+            "source_claim_seq": 4,
             "fields": {"physical_base": "density", "subject": "ion"},
         },
     ]
@@ -58,6 +67,41 @@ def sample_candidates() -> list[dict]:
 
 class TestPersistGeneratedNameBatch:
     """Tests for immediate per-batch persist during compose."""
+
+    @pytest.fixture(autouse=True)
+    def _stage_exact_claims(self):
+        tx = MagicMock()
+        tx.closed = False
+        tx.run = MagicMock(
+            side_effect=lambda _cypher, **params: [
+                {"id": item["sns_id"]}
+                for item in params.get("batch", [])
+                if item.get("sns_id")
+            ]
+        )
+        session = MagicMock()
+        session.begin_transaction.return_value = tx
+
+        @contextmanager
+        def _session():
+            yield session
+
+        gc = MagicMock()
+        gc.__enter__.return_value = gc
+        gc.__exit__.return_value = False
+        gc.session = _session
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.GraphClient",
+                return_value=gc,
+            ),
+            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ),
+        ):
+            yield
 
     def test_empty_candidates_returns_zero(self):
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
@@ -83,6 +127,7 @@ class TestPersistGeneratedNameBatch:
 
         mock_embed.side_effect = _embed_side_effect
         mock_write.return_value = 2
+        mock_finalize.side_effect = lambda batch: [item["sns_id"] for item in batch]
         result = persist_generated_name_batch(
             sample_candidates, compose_model="claude-test"
         )
@@ -113,6 +158,7 @@ class TestPersistGeneratedNameBatch:
 
         mock_embed.side_effect = _embed_side_effect
         mock_write.return_value = 2
+        mock_finalize.side_effect = lambda batch: [item["sns_id"] for item in batch]
         persist_generated_name_batch(sample_candidates, compose_model="test")
 
         written = mock_write.call_args[0][0]
@@ -134,6 +180,7 @@ class TestPersistGeneratedNameBatch:
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         mock_write.return_value = 2
+        mock_finalize.side_effect = lambda batch: [item["sns_id"] for item in batch]
         persist_generated_name_batch(sample_candidates, compose_model="test")
 
         written = mock_write.call_args[0][0]
@@ -152,6 +199,7 @@ class TestPersistGeneratedNameBatch:
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         mock_write.return_value = 2
+        mock_finalize.side_effect = lambda batch: [item["sns_id"] for item in batch]
         persist_generated_name_batch(sample_candidates, compose_model="test")
 
         written = mock_write.call_args[0][0]
@@ -170,6 +218,7 @@ class TestPersistGeneratedNameBatch:
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         mock_write.return_value = 2
+        mock_finalize.side_effect = lambda batch: [item["sns_id"] for item in batch]
         persist_generated_name_batch(sample_candidates, compose_model="test")
 
         written = mock_write.call_args[0][0]
@@ -186,6 +235,7 @@ class TestPersistGeneratedNameBatch:
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         mock_write.return_value = 2
+        mock_finalize.side_effect = lambda batch: [item["sns_id"] for item in batch]
         persist_generated_name_batch(sample_candidates, compose_model="test")
 
         written = mock_write.call_args[0][0]
@@ -201,6 +251,7 @@ class TestPersistGeneratedNameBatch:
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
         mock_write.return_value = 2
+        mock_finalize.side_effect = lambda batch: [item["sns_id"] for item in batch]
 
         batch1 = deepcopy(sample_candidates)
         batch2 = deepcopy(sample_candidates)

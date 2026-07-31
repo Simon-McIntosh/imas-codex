@@ -2058,6 +2058,12 @@ classes:
         range: datetime
       claim_token:
         description: UUID token for claim verification
+      claim_seq:
+        description: >-
+          Monotonic claim counter incremented whenever a worker claims this
+          source. Combined with claim_token to fence delayed duplicate workers;
+          legacy rows with no value start at one on their next claim.
+        range: integer
       attempt_count:
         description: Number of composition attempts (for durable retry)
         range: integer

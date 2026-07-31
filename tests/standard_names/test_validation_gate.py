@@ -48,18 +48,17 @@ class TestIsWellFormedCandidate:
         assert ok is False
         assert reason == "empty_or_whitespace"
 
-    # --- Too long (> 100 chars) ---
+    # --- Semantically necessary long names ---
 
-    def test_long_name_rejected(self):
-        name = "a" * 101
-        ok, reason = is_well_formed_candidate(name)
-        assert ok is False
-        assert reason == "too_long"
-
-    def test_exactly_100_chars_accepted(self):
-        name = "a" * 100
+    def test_long_structural_name_accepted(self):
+        name = (
+            "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_"
+            "gradient_magnitude_to_square_of_major_radius"
+        )
+        assert len(name) > 100
         ok, reason = is_well_formed_candidate(name)
         assert ok is True
+        assert reason is None
 
     # --- Illegal characters ---
 

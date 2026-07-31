@@ -18,6 +18,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+
+@pytest.fixture(autouse=True)
+def _preserve_claimed_source_batches():
+    with patch(
+        "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+        side_effect=lambda items, **_kwargs: items,
+    ):
+        yield
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -54,7 +64,10 @@ def _make_batch_items(
         dom = domains[i % len(domains)] if domains else None
         items.append(
             {
+                "id": f"dd:equilibrium/time_slice/profiles_1d/field_{i}",
                 "path": f"equilibrium/time_slice/profiles_1d/field_{i}",
+                "claim_token": "winner",
+                "claim_seq": 3,
                 "description": f"Test field {i} description",
                 "physics_domain": dom,
                 "unit": "T",
@@ -640,13 +653,11 @@ class TestBatchProcessorReleasesClaimsOnException:
 
 
 # ---------------------------------------------------------------------------
-# on_event comment/description payloads are NOT pre-truncated
-# Regression for: https://github.com/Simon-McIntosh/imas-codex/issues/???
-# Worker was clipping comments[:80] before emitting on_event, preventing
-# terminal-aware clipping in the rich display from using the full width.
+# on_event comment/description payloads remain full-width so terminal-aware
+# clipping in the rich display controls presentation.
 # ---------------------------------------------------------------------------
 
-_LONG_COMMENT = "A" * 200  # 200-char comment — well beyond old 80-char clip
+_LONG_COMMENT = "A" * 200  # well beyond the display width
 
 
 def _mock_review_name_llm_result(long_comment: str) -> Any:
