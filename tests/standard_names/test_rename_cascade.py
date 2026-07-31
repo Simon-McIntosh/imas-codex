@@ -12,6 +12,7 @@ The cascade is exercised in three layers:
 
 from __future__ import annotations
 
+from copy import deepcopy
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -24,6 +25,9 @@ from imas_codex.standard_names.cascade import (
     _isn_round_trip_ok,
     cascade_descendants_of,
     rename_cascade,
+)
+from imas_codex.standard_names.graph_ops import (
+    reconcile_structural_edges_for_standard_names,
 )
 
 # ---------------------------------------------------------------------------
@@ -43,7 +47,10 @@ class _MockGraph:
     nodes: dict[str, dict[str, Any]] = field(default_factory=dict)
     # edges keyed by child_id → list of dicts with target_id + props
     edges_by_child: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    refined_from: dict[str, str] = field(default_factory=dict)
     write_calls: list[tuple[str, dict[str, Any]]] = field(default_factory=list)
+    fail_transaction_on: str | None = None
+    rollback_count: int = 0
 
     def add_node(
         self,
@@ -51,10 +58,12 @@ class _MockGraph:
         *,
         origin: str | None = None,
         name_stage: str | None = None,
+        **fields: Any,
     ) -> None:
         self.nodes[nid] = {
             "origin": origin,
             "name_stage": name_stage,
+            **fields,
         }
 
     def add_edge(
@@ -109,6 +118,9 @@ class _MockGraph:
                     desc.add(c)
                     stack.append(c)
         return desc
+
+    def session(self) -> _MockSession:
+        return _MockSession(self)
 
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:  # noqa: PLR0911 - dispatcher
         # ── Root existence + collision probe ──
@@ -172,6 +184,102 @@ class _MockGraph:
             nid = params.get("id")
             return [{"n": 1 if nid in self.nodes else 0}]
 
+        # ── Guarded old-root fallback probe ──
+        if "CASCADE_OLD_ROOT_FALLBACK_GUARD" in cypher:
+            successor = params.get("successor")
+            old_root = params.get("old_root")
+            node = self.nodes.get(successor, {})
+            predecessor_id = (
+                old_root if self.refined_from.get(successor) == old_root else None
+            )
+            return [
+                {
+                    "successor_stage": node.get("name_stage"),
+                    "edit_mode": node.get("edit_mode"),
+                    "edit_status": node.get("edit_status"),
+                    "edit_scope": node.get("edit_scope"),
+                    "predecessor_id": predecessor_id,
+                    "predecessor_stage": (
+                        self.nodes.get(old_root, {}).get("name_stage")
+                        if predecessor_id
+                        else None
+                    ),
+                }
+            ]
+
+        # ── Exact structural reconciliation existence guard ──
+        if "RETURN requested AS id" in cypher and "AS exists" in cypher:
+            return [
+                {"id": name_id, "exists": name_id in self.nodes}
+                for name_id in params.get("ids") or []
+            ]
+
+        # ── Canonical structural writer admission probe ──
+        if "UNWIND $names AS nm" in cypher:
+            return [
+                {
+                    "name": name_id,
+                    "axes": [],
+                    "child_ids": [],
+                    "lone_child_id": None,
+                    "lone_child_stage": None,
+                    "lone_child_origin": None,
+                    "parent_sources": [],
+                    "lone_child_sources": [],
+                    "origin": self.nodes.get(name_id, {}).get("origin"),
+                    "name_stage": self.nodes.get(name_id, {}).get("name_stage"),
+                }
+                for name_id in params.get("names") or []
+            ]
+
+        # ── Canonical structural writer stale-edge reconciliation ──
+        if "UNWIND $recon AS rc" in cypher and "DELETE r" in cypher:
+            for row in params.get("recon") or []:
+                child = row["child"]
+                keep = set(row["keep"])
+                self.edges_by_child[child] = [
+                    edge
+                    for edge in self.edges_by_child.get(child, [])
+                    if not (
+                        edge.get("operator_kind") is not None
+                        and edge["target_id"] not in keep
+                    )
+                ]
+            return []
+
+        # ── Canonical structural writer HAS_PARENT materialization ──
+        if "UNWIND $batch AS b" in cypher and "SET r.operator" in cypher:
+            for row in params.get("batch") or []:
+                child = row["from_name"]
+                target = row["to_name"]
+                self.nodes.setdefault(
+                    target,
+                    {"origin": "derived", "name_stage": "pending"},
+                )
+                edges = self.edges_by_child.setdefault(child, [])
+                edge = next(
+                    (
+                        candidate
+                        for candidate in edges
+                        if candidate["target_id"] == target
+                    ),
+                    None,
+                )
+                props = {
+                    "target_id": target,
+                    "operator": row.get("operator"),
+                    "operator_kind": row.get("operator_kind"),
+                    "role": row.get("role"),
+                    "separator": row.get("separator"),
+                    "axis": row.get("axis"),
+                    "shape": row.get("shape"),
+                }
+                if edge is None:
+                    edges.append(props)
+                else:
+                    edge.update(props)
+            return []
+
         # ── Rename write ──
         if "SET sn.id = r.to" in cypher:
             renames = params.get("renames") or []
@@ -194,6 +302,59 @@ class _MockGraph:
             return []
 
         return []
+
+
+class _MockTransaction:
+    def __init__(self, owner: _MockGraph) -> None:
+        self._owner = owner
+        self._working = _MockGraph(
+            nodes=deepcopy(owner.nodes),
+            edges_by_child=deepcopy(owner.edges_by_child),
+            refined_from=deepcopy(owner.refined_from),
+            write_calls=deepcopy(owner.write_calls),
+            fail_transaction_on=owner.fail_transaction_on,
+            rollback_count=owner.rollback_count,
+        )
+        self._closed = False
+
+    def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        marker = self._working.fail_transaction_on
+        if marker and marker in cypher:
+            raise RuntimeError(f"injected transaction failure at {marker}")
+        return self._working.query(cypher, **params)
+
+    def commit(self) -> None:
+        self._owner.nodes = self._working.nodes
+        self._owner.edges_by_child = self._working.edges_by_child
+        self._owner.refined_from = self._working.refined_from
+        self._owner.write_calls = self._working.write_calls
+        self._closed = True
+
+    def closed(self) -> bool:
+        return self._closed
+
+    def rollback(self) -> None:
+        self._owner.rollback_count += 1
+        self._closed = True
+
+    def close(self) -> None:
+        self._closed = True
+
+
+class _MockSession:
+    def __init__(self, graph: _MockGraph) -> None:
+        self._transaction = _MockTransaction(graph)
+
+    def __enter__(self) -> _MockSession:
+        return self
+
+    def __exit__(self, *exc: Any) -> bool:
+        if not self._transaction.closed():
+            self._transaction.rollback()
+        return False
+
+    def begin_transaction(self) -> _MockTransaction:
+        return self._transaction
 
 
 # ---------------------------------------------------------------------------
@@ -723,6 +884,296 @@ class TestDescendantCascadeRecordsProvenance:
             )
         rec.assert_not_called()
         refresh.assert_not_called()
+
+
+class TestOldRootCascadeRecovery:
+    """Accepted subtree edits recover descendants rebuilt below the predecessor."""
+
+    old_root = "radiance_at_spectral_line"
+    successor = "photon_radiance_at_spectral_line"
+    old_child = "motional_stark_radiance_at_spectral_line"
+    new_child = "motional_stark_photon_radiance_at_spectral_line"
+
+    def _fallback_graph(self) -> _MockGraph:
+        gc = _MockGraph()
+        gc.add_node(
+            self.successor,
+            name_stage="accepted",
+            edit_mode="rename",
+            edit_status="applied",
+            edit_scope="subtree",
+        )
+        gc.add_node(self.old_root, name_stage="superseded")
+        gc.add_node(self.old_child, name_stage="accepted")
+        gc.add_edge(
+            self.old_child,
+            self.old_root,
+            operator="motional_stark",
+            operator_kind="qualifier",
+        )
+        gc.refined_from[self.successor] = self.old_root
+        return gc
+
+    def test_falls_back_to_superseded_predecessor_subtree(self) -> None:
+        gc = self._fallback_graph()
+
+        result = cascade_descendants_of(
+            gc,
+            successor_id=self.successor,
+            old_root=self.old_root,
+            new_root=self.successor,
+            dry_run=True,
+            override_edits=True,
+            include_accepted=True,
+        )
+
+        assert result.conflicts == []
+        assert result.renamed == [{"from": self.old_child, "to": self.new_child}]
+        assert result.total_descendants == 1
+        assert all(rename["from"] != self.old_root for rename in result.renamed)
+
+    @pytest.mark.parametrize(
+        ("successor_updates", "old_stage", "has_lineage", "expected"),
+        [
+            ({"name_stage": "reviewed"}, "superseded", True, "not accepted"),
+            ({"edit_mode": "hint"}, "superseded", True, "not a rename edit"),
+            ({"edit_status": "open"}, "superseded", True, "not applied"),
+            ({"edit_scope": "only_self"}, "superseded", True, "no cascade-bearing"),
+            ({}, "superseded", False, "does not directly refine"),
+            ({}, "accepted", True, "not superseded"),
+        ],
+    )
+    def test_fallback_guard_failures(
+        self,
+        successor_updates: dict[str, Any],
+        old_stage: str,
+        has_lineage: bool,
+        expected: str,
+    ) -> None:
+        gc = self._fallback_graph()
+        gc.nodes[self.successor].update(successor_updates)
+        gc.nodes[self.old_root]["name_stage"] = old_stage
+        if not has_lineage:
+            gc.refined_from.clear()
+
+        result = cascade_descendants_of(
+            gc,
+            successor_id=self.successor,
+            old_root=self.old_root,
+            new_root=self.successor,
+            dry_run=True,
+            override_edits=True,
+            include_accepted=True,
+        )
+
+        assert result.renamed == []
+        assert any(expected in conflict for conflict in result.conflicts)
+
+    def test_live_successor_subtree_takes_precedence(self) -> None:
+        gc = self._fallback_graph()
+        live_child = "ion_radiance_at_spectral_line"
+        gc.add_node(live_child, name_stage="accepted")
+        gc.add_edge(
+            live_child,
+            self.successor,
+            operator="ion",
+            operator_kind="qualifier",
+        )
+
+        result = cascade_descendants_of(
+            gc,
+            successor_id=self.successor,
+            old_root=self.old_root,
+            new_root=self.successor,
+            dry_run=True,
+            override_edits=True,
+            include_accepted=True,
+        )
+
+        assert result.conflicts == []
+        assert result.renamed == [
+            {
+                "from": live_child,
+                "to": "ion_photon_radiance_at_spectral_line",
+            }
+        ]
+        assert all(rename["from"] != self.old_child for rename in result.renamed)
+
+    def test_staged_preacceptance_probe_validates_guarded_fallback(self) -> None:
+        gc = self._fallback_graph()
+        gc.nodes[self.successor].update(
+            name_stage="drafted",
+            edit_status="open",
+        )
+
+        result = cascade_descendants_of(
+            gc,
+            successor_id=self.successor,
+            old_root=self.old_root,
+            new_root=self.successor,
+            dry_run=True,
+            override_edits=True,
+            include_accepted=True,
+        )
+
+        assert result.conflicts == []
+        assert result.renamed == [{"from": self.old_child, "to": self.new_child}]
+        assert result.total_descendants == 1
+
+    def test_fallback_collision_fails_before_write(self) -> None:
+        gc = self._fallback_graph()
+        gc.add_node(self.new_child, name_stage="accepted")
+
+        result = cascade_descendants_of(
+            gc,
+            successor_id=self.successor,
+            old_root=self.old_root,
+            new_root=self.successor,
+            dry_run=False,
+            override_edits=True,
+            include_accepted=True,
+        )
+
+        assert any("collides" in conflict for conflict in result.conflicts)
+        assert gc.write_calls == []
+        assert self.old_child in gc.nodes
+
+    def test_apply_excludes_root_and_reconciles_renamed_descendant(self) -> None:
+        from unittest.mock import patch
+
+        gc = self._fallback_graph()
+        provenance_module = "imas_codex.standard_names.provenance_lifecycle"
+        with (
+            patch(f"{provenance_module}.record_standard_name_change"),
+            patch(f"{provenance_module}.refresh_renamed_source_mirrors"),
+        ):
+            result = cascade_descendants_of(
+                gc,
+                successor_id=self.successor,
+                old_root=self.old_root,
+                new_root=self.successor,
+                dry_run=False,
+                override_edits=True,
+                include_accepted=True,
+            )
+
+        assert result.conflicts == []
+        assert result.renamed == [{"from": self.old_child, "to": self.new_child}]
+        assert self.old_root in gc.nodes
+        assert self.successor in gc.nodes
+        assert self.new_child in gc.nodes
+        assert gc.edges_by_child[self.new_child] == [
+            {
+                "target_id": self.successor,
+                "operator": "motional_stark",
+                "operator_kind": "qualifier",
+                "role": None,
+                "separator": None,
+                "axis": None,
+                "shape": None,
+            }
+        ]
+
+    def test_reconciliation_failure_rolls_back_identity_and_topology(self) -> None:
+        gc = self._fallback_graph()
+        gc.fail_transaction_on = "UNWIND $recon AS rc"
+
+        with pytest.raises(RuntimeError, match="injected transaction failure"):
+            cascade_descendants_of(
+                gc,
+                successor_id=self.successor,
+                old_root=self.old_root,
+                new_root=self.successor,
+                dry_run=False,
+                override_edits=True,
+                include_accepted=True,
+            )
+
+        assert self.old_child in gc.nodes
+        assert self.new_child not in gc.nodes
+        assert gc.edges_by_child[self.old_child][0]["target_id"] == self.old_root
+        assert gc.rollback_count == 1
+
+    def test_change_ledger_failure_rolls_back_complete_cascade(self) -> None:
+        from unittest.mock import patch
+
+        gc = self._fallback_graph()
+        provenance_module = "imas_codex.standard_names.provenance_lifecycle"
+        with (
+            patch(
+                f"{provenance_module}.record_standard_name_change",
+                side_effect=RuntimeError("injected ledger failure"),
+            ),
+            pytest.raises(RuntimeError, match="injected ledger failure"),
+        ):
+            cascade_descendants_of(
+                gc,
+                successor_id=self.successor,
+                old_root=self.old_root,
+                new_root=self.successor,
+                dry_run=False,
+                override_edits=True,
+                include_accepted=True,
+            )
+
+        assert self.old_child in gc.nodes
+        assert self.new_child not in gc.nodes
+        assert gc.edges_by_child[self.old_child][0]["target_id"] == self.old_root
+        assert gc.rollback_count == 1
+
+    def test_fallback_grammar_failure_fails_before_write(self) -> None:
+        gc = self._fallback_graph()
+        gc.edges_by_child[self.old_child][0]["operator"] = "not_a_grammar_token"
+
+        result = cascade_descendants_of(
+            gc,
+            successor_id=self.successor,
+            old_root=self.old_root,
+            new_root=self.successor,
+            dry_run=False,
+            override_edits=True,
+            include_accepted=True,
+        )
+
+        assert any("ISN round-trip failed" in conflict for conflict in result.conflicts)
+        assert gc.write_calls == []
+
+
+class TestExactStructuralReconciliation:
+    def test_delegates_exact_existing_ids_to_canonical_writer(self) -> None:
+        from unittest.mock import Mock, patch
+
+        gc = Mock()
+        gc.query.return_value = [
+            {"id": "alpha", "exists": True},
+            {"id": "beta", "exists": True},
+        ]
+        graph_ops_module = "imas_codex.standard_names.graph_ops"
+        with patch(f"{graph_ops_module}._write_standard_name_edges") as writer:
+            count = reconcile_structural_edges_for_standard_names(
+                gc, ["alpha", "beta", "alpha"]
+            )
+
+        assert count == 2
+        writer.assert_called_once_with(
+            gc,
+            [{"id": "alpha"}, {"id": "beta"}],
+            expand_closure=False,
+        )
+
+    def test_missing_id_fails_before_structural_write(self) -> None:
+        from unittest.mock import Mock, patch
+
+        gc = Mock()
+        gc.query.return_value = [{"id": "present", "exists": True}]
+        graph_ops_module = "imas_codex.standard_names.graph_ops"
+        with patch(f"{graph_ops_module}._write_standard_name_edges") as writer:
+            with pytest.raises(ValueError, match="missing StandardName ids"):
+                reconcile_structural_edges_for_standard_names(
+                    gc, ["present", "missing"]
+                )
+
+        writer.assert_not_called()
 
 
 @pytest.mark.parametrize(

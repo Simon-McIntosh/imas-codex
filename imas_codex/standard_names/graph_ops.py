@@ -1599,7 +1599,11 @@ def _emit_magnitude_of_edges(names: list[dict[str, Any]], gc: Any) -> None:
 
 
 def _write_standard_name_edges(
-    gc: Any, names: list[dict[str, Any]], *, full_rebuild: bool = False
+    gc: Any,
+    names: list[dict[str, Any]],
+    *,
+    full_rebuild: bool = False,
+    expand_closure: bool = True,
 ) -> None:
     """Emit all structural edges for a batch of StandardName nodes.
 
@@ -1634,6 +1638,9 @@ def _write_standard_name_edges(
     names:
         List of name dicts, each containing at minimum ``id``.  All other
         fields are optional; missing fields produce no edges.
+    expand_closure:
+        Also reconcile structural parent identities discovered while deriving
+        the requested names.  Disable for exact-name repair callers.
     """
     from imas_codex.standard_names.derivation import derive_edges
 
@@ -1662,7 +1669,7 @@ def _write_standard_name_edges(
                         "shape": edge.props.get("shape"),
                     }
                 )
-                if edge.to_name not in processed:
+                if expand_closure and edge.to_name not in processed:
                     pending.append(edge.to_name)
             elif edge.edge_type == "HAS_ERROR":
                 he_batch.append(
@@ -1672,7 +1679,7 @@ def _write_standard_name_edges(
                         "error_type": edge.props.get("error_type"),
                     }
                 )
-                if edge.from_name not in processed:
+                if expand_closure and edge.from_name not in processed:
                     pending.append(edge.from_name)
             elif edge.edge_type == "HAS_LOCUS":
                 geo_batch.append(
@@ -1856,6 +1863,56 @@ def _write_standard_name_edges(
             """,
             batch=domain_batch,
         )
+
+
+def reconcile_structural_edges_for_standard_names(
+    gc: Any,
+    name_ids: list[str],
+) -> int:
+    """Reconcile structural edges for an exact set of existing names.
+
+    This is the narrow public entry point for callers that have changed a
+    StandardName identity in place.  It delegates to the canonical structural
+    writer so ``HAS_PARENT``, ``HAS_ERROR``, and ``HAS_LOCUS`` remain a
+    deterministic function of each current id without rebuilding the whole
+    graph.
+
+    The existence check is completed for the entire requested set before any
+    structural write.  Missing names therefore fail closed instead of causing
+    the canonical writer to mint a replacement placeholder for a misspelled
+    id.
+    """
+    requested = list(dict.fromkeys(name_ids))
+    if any(not name_id for name_id in requested):
+        raise ValueError("name_ids must contain only non-empty StandardName ids")
+    if not requested:
+        return 0
+
+    rows = list(
+        gc.query(
+            """
+            UNWIND $ids AS requested
+            OPTIONAL MATCH (sn:StandardName {id: requested})
+            RETURN requested AS id,
+                   CASE WHEN sn IS NULL THEN false ELSE true END AS exists
+            """,
+            ids=requested,
+        )
+    )
+    present = {str(row["id"]) for row in rows if row.get("exists")}
+    missing = sorted(set(requested) - present)
+    if missing:
+        raise ValueError(
+            "cannot reconcile structural edges for missing StandardName ids: "
+            + ", ".join(repr(name_id) for name_id in missing)
+        )
+
+    _write_standard_name_edges(
+        gc,
+        [{"id": name_id} for name_id in requested],
+        expand_closure=False,
+    )
+    return len(requested)
 
 
 def rederive_structural_edges() -> dict[str, int]:
