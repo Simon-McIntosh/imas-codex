@@ -12,6 +12,7 @@ from imas_codex.standard_names.provenance_lifecycle import (
     fetch_public_semantic_sources,
     find_semantic_source_invariant_violations,
     official_dd_documentation_url,
+    refresh_renamed_source_mirrors,
     retarget_standard_name_sources,
     trace_standard_name_provenance,
 )
@@ -117,6 +118,51 @@ def test_retarget_query_repairs_all_source_mirrors() -> None:
         "FROM_DD_PATH" in cypher
         and "DELETE" not in cypher.split("FROM_DD_PATH")[1].split("FROM_SIGNAL")[0]
     )
+
+
+def test_rename_mirror_refresh_separates_updates_from_matches() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [{"refreshed": 0}]
+
+    assert (
+        refresh_renamed_source_mirrors(gc, [{"from": "old_name", "to": "new_name"}])
+        == 0
+    )
+
+    cypher = gc.query.call_args.args[0]
+    source_update = cypher.index("SET source.produced_sn_id = sn.id")
+    review_match = cypher.index(
+        "OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)"
+    )
+    review_update = cypher.index("SET review.standard_name_id = sn.id")
+    revision_match = cypher.index(
+        "OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(revision:DocsRevision)"
+    )
+
+    assert "WITH sn, source" in cypher[source_update:review_match]
+    assert "WITH sn, source" in cypher[review_update:revision_match]
+
+
+@pytest.mark.graph
+def test_rename_mirror_refresh_compiles_in_transaction(graph_client) -> None:
+    from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+
+    with graph_client.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            adapter = _TransactionQueryAdapter(transaction)
+            refreshed = refresh_renamed_source_mirrors(
+                adapter,
+                [
+                    {
+                        "from": "missing_predecessor_for_query_compilation",
+                        "to": "missing_successor_for_query_compilation",
+                    }
+                ],
+            )
+            assert refreshed == 0
+        finally:
+            transaction.rollback()
 
 
 def test_cleanup_manifest_is_unapproved_only() -> None:

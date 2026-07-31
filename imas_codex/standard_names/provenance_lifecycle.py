@@ -432,9 +432,11 @@ def refresh_renamed_source_mirrors(gc: Any, renames: list[dict[str, str]]) -> in
         OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)
         FOREACH (_ IN CASE WHEN source IS NULL THEN [] ELSE [1] END |
           SET source.produced_sn_id = sn.id)
+        WITH sn, source
         OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
         FOREACH (_ IN CASE WHEN review IS NULL THEN [] ELSE [1] END |
           SET review.standard_name_id = sn.id)
+        WITH sn, source
         OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
         FOREACH (_ IN CASE WHEN revision IS NULL THEN [] ELSE [1] END |
           SET revision.sn_id = sn.id)
