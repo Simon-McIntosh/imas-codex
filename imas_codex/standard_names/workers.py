@@ -4991,6 +4991,21 @@ async def compose_batch(
     if not batch:
         return 0
 
+    # Claim read-back carries name-side edit steering as scalar fields. The
+    # compose template renders those fields through review_feedback, so nest
+    # them here for pooled generation. Exact-source compose_hint stays separate
+    # because its lifecycle and authority boundary belong to the source node.
+    for item in batch:
+        if item.get("name_hint") and item.get("edit_reason"):
+            item["review_feedback"] = {
+                "previous_name": item.get("previous_name"),
+                "reviewer_score": None,
+                **(item.get("review_feedback") or {}),
+                "name_hint": item["name_hint"],
+                "edit_reason": item["edit_reason"],
+                "edit_origin": item.get("edit_origin"),
+            }
+
     model = compose_model or get_model("sn-compose")
     context = build_compose_context()
 
