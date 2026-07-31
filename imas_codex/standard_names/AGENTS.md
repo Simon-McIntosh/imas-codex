@@ -180,3 +180,26 @@ path for a bulk repair, since compose is free and review is the only paid stage.
 
 The single sanctioned structural accept is `ENRICH_PARENTS` for placeholder
 derived parents, which the quorum systematically penalises for being abstractions.
+
+## Exact-source compose steering
+
+Use `sn source-hint <exact-dd-path> --hint ... --reason ...` only before an
+eligible DD source without a live name binding composes. It is not a source
+mutation: DD snapshot, unit, COCOS, domain, identity, and grammar validation
+remain authoritative. Preview with `--dry-run`; replacing an open hint requires
+`--replace`.
+
+The write is claim-fenced compare-and-set. A missing or non-DD source, active
+claim, non-`extracted` state, attempt cap, live binding, or unacknowledged open
+hint is a refusal, not a reason to bypass the CLI with Cypher. An open hint rides
+pooled compose and is consumed atomically only when that exact source binds a
+name. Retry, failure, interruption, claim expiry, validation rejection, and
+collision preserve it. Use `sn run --focus <same-exact-path>` to fence the
+subsequent work; model choice comes from the configured compose seat unless the
+run explicitly overrides it.
+
+Do not confuse the three operator surfaces: `sn retry --reason` audits why a
+blocked source may attempt again, `sn source-hint` steers the next successful
+binding of one exact source, and `sn edit <name> --hint` steers an existing name
+through review. `rejected` is reserved in the hint-status schema; no current CLI
+transition sets it.
