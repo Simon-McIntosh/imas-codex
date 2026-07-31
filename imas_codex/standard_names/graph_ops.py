@@ -4647,9 +4647,6 @@ def persist_generated_name_winners(
                         "source claim changed during transactional name persistence"
                     )
 
-                finalized_candidates = [
-                    candidate_by_sns[sns_id] for sns_id in finalized_ids
-                ]
                 finalized_reserved_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id in finalized_ids
@@ -4661,7 +4658,7 @@ def persist_generated_name_winners(
                     )
                 supersede_pairs = [
                     {"new_name": entry["id"], "source_id": entry["source_id"]}
-                    for entry in finalized_candidates
+                    for entry in finalized_reserved_candidates
                     if entry.get("id")
                     and entry.get("source_id")
                     and "dd" in (entry.get("source_types") or [])

@@ -831,7 +831,7 @@ class TestPersistGeneratedNameBatch:
             patch(
                 "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
                 return_value=0,
-            ),
+            ) as supersede,
         ):
             winners = persist_generated_name_batch(
                 [candidate],
@@ -842,6 +842,7 @@ class TestPersistGeneratedNameBatch:
         assert winners == ["dd:core_profiles/profiles_1d/electrons/temperature"]
         write.assert_not_called()
         backfill.assert_not_called()
+        supersede.assert_not_called()
         finalize_cypher = _transaction_call(
             self.atomic_tx, "sns.status = 'composed'"
         ).args[0]
