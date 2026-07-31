@@ -1692,54 +1692,57 @@ def sn_run(
     if reset_only:
         if reset_to is None:
             raise click.UsageError("--reset-only requires --reset-to")
-        if not dry_run:
-            source_arg = "dd" if source == "dd" else "signals"
-            ids_filter: str | None = None
-            _tiers = [t.strip() for t in tier.split(",")] if tier else None
-            _validation_status: str | None = None
-            if retry_quarantined:
-                _validation_status = "quarantined"
-            _reset_filter_kwargs: dict[str, Any] = {
-                "since": since,
-                "before": before,
-                "below_score": below_score,
-                "tiers": _tiers,
-                "validation_status": _validation_status,
-            }
-            from imas_codex.standard_names.graph_ops import (
-                clear_standard_names,
-                reset_standard_names,
-            )
+        source_arg = "dd" if source == "dd" else "signals"
+        ids_filter: str | None = None
+        _tiers = [t.strip() for t in tier.split(",")] if tier else None
+        _validation_status: str | None = None
+        if retry_quarantined:
+            _validation_status = "quarantined"
+        _reset_filter_kwargs: dict[str, Any] = {
+            "since": since,
+            "before": before,
+            "below_score": below_score,
+            "tiers": _tiers,
+            "validation_status": _validation_status,
+        }
+        from imas_codex.standard_names.graph_ops import (
+            clear_standard_names,
+            reset_standard_names,
+        )
 
-            if reset_to == "extracted":
-                n = clear_standard_names(
-                    source_filter=source_arg,
-                    ids_filter=ids_filter,
-                    path_allowlist=flat_focus or None,
-                    include_accepted=include_accepted,
-                    **_reset_filter_kwargs,
-                )
-                console.print(
-                    f"[yellow]--reset-to extracted:[/yellow] cleared {n} SN nodes"
-                )
-            elif reset_to == "drafted":
-                # With --retry-quarantined the targets sit at any live stage
-                # (reviewed/refining/accepted); select by the filter set and
-                # re-stage them to 'drafted' for recompose.
-                n = reset_standard_names(
-                    from_stage=None if retry_quarantined else "drafted",
-                    to_stage="drafted" if retry_quarantined else None,
-                    include_accepted=include_accepted,
-                    source_filter=source_arg,
-                    ids_filter=ids_filter,
-                    path_allowlist=flat_focus or None,
-                    **_reset_filter_kwargs,
-                )
-                console.print(
-                    f"[yellow]--reset-to drafted:[/yellow] reset {n} SN nodes"
-                )
+        if reset_to == "extracted":
+            n = clear_standard_names(
+                source_filter=source_arg,
+                ids_filter=ids_filter,
+                path_allowlist=flat_focus or None,
+                include_accepted=include_accepted,
+                dry_run=dry_run,
+                **_reset_filter_kwargs,
+            )
+            action = "would clear" if dry_run else "cleared"
+            console.print(
+                f"[yellow]--reset-to extracted:[/yellow] {action} {n} SN nodes"
+            )
+        elif reset_to == "drafted":
+            # With --retry-quarantined the targets sit at any live stage
+            # (reviewed/refining/accepted); select by the filter set and
+            # re-stage them to 'drafted' for recompose.
+            n = reset_standard_names(
+                from_stage=None if retry_quarantined else "drafted",
+                to_stage="drafted" if retry_quarantined else None,
+                include_accepted=include_accepted,
+                source_filter=source_arg,
+                ids_filter=ids_filter,
+                path_allowlist=flat_focus or None,
+                dry_run=dry_run,
+                **_reset_filter_kwargs,
+            )
+            action = "would reset" if dry_run else "reset"
+            console.print(f"[yellow]--reset-to drafted:[/yellow] {action} {n} SN nodes")
         console.print(
-            "[green]--reset-only:[/green] reset complete, exiting without generation"
+            "[green]--reset-only:[/green] "
+            f"{'preview' if dry_run else 'reset'} complete, "
+            "exiting without generation"
         )
         return
 

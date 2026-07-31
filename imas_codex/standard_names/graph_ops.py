@@ -5714,6 +5714,81 @@ def clear_standard_names(
         # out-of-scope-producer guard below.
         out_scope_where = src_where.replace("src.", "o.")
 
+        exact_reset_parent_where = """
+            parent.origin = 'derived'
+            AND coalesce(parent.name_stage, '') IN ['', 'pending']
+            AND NOT (parent.id IN reset_candidate_ids)
+            AND parent.claimed_at IS NULL
+            AND parent.claim_token IS NULL
+            AND all(key IN keys(parent)
+                    WHERE key IN $reset_skeleton_parent_keys)
+            AND NOT EXISTS {
+                MATCH (other)-[parent_rel]-(parent)
+                WHERE NOT (
+                    (
+                        type(parent_rel) = 'HAS_PARENT'
+                        AND parent_rel.operator_kind IS NOT NULL
+                        AND other.id IN reset_candidate_ids
+                        AND startNode(parent_rel) = other
+                        AND endNode(parent_rel) = parent
+                    )
+                    OR (
+                        type(parent_rel) = 'PRODUCED_NAME'
+                        AND other:StandardNameSource
+                        AND other.id = 'derived:' + parent.id
+                        AND startNode(parent_rel) = other
+                        AND endNode(parent_rel) = parent
+                    )
+                )
+            }
+            AND NOT EXISTS {
+                MATCH (mirror_source:StandardNameSource)
+                WHERE mirror_source.produced_sn_id = parent.id
+                  AND mirror_source.id <> 'derived:' + parent.id
+            }
+        """
+        exact_reset_source_where = """
+            derived_source IS NULL OR (
+                derived_source.source_type = 'derived'
+                AND derived_source.source_id = parent.id
+                AND coalesce(derived_source.batch_key, 'derived_parent') =
+                    'derived_parent'
+                AND derived_source.status IS NULL
+                AND coalesce(derived_source.attempt_count, 0) = 0
+                AND derived_source.claimed_at IS NULL
+                AND derived_source.claim_token IS NULL
+                AND coalesce(derived_source.produced_sn_id, parent.id) = parent.id
+                AND all(key IN keys(derived_source)
+                        WHERE key IN $reset_skeleton_source_keys)
+                AND NOT EXISTS {
+                    MATCH (derived_source)-[source_rel]-()
+                    WHERE NOT (
+                        type(source_rel) = 'PRODUCED_NAME'
+                        AND endNode(source_rel) = parent
+                    )
+                }
+            )
+        """
+        if path_allowlist is not None:
+            params["reset_skeleton_parent_keys"] = [
+                "id",
+                "origin",
+                "name_stage",
+                "needs_composition",
+                "claimed_at",
+                "claim_token",
+            ]
+            params["reset_skeleton_source_keys"] = [
+                "id",
+                "source_type",
+                "source_id",
+                "batch_key",
+                "attempt_count",
+                "produced_sn_id",
+                "claimed_at",
+                "claim_token",
+            ]
+
         if use_src_join:
             # Count the names that will ACTUALLY be deleted, not merely the ones
             # matched in scope: a name matched via an in-scope edge SURVIVES if
@@ -5723,17 +5798,55 @@ def clear_standard_names(
             # real deletions. Restrict to names whose producers are ALL in
             # scope (no out-of-scope producer → truly orphaned after the edge
             # delete).
-            count_cypher = f"""
-                MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-                WHERE {sn_where}
-                AND {src_where}
-                WITH DISTINCT sn
-                WHERE NOT EXISTS {{
-                    MATCH (o:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-                    WHERE NOT ({out_scope_where})
-                }}
-                RETURN count(sn) AS n
-            """
+            if path_allowlist is not None:
+                count_cypher = f"""
+                    MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
+                    WHERE {sn_where}
+                    AND {src_where}
+                    WITH DISTINCT sn
+                    WHERE NOT EXISTS {{
+                        MATCH (o:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+                        WHERE NOT ({out_scope_where})
+                    }}
+                    WITH collect(sn) AS reset_candidates
+                    WITH reset_candidates,
+                         [candidate IN reset_candidates | candidate.id]
+                             AS reset_candidate_ids
+                    CALL {{
+                        WITH reset_candidates, reset_candidate_ids
+                        UNWIND reset_candidates AS candidate
+                        OPTIONAL MATCH (candidate)-[candidate_parent_edge:HAS_PARENT]->
+                                       (candidate_parent:StandardName)
+                        WHERE candidate_parent_edge.operator_kind IS NOT NULL
+                        WITH reset_candidate_ids,
+                             collect(DISTINCT candidate_parent) AS candidate_parents
+                        UNWIND CASE WHEN size(candidate_parents) = 0
+                            THEN [null] ELSE candidate_parents END AS parent
+                        WITH DISTINCT reset_candidate_ids, parent
+                        WHERE parent IS NOT NULL
+                          AND {exact_reset_parent_where}
+                        OPTIONAL MATCH (derived_source:StandardNameSource)
+                        WHERE derived_source.id = 'derived:' + parent.id
+                        WITH parent, derived_source
+                        WHERE {exact_reset_source_where}
+                        RETURN count(DISTINCT parent) AS skeleton_count
+                    }}
+                    RETURN size(reset_candidates) + skeleton_count AS n,
+                           size(reset_candidates) AS candidate_count,
+                           skeleton_count
+                """
+            else:
+                count_cypher = f"""
+                    MATCH (src:IMASNode)-[:HAS_STANDARD_NAME]->(sn:StandardName)
+                    WHERE {sn_where}
+                    AND {src_where}
+                    WITH DISTINCT sn
+                    WHERE NOT EXISTS {{
+                        MATCH (o:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+                        WHERE NOT ({out_scope_where})
+                    }}
+                    RETURN count(sn) AS n
+                """
         else:
             count_cypher = f"""
                 MATCH (sn:StandardName)
@@ -5779,26 +5892,114 @@ def clear_standard_names(
                 "clear_selected_name",
                 reason="selected name removed by a scoped pipeline clear",
             )
-            gc.query(
-                f"""
-                MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
-                WHERE {sn_where}
-                AND {src_where}
-                DELETE rel
-                WITH DISTINCT sn
-                WHERE NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
-                {deletion_clause}
-                WITH sn, change
-                CALL {{
-                    WITH sn
-                    OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
-                    DETACH DELETE r
-                }}
-                DETACH DELETE sn
-                """,
-                **params,
-                **deletion_params,
-            )
+            if path_allowlist is not None:
+                # An exact reset can delete the only child of a structural
+                # parent that relationship projection created as a bare
+                # scaffold. Carry only those former direct parents through the
+                # candidate delete and retire a parent in this SAME statement
+                # when it remains a null-lifecycle skeleton. The property-key,
+                # relationship, claim, and source-identity fences make this a
+                # cleanup of reset-created scaffolding rather than a general
+                # derived-parent reaper.
+                skeleton_params = deletion_change_params(
+                    "remove_skeleton_placeholder",
+                    reason=(
+                        "exact source reset removed the scaffold's only "
+                        "structural child"
+                    ),
+                )
+                rows = gc.query(
+                    f"""
+                    MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
+                    WHERE {sn_where}
+                    AND {src_where}
+                    OPTIONAL MATCH (sn)-[candidate_parent_edge:HAS_PARENT]->
+                                   (candidate_parent:StandardName)
+                    WHERE candidate_parent_edge.operator_kind IS NOT NULL
+                    WITH sn,
+                         collect(DISTINCT rel) AS reset_relationships,
+                         collect(DISTINCT candidate_parent.id)
+                             AS candidate_parent_ids
+                    FOREACH (rel IN reset_relationships | DELETE rel)
+                    WITH sn, candidate_parent_ids
+                    WHERE NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
+                    {deletion_clause}
+                    WITH sn, change, candidate_parent_ids,
+                         sn.id AS reset_candidate_id
+                    CALL {{
+                        WITH sn
+                        OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
+                        DETACH DELETE r
+                    }}
+                    DETACH DELETE sn
+                    WITH collect(DISTINCT change) AS candidate_changes,
+                         collect(DISTINCT reset_candidate_id)
+                             AS reset_candidate_ids,
+                         reduce(
+                             all_parent_ids = [],
+                             parent_ids IN collect(candidate_parent_ids) |
+                                 all_parent_ids + parent_ids
+                         ) AS candidate_parent_ids
+                    CALL {{
+                        WITH reset_candidate_ids, candidate_parent_ids
+                        UNWIND candidate_parent_ids AS parent_id
+                        WITH DISTINCT reset_candidate_ids, parent_id
+                        MATCH (parent:StandardName {{id: parent_id}})
+                        WHERE {exact_reset_parent_where}
+                        OPTIONAL MATCH (derived_source:StandardNameSource)
+                        WHERE derived_source.id = 'derived:' + parent.id
+                        WITH parent, derived_source
+                        WHERE {exact_reset_source_where}
+                        CREATE (:StandardNameChange {{
+                            id: 'sn-change:' + randomUUID(),
+                            from_name: parent.id,
+                            to_name: parent.id,
+                            operation: $reset_skeleton_deletion_operation,
+                            reason: $reset_skeleton_deletion_reason,
+                            origin: $reset_skeleton_deletion_origin,
+                            run_id: $reset_skeleton_deletion_run_id,
+                            changed_at: datetime(),
+                            internal: true
+                        }})
+                        FOREACH (source IN CASE
+                            WHEN derived_source IS NULL THEN [] ELSE [derived_source]
+                        END | DETACH DELETE source)
+                        DETACH DELETE parent
+                        RETURN count(DISTINCT parent) AS skeleton_count
+                    }}
+                    RETURN size(candidate_changes) + skeleton_count AS n,
+                           size(candidate_changes) AS candidate_count,
+                           skeleton_count
+                    """,
+                    **params,
+                    **deletion_params,
+                    **{
+                        f"reset_skeleton_{key}": value
+                        for key, value in skeleton_params.items()
+                    },
+                )
+                count = int(rows[0]["n"]) if rows else 0
+            else:
+                gc.query(
+                    f"""
+                    MATCH (src:IMASNode)-[rel:HAS_STANDARD_NAME]->(sn:StandardName)
+                    WHERE {sn_where}
+                    AND {src_where}
+                    DELETE rel
+                    WITH DISTINCT sn
+                    WHERE NOT EXISTS {{ MATCH ()-[:HAS_STANDARD_NAME]->(sn) }}
+                    {deletion_clause}
+                    WITH sn, change
+                    CALL {{
+                        WITH sn
+                        OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(r:StandardNameReview)
+                        DETACH DELETE r
+                    }}
+                    DETACH DELETE sn
+                    """,
+                    **params,
+                    **deletion_params,
+                )
         else:
             deletion_clause = deletion_change_cypher("sn")
             deletion_params = deletion_change_params(
