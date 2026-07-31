@@ -327,10 +327,13 @@ class TestClaimReturnScalarPhysicsDomain:
                         "source_type": "dd",
                         "batch_key": "equilibrium",
                         "description": "Poloidal flux",
+                        "claim_token": "winner",
+                        "claim_seq": 1,
                     }
                 ],
             ]
         )
+        gc.query.return_value = [{"id": "sns-1", "claim_seq": 1}]
         with _patch_gc(gc):
             result = claim_generate_name_batch(batch_size=1)
 

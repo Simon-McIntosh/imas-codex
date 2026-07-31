@@ -18,6 +18,7 @@ import os
 import re
 import time
 import uuid
+from contextlib import nullcontext
 from datetime import UTC
 from pathlib import Path
 from typing import Any
@@ -35,6 +36,17 @@ from imas_codex.standard_names.provenance_lifecycle import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class _TransactionQuery:
+    """Expose a Neo4j transaction through the graph-query interface."""
+
+    def __init__(self, transaction: Any) -> None:
+        self._transaction = transaction
+
+    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        """Run one query without leaving the caller-owned transaction."""
+        return [dict(record) for record in self._transaction.run(cypher, **params)]
 
 
 def _ensure_json(value: Any) -> str | None:
@@ -2968,7 +2980,9 @@ def write_standard_names(
     names: list[dict[str, Any]],
     *,
     override: bool = False,
-) -> int:
+    gc: Any | None = None,
+    return_written_ids: bool = False,
+) -> int | list[str]:
     """MERGE StandardName nodes with HAS_STANDARD_NAME relationships.
 
     Relationship direction: entity → concept
@@ -2995,6 +3009,11 @@ def write_standard_names(
     override:
         When ``True``, bypass pipeline protection — write protected fields
         even on catalog-edited names.
+    gc:
+        Optional caller-owned graph query handle. All writes use this handle,
+        allowing an explicit transaction to own the complete rich write.
+    return_written_ids:
+        Return the identities that survived validation and conflict checks.
 
     Performs conflict detection on ``unit``: if a StandardName already exists
     with a different unit value, that entry is skipped (not written)
@@ -3003,7 +3022,7 @@ def write_standard_names(
     Returns the number of nodes written.
     """
     if not names:
-        return 0
+        return [] if return_written_ids else 0
 
     # Pipeline protection — strip catalog-owned fields from catalog_edit items
     from imas_codex.standard_names.protection import filter_protected
@@ -3016,7 +3035,7 @@ def write_standard_names(
             ", ".join(skipped[:5]),
         )
     if not names:
-        return 0
+        return [] if return_written_ids else 0
 
     # Strict grammar identity gate — reject names that ISN cannot parse and
     # losslessly recompose.  The legacy flat projection is not an authority:
@@ -3050,7 +3069,7 @@ def write_standard_names(
             )
         names = valid_names
         if not names:
-            return 0
+            return [] if return_written_ids else 0
 
     # A COCOS-dependent name (cocos_transformation_type set) must carry the
     # integer cocos convention so the HAS_COCOS edge below is created. The
@@ -3060,7 +3079,7 @@ def write_standard_names(
     if any(
         n.get("cocos_transformation_type") and n.get("cocos") is None for n in names
     ):
-        with GraphClient() as _conv_gc:
+        with nullcontext(gc) if gc is not None else GraphClient() as _conv_gc:
             _conv_row = _conv_gc.query(
                 "MATCH (v:DDVersion {is_current: true}) RETURN v.cocos AS cocos"
             )
@@ -3085,7 +3104,7 @@ def write_standard_names(
                 n["cocos_transformation_type"],
             )
 
-    with GraphClient() as gc:
+    with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
         # Conflict-detect on unit — same name with different unit is a data
         # integrity error.  Filter out conflicting entries rather than raising
         # so that non-conflicting entries can still proceed.
@@ -3094,7 +3113,7 @@ def write_standard_names(
         ]
         if unit_check_batch:
             unit_conflicts = list(
-                gc.query(
+                write_gc.query(
                     """
                     UNWIND $batch AS b
                     MATCH (sn:StandardName {id: b.id})
@@ -3118,10 +3137,10 @@ def write_standard_names(
                 names = [n for n in names if n["id"] not in conflicting_ids]
                 if not names:
                     logger.warning("All entries had unit conflicts — nothing to write")
-                    return 0
+                    return [] if return_written_ids else 0
 
         # MERGE StandardName nodes with provenance — coalesce to preserve existing data
-        gc.query(
+        write_gc.query(
             """
             UNWIND $batch AS b
             MERGE (sn:StandardName {id: b.id})
@@ -3274,7 +3293,7 @@ def write_standard_names(
             # Read existing values for this batch so we can compute
             # promotion in Python (rank tables are not encodable in Cypher).
             existing_rows = (
-                gc.query(
+                write_gc.query(
                     """
                     UNWIND $ids AS sid
                     MATCH (sn:StandardName {id: sid})
@@ -3320,7 +3339,7 @@ def write_standard_names(
                     }
                 )
 
-            gc.query(
+            write_gc.query(
                 """
                 UNWIND $batch AS b
                 MERGE (sn:StandardName {id: b.id})
@@ -3335,7 +3354,7 @@ def write_standard_names(
         signal_names = [n for n in names if "signals" in (n.get("source_types") or [])]
 
         if dd_names:
-            gc.query(
+            write_gc.query(
                 """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
@@ -3349,7 +3368,7 @@ def write_standard_names(
                 ],
             )
         if signal_names:
-            gc.query(
+            write_gc.query(
                 """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
@@ -3378,7 +3397,7 @@ def write_standard_names(
         ]
         if units_batch:
             unit_sn_ids = [b["id"] for b in units_batch]
-            gc.query(
+            write_gc.query(
                 """
                 UNWIND $ids AS id
                 MATCH (sn:StandardName {id: id})-[r:HAS_UNIT]->()
@@ -3386,7 +3405,7 @@ def write_standard_names(
                 """,
                 ids=unit_sn_ids,
             )
-            gc.query(
+            write_gc.query(
                 """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
@@ -3405,7 +3424,7 @@ def write_standard_names(
             if n.get("cocos") is not None
         ]
         if cocos_batch:
-            gc.query(
+            write_gc.query(
                 """
                 UNWIND $batch AS b
                 MATCH (sn:StandardName {id: b.id})
@@ -3416,15 +3435,17 @@ def write_standard_names(
             )
 
         # Create grammar decomposition: typed edges + per-segment columns
-        token_miss_gaps = _write_grammar_decomposition(gc, [n["id"] for n in names])
+        token_miss_gaps = _write_grammar_decomposition(
+            write_gc, [n["id"] for n in names]
+        )
 
         # Emit structural edges: HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
         # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
         # Tail pass — all nodes in this batch exist before edges are written.
-        _write_standard_name_edges(gc, names)
+        _write_standard_name_edges(write_gc, names)
 
-    # Persist token-miss gaps as VocabGap nodes (outside gc context —
-    # write_vocab_gaps opens its own GraphClient)
+    # Persist token-miss gaps through the same caller-owned graph handle when
+    # one is supplied, so transactional callers keep every rich-write effect.
     if token_miss_gaps:
         # Build sn_id → source mapping from the names list
         sn_source_map: dict[str, tuple[str, str]] = {}
@@ -3455,20 +3476,20 @@ def write_standard_names(
                 signal_gap_dicts.append(gap_dict)
 
         if dd_gap_dicts:
-            write_vocab_gaps(dd_gap_dicts, source_type="dd")
+            write_vocab_gaps(dd_gap_dicts, source_type="dd", gc=gc)
         if signal_gap_dicts:
-            write_vocab_gaps(signal_gap_dicts, source_type="signals")
+            write_vocab_gaps(signal_gap_dicts, source_type="signals", gc=gc)
 
     # Sweep skeleton placeholders created by relationship-side MERGE on
     # uncomposed targets (HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
     # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN). A real StandardName
     # always has at least a created_at OR generated_at timestamp; pure
     # skeletons (id-only) are detached and deleted.
-    # Opens its own GraphClient — the surrounding `with` block has already
-    # closed; write_vocab_gaps above follows the same pattern.
-    with GraphClient() as gc:
+    # Reuse a caller-owned transaction when present; ordinary callers retain
+    # the independent graph context used by the public writer.
+    with nullcontext(gc) if gc is not None else GraphClient() as sweep_gc:
         deletion_clause = deletion_change_cypher("sn")
-        swept = gc.query(
+        swept = sweep_gc.query(
             f"""
             MATCH (sn:StandardName)
             WHERE sn.created_at IS NULL
@@ -3494,6 +3515,8 @@ def write_standard_names(
 
     written = len(names)
     logger.info("Wrote %d StandardName nodes", written)
+    if return_written_ids:
+        return [name["id"] for name in names]
     return written
 
 
@@ -4304,14 +4327,14 @@ SAFE_SCALAR_COCOS_UNITS: frozenset[str] = frozenset(
 )
 
 
-def persist_generated_name_batch(
+def persist_generated_name_winners(
     candidates: list[dict[str, Any]],
     *,
     compose_model: str,
     dd_version: str | None = None,
     cocos_version: int | None = None,
     run_id: str | None = None,
-) -> int:
+) -> list[str]:
     """Persist a single generate-name batch immediately to graph.
 
     Called from within ``compose_batch`` after LLM success.
@@ -4323,18 +4346,17 @@ def persist_generated_name_batch(
     candidate, ``embed_failed_at`` is set so the name can be retried later;
     the name is still written to the graph so it can advance through review.
 
-    After writing the StandardName nodes via :func:`write_standard_names`,
-    atomically transitions each new SN to ``name_stage='drafted'`` and
-    ``docs_stage='pending'`` (chain lengths = 0) and clears the
-    ``StandardNameSource`` claim in a **single** Neo4j transaction — so that
-    either all stage/claim updates land or none do.
+    An exact token-and-sequence source CAS acquires the source write lock. The
+    rich name writer, lifecycle transition, cluster backfill, and predecessor
+    retirement then run through that transaction before the source claim is
+    consumed. Any failure rolls every graph effect back together.
 
-    Returns the number of nodes written.
+    Returns the finalized ``StandardNameSource`` identities.
     """
     from datetime import UTC, datetime
 
     if not candidates:
-        return 0
+        return []
 
     now = datetime.now(UTC).isoformat()
     from imas_codex.standard_names.kind_derivation import derive_kind
@@ -4394,67 +4416,180 @@ def persist_generated_name_batch(
         entry["embedding"] = None
         entry["embed_text_hash"] = None
 
-    written = write_standard_names(candidates)
-
-    # --- Backfill primary_cluster_id from DD source path ---
-    # The compose worker doesn't carry cluster info, so we derive it from
-    # the graph: SN ← PRODUCED_NAME ← SNS → FROM_DD_PATH → IMAS → IN_CLUSTER → cluster.
-    # Uses the same IDS > domain > global scope priority as enrichment.
-    _backfill_cluster_from_sources(candidates)
-
-    # --- Atomically transition stage + clear source claim ---
-    # Build the batch excluding error-sibling candidates (no source node).
-    # StandardNameSource.id has a source-type prefix (e.g. "dd:path" or
-    # "signals:path"), so we must prepend the prefix derived from the
-    # candidate's source_types field.
-    finalize_batch = []
+    # Establish exact source identities before opening the transaction. Missing
+    # fences are rejected by _complete_source_fences; stale fences do not bind
+    # in the lock query below.
+    write_batch: list[dict[str, Any]] = []
+    candidate_by_sns: dict[str, dict[str, Any]] = {}
     for entry in candidates:
-        if not entry.get("id"):
-            continue
         if entry.get("model") == "deterministic:dd_error_modifier":
             continue
         raw_source_id = entry.get("source_id")
-        if raw_source_id:
-            _st = (entry.get("source_types") or ["dd"])[0]
-            _prefix = "dd" if _st == "dd" else "signals"
-            sns_id = f"{_prefix}:{raw_source_id}"
-        else:
-            sns_id = None
-        finalize_batch.append(
+        source_types = entry.get("source_types") or []
+        if not raw_source_id or not source_types:
+            continue
+        source_type = source_types[0]
+        sns_id = f"{'dd' if source_type == 'dd' else 'signals'}:{raw_source_id}"
+        write_batch.append(
             {
-                "sn_id": entry["id"],
                 "sns_id": sns_id,
+                "source_id": raw_source_id,
+                "source_type": source_type,
+                "sn_id": entry["id"],
+                "unit": entry.get("unit"),
                 "model": compose_model,
+                "claim_token": entry.get("source_claim_token"),
+                "claim_seq": entry.get("source_claim_seq"),
             }
         )
-    if finalize_batch:
-        _finalize_generated_name_stage(finalize_batch)
+        candidate_by_sns[sns_id] = entry
 
-    # --- Enforce one-source-one-name invariant (Class-A duplicate guard) ---
-    # On ``--force``/regen the source may already carry a prior accepted
-    # pipeline name. Retire it now so a later acceptance of this regenerated
-    # name cannot leave two live accepted names competing for one source.
-    # No-op in normal compose (the source had no prior pipeline name) and for
-    # byte-identical regen (same node id is reused — nothing to supersede).
-    supersede_pairs = [
-        {"new_name": entry["id"], "source_id": entry["source_id"]}
-        for entry in candidates
-        if entry.get("id")
-        and entry.get("source_id")
-        and entry.get("model") != "deterministic:dd_error_modifier"
-        and "dd" in (entry.get("source_types") or [])
-    ]
-    if supersede_pairs:
-        supersede_prior_source_names(supersede_pairs)
+    write_batch = _complete_source_fences(write_batch)
+    if not write_batch:
+        return []
 
-    # Async counter bump — live progress visibility for ``sn status``
-    if written > 0:
-        bump_sn_run_counter(run_id, "names_composed", delta=written)
+    finalized_ids: list[str] = []
+    with GraphClient() as graph:
+        with graph.session() as session:
+            tx = session.begin_transaction()
+            tx_gc = _TransactionQuery(tx)
+            try:
+                locked_rows = tx_gc.query(
+                    """
+                    UNWIND $batch AS b
+                    MATCH (sns:StandardNameSource {id: b.sns_id})
+                    WHERE sns.claim_token = b.claim_token
+                      AND sns.claim_seq = b.claim_seq
+                      AND sns.status = 'extracted'
+                    OPTIONAL MATCH (existing:StandardName {id: b.sn_id})
+                    WITH b, sns, existing
+                    WHERE existing IS NULL
+                       OR b.unit IS NULL
+                       OR existing.unit IS NULL
+                       OR existing.unit = b.unit
+                    SET sns.claimed_at = datetime()
+                    RETURN sns.id AS id
+                    """,
+                    batch=write_batch,
+                )
+                locked_ids = {row["id"] for row in locked_rows}
+                locked_candidates = [
+                    candidate_by_sns[sns_id]
+                    for sns_id in candidate_by_sns
+                    if sns_id in locked_ids
+                ]
+                if not locked_candidates:
+                    tx.commit()
+                    return []
 
-    return written
+                written_names = write_standard_names(
+                    locked_candidates,
+                    gc=tx_gc,
+                    return_written_ids=True,
+                )
+                if isinstance(written_names, int):
+                    if written_names != len(locked_candidates):
+                        raise RuntimeError(
+                            "rich standard-name write rejected an exact-claim winner"
+                        )
+                    written_names = [entry["id"] for entry in locked_candidates]
+                written_name_ids = set(written_names)
+                finalize_batch = [
+                    item
+                    for item in write_batch
+                    if item["sns_id"] in locked_ids
+                    and item["sn_id"] in written_name_ids
+                ]
+                if len(finalize_batch) != len(locked_candidates):
+                    raise RuntimeError(
+                        "rich standard-name write rejected an exact-claim winner"
+                    )
+
+                finalized_rows = tx_gc.query(
+                    """
+                    UNWIND $batch AS b
+                    MATCH (sns:StandardNameSource {id: b.sns_id})
+                    WHERE sns.claim_token = b.claim_token
+                      AND sns.claim_seq = b.claim_seq
+                      AND sns.status = 'extracted'
+                    MATCH (sn:StandardName {id: b.sn_id})
+                    SET sn.name_stage = CASE
+                            WHEN sn.name_stage IS NULL OR sn.name_stage = 'pending'
+                            THEN 'drafted' ELSE sn.name_stage END,
+                        sn.chain_length = coalesce(sn.chain_length, 0),
+                        sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
+                        sn.docs_chain_length = coalesce(sn.docs_chain_length, 0),
+                        sn.generated_at = coalesce(sn.generated_at, datetime()),
+                        sn.model = coalesce(sn.model, b.model),
+                        sn.run_id = coalesce(sns.run_id, sn.run_id),
+                        sns.claim_token = null,
+                        sns.claimed_at = null,
+                        sns.status = 'composed',
+                        sns.composed_at = datetime(),
+                        sns.produced_sn_id = sn.id
+                    MERGE (sns)-[:PRODUCED_NAME]->(sn)
+                    RETURN sns.id AS id
+                    """,
+                    batch=finalize_batch,
+                )
+                finalized_ids = [row["id"] for row in finalized_rows]
+                if set(finalized_ids) != {item["sns_id"] for item in finalize_batch}:
+                    raise RuntimeError(
+                        "source claim changed during transactional name persistence"
+                    )
+
+                finalized_candidates = [
+                    candidate_by_sns[sns_id] for sns_id in finalized_ids
+                ]
+                _backfill_cluster_from_sources(
+                    finalized_candidates, gc=tx_gc, strict=True
+                )
+                supersede_pairs = [
+                    {"new_name": entry["id"], "source_id": entry["source_id"]}
+                    for entry in finalized_candidates
+                    if entry.get("id")
+                    and entry.get("source_id")
+                    and "dd" in (entry.get("source_types") or [])
+                ]
+                if supersede_pairs:
+                    supersede_prior_source_names(supersede_pairs, gc=tx_gc)
+                tx.commit()
+            except BaseException:
+                if tx.closed is False:
+                    tx.close()
+                raise
+
+    if finalized_ids:
+        bump_sn_run_counter(run_id, "names_composed", delta=len(finalized_ids))
+    return finalized_ids
 
 
-def _backfill_cluster_from_sources(candidates: list[dict[str, Any]]) -> None:
+def persist_generated_name_batch(
+    candidates: list[dict[str, Any]],
+    *,
+    compose_model: str,
+    dd_version: str | None = None,
+    cocos_version: int | None = None,
+    run_id: str | None = None,
+    return_winner_ids: bool = False,
+) -> int | list[str]:
+    """Persist a generate-name batch and report its finalized sources."""
+    winner_ids = persist_generated_name_winners(
+        candidates,
+        compose_model=compose_model,
+        dd_version=dd_version,
+        cocos_version=cocos_version,
+        run_id=run_id,
+    )
+    return winner_ids if return_winner_ids else len(winner_ids)
+
+
+def _backfill_cluster_from_sources(
+    candidates: list[dict[str, Any]],
+    *,
+    gc: Any | None = None,
+    strict: bool = False,
+) -> None:
     """Backfill ``primary_cluster_id`` and ``IN_CLUSTER`` edge from DD sources.
 
     For each candidate, query the graph for the best cluster via the
@@ -4466,8 +4601,8 @@ def _backfill_cluster_from_sources(candidates: list[dict[str, Any]]) -> None:
         return
 
     try:
-        with GraphClient() as gc:
-            results = gc.query(
+        with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
+            results = write_gc.query(
                 """
                 UNWIND $sn_ids AS sid
                 MATCH (sn:StandardName {id: sid})
@@ -4496,47 +4631,59 @@ def _backfill_cluster_from_sources(candidates: list[dict[str, Any]]) -> None:
                     len(results),
                 )
     except Exception:
+        if strict:
+            raise
         logger.debug("_backfill_cluster_from_sources: failed", exc_info=True)
 
 
 @retry_on_deadlock()
 def _finalize_generated_name_stage(
     batch: list[dict[str, Any]],
-) -> None:
+) -> list[str]:
     """Set stage fields on new SNs and clear source claims — single transaction.
 
     Each item in *batch* must have ``sn_id`` (StandardName id), optionally
     ``sns_id`` (StandardNameSource id), and ``model``.
 
     In one transaction:
-    - ``name_stage = 'drafted'``, ``chain_length = 0``
-    - ``docs_stage = 'pending'``, ``docs_chain_length = 0``
-    - ``generated_at = datetime()``, ``model = <model>``
+    - initialise missing/pending name lifecycle to ``drafted`` without
+      demoting an existing reviewed, accepted, exhausted, or superseded name
+    - fill missing docs/generation defaults without overwriting later state
     - Source: ``claim_token = null``, ``claimed_at = null``,
       ``status = 'composed'``, ``composed_at = datetime()``,
       ``produced_sn_id = sn.id``
     - Edge: ``(sns)-[:PRODUCED_NAME]->(sn)``
     """
     if not batch:
-        return
+        return []
 
+    winner_ids: list[str] = []
     with GraphClient() as gc:
         with gc.session() as session:
             tx = session.begin_transaction()
             try:
-                tx.run(
-                    """
+                rows = list(
+                    tx.run(
+                        """
                     UNWIND $batch AS b
-                    MATCH (sn:StandardName {id: b.sn_id})
-                    SET sn.name_stage       = 'drafted',
-                        sn.chain_length     = 0,
-                        sn.docs_stage       = 'pending',
-                        sn.docs_chain_length = 0,
-                        sn.generated_at     = datetime(),
-                        sn.model            = b.model
-                    WITH sn, b
-                    WHERE b.sns_id IS NOT NULL
                     MATCH (sns:StandardNameSource {id: b.sns_id})
+                    WHERE b.claim_token IS NOT NULL
+                      AND b.claim_seq IS NOT NULL
+                      AND sns.claim_token = b.claim_token
+                      AND sns.claim_seq = b.claim_seq
+                      AND sns.status = 'extracted'
+                    MATCH (sn:StandardName {id: b.sn_id})
+                    SET sn.name_stage = CASE
+                            WHEN sn.name_stage IS NULL
+                                 OR sn.name_stage = 'pending'
+                            THEN 'drafted' ELSE sn.name_stage END,
+                        sn.chain_length = coalesce(sn.chain_length, 0),
+                        sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
+                        sn.docs_chain_length = coalesce(sn.docs_chain_length, 0),
+                        sn.generated_at = coalesce(sn.generated_at, datetime()),
+                        sn.model = coalesce(sn.model, b.model)
+                    WITH sn, b, sns
+                    WHERE sns IS NOT NULL
                     SET sns.claim_token  = null,
                         sns.claimed_at   = null,
                         sns.status       = 'composed',
@@ -4544,9 +4691,12 @@ def _finalize_generated_name_stage(
                         sns.produced_sn_id = sn.id,
                         sn.run_id        = coalesce(sns.run_id, sn.run_id)
                     MERGE (sns)-[:PRODUCED_NAME]->(sn)
+                    RETURN sns.id AS id
                     """,
-                    batch=batch,
+                        batch=batch,
+                    )
                 )
+                winner_ids = [row["id"] for row in rows]
                 tx.commit()
             except BaseException:
                 if tx.closed is False:
@@ -4555,8 +4705,9 @@ def _finalize_generated_name_stage(
 
     logger.debug(
         "_finalize_generated_name_stage: finalized %d SNs",
-        len(batch),
+        len(winner_ids),
     )
+    return winner_ids
 
 
 @retry_on_deadlock()
@@ -4565,6 +4716,7 @@ def write_vocab_gaps(
     source_type: str = "dd",
     *,
     skip_segment_filter: bool = False,
+    gc: Any | None = None,
 ) -> int:
     """Persist VocabGap nodes and HAS_STANDARD_NAME_VOCAB_GAP relationships.
 
@@ -4693,9 +4845,9 @@ def write_vocab_gaps(
             }
         )
 
-    with GraphClient() as gc:
+    with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
         # MERGE VocabGap nodes — increment count, update timestamps
-        gc.query(
+        write_gc.query(
             """
             UNWIND $batch AS b
             MERGE (vg:VocabGap {id: b.id})
@@ -4729,7 +4881,7 @@ def write_vocab_gaps(
 
         # Preserve every observation independently of the normalized node and
         # the convenience relationship properties below.
-        gc.query(
+        write_gc.query(
             """
             UNWIND $batch AS b
             MATCH (vg:VocabGap {id: b.gap_id})
@@ -4754,7 +4906,7 @@ def write_vocab_gaps(
         # Create HAS_STANDARD_NAME_VOCAB_GAP relationships from the underlying
         # DD path / facility signal entity (the DD-catalog view).
         entity_label = "IMASNode" if source_type == "dd" else "FacilitySignal"
-        gc.query(
+        write_gc.query(
             f"""
             UNWIND $batch AS b
             MATCH (vg:VocabGap {{id: b.gap_id}})
@@ -4769,7 +4921,7 @@ def write_vocab_gaps(
         # And a source-first link from the StandardNameSource itself — the
         # canonical, one-hop "why is this source blocked?" edge that reconcile
         # traverses. Its id is uniform across source types ({type}:{source_id}).
-        gc.query(
+        write_gc.query(
             """
             UNWIND $batch AS b
             MATCH (vg:VocabGap {id: b.gap_id})
@@ -6539,7 +6691,8 @@ def claim_standard_name_source_batch(
               )
             WITH sns ORDER BY rand() LIMIT $limit
             SET sns.claimed_at = datetime(),
-                sns.claim_token = $token
+                sns.claim_token = $token,
+                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1
             """,
             batch_key=batch_key,
             limit=limit,
@@ -6555,12 +6708,302 @@ def claim_standard_name_source_batch(
                        sns.source_id AS source_id,
                        sns.source_type AS source_type,
                        sns.batch_key AS batch_key,
-                       sns.description AS description
+                       sns.description AS description,
+                       sns.claim_token AS claim_token,
+                       sns.claim_seq AS claim_seq
                 """,
                 token=token,
             )
         )
     return token, claimed
+
+
+@retry_on_deadlock()
+def claim_explicit_standard_name_sources(
+    source_ids: list[str],
+    *,
+    timeout_minutes: int = 30,
+) -> list[dict[str, Any]]:
+    """Atomically claim the exact DD sources requested by a focused run.
+
+    Every returned row carries the committed token and incremented sequence;
+    missing, ineligible, or already-claimed sources are omitted.
+    """
+    if not source_ids:
+        return []
+    token = str(uuid.uuid4())
+    sns_ids = [f"dd:{source_id}" for source_id in dict.fromkeys(source_ids)]
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $ids AS sns_id
+            MATCH (sns:StandardNameSource {id: sns_id})
+            WHERE sns.status = 'extracted'
+              AND (
+                sns.claimed_at IS NULL
+                OR sns.claimed_at < datetime() - duration({minutes: $timeout})
+              )
+            SET sns.claimed_at = datetime(),
+                sns.claim_token = $token,
+                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
+                sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
+            RETURN sns.id AS id,
+                   sns.source_id AS source_id,
+                   sns.source_type AS source_type,
+                   sns.batch_key AS batch_key,
+                   sns.description AS description,
+                   sns.status AS status,
+                   sns.claim_token AS claim_token,
+                   sns.claim_seq AS claim_seq,
+                   sns.attempt_count AS attempt_count
+            """,
+            ids=sns_ids,
+            token=token,
+            timeout=timeout_minutes,
+        )
+    return [dict(row) for row in rows]
+
+
+def _complete_source_fences(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return only outcome items carrying a complete source ownership fence."""
+    return [
+        item
+        for item in items
+        if item.get("sns_id")
+        and item.get("claim_token")
+        and item.get("claim_seq") is not None
+    ]
+
+
+@retry_on_deadlock()
+def persist_claimed_source_outcomes(
+    outcomes: list[dict[str, Any]],
+) -> list[str]:
+    """Consume exact source claims and persist terminal/retry diagnostics.
+
+    The claim CAS and source mutation share one transaction. Items without a
+    complete fence are rejected before opening the graph.
+    """
+    batch = _complete_source_fences(outcomes)
+    if not batch:
+        return []
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $batch AS b
+            MATCH (sns:StandardNameSource {id: b.sns_id})
+            WHERE sns.claim_token = b.claim_token
+              AND sns.claim_seq = b.claim_seq
+              AND sns.status = 'extracted'
+            SET sns.status = b.status,
+                sns.claimed_at = null,
+                sns.claim_token = null,
+                sns.last_error = coalesce(b.last_error, sns.last_error),
+                sns.failed_at = CASE WHEN b.status = 'failed'
+                                     THEN datetime() ELSE sns.failed_at END,
+                sns.skip_reason = coalesce(b.skip_reason, sns.skip_reason),
+                sns.skip_reason_detail = coalesce(
+                    b.skip_reason_detail, sns.skip_reason_detail),
+                sns.skipped_at = CASE WHEN b.status = 'skipped'
+                                      THEN datetime() ELSE sns.skipped_at END
+            RETURN sns.id AS id
+            """,
+            batch=batch,
+        )
+    return [row["id"] for row in rows]
+
+
+@retry_on_deadlock()
+def persist_claimed_vocab_gaps(
+    gaps: list[dict[str, Any]],
+    outcomes: list[dict[str, Any]],
+    *,
+    source_type: str,
+) -> list[str]:
+    """Write gaps and consume their exact source claims in one transaction."""
+    batch = _complete_source_fences(outcomes)
+    if not batch:
+        return []
+    gaps_by_source: dict[str, list[dict[str, Any]]] = {}
+    for gap in gaps:
+        source_id = gap.get("source_id")
+        if source_id:
+            gaps_by_source.setdefault(source_id, []).append(gap)
+
+    winner_ids: list[str] = []
+    with GraphClient() as graph:
+        with graph.session() as session:
+            tx = session.begin_transaction()
+            tx_gc = _TransactionQuery(tx)
+            try:
+                locked_rows = tx_gc.query(
+                    """
+                    UNWIND $batch AS b
+                    MATCH (sns:StandardNameSource {id: b.sns_id})
+                    WHERE sns.claim_token = b.claim_token
+                      AND sns.claim_seq = b.claim_seq
+                      AND sns.status = 'extracted'
+                    SET sns.claimed_at = datetime()
+                    RETURN sns.id AS id, sns.source_id AS source_id
+                    """,
+                    batch=batch,
+                )
+                locked_ids = {row["id"] for row in locked_rows}
+                locked_source_ids = {row["source_id"] for row in locked_rows}
+                winner_outcomes = [
+                    item for item in batch if item["sns_id"] in locked_ids
+                ]
+                actionable_source_ids = {
+                    item["source_id"]
+                    for item in winner_outcomes
+                    if item.get("status") == "vocab_gap"
+                }
+                winner_gaps = [
+                    gap
+                    for source_id in actionable_source_ids
+                    for gap in gaps_by_source.get(source_id, [])
+                    if source_id in locked_source_ids
+                ]
+                if winner_gaps:
+                    written = write_vocab_gaps(
+                        winner_gaps,
+                        source_type,
+                        gc=tx_gc,
+                    )
+                    if written == 0:
+                        raise RuntimeError(
+                            "actionable vocabulary gaps produced no graph records"
+                        )
+
+                rows = tx_gc.query(
+                    """
+                    UNWIND $batch AS b
+                    MATCH (sns:StandardNameSource {id: b.sns_id})
+                    WHERE sns.claim_token = b.claim_token
+                      AND sns.claim_seq = b.claim_seq
+                      AND sns.status = 'extracted'
+                    SET sns.status = b.status,
+                        sns.claimed_at = null,
+                        sns.claim_token = null,
+                        sns.last_error = coalesce(b.last_error, sns.last_error),
+                        sns.failed_at = CASE WHEN b.status = 'failed'
+                                             THEN datetime() ELSE sns.failed_at END
+                    RETURN sns.id AS id
+                    """,
+                    batch=winner_outcomes,
+                )
+                winner_ids = [row["id"] for row in rows]
+                if set(winner_ids) != locked_ids:
+                    raise RuntimeError(
+                        "source claim changed during vocabulary-gap persistence"
+                    )
+                tx.commit()
+            except BaseException:
+                if tx.closed is False:
+                    tx.close()
+                raise
+    return winner_ids
+
+
+@retry_on_deadlock()
+def persist_claimed_attachments(
+    attachments: list[dict[str, Any]],
+) -> list[str]:
+    """Attach only exact source-claim winners in one transaction."""
+    batch = _complete_source_fences(attachments)
+    if not batch:
+        return []
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $batch AS b
+            MATCH (sns:StandardNameSource {id: b.sns_id})
+            WHERE sns.claim_token = b.claim_token
+              AND sns.claim_seq = b.claim_seq
+              AND sns.status = 'extracted'
+            MATCH (sn:StandardName {id: b.standard_name})
+            MATCH (src:IMASNode {id: b.source_id})
+            SET sns.status = 'attached',
+                sns.composed_at = datetime(),
+                sns.claimed_at = null,
+                sns.claim_token = null,
+                sns.produced_sn_id = sn.id
+            MERGE (sns)-[:PRODUCED_NAME]->(sn)
+            MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
+            WITH sns, sn, b, 'dd:' + b.source_id AS uri
+            SET sn.source_paths = CASE
+                WHEN uri IN coalesce(sn.source_paths, []) THEN sn.source_paths
+                ELSE coalesce(sn.source_paths, []) + uri END
+            RETURN sns.id AS id
+            """,
+            batch=batch,
+        )
+    return [row["id"] for row in rows]
+
+
+@retry_on_deadlock()
+def stage_claimed_generated_candidates(
+    candidates: list[dict[str, Any]],
+) -> list[str]:
+    """Reserve candidate source claims while staging names and source edges.
+
+    A missing/stale fence produces no name, edge, stage, source, or counter
+    mutation. The source stays claimed and ``extracted`` until the rich writer
+    succeeds and :func:`_finalize_generated_name_stage` consumes the same fence.
+    A rich-write crash therefore leaves a pending, automatically retryable
+    reservation rather than a composed source stranded on an incomplete name.
+    """
+    batch = _complete_source_fences(candidates)
+    if not batch:
+        return []
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $batch AS b
+            MATCH (sns:StandardNameSource {id: b.sns_id})
+            WHERE sns.claim_token = b.claim_token
+              AND sns.claim_seq = b.claim_seq
+              AND sns.status = 'extracted'
+            OPTIONAL MATCH (existing:StandardName {id: b.sn_id})
+            WITH b, sns, existing
+            WHERE existing IS NULL
+               OR b.unit IS NULL
+               OR existing.unit IS NULL
+               OR existing.unit = b.unit
+            MATCH (src:IMASNode {id: b.source_id})
+            CALL (sns, b) {
+                OPTIONAL MATCH
+                    (sns)-[:PRODUCED_NAME]->(stale:StandardName)
+                WHERE stale.id <> b.sn_id
+                  AND stale.name_stage = 'pending'
+                  AND NOT EXISTS {
+                      MATCH (other:StandardNameSource)-[:PRODUCED_NAME]->(stale)
+                      WHERE other <> sns
+                  }
+                  AND NOT EXISTS {
+                      MATCH (other_source:IMASNode)-[:HAS_STANDARD_NAME]->(stale)
+                      WHERE other_source.id <> b.source_id
+                  }
+                DETACH DELETE stale
+                RETURN count(stale) AS stale_reservations_removed
+            }
+            MERGE (sn:StandardName {id: b.sn_id})
+            ON CREATE SET sn.created_at = datetime(),
+                          sn.name_stage = 'pending'
+            SET sn.name_stage = coalesce(sn.name_stage, 'pending'),
+                sn.chain_length = coalesce(sn.chain_length, 0),
+                sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
+                sn.docs_chain_length = coalesce(sn.docs_chain_length, 0),
+                sn.generated_at = coalesce(sn.generated_at, datetime()),
+                sn.model = coalesce(sn.model, b.model),
+                sn.run_id = coalesce(sns.run_id, sn.run_id)
+            MERGE (sns)-[:PRODUCED_NAME]->(sn)
+            MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
+            RETURN sns.id AS id
+            """,
+            batch=batch,
+        )
+    return [row["id"] for row in rows]
 
 
 def fetch_claimed_source_metadata(token: str) -> list[dict]:
@@ -6600,12 +7043,14 @@ def fetch_claimed_source_metadata(token: str) -> list[dict]:
 
 def mark_sources_composed(
     token: str,
+    claim_seq: int,
     source_ids: list[str],
     standard_name_id: str,
 ) -> int:
     """Mark sources as composed and link to the produced StandardName.
 
-    Token-verified: only updates sources matching the claim_token.
+    Fence-verified: only updates extracted sources matching the claim token and
+    sequence.
     Creates PRODUCED_NAME relationship to the StandardName.
     Returns count of updated sources.
     """
@@ -6613,7 +7058,10 @@ def mark_sources_composed(
         result = gc.query(
             """
             UNWIND $source_ids AS sid
-            MATCH (sns:StandardNameSource {id: sid, claim_token: $token})
+            MATCH (sns:StandardNameSource {id: sid})
+            WHERE sns.claim_token = $token
+              AND sns.claim_seq = $claim_seq
+              AND sns.status = 'extracted'
             MATCH (sn:StandardName {id: $sn_id})
             SET sns.status = 'composed',
                 sns.composed_at = datetime(),
@@ -6625,6 +7073,7 @@ def mark_sources_composed(
             """,
             source_ids=source_ids,
             token=token,
+            claim_seq=claim_seq,
             sn_id=standard_name_id,
         )
         return result[0]["affected"] if result else 0
@@ -6632,20 +7081,24 @@ def mark_sources_composed(
 
 def mark_sources_attached(
     token: str,
+    claim_seq: int,
     source_ids: list[str],
     standard_name_id: str,
 ) -> int:
     """Mark sources as auto-attached to an existing StandardName.
 
     Used when a source matches an existing name without needing LLM composition.
-    Token-verified. Creates PRODUCED_NAME relationship.
+    Exact-fence verified. Creates PRODUCED_NAME relationship.
     Returns count of updated sources.
     """
     with GraphClient() as gc:
         result = gc.query(
             """
             UNWIND $source_ids AS sid
-            MATCH (sns:StandardNameSource {id: sid, claim_token: $token})
+            MATCH (sns:StandardNameSource {id: sid})
+            WHERE sns.claim_token = $token
+              AND sns.claim_seq = $claim_seq
+              AND sns.status = 'extracted'
             MATCH (sn:StandardName {id: $sn_id})
             SET sns.status = 'attached',
                 sns.composed_at = datetime(),
@@ -6657,6 +7110,7 @@ def mark_sources_attached(
             """,
             source_ids=source_ids,
             token=token,
+            claim_seq=claim_seq,
             sn_id=standard_name_id,
         )
         return result[0]["affected"] if result else 0
@@ -10031,6 +10485,7 @@ def claim_generate_name_batch(
                         WITH sns2 ORDER BY rand() LIMIT 1
                         SET sns2.claimed_at = datetime(),
                             sns2.claim_token = $token,
+                            sns2.claim_seq = coalesce(sns2.claim_seq, 0) + 1,
                             sns2.attempt_count = coalesce(sns2.attempt_count, 0) + 1
                         WITH sns2 AS sns
                         OPTIONAL MATCH (sns)-[:FROM_DD_PATH]
@@ -10093,6 +10548,7 @@ def claim_generate_name_batch(
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token,
+                                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
                                 sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
                             """,
                             token=token,
@@ -10123,6 +10579,7 @@ def claim_generate_name_batch(
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token,
+                                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
                                 sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
                             """,
                             token=token,
@@ -10148,6 +10605,7 @@ def claim_generate_name_batch(
                             WITH sns LIMIT $expand_limit
                             SET sns.claimed_at = datetime(),
                                 sns.claim_token = $token,
+                                sns.claim_seq = coalesce(sns.claim_seq, 0) + 1,
                                 sns.attempt_count = coalesce(sns.attempt_count, 0) + 1
                             """,
                             token=token,
@@ -10171,7 +10629,9 @@ def claim_generate_name_batch(
                                sns.batch_key AS batch_key,
                                sns.description AS description,
                                coalesce(sns.physics_domain, im.physics_domain, fs.physics_domain) AS physics_domain,
-                               sns.claim_token AS claim_token
+                               sns.claim_token AS claim_token,
+                               sns.claim_seq AS claim_seq,
+                               sns.attempt_count AS attempt_count
                         """,
                         token=token,
                     )
@@ -11790,6 +12250,8 @@ def persist_refined_name(
 @retry_on_deadlock()
 def supersede_prior_source_names(
     pairs: list[dict[str, str]],
+    *,
+    gc: Any | None = None,
 ) -> int:
     """Supersede stale pipeline names left on a source by ``--force``/regen.
 
@@ -11832,9 +12294,9 @@ def supersede_prior_source_names(
     if not pairs:
         return 0
 
-    with GraphClient() as gc:
+    with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
         rows = list(
-            gc.query(
+            write_gc.query(
                 """
                 UNWIND $pairs AS pr
                 MATCH (src:IMASNode {id: pr.source_id})-[:HAS_STANDARD_NAME]->(old:StandardName)
@@ -11921,7 +12383,7 @@ def supersede_prior_source_names(
             retarget_standard_name_sources,
         )
 
-        with GraphClient() as provenance_gc:
+        with nullcontext(gc) if gc is not None else GraphClient() as provenance_gc:
             for row in rows:
                 retarget_standard_name_sources(
                     provenance_gc,
@@ -13015,6 +13477,8 @@ def _verify_name_claim_winners(
 
 def _verify_source_claim_winners(
     items: list[dict[str, Any]],
+    *,
+    settle_seconds: float = _CLAIM_VERIFY_SETTLE_SECONDS,
 ) -> list[dict[str, Any]]:
     """Drop generate_name source-claim items that lost a concurrent-claim race.
 
@@ -13029,9 +13493,23 @@ def _verify_source_claim_winners(
     """
     if not items:
         return items
-    token = items[0].get("claim_token") or ""
-    if not token:
-        return items
+    tokens = {item.get("claim_token") for item in items}
+    if len(tokens) != 1 or not next(iter(tokens)):
+        logger.warning(
+            "_verify_source_claim_winners: rejected %d claim(s) without one token",
+            len(items),
+        )
+        return []
+    token = next(iter(tokens))
+    seqs = {it["id"]: it.get("claim_seq") for it in items}
+    if any(seq is None for seq in seqs.values()):
+        logger.warning(
+            "_verify_source_claim_winners: rejected %d claim(s) without claim_seq",
+            len(items),
+        )
+        return []
+    if settle_seconds > 0:
+        time.sleep(settle_seconds)
     ids = [it["id"] for it in items]
     with GraphClient() as gc:
         rows = gc.query(
@@ -13040,12 +13518,12 @@ def _verify_source_claim_winners(
             MATCH (sns:StandardNameSource {id: sid})
             WHERE sns.claim_token = $token
               AND sns.status = 'extracted'
-            RETURN sns.id AS id
+            RETURN sns.id AS id, sns.claim_seq AS claim_seq
             """,
             ids=ids,
             token=token,
         )
-    winners = {r["id"] for r in rows}
+    winners = {row["id"] for row in rows if row.get("claim_seq") == seqs[row["id"]]}
     if len(winners) == len(items):
         return items
     logger.debug(

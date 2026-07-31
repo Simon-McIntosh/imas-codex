@@ -54,7 +54,7 @@ class TestProcessAttachmentsCore:
         # Graph layer never invoked when nothing is accepted.
         assert not mock_gc.called
 
-    def test_accepted_writes_to_graph(self) -> None:
+    def test_accepted_writes_with_exact_source_fence(self) -> None:
         from imas_codex.standard_names.workers import _process_attachments_core
 
         wlog = logging.getLogger("test")
@@ -63,22 +63,49 @@ class TestProcessAttachmentsCore:
                 "imas_codex.standard_names.workers._is_attachment_consistent",
                 return_value=(True, ""),
             ),
-            patch("imas_codex.graph.client.GraphClient") as mock_gc,
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_claimed_attachments",
+                return_value=["dd:equilibrium/x"],
+            ) as persist,
         ):
             attach = SimpleNamespace(
                 source_id="equilibrium/x",
                 standard_name="some_name",
                 reason="duplicate",
             )
-            out = _process_attachments_core([attach], wlog)
+            out = _process_attachments_core(
+                [attach],
+                wlog,
+                source_claims=[
+                    {
+                        "path": "equilibrium/x",
+                        "claim_token": "winner",
+                        "claim_seq": 4,
+                    }
+                ],
+            )
 
         assert out == {"accepted": 1, "rejected": 0}
-        # Graph context manager entered once with a UNWIND query.
-        ctx = mock_gc.return_value.__enter__.return_value
-        ctx.query.assert_called_once()
-        cypher = ctx.query.call_args.args[0]
-        assert "HAS_STANDARD_NAME" in cypher
-        assert "source_paths" in cypher
+        item = persist.call_args.args[0][0]
+        assert item["sns_id"] == "dd:equilibrium/x"
+        assert item["claim_token"] == "winner"
+        assert item["claim_seq"] == 4
+
+    def test_accepted_without_source_fence_is_rejected(self) -> None:
+        from imas_codex.standard_names.workers import _process_attachments_core
+
+        attach = SimpleNamespace(
+            source_id="equilibrium/x",
+            standard_name="some_name",
+            reason="duplicate",
+        )
+        with patch(
+            "imas_codex.standard_names.workers._is_attachment_consistent",
+            return_value=(True, ""),
+        ):
+            out = _process_attachments_core([attach], logging.getLogger("test"))
+
+        assert out == {"accepted": 0, "rejected": 1}
 
 
 # ---------------------------------------------------------------------------
@@ -95,29 +122,22 @@ class TestUpdateSourcesAfterSkip:
             _update_sources_after_skip([], "dd", wlog)
         assert not mock_gc.called
 
-    def test_dd_source_prefixes_ids(self) -> None:
+    def test_dd_source_ids_without_fences_are_ignored(self) -> None:
         from imas_codex.standard_names.workers import _update_sources_after_skip
 
         wlog = logging.getLogger("test")
         with patch("imas_codex.graph.client.GraphClient") as mock_gc:
             _update_sources_after_skip(["a/b", "c/d"], "dd", wlog)
 
-        ctx = mock_gc.return_value.__enter__.return_value
-        ctx.query.assert_called_once()
-        kwargs = ctx.query.call_args.kwargs
-        assert kwargs["ids"] == ["dd:a/b", "dd:c/d"]
-        cypher = ctx.query.call_args.args[0]
-        assert "status        = 'skipped'" in cypher
-        assert "claim_token   = null" in cypher
+        assert not mock_gc.called
 
-    def test_signals_source_prefixes_ids(self) -> None:
+    def test_signal_source_ids_without_fences_are_ignored(self) -> None:
         from imas_codex.standard_names.workers import _update_sources_after_skip
 
         wlog = logging.getLogger("test")
         with patch("imas_codex.graph.client.GraphClient") as mock_gc:
             _update_sources_after_skip(["x"], "signals", wlog)
-        kwargs = mock_gc.return_value.__enter__.return_value.query.call_args.kwargs
-        assert kwargs["ids"] == ["signals:x"]
+        assert not mock_gc.called
 
     def test_graph_failure_swallowed(self) -> None:
         """A graph error must not propagate (best-effort cleanup)."""

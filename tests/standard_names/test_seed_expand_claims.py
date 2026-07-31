@@ -116,7 +116,13 @@ class TestSeedIsRandom:
                     ],
                 ]
             )
-            with _patch_gc(gc):
+            with (
+                _patch_gc(gc),
+                patch(
+                    "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                    side_effect=lambda items, **_kwargs: items,
+                ),
+            ):
                 result = claim_generate_name_batch(batch_size=1)
                 if result:
                     seen_ids.add(result[0]["id"])
@@ -372,6 +378,10 @@ class TestRefineNameEligibility:
         with (
             _patch_gc(gc),
             patch(
+                "imas_codex.standard_names.graph_ops._verify_name_claim_winners",
+                side_effect=lambda items, **_kwargs: items,
+            ),
+            patch(
                 "imas_codex.standard_names.chain_history.name_chain_history",
                 return_value=[],
             ),
@@ -534,6 +544,51 @@ class TestClaimTokenTwoStep:
             ],
             batch_size=5,
         )
+
+    def test_compose_seed_and_expand_increment_sequence(self):
+        """Both source-claim writes fence legacy rows with a monotonic sequence."""
+        from imas_codex.standard_names.graph_ops import claim_generate_name_batch
+
+        gc, tx = _mock_gc_tx()
+        tx.run = MagicMock(
+            side_effect=[
+                [
+                    {
+                        "_cluster_id": "c",
+                        "_unit": "V",
+                        "_physics_domain": "eq",
+                        "_batch_key": "eq",
+                    }
+                ],
+                None,
+                [
+                    {
+                        "id": "dd:x",
+                        "source_id": "x",
+                        "source_type": "dd",
+                        "claim_token": "token",
+                        "claim_seq": 1,
+                    }
+                ],
+            ]
+        )
+
+        with (
+            _patch_gc(gc),
+            patch(
+                "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                side_effect=lambda items: items,
+            ),
+        ):
+            items = claim_generate_name_batch(batch_size=2)
+
+        seed_query = tx.run.call_args_list[0].args[0]
+        expand_query = tx.run.call_args_list[1].args[0]
+        readback_query = tx.run.call_args_list[2].args[0]
+        for query in (seed_query, expand_query):
+            assert "claim_seq = coalesce" in query
+        assert "sns.claim_seq AS claim_seq" in readback_query
+        assert items[0]["claim_seq"] == 1
 
     def test_enrich_two_step(self):
         from imas_codex.standard_names.graph_ops import (
