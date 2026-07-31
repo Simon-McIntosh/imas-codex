@@ -15,6 +15,7 @@ observe the same state as edit.py's own direct queries.
 from __future__ import annotations
 
 from contextlib import contextmanager
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import patch
@@ -322,6 +323,28 @@ class FakeGraph:
             sn_id = params.get("id")
             return [{"n": 1 if sn_id in self.nodes else 0}]
 
+        if "CASCADE_OLD_ROOT_FALLBACK_GUARD" in cypher:
+            successor = params.get("successor")
+            old_root = params.get("old_root")
+            node = self.nodes.get(successor, {})
+            predecessor_id = (
+                old_root if self.refined_from.get(successor) == old_root else None
+            )
+            return [
+                {
+                    "successor_stage": node.get("name_stage"),
+                    "edit_mode": node.get("edit_mode"),
+                    "edit_status": node.get("edit_status"),
+                    "edit_scope": node.get("edit_scope"),
+                    "predecessor_id": predecessor_id,
+                    "predecessor_stage": (
+                        self.nodes.get(old_root, {}).get("name_stage")
+                        if predecessor_id
+                        else None
+                    ),
+                }
+            ]
+
         if "OPTIONAL MATCH path = (parent)<-[:HAS_PARENT" in cypher:
             old = params.get("old")
             desc = self._descendants(old) if old else set()
@@ -613,17 +636,34 @@ class FakeGraph:
 
 class _FakeTx:
     def __init__(self, graph: FakeGraph) -> None:
-        self.graph = graph
-        self.closed = False
+        self.owner = graph
+        self.graph = deepcopy(graph)
+        self._closed = False
 
     def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
-        return self.graph._tx_run(cypher, **params)
+        if "new_name" in params and "old_name" in params:
+            return self.graph._tx_run(cypher, **params)
+        if "cur_desc" in params:
+            return self.graph._tx_run(cypher, **params)
+        return self.graph.query(cypher, **params)
 
     def commit(self) -> None:
-        pass
+        self.owner.nodes = self.graph.nodes
+        self.owner.edges_by_child = self.graph.edges_by_child
+        self.owner.refined_from = self.graph.refined_from
+        self.owner.produced_name = self.graph.produced_name
+        self.owner.sources = self.graph.sources
+        self.owner.docs_revisions = self.graph.docs_revisions
+        self._closed = True
+
+    def closed(self) -> bool:
+        return self._closed
+
+    def rollback(self) -> None:
+        self._closed = True
 
     def close(self) -> None:
-        self.closed = True
+        self._closed = True
 
 
 class _FakeSession:
@@ -1325,6 +1365,24 @@ class TestRenameCascadeProtections:
         fake.add_edge("ion_temperature", "temperature", "ion", "qualifier")
         return fake
 
+    def _stale_fallback_graph(self) -> FakeGraph:
+        fake = FakeGraph()
+        fake.add_node(
+            "temperature_of_plasma_boundary",
+            name_stage="drafted",
+            edit_mode="rename",
+            edit_status="open",
+            edit_scope="subtree",
+            edit_include_accepted=True,
+            edit_override_edits=False,
+            claim_token="tok",
+        )
+        fake.add_node("temperature", name_stage="superseded")
+        fake.refined_from["temperature_of_plasma_boundary"] = "temperature"
+        fake.add_node("ion_temperature", name_stage="accepted")
+        fake.add_edge("ion_temperature", "temperature", "ion", "qualifier")
+        return fake
+
     def test_catalog_edit_descendant_blocks_by_default(self) -> None:
         fake = self._parent_with_child(name_stage="drafted", origin="catalog_edit")
         with _patched_graph(fake):
@@ -1491,3 +1549,52 @@ class TestRenameCascadeProtections:
         # … and the refusal reason is surfaced for operator follow-up.
         issues = fake.nodes["temperature_of_plasma_boundary"].get("validation_issues")
         assert issues and any("edit_cascade" in v for v in issues)
+
+    def test_old_root_fallback_collision_refuses_acceptance(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+        fake = self._stale_fallback_graph()
+        fake.add_node(
+            "ion_temperature_of_plasma_boundary",
+            name_stage="accepted",
+        )
+
+        with _patched_graph(fake):
+            stage = persist_reviewed_name(
+                sn_id="temperature_of_plasma_boundary",
+                claim_token="tok",
+                score=0.95,
+                model="reviewer/x",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+
+        assert stage == "reviewed"
+        successor = fake.nodes["temperature_of_plasma_boundary"]
+        assert successor["name_stage"] == "reviewed"
+        assert successor["edit_status"] == "open"
+        assert "ion_temperature" in fake.nodes
+        assert fake.edges_by_child["ion_temperature"][0]["parent_id"] == "temperature"
+
+    def test_old_root_fallback_grammar_failure_refuses_acceptance(self) -> None:
+        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+        fake = self._stale_fallback_graph()
+        fake.edges_by_child["ion_temperature"][0]["operator"] = "not_a_grammar_token"
+
+        with _patched_graph(fake):
+            stage = persist_reviewed_name(
+                sn_id="temperature_of_plasma_boundary",
+                claim_token="tok",
+                score=0.95,
+                model="reviewer/x",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+
+        assert stage == "reviewed"
+        successor = fake.nodes["temperature_of_plasma_boundary"]
+        assert successor["name_stage"] == "reviewed"
+        assert successor["edit_status"] == "open"
+        assert "ion_temperature" in fake.nodes
+        assert fake.edges_by_child["ion_temperature"][0]["parent_id"] == "temperature"

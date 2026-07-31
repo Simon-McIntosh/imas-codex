@@ -377,6 +377,67 @@ class _GraphProbe(Protocol):
     ) -> list[dict[str, Any]]: ...  # pragma: no cover
 
 
+class _TransactionQueryAdapter:
+    """Expose a Neo4j transaction through the graph probe query surface."""
+
+    def __init__(self, transaction: Any) -> None:
+        self._transaction = transaction
+
+    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        return [dict(record) for record in self._transaction.run(cypher, **params)]
+
+
+def _apply_descendant_cascade_atomically(
+    gc: Any,
+    renames: list[dict[str, str]],
+    *,
+    reconcile_structural_edges: bool,
+) -> None:
+    """Apply descendant identity, topology, mirrors, and ledger in one commit."""
+    session_factory = getattr(gc, "session", None)
+    if not callable(session_factory):
+        raise TypeError("cascade mutation requires a transactional graph client")
+
+    from imas_codex.standard_names.graph_ops import (
+        reconcile_structural_edges_for_standard_names,
+    )
+    from imas_codex.standard_names.provenance_lifecycle import (
+        record_standard_name_change,
+        refresh_renamed_source_mirrors,
+    )
+
+    with session_factory() as session:
+        tx = session.begin_transaction()
+        tx_gc = _TransactionQueryAdapter(tx)
+        try:
+            tx_gc.query(
+                """
+                UNWIND $renames AS r
+                MATCH (sn:StandardName {id: r.from})
+                SET sn.id = r.to
+                """,
+                renames=renames,
+            )
+            if reconcile_structural_edges:
+                reconcile_structural_edges_for_standard_names(
+                    tx_gc,
+                    [rename["to"] for rename in renames],
+                )
+            refresh_renamed_source_mirrors(tx_gc, renames)
+            for rename in renames:
+                record_standard_name_change(
+                    tx_gc,
+                    rename["from"],
+                    rename["to"],
+                    operation="cascade",
+                )
+            tx.commit()
+        except BaseException:
+            if not tx.closed():
+                tx.rollback()
+            raise
+
+
 # ---------------------------------------------------------------------------
 # Shared descendant walk + per-edge resolution (used by both entry points)
 # ---------------------------------------------------------------------------
@@ -875,10 +936,13 @@ def cascade_descendants_of(
     per-edge cascade rules as :func:`rename_cascade`, without repeating the
     root rename (already committed).
 
-    ``old_root`` is used only for audit-log labelling (``root=old→new``) —
-    the descendant walk and rule dispatch are keyed entirely off the live
-    topology rooted at *successor_id*, which no longer references
-    *old_root* at all.
+    The live topology rooted at *successor_id* is authoritative.  A guarded
+    fallback handles the narrow recovery case where structural re-derivation
+    has rebuilt the still-old descendant ids beneath the superseded
+    *old_root*: only an accepted, applied subtree/family rename successor with
+    a direct ``REFINED_FROM`` edge to that superseded predecessor may plan from
+    the old subtree.  The old root participates only as the substitution
+    anchor; it is never included in the applied rename set.
 
     Descendants never individually re-enter LLM review — the root rename
     was the reviewed decision; this applies its consequences atomically.
@@ -914,6 +978,90 @@ def cascade_descendants_of(
         override_edits=override_edits,
         include_accepted=include_accepted,
     )
+
+    used_old_root_fallback = False
+    if total_descendants == 0 and old_root != successor_id:
+        fallback_rows = list(
+            gc.query(
+                """
+                // CASCADE_OLD_ROOT_FALLBACK_GUARD
+                MATCH (successor:StandardName {id: $successor})
+                OPTIONAL MATCH
+                  (successor)-[:REFINED_FROM]->
+                  (predecessor:StandardName {id: $old_root})
+                RETURN successor.name_stage AS successor_stage,
+                       successor.edit_mode AS edit_mode,
+                       successor.edit_status AS edit_status,
+                       successor.edit_scope AS edit_scope,
+                       predecessor.id AS predecessor_id,
+                       predecessor.name_stage AS predecessor_stage
+                """,
+                successor=successor_id,
+                old_root=old_root,
+            )
+        )
+        fallback = fallback_rows[0] if fallback_rows else {}
+        staged_preflight = (
+            dry_run
+            and fallback.get("successor_stage") == "drafted"
+            and fallback.get("edit_mode") == "rename"
+            and fallback.get("edit_status") == "open"
+            and fallback.get("edit_scope") in ("family", "subtree")
+            and fallback.get("predecessor_id") == old_root
+            and fallback.get("predecessor_stage") == "superseded"
+        )
+        durable_recovery = (
+            fallback.get("successor_stage") == "accepted"
+            and fallback.get("edit_mode") == "rename"
+            and fallback.get("edit_status") == "applied"
+            and fallback.get("edit_scope") in ("family", "subtree")
+            and fallback.get("predecessor_id") == old_root
+            and fallback.get("predecessor_stage") == "superseded"
+        )
+        fallback_guard_issues: list[str] = []
+        if fallback.get("successor_stage") != "accepted":
+            fallback_guard_issues.append(f"successor {successor_id!r} is not accepted")
+        if fallback.get("edit_mode") != "rename":
+            fallback_guard_issues.append(
+                f"successor {successor_id!r} is not a rename edit"
+            )
+        if fallback.get("edit_status") != "applied":
+            fallback_guard_issues.append(
+                f"successor {successor_id!r} edit is not applied"
+            )
+        if fallback.get("edit_scope") not in ("family", "subtree"):
+            fallback_guard_issues.append(
+                f"successor {successor_id!r} has no cascade-bearing edit scope"
+            )
+        if fallback.get("predecessor_id") != old_root:
+            fallback_guard_issues.append(
+                f"successor {successor_id!r} does not directly refine {old_root!r}"
+            )
+        if fallback.get("predecessor_stage") != "superseded":
+            fallback_guard_issues.append(f"predecessor {old_root!r} is not superseded")
+
+        # The read-only staged preflight validates the exact fallback plan
+        # before acceptance, including grammar and collision checks. Mutation
+        # remains restricted to the durable accepted/applied state.
+        if staged_preflight or durable_recovery:
+            fallback_plan, skipped, fallback_conflicts, total_descendants = (
+                _walk_and_resolve_cascade(
+                    gc,
+                    old_root,
+                    new_root,
+                    override_edits=override_edits,
+                    include_accepted=include_accepted,
+                )
+            )
+            # The successor already embodies the root rename (or will embody it
+            # if the staged preflight succeeds). Only descendants belong in the
+            # planned/applicable set.
+            fallback_plan.pop(old_root, None)
+            rename_plan = fallback_plan
+            conflicts.extend(fallback_conflicts)
+            used_old_root_fallback = durable_recovery
+        else:
+            conflicts.extend(fallback_guard_issues)
 
     # Collision check — the same in-tree collision query :func:`rename_cascade`
     # runs against its own rename plan, excluding the trivial root
@@ -958,15 +1106,14 @@ def cascade_descendants_of(
             dry_run=dry_run,
         )
 
-    _write_audit_lines(
-        old_root,
-        new_root,
-        renamed_list,
-        dry_run=dry_run,
-        log_path=audit_log_path,
-    )
-
     if dry_run or not renamed_list:
+        _write_audit_lines(
+            old_root,
+            new_root,
+            renamed_list,
+            dry_run=True,
+            log_path=audit_log_path,
+        )
         return CascadeResult(
             old_name=old_root,
             new_name=new_root,
@@ -977,33 +1124,21 @@ def cascade_descendants_of(
             dry_run=True,
         )
 
-    gc.query(
-        """
-        UNWIND $renames AS r
-        MATCH (sn:StandardName {id: r.from})
-        SET sn.id = r.to
-        """,
-        renames=renamed_list,
+    # Identity, repaired structural topology, source mirrors, and one change
+    # event per descendant commit together. A failure at any layer rolls the
+    # whole mutation back instead of leaving a partially renamed subtree.
+    _apply_descendant_cascade_atomically(
+        gc,
+        renamed_list,
+        reconcile_structural_edges=used_old_root_fallback,
     )
-
-    # Record provenance for every descendant rename and repair the source
-    # mirrors that key off the old id. This mirrors rename_cascade's apply
-    # step — without it, accept-time descendant cascades left no
-    # StandardNameChange trail and stale source_paths / produced_sn_id
-    # projections (the change-history gap that stranded renamed descendants).
-    from imas_codex.standard_names.provenance_lifecycle import (
-        record_standard_name_change,
-        refresh_renamed_source_mirrors,
+    _write_audit_lines(
+        old_root,
+        new_root,
+        renamed_list,
+        dry_run=False,
+        log_path=audit_log_path,
     )
-
-    refresh_renamed_source_mirrors(gc, renamed_list)
-    for rename in renamed_list:
-        record_standard_name_change(
-            gc,
-            rename["from"],
-            rename["to"],
-            operation="cascade",
-        )
 
     logger.info(
         "cascade_descendants_of applied: root=%s (was %s) descendants_renamed=%d "
