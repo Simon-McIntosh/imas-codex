@@ -316,6 +316,61 @@ def _parse_grammar(name: str) -> dict[str, Any]:
     }
 
 
+def _semantic_ir_expression(ir: Any) -> str:
+    """Render a recursive public grammar IR as a compact semantic expression.
+
+    The public composer remains the authority for leaf spelling.  Operator
+    applications are rendered as ``operator(argument, ...)`` so operand scope
+    stays visible to reviewers instead of being flattened into compatibility
+    columns.
+    """
+    from imas_standard_names import compose
+
+    operators = list(getattr(ir, "operators", ()) or ())
+    if not operators:
+        return compose(ir)
+
+    outer = operators[0]
+    arguments = list(getattr(outer, "args", ()) or ())
+    if arguments:
+        rendered_arguments = ", ".join(
+            _semantic_ir_expression(argument) for argument in arguments
+        )
+        return f"{outer.op}({rendered_arguments})"
+
+    operand = ir.model_copy(update={"operators": operators[1:]})
+    return f"{outer.op}({_semantic_ir_expression(operand)})"
+
+
+def strict_review_grammar_context(name: str) -> dict[str, Any]:
+    """Return lossless public-ISN grammar evidence for name review.
+
+    Strict parsing and canonical equality are delegated to the shared lossless
+    adapter.  The compatibility projection is derived from that same recursive
+    IR, while ``semantic_ir`` keeps nested operator scope explicit.
+    """
+    import imas_standard_names
+
+    from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+
+    parsed = parse_canonical_name(name)
+    fields = _segments_from_ir(parsed.ir)
+    return {
+        "grammar_parse_version": imas_standard_names.__version__,
+        "grammar_round_trip": parsed.name,
+        "grammar_projection": [
+            {"field": field, "value": value}
+            for field, value in fields.items()
+            if value is not None
+        ],
+        "semantic_ir": _semantic_ir_expression(parsed.ir),
+        "semantic_ir_json": json.dumps(
+            parsed.ir.model_dump(mode="json"), sort_keys=True
+        ),
+        **fields,
+    }
+
+
 def _compute_link_status(links: list[str] | None) -> str | None:
     """Determine link resolution status from link prefixes.
 
@@ -11640,7 +11695,9 @@ def claim_review_name_batch(
     Returns claimed items as dicts with keys:
     ``id``, ``name``, ``description``, ``documentation``, ``kind``,
     ``unit``, ``tags``, ``physics_domain``, ``chain_length``,
-    ``claim_token``.
+    ``claim_token``, ``source_paths``, and ``source_bindings``.  Each source
+    binding carries the immutable DD snapshot captured on the exact
+    ``StandardNameSource`` that produced the name.
     """
     from imas_codex.standard_names.defaults import (
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -11691,6 +11748,28 @@ def claim_review_name_batch(
             ", sn.physical_base AS physical_base"
             ", sn.geometry AS geometry"
             ", sn.grammar_parse_version AS grammar_parse_version"
+            ", sn.source_paths AS source_paths"
+            ", [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {"
+            "     id: source.id,"
+            "     source_type: source.source_type,"
+            "     source_id: source.source_id,"
+            "     status: source.status,"
+            "     description: source.description,"
+            "     physics_domain: source.physics_domain,"
+            "     compose_hint: source.compose_hint,"
+            "     compose_hint_reason: source.compose_hint_reason,"
+            "     dd_path: source.dd_path,"
+            "     dd_version: source.dd_version,"
+            "     dd_documentation: source.dd_documentation,"
+            "     dd_snapshot_pinned: source.dd_snapshot_pinned,"
+            "     dd_parent_path: source.dd_parent_path,"
+            "     dd_parent_documentation: source.dd_parent_documentation,"
+            "     dd_data_type: source.dd_data_type,"
+            "     dd_unit: source.dd_unit,"
+            "     dd_coordinates: source.dd_coordinates,"
+            "     dd_lifecycle_status: source.dd_lifecycle_status,"
+            "     enhanced_description: source.enhanced_description"
+            " }] AS source_bindings"
         ),
         domain=domain,
         scope_run_id=scope_run_id,
