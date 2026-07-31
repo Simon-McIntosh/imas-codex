@@ -147,6 +147,29 @@ class TestClaimOnlyDrafted:
         where = captured[0]
         assert "sn.description IS NOT NULL" in where
 
+    def test_claim_requires_current_valid_status(self):
+        """Pending or quarantined candidates never enter paid name review."""
+        captured: list[str] = []
+
+        def _fake_claim_sn_atomic(
+            *,
+            eligibility_where: str,
+            **_kwargs: Any,
+        ) -> list[dict]:
+            captured.append(eligibility_where)
+            return []
+
+        with patch(
+            "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+            side_effect=_fake_claim_sn_atomic,
+        ):
+            from imas_codex.standard_names.graph_ops import claim_review_name_batch
+
+            claim_review_name_batch(batch_size=5)
+
+        assert len(captured) == 1
+        assert "sn.validation_status = 'valid'" in captured[0]
+
     def test_claim_does_not_transition_stage(self):
         """Stage is NOT transitioned at claim time (stage_field is None/not set)."""
         kwargs_captured: list[dict] = []
@@ -472,6 +495,7 @@ class TestVerifyNameClaimWinners:
         cypher = gc.query.call_args_list[0][0][0]
         assert "sn.claim_token = $token" in cypher
         assert "sn.name_stage = $eligible_stage" in cypher
+        assert "sn.validation_status = 'valid'" in cypher
         kwargs = gc.query.call_args_list[0][1]
         assert kwargs["token"] == "tok-1"
         assert kwargs["eligible_stage"] == "drafted"

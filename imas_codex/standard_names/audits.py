@@ -124,6 +124,133 @@ _NAME_TOKEN_UNIT_EXPECTATIONS: dict[str, set[str]] = {
     "frequency": {"Hz", "kHz", "MHz", "GHz", "rad.s^-1", "s^-1"},
 }
 
+
+def _operator_kind(operator: Any) -> str:
+    """Return the public IR operator-kind value without importing internals."""
+    kind = getattr(operator, "kind", "")
+    return str(getattr(kind, "value", kind))
+
+
+@lru_cache(maxsize=1024)
+def _parse_audit_ir(name: str) -> Any:
+    """Parse one canonical name once for all structure-aware audits."""
+    from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+
+    return parse_canonical_name(name).ir
+
+
+def _unit_dimensions(units: set[str]) -> set[str] | None:
+    """Return Pint dimensionalities for canonical unit spellings."""
+    from imas_codex.units import unit_registry
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+    dimensions: set[str] = set()
+    for unit in units:
+        canonical = canonical_or_none(unit)
+        if canonical is None:
+            return None
+        try:
+            dimensions.add(str(unit_registry(canonical).dimensionality))
+        except Exception:
+            return None
+    return dimensions
+
+
+def _per_time_dimensions(dimensions: set[str]) -> set[str] | None:
+    """Divide dimensionalities by time through the shared Pint registry."""
+    from imas_codex.units import unit_registry
+
+    transformed: set[str] = set()
+    for dimension in dimensions:
+        try:
+            # Pint accepts a dimensionality expression as a UnitsContainer,
+            # so this remains dimensional algebra rather than a unit alias.
+            parsed = unit_registry.get_dimensionality(dimension)
+            transformed.add(str(parsed / unit_registry.second.dimensionality))
+        except Exception:
+            return None
+    return transformed
+
+
+def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
+    """Infer an IR expression's dimensions and whether an operator transformed it.
+
+    Only semantics that the audit can prove are handled. Unknown operators make
+    the caller retain the established lexical audit, so a grammar extension
+    cannot silently weaken admission.
+    """
+    base = str(getattr(getattr(ir, "base", None), "token", "") or "").lower()
+    expected_units: set[str] = set()
+    for token, units in _NAME_TOKEN_UNIT_EXPECTATIONS.items():
+        # The terminal head is the base's dimensional meaning. A mapped word
+        # elsewhere in a compound is only a modifier: energy_confinement_time,
+        # energy_flux, energy_source, and energy_diffusivity do not carry the
+        # dimensionality of energy. heating_power does carry power because
+        # power is its terminal semantic head.
+        if base == token or base.endswith(f"_{token}"):
+            expected_units.update(units)
+    dimensions = _unit_dimensions(expected_units) if expected_units else None
+    transformed = False
+
+    # The public IR documents operators outermost-first, so dimensional
+    # evaluation proceeds from the innermost application outwards.
+    for operator in reversed(list(getattr(ir, "operators", ()) or ())):
+        kind = _operator_kind(operator)
+        op = str(getattr(operator, "op", ""))
+        if kind == "binary":
+            if op != "difference":
+                return None, False
+            args = list(getattr(operator, "args", ()) or ())
+            if len(args) != 2:
+                return None, False
+            left, _left_transformed = _ir_unit_dimensions(args[0])
+            right, _right_transformed = _ir_unit_dimensions(args[1])
+            if left is None or right is None:
+                return None, False
+            dimensions = left & right
+            transformed = True
+        elif kind == "unary_prefix" and op == "time_derivative":
+            if dimensions is None:
+                return None, False
+            dimensions = _per_time_dimensions(dimensions)
+            if dimensions is None:
+                return None, False
+            transformed = True
+        else:
+            return None, False
+    return dimensions, transformed
+
+
+def _structured_unit_consistency_issues(name: str, unit: str) -> list[str] | None:
+    """Audit dimensions implied by a losslessly parsed operator expression.
+
+    ``None`` means the expression is simple, failed to parse, or contains an
+    operator whose unit semantics are not encoded here; callers then preserve
+    the established lexical behavior.
+    """
+    try:
+        dimensions, transformed = _ir_unit_dimensions(_parse_audit_ir(name))
+    except (TypeError, ValueError):
+        return None
+    if not transformed or dimensions is None:
+        return None
+    if not dimensions:
+        return [
+            "audit:name_unit_consistency_check: binary operator operands "
+            f"in name '{name}' imply incompatible dimensionalities"
+        ]
+    candidate_dimensions = _unit_dimensions({unit})
+    if candidate_dimensions is None:
+        return None
+    if candidate_dimensions & dimensions:
+        return []
+    return [
+        "audit:name_unit_consistency_check: operator expression "
+        f"in name '{name}' implies dimensionality {sorted(dimensions)} "
+        f"but unit='{unit}' has dimensionality {sorted(candidate_dimensions)}"
+    ]
+
+
 # Single-token names that are too generic to be self-describing standard names.
 # A standard name must convey its meaning without requiring source-path context.
 _GENERIC_NOUN_NAMES = frozenset(
@@ -869,6 +996,10 @@ def name_unit_consistency_check(
             or "_normalised_" in name
         ):
             return issues
+
+    structured_issues = _structured_unit_consistency_issues(name, unit)
+    if structured_issues is not None:
+        return structured_issues
 
     name_tokens = set(re.findall(r"[a-z]+", name))
 
@@ -2340,23 +2471,56 @@ def repeated_token_check(candidate: dict[str, Any]) -> list[str]:
     if not name:
         return []
 
-    # Collapse known compound-subject pairs into single placeholder tokens
-    working = name
-    for pair in _COMPOUND_SUBJECT_PAIRS:
-        working = working.replace(pair, f"_compound_{pair.replace('_', '')}_")
+    def _repeated_token(working_name: str) -> str | None:
+        """Return the first duplicate in one lexical expression scope."""
+        working = working_name
+        for pair in _COMPOUND_SUBJECT_PAIRS:
+            working = working.replace(pair, f"_compound_{pair.replace('_', '')}_")
 
-    tokens = [t for t in working.split("_") if t and t not in _GRAMMAR_CONNECTIVES]
-    # Also skip the placeholder tokens we inserted
-    tokens = [t for t in tokens if not t.startswith("compound")]
+        tokens = [
+            token
+            for token in working.split("_")
+            if token
+            and token not in _GRAMMAR_CONNECTIVES
+            and not token.startswith("compound")
+        ]
+        seen: set[str] = set()
+        for token in tokens:
+            if token in seen:
+                return token
+            seen.add(token)
+        return None
 
-    seen: set[str] = set()
-    for tok in tokens:
-        if tok in seen:
-            return [
-                f"audit:repeated_token_check: name '{name}' contains "
-                f"duplicated content token '{tok}' — likely tautology"
-            ]
-        seen.add(tok)
+    def _operand_duplicates(ir: Any) -> str | None:
+        """Inspect binary operands independently, recursing into nested trees."""
+        from imas_codex.standard_names.grammar_adapter import compose_canonical_ir
+
+        for operator in getattr(ir, "operators", ()) or ():
+            if _operator_kind(operator) != "binary":
+                continue
+            args = list(getattr(operator, "args", ()) or ())
+            if len(args) != 2:
+                break
+            for argument in args:
+                duplicate = _operand_duplicates(argument)
+                if duplicate is not None:
+                    return duplicate
+            return None
+        return _repeated_token(compose_canonical_ir(ir))
+
+    duplicate: str | None = None
+    try:
+        duplicate = _operand_duplicates(_parse_audit_ir(name))
+    except (TypeError, ValueError):
+        # Invalid/non-canonical names still receive the historical whole-name
+        # lexical audit; parse failure must never become an admission bypass.
+        duplicate = _repeated_token(name)
+
+    if duplicate is not None:
+        return [
+            f"audit:repeated_token_check: name '{name}' contains "
+            f"duplicated content token '{duplicate}' — likely tautology"
+        ]
     return []
 
 

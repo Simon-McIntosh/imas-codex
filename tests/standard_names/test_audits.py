@@ -1196,6 +1196,119 @@ class TestPeakingFactorExemption:
         )
         assert issues
 
+
+class TestOperatorUnitConsistency:
+    """Operator trees determine the unit of compound physical expressions."""
+
+    _POWER_BALANCE = (
+        "difference_of_total_plasma_heating_power_and_"
+        "time_derivative_of_plasma_stored_energy"
+    )
+
+    def test_power_balance_accepts_power_unit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        assert (
+            name_unit_consistency_check({"id": self._POWER_BALANCE, "unit": "W"}) == []
+        )
+
+    @pytest.mark.parametrize("unit", ["J", "A"])
+    def test_power_balance_rejects_non_power_unit(self, unit: str):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check({"id": self._POWER_BALANCE, "unit": unit})
+        assert issues and "operator expression" in issues[0]
+
+    def test_simple_name_keeps_exact_unit_semantics(self):
+        """Pint's dimensionless angle must not make bare ``1`` an angle unit."""
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check({"id": "toroidal_angle", "unit": "1"})
+        assert issues and "dimensionless" in issues[0]
+
+    def test_parse_failure_keeps_flat_audit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check(
+            {"id": "unregistered_energy_expression", "unit": "A"}
+        )
+        assert issues and "contains 'energy'" in issues[0]
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "time_derivative_of_energy_confinement_time",
+            "time_derivative_of_plasma_energy_density",
+            "time_derivative_of_energy_flux",
+            "time_derivative_of_energy_source",
+            "time_derivative_of_energy_diffusivity",
+        ],
+    )
+    def test_decorated_bases_retain_compound_fallbacks(self, name: str):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        assert name_unit_consistency_check({"id": name, "unit": "1"}) == []
+
+    def test_non_difference_operator_retains_flat_audit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check(
+            {"id": "ratio_of_plasma_energy_to_ion_energy", "unit": "A"}
+        )
+        assert issues and "operator expression" not in issues[0]
+
+    def test_nested_unknown_operator_does_not_partially_transform(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        assert (
+            name_unit_consistency_check(
+                {
+                    "id": "time_derivative_of_ratio_of_plasma_energy_to_ion_energy",
+                    "unit": "A",
+                }
+            )
+            == []
+        )
+
+    def test_full_admission_clears_contextual_false_positives(self):
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.workers import validate_name_candidate
+
+        entry = {
+            "id": self._POWER_BALANCE,
+            "unit": "W",
+            "description": "Power remaining after the stored-energy rate is removed.",
+            "documentation": "",
+        }
+        with patch(
+            "imas_codex.standard_names.workers._validate_via_isn",
+            return_value=([], {}),
+        ):
+            issues, _layers, status = validate_name_candidate(entry)
+        assert status == "valid"
+        assert not any("name_unit_consistency_check" in issue for issue in issues)
+        assert not any("repeated_token_check" in issue for issue in issues)
+
+    def test_full_admission_still_quarantines_wrong_unit(self):
+        from unittest.mock import patch
+
+        from imas_codex.standard_names.workers import validate_name_candidate
+
+        entry = {
+            "id": self._POWER_BALANCE,
+            "unit": "A",
+            "description": "Power remaining after the stored-energy rate is removed.",
+            "documentation": "",
+        }
+        with patch(
+            "imas_codex.standard_names.workers._validate_via_isn",
+            return_value=([], {}),
+        ):
+            issues, _layers, status = validate_name_candidate(entry)
+        assert status == "quarantined"
+        assert any("name_unit_consistency_check" in issue for issue in issues)
+
     def test_pass_energy_flux_with_power_per_area(self):
         """``_energy_flux`` carries dimensions of power-per-area (W.m^-2),
         not pure energy. The audit must accept this without flagging."""
@@ -1868,6 +1981,54 @@ class TestRepeatedTokenCheck:
         assert (
             repeated_token_check({"id": "gradient_of_pressure_at_edge_of_plasma"}) == []
         )
+
+    def test_binary_operands_have_independent_duplicate_scopes(self):
+        from imas_codex.standard_names.audits import repeated_token_check
+
+        assert (
+            repeated_token_check(
+                {
+                    "id": (
+                        "difference_of_total_plasma_heating_power_and_"
+                        "time_derivative_of_plasma_stored_energy"
+                    )
+                }
+            )
+            == []
+        )
+
+    def test_duplicate_within_one_binary_operand_still_fails(self):
+        from imas_codex.standard_names.audits import repeated_token_check
+
+        issues = repeated_token_check(
+            {
+                "id": (
+                    "difference_of_magnetic_field_at_magnetic_axis_and_"
+                    "magnetic_field_at_plasma_boundary"
+                )
+            }
+        )
+        assert issues and "'magnetic'" in issues[0]
+
+    def test_outer_unary_preserves_nested_binary_scopes(self):
+        from imas_codex.standard_names.audits import repeated_token_check
+
+        assert (
+            repeated_token_check(
+                {
+                    "id": (
+                        "time_derivative_of_difference_of_plasma_energy_and_ion_energy"
+                    )
+                }
+            )
+            == []
+        )
+
+    def test_parse_failure_preserves_whole_name_fallback(self):
+        from imas_codex.standard_names.audits import repeated_token_check
+
+        issues = repeated_token_check({"id": "not_registered_energy_energy"})
+        assert issues and "'energy'" in issues[0]
 
 
 # =========================================================================

@@ -1511,6 +1511,36 @@ def rescore_name(
         "reviewed": reviewed,
         "outcome": None,
     }
+    if dry_run:
+        return result
+
+    validation = _run_rescore_validation(sn_id)
+    result["validation"] = validation
+    requarantined = set(validation.get("requarantined_ids") or ())
+    if sn_id in requarantined or int(validation.get("quarantined", 0) or 0) > 0:
+        from imas_codex.standard_names.graph_ops import (
+            restore_name_after_failed_rescore,
+        )
+
+        restored = restore_name_after_failed_rescore(
+            sn_id,
+            run_id=run_id,
+            prior_stage=str(staged.get("prior_stage")),
+        )
+        result.update(
+            {
+                "ok": False,
+                "reviewed": False,
+                "restored": restored,
+                "reason": (
+                    f"{sn_id!r} failed deterministic revalidation and was "
+                    "re-quarantined before review; its prior terminal state "
+                    f"was {'restored' if restored else 'not restored'}"
+                ),
+            }
+        )
+        return result
+
     if not reviewed:
         return result
 
@@ -1542,3 +1572,11 @@ def rescore_name(
         results=results,
     )
     return result
+
+
+def _run_rescore_validation(sn_id: str) -> dict[str, Any]:
+    """Run the LLM-free admission gate for one freshly staged rescore."""
+    from imas_codex.cli.utils import run_async
+    from imas_codex.standard_names.workers import drain_validation_for_ids
+
+    return run_async(drain_validation_for_ids([sn_id]))
