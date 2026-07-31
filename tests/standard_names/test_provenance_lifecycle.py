@@ -17,7 +17,7 @@ from imas_codex.standard_names.provenance_lifecycle import (
 )
 
 
-def test_retarget_query_enforces_all_source_mirrors() -> None:
+def test_retarget_selector_includes_edge_migrated_sources_only() -> None:
     gc = MagicMock()
     gc.query.side_effect = [[{"moved": 2}], []]
 
@@ -25,12 +25,94 @@ def test_retarget_query_enforces_all_source_mirrors() -> None:
 
     assert moved == 2
     cypher = gc.query.call_args_list[0].args[0]
+    selector = cypher.split("WHERE", 1)[1].split("WITH new, old", 1)[0]
+    assert "(sns)-[:PRODUCED_NAME]->(old)" in selector
+    assert "sns.produced_sn_id = $old_name" in selector
+    assert "(sns)-[:PRODUCED_NAME]->(new)" in selector
+    assert "sns.produced_sn_id = $new_name" not in selector
+
+
+def test_retarget_cache_uses_surviving_edge_bound_sources() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [{"moved": 1}]
+
+    retarget_standard_name_sources(gc, "old", "new", record_change=False)
+
+    cypher = gc.query.call_args.args[0]
+    selector = cypher.split("WHERE", 1)[1].split("WITH new, old", 1)[0]
+    cache_projection = cypher.split("AS authoritative_paths", 1)[1].split(
+        "RETURN size(moved)", 1
+    )[0]
+
+    sources = [
+        {
+            "id": "dd:accepted/path",
+            "source_type": "dd",
+            "source_id": "accepted/path",
+            "edge_target": "new",
+            "scalar_target": "new",
+            "path": "dd:accepted/path",
+        },
+        {
+            "id": "dd:rejected/path",
+            "source_type": "dd",
+            "source_id": "rejected/path",
+            "edge_target": None,
+            "scalar_target": "new",
+            "path": "dd:rejected/path",
+        },
+        {
+            "id": "derived:structural_parent",
+            "source_type": "derived",
+            "source_id": "derived:structural_parent",
+            "edge_target": "new",
+            "scalar_target": "new",
+            "path": "derived:structural_parent",
+        },
+    ]
+    selected = [
+        source
+        for source in sources
+        if source["edge_target"] in {"old", "new"} or source["scalar_target"] == "old"
+    ]
+
+    assert [source["id"] for source in selected] == [
+        "dd:accepted/path",
+        "derived:structural_parent",
+    ]
+    assert [source["path"] for source in selected] == [
+        "dd:accepted/path",
+        "derived:structural_parent",
+    ]
+    assert "(sns)-[:PRODUCED_NAME]->(new)" in selector
+    assert "sns.produced_sn_id = $new_name" not in selector
+    assert "SET new.source_paths = []" in cypher
+    assert "coalesce(old.source_paths" not in cache_projection
+    assert "coalesce(new.source_paths" not in cache_projection
+    assert "source.source_id STARTS WITH 'derived:'" in cypher
+    assert "THEN source.source_id" in cypher
+    assert "ELSE source.id" in cypher
+    assert "[p IN authoritative_paths WHERE p IS NOT NULL] AS paths" in cache_projection
+
+
+def test_retarget_query_repairs_all_source_mirrors() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [{"moved": 1}]
+
+    moved = retarget_standard_name_sources(gc, "old", "new", record_change=False)
+
+    assert moved == 1
+    cypher = gc.query.call_args.args[0]
     assert "DELETE prior" in cypher
     assert "MERGE (source)-[:PRODUCED_NAME]->(new)" in cypher
     assert "source.produced_sn_id = new.id" in cypher
+    assert "OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)" in cypher
+    assert "OPTIONAL MATCH (dd)-[dd_old:HAS_STANDARD_NAME]->(:StandardName)" in cypher
+    assert "DELETE dd_old" in cypher
     assert "MERGE (dd)-[:HAS_STANDARD_NAME]->(new)" in cypher
     assert "MERGE (signal)-[:HAS_STANDARD_NAME]->(new)" in cypher
-    assert "new.source_paths" in cypher
+    assert "'dd:' + dd.id" in cypher
+    assert "SET new.source_paths" in cypher
     assert (
         "FROM_DD_PATH" in cypher
         and "DELETE" not in cypher.split("FROM_DD_PATH")[1].split("FROM_SIGNAL")[0]

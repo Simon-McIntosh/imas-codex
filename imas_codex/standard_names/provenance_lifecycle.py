@@ -321,8 +321,13 @@ def retarget_standard_name_sources(
         MATCH (new:StandardName {id: $new_name})
         OPTIONAL MATCH (old:StandardName {id: $old_name})
         OPTIONAL MATCH (sns:StandardNameSource)
-        WHERE (sns)-[:PRODUCED_NAME]->(old) OR sns.produced_sn_id = $old_name
+        // A successor edge is authoritative. Its scalar alone can outlive an
+        // attachment-gate rejection and must not recreate the detached edge.
+        WHERE (sns)-[:PRODUCED_NAME]->(old)
+           OR sns.produced_sn_id = $old_name
+           OR (sns)-[:PRODUCED_NAME]->(new)
         WITH new, old, collect(DISTINCT sns) AS sources
+        SET new.source_paths = []
         UNWIND sources AS source
         WITH new, old, source WHERE source IS NOT NULL
         OPTIONAL MATCH (source)-[prior:PRODUCED_NAME]->(:StandardName)
@@ -341,13 +346,22 @@ def retarget_standard_name_sources(
           MERGE (dd)-[:HAS_STANDARD_NAME]->(new))
         FOREACH (_ IN CASE WHEN signal IS NULL THEN [] ELSE [1] END |
           MERGE (signal)-[:HAS_STANDARD_NAME]->(new))
-        WITH new, old, collect(DISTINCT source) AS moved,
+        WITH new, collect(DISTINCT source) AS moved,
              collect(DISTINCT CASE WHEN dd IS NULL THEN null ELSE 'dd:' + dd.id END) +
-             collect(DISTINCT CASE WHEN signal IS NULL THEN null ELSE signal.id END)
-             AS derived_paths
-        WITH new, moved,
-             coalesce(new.source_paths, []) + coalesce(old.source_paths, []) +
-             [p IN derived_paths WHERE p IS NOT NULL] AS paths
+             collect(DISTINCT CASE WHEN signal IS NULL THEN null ELSE signal.id END) +
+             collect(DISTINCT CASE
+               WHEN dd IS NULL AND signal IS NULL
+               THEN CASE
+                 WHEN source.source_type = 'derived'
+                  AND source.source_id STARTS WITH 'derived:'
+                 THEN source.source_id
+                 ELSE source.id
+               END
+               ELSE null
+             END) AS authoritative_paths
+        // Rebuild the cache from edge-bound sources. Existing caches can retain
+        // paths rejected by the attachment gate and are not authoritative.
+        WITH new, moved, [p IN authoritative_paths WHERE p IS NOT NULL] AS paths
         SET new.source_paths = reduce(acc = [], p IN paths |
           CASE WHEN p IN acc THEN acc ELSE acc + p END)
         RETURN size(moved) AS moved
