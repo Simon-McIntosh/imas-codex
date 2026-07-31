@@ -59,6 +59,18 @@ def _settled_fold_decisions() -> list[dict[str, object]]:
     ]
 
 
+def _public_advisory_aliases() -> dict[tuple[str, str], str]:
+    """Return the segment-scoped spelling guidance published by ISN."""
+    from imas_standard_names.grammar import get_grammar_context
+
+    aliases = get_grammar_context()["grammar"]["advisory_aliases"]
+    return {
+        (segment, token): str(rule["canonical"])
+        for segment, segment_aliases in aliases.items()
+        for token, rule in segment_aliases.items()
+    }
+
+
 @requires_isn
 class TestSettledFoldCoverage:
     """A settled fold is grammar-derived or carries a complete reviewed resolution."""
@@ -105,6 +117,7 @@ class TestSettledFoldCoverage:
             ("physical_base", "heat_flux"): "decomposable",
             ("position", "detector"): "ambiguous_known_token",
         }
+        expected.update(dict.fromkeys(_public_advisory_aliases(), "reuse"))
         actual: dict[tuple[str, str], str] = {}
         for decision in _settled_fold_decisions():
             segment = str(decision["segment"])
@@ -117,13 +130,32 @@ class TestSettledFoldCoverage:
 
         assert actual == expected
 
+    def test_public_advisory_aliases_match_reviewed_fold_targets(self):
+        reviewed_targets = {
+            (str(decision["segment"]), str(decision["token"])): str(
+                decision["canonical_target"]
+            )
+            for decision in _settled_fold_decisions()
+        }
+        aliases = _public_advisory_aliases()
+        assert aliases
+        assert {alias: reviewed_targets.get(alias) for alias in aliases} == aliases
+
+        for (segment, token), target in aliases.items():
+            verdict = describe_gap(segment, token)
+            assert verdict.category == "reuse"
+            assert verdict.reuse_target == target
+            assert not is_actionable_gap(segment, token)
+
     def test_contextual_folds_remain_explicitly_unresolved_and_actionable(self):
         mechanically_resolved = {
             ("physical_base", "heat_flux"),
             ("position", "detector"),
         }
+        mechanically_resolved.update(_public_advisory_aliases())
         unresolved = 0
-        for decision in _settled_fold_decisions():
+        decisions = _settled_fold_decisions()
+        for decision in decisions:
             segment = str(decision["segment"])
             token = str(decision["token"])
             if (segment, token) in mechanically_resolved:
@@ -132,7 +164,7 @@ class TestSettledFoldCoverage:
             assert is_actionable_gap(segment, token)
             unresolved += 1
 
-        assert unresolved == 25
+        assert unresolved == len(decisions) - len(mechanically_resolved)
 
 
 @requires_isn
@@ -389,7 +421,7 @@ STORED_GAP_FIXTURES: tuple[tuple[str, str, str], ...] = (
     ("genuine", "physical_base", "groove_density"),
     ("genuine", "physical_base", "substrate"),
     ("genuine", "subject", "lithium_6"),
-    ("genuine", "position", "rectangle_centre"),
+    ("reuse", "position", "rectangle_centre"),
 )
 
 
