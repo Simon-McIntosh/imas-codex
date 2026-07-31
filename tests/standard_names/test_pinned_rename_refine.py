@@ -26,8 +26,14 @@ class _NodeGraph:
     """Models a single StandardName node across the two-query recovery/resubmit
     paths, dispatching on Cypher-text substrings."""
 
-    def __init__(self, node: dict[str, Any]) -> None:
+    def __init__(
+        self,
+        node: dict[str, Any],
+        *,
+        lose_rescore_transition: bool = False,
+    ) -> None:
         self.node = node
+        self.lose_rescore_transition = lose_rescore_transition
 
     def __enter__(self) -> _NodeGraph:
         return self
@@ -53,15 +59,15 @@ class _NodeGraph:
             n["claim_token"] = None
             n["claimed_at"] = None
             return [{"outcome": "capped"}]
-        # ── stage_name_for_rescore probe ──
-        if "RETURN sn.name_stage AS stage" in cypher:
-            return [{"stage": n.get("name_stage")}] if n else []
-        # ── stage_name_for_rescore write ──
-        if (
-            "SET sn.name_stage = 'drafted'" in cypher
-            and "review_resubmit_count = 0" in cypher
-        ):
+        # ── stage_name_for_rescore atomic transition ──
+        if "RETURN prior_stage AS prior_stage" in cypher:
+            if self.lose_rescore_transition:
+                n["name_stage"] = "accepted"
+                return []
             if n.get("name_stage") in ("exhausted", "reviewed"):
+                prior_stage = n["name_stage"]
+                if p.get("dry_run"):
+                    return [{"prior_stage": prior_stage}]
                 n["name_stage"] = "drafted"
                 n["reviewer_score_name"] = None
                 n["review_resubmit_count"] = 0
@@ -69,14 +75,59 @@ class _NodeGraph:
                 n["claimed_at"] = None
                 if p.get("run_id") is not None:
                     n["run_id"] = p["run_id"]
-                # Mirror the stale-quarantine reset in the real Cypher.
-                if "was_quarantined" in cypher and (
-                    n.get("validation_status") == "quarantined"
-                ):
-                    n["validation_status"] = "pending"
-                    n["validation_issues"] = None
-                    n["validated_at"] = None
+                n["validation_status"] = "pending"
+                n["validation_issues"] = None
+                n["validation_layer_summary"] = None
+                n["quarantine_reason"] = None
+                n["validated_at"] = None
+                return [{"prior_stage": prior_stage}]
             return []
+        # ── refusal-message diagnostic after an ineligible transition ──
+        if "RETURN sn.name_stage AS stage" in cypher:
+            return [{"stage": n.get("name_stage")}] if n else []
+        # ── scoped deterministic-validation claim ──
+        if "WHERE sn.id IN $ids" in cypher and "sn.validated_at IS NULL" in cypher:
+            if (
+                n.get("id") in p["ids"]
+                and n.get("description") is not None
+                and n.get("validated_at") is None
+                and n.get("claim_token") is None
+            ):
+                n["claim_token"] = p["token"]
+                n["claimed_at"] = "now"
+            return []
+        if "MATCH (sn:StandardName {claim_token: $token})" in cypher:
+            if n.get("claim_token") != p["token"]:
+                return []
+            return [
+                {
+                    "id": n["id"],
+                    "description": n.get("description"),
+                    "documentation": n.get("documentation"),
+                    "kind": n.get("kind"),
+                    "unit": n.get("unit"),
+                    "links": n.get("links"),
+                    "source_paths": n.get("source_paths"),
+                    "object": n.get("object"),
+                    "physics_domain": n.get("physics_domain"),
+                    "origin": n.get("origin"),
+                    "source_ids": [],
+                    "children": [],
+                }
+            ]
+        # ── failed-rescore terminal-state restoration ──
+        if "RETURN count(sn) AS restored" in cypher:
+            eligible = (
+                n.get("name_stage") == "drafted"
+                and n.get("run_id") == p["run_id"]
+                and n.get("validation_status") == "quarantined"
+            )
+            if eligible:
+                n["name_stage"] = p["prior_stage"]
+                n["run_id"] = None
+                n["claim_token"] = None
+                n["claimed_at"] = None
+            return [{"restored": int(eligible)}]
         raise AssertionError(f"unexpected query: {cypher}")
 
 
@@ -178,6 +229,15 @@ class TestStageNameForRescore:
         assert res["ok"] is True and res["dry_run"] is True
         assert node["name_stage"] == "exhausted"  # untouched
 
+    def test_atomic_transition_race_loss_is_refused(self) -> None:
+        node = {"id": "n", "name_stage": "reviewed"}
+        fake = _NodeGraph(node, lose_rescore_transition=True)
+        with patch.object(graph_ops, "GraphClient", return_value=fake):
+            result = graph_ops.stage_name_for_rescore("n", run_id="r")
+        assert result["ok"] is False
+        assert "name_stage='accepted'" in result["reason"]
+        assert node["name_stage"] == "accepted"
+
     def test_stale_quarantine_reset_for_revalidation(self) -> None:
         # A quarantine stamped under an older grammar must not survive a
         # rescore — validation re-runs under the current grammar.
@@ -194,11 +254,39 @@ class TestStageNameForRescore:
         assert node["validation_issues"] is None
         assert node["validated_at"] is None
 
-    def test_valid_validation_state_is_preserved(self) -> None:
-        node = {"id": "n", "name_stage": "reviewed", "validation_status": "valid"}
+    def test_valid_name_is_forced_back_through_validation(self) -> None:
+        node = {
+            "id": "n",
+            "name_stage": "reviewed",
+            "description": "A valid name that still needs current admission.",
+            "validation_status": "valid",
+            "validation_issues": [],
+            "validated_at": "2026-07-31T00:00:00Z",
+        }
         res = _stage_rescore(node, run_id="r")
         assert res["ok"] is True
-        assert node["validation_status"] == "valid"
+        assert node["validation_status"] == "pending"
+        assert node["validation_issues"] is None
+        assert node["validated_at"] is None
+
+    def test_formerly_valid_name_is_claimable_for_scoped_validation(self) -> None:
+        from imas_codex.standard_names import workers
+
+        node = {
+            "id": "n",
+            "name_stage": "reviewed",
+            "description": "A valid name that still needs current admission.",
+            "validation_status": "valid",
+            "validated_at": "2026-07-31T00:00:00Z",
+            "claim_token": None,
+        }
+        _stage_rescore(node, run_id="r")
+        fake = _NodeGraph(node)
+        with patch("imas_codex.graph.client.GraphClient", return_value=fake):
+            token, items = workers.claim_ids_for_validation(["n"], 1)
+        assert token
+        assert [item["id"] for item in items] == ["n"]
+        assert node["claim_token"] == token
 
 
 class TestRescoreNameOrchestrator:
@@ -220,12 +308,22 @@ class TestRescoreNameOrchestrator:
                     "dry_run": False,
                 },
             ),
+            patch.object(
+                edit_mod,
+                "_run_rescore_validation",
+                return_value={
+                    "validated": 1,
+                    "quarantined": 0,
+                    "requarantined_ids": [],
+                },
+            ) as mock_validation,
             patch.object(edit_mod, "_run_scoped_pipeline") as mock_pipeline,
         ):
             res = edit_mod.rescore_name("n", stage_only=True)
         assert res["ok"] is True
         assert res["reviewed"] is False
         assert res["outcome"] is None
+        mock_validation.assert_called_once_with("n")
         mock_pipeline.assert_not_called()
 
     def test_review_path_runs_scoped_pipeline(self) -> None:
@@ -258,6 +356,16 @@ class TestRescoreNameOrchestrator:
                 edit_mod, "_run_scoped_pipeline", return_value=summary
             ) as mock_pipeline,
             patch.object(
+                edit_mod,
+                "_run_rescore_validation",
+                return_value={
+                    "validated": 1,
+                    "quarantined": 0,
+                    "requarantined_ids": [],
+                    "cleared_ids": ["n"],
+                },
+            ) as mock_validation,
+            patch.object(
                 edit_mod, "_collect_inline_outcomes", return_value=[outcome_result]
             ),
             patch.object(edit_mod, "GraphClient", return_value=MagicMock()),
@@ -266,7 +374,88 @@ class TestRescoreNameOrchestrator:
         assert res["ok"] is True and res["reviewed"] is True
         # skip_generate: a rescore re-scores an existing name, never regenerates.
         assert mock_pipeline.call_args.kwargs["skip_generate"] is True
+        mock_validation.assert_called_once_with("n")
         assert res["outcome"].all_accepted is True
+
+    def test_revalidation_precedes_review(self) -> None:
+        from imas_codex.standard_names import edit as edit_mod
+
+        order: list[str] = []
+        with (
+            patch.object(
+                graph_ops,
+                "stage_name_for_rescore",
+                return_value={"ok": True, "prior_stage": "reviewed"},
+            ),
+            patch.object(
+                edit_mod,
+                "_run_rescore_validation",
+                side_effect=lambda _sn: (
+                    order.append("validation")
+                    or {
+                        "validated": 1,
+                        "quarantined": 0,
+                        "requarantined_ids": [],
+                    }
+                ),
+            ),
+            patch.object(
+                edit_mod,
+                "_run_scoped_pipeline",
+                side_effect=lambda **_kw: order.append("review") or MagicMock(),
+            ),
+            patch.object(edit_mod, "_collect_inline_outcomes", return_value=[]),
+            patch.object(edit_mod, "GraphClient", return_value=MagicMock()),
+        ):
+            result = edit_mod.rescore_name("n")
+        assert result["ok"] is True
+        assert order == ["validation", "review"]
+
+    def test_requarantine_aborts_without_review_spend(self) -> None:
+        from imas_codex.standard_names import edit as edit_mod
+
+        node = {
+            "id": "n",
+            "name_stage": "reviewed",
+            "description": "A candidate that deterministic admission rejects.",
+            "validation_status": "valid",
+            "validated_at": "2026-07-31T00:00:00Z",
+            "claim_token": None,
+            "claimed_at": None,
+            "run_id": None,
+        }
+
+        def _requarantine(_sn: str) -> dict[str, Any]:
+            node["validation_status"] = "quarantined"
+            node["validated_at"] = "now"
+            return {
+                "validated": 1,
+                "quarantined": 1,
+                "requarantined_ids": ["n"],
+            }
+
+        fake = _NodeGraph(node)
+        with (
+            patch.object(graph_ops, "GraphClient", return_value=fake),
+            patch.object(
+                edit_mod,
+                "_run_rescore_validation",
+                side_effect=_requarantine,
+            ),
+            patch.object(edit_mod, "_run_scoped_pipeline") as mock_pipeline,
+        ):
+            result = edit_mod.rescore_name("n")
+        assert result["ok"] is False
+        assert result["reviewed"] is False
+        assert result["outcome"] is None
+        assert result["restored"] is True
+        assert "prior terminal state was restored" in result["reason"]
+        assert node["name_stage"] == "reviewed"
+        assert node["run_id"] is None
+        assert node["claim_token"] is None
+        assert node["claimed_at"] is None
+        assert node["validation_status"] == "quarantined"
+        mock_pipeline.assert_not_called()
 
     def test_refusal_propagates(self) -> None:
         from imas_codex.standard_names import edit as edit_mod
@@ -278,6 +467,22 @@ class TestRescoreNameOrchestrator:
         ):
             res = edit_mod.rescore_name("n")
         assert res["ok"] is False and "not found" in res["reason"]
+
+    def test_atomic_stage_race_loss_never_validates_or_reviews(self) -> None:
+        from imas_codex.standard_names import edit as edit_mod
+
+        node = {"id": "n", "name_stage": "reviewed"}
+        fake = _NodeGraph(node, lose_rescore_transition=True)
+        with (
+            patch.object(graph_ops, "GraphClient", return_value=fake),
+            patch.object(edit_mod, "_run_rescore_validation") as mock_validation,
+            patch.object(edit_mod, "_run_scoped_pipeline") as mock_pipeline,
+        ):
+            result = edit_mod.rescore_name("n")
+        assert result["ok"] is False
+        assert node["name_stage"] == "accepted"
+        mock_validation.assert_not_called()
+        mock_pipeline.assert_not_called()
 
 
 class TestRefineClaimExcludesCappedPinnedRenames:

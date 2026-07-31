@@ -7278,8 +7278,9 @@ def claim_review_names(
             """
             UNWIND $ids AS nid
             MATCH (sn:StandardName {id: nid})
-            WHERE sn.claimed_at IS NULL
-               OR sn.claimed_at < datetime() - duration($cutoff)
+            WHERE sn.validation_status = 'valid'
+              AND (sn.claimed_at IS NULL
+                   OR sn.claimed_at < datetime() - duration($cutoff))
             SET sn.claimed_at = datetime(),
                 sn.claim_token = $token
             """,
@@ -7291,6 +7292,7 @@ def claim_review_names(
         result = gc.query(
             """
             MATCH (sn:StandardName {claim_token: $token})
+            WHERE sn.validation_status = 'valid'
             RETURN sn.id AS id
             """,
             token=token,
@@ -10273,7 +10275,8 @@ def claim_review_name_batch(
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name review.
 
-    Eligibility: ``name_stage = 'drafted'`` AND ``claimed_at IS NULL``.
+    Eligibility: ``name_stage = 'drafted'``, ``validation_status = 'valid'``,
+    and ``claimed_at IS NULL``.
 
     Does NOT transition stage at claim time — stage remains ``'drafted'``
     until :func:`persist_reviewed_name` writes the final outcome.  Only
@@ -10291,6 +10294,7 @@ def claim_review_name_batch(
 
     where = (
         "sn.name_stage = 'drafted'"
+        " AND sn.validation_status = 'valid'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
         # Gate: require a real description before review so the
         # semantic_similarity_check in the review worker can run. Exclude the
@@ -12682,13 +12686,44 @@ def stage_name_for_rescore(
     """
     with GraphClient() as gc:
         rows = gc.query(
-            "MATCH (sn:StandardName {id: $id}) RETURN sn.name_stage AS stage",
+            """
+            MATCH (sn:StandardName {id: $id})
+            WHERE sn.name_stage IN ['exhausted', 'reviewed']
+            WITH sn, sn.name_stage AS prior_stage
+            // One compare-and-set transition: if another worker moves the
+            // stage before this MATCH acquires the write, no row is returned
+            // and the caller refuses the rescore. Dry-run retains the same
+            // eligibility query but executes no mutation.
+            FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
+                SET sn.name_stage = 'drafted',
+                    sn.reviewer_score_name = null,
+                    sn.review_resubmit_count = 0,
+                    sn.claim_token = null,
+                    sn.claimed_at = null,
+                    sn.run_id = coalesce($run_id, sn.run_id),
+                    sn.validation_status = 'pending',
+                    sn.validation_issues = null,
+                    sn.validation_layer_summary = null,
+                    sn.quarantine_reason = null,
+                    sn.validated_at = null
+            )
+            RETURN prior_stage AS prior_stage
+            """,
             id=sn_id,
+            run_id=run_id,
+            dry_run=dry_run,
         )
         if not rows:
-            return {"ok": False, "reason": f"name {sn_id!r} not found"}
-        stage = rows[0].get("stage")
-        if stage not in ("exhausted", "reviewed"):
+            # Diagnostic only after the guarded transition lost eligibility;
+            # this read can refine the refusal message but can never turn the
+            # failed transition into success.
+            current = gc.query(
+                "MATCH (sn:StandardName {id: $id}) RETURN sn.name_stage AS stage",
+                id=sn_id,
+            )
+            if not current:
+                return {"ok": False, "reason": f"name {sn_id!r} not found"}
+            stage = current[0].get("stage")
             return {
                 "ok": False,
                 "reason": (
@@ -12697,43 +12732,58 @@ def stage_name_for_rescore(
                     "live; superseded names should be recovered via their successor)"
                 ),
             }
-        result = {
-            "ok": True,
-            "sn_id": sn_id,
-            "prior_stage": stage,
-            "run_id": run_id,
-            "dry_run": dry_run,
-        }
-        if dry_run:
-            return result
-        gc.query(
+        stage = rows[0].get("prior_stage")
+    result = {
+        "ok": True,
+        "sn_id": sn_id,
+        "prior_stage": stage,
+        "run_id": run_id,
+        "dry_run": dry_run,
+    }
+    logger.info(
+        "stage_name_for_rescore: %s (%s) → %s (run_id=%s)",
+        sn_id,
+        stage,
+        stage if dry_run else "drafted",
+        run_id,
+    )
+    return result
+
+
+@retry_on_deadlock()
+def restore_name_after_failed_rescore(
+    sn_id: str,
+    *,
+    run_id: str,
+    prior_stage: str,
+) -> bool:
+    """Restore a deterministically rejected rescore to its terminal stage.
+
+    The run-id and drafted-stage guards make this a compare-and-set: a late
+    failure cannot overwrite a node another worker has already advanced. The
+    node remains quarantined, while every rescore-specific scope and claim is
+    removed atomically so no later scoped run can pick it up for paid review.
+    """
+    if prior_stage not in ("exhausted", "reviewed"):
+        raise ValueError(f"cannot restore rescore to stage {prior_stage!r}")
+    with GraphClient() as gc:
+        rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE sn.name_stage IN ['exhausted', 'reviewed']
-            // A quarantine stamped under an older grammar is stale by
-            // definition here — the operator asks for a fresh pass, so
-            // validation must re-run under the CURRENT grammar too.
-            WITH sn, sn.validation_status = 'quarantined' AS was_quarantined
-            SET sn.name_stage = 'drafted',
-                sn.reviewer_score_name = null,
-                sn.review_resubmit_count = 0,
+            WHERE sn.name_stage = 'drafted'
+              AND sn.run_id = $run_id
+              AND sn.validation_status = 'quarantined'
+            SET sn.name_stage = $prior_stage,
+                sn.run_id = null,
                 sn.claim_token = null,
-                sn.claimed_at = null,
-                sn.run_id = coalesce($run_id, sn.run_id),
-                sn.validation_status = CASE WHEN was_quarantined
-                    THEN 'pending' ELSE sn.validation_status END,
-                sn.validation_issues = CASE WHEN was_quarantined
-                    THEN null ELSE sn.validation_issues END,
-                sn.validated_at = CASE WHEN was_quarantined
-                    THEN null ELSE sn.validated_at END
+                sn.claimed_at = null
+            RETURN count(sn) AS restored
             """,
             id=sn_id,
             run_id=run_id,
+            prior_stage=prior_stage,
         )
-    logger.info(
-        "stage_name_for_rescore: %s (%s) → drafted (run_id=%s)", sn_id, stage, run_id
-    )
-    return result
+    return bool(rows and rows[0].get("restored"))
 
 
 def _mark_refine_vocab_gap_exhausted(
@@ -12871,6 +12921,7 @@ def _verify_claim_winners(
     eligible_stage: str,
     settle_seconds: float,
     axis: str,
+    require_validated: bool = False,
 ) -> list[dict[str, Any]]:
     """Shared claim-race winner verifier for the docs and names axes.
 
@@ -12894,6 +12945,7 @@ def _verify_claim_winners(
     if have_seq and settle_seconds > 0:
         time.sleep(settle_seconds)
     ids = [it["id"] for it in items]
+    validation_gate = "AND sn.validation_status = 'valid'" if require_validated else ""
     with GraphClient() as gc:
         rows = gc.query(
             f"""
@@ -12901,6 +12953,7 @@ def _verify_claim_winners(
             MATCH (sn:StandardName {{id: sid}})
             WHERE sn.claim_token = $token
               AND sn.{stage_field} = $eligible_stage
+              {validation_gate}
             RETURN sn.id AS id, sn.claim_seq AS claim_seq
             """,
             ids=ids,
@@ -12956,6 +13009,7 @@ def _verify_name_claim_winners(
         eligible_stage=eligible_stage,
         settle_seconds=settle_seconds,
         axis="name",
+        require_validated=True,
     )
 
 
