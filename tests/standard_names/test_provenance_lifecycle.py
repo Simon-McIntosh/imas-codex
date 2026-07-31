@@ -120,6 +120,39 @@ def test_retarget_query_repairs_all_source_mirrors() -> None:
     )
 
 
+def test_retarget_query_separates_cache_reset_from_source_unwind() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [{"moved": 0}]
+
+    retarget_standard_name_sources(gc, "old", "new", record_change=False)
+
+    cypher = gc.query.call_args.args[0]
+    cache_reset = cypher.index("SET new.source_paths = []")
+    source_unwind = cypher.index("UNWIND sources AS source")
+    boundary = cypher[cache_reset:source_unwind]
+
+    assert "WITH new, old, sources" in boundary
+
+
+@pytest.mark.graph
+def test_retarget_query_compiles_in_transaction(graph_client) -> None:
+    from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+
+    with graph_client.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            adapter = _TransactionQueryAdapter(transaction)
+            moved = retarget_standard_name_sources(
+                adapter,
+                "missing_predecessor_for_query_compilation",
+                "missing_successor_for_query_compilation",
+                record_change=False,
+            )
+            assert moved == 0
+        finally:
+            transaction.rollback()
+
+
 def test_rename_mirror_refresh_separates_updates_from_matches() -> None:
     gc = MagicMock()
     gc.query.return_value = [{"refreshed": 0}]
