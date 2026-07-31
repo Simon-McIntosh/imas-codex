@@ -301,7 +301,7 @@ class _DerivedParentTx:
         self.closed = True
 
 
-def test_pending_placeholder_repair_sets_docs_lifecycle_and_dd_source() -> None:
+def test_pending_placeholder_repair_does_not_project_common_dd_prefix() -> None:
     from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
 
     graph = _StatefulDerivedParentGraph(
@@ -324,9 +324,54 @@ def test_pending_placeholder_repair_sets_docs_lifecycle_and_dd_source() -> None:
     assert graph.parent["docs_chain_length"] == 0
     assert graph.parent["description"] == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
     assert graph.parent["kind"] == "vector"
-    assert graph.sources["dd:equilibrium/time_slice/profiles_1d"]["source_type"] == "dd"
-    assert graph.sources["dd:equilibrium/time_slice/profiles_1d"]["source_id"] == (
-        "equilibrium/time_slice/profiles_1d"
+    source = graph.sources["derived:magnetic_field"]
+    assert source["source_type"] == "derived"
+    assert source["source_id"] == "magnetic_field"
+    assert "dd_path" not in source
+    assert all(
+        "MERGE (sns)-[:FROM_DD_PATH]" not in cypher
+        for cypher, _params in graph.query_calls
+    )
+
+
+def test_single_child_parent_materialization_preserves_real_dd_source() -> None:
+    from imas_codex.standard_names.graph_ops import normalize_derived_parent_lifecycle
+
+    leaf = "spectrometer_visible/channel/processed_line/radiance"
+    child = "photon_radiance_at_spectral_line"
+    parent = "photon_radiance"
+    graph = _StatefulDerivedParentGraph(
+        parent_id=parent,
+        child_units=("m^-2.s^-1.sr^-1",),
+        child_domains=("spectroscopy",),
+        dd_paths=(leaf,),
+    )
+    graph.sources[f"dd:{leaf}"] = {
+        "id": f"dd:{leaf}",
+        "source_type": "dd",
+        "source_id": leaf,
+        "produced_sn_id": child,
+    }
+
+    assert normalize_derived_parent_lifecycle(graph) == 1
+    assert normalize_derived_parent_lifecycle(graph) == 0
+
+    assert graph.sources[f"dd:{leaf}"] == {
+        "id": f"dd:{leaf}",
+        "source_type": "dd",
+        "source_id": leaf,
+        "produced_sn_id": child,
+    }
+    assert graph.sources[f"derived:{parent}"] == {
+        "id": f"derived:{parent}",
+        "source_type": "derived",
+        "source_id": parent,
+        "batch_key": "derived_parent",
+        "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+    }
+    assert all(
+        "MERGE (sns)-[:FROM_DD_PATH]" not in cypher
+        for cypher, _params in graph.query_calls
     )
 
 

@@ -2265,19 +2265,13 @@ def sweep_orphaned_docs_revisions(gc: Any) -> int:
     return n
 
 
-def _derived_parent_source_metadata(
-    parent_id: str,
-    *,
-    parent_dd_path: str | None,
-) -> dict[str, str]:
-    """Build a valid StandardNameSource identity for a derived parent."""
-    if parent_dd_path:
-        return {
-            "source_node_id": f"dd:{parent_dd_path}",
-            "source_type": "dd",
-            "source_id": parent_dd_path,
-            "batch_key": "derived_parent",
-        }
+def _derived_parent_source_metadata(parent_id: str) -> dict[str, str]:
+    """Build the distinct structural provenance identity for a derived parent.
+
+    A common child DD path is evidence about the children, not a realization of
+    the parent. Structural sources therefore neither reuse a ``dd:<path>``
+    identity nor carry a ``FROM_DD_PATH`` relationship.
+    """
     return {
         "source_node_id": f"derived:{parent_id}",
         "source_type": "derived",
@@ -2337,8 +2331,6 @@ def _materialize_derived_parent_rows(
     for row in parents:
         parent_id = row["parent_id"]
         child_data = row.get("child_data") or []
-        dd_paths = [p for p in (row.get("dd_paths") or []) if p]
-
         edge_kinds = row.get("edge_kinds") or []
         is_geometric = any(k == "coordinate" for k in edge_kinds)
 
@@ -2419,18 +2411,6 @@ def _materialize_derived_parent_rows(
 
         grammar_fields = _parse_parent_grammar(parent_id)
 
-        parent_dd_path = None
-        if dd_paths:
-            parts = [p.split("/") for p in dd_paths]
-            common = []
-            for segments in zip(*parts, strict=False):
-                if len(set(segments)) == 1:
-                    common.append(segments[0])
-                else:
-                    break
-            if common:
-                parent_dd_path = "/".join(common)
-
         props: dict[str, Any] = {
             "parent_id": parent_id,
             "unit": unit,
@@ -2440,15 +2420,9 @@ def _materialize_derived_parent_rows(
             "kind": kind,
             "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
             "is_geometric_coordinate": is_geometric,
-            "dd_path": parent_dd_path,
         }
         props.update(grammar_fields)
-        props.update(
-            _derived_parent_source_metadata(
-                parent_id,
-                parent_dd_path=parent_dd_path,
-            )
-        )
+        props.update(_derived_parent_source_metadata(parent_id))
 
         # A derived parent is quantitative catalog data, even when it has no
         # DD realization of its own.  It must therefore carry an explicit unit
@@ -2576,17 +2550,6 @@ def _materialize_derived_parent_rows(
             """,
             **props,
         )
-
-        if parent_dd_path:
-            gc.query(
-                """
-                MATCH (sns:StandardNameSource {id: $source_node_id})
-                MATCH (imas:IMASNode {id: $dd_path})
-                MERGE (sns)-[:FROM_DD_PATH]->(imas)
-                """,
-                source_node_id=props["source_node_id"],
-                dd_path=parent_dd_path,
-            )
 
         if unit:
             # Self-heal: drop any pre-existing HAS_UNIT edge (possibly to a
@@ -8245,10 +8208,11 @@ def reconcile_provenance() -> dict[str, int]:
        is the recovery mirror; a missing edge is silent provenance loss).
     1. **NULL stale scalars** — any ``StandardNameSource.produced_sn_id`` whose
        target ``StandardName`` no longer exists is set to null.
-    2. **Delete orphaned derived-parent scaffolding** — any
-       ``StandardNameSource {batch_key: 'derived_parent'}`` (source_type
-       ``derived`` or ``dd``) whose parent ``StandardName(id = source_id)``
-       no longer exists is DETACH-DELETEd.
+    2. **Delete orphaned derived-parent scaffolding** — any edge-less derived
+       ``StandardNameSource {batch_key: 'derived_parent'}`` whose intended
+       ``StandardName(id = source_id)`` no longer exists is DETACH-DELETEd.
+       A live ``PRODUCED_NAME`` edge is authoritative after a cascade retargets
+       the source while preserving its immutable ``source_id``.
 
     Returns dict with counts: {edges_reattached, scalars_cleared,
     orphan_sources_deleted}.
@@ -8274,7 +8238,10 @@ def reconcile_provenance() -> dict[str, int]:
         orphans = gc.query(
             """
             MATCH (sns:StandardNameSource {batch_key: 'derived_parent'})
-            WHERE sns.source_type IN ['derived', 'dd']
+            WHERE sns.source_type = 'derived'
+              AND NOT EXISTS {
+                  MATCH (sns)-[:PRODUCED_NAME]->(:StandardName)
+              }
               AND NOT EXISTS {
                   MATCH (sn:StandardName {id: sns.source_id})
               }
@@ -14566,12 +14533,12 @@ def reconcile_orphan_parent_sources(
     """Seed the missing structural provenance source for childful parents.
 
     A structural parent (a ``StandardName`` that is the ``HAS_PARENT`` target of
-    at least one child) records its provenance as a ``derived:<name>`` — or
-    ``dd:<common-path>`` when its children share a real DD path — source linked
-    via ``PRODUCED_NAME``, the identity :func:`_derived_parent_source_metadata`
-    builds. That source is written in exactly ONE place
-    (:func:`_materialize_derived_parent_rows`), reached only through
-    :func:`seed_parent_sources`, whose selector gates on ``name_stage IS NULL``.
+    at least one child) records its provenance as its own ``derived:<name>``
+    source linked via ``PRODUCED_NAME``. A common child DD path does not realize
+    the parent, so structural provenance has no ``FROM_DD_PATH`` relationship.
+    Both normal materialization and this recovery path use
+    :func:`_derived_parent_source_metadata`, so they cannot diverge on source
+    identity.
 
     So a parent that acquires a non-null ``name_stage`` *before* it is seeded is
     skipped forever and left a provenance orphan — the exact leak this repairs.
@@ -14584,17 +14551,17 @@ def reconcile_orphan_parent_sources(
 
     This decouples source-seeding from the acceptance path. For every parent with
     at least one child, all children composed, and no ``PRODUCED_NAME`` source, it
-    materializes the structural source + ``PRODUCED_NAME`` (+ ``FROM_DD_PATH`` when
-    the children share a DD path that resolves to a live ``IMASNode``). It is
-    origin-, stage-, and operator-kind-agnostic — the parent already exists and
-    passed admission; this only records provenance and NEVER mutates the parent's
-    ``name_stage`` / ``origin`` / ``description``. Idempotent: a parent that gains a
-    source drops out of the selector. Childless sourceless names are not parents
-    and are left untouched (a distinct stranded-name concern). Every derived
-    candidate is re-checked against the current admission gate before seeding;
-    an invalid scaffold remains source-less for ledgered lifecycle retirement
-    rather than being legitimized by synthetic provenance. Non-derived parents
-    bypass structural admission and retain their origin-owned recovery path.
+    materializes the structural source + ``PRODUCED_NAME`` without a DD
+    realization edge. It is origin-, stage-, and operator-kind-agnostic — the
+    parent already exists and passed admission; this only records provenance and
+    NEVER mutates the parent's ``name_stage`` / ``origin`` / ``description``.
+    Idempotent: a parent that gains a source drops out of the selector. Childless
+    sourceless names are not parents and are left untouched (a distinct
+    stranded-name concern). Every derived candidate is re-checked against the
+    current admission gate before seeding; an invalid scaffold remains source-less
+    for ledgered lifecycle retirement rather than being legitimized by synthetic
+    provenance. Non-derived parents bypass structural admission and retain their
+    origin-owned recovery path.
 
     With ``dry_run=True``, returns the number eligible without writing.
     Otherwise returns the number of parent sources seeded.
@@ -14617,27 +14584,7 @@ def reconcile_orphan_parent_sources(
         seeded = 0
         for r in rows:
             parent_id = r["parent_id"]
-            dd_paths = r["dd_paths"]
-            parent_dd_path = None
-            if dd_paths:
-                parts = [p.split("/") for p in dd_paths]
-                common: list[str] = []
-                for segments in zip(*parts, strict=False):
-                    if len(set(segments)) == 1:
-                        common.append(segments[0])
-                    else:
-                        break
-                candidate = "/".join(common) if common else None
-                # Only adopt a dd: identity when the common prefix is a real
-                # IMASNode; a bare prefix (e.g. a shared IDS container) is not a
-                # source path, so fall back to the structural derived: identity.
-                if candidate and client.query(
-                    "MATCH (n:IMASNode {id: $p}) RETURN n.id LIMIT 1", p=candidate
-                ):
-                    parent_dd_path = candidate
-            meta = _derived_parent_source_metadata(
-                parent_id, parent_dd_path=parent_dd_path
-            )
+            meta = _derived_parent_source_metadata(parent_id)
             client.query(
                 """
                 MATCH (parent:StandardName {id: $parent_id})
@@ -14656,16 +14603,6 @@ def reconcile_orphan_parent_sources(
                 parent_id=parent_id,
                 **meta,
             )
-            if parent_dd_path:
-                client.query(
-                    """
-                    MATCH (sns:StandardNameSource {id: $source_node_id})
-                    MATCH (imas:IMASNode {id: $dd_path})
-                    MERGE (sns)-[:FROM_DD_PATH]->(imas)
-                    """,
-                    source_node_id=meta["source_node_id"],
-                    dd_path=parent_dd_path,
-                )
             seeded += 1
     finally:
         if own:
