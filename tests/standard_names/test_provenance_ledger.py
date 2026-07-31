@@ -108,6 +108,12 @@ def test_reconcile_provenance_reports_edges_reattached():
     assert result["scalars_cleared"] == 2
     assert result["orphan_sources_deleted"] == 1
 
+    orphan_cleanup = mock_gc.query.call_args_list[-1].args[0]
+    assert "sns.source_type = 'derived'" in orphan_cleanup
+    assert "source_type IN ['derived', 'dd']" not in orphan_cleanup
+    assert "MATCH (sns)-[:PRODUCED_NAME]->(:StandardName)" in orphan_cleanup
+    assert "MATCH (sn:StandardName {id: sns.source_id})" in orphan_cleanup
+
 
 # ---------------------------------------------------------------------------
 # Live ledger invariants (read-only) — the acceptance proof for the rebuild.

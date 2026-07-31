@@ -430,6 +430,56 @@ def test_non_derived_parent_bypasses_structural_admission_gate() -> None:
     assert write.kwargs["parent_id"] == parent_id
 
 
+def test_parent_source_reconcile_keeps_dd_identity_with_the_child() -> None:
+    """Structural sources stay distinct even when every parent shares one leaf."""
+    from imas_codex.standard_names.graph_ops import (
+        reconcile_orphan_parent_sources,
+    )
+    from imas_codex.standard_names.parents import AdmissionResult
+
+    leaf = "spectrometer_visible/channel/processed_line/radiance"
+    parent_ids = ["photon_radiance", "radiance"]
+    candidates = [
+        {"parent_id": parent_id, "origin": "derived", "dd_paths": [leaf]}
+        for parent_id in parent_ids
+    ]
+    gc = MagicMock()
+    gc.query.side_effect = [
+        candidates,
+        [],
+        [],
+        [],
+    ]
+
+    with patch(
+        "imas_codex.standard_names.parents.is_admissible_parent_name",
+        return_value=AdmissionResult(admit=True, reason="valid", clause=None),
+    ):
+        assert reconcile_orphan_parent_sources(gc=gc) == 2
+        assert reconcile_orphan_parent_sources(gc=gc) == 0
+
+    writes = [
+        item
+        for item in gc.query.call_args_list
+        if "MERGE (sns:StandardNameSource" in item.args[0]
+    ]
+    assert [item.kwargs["source_node_id"] for item in writes] == [
+        "derived:photon_radiance",
+        "derived:radiance",
+    ]
+    assert [item.kwargs["source_type"] for item in writes] == [
+        "derived",
+        "derived",
+    ]
+    assert [item.kwargs["source_id"] for item in writes] == parent_ids
+    assert all(item.kwargs["source_node_id"] != f"dd:{leaf}" for item in writes)
+
+    assert all(
+        "MERGE (sns)-[:FROM_DD_PATH]" not in item.args[0]
+        for item in gc.query.call_args_list
+    )
+
+
 def test_rebuild_dry_run_binds_nothing():
     """A dry run classifies but performs no writes and no fixpoints."""
     import imas_codex.standard_names.provenance_rebuild as pr
