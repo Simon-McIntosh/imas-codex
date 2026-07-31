@@ -1,8 +1,8 @@
-"""B12: bounded full-batch compose retry with re-enrichment in pool path.
+"""Bounded full-batch compose retry with re-enrichment in the pool path.
 
 Tests that ``compose_batch`` retries the LLM call when grammar validation
 fails on the first attempt, re-enriches items with expanded DD context,
-and only falls through to L6 per-candidate retry on the final attempt.
+and only falls through to the per-candidate retry on the final attempt.
 """
 
 from __future__ import annotations
@@ -22,7 +22,10 @@ def _make_batch_item(
     path: str = "equilibrium/time_slice/profiles_1d/psi", **kw
 ) -> dict[str, Any]:
     base = {
+        "id": f"dd:{path}",
         "path": path,
+        "claim_token": "winner",
+        "claim_seq": 3,
         "description": "Poloidal flux",
         "physics_domain": "equilibrium",
         "unit": "Wb",
@@ -171,6 +174,10 @@ def _patch_compose_deps():
             "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
             return_value=1,
         ),
+        patch(
+            "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+            side_effect=lambda items, **_kwargs: items,
+        ),
         # Audits
         patch(
             "imas_codex.standard_names.audits.run_audits",
@@ -194,7 +201,7 @@ def _patch_compose_deps():
 
 
 class TestPoolComposeRetry:
-    """B12: full-batch retry with re-enrichment in pool compose_batch."""
+    """Full-batch retry with re-enrichment in pool compose_batch."""
 
     @pytest.mark.asyncio
     async def test_all_pass_no_retry(self, _patch_compose_deps) -> None:
@@ -225,6 +232,46 @@ class TestPoolComposeRetry:
             await compose_batch(batch, mgr, stop)
 
         assert call_count == 1, "Should not retry when all candidates pass"
+
+    @pytest.mark.asyncio
+    async def test_partial_winner_emits_and_counts_only_finalized_source(
+        self, _patch_compose_deps
+    ) -> None:
+        """Events and counts describe only the committed claim winner."""
+        from imas_codex.standard_names.workers import compose_batch
+
+        first_path = "equilibrium/time_slice/profiles_1d/psi"
+        second_path = "equilibrium/time_slice/profiles_1d/q"
+        llm_out = _FakeLLMOut(
+            _FakeBatchResult(
+                [
+                    _FakeCandidate("electron_temperature", first_path),
+                    _FakeCandidate("ion_temperature", second_path),
+                ]
+            )
+        )
+
+        async def mock_llm(*_args, **_kwargs):
+            return llm_out
+
+        events: list[dict[str, Any]] = []
+        with (
+            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("imas_codex.standard_names.workers._retry_attempts", return_value=1),
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+                return_value=[f"dd:{first_path}"],
+            ),
+        ):
+            count = await compose_batch(
+                [_make_batch_item(first_path), _make_batch_item(second_path)],
+                _FakeBudgetManager(),
+                asyncio.Event(),
+                on_event=events.append,
+            )
+
+        assert count == 1
+        assert [event["name"] for event in events] == ["electron_temperature"]
 
     @pytest.mark.asyncio
     async def test_grammar_fail_triggers_retry(self, _patch_compose_deps) -> None:
@@ -300,7 +347,7 @@ class TestPoolComposeRetry:
 
     @pytest.mark.asyncio
     async def test_retry_exhausted_falls_through(self, _patch_compose_deps) -> None:
-        """When retries are exhausted, falls through to L6 per-candidate."""
+        """Exhausted batch retries fall through to the per-candidate retry."""
         import sys
 
         from imas_codex.standard_names.workers import compose_batch
@@ -363,7 +410,9 @@ class TestPoolComposeRetry:
 
         # 1 initial + 1 retry = 2 LLM calls
         assert call_count == 2
-        assert grammar_retry_called, "L6 grammar retry should run after B12 exhausted"
+        assert grammar_retry_called, (
+            "per-candidate grammar retry should run after batch retry exhaustion"
+        )
 
     @pytest.mark.asyncio
     async def test_retry_disabled_when_zero(self, _patch_compose_deps) -> None:

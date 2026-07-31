@@ -281,7 +281,7 @@ class TestComposeNameStageDrafted:
         assert "docs_stage" in cypher and "'pending'" in cypher
 
     def test_chain_length_zero(self) -> None:
-        """Cypher SET includes chain_length = 0."""
+        """Cypher initializes missing chain length without resetting it."""
         from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
 
         gc, tx = _mock_gc_tx()
@@ -291,7 +291,7 @@ class TestComposeNameStageDrafted:
             )
 
         cypher: str = tx.run.call_args.args[0]
-        assert "chain_length" in cypher and "= 0" in cypher
+        assert "coalesce(sn.chain_length, 0)" in cypher
 
     def test_single_transaction_committed(self) -> None:
         """All stage updates land in a single committed transaction."""

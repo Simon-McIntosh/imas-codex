@@ -538,14 +538,21 @@ class TestVerifySourceClaimWinners:
         from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
 
         items = [
-            {"id": "dd:a/path", "claim_token": "tok-9"},
-            {"id": "dd:b/path", "claim_token": "tok-9"},  # token overwritten
-            {"id": "dd:c/path", "claim_token": "tok-9"},
+            {"id": "dd:a/path", "claim_token": "tok-9", "claim_seq": 1},
+            {"id": "dd:b/path", "claim_token": "tok-9", "claim_seq": 1},
+            {"id": "dd:c/path", "claim_token": "tok-9", "claim_seq": 1},
         ]
-        gc = _mock_gc_query(return_values=[[{"id": "dd:a/path"}, {"id": "dd:c/path"}]])
+        gc = _mock_gc_query(
+            return_values=[
+                [
+                    {"id": "dd:a/path", "claim_seq": 1},
+                    {"id": "dd:c/path", "claim_seq": 1},
+                ]
+            ]
+        )
 
         with _patch_gc(gc):
-            survivors = _verify_source_claim_winners(items)
+            survivors = _verify_source_claim_winners(items, settle_seconds=0)
 
         assert [it["id"] for it in survivors] == ["dd:a/path", "dd:c/path"]
         # The verification query gates on token + StandardNameSource status.
@@ -560,15 +567,70 @@ class TestVerifySourceClaimWinners:
         from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
 
         items = [
-            {"id": "dd:a", "claim_token": "tok-x"},
-            {"id": "dd:b", "claim_token": "tok-x"},
+            {"id": "dd:a", "claim_token": "tok-x", "claim_seq": 2},
+            {"id": "dd:b", "claim_token": "tok-x", "claim_seq": 2},
         ]
-        gc = _mock_gc_query(return_values=[[{"id": "dd:a"}, {"id": "dd:b"}]])
+        gc = _mock_gc_query(
+            return_values=[
+                [
+                    {"id": "dd:a", "claim_seq": 2},
+                    {"id": "dd:b", "claim_seq": 2},
+                ]
+            ]
+        )
 
         with _patch_gc(gc):
-            survivors = _verify_source_claim_winners(items)
+            survivors = _verify_source_claim_winners(items, settle_seconds=0)
 
         assert [it["id"] for it in survivors] == ["dd:a", "dd:b"]
+
+    def test_exact_sequence_fences_delayed_duplicate(self):
+        """A token match is insufficient when a newer claim sequence won."""
+        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+
+        items = [
+            {"id": "dd:a", "claim_token": "tok-x", "claim_seq": 4},
+            {"id": "dd:b", "claim_token": "tok-x", "claim_seq": 7},
+        ]
+        gc = _mock_gc_query(
+            return_values=[
+                [
+                    {"id": "dd:a", "claim_seq": 5},
+                    {"id": "dd:b", "claim_seq": 7},
+                ]
+            ]
+        )
+
+        with _patch_gc(gc):
+            survivors = _verify_source_claim_winners(items, settle_seconds=0)
+
+        assert [it["id"] for it in survivors] == ["dd:b"]
+
+    def test_missing_sequence_is_not_authorized(self):
+        """A source with no exact sequence cannot authorize paid work."""
+        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+
+        items = [{"id": "dd:a", "claim_token": "tok-x", "claim_seq": None}]
+        gc = _mock_gc_query(return_values=[])
+
+        with _patch_gc(gc):
+            survivors = _verify_source_claim_winners(items, settle_seconds=0)
+
+        assert survivors == []
+        gc.query.assert_not_called()
+
+    def test_missing_token_is_not_authorized(self):
+        """A sequence without its exact token cannot authorize paid work."""
+        from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+
+        items = [{"id": "dd:a", "claim_token": None, "claim_seq": 3}]
+        gc = _mock_gc_query(return_values=[])
+
+        with _patch_gc(gc):
+            survivors = _verify_source_claim_winners(items, settle_seconds=0)
+
+        assert survivors == []
+        gc.query.assert_not_called()
 
     def test_empty_items_short_circuit(self):
         """Empty claim list returns immediately without a graph round-trip."""

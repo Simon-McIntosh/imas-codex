@@ -48,6 +48,7 @@ class TestStandardNameSourceSchema:
             "status",
             "claimed_at",
             "claim_token",
+            "claim_seq",
             "attempt_count",
             "last_error",
             "failed_at",

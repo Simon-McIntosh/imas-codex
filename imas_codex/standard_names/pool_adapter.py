@@ -112,7 +112,10 @@ async def _seed_explicit_paths(
     """
     from imas_codex.graph.client import GraphClient
     from imas_codex.settings import get_dd_version
-    from imas_codex.standard_names.graph_ops import merge_standard_name_sources
+    from imas_codex.standard_names.graph_ops import (
+        claim_explicit_standard_name_sources,
+        merge_standard_name_sources,
+    )
 
     dd_version = get_dd_version()
     # Build SNS dicts for merge. Per-source dicts carry no version (the re-seed
@@ -141,6 +144,12 @@ async def _seed_explicit_paths(
 
     await asyncio.to_thread(_merge)
 
+    claims = await asyncio.to_thread(claim_explicit_standard_name_sources, paths)
+    claims_by_source = {claim["source_id"]: claim for claim in claims}
+    claimed_paths = list(claims_by_source)
+    if not claimed_paths:
+        return []
+
     # Read back enriched items from graph
     def _read_items() -> list[dict]:
         with GraphClient() as gc:
@@ -155,7 +164,7 @@ async def _seed_explicit_paths(
                        n.data_type AS data_type,
                        coalesce(u.id, n.unit) AS unit
                 """,
-                paths=paths,
+                paths=claimed_paths,
             )
             return [dict(r) for r in (rows or [])]
 
@@ -177,6 +186,17 @@ async def _seed_explicit_paths(
 
     dd_meta = await asyncio.to_thread(_get_dd_meta)
     for item in items:
+        claim = claims_by_source[item["path"]]
+        item.update(
+            {
+                "source_id": claim["source_id"],
+                "source_type": claim["source_type"],
+                "claim_token": claim["claim_token"],
+                "claim_seq": claim["claim_seq"],
+                "status": claim["status"],
+                "attempt_count": claim.get("attempt_count", 0),
+            }
+        )
         item["dd_version"] = dd_meta.get("dd_version") or dd_version
         item["cocos_version"] = dd_meta.get("cocos_version")
 
@@ -191,6 +211,7 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
     """
     from imas_codex.settings import get_dd_version
     from imas_codex.standard_names.graph_ops import (
+        claim_explicit_standard_name_sources,
         get_existing_standard_names,
         get_named_source_ids,
         merge_standard_name_sources,
@@ -261,6 +282,27 @@ async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
                 sources, force=state.force, default_dd_version=get_dd_version()
             )
 
-        return all_items
+        claims = claim_explicit_standard_name_sources(
+            [item["path"] for item in all_items if item.get("path")]
+        )
+        claims_by_source = {claim["source_id"]: claim for claim in claims}
+        claimed_items = []
+        for item in all_items:
+            claim = claims_by_source.get(item.get("path"))
+            if claim is None:
+                continue
+            item.update(
+                {
+                    "source_id": claim["source_id"],
+                    "source_type": claim["source_type"],
+                    "claim_token": claim["claim_token"],
+                    "claim_seq": claim["claim_seq"],
+                    "status": claim["status"],
+                    "attempt_count": claim.get("attempt_count", 0),
+                }
+            )
+            claimed_items.append(item)
+
+        return claimed_items
 
     return await asyncio.to_thread(_extract)

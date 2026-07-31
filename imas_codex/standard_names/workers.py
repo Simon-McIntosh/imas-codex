@@ -434,15 +434,12 @@ def is_well_formed_candidate(raw_name: str) -> tuple[bool, str | None]:
 
     Rejection criteria:
     - Empty or whitespace-only
-    - Length > 100 characters (likely LLM monologue)
     - Contains newline, tab, ``{``, ``}``, ``\\``, or triple-dot
     - Not snake_case-shaped after stripping
     """
     if not raw_name or not raw_name.strip():
         return False, "empty_or_whitespace"
     name = raw_name.strip()
-    if len(name) > 100:
-        return False, "too_long"
     if any(ch in name for ch in ("\n", "\t", "{", "}", "\\")):
         return False, "illegal_chars"
     if "..." in name:
@@ -450,6 +447,159 @@ def is_well_formed_candidate(raw_name: str) -> tuple[bool, str | None]:
     if not _SNAKE_CASE_RE.fullmatch(name):
         return False, "not_snake_case"
     return True, None
+
+
+def _claimed_source_ids(batch: list[dict[str, Any]]) -> set[str]:
+    """Return the authoritative bare source ids carried by a claimed batch."""
+    return {
+        source_id
+        for item in batch
+        if (source_id := (item.get("path") or item.get("source_id")))
+    }
+
+
+def _claimed_source_outcome(
+    batch: list[dict[str, Any]],
+    source_id: str,
+    *,
+    source_type: str,
+    status: str,
+    last_error: str | None = None,
+    skip_reason: str | None = None,
+    skip_reason_detail: str | None = None,
+) -> dict[str, Any] | None:
+    """Build an exact fenced outcome for one source in a claimed batch."""
+    item = next(
+        (
+            claimed
+            for claimed in batch
+            if (claimed.get("path") or claimed.get("source_id")) == source_id
+        ),
+        None,
+    )
+    if not item:
+        return None
+    token = item.get("claim_token")
+    seq = item.get("claim_seq")
+    if not token or seq is None:
+        return None
+    return {
+        "sns_id": f"{source_type}:{source_id}",
+        "source_id": source_id,
+        "claim_token": token,
+        "claim_seq": seq,
+        "status": status,
+        "last_error": last_error,
+        "skip_reason": skip_reason,
+        "skip_reason_detail": skip_reason_detail,
+    }
+
+
+def _sanitize_compose_result_sources(
+    result: Any,
+    allowed_source_ids: set[str],
+    *,
+    phase: str,
+) -> None:
+    """Fence every compose-result source projection to the claimed batch.
+
+    The prompt contains related and cross-IDS paths for context, so an LLM can
+    legitimately mention an unclaimed sibling. Context is not authorization:
+    only the sources in the graph-claimed batch may be attached, skipped,
+    marked with a vocabulary gap, or persisted through a candidate.
+    """
+    rejected: set[str] = set()
+
+    kept_candidates = []
+    for candidate in result.candidates:
+        if candidate.source_id not in allowed_source_ids:
+            rejected.add(candidate.source_id)
+            continue
+        out_of_batch_paths = set(candidate.dd_paths) - allowed_source_ids
+        rejected.update(out_of_batch_paths)
+        candidate.dd_paths = [
+            path for path in candidate.dd_paths if path in allowed_source_ids
+        ]
+        kept_candidates.append(candidate)
+    result.candidates = kept_candidates
+
+    kept_attachments = []
+    for attachment in result.attachments:
+        if attachment.source_id in allowed_source_ids:
+            kept_attachments.append(attachment)
+        else:
+            rejected.add(attachment.source_id)
+    result.attachments = kept_attachments
+
+    rejected.update(set(result.skipped) - allowed_source_ids)
+    result.skipped = [sid for sid in result.skipped if sid in allowed_source_ids]
+
+    kept_gaps = []
+    for gap in result.vocab_gaps:
+        if gap.source_id in allowed_source_ids:
+            kept_gaps.append(gap)
+        else:
+            rejected.add(gap.source_id)
+    result.vocab_gaps = kept_gaps
+
+    if rejected:
+        logger.warning(
+            "Pool %s: ignored %d out-of-batch source proposal(s): %s",
+            phase,
+            len(rejected),
+            ", ".join(sorted(rejected)[:8]),
+        )
+
+
+def _filter_persist_candidates_to_claimed_sources(
+    candidates: list[dict[str, Any]],
+    allowed_source_ids: set[str],
+    *,
+    phase: str,
+) -> list[dict[str, Any]]:
+    """Keep only candidates whose own source was separately claimed."""
+    kept = [
+        candidate
+        for candidate in candidates
+        if candidate.get("source_id") in allowed_source_ids
+    ]
+    rejected = len(candidates) - len(kept)
+    if rejected:
+        logger.warning(
+            "Pool %s: deferred %d candidate(s) without a source claim",
+            phase,
+            rejected,
+        )
+    return kept
+
+
+def _mark_source_prevalidation_failed(
+    source_id: str,
+    *,
+    source_type: str,
+    candidate_name: str,
+    reason: str,
+    claim_token: str | None = None,
+    claim_seq: int | None = None,
+) -> bool:
+    """Persist a terminal pre-validation failure with actionable diagnostics."""
+    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
+
+    error = f"candidate pre-validation failed ({reason}): {candidate_name}"
+    if not claim_token or claim_seq is None:
+        return False
+    winners = persist_claimed_source_outcomes(
+        [
+            {
+                "sns_id": f"{source_type}:{source_id}",
+                "claim_token": claim_token,
+                "claim_seq": claim_seq,
+                "status": "failed",
+                "last_error": error,
+            }
+        ]
+    )
+    return bool(winners)
 
 
 def provenance_canonical_names(
@@ -1596,7 +1746,7 @@ def _mark_vocab_gap_sources(
     batch: list[dict],
     error_detail: str,
     source_kind: str,
-) -> None:
+) -> int:
     """Mark sources after a vocab-gap validation failure.
 
     When batch_size == 1 the offending source is known, so it is marked
@@ -1606,44 +1756,28 @@ def _mark_vocab_gap_sources(
     they will be reclaimed on the next ``sn run`` and retried in a
     different (possibly smaller) batch.
     """
-    try:
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.graph_ops import mark_source_skipped
+    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
 
-        single_source = len(batch) == 1
-        reason = "vocab_gap_compose" if single_source else "vocab_gap_batch"
-
-        with GraphClient() as gc:
-            for item in batch:
-                sid = item.get("source_id") or item.get("id", "")
-                if not sid:
-                    continue
-                if single_source:
-                    mark_source_skipped(
-                        gc,
-                        sid,
-                        reason=reason,
-                        detail=error_detail[:300],
-                        source_type=source_kind,
-                    )
-                else:
-                    # Reset to extracted so the source is reclaimed next run
-                    sns_id = f"{source_kind}:{sid}"
-                    gc.query(
-                        """
-                        MATCH (sns:StandardNameSource {id: $sns_id})
-                        SET sns.status = 'extracted',
-                            sns.claimed_at = null,
-                            sns.claim_token = null,
-                            sns.skip_reason = $reason,
-                            sns.skip_reason_detail = $detail
-                        """,
-                        sns_id=sns_id,
-                        reason=reason,
-                        detail=error_detail[:300],
-                    )
-    except Exception as exc:
-        logger.debug("Failed to mark sources after vocab gap: %s", exc)
+    single_source = len(batch) == 1
+    reason = "vocab_gap_compose" if single_source else "vocab_gap_batch"
+    status = "skipped" if single_source else "extracted"
+    outcomes = []
+    for item in batch:
+        sid = item.get("source_id") or item.get("path")
+        if not sid:
+            continue
+        outcome = _claimed_source_outcome(
+            batch,
+            sid,
+            source_type=source_kind,
+            status=status,
+            last_error=error_detail[:300],
+            skip_reason=reason,
+            skip_reason_detail=error_detail[:300],
+        )
+        if outcome:
+            outcomes.append(outcome)
+    return len(persist_claimed_source_outcomes(outcomes))
 
 
 def _related_path_neighbours(
@@ -2358,6 +2492,8 @@ def _is_attachment_consistent(
 def _process_attachments_core(
     attachments: list,
     wlog: logging.LoggerAdapter | logging.Logger,
+    *,
+    source_claims: list[dict[str, Any]] | None = None,
 ) -> dict[str, int]:
     """Stateless attachment-processing helper used by both compose paths.
 
@@ -2365,7 +2501,6 @@ def _process_attachments_core(
     appends ``source_paths``, and returns ``{"accepted", "rejected"}``
     counts.  Caller is responsible for any state-side stats updates.
     """
-    from imas_codex.graph.client import GraphClient
 
     # Accumulate each target name's accepted sources within this batch so two
     # conflicting attachments — e.g. two different vector fields of one DD
@@ -2392,31 +2527,47 @@ def _process_attachments_core(
     if not accepted:
         return counts
 
-    batch = [
-        {"source_id": a.source_id, "standard_name": a.standard_name} for a in accepted
-    ]
+    if source_claims is None:
+        wlog.warning(
+            "Rejected %d attachments without source ownership fences",
+            len(accepted),
+        )
+        counts["rejected"] += len(accepted)
+        return counts
 
-    try:
-        with GraphClient() as gc:
-            gc.query(
-                """
-                UNWIND $batch AS b
-                MATCH (sn:StandardName {id: b.standard_name})
-                MATCH (src:IMASNode {id: b.source_id})
-                MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
-                WITH sn, 'dd:' + b.source_id AS uri
-                WHERE NOT uri IN coalesce(sn.source_paths, [])
-                SET sn.source_paths = coalesce(sn.source_paths, []) + uri
-                """,
-                batch=batch,
+    from imas_codex.standard_names.graph_ops import persist_claimed_attachments
+
+    fenced_batch = []
+    for attachment in accepted:
+        outcome = _claimed_source_outcome(
+            source_claims,
+            attachment.source_id,
+            source_type="dd",
+            status="attached",
+        )
+        if outcome:
+            fenced_batch.append(
+                {
+                    **outcome,
+                    "source_id": attachment.source_id,
+                    "standard_name": attachment.standard_name,
+                }
             )
-
-        for a in accepted:
-            wlog.info("Attached %s → %s (%s)", a.source_id, a.standard_name, a.reason)
-
-        counts["accepted"] = len(accepted)
-    except Exception:
-        wlog.warning("Failed to process attachments", exc_info=True)
+    winner_ids = set(persist_claimed_attachments(fenced_batch))
+    accepted = [
+        attachment
+        for attachment in accepted
+        if f"dd:{attachment.source_id}" in winner_ids
+    ]
+    counts["rejected"] += len(attachments) - len(rejected) - len(accepted)
+    counts["accepted"] = len(accepted)
+    for attachment in accepted:
+        wlog.info(
+            "Attached %s → %s (%s)",
+            attachment.source_id,
+            attachment.standard_name,
+            attachment.reason,
+        )
 
     return counts
 
@@ -2447,109 +2598,29 @@ def _process_attachments(
 def _update_sources_after_compose(
     candidates: list[dict], source: str, wlog: logging.LoggerAdapter
 ) -> None:
-    """Update StandardNameSource nodes to 'composed' after successful batch composition.
+    """Reject the unfenced legacy compose transition.
 
-    Error-sibling candidates (minted deterministically, model=
-    ``deterministic:dd_error_modifier``) are excluded — their source
-    IMASNodes are not extracted as StandardNameSource, so linking them
-    here would produce false-positive "linking gap" warnings.  Their
-    provenance is carried on ``StandardName.source_paths``.
+    Claimed composition is finalized inside
+    :func:`graph_ops.persist_generated_name_batch`; source IDs alone are never
+    sufficient authority for a graph mutation.
     """
-    from imas_codex.graph.client import GraphClient
-
-    source_type = "dd" if source == "dd" else "signals"
-    batch = []
-    for c in candidates:
-        if c.get("model") == "deterministic:dd_error_modifier":
-            continue  # error siblings have no StandardNameSource
-        source_id = c.get("source_id")
-        sn_id = c.get("id")
-        if source_id and sn_id:
-            batch.append(
-                {
-                    "sns_id": f"{source_type}:{source_id}",
-                    "sn_id": sn_id,
-                }
-            )
-
-    if not batch:
-        return
-
-    try:
-        with GraphClient() as gc:
-            result = gc.query(
-                """
-                UNWIND $batch AS b
-                MATCH (sns:StandardNameSource {id: b.sns_id})
-                MATCH (sn:StandardName {id: b.sn_id})
-                SET sns.status = 'composed',
-                    sns.composed_at = datetime(),
-                    sns.produced_sn_id = sn.id
-                MERGE (sns)-[:PRODUCED_NAME]->(sn)
-                RETURN count(sns) AS linked
-                """,
-                batch=batch,
-            )
-            linked = result[0]["linked"] if result else 0
-        if linked < len(batch):
-            wlog.warning(
-                "Compose-linking gap: %d/%d sources had no matching "
-                "StandardName (edge not written, source still 'extracted')",
-                len(batch) - linked,
-                len(batch),
-            )
-        wlog.debug("Updated %d StandardNameSource nodes to composed", linked)
-    except Exception:
-        wlog.warning("Failed to update StandardNameSource status", exc_info=True)
+    if candidates:
+        wlog.warning(
+            "Ignored %d unfenced %s compose source updates",
+            len(candidates),
+            source,
+        )
 
 
 def _update_sources_after_attach(
     attachments: list, source: str, wlog: logging.LoggerAdapter
 ) -> None:
-    """Update StandardNameSource nodes to 'attached' status."""
-    from imas_codex.graph.client import GraphClient
-
-    source_type = "dd" if source == "dd" else "signals"
-    batch = []
-    for a in attachments:
-        if a.source_id:
-            batch.append(
-                {
-                    "sns_id": f"{source_type}:{a.source_id}",
-                    "sn_id": a.standard_name,
-                }
-            )
-
-    if not batch:
-        return
-
-    try:
-        with GraphClient() as gc:
-            result = gc.query(
-                """
-                UNWIND $batch AS b
-                MATCH (sns:StandardNameSource {id: b.sns_id})
-                MATCH (sn:StandardName {id: b.sn_id})
-                SET sns.status = 'attached',
-                    sns.composed_at = datetime(),
-                    sns.produced_sn_id = sn.id
-                MERGE (sns)-[:PRODUCED_NAME]->(sn)
-                RETURN count(sns) AS linked
-                """,
-                batch=batch,
-            )
-            linked = result[0]["linked"] if result else 0
-        if linked < len(batch):
-            wlog.warning(
-                "Attach-linking gap: %d/%d sources had no matching "
-                "StandardName (edge not written, source still 'extracted')",
-                len(batch) - linked,
-                len(batch),
-            )
-        wlog.debug("Updated %d StandardNameSource nodes to attached", linked)
-    except Exception:
+    """Reject the unfenced legacy attachment transition."""
+    if attachments:
         wlog.warning(
-            "Failed to update StandardNameSource attachment status", exc_info=True
+            "Ignored %d unfenced %s attachment source updates",
+            len(attachments),
+            source,
         )
 
 
@@ -2560,97 +2631,14 @@ def _update_sources_after_vocab_gap(
     *,
     max_attempts: int = 3,
 ) -> None:
-    """Set the source status after a compose-time vocab-gap report.
-
-    A source is retired to ``vocab_gap`` ONLY when it is blocked by a
-    genuinely-absent token in a closed grammar segment — the sole actionable
-    signal for an ISN vocabulary addition. The blocking gap itself is persisted
-    by :func:`write_vocab_gaps` (which runs first) as a ``VocabGap`` node with a
-    direct ``StandardNameSource -[:HAS_STANDARD_NAME_VOCAB_GAP]-> VocabGap``
-    edge, so the source explains itself in one hop and ``reconcile_vocab_gaps``
-    revives it when the gap is resolved. This function only flips the status.
-
-    A gap the composer mis-reported — a token that decomposes into existing
-    tokens, sits in the wrong slot, is ambiguous, or is a false positive — is
-    not a vocabulary deficiency (and gets no node): the source is still nameable
-    and the composer erred, so it is kept retryable under the attempt-count cap
-    rather than stranded at ``vocab_gap``. Open/pseudo-segment gaps
-    (grammar_ambiguity) are ignored entirely.
-    """
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.segments import (
-        is_actionable_gap,
-        is_open_segment,
-    )
-
-    source_type = "dd" if source == "dd" else "signals"
-    gaps_by_source: dict[str, list[dict]] = {}
-    skipped_pseudo = 0
-    for vg in vocab_gaps:
-        if is_open_segment(vg.get("segment")):
-            skipped_pseudo += 1
-            continue
-        sid = vg.get("source_id")
-        if sid:
-            gaps_by_source.setdefault(f"{source_type}:{sid}", []).append(vg)
-
-    if skipped_pseudo:
-        wlog.debug(
-            "Skipped vocab_gap update for %d pseudo-segment gaps", skipped_pseudo
+    """Reject the unfenced legacy vocabulary-gap transition."""
+    del max_attempts
+    if vocab_gaps:
+        wlog.warning(
+            "Ignored %d unfenced %s vocabulary-gap source updates",
+            len(vocab_gaps),
+            source,
         )
-    if not gaps_by_source:
-        return
-
-    retire_ids: list[str] = []
-    retry_ids: list[str] = []
-    for sns_id, gaps in gaps_by_source.items():
-        if any(is_actionable_gap(g.get("segment"), g.get("token")) for g in gaps):
-            retire_ids.append(sns_id)
-        else:
-            retry_ids.append(sns_id)
-
-    try:
-        with GraphClient() as gc:
-            if retire_ids:
-                gc.query(
-                    """
-                    UNWIND $ids AS sns_id
-                    MATCH (sns:StandardNameSource {id: sns_id})
-                    SET sns.status = 'vocab_gap',
-                        sns.claimed_at = null,
-                        sns.claim_token = null
-                    """,
-                    ids=retire_ids,
-                )
-            if retry_ids:
-                # Composer mis-report, not a vocabulary gap — increment the
-                # attempt count and return the source to the compose pool;
-                # a deterministic failure still terminates at 'failed' once
-                # the cap is hit, so it is bounded, never stranded.
-                gc.query(
-                    """
-                    UNWIND $ids AS sns_id
-                    MATCH (sns:StandardNameSource {id: sns_id})
-                    SET sns.attempt_count = coalesce(sns.attempt_count, 0) + 1,
-                        sns.claimed_at = null,
-                        sns.claim_token = null,
-                        sns.status = CASE
-                            WHEN coalesce(sns.attempt_count, 0) + 1 >= $max_attempts
-                            THEN 'failed' ELSE 'extracted' END,
-                        sns.failed_at = CASE
-                            WHEN coalesce(sns.attempt_count, 0) + 1 >= $max_attempts
-                            THEN datetime() ELSE sns.failed_at END
-                    """,
-                    ids=retry_ids,
-                    max_attempts=max_attempts,
-                )
-        wlog.debug(
-            "vocab_gap update: %d retired, %d kept retryable",
-            len(retire_ids),
-            len(retry_ids),
-        )
-    except Exception:
-        wlog.warning("Failed to persist vocab_gap source outcome", exc_info=True)
 
 
 def _update_sources_after_skip(
@@ -2658,38 +2646,103 @@ def _update_sources_after_skip(
     source: str,
     wlog: logging.LoggerAdapter | logging.Logger,
 ) -> None:
-    """Clear claims and mark StandardNameSource nodes ``status='skipped'``.
+    """Reject the unfenced legacy skip transition."""
+    if skipped_ids:
+        wlog.warning(
+            "Ignored %d unfenced %s skip source updates",
+            len(skipped_ids),
+            source,
+        )
 
-    The compose LLM may decide a source is not a physics quantity and emit
-    its ``source_id`` in ``result.skipped``.  Without this transition the
-    source remains ``claimed`` forever and gets re-processed every run.
-    """
-    from imas_codex.graph.client import GraphClient
 
-    if not skipped_ids:
-        return
+def _persist_claimed_skips(
+    skipped_ids: list[str],
+    batch: list[dict[str, Any]],
+    *,
+    source_type: str,
+    reason: str,
+    detail: str | None = None,
+) -> int:
+    """Persist skips only for exact source-claim winners."""
+    from imas_codex.standard_names.graph_ops import persist_claimed_source_outcomes
 
-    source_type = "dd" if source == "dd" else "signals"
-    sns_ids = [f"{source_type}:{sid}" for sid in skipped_ids if sid]
-    if not sns_ids:
-        return
+    outcomes = []
+    for source_id in skipped_ids:
+        outcome = _claimed_source_outcome(
+            batch,
+            source_id,
+            source_type=source_type,
+            status="skipped",
+            skip_reason=reason,
+            skip_reason_detail=detail,
+        )
+        if outcome:
+            outcomes.append(outcome)
+    return len(persist_claimed_source_outcomes(outcomes))
 
-    try:
-        with GraphClient() as gc:
-            gc.query(
-                """
-                UNWIND $ids AS sns_id
-                MATCH (sns:StandardNameSource {id: sns_id})
-                SET sns.status        = 'skipped',
-                    sns.claim_token   = null,
-                    sns.claimed_at    = null,
-                    sns.skipped_at    = datetime()
-                """,
-                ids=sns_ids,
+
+def _consume_claimed_vocab_gaps(
+    gaps: list[dict[str, Any]],
+    batch: list[dict[str, Any]],
+    *,
+    source_type: str,
+    max_attempts: int = 3,
+) -> list[dict[str, Any]]:
+    """Persist vocabulary gaps while consuming their exact source claims."""
+    from imas_codex.standard_names.graph_ops import persist_claimed_vocab_gaps
+    from imas_codex.standard_names.segments import is_actionable_gap, is_open_segment
+
+    outcomes = []
+    gap_by_sns: dict[str, list[dict[str, Any]]] = {}
+    for gap in gaps:
+        if is_open_segment(gap.get("segment")):
+            continue
+        source_id = gap.get("source_id")
+        if not source_id:
+            continue
+        item = next(
+            (
+                claimed
+                for claimed in batch
+                if (claimed.get("path") or claimed.get("source_id")) == source_id
+            ),
+            None,
+        )
+        if not item:
+            continue
+        actionable = is_actionable_gap(gap.get("segment"), gap.get("token"))
+        status = (
+            "vocab_gap"
+            if actionable
+            else (
+                "failed"
+                if int(item.get("attempt_count") or 0) >= max_attempts
+                else "extracted"
             )
-        wlog.debug("Marked %d StandardNameSource nodes as skipped", len(sns_ids))
-    except Exception:
-        wlog.warning("Failed to update StandardNameSource skip status", exc_info=True)
+        )
+        outcome = _claimed_source_outcome(
+            batch,
+            source_id,
+            source_type=source_type,
+            status=status,
+            last_error=(
+                None
+                if actionable
+                else f"non-actionable vocabulary gap: {gap.get('reason', '')}"[:300]
+            ),
+        )
+        if outcome:
+            outcomes.append(outcome)
+            gap_by_sns.setdefault(outcome["sns_id"], []).append(gap)
+
+    winners = set(
+        persist_claimed_vocab_gaps(
+            gaps,
+            outcomes,
+            source_type=source_type,
+        )
+    )
+    return [gap for sns_id in winners for gap in gap_by_sns.get(sns_id, [])]
 
 
 def _search_reference_exemplars(
@@ -3553,28 +3606,6 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     c.source_id,
                     raw_unit,
                 )
-                if c.source_id and not state.dry_run:
-                    try:
-                        from imas_codex.graph.client import GraphClient
-                        from imas_codex.standard_names.graph_ops import (
-                            mark_source_skipped,
-                        )
-
-                        _prefix = "dd" if state.source == "dd" else "signals"
-                        with GraphClient() as _gc:
-                            mark_source_skipped(
-                                _gc,
-                                c.source_id,
-                                reason=_skip_reason,
-                                detail=str(raw_unit),
-                                source_type=_prefix,
-                            )
-                    except Exception as exc:
-                        wlog.debug(
-                            "Failed to mark source %s skipped: %s",
-                            c.source_id,
-                            exc,
-                        )
                 state.compose_stats.errors += 1
                 continue
             unit = raw_unit
@@ -3618,17 +3649,13 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 # Mark source as failed (if identifiable)
                 if c.source_id and not state.dry_run:
                     try:
-                        from imas_codex.graph.client import GraphClient
-
                         _prefix = "dd" if state.source == "dd" else "signals"
-                        with GraphClient() as gc:
-                            gc.query(
-                                "MATCH (sns:StandardNameSource {id: $id}) "
-                                "SET sns.status = 'failed', "
-                                "    sns.claimed_at = null, "
-                                "    sns.claim_token = null",
-                                id=f"{_prefix}:{c.source_id}",
-                            )
+                        _mark_source_prevalidation_failed(
+                            c.source_id,
+                            source_type=_prefix,
+                            candidate_name=name_id,
+                            reason=_reject_reason or "malformed",
+                        )
                     except Exception:
                         wlog.debug("Failed to mark source %s as failed", c.source_id)
                 continue
@@ -3648,24 +3675,6 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     name_id[:80],
                     _skip_reason,
                 )
-                if c.source_id and not state.dry_run:
-                    try:
-                        from imas_codex.graph.client import GraphClient
-                        from imas_codex.standard_names.graph_ops import (
-                            mark_source_skipped,
-                        )
-
-                        _src_type = "dd" if state.source == "dd" else "signals"
-                        with GraphClient() as gc:
-                            mark_source_skipped(
-                                gc,
-                                c.source_id,
-                                reason=_skip_reason or "non_nameable_coordinate",
-                                detail=f"bare non-nameable token: {name_id}",
-                                source_type=_src_type,
-                            )
-                    except Exception:
-                        wlog.debug("Failed to mark source %s skipped", c.source_id)
                 continue
 
             # Deterministic source<->name consistency gate (tense + state
@@ -3834,15 +3843,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             # distinct_confirmed; the rest are unchecked.
             _stamp_dedup_decision(gap_dicts, _token_reuse_hits)
 
-            # Persist to graph immediately so gaps survive cost-limit interruption
-            from imas_codex.standard_names.graph_ops import write_vocab_gaps
-
-            source_type = "dd" if state.source == "dd" else "signals"
-            await asyncio.to_thread(write_vocab_gaps, gap_dicts, source_type)
-            wlog.debug("Persisted %d vocab gaps to graph", len(gap_dicts))
-
-            if not state.dry_run:
-                _update_sources_after_vocab_gap(gap_dicts, state.source, wlog)
+            wlog.warning(
+                "Retained %d legacy compose vocabulary gaps in memory only; "
+                "graph persistence requires fenced pool claims",
+                len(gap_dicts),
+            )
 
         # Auto-detect novel physical_base tokens in composed candidates.
         # These are surfaced as VocabGap nodes for ISN review without
@@ -3861,17 +3866,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     if (g["source_id"], g["segment"], g["token"]) not in existing_keys
                 ]
                 if novel:
-                    from imas_codex.standard_names.graph_ops import write_vocab_gaps
-
-                    source_type = "dd" if state.source == "dd" else "signals"
-                    await asyncio.to_thread(
-                        write_vocab_gaps,
-                        novel,
-                        source_type,
-                        skip_segment_filter=True,
-                    )
                     state.stats.setdefault("vocab_gaps", []).extend(novel)
-                    wlog.info("Auto-detected %d novel physical_base gaps", len(novel))
+                    wlog.info(
+                        "Retained %d legacy physical-base gaps in memory only",
+                        len(novel),
+                    )
         if result.attachments:
             _process_attachments(result.attachments, state, wlog)
             if not state.dry_run:
@@ -4983,6 +4982,15 @@ async def compose_batch(
     if not batch:
         return 0
 
+    # Claims are already verified by claim_generate_name_batch. Re-verify here
+    # as well so direct processor callers cannot bypass fencing before a paid
+    # compose call.
+    from imas_codex.standard_names.graph_ops import _verify_source_claim_winners
+
+    batch = await asyncio.to_thread(_verify_source_claim_winners, batch)
+    if not batch:
+        return 0
+
     model = compose_model or get_model("sn-compose")
     context = build_compose_context()
 
@@ -5195,6 +5203,11 @@ async def compose_batch(
                     return 0
                 raise
             result, cost, tokens = llm_out
+            _sanitize_compose_result_sources(
+                result,
+                _claimed_source_ids(batch),
+                phase=phase_tag,
+            )
 
             # Accumulate token/cost totals across retries
             _total_compose_cost += cost
@@ -5322,6 +5335,20 @@ async def compose_batch(
                 {"role": "user", "content": user_prompt},
             ]
 
+        # The paid response can return after the stale-claim window. Fence it
+        # again before source status, attachment, or candidate graph writes.
+        current_claims = await asyncio.to_thread(
+            _verify_source_claim_winners,
+            batch,
+            settle_seconds=0,
+        )
+        batch = current_claims
+        _sanitize_compose_result_sources(
+            result,
+            _claimed_source_ids(batch),
+            phase=phase_tag,
+        )
+
         # Use accumulated totals for per-candidate cost attribution
         cost = _total_compose_cost
         tokens_in = _total_tokens_in
@@ -5364,19 +5391,13 @@ async def compose_batch(
                 )
                 if c.source_id:
                     try:
-                        from imas_codex.graph.client import GraphClient
-                        from imas_codex.standard_names.graph_ops import (
-                            mark_source_skipped,
+                        _persist_claimed_skips(
+                            [c.source_id],
+                            batch,
+                            source_type=source_kind,
+                            reason=_skip_reason,
+                            detail=str(raw_unit),
                         )
-
-                        with GraphClient() as _gc:
-                            mark_source_skipped(
-                                _gc,
-                                c.source_id,
-                                reason=_skip_reason,
-                                detail=str(raw_unit),
-                                source_type=source_kind,
-                            )
                     except Exception as exc:
                         wlog.debug(
                             "Failed to mark pool source %s skipped: %s",
@@ -5417,16 +5438,14 @@ async def compose_batch(
                 )
                 if c.source_id:
                     try:
-                        from imas_codex.graph.client import GraphClient
-
-                        with GraphClient() as gc:
-                            gc.query(
-                                "MATCH (sns:StandardNameSource {id: $id}) "
-                                "SET sns.status = 'failed', "
-                                "    sns.claimed_at = null, "
-                                "    sns.claim_token = null",
-                                id=f"{source_kind}:{c.source_id}",
-                            )
+                        _mark_source_prevalidation_failed(
+                            c.source_id,
+                            source_type=source_kind,
+                            candidate_name=name_id,
+                            reason=_reject_reason or "malformed",
+                            claim_token=(source_item or {}).get("claim_token"),
+                            claim_seq=(source_item or {}).get("claim_seq"),
+                        )
                     except Exception:
                         wlog.debug("Failed to mark source %s as failed", c.source_id)
                 continue
@@ -5446,19 +5465,13 @@ async def compose_batch(
                 )
                 if c.source_id:
                     try:
-                        from imas_codex.graph.client import GraphClient
-                        from imas_codex.standard_names.graph_ops import (
-                            mark_source_skipped,
+                        _persist_claimed_skips(
+                            [c.source_id],
+                            batch,
+                            source_type=source_kind,
+                            reason=_skip_reason or "non_nameable_coordinate",
+                            detail=f"bare non-nameable token: {name_id}",
                         )
-
-                        with GraphClient() as gc:
-                            mark_source_skipped(
-                                gc,
-                                c.source_id,
-                                reason=_skip_reason or "non_nameable_coordinate",
-                                detail=f"bare non-nameable token: {name_id}",
-                                source_type=source_kind,
-                            )
                     except Exception:
                         wlog.debug("Failed to mark source %s skipped", c.source_id)
                 continue
@@ -5599,6 +5612,8 @@ async def compose_batch(
                 "cocos_transformation_type": cocos_type,
                 "cocos": batch[0].get("cocos_version") if batch else None,
                 "dd_version": batch[0].get("dd_version") if batch else None,
+                "source_claim_token": (source_item or {}).get("claim_token"),
+                "source_claim_seq": (source_item or {}).get("claim_seq"),
                 **({"_grammar_retry_exhausted": True} if grammar_failed else {}),
             }
 
@@ -5704,10 +5719,28 @@ async def compose_batch(
         for cand in candidates:
             cand.pop("_grammar_retry_exhausted", None)
 
+        # Re-check exact token+sequence ownership immediately before any graph
+        # mutation. A worker that lost its source claim while the LLM was
+        # running must not persist any part of that delayed response.
+        current_claims = await asyncio.to_thread(
+            _verify_source_claim_winners,
+            batch,
+            settle_seconds=0,
+        )
+        _sanitize_compose_result_sources(
+            result,
+            _claimed_source_ids(current_claims),
+            phase=phase_tag,
+        )
+        current_source_ids = _claimed_source_ids(current_claims)
+        candidates = _filter_persist_candidates_to_claimed_sources(
+            candidates,
+            current_source_ids,
+            phase=phase_tag,
+        )
+
         # ── Vocab gaps — persist + clear sources ──────────────────────
         if result.vocab_gaps:
-            from imas_codex.standard_names.graph_ops import write_vocab_gaps
-
             gap_dicts = [
                 {
                     "source_id": vg.source_id,
@@ -5721,56 +5754,21 @@ async def compose_batch(
             # after being shown a near-synonym registered token are
             # distinct_confirmed; the rest are unchecked.
             _stamp_dedup_decision(gap_dicts, _token_reuse_hits)
-            try:
-                await asyncio.to_thread(write_vocab_gaps, gap_dicts, source_kind)
-                wlog.debug(
-                    "Pool %s: persisted %d vocab gaps", phase_tag, len(gap_dicts)
-                )
-            except Exception:
-                wlog.warning(
-                    "Pool %s: write_vocab_gaps failed", phase_tag, exc_info=True
-                )
-            try:
-                await asyncio.to_thread(
-                    _update_sources_after_vocab_gap, gap_dicts, source_kind, wlog
-                )
-            except Exception:
-                wlog.debug(
-                    "Pool %s: vocab_gap source-status update failed",
-                    phase_tag,
-                    exc_info=True,
-                )
-
-        # Auto-detect novel physical_base tokens.
-        if result.candidates:
-            try:
-                auto_gaps = _auto_detect_physical_base_gaps(result.candidates)
-                if auto_gaps:
-                    from imas_codex.standard_names.graph_ops import write_vocab_gaps
-
-                    await asyncio.to_thread(
-                        write_vocab_gaps,
-                        auto_gaps,
-                        source_kind,
-                        skip_segment_filter=True,
-                    )
-                    wlog.debug(
-                        "Pool %s: auto-detected %d physical_base gaps",
-                        phase_tag,
-                        len(auto_gaps),
-                    )
-            except Exception:
-                wlog.debug(
-                    "Pool %s: physical_base gap detection failed",
-                    phase_tag,
-                    exc_info=True,
-                )
-
+            gap_dicts = await asyncio.to_thread(
+                _consume_claimed_vocab_gaps,
+                gap_dicts,
+                batch,
+                source_type=source_kind,
+            )
+            wlog.debug("Pool %s: persisted %d vocab gaps", phase_tag, len(gap_dicts))
         # ── Attachments — write edges + clear source claims ───────────
         if result.attachments:
             try:
                 attach_counts = await asyncio.to_thread(
-                    _process_attachments_core, result.attachments, wlog
+                    _process_attachments_core,
+                    result.attachments,
+                    wlog,
+                    source_claims=batch,
                 )
                 wlog.info(
                     "Pool %s: attached %d (rejected %d)",
@@ -5784,33 +5782,20 @@ async def compose_batch(
                     phase_tag,
                     exc_info=True,
                 )
-            try:
-                await asyncio.to_thread(
-                    _update_sources_after_attach,
-                    result.attachments,
-                    source_kind,
-                    wlog,
-                )
-            except Exception:
-                wlog.debug(
-                    "Pool %s: attach source-status update failed",
-                    phase_tag,
-                    exc_info=True,
-                )
-
         # ── Skipped sources — clear claims so they don't loop ─────────
         if result.skipped:
             try:
-                await asyncio.to_thread(
-                    _update_sources_after_skip,
+                skipped_count = await asyncio.to_thread(
+                    _persist_claimed_skips,
                     list(result.skipped),
-                    source_kind,
-                    wlog,
+                    batch,
+                    source_type=source_kind,
+                    reason="compose_model_skipped",
                 )
                 wlog.debug(
                     "Pool %s: marked %d sources as skipped",
                     phase_tag,
-                    len(result.skipped),
+                    skipped_count,
                 )
             except Exception:
                 wlog.debug(
@@ -5823,15 +5808,53 @@ async def compose_batch(
         if candidates:
             from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
-            written = await asyncio.to_thread(
+            persisted = await asyncio.to_thread(
                 persist_generated_name_batch,
                 candidates,
                 compose_model=model,
                 dd_version=batch[0].get("dd_version"),
                 cocos_version=batch[0].get("cocos_version"),
                 run_id=mgr.run_id,
+                return_winner_ids=True,
             )
+            if isinstance(persisted, int):
+                winner_ids = [
+                    f"{source_kind}:{candidate.get('source_id')}"
+                    for candidate in candidates[:persisted]
+                ]
+            else:
+                winner_ids = persisted
+            winner_id_set = set(winner_ids)
+            candidates = [
+                candidate
+                for candidate in candidates
+                if f"{source_kind}:{candidate.get('source_id')}" in winner_id_set
+            ]
+            written = len(candidates)
             logger.debug("Pool %s: persisted %d candidates", phase_tag, written)
+
+            # Derive auto-gaps only from finalized source winners. A losing
+            # source cannot authorize a gap mutation.
+            if candidates:
+                try:
+                    auto_gaps = _auto_detect_physical_base_gaps(candidates)
+                    if auto_gaps:
+                        from imas_codex.standard_names.graph_ops import (
+                            write_vocab_gaps,
+                        )
+
+                        await asyncio.to_thread(
+                            write_vocab_gaps,
+                            auto_gaps,
+                            source_kind,
+                            skip_segment_filter=True,
+                        )
+                except Exception:
+                    wlog.debug(
+                        "Pool %s: physical_base gap detection failed",
+                        phase_tag,
+                        exc_info=True,
+                    )
 
             # ── Emit per-item events ──────────────────────────────────
             if on_event is not None:
@@ -5847,7 +5870,7 @@ async def compose_batch(
                         }
                     )
 
-        return len(candidates)
+        return written if candidates else 0
 
     except Exception:
         logger.exception("Pool %s: compose batch failed", phase_tag)
