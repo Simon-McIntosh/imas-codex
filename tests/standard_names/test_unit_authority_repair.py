@@ -19,7 +19,10 @@ def test_derived_parent_identity_rejects_bare_state_without_subject() -> None:
     )
 
     assert issues
-    assert "requires a species subject" in issues[0]
+    assert any(
+        "internal_state" in issue and "requires one compatible species subject" in issue
+        for issue in issues
+    )
 
 
 def test_reviewed_unit_repair_is_ledgered_and_updates_edge() -> None:
