@@ -501,6 +501,79 @@ extracted → composed | attached | vocab_gap | failed | stale
 **Reconciliation:** `sn run --only reconcile` marks sources whose backing path
 no longer exists as `stale`.
 
+### Exact-source compose steering
+
+`sn source-hint` attaches durable, non-authoritative composition steering to
+one existing DD source before it enters pooled composition:
+
+```
+imas-codex sn source-hint <exact-dd-path> --hint TEXT --reason TEXT \
+    [--replace] [--dry-run]
+```
+
+The path must identify one exact DD source; a leading `dd:` is optional and
+wildcards, signal-source ids, and whitespace are refused. The source must be
+`extracted`, unclaimed, below the composition-attempt cap, and free of a live
+name binding. An existing open hint is also refused unless `--replace` is
+explicit. `--dry-run` reports the same decision without writing. Eligibility
+is checked again in the write query, so a concurrent claim or binding wins and
+the hint write reports the resulting refusal instead of steering in-flight
+work. This compare-and-set boundary is intentionally exact-source-only: the
+command cannot fan out to siblings, families, path patterns, or facility
+signals.
+
+The source stores `compose_hint`, its separate `compose_hint_reason`, request
+and consumption timestamps, and a `compose_hint_status` lifecycle:
+
+- `open` — delivered with that exact source whenever a generate-name worker
+  claims it;
+- `consumed` — the source atomically bound a newly generated, reserved, or
+  already-stable name;
+- `rejected` — reserved in the schema for a future explicit retirement
+  transition; no current CLI command sets this state.
+
+Only a successful source-to-name binding consumes an open hint. Validation
+failure, an LLM or persistence error, retry, interruption, claim expiry, and a
+name collision leave the hint open for the next claim. The text is retained
+after consumption as provenance; consumption changes the lifecycle fields
+rather than erasing the request.
+
+The pooled compose prompt receives an open hint and reason alongside the
+source's pinned DD snapshot. Steering may help interpret the quantity, but it
+cannot modify or override the DD version, unit, COCOS convention, physics
+domain, source identity, grammar validation, or other DD-authoritative fields.
+The reason is independent of `last_error` and retry-event reasons, so failure
+reporting cannot overwrite operator intent.
+
+Use this command only when a source has no live name to edit. It differs from
+the adjacent recovery surfaces:
+
+- `sn retry --failed ... --reason ...` releases a terminal or attempt-capped
+  source and records why another attempt is allowed; its reason is audit data,
+  not prompt steering.
+- `sn edit <name> --hint ... --reason ...` steers an existing StandardName and
+  can apply a name/family/subtree scope; `sn source-hint` instead steers the
+  next successful binding of exactly one DD source.
+
+The safe operator sequence is to preview and set the hint, then run the normal
+pool loop with that same exact path, for example:
+
+```
+imas-codex sn source-hint equilibrium/time_slice/.../quantity \
+    --hint "Preserve the source-defined denominator." \
+    --reason "The DD description defines a ratio against the complementary set." \
+    --dry-run
+imas-codex sn source-hint equilibrium/time_slice/.../quantity \
+    --hint "Preserve the source-defined denominator." \
+    --reason "The DD description defines a ratio against the complementary set."
+imas-codex sn run --focus equilibrium/time_slice/.../quantity
+```
+
+`sn run` uses the configured `[tool.imas-codex.sn-compose]` model by default;
+an explicit `--compose-model` remains a run-scoped override. Focus routing
+fences the worklist, while the ordinary compose, validation, review, and
+persistence gates remain authoritative.
+
 ### Validation gating
 
 `validation_status` is independent of review and gates names before review,
@@ -817,12 +890,13 @@ through review.
 
 | Command | Purpose | Key options |
 |---------|---------|-------------|
-| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted`, `--scope-run-id`, `--families` |
+| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `--compose-model`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted`, `--scope-run-id`, `--families` |
 | `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--stage`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
 | `sn status` | StandardName + StandardNameSource statistics, sibling-family harmonization state | `--family` |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
+| `sn source-hint` | Attach durable, non-authoritative compose steering to one eligible exact DD source; see [Exact-source compose steering](#exact-source-compose-steering). | `--hint`, `--reason` (mandatory), `--replace`, `--dry-run` |
 | `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |
 | `sn prune` | Scoped delete (relationship-first) | `--stage`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
 | `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |
@@ -931,7 +1005,8 @@ have closed vocabularies defined in ISN's `SEGMENT_TOKEN_MAP`.
 
 **Rules:** (1) Never add compounds to `physical_bases` — use qualifiers.
 (2) Qualifier order is insertion-order, preserved through round-trip.
-(3) Subjects win over qualifiers (parser stage 3 before stage 5). (4) Process
+(3) Role resolution assigns subject tokens to the dedicated subject segment
+rather than the generic qualifier segment. (4) Process
 tokens as prefixes are qualifiers, not processes. Never hardcode vocabulary
 tokens in Python — pull from ISN.
 
