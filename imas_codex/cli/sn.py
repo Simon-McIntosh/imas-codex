@@ -5894,6 +5894,55 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
         )
 
 
+@sn.command("source-hint")
+@click.argument("exact_dd_path")
+@click.option(
+    "--hint",
+    required=True,
+    help="Composition steering for this exact DD source.",
+)
+@click.option(
+    "--reason",
+    required=True,
+    help="Why this exact-source steering is warranted.",
+)
+@click.option(
+    "--replace",
+    is_flag=True,
+    help="Replace an existing open hint while the source remains eligible.",
+)
+@click.option("--dry-run", is_flag=True, help="Report the exact decision only.")
+def sn_source_hint(
+    exact_dd_path: str,
+    hint: str,
+    reason: str,
+    replace: bool,
+    dry_run: bool,
+) -> None:
+    """Steer composition of one exact DD source without overriding DD authority."""
+    from imas_codex.standard_names.graph_ops import set_source_compose_hint
+
+    try:
+        result = set_source_compose_hint(
+            exact_dd_path,
+            hint=hint,
+            reason=reason,
+            replace=replace,
+            dry_run=dry_run,
+        )
+    except ValueError as exc:
+        raise click.UsageError(str(exc)) from exc
+
+    if not result.get("eligible"):
+        raise click.ClickException(
+            f"source hint refused for {result['source_id']}: {result['decision']}"
+        )
+    click.echo(
+        f"{result['decision']}: {result['source_id']}"
+        + (" (dry-run)" if dry_run else "")
+    )
+
+
 @sn.command("retry")
 @click.option(
     "--failed",

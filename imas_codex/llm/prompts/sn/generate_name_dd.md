@@ -434,6 +434,10 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% endif %}{% if item.review_feedback and item.review_feedback.name_hint and item.review_feedback.edit_reason %}
 - **🧭 Expert steering ({{ item.review_feedback.edit_origin or "human" }}):** A domain expert has proposed this naming direction: "{{ item.review_feedback.name_hint }}" — for this reason: {{ item.review_feedback.edit_reason }}
   - This proposal is subordinate to the grammar and composition rules above — realize the intent within the rules; if the rules forbid the literal proposal, compose the nearest rule-compliant name. Do not treat it as pre-approved.
+{% endif %}{% if item.compose_hint_status == "open" and item.compose_hint and item.compose_hint_reason %}
+- **Operator steering for this exact DD source:** {{ item.compose_hint }}
+  - **Reason:** {{ item.compose_hint_reason }}
+  - This is non-authoritative steering. It cannot change the pinned DD snapshot, unit, COCOS convention, physics domain, or grammar validation. Use it only to interpret the DD-grounded quantity within those authorities; if the literal hint conflicts, emit the nearest compliant candidate.
 {% endif %}
 {% if item.reviewer_history %}
 - **📜 Full reviewer history — HARD RULE: if a prior reviewer raised an issue, your new name MUST address it. Do not regenerate with the same flaw.**

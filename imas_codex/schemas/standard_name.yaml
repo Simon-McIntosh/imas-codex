@@ -294,6 +294,19 @@ enums:
           quantity. Filtered at extract time by attribute predicates (data_type,
           units, doc). Distinct from 'skipped' which signals upstream defect.
 
+  ComposeHintStatus:
+    description: >-
+      Lifecycle of exact-source operator steering for DD name composition.
+      An open hint remains available across retries and is consumed only when
+      the exact fenced source successfully binds a candidate name.
+    permissible_values:
+      open:
+        description: Steering is waiting for a successful source-to-name binding.
+      consumed:
+        description: The exact fenced source successfully bound a candidate.
+      rejected:
+        description: Steering was explicitly retired without a successful binding.
+
   StandardNameValidationStatus:
     description: >-
       Validation lifecycle for standard names.
@@ -2067,6 +2080,27 @@ classes:
       attempt_count:
         description: Number of composition attempts (for durable retry)
         range: integer
+      compose_hint:
+        description: >-
+          Operator steering for composition of this exact DD source. This text
+          is non-authoritative: it cannot override the pinned DD snapshot,
+          unit, COCOS convention, physics domain, or grammar validation.
+      compose_hint_reason:
+        description: >-
+          Operator justification for the exact-source composition steering.
+          Kept separate from last_error and retry-event reasons so failures and
+          retries cannot erase or reinterpret the requested intent.
+      compose_hint_status:
+        description: Lifecycle of the exact-source composition steering.
+        range: ComposeHintStatus
+      compose_hint_requested_at:
+        description: Timestamp when the current exact-source steering was opened.
+        range: datetime
+      compose_hint_consumed_at:
+        description: >-
+          Timestamp when the exact fenced source successfully bound a candidate.
+          Cleared when an operator replaces an open hint.
+        range: datetime
       retry_events:
         description: >-
           Durable operator-requested releases of a terminal composition failure.

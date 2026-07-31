@@ -47,6 +47,13 @@ _STABLE_BINDING_NAME_STAGES: frozenset[str] = frozenset(
         NameStage.approved.value,
     }
 )
+_TERMINAL_BINDING_NAME_STAGES: frozenset[str] = frozenset(
+    {
+        NameStage.superseded.value,
+        NameStage.exhausted.value,
+        NameStage.contested.value,
+    }
+)
 
 
 class _TransactionQuery:
@@ -4570,6 +4577,11 @@ def persist_generated_name_winners(
                       MATCH (source:FacilitySignal {id: b.source_id})
                       RETURN source
                     }
+                    FOREACH (_ IN CASE
+                      WHEN sns.compose_hint_status = 'open' THEN [1] ELSE [] END |
+                      SET sns.compose_hint_status = 'consumed',
+                          sns.compose_hint_consumed_at = datetime()
+                    )
                     SET sn.name_stage = 'drafted',
                         sn.chain_length = coalesce(sn.chain_length, 0),
                         sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
@@ -4621,6 +4633,11 @@ def persist_generated_name_winners(
                       MATCH (source:FacilitySignal {id: b.source_id})
                       RETURN source
                     }
+                    FOREACH (_ IN CASE
+                      WHEN sns.compose_hint_status = 'open' THEN [1] ELSE [] END |
+                      SET sns.compose_hint_status = 'consumed',
+                          sns.compose_hint_consumed_at = datetime()
+                    )
                     SET sns.claim_token = null,
                         sns.claimed_at = null,
                         sns.status = 'composed',
@@ -6509,6 +6526,177 @@ def write_enrichment_results(
 # =============================================================================
 
 _VALID_PIPELINE_SOURCE_TYPES = {"dd", "signals"}
+_MAX_SOURCE_COMPOSE_HINT_CHARS = 4000
+_MAX_SOURCE_COMPOSE_HINT_REASON_CHARS = 2000
+
+
+def _exact_dd_source_id(dd_path: str) -> tuple[str, str]:
+    """Return canonical source id and bare path for one exact DD source."""
+    raw = str(dd_path).strip()
+    if raw.startswith("dd:"):
+        raw = raw[3:]
+    if (
+        not raw
+        or raw.startswith("signals:")
+        or any(char in raw for char in "*?[]{}")
+        or any(char.isspace() for char in raw)
+    ):
+        raise ValueError("source-hint requires one exact DD path without wildcards")
+    return f"dd:{raw}", raw
+
+
+def _source_compose_hint_decision(
+    gc: Any,
+    *,
+    source_id: str,
+    replace: bool,
+) -> dict[str, Any]:
+    """Classify whether an exact DD source can accept compose steering."""
+    rows = gc.query(
+        """
+        OPTIONAL MATCH (sns:StandardNameSource {id: $source_id})
+        WITH sns, CASE WHEN sns IS NULL THEN false ELSE EXISTS {
+          MATCH (sns)-[:PRODUCED_NAME]->(live:StandardName)
+          WHERE NOT (coalesce(live.name_stage, '') IN $terminal_stages)
+        } END AS has_live_binding
+        RETURN sns.id AS id,
+               sns.source_id AS source_path,
+               sns.source_type AS source_type,
+               sns.status AS source_status,
+               sns.claimed_at AS claimed_at,
+               coalesce(sns.attempt_count, 0) AS attempt_count,
+               sns.compose_hint_status AS compose_hint_status,
+               CASE
+                 WHEN sns IS NULL THEN 'missing_source'
+                 WHEN sns.source_type <> 'dd' THEN 'not_dd_source'
+                 WHEN sns.claimed_at IS NOT NULL THEN 'active_claim'
+                 WHEN sns.status <> 'extracted' THEN 'source_not_extracted'
+                 WHEN coalesce(sns.attempt_count, 0) >= $attempt_cap
+                   THEN 'attempt_cap_reached'
+                 WHEN has_live_binding THEN 'live_name_binding'
+                 WHEN sns.compose_hint_status = 'open' AND NOT $replace
+                   THEN 'open_hint_exists'
+                 ELSE 'eligible'
+               END AS decision
+        """,
+        source_id=source_id,
+        replace=replace,
+        attempt_cap=_MAX_COMPOSE_CLAIM_ATTEMPTS,
+        terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+    )
+    return dict(rows[0]) if rows else {"decision": "missing_source", "id": None}
+
+
+@retry_on_deadlock()
+def set_source_compose_hint(
+    dd_path: str,
+    *,
+    hint: str,
+    reason: str,
+    replace: bool = False,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Open durable composition steering for one exact DD source.
+
+    Eligibility and the write enforce the same claim, lifecycle, attempt, and
+    live-binding predicates. A claim turnover between classification and write
+    therefore refuses the update rather than steering an in-flight worker.
+    """
+    source_id, source_path = _exact_dd_source_id(dd_path)
+    hint = str(hint).strip()
+    reason = str(reason).strip()
+    if not hint:
+        raise ValueError("source-hint requires a non-empty hint")
+    if not reason:
+        raise ValueError("source-hint requires a non-empty reason")
+    if len(hint) > _MAX_SOURCE_COMPOSE_HINT_CHARS:
+        raise ValueError(
+            f"source hint exceeds {_MAX_SOURCE_COMPOSE_HINT_CHARS} characters"
+        )
+    if len(reason) > _MAX_SOURCE_COMPOSE_HINT_REASON_CHARS:
+        raise ValueError(
+            "source hint reason exceeds "
+            f"{_MAX_SOURCE_COMPOSE_HINT_REASON_CHARS} characters"
+        )
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        current = _source_compose_hint_decision(
+            client,
+            source_id=source_id,
+            replace=replace,
+        )
+        result = {
+            **current,
+            "source_id": source_id,
+            "source_path": source_path,
+            "eligible": current.get("decision") == "eligible",
+            "applied": False,
+            "replaced": False,
+            "dry_run": dry_run,
+        }
+        if current.get("decision") != "eligible":
+            return result
+        replacing_open = current.get("compose_hint_status") == "open"
+        if dry_run:
+            result["decision"] = "would_replace" if replacing_open else "would_set"
+            result["replaced"] = replacing_open
+            return result
+
+        rows = client.query(
+            """
+            MATCH (sns:StandardNameSource {id: $source_id})
+            WHERE sns.source_type = 'dd'
+              AND sns.status = 'extracted'
+              AND sns.claimed_at IS NULL
+              AND coalesce(sns.attempt_count, 0) < $attempt_cap
+              AND NOT EXISTS {
+                MATCH (sns)-[:PRODUCED_NAME]->(live:StandardName)
+                WHERE NOT (coalesce(live.name_stage, '') IN $terminal_stages)
+              }
+              AND ($replace OR coalesce(sns.compose_hint_status, '') <> 'open')
+            WITH sns, sns.compose_hint_status = 'open' AS replaced
+            SET sns.compose_hint = $hint,
+                sns.compose_hint_reason = $reason,
+                sns.compose_hint_status = 'open',
+                sns.compose_hint_requested_at = datetime(),
+                sns.compose_hint_consumed_at = null
+            RETURN sns.id AS id, sns.source_id AS source_path, replaced
+            """,
+            source_id=source_id,
+            hint=hint,
+            reason=reason,
+            replace=replace,
+            attempt_cap=_MAX_COMPOSE_CLAIM_ATTEMPTS,
+            terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+        )
+        if rows:
+            result.update(
+                applied=True,
+                replaced=bool(rows[0].get("replaced")),
+                decision="replaced" if rows[0].get("replaced") else "set",
+            )
+            return result
+
+        latest = _source_compose_hint_decision(
+            client,
+            source_id=source_id,
+            replace=replace,
+        )
+        latest_decision = latest.get("decision", "compare_and_set_lost")
+        if latest_decision == "eligible":
+            latest_decision = "compare_and_set_lost"
+        result.update(
+            latest,
+            eligible=False,
+            decision=latest_decision,
+        )
+        return result
+    finally:
+        if own:
+            client.close()
 
 
 def _pin_dd_source_snapshots(
@@ -7301,6 +7489,11 @@ def persist_claimed_attachments(
                         MATCH (sn:StandardName {id: b.sn_id})
                         WHERE sn.name_stage IN $stable_stages
                         MATCH (src:IMASNode {id: b.source_id})
+                        FOREACH (_ IN CASE
+                          WHEN sns.compose_hint_status = 'open' THEN [1] ELSE [] END |
+                          SET sns.compose_hint_status = 'consumed',
+                              sns.compose_hint_consumed_at = datetime()
+                        )
                         SET sns.status = 'attached',
                             sns.composed_at = datetime(),
                             sns.claimed_at = null,
@@ -10994,6 +11187,19 @@ def claim_generate_name_batch(
                                {claim_token: $token})
                         OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(im:IMASNode)
                         OPTIONAL MATCH (sns)-[:FROM_SIGNAL]->(fs:FacilitySignal)
+                        CALL (sns) {
+                          OPTIONAL MATCH (sns)-[:PRODUCED_NAME]
+                              ->(hinted:StandardName)
+                          WHERE hinted.name_hint IS NOT NULL
+                            AND hinted.edit_reason IS NOT NULL
+                            AND hinted.edit_status = 'open'
+                          WITH hinted
+                          ORDER BY hinted.edit_requested_at DESC, hinted.id ASC
+                          RETURN head(collect(hinted.id)) AS previous_name,
+                                 head(collect(hinted.name_hint)) AS name_hint,
+                                 head(collect(hinted.edit_reason)) AS edit_reason,
+                                 head(collect(hinted.edit_origin)) AS edit_origin
+                        }
                         RETURN sns.id AS id,
                                sns.source_id AS source_id,
                                sns.source_type AS source_type,
@@ -11002,7 +11208,18 @@ def claim_generate_name_batch(
                                coalesce(sns.physics_domain, im.physics_domain, fs.physics_domain) AS physics_domain,
                                sns.claim_token AS claim_token,
                                sns.claim_seq AS claim_seq,
-                               sns.attempt_count AS attempt_count
+                               sns.attempt_count AS attempt_count,
+                               sns.compose_hint AS compose_hint,
+                               sns.compose_hint_reason AS compose_hint_reason,
+                               sns.compose_hint_status AS compose_hint_status,
+                               sns.compose_hint_requested_at
+                                   AS compose_hint_requested_at,
+                               sns.compose_hint_consumed_at
+                                   AS compose_hint_consumed_at,
+                               previous_name,
+                               name_hint,
+                               edit_reason,
+                               edit_origin
                         """,
                         token=token,
                     )
