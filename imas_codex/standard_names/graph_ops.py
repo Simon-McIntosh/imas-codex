@@ -13393,14 +13393,9 @@ def _verify_claim_winners(
     """
     if not items:
         return items
-    tokens = {item.get("claim_token") for item in items}
-    if len(tokens) != 1 or None in tokens or "" in tokens:
-        logger.warning(
-            "_verify_source_claim_winners: rejected %d claim(s) without one token",
-            len(items),
-        )
-        return []
-    token = next(iter(tokens))
+    token = items[0].get("claim_token") or ""
+    if not token:
+        return items
     # Per-item (id, claim_seq). Legacy claims that predate the seq stamp fall
     # back to token+stage only so this never over-drops on missing data.
     seqs = {it["id"]: it.get("claim_seq") for it in items}
