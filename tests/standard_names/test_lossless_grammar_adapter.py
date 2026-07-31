@@ -203,8 +203,13 @@ def test_structured_locus_stays_on_binary_operand_a(monkeypatch) -> None:
     assert binary.args[1].locus is None
 
 
-def test_surface_round_trip_cannot_change_binary_operand_scope(monkeypatch) -> None:
-    """Equal spelling is insufficient when parsing moves a leaf locus."""
+def test_semantic_guard_rejects_binary_operand_scope_drift() -> None:
+    """Reject a synthetic dependency result that hoists a leaf locus.
+
+    The test-owned ``ParsedCanonicalName`` simulates a dependency parser
+    returning the candidate's canonical surface while changing recursive
+    scope.  It is not a valid public parse result.
+    """
     from imas_codex.standard_names import grammar_adapter
 
     intended = _binary_ir(
@@ -222,16 +227,17 @@ def test_surface_round_trip_cannot_change_binary_operand_scope(monkeypatch) -> N
 
     shifted = StandardNameIR.model_validate(shifted_data)
     name = compose(intended)
-    assert compose(shifted) == name
-
-    monkeypatch.setattr(
-        grammar_adapter,
-        "parse_canonical_name",
-        lambda candidate: ParsedCanonicalName(name=candidate, ir=shifted),
+    simulated_dependency_result = ParsedCanonicalName(
+        name=name,
+        ir=shifted,
     )
 
     with pytest.raises(ValueError, match="changes the semantic IR"):
-        grammar_adapter.compose_canonical_ir(intended)
+        grammar_adapter._require_semantic_ir(
+            intended,
+            simulated_dependency_result.ir,
+            name=simulated_dependency_result.name,
+        )
 
 
 def test_public_flat_projection_normalization_remains_supported() -> None:
