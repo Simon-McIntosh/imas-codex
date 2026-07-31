@@ -331,7 +331,9 @@ def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
     assert "reservation.claim_seq = b.claim_seq" in lock_cypher
     assert "reservation.created_target = true" in lock_cypher
     assert "HAS_STANDARD_NAME" not in lock_cypher
-    assert tx.run.call_count == 1
+    cleanup_cypher = tx.run.call_args_list[1].args[0]
+    assert "b.preserve_current = true" in cleanup_cypher
+    assert tx.run.call_count == 2
     tx.commit.assert_called_once()
 
 
@@ -404,7 +406,9 @@ class TestClaimedAttachmentPersistence:
             winners = persist_claimed_attachments([self._attachment()])
 
         assert winners == ["dd:spectrometer/channel/isotope_ratio"]
-        mutation = tx.run.call_args_list[1].args[0]
+        cleanup = tx.run.call_args_list[1].args[0]
+        mutation = tx.run.call_args_list[2].args[0]
+        assert "b.preserve_current = true" in cleanup
         assert "WHERE sn.name_stage IN $stable_stages" in mutation
         assert "MERGE (sns)-[produced:PRODUCED_NAME]->(sn)" in mutation
         assert "REMOVE produced.provisional" in mutation
@@ -439,6 +443,8 @@ class TestClaimedAttachmentPersistence:
                         "attempt_count": 1,
                     }
                 ]
+            if "[stale:PRODUCED_NAME]" in cypher:
+                return []
             raise RuntimeError("attachment write failed")
 
         tx.run.side_effect = _fail_after_lock
@@ -853,6 +859,8 @@ class TestPersistGeneratedNameBatch:
         assert (
             "REMOVE target.binding_lock_token, target.binding_lock_seq" in lock_cypher
         )
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "b.preserve_current = true" in cleanup_cypher
         finalize_cypher = _transaction_call(
             self.atomic_tx, "sns.status = 'composed'"
         ).args[0]
@@ -876,6 +884,78 @@ class TestPersistGeneratedNameBatch:
                 line.lstrip().startswith(f"sn.{field} =")
                 for line in finalize_cypher.splitlines()
             )
+
+    @pytest.mark.parametrize(
+        ("binding_kind", "target_stage", "rich_write_expected"),
+        [
+            ("owned_reservation", "pending", True),
+            ("stable_reuse", "accepted", False),
+        ],
+    )
+    def test_winner_prunes_stale_different_candidate_before_finalize(
+        self,
+        binding_kind,
+        target_stage,
+        rich_write_expected,
+    ):
+        """Both winner modes prune old provisional state before composing once."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate(name="electron_temperature")
+
+        def _winner(cypher, **params):
+            if "AS outcome" in cypher:
+                item = params["batch"][0]
+                return [
+                    {
+                        "id": item["sns_id"],
+                        "outcome": "winner",
+                        "binding_kind": binding_kind,
+                        "candidate_id": item["sn_id"],
+                        "target_stage": target_stage,
+                        "attempt_count": 3,
+                    }
+                ]
+            if "[stale:PRODUCED_NAME]" in cypher:
+                return []
+            return [{"id": row["sns_id"]} for row in params.get("batch", [])]
+
+        self.atomic_tx.run.side_effect = _winner
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ) as write,
+            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                return_value=0,
+            ),
+        ):
+            winners = persist_generated_name_batch(
+                [candidate], compose_model="test/model", return_winner_ids=True
+            )
+
+        assert winners == ["dd:core_profiles/profiles_1d/electrons/temperature"]
+        assert write.called is rich_write_expected
+        cleanup_call = self.atomic_tx.run.call_args_list[1]
+        cleanup_cypher = cleanup_call.args[0]
+        cleanup_item = cleanup_call.kwargs["batch"][0]
+        assert cleanup_item["preserve_current"] is True
+        assert "old.id = b.sn_id" in cleanup_cypher
+        assert "stale.claim_token = b.claim_token" in cleanup_cypher
+        assert "stale.claim_seq = b.claim_seq" in cleanup_cypher
+        assert "HAS_STANDARD_NAME" not in cleanup_cypher
+        assert "source_paths =" not in cleanup_cypher
+        finalize_cypher = _transaction_call(
+            self.atomic_tx, "sns.status = 'composed'"
+        ).args[0]
+        assert finalize_cypher.count("sns.status = 'composed'") == 1
+        if binding_kind == "owned_reservation":
+            assert "reservation.claim_token = b.claim_token" in finalize_cypher
+            assert "reservation.claim_seq = b.claim_seq" in finalize_cypher
+        else:
+            assert "WHERE sn.name_stage IN $stable_stages" in finalize_cypher
 
     def test_terminal_transition_after_rich_write_rolls_back_every_effect(self):
         """A reservation that turns terminal before finalize cannot commit."""
@@ -915,7 +995,9 @@ class TestPersistGeneratedNameBatch:
 
         write.assert_called_once()
         backfill.assert_not_called()
-        finalize_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        assert "b.preserve_current = true" in cleanup_cypher
+        finalize_cypher = self.atomic_tx.run.call_args_list[2].args[0]
         assert "sn.name_stage = $pending_stage" in finalize_cypher
         assert "reservation.provisional = true" in finalize_cypher
         assert "reservation.claim_token = b.claim_token" in finalize_cypher

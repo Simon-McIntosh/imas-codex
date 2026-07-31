@@ -7018,16 +7018,22 @@ def _lock_claimed_name_bindings(
         pending_stage=NameStage.pending.value,
     )
 
-    collision_ids = {
-        row["id"] for row in rows if row.get("outcome", "winner") != "winner"
-    }
-    collision_batch = [item for item in batch if item["sns_id"] in collision_ids]
-    if collision_batch:
-        # A reclaimed source can carry an abandoned provisional reservation.
-        # Only that directly stamped relationship is deletable. Projections
-        # and source-path mirrors are never inferred to belong to it: older
-        # writers created those assertions without ownership metadata, and a
-        # projection-only assertion can be legitimate.
+    outcomes_by_source = {row["id"]: row.get("outcome", "winner") for row in rows}
+    fenced_batch = [
+        {
+            **item,
+            "preserve_current": outcomes_by_source[item["sns_id"]] == "winner",
+        }
+        for item in batch
+        if item["sns_id"] in outcomes_by_source
+    ]
+    if fenced_batch:
+        # A reclaimed source can carry abandoned provisional reservations even
+        # when its new candidate wins. Only directly stamped relationships are
+        # deletable. A winner preserves its current exact reservation; every
+        # other provisional edge is stale. Projections and source-path mirrors
+        # are never inferred to belong to a reservation because older writers
+        # created those assertions without ownership metadata.
         gc.query(
             """
             UNWIND $batch AS b
@@ -7039,6 +7045,12 @@ def _lock_claimed_name_bindings(
             WHERE stale.provisional = true
               AND stale.claim_token IS NOT NULL
               AND stale.claim_seq IS NOT NULL
+              AND NOT (
+                b.preserve_current = true
+                AND old.id = b.sn_id
+                AND stale.claim_token = b.claim_token
+                AND stale.claim_seq = b.claim_seq
+              )
             WITH b, sns, old, stale,
                  stale.created_target = true
                    AND old.name_stage = $pending_stage
@@ -7054,9 +7066,15 @@ def _lock_claimed_name_bindings(
               DELETE owned_target
             )
             """,
-            batch=collision_batch,
+            batch=fenced_batch,
             pending_stage=NameStage.pending.value,
         )
+
+    collision_ids = {
+        row["id"] for row in rows if row.get("outcome", "winner") != "winner"
+    }
+    collision_batch = [item for item in batch if item["sns_id"] in collision_ids]
+    if collision_batch:
         gc.query(
             """
             UNWIND $batch AS b
