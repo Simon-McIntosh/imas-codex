@@ -7051,16 +7051,20 @@ def _lock_claimed_name_bindings(
                 AND stale.claim_token = b.claim_token
                 AND stale.claim_seq = b.claim_seq
               )
-            WITH b, sns, old, stale,
-                 stale.created_target = true
+            WITH old, collect(DISTINCT stale) AS stale_edges
+            WITH old, stale_edges,
+                 any(edge IN stale_edges
+                     WHERE edge.created_target = true) AS owns_target
+            FOREACH (stale_edge IN stale_edges |
+              DELETE stale_edge
+            )
+            WITH DISTINCT old, owns_target
+            WITH old,
+                 owns_target
                    AND old.name_stage = $pending_stage
                    AND coalesce(old.source_paths, []) = []
-                   AND NOT EXISTS {
-                     MATCH (old)-[reference]-()
-                     WHERE reference <> stale
-                   } AS delete_owned_orphan
-            DELETE stale
-            WITH old, delete_owned_orphan
+                   AND NOT EXISTS { MATCH (old)--() }
+                   AS delete_owned_orphan
             FOREACH (owned_target IN CASE
               WHEN delete_owned_orphan THEN [old] ELSE [] END |
               DELETE owned_target

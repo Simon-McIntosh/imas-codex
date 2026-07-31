@@ -1043,10 +1043,11 @@ class TestPersistGeneratedNameBatch:
         assert "stale.provisional = true" in cleanup_cypher
         assert "stale.claim_token IS NOT NULL" in cleanup_cypher
         assert "stale.claim_seq IS NOT NULL" in cleanup_cypher
-        assert "stale.created_target = true" in cleanup_cypher
+        assert "collect(DISTINCT stale) AS stale_edges" in cleanup_cypher
+        assert "edge.created_target = true" in cleanup_cypher
         assert "old.name_stage = $pending_stage" in cleanup_cypher
-        assert "NOT EXISTS" in cleanup_cypher
-        assert "DELETE stale" in cleanup_cypher
+        assert "NOT EXISTS { MATCH (old)--() }" in cleanup_cypher
+        assert "DELETE stale_edge" in cleanup_cypher
         assert "DELETE owned_target" in cleanup_cypher
         assert "HAS_STANDARD_NAME" not in cleanup_cypher
         assert "SET old.source_paths" not in cleanup_cypher
@@ -1085,7 +1086,7 @@ class TestPersistGeneratedNameBatch:
 
         cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
         assert "stale.provisional = true" in cleanup_cypher
-        assert "DELETE stale" in cleanup_cypher
+        assert "DELETE stale_edge" in cleanup_cypher
         assert "HAS_STANDARD_NAME" not in cleanup_cypher
         assert "source_paths =" not in cleanup_cypher
         assert "coalesce(old.source_paths, []) = []" in cleanup_cypher
@@ -1150,11 +1151,229 @@ class TestPersistGeneratedNameBatch:
         assert first[0]["outcome"] == "lifecycle_collision"
         assert second[0]["binding_kind"] == "owned_reservation"
         cleanup_cypher = gc.query.call_args_list[1].args[0]
-        assert "stale.created_target = true" in cleanup_cypher
+        assert "edge.created_target = true" in cleanup_cypher
         assert "DELETE owned_target" in cleanup_cypher
         retry_lock = gc.query.call_args_list[3].args[0]
         assert "MERGE (target:StandardName {id: b.sn_id})" in retry_lock
         assert "reservation.created_target = true" in retry_lock
+
+    def test_cleanup_reaps_multi_edge_owned_target_after_edge_deletion(self):
+        """A target-owned stale group is reaped only after every edge is gone."""
+        from imas_codex.standard_names.graph_ops import _lock_claimed_name_bindings
+
+        current_source = "dd:core_profiles/electrons/temperature"
+        retry_source = "dd:core_profiles/ions/temperature"
+        nodes = {
+            "hydrogen_fraction": {"stage": "pending", "source_paths": []},
+            "electron_temperature": {"stage": "pending", "source_paths": []},
+            "deuterium_fraction": {"stage": "pending", "source_paths": []},
+        }
+        edges = {
+            "owned-first": {
+                "source": current_source,
+                "target": "hydrogen_fraction",
+                "token": "abandoned-first",
+                "seq": 5,
+                "provisional": True,
+                "created_target": True,
+            },
+            "owned-second": {
+                "source": current_source,
+                "target": "hydrogen_fraction",
+                "token": "abandoned-second",
+                "seq": 6,
+                "provisional": True,
+                "created_target": False,
+            },
+            "current-winner": {
+                "source": current_source,
+                "target": "electron_temperature",
+                "token": "winner",
+                "seq": 7,
+                "provisional": True,
+                "created_target": True,
+            },
+            "current-stale": {
+                "source": current_source,
+                "target": "electron_temperature",
+                "token": "abandoned-current",
+                "seq": 2,
+                "provisional": True,
+                "created_target": True,
+            },
+            "unowned-false": {
+                "source": current_source,
+                "target": "deuterium_fraction",
+                "token": "unowned-first",
+                "seq": 3,
+                "provisional": True,
+                "created_target": False,
+            },
+            "unowned-unset": {
+                "source": current_source,
+                "target": "deuterium_fraction",
+                "token": "unowned-second",
+                "seq": 4,
+                "provisional": True,
+                "created_target": None,
+            },
+        }
+        deleted_edges = []
+        deleted_targets = []
+
+        def _query(cypher, **params):
+            if "AS outcome" in cypher:
+                results = []
+                for item in params["batch"]:
+                    target = nodes.get(item["sn_id"])
+                    exact_edge = next(
+                        (
+                            edge
+                            for edge in edges.values()
+                            if edge["source"] == item["sns_id"]
+                            and edge["target"] == item["sn_id"]
+                            and edge["token"] == item["claim_token"]
+                            and edge["seq"] == item["claim_seq"]
+                        ),
+                        None,
+                    )
+                    if target is None:
+                        nodes[item["sn_id"]] = {
+                            "stage": "pending",
+                            "source_paths": [],
+                        }
+                        edge_id = f"reserved:{item['sns_id']}:{item['sn_id']}"
+                        edges[edge_id] = {
+                            "source": item["sns_id"],
+                            "target": item["sn_id"],
+                            "token": item["claim_token"],
+                            "seq": item["claim_seq"],
+                            "provisional": True,
+                            "created_target": True,
+                        }
+                        exact_edge = edges[edge_id]
+                    results.append(
+                        {
+                            "id": item["sns_id"],
+                            "outcome": "winner",
+                            "binding_kind": "owned_reservation",
+                            "candidate_id": item["sn_id"],
+                            "target_stage": nodes[item["sn_id"]]["stage"],
+                            "attempt_count": 1,
+                        }
+                    )
+                    assert exact_edge is not None
+                return results
+
+            if "[stale:PRODUCED_NAME]" not in cypher:
+                return []
+
+            assert "collect(DISTINCT stale) AS stale_edges" in cypher
+            assert "any(edge IN stale_edges" in cypher
+            assert "FOREACH (stale_edge IN stale_edges" in cypher
+            assert "NOT EXISTS { MATCH (old)--() }" in cypher
+            assert cypher.index("DELETE stale_edge") < cypher.index(
+                "NOT EXISTS { MATCH (old)--() }"
+            )
+            for item in params["batch"]:
+                stale_groups = {}
+                for edge_id, edge in list(edges.items()):
+                    if edge["source"] != item["sns_id"]:
+                        continue
+                    if not edge["provisional"]:
+                        continue
+                    if edge["token"] is None or edge["seq"] is None:
+                        continue
+                    is_current = (
+                        item["preserve_current"]
+                        and edge["target"] == item["sn_id"]
+                        and edge["token"] == item["claim_token"]
+                        and edge["seq"] == item["claim_seq"]
+                    )
+                    if not is_current:
+                        stale_groups.setdefault(edge["target"], []).append(edge_id)
+
+                for target_id, edge_ids in stale_groups.items():
+                    owns_target = any(
+                        edges[edge_id]["created_target"] is True for edge_id in edge_ids
+                    )
+                    for edge_id in edge_ids:
+                        deleted_edges.append(edge_id)
+                        del edges[edge_id]
+                    target = nodes[target_id]
+                    has_relationship = any(
+                        edge["target"] == target_id for edge in edges.values()
+                    )
+                    if (
+                        owns_target
+                        and target["stage"] == params["pending_stage"]
+                        and target["source_paths"] == []
+                        and not has_relationship
+                    ):
+                        deleted_targets.append(target_id)
+                        del nodes[target_id]
+            return []
+
+        gc = MagicMock()
+        gc.query.side_effect = _query
+        current_batch = [
+            {
+                "sns_id": current_source,
+                "source_id": "core_profiles/electrons/temperature",
+                "source_type": "dd",
+                "sn_id": "electron_temperature",
+                "unit": "eV",
+                "claim_token": "winner",
+                "claim_seq": 7,
+            }
+        ]
+        current = _lock_claimed_name_bindings(
+            gc,
+            current_batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+
+        assert current[0]["binding_kind"] == "owned_reservation"
+        assert {"owned-first", "owned-second"} <= set(deleted_edges)
+        assert "hydrogen_fraction" in deleted_targets
+        assert "hydrogen_fraction" not in nodes
+        assert "current-stale" in deleted_edges
+        assert "current-winner" in edges
+        assert "electron_temperature" in nodes
+        assert "electron_temperature" not in deleted_targets
+        assert "deuterium_fraction" in nodes
+        assert not any(
+            edge["target"] == "deuterium_fraction" for edge in edges.values()
+        )
+
+        retry_batch = [
+            {
+                "sns_id": retry_source,
+                "source_id": "core_profiles/ions/temperature",
+                "source_type": "dd",
+                "sn_id": "hydrogen_fraction",
+                "unit": "1",
+                "claim_token": "retry",
+                "claim_seq": 9,
+            }
+        ]
+        retry = _lock_claimed_name_bindings(
+            gc,
+            retry_batch,
+            allow_missing=True,
+            allow_own_pending_reservation=True,
+        )
+
+        assert retry[0]["binding_kind"] == "owned_reservation"
+        assert "hydrogen_fraction" in nodes
+        assert any(
+            edge["source"] == retry_source
+            and edge["target"] == "hydrogen_fraction"
+            and edge["token"] == "retry"
+            and edge["seq"] == 9
+            for edge in edges.values()
+        )
 
     def test_rich_write_and_finalize_share_transaction(self):
         """The rich writer and source outcome use the locked transaction."""
