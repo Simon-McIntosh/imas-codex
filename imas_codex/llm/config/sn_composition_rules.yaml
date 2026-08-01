@@ -23,17 +23,15 @@ composition_rules:
       - "name"
 
   - id: "NC-2"
-    title: "Consistent boundary naming"
+    title: "Preserve registered locus identity"
     category: "consistency"
     severity: "soft"
     rule: |
-      Use a consistent `_of_plasma_boundary` suffix for boundary-specific
-      quantities. When a flux surface quantity has a boundary variant, derive it
-      as `{flux_surface_quantity}_of_plasma_boundary` (e.g.,
-      `elongation_of_plasma_boundary`).
-    examples_good:
-      - "elongation_of_plasma_boundary"
-      - "triangularity_of_plasma_boundary"
+      Use the exact locus token supported by the source and registered by the
+      injected ISN grammar. Every registered locus is a distinct concept; never
+      collapse one registered token into another. Apply a canonical replacement
+      only when ISN publishes the source spelling under `advisory_aliases`.
+    examples_good: []
     examples_bad: []
     affects:
       - "name"
@@ -317,33 +315,17 @@ composition_rules:
       - "name"
 
   - id: "NC-16b"
-    title: "Canonical locus tokens — never use synonym variants"
+    title: "Use grammar-owned advisory aliases"
     category: "naming"
     severity: "hard"
     rule: |
-      The catalog uses one canonical token per physical concept. Generation
-      must pick the canonical form even when the DD path or signal name
-      uses an alias. Synonym pairs documented:
-
-      | Canonical | Forbidden synonyms |
-      |---|---|
-      | plasma_boundary | separatrix, last_closed_flux_surface, lcfs |
-      | divertor_target | divertor_plate |
-      | magnetic_axis | core_axis |
-      | wall | wall_surface, first_wall_surface, vacuum_vessel_wall |
-      | pedestal | pedestal_region, edge_pedestal |
-
-      Apply NC-16 *after* normalising. The combined rule for a flux quantity
-      at the LCFS is `poloidal_magnetic_flux_at_plasma_boundary`, NOT
-      `_of_plasma_boundary`, `_at_separatrix`, or
-      `_at_last_closed_flux_surface`.
-    examples_good:
-      - "poloidal_magnetic_flux_at_plasma_boundary"
-      - "electron_density_at_divertor_target"
-    examples_bad:
-      - "poloidal_magnetic_flux_at_separatrix (synonym — use plasma_boundary)"
-      - "poloidal_magnetic_flux_of_plasma_boundary (wrong preposition for a field)"
-      - "electron_density_at_divertor_plate (synonym — use divertor_target)"
+      Generation must use the replacement only for spellings published by the
+      injected ISN grammar under `advisory_aliases`. The alias segment,
+      canonical replacement, and reason come from that public mapping. A token
+      present in the locus registry is never an alias and must retain its own
+      source-supported meaning. Apply the locus relation rule independently.
+    examples_good: []
+    examples_bad: []
     affects:
       - "name"
 

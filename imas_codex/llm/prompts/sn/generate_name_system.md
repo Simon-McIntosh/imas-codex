@@ -65,20 +65,16 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 - **`over` + region** — the base is integrated over a spatial region: `radiated_power_over_plasma_volume`.
 - **The test:** "does the entity *have* this quantity as a defining attribute?" If yes → `of`. If the quantity is a field merely sampled there → `at`. ✗ `poloidal_magnetic_flux_of_plasma_boundary` (flux is a field, evaluated AT the boundary).
 - **Value-parameterized positions.** For a profile value sampled at a specific numeric coordinate (q95, q at rho=0.5, density at psi_norm=0.95): set `locus_token` to the registered position (e.g. `normalized_poloidal_magnetic_flux`), `locus_relation="at"`, `locus_type="position"`, and `locus_value` to the numeric literal with underscore decimal separator (`"0_95"`). The composer renders `…_at_<position>_equal_to_0_95`. NEVER invent value-baked position tokens (✗ `95_percent_flux_surface`, ✗ `q95_surface`).
-- **Canonical locus tokens — never a synonym** (HARD RULE). Several features have multiple literature names; the catalog uses exactly ONE per concept even when the DD path/description uses an alias. Choose the canonical `locus_token`, THEN apply the of/at test:
-
-  | Canonical locus | Forbidden synonyms |
-  |---|---|
-  | `plasma_boundary` | `separatrix`, `last_closed_flux_surface`, `lcfs` |
-  | `divertor_target` | `divertor_plate` |
-  | `magnetic_axis` | `core_axis`, `o_point_axis` (use `o_point` for the field-line topology point) |
-  | `wall` | `wall_surface`, `vacuum_vessel_wall`, `first_wall_surface` |
-
-  ✓ `electron_density_at_divertor_target`; ✗ `electron_density_at_separatrix` (synonym → rewritten to `plasma_boundary`); ✗ `electron_density_at_divertor_plate`.
+- **Registered locus identity is authoritative** (HARD RULE). Every token in the injected locus registry denotes its own concept. Never collapse one registered locus into another because literature uses related language. A spelling is noncanonical only when the injected grammar publishes it in `advisory_aliases`; otherwise preserve the exact registered locus supported by the source.
+{% if grammar and grammar.advisory_aliases %}
+  The installed ISN grammar publishes these advisory aliases (the segment and canonical replacement are authoritative):
+{% for segment, aliases in grammar.advisory_aliases.items() %}{% for alias, details in aliases.items() %}
+  - `{{ alias }}` ({{ segment }}) → `{{ details.canonical }}`: {{ details.reason }}
+{% endfor %}{% endfor %}
+{% endif %}
 - **Loci and their variants come from the injected registry — a locus is not a zone (HARD RULE).** The registered locus tokens, the relations each allows (`_at_`, `_of_`, `_over_`, and any distribution/along relation), and any finer VARIANTS of one feature are defined by the injected grammar vocabulary — do NOT invent locus tokens or enumerate them from memory. Two data-driven choices follow from it:
   - **Value locus vs gradient/position locus.** When the registry offers more than one locus for the same feature (a locus for the *value* of a profile there, versus a locus for the steepest-gradient point or for the coordinate/flux that *locates* the feature), pick the variant matching what THIS quantity measures. Do not collapse the distinct variants onto one bare feature token.
   - **Point vs surface-distribution vs contact locus.** When a feature can be a sampled point, a distribution/peak over its surface, or a distinct contact/tangency point, pick the registered locus (and its allowed relation) whose description matches the source — never force the bare feature token where the registry defines a more specific locus.
-- **Position token `wall`, never `wall_surface`** — `wall` is the valid registry token; `wall_surface` fails grammar validation (a wall IS a surface). ✓ `energy_flux_at_wall`; ✗ `…_at_wall_surface`.
 - **Fidelity over expressibility — a different registered feature is NOT a "fit" (HARD RULE).** "Use registered tokens; if none fits, emit a `vocab_gap`" means the token for the **exact feature named in the DD path** — never the nearest lexical neighbour. If the exact feature has no registered `locus_token`, emit a `vocab_gap` for the literal feature; do NOT substitute a *related-but-different* registered feature just because it parses. A divertor **target** (a surface) is not a strike **point** (a point on the separatrix): a source path `.../strike_point_inner_r` whose "inner strike point" has no registered token must surface as a gap (`inner_strike_point`), and must NEVER be renamed to the registered `inner_divertor_target`. Grammatical acceptance never licenses naming a different physical object than the source. This is the **#1 silent semantic error** — a plausible, well-formed name that quietly denotes the wrong feature.
 - **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `radial_coordinate_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`. (For a generic hardware outline whose vertices are an ordinal array, collapse to `radial_outline` / `vertical_outline` — see "Enumeration is a coordinate, not a name" below.)
 - **Place names with quantity-words are single location tokens, not quantities.** `center_of_mass` is a reference point (barycentre), not a mass quantity — treat it as a location qualifier. ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`, `center_of_mass_position`; ✗ `mass_velocity`. Apply the same to `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
@@ -287,7 +283,6 @@ These terms are NOT synonyms — pick the one supported by the source descriptio
 - `geometric_axis` — geometric centre of the plasma cross-section (boundary centroid); minor-radius reference. UNIT: m.
 - `magnetic_axis` — point where the poloidal field vanishes inside the plasma (flux-surface centre). Distinct from geometric axis.
 - `current_center` / `current_centroid` — first moment of the toroidal current-density distribution. Distinct from both axes; use only when the DD exposes a current-moment quantity.
-- `plasma_boundary` — canonical token for the LCFS / the physical boundary used for a computation (may be separatrix- or limiter-defined). Always include the qualifier; do NOT substitute `separatrix` or `last_closed_flux_surface` (non-canonical synonyms, rewritten by the audit) unless the source specifies it. In double-null configurations there are `primary`/`secondary` variants — qualify when the DD distinguishes them.
 
 ### Boilerplate suppression
 

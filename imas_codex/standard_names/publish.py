@@ -78,10 +78,9 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
        the ``Validate Catalog`` GitHub workflow runs on the published
        repo. Surfacing the issues here means we catch broken names at
        publish time, not at release time.
-    3. **Pipeline-specific checks** — canonical-locus and field-at-region
-       preposition violations (``_CANONICAL_LOCUS_SYNONYMS`` and
-       ``_FIELD_BASES`` in ``standard_names.workers``) applied across the
-       whole staging set.
+    3. **Pipeline-specific checks** — public ISN advisory aliases and
+       structurally proven field-at-position relation violations, applied
+       across the whole staging set by ``canonical_locus_check``.
 
     Returns a list of error strings (empty if valid).
     """
@@ -139,7 +138,7 @@ def _validate_staging_dir(staging_dir: Path) -> list[str]:
     except Exception as exc:
         errors.append(f"structural check failed: {exc}")
 
-    # --- Layer 3: codex-side canonical / preposition checks --------------
+    # --- Layer 3: public alias / structural relation checks ---------------
     # Advisory only — the strong gates run at compose and review time
     # (see ``canonical_locus_check`` invoked from ``_validate_via_isn``).
     # Any violation that reaches this point came from a pre-existing

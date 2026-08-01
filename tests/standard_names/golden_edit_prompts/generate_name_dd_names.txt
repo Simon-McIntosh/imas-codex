@@ -84,12 +84,10 @@ path measures the same quantity — do not invent a synonym.
 
 ## Locus Preposition Rules (`_at_` vs `_of_`)
 
-The ISN grammar enforces strict preposition rules for locus qualifiers:
-
-- **`_at_` for spatial/geometric locus** (WHERE something is measured/evaluated): `at_core`, `at_pedestal_top`, `at_lcfs`
-- **`_of_` for entity/object association** (WHAT thing the quantity belongs to or is located at): `of_separatrix`, `of_magnetic_axis`, `of_plasma_boundary`, `of_langmuir_probe`, `of_coil`, `of_antenna`, `of_rogowski_coil`
-
-Named geometric entities (separatrix, magnetic_axis, x_point, plasma_boundary) and hardware objects (probe, coil, antenna) use `_of_`. Abstract spatial regions from the position vocabulary (core, pedestal_top, lcfs) use `_at_`.
+Follow the installed locus relation matrix. Use `_of_` for an intrinsic
+geometric property or object association and `_at_` for a field evaluated at a
+position. A registered locus may support both relations because the quantity
+semantics determine which one is correct.
 
 **Loci come from the injected registry — a locus is not a zone.** The registered locus tokens and the relations each allows (`_at_`/`_of_`/`_over_`/along) are defined by the injected grammar vocabulary — do not invent them. When the registry offers finer VARIANTS of one feature — a locus for a field's *value* there vs one for its steepest-gradient point or the coordinate/flux that *locates* the feature, or a sampled point vs a distribution/peak over a surface vs a distinct contact/tangency point — pick the variant matching what the source measures, and use the relation that variant allows. Never fold a locus into a zone prefix or force a bare feature token where the registry defines a more specific locus.
 

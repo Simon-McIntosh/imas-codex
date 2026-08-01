@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Mapping
 from functools import lru_cache
 from typing import Any
 
@@ -58,6 +59,77 @@ def _isn_locus_tokens() -> frozenset[str]:
     except Exception as exc:  # pragma: no cover - defensive
         logger.debug("Could not load ISN locus registry: %s", exc)
     return frozenset()
+
+
+@lru_cache(maxsize=1)
+def _isn_locus_advisory_aliases() -> dict[str, str]:
+    """Return unregistered locus aliases published by ISN's public grammar.
+
+    ``grammar.advisory_aliases`` is grouped by grammar segment.  A mapping is
+    locus-relevant when its ``canonical`` target is present in the public locus
+    registry.  Filtering by the target avoids duplicating ISN's segment names,
+    while filtering aliases that are themselves registered preserves distinct
+    public locus concepts.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+
+        grammar = get_grammar_context()["grammar"]
+        registry = grammar["vocabularies"]["locus_registry"]
+        aliases: dict[str, str] = {}
+        for segment_aliases in grammar["advisory_aliases"].values():
+            if not isinstance(segment_aliases, Mapping):
+                continue
+            for alias, details in segment_aliases.items():
+                if alias in registry or not isinstance(details, Mapping):
+                    continue
+                canonical = details.get("canonical")
+                if isinstance(canonical, str) and canonical in registry:
+                    aliases[str(alias)] = canonical
+        return aliases
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("Could not load ISN locus advisory aliases: %s", exc)
+    return {}
+
+
+@lru_cache(maxsize=1)
+def _isn_locus_relations() -> frozenset[str]:
+    """Return locus relation spellings from ISN's public relation matrix."""
+    try:
+        from imas_standard_names import get_grammar_context
+
+        matrix = get_grammar_context()["grammar"]["locus_relation_matrix"]
+        return frozenset(
+            relation
+            for relations in matrix.values()
+            for relation in relations
+            if isinstance(relation, str)
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        logger.debug("Could not load ISN locus relations: %s", exc)
+    return frozenset()
+
+
+def _has_field_evaluation_structure(name: str) -> bool:
+    """Return whether public parse fields prove a quantity is field-like.
+
+    ISN currently publishes the geometry-vs-position distinction but does not
+    classify every physical base as an evaluated field or an intrinsic
+    property.  Subject and population qualifiers and vector projections are
+    nevertheless unambiguous field-evaluation structure.  Reading those
+    public parse fields preserves a conservative deterministic gate without
+    copying either the physical-base or qualifier vocabularies into codex.
+    """
+    try:
+        from imas_standard_names.grammar import parse_standard_name
+
+        parsed = parse_standard_name(name)
+    except Exception:
+        return False
+    return any(
+        getattr(parsed, field, None) is not None
+        for field in ("subject", "population", "orbit", "component", "coordinate")
+    )
 
 
 # Checks whose failure demotes to quarantined
@@ -2558,38 +2630,6 @@ def instrument_stokes_bind_check(candidate: dict[str, Any]) -> list[str]:
     return []
 
 
-# Redundant position tokens: the ISN grammar has 'wall', not 'wall_surface'.
-_REDUNDANT_POSITION_MAP: dict[str, str] = {
-    "wall_surface": "wall",
-}
-
-
-def position_redundancy_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag redundant position tokens like ``at_wall_surface`` → ``at_wall``.
-
-    The ISN Position vocabulary has ``wall`` but NOT ``wall_surface``.
-    The ``_surface`` suffix is physically redundant — a wall IS a surface.
-    Catches both ``_at_wall_surface`` and ``_on_wall_surface`` patterns.
-    """
-    name = str(candidate.get("id") or candidate.get("name") or "").strip().lower()
-    if not name:
-        return []
-
-    issues: list[str] = []
-    for redundant, canonical in _REDUNDANT_POSITION_MAP.items():
-        for prep in ("_at_", "_on_"):
-            bad = f"{prep}{redundant}"
-            good = f"{prep}{canonical}"
-            if bad in name or name.endswith(f"{prep[1:]}{redundant}"):
-                suggested = name.replace(bad, good)
-                issues.append(
-                    f"audit:position_redundancy_check: name '{name}' uses "
-                    f"'{redundant}' as a position token, but ISN vocabulary "
-                    f"has '{canonical}'. Rename to '{suggested}'."
-                )
-    return issues
-
-
 def process_qualifier_check(candidate: dict[str, Any]) -> list[str]:
     """Flag over-qualified process tokens after ``due_to_``.
 
@@ -2673,191 +2713,73 @@ def preposition_physical_base_check(candidate: dict[str, Any]) -> list[str]:
 
 
 # =============================================================================
-# Canonical locus / field-at-region preposition checks
+# Grammar-owned locus alias check
 # =============================================================================
-
-# Forbidden locus-token synonyms → canonical replacement.
-# Canonical for the last-closed-flux-surface concept is ``plasma_boundary``
-# (descriptive geometric noun rather than the physics-jargon ``separatrix``);
-# this matches the project's catalog convention. The earlier short-lived
-# inversion (which had ``separatrix`` canonical) was a regression and is
-# explicitly avoided here.
-_CANONICAL_LOCUS_SYNONYMS: dict[str, str] = {
-    "separatrix": "plasma_boundary",
-    "outboard_midplane_separatrix": "plasma_boundary",
-    "last_closed_flux_surface": "plasma_boundary",
-    "lcfs": "plasma_boundary",
-    "divertor_plate": "divertor_target",
-    "wall_surface": "wall",
-    "first_wall_surface": "wall",
-    "vacuum_vessel_wall": "wall",
-    "pedestal_region": "pedestal",
-    "edge_pedestal": "pedestal",
-    "core_axis": "magnetic_axis",
-}
-
-# Synonym sources whose identity CHANGES under a geometric locus qualifier:
-# the bare separatrix is the plasma boundary, but ``secondary_separatrix``
-# (disconnected double-null) is a distinct surface that is NOT the boundary.
-# Qualified forms of these tokens are never rewritten by the synonym audit.
-_QUALIFIER_SENSITIVE_LOCUS_SYNONYMS: frozenset[str] = frozenset({"separatrix"})
-
-# Substrings that, when found anywhere inside a compound locus token,
-# indicate a canonical-locus violation. The exact-match map above
-# handles known compounds; this scan catches future compounds the
-# LLM might invent (e.g. ``upper_separatrix``, ``inner_divertor_plate``).
-_CANONICAL_LOCUS_SUBSTRINGS: dict[str, str] = {
-    "_separatrix": "_plasma_boundary",
-    "_divertor_plate": "_divertor_target",
-    "_lcfs": "_plasma_boundary",
-}
-
-# Bases that name an evaluated field (defined everywhere in the plasma
-# and READ at a locus). When paired with a position/region locus, the
-# relation MUST be ``_at_``. ``_of_`` is reserved for intrinsic
-# geometric properties (area, radius, elongation, …).
-_FIELD_BASES: frozenset[str] = frozenset(
-    {
-        "temperature",
-        "density",
-        "pressure",
-        "magnetic_field",
-        "electric_field",
-        "magnetic_flux",
-        "flux",
-        "current",
-        "current_density",
-        "voltage",
-        "loop_voltage",
-        "velocity",
-        "velocity_magnitude",
-        "magnetic_shear",
-        "safety_factor",
-        "particle_flux",
-        "energy_flux",
-        "momentum_flux",
-        "power",
-        "power_density",
-        "mass_density",
-        "electric_potential",
-        "electrostatic_potential",
-        "kinetic_energy",
-        "internal_energy",
-        "enthalpy",
-        "entropy",
-        "radiation_density",
-        "halo_current",
-        "heat_flux",
-    }
-)
 
 
 def canonical_locus_check(candidate: dict[str, Any]) -> list[str]:
-    """Flag canonical-locus violations on the candidate name.
+    """Flag public locus aliases and structurally proven relation mistakes.
 
-    Surfaces two anti-patterns that the compose prompt forbids but the
-    LLM occasionally produces anyway:
+    Every registered locus is authoritative and denotes its own concept.  An
+    unregistered spelling is noncanonical only when ISN publishes it under
+    ``grammar.advisory_aliases`` with a registered locus as its target.
 
-    1. **Synonym locus token** — the candidate uses a deprecated
-       synonym (``separatrix`` [bare], ``last_closed_flux_surface``,
-       ``lcfs``, ``divertor_plate``, ``wall_surface``, …) instead of the
-       canonical token (``plasma_boundary``, ``divertor_target``,
-       ``wall``, …). The audit recommends the rewrite. (The canonical
-       LCFS locus is ``plasma_boundary`` — the descriptive geometric
-       noun — per ``_CANONICAL_LOCUS_SYNONYMS``; ``separatrix`` is
-       qualifier-sensitive so ``secondary_separatrix`` stays distinct.)
-    2. **Field-at-region preposition** — when the base is an evaluated
-       field (flux, density, temperature, …) paired with a position or
-       region locus, the relation MUST be ``_at_``. ``_of_<region>``
-       reserves only intrinsic geometric properties (area, radius,
-       elongation, …).
-
-    Severity: critical — quarantines the candidate so the refine pool
-    rewrites it under the same prompts.
+    ISN also distinguishes intrinsic geometry (``of``) from fields evaluated
+    at a position (``at``).  Until its physical-base registry publishes that
+    semantic category, this audit quarantines only cases whose public parse
+    fields prove field-evaluation structure, such as a species quantity or a
+    projected field component.  It does not guess from a codex-owned base list.
     """
     name = (candidate.get("id") or candidate.get("name") or "").strip()
     if not name:
         return []
 
-    issues: list[str] = []
+    registered_loci = _isn_locus_tokens()
+    aliases = _isn_locus_advisory_aliases()
+    alias: str | None = None
+    canonical: str | None = None
     try:
         from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
         ir = parse_canonical_name(name).ir
-        if ir.locus is None or ir.base is None:
+        if ir.locus is None:
             return []
-
         locus_token = ir.locus.token
-        relation = (
-            ir.locus.relation.value
-            if hasattr(ir.locus.relation, "value")
-            else str(ir.locus.relation)
-        )
-        locus_type = (
-            ir.locus.type.value
-            if hasattr(ir.locus.type, "value")
-            else str(ir.locus.type)
-        )
-        base_token = ir.base.token
-
-        locus_qualifiers = tuple(getattr(ir.locus, "qualifiers", ()) or ())
-        canonical = _CANONICAL_LOCUS_SYNONYMS.get(locus_token)
-        if canonical and (
-            not locus_qualifiers
-            or locus_token not in _QUALIFIER_SENSITIVE_LOCUS_SYNONYMS
-        ):
-            # Most synonym pairs survive geometric qualification
-            # (``inner_divertor_plate`` IS the inner divertor target).
-            # A qualifier-SENSITIVE pair names a distinct feature once
-            # qualified — the secondary separatrix is not the plasma
-            # boundary — so the rewrite must not apply there.
-            issues.append(
-                f"audit:canonical_locus_check: name '{name}' uses synonym "
-                f"locus token '{locus_token}' — the canonical token is "
-                f"'{canonical}'. Rewrite as "
-                f"'{name.replace(locus_token, canonical)}'."
-            )
-        else:
-            # Substring scan: catches UNREGISTERED compound forms the exact
-            # map misses. A compound the ISN locus registry itself accepts
-            # (compositional geometric qualifiers, e.g.
-            # ``secondary_separatrix``) is a DISTINCT concept, not a synonym
-            # spelling — rewriting it fabricates wrong physics
-            # (``secondary_plasma_boundary``); leave those to the reviewer.
-            registered_loci = _isn_locus_tokens()
-            if locus_token not in registered_loci:
-                for bad, good in _CANONICAL_LOCUS_SUBSTRINGS.items():
-                    if bad in locus_token:
-                        fixed_locus = locus_token.replace(bad, good)
-                        # Only recommend rewrites that exist in the installed
-                        # ISN locus registry; otherwise we fabricate bogus
-                        # compounds.
-                        if fixed_locus not in registered_loci:
-                            continue
-                        issues.append(
-                            f"audit:canonical_locus_check: name '{name}' has "
-                            f"locus token '{locus_token}' containing "
-                            f"non-canonical substring '{bad}' — rewrite the "
-                            f"locus as '{fixed_locus}'."
-                        )
-                        break
-
+        if locus_token not in registered_loci:
+            alias = locus_token
+            canonical = aliases.get(alias)
+        relation = str(getattr(ir.locus.relation, "value", ir.locus.relation))
+        locus_type = str(getattr(ir.locus.type, "value", ir.locus.type))
         if (
             relation == "of"
-            and locus_type in {"position", "region"}
-            and base_token in _FIELD_BASES
+            and locus_type == "position"
+            and _has_field_evaluation_structure(name)
         ):
             corrected = name.replace(f"_of_{locus_token}", f"_at_{locus_token}")
-            issues.append(
-                f"audit:canonical_locus_check: field base '{base_token}' "
-                f"with '_of_{locus_token}' is the field-at-region "
-                f"anti-pattern — evaluated fields sample AT a position/"
-                f"region. Rewrite as '{corrected}'."
-            )
+            return [
+                f"audit:canonical_locus_check: name '{name}' has field-evaluation "
+                f"structure but uses intrinsic-geometry relation '_of_'. "
+                f"Rewrite as '{corrected}'."
+            ]
     except Exception:
-        pass
+        for candidate_alias, candidate_canonical in sorted(
+            aliases.items(), key=lambda item: len(item[0]), reverse=True
+        ):
+            if any(
+                f"_{relation}_{candidate_alias}" in name
+                for relation in _isn_locus_relations()
+            ):
+                alias = candidate_alias
+                canonical = candidate_canonical
+                break
 
-    return issues
+    if alias is None or canonical is None:
+        return []
+    return [
+        f"audit:canonical_locus_check: name '{name}' uses ISN advisory alias "
+        f"locus token '{alias}' — the registered token is '{canonical}'. "
+        f"Rewrite as '{name.replace(alias, canonical)}'."
+    ]
 
 
 def ggd_implementation_leakage_check(candidate: dict[str, Any]) -> list[str]:
@@ -3228,7 +3150,6 @@ def run_audits(
     all_issues.extend(repeated_token_check(candidate))
     all_issues.extend(adjacent_duplicate_token_check(candidate))
     all_issues.extend(instrument_stokes_bind_check(candidate))
-    all_issues.extend(position_redundancy_check(candidate))
     all_issues.extend(process_qualifier_check(candidate))
     all_issues.extend(preposition_physical_base_check(candidate))
     all_issues.extend(canonical_locus_check(candidate))

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import ast
+
 import numpy as np
 import pytest
 
@@ -2077,49 +2079,6 @@ class TestInstrumentStokesBindCheck:
 
 
 # =========================================================================
-# position_redundancy_check
-# =========================================================================
-
-
-class TestPositionRedundancyCheck:
-    """Tests for position_redundancy_check audit."""
-
-    def test_fail_at_wall_surface(self):
-        """``at_wall_surface`` triggers — ISN has ``wall``, not ``wall_surface``."""
-        from imas_codex.standard_names.audits import position_redundancy_check
-
-        issues = position_redundancy_check(
-            {"id": "emitted_radiation_energy_flux_at_wall_surface"}
-        )
-        assert len(issues) == 1
-        assert "position_redundancy_check" in issues[0]
-        assert "'wall'" in issues[0]
-
-    def test_fail_on_wall_surface(self):
-        """``on_wall_surface`` also triggers."""
-        from imas_codex.standard_names.audits import position_redundancy_check
-
-        issues = position_redundancy_check({"id": "ion_energy_flux_on_wall_surface"})
-        assert len(issues) == 1
-        assert "position_redundancy_check" in issues[0]
-
-    def test_pass_at_wall(self):
-        """Correct ``at_wall`` does not trigger."""
-        from imas_codex.standard_names.audits import position_redundancy_check
-
-        assert (
-            position_redundancy_check({"id": "emitted_radiation_energy_flux_at_wall"})
-            == []
-        )
-
-    def test_pass_unrelated(self):
-        """Unrelated name does not trigger."""
-        from imas_codex.standard_names.audits import position_redundancy_check
-
-        assert position_redundancy_check({"id": "electron_temperature"}) == []
-
-
-# =========================================================================
 # process_qualifier_check
 # =========================================================================
 
@@ -2576,31 +2535,152 @@ class TestPrepositionPhysicalBaseCheck:
         assert has_critical_audit_failure(issues) is True
 
 
+def _registered_locus_cases():
+    from imas_standard_names import get_grammar_context
+
+    registry = get_grammar_context()["grammar"]["vocabularies"]["locus_registry"]
+    return [
+        pytest.param(token, details["allowed_relations"][0], id=token)
+        for token, details in registry.items()
+    ]
+
+
+def _advisory_locus_alias_cases():
+    from imas_standard_names import get_grammar_context
+
+    grammar = get_grammar_context()["grammar"]
+    registry = grammar["vocabularies"]["locus_registry"]
+    return [
+        pytest.param(
+            alias,
+            details["canonical"],
+            registry[details["canonical"]]["allowed_relations"][0],
+            id=alias,
+        )
+        for aliases in grammar["advisory_aliases"].values()
+        for alias, details in aliases.items()
+        if details["canonical"] in registry and alias not in registry
+    ]
+
+
 class TestCanonicalLocusCheck:
-    """Canonical-locus rewrites must stay inside the installed ISN registry."""
+    """ISN's public registry and advisory aliases own locus authority."""
 
-    def test_flags_plain_separatrix_synonym(self):
+    def test_power_at_separatrix_has_no_canonical_issue(self):
         from imas_codex.standard_names.audits import canonical_locus_check
 
-        issues = canonical_locus_check({"id": "electron_temperature_at_separatrix"})
+        issues = canonical_locus_check({"id": "total_power_at_separatrix"})
 
-        assert any("plasma_boundary" in issue for issue in issues)
+        assert issues == []
 
-    def test_flags_registered_compound_divertor_synonym(self):
-        from imas_codex.standard_names.audits import canonical_locus_check
+    def test_power_at_separatrix_passes_complete_candidate_validation(self):
+        from imas_codex.standard_names.workers import validate_name_candidate
 
-        issues = canonical_locus_check({"id": "heat_flux_at_inner_divertor_plate"})
-
-        assert any("inner_divertor_target" in issue for issue in issues)
-
-    def test_does_not_invent_secondary_plasma_boundary(self):
-        from imas_codex.standard_names.audits import canonical_locus_check
-
-        issues = canonical_locus_check(
-            {"id": "electron_temperature_at_secondary_separatrix"}
+        issues, layers, status = validate_name_candidate(
+            {
+                "id": "total_power_at_separatrix",
+                "kind": "scalar",
+                "unit": "W",
+                "description": "Total power crossing the separatrix.",
+            }
         )
 
-        assert not any("secondary_plasma_boundary" in issue for issue in issues)
+        assert status == "valid", issues
+        assert layers["canonical"]["issue_count"] == 0
+        assert not any("canonical_locus_check" in issue for issue in issues)
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "electron_density_of_pedestal",
+            "poloidal_magnetic_flux_of_plasma_boundary",
+        ],
+    )
+    def test_structurally_proven_field_of_position_is_flagged(self, name):
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        issues = canonical_locus_check({"id": name})
+
+        assert len(issues) == 1
+        assert "field-evaluation structure" in issues[0]
+        assert "_at_" in issues[0]
+
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "elongation_of_plasma_boundary",
+            "minor_radius_of_plasma_boundary",
+            "radial_coordinate_of_magnetic_axis",
+            "electron_density_at_pedestal",
+            "poloidal_magnetic_flux_at_plasma_boundary",
+        ],
+    )
+    def test_correct_intrinsic_and_field_relations_are_accepted(self, name):
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        assert canonical_locus_check({"id": name}) == []
+
+    @pytest.mark.parametrize(
+        "locus,relation",
+        _registered_locus_cases(),
+    )
+    def test_every_registered_locus_is_never_flagged(self, locus, relation):
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        assert (
+            canonical_locus_check({"id": f"electron_temperature_{relation}_{locus}"})
+            == []
+        )
+
+    @pytest.mark.parametrize(
+        "alias,canonical,relation",
+        _advisory_locus_alias_cases(),
+    )
+    def test_every_published_locus_alias_is_flagged(self, alias, canonical, relation):
+        from imas_codex.standard_names.audits import canonical_locus_check
+        from imas_codex.standard_names.workers import validate_name_candidate
+
+        name = f"electron_temperature_{relation}_{alias}"
+        issues = canonical_locus_check({"id": name})
+
+        assert len(issues) == 1
+        assert alias in issues[0]
+        assert canonical in issues[0]
+        gate_issues, _layers, status = validate_name_candidate(
+            {
+                "id": name,
+                "kind": "scalar",
+                "unit": "eV",
+                "description": "Electron temperature at a specified locus.",
+            }
+        )
+        assert status == "quarantined"
+        assert gate_issues
+
+    def test_no_module_level_locus_vocabulary_tables(self):
+        import inspect
+
+        import imas_codex.standard_names.audits as audits
+
+        tree = ast.parse(inspect.getsource(audits))
+        offenders: list[str] = []
+        for node in tree.body:
+            target = None
+            value = None
+            if isinstance(node, ast.Assign) and len(node.targets) == 1:
+                target, value = node.targets[0], node.value
+            elif isinstance(node, ast.AnnAssign):
+                target, value = node.target, node.value
+            if not isinstance(target, ast.Name) or value is None:
+                continue
+            if not any(
+                part in target.id for part in ("LOCUS", "POSITION", "FIELD_BASE")
+            ):
+                continue
+            if isinstance(value, ast.Dict | ast.Set | ast.List | ast.Tuple | ast.Call):
+                offenders.append(target.id)
+
+        assert offenders == []
 
 
 class TestAttachmentStateResolution:
