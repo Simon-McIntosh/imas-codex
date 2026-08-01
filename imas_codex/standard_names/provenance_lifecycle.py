@@ -9,6 +9,9 @@ an internal audit trail after unapproved candidates are compacted.
 
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
+from contextlib import suppress
 from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import quote
@@ -188,7 +191,7 @@ def cancel_staged_rename(
         )
     )
     if len(result) != 1:
-        raise RuntimeError("staged rename changed state before cancellation")
+        raise RuntimeError("staged rename no longer satisfies cancellation constraints")
     return {
         "ok": True,
         "successor": successor_id,
@@ -475,6 +478,550 @@ def find_semantic_source_invariant_violations(gc: Any) -> list[dict[str, Any]]:
         """
     )
     return [dict(row) for row in rows or []]
+
+
+_SEMANTIC_SOURCE_REPAIR_INSPECTION = """
+UNWIND $source_ids AS source_id
+MATCH (source:StandardNameSource {id: source_id})
+OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+WITH source,
+     [item IN collect(DISTINCT {
+        id: target.id,
+        stage: target.name_stage,
+        validation_status: target.validation_status
+      })
+      WHERE item.id IS NOT NULL] AS targets
+OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+WITH source, targets, collect(DISTINCT dd.id) AS dd_backings
+OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+WITH source, targets, dd_backings,
+     collect(DISTINCT signal.id) AS signal_backings
+OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(mapped:StandardName)
+OPTIONAL MATCH (owner:StandardNameSource)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+RETURN source.id AS source_id,
+       source.source_id AS semantic_id,
+       source.source_type AS source_type,
+       source.status AS status,
+       source.produced_sn_id AS produced_sn_id,
+       [target IN targets | target.id] AS produced_targets,
+       targets AS target_states,
+       [target IN targets
+        WHERE NOT target.stage IN ['superseded', 'exhausted'] |
+        target.id] AS live_targets,
+       dd_backings,
+       signal_backings,
+       collect(DISTINCT mapped.id) AS mapped_ids,
+       collect(DISTINCT owner.id) AS backing_owner_ids
+ORDER BY source_id
+"""
+
+
+_SEMANTIC_SOURCE_REPAIR_MUTATION = """
+MATCH (source:StandardNameSource {id: $source_id})
+WHERE source.source_type = $source_type
+  AND source.source_id = $semantic_id
+  AND source.status = $status
+  AND (source.produced_sn_id = $before_scalar
+       OR (source.produced_sn_id IS NULL AND $before_scalar IS NULL))
+OPTIONAL MATCH (source)-[produced:PRODUCED_NAME]->(current:StandardName)
+WITH source, collect(DISTINCT current.id) AS current_targets
+WHERE size(current_targets) = size($before_targets)
+  AND all(id IN current_targets WHERE id IN $before_targets)
+OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(state_target:StandardName)
+WITH source, current_targets,
+     [state IN collect(DISTINCT {
+        id: state_target.id,
+        stage: state_target.name_stage,
+        validation_status: state_target.validation_status
+      }) WHERE state.id IS NOT NULL] AS current_target_states
+WHERE size(current_target_states) = size($before_target_states)
+  AND all(state IN current_target_states WHERE any(
+    expected IN $before_target_states
+    WHERE expected.id = state.id
+      AND coalesce(expected.stage, '') = coalesce(state.stage, '')
+      AND coalesce(expected.validation_status, '') =
+          coalesce(state.validation_status, '')
+  ))
+OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(current_live:StandardName)
+WHERE NOT current_live.name_stage IN ['superseded', 'exhausted']
+WITH source, current_targets, current_target_states,
+     collect(DISTINCT current_live.id) AS current_live_targets
+WHERE size(current_live_targets) = size($before_live_targets)
+  AND all(id IN current_live_targets WHERE id IN $before_live_targets)
+OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+WITH source, current_targets, current_target_states, current_live_targets,
+     collect(DISTINCT dd.id) AS dd_backings
+WHERE size(dd_backings) = size($dd_backings)
+  AND all(id IN dd_backings WHERE id IN $dd_backings)
+OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+WITH source, current_targets, current_target_states, current_live_targets, dd_backings,
+     collect(DISTINCT signal.id) AS signal_backings
+WHERE size(signal_backings) = size($signal_backings)
+  AND all(id IN signal_backings WHERE id IN $signal_backings)
+OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+OPTIONAL MATCH (backing)-[projection:HAS_STANDARD_NAME]->(mapped:StandardName)
+WITH source, current_targets, current_target_states, current_live_targets,
+     dd_backings, signal_backings, backing,
+     collect(DISTINCT mapped.id) AS mapped_ids,
+     collect(DISTINCT projection) AS projections
+WHERE size(mapped_ids) = size($before_mapped_ids)
+  AND all(id IN mapped_ids WHERE id IN $before_mapped_ids)
+OPTIONAL MATCH (owner:StandardNameSource)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+WITH source, current_targets, current_target_states, current_live_targets,
+     dd_backings, signal_backings, backing, mapped_ids, projections,
+     collect(DISTINCT owner.id) AS backing_owner_ids
+WHERE size(backing_owner_ids) = size($backing_owner_ids)
+  AND all(id IN backing_owner_ids WHERE id IN $backing_owner_ids)
+MATCH (target:StandardName {id: $target})
+OPTIONAL MATCH (source)-[stale:PRODUCED_NAME]->(old:StandardName)
+WHERE old.id <> target.id
+WITH source, target, backing, projections,
+     collect(DISTINCT stale) AS stale_edges
+FOREACH (edge IN stale_edges | DELETE edge)
+MERGE (source)-[:PRODUCED_NAME]->(target)
+SET source.produced_sn_id = target.id
+FOREACH (edge IN projections | DELETE edge)
+MERGE (backing)-[:HAS_STANDARD_NAME]->(target)
+CREATE (change:StandardNameChange {
+  id: $change_id,
+  from_name: coalesce($before_scalar, $target),
+  to_name: $target,
+  operation: 'repair_semantic_source_binding',
+  reason: $audit_reason,
+  origin: $origin,
+  run_id: $run_id,
+  changed_at: datetime(),
+  internal: true
+})
+MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+RETURN source.id AS source_id, target.id AS target, change.id AS change_id
+"""
+
+
+_SEMANTIC_SOURCE_PATH_INSPECTION = """
+UNWIND $name_ids AS name_id
+MATCH (sn:StandardName {id: name_id})
+OPTIONAL MATCH (imas:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+WITH sn, collect(DISTINCT 'dd:' + imas.id) AS hsn
+OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+WHERE source.source_type <> 'derived' AND source.id IS NOT NULL
+RETURN sn.id AS id,
+       coalesce(sn.source_paths, []) AS current,
+       [path IN hsn WHERE path IS NOT NULL AND path <> 'dd:'] AS hsn_paths,
+       collect(DISTINCT source.id) AS produced_paths
+ORDER BY id
+"""
+
+
+_SEMANTIC_SOURCE_PATH_WRITE = """
+UNWIND $updates AS update
+MATCH (sn:StandardName {id: update.id})
+SET sn.source_paths = update.paths
+RETURN sn.id AS id, sn.source_paths AS paths
+ORDER BY id
+"""
+
+
+def _inspect_semantic_source_repairs(
+    query: Any, source_ids: list[str]
+) -> list[dict[str, Any]]:
+    return [
+        dict(row)
+        for row in query(_SEMANTIC_SOURCE_REPAIR_INSPECTION, source_ids=source_ids)
+    ]
+
+
+def _semantic_source_repair_plan(
+    rows: list[dict[str, Any]],
+    source_ids: list[str],
+    authority_overrides: Mapping[str, str],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    by_id = {str(row["source_id"]): row for row in rows}
+    missing = [source_id for source_id in source_ids if source_id not in by_id]
+    if missing:
+        raise ValueError("semantic sources do not exist: " + ", ".join(missing))
+
+    unsupported = [
+        source_id
+        for source_id in source_ids
+        if by_id[source_id].get("source_type") not in {"dd", "signals"}
+    ]
+    if unsupported:
+        raise ValueError(
+            "unsupported semantic source kinds: "
+            + ", ".join(
+                f"{source_id}={by_id[source_id].get('source_type')!r}"
+                for source_id in unsupported
+            )
+        )
+
+    ineligible = [
+        source_id
+        for source_id in source_ids
+        if by_id[source_id].get("status") not in {"composed", "attached"}
+    ]
+    if ineligible:
+        raise ValueError(
+            "semantic sources are not composed or attached: " + ", ".join(ineligible)
+        )
+
+    backing_errors: list[str] = []
+    for source_id in source_ids:
+        row = by_id[source_id]
+        semantic_id = row.get("semantic_id")
+        dd_backings = sorted(row.get("dd_backings") or [])
+        signal_backings = sorted(row.get("signal_backings") or [])
+        backing_owner_ids = sorted(row.get("backing_owner_ids") or [])
+        if row["source_type"] == "dd":
+            valid = (
+                semantic_id is not None
+                and source_id == f"dd:{semantic_id}"
+                and dd_backings == [semantic_id]
+                and not signal_backings
+            )
+        else:
+            valid = (
+                semantic_id is not None
+                and source_id == f"signals:{semantic_id}"
+                and signal_backings == [semantic_id]
+                and not dd_backings
+            )
+        exclusively_owned = backing_owner_ids == [source_id]
+        if not valid or not exclusively_owned:
+            backing_errors.append(
+                f"{source_id}: semantic_id={semantic_id!r}, "
+                f"dd={dd_backings!r}, signals={signal_backings!r}, "
+                f"owners={backing_owner_ids!r}"
+            )
+    if backing_errors:
+        raise ValueError(
+            "semantic source backing identity or ownership is invalid: "
+            + "; ".join(backing_errors)
+        )
+
+    planned: list[dict[str, Any]] = []
+    ambiguous: list[dict[str, Any]] = []
+    already_clean: list[dict[str, Any]] = []
+    for source_id in source_ids:
+        row = by_id[source_id]
+        produced_targets = sorted(row.get("produced_targets") or [])
+        live_targets = sorted(row.get("live_targets") or [])
+        target_states = sorted(
+            (dict(state) for state in row.get("target_states") or []),
+            key=lambda state: str(state["id"]),
+        )
+        mapped_ids = sorted(row.get("mapped_ids") or [])
+        state_by_id = {state["id"]: state for state in target_states}
+        scalar = row.get("produced_sn_id")
+        before = {
+            "produced_targets": produced_targets,
+            "live_targets": live_targets,
+            "target_states": target_states,
+            "produced_sn_id": scalar,
+            "mapped_ids": mapped_ids,
+        }
+        base = {
+            "source_id": source_id,
+            "semantic_id": row["semantic_id"],
+            "source_type": row["source_type"],
+            "status": row["status"],
+            "backing_id": (
+                sorted(row.get("dd_backings") or [])[0]
+                if row["source_type"] == "dd"
+                else sorted(row.get("signal_backings") or [])[0]
+            ),
+            "backing_owner_ids": sorted(row.get("backing_owner_ids") or []),
+            "before": before,
+        }
+        override = authority_overrides.get(source_id)
+        if override is not None:
+            if live_targets.count(override) != 1:
+                raise ValueError(
+                    "semantic source authority override is not exactly one current "
+                    f"live target: {source_id}={override!r}"
+                )
+            target = override
+            authority_basis = "explicit_authority_override"
+        elif len(live_targets) == 1:
+            target = live_targets[0]
+            authority_basis = "sole_live_edge"
+        elif len(live_targets) > 1 and scalar in live_targets:
+            scalar_state = state_by_id.get(scalar, {})
+            scalar_is_accepted_valid = (
+                scalar_state.get("stage") == "accepted"
+                and scalar_state.get("validation_status") == "valid"
+            )
+            accepted_valid_competitors = [
+                name
+                for name in live_targets
+                if name != scalar
+                and state_by_id.get(name, {}).get("stage") == "accepted"
+                and state_by_id.get(name, {}).get("validation_status") == "valid"
+            ]
+            if accepted_valid_competitors and not scalar_is_accepted_valid:
+                ambiguous.append(
+                    {
+                        **base,
+                        "classification": "policy_conflict",
+                        "reason": (
+                            "produced_sn_id selects a lower-authority live target "
+                            "while another live target is accepted and valid"
+                        ),
+                        "accepted_valid_competitors": accepted_valid_competitors,
+                        "after": before,
+                    }
+                )
+                continue
+            target = str(scalar)
+            authority_basis = "lifecycle_compatible_scalar"
+        else:
+            ambiguous.append(
+                {
+                    **base,
+                    "classification": "ambiguous",
+                    "reason": (
+                        "no sole live edge and produced_sn_id does not select "
+                        "exactly one live target"
+                    ),
+                    "after": before,
+                }
+            )
+            continue
+
+        after = {
+            "produced_targets": [target],
+            "live_targets": [target],
+            "target_states": ([state_by_id[target]] if target in state_by_id else []),
+            "produced_sn_id": target,
+            "mapped_ids": [target],
+        }
+        item = {
+            **base,
+            "authoritative_target": target,
+            "authority_basis": authority_basis,
+            "removed_targets": [name for name in produced_targets if name != target],
+            "after": after,
+        }
+        if before == after:
+            already_clean.append({**item, "classification": "already_clean"})
+        else:
+            planned.append({**item, "classification": "planned"})
+    return planned, ambiguous, already_clean
+
+
+def repair_semantic_source_invariants(
+    gc: Any,
+    source_ids: list[str],
+    *,
+    reason: str,
+    dry_run: bool = True,
+    authority_overrides: Mapping[str, str] | None = None,
+    origin: str = "semantic_source_repair",
+    run_id: str | None = None,
+) -> dict[str, Any]:
+    """Repair current-target mirrors for an explicit semantic-source allowlist.
+
+    A sole live ``PRODUCED_NAME`` edge is authoritative. If several live edges
+    exist, the scalar mirror may select one; otherwise the source is reported as
+    ambiguous and remains untouched. Unsupported or structurally ambiguous
+    backing projections reject the whole request before mutation.
+
+    Applying re-reads and compare-checks every planned row inside one explicit
+    transaction. Any drift or write failure rolls back the complete batch.
+    ``source_paths`` is then rebuilt for every affected name from all surviving
+    graph bindings, including sources outside the requested allowlist.
+    """
+    selected = sorted(set(source_ids))
+    if not selected:
+        return {
+            "dry_run": dry_run,
+            "source_ids": [],
+            "planned": [],
+            "repaired": [],
+            "ambiguous": [],
+            "already_clean": [],
+        }
+    if not reason.strip():
+        raise ValueError("semantic source repair requires a non-empty reason")
+    overrides = dict(authority_overrides or {})
+    unexpected_overrides = sorted(set(overrides) - set(selected))
+    if unexpected_overrides:
+        raise ValueError(
+            "semantic source authority overrides are outside the exact scope: "
+            + ", ".join(unexpected_overrides)
+        )
+
+    if dry_run:
+        rows = _inspect_semantic_source_repairs(gc.query, selected)
+        planned, ambiguous, already_clean = _semantic_source_repair_plan(
+            rows, selected, overrides
+        )
+        return {
+            "dry_run": True,
+            "source_ids": selected,
+            "planned": planned,
+            "repaired": [],
+            "ambiguous": ambiguous,
+            "already_clean": already_clean,
+        }
+
+    session_factory = getattr(gc, "session", None)
+    if not callable(session_factory):
+        raise TypeError("semantic source repair requires a transactional graph client")
+
+    with session_factory() as session:
+        transaction = session.begin_transaction()
+        try:
+
+            def tx_query(cypher: str, **params: Any) -> Any:
+                return transaction.run(cypher, **params)
+
+            rows = _inspect_semantic_source_repairs(tx_query, selected)
+            planned, ambiguous, already_clean = _semantic_source_repair_plan(
+                rows, selected, overrides
+            )
+            repaired: list[dict[str, Any]] = []
+            affected_names: set[str] = set()
+            for item in planned:
+                before = item["before"]
+                audit_detail = {
+                    "source_id": item["source_id"],
+                    "semantic_id": item["semantic_id"],
+                    "backing_id": item["backing_id"],
+                    "backing_owner_ids": item["backing_owner_ids"],
+                    "before": before,
+                    "after": item["after"],
+                    "removed_targets": item["removed_targets"],
+                    "authority_basis": item["authority_basis"],
+                }
+                change_id = f"sn-change:{uuid4()}"
+                mutation_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _SEMANTIC_SOURCE_REPAIR_MUTATION,
+                        source_id=item["source_id"],
+                        semantic_id=item["semantic_id"],
+                        source_type=item["source_type"],
+                        status=item["status"],
+                        before_scalar=before["produced_sn_id"],
+                        before_targets=before["produced_targets"],
+                        before_target_states=before["target_states"],
+                        before_live_targets=before["live_targets"],
+                        dd_backings=(
+                            [item["backing_id"]] if item["source_type"] == "dd" else []
+                        ),
+                        signal_backings=(
+                            [item["backing_id"]]
+                            if item["source_type"] == "signals"
+                            else []
+                        ),
+                        before_mapped_ids=before["mapped_ids"],
+                        backing_owner_ids=item["backing_owner_ids"],
+                        target=item["authoritative_target"],
+                        change_id=change_id,
+                        audit_reason=(
+                            reason.strip()
+                            + "; exact source binding repair "
+                            + json.dumps(
+                                audit_detail,
+                                sort_keys=True,
+                                separators=(",", ":"),
+                            )
+                        ),
+                        origin=origin,
+                        run_id=run_id,
+                    )
+                ]
+                if len(mutation_rows) != 1:
+                    raise RuntimeError(
+                        "semantic source changed during repair: " + item["source_id"]
+                    )
+                repaired.append(
+                    {
+                        **item,
+                        "classification": "repaired",
+                        "change_id": mutation_rows[0]["change_id"],
+                    }
+                )
+                affected_names.update(before["produced_targets"])
+                affected_names.add(item["authoritative_target"])
+
+            if affected_names:
+                path_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _SEMANTIC_SOURCE_PATH_INSPECTION,
+                        name_ids=sorted(affected_names),
+                    )
+                ]
+                updates = []
+                for path_row in path_rows:
+                    current = list(path_row.get("current") or [])
+                    derived_keep = [
+                        path for path in current if path.startswith("derived:")
+                    ]
+                    canonical_paths = sorted(
+                        set(derived_keep)
+                        | set(path_row.get("hsn_paths") or [])
+                        | set(path_row.get("produced_paths") or [])
+                    )
+                    updates.append({"id": path_row["id"], "paths": canonical_paths})
+                if len(updates) != len(affected_names):
+                    raise RuntimeError(
+                        "affected StandardName disappeared during repair"
+                    )
+                written_paths = [
+                    dict(row)
+                    for row in transaction.run(
+                        _SEMANTIC_SOURCE_PATH_WRITE,
+                        updates=updates,
+                    )
+                ]
+                if written_paths != updates:
+                    raise RuntimeError(
+                        "affected StandardName source_paths changed during repair"
+                    )
+            after_rows = _inspect_semantic_source_repairs(tx_query, selected)
+            after_planned, after_ambiguous, after_clean = _semantic_source_repair_plan(
+                after_rows, selected, overrides
+            )
+            if after_planned:
+                raise RuntimeError(
+                    "semantic source repair did not converge: "
+                    + ", ".join(item["source_id"] for item in after_planned)
+                )
+            if after_ambiguous != ambiguous:
+                raise RuntimeError(
+                    "ambiguous semantic source set changed during repair"
+                )
+            expected_clean = sorted(
+                [item["source_id"] for item in repaired]
+                + [item["source_id"] for item in already_clean]
+            )
+            if [item["source_id"] for item in after_clean] != expected_clean:
+                raise RuntimeError("semantic source clean set changed during repair")
+            after_clean_by_id = {item["source_id"]: item for item in after_clean}
+            for clean_item in already_clean:
+                if after_clean_by_id.get(clean_item["source_id"]) != clean_item:
+                    raise RuntimeError(
+                        "unmodified semantic source changed during repair: "
+                        + clean_item["source_id"]
+                    )
+            transaction.commit()
+        except BaseException:
+            with suppress(Exception):
+                transaction.rollback()
+            raise
+
+    return {
+        "dry_run": False,
+        "source_ids": selected,
+        "planned": planned,
+        "repaired": repaired,
+        "ambiguous": after_ambiguous,
+        "already_clean": already_clean,
+    }
 
 
 def record_standard_name_change(
