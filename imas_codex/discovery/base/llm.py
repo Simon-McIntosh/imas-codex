@@ -175,6 +175,26 @@ class ProviderBudgetExhausted(Exception):
     intervention (top-up credits or raise the spending limit).
     """
 
+    def __init__(
+        self,
+        message: str,
+        *,
+        cost: float = 0.0,
+        input_tokens: int = 0,
+        output_tokens: int = 0,
+        cache_read_tokens: int = 0,
+        cache_creation_tokens: int = 0,
+        response_count: int = 0,
+    ) -> None:
+        super().__init__(message)
+        self.cost = cost
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+        self.tokens = input_tokens + output_tokens
+        self.cache_read_tokens = cache_read_tokens
+        self.cache_creation_tokens = cache_creation_tokens
+        self.response_count = response_count
+
 
 class EmptyResponseError(ValueError):
     """The LLM returned a response with no usable content.
@@ -264,6 +284,69 @@ class LLMResult:
             f"cache_read={self.cache_read_tokens}, "
             f"cache_creation={self.cache_creation_tokens})"
         )
+
+
+class LLMStructuredCallError(ValueError):
+    """A structured LLM call failed after at least one provider response.
+
+    Provider responses are billable even when their content cannot be parsed
+    or validated.  The structured-call retry loop raises this error with the
+    aggregate telemetry from every completed response so callers can record
+    the spend once before handling the underlying failure.
+    """
+
+    __slots__ = (
+        "cost",
+        "tokens",
+        "input_tokens",
+        "output_tokens",
+        "cache_read_tokens",
+        "cache_creation_tokens",
+        "response_count",
+    )
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        cost: float,
+        input_tokens: int,
+        output_tokens: int,
+        cache_read_tokens: int,
+        cache_creation_tokens: int,
+        response_count: int,
+    ) -> None:
+        super().__init__(message)
+        self.cost = cost
+        self.input_tokens = input_tokens
+        self.output_tokens = output_tokens
+        self.tokens = input_tokens + output_tokens
+        self.cache_read_tokens = cache_read_tokens
+        self.cache_creation_tokens = cache_creation_tokens
+        self.response_count = response_count
+
+
+def _structured_call_error(
+    error_msg: str,
+    *,
+    cost: float,
+    input_tokens: int,
+    output_tokens: int,
+    cache_read_tokens: int,
+    cache_creation_tokens: int,
+    response_count: int,
+) -> LLMStructuredCallError:
+    """Build a telemetry-bearing terminal structured-call error."""
+    return LLMStructuredCallError(
+        f"LLM structured call failed after {response_count} provider "
+        f"response(s): {error_msg[:200]}",
+        cost=cost,
+        input_tokens=input_tokens,
+        output_tokens=output_tokens,
+        cache_read_tokens=cache_read_tokens,
+        cache_creation_tokens=cache_creation_tokens,
+        response_count=response_count,
+    )
 
 
 # Patterns indicating the API key or account has hit a hard spending cap.
@@ -1772,11 +1855,24 @@ def call_llm_structured(
 
     last_error: Exception | None = None
     total_cost = 0.0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_cache_read = 0
+    total_cache_creation = 0
+    response_count = 0
 
     for attempt in range(max_retries):
         try:
             response = litellm.completion(**kwargs)
             total_cost += extract_cost(response, model=model)
+            input_tokens = response.usage.prompt_tokens or 0
+            output_tokens = response.usage.completion_tokens or 0
+            cache_read, cache_creation = extract_cache_tokens(response)
+            total_input_tokens += input_tokens
+            total_output_tokens += output_tokens
+            total_cache_read += cache_read
+            total_cache_creation += cache_creation
+            response_count += 1
             _log_cache_metrics(response, model)
 
             # Parse response content through Pydantic
@@ -1787,20 +1883,14 @@ def call_llm_structured(
             content = _sanitize_content(content)
             parsed = _parse_structured_content(content, response_model, model)
 
-            total_tokens = (
-                response.usage.prompt_tokens + response.usage.completion_tokens
-            )
-            input_tokens = response.usage.prompt_tokens or 0
-            output_tokens = response.usage.completion_tokens or 0
-            cache_read, cache_creation = extract_cache_tokens(response)
             return LLMResult(
                 parsed,
                 total_cost,
-                total_tokens,
-                cache_read,
-                cache_creation,
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
+                total_input_tokens + total_output_tokens,
+                total_cache_read,
+                total_cache_creation,
+                input_tokens=total_input_tokens,
+                output_tokens=total_output_tokens,
             )
 
         except Exception as e:
@@ -1808,7 +1898,13 @@ def call_llm_structured(
             error_msg = str(e)
             if _is_budget_exhausted(error_msg):
                 raise ProviderBudgetExhausted(
-                    f"LLM provider budget exhausted: {error_msg[:200]}"
+                    f"LLM provider budget exhausted: {error_msg[:200]}",
+                    cost=total_cost,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
+                    cache_read_tokens=total_cache_read,
+                    cache_creation_tokens=total_cache_creation,
+                    response_count=response_count,
                 ) from e
             if _is_retryable(error_msg) and attempt < max_retries - 1:
                 # Budget-exhaustion empty (reasoning model spent its whole
@@ -1837,10 +1933,30 @@ def call_llm_structured(
                     max_retries,
                     error_msg[:200],
                 )
+                if response_count:
+                    raise _structured_call_error(
+                        error_msg,
+                        cost=total_cost,
+                        input_tokens=total_input_tokens,
+                        output_tokens=total_output_tokens,
+                        cache_read_tokens=total_cache_read,
+                        cache_creation_tokens=total_cache_creation,
+                        response_count=response_count,
+                    ) from e
                 raise ValueError(
                     f"LLM failed after {max_retries} attempts: {error_msg[:200]}"
                 ) from e
             else:
+                if response_count:
+                    raise _structured_call_error(
+                        error_msg,
+                        cost=total_cost,
+                        input_tokens=total_input_tokens,
+                        output_tokens=total_output_tokens,
+                        cache_read_tokens=total_cache_read,
+                        cache_creation_tokens=total_cache_creation,
+                        response_count=response_count,
+                    ) from e
                 raise
 
     raise last_error  # type: ignore[misc]
@@ -1902,6 +2018,11 @@ async def acall_llm_structured(
 
     last_error: Exception | None = None
     total_cost = 0.0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_cache_read = 0
+    total_cache_creation = 0
+    response_count = 0
 
     # Local endpoints (hosted_vllm) bypass litellm's shared connection pool —
     # they use a dedicated, isolated client so free GPU generation is never
@@ -1936,6 +2057,14 @@ async def acall_llm_structured(
                 cost_delta = extract_cost(response, model=model)
                 total_cost += cost_delta
                 _ACTIVITY.add_spend(cost_delta)
+                input_tokens = response.usage.prompt_tokens or 0
+                output_tokens = response.usage.completion_tokens or 0
+                cache_read, cache_creation = extract_cache_tokens(response)
+                total_input_tokens += input_tokens
+                total_output_tokens += output_tokens
+                total_cache_read += cache_read
+                total_cache_creation += cache_creation
+                response_count += 1
                 _log_cache_metrics(response, model)
 
                 # Parse response content through Pydantic
@@ -1946,22 +2075,16 @@ async def acall_llm_structured(
                 content = _sanitize_content(content)
                 parsed = _parse_structured_content(content, response_model, model)
 
-                total_tokens = (
-                    response.usage.prompt_tokens + response.usage.completion_tokens
-                )
-                input_tokens = response.usage.prompt_tokens or 0
-                output_tokens = response.usage.completion_tokens or 0
-                cache_read, cache_creation = extract_cache_tokens(response)
                 _ACTIVITY.record_completed()
                 succeeded = True
                 return LLMResult(
                     parsed,
                     total_cost,
-                    total_tokens,
-                    cache_read,
-                    cache_creation,
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
+                    total_input_tokens + total_output_tokens,
+                    total_cache_read,
+                    total_cache_creation,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
                 )
 
             except Exception as e:
@@ -1969,7 +2092,13 @@ async def acall_llm_structured(
                 error_msg = str(e)
                 if _is_budget_exhausted(error_msg):
                     raise ProviderBudgetExhausted(
-                        f"LLM provider budget exhausted: {error_msg[:200]}"
+                        f"LLM provider budget exhausted: {error_msg[:200]}",
+                        cost=total_cost,
+                        input_tokens=total_input_tokens,
+                        output_tokens=total_output_tokens,
+                        cache_read_tokens=total_cache_read,
+                        cache_creation_tokens=total_cache_creation,
+                        response_count=response_count,
                     ) from e
                 # Global concurrency pullback on a provider 429 (independent of
                 # the per-call retry/backoff, which still retries this attempt).
@@ -2005,10 +2134,30 @@ async def acall_llm_structured(
                         max_retries,
                         error_msg[:200],
                     )
+                    if response_count:
+                        raise _structured_call_error(
+                            error_msg,
+                            cost=total_cost,
+                            input_tokens=total_input_tokens,
+                            output_tokens=total_output_tokens,
+                            cache_read_tokens=total_cache_read,
+                            cache_creation_tokens=total_cache_creation,
+                            response_count=response_count,
+                        ) from e
                     raise ValueError(
                         f"LLM failed after {max_retries} attempts: {error_msg[:200]}"
                     ) from e
                 else:
+                    if response_count:
+                        raise _structured_call_error(
+                            error_msg,
+                            cost=total_cost,
+                            input_tokens=total_input_tokens,
+                            output_tokens=total_output_tokens,
+                            cache_read_tokens=total_cache_read,
+                            cache_creation_tokens=total_cache_creation,
+                            response_count=response_count,
+                        ) from e
                     raise
 
         raise last_error  # type: ignore[misc]

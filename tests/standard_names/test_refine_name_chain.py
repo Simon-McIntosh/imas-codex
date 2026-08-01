@@ -1,4 +1,4 @@
-"""Tests for the refine_name pipeline (Option B: chain creation).
+"""Tests for successor-chain creation in the refine_name pipeline.
 
 Covers:
 - Claim eligibility (reviewed + low score + chain < cap)
@@ -515,6 +515,79 @@ class TestReleaseRefineNameFailedClaims:
         assert released == 0
 
 
+class TestRefineTerminalClaimFence:
+    """Deterministic termination is fenced by the exact active claim token."""
+
+    def test_stale_token_does_not_mutate_current_claim(self):
+        from imas_codex.standard_names.graph_ops import (
+            _mark_refine_vocab_gap_exhausted,
+        )
+
+        state = {
+            "name_stage": "refining",
+            "claim_token": "current-token",
+            "reviewer_comments_name": "review feedback",
+            "chain_length": 1,
+        }
+
+        def _query(cypher: str, **params):
+            if (
+                state["claim_token"] == params["token"]
+                and state["name_stage"] == "refining"
+            ):
+                state["name_stage"] = "exhausted"
+            assert "sn.claim_token = $token" in cypher
+            assert "sn.name_stage = 'refining'" in cypher
+            return []
+
+        gc = _mock_gc_query()
+        gc.query = MagicMock(side_effect=_query)
+        with _patch_gc(gc):
+            _mark_refine_vocab_gap_exhausted(
+                sn_id="test_name",
+                token="stale-token",
+                error_msg="strict grammar validation failed",
+            )
+
+        assert state == {
+            "name_stage": "refining",
+            "claim_token": "current-token",
+            "reviewer_comments_name": "review feedback",
+            "chain_length": 1,
+        }
+
+    def test_terminal_query_preserves_identity_provenance_and_counters(self):
+        from imas_codex.standard_names.graph_ops import (
+            _mark_refine_vocab_gap_exhausted,
+        )
+
+        gc = _mock_gc_query()
+        gc.query = MagicMock(return_value=[])
+        with _patch_gc(gc):
+            _mark_refine_vocab_gap_exhausted(
+                sn_id="test_name",
+                token="active-token",
+                error_msg="strict grammar validation failed",
+            )
+
+        cypher = " ".join(gc.query.call_args.args[0].split())
+        assert "MATCH (sn:StandardName {id: $sn_id})" in cypher
+        assert "sn.claim_token = $token" in cypher
+        assert "sn.name_stage = 'refining'" in cypher
+        assert "coalesce(sn.reviewer_comments_name, '')" in cypher
+        for preserved in (
+            "chain_length",
+            "reviewer_score_name",
+            "review_count_name",
+            "validation_status",
+            "REFINED_FROM",
+            "PRODUCED_NAME",
+            "HAS_STANDARD_NAME",
+            "DETACH DELETE",
+        ):
+            assert preserved not in cypher
+
+
 class TestReleaseRefineNameClaims:
     """release_refine_name_claims reverts refining → reviewed by id list."""
 
@@ -763,6 +836,228 @@ class TestProcessReleasesOnFailure:
         call_kwargs = mock_release.call_args.kwargs
         assert call_kwargs["sn_ids"] == ["test_name"]
         assert call_kwargs["token"] == "tok-abc-123"
+
+    @pytest.mark.asyncio
+    async def test_parse_failure_charges_once_then_terminates(self):
+        from imas_standard_names import ParseError
+
+        from imas_codex.discovery.base.llm import LLMResult
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        class CandidateWithInvalidComposition:
+            description = "A candidate definition"
+            kind = "scalar"
+            reason = "Addresses reviewer feedback"
+
+            def __init__(self) -> None:
+                self.name_accesses = 0
+
+            @property
+            def name(self) -> str:
+                self.name_accesses += 1
+                raise ParseError("strict parser rejected the composed name")
+
+        item = _make_refine_item()
+        candidate = CandidateWithInvalidComposition()
+        llm_out = LLMResult(
+            candidate,
+            0.37,
+            150,
+            input_tokens=100,
+            output_tokens=50,
+        )
+        events: list[dict[str, Any]] = []
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                return_value=llm_out,
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt text",
+            ),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch("imas_codex.settings.get_model", return_value="default-model"),
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_refined_name"
+            ) as mock_persist,
+            patch(
+                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
+                return_value=None,
+            ) as mock_exhaust,
+            patch(
+                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims"
+            ) as mock_release,
+            patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
+        ):
+            mgr = _mock_budget_manager()
+            lease = mgr.reserve.return_value
+            count = await process_refine_name_batch(
+                [item], mgr, asyncio.Event(), on_event=events.append
+            )
+
+        assert count == 0
+        assert candidate.name_accesses == 1
+        lease.charge_event.assert_called_once()
+        charged_cost, charged_event = lease.charge_event.call_args.args
+        assert charged_cost == pytest.approx(0.37)
+        assert charged_event.sn_ids == (item["id"],)
+        assert charged_event.tokens_in == 100
+        assert charged_event.tokens_out == 50
+        mock_exhaust.assert_called_once()
+        assert mock_exhaust.call_args.kwargs["sn_id"] == item["id"]
+        assert mock_exhaust.call_args.kwargs["token"] == item["claim_token"]
+        assert "strict grammar validation" in mock_exhaust.call_args.kwargs["error_msg"]
+        mock_release.assert_not_called()
+        mock_persist.assert_not_called()
+        assert events[-1]["outcome"] == "refine_failed"
+        assert events[-1]["cost"] == pytest.approx(0.37)
+
+    @pytest.mark.asyncio
+    async def test_billed_structured_failure_charges_telemetry_once(self):
+        from imas_codex.discovery.base.llm import LLMStructuredCallError
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        item = _make_refine_item()
+        failure = LLMStructuredCallError(
+            "LLM structured call failed: validation error for RefinedName",
+            cost=0.29,
+            input_tokens=180,
+            output_tokens=30,
+            cache_read_tokens=40,
+            cache_creation_tokens=5,
+            response_count=2,
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                side_effect=failure,
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt text",
+            ),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch("imas_codex.settings.get_model", return_value="default-model"),
+            patch(
+                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
+                return_value=None,
+            ) as mock_exhaust,
+            patch(
+                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims"
+            ) as mock_release,
+            patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
+        ):
+            mgr = _mock_budget_manager()
+            lease = mgr.reserve.return_value
+            count = await process_refine_name_batch([item], mgr, asyncio.Event())
+
+        assert count == 0
+        lease.charge_event.assert_called_once()
+        charged_cost, charged_event = lease.charge_event.call_args.args
+        assert charged_cost == pytest.approx(0.29)
+        assert charged_event.sn_ids == (item["id"],)
+        assert charged_event.tokens_in == 180
+        assert charged_event.tokens_out == 30
+        assert charged_event.tokens_cached_read == 40
+        assert charged_event.tokens_cached_write == 5
+        mock_exhaust.assert_called_once()
+        mock_release.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_provider_budget_error_charges_prior_responses_then_propagates(self):
+        from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        item = _make_refine_item()
+        failure = ProviderBudgetExhausted(
+            "provider budget exhausted",
+            cost=0.23,
+            input_tokens=140,
+            output_tokens=20,
+            cache_read_tokens=30,
+            cache_creation_tokens=4,
+            response_count=1,
+        )
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                side_effect=failure,
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt text",
+            ),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch("imas_codex.settings.get_model", return_value="default-model"),
+            patch(
+                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted"
+            ) as mock_exhaust,
+            patch(
+                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims"
+            ) as mock_release,
+            patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
+        ):
+            mgr = _mock_budget_manager()
+            lease = mgr.reserve.return_value
+            with pytest.raises(ProviderBudgetExhausted):
+                await process_refine_name_batch([item], mgr, asyncio.Event())
+
+        lease.charge_event.assert_called_once()
+        charged_cost, charged_event = lease.charge_event.call_args.args
+        assert charged_cost == pytest.approx(0.23)
+        assert charged_event.sn_ids == (item["id"],)
+        assert charged_event.tokens_in == 140
+        assert charged_event.tokens_out == 20
+        assert charged_event.tokens_cached_read == 30
+        assert charged_event.tokens_cached_write == 4
+        lease.release_unused.assert_called_once()
+        mock_exhaust.assert_not_called()
+        mock_release.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_pre_response_provider_budget_error_does_not_charge(self):
+        from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        item = _make_refine_item()
+        failure = ProviderBudgetExhausted("provider budget exhausted")
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                side_effect=failure,
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt text",
+            ),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch("imas_codex.settings.get_model", return_value="default-model"),
+            patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
+        ):
+            mgr = _mock_budget_manager()
+            lease = mgr.reserve.return_value
+            with pytest.raises(ProviderBudgetExhausted):
+                await process_refine_name_batch([item], mgr, asyncio.Event())
+
+        lease.charge_event.assert_not_called()
+        lease.release_unused.assert_called_once()
 
 
 class TestProcessStopEvent:

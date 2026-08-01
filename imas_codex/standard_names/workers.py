@@ -5940,6 +5940,23 @@ _GRAMMAR_FAILURE_MARKERS: tuple[str, ...] = (
 )
 
 
+class RefineCandidateValidationError(ValueError):
+    """A refined candidate failed deterministic strict grammar validation."""
+
+
+def _compose_refined_candidate_name(result_obj: Any) -> str:
+    """Compose one refined candidate name and type deterministic failures."""
+    from imas_standard_names import ParseError
+    from pydantic import ValidationError
+
+    try:
+        return result_obj.name
+    except (ParseError, ValidationError, ValueError) as exc:
+        raise RefineCandidateValidationError(
+            f"refined candidate failed strict grammar validation: {exc}"
+        ) from exc
+
+
 def _is_refine_grammar_failure(exc: BaseException) -> bool:
     """Return True if *exc* is a deterministic grammar/validation refine failure.
 
@@ -5947,6 +5964,8 @@ def _is_refine_grammar_failure(exc: BaseException) -> bool:
     a normal failed-refine outcome, not a crash: they must be routed to the
     exhaust path so the item stops re-claiming and re-burning paid budget.
     """
+    if isinstance(exc, RefineCandidateValidationError):
+        return True
     msg = str(exc).lower()
     return any(marker in msg for marker in _GRAMMAR_FAILURE_MARKERS)
 
@@ -5969,7 +5988,7 @@ async def process_refine_name_batch(
     *,
     on_event: Callable[[dict[str, Any]], None] | None = None,
 ) -> int:
-    """Process a batch of StandardNames for name refinement (Option B).
+    """Process a batch of StandardNames through successor-chain refinement.
 
     For each item in the batch:
     1. Walk the REFINED_FROM chain via ``chain_history`` (already enriched).
@@ -5984,7 +6003,11 @@ async def process_refine_name_batch(
     """
     import asyncio as _asyncio
 
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.base.llm import (
+        LLMStructuredCallError,
+        ProviderBudgetExhausted,
+        acall_llm_structured,
+    )
     from imas_codex.graph.client import GraphClient
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import get_model, get_reasoning_effort
@@ -6275,6 +6298,12 @@ async def process_refine_name_batch(
                 if system_prompt
                 else [{"role": "user", "content": user_prompt}]
             )
+            cost = 0.0
+            llm_tokens_in = 0
+            llm_tokens_out = 0
+            llm_tokens_cached_read = 0
+            llm_tokens_cached_write = 0
+            llm_charge_recorded = False
             try:
                 llm_out = await acall_llm_structured(
                     model=model,
@@ -6309,7 +6338,7 @@ async def process_refine_name_batch(
                         tokens_out=llm_tokens_out,
                         tokens_cached_read=llm_tokens_cached_read,
                         tokens_cached_write=llm_tokens_cached_write,
-                        sn_ids=(result_obj.name,),
+                        sn_ids=(sn_id,),
                         phase=(
                             "refine_name+fanout" if fanout_run_id else "refine_name"
                         ),
@@ -6317,6 +6346,12 @@ async def process_refine_name_batch(
                         batch_id=fanout_run_id,
                     )
                     lease.charge_event(cost, _event)
+                    llm_charge_recorded = True
+
+                # Strict composition can fail even after the response model
+                # validates.  Cost is already recorded against the stable
+                # predecessor before this derived accessor is evaluated.
+                candidate_name = _compose_refined_candidate_name(result_obj)
 
                 # ── Deterministic name-key dup guard ──────────────
                 # Name-key lookup AFTER the final retry's
@@ -6328,7 +6363,7 @@ async def process_refine_name_batch(
                 try:
                     dup_id = find_name_key_duplicate(
                         gc,
-                        result_obj.name,
+                        candidate_name,
                         exclude=sn_id,
                     )
                 except Exception:
@@ -6340,7 +6375,7 @@ async def process_refine_name_batch(
                     logger.info(
                         "refine_name dup_prevented: %s → %s collides with %s",
                         sn_id,
-                        result_obj.name,
+                        candidate_name,
                         dup_id,
                     )
                     # Release claim back to 'reviewed' so the cycle
@@ -6376,7 +6411,7 @@ async def process_refine_name_batch(
                 await _asyncio.to_thread(
                     persist_refined_name,
                     old_name=sn_id,
-                    new_name=result_obj.name,
+                    new_name=candidate_name,
                     description=normalize_description_text(result_obj.description),
                     kind=result_obj.kind,
                     unit=item.get("unit"),
@@ -6403,7 +6438,7 @@ async def process_refine_name_batch(
                 logger.info(
                     "refine_name: %s → %s (chain_length=%d, model=%s)",
                     sn_id,
-                    result_obj.name,
+                    candidate_name,
                     chain_length + 1,
                     model,
                 )
@@ -6412,9 +6447,9 @@ async def process_refine_name_batch(
                     on_event(
                         {
                             "pool": "refine_name",
-                            "name": result_obj.name,
+                            "name": candidate_name,
                             "old_name": sn_id,
-                            "new_name": result_obj.name,
+                            "new_name": candidate_name,
                             "chain_length": chain_length + 1,
                             "escalated": escalate,
                             "model": model,
@@ -6430,6 +6465,30 @@ async def process_refine_name_batch(
                     )
 
             except Exception as exc:
+                if isinstance(exc, LLMStructuredCallError | ProviderBudgetExhausted):
+                    cost = exc.cost
+                    llm_tokens_in = exc.input_tokens
+                    llm_tokens_out = exc.output_tokens
+                    llm_tokens_cached_read = exc.cache_read_tokens
+                    llm_tokens_cached_write = exc.cache_creation_tokens
+                    if lease and exc.response_count > 0 and not llm_charge_recorded:
+                        _event = LLMCostEvent(
+                            model=model,
+                            tokens_in=llm_tokens_in,
+                            tokens_out=llm_tokens_out,
+                            tokens_cached_read=llm_tokens_cached_read,
+                            tokens_cached_write=llm_tokens_cached_write,
+                            sn_ids=(sn_id,),
+                            phase=(
+                                "refine_name+fanout" if fanout_run_id else "refine_name"
+                            ),
+                            service="standard-names",
+                            batch_id=fanout_run_id,
+                        )
+                        lease.charge_event(cost, _event)
+                        llm_charge_recorded = True
+                if isinstance(exc, ProviderBudgetExhausted):
+                    raise
                 _exc_str = str(exc)
                 # "no-op" means orphan_sweep already reverted this claim
                 # while the LLM call was in flight — the graph is already
@@ -6486,7 +6545,11 @@ async def process_refine_name_batch(
                             "old_name": sn_id,
                             "outcome": "refine_failed",
                             "model": model,
-                            "cost": 0.0,
+                            "cost": cost,
+                            "llm_tokens_in": llm_tokens_in,
+                            "llm_tokens_out": llm_tokens_out,
+                            "llm_tokens_cached_read": llm_tokens_cached_read,
+                            "llm_tokens_cached_write": llm_tokens_cached_write,
                         }
                     )
             finally:

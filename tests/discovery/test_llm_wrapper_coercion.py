@@ -14,10 +14,13 @@ import pytest
 from pydantic import BaseModel, Field
 
 from imas_codex.discovery.base.llm import (
+    LLMStructuredCallError,
+    ProviderBudgetExhausted,
     _coerce_to_wrapper,
     _parse_structured_content,
     _wrapper_field,
     acall_llm_structured,
+    call_llm_structured,
 )
 from imas_codex.standard_names.models import (
     StandardNameQualityReviewDocs,
@@ -247,6 +250,28 @@ class _FakeResponse:
         self._hidden_params = {"response_cost": 0.0}
 
 
+class _MeteredUsage:
+    prompt_tokens_details = None
+
+    def __init__(self, prompt_tokens: int, completion_tokens: int) -> None:
+        self.prompt_tokens = prompt_tokens
+        self.completion_tokens = completion_tokens
+
+
+class _MeteredResponse(_FakeResponse):
+    def __init__(
+        self,
+        content: str,
+        *,
+        cost: float,
+        prompt_tokens: int,
+        completion_tokens: int,
+    ) -> None:
+        super().__init__(content)
+        self.usage = _MeteredUsage(prompt_tokens, completion_tokens)
+        self._hidden_params = {"response_cost": cost}
+
+
 async def test_acall_structured_coerces_bare_item_no_retry(monkeypatch):
     """qwen-style bare inner object → coerced, single API call, no retry."""
     monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
@@ -273,6 +298,189 @@ async def test_acall_structured_coerces_bare_item_no_retry(monkeypatch):
     assert isinstance(batch, StandardNameQualityReviewDocsBatch)
     assert len(batch.reviews) == 1
     assert batch.reviews[0].source_id == "dd:foo/bar"
+
+
+async def test_structured_failure_exposes_accumulated_billed_telemetry(monkeypatch):
+    """Terminal schema failure carries every completed response's telemetry."""
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    responses = [
+        _MeteredResponse(
+            '{"name": "candidate"}',
+            cost=0.11,
+            prompt_tokens=90,
+            completion_tokens=10,
+        ),
+        _MeteredResponse(
+            '{"score": 0.5}',
+            cost=0.17,
+            prompt_tokens=120,
+            completion_tokens=15,
+        ),
+    ]
+    fake = AsyncMock(side_effect=responses)
+
+    with (
+        patch("litellm.acompletion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        await acall_llm_structured(
+            model="openrouter/qwen/qwen-max",
+            messages=[{"role": "user", "content": "return one object"}],
+            response_model=SingleObject,
+            service="standard-names",
+            max_retries=2,
+            retry_base_delay=0.0,
+        )
+
+    exc = raised.value
+    assert fake.call_count == 2
+    assert exc.cost == pytest.approx(0.28)
+    assert exc.input_tokens == 210
+    assert exc.output_tokens == 25
+    assert exc.tokens == 235
+    assert exc.response_count == 2
+
+
+async def test_pre_response_network_failure_keeps_unmetered_error(monkeypatch):
+    """A call with no provider response has no telemetry-bearing wrapper."""
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+
+    with (
+        patch(
+            "litellm.acompletion",
+            AsyncMock(side_effect=ConnectionError("connection unavailable")),
+        ),
+        pytest.raises(ValueError) as raised,
+    ):
+        await acall_llm_structured(
+            model="openrouter/qwen/qwen-max",
+            messages=[{"role": "user", "content": "return one object"}],
+            response_model=SingleObject,
+            service="standard-names",
+            max_retries=1,
+        )
+
+    assert not isinstance(raised.value, LLMStructuredCallError)
+
+
+_PROVIDER_BUDGET_ERROR = RuntimeError(
+    "402 payment required: request requires more credits"
+)
+
+
+async def test_async_provider_budget_error_carries_prior_response_telemetry(
+    monkeypatch,
+):
+    """Async hard-stop preserves telemetry from earlier invalid responses."""
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+    fake = AsyncMock(
+        side_effect=[
+            _MeteredResponse(
+                '{"name": "candidate"}',
+                cost=0.13,
+                prompt_tokens=80,
+                completion_tokens=12,
+            ),
+            _PROVIDER_BUDGET_ERROR,
+        ]
+    )
+
+    with (
+        patch("litellm.acompletion", fake),
+        pytest.raises(ProviderBudgetExhausted) as raised,
+    ):
+        await acall_llm_structured(
+            model="openrouter/qwen/qwen-max",
+            messages=[{"role": "user", "content": "return one object"}],
+            response_model=SingleObject,
+            service="standard-names",
+            max_retries=3,
+            retry_base_delay=0.0,
+        )
+
+    exc = raised.value
+    assert fake.call_count == 2
+    assert exc.cost == pytest.approx(0.13)
+    assert exc.input_tokens == 80
+    assert exc.output_tokens == 12
+    assert exc.response_count == 1
+
+
+def test_sync_provider_budget_error_carries_prior_response_telemetry(monkeypatch):
+    """Sync hard-stop preserves telemetry from earlier invalid responses."""
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+
+    with (
+        patch(
+            "litellm.completion",
+            side_effect=[
+                _MeteredResponse(
+                    '{"score": 0.5}',
+                    cost=0.19,
+                    prompt_tokens=110,
+                    completion_tokens=16,
+                ),
+                _PROVIDER_BUDGET_ERROR,
+            ],
+        ) as fake,
+        pytest.raises(ProviderBudgetExhausted) as raised,
+    ):
+        call_llm_structured(
+            model="openrouter/qwen/qwen-max",
+            messages=[{"role": "user", "content": "return one object"}],
+            response_model=SingleObject,
+            service="standard-names",
+            max_retries=3,
+            retry_base_delay=0.0,
+        )
+
+    exc = raised.value
+    assert fake.call_count == 2
+    assert exc.cost == pytest.approx(0.19)
+    assert exc.input_tokens == 110
+    assert exc.output_tokens == 16
+    assert exc.response_count == 1
+
+
+@pytest.mark.parametrize("is_async", [False, True])
+async def test_provider_budget_error_before_response_has_zero_telemetry(
+    monkeypatch, is_async: bool
+):
+    """A pure pre-response hard-stop retains its type without billable usage."""
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
+
+    if is_async:
+        with (
+            patch(
+                "litellm.acompletion",
+                AsyncMock(side_effect=_PROVIDER_BUDGET_ERROR),
+            ),
+            pytest.raises(ProviderBudgetExhausted) as raised,
+        ):
+            await acall_llm_structured(
+                model="openrouter/qwen/qwen-max",
+                messages=[{"role": "user", "content": "return one object"}],
+                response_model=SingleObject,
+                service="standard-names",
+                max_retries=3,
+            )
+    else:
+        with (
+            patch("litellm.completion", side_effect=_PROVIDER_BUDGET_ERROR),
+            pytest.raises(ProviderBudgetExhausted) as raised,
+        ):
+            call_llm_structured(
+                model="openrouter/qwen/qwen-max",
+                messages=[{"role": "user", "content": "return one object"}],
+                response_model=SingleObject,
+                service="standard-names",
+                max_retries=3,
+            )
+
+    exc = raised.value
+    assert exc.cost == 0.0
+    assert exc.tokens == 0
+    assert exc.response_count == 0
 
 
 class TestReasoningEffortProviderShape:
