@@ -1689,7 +1689,7 @@ def _write_standard_name_edges(
     *,
     full_rebuild: bool = False,
     expand_closure: bool = True,
-) -> None:
+) -> set[str]:
     """Emit all structural edges for a batch of StandardName nodes.
 
     Called as a tail pass **after** all nodes in the batch have been
@@ -1726,6 +1726,13 @@ def _write_standard_name_edges(
     expand_closure:
         Also reconcile structural parent identities discovered while deriving
         the requested names.  Disable for exact-name repair callers.
+
+    Returns
+    -------
+    The finite set of ``StandardName`` identities involved in this relation
+    projection, including endpoints that relationship-side ``MERGE`` may have
+    created. Callers can use this set for batch-local placeholder cleanup
+    without inspecting unrelated graph state.
     """
     from imas_codex.standard_names.derivation import derive_edges
 
@@ -1948,6 +1955,17 @@ def _write_standard_name_edges(
             """,
             batch=domain_batch,
         )
+
+    candidate_name_ids = {n["id"] for n in names if n.get("id")}
+    for batch in (co_batch, he_batch, pred_batch, succ_batch):
+        for row in batch:
+            candidate_name_ids.update((row["from_name"], row["to_name"]))
+    candidate_name_ids.update(
+        row["from_name"] for row in geo_batch if row.get("from_name")
+    )
+    candidate_name_ids.update(row["sn_id"] for row in cluster_batch if row.get("sn_id"))
+    candidate_name_ids.update(row["sn_id"] for row in domain_batch if row.get("sn_id"))
+    return candidate_name_ids
 
 
 def reconcile_structural_edges_for_standard_names(
@@ -3515,7 +3533,7 @@ def write_standard_names(
         # Emit structural edges: HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
         # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN.
         # Tail pass — all nodes in this batch exist before edges are written.
-        _write_standard_name_edges(write_gc, names)
+        skeleton_candidate_ids = _write_standard_name_edges(write_gc, names)
 
     # Persist token-miss gaps through the same caller-owned graph handle when
     # one is supplied, so transactional callers keep every rich-write effect.
@@ -3553,36 +3571,51 @@ def write_standard_names(
         if signal_gap_dicts:
             write_vocab_gaps(signal_gap_dicts, source_type="signals", gc=gc)
 
-    # Sweep skeleton placeholders created by relationship-side MERGE on
-    # uncomposed targets (HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
+    # Sweep skeleton placeholders created by this write's relationship-side
+    # MERGE on uncomposed targets (HAS_PARENT, HAS_ERROR, HAS_PREDECESSOR,
     # HAS_SUCCESSOR, IN_CLUSTER, HAS_PHYSICS_DOMAIN). A real StandardName
     # always has at least a created_at OR generated_at timestamp; pure
     # skeletons (id-only) are detached and deleted.
     # Reuse a caller-owned transaction when present; ordinary callers retain
-    # the independent graph context used by the public writer.
-    with nullcontext(gc) if gc is not None else GraphClient() as sweep_gc:
-        deletion_clause = deletion_change_cypher("sn")
-        swept = sweep_gc.query(
-            f"""
-            MATCH (sn:StandardName)
-            WHERE sn.created_at IS NULL
-              AND sn.generated_at IS NULL
-              AND sn.validation_status IS NULL
-              AND sn.unit IS NULL
-              AND sn.kind IS NULL
-              AND sn.needs_composition IS NULL
-              AND NOT EXISTS {{ ()-[:HAS_PARENT]->(sn) }}
-              AND NOT EXISTS {{ ()-[:HAS_ERROR]->(sn) }}
-            {deletion_clause}
-            DETACH DELETE sn
-            RETURN count(sn) AS swept
-            """,
-            **deletion_change_params(
-                "remove_skeleton_placeholder",
-                reason="relationship placeholder never became a composed name",
-            ),
-        )
-    swept_count = (swept[0]["swept"] if swept else 0) if swept else 0
+    # the independent graph context used by the public writer. An empty
+    # candidate set performs no query: it must never degrade into a global
+    # placeholder search.
+    swept_count = 0
+    if skeleton_candidate_ids:
+        with nullcontext(gc) if gc is not None else GraphClient() as sweep_gc:
+            deletion_clause = deletion_change_cypher("sn")
+            swept = sweep_gc.query(
+                f"""
+                MATCH (sn:StandardName)
+                WHERE sn.id IN $candidate_ids
+                  AND sn.created_at IS NULL
+                  AND sn.generated_at IS NULL
+                  AND sn.validation_status IS NULL
+                  AND sn.unit IS NULL
+                  AND sn.kind IS NULL
+                  AND sn.needs_composition IS NULL
+                  AND coalesce(sn.name_stage, '') IN ['', 'pending']
+                  AND NOT EXISTS {{ ()-[:HAS_PARENT]->(sn) }}
+                  AND NOT EXISTS {{ ()-[:HAS_ERROR]->(sn) }}
+                  AND NOT EXISTS {{ ()-[:HAS_STANDARD_NAME]->(sn) }}
+                  AND NOT EXISTS {{
+                      (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+                  }}
+                  AND NOT EXISTS {{
+                      MATCH (source:StandardNameSource)
+                      WHERE source.produced_sn_id = sn.id
+                  }}
+                {deletion_clause}
+                DETACH DELETE sn
+                RETURN count(sn) AS swept
+                """,
+                candidate_ids=sorted(skeleton_candidate_ids),
+                **deletion_change_params(
+                    "remove_skeleton_placeholder",
+                    reason="relationship placeholder never became a composed name",
+                ),
+            )
+        swept_count = int(swept[0]["swept"]) if swept else 0
     if swept_count:
         logger.info("Swept %d skeleton StandardName placeholder(s)", swept_count)
 
