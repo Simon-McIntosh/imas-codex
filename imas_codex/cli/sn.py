@@ -513,6 +513,7 @@ def _run_sn_cmd(
     max_sources: int | None = None,
     scope_run_id: str | None = None,
     edits_only: bool = False,
+    skip_global_maintenance: bool = False,
 ) -> dict[str, Any] | None:
     """Execute the pool-based SN orchestrator with Rich progress display.
 
@@ -725,6 +726,7 @@ def _run_sn_cmd(
             skip_generate=skip_generate,
             attach_only=(only == "attach"),
             reconcile_only=(only == "reconcile"),
+            skip_global_maintenance=skip_global_maintenance,
         )
         return {"summary": summary}
 
@@ -1330,6 +1332,18 @@ def _reject_unscoped_accepted_reset(
     ),
 )
 @click.option(
+    "--skip-global-maintenance",
+    is_flag=True,
+    default=False,
+    help=(
+        "For a run bounded by --focus/--batch or --scope-run-id, bypass all "
+        "global startup, background, and post-drain maintenance writes while "
+        "running the normal scoped worker pools. Invalid without an explicit "
+        "scope and with reset/reseed/revalidate or maintenance-only modes. With "
+        "--dry-run, validate and preview the scope without graph mutation."
+    ),
+)
+@click.option(
     "--families",
     "families",
     default=None,
@@ -1550,6 +1564,7 @@ def sn_run(
     flush: bool,
     edits_only: bool,
     scope_run_id: str | None,
+    skip_global_maintenance: bool,
     families: str | None,
     only_phase: str | None,
     override_edits: tuple[str, ...],
@@ -1596,6 +1611,11 @@ def sn_run(
       imas-codex sn run --min-score 0.85 --rotation-cap 5    # tighter thresholds
     """
     import os as _os
+
+    if skip_global_maintenance and rename_spec is not None:
+        raise click.UsageError(
+            "--skip-global-maintenance cannot be combined with --rename"
+        )
 
     # --- Rename short-circuit ---
     # When --rename OLD:NEW is provided, run the parent-rename cascade and
@@ -1672,6 +1692,58 @@ def sn_run(
         raise click.UsageError("--flush and --focus are mutually exclusive")
     if docs_only and names_only:
         raise click.UsageError("--docs-only and --names-only are mutually exclusive")
+
+    # Global-maintenance bypass is an explicit contract for a bounded pool run,
+    # not a general way to suppress safety work. Keep it fail-closed at the CLI
+    # boundary so a typo cannot turn an intended scoped operation into a global
+    # drain. Reset/reseed and maintenance-only modes have their own graph-write
+    # semantics and therefore cannot claim this contract.
+    if skip_global_maintenance:
+        if source != "dd":
+            raise click.UsageError(
+                "--skip-global-maintenance requires the DD pool orchestrator"
+            )
+        if not flat_focus and not scope_run_id:
+            raise click.UsageError(
+                "--skip-global-maintenance requires --focus/--batch or --scope-run-id"
+            )
+        if reseed:
+            raise click.UsageError(
+                "--skip-global-maintenance cannot be combined with --reseed"
+            )
+        if reset_to is not None or reset_only:
+            raise click.UsageError(
+                "--skip-global-maintenance cannot be combined with "
+                "--reset-to/--reset-only"
+            )
+        if revalidate:
+            raise click.UsageError(
+                "--skip-global-maintenance cannot be combined with --revalidate"
+            )
+        if only_phase in {"reconcile", "attach", "validate", "link"}:
+            raise click.UsageError(
+                f"--skip-global-maintenance cannot be combined with --only {only_phase}"
+            )
+        if families:
+            raise click.UsageError(
+                "--skip-global-maintenance cannot be combined with --families"
+            )
+        if campaign or campaign_manifest:
+            raise click.UsageError(
+                "--skip-global-maintenance cannot be combined with campaign modes"
+            )
+        if dry_run:
+            scope_label = (
+                f"{len(flat_focus)} focused DD path(s)"
+                if flat_focus
+                else f"run_id {scope_run_id}"
+            )
+            console.print(
+                "[yellow]--skip-global-maintenance --dry-run:[/yellow] "
+                f"would run normal worker pools for {scope_label}; "
+                "no graph writes performed"
+            )
+            return
 
     # ── Guard the unscoped graph-wide accepted-wipe footgun ───────────
     # Fires before either reset branch so it covers --reset-only and the
@@ -1753,13 +1825,14 @@ def sn_run(
         # no-op when already in sync — and best-effort (a sync failure logs
         # and continues rather than crashing the run). Runs once at startup,
         # before any pool launches; never on the per-name hot path.
-        _auto_sync_grammar(quiet=quiet)
-        # Pipeline-version drift note: the catalog is never wiped and
-        # regenerated; prompt/vocab evolution is normal. Log drift for
-        # provenance and carry on. Placed after the embed preflight so a
-        # failed preflight aborts before ANY graph access, even reads
-        # (--skip-clear-gate is a deprecated no-op kept for compatibility).
-        _note_pipeline_version_drift()
+        if not skip_global_maintenance:
+            _auto_sync_grammar(quiet=quiet)
+            # Pipeline-version drift note: the catalog is never wiped and
+            # regenerated; prompt/vocab evolution is normal. Log drift for
+            # provenance and carry on. Placed after the embed preflight so a
+            # failed preflight aborts before ANY graph access, even reads
+            # (--skip-clear-gate is a deprecated no-op kept for compatibility).
+            _note_pipeline_version_drift()
 
     # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
     if flat_focus:
@@ -1777,14 +1850,15 @@ def sn_run(
         #    are cleared in a single statement so the reset is atomic and the
         #    scoping invariant (no residual run_id survives a fresh focus run)
         #    holds even if a preceding read query interposes.
-        with GraphClient() as gc:
-            gc.query(
-                "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
-                "SET sn.run_id = NULL "
-                "WITH count(*) AS _cleared "
-                "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
-                "SET sns.run_id = NULL"
-            )
+        if not skip_global_maintenance:
+            with GraphClient() as gc:
+                gc.query(
+                    "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
+                    "SET sn.run_id = NULL "
+                    "WITH count(*) AS _cleared "
+                    "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
+                    "SET sns.run_id = NULL"
+                )
 
         # Gap-only default: a focused path that already carries a live
         # accepted/approved name is left untouched — a focus mop-up must not
@@ -1889,6 +1963,7 @@ def sn_run(
             max_sources=max_sources,
             scope_run_id=scope_run_id,
             edits_only=edits_only,
+            skip_global_maintenance=skip_global_maintenance,
         )
         return
 
@@ -2235,6 +2310,7 @@ def sn_run(
             max_sources=max_sources,
             scope_run_id=scope_run_id,
             edits_only=edits_only,
+            skip_global_maintenance=skip_global_maintenance,
         )
         return
 

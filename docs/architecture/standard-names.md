@@ -708,6 +708,25 @@ name is in `override_names` (`sn run --override-edits <name>`, repeatable).
 on the name id and never create `StandardName` nodes, so re-running the same
 catalog state is a no-op — no watermark or lock is needed.
 
+## Scoped Runs Without Global Maintenance
+
+Ordinary `sn run` behavior is unchanged: it performs the graph-wide startup
+reconcilers, background orphan and embedding workers, and post-drain structural,
+link, and family maintenance around the seven worker pools. For an operator who
+needs a run to write only an explicitly stamped scope, add
+`--skip-global-maintenance` to `--focus`/`--batch` or `--scope-run-id`. The run
+still uses the normal generate, validation, review, refine, and documentation
+pools with strict claims, quorum acceptance, shared cost accounting, and an
+audited `SNRun`; only the global maintenance writers are bypassed. Focus seeding
+and `run_id` stamping remain limited to the requested DD paths.
+
+The option fails closed without one of those explicit scopes and with
+`--reseed`, `--reset-to`/`--reset-only`, `--revalidate`, family or campaign
+modes, and maintenance-only `--only reconcile|attach|validate|link` runs. It is
+available only for the DD pool orchestrator. With `--dry-run`, the CLI validates
+and reports the bounded scope, performs no graph writes, and does not start
+pools.
+
 ## Reset & Clear Semantics
 
 - **`sn run --reset-to {drafted|extracted}`** — re-process existing nodes
@@ -890,7 +909,7 @@ through review.
 
 | Command | Purpose | Key options |
 |---------|---------|-------------|
-| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `--compose-model`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted`, `--scope-run-id`, `--families` |
+| `sn run` | Run the seven-pool loop. Auto-seeds all eligible domains; `--domain` restricts. `--focus` routes specific paths; `--only` runs a single phase; `--flush` drains without composing; `--rename OLD:NEW` short-circuits to the parent-rename cascade (no LLM; pair with `--dry-run`). | `--source {dd,signals}`, `--domain` (multi), `--facility`, `--focus` (multi), `--limit`, `--max-sources`, `--compose-model`, `-c/--cost-limit`, `--dry-run`, `--force`, `--reset-to`, `--reset-only`, `--from-model`, `--since`, `--before`, `--below-score`, `--tier`, `--retry-quarantined`, `--retry-skipped`, `--retry-vocab-gap`, `--min-score` (0.80), `--rotation-cap` (3), `--escalation-model`, `--review-name-backlog-cap`, `--review-docs-backlog-cap`, `--skip-review`, `--only`, `--override-edits`, `--flush`, `--rename`, `--include-accepted`, `--scope-run-id`, `--skip-global-maintenance`, `--families` |
 | `sn review` | Score existing valid names via RD-quorum (3-layer: audits → batched LLM → consolidation) | `--ids`, `--physics-domain`, `--stage`, `--unreviewed`, `--force`, `--models`, `--batch-size`, `--neighborhood`, `--target`, `--reviewer-profile` |
 | `sn preview` | Auto-export + local MkDocs preview | `--export/--no-export`, `--staging`, `--port`, `--host` |
 | `sn release` | Release to ISNC catalog (RC→origin, final→upstream). `--export-only` runs just the graph→staging export leg and stops (no tag/push). | `-m`, `--bump`, `--final`, `--remote`, `--isnc`, `--staging`, `--skip-export`, `--dry-run`, `--export-only`, `--names-only`, and `[export]` scoping (`--min-score`, `--include-unreviewed`, `--min-description-score`, `--gate-only`, `--gate-scope {all,a,b,c,d}`, `--domain`, `--force`, `--skip-gate`, `--override-edits`, `--include-sources/--no-include-sources`) |
