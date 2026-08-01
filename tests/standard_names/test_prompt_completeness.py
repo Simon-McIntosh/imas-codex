@@ -309,6 +309,59 @@ class TestEndorsedExamplesParse:
         assert "precedence 35" in rendered
 
 
+class TestGrammarOwnedAdvisoryAliases:
+    """Alias guidance must render directly from the installed ISN contract."""
+
+    @staticmethod
+    def _aliases() -> list[tuple[str, str]]:
+        from imas_standard_names import get_grammar_context
+
+        return [
+            (alias, details["canonical"])
+            for aliases in get_grammar_context()["grammar"]["advisory_aliases"].values()
+            for alias, details in aliases.items()
+        ]
+
+    def test_compose_prompt_renders_every_published_alias(self, rendered_system_prompt):
+        for alias, canonical in self._aliases():
+            assert f"`{alias}`" in rendered_system_prompt
+            assert f"`{canonical}`" in rendered_system_prompt
+
+    @pytest.mark.parametrize(
+        "seat",
+        ["sn/review_names_system", "sn/refine_name_system"],
+    )
+    def test_production_review_and_refine_prompts_render_every_alias(self, seat):
+        rendered = render_prompt(seat, context=build_compose_context())
+        assert "{{" not in rendered
+        assert "{%" not in rendered
+        for alias, canonical in self._aliases():
+            assert f"`{alias}`" in rendered
+            assert f"`{canonical}`" in rendered
+
+    def test_assigned_policy_files_do_not_collapse_registered_loci(self):
+        paths = [
+            PROMPTS_DIR / "sn" / "generate_name_system.md",
+            PROMPTS_DIR / "sn" / "generate_name_dd.md",
+            PROMPTS_DIR / "sn" / "generate_name_dd_names.md",
+            PROMPTS_DIR / "sn" / "review_names.md",
+            PROMPTS_DIR / "sn" / "review_names_system.md",
+            PROMPTS_DIR / "sn" / "refine_name_system.md",
+            PROMPTS_DIR / "sn" / "refine_name_user.md",
+            PROMPTS_DIR.parent / "config" / "sn_composition_rules.yaml",
+            PROMPTS_DIR.parent / "config" / "sn_review_criteria.yaml",
+        ]
+        stale_claims = (
+            "plasma_boundary replaces separatrix",
+            "`separatrix` is a deprecated synonym",
+            "separatrix` / `last_closed_flux_surface` / `lcfs`",
+            "| plasma_boundary | separatrix",
+        )
+        for path in paths:
+            text = path.read_text(encoding="utf-8")
+            assert not any(claim in text for claim in stale_claims), path
+
+
 class TestStructuredOperatorContract:
     """Prompt and response schema expose one outer-to-inner operator contract."""
 

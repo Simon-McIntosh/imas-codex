@@ -42,8 +42,7 @@ _ACCEPTANCE_PHRASES = (
 )
 
 _SUBORDINATION_SENTENCE = (
-    "This proposal is subordinate to the grammar and composition rules "
-    "above"
+    "This proposal is subordinate to the grammar and composition rules above"
 )
 _DO_NOT_PENALIZE_SENTENCE = "do NOT penalize it merely for differing from"
 
@@ -270,7 +269,10 @@ def test_golden_files_exist():
 def test_no_edit_render_matches_golden():
     for key, (template, builder) in _TEMPLATES.items():
         rendered = render_prompt(template, builder(with_edit=False))
-        golden = _golden_path(key).read_text()
+        # Prompt parsing removes file-terminal whitespace before rendering;
+        # normalize only the golden file terminator while preserving every
+        # substantive byte of the captured prompt.
+        golden = _golden_path(key).read_text().rstrip("\n")
         assert rendered == golden, (
             f"{template}: no-edit render diverged from golden capture — "
             "the edit-steering change must be a no-op when no edit fields "

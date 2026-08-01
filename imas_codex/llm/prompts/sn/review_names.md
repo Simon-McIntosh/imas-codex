@@ -60,11 +60,12 @@ grammar and convention scores.
     - If the base is an **intrinsic geometric property** (`area`, `radius`, `major_radius`, `length`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `coordinate`), `_of_` is correct.
     - Examples to refine: `poloidal_magnetic_flux_of_plasma_boundary → poloidal_magnetic_flux_at_plasma_boundary`; `electron_density_of_pedestal → electron_density_at_pedestal`.
 - **[I1.7b] Shape parameter requires a surface (HARD)** — a plasma-shape parameter (`triangularity`, `elongation`, `squareness`, `ellipticity`, and their `upper`/`lower`/`inner`/`outer` variants) is a property OF a specific surface and is meaningless without it ("of WHICH surface?"). It MUST carry a surface locus: `_of_plasma_boundary` for the LCFS contour, `_of_flux_surface` (or the named interior surface) otherwise. A bare shape parameter (e.g. `outer_triangularity`, `upper_inner_squareness`) parses but is **NON-CANONICAL** even in the equilibrium domain — the surface locus is distinguishing, never redundant. Dock `Convention` to **≤ 5** and propose `revised_name` adding the surface (`outer_triangularity → outer_triangularity_of_plasma_boundary`). **NEVER** score a bare shape parameter at or above its surface-qualified sibling.
-- **[I1.8] Canonical locus tokens (HARD)** — the catalog uses one canonical token per physical concept. If the name uses a synonym, dock `Convention` to **≤ 5** and propose the canonical rewrite:
-    - `separatrix` / `last_closed_flux_surface` / `lcfs` → canonical **`plasma_boundary`**.
-    - `divertor_plate` → canonical **`divertor_target`**.
-    - `wall_surface` / `first_wall_surface` / `vacuum_vessel_wall` → canonical **`wall`**.
-    - `pedestal_region` / `edge_pedestal` → canonical **`pedestal`**.
+- **[I1.8] Grammar-owned advisory aliases (HARD)** — every injected registered locus is authoritative and distinct. Never collapse one registered locus into another. Dock `Convention` to **≤ 5** and propose a rewrite only when the installed grammar publishes the spelling under `advisory_aliases`:
+{% if grammar and grammar.advisory_aliases %}
+{% for segment, aliases in grammar.advisory_aliases.items() %}{% for alias, details in aliases.items() %}
+    - `{{ alias }}` ({{ segment }}) → **`{{ details.canonical }}`**: {{ details.reason }}
+{% endfor %}{% endfor %}
+{% endif %}
 - **[I4.6] Decomposition audit** — inspect the `physical_base` slot for
   potential group absorption. Flag any known group token (from operators,
   subjects, components, coordinates, locus, process registries) that

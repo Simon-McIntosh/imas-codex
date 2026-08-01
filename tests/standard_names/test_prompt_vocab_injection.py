@@ -42,3 +42,19 @@ def test_review_names_system_injects_the_full_registry(compose_ctx):
     assert "etendue" in out
     # The operator registry likewise (a grammar mechanism the reviewer scores).
     assert "flux_surface_averaged" in out
+
+
+@pytest.mark.parametrize("seat", ["sn/review_names_system", "sn/refine_name_system"])
+def test_active_name_seats_inject_public_advisory_aliases(compose_ctx, seat):
+    """Every active name critic/repair seat sees the grammar-owned aliases."""
+    from imas_codex.llm.prompt_loader import render_prompt
+
+    aliases = compose_ctx["grammar"]["advisory_aliases"]
+    out = render_prompt(seat, compose_ctx)
+
+    assert "{{" not in out
+    assert "{%" not in out
+    for segment_aliases in aliases.values():
+        for alias, details in segment_aliases.items():
+            assert f"`{alias}`" in out
+            assert f"`{details['canonical']}`" in out

@@ -74,7 +74,6 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 | `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Drop provenance; use the registered Faraday-polarization quantity |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking into standard name |
 | `flux_surface_averaged_elongation` | `elongation` | Elongation is a geometric property of a contour, not a flux-surface average |
-| `energy_flux_at_wall_surface` | `energy_flux_at_wall` | Position token is `wall`, not `wall_surface` — the `_surface` suffix is redundant |
 | `energy_due_to_recombination_at_ion_state` | `energy_due_to_recombination` | Process tokens are bare vocabulary entries — never append `_at_X` / `_in_X` / `_on_X` qualifiers |
 | `energy_due_to_impurity_radiation_in_halo_region` | `radiated_energy_over_halo_region_due_to_impurity_radiation` | A region is a postfix `_over_` locus before the process suffix |
 | `vertical_coordinate_of_outline_point` | `vertical_outline` | **Enumeration is a coordinate, not a name** — outline vertices are an ordinal array of ONE geometry; collapse to `radial_outline` / `vertical_outline` (`base_token=outline`, axis as `coordinate` projection). The vertex index lives in the DD path; emit every vertex path in `dd_paths`. Never encode `outline_point` |
@@ -193,8 +192,8 @@ Study this table before composing — it eliminates the most common vocab-gap re
 | `perpendicular`, `vertical`, `poloidal` | physical_base | component | These are direction tokens — use component segment |
 | `unit_vector_*_component` | geometric_base | — | Decompose: component=`x`/`y`/`z` + geometric_base=`unit_vector` |
 | `perturbed_*_field`, `electrostatic_potential` | process | physical_base | These are quantities, not mechanisms |
-| `separatrix_average`, `flux_surface_average` (a `local/separatrix_average/...` path) | position + **transformation** | — | CONDITIONAL rule. Position=`plasma_boundary` ALWAYS (the boundary is one of a continuum of flux surfaces — never drop the locus). Transformation=`flux_surface_averaged` IFF the base is NOT constant on a flux surface: for surface-varying bases (densities, temperatures, velocities, momentum, parallel electric field) the prefix is REQUIRED — e.g. `flux_surface_averaged_<species>_density_at_plasma_boundary`, `toroidal_flux_surface_averaged_<species>_velocity_at_plasma_boundary` — because the bare `<species>_density_at_plasma_boundary` is the LOCAL (`local/separatrix/...`) value and would COLLIDE. For flux-function bases (safety factor, magnetic shear, flux labels psi/rho_tor, pressure — flagged `constant_on_flux_surface` in the grammar vocabulary) FSA is a no-op (FSA of an FSA) and the prefix is BANNED by the grammar gate: the local and averaged leaves share ONE name, `<q>_at_plasma_boundary` (two DD sources, one StandardName). `separatrix` is a deprecated synonym; use `plasma_boundary`. |
-| `separatrix` (bare, in a `local/separatrix/...` path — NO `_average`) | position | — | Use position=`plasma_boundary`, NO transformation (this is the local LCFS value). The bare separatrix IS the plasma boundary / LCFS; reserve `secondary_separatrix` etc. for genuinely distinct qualified surfaces. |
+| `<registered_locus>_average` (an averaged path at a registered locus) | position + **transformation** | — | Preserve the exact registered locus supported by the DD. Apply `flux_surface_averaged` IFF the base is NOT constant on a flux surface: surface-varying bases require the operator so the average does not collide with the local value; a base marked `constant_on_flux_surface` in the injected grammar rejects the no-op operator and shares one name across local and averaged sources. |
+| a bare registered locus in a local-value path | position | — | Preserve that exact registered locus and use no averaging transformation. Registered loci are distinct concepts; never collapse one into another unless the injected grammar explicitly publishes an advisory alias. |
 | `measurement_position` | position (as token) | — | Already exists in position vocab — use it correctly as a locus |
 | `derivative_with_respect_to_*` | operators | transformation | Use transformation segment for derivatives |
 | `diffusion_coefficient`, `convection_velocity` | process | physical_base | Transport coefficients are quantities, not processes |
@@ -244,7 +243,7 @@ defines a more specific locus.
 
 Before finalizing your output, verify:
 1. **No synonymous names** — if you used `magnetic_flux` in one entry, don't use just `flux` in another
-2. **Consistent suffixes** — all boundary quantities use `_of_plasma_boundary`, not a mix of patterns
+2. **Registry fidelity** — every locus uses the exact registered token and an allowed relation; distinct registered loci are never collapsed
 3. **No DD leakage** — none of your names start with an IDS or DD section name
 4. **No storage-shape tags** — none of your descriptions mention "1D", "2D", "3D", "profile", "array"
 5. **American spelling** — check for "centre", "metre", "behaviour" and correct to American

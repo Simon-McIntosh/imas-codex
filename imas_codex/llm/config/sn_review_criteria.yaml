@@ -103,12 +103,12 @@ common_issues:
       score_override: "convention = 0 if duplicate detected"
 
     I1.3_inconsistent_boundary:
-      description: "Mixed naming patterns for plasma boundary quantities"
+      description: "Registered locus identity is not preserved"
       rule: |
-        Use the canonical token ``plasma_boundary`` for the LCFS in every
-        name — never the synonyms ``separatrix``, ``last_closed_flux_surface``,
-        or ``lcfs``. Pair with the correct preposition: ``_at_`` for evaluated
-        fields, ``_of_`` for intrinsic shape parameters (see I1.7).
+        Use the exact locus token supported by the source and present in the
+        injected ISN locus registry. Registered loci are distinct concepts and
+        must never be collapsed into one another. Pair the chosen token with
+        the relation allowed by the grammar and supported by its semantics.
       affects: [convention]
 
     I1.7_field_at_region_preposition:
@@ -145,20 +145,14 @@ common_issues:
       score_override: "convention <= 5 if a shape parameter (triangularity/elongation/squareness/ellipticity) lacks a surface locus"
 
     I1.8_locus_token_synonyms:
-      description: "Use of forbidden synonym for a canonical locus token"
-      example_bad: "electron_density_at_divertor_plate"
-      example_good: "electron_density_at_divertor_target"
+      description: "Use of an ISN-published advisory alias"
       rule: |
-        The catalog uses one canonical token per concept:
-          plasma_boundary replaces separatrix, last_closed_flux_surface, lcfs
-          divertor_target replaces divertor_plate
-          wall            replaces wall_surface, first_wall_surface, vacuum_vessel_wall
-          pedestal        replaces pedestal_region, edge_pedestal
-          magnetic_axis   replaces core_axis
-        Reviewers must propose ``revised_name`` swapping the synonym for the
-        canonical form.
+        Treat a spelling as noncanonical only when the injected ISN grammar
+        publishes it under ``advisory_aliases``. Use that entry's segment,
+        canonical replacement, and reason when proposing ``revised_name``.
+        Never treat a token present in the locus registry as an alias.
       affects: [convention]
-      score_override: "convention <= 5 if a forbidden synonym is used"
+      score_override: "convention <= 5 if a grammar-published advisory alias is used"
 
     I1.9_measurement_principle:
       description: >-

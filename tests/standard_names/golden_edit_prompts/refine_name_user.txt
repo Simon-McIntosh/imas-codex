@@ -59,10 +59,11 @@ Rules:
 - Follow the standard name grammar: fill IR segment fields inside the `segments`
   object (`base_token`, `base_kind`, `projection_axis`, `qualifiers`, etc.),
   no abbreviations, no instrument prefixes for generic observables.
-- **Locus prepositions:** Named geometric entities (separatrix, magnetic_axis,
-  plasma_boundary, x_point) and hardware objects (probe, coil, antenna) use
-  `locus_relation="of"`. Abstract spatial regions from the position vocabulary
-  (core, pedestal_top, lcfs) use `locus_relation="at"`.
+- **Locus prepositions:** Follow the installed locus relation matrix. Use
+  `locus_relation="of"` for an intrinsic geometric property or object
+  association, and `locus_relation="at"` for a field evaluated at a position.
+  A registered locus may support both relations because the quantity semantics
+  determine which one is correct.
 - Provide a short `description` (≤ 120 chars, one sentence, no LaTeX).
 - Set `kind` to exactly one of `"scalar"`, `"vector"`, `"tensor"`,
   `"complex"`, `"metadata"` — the structural classification of the quantity.

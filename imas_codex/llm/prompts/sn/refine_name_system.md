@@ -54,4 +54,15 @@ not to guess.
 
 {% include "sn/_nc_rules.md" %}
 {% include "sn/_grammar_reference.md" %}
+
+## ISN advisory aliases
+
+The installed grammar publishes these advisory spellings. Do not repeat the
+left-hand token; use the registered right-hand token instead:
+{% for segment, aliases in grammar.advisory_aliases | dictsort %}
+{% for alias, details in aliases | dictsort %}
+- **{{ segment }}:** `{{ alias }}` -> `{{ details.canonical }}`{% if details.reason %} — {{ details.reason }}{% endif %}
+{% endfor %}
+{% endfor %}
+
 {% include "sn/_coordinate_conventions.md" %}
