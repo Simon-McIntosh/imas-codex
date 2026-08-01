@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import inspect
 from contextlib import contextmanager
 from types import SimpleNamespace
@@ -1024,8 +1025,25 @@ def test_accepted_docs_complete_parent_with_missing_unit_is_repaired() -> None:
 def test_run_sn_pools_normalizes_after_parent_seeding() -> None:
     from imas_codex.standard_names import loop
 
-    src = inspect.getsource(loop.run_sn_pools)
-    assert "repaired_parent_count = await asyncio.to_thread(" in src
-    assert src.index(
-        "parent_count = await asyncio.to_thread(seed_parent_sources)"
-    ) < src.index("repaired_parent_count = await asyncio.to_thread(")
+    tree = ast.parse(inspect.getsource(loop.run_sn_pools))
+    maintenance_calls = sorted(
+        (
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "_global_maintenance_call"
+            and node.args
+            and isinstance(node.args[0], ast.Name)
+        ),
+        key=lambda node: (node.lineno, node.col_offset),
+    )
+    calls_by_name = {node.args[0].id: node for node in maintenance_calls}
+    call_names = [node.args[0].id for node in maintenance_calls]
+
+    assert "seed_parent_sources" in call_names
+    assert "normalize_derived_parent_lifecycle" in call_names
+    assert call_names.index("seed_parent_sources") < call_names.index(
+        "normalize_derived_parent_lifecycle"
+    )
+    assert len(calls_by_name["normalize_derived_parent_lifecycle"].args) == 1

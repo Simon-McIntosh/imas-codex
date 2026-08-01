@@ -9,6 +9,8 @@ Verifies that:
 
 from __future__ import annotations
 
+import ast
+import inspect
 from unittest.mock import MagicMock
 
 import pytest
@@ -173,22 +175,27 @@ def test_run_sn_pools_rederives_edges_before_seeding():
     were entirely absent rather than orphan placeholders — invisible
     to ``seed_parent_sources`` no matter how robust its query is.
     """
-    import inspect
-
     from imas_codex.standard_names import loop
 
-    src = inspect.getsource(loop.run_sn_pools)
-    # Both helpers must be invoked (not just mentioned in comments) —
-    # check for ``asyncio.to_thread(<helper>)`` call sites.
-    assert "asyncio.to_thread(rederive_structural_edges)" in src, (
-        "run_sn_pools must invoke rederive_structural_edges to backfill "
-        "missing HAS_PARENT edges before parent seeding."
+    tree = ast.parse(inspect.getsource(loop.run_sn_pools))
+    maintenance_calls = sorted(
+        (
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "_global_maintenance_call"
+            and node.args
+            and isinstance(node.args[0], ast.Name)
+        ),
+        key=lambda node: (node.lineno, node.col_offset),
     )
-    assert "asyncio.to_thread(seed_parent_sources)" in src
-    # The rederive call must precede the seed call so newly-derived
-    # placeholders are visible to the same seed pass.
-    assert src.index("asyncio.to_thread(rederive_structural_edges)") < src.index(
-        "asyncio.to_thread(seed_parent_sources)"
+    call_names = [node.args[0].id for node in maintenance_calls]
+
+    assert "rederive_structural_edges" in call_names
+    assert "seed_parent_sources" in call_names
+    assert call_names.index("rederive_structural_edges") < call_names.index(
+        "seed_parent_sources"
     ), (
         "rederive_structural_edges must run before seed_parent_sources "
         "in run_sn_pools (rederive creates the placeholder, seed fills it)."
