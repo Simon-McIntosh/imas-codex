@@ -1,11 +1,11 @@
 {
-  "updated": "2026-07-30T01:55:13",
+  "updated": "2026-08-01T11:06:48",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": "S6",
+    "active_sprint_id": null,
     "sprints": [
       {
         "id": "S1",
@@ -168,44 +168,29 @@
         "items": [
           {
             "slug": "sn-west-review-rehearsal",
-            "why_now": "All five D-release-standard gates carry measured HOLDS; 331/355 accepted, 221/221 batch names parse, export ambiguity 0, partition zero unexplained. The RC is unblocked by the gates and cost-gated on the lead's trigger; cutting at the current pin avoids re-breaking the batch when the rung-5 rotation moves the grammar.",
-            "done_when": "Stage 2: fork PR open (RC version, URL, batch size, PR-body judgement, pre-flight parse-check green). Stages 3-6: human review + merge, fold-back exercising the graph-merged: tag, freeze-check, --undo unwind with matching counts. Then act 2 readiness stated."
-          },
-          {
-            "slug": "sn-naming-loop-robustness",
-            "why_now": "Two sweep-verified mechanics defects gate the RC tail: no sanctioned retry exists for failed-at-cap sources (gm1/gm5/gm6 are stuck on it) and --compose-model is silently discarded in pooled mode (compose_batch hardcodes the seat). Both are small, free, and land before the residual close.",
-            "done_when": "Scoped to f-nlr-003 items 1-2 only: the failed-retry instrument exists with a ledger trail and gm1/gm5/gm6 are claimable again; a pooled compose demonstrably uses the --compose-model override. The rest of f-nlr-003 stays in S6."
+            "why_now": "S6 is closed at the exact rc64 pin with HOLD/HOLD/HOLD/HOLD/HOLD. The WEST manifest is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained, with strict accepted parsing, authoritative units, unique accepted bindings, and source invariants green. The fork-PR rehearsal is now the next cost- and human-triggered act.",
+            "done_when": "Stage 2: exact current partition rechecked, fork review-batch RC and PR opened with version, URL, batch size, and judgement rubric. Stages 3-6: human review and merge, graph fold-back using the graph-merged tag, freeze-check, and --undo unwind with matching counts; then act-2 upstream readiness stated."
           }
         ],
         "starts": "2026-08-12",
         "ends": "2026-08-19",
-        "description": "Cut the fork-PR review-batch RC at the POST-S6 pin and run the full human-in-the-loop cycle: PR review, fold-back with the graph-merged: tag, freeze-check, undo. Runs after the stability tail so the reviewed nameset survives the rotation unchanged and the reviewer-facing ISN docs are correct. Entry condition = S6's exit criteria (gates re-measured HOLDS at the new pin)."
+        "description": "Run the WEST fork-PR review rehearsal at the stable post-S6 rc64 pin. S6 entry gates are green; this sprint owns only the cost-gated backlog handling and human-in-the-loop RC/PR, fold-back, freeze-check, and unwind workflow."
       },
       {
         "id": "S6",
-        "status": "active",
+        "status": "done",
         "theme": "SN pipeline stability tail",
         "items": [
           {
             "slug": "sn-naming-loop-robustness",
             "why_now": "Owns the loop's remaining stability work: the pipeline mechanics (failed-retry instrument, pooled compose-model threading, pending scoping, edit reachability, status mirrors), the grammar/prompt truth pass from the ISN sweep, the rung-5 vocabulary rotation from the 159-token triaged list, and the rung-6 design landing including chained operators.",
             "done_when": "f-nlr-003 and f-nlr-004 resolved with numbers; the 159 adjudicated add/fold/reject; adds in an ISN RC with the codex pin bumped; rung-6 prerequisites green; all five gates re-measured HOLDS at the post-rotation pin with the WEST batch parse-check green (the sprint exit)."
-          },
-          {
-            "slug": "sn-graph-wide-integrity",
-            "why_now": "Lead-raised correctness items pulled forward of the release: unit authority (D-parent-units, the mint-path validation hole, the 8 null-unit parents, the ghost dispositions) and the deletion-ledger invariant (no StandardName leaves the graph without a ledger row; 296 ghost rows reconciled; a catalog-vs-graph diff quantifies any accepted losses).",
-            "done_when": "f-sgwi-002 and f-sgwi-003 resolved: D-parent-units locked and the eight repaired; every delete path ledgered with the graph-quality test green; the 296 attributed or stamped; the 35 regenerated provenance orphans healed with the self-heal hole closed."
-          },
-          {
-            "slug": "sn-dd-gaps",
-            "why_now": "Lead direction 2026-07-29: first-class authority for the pipeline to flag DD errors, mirroring vocab_gaps. Steps 1-2 are zero-behaviour-change foundation (schema, write path, CLI, registry back-fill).",
-            "done_when": "DDGap write path TDD'd with the sn ddgap CLI and sn status surface; the unit-exception registry back-filled as pre-triaged gaps with zero enforcement change; D-ddgap-authority and D-ddgap-storage surfaced to the lead."
           }
         ],
         "starts": "2026-07-29",
         "ends": "2026-08-12",
         "description": "Stability and correctness BEFORE the release (lead decision 2026-07-29: 'I value stability and correctness over a rushed release'). All grammar-moving and validation work lands here so the batch the human reviews is the stable one: the vocabulary rotation, the grammar/prompt truth pass, unit authority, the deletion-ledger invariant, the pipeline mechanics, and the DD-gaps foundation. EXIT CRITERIA (hard, so the RC does not recede again): all five convergence gates re-measured HOLDS at the post-rotation pin, the WEST batch parse-check green at that pin, suites green, and a fresh gate-ledger row recorded.",
-        "summary": "Unit authority and deletion-ledger work are closed; the DDGap foundation is live; the newly eligible canonical-name cohort is drained. ISN v0.8.0rc61 removes toroidal_flux_radius entirely and makes toroidal_flux_coordinate_gradient canonical. Fresh quorum accepted the gm2/gm3/gm7 successors; all nine radius-named graph nodes were safely compacted with audit events, zero such live nodes remain, and the full SN suite passed 5,167 tests. Incremental spend was $0.526032 and cumulative canonical-campaign spend is $3.065340 of the authorized $50. S6 remains active for the 159-token vocabulary rotation, remaining grammar/prompt truth pass and rung-6 work, post-rotation gate replay, and the open DDGap storage decision."
+        "summary": "S6 closed on 2026-08-01 at ISN v0.8.0rc64. The 159-token rotation is fully dispositioned (18 add, 27 fold, 114 reject) with an atomic receipt; ordered strict operator trees, grammar/prompt truth, exact dependency pinning, pipeline retry/scoping mechanics, unit authority, deletion-ledger repair, DDGap foundation, and the WEST semantic-source repair landed. Final gates are HOLD/HOLD/HOLD/HOLD/HOLD. Gate 2 was 0/1 then 0/1 actionable gaps; exact WEST is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained, zero duplicate accepted identities, zero authoritative unit conflicts, and zero source-invariant violations. Codex SN suite: 5,692 passed; ISN grammar suite: 1,076 passed. Global non-WEST debt is explicitly carried to S7; the review rehearsal remains planned in S5."
       },
       {
         "id": "S7",
@@ -214,13 +199,18 @@
         "items": [
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "After the RC lands and the stability tail closes, the exploratory half's 1458 ledger violations, 151 orphans, three ungated write paths and the broken semantic-search embedding dimension are the remaining debt; gating before the paid review means the review is not repeated.",
-            "done_when": "The first followup's done-when holds: D-fanout locked, embed dimension fixed with the 20 search tests green, the 596-class collapsed by one write-time fix, three paths gated plus the geometry rule with the 29-attachment test, suite no worse than baseline."
+            "why_now": "After S6 closes, the remaining 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, global writer/fan-out/embedding debt, and the rejected bounded-manifest prototype are explicit graph-wide work. WEST is excluded and remains green.",
+            "done_when": "f-sgwi-001 and f-sgwi-004 close: graph-wide provenance/parser residue is reconciled without touching WEST; fan-out and embedding decisions are settled; writer gates and geometry rule are tested; bounded manifest draining preserves scope through refine/review/docs, uses ordinary acceptance hygiene, is fail-closed and transactionally fenced, clears scope on every exit, and passes independent review plus the full SN suite."
+          },
+          {
+            "slug": "sn-dd-gaps",
+            "why_now": "The S6 evidence-only DDGap foundation is complete. The remaining storage-authority decision and automated writer/triage/reconcile/release-reporting policy are explicitly deferred rather than hidden inside sprint closure.",
+            "done_when": "f-ddg-002 closes: storage authority is locked; agent-side facts are evidence-grounded and idempotent; triage/reconcile semantics and release reporting are implemented with no silent suppression of source eligibility; tests and status surfaces are green."
           }
         ],
         "starts": "2026-08-14",
         "ends": "2026-08-28",
-        "description": "The exploratory-half backlog: fan-out invariant decision, embed-dimension fix, the supersede-without-retarget class (596 sources), write-path gating with the geometry-representation rule, orphan adjudication (151 names), then the budgeted graph-wide review (about 150-250 USD)."
+        "description": "Graph-wide integrity and evidence-policy follow-on after S6: 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, writer/fan-out/embedding debt, a safe bounded-manifest operator, and DDGap storage/writer/triage policy. WEST remains excluded and must retain its zero-invariant baseline."
       }
     ],
     "milestones": [],
@@ -269,9 +259,14 @@
         "when": "2026-07-30",
         "who": "reckon-ship",
         "what": "S6 toroidal-flux correction closed: IMAS-DD metadata established coordinate semantics; ISN v0.8.0rc61 removed the radius alias and renamed the gradient base; Codex pinned the release, fresh quorum accepted gm2/gm3/gm7, and sanctioned provenance cleanup removed all nine radius-named graph nodes while preserving audit events. Full SN suite: 5,167 passed; incremental review spend $0.526032."
+      },
+      {
+        "when": "2026-08-01",
+        "who": "reckon-ship",
+        "what": "S6 closed at the exact ISN rc64 pin. The 159-token adjudication, strict ordered grammar and prompt truth, pipeline stability mechanics, unit/deletion-ledger work, DDGap foundation, and scoped WEST provenance repair are complete. Final five-gate matrix HOLD/HOLD/HOLD/HOLD/HOLD; WEST 355 partitions with zero unexplained and zero source-invariant violations. S5 remains planned for the human review rehearsal; global and DDGap policy debt moves explicitly to S7."
       }
     ],
     "blockers": [],
-    "_version": 16
+    "_version": 18
   }
 }

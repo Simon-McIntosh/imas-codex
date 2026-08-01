@@ -16,10 +16,10 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-30">
-<meta name="plan-version" content="11">
+<meta name="plan-modified" content="2026-08-01">
+<meta name="plan-version" content="12">
 <meta name="plan-impl" content="0.85">
-<meta name="plan-sprint" content="S6">
+<meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html">
@@ -568,6 +568,31 @@ Done-when
      hole closed with a regression test; this followup resolved with numbers.</pre>
     <p class="r-fu-outcome">All production StandardName deletion paths now write an atomic StandardNameChange record. The 301 legacy missing-target rows are durably classified as unexplained legacy history. Live recovery deterministically rebound 10 of the final 19 provenance orphans to catalog evidence and retired the remaining nine exact unrecoverable ghosts through remove_provenance_orphan ledger rows; an independent graph audit reports zero live provenance orphans.</p>
     </article>
+<article class="r-fu" data-id="f-sgwi-004" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-01T12:10:00+02:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land a fail-closed bounded manifest drain after the rejected scope prototype</h4>
+    <div class="r-fu-body"><p>An optional bounded-drain prototype was independently rejected and remains unmerged at <code>b2ed7943</code>. The review found seven safety defects: refined successors lose manifest scope; stranded-doc promotion bypasses name and link hygiene; supported invocation can fall back to global promotion; multiple-live refusal is not transactionally fenced before writes; drafted/reviewed bindings are misclassified as true gaps; boundedness depends on a second operator flag; and scope stamps survive completion/failure. Preserve the useful tests and design intent, but do not merge or run the prototype.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-graph-wide-integrity
+Capability: bounded manifest lifecycle drain
+
+Implement a bounded manifest drain only after re-reading the independent rejection of commit b2ed7943. Start from current main; do not merge or cherry-pick that commit. Recover ideas selectively with TDD.
+
+Required invariants
+1. A refined successor inherits and remains claimable in the same manifest scope through review and docs.
+2. Docs acceptance uses the ordinary name-form, link-label, and bare-link hygiene gates; no direct promotion bypass.
+3. Bounded mode implies or enforces skipped global maintenance and cannot promote unrelated names.
+4. Multiple-live preflight and scope stamping are one fail-closed transaction with compare-and-swap ownership.
+5. Partition paths into accepted, active lifecycle, genuine gap, documented non-nameable, and ambiguous; never revive active or stale sources accidentally.
+6. Scope identifiers are cleared on success and failure, with orphan recovery tested.
+7. Dry-run is fully non-mutating and reports the exact manifest closure.
+
+Validation
+- Focused unit and live graph tests for refine to successor to review/docs, link hygiene, global non-mutation fingerprints, concurrent second binding, interruption cleanup, and idempotence.
+- Independent review before merge.
+- Full Standard Names suite on a debug compute node.
+
+Do not execute a live drain until review approves the implementation. The global 961 provenance violations and 15 legacy parser/stamp residues remain separate work under f-sgwi-001.</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -588,6 +613,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="s3" data-id="c-sgwi-provenance-closure-live" data-who="Codex" data-when="2026-07-30" data-quote="The reopened provenance invariant is closed on the live graph.">
     <div class="r-comment-body"><p>Final cascading-parent code at <code>8e5969e3</code> was exercised through maintenance-only run <code>81f22918</code> on the live graph. The run completed in 566.00 s at <strong>$0.0000</strong>, deleted 11 orphaned derived-parent sources, reaped two additional childless derived parents after structural rederivation, and seeded 17 legitimate missing parent sources. Two independent post-run calls to <code>find_provenance_orphans()</code> both returned <strong>0</strong>. This closes the S6 provenance-repair slice; the fan-out, embedding, supersede-retarget, scalar-disagreement, and write-path work in <code>f-sgwi-001</code> remains later graph-wide scope and was not pulled into this sprint.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="s6-slice-closure-20260801" data-who="reckon-ship" data-when="2026-08-01T12:10:00+02:00">
+    <div class="r-comment-body"><p><strong>The sprint-scoped correctness slice is closed.</strong> Unit authority and deletion-ledger work remain resolved. The exact WEST semantic-source repair changed 38 sources transactionally, wrote 38 audit rows, left zero WEST invariant violations or duplicate accepted identities, and reduced the global violation count from 999 to 961. Every remaining violation is outside WEST and stays with <code>f-sgwi-001</code>. The 15 older graph-wide strict-parser/stamp residues are likewise deferred here; accepted WEST is strict-lossless with zero drift. This deferral is explicit scope, not a failed stability gate.</p></div>
 </div>
 </section>
 </main>
