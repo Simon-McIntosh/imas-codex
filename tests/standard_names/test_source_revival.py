@@ -85,6 +85,20 @@ def _clean(_gc):
     _wipe()
 
 
+@pytest.fixture()
+def _rollback_gc(_gc):
+    """Expose one transaction that always rolls back graph semantics tests."""
+    from imas_codex.standard_names.graph_ops import _TransactionQuery
+
+    with _gc.session() as session:
+        tx = session.begin_transaction()
+        try:
+            yield _TransactionQuery(tx)
+        finally:
+            if tx.closed is False:
+                tx.rollback()
+
+
 def _uid(tag: str) -> str:
     return f"{_PREFIX}{tag}_{uuid.uuid4().hex[:8]}"
 
@@ -208,6 +222,111 @@ def _link_source_to_name(
     )
 
 
+def _create_terminal_projection_case(
+    gc,
+    *,
+    source_status: str,
+    produced_edge: bool,
+    live_shared_backing: bool,
+) -> dict[str, str]:
+    """Create one terminal DD projection with optional shared live backing."""
+    path = _uid("shared_dd")
+    source_id = _create_dd_source(
+        gc,
+        path=path,
+        unit=None,
+        status=source_status,
+        skip_reason=None,
+    )
+    terminal_id = _uid("terminal_name")
+    unrelated_path = f"dd:{_uid('unrelated_path')}"
+    gc.query(
+        """
+        MATCH (sns:StandardNameSource {id: $source_id})
+              -[:FROM_DD_PATH]->(dd:IMASNode {id: $path})
+        CREATE (terminal:StandardName {id: $terminal_id})
+        SET terminal.name_stage = 'superseded',
+            terminal.source_paths = [$source_id, $unrelated_path],
+            sns.composed_at = datetime(),
+            sns.produced_sn_id = $terminal_id
+        MERGE (dd)-[:HAS_STANDARD_NAME]->(terminal)
+        FOREACH (_ IN CASE WHEN $produced_edge THEN [1] ELSE [] END |
+          MERGE (sns)-[:PRODUCED_NAME]->(terminal)
+        )
+        """,
+        source_id=source_id,
+        path=path,
+        terminal_id=terminal_id,
+        unrelated_path=unrelated_path,
+        produced_edge=produced_edge,
+    )
+    if live_shared_backing:
+        other_source_id = _uid("live_shared_source")
+        live_name_id = _uid("live_name")
+        gc.query(
+            """
+            MATCH (dd:IMASNode {id: $path})
+            MATCH (terminal:StandardName {id: $terminal_id})
+            CREATE (other:StandardNameSource {id: $other_source_id})
+            SET other.source_type = 'dd',
+                other.source_id = $path,
+                other.status = 'attached'
+            CREATE (live:StandardName {id: $live_name_id})
+            SET live.name_stage = 'drafted'
+            MERGE (other)-[:FROM_DD_PATH]->(dd)
+            MERGE (other)-[:PRODUCED_NAME]->(terminal)
+            MERGE (other)-[:PRODUCED_NAME]->(live)
+            """,
+            path=path,
+            terminal_id=terminal_id,
+            other_source_id=other_source_id,
+            live_name_id=live_name_id,
+        )
+    return {
+        "path": path,
+        "source_id": source_id,
+        "terminal_id": terminal_id,
+        "unrelated_path": unrelated_path,
+    }
+
+
+def _terminal_projection_state(gc, case: dict[str, str]) -> dict:
+    rows = gc.query(
+        """
+        MATCH (sns:StandardNameSource {id: $source_id})
+        MATCH (dd:IMASNode {id: $path})
+        MATCH (terminal:StandardName {id: $terminal_id})
+        RETURN sns.status AS status,
+               sns.produced_sn_id AS produced_sn_id,
+               sns.composed_at AS composed_at,
+               terminal.source_paths AS source_paths,
+               EXISTS {
+                 MATCH (sns)-[:PRODUCED_NAME]->(terminal)
+               } AS source_edge,
+               EXISTS {
+                 MATCH (dd)-[:HAS_STANDARD_NAME]->(terminal)
+               } AS projection,
+               EXISTS {
+                 MATCH (other:StandardNameSource)-[:FROM_DD_PATH]->(dd)
+                 WHERE other <> sns
+                   AND other.status IN ['composed', 'attached']
+                   AND EXISTS {
+                     MATCH (other)-[:PRODUCED_NAME]->(terminal)
+                   }
+                   AND EXISTS {
+                     MATCH (other)-[:PRODUCED_NAME]->(live:StandardName)
+                     WHERE NOT (coalesce(live.name_stage, '') IN
+                                ['superseded', 'exhausted', 'contested'])
+                   }
+               } AS backed_by_other
+        """,
+        source_id=case["source_id"],
+        path=case["path"],
+        terminal_id=case["terminal_id"],
+    )
+    return rows[0]
+
+
 # ---------------------------------------------------------------------------
 # Part A — stale unit skips are revived against the current resolver
 # ---------------------------------------------------------------------------
@@ -264,6 +383,88 @@ def test_ordinary_live_target_still_realigns_source(_gc, _clean):
     props = _source(_gc, sns_id)
     assert props["status"] == "attached"
     assert props["produced_sn_id"] == name_id
+
+
+@pytest.mark.graph
+def test_terminal_reset_keeps_shared_projection_and_cache(_rollback_gc):
+    """A live same-DD source keeps the shared projection and DD cache URI."""
+    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+
+    case = _create_terminal_projection_case(
+        _rollback_gc,
+        source_status="composed",
+        produced_edge=True,
+        live_shared_backing=True,
+    )
+
+    result = reconcile_source_status_liveness(
+        gc=_rollback_gc,
+        source_ids=[case["source_id"]],
+    )
+
+    state = _terminal_projection_state(_rollback_gc, case)
+    assert state["status"] == "extracted"
+    assert state["produced_sn_id"] is None
+    assert state["composed_at"] is None
+    assert state["source_edge"] is False
+    assert state["projection"] is True
+    assert state["backed_by_other"] is True
+    assert state["source_paths"] == [case["source_id"], case["unrelated_path"]]
+    assert result["terminal_projections_dropped"] == 0
+    assert result["terminal_source_paths_dropped"] == 0
+    assert result["ghost_projections_dropped"] == 0
+    assert result["ghost_source_paths_dropped"] == 0
+
+
+@pytest.mark.graph
+def test_projection_ghost_keeps_shared_projection_and_cache(_rollback_gc):
+    """Projection-only cleanup clears scalars but keeps live shared DD state."""
+    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+
+    case = _create_terminal_projection_case(
+        _rollback_gc,
+        source_status="extracted",
+        produced_edge=False,
+        live_shared_backing=True,
+    )
+
+    result = reconcile_source_status_liveness(
+        gc=_rollback_gc,
+        source_ids=[case["source_id"]],
+    )
+
+    state = _terminal_projection_state(_rollback_gc, case)
+    assert state["produced_sn_id"] is None
+    assert state["composed_at"] is None
+    assert state["projection"] is True
+    assert state["backed_by_other"] is True
+    assert state["source_paths"] == [case["source_id"], case["unrelated_path"]]
+    assert result["ghost_projections_dropped"] == 0
+    assert result["ghost_source_paths_dropped"] == 0
+
+
+@pytest.mark.graph
+def test_projection_ghost_removes_only_unshared_dd_state(_rollback_gc):
+    """Without live backing, cleanup removes the DD URI but not other paths."""
+    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+
+    case = _create_terminal_projection_case(
+        _rollback_gc,
+        source_status="extracted",
+        produced_edge=False,
+        live_shared_backing=False,
+    )
+
+    result = reconcile_source_status_liveness(
+        gc=_rollback_gc,
+        source_ids=[case["source_id"]],
+    )
+
+    state = _terminal_projection_state(_rollback_gc, case)
+    assert state["projection"] is False
+    assert state["source_paths"] == [case["unrelated_path"]]
+    assert result["ghost_projections_dropped"] == 1
+    assert result["ghost_source_paths_dropped"] == 1
 
 
 def test_revive_unit_skipped_sources_returns_counts():

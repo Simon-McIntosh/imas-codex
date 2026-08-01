@@ -165,6 +165,43 @@ class TestFinalizeGeneratedNameStage:
         assert "sns.claim_token = b.claim_token" in cypher
         assert "sns.claim_seq = b.claim_seq" in cypher
         assert "sns.last_error   = null" in cypher
+        assert "source_gap:HAS_STANDARD_NAME_VOCAB_GAP" in cypher
+        assert "entity_gap:HAS_STANDARD_NAME_VOCAB_GAP" in cypher
+        assert "size(backing_entities) = 1" in cypher
+        assert "sns.id = 'dd:' + sns.source_id" in cypher
+        assert "DELETE edge" in cypher
+        assert "DELETE vg" not in cypher
+        assert "HAS_EVIDENCE" not in cypher
+
+    def test_stale_source_fence_precedes_gap_retirement(self):
+        """A lost source claim cannot reach relationship retirement."""
+        from imas_codex.standard_names.graph_ops import _finalize_generated_name_stage
+
+        gc, tx = _mock_gc_tx()
+        tx.run.side_effect = lambda *_args, **_kwargs: []
+        with _patch_gc(gc):
+            assert (
+                _finalize_generated_name_stage(
+                    [
+                        {
+                            "sn_id": "electron_temperature",
+                            "sns_id": "dd:core_profiles/temperature",
+                            "model": "test/model",
+                            "claim_token": "stale",
+                            "claim_seq": 9,
+                        }
+                    ]
+                )
+                == []
+            )
+
+        cypher = tx.run.call_args.args[0]
+        assert cypher.index("sns.claim_token = b.claim_token") < cypher.index(
+            "source_gap:HAS_STANDARD_NAME_VOCAB_GAP"
+        )
+        assert cypher.index("sns.claim_seq = b.claim_seq") < cypher.index(
+            "entity_gap:HAS_STANDARD_NAME_VOCAB_GAP"
+        )
 
     def test_finalize_batch_carries_exact_source_fence(self):
         """Persistence threads the source token and sequence through one tx."""
@@ -954,6 +991,12 @@ class TestPersistGeneratedNameBatch:
         ).args[0]
         assert finalize_cypher.count("sns.status = 'composed'") == 1
         assert "sns.last_error = null" in finalize_cypher
+        assert "source_gap:HAS_STANDARD_NAME_VOCAB_GAP" in finalize_cypher
+        assert "entity_gap:HAS_STANDARD_NAME_VOCAB_GAP" in finalize_cypher
+        assert "FOREACH (edge IN source_gap_edges | DELETE edge)" in finalize_cypher
+        assert "FOREACH (edge IN entity_gap_edges | DELETE edge)" in finalize_cypher
+        assert "DELETE vg" not in finalize_cypher
+        assert "HAS_EVIDENCE" not in finalize_cypher
         if binding_kind == "owned_reservation":
             assert "reservation.claim_token = b.claim_token" in finalize_cypher
             assert "reservation.claim_seq = b.claim_seq" in finalize_cypher
@@ -1447,6 +1490,31 @@ class TestPersistGeneratedNameBatch:
         backfill.assert_not_called()
         supersede.assert_not_called()
         counter.assert_not_called()
+        self.atomic_tx.commit.assert_not_called()
+        self.atomic_tx.close.assert_called_once()
+
+    def test_post_finalize_failure_rolls_back_gap_retirement(self):
+        """A later transactional failure retains gaps with every other write."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._backfill_cluster_from_sources",
+                side_effect=RuntimeError("cluster backfill failed"),
+            ),
+            pytest.raises(RuntimeError, match="cluster backfill failed"),
+        ):
+            persist_generated_name_batch([candidate], compose_model="test/model")
+
+        finalize_cypher = _transaction_call(
+            self.atomic_tx, "source_gap:HAS_STANDARD_NAME_VOCAB_GAP"
+        ).args[0]
+        assert "entity_gap:HAS_STANDARD_NAME_VOCAB_GAP" in finalize_cypher
         self.atomic_tx.commit.assert_not_called()
         self.atomic_tx.close.assert_called_once()
 
