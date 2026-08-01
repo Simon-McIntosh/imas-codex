@@ -775,6 +775,7 @@ async def run_sn_pools(
     skip_generate: bool = False,
     attach_only: bool = False,
     reconcile_only: bool = False,
+    skip_global_maintenance: bool = False,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
@@ -851,11 +852,23 @@ async def run_sn_pools(
         reconcile_only: Run the complete graph-maintenance sequence, including
             structural parent lifecycle repair, then return before constructing
             any operational worker pool.
+        skip_global_maintenance: Bypass graph-wide startup, background, and
+            post-drain maintenance while retaining the ordinary scoped worker
+            pools and run audit. Requires *scope_run_id* and is incompatible
+            with maintenance-only modes.
     """
     from imas_codex.standard_names.budget import BudgetManager
     from imas_codex.standard_names.pools import run_pools
 
     started = datetime.now(UTC)
+
+    if skip_global_maintenance and not scope_run_id:
+        raise ValueError("skip_global_maintenance requires scope_run_id")
+    if skip_global_maintenance and (attach_only or reconcile_only):
+        raise ValueError(
+            "skip_global_maintenance is incompatible with maintenance-only modes"
+        )
+
     run_id = str(uuid.uuid4())
     summary = RunSummary(
         run_id=run_id,
@@ -947,17 +960,29 @@ async def run_sn_pools(
     # runs in a finally block, so an open 'started' row means the process died
     # before it could close the run). Best-effort — never let a sweep failure
     # abort a fresh run.
-    try:
-        from imas_codex.standard_names.graph_ops import (
-            mark_orphaned_standard_name_runs_stale,
-        )
+    async def _global_maintenance_call(
+        fn: Callable[..., Any],
+        *args: Any,
+        default: Any,
+        **kwargs: Any,
+    ) -> Any:
+        """Run one graph-wide maintenance function unless explicitly bypassed."""
+        if skip_global_maintenance:
+            return default
+        return await asyncio.to_thread(fn, *args, **kwargs)
 
-        mark_orphaned_standard_name_runs_stale(current_run_id=run_id)
-    except Exception as _stale_exc:  # noqa: BLE001 — non-fatal reconciliation
-        logger.warning(
-            "run_sn_pools: orphaned-SNRun sweep failed (non-fatal): %s",
-            _stale_exc,
-        )
+    if not skip_global_maintenance:
+        try:
+            from imas_codex.standard_names.graph_ops import (
+                mark_orphaned_standard_name_runs_stale,
+            )
+
+            mark_orphaned_standard_name_runs_stale(current_run_id=run_id)
+        except Exception as _stale_exc:  # noqa: BLE001 — non-fatal reconciliation
+            logger.warning(
+                "run_sn_pools: orphaned-SNRun sweep failed (non-fatal): %s",
+                _stale_exc,
+            )
 
     cost_is_exact = True
 
@@ -984,6 +1009,11 @@ async def run_sn_pools(
     )
 
     try:
+        if skip_global_maintenance:
+            logger.info(
+                "run_sn_pools: scoped mode — bypassing global maintenance (run_id=%s)",
+                scope_run_id,
+            )
         # ── Reconcile-once-at-startup ─────────────────────────────
         # Must complete BEFORE any pool issues its first claim.
         from imas_codex.standard_names.graph_ops import (
@@ -991,7 +1021,9 @@ async def run_sn_pools(
         )
 
         logger.info("run_sn_pools: reconciling sources (source=%s)…", source)
-        recon_result = await asyncio.to_thread(reconcile_standard_name_sources, source)
+        recon_result = await _global_maintenance_call(
+            reconcile_standard_name_sources, source, default={}
+        )
         recon_total = sum(recon_result.values()) if recon_result else 0
         summary.sources_reconciled = recon_total
         logger.info(
@@ -1003,7 +1035,7 @@ async def run_sn_pools(
         # ── Reconcile VocabGap nodes against current ISN vocab ────────
         from imas_codex.standard_names.graph_ops import reconcile_vocab_gaps
 
-        vg_result = await asyncio.to_thread(reconcile_vocab_gaps)
+        vg_result = await _global_maintenance_call(reconcile_vocab_gaps, default={})
         if vg_result.get("checked", 0) > 0:
             deleted = (
                 vg_result.get("deleted_false_positive", 0)
@@ -1030,7 +1062,9 @@ async def run_sn_pools(
         # symbol order) does not lift it. Re-ask the extractor's own question.
         from imas_codex.standard_names.graph_ops import revive_unit_skipped_sources
 
-        unit_result = await asyncio.to_thread(revive_unit_skipped_sources)
+        unit_result = await _global_maintenance_call(
+            revive_unit_skipped_sources, default={}
+        )
         if unit_result.get("revived", 0):
             logger.info(
                 "run_sn_pools: unit-skip revival — %d of %d unit-skipped "
@@ -1047,7 +1081,9 @@ async def run_sn_pools(
             retry_vocab_gap_sources_on_grammar_change,
         )
 
-        gap_retry = await asyncio.to_thread(retry_vocab_gap_sources_on_grammar_change)
+        gap_retry = await _global_maintenance_call(
+            retry_vocab_gap_sources_on_grammar_change, default={}
+        )
         if gap_retry.get("revived", 0):
             logger.info(
                 "run_sn_pools: vocabulary-bump retry — %d of %d parked "
@@ -1071,7 +1107,7 @@ async def run_sn_pools(
         )
         from imas_codex.standard_names.ledger import find_provenance_orphans
 
-        prov_result = await asyncio.to_thread(reconcile_provenance)
+        prov_result = await _global_maintenance_call(reconcile_provenance, default={})
         if (
             prov_result.get("edges_reattached", 0)
             or prov_result.get("scalars_cleared", 0)
@@ -1086,7 +1122,9 @@ async def run_sn_pools(
                 prov_result.get("orphan_sources_deleted", 0),
             )
 
-        source_status = await asyncio.to_thread(reconcile_source_status_liveness)
+        source_status = await _global_maintenance_call(
+            reconcile_source_status_liveness, default={}
+        )
         if source_status.get("live_realigned", 0) or source_status.get(
             "orphaned_reset", 0
         ):
@@ -1097,7 +1135,9 @@ async def run_sn_pools(
                 source_status.get("orphaned_reset", 0),
             )
 
-        retired_hints = await asyncio.to_thread(retire_unreachable_hint_edits)
+        retired_hints = await _global_maintenance_call(
+            retire_unreachable_hint_edits, default=0
+        )
         if retired_hints:
             logger.info(
                 "run_sn_pools: retired %d terminal name-hint edit(s)",
@@ -1108,7 +1148,9 @@ async def run_sn_pools(
         # stale segment (e.g. position='pedestal' on an ..._at_pedestal_top
         # name written by a since-removed import path) self-heals and a
         # re-composition never diverges from the accepted id.
-        seg_result = await asyncio.to_thread(reconcile_grammar_segments)
+        seg_result = await _global_maintenance_call(
+            reconcile_grammar_segments, default={}
+        )
         if seg_result.get("names_realigned", 0):
             logger.info(
                 "run_sn_pools: grammar-segment reconcile — %d name(s) realigned to canonical id",
@@ -1127,7 +1169,9 @@ async def run_sn_pools(
             reconcile_reviewable_name_stage,
         )
 
-        entry_result = await asyncio.to_thread(reconcile_reviewable_name_stage)
+        entry_result = await _global_maintenance_call(
+            reconcile_reviewable_name_stage, default={}
+        )
         if entry_result.get("names_advanced", 0):
             logger.info(
                 "run_sn_pools: review-entry reconcile — %d stranded name(s) "
@@ -1143,7 +1187,9 @@ async def run_sn_pools(
             reconcile_standard_name_cocos_links,
         )
 
-        cocos_result = await asyncio.to_thread(reconcile_standard_name_cocos_links)
+        cocos_result = await _global_maintenance_call(
+            reconcile_standard_name_cocos_links, default={}
+        )
         if cocos_result.get("scalars_set", 0) or cocos_result.get("edges_created", 0):
             logger.info(
                 "run_sn_pools: COCOS-link reconcile — %d cocos scalar(s) set, "
@@ -1161,7 +1207,9 @@ async def run_sn_pools(
         # every composed name, so this runs before anything that reads them.
         from imas_codex.graph.dd_graph_ops import reconcile_dd_unit_corrections
 
-        dd_unit_result = await asyncio.to_thread(reconcile_dd_unit_corrections)
+        dd_unit_result = await _global_maintenance_call(
+            reconcile_dd_unit_corrections, default={}
+        )
         if dd_unit_result.get("corrected", 0):
             logger.info(
                 "run_sn_pools: DD-unit correction reconcile — %d stored unit(s) "
@@ -1179,7 +1227,9 @@ async def run_sn_pools(
             reconcile_standard_name_unit_edges,
         )
 
-        unit_edge_result = await asyncio.to_thread(reconcile_standard_name_unit_edges)
+        unit_edge_result = await _global_maintenance_call(
+            reconcile_standard_name_unit_edges, default={}
+        )
         if unit_edge_result.get("names_realigned", 0):
             logger.info(
                 "run_sn_pools: unit-edge reconcile — %d name(s) realigned "
@@ -1200,10 +1250,15 @@ async def run_sn_pools(
         # Accepted names are catalog-authoritative and are reported, not
         # detached, without an explicit opt-in. Idempotent.
         from imas_codex.standard_names.attachment_audit import (
+            AttachmentAuditResult,
             reconcile_attachment_consistency,
         )
 
-        attach_result = await asyncio.to_thread(reconcile_attachment_consistency)
+        attach_result = (
+            AttachmentAuditResult()
+            if skip_global_maintenance
+            else await asyncio.to_thread(reconcile_attachment_consistency)
+        )
         if attach_result.detached or attach_result.rejected:
             logger.info(
                 "run_sn_pools: attachment-consistency reconcile — %d of %d "
@@ -1226,7 +1281,9 @@ async def run_sn_pools(
             reconcile_standard_name_dd_edges,
         )
 
-        dd_edge_result = await asyncio.to_thread(reconcile_standard_name_dd_edges)
+        dd_edge_result = await _global_maintenance_call(
+            reconcile_standard_name_dd_edges, default={}
+        )
         if dd_edge_result.get("edges_created", 0) or dd_edge_result.get(
             "pairs_dropped", 0
         ):
@@ -1244,7 +1301,9 @@ async def run_sn_pools(
             reconcile_standard_name_source_paths,
         )
 
-        sp_result = await asyncio.to_thread(reconcile_standard_name_source_paths)
+        sp_result = await _global_maintenance_call(
+            reconcile_standard_name_source_paths, default={}
+        )
         if sp_result.get("names_reconciled", 0):
             logger.info(
                 "run_sn_pools: source_paths reconcile — %d name(s) materialized "
@@ -1323,7 +1382,7 @@ async def run_sn_pools(
                 refresh_drifted_sources,
             )
 
-            sr = await asyncio.to_thread(refresh_drifted_sources)
+            sr = await _global_maintenance_call(refresh_drifted_sources, default={})
             if sr.get("baselined") or sr.get("detected"):
                 logger.info(
                     "run_sn_pools: source-drift refresh — %d baselined, "
@@ -1347,7 +1406,11 @@ async def run_sn_pools(
         from imas_codex.standard_names.graph_ops import promote_stranded_reviewed
 
         _promote_min = min_score if min_score is not None else DEFAULT_MIN_SCORE
-        promoted = await asyncio.to_thread(promote_stranded_reviewed, _promote_min)
+        promoted = await _global_maintenance_call(
+            promote_stranded_reviewed,
+            _promote_min,
+            default={},
+        )
         if promoted.get("name") or promoted.get("docs"):
             logger.info(
                 "run_sn_pools: promoted %d stranded reviewed name(s) + %d "
@@ -1432,7 +1495,9 @@ async def run_sn_pools(
             structural_accept_derived_parents,
         )
 
-        edge_result = await asyncio.to_thread(rederive_structural_edges)
+        edge_result = await _global_maintenance_call(
+            rederive_structural_edges, default={}
+        )
         logger.debug(
             "rederive_structural_edges processed %d SN(s)",
             edge_result.get("processed", 0),
@@ -1443,11 +1508,12 @@ async def run_sn_pools(
                 edge_result["migrated"],
             )
 
-        parent_count = await asyncio.to_thread(seed_parent_sources)
+        parent_count = await _global_maintenance_call(seed_parent_sources, default=0)
         if parent_count:
             logger.info("Seeded %d parent component sources", parent_count)
-        repaired_parent_count = await asyncio.to_thread(
-            normalize_derived_parent_lifecycle
+        repaired_parent_count = await _global_maintenance_call(
+            normalize_derived_parent_lifecycle,
+            default=0,
         )
         if repaired_parent_count:
             logger.info(
@@ -1458,8 +1524,9 @@ async def run_sn_pools(
         # reached drafted/reviewed/exhausted (via a child's refine or legacy
         # routing) to accepted structurally so they never strand on the name
         # axis. Self-healing — runs every startup.
-        _structural_accepted = await asyncio.to_thread(
-            structural_accept_derived_parents
+        _structural_accepted = await _global_maintenance_call(
+            structural_accept_derived_parents,
+            default=0,
         )
         if _structural_accepted:
             logger.info(
@@ -1477,7 +1544,9 @@ async def run_sn_pools(
             reconcile_orphan_parent_sources,
         )
 
-        _parent_sources = await asyncio.to_thread(reconcile_orphan_parent_sources)
+        _parent_sources = await _global_maintenance_call(
+            reconcile_orphan_parent_sources, default=0
+        )
         if _parent_sources:
             logger.info(
                 "Seeded %d missing parent provenance source(s)",
@@ -1528,14 +1597,16 @@ async def run_sn_pools(
         )
         from imas_codex.standard_names.orphan_sweep import run_orphan_sweep_loop
 
-        sweep_task = asyncio.create_task(
-            run_orphan_sweep_loop(
-                interval_s=DEFAULT_ORPHAN_SWEEP_INTERVAL_S,
-                timeout_s=DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
-                stop_event=stop_event,
-            ),
-            name="orphan_sweep",
-        )
+        sweep_task: asyncio.Task[None] | None = None
+        if not skip_global_maintenance:
+            sweep_task = asyncio.create_task(
+                run_orphan_sweep_loop(
+                    interval_s=DEFAULT_ORPHAN_SWEEP_INTERVAL_S,
+                    timeout_s=DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
+                    stop_event=stop_event,
+                ),
+                name="orphan_sweep",
+            )
 
         # ── Embedding worker (reuses discovery infrastructure) ─────
         # Runs the shared embed_description_worker targeting StandardName
@@ -1554,15 +1625,17 @@ async def run_sn_pools(
                 return stop_event.is_set()
 
         embed_state = _EmbedState()
-        embed_task = asyncio.create_task(
-            embed_description_worker(
-                embed_state,
-                labels=["StandardName"],
-                facility=None,
-                batch_size=100,
-            ),
-            name="embed_sn",
-        )
+        embed_task: asyncio.Task[None] | None = None
+        if not skip_global_maintenance:
+            embed_task = asyncio.create_task(
+                embed_description_worker(
+                    embed_state,
+                    labels=["StandardName"],
+                    facility=None,
+                    batch_size=100,
+                ),
+                name="embed_sn",
+            )
 
         # Periodic ``SNRun.cost_spent`` sync so ``imas-codex sn status``
         # reflects real spend even when the run is interrupted or crashes
@@ -1625,15 +1698,19 @@ async def run_sn_pools(
                 provider_exhausted_event=provider_exhausted_event,
             )
         finally:
-            if not sweep_task.done():
+            if sweep_task is not None and not sweep_task.done():
                 sweep_task.cancel()
             if not cost_sync_task.done():
                 cost_sync_task.cancel()
-            if not embed_task.done():
+            if embed_task is not None and not embed_task.done():
                 embed_task.cancel()
             if deadline_task is not None and not deadline_task.done():
                 deadline_task.cancel()
-            _gather_tasks = [sweep_task, cost_sync_task, embed_task]
+            _gather_tasks = [cost_sync_task]
+            if sweep_task is not None:
+                _gather_tasks.append(sweep_task)
+            if embed_task is not None:
+                _gather_tasks.append(embed_task)
             if deadline_task is not None:
                 _gather_tasks.append(deadline_task)
             await asyncio.gather(*_gather_tasks, return_exceptions=True)
@@ -1818,7 +1895,10 @@ async def run_sn_pools(
             from imas_codex.standard_names.graph_ops import release_all_orphan_claims
 
             orphan_counts = await asyncio.wait_for(
-                asyncio.to_thread(release_all_orphan_claims),
+                _global_maintenance_call(
+                    release_all_orphan_claims,
+                    default={},
+                ),
                 timeout=ORPHAN_TIMEOUT,
             )
             if orphan_counts.get("sn", 0) or orphan_counts.get("sns", 0):
@@ -1844,7 +1924,7 @@ async def run_sn_pools(
         # before its control-flow boundary, so it must not repeat mutating
         # work during shutdown.
         FIXUP_TIMEOUT = 30.0
-        if not reconcile_only:
+        if not reconcile_only and not skip_global_maintenance:
             try:
                 from imas_codex.standard_names.graph_ops import (
                     normalize_derived_parent_lifecycle,
@@ -1876,7 +1956,7 @@ async def run_sn_pools(
             from imas_codex.standard_names.graph_ops import resolve_doc_links
 
             _link_stats = await asyncio.wait_for(
-                asyncio.to_thread(resolve_doc_links),
+                _global_maintenance_call(resolve_doc_links, default={}),
                 timeout=FIXUP_TIMEOUT,
             )
             _total_fixed = _link_stats.get("resolved", 0) + _link_stats.get(
@@ -1899,7 +1979,7 @@ async def run_sn_pools(
         # for every sibling family whose live members are all docs-accepted
         # (a member joined, or a member's docs changed and re-passed review).
         # Purely additive scalar writes; no-op when nothing changed.
-        if not names_only:
+        if not names_only and not skip_global_maintenance:
             try:
                 from imas_codex.standard_names.harmonize import (
                     restamp_harmonized_families,
