@@ -140,24 +140,86 @@ def test_source_status_reconcile_repairs_both_liveness_directions() -> None:
     from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
 
     gc = MagicMock()
-    gc.query.side_effect = [[{"n": 4}], [{"n": 6, "edges": 5}]]
+    gc.query.side_effect = [
+        [{"n": 4}],
+        [{"n": 6, "edges": 5, "projections": 3, "source_paths": 4}],
+        [{"n": 2, "projections": 1, "terminal_targets": 2}],
+    ]
 
-    result = reconcile_source_status_liveness(gc=gc)
+    result = reconcile_source_status_liveness(gc=gc, source_ids=["dd:scoped/path"])
 
     assert result == {
         "live_realigned": 4,
         "orphaned_reset": 6,
         "terminal_edges_dropped": 5,
+        "terminal_projections_dropped": 3,
+        "terminal_source_paths_dropped": 4,
+        "projection_ghosts_reset": 2,
+        "ghost_projections_dropped": 1,
+        "ghost_source_paths_dropped": 2,
     }
     live_query = gc.query.call_args_list[0].args[0]
     orphan_query = gc.query.call_args_list[1].args[0]
+    projection_query = gc.query.call_args_list[2].args[0]
+    assert all(
+        call.kwargs["source_ids"] == ["dd:scoped/path"]
+        for call in gc.query.call_args_list
+    )
+    assert "$source_ids IS NULL OR sns.id IN $source_ids" in live_query
+    assert "$source_ids IS NULL OR sns.id IN $source_ids" in orphan_query
+    assert "$source_ids IS NULL OR sns.id IN $source_ids" in projection_query
     assert "sns.status = 'attached'" in live_query
+    assert "sns.claim_token IS NULL" in live_query
     assert "hint.edit_mode, '') = 'hint'" in live_query
     assert "hint.edit_status, '') = 'open'" in live_query
     assert "hint.name_hint IS NOT NULL" in live_query
     assert "NOT EXISTS" in live_query
     assert "sns.status = 'extracted'" in orphan_query
     assert "sns.produced_sn_id = null" in orphan_query
+    assert "sns.composed_at = null" in orphan_query
+    assert "path <> sns.id" in orphan_query
+    assert "size(dd_nodes) = 1" in orphan_query
+    assert "other <> sns" in orphan_query
+    assert "other_live.name_stage" in orphan_query
+    assert "AND NOT backed_by_other" in orphan_query
+    assert "terminal IS NULL OR backed_by_other" in orphan_query
+    assert "DELETE edge" in orphan_query
+    assert "DELETE terminal" not in orphan_query
+    assert "HAS_STANDARD_NAME_VOCAB_GAP" not in orphan_query
+
+    assert "sns.claim_token IS NULL" in projection_query
+    assert "NOT (sns)-[:PRODUCED_NAME]->(:StandardName)" in projection_query
+    assert "size(dd_nodes) = 1" in projection_query
+    assert "dd_nodes[0].id = sns.source_id" in projection_query
+    assert "terminal.name_stage" in projection_query
+    assert "other <> sns" in projection_query
+    assert "WHEN backed_by_other THEN []" in projection_query
+    assert "WHEN NOT backed_by_other THEN terminal" in projection_query
+    assert "path <> sns.id" in projection_query
+    assert "sns.composed_at = null" in projection_query
+
+
+def test_source_status_reconcile_is_idempotent_when_no_residue_matches() -> None:
+    """A clean graph reports zero changes on every lifecycle repair path."""
+    from imas_codex.standard_names.graph_ops import reconcile_source_status_liveness
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [{"n": 0}],
+        [{"n": 0, "edges": 0, "projections": 0, "source_paths": 0}],
+        [{"n": 0, "projections": 0, "terminal_targets": 0}],
+    ]
+
+    assert reconcile_source_status_liveness(gc=gc) == {
+        "live_realigned": 0,
+        "orphaned_reset": 0,
+        "terminal_edges_dropped": 0,
+        "terminal_projections_dropped": 0,
+        "terminal_source_paths_dropped": 0,
+        "projection_ghosts_reset": 0,
+        "ghost_projections_dropped": 0,
+        "ghost_source_paths_dropped": 0,
+    }
 
 
 def test_terminal_name_hints_are_retired() -> None:

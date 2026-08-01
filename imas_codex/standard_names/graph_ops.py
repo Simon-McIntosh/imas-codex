@@ -4400,6 +4400,46 @@ SAFE_SCALAR_COCOS_UNITS: frozenset[str] = frozenset(
 )
 
 
+_RETIRE_FINALIZED_SOURCE_GAPS = """
+                    WITH sns
+                    OPTIONAL MATCH
+                        (sns)-[source_gap:HAS_STANDARD_NAME_VOCAB_GAP]->(:VocabGap)
+                    WITH sns, collect(DISTINCT source_gap) AS source_gap_edges
+                    OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(dd:IMASNode)
+                    OPTIONAL MATCH (sns)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+                    WITH sns, source_gap_edges,
+                         collect(DISTINCT dd) + collect(DISTINCT signal)
+                             AS backing_entities
+                    FOREACH (edge IN source_gap_edges | DELETE edge)
+                    WITH sns,
+                         CASE
+                           WHEN size(backing_entities) = 1
+                            AND (
+                              (sns.source_type = 'dd'
+                               AND sns.id = 'dd:' + sns.source_id
+                               AND backing_entities[0].id = sns.source_id
+                               AND 'IMASNode' IN labels(backing_entities[0]))
+                              OR
+                              (sns.source_type = 'signals'
+                               AND sns.id = 'signals:' + sns.source_id
+                               AND backing_entities[0].id = sns.source_id
+                               AND 'FacilitySignal' IN labels(backing_entities[0]))
+                            )
+                           THEN backing_entities ELSE []
+                         END AS exact_backing
+                    UNWIND CASE
+                      WHEN exact_backing = [] THEN [null]
+                      ELSE exact_backing
+                    END AS source_entity
+                    OPTIONAL MATCH
+                        (source_entity)-[entity_gap:HAS_STANDARD_NAME_VOCAB_GAP]
+                        ->(:VocabGap)
+                    WITH sns, collect(DISTINCT entity_gap) AS entity_gap_edges
+                    FOREACH (edge IN entity_gap_edges | DELETE edge)
+                    RETURN sns.id AS id
+"""
+
+
 def persist_generated_name_winners(
     candidates: list[dict[str, Any]],
     *,
@@ -4660,8 +4700,11 @@ def persist_generated_name_winners(
                       WHEN uri IN coalesce(sn.source_paths, [])
                       THEN sn.source_paths
                       ELSE coalesce(sn.source_paths, []) + uri END
-                    RETURN sns.id AS id
-                    """,
+                    __RETIRE_FINALIZED_SOURCE_GAPS__
+                    """.replace(
+                                "__RETIRE_FINALIZED_SOURCE_GAPS__",
+                                _RETIRE_FINALIZED_SOURCE_GAPS,
+                            ),
                             batch=reserved_finalize_batch,
                             pending_stage=NameStage.pending.value,
                         )
@@ -4711,8 +4754,11 @@ def persist_generated_name_winners(
                       WHEN uri IN coalesce(sn.source_paths, [])
                       THEN sn.source_paths
                       ELSE coalesce(sn.source_paths, []) + uri END
-                    RETURN sns.id AS id
-                    """,
+                    __RETIRE_FINALIZED_SOURCE_GAPS__
+                    """.replace(
+                                "__RETIRE_FINALIZED_SOURCE_GAPS__",
+                                _RETIRE_FINALIZED_SOURCE_GAPS,
+                            ),
                             batch=stable_finalize_batch,
                             stable_stages=sorted(_STABLE_BINDING_NAME_STAGES),
                         )
@@ -4884,8 +4930,11 @@ def _finalize_generated_name_stage(
                            produced.claim_token,
                            produced.claim_seq,
                            produced.created_target
-                    RETURN sns.id AS id
-                    """,
+                    __RETIRE_FINALIZED_SOURCE_GAPS__
+                    """.replace(
+                            "__RETIRE_FINALIZED_SOURCE_GAPS__",
+                            _RETIRE_FINALIZED_SOURCE_GAPS,
+                        ),
                         batch=batch,
                     )
                 )
@@ -8907,7 +8956,11 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     }
 
 
-def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
+def reconcile_source_status_liveness(
+    gc: Any | None = None,
+    *,
+    source_ids: list[str] | None = None,
+) -> dict[str, int]:
     """Make source lifecycle status agree with its current live target.
 
     ``composed`` and ``attached`` are terminal only while the source still
@@ -8922,10 +8975,16 @@ def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
     carries an open name hint: that source must stay eligible for the
     regeneration requested by the edit. Sources claiming completion with no
     live target return to ``extracted`` with a fresh attempt budget. Terminal
-    target edges and the scalar mirror are cleared in the latter case.
-    Upstream-stale sources are never revived here.
+    target edges, exact DD projections, source-path cache entries, and scalar
+    mirrors are cleared in the latter case. Already-extracted DD sources with
+    no produced edge receive the same projection/cache cleanup when their
+    single exact backing path proves ownership of a terminal projection.
+    Upstream-stale sources and active extracted claims are never revived or
+    modified here.
 
-    Idempotent once status, edge, and scalar liveness agree.
+    ``source_ids`` optionally restricts every repair direction to exact source
+    identities; the default remains the whole graph. Idempotent once status,
+    edge, and scalar liveness agree.
     """
     own = gc is None
     client = GraphClient() if own else gc
@@ -8935,7 +8994,9 @@ def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
             MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
             WHERE NOT (coalesce(sn.name_stage, '') IN
                        ['superseded', 'exhausted', 'contested'])
+              AND ($source_ids IS NULL OR sns.id IN $source_ids)
               AND NOT (sns.status IN ['composed', 'attached', 'stale'])
+              AND sns.claim_token IS NULL
               AND NOT EXISTS {
                 MATCH (sns)-[:PRODUCED_NAME]->(hint:StandardName)
                 WHERE NOT (coalesce(hint.name_stage, '') IN
@@ -8949,7 +9010,8 @@ def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
                 sns.claimed_at = null,
                 sns.claim_token = null
             RETURN count(DISTINCT sns) AS n
-            """
+            """,
+            source_ids=source_ids,
         )
         live_realigned = live_rows[0]["n"] if live_rows else 0
 
@@ -8957,44 +9019,194 @@ def reconcile_source_status_liveness(gc: Any | None = None) -> dict[str, int]:
             """
             MATCH (sns:StandardNameSource)
             WHERE sns.status IN ['composed', 'attached']
+              AND ($source_ids IS NULL OR sns.id IN $source_ids)
               AND NOT EXISTS {
                 MATCH (sns)-[:PRODUCED_NAME]->(live:StandardName)
                 WHERE NOT (coalesce(live.name_stage, '') IN
                            ['superseded', 'exhausted', 'contested'])
               }
-            OPTIONAL MATCH (sns)-[r:PRODUCED_NAME]->(:StandardName)
-            WITH sns, collect(r) AS stale_edges
+            OPTIONAL MATCH (sns)-[r:PRODUCED_NAME]->(terminal:StandardName)
+            WITH sns, collect(DISTINCT r) AS stale_edges,
+                 collect(DISTINCT terminal) AS terminal_targets
+            OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(dd:IMASNode)
+            WITH sns, stale_edges, terminal_targets,
+                 collect(DISTINCT dd) AS dd_nodes
+            WITH sns, stale_edges, terminal_targets,
+                 CASE
+                   WHEN size(dd_nodes) = 1
+                    AND sns.source_type = 'dd'
+                    AND sns.id = 'dd:' + sns.source_id
+                    AND dd_nodes[0].id = sns.source_id
+                   THEN dd_nodes[0] ELSE null
+                 END AS exact_dd
+            UNWIND CASE
+              WHEN terminal_targets = [] THEN [null]
+              ELSE terminal_targets
+            END AS terminal
+            OPTIONAL MATCH
+                (exact_dd)-[projection:HAS_STANDARD_NAME]->(terminal)
+            WITH sns, stale_edges, terminal_targets, terminal, projection,
+                 EXISTS {
+                      MATCH (other:StandardNameSource)-[:FROM_DD_PATH]->(exact_dd)
+                      WHERE other <> sns
+                        AND other.status IN ['composed', 'attached']
+                        AND EXISTS {
+                          MATCH (other)-[:PRODUCED_NAME]->(terminal)
+                        }
+                        AND EXISTS {
+                          MATCH (other)-[:PRODUCED_NAME]->(other_live:StandardName)
+                          WHERE NOT (coalesce(other_live.name_stage, '') IN
+                                     $terminal_stages)
+                        }
+                 } AS backed_by_other
+            WITH sns, stale_edges, terminal_targets, terminal, projection,
+                 backed_by_other,
+                 terminal IS NOT NULL
+                   AND NOT backed_by_other
+                   AND sns.id IN coalesce(terminal.source_paths, [])
+                     AS had_source_path,
+                 CASE
+                   WHEN projection IS NOT NULL AND NOT backed_by_other
+                   THEN projection ELSE null
+                 END AS removable_projection
+            FOREACH (target IN CASE
+              WHEN terminal IS NULL OR backed_by_other THEN []
+              ELSE [terminal] END |
+              SET target.source_paths = [
+                path IN coalesce(target.source_paths, [])
+                WHERE path <> sns.id
+              ]
+            )
+            WITH sns, stale_edges,
+                 collect(DISTINCT removable_projection) AS stale_projections,
+                 sum(CASE WHEN had_source_path THEN 1 ELSE 0 END)
+                     AS source_paths_removed
             FOREACH (edge IN stale_edges | DELETE edge)
+            FOREACH (edge IN stale_projections | DELETE edge)
             SET sns.status = 'extracted',
                 sns.attempt_count = 0,
                 sns.claimed_at = null,
                 sns.claim_token = null,
-                sns.produced_sn_id = null
+                sns.produced_sn_id = null,
+                sns.composed_at = null
             RETURN count(DISTINCT sns) AS n,
-                   sum(size(stale_edges)) AS edges
-            """
+                   sum(size(stale_edges)) AS edges,
+                   sum(size(stale_projections)) AS projections,
+                   sum(source_paths_removed) AS source_paths
+            """,
+            terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+            source_ids=source_ids,
         )
         orphaned_reset = orphan_rows[0]["n"] if orphan_rows else 0
         terminal_edges_dropped = (
             int(orphan_rows[0].get("edges") or 0) if orphan_rows else 0
         )
+        terminal_projections_dropped = (
+            int(orphan_rows[0].get("projections") or 0) if orphan_rows else 0
+        )
+        terminal_source_paths_dropped = (
+            int(orphan_rows[0].get("source_paths") or 0) if orphan_rows else 0
+        )
+
+        projection_rows = client.query(
+            """
+            MATCH (sns:StandardNameSource {source_type: 'dd', status: 'extracted'})
+            WHERE sns.claim_token IS NULL
+              AND ($source_ids IS NULL OR sns.id IN $source_ids)
+              AND NOT (sns)-[:PRODUCED_NAME]->(:StandardName)
+            MATCH (sns)-[:FROM_DD_PATH]->(dd:IMASNode)
+            WITH sns, collect(DISTINCT dd) AS dd_nodes
+            WHERE size(dd_nodes) = 1
+              AND sns.id = 'dd:' + sns.source_id
+              AND dd_nodes[0].id = sns.source_id
+            WITH sns, dd_nodes[0] AS dd
+            MATCH (dd)-[projection:HAS_STANDARD_NAME]->(terminal:StandardName)
+            WHERE coalesce(terminal.name_stage, '') IN $terminal_stages
+              AND sns.id IN coalesce(terminal.source_paths, [])
+            WITH sns, terminal, projection,
+                 EXISTS {
+                   MATCH (other:StandardNameSource)-[:FROM_DD_PATH]->(dd)
+                   WHERE other <> sns
+                     AND other.status IN ['composed', 'attached']
+                     AND EXISTS {
+                       MATCH (other)-[:PRODUCED_NAME]->(terminal)
+                     }
+                     AND EXISTS {
+                       MATCH (other)-[:PRODUCED_NAME]->(other_live:StandardName)
+                       WHERE NOT (coalesce(other_live.name_stage, '') IN
+                                  $terminal_stages)
+                     }
+                 } AS backed_by_other
+            WITH sns, terminal, projection, backed_by_other
+            WHERE NOT backed_by_other
+               OR sns.composed_at IS NOT NULL
+               OR sns.produced_sn_id IS NOT NULL
+               OR sns.claimed_at IS NOT NULL
+            FOREACH (target IN CASE
+              WHEN backed_by_other THEN [] ELSE [terminal] END |
+              SET target.source_paths = [
+                path IN coalesce(target.source_paths, [])
+                WHERE path <> sns.id
+              ]
+            )
+            FOREACH (edge IN CASE
+              WHEN backed_by_other THEN [] ELSE [projection] END |
+              DELETE edge
+            )
+            WITH sns, count(DISTINCT CASE
+                   WHEN NOT backed_by_other THEN terminal
+                 END) AS terminal_targets,
+                 count(DISTINCT CASE
+                   WHEN NOT backed_by_other THEN projection
+                 END) AS projections
+            SET sns.claimed_at = null,
+                sns.produced_sn_id = null,
+                sns.composed_at = null
+            RETURN count(DISTINCT sns) AS n,
+                   sum(terminal_targets) AS terminal_targets,
+                   sum(projections) AS projections
+            """,
+            terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+            source_ids=source_ids,
+        )
+        projection_ghosts_reset = projection_rows[0]["n"] if projection_rows else 0
+        ghost_projections_dropped = (
+            int(projection_rows[0].get("projections") or 0) if projection_rows else 0
+        )
+        ghost_source_paths_dropped = (
+            int(projection_rows[0].get("terminal_targets") or 0)
+            if projection_rows
+            else 0
+        )
     finally:
         if own:
             client.close()
 
-    if live_realigned or orphaned_reset:
+    if live_realigned or orphaned_reset or projection_ghosts_reset:
         logger.info(
             "reconcile_source_status_liveness: realigned %d source(s) with a "
             "live target; returned %d source(s) without one to extracted "
-            "(%d stale edge(s) dropped)",
+            "(%d stale edge(s), %d projection(s), and %d source-path entry(s) "
+            "dropped); cleaned %d projection-only ghost source(s) "
+            "(%d projection(s), %d source-path entry(s))",
             live_realigned,
             orphaned_reset,
             terminal_edges_dropped,
+            terminal_projections_dropped,
+            terminal_source_paths_dropped,
+            projection_ghosts_reset,
+            ghost_projections_dropped,
+            ghost_source_paths_dropped,
         )
     return {
         "live_realigned": live_realigned,
         "orphaned_reset": orphaned_reset,
         "terminal_edges_dropped": terminal_edges_dropped,
+        "terminal_projections_dropped": terminal_projections_dropped,
+        "terminal_source_paths_dropped": terminal_source_paths_dropped,
+        "projection_ghosts_reset": projection_ghosts_reset,
+        "ghost_projections_dropped": ghost_projections_dropped,
+        "ghost_source_paths_dropped": ghost_source_paths_dropped,
     }
 
 
