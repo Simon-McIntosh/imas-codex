@@ -551,6 +551,15 @@ the adjacent recovery surfaces:
 - `sn retry --failed ... --reason ...` releases a terminal or attempt-capped
   source and records why another attempt is allowed; its reason is audit data,
   not prompt steering.
+- `sn retry --skipped <exact-path> ... --reason ...` releases only the named
+  skipped sources. It refuses claimed sources and any source with a live name
+  binding, expands no patterns or families, and supports `--dry-run` for exact
+  eligibility counts. The compare-and-set transaction writes a
+  `StandardNameSourceRetry` before returning the source to `extracted`;
+  `previous_status='skipped'` is the schema-defined recovery-kind signal. The
+  source identity, DD edge, and any open compose hint remain unchanged.
+- `sn run --retry-skipped` is selection-only. It does not make skipped sources
+  claimable or mutate their lifecycle; use the exact recovery command above.
 - `sn edit <name> --hint ... --reason ...` steers an existing StandardName and
   can apply a name/family/subtree scope; `sn source-hint` instead steers the
   next successful binding of exactly one DD source.
@@ -916,6 +925,7 @@ through review.
 | `sn status` | StandardName + StandardNameSource statistics, sibling-family harmonization state | `--family` |
 | `sn coverage` | DD/signal coverage by domain, cluster, IDS | `--domain`, `--ids`, `--format` |
 | `sn source-hint` | Attach durable, non-authoritative compose steering to one eligible exact DD source; see [Exact-source compose steering](#exact-source-compose-steering). | `--hint`, `--reason` (mandatory), `--replace`, `--dry-run` |
+| `sn retry` | Return explicitly selected blocked sources to composition with a durable pre-reset audit event. Skipped recovery refuses active claims and live name bindings. | exactly one of `--failed` or `--skipped`, `--reason` (mandatory), `--dry-run`, exact source paths |
 | `sn clear` | Full-subsystem wipe + auto re-seed of ISN grammar | `--dry-run`, `--force`, `--no-comment-export`, `--no-reseed` |
 | `sn prune` | Scoped delete (relationship-first) | `--stage`, `--all`, `--source`, `--ids`, `--include-accepted`, `--include-sources`, `--dry-run` |
 | `sn bench` | Benchmark LLM models on generation quality | `--models`, `--max-candidates`, `--runs`, `--temperature`, `--output`, `--reviewer-model`, `--reviewer-models` |

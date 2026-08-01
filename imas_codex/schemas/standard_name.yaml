@@ -2103,10 +2103,11 @@ classes:
         range: datetime
       retry_events:
         description: >-
-          Durable operator-requested releases of a terminal composition failure.
-          Each event records the source state and error before the attempt budget
-          was reset, so restoring claimability never erases why the source was
-          parked.
+          Durable operator-requested releases of a terminal composition failure,
+          an attempt-capped source, or an explicitly selected skipped source.
+          Each event records the source state and error before exclusion and
+          attempt state are reset, so restoring claimability never erases why
+          the source was parked.
         multivalued: true
         range: StandardNameSourceRetry
         inlined: false
@@ -2251,9 +2252,10 @@ classes:
 
   StandardNameSourceRetry:
     description: >-
-      Audit event written before a failed or attempt-capped StandardNameSource
-      is returned to the composition queue. The source keeps a scalar event-id
-      mirror and a HAS_RETRY_EVENT relationship to every event.
+      Audit event written before a failed, attempt-capped, or explicitly
+      selected skipped StandardNameSource is returned to the composition queue.
+      The source keeps a scalar event-id mirror and a HAS_RETRY_EVENT
+      relationship to every event.
     class_uri: sn:StandardNameSourceRetry
     attributes:
       id:
@@ -2266,13 +2268,19 @@ classes:
       previous_status:
         required: true
         range: StandardNameSourceStatus
-        description: Source lifecycle status immediately before release.
+        description: >-
+          Source lifecycle status immediately before release. This is also the
+          recovery-kind discriminator; skipped recovery records ``skipped``.
       previous_attempt_count:
         required: true
         range: integer
         description: Composition-attempt count immediately before release.
       previous_error:
-        description: Most recent composition error retained from the source.
+        description: >-
+          Durable recovery explanation. Retains the most recent non-empty
+          composition error and, whenever present, appends the prior skip_reason
+          plus optional skip_reason_detail. Either source may stand alone; null
+          means neither source contained an explanation.
       reason:
         required: true
         description: Operator-supplied reason for granting another attempt.

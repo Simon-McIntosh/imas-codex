@@ -8227,6 +8227,167 @@ def retry_failed_sources(
             client.close()
 
 
+def retry_skipped_sources(
+    source_paths: list[str],
+    *,
+    reason: str,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Return explicitly selected skipped sources to the composition queue.
+
+    Eligibility is deliberately exact and fail-closed: the source must still
+    be ``status='skipped'``, unclaimed, and have no scalar or relationship
+    binding to a StandardName. Before resetting the source, the operation
+    creates a ``StandardNameSourceRetry`` event. Its required
+    ``previous_status='skipped'`` field is the schema-defined recovery-kind
+    discriminator; the event also retains the prior attempt count, error, and
+    operator reason.
+
+    The compare-and-set write rechecks every eligibility predicate in the same
+    transaction that records the event and changes the lifecycle state. It
+    clears only exclusion/failure state needed for normal composition. Source
+    identity, DD/signal relationships, and exact-source compose hints are not
+    written and therefore remain intact.
+
+    ``source_paths`` accepts either full ``StandardNameSource.id`` values or
+    their bare ``source_id`` values. No patterns, siblings, or families are
+    expanded.
+    """
+    requested = sorted(
+        {str(path).strip() for path in source_paths if str(path).strip()}
+    )
+    if not requested:
+        raise ValueError("at least one source path is required")
+    reason = reason.strip()
+    if not reason:
+        raise ValueError("a non-empty retry reason is required")
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        candidates = list(
+            client.query(
+                """
+                MATCH (sns:StandardNameSource)
+                WHERE sns.id IN $requested OR sns.source_id IN $requested
+                WITH sns, coalesce(sns.attempt_count, 0) AS attempts
+                WHERE sns.status = 'skipped'
+                  AND sns.claimed_at IS NULL
+                  AND sns.claim_token IS NULL
+                  AND sns.produced_sn_id IS NULL
+                  AND NOT (sns)-[:PRODUCED_NAME]->(:StandardName)
+                RETURN sns.id AS id, sns.source_id AS source_path,
+                       sns.status AS status,
+                       attempts AS attempt_count, sns.last_error AS last_error,
+                       sns.skip_reason AS skip_reason,
+                       sns.skip_reason_detail AS skip_reason_detail
+                ORDER BY sns.id
+                """,
+                requested=requested,
+            )
+        )
+        eligible_ids = [row["id"] for row in candidates]
+        matched_requests = {
+            requested_path
+            for requested_path in requested
+            for row in candidates
+            if requested_path
+            in {
+                row["id"],
+                row.get("source_path") or row["id"].partition(":")[2],
+            }
+        }
+        result: dict[str, Any] = {
+            "requested": len(requested),
+            "eligible": len(candidates),
+            "retried": 0,
+            "refused": len(requested) - len(matched_requests),
+            "source_ids": eligible_ids,
+            "event_ids": [],
+            "dry_run": dry_run,
+        }
+        if dry_run or not candidates:
+            return result
+
+        items = [
+            {
+                "source_id": row["id"],
+                "previous_status": row["status"],
+                "previous_attempt_count": int(row["attempt_count"]),
+                "previous_error": _skipped_recovery_error(row),
+                "previous_skip_reason": row.get("skip_reason"),
+                "previous_skip_reason_detail": row.get("skip_reason_detail"),
+                "event_id": f"source-retry:{uuid.uuid4()}",
+            }
+            for row in candidates
+        ]
+        rows = list(
+            client.query(
+                """
+                UNWIND $items AS item
+                MATCH (sns:StandardNameSource {id: item.source_id})
+                WHERE sns.status = 'skipped'
+                  AND item.previous_status = 'skipped'
+                  AND coalesce(sns.attempt_count, 0)
+                      = item.previous_attempt_count
+                  AND coalesce(sns.skip_reason, '')
+                      = coalesce(item.previous_skip_reason, '')
+                  AND coalesce(sns.skip_reason_detail, '')
+                      = coalesce(item.previous_skip_reason_detail, '')
+                  AND sns.claimed_at IS NULL
+                  AND sns.claim_token IS NULL
+                  AND sns.produced_sn_id IS NULL
+                  AND NOT (sns)-[:PRODUCED_NAME]->(:StandardName)
+                CREATE (event:StandardNameSourceRetry {id: item.event_id})
+                SET event.source_id = sns.id,
+                    event.previous_status = item.previous_status,
+                    event.previous_attempt_count = item.previous_attempt_count,
+                    event.previous_error = item.previous_error,
+                    event.reason = $reason,
+                    event.retried_at = datetime()
+                MERGE (sns)-[:HAS_RETRY_EVENT]->(event)
+                SET sns.retry_events =
+                        coalesce(sns.retry_events, []) + item.event_id,
+                    sns.status = 'extracted',
+                    sns.attempt_count = 0,
+                    sns.claimed_at = null,
+                    sns.claim_token = null,
+                    sns.skip_reason = null,
+                    sns.skip_reason_detail = null,
+                    sns.skipped_at = null,
+                    sns.failed_at = null,
+                    sns.last_error = null
+                RETURN sns.id AS source_id, event.id AS event_id
+                """,
+                items=items,
+                reason=reason,
+            )
+        )
+        result["retried"] = len(rows)
+        result["refused"] += len(candidates) - len(rows)
+        result["source_ids"] = [row["source_id"] for row in rows]
+        result["event_ids"] = [row["event_id"] for row in rows]
+        return result
+    finally:
+        if own:
+            client.close()
+
+
+def _skipped_recovery_error(source: dict[str, Any]) -> str | None:
+    """Compose all durable explanations for a skipped recovery."""
+    last_error = str(source.get("last_error") or "").strip()
+    skip_reason = str(source.get("skip_reason") or "").strip()
+    detail = str(source.get("skip_reason_detail") or "").strip()
+    explanations = [last_error.rstrip(" ;")] if last_error.rstrip(" ;") else []
+    if skip_reason:
+        classification = f"skip_reason={skip_reason}"
+        if detail:
+            classification += f"; detail={detail}"
+        explanations.append(classification)
+    return "; ".join(explanations) or None
+
+
 def mark_source_skipped(
     gc: GraphClient,
     source_id: str,

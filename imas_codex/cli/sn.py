@@ -1199,10 +1199,9 @@ def _reject_unscoped_accepted_reset(
     is_flag=True,
     default=False,
     help=(
-        "Include StandardNameSource records with status=skipped in re-extraction "
-        "(their underlying DD paths get re-queued). Useful after unit override "
-        "table updates. This selector is currently accepted but does not yet "
-        "change source eligibility."
+        "Select skipped sources for run scoping only; this does not make them "
+        "claimable or change lifecycle state. Release exact paths explicitly "
+        "with `sn retry --skipped ... --reason ...`."
     ),
 )
 @click.option(
@@ -6033,6 +6032,15 @@ def sn_source_hint(
     ),
 )
 @click.option(
+    "--skipped",
+    "retry_skipped",
+    is_flag=True,
+    help=(
+        "Release exact skipped sources for another composition attempt. "
+        "Sources with a claim or live name binding are refused."
+    ),
+)
+@click.option(
     "--reason",
     required=True,
     help="Why another composition attempt is warranted (stored in the audit event).",
@@ -6041,6 +6049,7 @@ def sn_source_hint(
 @click.argument("paths", nargs=-1, required=True)
 def sn_retry(
     retry_failed: bool,
+    retry_skipped: bool,
     reason: str,
     dry_run: bool,
     paths: tuple[str, ...],
@@ -6051,13 +6060,18 @@ def sn_retry(
     Examples:
       imas-codex sn retry --failed equilibrium/path --reason "grammar now supports it"
       imas-codex sn retry --failed dd:path/a dd:path/b --reason "retry after repair"
+      imas-codex sn retry --skipped dd:path/a --reason "source is now nameable"
     """
-    if not retry_failed:
-        raise click.UsageError("select a retry mode; currently supported: --failed")
+    if retry_failed == retry_skipped:
+        raise click.UsageError("select exactly one retry mode: --failed or --skipped")
 
-    from imas_codex.standard_names.graph_ops import retry_failed_sources
+    from imas_codex.standard_names.graph_ops import (
+        retry_failed_sources,
+        retry_skipped_sources,
+    )
 
-    result = retry_failed_sources(list(paths), reason=reason, dry_run=dry_run)
+    retry_sources = retry_failed_sources if retry_failed else retry_skipped_sources
+    result = retry_sources(list(paths), reason=reason, dry_run=dry_run)
     verb = "eligible" if dry_run else "retried"
     click.echo(
         f"{verb}: {result['retried'] if not dry_run else result['eligible']} "
@@ -6067,9 +6081,13 @@ def sn_retry(
         for source_id in result["source_ids"]:
             click.echo(f"  {source_id}")
     if result["refused"]:
+        refusal = (
+            "missing or not failed/attempt-capped"
+            if retry_failed
+            else "missing, not skipped, claimed, or already name-bound"
+        )
         click.echo(
-            f"refused: {result['refused']} source path(s) were missing or not "
-            "failed/attempt-capped",
+            f"refused: {result['refused']} source path(s) were {refusal}",
             err=True,
         )
 
