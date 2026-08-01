@@ -15,7 +15,10 @@ refine loop.
 
 from __future__ import annotations
 
-from imas_codex.standard_names.workers import _is_refine_grammar_failure
+from imas_codex.standard_names.workers import (
+    RefineCandidateValidationError,
+    _is_refine_grammar_failure,
+)
 
 
 def test_isn_invalid_operator_token_is_terminal() -> None:
@@ -48,6 +51,12 @@ def test_existing_markers_still_terminal() -> None:
     assert _is_refine_grammar_failure(
         ValueError("Token 'foo' is not a registered qualifier")
     )
+
+
+def test_typed_candidate_validation_failure_is_terminal() -> None:
+    """Typed strict-composition failures do not depend on message matching."""
+    exc = RefineCandidateValidationError("strict composition rejected the candidate")
+    assert _is_refine_grammar_failure(exc) is True
     assert _is_refine_grammar_failure(
         ValueError("1 validation error for RefinedName\nname\n  field required")
     )
