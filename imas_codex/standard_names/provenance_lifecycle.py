@@ -498,7 +498,9 @@ WITH source, targets, dd_backings,
      collect(DISTINCT signal.id) AS signal_backings
 OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
 OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(mapped:StandardName)
+OPTIONAL MATCH (owner:StandardNameSource)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
 RETURN source.id AS source_id,
+       source.source_id AS semantic_id,
        source.source_type AS source_type,
        source.status AS status,
        source.produced_sn_id AS produced_sn_id,
@@ -509,7 +511,8 @@ RETURN source.id AS source_id,
         target.id] AS live_targets,
        dd_backings,
        signal_backings,
-       collect(DISTINCT mapped.id) AS mapped_ids
+       collect(DISTINCT mapped.id) AS mapped_ids,
+       collect(DISTINCT owner.id) AS backing_owner_ids
 ORDER BY source_id
 """
 
@@ -517,6 +520,7 @@ ORDER BY source_id
 _SEMANTIC_SOURCE_REPAIR_MUTATION = """
 MATCH (source:StandardNameSource {id: $source_id})
 WHERE source.source_type = $source_type
+  AND source.source_id = $semantic_id
   AND source.status = $status
   AND (source.produced_sn_id = $before_scalar
        OR (source.produced_sn_id IS NULL AND $before_scalar IS NULL))
@@ -563,6 +567,12 @@ WITH source, current_targets, current_target_states, current_live_targets,
      collect(DISTINCT projection) AS projections
 WHERE size(mapped_ids) = size($before_mapped_ids)
   AND all(id IN mapped_ids WHERE id IN $before_mapped_ids)
+OPTIONAL MATCH (owner:StandardNameSource)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+WITH source, current_targets, current_target_states, current_live_targets,
+     dd_backings, signal_backings, backing, mapped_ids, projections,
+     collect(DISTINCT owner.id) AS backing_owner_ids
+WHERE size(backing_owner_ids) = size($backing_owner_ids)
+  AND all(id IN backing_owner_ids WHERE id IN $backing_owner_ids)
 MATCH (target:StandardName {id: $target})
 OPTIONAL MATCH (source)-[stale:PRODUCED_NAME]->(old:StandardName)
 WHERE old.id <> target.id
@@ -589,26 +599,26 @@ RETURN source.id AS source_id, target.id AS target, change.id AS change_id
 """
 
 
-_SEMANTIC_SOURCE_PATH_REBUILD = """
+_SEMANTIC_SOURCE_PATH_INSPECTION = """
 UNWIND $name_ids AS name_id
 MATCH (sn:StandardName {id: name_id})
+OPTIONAL MATCH (imas:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+WITH sn, collect(DISTINCT 'dd:' + imas.id) AS hsn
 OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
-OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
-WITH sn,
-     CASE
-       WHEN dd IS NOT NULL THEN 'dd:' + dd.id
-       WHEN signal IS NOT NULL THEN signal.id
-       WHEN source.source_type = 'derived'
-        AND source.source_id STARTS WITH 'derived:'
-       THEN source.source_id
-       WHEN source IS NOT NULL THEN source.id
-       ELSE null
-     END AS path
-ORDER BY sn.id, path
-WITH sn, [path IN collect(DISTINCT path) WHERE path IS NOT NULL] AS paths
-SET sn.source_paths = paths
-RETURN sn.id AS id, paths
+WHERE source.source_type <> 'derived' AND source.id IS NOT NULL
+RETURN sn.id AS id,
+       coalesce(sn.source_paths, []) AS current,
+       [path IN hsn WHERE path IS NOT NULL AND path <> 'dd:'] AS hsn_paths,
+       collect(DISTINCT source.id) AS produced_paths
+ORDER BY id
+"""
+
+
+_SEMANTIC_SOURCE_PATH_WRITE = """
+UNWIND $updates AS update
+MATCH (sn:StandardName {id: update.id})
+SET sn.source_paths = update.paths
+RETURN sn.id AS id, sn.source_paths AS paths
 ORDER BY id
 """
 
@@ -656,23 +666,38 @@ def _semantic_source_repair_plan(
             "semantic sources are not composed or attached: " + ", ".join(ineligible)
         )
 
-    projection_errors: list[str] = []
+    backing_errors: list[str] = []
     for source_id in source_ids:
         row = by_id[source_id]
+        semantic_id = row.get("semantic_id")
         dd_backings = sorted(row.get("dd_backings") or [])
         signal_backings = sorted(row.get("signal_backings") or [])
+        backing_owner_ids = sorted(row.get("backing_owner_ids") or [])
         if row["source_type"] == "dd":
-            valid = len(dd_backings) == 1 and not signal_backings
-        else:
-            valid = len(signal_backings) == 1 and not dd_backings
-        if not valid:
-            projection_errors.append(
-                f"{source_id}: dd={dd_backings!r}, signals={signal_backings!r}"
+            valid = (
+                semantic_id is not None
+                and source_id == f"dd:{semantic_id}"
+                and dd_backings == [semantic_id]
+                and not signal_backings
             )
-    if projection_errors:
+        else:
+            valid = (
+                semantic_id is not None
+                and source_id == f"signals:{semantic_id}"
+                and signal_backings == [semantic_id]
+                and not dd_backings
+            )
+        exclusively_owned = backing_owner_ids == [source_id]
+        if not valid or not exclusively_owned:
+            backing_errors.append(
+                f"{source_id}: semantic_id={semantic_id!r}, "
+                f"dd={dd_backings!r}, signals={signal_backings!r}, "
+                f"owners={backing_owner_ids!r}"
+            )
+    if backing_errors:
         raise ValueError(
-            "semantic source backing projection is ambiguous: "
-            + "; ".join(projection_errors)
+            "semantic source backing identity or ownership is invalid: "
+            + "; ".join(backing_errors)
         )
 
     planned: list[dict[str, Any]] = []
@@ -698,12 +723,15 @@ def _semantic_source_repair_plan(
         }
         base = {
             "source_id": source_id,
+            "semantic_id": row["semantic_id"],
             "source_type": row["source_type"],
+            "status": row["status"],
             "backing_id": (
                 sorted(row.get("dd_backings") or [])[0]
                 if row["source_type"] == "dd"
                 else sorted(row.get("signal_backings") or [])[0]
             ),
+            "backing_owner_ids": sorted(row.get("backing_owner_ids") or []),
             "before": before,
         }
         override = authority_overrides.get(source_id)
@@ -859,6 +887,9 @@ def repair_semantic_source_invariants(
                 before = item["before"]
                 audit_detail = {
                     "source_id": item["source_id"],
+                    "semantic_id": item["semantic_id"],
+                    "backing_id": item["backing_id"],
+                    "backing_owner_ids": item["backing_owner_ids"],
                     "before": before,
                     "after": item["after"],
                     "removed_targets": item["removed_targets"],
@@ -870,12 +901,9 @@ def repair_semantic_source_invariants(
                     for row in transaction.run(
                         _SEMANTIC_SOURCE_REPAIR_MUTATION,
                         source_id=item["source_id"],
+                        semantic_id=item["semantic_id"],
                         source_type=item["source_type"],
-                        status=next(
-                            row["status"]
-                            for row in rows
-                            if row["source_id"] == item["source_id"]
-                        ),
+                        status=item["status"],
                         before_scalar=before["produced_sn_id"],
                         before_targets=before["produced_targets"],
                         before_target_states=before["target_states"],
@@ -889,6 +917,7 @@ def repair_semantic_source_invariants(
                             else []
                         ),
                         before_mapped_ids=before["mapped_ids"],
+                        backing_owner_ids=item["backing_owner_ids"],
                         target=item["authoritative_target"],
                         change_id=change_id,
                         audit_reason=(
@@ -919,12 +948,40 @@ def repair_semantic_source_invariants(
                 affected_names.add(item["authoritative_target"])
 
             if affected_names:
-                list(
-                    transaction.run(
-                        _SEMANTIC_SOURCE_PATH_REBUILD,
+                path_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _SEMANTIC_SOURCE_PATH_INSPECTION,
                         name_ids=sorted(affected_names),
                     )
-                )
+                ]
+                updates = []
+                for path_row in path_rows:
+                    current = list(path_row.get("current") or [])
+                    derived_keep = [
+                        path for path in current if path.startswith("derived:")
+                    ]
+                    canonical_paths = sorted(
+                        set(derived_keep)
+                        | set(path_row.get("hsn_paths") or [])
+                        | set(path_row.get("produced_paths") or [])
+                    )
+                    updates.append({"id": path_row["id"], "paths": canonical_paths})
+                if len(updates) != len(affected_names):
+                    raise RuntimeError(
+                        "affected StandardName disappeared during repair"
+                    )
+                written_paths = [
+                    dict(row)
+                    for row in transaction.run(
+                        _SEMANTIC_SOURCE_PATH_WRITE,
+                        updates=updates,
+                    )
+                ]
+                if written_paths != updates:
+                    raise RuntimeError(
+                        "affected StandardName source_paths changed during repair"
+                    )
             after_rows = _inspect_semantic_source_repairs(tx_query, selected)
             after_planned, after_ambiguous, after_clean = _semantic_source_repair_plan(
                 after_rows, selected, overrides
@@ -934,9 +991,7 @@ def repair_semantic_source_invariants(
                     "semantic source repair did not converge: "
                     + ", ".join(item["source_id"] for item in after_planned)
                 )
-            if [item["source_id"] for item in after_ambiguous] != [
-                item["source_id"] for item in ambiguous
-            ]:
+            if after_ambiguous != ambiguous:
                 raise RuntimeError(
                     "ambiguous semantic source set changed during repair"
                 )
@@ -946,6 +1001,13 @@ def repair_semantic_source_invariants(
             )
             if [item["source_id"] for item in after_clean] != expected_clean:
                 raise RuntimeError("semantic source clean set changed during repair")
+            after_clean_by_id = {item["source_id"]: item for item in after_clean}
+            for clean_item in already_clean:
+                if after_clean_by_id.get(clean_item["source_id"]) != clean_item:
+                    raise RuntimeError(
+                        "unmodified semantic source changed during repair: "
+                        + clean_item["source_id"]
+                    )
             transaction.commit()
         except BaseException:
             with suppress(Exception):

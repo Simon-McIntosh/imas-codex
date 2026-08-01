@@ -20,21 +20,32 @@ def _row(
     produced: list[str],
     live: list[str],
     mapped: list[str],
+    semantic_id: str | None = None,
     target_states: list[dict] | None = None,
     dd_backings: list[str] | None = None,
     signal_backings: list[str] | None = None,
+    backing_owner_ids: list[str] | None = None,
 ) -> dict:
+    if semantic_id is None:
+        prefix = "dd:" if source_type == "dd" else "signals:"
+        semantic_id = source_id.removeprefix(prefix)
+    if dd_backings is None:
+        dd_backings = [semantic_id] if source_type == "dd" else []
+    if signal_backings is None:
+        signal_backings = [semantic_id] if source_type == "signals" else []
     return {
         "source_id": source_id,
+        "semantic_id": semantic_id,
         "source_type": source_type,
         "status": "composed",
         "produced_sn_id": scalar,
         "produced_targets": produced,
         "live_targets": live,
         "target_states": target_states or [],
-        "dd_backings": dd_backings if dd_backings is not None else [source_id[3:]],
-        "signal_backings": signal_backings or [],
+        "dd_backings": dd_backings,
+        "signal_backings": signal_backings,
         "mapped_ids": mapped,
+        "backing_owner_ids": backing_owner_ids or [source_id],
     }
 
 
@@ -115,7 +126,41 @@ def test_dry_run_classifies_authority_without_opening_a_transaction() -> None:
                 mapped=["quantity"],
                 dd_backings=["one", "two"],
             ),
-            "backing projection is ambiguous",
+            "backing identity or ownership is invalid",
+        ),
+        (
+            _row(
+                "dd:canonical/path",
+                scalar="quantity",
+                produced=["quantity"],
+                live=["quantity"],
+                mapped=["quantity"],
+                dd_backings=["wrong/path"],
+            ),
+            "backing identity or ownership is invalid",
+        ),
+        (
+            _row(
+                "signals:west:diagnostic/channel",
+                source_type="signals",
+                scalar="quantity",
+                produced=["quantity"],
+                live=["quantity"],
+                mapped=["quantity"],
+                signal_backings=["west:other/channel"],
+            ),
+            "backing identity or ownership is invalid",
+        ),
+        (
+            _row(
+                "dd:shared/path",
+                scalar="quantity",
+                produced=["quantity"],
+                live=["quantity"],
+                mapped=["quantity"],
+                backing_owner_ids=["dd:shared/path", "dd:other/source"],
+            ),
+            "backing identity or ownership is invalid",
         ),
     ],
 )
@@ -188,7 +233,11 @@ def test_multi_live_lower_authority_scalar_requires_explicit_override() -> None:
 
 
 def _transactional_client(
-    before: list[dict], after: list[dict], *, mutation_rows: list[dict]
+    before: list[dict],
+    after: list[dict],
+    *,
+    mutation_rows: list[dict],
+    path_rows: list[dict] | None = None,
 ) -> tuple[MagicMock, MagicMock]:
     gc = MagicMock()
     transaction = MagicMock()
@@ -201,8 +250,23 @@ def _transactional_client(
             return before if inspection_count == 1 else after
         if "repair_semantic_source_binding" in cypher:
             return mutation_rows
-        if "SET sn.source_paths = paths" in cypher:
-            return []
+        if "AS hsn_paths" in cypher:
+            return path_rows or [
+                {
+                    "id": "discarded",
+                    "current": ["derived:discarded_parent", "stale/path"],
+                    "hsn_paths": ["dd:direct/discarded"],
+                    "produced_paths": [],
+                },
+                {
+                    "id": "selected",
+                    "current": ["derived:selected_parent", "stale/path"],
+                    "hsn_paths": ["dd:direct/selected"],
+                    "produced_paths": ["dd:path", "catalog:selected"],
+                },
+            ]
+        if "SET sn.source_paths = update.paths" in cypher:
+            return _params["updates"]
         raise AssertionError(f"unexpected query: {cypher}")
 
     transaction.run.side_effect = run
@@ -260,17 +324,39 @@ def test_apply_is_atomic_audited_and_rebuilds_complete_name_caches() -> None:
         if "repair_semantic_source_binding" in call.args[0]
     )
     assert "WHERE size(current_targets) = size($before_targets)" in mutation.args[0]
+    assert "source.source_id = $semantic_id" in mutation.args[0]
+    assert "size(backing_owner_ids) = size($backing_owner_ids)" in mutation.args[0]
     assert "FOREACH (edge IN stale_edges | DELETE edge)" in mutation.args[0]
     assert "HAS_INTERNAL_CHANGE" in mutation.args[0]
     assert '"removed_targets":["discarded"]' in mutation.kwargs["audit_reason"]
+    inspection = next(
+        call
+        for call in transaction.run.call_args_list
+        if "AS hsn_paths" in call.args[0]
+    )
+    assert inspection.kwargs["name_ids"] == ["discarded", "selected"]
+    assert "MATCH (imas:IMASNode)-[:HAS_STANDARD_NAME]->(sn)" in inspection.args[0]
+    assert "source.source_type <> 'derived'" in inspection.args[0]
     rebuild = next(
         call
         for call in transaction.run.call_args_list
-        if "SET sn.source_paths = paths" in call.args[0]
+        if "SET sn.source_paths = update.paths" in call.args[0]
     )
-    assert rebuild.kwargs["name_ids"] == ["discarded", "selected"]
-    assert "MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)" in rebuild.args[0]
-    assert "source.id" in rebuild.args[0]
+    assert rebuild.kwargs["updates"] == [
+        {
+            "id": "discarded",
+            "paths": ["dd:direct/discarded", "derived:discarded_parent"],
+        },
+        {
+            "id": "selected",
+            "paths": [
+                "catalog:selected",
+                "dd:direct/selected",
+                "dd:path",
+                "derived:selected_parent",
+            ],
+        },
+    ]
 
 
 def test_apply_rolls_back_complete_batch_when_compare_check_fails() -> None:
@@ -297,6 +383,53 @@ def test_apply_rolls_back_complete_batch_when_compare_check_fails() -> None:
     transaction.rollback.assert_called_once()
 
 
+def test_postflight_compares_complete_ambiguous_source_state() -> None:
+    planned = _row(
+        "dd:path",
+        scalar="selected",
+        produced=["discarded", "selected"],
+        live=["discarded", "selected"],
+        mapped=["discarded"],
+    )
+    ambiguous = _row(
+        "dd:ambiguous",
+        scalar="outside",
+        produced=["left", "right"],
+        live=["left", "right"],
+        mapped=["left"],
+    )
+    repaired = _row(
+        "dd:path",
+        scalar="selected",
+        produced=["selected"],
+        live=["selected"],
+        mapped=["selected"],
+    )
+    changed_ambiguous = {**ambiguous, "mapped_ids": ["right"]}
+    gc, transaction = _transactional_client(
+        [planned, ambiguous],
+        [repaired, changed_ambiguous],
+        mutation_rows=[
+            {
+                "source_id": "dd:path",
+                "target": "selected",
+                "change_id": "sn-change:test",
+            }
+        ],
+    )
+
+    with pytest.raises(RuntimeError, match="ambiguous semantic source set changed"):
+        repair_semantic_source_invariants(
+            gc,
+            ["dd:path", "dd:ambiguous"],
+            reason="repair exact binding",
+            dry_run=False,
+        )
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once()
+
+
 @pytest.mark.graph
 def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -> None:
     token = uuid4().hex
@@ -308,9 +441,29 @@ def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -
     }
     paths = {
         key: f"{prefix}/{key}"
-        for key in ["scoped", "collateral", "ambiguous", "outside", "malformed"]
+        for key in [
+            "scoped",
+            "collateral",
+            "ambiguous",
+            "outside",
+            "malformed",
+            "direct",
+            "signal",
+            "shared",
+        ]
     }
-    sources = {key: f"dd:{path}" for key, path in paths.items()}
+    sources = {
+        key: f"dd:{path}"
+        for key, path in paths.items()
+        if key not in {"direct", "signal"}
+    }
+    sources.update(
+        {
+            "signal": f"signals:{paths['signal']}",
+            "catalog": f"catalog:{prefix}_catalog",
+            "shared_other": f"dd:{paths['shared']}/alias",
+        }
+    )
 
     graph_client.query(
         """
@@ -326,7 +479,13 @@ def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -
         UNWIND $paths AS path
         CREATE (:IMASNode {id: path})
         """,
-        paths=[path for key, path in paths.items() if key != "malformed"],
+        paths=[
+            path for key, path in paths.items() if key not in {"malformed", "signal"}
+        ],
+    )
+    graph_client.query(
+        "CREATE (:FacilitySignal {id: $signal})",
+        signal=paths["signal"],
     )
     try:
         graph_client.query(
@@ -337,7 +496,11 @@ def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -
                   (scoped_dd:IMASNode {id: $scoped_path}),
                   (collateral_dd:IMASNode {id: $collateral_path}),
                   (ambiguous_dd:IMASNode {id: $ambiguous_path}),
-                  (outside_dd:IMASNode {id: $outside_path})
+                  (outside_dd:IMASNode {id: $outside_path}),
+                  (direct_dd:IMASNode {id: $direct_path}),
+                  (shared_dd:IMASNode {id: $shared_path}),
+                  (signal_node:FacilitySignal {id: $signal_path})
+            SET selected.source_paths = ['derived:structural_only', 'stale/cache']
             CREATE (scoped:StandardNameSource {
               id: $scoped_source, source_id: $scoped_path,
               source_type: 'dd', status: 'composed', produced_sn_id: $selected
@@ -358,10 +521,29 @@ def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -
               id: $malformed_source, source_id: $malformed_path,
               source_type: 'dd', status: 'composed', produced_sn_id: $selected
             })
+            CREATE (signal_source:StandardNameSource {
+              id: $signal_source, source_id: $signal_path,
+              source_type: 'signals', status: 'attached', produced_sn_id: $selected
+            })
+            CREATE (catalog:StandardNameSource {
+              id: $catalog_source, source_id: $selected,
+              source_type: 'catalog', status: 'attached', produced_sn_id: $selected
+            })
+            CREATE (shared:StandardNameSource {
+              id: $shared_source, source_id: $shared_path,
+              source_type: 'dd', status: 'composed', produced_sn_id: $selected
+            })
+            CREATE (shared_other:StandardNameSource {
+              id: $shared_other_source, source_id: $shared_path + '/alias',
+              source_type: 'dd', status: 'extracted'
+            })
             CREATE (scoped)-[:FROM_DD_PATH]->(scoped_dd)
             CREATE (collateral)-[:FROM_DD_PATH]->(collateral_dd)
             CREATE (ambiguous)-[:FROM_DD_PATH]->(ambiguous_dd)
             CREATE (outside_source)-[:FROM_DD_PATH]->(outside_dd)
+            CREATE (signal_source)-[:FROM_SIGNAL]->(signal_node)
+            CREATE (shared)-[:FROM_DD_PATH]->(shared_dd)
+            CREATE (shared_other)-[:FROM_DD_PATH]->(shared_dd)
             CREATE (scoped)-[:PRODUCED_NAME]->(discarded)
             CREATE (scoped)-[:PRODUCED_NAME]->(selected)
             CREATE (collateral)-[:PRODUCED_NAME]->(selected)
@@ -369,10 +551,17 @@ def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -
             CREATE (ambiguous)-[:PRODUCED_NAME]->(selected)
             CREATE (outside_source)-[:PRODUCED_NAME]->(discarded)
             CREATE (malformed)-[:PRODUCED_NAME]->(selected)
+            CREATE (signal_source)-[:PRODUCED_NAME]->(selected)
+            CREATE (catalog)-[:PRODUCED_NAME]->(selected)
+            CREATE (shared)-[:PRODUCED_NAME]->(discarded)
+            CREATE (shared)-[:PRODUCED_NAME]->(selected)
             CREATE (scoped_dd)-[:HAS_STANDARD_NAME]->(discarded)
             CREATE (collateral_dd)-[:HAS_STANDARD_NAME]->(selected)
             CREATE (ambiguous_dd)-[:HAS_STANDARD_NAME]->(discarded)
             CREATE (outside_dd)-[:HAS_STANDARD_NAME]->(discarded)
+            CREATE (direct_dd)-[:HAS_STANDARD_NAME]->(selected)
+            CREATE (signal_node)-[:HAS_STANDARD_NAME]->(selected)
+            CREATE (shared_dd)-[:HAS_STANDARD_NAME]->(discarded)
             """,
             discarded=names["discarded"],
             selected=names["selected"],
@@ -381,7 +570,44 @@ def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -
             **{f"{key}_source": value for key, value in sources.items()},
         )
 
-        with pytest.raises(ValueError, match="backing projection is ambiguous"):
+        shared_before = graph_client.query(
+            """
+            MATCH (source:StandardNameSource {id: $source})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+            WITH source, collect(target.id) AS targets
+            MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+            OPTIONAL MATCH (dd)-[:HAS_STANDARD_NAME]->(mapped:StandardName)
+            RETURN source.produced_sn_id AS scalar, targets,
+                   collect(mapped.id) AS mapped
+            """,
+            source=sources["shared"],
+        )[0]
+        with pytest.raises(
+            ValueError, match="backing identity or ownership is invalid"
+        ):
+            repair_semantic_source_invariants(
+                graph_client,
+                [sources["shared"]],
+                reason=f"{prefix} refuse shared backing",
+                dry_run=False,
+            )
+        shared_after = graph_client.query(
+            """
+            MATCH (source:StandardNameSource {id: $source})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+            WITH source, collect(target.id) AS targets
+            MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+            OPTIONAL MATCH (dd)-[:HAS_STANDARD_NAME]->(mapped:StandardName)
+            RETURN source.produced_sn_id AS scalar, targets,
+                   collect(mapped.id) AS mapped
+            """,
+            source=sources["shared"],
+        )[0]
+        assert shared_after == shared_before
+
+        with pytest.raises(
+            ValueError, match="backing identity or ownership is invalid"
+        ):
             repair_semantic_source_invariants(
                 graph_client,
                 [sources["scoped"], sources["malformed"]],
@@ -446,12 +672,31 @@ def test_live_repair_is_exact_fail_closed_audited_and_idempotent(graph_client) -
                 f"dd:{paths['scoped']}",
                 f"dd:{paths['collateral']}",
                 f"dd:{paths['ambiguous']}",
+                f"dd:{paths['direct']}",
+                f"dd:{paths['shared']}",
                 sources["malformed"],
+                sources["signal"],
+                sources["catalog"],
+                "derived:structural_only",
             ]
         )
         assert cache_by_name[names["discarded"]] == sorted(
-            [f"dd:{paths['ambiguous']}", f"dd:{paths['outside']}"]
+            [
+                f"dd:{paths['ambiguous']}",
+                f"dd:{paths['outside']}",
+                f"dd:{paths['shared']}",
+            ]
         )
+        assert "stale/cache" not in cache_by_name[names["selected"]]
+
+        shared_projection = graph_client.query(
+            """
+            MATCH (:IMASNode {id: $path})-[:HAS_STANDARD_NAME]->(sn:StandardName)
+            RETURN collect(sn.id) AS targets
+            """,
+            path=paths["shared"],
+        )[0]["targets"]
+        assert shared_projection == [names["discarded"]]
 
         changes = graph_client.query(
             """
