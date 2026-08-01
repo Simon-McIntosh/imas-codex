@@ -97,6 +97,173 @@ def test_retry_failed_sources_dry_run_never_mutates() -> None:
     assert gc.query.call_count == 1
 
 
+def test_retry_skipped_sources_is_fenced_and_context_neutral() -> None:
+    """Skipped recovery is audited, claim-fenced, and source-context neutral."""
+    from imas_codex.standard_names.graph_ops import retry_skipped_sources
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [
+            {
+                "id": "dd:path/a",
+                "source_path": "path/a",
+                "status": "skipped",
+                "attempt_count": 2,
+                "last_error": "prior composition failure",
+                "skip_reason": "dd_unit_unresolvable",
+                "skip_reason_detail": "source declaration was incomplete",
+            },
+            {
+                "id": "dd:path/b",
+                "source_path": "path/b",
+                "status": "skipped",
+                "attempt_count": 3,
+                "last_error": None,
+                "skip_reason": "dd_unit_context_dependent",
+                "skip_reason_detail": "unit depends on source context",
+            },
+        ],
+        [
+            {"source_id": "dd:path/a", "event_id": "source-retry:a"},
+            {"source_id": "dd:path/b", "event_id": "source-retry:b"},
+        ],
+    ]
+
+    result = retry_skipped_sources(
+        ["dd:path/a", "dd:path/b"],
+        reason="the exact source is now nameable",
+        gc=gc,
+    )
+
+    assert result["eligible"] == 2
+    assert result["retried"] == 2
+    assert result["refused"] == 0
+    write_call = gc.query.call_args_list[1]
+    write_query = write_call.args[0]
+    item = write_call.kwargs["items"][0]
+    assert item["previous_status"] == "skipped"
+    assert item["previous_attempt_count"] == 2
+    assert item["previous_error"] == (
+        "prior composition failure; skip_reason=dd_unit_unresolvable; "
+        "detail=source declaration was incomplete"
+    )
+    fallback_item = write_call.kwargs["items"][1]
+    assert fallback_item["previous_error"] == (
+        "skip_reason=dd_unit_context_dependent; detail=unit depends on source context"
+    )
+    assert "CREATE (event:StandardNameSourceRetry" in write_query
+    assert "event.previous_status = item.previous_status" in write_query
+    assert "event.reason = $reason" in write_query
+    assert "sns.status = 'skipped'" in write_query
+    assert "sns.claimed_at IS NULL" in write_query
+    assert "sns.claim_token IS NULL" in write_query
+    assert "sns.produced_sn_id IS NULL" in write_query
+    assert "NOT (sns)-[:PRODUCED_NAME]->(:StandardName)" in write_query
+    assert "sns.status = 'extracted'" in write_query
+    assert "sns.attempt_count = 0" in write_query
+    assert "sns.skip_reason = null" in write_query
+    assert "sns.skip_reason_detail = null" in write_query
+    assert "sns.last_error = null" in write_query
+    assert "compose_hint" not in write_query
+    assert "FROM_DD_PATH" not in write_query
+    assert "DELETE" not in write_query
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ({"last_error": "bare failure;", "skip_reason": None}, "bare failure"),
+        (
+            {
+                "last_error": "  ",
+                "skip_reason": None,
+                "skip_reason_detail": "orphan detail",
+            },
+            None,
+        ),
+    ],
+)
+def test_skipped_recovery_error_without_classification(
+    source: dict[str, str | None], expected: str | None
+) -> None:
+    """Absent classifications preserve only substantive errors, without debris."""
+    from imas_codex.standard_names.graph_ops import _skipped_recovery_error
+
+    assert _skipped_recovery_error(source) == expected
+
+
+def test_retry_skipped_sources_dry_run_has_exact_eligibility_cardinality() -> None:
+    """Dry-run counts only exact, still-eligible skipped source paths."""
+    from imas_codex.standard_names.graph_ops import retry_skipped_sources
+
+    gc = MagicMock()
+    gc.query.return_value = [
+        {
+            "id": "dd:path/a",
+            "source_path": "path/a",
+            "status": "skipped",
+            "attempt_count": 0,
+            "last_error": None,
+            "skip_reason": "dd_unit_unresolvable",
+            "skip_reason_detail": "",
+        }
+    ]
+
+    result = retry_skipped_sources(
+        ["path/a", "path/not-skipped"],
+        reason="inspect exact recovery scope",
+        dry_run=True,
+        gc=gc,
+    )
+
+    assert result == {
+        "requested": 2,
+        "eligible": 1,
+        "retried": 0,
+        "refused": 1,
+        "source_ids": ["dd:path/a"],
+        "event_ids": [],
+        "dry_run": True,
+    }
+    assert gc.query.call_count == 1
+    selection_query = gc.query.call_args.args[0]
+    assert "sns.id IN $requested OR sns.source_id IN $requested" in selection_query
+    assert "sns.status = 'skipped'" in selection_query
+    assert "sns.claimed_at IS NULL" in selection_query
+    assert "sns.produced_sn_id IS NULL" in selection_query
+
+
+def test_retry_skipped_sources_reports_compare_and_set_refusal() -> None:
+    """A source that changes after selection is refused without collateral writes."""
+    from imas_codex.standard_names.graph_ops import retry_skipped_sources
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [
+            {
+                "id": "dd:path/a",
+                "source_path": "path/a",
+                "status": "skipped",
+                "attempt_count": 0,
+                "last_error": None,
+                "skip_reason": "dd_unit_unresolvable",
+                "skip_reason_detail": "",
+            }
+        ],
+        [],
+    ]
+
+    result = retry_skipped_sources(
+        ["path/a"], reason="source declaration changed", gc=gc
+    )
+
+    assert result["eligible"] == 1
+    assert result["retried"] == 0
+    assert result["refused"] == 1
+    assert result["source_ids"] == []
+    assert result["event_ids"] == []
+
+
 def test_retry_cli_reports_dry_run_eligibility() -> None:
     """The CLI exposes the release instrument without starting a pool run."""
     from imas_codex.cli.sn import sn
@@ -133,6 +300,80 @@ def test_retry_cli_reports_dry_run_eligibility() -> None:
         reason="grammar now supports the quantity",
         dry_run=True,
     )
+
+
+def test_retry_cli_dispatches_exact_skipped_dry_run() -> None:
+    """The skipped mode dispatches only the explicitly supplied paths."""
+    from imas_codex.cli.sn import sn
+
+    result_payload = {
+        "requested": 2,
+        "eligible": 1,
+        "retried": 0,
+        "refused": 1,
+        "source_ids": ["dd:path/a"],
+        "event_ids": [],
+        "dry_run": True,
+    }
+    with patch(
+        "imas_codex.standard_names.graph_ops.retry_skipped_sources",
+        return_value=result_payload,
+    ) as retry:
+        result = CliRunner().invoke(
+            sn,
+            [
+                "retry",
+                "--skipped",
+                "--reason",
+                "source is now nameable",
+                "--dry-run",
+                "dd:path/a",
+                "dd:path/b",
+            ],
+        )
+
+    assert result.exit_code == 0
+    assert "eligible: 1 of 2 requested source(s)" in result.output
+    assert "claimed, or already name-bound" in result.output
+    retry.assert_called_once_with(
+        ["dd:path/a", "dd:path/b"],
+        reason="source is now nameable",
+        dry_run=True,
+    )
+
+
+@pytest.mark.parametrize(
+    "mode_args",
+    [[], ["--failed", "--skipped"]],
+)
+def test_retry_cli_requires_exactly_one_recovery_mode(mode_args: list[str]) -> None:
+    """Neither implicit recovery nor overlapping lifecycle modes are allowed."""
+    from imas_codex.cli.sn import sn
+
+    result = CliRunner().invoke(
+        sn,
+        [
+            "retry",
+            *mode_args,
+            "--reason",
+            "operator reviewed the source",
+            "dd:path/a",
+        ],
+    )
+
+    assert result.exit_code == 2
+    assert "select exactly one retry mode: --failed or --skipped" in result.output
+
+
+def test_run_retry_skipped_help_is_selection_only() -> None:
+    """Run help cannot imply that its selector performs lifecycle recovery."""
+    from imas_codex.cli.sn import sn
+
+    result = CliRunner().invoke(sn, ["run", "--help"])
+
+    assert result.exit_code == 0
+    assert "Select skipped sources for run scoping only" in result.output
+    assert "sn retry --skipped" in result.output
 
 
 def test_source_status_reconcile_repairs_both_liveness_directions() -> None:
