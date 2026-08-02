@@ -256,23 +256,18 @@ def recover_manifest_drain_scope(
     own = gc is None
     client = GraphClient() if own else gc
     try:
-        source_ids = [f"dd:{path}" for path in paths] if paths is not None else None
+        exact_paths = paths
         with client.session() as session:
             tx = session.begin_transaction()
             try:
                 probe = list(
                     tx.run(
                         """
-                        MATCH (source:StandardNameSource)
-                        WHERE source.drain_scope_id = $scope_id
-                          AND ($source_ids IS NULL OR source.id IN $source_ids)
-                        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
-                        OPTIONAL MATCH (name)-[:HAS_PARENT*1..]->(parent:StandardName)
-                        WITH collect(DISTINCT source) + collect(DISTINCT name)
-                             + collect(DISTINCT parent) AS candidates
-                        UNWIND [node IN candidates
-                                WHERE node IS NOT NULL
-                                  AND node.drain_scope_id = $scope_id] AS node
+                        MATCH (node)
+                        WHERE (node:StandardName OR node:StandardNameSource)
+                          AND node.drain_scope_id = $scope_id
+                          AND ($paths IS NULL OR any(path IN node.drain_scope_paths
+                                                     WHERE path IN $paths))
                         RETURN count(node) AS total,
                                count(CASE
                                  WHEN node.drain_scope_claimed_at IS NULL
@@ -282,7 +277,7 @@ def recover_manifest_drain_scope(
                         """,
                         scope_id=drain_scope_id,
                         scope_cutoff=scope_cutoff,
-                        source_ids=source_ids,
+                        paths=exact_paths,
                     )
                 )
                 total = int(probe[0]["total"]) if probe else 0
@@ -294,21 +289,17 @@ def recover_manifest_drain_scope(
                 names = list(
                     tx.run(
                         """
-                        MATCH (source:StandardNameSource)
-                        WHERE source.drain_scope_id = $scope_id
-                          AND ($source_ids IS NULL OR source.id IN $source_ids)
-                        MATCH (source)-[:PRODUCED_NAME]->(sn:StandardName)
-                        WHERE sn.drain_scope_id = $scope_id
-                        OPTIONAL MATCH (sn)-[:HAS_PARENT*1..]->(parent:StandardName)
-                        WITH collect(DISTINCT sn) + collect(DISTINCT parent) AS names
-                        UNWIND [entry IN names WHERE entry IS NOT NULL
-                                AND entry.drain_scope_id = $scope_id] AS sn
+                        MATCH (sn:StandardName {drain_scope_id: $scope_id})
+                        WHERE $paths IS NULL OR any(path IN sn.drain_scope_paths
+                                                   WHERE path IN $paths)
                         WITH sn,
                           (sn.name_stage = 'refining'
                            OR sn.docs_stage = 'refining') AS was_refining,
-                          (sn.claim_token IS NULL OR sn.claimed_at IS NULL
-                           OR sn.claimed_at < datetime()
-                                - duration($worker_cutoff)) AS worker_stale
+                          (sn.drain_claim_scope_id = $scope_id
+                           AND sn.claim_token IS NOT NULL
+                           AND (sn.claimed_at IS NULL
+                                OR sn.claimed_at < datetime()
+                                - duration($worker_cutoff))) AS worker_stale
                         SET sn.name_stage = CASE
                               WHEN sn.name_stage = 'refining' AND worker_stale
                               THEN 'reviewed' ELSE sn.name_stage END,
@@ -319,7 +310,8 @@ def recover_manifest_drain_scope(
                               ELSE sn.claim_token END,
                             sn.claimed_at = CASE WHEN worker_stale THEN null
                               ELSE sn.claimed_at END
-                        REMOVE sn.drain_scope_id, sn.drain_scope_claimed_at
+                        REMOVE sn.drain_scope_id, sn.drain_scope_claimed_at,
+                               sn.drain_scope_paths, sn.drain_claim_scope_id
                         RETURN count(sn) AS names,
                                count(CASE
                                  WHEN was_refining AND worker_stale THEN 1 END)
@@ -327,20 +319,33 @@ def recover_manifest_drain_scope(
                         """,
                         scope_id=drain_scope_id,
                         worker_cutoff=worker_cutoff,
-                        source_ids=source_ids,
+                        paths=exact_paths,
                     )
                 )
                 sources = list(
                     tx.run(
                         """
                         MATCH (s:StandardNameSource {drain_scope_id: $scope_id})
-                        WHERE $source_ids IS NULL OR s.id IN $source_ids
+                        WHERE $paths IS NULL OR any(path IN s.drain_scope_paths
+                                                   WHERE path IN $paths)
+                        WITH s,
+                          (s.drain_claim_scope_id = $scope_id
+                           AND s.claim_token IS NOT NULL
+                           AND (s.claimed_at IS NULL
+                                OR s.claimed_at < datetime()
+                                     - duration($worker_cutoff))) AS worker_stale
+                        SET s.claim_token = CASE WHEN worker_stale THEN null
+                              ELSE s.claim_token END,
+                            s.claimed_at = CASE WHEN worker_stale THEN null
+                              ELSE s.claimed_at END
                         REMOVE s.drain_scope_id, s.drain_scope_claimed_at,
-                               s.drain_scope_actionable
+                               s.drain_scope_paths, s.drain_scope_actionable,
+                               s.drain_claim_scope_id
                         RETURN count(s) AS sources
                         """,
                         scope_id=drain_scope_id,
-                        source_ids=source_ids,
+                        paths=exact_paths,
+                        worker_cutoff=worker_cutoff,
                     )
                 )
                 tx.commit()

@@ -288,7 +288,9 @@ def _compute_pool_progress(
     scope_filter_src = "AND s.run_id = $scope_run_id" if scope_run_id else ""
     scope_filter_sn = "AND sn.run_id = $scope_run_id" if scope_run_id else ""
     if drain_scope_id:
-        scope_filter_src = "AND s.drain_scope_id = $drain_scope_id"
+        scope_filter_src = (
+            "AND s.drain_scope_id = $drain_scope_id AND s.drain_scope_actionable = true"
+        )
         scope_filter_sn = "AND sn.drain_scope_id = $drain_scope_id"
     pending_filter_src = scope_filter_src + (" AND false" if edits_only else "")
     pending_filter_sn = scope_filter_sn + (

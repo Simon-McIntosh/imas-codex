@@ -18,6 +18,7 @@ from imas_codex.standard_names.graph_ops import (
     claim_generate_name_batch,
     claim_manifest_drain_scope,
     clear_manifest_drain_scope,
+    prepare_manifest_drain_scope,
     release_manifest_drain_claims,
 )
 from imas_codex.standard_names.orphan_sweep import recover_manifest_drain_scope
@@ -194,6 +195,20 @@ def test_exact_source_creation_and_cleanup_are_scope_owned(
         )
         assert scope_id == scope
         assert plan[0]["disposition"] == "genuine_gap"
+        claimed = claim_generate_name_batch(drain_scope_id=scope)
+        assert [item["id"] for item in claimed] == [f"dd:{graph_case['good']}"]
+        marker = gc.query(
+            """
+            MATCH (source:StandardNameSource {id: $id})
+            RETURN source.drain_claim_scope_id AS marker
+            """,
+            id=f"dd:{graph_case['good']}",
+        )[0]["marker"]
+        assert marker == scope
+        assert release_manifest_drain_claims(scope, gc=gc) == {
+            "sources": 1,
+            "names": 0,
+        }
         cleared = clear_manifest_drain_scope(scope, gc=gc)
     assert cleared == {"sources": 1, "names": 0}
 
@@ -228,17 +243,22 @@ def test_stale_scope_recovery_preserves_a_fresh_worker_token(
             CREATE (source:StandardNameSource {
               id: 'dd:' + $path, source_type: 'dd', source_id: $path,
               status: 'composed', drain_scope_id: $scope,
-              drain_scope_claimed_at: datetime() - duration('PT1H')
+              drain_scope_claimed_at: datetime() - duration('PT1H'),
+              drain_scope_paths: [$path], drain_claim_scope_id: $scope,
+              claim_token: 'source-expired',
+              claimed_at: datetime() - duration('PT1H')
             })-[:FROM_DD_PATH]->(node)
             CREATE (fresh:StandardName {
               id: $fresh, name_stage: 'refining', docs_stage: 'pending',
               drain_scope_id: $scope,
+              drain_scope_paths: [$path], drain_claim_scope_id: 'external-scope',
               drain_scope_claimed_at: datetime() - duration('PT1H'),
               claim_token: 'external', claimed_at: datetime()
             })
             CREATE (stale:StandardName {
               id: $stale, name_stage: 'refining', docs_stage: 'pending',
               drain_scope_id: $scope,
+              drain_scope_paths: [$path], drain_claim_scope_id: $scope,
               drain_scope_claimed_at: datetime() - duration('PT1H'),
               claim_token: 'expired',
               claimed_at: datetime() - duration('PT1H')
@@ -253,6 +273,8 @@ def test_stale_scope_recovery_preserves_a_fresh_worker_token(
               drain_scope_id: $scope,
               drain_scope_claimed_at: datetime() - duration('PT1H'),
               drain_scope_actionable: true,
+              drain_scope_paths: [$unrelated_path],
+              drain_claim_scope_id: 'external-scope',
               claim_token: 'unrelated-external', claimed_at: datetime()
             })-[:FROM_DD_PATH]->(unrelated_node)
             """,
@@ -272,6 +294,16 @@ def test_stale_scope_recovery_preserves_a_fresh_worker_token(
             gc=gc,
         )
     assert result == {"sources": 1, "names": 2, "refining_reverted": 1}
+
+    with ephemeral_driver.session() as session:
+        source_token = session.run(
+            """
+            MATCH (source:StandardNameSource {id: 'dd:' + $path})
+            RETURN source.claim_token AS token
+            """,
+            path=graph_case["active"],
+        ).single(strict=True)["token"]
+    assert source_token is None
 
     with ephemeral_driver.session() as session:
         rows = {
@@ -321,7 +353,6 @@ def test_scope_takeover_recovers_only_stale_worker_state_and_preserves_status(
 ) -> None:
     path = graph_case["active"]
     prior_scope = f"test/{graph_case['namespace']}/prior-scope"
-    next_scope = f"test/{graph_case['namespace']}/next-scope"
     name_id = f"test/{graph_case['namespace']}/refining-name"
     with ephemeral_driver.session() as session:
         session.run(
@@ -332,6 +363,7 @@ def test_scope_takeover_recovers_only_stale_worker_state_and_preserves_status(
               status: 'failed', dd_version: $version,
               dd_snapshot_pinned: true, produced_sn_id: $name_id,
               drain_scope_id: $prior_scope,
+              drain_scope_paths: [$path],
               drain_scope_claimed_at: datetime() - duration('PT1H'),
               description: node.documentation,
               physics_domain: node.physics_domain,
@@ -347,6 +379,7 @@ def test_scope_takeover_recovers_only_stale_worker_state_and_preserves_status(
               validation_status: 'valid', claim_token: 'expired',
               claimed_at: datetime() - duration('PT1H'),
               drain_scope_id: $prior_scope,
+              drain_scope_paths: [$path], drain_claim_scope_id: $prior_scope,
               drain_scope_claimed_at: datetime() - duration('PT1H')
             })
             CREATE (source)-[:PRODUCED_NAME]->(name)
@@ -357,23 +390,13 @@ def test_scope_takeover_recovers_only_stale_worker_state_and_preserves_status(
             prior_scope=prior_scope,
         ).consume()
 
+    scope_id, plan = prepare_manifest_drain_scope(
+        [path], dd_version=graph_case["version"], scope_timeout_seconds=60
+    )
+    assert scope_id != prior_scope
+    assert plan[0]["disposition"] == "active_in_flight"
     with _client() as gc:
-        recover_manifest_drain_scope(
-            prior_scope,
-            scope_timeout_s=60,
-            worker_timeout_s=60,
-            paths=[path],
-            gc=gc,
-        )
-        scope_id, plan = claim_manifest_drain_scope(
-            [path],
-            dd_version=graph_case["version"],
-            drain_scope_id=next_scope,
-            gc=gc,
-        )
-        assert scope_id == next_scope
-        assert plan[0]["disposition"] == "active_in_flight"
-        clear_manifest_drain_scope(next_scope, gc=gc)
+        clear_manifest_drain_scope(scope_id, gc=gc)
 
     with ephemeral_driver.session() as session:
         row = session.run(
@@ -398,11 +421,80 @@ def test_scope_takeover_recovers_only_stale_worker_state_and_preserves_status(
     }
 
 
+def test_recovery_clears_refined_predecessor_outside_current_source_closure(
+    ephemeral_driver, graph_case
+) -> None:
+    path = graph_case["active"]
+    scope = f"test/{graph_case['namespace']}/refined-scope"
+    predecessor = f"test/{graph_case['namespace']}/predecessor"
+    successor = f"test/{graph_case['namespace']}/successor"
+    with ephemeral_driver.session() as session:
+        session.run(
+            """
+            MATCH (node:IMASNode {id: $path})
+            CREATE (source:StandardNameSource {
+              id: 'dd:' + $path, source_type: 'dd', source_id: $path,
+              status: 'composed', drain_scope_id: $scope,
+              drain_scope_paths: [$path],
+              drain_scope_claimed_at: datetime() - duration('PT1H')
+            })-[:FROM_DD_PATH]->(node)
+            CREATE (old:StandardName {
+              id: $predecessor, name_stage: 'refining', docs_stage: 'pending',
+              drain_scope_id: $scope, drain_scope_paths: [$path],
+              drain_scope_claimed_at: datetime() - duration('PT1H'),
+              drain_claim_scope_id: $scope, claim_token: 'owned-old',
+              claimed_at: datetime() - duration('PT1H')
+            })
+            CREATE (new:StandardName {
+              id: $successor, name_stage: 'drafted', docs_stage: 'pending',
+              drain_scope_id: $scope, drain_scope_paths: [$path],
+              drain_scope_claimed_at: datetime() - duration('PT1H')
+            })
+            CREATE (new)-[:REFINED_FROM]->(old)
+            CREATE (source)-[:PRODUCED_NAME]->(new)
+            """,
+            path=path,
+            scope=scope,
+            predecessor=predecessor,
+            successor=successor,
+        ).consume()
+    with _client() as gc:
+        result = recover_manifest_drain_scope(
+            scope,
+            scope_timeout_s=60,
+            worker_timeout_s=60,
+            paths=[path],
+            gc=gc,
+        )
+    assert result == {"sources": 1, "names": 2, "refining_reverted": 1}
+    with ephemeral_driver.session() as session:
+        rows = list(
+            session.run(
+                """
+                MATCH (name:StandardName) WHERE name.id IN [$predecessor, $successor]
+                RETURN name.id AS id, name.drain_scope_id AS scope,
+                       name.claim_token AS token, name.name_stage AS stage
+                ORDER BY id
+                """,
+                predecessor=predecessor,
+                successor=successor,
+            )
+        )
+    assert all(row["scope"] is None for row in rows)
+    predecessor_row = next(row for row in rows if row["id"] == predecessor)
+    assert predecessor_row["token"] is None
+    assert predecessor_row["stage"] == "reviewed"
+
+
 def test_terminal_roots_are_report_only_and_unclaimable(
     ephemeral_driver, graph_case
 ) -> None:
     accepted_path = graph_case["active"]
     metadata_path = f"test/{graph_case['namespace']}/metadata"
+    terminal_paths = [
+        f"test/{graph_case['namespace']}/{status}"
+        for status in ("failed", "vocab_gap", "skipped", "attempt_cap")
+    ]
     scope = f"test/{graph_case['namespace']}/terminal-scope"
     with ephemeral_driver.session() as session:
         session.run(
@@ -439,27 +531,59 @@ def test_terminal_roots_are_report_only_and_unclaimable(
               dd_data_type: metadata.data_type,
               dd_lifecycle_status: metadata.lifecycle_status
             })-[:FROM_DD_PATH]->(metadata)
+            WITH 1 AS ready
+            UNWIND $terminal AS item
+            CREATE (terminal_node:IMASNode {
+              id: item.path, node_category: 'quantity',
+              documentation: 'terminal', data_type: 'FLT_0D',
+              lifecycle_status: 'active'
+            })
+            CREATE (:StandardNameSource {
+              id: 'dd:' + item.path, source_type: 'dd', source_id: item.path,
+              status: item.status, attempt_count: item.attempt_count,
+              dd_version: $version, dd_snapshot_pinned: true,
+              description: terminal_node.documentation,
+              dd_documentation: terminal_node.documentation,
+              dd_data_type: terminal_node.data_type,
+              dd_lifecycle_status: terminal_node.lifecycle_status
+            })-[:FROM_DD_PATH]->(terminal_node)
             """,
             accepted_path=accepted_path,
             accepted_name=f"test/{graph_case['namespace']}/accepted-name",
             metadata_path=metadata_path,
             version=graph_case["version"],
+            terminal=[
+                {
+                    "path": path,
+                    "status": "extracted"
+                    if path.endswith("attempt_cap")
+                    else path.rsplit("/", 1)[-1],
+                    "attempt_count": 5 if path.endswith("attempt_cap") else 0,
+                }
+                for path in terminal_paths
+            ],
         ).consume()
 
     with _client() as gc:
         _, plan = claim_manifest_drain_scope(
-            [accepted_path, metadata_path],
+            [accepted_path, metadata_path, *terminal_paths],
             dd_version=graph_case["version"],
             drain_scope_id=scope,
             gc=gc,
         )
-    assert [item["disposition"] for item in plan] == ["accepted", "non_nameable"]
+    dispositions = {item["path"]: item["disposition"] for item in plan}
+    assert dispositions == {
+        accepted_path: "accepted",
+        metadata_path: "non_nameable",
+        **dict.fromkeys(terminal_paths, "genuine_gap"),
+    }
     assert claim_generate_name_batch(drain_scope_id=scope) == []
     with ephemeral_driver.session() as session:
         row = session.run(
             """
             MATCH (source:StandardNameSource)
             WHERE source.id IN ['dd:' + $accepted_path, 'dd:' + $metadata_path]
+               OR source.source_id IN $terminal_paths
             RETURN count(CASE WHEN source.drain_scope_id IS NOT NULL THEN 1 END)
                    AS scoped,
                    count(CASE WHEN source.claim_token IS NOT NULL THEN 1 END)
@@ -467,6 +591,7 @@ def test_terminal_roots_are_report_only_and_unclaimable(
             """,
             accepted_path=accepted_path,
             metadata_path=metadata_path,
+            terminal_paths=terminal_paths,
         ).single(strict=True)
     assert dict(row) == {"scoped": 0, "claimed": 0}
 
@@ -482,6 +607,7 @@ def test_terminal_roots_are_report_only_and_unclaimable(
         "unit",
         "coordinate",
         "parent",
+        "configured_version",
     ],
 )
 def test_authority_drift_between_plan_and_cas_rolls_back(
@@ -492,7 +618,15 @@ def test_authority_drift_between_plan_and_cas_rolls_back(
 
     def mutate_then_lock(gc, paths):
         with ephemeral_driver.session() as session:
-            if mutation in {
+            if mutation == "configured_version":
+                session.run(
+                    """
+                    MATCH (version:DDVersion {id: $version})
+                    SET version.is_current = false
+                    """,
+                    version=graph_case["version"],
+                ).consume()
+            elif mutation in {
                 "documentation",
                 "data_type",
                 "physics_domain",
@@ -625,29 +759,27 @@ def test_exact_token_release_preserves_external_claim(
 ) -> None:
     owned = f"test/{graph_case['namespace']}/owned-claim"
     external = f"test/{graph_case['namespace']}/external-claim"
+    scope = f"test/{graph_case['namespace']}/claim-scope"
     with ephemeral_driver.session() as session:
         session.run(
             """
             CREATE (:StandardName {
               id: $owned, name_stage: 'refining', docs_stage: 'pending',
-              claim_token: 'owned', claimed_at: datetime()
+              claim_token: 'owned', claimed_at: datetime(),
+              drain_scope_id: $scope, drain_claim_scope_id: $scope
             })
             CREATE (:StandardName {
               id: $external, name_stage: 'refining', docs_stage: 'pending',
-              claim_token: 'external', claimed_at: datetime()
+              claim_token: 'external', claimed_at: datetime(),
+              drain_scope_id: $scope, drain_claim_scope_id: 'external-scope'
             })
             """,
             owned=owned,
             external=external,
+            scope=scope,
         ).consume()
     with _client() as gc:
-        result = release_manifest_drain_claims(
-            [
-                {"pool": "refine_name", "id": owned, "token": "owned"},
-                {"pool": "refine_name", "id": external, "token": "not-ours"},
-            ],
-            gc=gc,
-        )
+        result = release_manifest_drain_claims(scope, gc=gc)
     assert result == {"sources": 0, "names": 1}
     with ephemeral_driver.session() as session:
         rows = {

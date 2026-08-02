@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+import asyncio
+from contextlib import ExitStack, contextmanager
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import _run_sn_cmd, sn_run
+from imas_codex.cli.sn import _compute_pool_progress, _run_sn_cmd, sn_run
 from imas_codex.standard_names.graph_ops import (
     MANIFEST_DRAIN_DISPOSITIONS,
     _claim_sn_atomic,
@@ -210,6 +211,8 @@ def test_scoped_review_restage_is_atomic_in_seed_expand_and_readback(
     assert "sn.drain_scope_id = $drain_scope_id" in readback
     assert "THEN 'drafted' ELSE sn.name_stage END" in seed
     assert "THEN 'drafted' ELSE sn.name_stage END" in expand
+    assert "sn.drain_claim_scope_id = $drain_scope_id" in seed
+    assert "sn.drain_claim_scope_id = $drain_scope_id" in expand
 
 
 def _write_manifest(path: Path) -> None:
@@ -349,6 +352,95 @@ def test_pre_loop_cleanup_does_not_mask_the_primary_failure(
     assert str(result.exception) == "primary failure"
 
 
+@pytest.mark.asyncio
+async def test_in_loop_cleanup_does_not_mask_the_primary_failure() -> None:
+    from tests.standard_names.test_scoped_global_maintenance import (
+        _GO,
+        _LOOP,
+        _graph_context,
+        _maintenance_mocks,
+    )
+
+    graph_context, _ = _graph_context()
+    with ExitStack() as stack:
+        _maintenance_mocks(stack)
+        stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
+        stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.ledger.find_provenance_orphans",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.audits."
+                "find_flux_surface_reduction_violations",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.audits.find_removed_dd_sources",
+                return_value=[],
+            )
+        )
+        stack.enter_context(patch(f"{_GO}.persist_outcome_snapshot", return_value={}))
+        stack.enter_context(patch(f"{_GO}.reset_persist_outcomes"))
+        stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.pools.run_pools",
+                new_callable=AsyncMock,
+                side_effect=RuntimeError("primary failure"),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.budget.BudgetManager.start",
+                new_callable=AsyncMock,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.budget.BudgetManager.drain_pending",
+                new_callable=AsyncMock,
+                return_value=True,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
+                return_value=0.0,
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.graph.client.GraphClient", return_value=graph_context)
+        )
+        finalize = stack.enter_context(
+            patch(
+                f"{_GO}.finalize_manifest_drain_scope",
+                side_effect=RuntimeError("cleanup failure"),
+            )
+        )
+
+        from imas_codex.standard_names.loop import run_sn_pools
+
+        stop = asyncio.Event()
+        stop.set()
+        with pytest.raises(RuntimeError, match="primary failure"):
+            await run_sn_pools(
+                cost_limit=5.0,
+                drain_scope_id="owned-scope",
+                drain_paths=("magnetics/ip",),
+                drain_dd_version="4.1.0",
+                stop_event=stop,
+                skip_global_maintenance=True,
+            )
+
+    finalize.assert_called_once()
+
+
 def test_scope_finalization_preserves_primary_cleanup_failure(monkeypatch) -> None:
     monkeypatch.setattr(
         "imas_codex.standard_names.graph_ops.release_manifest_drain_claims",
@@ -362,13 +454,16 @@ def test_scope_finalization_preserves_primary_cleanup_failure(monkeypatch) -> No
     with pytest.raises(RuntimeError, match="release failure"):
         finalize_manifest_drain_scope(
             "owned-scope",
-            claims=[{"pool": "generate_name", "id": "dd:path", "token": "owned"}],
             paths=["path"],
             dd_version="4.1.0",
         )
 
 
 def test_scope_finalization_surfaces_clear_failure_after_success(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.release_manifest_drain_claims",
+        MagicMock(return_value={"sources": 0, "names": 0}),
+    )
     monkeypatch.setattr(
         "imas_codex.standard_names.graph_ops.build_manifest_drain_plan",
         MagicMock(return_value=[]),
@@ -379,9 +474,45 @@ def test_scope_finalization_surfaces_clear_failure_after_success(monkeypatch) ->
     )
 
     with pytest.raises(RuntimeError, match="clear failure"):
-        finalize_manifest_drain_scope(
-            "owned-scope", claims=[], paths=["path"], dd_version="4.1.0"
-        )
+        finalize_manifest_drain_scope("owned-scope", paths=["path"], dd_version="4.1.0")
+
+
+@pytest.mark.parametrize(
+    "source_updates",
+    [
+        {"status": "failed"},
+        {"status": "vocab_gap"},
+        {"status": "skipped"},
+        {"attempt_count": 5},
+        {"produced_sn_id": "exhausted", "dd_target_ids": ["magnetics/ip"]},
+    ],
+)
+def test_terminal_genuine_gaps_are_report_only(source_updates: dict) -> None:
+    path = "magnetics/ip"
+    item = _plan_item(
+        path=path,
+        node={"id": path, "node_category": "quantity"},
+        source=_source(path, **source_updates),
+        all_name_ids=["exhausted"] if source_updates.get("produced_sn_id") else [],
+    )
+    classified = classify_manifest_drain_item(item)
+    assert classified["disposition"] == "genuine_gap"
+    assert classified["drain_actionable"] is False
+
+
+def test_progress_generate_count_requires_actionable_scope() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [{}]
+    _compute_pool_progress(
+        gc,
+        domains=None,
+        rotation_cap=3,
+        min_score=0.85,
+        drain_scope_id="owned-scope",
+    )
+    query = gc.query.call_args.args[0]
+    pending_generate = query.split("RETURN count(s) AS generate_name", 1)[0]
+    assert "s.drain_scope_actionable = true" in pending_generate
 
 
 @pytest.mark.parametrize(
