@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from imas_codex.standard_names.merge import mark_catalog_name_approved, run_merge
 from imas_codex.standard_names.provenance_lifecycle import (
+    bind_sources_exclusively,
     compact_unapproved_superseded,
     fetch_public_semantic_sources,
     find_semantic_source_invariant_violations,
@@ -18,11 +19,68 @@ from imas_codex.standard_names.provenance_lifecycle import (
 )
 
 
+def test_retarget_mutates_only_sources_admitted_by_pairing_guard() -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        AttachmentPairingGuardResult,
+        AttachmentVerdict,
+    )
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [{"source_id": "dd:valid"}, {"source_id": "dd:invalid"}],
+        [{"moved": 1}],
+    ]
+    verdict = AttachmentVerdict(
+        "dd:invalid", "bad/path", "new", "drafted", "geometry mismatch"
+    )
+    with patch(
+        "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+        return_value=AttachmentPairingGuardResult(("dd:valid",), (verdict,)),
+    ) as guard:
+        moved = retarget_standard_name_sources(gc, "old", "new", record_change=False)
+
+    assert moved == 1
+    guard.assert_called_once_with(gc, "new", ["dd:valid", "dd:invalid"])
+    assert gc.query.call_args_list[1].kwargs["source_ids"] == ["dd:valid"]
+
+
+def test_exclusive_bind_can_bypass_guard_only_for_recovery_replay() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [{"bound": 1}]
+
+    bound = bind_sources_exclusively(
+        gc, "restored_name", ["dd:history"], enforce_consistency=False
+    )
+
+    assert bound == 1
+    assert gc.query.call_args.kwargs["source_ids"] == ["dd:history"]
+
+
+def test_exclusive_bind_mutates_only_sources_admitted_by_guard() -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        AttachmentPairingGuardResult,
+    )
+
+    gc = MagicMock()
+    gc.query.return_value = [{"bound": 1}]
+    with patch(
+        "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+        return_value=AttachmentPairingGuardResult(("dd:valid",), ()),
+    ) as guard:
+        bound = bind_sources_exclusively(gc, "target_name", ["dd:invalid", "dd:valid"])
+
+    assert bound == 1
+    guard.assert_called_once_with(gc, "target_name", ["dd:invalid", "dd:valid"])
+    assert gc.query.call_args.kwargs["source_ids"] == ["dd:valid"]
+
+
 def test_retarget_selector_includes_edge_migrated_sources_only() -> None:
     gc = MagicMock()
     gc.query.side_effect = [[{"moved": 2}], []]
 
-    moved = retarget_standard_name_sources(gc, "old", "new", record_change=False)
+    moved = retarget_standard_name_sources(
+        gc, "old", "new", record_change=False, enforce_consistency=False
+    )
 
     assert moved == 2
     cypher = gc.query.call_args_list[0].args[0]
@@ -37,7 +95,9 @@ def test_retarget_cache_uses_surviving_edge_bound_sources() -> None:
     gc = MagicMock()
     gc.query.return_value = [{"moved": 1}]
 
-    retarget_standard_name_sources(gc, "old", "new", record_change=False)
+    retarget_standard_name_sources(
+        gc, "old", "new", record_change=False, enforce_consistency=False
+    )
 
     cypher = gc.query.call_args.args[0]
     selector = cypher.split("WHERE", 1)[1].split("WITH new, old", 1)[0]
@@ -100,7 +160,9 @@ def test_retarget_query_repairs_all_source_mirrors() -> None:
     gc = MagicMock()
     gc.query.return_value = [{"moved": 1}]
 
-    moved = retarget_standard_name_sources(gc, "old", "new", record_change=False)
+    moved = retarget_standard_name_sources(
+        gc, "old", "new", record_change=False, enforce_consistency=False
+    )
 
     assert moved == 1
     cypher = gc.query.call_args.args[0]
@@ -124,7 +186,9 @@ def test_retarget_query_separates_cache_reset_from_source_unwind() -> None:
     gc = MagicMock()
     gc.query.return_value = [{"moved": 0}]
 
-    retarget_standard_name_sources(gc, "old", "new", record_change=False)
+    retarget_standard_name_sources(
+        gc, "old", "new", record_change=False, enforce_consistency=False
+    )
 
     cypher = gc.query.call_args.args[0]
     cache_reset = cypher.index("SET new.source_paths = []")
@@ -147,6 +211,7 @@ def test_retarget_query_compiles_in_transaction(graph_client) -> None:
                 "missing_predecessor_for_query_compilation",
                 "missing_successor_for_query_compilation",
                 record_change=False,
+                enforce_consistency=False,
             )
             assert moved == 0
         finally:

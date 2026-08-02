@@ -92,10 +92,12 @@ from imas_codex.graph.models import NameStage
 logger = logging.getLogger(__name__)
 
 __all__ = [
+    "AttachmentPairingGuardResult",
     "AttachmentVerdict",
     "AttachmentAuditResult",
     "NameLevelDefect",
     "audit_attachments",
+    "guard_source_pairings",
     "recover_terminal_attachment",
     "reconcile_attachment_consistency",
 ]
@@ -161,6 +163,26 @@ RETURN src.id            AS source_node_id,
 #: paths that migrate a historical source set onto a NEW name, where a full
 #: corpus audit would be far too expensive for a hot path.
 _ONE_NAME_SCOPE = "WHERE sn.id = $sn_id"
+
+_PAIRING_GUARD_QUERY = """
+MATCH (sn:StandardName {id: $sn_id})
+OPTIONAL MATCH (bound:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+OPTIONAL MATCH (bound)-[:FROM_DD_PATH]->(bound_dd:IMASNode)
+WITH sn, collect(DISTINCT bound_dd.id) AS existing_dd_paths
+UNWIND $source_ids AS source_id
+OPTIONAL MATCH (source:StandardNameSource {id: source_id})
+OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
+OPTIONAL MATCH (sn)-[:HAS_UNIT]->(nu:Unit)
+RETURN source_id,
+       source.source_type AS source_type,
+       dd.id AS dd_path,
+       coalesce(du.id, dd.unit) AS dd_unit,
+       coalesce(nu.id, sn.unit) AS sn_unit,
+       EXISTS { (source)-[:PRODUCED_NAME]->(sn) } AS already_bound,
+       existing_dd_paths,
+       sn.name_stage AS name_stage
+"""
 
 #: Detach one attachment: the provenance edge, the DD-side projection, and the
 #: name's ``source_paths`` entry.
@@ -339,6 +361,84 @@ class AttachmentVerdict:
     def reroute(self) -> bool:
         """Whether detaching leaves the source with no live name to realize."""
         return self.other_live_names == 0
+
+
+@dataclass(frozen=True)
+class AttachmentPairingGuardResult:
+    """Fresh source pairings admitted and rejected by the write-time guard."""
+
+    accepted_source_ids: tuple[str, ...]
+    rejected: tuple[AttachmentVerdict, ...]
+
+
+def guard_source_pairings(
+    gc: Any, sn_id: str, source_ids: list[str]
+) -> AttachmentPairingGuardResult:
+    """Preflight fresh source-to-name pairings on the caller's query handle.
+
+    Existing bindings are preserved: corpus reconciliation owns historical
+    defects, while this boundary prevents a writer from introducing a new one.
+    Signal and derived sources have no DD path to validate and pass unchanged.
+    DD candidates are evaluated in deterministic path order with the same
+    compose semantics as :func:`audit_attachments`.
+    """
+    from imas_codex.standard_names.workers import _is_attachment_consistent
+
+    requested = sorted(set(source_ids))
+    if not sn_id or not requested:
+        return AttachmentPairingGuardResult((), ())
+
+    rows = list(
+        gc.query(
+            _PAIRING_GUARD_QUERY,
+            sn_id=sn_id,
+            source_ids=requested,
+        )
+    )
+    by_id = {row["source_id"]: row for row in rows}
+    existing_paths = sorted(
+        {path for row in rows for path in (row.get("existing_dd_paths") or []) if path}
+    )
+    accepted: list[str] = []
+    rejected: list[AttachmentVerdict] = []
+    for source_id in requested:
+        row = by_id.get(source_id)
+        if row is None or row.get("source_type") is None:
+            rejected.append(
+                AttachmentVerdict(
+                    source_node_id=source_id,
+                    dd_path="",
+                    sn_id=sn_id,
+                    name_stage=None,
+                    reason="missing semantic source: source node does not exist",
+                )
+            )
+            continue
+        if row.get("already_bound") or not row.get("dd_path"):
+            accepted.append(source_id)
+            continue
+        dd_path = row["dd_path"]
+        ok, reason = _is_attachment_consistent(
+            dd_path,
+            sn_id,
+            existing_sources=tuple(existing_paths),
+            dd_unit=row.get("dd_unit"),
+            sn_unit=row.get("sn_unit"),
+        )
+        if ok:
+            accepted.append(source_id)
+            existing_paths.append(dd_path)
+        else:
+            rejected.append(
+                AttachmentVerdict(
+                    source_node_id=source_id,
+                    dd_path=dd_path,
+                    sn_id=sn_id,
+                    name_stage=row.get("name_stage"),
+                    reason=reason,
+                )
+            )
+    return AttachmentPairingGuardResult(tuple(accepted), tuple(rejected))
 
 
 @dataclass(frozen=True)

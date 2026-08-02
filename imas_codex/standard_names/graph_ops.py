@@ -277,7 +277,7 @@ def _parse_grammar(name: str) -> dict[str, Any]:
         import dataclasses
 
         import imas_standard_names
-        from imas_standard_names.grammar import compose, parse
+        from imas_standard_names import compose, parse
 
         version: str = imas_standard_names.__version__
     except ImportError:
@@ -2160,7 +2160,7 @@ def _parse_parent_grammar(name_id: str) -> dict[str, str | None]:
     ``_parse_grammar`` and ``_write_grammar_decomposition``.
     """
     try:
-        from imas_standard_names.grammar import compose, parse
+        from imas_standard_names import compose, parse
 
         result = parse(name_id, strict=True)
         if compose(result.ir) != name_id:
@@ -3134,7 +3134,7 @@ def write_standard_names(
     # This is a hard invariant: if a name fails grammar round-trip, it is
     # invalid by definition and must not enter the graph.
     try:
-        from imas_standard_names.grammar import compose, parse
+        from imas_standard_names import compose, parse
     except ImportError:
         parse = None  # type: ignore[assignment]
 
@@ -3260,23 +3260,23 @@ def write_standard_names(
                 sn.review_input_hash = b.review_input_hash,
                 sn.embedding = coalesce(b.embedding, sn.embedding),
                 sn.embedded_at = coalesce(b.embedded_at, sn.embedded_at),
-                sn.grammar_parse_version = coalesce(b.grammar_parse_version, sn.grammar_parse_version),
-                sn.validation_diagnostics_json = coalesce(b.validation_diagnostics_json, sn.validation_diagnostics_json),
-                sn.physical_base = coalesce(b.physical_base, sn.physical_base),
-                sn.geometric_base = coalesce(b.geometric_base, sn.geometric_base),
-                sn.subject = coalesce(b.subject, sn.subject),
-                sn.component = coalesce(b.component, sn.component),
-                sn.coordinate = coalesce(b.coordinate, sn.coordinate),
-                sn.transformation = coalesce(b.transformation, sn.transformation),
-                sn.position = coalesce(b.position, sn.position),
-                sn.process = coalesce(b.process, sn.process),
-                sn.device = coalesce(b.device, sn.device),
-                sn.region = coalesce(b.region, sn.region),
-                sn.aggregation = coalesce(b.aggregation, sn.aggregation),
-                sn.orbit = coalesce(b.orbit, sn.orbit),
-                sn.population = coalesce(b.population, sn.population),
-                sn.object = coalesce(b.object, sn.object),
-                sn.geometry = coalesce(b.geometry, sn.geometry),
+                sn.grammar_parse_version = b.grammar_parse_version,
+                sn.validation_diagnostics_json = b.validation_diagnostics_json,
+                sn.physical_base = b.physical_base,
+                sn.geometric_base = b.geometric_base,
+                sn.subject = b.subject,
+                sn.component = b.component,
+                sn.coordinate = b.coordinate,
+                sn.transformation = b.transformation,
+                sn.position = b.position,
+                sn.process = b.process,
+                sn.device = b.device,
+                sn.region = b.region,
+                sn.aggregation = b.aggregation,
+                sn.orbit = b.orbit,
+                sn.population = b.population,
+                sn.object = b.object,
+                sn.geometry = b.geometry,
                 sn.llm_cost_refine_name = CASE WHEN sn.generate_name_count IS NOT NULL
                                              AND sn.generate_name_count > 0
                                              AND b.llm_cost IS NOT NULL
@@ -3445,6 +3445,53 @@ def write_standard_names(
         signal_names = [n for n in names if "signals" in (n.get("source_types") or [])]
 
         if dd_names:
+            from imas_codex.standard_names.workers import _is_attachment_consistent
+
+            pairing_rows = write_gc.query(
+                """
+                UNWIND $batch AS b
+                MATCH (sn:StandardName {id: b.id})
+                OPTIONAL MATCH (src:IMASNode {id: b.source_id})
+                OPTIONAL MATCH (src)-[:HAS_UNIT]->(du:Unit)
+                OPTIONAL MATCH (bound:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
+                RETURN b.id AS id, b.source_id AS source_id,
+                       coalesce(du.id, src.unit) AS dd_unit,
+                       sn.unit AS sn_unit,
+                       collect(DISTINCT bound.id) AS existing_dd_paths
+                """,
+                batch=[
+                    {"id": n["id"], "source_id": n["source_id"]}
+                    for n in dd_names
+                    if n.get("source_id")
+                ],
+            )
+            accepted_by_name: dict[str, list[str]] = {}
+            accepted_pairs: list[dict[str, str]] = []
+            for row in sorted(
+                pairing_rows, key=lambda item: (item["id"], item["source_id"])
+            ):
+                accepted_paths = accepted_by_name.setdefault(
+                    row["id"], sorted(row.get("existing_dd_paths") or [])
+                )
+                accepted, reason = _is_attachment_consistent(
+                    row["source_id"],
+                    row["id"],
+                    existing_sources=tuple(accepted_paths),
+                    dd_unit=row.get("dd_unit"),
+                    sn_unit=row.get("sn_unit"),
+                )
+                if accepted:
+                    accepted_pairs.append(
+                        {"id": row["id"], "source_id": row["source_id"]}
+                    )
+                    accepted_paths.append(row["source_id"])
+                else:
+                    logger.warning(
+                        "write_standard_names: rejected DD pairing %s → %s: %s",
+                        row["source_id"],
+                        row["id"],
+                        reason,
+                    )
             write_gc.query(
                 """
                 UNWIND $batch AS b
@@ -3452,11 +3499,7 @@ def write_standard_names(
                 MATCH (src:IMASNode {id: b.source_id})
                 MERGE (src)-[:HAS_STANDARD_NAME]->(sn)
                 """,
-                batch=[
-                    {"id": n["id"], "source_id": n["source_id"]}
-                    for n in dd_names
-                    if n.get("source_id")
-                ],
+                batch=accepted_pairs,
             )
         if signal_names:
             write_gc.query(
@@ -10319,17 +10362,15 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     :func:`reconcile_standard_name_source_paths` on the SN-side scalar. For
     every ``(s)-[:PRODUCED_NAME]->(sn)`` on a non-terminal name where
     ``(s)-[:FROM_DD_PATH]->(dd)`` and ``dd`` is SN-eligible
-    (``node_category ∈ SN_SOURCE_CATEGORIES``), MERGE the edge — unless the DD
-    path carries a *known* unit that ``units_agree`` rejects.
+    (``node_category ∈ SN_SOURCE_CATEGORIES``), MERGE the edge only when the
+    shared attachment guard admits the pair.
 
-    **Unit gate (drop-and-triage).** A pair is dropped only on a *known*
-    disagreement: the DD path has a ``HAS_UNIT`` edge whose unit canonically
-    conflicts with the name's. That means a wrong name or a wrong source, not
-    an edge to force, so it is dropped and logged for the unit-curation triage.
-    A DD path with **no** unit edge is a DD-completeness gap (nothing to
-    disagree with), not an attachment defect — it is attached. This is exactly
-    the predicate the soundness invariant in ``test_sn_edge_integrity`` asserts
-    on the existing edges, so edge and invariant stay self-consistent.
+    **Full gate (drop-and-triage).** Unit disagreement, semantic-shape conflict,
+    geometry-representation conflict, and sibling composition conflict all
+    reject a fresh projection. A DD path with **no** unit edge remains a DD
+    completeness gap rather than an attachment defect. Candidate order is
+    deterministic so the compose-style sibling rule retains the same accepted
+    representative on every pass.
 
     Idempotent: the match excludes pairs already carrying the edge, so a second
     run creates zero. Provenance stays the sole authority — no orphan edge is
@@ -10338,7 +10379,7 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     Returns dict: {edges_created, pairs_dropped}.
     """
     from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
-    from imas_codex.units.dd_unit_exceptions import units_agree
+    from imas_codex.standard_names.workers import _is_attachment_consistent
 
     own = gc is None
     client = GraphClient() if own else gc
@@ -10351,20 +10392,33 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
             WHERE dd.node_category IN $categories
               AND NOT (dd)-[:HAS_STANDARD_NAME]->(sn)
             OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
+            OPTIONAL MATCH (bound:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
             RETURN DISTINCT dd.id AS dd_path, sn.id AS sn_id, sn.name AS name,
-                   sn.unit AS sn_unit, du.id AS dd_unit
+                   sn.unit AS sn_unit, du.id AS dd_unit,
+                   collect(DISTINCT bound.id) AS existing_dd_paths
             """,
             terminal=_TERMINAL_NAME_STAGES,
             categories=list(SN_SOURCE_CATEGORIES),
         )
         attach: list[dict[str, str]] = []
         dropped: list[dict[str, Any]] = []
-        for r in rows:
-            dd_unit = r["dd_unit"]
-            if dd_unit and not units_agree(r["sn_unit"], dd_unit, r["dd_path"]):
-                dropped.append(r)
-            else:
+        accepted_by_name: dict[str, list[str]] = {}
+        for r in sorted(rows, key=lambda row: (row["sn_id"], row["dd_path"])):
+            accepted = accepted_by_name.setdefault(
+                r["sn_id"], sorted(r.get("existing_dd_paths") or [])
+            )
+            ok, reason = _is_attachment_consistent(
+                r["dd_path"],
+                r["sn_id"],
+                existing_sources=tuple(accepted),
+                dd_unit=r["dd_unit"],
+                sn_unit=r["sn_unit"],
+            )
+            if ok:
                 attach.append({"dd_path": r["dd_path"], "sn_id": r["sn_id"]})
+                accepted.append(r["dd_path"])
+            else:
+                dropped.append({**r, "reason": reason})
         if attach:
             client.query(
                 """
@@ -10386,17 +10440,14 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
             len(attach),
         )
     if dropped:
-        # Route unit-disagreeing pairs to the unit-curation triage: a
-        # disagreement is a wrong name or a wrong source, never an edge to
-        # force. Surface them (capped) so a curator can fix the name/source or
-        # record a DD-unit-bug exception in dd_unit_exceptions.yaml.
+        # A rejected pair is a wrong name or source, never an edge to force.
+        # Surface a bounded sample for attachment triage.
         logger.warning(
             "reconcile_standard_name_dd_edges: dropped %d provenance pair(s) on "
-            "SN↔DD unit disagreement (route to unit-curation triage). First few: %s",
+            "attachment consistency (route to attachment triage). First few: %s",
             len(dropped),
             "; ".join(
-                f"{d['name']}({d['sn_unit']}) ↮ {d['dd_path']}({d['dd_unit']})"
-                for d in dropped[:10]
+                f"{d['name']} ↮ {d['dd_path']} ({d['reason']})" for d in dropped[:10]
             ),
         )
     return {"edges_created": len(attach), "pairs_dropped": len(dropped)}
@@ -12271,6 +12322,7 @@ def persist_reviewed_name(
             WHERE sn.name_stage = 'drafted'
               AND (sn.claim_token = $token OR sn.claim_token IS NULL)
             RETURN coalesce(sn.chain_length, 0) AS chain_length,
+                   sn.validation_status AS validation_status,
                    sn.edit_status AS edit_status,
                    sn.edit_scope AS edit_scope,
                    sn.edit_override_edits AS edit_override_edits,
@@ -12310,6 +12362,27 @@ def persist_reviewed_name(
         target_stage = "exhausted"
     else:
         target_stage = "reviewed"
+
+    grammar_valid = True
+    grammar_issue: str | None = None
+    # Lightweight stage-decision unit fixtures may omit the graph status field;
+    # real Neo4j rows always carry the projected key, including when its value
+    # is null. The durable write path therefore always runs this gate.
+    if "validation_status" in rows[0]:
+        try:
+            from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+
+            parse_canonical_name(sn_id)
+        except Exception as exc:
+            grammar_valid = False
+            grammar_issue = f"[strict_grammar] {str(exc)[:240]}"
+            target_stage = "exhausted"
+            logger.warning(
+                "persist_reviewed_name: quarantining grammar-invalid name %s: %s",
+                sn_id,
+                exc,
+            )
+    grammar_identity = _parse_grammar(sn_id)
 
     # ── Cascade atomicity preflight (edit rename acceptance) ─────────────
     # A family/subtree rename edit accepts the ROOT and cascades every
@@ -12395,7 +12468,16 @@ def persist_reviewed_name(
                 sn.name_stage                 = $target_stage,
                 sn.edit_status                = $new_edit_status,
                 sn.claim_token                = null,
-                sn.claimed_at                 = null
+                sn.claimed_at                 = null,
+                sn.validation_status = CASE
+                  WHEN $grammar_valid THEN sn.validation_status
+                  ELSE 'quarantined'
+                END,
+                sn.validation_issues = CASE
+                  WHEN $grammar_issue IS NULL THEN sn.validation_issues
+                  ELSE coalesce(sn.validation_issues, []) + [$grammar_issue]
+                END
+            SET sn += $grammar_identity
             RETURN sn.id AS id
             """,
             id=sn_id,
@@ -12407,6 +12489,9 @@ def persist_reviewed_name(
             model=model,
             target_stage=target_stage,
             new_edit_status=new_edit_status,
+            grammar_valid=grammar_valid,
+            grammar_issue=grammar_issue,
+            grammar_identity=grammar_identity,
         )
 
     # A concurrent reviewer already transitioned this node out of 'drafted'

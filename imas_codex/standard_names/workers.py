@@ -2218,6 +2218,18 @@ _ORDINAL_POSITION_WORDS = frozenset(
 )
 
 
+#: IMAS-DD path segments for solid hardware cross-section representations.
+#: These are DD structure tokens, not a duplicate of ISN grammar vocabulary.
+_SOLID_GEOMETRY_PATH_SEGMENTS = frozenset(
+    {"thick_line", "outline", "rectangle", "oblique", "arcs_of_circle"}
+)
+
+#: Words used by IMAS-DD path segments for optical ray/path representations.
+#: The name-side comparison below derives its words from the parsed surface
+#: locus; this set remains a DD representation policy, not a grammar token list.
+_OPTICAL_GEOMETRY_PATH_WORDS = frozenset({"beam", "sight"})
+
+
 def _is_ordinal_point_sample(segment: str) -> bool:
     """True when *segment* names one ordinal sample of a single object.
 
@@ -2327,6 +2339,37 @@ def _name_locus_token(sn_name: str) -> str | None:
     if due >= 0:
         locus = locus[:due]
     return locus or None
+
+
+def _geometry_representation_conflicts(source_id: str, locus: str | None) -> bool:
+    """Return whether DD geometry shape and name locus assert opposite media.
+
+    A DD ``geometry/<solid primitive>/...`` subtree is a hardware conductor or
+    component cross-section.  A line-of-sight/beam subtree is an optical path.
+    Their scalar coordinate leaves commonly share unit ``m``, so dimensionality
+    cannot distinguish them.  Compare only DD-owned path representation tokens
+    with the words of the name's locus; no ISN vocabulary is enumerated here.
+    """
+    if not locus:
+        return False
+
+    segments = tuple(segment for segment in source_id.lower().split("/") if segment)
+    solid_path = any(
+        segment == "geometry"
+        and index + 1 < len(segments)
+        and segments[index + 1] in _SOLID_GEOMETRY_PATH_SEGMENTS
+        for index, segment in enumerate(segments)
+    )
+    optical_path = any(
+        _content_tokens(segment) & _OPTICAL_GEOMETRY_PATH_WORDS for segment in segments
+    )
+    locus_words = _content_tokens(locus)
+    solid_locus_words = set().union(
+        *(_content_tokens(segment) for segment in _SOLID_GEOMETRY_PATH_SEGMENTS)
+    )
+    optical_locus = bool(locus_words & _OPTICAL_GEOMETRY_PATH_WORDS)
+    solid_locus = bool(locus_words & solid_locus_words)
+    return (solid_path and optical_locus) or (optical_path and solid_locus)
 
 
 def _is_attachment_consistent(
@@ -2450,6 +2493,11 @@ def _is_attachment_consistent(
     # rejects on ZERO overlap when the locus is a recognised hardware token.
     locus = _name_locus_token(sn_name)
     if locus:
+        if _geometry_representation_conflicts(source_id, locus):
+            return False, (
+                f"geometry representation mismatch: path '{source_id}' and "
+                f"SN '{sn_name}' describe incompatible solid/optical geometry"
+            )
         locus_tokens = _content_tokens(locus)
         if locus_tokens & _HARDWARE_LOCUS_WORDS:
             path_tokens = _expanded_path_tokens(source_id)

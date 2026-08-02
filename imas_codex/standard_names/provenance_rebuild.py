@@ -562,7 +562,12 @@ def rebuild_provenance(
             elif name_id in history_sources:
                 summary["bound_from_history"] += 1
                 if not dry_run:
-                    bind_sources_exclusively(gc, name_id, history_sources[name_id])
+                    bind_sources_exclusively(
+                        gc,
+                        name_id,
+                        history_sources[name_id],
+                        enforce_consistency=False,
+                    )
                 continue
             elif name_id in pending_names:
                 # Real dd source pending in the queue — leave it for the
