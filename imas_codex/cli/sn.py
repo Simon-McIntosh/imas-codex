@@ -6276,6 +6276,8 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
         "status",
         "affected_path_count",
         "example_count",
+        "first_seen_at",
+        "last_seen_at",
         "observed_dd_version",
         "observed_value",
         "expected_value",

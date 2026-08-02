@@ -152,6 +152,8 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
         "kind": "unit_defect",
         "status": "triaged",
         "affected_path_count": 1,
+        "first_seen_at": "2026-08-01T10:00:00Z",
+        "last_seen_at": "2026-08-02T10:00:00Z",
         "observed_dd_version": "4.1.0",
         "observed_value": "1",
         "expected_value": "Pa",
@@ -203,6 +205,8 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
 
     assert result.exit_code == 0, result.output
     assert "source_paths:\n  - equilibrium/path" in result.output
+    assert "first_seen_at: 2026-08-01T10:00:00Z" in result.output
+    assert "last_seen_at: 2026-08-02T10:00:00Z" in result.output
     assert "observed_value: 1" in result.output
     assert "expected_value: Pa" in result.output
     assert "evidence_rule: unit_equals_expected" in result.output
