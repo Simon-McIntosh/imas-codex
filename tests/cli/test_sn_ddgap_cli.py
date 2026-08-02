@@ -72,12 +72,31 @@ def test_registry_sync_reports_provenance_counts() -> None:
             "matched_paths": 370,
             "dry_run": True,
         },
-    ):
-        result = CliRunner().invoke(sn, ["ddgap", "--sync-registry", "--dry-run"])
+    ) as sync:
+        result = CliRunner().invoke(sn, ["ddgap", "--sync-registry"])
 
     assert result.exit_code == 0, result.output
     assert "would sync 34 registry entries into 35 DD-gap facts" in result.output
     assert "450 path evidence link(s)" in result.output
+    sync.assert_called_once_with(dry_run=True)
+
+
+def test_registry_sync_mutation_requires_explicit_apply() -> None:
+    with patch(
+        "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
+        return_value={
+            "registry_entries": 34,
+            "reported": 35,
+            "relationships": 450,
+            "matched_paths": 370,
+            "dry_run": False,
+        },
+    ) as sync:
+        result = CliRunner().invoke(sn, ["ddgap", "--sync-registry", "--apply"])
+
+    assert result.exit_code == 0, result.output
+    assert "synced 34 registry entries into 35 DD-gap facts" in result.output
+    sync.assert_called_once_with(dry_run=False)
 
 
 def test_list_uses_exact_read_filters_and_does_not_call_writers() -> None:
@@ -131,10 +150,36 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
         "kind": "unit_defect",
         "status": "triaged",
         "affected_path_count": 1,
+        "observed_dd_version": "4.1.0",
+        "observed_value": "1",
+        "expected_value": "Pa",
+        "evidence_rule": "unit_equals_expected",
         "source_paths": ["equilibrium/path"],
         "affected_name_ids": ["plasma_pressure"],
-        "observations": [{"id": "observation:1"}],
-        "state_changes": [{"id": "change:1"}],
+        "observations": [
+            {
+                "id": "observation:1",
+                "source_path": "equilibrium/path",
+                "reporter": "unit-audit",
+                "reason": "measured twin declares pressure",
+                "observed_dd_version": "4.1.0",
+                "observed_value": "1",
+                "expected_value": "Pa",
+                "evidence_rule": "unit_equals_expected",
+                "first_observed_at": "2026-08-01T10:00:00Z",
+                "last_observed_at": "2026-08-02T10:00:00Z",
+            }
+        ],
+        "state_changes": [
+            {
+                "id": "change:1",
+                "from_status": "flagged",
+                "to_status": "triaged",
+                "actor": "operator@example.org",
+                "reason": "evidence checked against the declaration",
+                "changed_at": "2026-08-02T11:00:00Z",
+            }
+        ],
     }
     with (
         patch("imas_codex.standard_names.dd_gaps.get_dd_gap", return_value=fact),
@@ -149,7 +194,16 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
 
     assert result.exit_code == 0, result.output
     assert "source_paths:\n  - equilibrium/path" in result.output
-    assert "observations: 1" in result.output
+    assert "observed_value: 1" in result.output
+    assert "expected_value: Pa" in result.output
+    assert "evidence_rule: unit_equals_expected" in result.output
+    assert "observations (1):" in result.output
+    assert "reporter: unit-audit" in result.output
+    assert "reason: measured twin declares pressure" in result.output
+    assert "state_changes (1):" in result.output
+    assert "from_status: flagged" in result.output
+    assert "to_status: triaged" in result.output
+    assert "actor: operator@example.org" in result.output
     write.assert_not_called()
     transition.assert_not_called()
     reconcile.assert_not_called()
@@ -301,6 +355,7 @@ def test_release_reconcile_is_read_only_by_default(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     assert "dry-run: DD=4.1.1" in result.output
     assert "would resolve: dd_gap:equilibrium/path:unit_defect" in result.output
+    assert "stale registry entries: none" in result.output
     reconcile.assert_called_once_with(
         "4.1.1",
         {"equilibrium/path": {"unit": "Pa"}},
@@ -320,7 +375,7 @@ def test_release_reconcile_apply_and_conflict_reporting(tmp_path: Path) -> None:
         "manual_required": [],
         "unchanged": [],
         "conflicts": ["dd_gap:equilibrium/path:unit_defect"],
-        "stale_registry_entries": [],
+        "stale_registry_entries": ["dd_gap:equilibrium/path:unit_defect"],
         "dry_run": False,
     }
     with patch(
@@ -343,6 +398,8 @@ def test_release_reconcile_apply_and_conflict_reporting(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     assert "applied: DD=4.1.0" in result.output
     assert "conflict: dd_gap:equilibrium/path:unit_defect" in result.output
+    assert "stale registry entries requiring governed YAML cleanup:" in result.output
+    assert "  - dd_gap:equilibrium/path:unit_defect" in result.output
     reconcile.assert_called_once_with(
         "4.1.0",
         {"equilibrium/path": {"unit": "Pa"}},

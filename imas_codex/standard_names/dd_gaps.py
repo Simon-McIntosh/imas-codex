@@ -754,7 +754,21 @@ WHERE NOT $require_current OR version.is_current = true
 UNWIND $batch AS item
 MATCH (gap:DDGap {id: item.id})
 WHERE gap.status = item.expected_status
-WITH version, gap, gap.status AS from_status, item
+  AND coalesce(gap.path, '') = item.path
+  AND coalesce(gap.kind, '') = item.kind
+  AND coalesce(gap.observed_dd_version, '') = item.observed_dd_version
+  AND coalesce(gap.observed_value, '') = item.observed_value
+  AND coalesce(gap.expected_value, '') = item.expected_value
+  AND coalesce(gap.evidence_rule, '') = item.evidence_rule
+  AND coalesce(gap.reference_path, '') = item.reference_path
+  AND coalesce(gap.reference_value, '') = item.reference_value
+  AND coalesce(gap.registry_backend, '') = item.registry_backend
+OPTIONAL MATCH (source:IMASNode)-[:HAS_DD_GAP]->(gap)
+WITH version, gap, gap.status AS from_status, item,
+     collect(DISTINCT source.id) AS current_source_paths
+WHERE size(current_source_paths) = size(item.source_paths)
+  AND all(path IN current_source_paths WHERE path IN item.source_paths)
+  AND all(path IN item.source_paths WHERE path IN current_source_paths)
 SET gap.status = 'resolved_upstream',
     gap.triaged_at = datetime($changed_at),
     gap.triage_actor = $actor,
@@ -823,7 +837,11 @@ def reconcile_dd_gaps(
         OPTIONAL MATCH (node:IMASNode)-[:HAS_DD_GAP]->(gap)
         RETURN gap.id AS id, gap.path AS path, gap.kind AS kind,
                gap.status AS status, gap.expected_value AS expected_value,
+               gap.observed_dd_version AS observed_dd_version,
+               gap.observed_value AS observed_value,
                gap.evidence_rule AS evidence_rule,
+               gap.reference_path AS reference_path,
+               gap.reference_value AS reference_value,
                gap.registry_backend AS registry_backend,
                collect(DISTINCT node.id) AS source_paths
         ORDER BY id
@@ -831,7 +849,7 @@ def reconcile_dd_gaps(
         statuses=list(_RECONCILABLE_STATUSES),
     )
 
-    candidates: list[dict[str, str]] = []
+    candidates: list[dict[str, Any]] = []
     manual_required: list[dict[str, str]] = []
     unchanged: list[str] = []
     registry_candidates: set[str] = set()
@@ -891,6 +909,20 @@ def reconcile_dd_gaps(
                 {
                     "id": gap_id,
                     "expected_status": str(gap["status"]),
+                    "path": _optional_text(gap.get("path")) or "",
+                    "kind": kind,
+                    "observed_dd_version": _optional_text(
+                        gap.get("observed_dd_version")
+                    )
+                    or "",
+                    "observed_value": _optional_text(gap.get("observed_value")) or "",
+                    "expected_value": expected,
+                    "evidence_rule": rule,
+                    "reference_path": _optional_text(gap.get("reference_path")) or "",
+                    "reference_value": _optional_text(gap.get("reference_value")) or "",
+                    "registry_backend": _optional_text(gap.get("registry_backend"))
+                    or "",
+                    "source_paths": source_paths,
                     "validation_evidence": validation,
                 }
             )
@@ -995,7 +1027,13 @@ def list_dd_gaps(
         path_ids=clean_path_ids,
         name_ids=clean_name_ids,
     )
-    return [dict(row) for row in rows]
+    result = [dict(row) for row in rows]
+    for row in result:
+        row["source_paths"] = sorted(str(item) for item in row["source_paths"])
+        row["affected_name_ids"] = sorted(
+            str(item) for item in row["affected_name_ids"]
+        )
+    return sorted(result, key=lambda row: str(row["id"]))
 
 
 def get_dd_gap(
@@ -1078,8 +1116,18 @@ def get_dd_gap(
         gap_id=clean_id,
     )
     result = dict(facts[0])
-    result["observations"] = [dict(row) for row in observations]
-    result["state_changes"] = [dict(row) for row in state_changes]
+    result["source_paths"] = sorted(str(item) for item in result["source_paths"])
+    result["affected_name_ids"] = sorted(
+        str(item) for item in result["affected_name_ids"]
+    )
+    result["observations"] = sorted(
+        (dict(row) for row in observations),
+        key=lambda row: (str(row.get("first_observed_at") or ""), str(row["id"])),
+    )
+    result["state_changes"] = sorted(
+        (dict(row) for row in state_changes),
+        key=lambda row: (str(row.get("changed_at") or ""), str(row["id"])),
+    )
     return result
 
 

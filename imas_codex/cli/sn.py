@@ -6275,9 +6275,19 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
         "kind",
         "status",
         "affected_path_count",
+        "example_count",
+        "observed_dd_version",
+        "observed_value",
+        "expected_value",
+        "evidence_rule",
+        "reference_path",
+        "reference_value",
+        "triage_actor",
+        "triage_reason",
         "upstream_url",
         "registry_backend",
         "resolved_dd_version",
+        "validation_evidence",
     ):
         value = fact.get(key)
         if value is not None:
@@ -6287,6 +6297,43 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
         click.echo(f"{key}:")
         for value in values:
             click.echo(f"  - {value}")
+
+    observations = fact.get("observations") or []
+    click.echo(f"observations ({len(observations)}):")
+    for observation in observations:
+        click.echo(f"  - id: {observation['id']}")
+        for key in (
+            "source_path",
+            "reporter",
+            "reason",
+            "observed_dd_version",
+            "observed_value",
+            "expected_value",
+            "evidence_rule",
+            "first_observed_at",
+            "last_observed_at",
+        ):
+            value = observation.get(key)
+            if value is not None:
+                click.echo(f"    {key}: {value}")
+
+    state_changes = fact.get("state_changes") or []
+    click.echo(f"state_changes ({len(state_changes)}):")
+    for change in state_changes:
+        click.echo(f"  - id: {change['id']}")
+        for key in (
+            "from_status",
+            "to_status",
+            "actor",
+            "reason",
+            "changed_at",
+            "upstream_url",
+            "resolved_dd_version",
+            "validation_evidence",
+        ):
+            value = change.get(key)
+            if value is not None:
+                click.echo(f"    {key}: {value}")
 
 
 @sn.command("ddgap")
@@ -6340,7 +6387,7 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
     "--apply",
     "apply_changes",
     is_flag=True,
-    help="Apply an explicit transition or proven release reconciliation.",
+    help="Apply a transition, registry sync, or proven release reconciliation.",
 )
 @click.option(
     "--dry-run",
@@ -6476,8 +6523,6 @@ def sn_ddgap(
         if fact is None:
             raise click.ClickException(f"DD gap {show_id!r} was not found")
         _echo_dd_gap_fact(fact)
-        click.echo(f"observations: {len(fact['observations'])}")
-        click.echo(f"state_changes: {len(fact['state_changes'])}")
         return
 
     if triage_id is not None:
@@ -6564,6 +6609,13 @@ def sn_ddgap(
             click.echo(f"manual: {item['id']}: {item['reason']}")
         for gap_id in result["conflicts"]:
             click.echo(f"conflict: {gap_id}")
+        stale_registry_entries = result["stale_registry_entries"]
+        if stale_registry_entries:
+            click.echo("stale registry entries requiring governed YAML cleanup:")
+            for gap_id in stale_registry_entries:
+                click.echo(f"  - {gap_id}")
+        else:
+            click.echo("stale registry entries: none")
         return
 
     if sync_registry:
@@ -6585,15 +6637,16 @@ def sn_ddgap(
                     release_facts,
                 )
             )
-            or apply_changes
             or allow_noncurrent
         ):
             raise click.UsageError("--sync-registry received unrelated control options")
+        if apply_changes and dry_run:
+            raise click.UsageError("--apply and --dry-run are mutually exclusive")
         try:
-            result = sync_dd_unit_exception_gaps(dry_run=dry_run)
+            result = sync_dd_unit_exception_gaps(dry_run=not apply_changes)
         except ValueError as exc:
             raise click.ClickException(str(exc)) from exc
-        verb = "would sync" if dry_run else "synced"
+        verb = "synced" if apply_changes else "would sync"
         click.echo(
             f"{verb} {result['registry_entries']} registry entries into "
             f"{result['reported']} DD-gap facts; "

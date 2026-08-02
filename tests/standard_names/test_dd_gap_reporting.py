@@ -11,6 +11,7 @@ from imas_codex.standard_names.dd_gaps import (
     get_dd_gap,
     get_dd_gap_stats,
     list_dd_gaps,
+    reconcile_dd_gaps,
     sync_dd_unit_exception_gaps,
     write_dd_gaps,
 )
@@ -381,28 +382,52 @@ def test_get_exact_gap_includes_observations_and_state_history() -> None:
                 "path": "equilibrium/path",
                 "kind": "unit_defect",
                 "status": "triaged",
-                "source_paths": ["equilibrium/path"],
-                "affected_name_ids": ["plasma_pressure"],
-                "affected_path_count": 1,
+                "source_paths": ["equilibrium/z", "equilibrium/a"],
+                "affected_name_ids": ["z_pressure", "a_pressure"],
+                "affected_path_count": 2,
             }
         ],
-        [{"id": "observation:1", "reason": "measured twin declares Pa"}],
         [
             {
-                "id": "change:1",
+                "id": "observation:later",
+                "reason": "second observation",
+                "first_observed_at": "2026-08-02T10:00:00Z",
+            },
+            {
+                "id": "observation:first",
+                "reason": "measured twin declares Pa",
+                "first_observed_at": "2026-08-01T10:00:00Z",
+            },
+        ],
+        [
+            {
+                "id": "change:later",
+                "from_status": "triaged",
+                "to_status": "upstream_issue",
+                "changed_at": "2026-08-02T12:00:00Z",
+            },
+            {
+                "id": "change:first",
                 "from_status": "flagged",
                 "to_status": "triaged",
-            }
+                "changed_at": "2026-08-02T11:00:00Z",
+            },
         ],
     ]
 
     fact = get_dd_gap("dd_gap:equilibrium/path:unit_defect", gc=gc)
 
     assert fact is not None
-    assert fact["observations"] == [
-        {"id": "observation:1", "reason": "measured twin declares Pa"}
+    assert fact["source_paths"] == ["equilibrium/a", "equilibrium/z"]
+    assert fact["affected_name_ids"] == ["a_pressure", "z_pressure"]
+    assert [row["id"] for row in fact["observations"]] == [
+        "observation:first",
+        "observation:later",
     ]
-    assert fact["state_changes"][0]["to_status"] == "triaged"
+    assert [row["id"] for row in fact["state_changes"]] == [
+        "change:first",
+        "change:later",
+    ]
     assert gc.query.call_count == 3
     assert all(
         not any(
@@ -417,3 +442,85 @@ def test_get_gap_rejects_invalid_identity_before_graph_access() -> None:
     with pytest.raises(ValueError, match="exact 'dd_gap"):
         get_dd_gap("equilibrium/path", gc=gc)
     gc.query.assert_not_called()
+
+
+def test_list_normalizes_multi_value_and_row_order() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [
+        {
+            "id": "dd_gap:z/path:unit_defect",
+            "source_paths": ["z/path", "a/path"],
+            "affected_name_ids": ["z_name", "a_name"],
+        },
+        {
+            "id": "dd_gap:a/path:unit_defect",
+            "source_paths": ["b/path", "a/path"],
+            "affected_name_ids": ["b_name", "a_name"],
+        },
+    ]
+
+    rows = list_dd_gaps(gc=gc)
+
+    assert [row["id"] for row in rows] == [
+        "dd_gap:a/path:unit_defect",
+        "dd_gap:z/path:unit_defect",
+    ]
+    assert rows[0]["source_paths"] == ["a/path", "b/path"]
+    assert rows[1]["affected_name_ids"] == ["a_name", "z_name"]
+
+
+def test_reconcile_fails_closed_when_evidence_changes_after_preflight() -> None:
+    gap_id = "dd_gap:equilibrium/path:unit_defect"
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [{"id": "4.1.1", "is_current": True}],
+        [
+            {
+                "id": gap_id,
+                "path": "equilibrium/path",
+                "kind": "unit_defect",
+                "status": "upstream_issue",
+                "observed_dd_version": "4.1.0",
+                "observed_value": "1",
+                "expected_value": "Pa",
+                "evidence_rule": "unit_equals_expected",
+                "reference_path": "equilibrium/reference",
+                "reference_value": "Pa",
+                "source_paths": ["equilibrium/path"],
+                "registry_backend": None,
+            }
+        ],
+        [],
+    ]
+
+    result = reconcile_dd_gaps(
+        "4.1.1",
+        {"equilibrium/path": {"unit": "Pa"}},
+        gc=gc,
+    )
+
+    assert result["resolved"] == 0
+    assert result["conflicts"] == [gap_id]
+    mutation = gc.query.call_args_list[2]
+    query = mutation.args[0]
+    assert "coalesce(gap.observed_value, '') = item.observed_value" in query
+    assert "coalesce(gap.expected_value, '') = item.expected_value" in query
+    assert "coalesce(gap.evidence_rule, '') = item.evidence_rule" in query
+    assert "size(current_source_paths) = size(item.source_paths)" in query
+    assert mutation.kwargs["batch"] == [
+        {
+            "id": gap_id,
+            "expected_status": "upstream_issue",
+            "path": "equilibrium/path",
+            "kind": "unit_defect",
+            "observed_dd_version": "4.1.0",
+            "observed_value": "1",
+            "expected_value": "Pa",
+            "evidence_rule": "unit_equals_expected",
+            "reference_path": "equilibrium/reference",
+            "reference_value": "Pa",
+            "registry_backend": "",
+            "source_paths": ["equilibrium/path"],
+            "validation_evidence": ("4.1.1 raw unit equals 'Pa' on equilibrium/path"),
+        }
+    ]
