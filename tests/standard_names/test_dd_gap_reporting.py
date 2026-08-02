@@ -21,74 +21,170 @@ def _graph_context(mock_gc: MagicMock):
     return patch("imas_codex.standard_names.dd_gaps.GraphClient", graph)
 
 
+def _evidence(path: str = "equilibrium/path") -> dict[str, str]:
+    return {
+        "path": path,
+        "kind": "unit_defect",
+        "reason": "measured twin declares Pa",
+        "reporter": "unit-audit",
+        "observed_dd_version": "4.1.0",
+        "observed_value": "1",
+        "expected_value": "Pa",
+        "evidence_rule": "unit_equals_expected",
+    }
+
+
 def test_empty_report_is_a_noop() -> None:
     assert write_dd_gaps([]) == {
         "reported": 0,
         "relationships": 0,
+        "observations": 0,
         "ids": [],
         "dry_run": False,
     }
 
 
 def test_report_requires_evidence() -> None:
+    report = _evidence()
+    report["reason"] = ""
     with pytest.raises(ValueError, match="requires a reason"):
-        write_dd_gaps(
-            [{"path": "equilibrium/path", "kind": "unit_defect", "reason": ""}],
-            dry_run=True,
-        )
+        write_dd_gaps([report], dry_run=True)
 
 
 def test_report_kind_comes_from_generated_enum() -> None:
+    report = _evidence()
+    report["kind"] = "invented"
     with pytest.raises(ValueError, match="invalid DDGapKind"):
-        write_dd_gaps(
-            [{"path": "equilibrium/path", "kind": "invented", "reason": "evidence"}],
-            dry_run=True,
-        )
+        write_dd_gaps([report], dry_run=True)
 
 
-def test_duplicate_fact_aggregates_count_and_keeps_edge_argument() -> None:
+@pytest.mark.parametrize(
+    "field",
+    [
+        "status",
+        "registry_backend",
+        "upstream_url",
+        "resolved_dd_version",
+        "triage_actor",
+    ],
+)
+def test_automated_report_rejects_disposition_fields(field: str) -> None:
+    report = _evidence()
+    report[field] = "flagged"
+    with pytest.raises(ValueError, match="evidence-only"):
+        write_dd_gaps([report], dry_run=True)
+
+
+def test_reference_path_and_value_must_be_paired() -> None:
+    report = _evidence()
+    report["reference_path"] = "equilibrium/reference"
+    with pytest.raises(ValueError, match="must be supplied together"):
+        write_dd_gaps([report], dry_run=True)
+
+
+def test_duplicate_fact_preserves_distinct_observations() -> None:
     mock_gc = MagicMock()
-    mock_gc.query.return_value = []
-    reports = [
-        {
-            "path": "equilibrium/path",
-            "kind": "unit_defect",
-            "reason": "measured twin declares Pa",
-        },
-        {
-            "path": "equilibrium/path",
-            "kind": "unit_defect",
-            "reason": "documentation also says pressure",
-        },
+    mock_gc.query.side_effect = [
+        [{"id": "equilibrium/path"}],
+        [
+            {
+                "reported": 1,
+                "relationships": 1,
+                "observations": 2,
+                "ids": ["dd_gap:equilibrium/path:unit_defect"],
+            }
+        ],
+    ]
+    first = _evidence()
+    second = _evidence()
+    second["reason"] = "documentation also says pressure"
+
+    with _graph_context(mock_gc):
+        result = write_dd_gaps([first, second])
+
+    assert result["reported"] == 1
+    assert result["relationships"] == 1
+    assert result["observations"] == 2
+    write_call = mock_gc.query.call_args_list[1]
+    assert "DDGapObservation" in write_call.args[0]
+    assert "HAS_OBSERVATION" in write_call.args[0]
+    assert "gap.example_count = evidence_count" in write_call.args[0]
+    assert "datetime(b.observed_at) < gap.first_seen_at" in write_call.args[0]
+    assert "datetime(b.observed_at) > gap.last_seen_at" in write_call.args[0]
+    assert len({row["observation_id"] for row in write_call.kwargs["batch"]}) == 2
+
+
+def test_identical_evidence_has_stable_observation_identity() -> None:
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "equilibrium/path"}],
+        [
+            {
+                "reported": 1,
+                "relationships": 1,
+                "observations": 1,
+                "ids": ["dd_gap:equilibrium/path:unit_defect"],
+            }
+        ],
     ]
     with _graph_context(mock_gc):
-        result = write_dd_gaps(reports)
+        write_dd_gaps([_evidence(), _evidence()])
 
-    assert result["reported"] == 1
-    node_call, edge_call = mock_gc.query.call_args_list
-    assert node_call.kwargs["batch"][0]["example_count"] == 2
-    assert "coalesce(gap.example_count, 0) + b.example_count" in node_call.args[0]
-    assert "HAS_DD_GAP" in edge_call.args[0]
-    assert edge_call.kwargs["batch"][0]["reason"] == "documentation also says pressure"
+    batch = mock_gc.query.call_args_list[1].kwargs["batch"]
+    assert batch[0]["observation_id"] == batch[1]["observation_id"]
 
 
-def test_dry_run_never_opens_graph() -> None:
-    with patch("imas_codex.standard_names.dd_gaps.GraphClient") as graph:
-        result = write_dd_gaps(
-            [
-                {
-                    "path": "equilibrium/path",
-                    "kind": "unit_defect",
-                    "reason": "measured twin declares Pa",
-                }
-            ],
-            dry_run=True,
-        )
-    assert result["reported"] == 1
-    graph.assert_not_called()
+def test_missing_exact_paths_abort_before_any_write() -> None:
+    mock_gc = MagicMock()
+    mock_gc.query.return_value = [{"id": "equilibrium/existing"}]
+    reports = [_evidence("equilibrium/existing"), _evidence("equilibrium/missing")]
+
+    with (
+        _graph_context(mock_gc),
+        pytest.raises(ValueError, match="equilibrium/missing"),
+    ):
+        write_dd_gaps(reports)
+
+    assert mock_gc.query.call_count == 1
+    assert "RETURN node.id AS id" in mock_gc.query.call_args.args[0]
 
 
-def test_registry_inventory_is_one_fact_per_entry_plus_upstream_filing() -> None:
+def test_live_result_uses_actual_persisted_counts() -> None:
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "equilibrium/path"}],
+        [
+            {
+                "reported": 1,
+                "relationships": 0,
+                "observations": 1,
+                "ids": ["dd_gap:equilibrium/path:unit_defect"],
+            }
+        ],
+    ]
+    with _graph_context(mock_gc):
+        result = write_dd_gaps([_evidence()])
+
+    assert result["relationships"] == 0
+
+
+def test_dry_run_validates_paths_but_does_not_write() -> None:
+    mock_gc = MagicMock()
+    mock_gc.query.return_value = [{"id": "equilibrium/path"}]
+    with _graph_context(mock_gc):
+        result = write_dd_gaps([_evidence()], dry_run=True)
+
+    assert result == {
+        "reported": 1,
+        "relationships": 1,
+        "observations": 1,
+        "ids": ["dd_gap:equilibrium/path:unit_defect"],
+        "dry_run": True,
+    }
+    assert mock_gc.query.call_count == 1
+
+
+def test_registry_inventory_backfills_structured_unit_facts() -> None:
     entries = {
         "dd_unit_bugs": [
             {
@@ -108,29 +204,80 @@ def test_registry_inventory_is_one_fact_per_entry_plus_upstream_filing() -> None
             },
         ]
     }
-    paths = [
-        "equilibrium/pressure/reconstructed",
-        "launcher/direction/x",
-        "wall/energy_fluxes/kinetic/neutral/state/incident/values",
-    ]
+    paths = ["equilibrium/pressure/reconstructed", "launcher/direction/x"]
     with patch(
         "imas_codex.standard_names.dd_gaps.load_exceptions",
         return_value=entries,
     ):
-        nodes, relationships = _registry_inventory(paths)
+        nodes, relationships = _registry_inventory(paths, "4.1.0")
 
     assert len(nodes) == 3
     by_kind = {node["kind"]: node for node in nodes}
     assert by_kind["self_contradiction"]["status"] == "registered_exception"
     assert by_kind["unit_defect"]["registry_backend"] == "dd_unit_exceptions"
     assert by_kind["type_wiring"]["status"] == "upstream_issue"
-    assert by_kind["type_wiring"]["upstream_url"] == "https://example.invalid/dd-filing"
-    assert len(relationships) == 3
+    assert by_kind["type_wiring"]["upstream_url"] == (
+        "https://example.invalid/dd-filing"
+    )
+    assert all(row["observed_dd_version"] == "4.1.0" for row in relationships)
+    assert {row["observed_value"] for row in relationships} == {"1", "m"}
+    assert {row["expected_value"] for row in relationships} == {"Pa", "1"}
+    assert all(row["evidence_rule"] == "unit_equals_expected" for row in relationships)
 
 
-def test_registry_sync_is_idempotent_and_dry_run_is_read_only() -> None:
+def test_registry_sync_returns_persisted_counts() -> None:
     mock_gc = MagicMock()
-    mock_gc.query.return_value = [{"id": "launcher/direction/x"}]
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": "launcher/direction/x"}],
+        [
+            {
+                "reported": 1,
+                "relationships": 1,
+                "observations": 1,
+                "ids": ["dd_gap:*/direction/[xyz]:unit_defect"],
+            }
+        ],
+    ]
+    entries = {
+        "dd_unit_bugs": [
+            {
+                "path": "*/direction/[xyz]",
+                "dd_unit": "m",
+                "correct_unit": "1",
+                "reason": "unit-vector component is dimensionless",
+            }
+        ]
+    }
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+    ):
+        result = sync_dd_unit_exception_gaps()
+
+    assert result == {
+        "registry_entries": 1,
+        "reported": 1,
+        "relationships": 1,
+        "observations": 1,
+        "matched_paths": 1,
+        "dry_run": False,
+    }
+    sync_query = mock_gc.query.call_args_list[2].args[0]
+    assert "DDGapObservation" in sync_query
+    assert "ON CREATE SET observation.dd_gap_id" in sync_query
+    assert "SET observation.last_observed_at" not in sync_query
+
+
+def test_registry_dry_run_reads_version_and_paths_only() -> None:
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": "launcher/direction/x"}],
+    ]
     entries = {
         "dd_unit_bugs": [
             {
@@ -150,45 +297,10 @@ def test_registry_sync_is_idempotent_and_dry_run_is_read_only() -> None:
     ):
         result = sync_dd_unit_exception_gaps(dry_run=True)
 
-    assert result == {
-        "registry_entries": 1,
-        "reported": 1,
-        "relationships": 1,
-        "matched_paths": 1,
-        "dry_run": True,
-    }
-    assert mock_gc.query.call_count == 1
-
-
-def test_registry_write_uses_create_only_example_count() -> None:
-    mock_gc = MagicMock()
-    mock_gc.query.side_effect = [[{"id": "launcher/direction/x"}], [], []]
-    entries = {
-        "dd_unit_bugs": [
-            {
-                "path": "*/direction/[xyz]",
-                "dd_unit": "m",
-                "correct_unit": "1",
-                "reason": "unit-vector component is dimensionless",
-            }
-        ]
-    }
-    with (
-        _graph_context(mock_gc),
-        patch(
-            "imas_codex.standard_names.dd_gaps.load_exceptions",
-            return_value=entries,
-        ),
-    ):
-        sync_dd_unit_exception_gaps()
-
-    node_query = mock_gc.query.call_args_list[1].args[0]
-    edge_query = mock_gc.query.call_args_list[2].args[0]
-    assert "ON CREATE SET" in node_query
-    assert "gap.example_count = 1" in node_query
-    assert "gap.example_count =" not in node_query.split("SET gap.path", 1)[1]
-    assert "ON CREATE SET report.observed_at" in edge_query
-    assert "report.observed_at" not in edge_query.split("SET report.reason", 1)[1]
+    assert result["dry_run"] is True
+    assert result["relationships"] == 1
+    assert result["observations"] == 1
+    assert mock_gc.query.call_count == 2
 
 
 def test_status_counts_are_grouped_on_both_axes() -> None:

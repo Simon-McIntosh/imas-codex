@@ -247,6 +247,21 @@ enums:
       resolved_upstream:
         description: A published DD version corrected the defect.
 
+  DDGapEvidenceRule:
+    description: >-
+      Machine-readable predicate asserted by one DD-gap observation. Only
+      predicates with kind-specific release validators may be reconciled
+      automatically; every other predicate remains manual evidence.
+    permissible_values:
+      unit_equals_expected:
+        description: The raw published DD unit must equal expected_value.
+      declaration_present:
+        description: A named declaration absent from the observed DD must exist.
+      value_equals_expected:
+        description: A named declaration must equal expected_value.
+      reference_value_matches:
+        description: The declaration must equal the named reference path value.
+
   StandardNameKind:
     description: >-
       Entry kind for standard names — the structural classification of the
@@ -1972,6 +1987,86 @@ classes:
         range: datetime
         description: When this observation was recorded.
 
+  DDGapObservation:
+    description: >-
+      Immutable evidence payload for one distinct source, rule, value, and
+      argument. Re-reporting identical evidence updates last_observed_at without
+      erasing the first observation; changed evidence creates a new node.
+    class_uri: sn:DDGapObservation
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Content-addressed identity: dd_gap_observation:{sha256}"
+      dd_gap_id:
+        required: true
+        description: DDGap fact observed by this evidence record.
+      source_path:
+        required: true
+        description: Exact IMASNode path that supplied the evidence.
+      reason:
+        required: true
+        description: Evidence-backed argument supplied by the reporter.
+      reporter:
+        required: true
+        description: Audit, pipeline seat, model, or human that reported the evidence.
+      observed_dd_version:
+        description: Exact published DD version in which the value was observed.
+      observed_value:
+        description: Raw DD declaration observed by the reporter.
+      expected_value:
+        description: Value the evidence says a corrected DD should publish.
+      evidence_rule:
+        range: DDGapEvidenceRule
+        description: Structured predicate supporting release reconciliation.
+      reference_path:
+        description: Optional exact DD path used as comparison evidence.
+      reference_value:
+        description: Raw value observed at reference_path.
+      first_observed_at:
+        required: true
+        range: datetime
+        description: When this exact evidence payload was first observed.
+      last_observed_at:
+        required: true
+        range: datetime
+        description: When this exact evidence payload was most recently observed.
+
+  DDGapStateChange:
+    description: >-
+      Immutable audit event created by a successful compare-and-set DD-gap
+      lifecycle transition.
+    class_uri: sn:DDGapStateChange
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Unique identity: dd_gap_state_change:{uuid}"
+      dd_gap_id:
+        required: true
+        description: DDGap fact whose state changed.
+      from_status:
+        required: true
+        range: DDGapStatus
+      to_status:
+        required: true
+        range: DDGapStatus
+      actor:
+        required: true
+        description: Human authority or governed release reconciler applying the change.
+      reason:
+        required: true
+        description: Evidence-backed justification for the lifecycle change.
+      changed_at:
+        required: true
+        range: datetime
+      upstream_url:
+        description: HTTPS upstream issue or change URL attached by this transition.
+      resolved_dd_version:
+        description: Exact published DD version proven to correct the fact.
+      validation_evidence:
+        description: Structured or human validation result proving a resolution.
+
   DDGap:
     description: >-
       Records evidence that a Data Dictionary path or path pattern carries a
@@ -2008,9 +2103,35 @@ classes:
       last_seen_at:
         description: When the fact was most recently reported.
         range: datetime
+      observed_dd_version:
+        description: Exact DD version from the most recently observed evidence payload.
+      observed_value:
+        description: Raw declaration from the most recently observed evidence payload.
+      expected_value:
+        description: Expected corrected declaration from the latest evidence payload.
+      evidence_rule:
+        range: DDGapEvidenceRule
+        description: Latest structured predicate available for reconciliation.
+      reference_path:
+        description: Optional exact DD comparison path from the latest evidence.
+      reference_value:
+        description: Raw declaration observed at reference_path.
       triaged_at:
         description: When a human last dispositioned the fact.
         range: datetime
+      triage_actor:
+        description: Human authority that most recently triaged the fact.
+      triage_reason:
+        description: Evidence-backed reason for the most recent human disposition.
+      status_changed_at:
+        description: When the lifecycle status most recently changed.
+        range: datetime
+      status_changed_by:
+        description: Human authority or governed reconciler that changed the status.
+      status_change_reason:
+        description: Reason recorded with the most recent lifecycle change.
+      validation_evidence:
+        description: Validation result supporting resolved_upstream.
       upstream_url:
         description: Upstream DD issue or change URL, when filed.
       resolved_dd_version:
@@ -2022,6 +2143,18 @@ classes:
       affected_path_count:
         description: Number of current IMASNode paths matched by a registry pattern.
         range: integer
+      observations:
+        description: Durable history of distinct evidence payloads for this fact.
+        multivalued: true
+        range: DDGapObservation
+        annotations:
+          relationship_type: HAS_OBSERVATION
+      state_changes:
+        description: Immutable compare-and-set lifecycle transition history.
+        multivalued: true
+        range: DDGapStateChange
+        annotations:
+          relationship_type: HAS_STATE_CHANGE
 
   StandardNameSource:
     description: >-
