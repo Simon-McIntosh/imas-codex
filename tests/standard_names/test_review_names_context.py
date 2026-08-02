@@ -244,7 +244,6 @@ def test_review_pydantic_accepts_null_suggestion() -> None:
         "scores": {"grammar": 20, "semantic": 18, "convention": 19, "completeness": 18},
         "reasoning": "Clean grammar, accurate physics.",
         "revised_name": None,
-        "revised_fields": None,
         "suggested_name": None,
         "suggestion_justification": None,
         "issues": [],
@@ -264,7 +263,6 @@ def test_review_pydantic_accepts_populated_suggestion() -> None:
         "scores": {"grammar": 8, "semantic": 14, "convention": 6, "completeness": 12},
         "reasoning": "Symbol abbreviation; missing locus distinguisher.",
         "revised_name": "electron_temperature_core",
-        "revised_fields": None,
         "suggested_name": "electron_temperature_core",
         "suggestion_justification": (
             "Original used the symbol abbreviation 'Te'; cluster siblings "

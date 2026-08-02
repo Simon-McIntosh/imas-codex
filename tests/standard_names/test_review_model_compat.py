@@ -137,6 +137,58 @@ def test_sanitize_content_large_review_batch() -> None:
     assert parsed["reviews"][0]["id"] == "plasma_current"
 
 
+def test_name_only_wire_schema_has_no_open_ended_revised_fields() -> None:
+    """The provider-facing name-review schema stays closed and score-canonical."""
+    from imas_codex.discovery.base.llm import _to_json_schema_format
+    from imas_codex.standard_names.models import (
+        StandardNameQualityReviewNameOnlyBatch,
+    )
+
+    wire_schema = _to_json_schema_format(StandardNameQualityReviewNameOnlyBatch)[
+        "json_schema"
+    ]["schema"]
+    compact_schema = json.dumps(wire_schema, separators=(",", ":"), sort_keys=True)
+    review_schema = wire_schema["$defs"]["StandardNameQualityReviewNameOnly"]
+    review_properties = review_schema["properties"]
+
+    assert "revised_fields" not in compact_schema
+    assert set(review_properties) == {
+        "source_id",
+        "standard_name",
+        "scores",
+        "comments",
+        "reasoning",
+        "revised_name",
+        "suggested_name",
+        "suggestion_justification",
+        "issues",
+        "dd_gaps",
+    }
+    assert set(review_schema["required"]) == {
+        "source_id",
+        "standard_name",
+        "scores",
+        "reasoning",
+    }
+    assert "verdict" not in review_properties
+    assert review_properties["dd_gaps"]["items"]["$ref"].endswith("/DDGapEvidence")
+
+    def open_ended_objects(value):
+        if isinstance(value, dict):
+            if (
+                value.get("type") == "object"
+                and value.get("additionalProperties") is True
+            ):
+                yield value
+            for child in value.values():
+                yield from open_ended_objects(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from open_ended_objects(child)
+
+    assert list(open_ended_objects(wire_schema)) == []
+
+
 # ---------------------------------------------------------------------------
 # 3. Review pipeline acall_llm_structured invocation — no explicit temperature
 # ---------------------------------------------------------------------------

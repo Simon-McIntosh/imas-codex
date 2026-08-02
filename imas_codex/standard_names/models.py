@@ -1341,9 +1341,6 @@ class StandardNameQualityReviewNameOnly(BaseModel):
     revised_name: str | None = Field(
         default=None, description="Suggested revised name, if any"
     )
-    revised_fields: dict[str, Any] | None = Field(
-        default=None, description="Revised grammar fields"
-    )
     suggested_name: str | None = Field(
         default=None,
         description=(

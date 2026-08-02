@@ -1797,8 +1797,9 @@ def _match_reviews_to_entries(
             revised_entry["_original_id"] = original["id"]  # preserve real SN id
             revised_entry["_suggested_name"] = revised_name  # record suggestion
             # do NOT overwrite revised_entry["id"] — keeps MATCH on SN node correct
-            if review.revised_fields:
-                for key, value in review.revised_fields.items():
+            revised_fields = getattr(review, "revised_fields", None)
+            if revised_fields:
+                for key, value in revised_fields.items():
                     if key in revised_entry:
                         revised_entry[key] = value
             scored.append(revised_entry)

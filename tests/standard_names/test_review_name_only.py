@@ -91,7 +91,6 @@ def _make_review(score_cls, source_id: str, name: str, **scores: int):
         scores=score_cls(**scores),
         reasoning="test",
         revised_name=None,
-        revised_fields=None,
     )
 
 
