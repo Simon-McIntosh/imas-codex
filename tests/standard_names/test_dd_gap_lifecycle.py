@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+import yaml
 
 from imas_codex.standard_names.dd_gaps import (
     DDGapTransitionConflict,
@@ -14,6 +16,34 @@ from imas_codex.standard_names.dd_gaps import (
 )
 
 _ANY_EVIDENCE_TOKEN = "dd-gap-evidence:validation-only"
+
+
+def test_schema_separates_identity_history_from_lifecycle_history() -> None:
+    schema_path = Path(__file__).parents[2] / "imas_codex/schemas/standard_name.yaml"
+    schema = yaml.safe_load(schema_path.read_text())
+    identity = schema["classes"]["DDGapIdentityChange"]["attributes"]
+    gap = schema["classes"]["DDGap"]["attributes"]
+
+    assert set(identity) == {
+        "id",
+        "dd_gap_id",
+        "old_id",
+        "new_id",
+        "old_kind",
+        "new_kind",
+        "changed_at",
+        "changed_by",
+        "reason",
+    }
+    assert identity["id"]["identifier"] is True
+    assert identity["old_kind"]["range"] == "DDGapKind"
+    assert identity["new_kind"]["range"] == "DDGapKind"
+    assert identity["changed_at"]["range"] == "datetime"
+    assert gap["identity_changes"]["range"] == "DDGapIdentityChange"
+    assert gap["identity_changes"]["annotations"]["relationship_type"] == (
+        "HAS_IDENTITY_CHANGE"
+    )
+    assert gap["state_changes"]["range"] == "DDGapStateChange"
 
 
 def _transition_row(status: str) -> list[dict[str, str]]:

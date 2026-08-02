@@ -2,15 +2,22 @@
 
 from __future__ import annotations
 
+import copy
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
+from neo4j.exceptions import ConstraintError
 
 from imas_codex.standard_names.dd_gaps import (
     DDGapRegistrySyncConflict,
+    _canonical_graph_value,
     _evidence_token,
     _registry_inventory,
+    _registry_migration_parameters,
     _registry_sync_plan,
+    _registry_sync_token,
+    _require_online_ddgap_identity_constraint,
     get_dd_gap,
     get_dd_gap_stats,
     list_dd_gaps,
@@ -50,7 +57,8 @@ def _registry_fact(
     backend: str | None = "dd_unit_exceptions",
     upstream_url: str | None = None,
 ) -> dict[str, object]:
-    return {
+    paths = source_paths if source_paths is not None else ["launcher/direction/x"]
+    gap_properties = {
         "id": gap_id,
         "path": path,
         "kind": kind,
@@ -68,15 +76,96 @@ def _registry_fact(
         "first_seen_at": "2026-07-01T00:00:00Z",
         "last_seen_at": "2026-08-01T00:00:00Z",
         "example_count": 1,
+        "affected_path_count": len(paths),
         "observed_dd_version": "4.1.0",
         "observed_value": "m",
         "expected_value": "1",
         "evidence_rule": "unit_equals_expected",
         "reference_path": None,
         "reference_value": None,
-        "source_paths": source_paths or ["launcher/direction/x"],
-        "observation_ids": ["observation:1"],
-        "state_change_ids": ["change:1"],
+    }
+    path_links = [
+        {
+            "source_id": source_path,
+            "relationship_properties": {
+                "reason": "curated registry entry",
+                "reporter": "registry_backfill",
+            },
+        }
+        for source_path in paths
+    ]
+    observation_records = [
+        {
+            "id": "observation:1",
+            "node_properties": {
+                "id": "observation:1",
+                "dd_gap_id": gap_id,
+                "source_path": paths[0] if paths else path,
+                "reason": "curated registry entry",
+                "reporter": "registry_backfill",
+            },
+            "relationship_properties": {},
+        }
+    ]
+    state_change_records = [
+        {
+            "id": "change:1",
+            "node_properties": {
+                "id": "change:1",
+                "dd_gap_id": gap_id,
+                "from_status": "flagged",
+                "to_status": status,
+                "changed_by": "operator@example.org",
+            },
+            "relationship_properties": {},
+        }
+    ]
+    incident_links = [
+        {
+            "relationship_id": f"path-link:{index}",
+            "relationship_type": "HAS_DD_GAP",
+            "relationship_properties": item["relationship_properties"],
+            "outgoing": False,
+            "other_id": item["source_id"],
+            "other_labels": ["IMASNode"],
+        }
+        for index, item in enumerate(path_links)
+    ]
+    incident_links.extend(
+        [
+            {
+                "relationship_id": "observation-link:1",
+                "relationship_type": "HAS_OBSERVATION",
+                "relationship_properties": {},
+                "outgoing": True,
+                "other_id": "observation:1",
+                "other_labels": ["DDGapObservation"],
+            },
+            {
+                "relationship_id": "state-link:1",
+                "relationship_type": "HAS_STATE_CHANGE",
+                "relationship_properties": {},
+                "outgoing": True,
+                "other_id": "change:1",
+                "other_labels": ["DDGapStateChange"],
+            },
+        ]
+    )
+    return {
+        "id": gap_id,
+        "path": path,
+        "kind": kind,
+        "registry_backend": backend,
+        "upstream_url": upstream_url,
+        "gap_properties": gap_properties,
+        "source_paths": paths,
+        "path_links": path_links,
+        "observation_records": observation_records,
+        "state_change_records": state_change_records,
+        "identity_change_records": [],
+        "incident_links": incident_links,
+        "direct_name_links": [],
+        "source_name_links": [],
     }
 
 
@@ -88,6 +177,46 @@ def _transaction(mock_gc: MagicMock, side_effect: list[object]):
     session.begin_transaction.return_value = transaction
     transaction.run.side_effect = side_effect
     return transaction
+
+
+def _online_constraint(mock_gc: MagicMock) -> list[list[dict[str, object]]]:
+    mock_gc.schema.constraint_statements.return_value = [
+        "CREATE CONSTRAINT ddgap_id IF NOT EXISTS FOR (n:DDGap) REQUIRE n.id IS UNIQUE"
+    ]
+    return [
+        [
+            {
+                "name": "ddgap_id",
+                "type": "UNIQUENESS",
+                "labelsOrTypes": ["DDGap"],
+                "properties": ["id"],
+                "ownedIndex": "ddgap_id",
+            }
+        ],
+        [{"name": "ddgap_id", "state": "ONLINE"}],
+    ]
+
+
+def _reclassification_case() -> tuple[str, str, dict[str, object], dict[str, object]]:
+    pattern = "spi/injector/*_gas/flow_rate"
+    source_path = "spi/injector/fragmentation_gas/flow_rate"
+    old = _registry_fact(
+        gap_id=f"dd_gap:{pattern}:unit_defect",
+        path=pattern,
+        source_paths=[source_path],
+    )
+    entries = {
+        "dd_unit_bugs": [
+            {
+                "path": pattern,
+                "dd_unit": "s^-1",
+                "correct_unit": "Pa.m^3.s^-1",
+                "correct_in_graph": True,
+                "reason": "flow rate carries pressure-volume throughput",
+            }
+        ]
+    }
+    return pattern, source_path, old, entries
 
 
 def test_empty_report_is_a_noop() -> None:
@@ -303,8 +432,8 @@ def test_registry_sync_returns_persisted_counts() -> None:
             [
                 {
                     "id": "dd_gap:*/direction/[xyz]:unit_defect",
-                    "exists": True,
-                    "kind": "unit_defect",
+                    "exact_count": 1,
+                    "kinds": ["unit_defect"],
                     "source_paths": ["launcher/direction/x"],
                 }
             ],
@@ -387,6 +516,114 @@ def test_registry_dry_run_reads_version_and_paths_only() -> None:
     mock_gc.session.assert_not_called()
 
 
+def test_registry_apply_requires_schema_declared_online_identity_constraint() -> None:
+    gc = MagicMock()
+    gc.schema.constraint_statements.return_value = [
+        "CREATE CONSTRAINT ddgap_id IF NOT EXISTS FOR (n:DDGap) REQUIRE n.id IS UNIQUE"
+    ]
+    gc.query.return_value = []
+
+    with pytest.raises(DDGapRegistrySyncConflict, match="ddgap_id.*missing"):
+        _require_online_ddgap_identity_constraint(gc)
+
+    call = gc.query.call_args
+    assert call.kwargs["constraint_name"] == "ddgap_id"
+    assert "SHOW CONSTRAINTS" in call.args[0]
+    assert "CREATE CONSTRAINT" not in call.args[0]
+
+
+def test_registry_apply_rejects_nononline_constraint_index() -> None:
+    gc = MagicMock()
+    gc.schema.constraint_statements.return_value = [
+        "CREATE CONSTRAINT ddgap_id IF NOT EXISTS FOR (n:DDGap) REQUIRE n.id IS UNIQUE"
+    ]
+    gc.query.side_effect = [
+        [
+            {
+                "name": "ddgap_id",
+                "type": "UNIQUENESS",
+                "labelsOrTypes": ["DDGap"],
+                "properties": ["id"],
+                "ownedIndex": "ddgap_id",
+            }
+        ],
+        [{"name": "ddgap_id", "state": "POPULATING"}],
+    ]
+
+    with pytest.raises(DDGapRegistrySyncConflict, match="not ONLINE"):
+        _require_online_ddgap_identity_constraint(gc)
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda fact: fact["observation_records"][0]["node_properties"].update(
+            {"reason": "concurrently revised observation"}
+        ),
+        lambda fact: fact["state_change_records"][0]["node_properties"].update(
+            {"reason": "concurrently revised state evidence"}
+        ),
+        lambda fact: fact["path_links"][0]["relationship_properties"].update(
+            {"reason": "concurrently revised path evidence"}
+        ),
+    ],
+    ids=["observation-property", "state-property", "relationship-property"],
+)
+def test_registry_sync_token_covers_complete_evidence_graph(mutation) -> None:
+    fact = _registry_fact()
+    changed = copy.deepcopy(fact)
+    mutation(changed)
+
+    assert _registry_sync_token(changed) != _registry_sync_token(fact)
+
+
+def test_registry_sync_token_serializes_temporal_values_canonically() -> None:
+    observed_at = datetime(2026, 8, 2, 10, 15, tzinfo=UTC)
+
+    assert _canonical_graph_value(observed_at) == "2026-08-02T10:15:00+00:00"
+
+
+def test_registry_migration_cas_compares_complete_graph_snapshots() -> None:
+    target = {
+        "id": "dd_gap:pattern:self_contradiction",
+        "path": "pattern",
+        "kind": "self_contradiction",
+        "registry_backend": "dd_unit_exceptions",
+        "affected_path_count": 1,
+        "observed_dd_version": "4.1.0",
+        "observed_value": "1",
+        "expected_value": "Pa",
+        "evidence_rule": "unit_equals_expected",
+    }
+    old = _registry_fact(
+        gap_id="dd_gap:pattern:unit_defect",
+        path="pattern",
+        source_paths=["exact/path"],
+    )
+    plan = _registry_sync_plan(
+        [target],
+        [{"gap_id": target["id"], "source_path": "exact/path"}],
+        [old],
+    )
+
+    params = _registry_migration_parameters(plan["reclassify"][0])
+
+    assert params["expected_gap_properties"] == old["gap_properties"]
+    assert params["expected_observation_records"] == old["observation_records"]
+    assert params["expected_state_change_records"] == old["state_change_records"]
+    assert params["expected_path_links"] == old["path_links"]
+    assert params["expected_incident_links"] == old["incident_links"]
+    assert params["expected_direct_name_links"] == old["direct_name_links"]
+    assert params["expected_source_name_links"] == old["source_name_links"]
+    assert params["observation_rekeys"] == [
+        {
+            "old_id": "observation:1",
+            "new_id": params["observation_rekeys"][0]["new_id"],
+        }
+    ]
+    assert params["observation_rekeys"][0]["new_id"].startswith("dd_gap_observation:")
+
+
 def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
     path_pattern = "spi/injector/*_gas/flow_rate"
     old_id = f"dd_gap:{path_pattern}:unit_defect"
@@ -400,8 +637,8 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
         path=path_pattern,
         source_paths=source_paths,
     )
-    old["observed_value"] = "s^-1"
-    old["expected_value"] = "Pa.m^3.s^-1"
+    old["gap_properties"]["observed_value"] = "s^-1"  # type: ignore[index]
+    old["gap_properties"]["expected_value"] = "Pa.m^3.s^-1"  # type: ignore[index]
     entries = {
         "dd_unit_bugs": [
             {
@@ -418,6 +655,7 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
         [{"id": "4.1.0"}],
         [{"id": p} for p in source_paths],
         [old],
+        *_online_constraint(mock_gc),
     ]
     transaction = _transaction(
         mock_gc,
@@ -428,8 +666,9 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
                     "id": new_id,
                     "source_path_count": 2,
                     "observation_count": 1,
-                    "state_change_count": 2,
-                    "state_change_id": "change:registry-reclassification",
+                    "state_change_count": 1,
+                    "identity_change_count": 1,
+                    "identity_change_id": "identity-change:registry-reclassification",
                 }
             ],
             [
@@ -443,12 +682,12 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
             [
                 {
                     "id": new_id,
-                    "exists": True,
-                    "kind": "self_contradiction",
+                    "exact_count": 1,
+                    "kinds": ["self_contradiction"],
                     "source_paths": source_paths,
                 }
             ],
-            [],
+            [{"id": old_id, "exact_count": 0}],
         ],
     )
 
@@ -479,23 +718,28 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
     migration = transaction.run.call_args_list[1]
     assert migration.kwargs["old_id"] == old_id
     assert migration.kwargs["new_id"] == new_id
-    assert migration.kwargs["expected_status"] == "registered_exception"
     assert migration.kwargs["target_kind"] == "self_contradiction"
-    assert migration.kwargs["expected_source_paths"] == source_paths
-    assert migration.kwargs["expected_observation_ids"] == ["observation:1"]
-    assert migration.kwargs["expected_state_change_ids"] == ["change:1"]
+    assert migration.kwargs["expected_gap_properties"]["status"] == (
+        "registered_exception"
+    )
+    assert [
+        item["source_id"] for item in migration.kwargs["expected_path_links"]
+    ] == source_paths
+    assert migration.kwargs["expected_observation_records"][0]["id"] == (
+        "observation:1"
+    )
+    assert migration.kwargs["expected_state_change_records"][0]["id"] == "change:1"
     query = migration.args[0]
     assert "SET gap.id = $new_id" in query
     assert "SET item.dd_gap_id" not in query
-    assert "authoritative registry identity changed classification from" in query
+    assert "DDGapIdentityChange" in query
+    assert "HAS_IDENTITY_CHANGE" in query
+    assert "CREATE (gap)-[:HAS_STATE_CHANGE]" not in query
     assert "DELETE" not in query
-    set_clause = query.split("SET gap.id = $new_id", 1)[1].split("FOREACH", 1)[0]
+    set_clause = query.split("SET gap.id = $new_id", 1)[1].split("CREATE", 1)[0]
     assert "first_seen_at" not in set_clause
     assert "triaged_at" not in set_clause
     assert "resolved_dd_version" not in set_clause
-    assert _evidence_token(old) != _evidence_token(
-        {**old, "id": new_id, "kind": "self_contradiction"}
-    )
     transaction.commit.assert_called_once_with()
     transaction.rollback.assert_not_called()
 
@@ -671,7 +915,13 @@ def test_registry_sync_rejects_concurrent_lifecycle_drift_and_rolls_back() -> No
         path=pattern,
         source_paths=["spi/injector/fragmentation_gas/flow_rate"],
     )
-    changed = {**old, "status": "resolved_upstream"}
+    changed = {
+        **old,
+        "gap_properties": {
+            **old["gap_properties"],  # type: ignore[dict-item]
+            "status": "resolved_upstream",
+        },
+    }
     entries = {
         "dd_unit_bugs": [
             {
@@ -688,6 +938,50 @@ def test_registry_sync_rejects_concurrent_lifecycle_drift_and_rolls_back() -> No
         [{"id": "4.1.0"}],
         [{"id": "spi/injector/fragmentation_gas/flow_rate"}],
         [old],
+        *_online_constraint(mock_gc),
+    ]
+    transaction = _transaction(mock_gc, [[changed]])
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(DDGapRegistrySyncConflict, match="changed after preflight"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+    assert transaction.run.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        lambda fact: fact["observation_records"][0]["node_properties"].update(
+            {"reason": "changed after preflight"}
+        ),
+        lambda fact: fact["state_change_records"][0]["node_properties"].update(
+            {"reason": "changed after preflight"}
+        ),
+        lambda fact: fact["path_links"][0]["relationship_properties"].update(
+            {"reporter": "changed-after-preflight"}
+        ),
+    ],
+    ids=["observation-property", "state-property", "relationship-property"],
+)
+def test_registry_sync_rejects_concurrent_evidence_graph_drift(mutation) -> None:
+    _, source_path, old, entries = _reclassification_case()
+    changed = copy.deepcopy(old)
+    mutation(changed)
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": source_path}],
+        [old],
+        *_online_constraint(mock_gc),
     ]
     transaction = _transaction(mock_gc, [[changed]])
 
@@ -729,6 +1023,7 @@ def test_registry_sync_rolls_back_when_atomic_rewrite_matches_nothing() -> None:
         [{"id": "4.1.0"}],
         [{"id": "spi/injector/fragmentation_gas/flow_rate"}],
         [old],
+        *_online_constraint(mock_gc),
     ]
     transaction = _transaction(mock_gc, [[old], []])
 
@@ -739,6 +1034,84 @@ def test_registry_sync_rolls_back_when_atomic_rewrite_matches_nothing() -> None:
             return_value=entries,
         ),
         pytest.raises(DDGapRegistrySyncConflict, match="no longer matches"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+
+
+def test_registry_sync_rolls_back_on_concurrent_target_constraint_violation() -> None:
+    _, source_path, old, entries = _reclassification_case()
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": source_path}],
+        [old],
+        *_online_constraint(mock_gc),
+    ]
+    transaction = _transaction(
+        mock_gc,
+        [[old], ConstraintError("concurrent target id violates DDGap uniqueness")],
+    )
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(ConstraintError, match="concurrent target id"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+
+
+def test_registry_sync_rejects_duplicate_target_rows_during_postverify() -> None:
+    pattern, source_path, old, entries = _reclassification_case()
+    old_id = str(old["id"])
+    new_id = f"dd_gap:{pattern}:self_contradiction"
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": source_path}],
+        [old],
+        *_online_constraint(mock_gc),
+    ]
+    transaction = _transaction(
+        mock_gc,
+        [
+            [old],
+            [{"id": new_id}],
+            [
+                {
+                    "reported": 1,
+                    "relationships": 1,
+                    "observations": 1,
+                    "ids": [new_id],
+                }
+            ],
+            [
+                {
+                    "id": new_id,
+                    "exact_count": 2,
+                    "kinds": ["self_contradiction", "self_contradiction"],
+                    "source_paths": [source_path],
+                }
+            ],
+            [{"id": old_id, "exact_count": 0}],
+        ],
+    )
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(DDGapRegistrySyncConflict, match="invalid=.*self_contradiction"),
     ):
         sync_dd_unit_exception_gaps()
 
