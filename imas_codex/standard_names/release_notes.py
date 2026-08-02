@@ -17,6 +17,7 @@ fallback body is used so a release never blocks on the notes model.
 from __future__ import annotations
 
 import logging
+import re
 from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
@@ -272,6 +273,18 @@ def _static_dd_gap_caveat(summary: Mapping[str, Any]) -> str:
     return "\n".join(lines)
 
 
+_MODEL_DD_GAP_SECTION_RE = re.compile(
+    r"(?ims)^##[ \t]+Data[ \t]+Dictionary[ \t]+caveats[ \t]*$"
+    r".*?(?=^##[ \t]+|\Z)"
+)
+
+
+def _with_canonical_dd_gap_caveat(model_body: str, summary: Mapping[str, Any]) -> str:
+    """Replace model-authored DD caveats with the deterministic rendering."""
+    without_model_caveats = _MODEL_DD_GAP_SECTION_RE.sub("", model_body).strip()
+    return without_model_caveats + _static_dd_gap_caveat(summary)
+
+
 def static_pr_notes(
     *,
     message: str,
@@ -333,7 +346,8 @@ def build_pr_notes(
             service="standard-names",
         )
         title = notes.title.strip() or message or rc_version
-        return title, notes.body.strip()
+        summary = dd_gaps or summarize_dd_gap_facts([])
+        return title, _with_canonical_dd_gap_caveat(notes.body, summary)
     except Exception:
         logger.warning(
             "release-notes synthesis failed — using the static PR body",
