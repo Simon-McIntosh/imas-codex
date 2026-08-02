@@ -181,6 +181,7 @@ dd_unit_bugs:
   - path: "spi/injector/*_gas/flow_rate"
     dd_unit: s^-1
     correct_unit: Pa.m^3.s^-1
+    correct_in_graph: true
     reason: >-
       A gas flow rate is a throughput in Pa.m^3.s^-1 (every other DD flow_rate
       agrees); the spi injector copies are tagged with the particle rate s^-1.

@@ -23,6 +23,17 @@ class _FakeGC:
         pass
 
 
+class _CaptureGC:
+    """Capture a snapshot query and report one stamped name."""
+
+    def __init__(self):
+        self.calls: list[tuple[str, dict]] = []
+
+    def query(self, cypher, **kw):
+        self.calls.append((cypher, kw))
+        return [{"c": 1}]
+
+
 def test_norm_collapses_none_and_strips():
     assert sr._norm(None) == ""
     assert sr._norm("  x ") == "x"
@@ -42,11 +53,15 @@ def test_format_reason_reports_precise_delta():
 
 def test_format_reason_truncates_long_documentation():
     long_old = "A" * 400
-    reason = sr._format_reason("x", [{"field": "documentation", "old": long_old, "new": "B"}])
+    reason = sr._format_reason(
+        "x", [{"field": "documentation", "old": long_old, "new": "B"}]
+    )
     assert "…" in reason  # long doc is truncated for the steering reason
 
 
-def _row(old_unit, new_unit, old_doc="d", new_doc="d", old_path="wall/x", new_path="wall/x"):
+def _row(
+    old_unit, new_unit, old_doc="d", new_doc="d", old_path="wall/x", new_path="wall/x"
+):
     return {
         "sn_id": "some_name",
         "name_stage": "accepted",
@@ -63,21 +78,30 @@ def _row(old_unit, new_unit, old_doc="d", new_doc="d", old_path="wall/x", new_pa
 def test_detect_drift_units_change():
     out = sr.detect_source_drift(gc=_FakeGC([_row("m^-2.s^-1", "W.m^-2")]))
     assert len(out) == 1
-    assert out[0]["deltas"] == [
-        {"field": "units", "old": "m^-2.s^-1", "new": "W.m^-2"}
-    ]
+    assert out[0]["deltas"] == [{"field": "units", "old": "m^-2.s^-1", "new": "W.m^-2"}]
     assert out[0]["renamed"] is False
 
 
 def test_detect_drift_documentation_change():
-    out = sr.detect_source_drift(gc=_FakeGC([_row("W.m^-2", "W.m^-2", "old doc", "new doc")]))
+    out = sr.detect_source_drift(
+        gc=_FakeGC([_row("W.m^-2", "W.m^-2", "old doc", "new doc")])
+    )
     assert len(out) == 1
     assert [d["field"] for d in out[0]["deltas"]] == ["documentation"]
 
 
 def test_detect_drift_path_rename():
     out = sr.detect_source_drift(
-        gc=_FakeGC([_row("W.m^-2", "W.m^-2", old_path="x/torque_fast_tor", new_path="x/torque_fast_phi")])
+        gc=_FakeGC(
+            [
+                _row(
+                    "W.m^-2",
+                    "W.m^-2",
+                    old_path="x/torque_fast_tor",
+                    new_path="x/torque_fast_phi",
+                )
+            ]
+        )
     )
     assert len(out) == 1
     assert out[0]["renamed"] is True
@@ -103,3 +127,18 @@ def test_refresh_no_drift_is_noop():
     summary = sr.refresh_drifted_sources(gc=_FakeGC([]), dry_run=True)
     assert summary["detected"] == 0
     assert summary["steered"] == 0
+
+
+def test_stamp_source_snapshot_targets_only_gas_flow_cache():
+    gc = _CaptureGC()
+
+    stamped = sr.stamp_source_snapshots(["gas_flow"], gc=gc)
+
+    assert stamped == 1
+    assert len(gc.calls) == 1
+    cypher, params = gc.calls[0]
+    assert "sn.id IN $sn_ids" in cypher
+    assert params["sn_ids"] == ["gas_flow"]
+    set_clause = cypher.split("SET", 1)[1].split("RETURN", 1)[0]
+    assert "sn.source_unit = n.unit" in set_clause
+    assert "sn.unit" not in set_clause
