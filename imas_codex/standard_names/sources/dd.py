@@ -41,16 +41,117 @@ def _is_unparseable_dd_unit(unit: str) -> bool:
     # (see the unit-eligibility check in ``dd_qualifier.qualify_dd``).
     if unit in ("1", "dimensionless", "-", "none"):
         return False
-    # C1: whitespace in unit string
+    # Whitespace separates unit factors without the explicit DD product syntax.
     if re.search(r"\s", unit):
         return True
-    # C2: non-numeric exponents (e.g. m^dimension)
+    # Exponents must be numeric rather than unresolved dimension labels.
     if re.search(r"\^[a-zA-Z]", unit):
         return True
-    # C3: attempt pint parse — catches everything else
+    # The canonical parser catches all remaining invalid unit expressions.
     from imas_codex.units import normalize_unit_symbol
 
     return normalize_unit_symbol(unit) is None
+
+
+def _unit_declaration_conflict_reports(
+    rows: list[dict], observed_dd_version: str | None
+) -> list[dict]:
+    """Build evidence when a DD node property contradicts its unit edge."""
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+    reports: list[dict] = []
+    seen: set[str] = set()
+    for row in rows:
+        path = str(row.get("path") or "").strip()
+        declared = str(row.get("unit") or "").strip()
+        relationship_units = sorted(
+            {
+                str(unit).strip()
+                for unit in row.get("unit_relationships") or []
+                if str(unit).strip()
+            }
+        )
+        if len(relationship_units) > 1:
+            if path and path not in seen:
+                seen.add(path)
+                reports.append(
+                    {
+                        "path": path,
+                        "kind": "self_contradiction",
+                        "reason": (
+                            "The DD node has multiple authoritative HAS_UNIT "
+                            "relationships, so no unique unit declaration exists."
+                        ),
+                        "observed_dd_version": observed_dd_version,
+                        "observed_value": declared,
+                        "expected_value": ",".join(relationship_units),
+                        "evidence_rule": "unit_relationship_is_unique",
+                        "reporter": "dd-unit-injection",
+                    }
+                )
+            continue
+        related = str(row.get("unit_from_rel") or "").strip()
+        if not path or not declared or not related or declared == related:
+            continue
+        declared_canonical = canonical_or_none(declared)
+        related_canonical = canonical_or_none(related)
+        if (
+            declared_canonical is not None
+            and related_canonical is not None
+            and declared_canonical == related_canonical
+        ):
+            continue
+        if path in seen:
+            continue
+        seen.add(path)
+        reports.append(
+            {
+                "path": path,
+                "kind": "self_contradiction",
+                "reason": (
+                    "The DD node unit property contradicts its authoritative "
+                    "HAS_UNIT relationship."
+                ),
+                "observed_dd_version": observed_dd_version,
+                "observed_value": declared,
+                "expected_value": related,
+                "evidence_rule": "unit_equals_expected",
+                "reporter": "dd-unit-injection",
+            }
+        )
+    return reports
+
+
+def _resolve_authoritative_unit_edges(rows: list[dict]) -> None:
+    """Normalize unit edges and refuse authority when more than one exists."""
+    for row in rows:
+        raw_units = row.get("unit_relationships")
+        if raw_units is None:
+            raw_units = [row.get("unit_from_rel")] if row.get("unit_from_rel") else []
+        units = sorted({str(unit).strip() for unit in raw_units if str(unit).strip()})
+        row["unit_relationships"] = units
+        row["unit_from_rel"] = units[0] if len(units) == 1 else None
+
+
+def _persist_unit_declaration_conflicts(
+    rows: list[dict], observed_dd_version: str | None
+) -> int:
+    """Persist unit-authority contradictions without blocking extraction."""
+    reports = _unit_declaration_conflict_reports(rows, observed_dd_version)
+    if not reports:
+        return 0
+    try:
+        from imas_codex.standard_names.dd_gaps import write_dd_gaps
+
+        result = write_dd_gaps(reports)
+        return int(result.get("reported", 0))
+    except Exception:
+        logger.warning(
+            "Failed to persist DD unit self-contradiction evidence; extraction "
+            "continues unchanged",
+            exc_info=True,
+        )
+        return 0
 
 
 def _qualify_sources(
@@ -222,6 +323,7 @@ ORDER BY ids.id, n.id
 {limit_clause}
 WITH n, ids
 OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
+WITH n, ids, u ORDER BY u.id
 WITH n, ids, collect(DISTINCT u.id) AS unit_rels
 OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
 OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
@@ -233,9 +335,8 @@ RETURN n.id AS path,
        n.description AS description,
        n.documentation AS documentation,
        n.unit AS unit,
-       CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
-            WHEN size(unit_rels) > 1 THEN coalesce(n.units, unit_rels[0])
-            ELSE null END AS unit_from_rel,
+       CASE WHEN size(unit_rels) = 1 THEN head(unit_rels) ELSE null END AS unit_from_rel,
+       unit_rels AS unit_relationships,
        n.data_type AS data_type,
        n.node_type AS node_type,
        n.physics_domain AS physics_domain,
@@ -616,9 +717,18 @@ def extract_dd_candidates(
 
         _status(f"found {len(results)} paths, resolving units…")
 
+        _resolve_authoritative_unit_edges(results)
+
+        if write_skipped:
+            _persist_unit_declaration_conflicts(results, dd_version)
+
         # Resolve authoritative unit: prefer HAS_UNIT relationship, fall back to node property
         for row in results:
-            row["unit"] = row.get("unit_from_rel") or row.get("unit") or None
+            row["unit"] = (
+                None
+                if len(row.get("unit_relationships") or []) > 1
+                else row.get("unit_from_rel") or row.get("unit") or None
+            )
 
         # Apply DD unit override/skip config — fixes upstream defects and
         # records unresolvable paths as skipped StandardNameSource records.
@@ -730,6 +840,7 @@ def extract_dd_candidates(
 _TARGETED_PATH_QUERY = """
 MATCH (n:IMASNode {id: $path})-[:IN_IDS]->(ids:IDS)
 OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
+WITH n, ids, u ORDER BY u.id
 WITH n, ids, collect(DISTINCT u.id) AS unit_rels
 OPTIONAL MATCH (n)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
 OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
@@ -739,9 +850,8 @@ RETURN n.id AS path,
        n.description AS description,
        n.documentation AS documentation,
        n.unit AS unit,
-       CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
-            WHEN size(unit_rels) > 1 THEN coalesce(n.units, unit_rels[0])
-            ELSE null END AS unit_from_rel,
+       CASE WHEN size(unit_rels) = 1 THEN head(unit_rels) ELSE null END AS unit_from_rel,
+       unit_rels AS unit_relationships,
        n.data_type AS data_type,
        n.physics_domain AS physics_domain,
        n.keywords AS keywords,
@@ -768,6 +878,7 @@ def extract_specific_paths(
     *,
     existing_names: set[str] | None = None,
     on_status: Callable[[str], None] | None = None,
+    write_side_effects: bool = True,
 ) -> list[ExtractionBatch]:
     """Extract specific DD paths with full context — bypasses classifier.
 
@@ -827,14 +938,27 @@ def extract_specific_paths(
         logger.info("No targeted paths found in graph")
         return []
 
+    _resolve_authoritative_unit_edges(results)
+
+    if write_side_effects:
+        _persist_unit_declaration_conflicts(results, dd_version)
+
     # Pre-resolve authoritative unit (prefer HAS_UNIT relationship), then
     # apply DD unit override/skip config before further processing.
     for row in results:
-        row["unit"] = row.get("unit_from_rel") or row.get("unit") or None
+        row["unit"] = (
+            None
+            if len(row.get("unit_relationships") or []) > 1
+            else row.get("unit_from_rel") or row.get("unit") or None
+        )
 
-    results = _apply_unit_overrides(results, source_type="dd")
+    results = _apply_unit_overrides(
+        results, source_type="dd", write_skipped=write_side_effects
+    )
 
-    results = _qualify_sources(results, source_type="dd")
+    results = _qualify_sources(
+        results, source_type="dd", write_skipped=write_side_effects
+    )
     if not results:
         logger.info("No targeted DD paths remain after source qualification")
         return []

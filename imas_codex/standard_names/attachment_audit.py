@@ -144,6 +144,7 @@ _ATTACHMENTS_QUERY = """
 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
 {scope}
 MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
+OPTIONAL MATCH (dd)-[:IN_IDS]->(ids:IDS)
 OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(nu:Unit)
 OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
@@ -154,8 +155,15 @@ RETURN src.id            AS source_node_id,
        sn.id             AS sn_id,
        sn.name_stage     AS name_stage,
        sn.origin         AS origin,
-       coalesce(du.id, dd.unit) AS dd_unit,
-       coalesce(nu.id, sn.unit) AS sn_unit,
+       CASE size(collect(DISTINCT du.id))
+         WHEN 0 THEN dd.unit
+         WHEN 1 THEN head(collect(DISTINCT du.id))
+         ELSE null
+       END AS dd_unit,
+       dd.unit           AS dd_declared_unit,
+       collect(DISTINCT du.id) AS dd_relationship_units,
+       ids.dd_version    AS dd_version,
+       coalesce(head(collect(DISTINCT nu.id)), sn.unit) AS sn_unit,
        count(DISTINCT other) AS other_live_names
 """
 
@@ -480,6 +488,7 @@ class AttachmentAuditResult:
     skipped_misnamed: int = 0
     names_misnamed: list[NameLevelDefect] = field(default_factory=list)
     names_orphaned: list[str] = field(default_factory=list)
+    dd_gap_evidence: list[dict[str, Any]] = field(default_factory=list)
 
     def by_rule(self) -> dict[str, int]:
         counts: dict[str, int] = {}
@@ -501,8 +510,54 @@ class AttachmentAuditResult:
             # point of the classification and the operator acts on it directly.
             "misnamed": [d.as_dict() for d in self.names_misnamed],
             "names_orphaned": len(self.names_orphaned),
+            "dd_gaps": len(self.dd_gap_evidence),
             "by_rule": self.by_rule(),
         }
+
+
+def _attachment_dd_gap_evidence(rows: list[dict]) -> list[dict[str, Any]]:
+    """Derive DD evidence only from fetched scalar-versus-edge contradictions."""
+    from imas_codex.standard_names.sources.dd import (
+        _unit_declaration_conflict_reports,
+    )
+
+    reports_by_path: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        relationship_units = sorted(
+            {
+                str(unit).strip()
+                for unit in row.get("dd_relationship_units") or []
+                if str(unit).strip()
+            }
+        )
+        if len(relationship_units) > 1:
+            path = str(row.get("dd_path") or "").strip()
+            if path:
+                reports_by_path[path] = {
+                    "path": path,
+                    "kind": "self_contradiction",
+                    "reason": (
+                        "The DD node has multiple authoritative HAS_UNIT "
+                        "relationships, so no unique unit declaration exists."
+                    ),
+                    "observed_dd_version": row.get("dd_version"),
+                    "observed_value": str(row.get("dd_declared_unit") or ""),
+                    "expected_value": ",".join(relationship_units),
+                    "evidence_rule": "unit_relationship_is_unique",
+                    "reporter": "attachment-audit",
+                }
+            continue
+        unit_row = {
+            "path": row.get("dd_path"),
+            "unit": row.get("dd_declared_unit"),
+            "unit_from_rel": relationship_units[0] if relationship_units else None,
+        }
+        for report in _unit_declaration_conflict_reports(
+            [unit_row], row.get("dd_version")
+        ):
+            report["reporter"] = "attachment-audit"
+            reports_by_path.setdefault(report["path"], report)
+    return list(reports_by_path.values())
 
 
 def audit_attachments(
@@ -549,7 +604,10 @@ def audit_attachments(
     for r in rows:
         by_name.setdefault(r["sn_id"], []).append(r)
 
-    result = AttachmentAuditResult(checked=len(rows))
+    result = AttachmentAuditResult(
+        checked=len(rows),
+        dd_gap_evidence=_attachment_dd_gap_evidence(rows),
+    )
     for sn_id in sorted(by_name):
         # Sorted by path so the pairwise rule keeps the SAME representative on
         # every pass: the read returns rows in Neo4j's order, and an
@@ -644,6 +702,17 @@ def reconcile_attachment_consistency(
         client = gc
     try:
         result = audit_attachments(client, sn_id=sn_id)
+        if not dry_run and result.dd_gap_evidence:
+            try:
+                from imas_codex.standard_names.dd_gaps import write_dd_gaps
+
+                write_dd_gaps(result.dd_gap_evidence)
+            except Exception:
+                logger.warning(
+                    "Attachment DD-gap evidence persistence failed without "
+                    "changing reconciliation",
+                    exc_info=True,
+                )
         misnamed = {d.sn_id for d in result.names_misnamed}
         # Disjoint buckets, most-binding first: a provenance edge is never
         # touched; a name-level defect is repaired by renaming the name, not by
