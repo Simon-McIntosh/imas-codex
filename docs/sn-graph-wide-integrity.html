@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="29">
 <meta name="plan-impl" content="0.94">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -658,6 +658,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="cross-section-fold-west-gate-20260802" data-who="reckon-ship" data-when="2026-08-02T17:42:00+02:00">
     <div class="r-comment-body"><p><strong>The cross-section identity fold was refused before mutation because its surviving identity is WEST-shared.</strong> The old <code>cross_section_of_flux_surface</code> backing has zero WEST overlap, but the proposed target <code>area_of_flux_surface</code> already owns the WEST manifest paths <code>core_profiles/profiles_1d/grid/area</code> and <code>equilibrium/time_slice/profiles_1d/area</code>, with matching sources, cached paths, and projections. The strict transitive preflight therefore stopped before any event or receipt was written. This pair is reclassified from executable to WEST-name-dependent and remains untouched; the audit partition must be regenerated with the full target-identity closure before any cohort is derived.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="vorticity-fold-temporal-cas-20260802" data-who="reckon-ship" data-when="2026-08-02T17:55:00+02:00">
+    <div class="r-comment-body"><p><strong>The WEST-clean vorticity fold exposed a temporal CAS defect and rolled back exactly.</strong> The full transitive gate was empty and the immutable preflight matched one source, one DD backing, two existing bindings/projections, and two target paths. Before any participant mutation or event, the event predicate returned zero because Neo4j 2026 compared ten resubmitted <code>ZONED DATETIME</code> properties false even when the raw driver types and exact nanosecond values matched. The helper raised, the transaction rolled back, the snapshot hash remained <code>800d3385…</code>, event count stayed zero, and WEST remained empty. Evidence: <code>/tmp/s7_vorticity_identity_fold.json</code>, SHA-256 <code>beaf9188e04876dc0f8bd65d0a6bcd34f857fe338e8d58906316b4c2c96f9746</code>. A focused repair is replacing property-map equality with locked, type-sensitive full-snapshot equality before element-ID event/mutation operations; no retry is authorized until independent graph verification passes.</p></div>
 </div>
 </section>
 </main>
