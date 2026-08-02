@@ -8,9 +8,12 @@ import pytest
 
 from imas_codex.standard_names.dd_gaps import (
     DDGapTransitionConflict,
+    _evidence_token,
     reconcile_dd_gaps,
     transition_dd_gap,
 )
+
+_ANY_EVIDENCE_TOKEN = "dd-gap-evidence:validation-only"
 
 
 def _transition_row(status: str) -> list[dict[str, str]]:
@@ -23,9 +26,39 @@ def _transition_row(status: str) -> list[dict[str, str]]:
     ]
 
 
-def test_flagged_to_triaged_uses_expected_status_compare_and_set() -> None:
+def _transition_fact(status: str) -> dict[str, object]:
+    return {
+        "id": "dd_gap:equilibrium/path:unit_defect",
+        "path": "equilibrium/path",
+        "kind": "unit_defect",
+        "status": status,
+        "example_count": 1,
+        "first_seen_at": "2026-08-01T10:00:00Z",
+        "last_seen_at": "2026-08-01T10:00:00Z",
+        "observed_dd_version": "4.1.0",
+        "observed_value": "1",
+        "expected_value": "Pa",
+        "evidence_rule": "unit_equals_expected",
+        "reference_path": None,
+        "reference_value": None,
+        "registry_backend": None,
+        "source_paths": ["equilibrium/path"],
+        "affected_name_ids": ["plasma_pressure"],
+        "affected_path_count": 1,
+    }
+
+
+def _transition_graph(current_status: str, target_status: str) -> tuple[MagicMock, str]:
     gc = MagicMock()
-    gc.query.return_value = _transition_row("triaged")
+    fact = _transition_fact(current_status)
+    observations = [{"id": "observation:1"}]
+    gc.query.side_effect = [[fact], observations, [], _transition_row(target_status)]
+    token = _evidence_token({**fact, "observations": observations})
+    return gc, token
+
+
+def test_flagged_to_triaged_uses_expected_status_compare_and_set() -> None:
+    gc, token = _transition_graph("flagged", "triaged")
 
     result = transition_dd_gap(
         "dd_gap:equilibrium/path:unit_defect",
@@ -33,14 +66,45 @@ def test_flagged_to_triaged_uses_expected_status_compare_and_set() -> None:
         new_status="triaged",
         actor="operator@example.org",
         reason="evidence checked against the DD declaration",
+        expected_evidence_token=token,
         gc=gc,
     )
 
     assert result["status"] == "triaged"
     query = gc.query.call_args.args[0]
     assert "gap.status = $expected_status" in query
+    assert "size(current_observation_ids) = size($evidence_observation_ids)" in query
     assert "DDGapStateChange" in query
     assert "HAS_STATE_CHANGE" in query
+
+
+def test_transition_requires_the_reviewed_evidence_token() -> None:
+    gc = MagicMock()
+    with pytest.raises(TypeError, match="expected_evidence_token"):
+        transition_dd_gap(
+            "dd_gap:equilibrium/path:unit_defect",
+            expected_status="flagged",
+            new_status="triaged",
+            actor="operator@example.org",
+            reason="evidence checked",
+            gc=gc,
+        )
+    gc.query.assert_not_called()
+
+
+def test_transition_rejects_evidence_changed_since_operator_review() -> None:
+    gc, token = _transition_graph("flagged", "triaged")
+    with pytest.raises(DDGapTransitionConflict, match="evidence changed"):
+        transition_dd_gap(
+            "dd_gap:equilibrium/path:unit_defect",
+            expected_status="flagged",
+            new_status="triaged",
+            actor="operator@example.org",
+            reason="evidence checked",
+            expected_evidence_token=token + "-stale",
+            gc=gc,
+        )
+    assert gc.query.call_count == 3
 
 
 def test_registered_exception_requires_registry_provenance() -> None:
@@ -51,6 +115,7 @@ def test_registered_exception_requires_registry_provenance() -> None:
             new_status="registered_exception",
             actor="operator@example.org",
             reason="curated exception exists",
+            expected_evidence_token=_ANY_EVIDENCE_TOKEN,
             gc=MagicMock(),
         )
 
@@ -63,20 +128,21 @@ def test_upstream_issue_requires_https_url() -> None:
             new_status="upstream_issue",
             actor="operator@example.org",
             reason="filed after reproducing the defect",
+            expected_evidence_token=_ANY_EVIDENCE_TOKEN,
             upstream_url="http://example.invalid/issue/1",
             gc=MagicMock(),
         )
 
 
 def test_triaged_to_upstream_issue_records_url() -> None:
-    gc = MagicMock()
-    gc.query.return_value = _transition_row("upstream_issue")
+    gc, token = _transition_graph("triaged", "upstream_issue")
     result = transition_dd_gap(
         "dd_gap:equilibrium/path:unit_defect",
         expected_status="triaged",
         new_status="upstream_issue",
         actor="operator@example.org",
         reason="upstream maintainers can reproduce it",
+        expected_evidence_token=token,
         upstream_url="https://example.invalid/issue/1",
         gc=gc,
     )
@@ -87,14 +153,14 @@ def test_triaged_to_upstream_issue_records_url() -> None:
 
 
 def test_rejected_is_a_human_disposition() -> None:
-    gc = MagicMock()
-    gc.query.return_value = _transition_row("rejected")
+    gc, token = _transition_graph("flagged", "rejected")
     result = transition_dd_gap(
         "dd_gap:equilibrium/path:unit_defect",
         expected_status="flagged",
         new_status="rejected",
         actor="operator@example.org",
         reason="comparison path represents a different quantity",
+        expected_evidence_token=token,
         gc=gc,
     )
     assert result["status"] == "rejected"
@@ -108,6 +174,7 @@ def test_resolved_upstream_requires_version_and_validation_evidence() -> None:
             new_status="resolved_upstream",
             actor="dd-release-reconcile",
             reason="release predicate passed",
+            expected_evidence_token=_ANY_EVIDENCE_TOKEN,
             validation_evidence="unit now equals Pa",
             gc=MagicMock(),
         )
@@ -118,6 +185,7 @@ def test_resolved_upstream_requires_version_and_validation_evidence() -> None:
             new_status="resolved_upstream",
             actor="dd-release-reconcile",
             reason="release predicate passed",
+            expected_evidence_token=_ANY_EVIDENCE_TOKEN,
             resolved_dd_version="4.1.1",
             gc=MagicMock(),
         )
@@ -132,6 +200,7 @@ def test_invalid_transition_is_rejected_before_graph_access() -> None:
             new_status="upstream_issue",
             actor="operator@example.org",
             reason="attempted implicit reopen",
+            expected_evidence_token=_ANY_EVIDENCE_TOKEN,
             upstream_url="https://example.invalid/issue/1",
             gc=gc,
         )
@@ -140,7 +209,10 @@ def test_invalid_transition_is_rejected_before_graph_access() -> None:
 
 def test_compare_and_set_conflict_is_visible() -> None:
     gc = MagicMock()
-    gc.query.return_value = []
+    fact = _transition_fact("flagged")
+    observations = [{"id": "observation:1"}]
+    gc.query.side_effect = [[fact], observations, [], []]
+    token = _evidence_token({**fact, "observations": observations})
     with pytest.raises(DDGapTransitionConflict, match="expected 'flagged'"):
         transition_dd_gap(
             "dd_gap:equilibrium/path:unit_defect",
@@ -148,6 +220,7 @@ def test_compare_and_set_conflict_is_visible() -> None:
             new_status="triaged",
             actor="operator@example.org",
             reason="evidence checked",
+            expected_evidence_token=token,
             gc=gc,
         )
 
@@ -274,14 +347,14 @@ def test_reconcile_rejects_missing_or_noncurrent_dd_version() -> None:
 
 
 def test_lifecycle_queries_never_mutate_pipeline_behavior_fields() -> None:
-    gc = MagicMock()
-    gc.query.return_value = _transition_row("triaged")
+    gc, token = _transition_graph("flagged", "triaged")
     transition_dd_gap(
         "dd_gap:equilibrium/path:unit_defect",
         expected_status="flagged",
         new_status="triaged",
         actor="operator@example.org",
         reason="evidence checked",
+        expected_evidence_token=token,
         gc=gc,
     )
     query = gc.query.call_args.args[0]

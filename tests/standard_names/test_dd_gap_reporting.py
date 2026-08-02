@@ -7,8 +7,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.dd_gaps import (
+    _evidence_token,
     _registry_inventory,
+    get_dd_gap,
     get_dd_gap_stats,
+    list_dd_gaps,
+    reconcile_dd_gaps,
     sync_dd_unit_exception_gaps,
     write_dd_gaps,
 )
@@ -314,3 +318,275 @@ def test_status_counts_are_grouped_on_both_axes() -> None:
         "by_status": {"registered_exception": 3, "upstream_issue": 1},
         "by_kind": {"unit_defect": 3, "type_wiring": 1},
     }
+
+
+def test_list_filters_exact_paths_names_and_generated_lifecycle_values() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [
+        {
+            "id": "dd_gap:equilibrium/path:unit_defect",
+            "path": "equilibrium/path",
+            "kind": "unit_defect",
+            "status": "upstream_issue",
+            "source_paths": ["equilibrium/path"],
+            "affected_name_ids": ["plasma_pressure"],
+            "upstream_url": "https://example.invalid/issue/1",
+            "registry_backend": None,
+            "resolved_dd_version": None,
+            "affected_path_count": 1,
+        }
+    ]
+
+    rows = list_dd_gaps(
+        statuses=["upstream_issue"],
+        kinds=["unit_defect"],
+        path_ids=["equilibrium/path"],
+        name_ids=["plasma_pressure"],
+        gc=gc,
+    )
+
+    assert rows[0]["source_paths"] == ["equilibrium/path"]
+    call = gc.query.call_args
+    assert call.kwargs == {
+        "statuses": ["upstream_issue"],
+        "kinds": ["unit_defect"],
+        "path_ids": ["equilibrium/path"],
+        "name_ids": ["plasma_pressure"],
+    }
+    query = call.args[0]
+    assert "ORDER BY gap.id" in query
+    assert "source.source_id IN source_paths" in query
+    assert not any(token in query for token in ("CREATE ", "MERGE ", "SET ", "DELETE "))
+
+
+@pytest.mark.parametrize("parameter", ["statuses", "kinds", "path_ids", "name_ids"])
+def test_list_rejects_bare_string_filters(parameter: str) -> None:
+    gc = MagicMock()
+    with pytest.raises(ValueError, match="bare string"):
+        list_dd_gaps(gc=gc, **{parameter: "equilibrium/path"})
+    gc.query.assert_not_called()
+
+
+def test_list_rejects_pattern_where_exact_path_is_required() -> None:
+    gc = MagicMock()
+    with pytest.raises(ValueError, match="exact paths"):
+        list_dd_gaps(path_ids=["*/pressure"], gc=gc)
+    gc.query.assert_not_called()
+
+
+def test_get_exact_gap_includes_observations_and_state_history() -> None:
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [
+            {
+                "id": "dd_gap:equilibrium/path:unit_defect",
+                "path": "equilibrium/path",
+                "kind": "unit_defect",
+                "status": "triaged",
+                "triaged_at": "2026-08-02T11:00:00Z",
+                "status_changed_at": "2026-08-02T11:00:00Z",
+                "status_changed_by": "operator@example.org",
+                "status_change_reason": "evidence checked",
+                "source_paths": ["equilibrium/z", "equilibrium/a"],
+                "affected_name_ids": ["z_pressure", "a_pressure"],
+                "affected_path_count": 2,
+            }
+        ],
+        [
+            {
+                "id": "observation:later",
+                "reason": "second observation",
+                "reference_path": "equilibrium/reference/z",
+                "reference_value": "Pa",
+                "first_observed_at": "2026-08-02T10:00:00Z",
+            },
+            {
+                "id": "observation:first",
+                "reason": "measured twin declares Pa",
+                "reference_path": "equilibrium/reference/a",
+                "reference_value": "Pa",
+                "first_observed_at": "2026-08-01T10:00:00Z",
+            },
+        ],
+        [
+            {
+                "id": "change:later",
+                "from_status": "triaged",
+                "to_status": "upstream_issue",
+                "changed_at": "2026-08-02T12:00:00Z",
+            },
+            {
+                "id": "change:first",
+                "from_status": "flagged",
+                "to_status": "triaged",
+                "changed_at": "2026-08-02T11:00:00Z",
+            },
+        ],
+    ]
+
+    fact = get_dd_gap("dd_gap:equilibrium/path:unit_defect", gc=gc)
+
+    assert fact is not None
+    assert fact["source_paths"] == ["equilibrium/a", "equilibrium/z"]
+    assert fact["affected_name_ids"] == ["a_pressure", "z_pressure"]
+    assert fact["triaged_at"] == "2026-08-02T11:00:00Z"
+    assert fact["status_changed_by"] == "operator@example.org"
+    assert [row["id"] for row in fact["observations"]] == [
+        "observation:first",
+        "observation:later",
+    ]
+    assert [row["id"] for row in fact["state_changes"]] == [
+        "change:first",
+        "change:later",
+    ]
+    assert fact["observations"][0]["reference_path"] == "equilibrium/reference/a"
+    assert fact["observations"][1]["reference_value"] == "Pa"
+    assert fact["evidence_token"].startswith("dd-gap-evidence:")
+    assert gc.query.call_count == 3
+    assert all(
+        not any(
+            token in call.args[0] for token in ("CREATE ", "MERGE ", "SET ", "DELETE ")
+        )
+        for call in gc.query.call_args_list
+    )
+
+
+def test_get_gap_rejects_invalid_identity_before_graph_access() -> None:
+    gc = MagicMock()
+    with pytest.raises(ValueError, match="exact 'dd_gap"):
+        get_dd_gap("equilibrium/path", gc=gc)
+    gc.query.assert_not_called()
+
+
+def test_list_normalizes_multi_value_and_row_order() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [
+        {
+            "id": "dd_gap:z/path:unit_defect",
+            "source_paths": ["z/path", "a/path"],
+            "affected_name_ids": ["z_name", "a_name"],
+        },
+        {
+            "id": "dd_gap:a/path:unit_defect",
+            "source_paths": ["b/path", "a/path"],
+            "affected_name_ids": ["b_name", "a_name"],
+        },
+    ]
+
+    rows = list_dd_gaps(gc=gc)
+
+    assert [row["id"] for row in rows] == [
+        "dd_gap:a/path:unit_defect",
+        "dd_gap:z/path:unit_defect",
+    ]
+    assert rows[0]["source_paths"] == ["a/path", "b/path"]
+    assert rows[1]["affected_name_ids"] == ["a_name", "z_name"]
+
+
+def test_evidence_token_is_order_independent_and_observation_sensitive() -> None:
+    fact = {
+        "path": "equilibrium/path",
+        "kind": "unit_defect",
+        "source_paths": ["equilibrium/z", "equilibrium/a"],
+        "observations": [{"id": "observation:z"}, {"id": "observation:a"}],
+        "example_count": 2,
+        "first_seen_at": "2026-08-01T10:00:00Z",
+        "last_seen_at": "2026-08-02T10:00:00Z",
+    }
+    reordered = {
+        **fact,
+        "source_paths": list(reversed(fact["source_paths"])),
+        "observations": list(reversed(fact["observations"])),
+    }
+    concurrent = {
+        **fact,
+        "observations": [*fact["observations"], {"id": "observation:new"}],
+        "example_count": 3,
+        "last_seen_at": "2026-08-03T10:00:00Z",
+    }
+
+    assert _evidence_token(fact) == _evidence_token(reordered)
+    assert _evidence_token(fact) != _evidence_token(concurrent)
+
+
+def test_reconcile_fails_closed_when_evidence_changes_after_preflight() -> None:
+    gap_id = "dd_gap:equilibrium/path:unit_defect"
+    initial_seen = "2026-08-01T10:00:00Z"
+
+    class RacingGraph:
+        def __init__(self) -> None:
+            self.observation_ids = ["observation:original"]
+            self.example_count = 1
+            self.last_seen_at = initial_seen
+            self.mutation_batch: list[dict[str, object]] = []
+
+        def query(self, cypher: str, **params):
+            if "RETURN version.id AS id, version.is_current AS is_current" in cypher:
+                return [{"id": "4.1.1", "is_current": True}]
+            if "WHERE gap.status IN $statuses" in cypher:
+                return [
+                    {
+                        "id": gap_id,
+                        "path": "equilibrium/path",
+                        "kind": "unit_defect",
+                        "status": "upstream_issue",
+                        "observed_dd_version": "4.1.0",
+                        "observed_value": "1",
+                        "expected_value": "Pa",
+                        "evidence_rule": "unit_equals_expected",
+                        "reference_path": "equilibrium/reference",
+                        "reference_value": "Pa",
+                        "source_paths": ["equilibrium/path"],
+                        "observation_ids": list(self.observation_ids),
+                        "example_count": self.example_count,
+                        "first_seen_at": initial_seen,
+                        "last_seen_at": self.last_seen_at,
+                        "registry_backend": None,
+                    }
+                ]
+            if "UNWIND $batch AS item" in cypher:
+                self.mutation_batch = params["batch"]
+                self.observation_ids.append("observation:concurrent")
+                self.example_count += 1
+                self.last_seen_at = "2026-08-02T10:00:00Z"
+                candidate = self.mutation_batch[0]
+                evidence_still_matches = (
+                    candidate["observation_ids"] == self.observation_ids
+                    and candidate["example_count"] == self.example_count
+                    and candidate["last_seen_at"] == self.last_seen_at
+                )
+                return [{"id": gap_id}] if evidence_still_matches else []
+            raise AssertionError(f"unexpected query: {cypher}")
+
+    gc = RacingGraph()
+
+    result = reconcile_dd_gaps(
+        "4.1.1",
+        {"equilibrium/path": {"unit": "Pa"}},
+        gc=gc,
+    )
+
+    assert gc.observation_ids == ["observation:original", "observation:concurrent"]
+    assert result["resolved"] == 0
+    assert result["conflicts"] == [gap_id]
+    assert gc.mutation_batch == [
+        {
+            "id": gap_id,
+            "expected_status": "upstream_issue",
+            "path": "equilibrium/path",
+            "kind": "unit_defect",
+            "observed_dd_version": "4.1.0",
+            "observed_value": "1",
+            "expected_value": "Pa",
+            "evidence_rule": "unit_equals_expected",
+            "reference_path": "equilibrium/reference",
+            "reference_value": "Pa",
+            "registry_backend": "",
+            "source_paths": ["equilibrium/path"],
+            "observation_ids": ["observation:original"],
+            "example_count": 1,
+            "first_seen_at": initial_seen,
+            "last_seen_at": initial_seen,
+            "validation_evidence": ("4.1.1 raw unit equals 'Pa' on equilibrium/path"),
+        }
+    ]
