@@ -11,15 +11,18 @@ import pytest
 from neo4j import GraphDatabase
 from neo4j.exceptions import ConstraintError
 
+from imas_codex.graph.client import GraphClient
 from imas_codex.graph.schema import get_schema
 from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.dd_gaps import (
     _RECLASSIFY_REGISTRY_FACT_QUERY,
     _REGISTRY_FACTS_QUERY,
     _SYNC_REGISTRY_QUERY,
+    DDGapRegistrySyncConflict,
     _observation_id,
     _registry_migration_parameters,
     _registry_sync_plan,
+    _require_online_registry_identity_constraints,
 )
 
 pytestmark = pytest.mark.graph
@@ -38,8 +41,15 @@ def ephemeral_driver() -> Iterator:
 
     driver = GraphDatabase.driver(uri, auth=None)
     driver.verify_connectivity()
+    try:
+        yield driver
+    finally:
+        driver.close()
+
+
+def _constraint_statements() -> dict[str, str]:
     schema = get_schema()
-    statements = {
+    return {
         label: next(
             statement
             for statement in schema.constraint_statements()
@@ -47,13 +57,67 @@ def ephemeral_driver() -> Iterator:
         )
         for label in ("DDGap", "DDGapObservation", "DDGapIdentityChange")
     }
+
+
+def _install_constraints(driver, labels: tuple[str, ...]) -> None:
+    statements = _constraint_statements()
     with driver.session() as session:
         for statement in statements.values():
+            constraint_name = statement.split()[2]
+            session.run(f"DROP CONSTRAINT {constraint_name} IF EXISTS").consume()
+        for label in labels:
+            statement = statements[label]
             session.run(statement).consume()
-    try:
-        yield driver
-    finally:
-        driver.close()
+
+
+@pytest.fixture
+def registry_constraints(ephemeral_driver) -> None:
+    _install_constraints(
+        ephemeral_driver,
+        ("DDGap", "DDGapObservation", "DDGapIdentityChange"),
+    )
+
+
+def test_production_preflight_requires_all_schema_constraints(
+    ephemeral_driver,
+) -> None:
+    _install_constraints(ephemeral_driver, ("DDGap",))
+    uri = os.environ["IMAS_CODEX_TEST_NEO4J_URI"]
+    with GraphClient(
+        uri=uri,
+        username="neo4j",
+        password="",
+        graph_name="ephemeral-dd-gap",
+    ) as gc:
+        with pytest.raises(
+            DDGapRegistrySyncConflict,
+            match="ddgapobservation_id.*DDGapObservation.*missing",
+        ):
+            _require_online_registry_identity_constraints(gc)
+
+    _install_constraints(
+        ephemeral_driver,
+        ("DDGap", "DDGapObservation", "DDGapIdentityChange"),
+    )
+    with GraphClient(
+        uri=uri,
+        username="neo4j",
+        password="",
+        graph_name="ephemeral-dd-gap",
+    ) as gc:
+        assert _require_online_registry_identity_constraints(gc) == {
+            "DDGap": "ddgap_id",
+            "DDGapObservation": "ddgapobservation_id",
+            "DDGapIdentityChange": "ddgapidentitychange_id",
+        }
+
+    with ephemeral_driver.session() as session:
+        assert (
+            session.run("MATCH (node) RETURN count(node) AS count").single(strict=True)[
+                "count"
+            ]
+            == 0
+        )
 
 
 def _case() -> dict[str, object]:
@@ -202,6 +266,7 @@ def _fact_snapshot(tx, gap_id: str) -> dict[str, object]:
 
 def test_reclassification_preserves_fact_topology_and_identity_history(
     ephemeral_driver,
+    registry_constraints,
 ) -> None:
     case = _case()
     with ephemeral_driver.session() as session:
@@ -298,7 +363,9 @@ def test_reclassification_preserves_fact_topology_and_identity_history(
         )
 
 
-def test_reclassification_rejects_relationship_property_race(ephemeral_driver) -> None:
+def test_reclassification_rejects_relationship_property_race(
+    ephemeral_driver, registry_constraints
+) -> None:
     case = _case()
     with ephemeral_driver.session() as session:
         tx = session.begin_transaction()
@@ -336,7 +403,9 @@ def test_reclassification_rejects_relationship_property_race(ephemeral_driver) -
             tx.rollback()
 
 
-def test_schema_constraint_rejects_duplicate_ddgap_identity(ephemeral_driver) -> None:
+def test_schema_constraint_rejects_duplicate_ddgap_identity(
+    ephemeral_driver, registry_constraints
+) -> None:
     duplicate_id = f"dd_gap:test/{uuid4().hex}:unit_defect"
     with ephemeral_driver.session() as session:
         tx = session.begin_transaction()

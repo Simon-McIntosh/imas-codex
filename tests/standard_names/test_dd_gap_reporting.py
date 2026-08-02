@@ -10,14 +10,17 @@ import pytest
 from neo4j.exceptions import ConstraintError
 
 from imas_codex.standard_names.dd_gaps import (
+    _REGISTRY_IDENTITY_CHANGE_ACTOR,
+    _REGISTRY_IDENTITY_CHANGE_REASON,
     DDGapRegistrySyncConflict,
     _canonical_graph_value,
     _evidence_token,
+    _observation_id,
     _registry_inventory,
     _registry_migration_parameters,
     _registry_sync_plan,
     _registry_sync_token,
-    _require_online_ddgap_identity_constraint,
+    _require_online_registry_identity_constraints,
     get_dd_gap,
     get_dd_gap_stats,
     list_dd_gaps,
@@ -208,7 +211,11 @@ def _transaction(mock_gc: MagicMock, side_effect: list[object]):
 
 def _online_constraint(mock_gc: MagicMock) -> list[list[dict[str, object]]]:
     mock_gc.schema.constraint_statements.return_value = [
-        "CREATE CONSTRAINT ddgap_id IF NOT EXISTS FOR (n:DDGap) REQUIRE n.id IS UNIQUE"
+        "CREATE CONSTRAINT ddgap_id IF NOT EXISTS FOR (n:DDGap) REQUIRE n.id IS UNIQUE",
+        "CREATE CONSTRAINT ddgapobservation_id IF NOT EXISTS "
+        "FOR (n:DDGapObservation) REQUIRE n.id IS UNIQUE",
+        "CREATE CONSTRAINT ddgapidentitychange_id IF NOT EXISTS "
+        "FOR (n:DDGapIdentityChange) REQUIRE n.id IS UNIQUE",
     ]
     return [
         [
@@ -218,9 +225,27 @@ def _online_constraint(mock_gc: MagicMock) -> list[list[dict[str, object]]]:
                 "labelsOrTypes": ["DDGap"],
                 "properties": ["id"],
                 "ownedIndex": "ddgap_id",
-            }
+            },
+            {
+                "name": "ddgapobservation_id",
+                "type": "UNIQUENESS",
+                "labelsOrTypes": ["DDGapObservation"],
+                "properties": ["id"],
+                "ownedIndex": "ddgapobservation_id",
+            },
+            {
+                "name": "ddgapidentitychange_id",
+                "type": "UNIQUENESS",
+                "labelsOrTypes": ["DDGapIdentityChange"],
+                "properties": ["id"],
+                "ownedIndex": "ddgapidentitychange_id",
+            },
         ],
-        [{"name": "ddgap_id", "state": "ONLINE"}],
+        [
+            {"name": "ddgap_id", "state": "ONLINE"},
+            {"name": "ddgapobservation_id", "state": "ONLINE"},
+            {"name": "ddgapidentitychange_id", "state": "ONLINE"},
+        ],
     ]
 
 
@@ -244,6 +269,82 @@ def _reclassification_case() -> tuple[str, str, dict[str, object], dict[str, obj
         ]
     }
     return pattern, source_path, old, entries
+
+
+def _reclassification_transaction_rows(
+    *,
+    pattern: str,
+    source_path: str,
+    old: dict[str, object],
+    observation_new_count: int = 1,
+    observation_old_count: int = 0,
+    identity_count: int = 1,
+    identity_old_kind: str = "unit_defect",
+) -> list[object]:
+    old_id = str(old["id"])
+    new_id = f"dd_gap:{pattern}:self_contradiction"
+    identity_change_id = "identity-change:registry-reclassification"
+    new_observation_id = _observation_id(
+        {
+            **old["observation_records"][0]["node_properties"],
+            "gap_id": new_id,
+        }
+    )
+    return [
+        [old],
+        [
+            {
+                "id": new_id,
+                "identity_change_id": identity_change_id,
+            }
+        ],
+        [
+            {
+                "reported": 1,
+                "relationships": 1,
+                "observations": 1,
+                "ids": [new_id],
+            }
+        ],
+        [
+            {
+                "id": new_id,
+                "exact_count": 1,
+                "kinds": ["self_contradiction"],
+                "source_paths": [source_path],
+            }
+        ],
+        [{"id": old_id, "exact_count": 0}],
+        [
+            {
+                "old_id": "observation:1",
+                "new_id": new_observation_id,
+                "new_exact_count": observation_new_count,
+                "dd_gap_ids": [new_id] * observation_new_count,
+                "old_exact_count": observation_old_count,
+            }
+        ],
+        [
+            {
+                "id": identity_change_id,
+                "exact_count": identity_count,
+                "details": [
+                    {
+                        "property_count": 9,
+                        "dd_gap_id": new_id,
+                        "old_id": old_id,
+                        "new_id": new_id,
+                        "old_kind": identity_old_kind,
+                        "new_kind": "self_contradiction",
+                        "changed_by": _REGISTRY_IDENTITY_CHANGE_ACTOR,
+                        "reason": _REGISTRY_IDENTITY_CHANGE_REASON,
+                        "changed_at_matches": True,
+                    }
+                ]
+                * identity_count,
+            }
+        ],
+    ]
 
 
 def test_empty_report_is_a_noop() -> None:
@@ -465,6 +566,8 @@ def test_registry_sync_returns_persisted_counts() -> None:
                 }
             ],
             [],
+            [],
+            [],
         ],
     )
     entries = {
@@ -543,42 +646,87 @@ def test_registry_dry_run_reads_version_and_paths_only() -> None:
     mock_gc.session.assert_not_called()
 
 
-def test_registry_apply_requires_schema_declared_online_identity_constraint() -> None:
+def test_registry_apply_refuses_when_only_ddgap_constraint_is_installed() -> None:
     gc = MagicMock()
-    gc.schema.constraint_statements.return_value = [
-        "CREATE CONSTRAINT ddgap_id IF NOT EXISTS FOR (n:DDGap) REQUIRE n.id IS UNIQUE"
-    ]
-    gc.query.return_value = []
+    responses = _online_constraint(gc)
+    gc.query.return_value = responses[0][:1]
 
-    with pytest.raises(DDGapRegistrySyncConflict, match="ddgap_id.*missing"):
-        _require_online_ddgap_identity_constraint(gc)
+    with pytest.raises(DDGapRegistrySyncConflict, match="ddgapobservation_id.*missing"):
+        _require_online_registry_identity_constraints(gc)
 
     call = gc.query.call_args
-    assert call.kwargs["constraint_name"] == "ddgap_id"
+    assert call.kwargs["constraint_names"] == [
+        "ddgap_id",
+        "ddgapobservation_id",
+        "ddgapidentitychange_id",
+    ]
     assert "SHOW CONSTRAINTS" in call.args[0]
     assert "CREATE CONSTRAINT" not in call.args[0]
 
 
-def test_registry_apply_rejects_nononline_constraint_index() -> None:
+@pytest.mark.parametrize(
+    ("missing_name", "label"),
+    [
+        ("ddgapobservation_id", "DDGapObservation"),
+        ("ddgapidentitychange_id", "DDGapIdentityChange"),
+    ],
+)
+def test_registry_apply_rejects_missing_owned_constraint(
+    missing_name: str, label: str
+) -> None:
     gc = MagicMock()
-    gc.schema.constraint_statements.return_value = [
-        "CREATE CONSTRAINT ddgap_id IF NOT EXISTS FOR (n:DDGap) REQUIRE n.id IS UNIQUE"
-    ]
-    gc.query.side_effect = [
-        [
-            {
-                "name": "ddgap_id",
-                "type": "UNIQUENESS",
-                "labelsOrTypes": ["DDGap"],
-                "properties": ["id"],
-                "ownedIndex": "ddgap_id",
-            }
-        ],
-        [{"name": "ddgap_id", "state": "POPULATING"}],
-    ]
+    constraints, _ = _online_constraint(gc)
+    gc.query.return_value = [row for row in constraints if row["name"] != missing_name]
 
-    with pytest.raises(DDGapRegistrySyncConflict, match="not ONLINE"):
-        _require_online_ddgap_identity_constraint(gc)
+    with pytest.raises(
+        DDGapRegistrySyncConflict, match=rf"{missing_name}.*{label}.*missing"
+    ):
+        _require_online_registry_identity_constraints(gc)
+
+
+@pytest.mark.parametrize(
+    ("offline_name", "label"),
+    [
+        ("ddgapobservation_id", "DDGapObservation"),
+        ("ddgapidentitychange_id", "DDGapIdentityChange"),
+    ],
+)
+def test_registry_apply_rejects_nononline_owned_index(
+    offline_name: str, label: str
+) -> None:
+    gc = MagicMock()
+    constraints, indexes = _online_constraint(gc)
+    changed_indexes = copy.deepcopy(indexes)
+    next(row for row in changed_indexes if row["name"] == offline_name)["state"] = (
+        "POPULATING"
+    )
+    gc.query.side_effect = [constraints, changed_indexes]
+
+    with pytest.raises(
+        DDGapRegistrySyncConflict, match=rf"{offline_name}.*{label}.*not ONLINE"
+    ):
+        _require_online_registry_identity_constraints(gc)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("labelsOrTypes", ["WrongLabel"]),
+        ("properties", ["wrong_property"]),
+        ("ownedIndex", None),
+    ],
+)
+def test_registry_apply_rejects_wrong_observation_constraint_definition(
+    field: str, value: object
+) -> None:
+    gc = MagicMock()
+    constraints, _ = _online_constraint(gc)
+    changed = copy.deepcopy(constraints)
+    next(row for row in changed if row["name"] == "ddgapobservation_id")[field] = value
+    gc.query.return_value = changed
+
+    with pytest.raises(DDGapRegistrySyncConflict, match="unexpected definition"):
+        _require_online_registry_identity_constraints(gc)
 
 
 @pytest.mark.parametrize(
@@ -676,6 +824,13 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
     )
     old["gap_properties"]["observed_value"] = "s^-1"  # type: ignore[index]
     old["gap_properties"]["expected_value"] = "Pa.m^3.s^-1"  # type: ignore[index]
+    new_observation_id = _observation_id(
+        {
+            **old["observation_records"][0]["node_properties"],
+            "gap_id": new_id,
+        }
+    )
+    identity_change_id = "identity-change:registry-reclassification"
     entries = {
         "dd_unit_bugs": [
             {
@@ -705,7 +860,7 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
                     "observation_count": 1,
                     "state_change_count": 1,
                     "identity_change_count": 1,
-                    "identity_change_id": "identity-change:registry-reclassification",
+                    "identity_change_id": identity_change_id,
                 }
             ],
             [
@@ -725,6 +880,34 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
                 }
             ],
             [{"id": old_id, "exact_count": 0}],
+            [
+                {
+                    "old_id": "observation:1",
+                    "new_id": new_observation_id,
+                    "new_exact_count": 1,
+                    "dd_gap_ids": [new_id],
+                    "old_exact_count": 0,
+                }
+            ],
+            [
+                {
+                    "id": identity_change_id,
+                    "exact_count": 1,
+                    "details": [
+                        {
+                            "property_count": 9,
+                            "dd_gap_id": new_id,
+                            "old_id": old_id,
+                            "new_id": new_id,
+                            "old_kind": "unit_defect",
+                            "new_kind": "self_contradiction",
+                            "changed_by": _REGISTRY_IDENTITY_CHANGE_ACTOR,
+                            "reason": _REGISTRY_IDENTITY_CHANGE_REASON,
+                            "changed_at_matches": True,
+                        }
+                    ],
+                }
+            ],
         ],
     )
 
@@ -1111,8 +1294,52 @@ def test_registry_sync_rolls_back_on_concurrent_target_constraint_violation() ->
 
 def test_registry_sync_rejects_duplicate_target_rows_during_postverify() -> None:
     pattern, source_path, old, entries = _reclassification_case()
-    old_id = str(old["id"])
     new_id = f"dd_gap:{pattern}:self_contradiction"
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": source_path}],
+        [old],
+        *_online_constraint(mock_gc),
+    ]
+    transaction_rows = _reclassification_transaction_rows(
+        pattern=pattern,
+        source_path=source_path,
+        old=old,
+    )
+    transaction_rows[3] = [
+        {
+            "id": new_id,
+            "exact_count": 2,
+            "kinds": ["self_contradiction", "self_contradiction"],
+            "source_paths": [source_path],
+        }
+    ]
+    transaction = _transaction(mock_gc, transaction_rows)
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(DDGapRegistrySyncConflict, match="invalid=.*self_contradiction"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    ("new_count", "old_count"),
+    [(0, 0), (2, 0), (1, 1)],
+    ids=["missing-target", "duplicate-target", "stale-source"],
+)
+def test_registry_sync_rolls_back_on_observation_rekey_postverify_failure(
+    new_count: int, old_count: int
+) -> None:
+    pattern, source_path, old, entries = _reclassification_case()
     mock_gc = MagicMock()
     mock_gc.query.side_effect = [
         [{"id": "4.1.0"}],
@@ -1122,27 +1349,13 @@ def test_registry_sync_rejects_duplicate_target_rows_during_postverify() -> None
     ]
     transaction = _transaction(
         mock_gc,
-        [
-            [old],
-            [{"id": new_id}],
-            [
-                {
-                    "reported": 1,
-                    "relationships": 1,
-                    "observations": 1,
-                    "ids": [new_id],
-                }
-            ],
-            [
-                {
-                    "id": new_id,
-                    "exact_count": 2,
-                    "kinds": ["self_contradiction", "self_contradiction"],
-                    "source_paths": [source_path],
-                }
-            ],
-            [{"id": old_id, "exact_count": 0}],
-        ],
+        _reclassification_transaction_rows(
+            pattern=pattern,
+            source_path=source_path,
+            old=old,
+            observation_new_count=new_count,
+            observation_old_count=old_count,
+        ),
     )
 
     with (
@@ -1151,7 +1364,48 @@ def test_registry_sync_rejects_duplicate_target_rows_during_postverify() -> None
             "imas_codex.standard_names.dd_gaps.load_exceptions",
             return_value=entries,
         ),
-        pytest.raises(DDGapRegistrySyncConflict, match="invalid=.*self_contradiction"),
+        pytest.raises(DDGapRegistrySyncConflict, match="observations=.*"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    ("event_count", "old_kind"),
+    [(0, "unit_defect"), (2, "unit_defect"), (1, "wrong_kind")],
+    ids=["missing-event", "duplicate-event", "property-mismatch"],
+)
+def test_registry_sync_rolls_back_on_identity_event_postverify_failure(
+    event_count: int, old_kind: str
+) -> None:
+    pattern, source_path, old, entries = _reclassification_case()
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": source_path}],
+        [old],
+        *_online_constraint(mock_gc),
+    ]
+    transaction = _transaction(
+        mock_gc,
+        _reclassification_transaction_rows(
+            pattern=pattern,
+            source_path=source_path,
+            old=old,
+            identity_count=event_count,
+            identity_old_kind=old_kind,
+        ),
+    )
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(DDGapRegistrySyncConflict, match="identity_changes=.*"),
     ):
         sync_dd_unit_exception_gaps()
 

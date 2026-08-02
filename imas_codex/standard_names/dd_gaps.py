@@ -952,6 +952,13 @@ def _registry_sync_plan(
     }
 
 
+_REGISTRY_IDENTITY_CHANGE_ACTOR = "registry-sync"
+_REGISTRY_IDENTITY_CHANGE_REASON = (
+    "authoritative registry classification changed while lifecycle and evidence "
+    "remained fixed"
+)
+
+
 _RECLASSIFY_REGISTRY_FACT_QUERY = """
 MATCH (gap:DDGap {id: $old_id})
 WHERE NOT EXISTS { MATCH (:DDGap {id: $new_id}) }
@@ -1168,9 +1175,8 @@ CREATE (gap)-[:HAS_IDENTITY_CHANGE]->(change:DDGapIdentityChange {
     new_id: $new_id,
     old_kind: $old_kind,
     new_kind: $target_kind,
-    changed_by: 'registry-sync',
-    reason: 'authoritative registry classification changed while lifecycle '
-            + 'and evidence remained fixed',
+    changed_by: $identity_change_actor,
+    reason: $identity_change_reason,
     changed_at: datetime($changed_at)
 })
 WITH gap, source_paths, observation_records, state_change_records,
@@ -1225,6 +1231,42 @@ ORDER BY id
 """
 
 
+_VERIFY_REGISTRY_OBSERVATION_REKEYS_QUERY = """
+UNWIND $expected AS item
+OPTIONAL MATCH (current:DDGapObservation {id: item.new_id})
+WITH item, collect(current) AS current_nodes
+OPTIONAL MATCH (stale:DDGapObservation {id: item.old_id})
+RETURN item.old_id AS old_id,
+       item.new_id AS new_id,
+       size(current_nodes) AS new_exact_count,
+       [node IN current_nodes | node.dd_gap_id] AS dd_gap_ids,
+       count(stale) AS old_exact_count
+ORDER BY old_id, new_id
+"""
+
+
+_VERIFY_REGISTRY_IDENTITY_CHANGES_QUERY = """
+UNWIND $expected AS item
+OPTIONAL MATCH (:DDGap {id: item.new_id})-[:HAS_IDENTITY_CHANGE]->
+               (change:DDGapIdentityChange {id: item.id})
+WITH item, collect(change) AS exact_changes
+RETURN item.id AS id,
+       size(exact_changes) AS exact_count,
+       [change IN exact_changes | {
+           property_count: size(keys(change)),
+           dd_gap_id: change.dd_gap_id,
+           old_id: change.old_id,
+           new_id: change.new_id,
+           old_kind: change.old_kind,
+           new_kind: change.new_kind,
+           changed_by: change.changed_by,
+           reason: change.reason,
+           changed_at_matches: change.changed_at = datetime(item.changed_at)
+       }] AS details
+ORDER BY id
+"""
+
+
 def _schema_identifier_constraint_name(gc: GraphClient, label: str) -> str:
     """Resolve one identifier constraint name from the active LinkML schema."""
     statements = [
@@ -1244,46 +1286,66 @@ def _schema_identifier_constraint_name(gc: GraphClient, label: str) -> str:
     return parts[2]
 
 
-def _require_online_ddgap_identity_constraint(gc: GraphClient) -> str:
-    """Require the schema-declared DDGap identity constraint and backing index."""
-    constraint_name = _schema_identifier_constraint_name(gc, "DDGap")
+_REGISTRY_IDENTITY_LABELS = (
+    "DDGap",
+    "DDGapObservation",
+    "DDGapIdentityChange",
+)
+
+
+def _require_online_registry_identity_constraints(
+    gc: GraphClient,
+) -> dict[str, str]:
+    """Require every schema-owned identity constraint used by reclassification."""
+    expected = {
+        label: _schema_identifier_constraint_name(gc, label)
+        for label in _REGISTRY_IDENTITY_LABELS
+    }
     constraints = gc.query(
         """
         SHOW CONSTRAINTS
         YIELD name, type, labelsOrTypes, properties, ownedIndex
-        WHERE name = $constraint_name
+        WHERE name IN $constraint_names
         RETURN name, type, labelsOrTypes, properties, ownedIndex
         """,
-        constraint_name=constraint_name,
+        constraint_names=list(expected.values()),
     )
-    if len(constraints) != 1:
-        raise DDGapRegistrySyncConflict(
-            f"schema constraint {constraint_name!r} is missing"
-        )
-    constraint = constraints[0]
-    if (
-        str(constraint.get("type") or "") not in {"UNIQUENESS", "NODE_KEY"}
-        or list(constraint.get("labelsOrTypes") or []) != ["DDGap"]
-        or list(constraint.get("properties") or []) != ["id"]
-        or not constraint.get("ownedIndex")
-    ):
-        raise DDGapRegistrySyncConflict(
-            f"schema constraint {constraint_name!r} has an unexpected definition"
-        )
+    constraints_by_name = {str(row["name"]): row for row in constraints}
+    owned_indexes: dict[str, str] = {}
+    for label, constraint_name in expected.items():
+        constraint = constraints_by_name.get(constraint_name)
+        if constraint is None:
+            raise DDGapRegistrySyncConflict(
+                f"schema constraint {constraint_name!r} for {label}.id is missing"
+            )
+        if (
+            str(constraint.get("type") or "") not in {"UNIQUENESS", "NODE_KEY"}
+            or list(constraint.get("labelsOrTypes") or []) != [label]
+            or list(constraint.get("properties") or []) != ["id"]
+            or not constraint.get("ownedIndex")
+        ):
+            raise DDGapRegistrySyncConflict(
+                f"schema constraint {constraint_name!r} for {label}.id has an "
+                "unexpected definition"
+            )
+        owned_indexes[label] = str(constraint["ownedIndex"])
+
     indexes = gc.query(
         """
         SHOW INDEXES
         YIELD name, state
-        WHERE name = $index_name
+        WHERE name IN $index_names
         RETURN name, state
         """,
-        index_name=str(constraint["ownedIndex"]),
+        index_names=list(owned_indexes.values()),
     )
-    if len(indexes) != 1 or str(indexes[0].get("state") or "") != "ONLINE":
-        raise DDGapRegistrySyncConflict(
-            f"schema constraint {constraint_name!r} is not ONLINE"
-        )
-    return constraint_name
+    indexes_by_name = {str(row["name"]): row for row in indexes}
+    for label, index_name in owned_indexes.items():
+        if str(indexes_by_name.get(index_name, {}).get("state") or "") != "ONLINE":
+            raise DDGapRegistrySyncConflict(
+                f"schema constraint {expected[label]!r} for {label}.id is not ONLINE"
+            )
+    return expected
 
 
 def _registry_migration_parameters(item: Mapping[str, Any]) -> dict[str, Any]:
@@ -1366,6 +1428,8 @@ def _registry_migration_parameters(item: Mapping[str, Any]) -> dict[str, Any]:
         "target_observed_value": target["observed_value"],
         "target_expected_value": target["expected_value"],
         "target_evidence_rule": target["evidence_rule"],
+        "identity_change_actor": _REGISTRY_IDENTITY_CHANGE_ACTOR,
+        "identity_change_reason": _REGISTRY_IDENTITY_CHANGE_REASON,
         "changed_at": datetime.now(UTC).isoformat(),
     }
 
@@ -1426,7 +1490,7 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
                 + json.dumps(plan["manual_required"], sort_keys=True)
             )
         if plan["reclassify"]:
-            _require_online_ddgap_identity_constraint(gc)
+            _require_online_registry_identity_constraints(gc)
 
         paths_by_id: dict[str, set[str]] = {}
         for observation in observations:
@@ -1440,6 +1504,8 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
                 current_facts = {
                     str(row["id"]): dict(row) for row in tx.run(_REGISTRY_FACTS_QUERY)
                 }
+                expected_observation_rekeys: list[dict[str, str]] = []
+                expected_identity_changes: list[dict[str, str]] = []
                 for item in plan["reclassify"]:
                     old_id = str(item["old_id"])
                     current = current_facts.get(old_id)
@@ -1451,11 +1517,12 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
                             f"registry fact {old_id!r} changed after preflight"
                         )
 
+                    migration_parameters = _registry_migration_parameters(item)
                     migrated = [
                         dict(row)
                         for row in tx.run(
                             _RECLASSIFY_REGISTRY_FACT_QUERY,
-                            **_registry_migration_parameters(item),
+                            **migration_parameters,
                         )
                     ]
                     if len(migrated) != 1:
@@ -1463,6 +1530,30 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
                             f"registry fact {old_id!r} no longer matches reviewed "
                             "lifecycle evidence and links"
                         )
+                    expected_observation_rekeys.extend(
+                        {
+                            **rekey,
+                            "new_gap_id": str(item["new_id"]),
+                        }
+                        for rekey in migration_parameters["observation_rekeys"]
+                    )
+                    expected_identity_changes.append(
+                        {
+                            "id": str(migrated[0]["identity_change_id"]),
+                            "dd_gap_id": str(item["new_id"]),
+                            "old_id": str(item["old_id"]),
+                            "new_id": str(item["new_id"]),
+                            "old_kind": str(item["old_kind"]),
+                            "new_kind": str(item["new_kind"]),
+                            "changed_by": str(
+                                migration_parameters["identity_change_actor"]
+                            ),
+                            "reason": str(
+                                migration_parameters["identity_change_reason"]
+                            ),
+                            "changed_at": str(migration_parameters["changed_at"]),
+                        }
+                    )
 
                 rows = [
                     dict(row)
@@ -1517,10 +1608,66 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
                     )
                     if int(row.get("exact_count") or 0) != 0
                 ]
-                if invalid or stale_ids:
+                observation_verification = [
+                    dict(row)
+                    for row in tx.run(
+                        _VERIFY_REGISTRY_OBSERVATION_REKEYS_QUERY,
+                        expected=expected_observation_rekeys,
+                    )
+                ]
+                invalid_observations = [
+                    str(row["new_id"])
+                    for row in observation_verification
+                    if int(row.get("new_exact_count") or 0) != 1
+                    or [str(value) for value in (row.get("dd_gap_ids") or [])]
+                    != [
+                        item["new_gap_id"]
+                        for item in expected_observation_rekeys
+                        if item["new_id"] == str(row["new_id"])
+                        and item["old_id"] == str(row["old_id"])
+                    ]
+                    or int(row.get("old_exact_count") or 0) != 0
+                ]
+                identity_verification = [
+                    dict(row)
+                    for row in tx.run(
+                        _VERIFY_REGISTRY_IDENTITY_CHANGES_QUERY,
+                        expected=expected_identity_changes,
+                    )
+                ]
+                identity_by_id = {
+                    str(item["id"]): item for item in expected_identity_changes
+                }
+                invalid_identity_changes = [
+                    str(row["id"])
+                    for row in identity_verification
+                    if int(row.get("exact_count") or 0) != 1
+                    or (row.get("details") or [])
+                    != [
+                        {
+                            "property_count": 9,
+                            "dd_gap_id": identity_by_id[str(row["id"])]["dd_gap_id"],
+                            "old_id": identity_by_id[str(row["id"])]["old_id"],
+                            "new_id": identity_by_id[str(row["id"])]["new_id"],
+                            "old_kind": identity_by_id[str(row["id"])]["old_kind"],
+                            "new_kind": identity_by_id[str(row["id"])]["new_kind"],
+                            "changed_by": identity_by_id[str(row["id"])]["changed_by"],
+                            "reason": identity_by_id[str(row["id"])]["reason"],
+                            "changed_at_matches": True,
+                        }
+                    ]
+                ]
+                if (
+                    invalid
+                    or stale_ids
+                    or invalid_observations
+                    or invalid_identity_changes
+                ):
                     raise DDGapRegistrySyncConflict(
                         "registry identity verification failed: "
-                        f"invalid={sorted(invalid)} stale={sorted(stale_ids)}"
+                        f"invalid={sorted(invalid)} stale={sorted(stale_ids)} "
+                        f"observations={sorted(invalid_observations)} "
+                        f"identity_changes={sorted(invalid_identity_changes)}"
                     )
                 tx.commit()
             except BaseException:
