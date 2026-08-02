@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import uuid
 from copy import deepcopy
+from types import TracebackType
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -32,7 +34,7 @@ from imas_codex.standard_names.attachment_audit import (
     reconcile_attachment_consistency,
 )
 
-_PREFIX = "test_attach_audit__"
+_FIXTURE_ID_STEM = "test_attach_audit__"
 
 
 # ---------------------------------------------------------------------------
@@ -424,6 +426,7 @@ def test_as_dict_reports_name_level_defects() -> None:
 
 @pytest.fixture()
 def _gc():
+    client = None
     try:
         from imas_codex.graph.client import GraphClient
 
@@ -431,53 +434,132 @@ def _gc():
         client.get_stats()
     except Exception as exc:  # pragma: no cover - env-dependent
         pytest.skip(f"Neo4j not available: {exc}")
-    yield client
-    client.close()
+    try:
+        yield client
+    finally:
+        client.close()
+
+
+class _GraphFixtureScope:
+    """Track and remove only the exact graph entities created by one test."""
+
+    _DELETE_ORDER = (
+        "StandardNameChange",
+        "StandardNameSource",
+        "IMASNode",
+        "StandardName",
+        "Unit",
+    )
+
+    def __init__(self, gc: Any) -> None:
+        self.gc = gc
+        self.prefix = f"{_FIXTURE_ID_STEM}{uuid.uuid4().hex}__"
+        self.created: dict[str, set[str]] = {
+            label: set() for label in self._DELETE_ORDER
+        }
+        self.cleaned = False
+
+    def __enter__(self) -> _GraphFixtureScope:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc: BaseException | None,
+        traceback: TracebackType | None,
+    ) -> bool:
+        try:
+            self.cleanup()
+        except BaseException as cleanup_error:
+            if exc is None:
+                raise
+            exc.add_note(f"attachment fixture cleanup also failed: {cleanup_error}")
+        return False
+
+    def path(self, suffix: str) -> str:
+        return f"{self.prefix}{suffix}"
+
+    def uid(self, tag: str) -> str:
+        return self.path(f"{tag}_{uuid.uuid4().hex[:8]}")
+
+    def track(self, label: str, *ids: str) -> None:
+        self.created[label].update(identifier for identifier in ids if identifier)
+
+    def _discover_changes(self) -> None:
+        name_ids = sorted(self.created["StandardName"])
+        dd_paths = sorted(self.created["IMASNode"])
+        if not name_ids and not dd_paths:
+            return
+        rows = self.gc.query(
+            """
+            MATCH (change:StandardNameChange)
+            WHERE change.from_name IN $dd_paths
+               OR change.to_name IN $dd_paths
+               OR EXISTS {
+                    MATCH (sn:StandardName)-[:HAS_INTERNAL_CHANGE]->(change)
+                    WHERE sn.id IN $name_ids
+                  }
+            RETURN DISTINCT change.id AS id
+            """,
+            name_ids=name_ids,
+            dd_paths=dd_paths,
+        )
+        self.track("StandardNameChange", *(row["id"] for row in rows))
+
+    def remaining_count(self) -> int:
+        remaining = 0
+        for label, ids in self.created.items():
+            if not ids:
+                continue
+            rows = self.gc.query(
+                f"MATCH (n:{label}) WHERE n.id IN $ids RETURN count(n) AS count",
+                ids=sorted(ids),
+            )
+            remaining += int(rows[0]["count"] if rows else 0)
+        return remaining
+
+    def cleanup(self) -> None:
+        if self.cleaned:
+            assert self.remaining_count() == 0
+            return
+        self._discover_changes()
+        all_ids = sorted(
+            {identifier for ids in self.created.values() for identifier in ids}
+        )
+        if all_ids:
+            self.gc.query(
+                """
+                MATCH (node)
+                WHERE node.id IN $ids
+                OPTIONAL MATCH (node)-[relationship]-()
+                WITH collect(DISTINCT relationship) AS relationships
+                FOREACH (relationship IN relationships | DELETE relationship)
+                """,
+                ids=all_ids,
+            )
+        for label in self._DELETE_ORDER:
+            ids = sorted(self.created[label])
+            if not ids:
+                continue
+            self.gc.query(
+                f"MATCH (node:{label}) WHERE node.id IN $ids DELETE node",
+                ids=ids,
+            )
+        assert self.remaining_count() == 0, (
+            f"fixture cleanup left exact tracked nodes for {self.prefix}"
+        )
+        self.cleaned = True
 
 
 @pytest.fixture()
 def _clean(_gc):
-    """Wipe the fixture's own nodes on BOTH setup and teardown.
-
-    Setup as well as teardown, so a killed run leaves nothing behind that the
-    next one has to live with.
-    """
-
-    def _wipe() -> None:
-        for label in (
-            "StandardName",
-            "StandardNameSource",
-            "IMASNode",
-            "StandardNameChange",
-            "Unit",
-        ):
-            _gc.query(
-                f"MATCH (n:{label}) WHERE n.id STARTS WITH $p DETACH DELETE n",
-                p=_PREFIX,
-            )
-        # A detachment crumb is keyed 'sn-change:<uuid>', so the id prefix above
-        # never matches it — it is identified by the fixture path it records.
-        _gc.query(
-            """
-            MATCH (c:StandardNameChange)
-            WHERE coalesce(c.from_name, '') STARTS WITH $p
-               OR coalesce(c.to_name, '') STARTS WITH $p
-            DETACH DELETE c
-            """,
-            p=_PREFIX,
-        )
-
-    _wipe()
-    yield
-    _wipe()
-
-
-def _uid(tag: str) -> str:
-    return f"{_PREFIX}{tag}_{uuid.uuid4().hex[:8]}"
+    """Provide a unique exact-ID scope with exception-safe final cleanup."""
+    with _GraphFixtureScope(_gc) as scope:
+        yield scope
 
 
 def _seed_attachment(
-    gc,
+    scope: _GraphFixtureScope,
     *,
     dd_path: str,
     sn_id: str,
@@ -487,7 +569,10 @@ def _seed_attachment(
 ) -> str:
     """Create (source)-[:PRODUCED_NAME]->(name) with the DD-side projection."""
     source_node_id = f"dd:{dd_path}"
-    gc.query(
+    scope.track("IMASNode", dd_path)
+    scope.track("StandardName", sn_id)
+    scope.track("StandardNameSource", source_node_id)
+    scope.gc.query(
         """
         MERGE (dd:IMASNode {id: $dd_path})
           SET dd.unit = $dd_unit, dd.node_category = 'quantity'
@@ -523,16 +608,40 @@ def _seed_attachment(
     return source_node_id
 
 
-def _scoped(gc, prefix: str = _PREFIX, **params):
+@pytest.mark.graph
+def test_graph_scope_cleans_partial_setup_without_hiding_failure(_gc):
+    """An interrupted multi-query setup preserves its error and leaves no nodes."""
+    scope = None
+    with pytest.raises(RuntimeError, match="injected setup failure") as captured:
+        with _GraphFixtureScope(_gc) as active_scope:
+            scope = active_scope
+            dd_path = scope.path("partial_setup/path")
+            sn_id = scope.uid("partial_setup_name")
+            _seed_attachment(scope, dd_path=dd_path, sn_id=sn_id)
+            unit_id = scope.path("partial_setup_unit")
+            scope.track("Unit", unit_id)
+            _gc.query(
+                """
+                MATCH (dd:IMASNode {id: $dd_path})
+                MERGE (unit:Unit {id: $unit_id})
+                MERGE (dd)-[:HAS_UNIT]->(unit)
+                """,
+                dd_path=dd_path,
+                unit_id=unit_id,
+            )
+            raise RuntimeError("injected setup failure")
+
+    assert str(captured.value) == "injected setup failure"
+    assert scope is not None and scope.cleaned is True
+    assert scope.remaining_count() == 0
+
+
+def _scoped(gc, prefix: str, **params):
     """Audit only the fixture's own attachments (the graph is shared)."""
     from imas_codex.standard_names import attachment_audit as mod
 
     rows = gc.query(
-        mod._ATTACHMENTS_QUERY.replace(
-            "MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)",
-            "MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)\n"
-            "WHERE sn.id STARTS WITH $prefix",
-        ),
+        mod._ATTACHMENTS_QUERY.format(scope="WHERE sn.id STARTS WITH $prefix"),
         prefix=prefix,
         **params,
     )
@@ -542,14 +651,14 @@ def _scoped(gc, prefix: str = _PREFIX, **params):
 class _ScopedClient:
     """Delegate to a real client, but narrow the audit read to the fixture set."""
 
-    def __init__(self, gc, prefix: str = _PREFIX) -> None:
+    def __init__(self, gc, prefix: str) -> None:
         self._gc = gc
         self._prefix = prefix
 
     def query(self, q: str, **params):
         from imas_codex.standard_names import attachment_audit as mod
 
-        if q == mod._ATTACHMENTS_QUERY:
+        if q == mod._ATTACHMENTS_QUERY.format(scope=""):
             return _scoped(self._gc, self._prefix, **params)
         return self._gc.query(q, **params)
 
@@ -560,11 +669,11 @@ class _ScopedClient:
 @pytest.mark.graph
 def test_reconcile_detaches_and_reroutes(_gc, _clean):
     """An inconsistent edge is detached and its source returns to compose."""
-    dd_path = f"{_PREFIX}summary/boundary/strike_point_inner_z/value"
-    sn_id = _uid("z_image_up_unit_vector_of_camera")
-    source_node_id = _seed_attachment(_gc, dd_path=dd_path, sn_id=sn_id)
+    dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
+    sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
+    source_node_id = _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
 
-    result = reconcile_attachment_consistency(_ScopedClient(_gc))
+    result = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
 
     assert len(result.rejected) == 1
     assert result.rejected[0].rule == "locus/source device mismatch"
@@ -602,11 +711,12 @@ def test_source_backing_a_good_name_keeps_its_status(_gc, _clean):
     one it accepts — loses only the wrong edge; rewinding it to 'extracted'
     would orphan the good name.
     """
-    bad_path = f"{_PREFIX}summary/boundary/strike_point_inner_z/value"
-    bad_name = _uid("z_image_up_unit_vector_of_camera")
-    good_name = _uid("vertical_coordinate_of_inner_strike_point")
-    source_node_id = _seed_attachment(_gc, dd_path=bad_path, sn_id=bad_name)
+    bad_path = _clean.path("summary/boundary/strike_point_inner_z/value")
+    bad_name = _clean.uid("z_image_up_unit_vector_of_camera")
+    good_name = _clean.uid("vertical_coordinate_of_inner_strike_point")
+    source_node_id = _seed_attachment(_clean, dd_path=bad_path, sn_id=bad_name)
     # Same source also produces a name the guard accepts.
+    _clean.track("StandardName", good_name)
     _gc.query(
         """
         MERGE (sn:StandardName {id: $good})
@@ -620,7 +730,7 @@ def test_source_backing_a_good_name_keeps_its_status(_gc, _clean):
         sid=source_node_id,
     )
 
-    result = reconcile_attachment_consistency(_ScopedClient(_gc))
+    result = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert result.detached == 1
     assert result.sources_rerouted == 0
 
@@ -643,13 +753,15 @@ def test_source_backing_a_good_name_keeps_its_status(_gc, _clean):
 @pytest.mark.graph
 def test_superseded_provenance_survives(_gc, _clean):
     """Edges a supersede deliberately left in place are not touched."""
-    dd_path = f"{_PREFIX}summary/boundary/strike_point_inner_z/value"
-    sn_id = _uid("z_image_up_unit_vector_of_camera")
+    dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
+    sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
     source_node_id = _seed_attachment(
-        _gc, dd_path=dd_path, sn_id=sn_id, name_stage="superseded"
+        _clean, dd_path=dd_path, sn_id=sn_id, name_stage="superseded"
     )
 
-    result = reconcile_attachment_consistency(_ScopedClient(_gc), include_accepted=True)
+    result = reconcile_attachment_consistency(
+        _ScopedClient(_gc, _clean.prefix), include_accepted=True
+    )
     assert result.skipped_historical == 1
     assert result.detached == 0
 
@@ -667,11 +779,11 @@ def test_superseded_provenance_survives(_gc, _clean):
 @pytest.mark.graph
 def test_reconcile_keeps_history(_gc, _clean):
     """Detaching records a StandardNameChange and deletes no node."""
-    dd_path = f"{_PREFIX}summary/boundary/strike_point_inner_z/value"
-    sn_id = _uid("z_image_up_unit_vector_of_camera")
-    _seed_attachment(_gc, dd_path=dd_path, sn_id=sn_id)
+    dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
+    sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
+    _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
 
-    reconcile_attachment_consistency(_ScopedClient(_gc))
+    reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
 
     rows = _gc.query(
         """
@@ -703,14 +815,14 @@ def test_reconcile_keeps_history(_gc, _clean):
 @pytest.mark.graph
 def test_reconcile_is_idempotent(_gc, _clean):
     """A second pass acts on nothing."""
-    dd_path = f"{_PREFIX}summary/boundary/strike_point_inner_z/value"
-    sn_id = _uid("z_image_up_unit_vector_of_camera")
-    _seed_attachment(_gc, dd_path=dd_path, sn_id=sn_id)
+    dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
+    sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
+    _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
 
-    first = reconcile_attachment_consistency(_ScopedClient(_gc))
+    first = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert first.detached == 1
 
-    second = reconcile_attachment_consistency(_ScopedClient(_gc))
+    second = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert second.rejected == []
     assert second.detached == 0
     assert second.sources_rerouted == 0
@@ -718,13 +830,13 @@ def test_reconcile_is_idempotent(_gc, _clean):
 
 @pytest.mark.graph
 def test_reconcile_leaves_consistent_attachment_alone(_gc, _clean):
-    dd_path = f"{_PREFIX}camera_ir/channel/camera/up/z"
-    sn_id = _uid("z_image_up_unit_vector_of_camera")
+    dd_path = _clean.path("camera_ir/channel/camera/up/z")
+    sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
     source_node_id = _seed_attachment(
-        _gc, dd_path=dd_path, sn_id=sn_id, dd_unit="m", sn_unit="1"
+        _clean, dd_path=dd_path, sn_id=sn_id, dd_unit="m", sn_unit="1"
     )
 
-    result = reconcile_attachment_consistency(_ScopedClient(_gc))
+    result = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert result.rejected == []
     assert result.detached == 0
 
@@ -742,15 +854,17 @@ def test_reconcile_leaves_consistent_attachment_alone(_gc, _clean):
 @pytest.mark.graph
 def test_accepted_attachment_survives_without_the_flag(_gc, _clean):
     """Catalog-authoritative state is not broken casually."""
-    dd_path = f"{_PREFIX}summary/boundary/strike_point_inner_z/value"
-    sn_id = _uid("z_image_up_unit_vector_of_camera")
-    _seed_attachment(_gc, dd_path=dd_path, sn_id=sn_id, name_stage="accepted")
+    dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
+    sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
+    _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id, name_stage="accepted")
 
-    guarded = reconcile_attachment_consistency(_ScopedClient(_gc))
+    guarded = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert guarded.skipped_protected == 1
     assert guarded.detached == 0
 
-    forced = reconcile_attachment_consistency(_ScopedClient(_gc), include_accepted=True)
+    forced = reconcile_attachment_consistency(
+        _ScopedClient(_gc, _clean.prefix), include_accepted=True
+    )
     assert forced.detached == 1
     assert forced.skipped_protected == 0
 
@@ -813,9 +927,9 @@ def test_attachment_read_has_one_row_and_deterministic_unit_ambiguity(_gc, _clea
     """Zero, one, or many unit edges each yield exactly one attachment row."""
     from imas_codex.standard_names import attachment_audit as mod
 
-    scalar_unit = f"{_PREFIX}scalar_unit"
-    edge_unit = f"{_PREFIX}edge_unit"
-    conflicting_unit = f"{_PREFIX}conflicting_unit"
+    scalar_unit = _clean.path("scalar_unit")
+    edge_unit = _clean.path("edge_unit")
+    conflicting_unit = _clean.path("conflicting_unit")
     cases = (
         ("no_edges", [], scalar_unit),
         ("one_edge", [edge_unit], edge_unit),
@@ -823,17 +937,18 @@ def test_attachment_read_has_one_row_and_deterministic_unit_ambiguity(_gc, _clea
     )
     name_ids: list[str] = []
     for tag, units, _expected in cases:
-        dd_path = f"{_PREFIX}unit_case/{tag}"
-        sn_id = _uid(tag)
+        dd_path = _clean.path(f"unit_case/{tag}")
+        sn_id = _clean.uid(tag)
         name_ids.append(sn_id)
         _seed_attachment(
-            _gc,
+            _clean,
             dd_path=dd_path,
             sn_id=sn_id,
             dd_unit=scalar_unit,
             sn_unit=scalar_unit,
         )
         for unit_id in units:
+            _clean.track("Unit", unit_id)
             _gc.query(
                 """
                 MATCH (sn:StandardName {id: $sn_id})
@@ -1717,11 +1832,11 @@ def test_gate_survives_a_graph_failure() -> None:
 @pytest.mark.graph
 def test_orphaned_name_is_reported(_gc, _clean):
     """A name whose only source was wrong is flagged, not auto-superseded."""
-    dd_path = f"{_PREFIX}summary/boundary/strike_point_inner_z/value"
-    sn_id = _uid("z_image_up_unit_vector_of_camera")
-    _seed_attachment(_gc, dd_path=dd_path, sn_id=sn_id)
+    dd_path = _clean.path("summary/boundary/strike_point_inner_z/value")
+    sn_id = _clean.uid("z_image_up_unit_vector_of_camera")
+    _seed_attachment(_clean, dd_path=dd_path, sn_id=sn_id)
 
-    result = reconcile_attachment_consistency(_ScopedClient(_gc))
+    result = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert result.names_orphaned == [sn_id]
 
     still_there = _gc.query(
@@ -1733,13 +1848,13 @@ def test_orphaned_name_is_reported(_gc, _clean):
 @pytest.mark.graph
 def test_conflicting_group_leaves_one_edge_standing(_gc, _clean):
     """Only the surplus member of a pairwise-conflicting group is detached."""
-    kept = f"{_PREFIX}camera_ir/channel/camera/direction/z"
-    surplus = f"{_PREFIX}camera_ir/channel/camera/up/z"
-    sn_id = _uid("z_direction_unit_vector_of_camera")
+    kept = _clean.path("camera_ir/channel/camera/direction/z")
+    surplus = _clean.path("camera_ir/channel/camera/up/z")
+    sn_id = _clean.uid("z_direction_unit_vector_of_camera")
     for path in (surplus, kept):  # seeded surplus-first on purpose
-        _seed_attachment(_gc, dd_path=path, sn_id=sn_id, dd_unit="1", sn_unit="1")
+        _seed_attachment(_clean, dd_path=path, sn_id=sn_id, dd_unit="1", sn_unit="1")
 
-    result = reconcile_attachment_consistency(_ScopedClient(_gc))
+    result = reconcile_attachment_consistency(_ScopedClient(_gc, _clean.prefix))
     assert [v.dd_path for v in result.rejected] == [surplus]
     assert result.detached == 1
     assert result.names_orphaned == [], "the representative keeps the name sourced"
@@ -1759,14 +1874,14 @@ def test_conflicting_group_leaves_one_edge_standing(_gc, _clean):
 @pytest.mark.graph
 def test_name_level_defect_keeps_every_attachment(_gc, _clean):
     """A uniformly-rejected name is handed to ``sn edit``, not stripped."""
-    sn_id = _uid("atomic_count_of_ion_state")
+    sn_id = _clean.uid("atomic_count_of_ion_state")
     paths = [
-        f"{_PREFIX}core_profiles/profiles_1d/ion/element/atoms_n",
-        f"{_PREFIX}edge_profiles/profiles_1d/ion/element/atoms_n",
+        _clean.path("core_profiles/profiles_1d/ion/element/atoms_n"),
+        _clean.path("edge_profiles/profiles_1d/ion/element/atoms_n"),
     ]
     for path in paths:
         _seed_attachment(
-            _gc,
+            _clean,
             dd_path=path,
             sn_id=sn_id,
             name_stage="accepted",
@@ -1774,7 +1889,9 @@ def test_name_level_defect_keeps_every_attachment(_gc, _clean):
             sn_unit="1",
         )
 
-    result = reconcile_attachment_consistency(_ScopedClient(_gc), include_accepted=True)
+    result = reconcile_attachment_consistency(
+        _ScopedClient(_gc, _clean.prefix), include_accepted=True
+    )
     assert len(result.rejected) == 2
     assert [d.sn_id for d in result.names_misnamed] == [sn_id]
     assert result.skipped_misnamed == 2
