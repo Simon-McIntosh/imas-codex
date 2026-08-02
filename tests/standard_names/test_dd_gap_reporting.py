@@ -47,6 +47,13 @@ def _evidence(path: str = "equilibrium/path") -> dict[str, str]:
     }
 
 
+def _property_fingerprint(properties: dict[str, object]) -> list[dict[str, str]]:
+    return [
+        {"key": key, "type": type(value).__name__, "value": str(value)}
+        for key, value in sorted(properties.items())
+    ]
+
+
 def _registry_fact(
     *,
     gap_id: str = "dd_gap:*/direction/[xyz]:unit_defect",
@@ -91,6 +98,12 @@ def _registry_fact(
                 "reason": "curated registry entry",
                 "reporter": "registry_backfill",
             },
+            "relationship_fingerprint": _property_fingerprint(
+                {
+                    "reason": "curated registry entry",
+                    "reporter": "registry_backfill",
+                }
+            ),
         }
         for source_path in paths
     ]
@@ -107,6 +120,11 @@ def _registry_fact(
             "relationship_properties": {},
         }
     ]
+    for record in observation_records:
+        record["node_fingerprint"] = _property_fingerprint(record["node_properties"])
+        record["relationship_fingerprint"] = _property_fingerprint(
+            record["relationship_properties"]
+        )
     state_change_records = [
         {
             "id": "change:1",
@@ -120,11 +138,17 @@ def _registry_fact(
             "relationship_properties": {},
         }
     ]
+    for record in state_change_records:
+        record["node_fingerprint"] = _property_fingerprint(record["node_properties"])
+        record["relationship_fingerprint"] = _property_fingerprint(
+            record["relationship_properties"]
+        )
     incident_links = [
         {
             "relationship_id": f"path-link:{index}",
             "relationship_type": "HAS_DD_GAP",
             "relationship_properties": item["relationship_properties"],
+            "relationship_fingerprint": item["relationship_fingerprint"],
             "outgoing": False,
             "other_id": item["source_id"],
             "other_labels": ["IMASNode"],
@@ -137,6 +161,7 @@ def _registry_fact(
                 "relationship_id": "observation-link:1",
                 "relationship_type": "HAS_OBSERVATION",
                 "relationship_properties": {},
+                "relationship_fingerprint": [],
                 "outgoing": True,
                 "other_id": "observation:1",
                 "other_labels": ["DDGapObservation"],
@@ -145,6 +170,7 @@ def _registry_fact(
                 "relationship_id": "state-link:1",
                 "relationship_type": "HAS_STATE_CHANGE",
                 "relationship_properties": {},
+                "relationship_fingerprint": [],
                 "outgoing": True,
                 "other_id": "change:1",
                 "other_labels": ["DDGapStateChange"],
@@ -158,6 +184,7 @@ def _registry_fact(
         "registry_backend": backend,
         "upstream_url": upstream_url,
         "gap_properties": gap_properties,
+        "gap_property_fingerprint": _property_fingerprint(gap_properties),
         "source_paths": paths,
         "path_links": path_links,
         "observation_records": observation_records,
@@ -615,6 +642,16 @@ def test_registry_migration_cas_compares_complete_graph_snapshots() -> None:
     assert params["expected_incident_links"] == old["incident_links"]
     assert params["expected_direct_name_links"] == old["direct_name_links"]
     assert params["expected_source_name_links"] == old["source_name_links"]
+    assert (
+        params["expected_gap_property_fingerprint"] == old["gap_property_fingerprint"]
+    )
+    assert params["expected_cas_observation_records"] == [
+        {
+            "id": "observation:1",
+            "node_fingerprint": old["observation_records"][0]["node_fingerprint"],
+            "relationship_fingerprint": [],
+        }
+    ]
     assert params["observation_rekeys"] == [
         {
             "old_id": "observation:1",
@@ -734,6 +771,9 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
     assert "SET item.dd_gap_id" not in query
     assert "DDGapIdentityChange" in query
     assert "HAS_IDENTITY_CHANGE" in query
+    assert "epochSeconds" in query
+    assert "nanosecond" in query
+    assert "properties(gap) = $expected_gap_properties" not in query
     assert "CREATE (gap)-[:HAS_STATE_CHANGE]" not in query
     assert "DELETE" not in query
     set_clause = query.split("SET gap.id = $new_id", 1)[1].split("CREATE", 1)[0]

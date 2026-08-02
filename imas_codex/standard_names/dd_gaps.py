@@ -586,7 +586,17 @@ CALL {
     WITH node, report ORDER BY node.id, elementId(report)
     RETURN [item IN collect(CASE WHEN node IS NULL THEN null ELSE {
         source_id: node.id,
-        relationship_properties: properties(report)
+        relationship_properties: properties(report),
+        relationship_fingerprint: [property_key IN keys(report) | {
+            key: property_key,
+            type: valueType(report[property_key]),
+            value: CASE
+                WHEN valueType(report[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(report[property_key].epochSeconds) + ':' +
+                     toString(report[property_key].nanosecond)
+                ELSE toString(report[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS path_links
 }
 WITH gap, path_links, [item IN path_links | item.source_id] AS source_paths
@@ -598,7 +608,27 @@ CALL {
     RETURN [item IN collect(CASE WHEN observation IS NULL THEN null ELSE {
         id: observation.id,
         node_properties: properties(observation),
-        relationship_properties: properties(link)
+        node_fingerprint: [property_key IN keys(observation) | {
+            key: property_key,
+            type: valueType(observation[property_key]),
+            value: CASE
+                WHEN valueType(observation[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(observation[property_key].epochSeconds) + ':' +
+                     toString(observation[property_key].nanosecond)
+                ELSE toString(observation[property_key])
+            END
+        }],
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS observation_records
 }
 CALL {
@@ -608,7 +638,27 @@ CALL {
     RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
         id: change.id,
         node_properties: properties(change),
-        relationship_properties: properties(link)
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS state_change_records
 }
 CALL {
@@ -619,7 +669,27 @@ CALL {
     RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
         id: change.id,
         node_properties: properties(change),
-        relationship_properties: properties(link)
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS identity_change_records
 }
 CALL {
@@ -630,6 +700,16 @@ CALL {
         relationship_id: elementId(link),
         relationship_type: type(link),
         relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }],
         outgoing: startNode(link) = gap,
         other_id: other.id,
         other_labels: labels(other)
@@ -644,7 +724,17 @@ CALL {
     RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
         source_id: node.id,
         name_id: name.id,
-        relationship_properties: properties(link)
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS direct_name_links
 }
 CALL {
@@ -657,7 +747,17 @@ CALL {
         source_node_id: source.id,
         source_id: source.source_id,
         name_id: name.id,
-        relationship_properties: properties(link)
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS source_name_links
 }
 RETURN gap.id AS id,
@@ -666,6 +766,16 @@ RETURN gap.id AS id,
        gap.registry_backend AS registry_backend,
        gap.upstream_url AS upstream_url,
        properties(gap) AS gap_properties,
+       [property_key IN keys(gap) | {
+           key: property_key,
+           type: valueType(gap[property_key]),
+           value: CASE
+               WHEN valueType(gap[property_key]) STARTS WITH 'ZONED DATETIME'
+               THEN toString(gap[property_key].epochSeconds) + ':' +
+                    toString(gap[property_key].nanosecond)
+               ELSE toString(gap[property_key])
+           END
+       }] AS gap_property_fingerprint,
        source_paths,
        path_links,
        observation_records,
@@ -694,6 +804,7 @@ def _registry_sync_snapshot(fact: Mapping[str, Any]) -> dict[str, Any]:
     """Capture every lifecycle, evidence, and link field guarded during sync."""
     return {
         "gap_properties": dict(fact.get("gap_properties") or {}),
+        "gap_property_fingerprint": list(fact.get("gap_property_fingerprint") or []),
         "path_links": list(fact.get("path_links") or []),
         "observation_records": list(fact.get("observation_records") or []),
         "state_change_records": list(fact.get("state_change_records") or []),
@@ -844,18 +955,36 @@ def _registry_sync_plan(
 _RECLASSIFY_REGISTRY_FACT_QUERY = """
 MATCH (gap:DDGap {id: $old_id})
 WHERE NOT EXISTS { MATCH (:DDGap {id: $new_id}) }
-  AND properties(gap) = $expected_gap_properties
+  AND [property_key IN keys(gap) | {
+      key: property_key,
+      type: valueType(gap[property_key]),
+      value: CASE
+          WHEN valueType(gap[property_key]) STARTS WITH 'ZONED DATETIME'
+          THEN toString(gap[property_key].epochSeconds) + ':' +
+               toString(gap[property_key].nanosecond)
+          ELSE toString(gap[property_key])
+      END
+  }] = $expected_gap_property_fingerprint
 CALL {
     WITH gap
     OPTIONAL MATCH (node:IMASNode)-[report:HAS_DD_GAP]->(gap)
     WITH node, report ORDER BY node.id, elementId(report)
     RETURN [item IN collect(CASE WHEN node IS NULL THEN null ELSE {
         source_id: node.id,
-        relationship_properties: properties(report)
+        relationship_fingerprint: [property_key IN keys(report) | {
+            key: property_key,
+            type: valueType(report[property_key]),
+            value: CASE
+                WHEN valueType(report[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(report[property_key].epochSeconds) + ':' +
+                     toString(report[property_key].nanosecond)
+                ELSE toString(report[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS path_links
 }
 WITH gap, path_links, [item IN path_links | item.source_id] AS source_paths
-WHERE path_links = $expected_path_links
+WHERE path_links = $expected_cas_path_links
 CALL {
     WITH gap
     OPTIONAL MATCH (gap)-[link:HAS_OBSERVATION]->
@@ -863,24 +992,60 @@ CALL {
     WITH observation, link ORDER BY observation.id, elementId(link)
     RETURN [item IN collect(CASE WHEN observation IS NULL THEN null ELSE {
         id: observation.id,
-        node_properties: properties(observation),
-        relationship_properties: properties(link)
+        node_fingerprint: [property_key IN keys(observation) | {
+            key: property_key,
+            type: valueType(observation[property_key]),
+            value: CASE
+                WHEN valueType(observation[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(observation[property_key].epochSeconds) + ':' +
+                     toString(observation[property_key].nanosecond)
+                ELSE toString(observation[property_key])
+            END
+        }],
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS observation_records
 }
 WITH gap, source_paths, observation_records
-WHERE observation_records = $expected_observation_records
+WHERE observation_records = $expected_cas_observation_records
 CALL {
     WITH gap
     OPTIONAL MATCH (gap)-[link:HAS_STATE_CHANGE]->(change:DDGapStateChange)
     WITH change, link ORDER BY change.id, elementId(link)
     RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
         id: change.id,
-        node_properties: properties(change),
-        relationship_properties: properties(link)
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS state_change_records
 }
 WITH gap, source_paths, observation_records, state_change_records
-WHERE state_change_records = $expected_state_change_records
+WHERE state_change_records = $expected_cas_state_change_records
 CALL {
     WITH gap
     OPTIONAL MATCH (gap)-[link:HAS_IDENTITY_CHANGE]->
@@ -888,13 +1053,31 @@ CALL {
     WITH change, link ORDER BY change.id, elementId(link)
     RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
         id: change.id,
-        node_properties: properties(change),
-        relationship_properties: properties(link)
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS identity_change_records
 }
 WITH gap, source_paths, observation_records, state_change_records,
      identity_change_records
-WHERE identity_change_records = $expected_identity_change_records
+WHERE identity_change_records = $expected_cas_identity_change_records
 CALL {
     WITH gap
     OPTIONAL MATCH (gap)-[link]-(other)
@@ -902,7 +1085,16 @@ CALL {
     RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
         relationship_id: elementId(link),
         relationship_type: type(link),
-        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }],
         outgoing: startNode(link) = gap,
         other_id: other.id,
         other_labels: labels(other)
@@ -910,7 +1102,7 @@ CALL {
 }
 WITH gap, source_paths, observation_records, state_change_records,
      identity_change_records, incident_links
-WHERE incident_links = $expected_incident_links
+WHERE incident_links = $expected_cas_incident_links
 CALL {
     WITH source_paths
     OPTIONAL MATCH (node:IMASNode)-[link:HAS_STANDARD_NAME]->
@@ -920,12 +1112,21 @@ CALL {
     RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
         source_id: node.id,
         name_id: name.id,
-        relationship_properties: properties(link)
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS direct_name_links
 }
 WITH gap, source_paths, observation_records, state_change_records,
      identity_change_records, direct_name_links
-WHERE direct_name_links = $expected_direct_name_links
+WHERE direct_name_links = $expected_cas_direct_name_links
 CALL {
     WITH source_paths
     OPTIONAL MATCH (source:StandardNameSource)-[link:PRODUCED_NAME]->
@@ -936,12 +1137,21 @@ CALL {
         source_node_id: source.id,
         source_id: source.source_id,
         name_id: name.id,
-        relationship_properties: properties(link)
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
     } END) WHERE item IS NOT NULL] AS source_name_links
 }
 WITH gap, source_paths, observation_records, state_change_records,
      identity_change_records, source_name_links
-WHERE source_name_links = $expected_source_name_links
+WHERE source_name_links = $expected_cas_source_name_links
 SET gap.id = $new_id,
     gap.path = $target_path,
     gap.kind = $target_kind,
@@ -1080,6 +1290,23 @@ def _registry_migration_parameters(item: Mapping[str, Any]) -> dict[str, Any]:
     """Build the complete CAS parameter set for one planned reclassification."""
     expected = item["expected"]
     target = item["target"]
+
+    def cas_records(
+        records: Sequence[Mapping[str, Any]], identity_fields: Sequence[str]
+    ) -> list[dict[str, Any]]:
+        return [
+            {
+                **{field: record[field] for field in identity_fields},
+                **(
+                    {"node_fingerprint": record["node_fingerprint"]}
+                    if "node_fingerprint" in record
+                    else {}
+                ),
+                "relationship_fingerprint": record["relationship_fingerprint"],
+            }
+            for record in records
+        ]
+
     observation_rekeys = []
     for record in expected["observation_records"]:
         properties = dict(record["node_properties"])
@@ -1095,6 +1322,7 @@ def _registry_migration_parameters(item: Mapping[str, Any]) -> dict[str, Any]:
         "new_id": item["new_id"],
         "old_kind": item["old_kind"],
         "expected_gap_properties": expected["gap_properties"],
+        "expected_gap_property_fingerprint": expected["gap_property_fingerprint"],
         "expected_path_links": expected["path_links"],
         "expected_observation_records": expected["observation_records"],
         "expected_state_change_records": expected["state_change_records"],
@@ -1102,6 +1330,33 @@ def _registry_migration_parameters(item: Mapping[str, Any]) -> dict[str, Any]:
         "expected_incident_links": expected["incident_links"],
         "expected_direct_name_links": expected["direct_name_links"],
         "expected_source_name_links": expected["source_name_links"],
+        "expected_cas_path_links": cas_records(expected["path_links"], ("source_id",)),
+        "expected_cas_observation_records": cas_records(
+            expected["observation_records"], ("id",)
+        ),
+        "expected_cas_state_change_records": cas_records(
+            expected["state_change_records"], ("id",)
+        ),
+        "expected_cas_identity_change_records": cas_records(
+            expected["identity_change_records"], ("id",)
+        ),
+        "expected_cas_incident_links": cas_records(
+            expected["incident_links"],
+            (
+                "relationship_id",
+                "relationship_type",
+                "outgoing",
+                "other_id",
+                "other_labels",
+            ),
+        ),
+        "expected_cas_direct_name_links": cas_records(
+            expected["direct_name_links"], ("source_id", "name_id")
+        ),
+        "expected_cas_source_name_links": cas_records(
+            expected["source_name_links"],
+            ("source_node_id", "source_id", "name_id"),
+        ),
         "observation_rekeys": observation_rekeys,
         "target_path": target["path"],
         "target_kind": target["kind"],
