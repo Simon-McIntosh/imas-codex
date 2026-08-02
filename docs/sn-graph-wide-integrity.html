@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -707,6 +707,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="governed-source-snapshot-migrator" data-who="reckon-ship" data-when="2026-08-02T22:02:00+02:00">
     <div class="r-comment-body"><p><strong>The governed DD source-snapshot migrator is implemented and fail-closed.</strong> Commits <code>757e3bb9</code>, <code>7a2f9dbb</code>, and <code>c72d2ef4</code> add a typed immutable ledger, full-CAS atomic migration, global WEST/test/DDGap exclusion, apply-time raw-manifest SHA binding before graph access, and authoritative semantic classification that keeps the redundant description mirror in payload/CAS/mutation while excluding it from review routing. Verification-driven repairs closed record-local closure leakage and 203 false <code>changed</code> classifications. Latest author validation passed 18 focused and 12 real-Neo4j tests at 512 MiB Metaspace. Production apply remains prohibited until the independent verifier repeats the corrected dry-run twice with identical zero-write hashes.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260802T205247090614" data-who="" data-when="">
+    <div class="r-comment-body"><p><strong>The guarded DD source-snapshot migration passed its final independent production dry-run gate.</strong> Artifact <code>/tmp/s7_source_snapshot_migration_verification_final.json</code> (SHA-256 <code>ddd3f7a1025e2a165682836d526bf0b4391db35e38d79668a72e12b0b6ac5cd9</code>) records two byte-identical dry-run receipts: 213 allowlisted sources, 203 planned and 10 refused, classified as 162 byte-unchanged, one semantic-unchanged, and 40 materially changed. All 17 independently keyset-paged protected graph sections were identical before, between, and after at combined hash <code>fd20296c1d4cff8493f9ee89d395644c6336637a8ab2054cb2572faf8363b6c9</code>; claims, scopes, and migration ledgers remained zero. The 10 refusals are eight identity/type changes, one already-current source without matching snapshot proof, and one unpinned source. No production apply has run; the next gate is an exact 203-source reduced manifest with repeat dry-run proof.</p></div>
 </div>
 </section>
 </main>
