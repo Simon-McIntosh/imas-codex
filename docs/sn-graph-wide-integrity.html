@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="31">
-<meta name="plan-impl" content="0.94">
+<meta name="plan-version" content="32">
+<meta name="plan-impl" content="0.95">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -667,6 +667,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="atomic-fold-temporal-repair-20260802" data-who="reckon-ship" data-when="2026-08-02T19:05:00+02:00">
     <div class="r-comment-body"><p><strong>The production temporal-CAS repair is independently approved and merged at <code>6161dfd6</code>.</strong> The final helper locks the complete participant closure, compares a type-sensitive second snapshot, creates its event and mutates only exact locked element IDs in the same transaction, and preserves duplicate/cardinality and postflight checks. The parent repair passed 35 stateful and seven disposable-Neo4j tests plus six live EXPLAIN checks. The final two-line target fence passed its focused unit, live EXPLAIN, and an exact production vorticity execution through expected-after under explicit rollback: full snapshot <code>19353d27…</code>, event count zero, and the 355-path WEST census were identical before and after. Evidence: <code>/tmp/atomic_fold_b347459b_production_rollback.json</code>, SHA-256 <code>986ed3a0fe0129524a82dc116950710e15d1c5f685bb22ed8dc0ab0c1ddbe4a1</code>. The undersized 128 MiB disposable verifier instance failed environmentally before mutation and was not rerun; the changed production query itself is verified. Live vorticity application remains a separate exact gated step.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="vorticity-fold-live-20260802" data-who="reckon-ship" data-when="2026-08-02T19:18:00+02:00">
+    <div class="r-comment-body"><p><strong>The WEST-clean vorticity identity fold is live, exact, and idempotent.</strong> The merged helper committed event <code>sn-change:c6182dca-a931-4c9e-9ff2-87a439a23f7e</code> under run <code>sn-fold:e96d25c4-1803-4e48-bc7e-2741e7f30fb5</code>. One source and one DD backing moved from two old-plus-target bindings/projections to one target-only binding/projection; source, projection, lineage, and change receipt counts are each one, with zero rejected, detached, or stranded attachments. The exact second invocation returned <code>already_superseded=true</code> with the same event/run and unchanged final snapshot. Before hash <code>19353d27…</code>, final hash <code>fd6be5df…</code>, and expected/actual semantic hash <code>b22d1f9d…</code> match the recorded contract. The full 355-path WEST transitive overlap remained empty and its census hash stayed <code>2208a13a…</code>. Evidence: <code>/tmp/s7_vorticity_identity_fold_applied.json</code>, SHA-256 <code>017905170e3b030ec6b9a6d61952cb94826d838f393809ffc3a5d9a5e72bb0f8</code>. Cross-section remains untouched and deferred as WEST-name-dependent.</p></div>
 </div>
 </section>
 </main>
