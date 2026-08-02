@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="40">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -698,6 +698,15 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="reviewer-wire-schema-compatibility" data-who="reckon-ship" data-when="2026-08-02T20:28:00+02:00">
     <div class="r-comment-body"><p><strong>Bounded reviewer compatibility fixes landed.</strong> Commits <code>c2a3b216</code> and <code>eba69937</code> propagate the resolved reviewer profile before bounded-drain returns and remove only the open-ended <code>revised_fields</code> map from the name-only wire model; eight targeted files passed on <code>sun_debug</code>. The one-call Sonnet 5 probe advanced beyond immediate schema rejection into HTTPS response-body streaming but timed out after 141.23 s, so live compatibility remains <strong>INDETERMINATE</strong>, not PASS. No retry or cohort resume occurred; exact provider cost is unavailable. Evidence: <code>/tmp/s7_name_review_schema_compat.json</code>, SHA-256 <code>50db94644e16b050a83fad72df99360eb2a1cf15a43e1f97590f7445f582bb3b</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="bounded-reviewer-quorum-restored" data-who="reckon-ship" data-when="2026-08-02T22:02:00+02:00">
+    <div class="r-comment-body"><p><strong>Bounded name review is operational with a fail-closed quorum.</strong> Commits <code>31064374</code> and <code>062e96b8</code> reject single-review profiles for bounded drains and order the existing default seats as blind Grok 4.5 + GPT-5.6 Luna with Claude Sonnet 5 only as the disagreement breaker. Exact lean-schema probes passed for Luna (<code>/tmp/s7_luna_reviewer_compat.json</code>, SHA-256 <code>15bde1fe…</code>, USD 0.000279375) and Grok (<code>/tmp/s7_grok_reviewer_compat.json</code>, SHA-256 <code>a3635ae7…</code>, USD 0.0063824). Three Anthropic name-schema diagnostics timed out without responses, so each remains conservatively reserved at its USD 2 ceiling rather than being reported as zero.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="bounded-cohort-resume-outcome" data-who="reckon-ship" data-when="2026-08-02T22:02:00+02:00">
+    <div class="r-comment-body"><p><strong>The original 17-path cohort resumed once and reached natural terminality.</strong> Run <code>01e16542-6ce1-4aa3-b540-c243778be609</code>, scope <code>49ab7317-01ef-44d2-b137-2f024ef7e1f1</code>, completed with <code>no_eligible_work</code> after 964.34 s and USD 2.757548 across 49 calls. Thirteen paths are fully accepted; <code>change_in_ion_state_mean_ionisation_potential</code> has an accepted name but docs exhausted at chain length 3 (score 0.7875); two names are exhausted and one source is skipped. All 26 transitive cohort names strict-parse, no incomplete name quorum or single-review name acceptance exists, scope/claims are empty, and DD/WEST/test hashes are unchanged. Receipt: <code>/tmp/s7_bounded_cohort_01_resume.json</code>, SHA-256 <code>fa8b02e3c9f0fb08a184312d73461b0e607b93be78719a6e522bb86095d428b9</code>. Exact cohort spend is USD 3.690404 across the initial + resume runs; with known compatibility calls and all three unknown calls reserved at their hard maxima, total exposure remains below USD 9.70 of the authorized USD 200.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="governed-source-snapshot-migrator" data-who="reckon-ship" data-when="2026-08-02T22:02:00+02:00">
+    <div class="r-comment-body"><p><strong>The governed DD source-snapshot migrator is implemented and fail-closed.</strong> Commits <code>757e3bb9</code>, <code>7a2f9dbb</code>, and <code>c72d2ef4</code> add a typed immutable ledger, full-CAS atomic migration, global WEST/test/DDGap exclusion, apply-time raw-manifest SHA binding before graph access, and authoritative semantic classification that keeps the redundant description mirror in payload/CAS/mutation while excluding it from review routing. Verification-driven repairs closed record-local closure leakage and 203 false <code>changed</code> classifications. Latest author validation passed 18 focused and 12 real-Neo4j tests at 512 MiB Metaspace. Production apply remains prohibited until the independent verifier repeats the corrected dry-run twice with identical zero-write hashes.</p></div>
 </div>
 </section>
 </main>
