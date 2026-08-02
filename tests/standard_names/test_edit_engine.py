@@ -560,12 +560,24 @@ class FakeGraph:
     # -- transaction surface (persist_refined_name / persist_refined_docs) --
 
     def _tx_run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
-        if "new_name" in params and "old_name" in params:
+        if "// REFINE_ATOMIC_PREFLIGHT" in cypher:
             old_name = params["old_name"]
             new_name = params["new_name"]
             old = self.nodes.get(old_name)
-            if old is None or old.get("name_stage") != "refining":
+            expected_stage = params.get("expected_old_stage") or "refining"
+            if old is None or old.get("name_stage") != expected_stage:
                 return []
+            existing = self.nodes.get(new_name)
+            if existing is not None and not (
+                params.get("edit_mode") is None
+                and (existing.get("name_stage") or "") in ("", "pending")
+                and (existing.get("origin") or "") != "derived"
+            ):
+                return []
+            old["superseded_from_stage"] = (
+                old.get("superseded_from_stage") or old["name_stage"]
+            )
+            old["name_stage"] = "refining"
             new_row = dict(_DEFAULT_NODE_FIELDS)
             new_row.update(
                 name_stage="drafted",
@@ -591,19 +603,53 @@ class FakeGraph:
                 edit_override_edits=params.get("edit_override_edits"),
                 edit_include_accepted=params.get("edit_include_accepted"),
             )
-            self.nodes[new_name] = new_row
+            if existing is None:
+                self.nodes[new_name] = new_row
+            else:
+                existing["name_stage"] = "drafted"
+                existing["origin"] = "pipeline"
+            return [
+                {
+                    "new_name": new_name,
+                    "old_name": old_name,
+                    "source_ids": sorted(
+                        sid
+                        for sid, target in self.produced_name.items()
+                        if target == old_name
+                    ),
+                }
+            ]
+
+        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+            old_name = params["old_name"]
+            new_name = params["new_name"]
+            old = self.nodes.get(old_name)
+            if old is None or old.get("name_stage") != "refining":
+                return []
             self.refined_from[new_name] = old_name
             old["name_stage"] = "superseded"
             old["claim_token"] = None
             old["claimed_at"] = None
-            for sid, tgt in list(self.produced_name.items()):
-                if tgt == old_name:
-                    self.produced_name[sid] = new_name
             for _child, edges in self.edges_by_child.items():
                 for e in edges:
                     if e["parent_id"] == old_name:
                         e["parent_id"] = new_name
             return [{"new_name": new_name, "old_name": old_name}]
+
+        if "RETURN size(moved) AS moved" in cypher:
+            old_name = params["old_name"]
+            new_name = params["new_name"]
+            selected = set(params.get("source_ids") or [])
+            moved = 0
+            for sid, target in list(self.produced_name.items()):
+                if target == old_name and sid in selected:
+                    self.produced_name[sid] = new_name
+                    moved += 1
+            self.nodes[new_name]["source_paths"] = sorted(selected)
+            return [{"moved": moved}]
+
+        if "CREATE (change:StandardNameChange" in cypher:
+            return []
 
         if "cur_desc" in params:
             sn_id = params["sn_id"]

@@ -916,16 +916,6 @@ def _apply_rename(
 
     # 6. Apply: enter REVIEW_NAME by creating the refined successor node.
     run_id = _new_run_id()
-    gc.query(
-        """
-        // EDIT_SET_REFINING
-        MATCH (sn:StandardName {id: $id})
-        SET sn.superseded_from_stage =
-                coalesce(sn.superseded_from_stage, sn.name_stage),
-            sn.name_stage = 'refining'
-        """,
-        id=refine_root_old,
-    )
     result = persist_refined_name(
         old_name=refine_root_old,
         new_name=refine_root_new,
@@ -947,6 +937,7 @@ def _apply_rename(
         edit_requested_at=_now_iso(),
         edit_override_edits=override_edits,
         edit_include_accepted=include_accepted,
+        expected_old_stage=root_stage,
     )
     successor = result["new_name"]
 

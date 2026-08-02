@@ -10,7 +10,7 @@ an internal audit trail after unapproved candidates are compacted.
 from __future__ import annotations
 
 import json
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from contextlib import suppress
 from datetime import UTC, datetime
 from typing import Any
@@ -310,6 +310,7 @@ def retarget_standard_name_sources(
     run_id: str | None = None,
     record_change: bool = True,
     enforce_consistency: bool = True,
+    source_ids: Sequence[str] | None = None,
     _transactional: bool = False,
 ) -> int:
     """Move every semantic source from ``old_name`` to ``new_name``.
@@ -341,6 +342,7 @@ def retarget_standard_name_sources(
                         run_id=run_id,
                         record_change=record_change,
                         enforce_consistency=True,
+                        source_ids=source_ids,
                         _transactional=True,
                     )
                     tx.commit()
@@ -349,7 +351,7 @@ def retarget_standard_name_sources(
                     tx.rollback()
                     raise
 
-    admitted_source_ids: list[str] | None = None
+    admitted_source_ids = sorted(set(source_ids)) if source_ids is not None else None
     if enforce_consistency:
         candidate_rows = gc.query(
             """
@@ -365,6 +367,12 @@ def retarget_standard_name_sources(
             new_name=new_name,
         )
         candidate_ids = [r["source_id"] for r in candidate_rows if r.get("source_id")]
+        if admitted_source_ids is not None:
+            candidate_ids = [
+                source_id
+                for source_id in candidate_ids
+                if source_id in admitted_source_ids
+            ]
         from imas_codex.standard_names.attachment_audit import guard_source_pairings
 
         guarded = guard_source_pairings(gc, new_name, candidate_ids)
@@ -384,7 +392,7 @@ def retarget_standard_name_sources(
         WITH new, old, sns
         WHERE $source_ids IS NULL OR sns.id IN $source_ids
         WITH new, old, collect(DISTINCT sns) AS sources
-        SET new.source_paths = []
+        SET old.source_paths = [], new.source_paths = []
         WITH new, old, sources
         UNWIND sources AS source
         WITH new, old, source WHERE source IS NOT NULL

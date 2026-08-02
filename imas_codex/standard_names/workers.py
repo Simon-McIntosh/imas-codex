@@ -371,6 +371,60 @@ def _name_denotes_rate(sn_name: str) -> bool:
     return any(f"_{t}_" in padded for t in _rate_natured_bases())
 
 
+# Codex policy classifying the public operator registry by temporal meaning.
+# The registry remains ISN-owned; the drift test below this boundary requires
+# every policy key to remain registered rather than letting a renamed operator
+# silently stop protecting attachments.
+_TIME_CHANGE_OPERATOR_POLICY = frozenset({"change_in", "tendency", "time_derivative"})
+
+
+def _ir_denotes_time_change(ir: Any) -> bool:
+    """Recursively find registered temporal-change semantics in public ISN IR."""
+    from imas_codex.standard_names.segments import (
+        OPERATOR_SEGMENT,
+        grammar_tokens_by_segment,
+    )
+
+    registered = frozenset(grammar_tokens_by_segment().get(OPERATOR_SEGMENT, ()))
+    time_change_operators = _TIME_CHANGE_OPERATOR_POLICY & registered
+    for operator in getattr(ir, "operators", ()) or ():
+        if getattr(operator, "op", None) in time_change_operators:
+            return True
+        if any(
+            _ir_denotes_time_change(argument)
+            for argument in getattr(operator, "args", ()) or ()
+        ):
+            return True
+
+    # The public parser can canonically absorb a bare-prefix operator into the
+    # qualifier sequence. Read that parser-owned IR token rather than matching
+    # the name string, while still requiring it to be a registered operator.
+    return any(
+        getattr(qualifier, "token", None) in time_change_operators
+        for qualifier in getattr(ir, "qualifiers", ()) or ()
+    )
+
+
+def _name_claims_time_change(sn_name: str) -> bool:
+    """Interpret temporal semantics structurally, with a legacy-safe fallback."""
+    try:
+        from imas_codex.standard_names.grammar_adapter import parse_canonical_name
+
+        return _ir_denotes_time_change(parse_canonical_name(sn_name).ir)
+    except (TypeError, ValueError):
+        # Legacy graph identities can predate the strict grammar. Preserve the
+        # conservative lexical rule for those unparseable names only.
+        return sn_name.startswith(
+            (
+                "change_in_",
+                "tendency_of_",
+                "rate_of_",
+                "rate_of_change_of_",
+                "time_derivative_of_",
+            )
+        )
+
+
 def _shape_parameter_surface(dd_path: str | None) -> str:
     """Surface a shape parameter from *dd_path* is defined *of*.
 
@@ -2537,13 +2591,6 @@ def _is_attachment_consistent(
     because the lexical rules are unit-independent; a caller with no unit
     context gets exactly the pre-unit behaviour.
     """
-    change_prefixes = (
-        "change_in_",
-        "tendency_of_",
-        "rate_of_",
-        "rate_of_change_of_",
-        "time_derivative_of_",
-    )
     change_path_tokens = (
         "instant_changes",
         "/change/",
@@ -2555,7 +2602,7 @@ def _is_attachment_consistent(
     # ``rotation_frequency_of_…``). Only the explicit claim demands a
     # differentiating source — a directly measured frequency is its own base
     # quantity — while either reading satisfies a derivative source.
-    sn_claims_derivative = any(sn_name.startswith(p) for p in change_prefixes)
+    sn_claims_derivative = _name_claims_time_change(sn_name)
     sn_is_rate = sn_claims_derivative or _name_denotes_rate(sn_name)
     # Rate-ness on the path side is a property of the individual SEGMENT that
     # names the derivative, not of an enclosing container: a container of
@@ -6692,6 +6739,7 @@ async def process_refine_name_batch(
                     reason=result_obj.reason,
                     escalated=escalate,
                     run_id=mgr.run_id,
+                    expected_claim_token=item.get("claim_token"),
                 )
                 processed += 1
                 logger.info(

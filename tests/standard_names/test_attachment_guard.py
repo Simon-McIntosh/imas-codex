@@ -79,6 +79,66 @@ def test_rate_marker_paths_accept_rate_names(source_id: str, sn_name: str) -> No
     assert ok, reason
 
 
+@pytest.mark.parametrize(
+    "sn_name",
+    [
+        "time_derivative_of_electron_density",
+        "tendency_of_electron_density",
+        "change_in_electron_density",
+        "volume_averaged_time_derivative_of_electron_density",
+        "volume_integrated_time_derivative_of_electron_density",
+        "flux_surface_averaged_time_derivative_of_electron_density",
+        "difference_of_time_derivative_of_electron_density_and_ion_density",
+        "product_of_time_derivative_of_electron_density_and_volume",
+        "ratio_of_time_derivative_of_electron_density_to_ion_density",
+    ],
+)
+def test_recursive_time_change_shapes_match_a_derivative_path(sn_name: str) -> None:
+    """Every supported time-change expression is found anywhere in public IR."""
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/dn_e_dt/value", sn_name
+    )
+    assert ok, reason
+
+
+def test_nested_time_derivative_still_rejects_a_plain_path() -> None:
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/n_e/value",
+        "volume_averaged_time_derivative_of_electron_density",
+    )
+    assert not ok
+    assert "tense mismatch" in reason
+
+
+def test_non_time_operator_does_not_claim_a_derivative() -> None:
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/dn_e_dt/value",
+        "volume_averaged_electron_density",
+    )
+    assert not ok
+    assert "tense mismatch" in reason
+
+
+def test_parse_failure_retains_conservative_lexical_fallback() -> None:
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/dn_e_dt/value",
+        "time_derivative_of_unregistered_quantity",
+    )
+    assert ok, reason
+
+
+def test_time_change_policy_operators_exist_in_public_registry() -> None:
+    """Codex policy may classify operators but never invent their vocabulary."""
+    from imas_codex.standard_names.segments import (
+        OPERATOR_SEGMENT,
+        grammar_tokens_by_segment,
+    )
+    from imas_codex.standard_names.workers import _TIME_CHANGE_OPERATOR_POLICY
+
+    registered = set(grammar_tokens_by_segment()[OPERATOR_SEGMENT])
+    assert _TIME_CHANGE_OPERATOR_POLICY <= registered
+
+
 # ---------------------------------------------------------------------------
 # ``_dt`` is overloaded: time denominator vs deuterium-tritium species
 # ---------------------------------------------------------------------------

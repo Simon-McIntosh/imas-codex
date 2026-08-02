@@ -196,15 +196,14 @@ def test_review_stage_decision(
 
     fn = getattr(graph_ops, fn_name)
 
-    # persist_reviewed_* makes TWO GraphClient() calls:
-    #   Q1 — reads current chain_length (returns a row with the chain key)
-    #   Q2 — writes the new stage. persist_reviewed_docs RETURNs the written
-    #        node id and treats an empty result as a concurrent-win no-op, so
-    #        Q2 must yield a row (harmless for persist_reviewed_name).
+    # persist_reviewed_* first reads the current chain length, then writes the
+    # new stage. persist_reviewed_docs returns the written node id and treats an
+    # empty result as a concurrent-win no-op, so the write must yield a row
+    # (harmless for persist_reviewed_name).
     gc = _mock_gc_query(
         return_values=[
-            [{chain_key: chain_len}],  # Q1: chain-length read succeeds
-            [{"id": "test_sn"}],  # Q2: stage write committed (one row)
+            [{chain_key: chain_len}],  # Chain-length read succeeds.
+            [{"id": "test_sn"}],  # Stage write commits one row.
         ]
     )
 
@@ -225,10 +224,10 @@ def test_review_stage_decision(
 
 
 def test_review_stage_token_mismatch_is_noop() -> None:
-    """Token mismatch (Q1 returns empty) → function returns empty string (no-op)."""
+    """An empty claim read returns an empty string without writing."""
     from imas_codex.standard_names.graph_ops import persist_reviewed_name
 
-    # Q1 returns nothing — simulates wrong token or wrong stage.
+    # An empty read simulates a wrong token or wrong stage.
     gc = _mock_gc_query(return_values=[[]])
     with _patch_gc(gc), _no_write_reviews():
         result = persist_reviewed_name(
@@ -402,6 +401,23 @@ class TestGenerateDocsPendingToDrafted:
 class TestRefineNameStageMachine:
     """persist_refined_name: predecessor→superseded, new SN→drafted, edges migrated."""
 
+    @staticmethod
+    def _queries(tx: MagicMock) -> list[str]:
+        return [call.args[0] for call in tx.run.call_args_list]
+
+    @classmethod
+    def _combined_cypher(cls, tx: MagicMock) -> str:
+        return "\n".join(cls._queries(tx))
+
+    @classmethod
+    def _preflight_params(cls, tx: MagicMock) -> dict[str, Any]:
+        position = next(
+            index
+            for index, query in enumerate(cls._queries(tx))
+            if "REFINE_ATOMIC_PREFLIGHT" in query
+        )
+        return tx.run.call_args_list[position].kwargs
+
     def _call_persist(
         self,
         tx_run_return: list[dict[str, Any]] | None = None,
@@ -428,49 +444,49 @@ class TestRefineNameStageMachine:
     def test_cypher_marks_predecessor_superseded(self) -> None:
         """Cypher SET marks old node name_stage = 'superseded'."""
         _, tx = self._call_persist()
-        cypher: str = tx.run.call_args.args[0]
+        cypher = self._combined_cypher(tx)
         assert "superseded" in cypher
 
     def test_cypher_sets_new_sn_name_stage_drafted(self) -> None:
         """Cypher ON CREATE SET sets new node name_stage = 'drafted'."""
         _, tx = self._call_persist()
-        cypher: str = tx.run.call_args.args[0]
+        cypher = self._combined_cypher(tx)
         assert "drafted" in cypher
 
     def test_cypher_sets_new_sn_docs_stage_pending(self) -> None:
         """Cypher ON CREATE SET sets new node docs_stage = 'pending'."""
         _, tx = self._call_persist()
-        cypher: str = tx.run.call_args.args[0]
+        cypher = self._combined_cypher(tx)
         assert "docs_stage" in cypher and "'pending'" in cypher
 
     def test_cypher_creates_refined_from_edge(self) -> None:
         """Cypher creates REFINED_FROM edge from new SN to old SN."""
         _, tx = self._call_persist()
-        cypher: str = tx.run.call_args.args[0]
+        cypher = self._combined_cypher(tx)
         assert "REFINED_FROM" in cypher
 
     def test_chain_length_incremented(self) -> None:
         """new_chain_length passed to Cypher equals old_chain_length + 1."""
         _, tx = self._call_persist(old_chain_length=1)
-        params: dict[str, Any] = tx.run.call_args.kwargs
+        params = self._preflight_params(tx)
         assert params["new_chain_length"] == 2  # 1 + 1
 
     def test_chain_length_incremented_from_zero(self) -> None:
         """First refine: chain_length 0 → 1."""
         _, tx = self._call_persist(old_chain_length=0)
-        params: dict[str, Any] = tx.run.call_args.kwargs
+        params = self._preflight_params(tx)
         assert params["new_chain_length"] == 1
 
     def test_cypher_migrates_produced_name_edges(self) -> None:
         """Cypher deletes PRODUCED_NAME from old SN and re-creates on new SN."""
         _, tx = self._call_persist()
-        cypher: str = tx.run.call_args.args[0]
+        cypher = self._combined_cypher(tx)
         assert "PRODUCED_NAME" in cypher
 
     def test_cypher_migrates_has_standard_name_edges(self) -> None:
         """Cypher deletes HAS_STANDARD_NAME from old SN and re-creates on new SN."""
         _, tx = self._call_persist()
-        cypher: str = tx.run.call_args.args[0]
+        cypher = self._combined_cypher(tx)
         assert "HAS_STANDARD_NAME" in cypher
 
     def test_returns_new_and_old_name(self) -> None:
@@ -480,9 +496,14 @@ class TestRefineNameStageMachine:
         assert result["old_name"] == "test_sn"
 
     def test_single_committed_transaction(self) -> None:
-        """All changes (new node + edge + migration) land in a single transaction."""
+        """Guarded mutation, mirrors, and ledger share one transaction."""
         _, tx = self._call_persist()
-        tx.run.assert_called_once()
+        queries = self._queries(tx)
+        assert "REFINE_ATOMIC_PREFLIGHT" in queries[0]
+        assert "REFINED_FROM" in queries[1]
+        assert "RETURN size(moved) AS moved" in queries[2]
+        assert "CREATE (change:StandardNameChange" in queries[3]
+        assert len(queries) == 4
         tx.commit.assert_called_once()
 
 
