@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-impl" content="0.95">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -670,6 +670,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="vorticity-fold-live-20260802" data-who="reckon-ship" data-when="2026-08-02T19:18:00+02:00">
     <div class="r-comment-body"><p><strong>The WEST-clean vorticity identity fold is live, exact, and idempotent.</strong> The merged helper committed event <code>sn-change:c6182dca-a931-4c9e-9ff2-87a439a23f7e</code> under run <code>sn-fold:e96d25c4-1803-4e48-bc7e-2741e7f30fb5</code>. One source and one DD backing moved from two old-plus-target bindings/projections to one target-only binding/projection; source, projection, lineage, and change receipt counts are each one, with zero rejected, detached, or stranded attachments. The exact second invocation returned <code>already_superseded=true</code> with the same event/run and unchanged final snapshot. Before hash <code>19353d27…</code>, final hash <code>fd6be5df…</code>, and expected/actual semantic hash <code>b22d1f9d…</code> match the recorded contract. The full 355-path WEST transitive overlap remained empty and its census hash stayed <code>2208a13a…</code>. Evidence: <code>/tmp/s7_vorticity_identity_fold_applied.json</code>, SHA-256 <code>017905170e3b030ec6b9a6d61952cb94826d838f393809ffc3a5d9a5e72bb0f8</code>. Cross-section remains untouched and deferred as WEST-name-dependent.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="bounded-generation-budget-20260802" data-who="Simon McIntosh" data-when="2026-08-02T19:30:00+02:00" data-quote="A budget of 200 USD is authorized for generation work using the SN pipeline if warranted.">
+    <div class="r-comment-body"><p><strong>A hard cumulative budget of USD 200 is authorized for warranted SN pipeline generation/review work.</strong> Execution remains conditional on independent approval and integration of the bounded-drain instrument plus an exact executable DD-path manifest derived from the corrected transitive WEST closure. The operator will use at most USD 50 guarded cohorts, remeasure integrity, WEST invariants, and attributable spend after every cohort, and stop at USD 200 or earlier when no safe executable work remains. Unscoped review, the evidence-only audit artifact, WEST paths/names, and semantically unadjudicated atomic candidates remain unauthorized.</p></div>
 </div>
 </section>
 </main>
