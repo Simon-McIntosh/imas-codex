@@ -9,6 +9,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+from neo4j.time import DateTime
 
 from imas_codex.standard_names import edit
 
@@ -466,9 +467,11 @@ class _Transaction:
             self.write_markers.append("event")
             if self.graph.fail_at == "event":
                 raise RuntimeError("injected event failure")
-            old = self.state.nodes[params["old_id"]]
-            target = self.state.nodes[params["into_id"]]
-            if old != params["old_properties"] or target != params["target_properties"]:
+            if (
+                self._element_id("name", params["old_id"]) != params["old_element_id"]
+                or self._element_id("name", params["into_id"])
+                != params["target_element_id"]
+            ):
                 return []
             change = {
                 "id": params["change_id"],
@@ -539,10 +542,7 @@ class _Transaction:
             moved_sources = 0
             for index, expected in enumerate(params["sources"]):
                 source = self.state.sources[expected["id"]]
-                if (
-                    self._element_id("source", expected["id"]) != expected["element_id"]
-                    or source["properties"] != expected["properties"]
-                ):
+                if self._element_id("source", expected["id"]) != expected["element_id"]:
                     continue
                 remove = set(expected["remove_binding_element_ids"])
                 source["bindings"] = [
@@ -558,10 +558,12 @@ class _Transaction:
                     raise RuntimeError("injected partial source migration")
             moved_backings = 0
             for expected in params["backings"]:
-                backing_id = expected["properties"]["id"]
+                backing_id = next(
+                    identifier
+                    for identifier in self.state.backings
+                    if self._element_id("backing", identifier) == expected["element_id"]
+                )
                 backing = self.state.backings[backing_id]
-                if backing["properties"] != expected["properties"]:
-                    continue
                 remove = set(expected["remove_projection_element_ids"])
                 backing["projections"] = [
                     name
@@ -583,12 +585,16 @@ class _Transaction:
             self.write_markers.append("names")
             old = self.state.nodes[params["old_id"]]
             target = self.state.nodes[params["into_id"]]
-            if old != params["old_properties"] or target != params["target_properties"]:
+            if (
+                self._element_id("name", params["old_id"]) != params["old_element_id"]
+                or self._element_id("name", params["into_id"])
+                != params["target_element_id"]
+            ):
                 return []
             old["superseded_from_stage"] = params["predecessor_stage"]
             old["name_stage"] = "superseded"
-            old["claim_token"] = None
-            old["claimed_at"] = None
+            old.pop("claim_token", None)
+            old.pop("claimed_at", None)
             old["source_paths"] = []
             if old.get("edit_status") == "open":
                 old["edit_status"] = "applied"
@@ -740,6 +746,15 @@ def _run(
         return edit.supersede_into(old, target, dry_run=dry_run)
 
 
+def test_cas_signature_preserves_temporal_scalar_type() -> None:
+    timestamp = DateTime.from_iso_format("2026-07-04T21:20:38.632000000+00:00")
+    text = timestamp.iso_format()
+    assert edit._fold_normalize({"created_at": timestamp}) == {"created_at": text}
+    assert edit._fold_cas_signature(
+        {"created_at": timestamp}
+    ) != edit._fold_cas_signature({"created_at": text})
+
+
 @pytest.mark.parametrize(
     "stage", ["pending", "drafted", "reviewed", "accepted", "exhausted"]
 )
@@ -777,6 +792,7 @@ def test_fold_migrates_scalars_edges_cache_and_lineage_exactly() -> None:
         "lineage": 1,
         "changes": 1,
     }
+    assert graph.transactions[0].write_markers == ["lock", "event", "sources", "names"]
 
 
 def test_exact_preexisting_target_lineage_is_admitted_without_duplicate() -> None:
@@ -1005,6 +1021,8 @@ def test_transaction_failure_rolls_back_everything(failure: str) -> None:
     assert graph.state == before
     assert graph.commits == 0
     assert graph.rollbacks == 1
+    if failure == "race":
+        assert "event" not in graph.transactions[0].write_markers
 
 
 @pytest.mark.parametrize("failure", ["competitor_race", "unit_race"])
@@ -1019,6 +1037,7 @@ def test_locked_snapshot_detects_competitor_and_unit_races(failure: str) -> None
     assert graph.state == before
     assert graph.commits == 0
     assert graph.rollbacks == 1
+    assert "event" not in graph.transactions[0].write_markers
 
 
 def test_exact_second_run_is_noop_and_all_partial_drift_is_refused() -> None:
