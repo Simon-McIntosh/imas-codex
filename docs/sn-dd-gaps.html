@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-commits" content="c7c2d3d3,baeb7614">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
-<meta name="plan-impl" content="0.4">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -245,6 +245,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddgap-policy-20260802" data-who="reckon-ship" data-when="2026-08-02T12:50:00+02:00">
     <div class="r-comment-body"><p><strong>Storage authority, governed lifecycle, and typed evidence contracts landed.</strong> Graph facts now own durable observation and compare-and-set lifecycle while YAML remains the only unit-enforcement backend. Automated responses can report exact-path evidence but cannot select a disposition or affect score/stage. Commits <code>33639686</code> and <code>27a03a7d</code> passed 36 and 68 independent tests; integrated verification passed 179. Automated writer wiring, human CLI, DD-release execution, and deterministic review-release reporting remain open.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddgap-governance-live-20260802" data-who="reckon-ship" data-when="2026-08-02T15:05:00+02:00">
+    <div class="r-comment-body"><p><strong>Governed automated writers and human controls are integrated.</strong> Merge <code>fe75dacd</code> adds deterministic list/show, evidence-token-fenced triage, DD-release reconcile, stale-YAML reporting, and explicit <code>--apply</code> safety; three independent review rounds drove the evidence set into the atomic CAS. Merge <code>e2e95ac1</code> adds exact claimed-path evidence from compose/name-review/docs-review and deterministic attachment audits. It is dry-run non-mutating, authorizes only exact committed disposition winners, uses relationship-backed DD versions, and refuses ambiguous multiple unit edges. Independent final verification passed 60 CLI/lifecycle tests and 239 writer/integrity tests. Flags remain evidence-only: no unit correction, source suppression, score, stage, or acceptance behavior is controlled by a DDGap. Release-note surfacing remains the last implementation node before lifecycle exercise and closure.</p></div>
 </div>
 </section>
 </main>
