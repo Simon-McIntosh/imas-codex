@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -643,6 +643,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="atomic-rename-persistence" data-who="reckon-ship" data-when="2026-08-02">
     <div class="r-comment-body"><p><strong>Rename/refine persistence is now atomically fenced.</strong> Merge <code>68097679</code> places predecessor edit-state reads, the full field CAS, successor creation, lineage/source/projection/cache retargeting, and inherited edit ledger write inside one transaction and one graph client. Temporal-change guards consume the public ISN operator-semantics registry rather than duplicating grammar tokens. Independent review passed 286 focused tests and all 17 exact staged source pairings, including the volume-averaged time-derivative source. ISN <code>v0.8.0rc65</code> was cut from verified commit <code>7e16c45d</code>; Codex pins that exact commit in both dependency declarations at <code>cc8b7f4b</code>. The integrated focused subset exited zero.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="deterministic-provenance-repair" data-who="reckon-ship" data-when="2026-08-02">
+    <div class="r-comment-body"><p><strong>The deterministic provenance slice is repaired and idempotent.</strong> A fresh corrected census found 946 production defects after removing eight leaked graph-test fixtures; commit <code>c8fec7d7</code> now makes those tests exception-safe and independent verification passed 72 graph-enabled cases with zero residue. The live repair then selected only exact non-WEST, non-parser, no-open-edit rows and applied 214 full-CAS changes in nine bounded transactions: 205 scalar/sole-live mismatches and nine missing projections, each with a durable <code>repair_semantic_source_binding</code> receipt. Immutable before/after hashes match and the second pass planned zero. The remaining partition is 336 genuine competing-target ambiguities, 343 missing projections, 45 scalar mismatches, and eight no-live sources; WEST remains zero across 355 manifest sources. One additional non-WEST parser hint was staged through <code>sn edit</code> at zero cost, while four pre-existing human edits were preserved rather than overwritten.</p></div>
 </div>
 </section>
 </main>
