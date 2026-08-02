@@ -49,6 +49,29 @@ _SNAPSHOT_FIELDS = (
     "enhancement_kind",
 )
 
+_DD_AUTHORITY_CLASSIFICATION_FIELDS = (
+    "physics_domain",
+    "dd_documentation",
+    "dd_snapshot_pinned",
+    "dd_parent_path",
+    "dd_parent_documentation",
+    "dd_data_type",
+    "dd_unit",
+    "dd_coordinates",
+    "dd_lifecycle_status",
+    "dd_lifecycle_version",
+    "enhanced_description",
+    "enhancement_kind",
+)
+
+if set(_DD_AUTHORITY_CLASSIFICATION_FIELDS) != set(_SNAPSHOT_FIELDS) - {
+    "dd_version",
+    "description",
+}:
+    raise RuntimeError(
+        "DD source classification fields must cover every authoritative snapshot field"
+    )
+
 
 @dataclass(frozen=True)
 class SourceSnapshotAllowlist:
@@ -345,10 +368,10 @@ def classify_snapshot_change(
 ) -> str:
     """Classify one canonical source snapshot without changing lifecycle state."""
     before_semantics = {
-        key: value for key, value in before.items() if key != "dd_version"
+        field: before.get(field) for field in _DD_AUTHORITY_CLASSIFICATION_FIELDS
     }
     after_semantics = {
-        key: value for key, value in after.items() if key != "dd_version"
+        field: after.get(field) for field in _DD_AUTHORITY_CLASSIFICATION_FIELDS
     }
     if canonical_payload(before_semantics) == canonical_payload(after_semantics):
         return "byte_unchanged"

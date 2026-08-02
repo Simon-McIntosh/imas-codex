@@ -74,12 +74,15 @@ enums:
       uniquely current DD authority that replaced it.
     permissible_values:
       byte_unchanged:
-        description: Every canonical snapshot field is identical.
+        description: >-
+          Every DD-authoritative classification field is identical. The
+          redundant operational description mirror is retained in the full
+          ledger payload but does not independently make the change material.
       semantic_unchanged:
         description: >-
-          Canonical bytes differ only by an explicitly governed semantic
-          equivalence such as an equivalent unit spelling or registered DD
-          unit correction.
+          DD-authoritative classification fields differ only by an explicitly
+          governed semantic equivalence such as an equivalent unit spelling or
+          registered DD unit correction.
       changed:
         description: At least one authoritative semantic field changed.
 

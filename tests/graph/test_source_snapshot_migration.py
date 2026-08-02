@@ -179,11 +179,14 @@ def _seed(driver) -> None:
             WITH 1 AS ignored
             UNWIND [
               {path: 'byte/path', name: 'name_byte', old_unit: 'Pa', new_unit: 'Pa',
-               old_domain: 'transport', new_domain: 'transport'},
+               old_domain: 'transport', new_domain: 'transport',
+               old_description: 'stale operational documentation mirror'},
               {path: 'semantic/path', name: 'name_semantic', old_unit: 'Hz',
-               new_unit: 's^-1', old_domain: 'transport', new_domain: 'transport'},
+               new_unit: 's^-1', old_domain: 'transport', new_domain: 'transport',
+               old_description: 'documentation'},
               {path: 'changed/path', name: 'name_changed', old_unit: 'Pa',
-               new_unit: 'Pa', old_domain: 'transport', new_domain: 'equilibrium'}
+               new_unit: 'Pa', old_domain: 'transport', new_domain: 'equilibrium',
+               old_description: 'documentation'}
             ] AS item
             CREATE (unit:Unit {id: item.new_unit})
             CREATE (parent:IMASNode {id: item.path + '/parent', documentation: 'parent'})
@@ -201,7 +204,7 @@ def _seed(driver) -> None:
               id: 'dd:' + item.path, source_type: 'dd', source_id: item.path,
               status: 'attached', attempt_count: 3, batch_key: 'preserved',
               produced_sn_id: item.name, dd_version: 'old-dd',
-              description: 'documentation', physics_domain: item.old_domain,
+              description: item.old_description, physics_domain: item.old_domain,
               dd_documentation: 'documentation', dd_snapshot_pinned: true,
               dd_parent_path: item.path + '/parent',
               dd_parent_documentation: 'parent', dd_data_type: 'FLT_1D',
@@ -305,6 +308,26 @@ def test_migrates_all_classifications_without_name_or_relationship_churn(
             "MATCH (:StandardNameSource)-[:HAS_SNAPSHOT_CHANGE]->(event) "
             "RETURN count(event) AS count",
         ) == [{"count": 3}]
+        byte_ledger = _query(
+            driver,
+            "MATCH (source:StandardNameSource {id: 'dd:byte/path'})"
+            "-[:HAS_SNAPSHOT_CHANGE]->(event) "
+            "RETURN source.description AS description, "
+            "event.classification AS classification, "
+            "event.before_snapshot_payload AS before_payload, "
+            "event.after_snapshot_payload AS after_payload, "
+            "event.before_snapshot_hash AS before_hash, "
+            "event.after_snapshot_hash AS after_hash",
+        )
+        assert len(byte_ledger) == 1
+        assert byte_ledger[0]["description"] == "documentation"
+        assert byte_ledger[0]["classification"] == "byte_unchanged"
+        assert (
+            "stale operational documentation mirror" in byte_ledger[0]["before_payload"]
+        )
+        assert "documentation" in byte_ledger[0]["after_payload"]
+        assert byte_ledger[0]["before_payload"] != byte_ledger[0]["after_payload"]
+        assert byte_ledger[0]["before_hash"] != byte_ledger[0]["after_hash"]
         assert (
             _query(
                 driver,

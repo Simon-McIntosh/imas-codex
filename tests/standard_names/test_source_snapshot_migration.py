@@ -153,16 +153,63 @@ def test_canonical_payload_preserves_types_and_normalizes_order() -> None:
 
 
 def test_snapshot_classification_distinguishes_byte_semantic_and_material() -> None:
-    base = {"dd_unit": "W.m^-2", "physics_domain": "wall"}
+    base = {
+        "description": "operational mirror",
+        "dd_documentation": "authoritative documentation",
+        "dd_unit": "W.m^-2",
+        "physics_domain": "wall",
+    }
 
     assert classify_snapshot_change("wall/path", base, dict(base)) == "byte_unchanged"
+    mirror_refresh = {**base, "description": "refreshed operational mirror"}
     assert (
-        classify_snapshot_change("wall/path", {"dd_unit": "Hz"}, {"dd_unit": "s^-1"})
+        classify_snapshot_change("wall/path", base, mirror_refresh) == "byte_unchanged"
+    )
+    assert (
+        sha256(canonical_payload(base).encode()).hexdigest()
+        != sha256(canonical_payload(mirror_refresh).encode()).hexdigest()
+    )
+    assert (
+        classify_snapshot_change(
+            "wall/path",
+            {**base, "dd_unit": "Hz"},
+            {**base, "dd_unit": "s^-1"},
+        )
         == "semantic_unchanged"
     )
     assert (
         classify_snapshot_change(
-            "wall/path", base, {**base, "physics_domain": "transport"}
+            "wall/path",
+            {**base, "dd_unit": "Hz"},
+            {
+                **base,
+                "description": "refreshed operational mirror",
+                "dd_unit": "s^-1",
+            },
+        )
+        == "semantic_unchanged"
+    )
+    assert (
+        classify_snapshot_change(
+            "wall/path",
+            base,
+            {
+                **base,
+                "description": "refreshed operational mirror",
+                "physics_domain": "transport",
+            },
+        )
+        == "changed"
+    )
+    assert (
+        classify_snapshot_change(
+            "wall/path",
+            base,
+            {
+                **base,
+                "description": "refreshed operational mirror",
+                "dd_documentation": "changed authoritative documentation",
+            },
         )
         == "changed"
     )
