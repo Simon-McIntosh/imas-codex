@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="25">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="26">
+<meta name="plan-impl" content="0.92">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -649,6 +649,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="time-derivative-provenance-repair" data-who="reckon-ship" data-when="2026-08-02">
     <div class="r-comment-body"><p><strong>The staged time-derivative rename is now fully coherent.</strong> One typed-fingerprint CAS transaction restored <code>dd:summary/volume_average/dn_e_dt/value</code> and its DD projection solely to <code>volume_averaged_time_derivative_of_electron_density</code>, repaired scalar/cache and source lifecycle fields, preserved lineage, detach history, docs, review, validation and scores, and wrote change event <code>sn-change:6a6059bf-f057-4af1-b3f3-f5d745e952e3</code>. The second selector returned zero; provenance orphans fell by one. The current audit has 732 semantic-source violations, 127 provenance orphans, 159 attachment-guard rejections, and seven live strict-parser failures. The pending/quarantined cross-section and flux-surface-average residues are census-filter exclusions, not completed repairs; they remain explicit work. WEST semantic-source invariants remain zero across 355 manifest sources; its eight separate attachment findings were only inventoried and not touched.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="bounded-integrity-audit-20260802" data-who="reckon-ship" data-when="2026-08-02T16:40:00+02:00">
+    <div class="r-comment-body"><p><strong>The bounded audit closure is reproducible but deliberately not executable as one batch.</strong> Two identical read snapshots partitioned 732 provenance violations into 593 non-WEST executable findings plus 139 WEST-name dependencies, and 159 attachment rejections into 49 executable plus 110 WEST exclusions. The dependency closure contains 2,884 sources, 2,223 names, 1,917 edges, 336 competing families, and all 16 non-WEST open human edits with zero WEST/test membership intersection. Of 336 families, 208 are in scope (19 candidate atomic folds and 189 ordinary bounded reviews); 128 remain WEST-dependent. A complete name-and-doc chain is bounded at 32 calls and $2.385916 at historical medians; safe cohorts reserve 20 percent. Evidence: <code>/tmp/bounded_integrity_manifest.json</code>, SHA-256 <code>cff1f0d95509cc340a2d84ab053804a6678fd914422c38fa0d9a0c1fb5a0ed75</code>. The artifact declares <code>is_executable_drain_batch=false</code>; only separately derived exact DD-path cohorts may be run.</p></div>
 </div>
 </section>
 </main>
