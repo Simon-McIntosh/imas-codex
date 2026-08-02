@@ -797,6 +797,16 @@ classes:
           ID of the sn run that produced this standard name. Propagated from
           the originating StandardNameSource at compose time. Used for
           run-scoped filtering (``--focus``) and provenance.
+      drain_scope_id:
+        description: >-
+          Ephemeral owner of one exact bounded manifest drain. This is
+          independent of run_id provenance and is cleared when that drain
+          completes or its lease is recovered.
+      drain_scope_claimed_at:
+        description: >-
+          Heartbeat timestamp for drain_scope_id. This lease is independent of
+          the worker claimed_at/claim_token pair.
+        range: datetime
       semantic_sim:
         description: >-
           Semantic-similarity score (0-1) from the duplicate-detection gate.
@@ -2242,6 +2252,15 @@ classes:
         range: datetime
       claimed_at:
         description: Timestamp when a worker claimed this source for processing
+        range: datetime
+      drain_scope_id:
+        description: >-
+          Ephemeral owner of one exact bounded manifest drain. This is never
+          used as production provenance and never replaces run_id.
+      drain_scope_claimed_at:
+        description: >-
+          Heartbeat timestamp for drain_scope_id. This lease is independent of
+          the worker claimed_at/claim_token pair.
         range: datetime
       claim_token:
         description: UUID token for claim verification

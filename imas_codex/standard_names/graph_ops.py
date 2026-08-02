@@ -19,7 +19,7 @@ import re
 import time
 import uuid
 from contextlib import nullcontext, suppress
-from datetime import UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -54,6 +54,7 @@ _TERMINAL_BINDING_NAME_STAGES: frozenset[str] = frozenset(
         NameStage.contested.value,
     }
 )
+_CLAIM_TIMEOUT_SECONDS = 300
 
 
 class _TransactionQuery:
@@ -779,6 +780,558 @@ def partition_focus_by_accepted(
     gap = [p for p in paths if f"dd:{p}" not in accepted_ids]
     accepted = [p for p in paths if f"dd:{p}" in accepted_ids]
     return gap, accepted
+
+
+MANIFEST_DRAIN_DISPOSITIONS: tuple[str, ...] = (
+    "accepted",
+    "active_in_flight",
+    "genuine_gap",
+    "non_nameable",
+    "ambiguous",
+)
+
+
+def canonicalize_manifest_drain_paths(paths: list[str]) -> list[str]:
+    """Validate and de-duplicate exact DD paths without changing their order."""
+    canonical: list[str] = []
+    seen: set[str] = set()
+    for raw in paths:
+        if not isinstance(raw, str):
+            raise ValueError("bounded drain paths must be strings")
+        path = raw.strip().strip("/")
+        if (
+            not path
+            or path != raw.strip()
+            or "*" in path
+            or "?" in path
+            or any(char.isspace() for char in path)
+            or ":" in path
+        ):
+            raise ValueError(f"bounded drain requires an exact DD path: {raw!r}")
+        if path not in seen:
+            seen.add(path)
+            canonical.append(path)
+    if not canonical:
+        raise ValueError("bounded drain manifest resolved to zero exact DD paths")
+    return canonical
+
+
+def classify_manifest_drain_item(item: dict[str, Any]) -> dict[str, Any]:
+    """Return one immutable five-way disposition from a manifest plan row."""
+    reasons: list[str] = []
+    node = item.get("node") or {}
+    source = item.get("source")
+    live_names = item.get("live_names") or []
+    all_name_ids = set(item.get("all_name_ids") or [])
+    parents = item.get("parents") or []
+    path = item["path"]
+    dd_version = item["dd_version"]
+
+    if not item.get("configured_version_present"):
+        reasons.append("configured DD version is not the unique current version")
+    if not node.get("id") or node.get("id") != path:
+        reasons.append("exact IMAS identity is missing")
+    if node.get("node_category") is None:
+        reasons.append("IMAS node category is missing")
+
+    if source:
+        if (
+            source.get("id") != f"dd:{path}"
+            or source.get("source_type") != "dd"
+            or source.get("source_id") != path
+            or source.get("dd_version") != dd_version
+            or source.get("dd_snapshot_pinned") is not True
+            or sorted(source.get("dd_target_ids") or []) != [path]
+        ):
+            reasons.append("exact source identity or immutable DD pin is inconsistent")
+        produced_sn_id = source.get("produced_sn_id")
+        if produced_sn_id and produced_sn_id not in all_name_ids:
+            reasons.append("produced_sn_id has no matching PRODUCED_NAME edge")
+        if live_names and produced_sn_id != live_names[0].get("id"):
+            reasons.append("produced_sn_id does not identify the live name binding")
+        if source.get("scope_conflict"):
+            reasons.append("source is held by a non-stale competing drain scope")
+
+    if len(live_names) > 1:
+        reasons.append("source has multiple live PRODUCED_NAME bindings")
+    if any(name.get("scope_conflict") for name in live_names):
+        reasons.append("live name is held by a non-stale competing drain scope")
+    if any(parent.get("scope_conflict") for parent in parents):
+        reasons.append("derived parent is held by a non-stale competing drain scope")
+    if reasons:
+        disposition = "ambiguous"
+    else:
+        from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
+
+        non_nameable = node.get("node_category") not in SN_SOURCE_CATEGORIES or (
+            source and source.get("status") == "not_physical_quantity"
+        )
+        if non_nameable:
+            disposition = "non_nameable"
+        elif live_names:
+            live = live_names[0]
+            disposition = (
+                "accepted"
+                if live.get("validation_status") == "valid"
+                and live.get("name_stage") in {"accepted", "approved"}
+                and live.get("docs_stage") == "accepted"
+                else "active_in_flight"
+            )
+        elif source and source.get("worker_claim_live"):
+            disposition = "active_in_flight"
+        else:
+            disposition = "genuine_gap"
+
+    return {**item, "disposition": disposition, "ambiguity_reasons": reasons}
+
+
+_MANIFEST_DRAIN_PLAN_QUERY = """
+UNWIND $paths AS path
+OPTIONAL MATCH (version:DDVersion {id: $dd_version, is_current: true})
+WITH path, count(version) AS version_count
+OPTIONAL MATCH (node:IMASNode {id: path})
+OPTIONAL MATCH (source:StandardNameSource {id: 'dd:' + path})
+CALL (source) {
+  OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(target:IMASNode)
+  RETURN [id IN collect(DISTINCT target.id) WHERE id IS NOT NULL]
+         AS dd_target_ids
+}
+CALL (source) {
+  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(all_name:StandardName)
+  RETURN [id IN collect(DISTINCT all_name.id) WHERE id IS NOT NULL]
+         AS all_name_ids
+}
+CALL (source) {
+  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(live:StandardName)
+  WHERE NOT (coalesce(live.name_stage, '') IN $terminal_stages)
+  RETURN [entry IN collect(DISTINCT CASE WHEN live IS NULL THEN null ELSE {
+    id: live.id,
+    name_stage: live.name_stage,
+    docs_stage: live.docs_stage,
+    validation_status: live.validation_status,
+    claim_token: live.claim_token,
+    claim_seq: live.claim_seq,
+    claimed_at: live.claimed_at,
+    drain_scope_id: live.drain_scope_id,
+    drain_scope_claimed_at: live.drain_scope_claimed_at,
+    drain_scope_claimed_at_epoch_ms:
+      live.drain_scope_claimed_at.epochMillis,
+    scope_conflict: live.drain_scope_id IS NOT NULL
+      AND live.drain_scope_id <> $drain_scope_id
+      AND live.drain_scope_claimed_at IS NOT NULL
+      AND live.drain_scope_claimed_at >= datetime() - duration($scope_cutoff)
+  } END) WHERE entry IS NOT NULL] AS live_names
+}
+CALL (source) {
+  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(live:StandardName)
+  WHERE NOT (coalesce(live.name_stage, '') IN $terminal_stages)
+  OPTIONAL MATCH (live)-[:HAS_PARENT*1..]->(parent:StandardName)
+  WHERE parent.origin = 'derived'
+  RETURN [entry IN collect(DISTINCT CASE WHEN parent IS NULL THEN null ELSE {
+    id: parent.id,
+    name_stage: parent.name_stage,
+    docs_stage: parent.docs_stage,
+    validation_status: parent.validation_status,
+    claim_token: parent.claim_token,
+    claim_seq: parent.claim_seq,
+    claimed_at: parent.claimed_at,
+    drain_scope_id: parent.drain_scope_id,
+    drain_scope_claimed_at: parent.drain_scope_claimed_at,
+    drain_scope_claimed_at_epoch_ms:
+      parent.drain_scope_claimed_at.epochMillis,
+    scope_conflict: parent.drain_scope_id IS NOT NULL
+      AND parent.drain_scope_id <> $drain_scope_id
+      AND parent.drain_scope_claimed_at IS NOT NULL
+      AND parent.drain_scope_claimed_at >= datetime() - duration($scope_cutoff)
+  } END) WHERE entry IS NOT NULL] AS parents
+}
+CALL (path, node) {
+  OPTIONAL MATCH (gap:DDGap {path: path})
+  OPTIONAL MATCH (node)-[owned:HAS_DD_GAP]->(gap)
+  RETURN [entry IN collect(DISTINCT CASE WHEN gap IS NULL THEN null ELSE {
+    id: gap.id, kind: gap.kind, status: gap.status, linked: owned IS NOT NULL
+  } END) WHERE entry IS NOT NULL] AS dd_gaps
+}
+RETURN path, $dd_version AS dd_version,
+       version_count = 1 AS configured_version_present,
+       CASE WHEN node IS NULL THEN null ELSE {
+         id: node.id, node_category: node.node_category,
+         lifecycle_status: node.lifecycle_status,
+         lifecycle_version: node.lifecycle_version,
+         documentation: node.documentation, data_type: node.data_type,
+         physics_domain: node.physics_domain, unit: node.unit
+       } END AS node,
+       CASE WHEN source IS NULL THEN null ELSE {
+         id: source.id, source_type: source.source_type,
+         source_id: source.source_id, status: source.status,
+         claim_token: source.claim_token, claim_seq: source.claim_seq,
+         claimed_at: source.claimed_at,
+         worker_claim_live: source.claim_token IS NOT NULL
+           AND source.claimed_at IS NOT NULL
+           AND source.claimed_at >= datetime() - duration($worker_cutoff),
+         attempt_count: source.attempt_count,
+         produced_sn_id: source.produced_sn_id,
+         dd_version: source.dd_version,
+         dd_snapshot_pinned: source.dd_snapshot_pinned,
+         drain_scope_id: source.drain_scope_id,
+         drain_scope_claimed_at: source.drain_scope_claimed_at,
+         drain_scope_claimed_at_epoch_ms:
+           source.drain_scope_claimed_at.epochMillis,
+         scope_conflict: source.drain_scope_id IS NOT NULL
+           AND source.drain_scope_id <> $drain_scope_id
+           AND source.drain_scope_claimed_at IS NOT NULL
+           AND source.drain_scope_claimed_at >= datetime() - duration($scope_cutoff),
+         dd_target_ids: dd_target_ids
+       } END AS source,
+       all_name_ids, live_names, parents, dd_gaps
+ORDER BY path
+"""
+
+
+def build_manifest_drain_plan(
+    paths: list[str],
+    *,
+    dd_version: str,
+    drain_scope_id: str = "dry-run",
+    scope_timeout_seconds: int = 600,
+    worker_timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
+    gc: Any | None = None,
+) -> list[dict[str, Any]]:
+    """Read and classify every exact path without issuing any graph write."""
+    exact_paths = canonicalize_manifest_drain_paths(paths)
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            _MANIFEST_DRAIN_PLAN_QUERY,
+            paths=exact_paths,
+            dd_version=dd_version,
+            drain_scope_id=drain_scope_id,
+            scope_cutoff=f"PT{scope_timeout_seconds}S",
+            worker_cutoff=f"PT{worker_timeout_seconds}S",
+            terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+        )
+        return [classify_manifest_drain_item(dict(row)) for row in rows]
+    finally:
+        if own:
+            client.close()
+
+
+class ManifestDrainConflict(RuntimeError):
+    """The bounded manifest changed or contains an ambiguous identity."""
+
+
+@retry_on_deadlock()
+def claim_manifest_drain_scope(
+    paths: list[str],
+    *,
+    dd_version: str,
+    drain_scope_id: str | None = None,
+    scope_timeout_seconds: int = 600,
+    gc: Any | None = None,
+) -> tuple[str, list[dict[str, Any]]]:
+    """Atomically create absent exact sources and CAS-stamp one bounded scope."""
+    exact_paths = canonicalize_manifest_drain_paths(paths)
+    scope_id = drain_scope_id or str(uuid.uuid4())
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            tx = session.begin_transaction()
+            tx_gc = _TransactionQuery(tx)
+            try:
+                rows = tx_gc.query(
+                    _MANIFEST_DRAIN_PLAN_QUERY,
+                    paths=exact_paths,
+                    dd_version=dd_version,
+                    drain_scope_id=scope_id,
+                    scope_cutoff=f"PT{scope_timeout_seconds}S",
+                    worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
+                    terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+                )
+                plan = [classify_manifest_drain_item(dict(row)) for row in rows]
+                ambiguous = [
+                    item for item in plan if item["disposition"] == "ambiguous"
+                ]
+                if ambiguous:
+                    details = "; ".join(
+                        f"{item['path']}: {', '.join(item['ambiguity_reasons'])}"
+                        for item in ambiguous[:10]
+                    )
+                    raise ManifestDrainConflict(
+                        f"bounded manifest contains {len(ambiguous)} ambiguous path(s): "
+                        + details
+                    )
+
+                absent = [
+                    {
+                        "id": f"dd:{item['path']}",
+                        "source_type": "dd",
+                        "source_id": item["path"],
+                        "dd_path": item["path"],
+                        "batch_key": "bounded-manifest",
+                        "status": "extracted",
+                        "description": item["node"].get("documentation"),
+                        "physics_domain": item["node"].get("physics_domain"),
+                    }
+                    for item in plan
+                    if item["source"] is None and item["disposition"] == "genuine_gap"
+                ]
+                prepared = _pin_dd_source_snapshots(
+                    tx_gc, absent, default_dd_version=dd_version
+                )
+                if prepared:
+                    created = tx_gc.query(
+                        """
+                        UNWIND $sources AS src
+                        MATCH (version:DDVersion {id: src.dd_version, is_current: true})
+                        MATCH (node:IMASNode {id: src.dd_path})
+                        WHERE node.node_category = src.expected_node_category
+                          AND (node.documentation = src.expected_documentation OR
+                               (node.documentation IS NULL AND
+                                src.expected_documentation IS NULL))
+                          AND (node.lifecycle_status = src.expected_lifecycle_status OR
+                               (node.lifecycle_status IS NULL AND
+                                src.expected_lifecycle_status IS NULL))
+                        CREATE (source:StandardNameSource {
+                          id: src.id, source_type: 'dd', source_id: src.source_id,
+                          batch_key: src.batch_key, status: 'extracted',
+                          description: src.description,
+                          physics_domain: src.physics_domain,
+                          dd_version: src.dd_version,
+                          dd_documentation: src.dd_documentation,
+                          dd_snapshot_pinned: true,
+                          dd_parent_path: src.dd_parent_path,
+                          dd_parent_documentation: src.dd_parent_documentation,
+                          dd_data_type: src.dd_data_type,
+                          dd_unit: src.dd_unit,
+                          dd_coordinates: src.dd_coordinates,
+                          dd_lifecycle_status: src.dd_lifecycle_status,
+                          dd_lifecycle_version: src.dd_lifecycle_version,
+                          enhanced_description: src.enhanced_description,
+                          enhancement_kind: src.enhancement_kind,
+                          attempt_count: 0,
+                          drain_scope_id: $scope_id,
+                          drain_scope_claimed_at: datetime()
+                        })
+                        CREATE (source)-[:FROM_DD_PATH]->(node)
+                        RETURN collect(source.id) AS ids
+                        """,
+                        sources=[
+                            {
+                                **source,
+                                "expected_node_category": next(
+                                    item["node"].get("node_category")
+                                    for item in plan
+                                    if item["path"] == source["dd_path"]
+                                ),
+                                "expected_documentation": next(
+                                    item["node"].get("documentation")
+                                    for item in plan
+                                    if item["path"] == source["dd_path"]
+                                ),
+                                "expected_lifecycle_status": next(
+                                    item["node"].get("lifecycle_status")
+                                    for item in plan
+                                    if item["path"] == source["dd_path"]
+                                ),
+                            }
+                            for source in prepared
+                        ],
+                        scope_id=scope_id,
+                    )
+                    created_ids = set(created[0]["ids"] if created else [])
+                    if created_ids != {source["id"] for source in prepared}:
+                        raise ManifestDrainConflict(
+                            "exact DD source creation changed during manifest stamp"
+                        )
+
+                existing = [
+                    {
+                        "id": item["source"]["id"],
+                        "status": item["source"].get("status"),
+                        "claim_token": item["source"].get("claim_token"),
+                        "claim_seq": item["source"].get("claim_seq"),
+                        "attempt_count": item["source"].get("attempt_count"),
+                        "produced_sn_id": item["source"].get("produced_sn_id"),
+                        "dd_version": item["source"].get("dd_version"),
+                        "prior_scope_id": item["source"].get("drain_scope_id"),
+                        "prior_scope_claimed_at": item["source"].get(
+                            "drain_scope_claimed_at"
+                        ),
+                        "prior_scope_claimed_at_epoch_ms": item["source"].get(
+                            "drain_scope_claimed_at_epoch_ms"
+                        ),
+                        "dd_target_ids": item["source"].get("dd_target_ids") or [],
+                        "all_name_ids": item.get("all_name_ids") or [],
+                    }
+                    for item in plan
+                    if item["source"] is not None
+                ]
+                stamped_sources: set[str] = set()
+                if existing:
+                    stamped = tx_gc.query(
+                        """
+                        UNWIND $items AS item
+                        MATCH (node:StandardNameSource {id: item.id})
+                        SET node._drain_scope_lock = true
+                        REMOVE node._drain_scope_lock
+                        WITH node, item
+                        OPTIONAL MATCH (node)-[:FROM_DD_PATH]->(dd:IMASNode)
+                        WITH node, item,
+                             [id IN collect(DISTINCT dd.id) WHERE id IS NOT NULL]
+                               AS dd_target_ids
+                        OPTIONAL MATCH (node)-[:PRODUCED_NAME]->(sn:StandardName)
+                        WITH node, item, dd_target_ids,
+                             [id IN collect(DISTINCT sn.id) WHERE id IS NOT NULL]
+                               AS all_name_ids
+                        WHERE node.status = item.status
+                          AND (node.claim_token = item.claim_token OR
+                               (node.claim_token IS NULL AND item.claim_token IS NULL))
+                          AND (node.claim_seq = item.claim_seq OR
+                               (node.claim_seq IS NULL AND item.claim_seq IS NULL))
+                          AND (node.attempt_count = item.attempt_count OR
+                               (node.attempt_count IS NULL AND item.attempt_count IS NULL))
+                          AND (node.produced_sn_id = item.produced_sn_id OR
+                               (node.produced_sn_id IS NULL AND
+                                item.produced_sn_id IS NULL))
+                          AND node.dd_version = item.dd_version
+                          AND node.dd_snapshot_pinned = true
+                          AND size(dd_target_ids) = size(item.dd_target_ids)
+                          AND all(id IN dd_target_ids
+                                  WHERE id IN item.dd_target_ids)
+                          AND size(all_name_ids) = size(item.all_name_ids)
+                          AND all(id IN all_name_ids
+                                  WHERE id IN item.all_name_ids)
+                          AND (node.drain_scope_id = item.prior_scope_id OR
+                               (node.drain_scope_id IS NULL AND
+                                item.prior_scope_id IS NULL))
+                          AND (node.drain_scope_claimed_at.epochMillis =
+                                 item.prior_scope_claimed_at_epoch_ms OR
+                               (node.drain_scope_claimed_at IS NULL AND
+                                item.prior_scope_claimed_at_epoch_ms IS NULL))
+                        WITH node, item,
+                          (node.claim_token IS NOT NULL
+                           AND (node.claimed_at IS NULL
+                                OR node.claimed_at < datetime()
+                                     - duration($worker_cutoff))) AS worker_stale
+                        SET node.drain_scope_id = $scope_id,
+                            node.drain_scope_claimed_at = datetime(),
+                            node.claim_token = CASE WHEN worker_stale THEN null
+                              ELSE node.claim_token END,
+                            node.claimed_at = CASE WHEN worker_stale THEN null
+                              ELSE node.claimed_at END
+                        RETURN collect(node.id) AS ids
+                        """,
+                        items=existing,
+                        scope_id=scope_id,
+                        worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
+                    )
+                    stamped_sources = set(stamped[0]["ids"] if stamped else [])
+                    if stamped_sources != {item["id"] for item in existing}:
+                        raise ManifestDrainConflict(
+                            "source identity or lifecycle changed during manifest stamp"
+                        )
+
+                expected_names: dict[str, dict[str, Any]] = {}
+                for item in plan:
+                    for name in [
+                        *(item.get("live_names") or []),
+                        *(item.get("parents") or []),
+                    ]:
+                        expected_names.setdefault(name["id"], name)
+                if expected_names:
+                    stamped = tx_gc.query(
+                        """
+                        UNWIND $items AS item
+                        MATCH (node:StandardName {id: item.id})
+                        SET node._drain_scope_lock = true
+                        REMOVE node._drain_scope_lock
+                        WITH node, item
+                        WHERE (node.name_stage = item.name_stage OR
+                               (node.name_stage IS NULL AND item.name_stage IS NULL))
+                          AND (node.docs_stage = item.docs_stage OR
+                               (node.docs_stage IS NULL AND item.docs_stage IS NULL))
+                          AND (node.validation_status = item.validation_status OR
+                               (node.validation_status IS NULL AND
+                                item.validation_status IS NULL))
+                          AND (node.claim_token = item.claim_token OR
+                               (node.claim_token IS NULL AND item.claim_token IS NULL))
+                          AND (node.claim_seq = item.claim_seq OR
+                               (node.claim_seq IS NULL AND item.claim_seq IS NULL))
+                          AND (node.drain_scope_id = item.drain_scope_id OR
+                               (node.drain_scope_id IS NULL AND
+                                item.drain_scope_id IS NULL))
+                          AND (node.drain_scope_claimed_at.epochMillis =
+                                 item.drain_scope_claimed_at_epoch_ms OR
+                               (node.drain_scope_claimed_at IS NULL AND
+                                item.drain_scope_claimed_at_epoch_ms IS NULL))
+                        WITH node, item,
+                          (node.claim_token IS NULL OR node.claimed_at IS NULL
+                           OR node.claimed_at < datetime()
+                                - duration($worker_cutoff)) AS worker_stale
+                        SET node.name_stage = CASE
+                              WHEN node.name_stage = 'refining' AND worker_stale
+                              THEN 'reviewed' ELSE node.name_stage END,
+                            node.docs_stage = CASE
+                              WHEN node.docs_stage = 'refining' AND worker_stale
+                              THEN 'reviewed' ELSE node.docs_stage END,
+                            node.claim_token = CASE WHEN worker_stale THEN null
+                              ELSE node.claim_token END,
+                            node.claimed_at = CASE WHEN worker_stale THEN null
+                              ELSE node.claimed_at END,
+                            node.drain_scope_id = $scope_id,
+                            node.drain_scope_claimed_at = datetime()
+                        RETURN collect(node.id) AS ids
+                        """,
+                        items=list(expected_names.values()),
+                        scope_id=scope_id,
+                        worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
+                    )
+                    stamped_names = set(stamped[0]["ids"] if stamped else [])
+                    if stamped_names != set(expected_names):
+                        raise ManifestDrainConflict(
+                            "name lifecycle or ownership changed during manifest stamp"
+                        )
+                tx.commit()
+                return scope_id, plan
+            except BaseException:
+                with suppress(Exception):
+                    tx.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
+@retry_on_deadlock()
+def clear_manifest_drain_scope(
+    drain_scope_id: str, *, gc: Any | None = None
+) -> dict[str, int]:
+    """Clear only one owned manifest scope without touching worker claims."""
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            CALL {
+              MATCH (source:StandardNameSource {drain_scope_id: $scope_id})
+              REMOVE source.drain_scope_id, source.drain_scope_claimed_at
+              RETURN count(source) AS sources
+            }
+            CALL {
+              MATCH (name:StandardName {drain_scope_id: $scope_id})
+              REMOVE name.drain_scope_id, name.drain_scope_claimed_at
+              RETURN count(name) AS names
+            }
+            RETURN sources, names
+            """,
+            scope_id=drain_scope_id,
+        )
+        return dict(rows[0]) if rows else {"sources": 0, "names": 0}
+    finally:
+        if own:
+            client.close()
 
 
 @retry_on_deadlock()
@@ -4542,7 +5095,7 @@ def persist_generated_name_winners(
 
     Returns the finalized ``StandardNameSource`` identities.
     """
-    from datetime import UTC, datetime
+    from datetime import UTC
 
     if not candidates:
         return []
@@ -4845,6 +5398,56 @@ def persist_generated_name_winners(
                         "source claim changed during transactional name persistence"
                     )
 
+                scoped_rows = tx_gc.query(
+                    """
+                    UNWIND $source_ids AS source_id
+                    MATCH (source:StandardNameSource {id: source_id})
+                    WHERE source.drain_scope_id IS NOT NULL
+                    MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
+                    OPTIONAL MATCH (name)-[:HAS_PARENT*1..]->(parent:StandardName)
+                    WHERE parent.origin = 'derived'
+                    WITH source, name,
+                         [p IN collect(DISTINCT parent) WHERE p IS NOT NULL]
+                           AS parents
+                    WHERE (name.drain_scope_id IS NULL
+                           OR name.drain_scope_id = source.drain_scope_id
+                           OR name.drain_scope_claimed_at IS NULL
+                           OR name.drain_scope_claimed_at < datetime()
+                                - duration('PT600S'))
+                      AND all(parent IN parents WHERE
+                           parent.drain_scope_id IS NULL
+                           OR parent.drain_scope_id = source.drain_scope_id
+                           OR parent.drain_scope_claimed_at IS NULL
+                           OR parent.drain_scope_claimed_at < datetime()
+                                - duration('PT600S'))
+                    SET name.drain_scope_id = source.drain_scope_id,
+                        name.drain_scope_claimed_at =
+                          source.drain_scope_claimed_at
+                    FOREACH (parent IN parents |
+                      SET parent.drain_scope_id = source.drain_scope_id,
+                          parent.drain_scope_claimed_at =
+                            source.drain_scope_claimed_at)
+                    RETURN source.id AS id
+                    """,
+                    source_ids=finalized_ids,
+                )
+                expected_scoped = {
+                    row["id"]
+                    for row in tx_gc.query(
+                        """
+                        UNWIND $source_ids AS source_id
+                        MATCH (source:StandardNameSource {id: source_id})
+                        WHERE source.drain_scope_id IS NOT NULL
+                        RETURN source.id AS id
+                        """,
+                        source_ids=finalized_ids,
+                    )
+                }
+                if {row["id"] for row in scoped_rows} != expected_scoped:
+                    raise ManifestDrainConflict(
+                        "generated name or derived parent has a competing drain lease"
+                    )
+
                 finalized_reserved_candidates = [
                     candidate_by_sns[sns_id]
                     for sns_id in finalized_ids
@@ -5056,7 +5659,7 @@ def write_vocab_gaps(
     if not gaps:
         return 0
 
-    from datetime import UTC, datetime
+    from datetime import UTC
 
     if not skip_segment_filter:
         from imas_codex.standard_names.segments import filter_closed_segment_gaps
@@ -8704,8 +9307,6 @@ def release_standard_name_source_claims(token: str) -> int:
 # Polling-based work claiming — compose and review
 # =============================================================================
 
-_CLAIM_TIMEOUT_SECONDS = 300  # 5 minutes — matches DEFAULT_CLAIM_TIMEOUT_SECONDS
-
 # Settle window inserted before the post-claim winner re-read (see
 # _verify_docs_claim_winners / _verify_name_claim_winners). Concurrent replicas
 # that bind the same eligible node commit their claim SETs in a lock-serialised
@@ -10625,7 +11226,7 @@ def write_run_provenance(
     if not name_ids:
         return 0
 
-    from datetime import UTC, datetime
+    from datetime import UTC
 
     now = datetime.now(UTC).isoformat()
 
@@ -11179,7 +11780,7 @@ def record_llm_cost(
     Returns:
         The deterministic ``id`` string.
     """
-    from datetime import UTC, datetime
+    from datetime import UTC
 
     if llm_at is None:
         llm_at = datetime.now(UTC)
@@ -11426,7 +12027,9 @@ def _claim_sn_atomic(
     to_stage: str | None = None,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
+    restage_review_axis: str | None = None,
     seed_extra_where: str = "",
     seed_with_extras: str = "",
     seed_order_by: str = "rand()",
@@ -11507,6 +12110,17 @@ def _claim_sn_atomic(
     if stage_field and to_stage:
         stage_set = f", sn.{stage_field} = $to_stage"
         params["to_stage"] = to_stage
+    if restage_review_axis:
+        if restage_review_axis not in {"name", "docs"}:
+            raise ValueError("restage_review_axis must be 'name' or 'docs'")
+        stage_property = f"{restage_review_axis}_stage"
+        score_property = f"reviewer_score_{restage_review_axis}"
+        stage_set += (
+            f", sn.{stage_property} = CASE "
+            f"WHEN sn.{stage_property} = 'reviewed' "
+            f"AND sn.{score_property} >= $min_score "
+            f"THEN 'drafted' ELSE sn.{stage_property} END"
+        )
 
     # Optional physics-domain scope (scalar comparison post-refactor).
     domain_where = ""
@@ -11521,6 +12135,9 @@ def _claim_sn_atomic(
     if scope_run_id:
         scope_where += " AND sn.run_id = $scope_run_id"
         params["scope_run_id"] = scope_run_id
+    if drain_scope_id:
+        scope_where += " AND sn.drain_scope_id = $drain_scope_id"
+        params["drain_scope_id"] = drain_scope_id
     if edits_only:
         scope_where += " AND coalesce(sn.edit_status, '') = 'open'"
 
@@ -11658,6 +12275,8 @@ def _claim_sn_atomic(
                     tx.run(
                         f"""
                         MATCH (sn:StandardName {{claim_token: $token}})
+                        WHERE $drain_scope_id IS NULL
+                           OR sn.drain_scope_id = $drain_scope_id
                         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
                         OPTIONAL MATCH (sn)-[:IN_CLUSTER]
                             ->(c:IMASSemanticCluster)
@@ -11675,6 +12294,7 @@ def _claim_sn_atomic(
                                {extra_return_fields}
                         """,
                         token=token,
+                        drain_scope_id=drain_scope_id,
                     )
                 )
 
@@ -11704,6 +12324,7 @@ def claim_generate_name_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardNameSource nodes (status='extracted') for name generation.
@@ -11786,6 +12407,10 @@ def claim_generate_name_batch(
         scope_sns_where += " AND sns.run_id = $scope_run_id"
         scope_sns2_where += " AND sns2.run_id = $scope_run_id"
         extra_params["scope_run_id"] = scope_run_id
+    if drain_scope_id:
+        scope_sns_where += " AND sns.drain_scope_id = $drain_scope_id"
+        scope_sns2_where += " AND sns2.drain_scope_id = $drain_scope_id"
+        extra_params["drain_scope_id"] = drain_scope_id
     if edits_only:
         scope_sns_where += " AND coalesce(sns.edit_status, '') = 'open'"
         scope_sns2_where += " AND coalesce(sns2.edit_status, '') = 'open'"
@@ -12003,6 +12628,8 @@ def claim_generate_name_batch(
                         """
                         MATCH (sns:StandardNameSource
                                {claim_token: $token})
+                        WHERE $drain_scope_id IS NULL
+                           OR sns.drain_scope_id = $drain_scope_id
                         OPTIONAL MATCH (sns)-[:FROM_DD_PATH]->(im:IMASNode)
                         OPTIONAL MATCH (sns)-[:FROM_SIGNAL]->(fs:FacilitySignal)
                         CALL (sns) {
@@ -12040,6 +12667,7 @@ def claim_generate_name_batch(
                                edit_origin
                         """,
                         token=token,
+                        drain_scope_id=drain_scope_id,
                     )
                 )
 
@@ -12137,7 +12765,9 @@ def claim_review_name_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
+    min_score: float = DEFAULT_MIN_SCORE,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name review.
 
@@ -12161,7 +12791,9 @@ def claim_review_name_batch(
     )
 
     where = (
-        "sn.name_stage = 'drafted'"
+        "(sn.name_stage = 'drafted' OR "
+        "($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed' "
+        "AND sn.reviewer_score_name >= $min_score))"
         " AND sn.validation_status = 'valid'"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
         # Gate: require a real description before review so the
@@ -12182,6 +12814,8 @@ def claim_review_name_batch(
     )
     query_params: dict[str, Any] = {
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        "drain_scope_id": drain_scope_id,
+        "min_score": min_score,
     }
     if facility is not None:
         where += " AND sn.facility = $facility"
@@ -12230,7 +12864,9 @@ def claim_review_name_batch(
         ),
         domain=domain,
         scope_run_id=scope_run_id,
+        drain_scope_id=drain_scope_id,
         edits_only=edits_only,
+        restage_review_axis="name" if drain_scope_id else None,
     )
     # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
     # _verify_name_claim_winners). review_name is gated on name_stage='drafted'.
@@ -12679,7 +13315,9 @@ def claim_review_docs_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
+    min_score: float = DEFAULT_MIN_SCORE,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs review.
 
@@ -12717,7 +13355,9 @@ def claim_review_docs_batch(
         )
     )
     where = (
-        "sn.docs_stage = 'drafted'"
+        "(sn.docs_stage = 'drafted' OR "
+        "($drain_scope_id IS NOT NULL AND sn.docs_stage = 'reviewed' "
+        "AND sn.reviewer_score_docs >= $min_score))"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
         + score_gate
     )
@@ -12726,6 +13366,7 @@ def claim_review_docs_batch(
         query_params: dict[str, Any] = {"facility": facility}
     else:
         query_params = {}
+    query_params.update(drain_scope_id=drain_scope_id, min_score=min_score)
     items = _claim_sn_atomic(
         eligibility_where=where,
         query_params=query_params,
@@ -12751,7 +13392,9 @@ def claim_review_docs_batch(
         ),
         domain=domain,
         scope_run_id=scope_run_id,
+        drain_scope_id=drain_scope_id,
         edits_only=edits_only,
+        restage_review_axis="docs" if drain_scope_id else None,
     )
     # Drop claim-race losers BEFORE the reviewer quorum spends LLM calls (see
     # _verify_docs_claim_winners). review_docs is gated on docs_stage='drafted'.
@@ -13080,6 +13723,7 @@ def claim_refine_name_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for name refinement (Option B chain creation).
@@ -13142,6 +13786,7 @@ def claim_refine_name_batch(
         to_stage="refining",
         domain=domain,
         scope_run_id=scope_run_id,
+        drain_scope_id=drain_scope_id,
         edits_only=edits_only,
     )
 
@@ -13444,7 +14089,13 @@ def persist_refined_name(
                         WHERE existing IS NULL
                            OR ($edit_mode IS NULL
                                AND coalesce(existing.name_stage, '') IN ['', 'pending']
-                               AND coalesce(existing.origin, '') <> 'derived')
+                               AND coalesce(existing.origin, '') <> 'derived'
+                               AND (old.drain_scope_id IS NULL
+                                    OR existing.drain_scope_id IS NULL
+                                    OR existing.drain_scope_id = old.drain_scope_id
+                                    OR existing.drain_scope_claimed_at IS NULL
+                                    OR existing.drain_scope_claimed_at < datetime()
+                                         - duration('PT600S')))
                         WITH old, existing,
                              CASE WHEN $inherit_open_edit
                                         AND old.edit_status = 'open'
@@ -13512,6 +14163,9 @@ def persist_refined_name(
                           new.generated_at      = datetime(),
                           new.refine_reason     = $reason,
                           new.run_id            = $run_id,
+                          new.drain_scope_id     = old.drain_scope_id,
+                          new.drain_scope_claimed_at =
+                            old.drain_scope_claimed_at,
                           new.edit_mode         = successor_edit_mode,
                           new.name_hint         = successor_name_hint,
                           new.docs_hint         = successor_docs_hint,
@@ -13543,6 +14197,12 @@ def persist_refined_name(
                           new.edit_requested_at = successor_edit_requested_at,
                           new.edit_override_edits = successor_edit_override_edits,
                           new.edit_include_accepted = successor_edit_include_accepted,
+                          new.drain_scope_id = coalesce(
+                            old.drain_scope_id, new.drain_scope_id),
+                          new.drain_scope_claimed_at = CASE
+                            WHEN old.drain_scope_id IS NOT NULL
+                            THEN old.drain_scope_claimed_at
+                            ELSE new.drain_scope_claimed_at END,
                           new.embed_text_hash = null
                         WITH old, new, successor_edit_mode,
                              successor_name_hint, successor_docs_hint,
@@ -13748,6 +14408,12 @@ def persist_refined_name(
                             // stranded 'drafted'. Inherit the predecessor's
                             // run_id when the successor has none.
                             new.run_id = coalesce(new.run_id, old.run_id),
+                            new.drain_scope_id = coalesce(
+                                old.drain_scope_id, new.drain_scope_id),
+                            new.drain_scope_claimed_at = CASE
+                                WHEN old.drain_scope_id IS NOT NULL
+                                THEN old.drain_scope_claimed_at
+                                ELSE new.drain_scope_claimed_at END,
                             // Close the predecessor's edit lifecycle: a
                             // still-open steer was already carried forward onto
                             // the successor (see the copy-forward read above), so
@@ -15206,6 +15872,7 @@ def claim_generate_docs_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes ready for generate_docs.
@@ -15289,6 +15956,7 @@ def claim_generate_docs_batch(
         # stage_field=None → claim only, no stage transition
         domain=domain,
         scope_run_id=scope_run_id,
+        drain_scope_id=drain_scope_id,
         edits_only=edits_only,
         # Parent-first ordering: nodes that have incoming HAS_PARENT edges
         # (i.e. nodes which are parents) receive priority 0 so they are
@@ -15522,6 +16190,7 @@ def claim_refine_docs_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs refinement.
@@ -15593,6 +16262,7 @@ def claim_refine_docs_batch(
         to_stage="refining",
         domain=domain,
         scope_run_id=scope_run_id,
+        drain_scope_id=drain_scope_id,
         edits_only=edits_only,
     )
 
@@ -16372,6 +17042,7 @@ def claim_enrich_parents_batch(
     timeout_seconds: int = _CLAIM_TIMEOUT_SECONDS,
     domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim placeholder derived parents that still need a real description.
@@ -16410,6 +17081,7 @@ def claim_enrich_parents_batch(
         extra_return_fields=", coalesce(sn.name, sn.id) AS name",
         domain=domain,
         scope_run_id=scope_run_id,
+        drain_scope_id=drain_scope_id,
         edits_only=edits_only,
     )
     # Two-step claim_token verify (mandated for every claim function): drop nodes

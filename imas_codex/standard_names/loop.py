@@ -42,6 +42,7 @@ class RunSummary:
     pass_records: list[dict[str, Any]] = field(default_factory=list)
     compose_cost: float = 0.0
     review_cost: float = 0.0
+    drain_report: list[dict[str, Any]] = field(default_factory=list)
 
 
 # ── Status mapping ────────────────────────────────────────────────────
@@ -85,6 +86,7 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
         "links_resolved": summary.links_resolved,
         "domains_touched": sorted(summary.domains_touched),
         "stop_reason": summary.stop_reason,
+        "drain_report": summary.drain_report,
     }
 
 
@@ -97,7 +99,9 @@ def summary_table(summary: RunSummary) -> dict[str, Any]:
 # Imported from defaults.py — do not re-define here.
 
 
-def _count_scope_names(scope_run_id: str) -> int:
+def _count_scope_names(
+    scope_run_id: str | None = None, drain_scope_id: str | None = None
+) -> int:
     """Return the number of StandardName nodes bound to *scope_run_id*.
 
     This is the size of a ``--focus`` scoped drain — the natural ceiling on how
@@ -109,12 +113,21 @@ def _count_scope_names(scope_run_id: str) -> int:
 
     try:
         with GraphClient() as gc:
-            rows = list(
-                gc.query(
-                    "MATCH (sn:StandardName {run_id: $rid}) RETURN count(sn) AS n",
-                    rid=scope_run_id,
+            if drain_scope_id:
+                rows = list(
+                    gc.query(
+                        "MATCH (sn:StandardName {drain_scope_id: $sid}) "
+                        "RETURN count(sn) AS n",
+                        sid=drain_scope_id,
+                    )
                 )
-            )
+            else:
+                rows = list(
+                    gc.query(
+                        "MATCH (sn:StandardName {run_id: $rid}) RETURN count(sn) AS n",
+                        rid=scope_run_id,
+                    )
+                )
         return int(rows[0]["n"]) if rows else 0
     except Exception as exc:  # noqa: BLE001 — best-effort sizing, never fatal
         logger.warning("_count_scope_names(%s) failed: %s", scope_run_id, exc)
@@ -134,6 +147,7 @@ def _build_pool_specs(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
     names_only: bool = False,
     docs_only: bool = False,
@@ -353,6 +367,8 @@ def _build_pool_specs(
     _scope_kwargs: dict[str, Any] = {}
     if scope_run_id:
         _scope_kwargs["scope_run_id"] = scope_run_id
+    if drain_scope_id:
+        _scope_kwargs["drain_scope_id"] = drain_scope_id
     if edits_only:
         _scope_kwargs["edits_only"] = True
 
@@ -381,10 +397,10 @@ def _build_pool_specs(
     # never exceeds the work available. The names pools are left alone: a scoped
     # docs drain (``docs_only``) is where this pathology was measured, and the
     # scope size is the natural ceiling for the docs axis.
-    if scope_run_id:
+    if scope_run_id or drain_scope_id:
         import math
 
-        _scope_size = _count_scope_names(scope_run_id)
+        _scope_size = _count_scope_names(scope_run_id, drain_scope_id)
         if _scope_size > 0:
             _cap = max(1, math.ceil(_scope_size / 2))
             _gen_docs_replicas = min(_gen_docs_replicas, _cap)
@@ -393,7 +409,7 @@ def _build_pool_specs(
             logger.info(
                 "scoped run (%s): %d names in scope — docs-pool replicas capped "
                 "at %d (generate=%d review=%d refine=%d)",
-                scope_run_id,
+                scope_run_id or drain_scope_id,
                 _scope_size,
                 _cap,
                 _gen_docs_replicas,
@@ -422,6 +438,7 @@ def _build_pool_specs(
             name="review_name",
             claim=_make_claim_adapter(
                 claim_review_name_batch,
+                min_score=regen_score,
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
@@ -463,6 +480,7 @@ def _build_pool_specs(
             name="review_docs",
             claim=_make_claim_adapter(
                 claim_review_docs_batch,
+                min_score=regen_score,
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
@@ -545,7 +563,7 @@ def _build_pool_specs(
     # In focus mode (scope_run_id set) or edits mode (edits_only), skip
     # throttle entirely — the scoped set is a bounded batch that should never
     # be blocked by the global review backlog.
-    if not (scope_run_id or edits_only):
+    if not (scope_run_id or drain_scope_id or edits_only):
         specs_by_name = {s.name: s for s in specs}
 
         # NB: enrich_parents is NOT throttled. It accepts derived parents
@@ -767,6 +785,9 @@ async def run_sn_pools(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     display: Any | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
+    drain_paths: tuple[str, ...] = (),
+    drain_dd_version: str | None = None,
     edits_only: bool = False,
     names_only: bool = False,
     docs_only: bool = False,
@@ -862,8 +883,15 @@ async def run_sn_pools(
 
     started = datetime.now(UTC)
 
-    if skip_global_maintenance and not scope_run_id:
-        raise ValueError("skip_global_maintenance requires scope_run_id")
+    if drain_scope_id and (scope_run_id or edits_only):
+        raise ValueError("drain_scope_id cannot be combined with another scope")
+    if drain_scope_id and (not drain_paths or not drain_dd_version):
+        raise ValueError("drain_scope_id requires exact paths and a DD version")
+    skip_global_maintenance = skip_global_maintenance or bool(drain_scope_id)
+    if skip_global_maintenance and not (scope_run_id or drain_scope_id):
+        raise ValueError(
+            "skip_global_maintenance requires scope_run_id or drain_scope_id"
+        )
     if skip_global_maintenance and (attach_only or reconcile_only):
         raise ValueError(
             "skip_global_maintenance is incompatible with maintenance-only modes"
@@ -923,6 +951,7 @@ async def run_sn_pools(
     # spins. The pool loop catches the exception, sets this event, and
     # propagates stop_event so all pools drain.
     provider_exhausted_event = asyncio.Event()
+    drain_heartbeat_task: asyncio.Task[None] | None = None
 
     # Shared BudgetManager — all six pools draw from the same pot.
     # Treat cost_limit <= 0 as unlimited (local GPU = zero cost).
@@ -1577,6 +1606,7 @@ async def run_sn_pools(
             on_event=on_event,
             only_domain=_only_domain_for_pools,
             scope_run_id=scope_run_id,
+            drain_scope_id=drain_scope_id,
             edits_only=edits_only,
             names_only=names_only,
             docs_only=docs_only,
@@ -1595,7 +1625,10 @@ async def run_sn_pools(
             DEFAULT_ORPHAN_SWEEP_INTERVAL_S,
             DEFAULT_ORPHAN_SWEEP_TIMEOUT_S,
         )
-        from imas_codex.standard_names.orphan_sweep import run_orphan_sweep_loop
+        from imas_codex.standard_names.orphan_sweep import (
+            run_manifest_drain_heartbeat_loop,
+            run_orphan_sweep_loop,
+        )
 
         sweep_task: asyncio.Task[None] | None = None
         if not skip_global_maintenance:
@@ -1606,6 +1639,15 @@ async def run_sn_pools(
                     stop_event=stop_event,
                 ),
                 name="orphan_sweep",
+            )
+        elif drain_scope_id:
+            drain_heartbeat_task = asyncio.create_task(
+                run_manifest_drain_heartbeat_loop(
+                    drain_scope_id=drain_scope_id,
+                    interval_s=max(5, DEFAULT_ORPHAN_SWEEP_TIMEOUT_S // 3),
+                    stop_event=stop_event,
+                ),
+                name="manifest_drain_heartbeat",
             )
 
         # ── Embedding worker (reuses discovery infrastructure) ─────
@@ -1882,6 +1924,34 @@ async def run_sn_pools(
         logger.error("run_sn_pools failed: %s", exc, exc_info=True)
     finally:
         summary.stopped_at = datetime.now(UTC)
+
+        if drain_heartbeat_task is not None:
+            drain_heartbeat_task.cancel()
+            with __import__("contextlib").suppress(asyncio.CancelledError):
+                await drain_heartbeat_task
+
+        if drain_scope_id:
+            from imas_codex.standard_names.graph_ops import (
+                build_manifest_drain_plan,
+                clear_manifest_drain_scope,
+            )
+
+            try:
+                summary.drain_report = await asyncio.to_thread(
+                    build_manifest_drain_plan,
+                    list(drain_paths),
+                    dd_version=drain_dd_version,
+                    drain_scope_id=drain_scope_id,
+                )
+            except Exception as report_exc:  # noqa: BLE001
+                logger.warning("bounded drain final report failed: %s", report_exc)
+            finally:
+                try:
+                    await asyncio.shield(
+                        asyncio.to_thread(clear_manifest_drain_scope, drain_scope_id)
+                    )
+                except Exception as clear_exc:  # noqa: BLE001
+                    logger.error("bounded drain scope cleanup failed: %s", clear_exc)
 
         # ── Shutdown timeouts ─────────────────────────────────────
         # Each sync graph call is wrapped in to_thread + wait_for so
