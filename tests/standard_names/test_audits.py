@@ -1251,22 +1251,143 @@ class TestOperatorUnitConsistency:
 
         assert name_unit_consistency_check({"id": name, "unit": "1"}) == []
 
-    def test_non_difference_operator_retains_flat_audit(self):
+    @pytest.mark.parametrize("unit", ["1", "-", "none"])
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "ratio_of_particle_temperature_to_particle_reference_temperature",
+            (
+                "ratio_of_ion_average_temperature_to_"
+                "volume_averaged_ion_average_temperature"
+            ),
+        ],
+    )
+    def test_equal_dimension_ratios_accept_dimensionless_unit(
+        self, name: str, unit: str
+    ):
+        """A proven quotient result wins over flat operand-token heuristics."""
+        from unittest.mock import patch
+
+        from imas_codex.standard_names import audits
+
+        ir = audits._parse_audit_ir(name)
+        with patch.dict(audits._NAME_TOKEN_UNIT_EXPECTATIONS, {}, clear=True):
+            assert audits._ir_unit_dimensions(ir) == ({"dimensionless"}, True)
+            assert audits._structured_unit_consistency_issues(name, unit) == []
+            assert audits.name_unit_consistency_check({"id": name, "unit": unit}) == []
+
+    @pytest.mark.parametrize("unit", ["J.K^-1", "K.J^-1"])
+    def test_equal_dimension_ratios_reject_cross_family_quotients(self, unit: str):
         from imas_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
-            {"id": "ratio_of_plasma_energy_to_ion_energy", "unit": "A"}
+            {
+                "id": (
+                    "ratio_of_particle_temperature_to_particle_reference_temperature"
+                ),
+                "unit": unit,
+            }
         )
-        assert issues and "operator expression" not in issues[0]
+        assert issues and "operator expression" in issues[0]
 
-    def test_nested_unknown_operator_does_not_partially_transform(self):
+    def test_vorticity_per_major_radius_dimensions_use_quotient(self):
+        from imas_codex.standard_names.audits import (
+            _dimensions_overlap,
+            _quotient_dimensions,
+            _unit_dimensions,
+        )
+
+        vorticity_dimensions = {"1 / [time]"}
+        major_radius_dimensions = {"[length]"}
+        quotient = _quotient_dimensions(vorticity_dimensions, major_radius_dimensions)
+        expected = _unit_dimensions({"m^-1.s^-1"})
+        dimensionless = _unit_dimensions({"1"})
+        assert quotient is not None
+        assert expected is not None and _dimensions_overlap(quotient, expected)
+        assert dimensionless is not None
+        assert not _dimensions_overlap(quotient, dimensionless)
+
+    def test_same_subject_different_physical_bases_are_not_dimensionless(self):
+        from unittest.mock import patch
+
+        from imas_codex.standard_names import audits
+
+        name = "ratio_of_ion_temperature_to_ion_density"
+        with patch.dict(audits._NAME_TOKEN_UNIT_EXPECTATIONS, {}, clear=True):
+            assert audits._ir_unit_dimensions(audits._parse_audit_ir(name)) == (
+                None,
+                False,
+            )
+            assert audits._structured_unit_consistency_issues(name, "1") is None
+
+    def test_dimensioned_live_ratio_remains_uninferred_without_unit_metadata(self):
+        from imas_codex.standard_names import audits
+
+        name = "ratio_of_vorticity_to_major_radius"
+        assert audits._ir_unit_dimensions(audits._parse_audit_ir(name)) == (
+            None,
+            False,
+        )
+        assert audits._structured_unit_consistency_issues(name, "m^-1.s^-1") is None
+        assert (
+            audits.name_unit_consistency_check({"id": name, "unit": "m^-1.s^-1"}) == []
+        )
+
+    def test_nested_derivative_transforms_dimensionless_ratio(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        name = (
+            "time_derivative_of_ratio_of_particle_temperature_to_"
+            "particle_reference_temperature"
+        )
+        assert name_unit_consistency_check({"id": name, "unit": "s^-1"}) == []
+        issues = name_unit_consistency_check({"id": name, "unit": "1"})
+        assert issues and "operator expression" in issues[0]
+
+    def test_ratio_with_unknown_operand_retains_flat_audit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check(
+            {"id": "ratio_of_safety_factor_to_particle_temperature", "unit": "1"}
+        )
+        assert issues and "contains 'temperature'" in issues[0]
+
+    def test_ratio_with_missing_argument_is_unknown(self):
+        from types import SimpleNamespace
+
+        from imas_codex.standard_names.audits import (
+            _ir_unit_dimensions,
+            _parse_audit_ir,
+        )
+
+        incomplete = SimpleNamespace(
+            base=SimpleNamespace(token="placeholder"),
+            operators=[
+                SimpleNamespace(
+                    kind="binary",
+                    op="ratio",
+                    args=[_parse_audit_ir("particle_temperature")],
+                )
+            ],
+        )
+        assert _ir_unit_dimensions(incomplete) == (None, False)
+
+    def test_malformed_declared_unit_remains_unknown(self):
+        from imas_codex.standard_names.audits import _unit_dimensions
+
+        assert _unit_dimensions({"not a pint unit"}) is None
+
+    def test_nested_ratio_with_unknown_operand_does_not_partially_transform(self):
         from imas_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
                 {
-                    "id": "time_derivative_of_ratio_of_plasma_energy_to_ion_energy",
-                    "unit": "A",
+                    "id": (
+                        "time_derivative_of_ratio_of_safety_factor_to_"
+                        "particle_temperature"
+                    ),
+                    "unit": "K",
                 }
             )
             == []

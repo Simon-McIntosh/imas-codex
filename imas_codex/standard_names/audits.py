@@ -203,6 +203,39 @@ def _operator_kind(operator: Any) -> str:
     return str(getattr(kind, "value", kind))
 
 
+def _ir_physical_quantity_signature(ir: Any) -> tuple[Any, ...] | None:
+    """Return the public IR identity that determines a quantity's dimensions.
+
+    Qualifiers, loci, mechanisms, and projections specialize where or for what
+    a physical quantity is evaluated without changing the identity of its
+    physical base. Operators remain part of the signature because they can
+    transform dimensions.
+    """
+    base = getattr(ir, "base", None)
+    base_token = str(getattr(base, "token", "") or "")
+    base_kind = getattr(base, "kind", "")
+    base_kind = str(getattr(base_kind, "value", base_kind) or "")
+    if not base_token or not base_kind:
+        return None
+
+    operator_signatures: list[tuple[Any, ...]] = []
+    for operator in list(getattr(ir, "operators", ()) or ()):
+        kind = _operator_kind(operator)
+        op = str(getattr(operator, "op", "") or "")
+        if not kind or not op:
+            return None
+        args = list(getattr(operator, "args", ()) or ())
+        argument_signatures: list[tuple[Any, ...]] = []
+        for argument in args:
+            signature = _ir_physical_quantity_signature(argument)
+            if signature is None:
+                return None
+            argument_signatures.append(signature)
+        operator_signatures.append((kind, op, tuple(argument_signatures)))
+
+    return base_kind, base_token, tuple(operator_signatures)
+
+
 @lru_cache(maxsize=1024)
 def _parse_audit_ir(name: str) -> Any:
     """Parse one canonical name once for all structure-aware audits."""
@@ -218,14 +251,46 @@ def _unit_dimensions(units: set[str]) -> set[str] | None:
 
     dimensions: set[str] = set()
     for unit in units:
+        if unit.strip().lower() in {"1", "dimensionless", "-", "none"}:
+            dimensions.add("dimensionless")
+            continue
         canonical = canonical_or_none(unit)
         if canonical is None:
             return None
         try:
-            dimensions.add(str(unit_registry(canonical).dimensionality))
+            dimensions.add(str(unit_registry.Quantity(1, canonical).dimensionality))
         except Exception:
             return None
     return dimensions
+
+
+def _dimension_container(dimension: str) -> Any:
+    """Parse one stored dimensionality, including Pint's empty dimension."""
+    from imas_codex.units import unit_registry
+
+    expression = "" if dimension == "dimensionless" else dimension
+    return unit_registry.get_dimensionality(expression)
+
+
+def _dimensions_overlap(left: set[str], right: set[str]) -> bool:
+    """Return whether either set contains a Pint-equivalent dimensionality."""
+    try:
+        left_dimensions = [_dimension_container(dimension) for dimension in left]
+        right_dimensions = [_dimension_container(dimension) for dimension in right]
+    except Exception:
+        return False
+    return any(
+        left_dimension == right_dimension
+        for left_dimension in left_dimensions
+        for right_dimension in right_dimensions
+    )
+
+
+def _dimension_sets_equivalent(left: set[str], right: set[str]) -> bool:
+    """Return whether two alternatives describe the same dimension choices."""
+    return all(_dimensions_overlap({dimension}, right) for dimension in left) and all(
+        _dimensions_overlap({dimension}, left) for dimension in right
+    )
 
 
 def _per_time_dimensions(dimensions: set[str]) -> set[str] | None:
@@ -237,11 +302,33 @@ def _per_time_dimensions(dimensions: set[str]) -> set[str] | None:
         try:
             # Pint accepts a dimensionality expression as a UnitsContainer,
             # so this remains dimensional algebra rather than a unit alias.
-            parsed = unit_registry.get_dimensionality(dimension)
+            parsed = _dimension_container(dimension)
             transformed.add(str(parsed / unit_registry.second.dimensionality))
         except Exception:
             return None
     return transformed
+
+
+def _quotient_dimensions(
+    numerators: set[str], denominators: set[str]
+) -> set[str] | None:
+    """Infer a quotient only when operand dimension alternatives are decisive."""
+
+    if not numerators or not denominators:
+        return None
+    if _dimension_sets_equivalent(numerators, denominators):
+        return {"dimensionless"}
+    if _dimensions_overlap(numerators, denominators):
+        return None
+    if len(numerators) != 1 or len(denominators) != 1:
+        return None
+
+    try:
+        numerator_dims = _dimension_container(next(iter(numerators)))
+        denominator_dims = _dimension_container(next(iter(denominators)))
+        return {str(numerator_dims / denominator_dims)}
+    except Exception:
+        return None
 
 
 def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
@@ -270,16 +357,32 @@ def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
         kind = _operator_kind(operator)
         op = str(getattr(operator, "op", ""))
         if kind == "binary":
-            if op != "difference":
+            if op not in {"difference", "ratio"}:
                 return None, False
             args = list(getattr(operator, "args", ()) or ())
             if len(args) != 2:
                 return None, False
+            if op == "ratio":
+                left_signature = _ir_physical_quantity_signature(args[0])
+                right_signature = _ir_physical_quantity_signature(args[1])
+                if left_signature is not None and left_signature == right_signature:
+                    dimensions = {"dimensionless"}
+                    transformed = True
+                    continue
             left, _left_transformed = _ir_unit_dimensions(args[0])
             right, _right_transformed = _ir_unit_dimensions(args[1])
             if left is None or right is None:
                 return None, False
-            dimensions = left & right
+            if op == "difference":
+                dimensions = {
+                    left_dimension
+                    for left_dimension in left
+                    if _dimensions_overlap({left_dimension}, right)
+                }
+            else:
+                dimensions = _quotient_dimensions(left, right)
+                if dimensions is None:
+                    return None, False
             transformed = True
         elif kind == "unary_prefix" and op == "time_derivative":
             if dimensions is None:
@@ -314,7 +417,7 @@ def _structured_unit_consistency_issues(name: str, unit: str) -> list[str] | Non
     candidate_dimensions = _unit_dimensions({unit})
     if candidate_dimensions is None:
         return None
-    if candidate_dimensions & dimensions:
+    if _dimensions_overlap(candidate_dimensions, dimensions):
         return []
     return [
         "audit:name_unit_consistency_check: operator expression "
