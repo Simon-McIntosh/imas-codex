@@ -144,27 +144,42 @@ _ATTACHMENTS_QUERY = """
 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName)
 {scope}
 MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
-OPTIONAL MATCH (dd)-[:IN_IDS]->(ids:IDS)
 OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
+WITH src, sn, dd, collect(DISTINCT du.id) AS dd_relationship_units
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(nu:Unit)
+WITH src, sn, dd, dd_relationship_units,
+     collect(DISTINCT nu.id) AS sn_relationship_units
+OPTIONAL MATCH (dd)-[:IN_IDS]->(ids:IDS)
+WITH src, sn, dd, dd_relationship_units, sn_relationship_units,
+     collect(DISTINCT ids.dd_version) AS dd_versions
 OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
 WHERE other.id <> sn.id
   AND NOT (coalesce(other.name_stage, '') IN $historical)
+WITH src, sn, dd, dd_relationship_units, sn_relationship_units, dd_versions,
+     count(DISTINCT other) AS other_live_names
 RETURN src.id            AS source_node_id,
        dd.id             AS dd_path,
        sn.id             AS sn_id,
        sn.name_stage     AS name_stage,
        sn.origin         AS origin,
-       CASE size(collect(DISTINCT du.id))
+       CASE size(dd_relationship_units)
          WHEN 0 THEN dd.unit
-         WHEN 1 THEN head(collect(DISTINCT du.id))
+         WHEN 1 THEN dd_relationship_units[0]
          ELSE null
        END AS dd_unit,
        dd.unit           AS dd_declared_unit,
-       collect(DISTINCT du.id) AS dd_relationship_units,
-       ids.dd_version    AS dd_version,
-       coalesce(head(collect(DISTINCT nu.id)), sn.unit) AS sn_unit,
-       count(DISTINCT other) AS other_live_names
+       dd_relationship_units,
+       CASE size(dd_versions)
+         WHEN 1 THEN dd_versions[0]
+         ELSE null
+       END AS dd_version,
+       CASE size(sn_relationship_units)
+         WHEN 0 THEN sn.unit
+         WHEN 1 THEN sn_relationship_units[0]
+         ELSE null
+       END AS sn_unit,
+       sn_relationship_units,
+       other_live_names
 """
 
 #: Scope clause narrowing the read to one name. Used by the write-time gate on

@@ -449,6 +449,7 @@ def _clean(_gc):
             "StandardNameSource",
             "IMASNode",
             "StandardNameChange",
+            "Unit",
         ):
             _gc.query(
                 f"MATCH (n:{label}) WHERE n.id STARTS WITH $p DETACH DELETE n",
@@ -788,6 +789,80 @@ def test_audit_covers_every_attachment_writer() -> None:
             f"audit selector narrowed by {narrowing!r} — a writer that produces "
             "that state escapes retroactive validation"
         )
+
+
+def test_attachment_read_aggregates_each_relationship_before_projection() -> None:
+    """Unit and peer-name fan-out must not change attachment cardinality."""
+    from imas_codex.standard_names import attachment_audit as mod
+
+    q = mod._ATTACHMENTS_QUERY
+    assert "collect(DISTINCT du.id) AS dd_relationship_units" in q
+    assert "collect(DISTINCT nu.id) AS sn_relationship_units" in q
+    assert "count(DISTINCT other) AS other_live_names" in q
+    assert "coalesce(head(collect(DISTINCT nu.id)), sn.unit)" not in q
+    assert q.index("AS dd_relationship_units") < q.index(
+        "OPTIONAL MATCH (sn)-[:HAS_UNIT]"
+    )
+    assert q.index("AS sn_relationship_units") < q.index(
+        "OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)"
+    )
+
+
+@pytest.mark.graph
+def test_attachment_read_has_one_row_and_deterministic_unit_ambiguity(_gc, _clean):
+    """Zero, one, or many unit edges each yield exactly one attachment row."""
+    from imas_codex.standard_names import attachment_audit as mod
+
+    scalar_unit = f"{_PREFIX}scalar_unit"
+    edge_unit = f"{_PREFIX}edge_unit"
+    conflicting_unit = f"{_PREFIX}conflicting_unit"
+    cases = (
+        ("no_edges", [], scalar_unit),
+        ("one_edge", [edge_unit], edge_unit),
+        ("many_edges", [edge_unit, conflicting_unit], None),
+    )
+    name_ids: list[str] = []
+    for tag, units, _expected in cases:
+        dd_path = f"{_PREFIX}unit_case/{tag}"
+        sn_id = _uid(tag)
+        name_ids.append(sn_id)
+        _seed_attachment(
+            _gc,
+            dd_path=dd_path,
+            sn_id=sn_id,
+            dd_unit=scalar_unit,
+            sn_unit=scalar_unit,
+        )
+        for unit_id in units:
+            _gc.query(
+                """
+                MATCH (sn:StandardName {id: $sn_id})
+                MATCH (dd:IMASNode {id: $dd_path})
+                MERGE (unit:Unit {id: $unit_id})
+                MERGE (sn)-[:HAS_UNIT]->(unit)
+                MERGE (dd)-[:HAS_UNIT]->(unit)
+                """,
+                sn_id=sn_id,
+                dd_path=dd_path,
+                unit_id=unit_id,
+            )
+
+    scope = "WHERE sn.id IN $name_ids"
+    params = {
+        "name_ids": name_ids,
+        "historical": sorted(mod._HISTORICAL_NAME_STAGES),
+    }
+    # EXPLAIN proves the same read is accepted by the configured Cypher parser.
+    _gc.query(f"EXPLAIN {mod._ATTACHMENTS_QUERY.format(scope=scope)}", **params)
+    rows = list(_gc.query(mod._ATTACHMENTS_QUERY.format(scope=scope), **params))
+
+    assert len(rows) == len(cases)
+    by_tag = {row["dd_path"].rsplit("/", 1)[-1]: row for row in rows}
+    for tag, units, expected in cases:
+        assert by_tag[tag]["dd_unit"] == expected
+        assert sorted(by_tag[tag]["dd_relationship_units"]) == sorted(units)
+        assert by_tag[tag]["sn_unit"] == expected
+        assert sorted(by_tag[tag]["sn_relationship_units"]) == sorted(units)
 
 
 def test_refine_successor_migration_is_gated() -> None:
