@@ -107,4 +107,7 @@ failure, not consistency.
 {% include "sn/_review_scored_examples.md" %}
 
 Return JSON matching the schema defined in the system prompt; set
-`source_id` and `standard_name` to `{{ item.id }}`.
+`source_id` and `standard_name` to `{{ item.id }}`, and return `"dd_gaps": []`
+unless the exact source-binding evidence meets the flag-only DD-gap contract.
+When reporting evidence, every entry requires `"path"`, `"kind"`, and a
+substantive `"reason"`.

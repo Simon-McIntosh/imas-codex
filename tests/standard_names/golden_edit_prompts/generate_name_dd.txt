@@ -26,6 +26,28 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 - Use the provided unit to inform your naming (e.g., "eV" tells you this is an energy/temperature quantity)
 - "dimensionless" means the quantity is genuinely unitless (e.g., safety factor, elongation)
 
+## Optional DD-gap evidence — flag only
+
+When the supplied DD metadata itself contains a concrete contradiction, you may
+add a typed object to the top-level `dd_gaps` array. Report only an **exact
+claimed DD path** shown in this batch (or another exact source-binding path
+explicitly shown for the same claimed item). Never report a wildcard, parent,
+semantic neighbour, sibling, or other unclaimed path.
+
+Each object contains `path`, `kind`, and a substantive `reason`; when the
+evidence supplies them, also include `observed_dd_version`, `observed_value`,
+`expected_value`, `evidence_rule`, and the paired `reference_path` /
+`reference_value`. `kind` must be one of `unit_defect`, `self_contradiction`,
+`doc_mismatch`, `type_wiring`, `missing_declaration`, or
+`rename_inconsistency`.
+
+This is evidence only. Flagging a DD gap **must not change** the candidate,
+attachment, skip, vocabulary-gap, score, verdict, or stage outcome that you
+would otherwise return. Do not emit a status, disposition, enforcement choice,
+or registry change; graph triage owns lifecycle and curated registries own
+enforcement. **Lexical name or attachment disagreement alone is not a DD
+defect.**
+
 ## Common Anti-Patterns (AVOID these)
 
 | ❌ Wrong | ✅ Correct | Why |

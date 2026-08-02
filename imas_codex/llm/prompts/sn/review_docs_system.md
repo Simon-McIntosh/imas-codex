@@ -32,6 +32,21 @@ For sibling-comparison context:
 
 When sibling lists are empty, score on physics correctness + grammar/style alone.
 
+## Optional DD-gap evidence — flag only
+
+When the supplied DD ground truth itself contains a concrete contradiction,
+return a typed object in the review's `dd_gaps` array. Report only an **exact
+source-binding path** shown for the candidate. Do not report a wildcard,
+parent, semantic neighbour, sibling, or path bound to another candidate. Each
+object has `path`, `kind`, and a substantive `reason`, with structured
+observed/expected and reference fields when available.
+
+This evidence is independent of the documentation review and **must not change**
+any score, rewrite, verdict, or stage outcome you would otherwise
+return. Do not choose a DD-gap status, disposition, enforcement action, or
+registry change. **Lexical name or attachment disagreement alone is not a DD
+defect.**
+
 ## Family Parallel-Structure Rule (applies when `sibling_family` is present)
 
 Sibling-family members must read as a **matched set**: the same opening
@@ -158,6 +173,7 @@ Return a JSON object:
   "reasoning": "Specific justification covering each dimension",
   "revised_description": null,
   "revised_documentation": null,
-  "issues": []
+  "issues": [],
+  "dd_gaps": []
 }
 ```
