@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="34">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="35">
+<meta name="plan-impl" content="0.97">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -676,6 +676,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="corrected-transitive-audit-20260802" data-who="reckon-ship" data-when="2026-08-02T19:48:00+02:00">
     <div class="r-comment-body"><p><strong>The post-fold audit is reproducible with full transitive WEST closure.</strong> Two complete reads matched component-for-component at snapshot <code>b922fc4a…</code>. Current executable/deferred partitions are: provenance <strong>373/358</strong>, orphans <strong>95/32</strong>, attachment rejections <strong>26/133</strong>, competing families <strong>145/190</strong> (executable: 15 candidate folds plus 130 ordinary reviews), live parser residues <strong>5/1</strong>, hidden pending residues <strong>0/2</strong>, and open edits <strong>14/3</strong>. The closure reached 2,807 sources, 1,509 names, and 141 components in 27 rounds; the test closure contains 71 sources. Every direct and transitive WEST/test intersection in the executable partition is zero. The vorticity source/family/parser residue is absent as expected; cross-section is deferred through <code>area_of_flux_surface</code>'s two WEST target paths. Evidence-only artifact: <code>/tmp/bounded_integrity_manifest_corrected.json</code>, schema v2, SHA-256 <code>3277d9ea45aef8fa6683df6e316b1e5d09581e8acc0a7a6cfc9f2f3b5c7299fc</code>; it remains explicitly non-executable.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="bounded-drain-integrated-20260802" data-who="reckon-ship" data-when="2026-08-02T20:05:00+02:00">
+    <div class="r-comment-body"><p><strong>The bounded manifest-drain instrument is independently approved and merged at <code>ee743195</code>.</strong> It enforces exact DD-only manifests, immutable DD/source/DDVersion authority CAS, report-only terminal gaps, durable all-seven-pool scope ownership, path-fenced hard-kill recovery including refined predecessors, exact external-claim preservation, primary-exception precedence, actionable-only progress, intrinsic maintenance suppression, and zero-write dry-run semantics. Independent validation passed schema/lint/format checks, 105 focused/adjacent cases with no failures, a correctly sized Neo4j module at 29/29 with zero skips, and direct public-entrypoint ownership coverage at 6/6 with zero skips. No live drain has run yet. Followup <code>f-sgwi-004</code> remains open until an exact corrected-audit cohort is derived and its supported CLI dry-run proves zero writes.</p></div>
 </div>
 </section>
 </main>
