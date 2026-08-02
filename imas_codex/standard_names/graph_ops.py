@@ -13411,45 +13411,9 @@ def persist_refined_name(
         )
     new_chain_length = old_chain_length + 1
 
-    # Edit-field propagation for the "regular pipeline refine" caller (no
-    # edit kwargs passed explicitly): if the predecessor's edit is still
-    # open, ride its steering fields forward onto the successor. The
-    # `imas-codex sn edit` rename-mode caller always passes edit_mode,
-    # edit_reason, and edit_status explicitly, so this lookup is skipped
-    # for that path.
-    if edit_mode is None and edit_reason is None and edit_status is None:
-        with GraphClient() as gc:
-            _old_rows = gc.query(
-                """
-                MATCH (old:StandardName {id: $old_name})
-                RETURN old.edit_status AS edit_status,
-                       old.edit_mode AS edit_mode,
-                       old.name_hint AS name_hint,
-                       old.docs_hint AS docs_hint,
-                       old.edit_reason AS edit_reason,
-                       old.edit_origin AS edit_origin,
-                       old.edit_scope AS edit_scope,
-                       old.edit_requested_at AS edit_requested_at,
-                       old.edit_override_edits AS edit_override_edits,
-                       old.edit_include_accepted AS edit_include_accepted
-                """,
-                old_name=old_name,
-            )
-        if _old_rows and _old_rows[0].get("edit_status") == "open":
-            _old = _old_rows[0]
-            edit_mode = _old.get("edit_mode")
-            name_hint = _old.get("name_hint")
-            docs_hint = _old.get("docs_hint")
-            edit_reason = _old.get("edit_reason")
-            edit_origin = _old.get("edit_origin")
-            edit_scope = _old.get("edit_scope")
-            edit_status = _old.get("edit_status")
-            edit_requested_at = _old.get("edit_requested_at")
-            # Carry the cascade-authorization opt-in forward so a rename edit
-            # that rotates through refine still respects the operator's
-            # override_edits / include_accepted choice when finally accepted.
-            edit_override_edits = _old.get("edit_override_edits")
-            edit_include_accepted = _old.get("edit_include_accepted")
+    inherit_open_edit = (
+        edit_mode is None and edit_reason is None and edit_status is None
+    )
 
     escalation_set = ""
     if escalated:
@@ -13481,6 +13445,50 @@ def persist_refined_name(
                            OR ($edit_mode IS NULL
                                AND coalesce(existing.name_stage, '') IN ['', 'pending']
                                AND coalesce(existing.origin, '') <> 'derived')
+                        WITH old, existing,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_mode ELSE $edit_mode END
+                               AS successor_edit_mode,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.name_hint ELSE $name_hint END
+                               AS successor_name_hint,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.docs_hint ELSE $docs_hint END
+                               AS successor_docs_hint,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_reason ELSE $edit_reason END
+                               AS successor_edit_reason,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_origin ELSE $edit_origin END
+                               AS successor_edit_origin,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_scope ELSE $edit_scope END
+                               AS successor_edit_scope,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_status ELSE $edit_status END
+                               AS successor_edit_status,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_requested_at
+                                  ELSE $edit_requested_at END
+                               AS successor_edit_requested_at,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_override_edits
+                                  ELSE $edit_override_edits END
+                               AS successor_edit_override_edits,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_include_accepted
+                                  ELSE $edit_include_accepted END
+                               AS successor_edit_include_accepted
                         SET old.superseded_from_stage = coalesce(
                                 old.superseded_from_stage, old.name_stage
                             ),
@@ -13504,16 +13512,16 @@ def persist_refined_name(
                           new.generated_at      = datetime(),
                           new.refine_reason     = $reason,
                           new.run_id            = $run_id,
-                          new.edit_mode         = $edit_mode,
-                          new.name_hint         = $name_hint,
-                          new.docs_hint         = $docs_hint,
-                          new.edit_reason       = $edit_reason,
-                          new.edit_origin       = $edit_origin,
-                          new.edit_scope        = $edit_scope,
-                          new.edit_status       = $edit_status,
-                          new.edit_requested_at = $edit_requested_at,
-                          new.edit_override_edits = $edit_override_edits,
-                          new.edit_include_accepted = $edit_include_accepted,
+                          new.edit_mode         = successor_edit_mode,
+                          new.name_hint         = successor_name_hint,
+                          new.docs_hint         = successor_docs_hint,
+                          new.edit_reason       = successor_edit_reason,
+                          new.edit_origin       = successor_edit_origin,
+                          new.edit_scope        = successor_edit_scope,
+                          new.edit_status       = successor_edit_status,
+                          new.edit_requested_at = successor_edit_requested_at,
+                          new.edit_override_edits = successor_edit_override_edits,
+                          new.edit_include_accepted = successor_edit_include_accepted,
                           new.embed_text_hash   = null
                           {escalation_set}
                         ON MATCH SET
@@ -13525,19 +13533,61 @@ def persist_refined_name(
                             WHEN coalesce(new.name_stage, '') IN ['', 'pending']
                              AND coalesce(new.origin, '') <> 'derived'
                             THEN 'pipeline' ELSE new.origin END,
+                          new.edit_mode = successor_edit_mode,
+                          new.name_hint = successor_name_hint,
+                          new.docs_hint = successor_docs_hint,
+                          new.edit_reason = successor_edit_reason,
+                          new.edit_origin = successor_edit_origin,
+                          new.edit_scope = successor_edit_scope,
+                          new.edit_status = successor_edit_status,
+                          new.edit_requested_at = successor_edit_requested_at,
+                          new.edit_override_edits = successor_edit_override_edits,
+                          new.edit_include_accepted = successor_edit_include_accepted,
                           new.embed_text_hash = null
-                        WITH old, new
+                        WITH old, new, successor_edit_mode,
+                             successor_name_hint, successor_docs_hint,
+                             successor_edit_reason, successor_edit_origin,
+                             successor_edit_scope, successor_edit_status,
+                             successor_edit_requested_at,
+                             successor_edit_override_edits,
+                             successor_edit_include_accepted
                         OPTIONAL MATCH (source:StandardNameSource)
                         WHERE (source)-[:PRODUCED_NAME]->(old)
                            OR source.produced_sn_id = old.id
                         RETURN old.id AS old_name, new.id AS new_name,
                                [source_id IN collect(DISTINCT source.id)
-                                WHERE source_id IS NOT NULL] AS source_ids
+                                WHERE source_id IS NOT NULL] AS source_ids,
+                               old.edit_mode AS source_edit_mode,
+                               old.name_hint AS source_name_hint,
+                               old.docs_hint AS source_docs_hint,
+                               old.edit_reason AS source_edit_reason,
+                               old.edit_origin AS source_edit_origin,
+                               old.edit_scope AS source_edit_scope,
+                               old.edit_status AS source_edit_status,
+                               old.edit_requested_at AS source_edit_requested_at,
+                               old.edit_override_edits
+                                 AS source_edit_override_edits,
+                               old.edit_include_accepted
+                                 AS source_edit_include_accepted,
+                               successor_edit_mode AS effective_edit_mode,
+                               successor_name_hint AS effective_name_hint,
+                               successor_docs_hint AS effective_docs_hint,
+                               successor_edit_reason AS effective_edit_reason,
+                               successor_edit_origin AS effective_edit_origin,
+                               successor_edit_scope AS effective_edit_scope,
+                               successor_edit_status AS effective_edit_status,
+                               successor_edit_requested_at
+                                 AS effective_edit_requested_at,
+                               successor_edit_override_edits
+                                 AS effective_edit_override_edits,
+                               successor_edit_include_accepted
+                                 AS effective_edit_include_accepted
                         """,
                         old_name=old_name,
                         new_name=new_name,
                         expected_old_stage=expected_old_stage,
                         expected_claim_token=expected_claim_token,
+                        inherit_open_edit=inherit_open_edit,
                         new_chain_length=new_chain_length,
                         description=description,
                         kind=kind,
@@ -13568,9 +13618,41 @@ def persist_refined_name(
                         "before the atomic rename began"
                     )
 
+                preflight_row = dict(preflight[0])
                 candidate_source_ids = sorted(
-                    set(dict(preflight[0]).get("source_ids") or [])
+                    set(preflight_row.get("source_ids") or [])
                 )
+                edit_mode = preflight_row.get("effective_edit_mode", edit_mode)
+                name_hint = preflight_row.get("effective_name_hint", name_hint)
+                docs_hint = preflight_row.get("effective_docs_hint", docs_hint)
+                edit_reason = preflight_row.get("effective_edit_reason", edit_reason)
+                edit_origin = preflight_row.get("effective_edit_origin", edit_origin)
+                edit_scope = preflight_row.get("effective_edit_scope", edit_scope)
+                edit_status = preflight_row.get("effective_edit_status", edit_status)
+                edit_requested_at = preflight_row.get(
+                    "effective_edit_requested_at", edit_requested_at
+                )
+                edit_override_edits = preflight_row.get(
+                    "effective_edit_override_edits", edit_override_edits
+                )
+                edit_include_accepted = preflight_row.get(
+                    "effective_edit_include_accepted", edit_include_accepted
+                )
+                source_edit_state = {
+                    field: preflight_row.get(f"source_{field}")
+                    for field in (
+                        "edit_mode",
+                        "name_hint",
+                        "docs_hint",
+                        "edit_reason",
+                        "edit_origin",
+                        "edit_scope",
+                        "edit_status",
+                        "edit_requested_at",
+                        "edit_override_edits",
+                        "edit_include_accepted",
+                    )
+                }
                 from imas_codex.standard_names.attachment_audit import (
                     guard_source_pairings,
                 )
@@ -13601,6 +13683,39 @@ def persist_refined_name(
                         MATCH (new:StandardName {id: $new_name}),
                               (old:StandardName {id: $old_name})
                         WHERE old.name_stage = 'refining'
+                          AND (old.edit_mode = $source_edit_mode OR
+                               (old.edit_mode IS NULL AND
+                                $source_edit_mode IS NULL))
+                          AND (old.name_hint = $source_name_hint OR
+                               (old.name_hint IS NULL AND
+                                $source_name_hint IS NULL))
+                          AND (old.docs_hint = $source_docs_hint OR
+                               (old.docs_hint IS NULL AND
+                                $source_docs_hint IS NULL))
+                          AND (old.edit_reason = $source_edit_reason OR
+                               (old.edit_reason IS NULL AND
+                                $source_edit_reason IS NULL))
+                          AND (old.edit_origin = $source_edit_origin OR
+                               (old.edit_origin IS NULL AND
+                                $source_edit_origin IS NULL))
+                          AND (old.edit_scope = $source_edit_scope OR
+                               (old.edit_scope IS NULL AND
+                                $source_edit_scope IS NULL))
+                          AND (old.edit_status = $source_edit_status OR
+                               (old.edit_status IS NULL AND
+                                $source_edit_status IS NULL))
+                          AND (old.edit_requested_at =
+                               $source_edit_requested_at OR
+                               (old.edit_requested_at IS NULL AND
+                                $source_edit_requested_at IS NULL))
+                          AND (old.edit_override_edits =
+                               $source_edit_override_edits OR
+                               (old.edit_override_edits IS NULL AND
+                                $source_edit_override_edits IS NULL))
+                          AND (old.edit_include_accepted =
+                               $source_edit_include_accepted OR
+                               (old.edit_include_accepted IS NULL AND
+                                $source_edit_include_accepted IS NULL))
                         MERGE (new)-[:REFINED_FROM]->(old)
 
                         // 3. Mark old as superseded, clear claim
@@ -13713,6 +13828,10 @@ def persist_refined_name(
                         edit_requested_at=edit_requested_at,
                         edit_override_edits=edit_override_edits,
                         edit_include_accepted=edit_include_accepted,
+                        **{
+                            f"source_{field}": value
+                            for field, value in source_edit_state.items()
+                        },
                     )
                 )
                 if not result:

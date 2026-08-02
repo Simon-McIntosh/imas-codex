@@ -14,9 +14,29 @@ from imas_codex.standard_names.attachment_audit import (
 )
 from imas_codex.standard_names.graph_ops import persist_refined_name
 
+_EDIT_FIELDS = (
+    "edit_mode",
+    "name_hint",
+    "docs_hint",
+    "edit_reason",
+    "edit_origin",
+    "edit_scope",
+    "edit_status",
+    "edit_requested_at",
+    "edit_override_edits",
+    "edit_include_accepted",
+)
 
-def _transaction(source_ids: list[str]) -> MagicMock:
+
+def _transaction(
+    source_ids: list[str],
+    *,
+    source_edit_state: dict[str, object] | None = None,
+    effective_edit_state: dict[str, object] | None = None,
+) -> MagicMock:
     tx = MagicMock()
+    source_edit_state = source_edit_state or {}
+    effective_edit_state = effective_edit_state or {}
 
     def run(cypher: str, **_params):
         if "// REFINE_ATOMIC_PREFLIGHT" in cypher:
@@ -25,6 +45,18 @@ def _transaction(source_ids: list[str]) -> MagicMock:
                     "old_name": "electron_density",
                     "new_name": "volume_averaged_electron_density",
                     "source_ids": source_ids,
+                    **{
+                        f"source_{field}": source_edit_state.get(field)
+                        for field in _EDIT_FIELDS
+                    },
+                    **{
+                        f"effective_{field}": (
+                            effective_edit_state[field]
+                            if field in effective_edit_state
+                            else _params.get(field)
+                        )
+                        for field in _EDIT_FIELDS
+                    },
                 }
             ]
         if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
@@ -38,6 +70,53 @@ def _transaction(source_ids: list[str]) -> MagicMock:
 
     tx.run.side_effect = run
     return tx
+
+
+class _RacingEditTransaction:
+    """Stateful transaction double that changes edit state after preflight."""
+
+    def __init__(self) -> None:
+        self.state = {
+            "name_stage": "refining",
+            "edit_mode": "rename",
+            "edit_reason": "initial reason",
+            "edit_status": "open",
+        }
+        self.successor: dict[str, object] = {}
+        self.commit = MagicMock()
+        self.rollback = MagicMock()
+
+    def run(self, cypher: str, **params):
+        if "// REFINE_ATOMIC_PREFLIGHT" in cypher:
+            source_state = {field: self.state.get(field) for field in _EDIT_FIELDS}
+            self.successor = dict(source_state)
+            self.state["edit_reason"] = "concurrent replacement"
+            return [
+                {
+                    "old_name": params["old_name"],
+                    "new_name": params["new_name"],
+                    "source_ids": [],
+                    **{
+                        f"source_{field}": value
+                        for field, value in source_state.items()
+                    },
+                    **{
+                        f"effective_{field}": value
+                        for field, value in self.successor.items()
+                    },
+                }
+            ]
+        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+            matches_snapshot = all(
+                self.state.get(field) == params.get(f"source_{field}")
+                for field in _EDIT_FIELDS
+            )
+            return (
+                [{"old_name": params["old_name"], "new_name": params["new_name"]}]
+                if matches_snapshot
+                else []
+            )
+        raise AssertionError(f"unexpected transaction query: {cypher}")
 
 
 def _graph(transaction: MagicMock) -> MagicMock:
@@ -55,8 +134,15 @@ def _graph(transaction: MagicMock) -> MagicMock:
 def _persistence_boundary(
     source_ids: list[str],
     guard_result: AttachmentPairingGuardResult,
+    *,
+    source_edit_state: dict[str, object] | None = None,
+    effective_edit_state: dict[str, object] | None = None,
 ):
-    transaction = _transaction(source_ids)
+    transaction = _transaction(
+        source_ids,
+        source_edit_state=source_edit_state,
+        effective_edit_state=effective_edit_state,
+    )
     graph = _graph(transaction)
     with (
         patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
@@ -202,16 +288,124 @@ def test_preflight_fences_settled_edits_and_worker_claims() -> None:
     assert preflight.kwargs["expected_claim_token"] == "claim-token"
 
 
-def test_event_write_failure_rolls_back_graph_mutation() -> None:
-    admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
-    with _persistence_boundary(["dd:path/a"], admitted) as boundary:
-        transaction, _guard, _retarget, record = boundary
-        record.side_effect = RuntimeError("event storage unavailable")
-        with pytest.raises(RuntimeError, match="event storage"):
-            _persist()
+def test_open_edit_propagation_uses_only_the_atomic_transaction() -> None:
+    open_edit = {
+        "edit_mode": "rename",
+        "name_hint": "volume_averaged_electron_density",
+        "edit_reason": "preserve the requested averaging scope",
+        "edit_origin": "human",
+        "edit_scope": "only_self",
+        "edit_status": "open",
+        "edit_requested_at": "2026-08-02T10:00:00+00:00",
+        "edit_override_edits": False,
+        "edit_include_accepted": True,
+    }
+    transaction = _transaction(
+        [], source_edit_state=open_edit, effective_edit_state=open_edit
+    )
+    graph = _graph(transaction)
+    admitted = AttachmentPairingGuardResult((), ())
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.GraphClient",
+            return_value=graph,
+        ) as graph_client,
+        patch(
+            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            return_value=admitted,
+        ),
+        patch(
+            "imas_codex.standard_names.provenance_lifecycle."
+            "retarget_standard_name_sources",
+            return_value=0,
+        ),
+        patch(
+            "imas_codex.standard_names.provenance_lifecycle."
+            "record_standard_name_change",
+            return_value="sn-change:edit",
+        ) as record,
+        patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter"),
+    ):
+        _persist(
+            edit_mode=None,
+            edit_reason=None,
+            edit_origin=None,
+            edit_status=None,
+            expected_old_stage=None,
+        )
+
+    graph_client.assert_called_once_with()
+    preflight = transaction.run.call_args_list[0]
+    assert preflight.kwargs["inherit_open_edit"] is True
+    assert "old.edit_status = 'open'" in preflight.args[0]
+    assert "new.edit_reason       = successor_edit_reason" in preflight.args[0]
+    record.assert_called_once()
+    assert record.call_args.kwargs["operation"] == "human_edit"
+    assert record.call_args.kwargs["reason"] == open_edit["edit_reason"]
+    transaction.commit.assert_called_once_with()
+
+
+def test_edit_state_race_fails_the_finalization_fence_and_rolls_back() -> None:
+    transaction = _RacingEditTransaction()
+    graph = _graph(transaction)
+    admitted = AttachmentPairingGuardResult((), ())
+    with (
+        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
+        patch(
+            "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+            return_value=admitted,
+        ),
+        patch(
+            "imas_codex.standard_names.provenance_lifecycle."
+            "retarget_standard_name_sources"
+        ) as retarget,
+        patch(
+            "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
+        ) as record,
+    ):
+        with pytest.raises(RuntimeError, match="left name_stage='refining'"):
+            _persist(
+                edit_mode=None,
+                edit_reason=None,
+                edit_origin=None,
+                edit_status=None,
+                expected_old_stage=None,
+            )
 
     transaction.rollback.assert_called_once_with()
     transaction.commit.assert_not_called()
+    retarget.assert_not_called()
+    record.assert_not_called()
+
+
+def test_event_write_failure_rolls_back_graph_mutation() -> None:
+    admitted = AttachmentPairingGuardResult(("dd:path/a",), ())
+    open_edit = {
+        "edit_mode": "rename",
+        "edit_reason": "preserve the requested averaging scope",
+        "edit_status": "open",
+    }
+    with _persistence_boundary(
+        ["dd:path/a"],
+        admitted,
+        source_edit_state=open_edit,
+        effective_edit_state=open_edit,
+    ) as boundary:
+        transaction, _guard, _retarget, record = boundary
+        record.side_effect = RuntimeError("event storage unavailable")
+        with pytest.raises(RuntimeError, match="event storage"):
+            _persist(
+                edit_mode=None,
+                edit_reason=None,
+                edit_origin=None,
+                edit_status=None,
+                expected_old_stage=None,
+            )
+
+    transaction.rollback.assert_called_once_with()
+    transaction.commit.assert_not_called()
+    assert record.call_args.kwargs["operation"] == "human_edit"
+    assert record.call_args.kwargs["reason"] == open_edit["edit_reason"]
 
 
 def test_regular_refine_records_its_operation_once() -> None:

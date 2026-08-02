@@ -371,24 +371,17 @@ def _name_denotes_rate(sn_name: str) -> bool:
     return any(f"_{t}_" in padded for t in _rate_natured_bases())
 
 
-# Codex policy classifying the public operator registry by temporal meaning.
-# The registry remains ISN-owned; the drift test below this boundary requires
-# every policy key to remain registered rather than letting a renamed operator
-# silently stop protecting attachments.
-_TIME_CHANGE_OPERATOR_POLICY = frozenset({"change_in", "tendency", "time_derivative"})
-
-
 def _ir_denotes_time_change(ir: Any) -> bool:
-    """Recursively find registered temporal-change semantics in public ISN IR."""
-    from imas_codex.standard_names.segments import (
-        OPERATOR_SEGMENT,
-        grammar_tokens_by_segment,
-    )
+    """Recursively find temporal-change semantics through the public ISN API."""
+    from imas_standard_names import get_operator_semantics
 
-    registered = frozenset(grammar_tokens_by_segment().get(OPERATOR_SEGMENT, ()))
-    time_change_operators = _TIME_CHANGE_OPERATOR_POLICY & registered
+    def denotes_time_change(token: Any) -> bool:
+        return isinstance(token, str) and (
+            "temporal_change" in get_operator_semantics(token)
+        )
+
     for operator in getattr(ir, "operators", ()) or ():
-        if getattr(operator, "op", None) in time_change_operators:
+        if denotes_time_change(getattr(operator, "op", None)):
             return True
         if any(
             _ir_denotes_time_change(argument)
@@ -396,11 +389,11 @@ def _ir_denotes_time_change(ir: Any) -> bool:
         ):
             return True
 
-    # The public parser can canonically absorb a bare-prefix operator into the
-    # qualifier sequence. Read that parser-owned IR token rather than matching
-    # the name string, while still requiring it to be a registered operator.
+    # The public parser can represent a bare-prefix operator as a qualifier.
+    # Semantic lookup is token-based and intentionally independent of where the
+    # parser places that token in the public IR.
     return any(
-        getattr(qualifier, "token", None) in time_change_operators
+        denotes_time_change(getattr(qualifier, "token", None))
         for qualifier in getattr(ir, "qualifiers", ()) or ()
     )
 
@@ -412,16 +405,16 @@ def _name_claims_time_change(sn_name: str) -> bool:
 
         return _ir_denotes_time_change(parse_canonical_name(sn_name).ir)
     except (TypeError, ValueError):
-        # Legacy graph identities can predate the strict grammar. Preserve the
-        # conservative lexical rule for those unparseable names only.
-        return sn_name.startswith(
-            (
-                "change_in_",
-                "tendency_of_",
-                "rate_of_",
-                "rate_of_change_of_",
-                "time_derivative_of_",
-            )
+        # Legacy identities can predate the strict grammar. Ask ISN about every
+        # contiguous token span so this conservative fallback remains entirely
+        # vocabulary-owned without duplicating operator names in codex.
+        from imas_standard_names import get_operator_semantics
+
+        parts = sn_name.split("_")
+        return any(
+            "temporal_change" in get_operator_semantics("_".join(parts[start:end]))
+            for start in range(len(parts))
+            for end in range(start + 1, len(parts) + 1)
         )
 
 
