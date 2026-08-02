@@ -251,6 +251,111 @@ def test_dry_run_stops_before_every_mutator(monkeypatch, tmp_path: Path) -> None
     forbidden.assert_not_called()
 
 
+def test_dry_run_propagates_selected_reviewer_profile(
+    monkeypatch, tmp_path: Path
+) -> None:
+    from imas_codex import settings as settings_mod
+
+    manifest = tmp_path / "batch.yaml"
+    _write_manifest(manifest)
+    plan = [
+        classify_manifest_drain_item(
+            _plan_item(
+                path="magnetics/ip",
+                node={"id": "magnetics/ip", "node_category": "quantity"},
+            )
+        )
+    ]
+    expected_models = settings_mod.get_sn_review_profile_models("quality-cost-balanced")
+    expected_threshold = settings_mod.get_sn_review_profile_threshold(
+        "quality-cost-balanced"
+    )
+    observed: dict[str, object] = {}
+
+    def build_plan(paths, **kwargs):
+        observed["profile"] = settings_mod.get_sn_review_active_profile()
+        observed["models"] = settings_mod.get_sn_review_names_models()
+        observed["threshold"] = settings_mod.get_sn_review_disagreement_threshold()
+        return plan
+
+    monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.build_manifest_drain_plan", build_plan
+    )
+
+    result = CliRunner().invoke(
+        sn_run,
+        [
+            "--reviewer-profile",
+            "quality-cost-balanced",
+            "--drain-batch",
+            str(manifest),
+            "--dry-run",
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert observed == {
+        "profile": "quality-cost-balanced",
+        "models": expected_models,
+        "threshold": expected_threshold,
+    }
+
+
+def test_live_drain_explicit_default_replaces_stale_profile(
+    monkeypatch, tmp_path: Path
+) -> None:
+    from imas_codex import settings as settings_mod
+
+    manifest = tmp_path / "batch.yaml"
+    _write_manifest(manifest)
+    item = classify_manifest_drain_item(
+        _plan_item(
+            path="magnetics/ip",
+            node={"id": "magnetics/ip", "node_category": "quantity"},
+        )
+    )
+    expected_models = settings_mod.get_sn_review_profile_models("default")
+    expected_threshold = settings_mod.get_sn_review_profile_threshold("default")
+    observed: dict[str, object] = {}
+
+    monkeypatch.setenv("IMAS_CODEX_SN_REVIEW_PROFILE", "quality-cost-balanced")
+    monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.prepare_manifest_drain_scope",
+        lambda paths, **kwargs: ("owned-scope", [item]),
+    )
+
+    def run(**kwargs):
+        observed["profile"] = settings_mod.get_sn_review_active_profile()
+        observed["models"] = settings_mod.get_sn_review_names_models()
+        observed["threshold"] = settings_mod.get_sn_review_disagreement_threshold()
+        return {"drain_report": [item]}
+
+    monkeypatch.setattr("imas_codex.cli.sn._run_sn_cmd", run)
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        MagicMock(return_value={"sources": 1, "names": 0}),
+    )
+
+    result = CliRunner().invoke(
+        sn_run,
+        [
+            "--reviewer-profile",
+            "default",
+            "--drain-batch",
+            str(manifest),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert observed == {
+        "profile": "default",
+        "models": expected_models,
+        "threshold": expected_threshold,
+    }
+
+
 def test_live_operator_reports_owned_scope_and_cleans_it(
     monkeypatch, tmp_path: Path
 ) -> None:

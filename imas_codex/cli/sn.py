@@ -1442,17 +1442,15 @@ def _reject_unscoped_accepted_reset(
     "--reviewer-profile",
     "reviewer_profile",
     type=click.Choice(
-        ["default", "pilot", "opus-only", "haiku-only"], case_sensitive=False
+        ["default", "quality-cost-balanced", "opus-only"], case_sensitive=False
     ),
     default="default",
     show_default=True,
     envvar="IMAS_CODEX_SN_REVIEW_PROFILE",
     help=(
         "Reviewer model chain profile for the review phase. "
-        "'default' → Opus+GPT-5.4+Sonnet (3-model RD-quorum). "
-        "'pilot' → Haiku×2+Opus arbiter (~85%% cost reduction). "
-        "'opus-only' → single Opus reviewer. "
-        "'haiku-only' → single Haiku reviewer (cheapest). "
+        "'default' and 'quality-cost-balanced' use configured RD-quorum chains; "
+        "'opus-only' uses the configured single reviewer without quorum. "
         "Also read from IMAS_CODEX_SN_REVIEW_PROFILE env var."
     ),
 )
@@ -1651,6 +1649,12 @@ def sn_run(
     """
     import os as _os
 
+    # Click has already resolved explicit option > environment > default.
+    # Always propagate that resolved value so an explicit ``default`` replaces
+    # any profile left in the process environment by an earlier invocation.
+    reviewer_profile = reviewer_profile.lower()
+    _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
+
     if drain_batch:
         incompatible = {
             "--source": source != "dd",
@@ -1829,13 +1833,6 @@ def sn_run(
             include_accepted=include_accepted,
         )
         return
-
-    # --- Reviewer profile: propagate via env var so the review pipeline picks
-    # it up automatically wherever it reads get_sn_review_names_models() /
-    # get_sn_review_disagreement_threshold().
-    reviewer_profile = reviewer_profile.lower()
-    if reviewer_profile != "default":
-        _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
 
     # --- Apply --only overrides ---
     if only_phase:
@@ -5388,17 +5385,15 @@ def sn_provenance_cleanup(apply: bool, names: tuple[str, ...], force: bool) -> N
     "--reviewer-profile",
     "reviewer_profile",
     type=click.Choice(
-        ["default", "pilot", "opus-only", "haiku-only"], case_sensitive=False
+        ["default", "quality-cost-balanced", "opus-only"], case_sensitive=False
     ),
     default="default",
     show_default=True,
     envvar="IMAS_CODEX_SN_REVIEW_PROFILE",
     help=(
         "Reviewer model chain profile. "
-        "'default' → Opus+GPT-5.4+Sonnet (3-model RD-quorum, $0.027/name). "
-        "'pilot' → Haiku×2+Opus arbiter ($0.004/name, ~85%% cost reduction). "
-        "'opus-only' → single Opus reviewer (no quorum). "
-        "'haiku-only' → single Haiku reviewer (cheapest). "
+        "'default' and 'quality-cost-balanced' use configured RD-quorum chains; "
+        "'opus-only' uses the configured single reviewer without quorum. "
         "Overridden by --models if both are specified. "
         "Also read from IMAS_CODEX_SN_REVIEW_PROFILE env var."
     ),
