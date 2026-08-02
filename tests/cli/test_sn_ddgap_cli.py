@@ -107,6 +107,7 @@ def test_list_uses_exact_read_filters_and_does_not_call_writers() -> None:
             "kind": "unit_defect",
             "status": "flagged",
             "affected_path_count": 1,
+            "evidence_token": "dd-gap-evidence:list-token",
         }
     ]
     with (
@@ -133,6 +134,7 @@ def test_list_uses_exact_read_filters_and_does_not_call_writers() -> None:
 
     assert result.exit_code == 0, result.output
     assert "dd_gap:equilibrium/path:unit_defect\tflagged" in result.output
+    assert "dd-gap-evidence:list-token" in result.output
     listing.assert_called_once_with(
         statuses=["flagged"],
         kinds=["unit_defect"],
@@ -154,6 +156,11 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
         "observed_value": "1",
         "expected_value": "Pa",
         "evidence_rule": "unit_equals_expected",
+        "triaged_at": "2026-08-02T11:00:00Z",
+        "status_changed_at": "2026-08-02T11:00:00Z",
+        "status_changed_by": "operator@example.org",
+        "status_change_reason": "evidence checked against the declaration",
+        "evidence_token": "dd-gap-evidence:reviewed-token",
         "source_paths": ["equilibrium/path"],
         "affected_name_ids": ["plasma_pressure"],
         "observations": [
@@ -166,6 +173,8 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
                 "observed_value": "1",
                 "expected_value": "Pa",
                 "evidence_rule": "unit_equals_expected",
+                "reference_path": "equilibrium/reference",
+                "reference_value": "Pa",
                 "first_observed_at": "2026-08-01T10:00:00Z",
                 "last_observed_at": "2026-08-02T10:00:00Z",
             }
@@ -197,9 +206,18 @@ def test_show_reports_exact_paths_and_is_read_only() -> None:
     assert "observed_value: 1" in result.output
     assert "expected_value: Pa" in result.output
     assert "evidence_rule: unit_equals_expected" in result.output
+    assert "triaged_at: 2026-08-02T11:00:00Z" in result.output
+    assert "status_changed_by: operator@example.org" in result.output
+    assert (
+        "status_change_reason: evidence checked against the declaration"
+        in result.output
+    )
+    assert "evidence_token: dd-gap-evidence:reviewed-token" in result.output
     assert "observations (1):" in result.output
     assert "reporter: unit-audit" in result.output
     assert "reason: measured twin declares pressure" in result.output
+    assert "reference_path: equilibrium/reference" in result.output
+    assert "reference_value: Pa" in result.output
     assert "state_changes (1):" in result.output
     assert "from_status: flagged" in result.output
     assert "to_status: triaged" in result.output
@@ -247,6 +265,28 @@ def test_human_transition_requires_explicit_apply() -> None:
     assert "requires --apply" in result.output
 
 
+def test_human_transition_requires_reviewed_evidence_token() -> None:
+    result = CliRunner().invoke(
+        sn,
+        [
+            "ddgap",
+            "--triage",
+            "dd_gap:equilibrium/path:unit_defect",
+            "--expected-status",
+            "flagged",
+            "--to-status",
+            "triaged",
+            "--actor",
+            "operator@example.org",
+            "--reason",
+            "evidence checked",
+            "--apply",
+        ],
+    )
+    assert result.exit_code == 2
+    assert "--expected-evidence-token" in result.output
+
+
 def test_human_transition_forwards_only_governed_disposition_fields() -> None:
     with (
         patch(
@@ -267,6 +307,8 @@ def test_human_transition_forwards_only_governed_disposition_fields() -> None:
                 "dd_gap:equilibrium/path:unit_defect",
                 "--expected-status",
                 "triaged",
+                "--expected-evidence-token",
+                "dd-gap-evidence:reviewed-token",
                 "--to-status",
                 "upstream_issue",
                 "--actor",
@@ -287,6 +329,7 @@ def test_human_transition_forwards_only_governed_disposition_fields() -> None:
         new_status="upstream_issue",
         actor="operator@example.org",
         reason="maintainers reproduced the declaration defect",
+        expected_evidence_token="dd-gap-evidence:reviewed-token",
         upstream_url="https://example.invalid/issue/1",
         resolved_dd_version=None,
         registry_backend=None,
@@ -308,6 +351,8 @@ def test_stale_expected_state_is_a_clear_operator_failure() -> None:
                 "dd_gap:equilibrium/path:unit_defect",
                 "--expected-status",
                 "flagged",
+                "--expected-evidence-token",
+                "dd-gap-evidence:stale-token",
                 "--to-status",
                 "rejected",
                 "--actor",

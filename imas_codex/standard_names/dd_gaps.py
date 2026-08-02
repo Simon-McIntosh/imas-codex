@@ -174,6 +174,43 @@ def _filter_sequence(
     return sorted(set(normalized))
 
 
+def _evidence_snapshot(fact: Mapping[str, Any]) -> dict[str, Any]:
+    """Normalize every mutable field that defines one reviewed evidence set."""
+    raw_observation_ids = fact.get("observation_ids")
+    if raw_observation_ids is None:
+        raw_observation_ids = [item["id"] for item in (fact.get("observations") or [])]
+    return {
+        "path": _optional_text(fact.get("path")) or "",
+        "kind": _optional_text(fact.get("kind")) or "",
+        "observed_dd_version": _optional_text(fact.get("observed_dd_version")) or "",
+        "observed_value": _optional_text(fact.get("observed_value")) or "",
+        "expected_value": _optional_text(fact.get("expected_value")) or "",
+        "evidence_rule": _optional_text(fact.get("evidence_rule")) or "",
+        "reference_path": _optional_text(fact.get("reference_path")) or "",
+        "reference_value": _optional_text(fact.get("reference_value")) or "",
+        "registry_backend": _optional_text(fact.get("registry_backend")) or "",
+        "source_paths": sorted(str(item) for item in (fact.get("source_paths") or [])),
+        "observation_ids": sorted(str(item) for item in raw_observation_ids),
+        "example_count": int(fact.get("example_count") or 0),
+        "first_seen_at": fact.get("first_seen_at"),
+        "last_seen_at": fact.get("last_seen_at"),
+    }
+
+
+def _evidence_token(fact: Mapping[str, Any]) -> str:
+    """Return a stable token for the exact evidence snapshot an operator saw."""
+    snapshot = _evidence_snapshot(fact)
+    serializable = {
+        **snapshot,
+        "first_seen_at": str(snapshot["first_seen_at"] or ""),
+        "last_seen_at": str(snapshot["last_seen_at"] or ""),
+    }
+    digest = hashlib.sha256(
+        json.dumps(serializable, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    return f"dd-gap-evidence:{digest}"
+
+
 def _observation_id(payload: Mapping[str, Any]) -> str:
     identity = {
         key: payload.get(key)
@@ -624,6 +661,31 @@ def _validate_transition_request(
 _TRANSITION_QUERY = """
 MATCH (gap:DDGap {id: $gap_id})
 WHERE gap.status = $expected_status
+  AND coalesce(gap.path, '') = $evidence_path
+  AND coalesce(gap.kind, '') = $evidence_kind
+  AND coalesce(gap.observed_dd_version, '') = $evidence_observed_dd_version
+  AND coalesce(gap.observed_value, '') = $evidence_observed_value
+  AND coalesce(gap.expected_value, '') = $evidence_expected_value
+  AND coalesce(gap.evidence_rule, '') = $evidence_rule
+  AND coalesce(gap.reference_path, '') = $evidence_reference_path
+  AND coalesce(gap.reference_value, '') = $evidence_reference_value
+  AND coalesce(gap.registry_backend, '') = $evidence_registry_backend
+OPTIONAL MATCH (source:IMASNode)-[:HAS_DD_GAP]->(gap)
+WITH gap, collect(DISTINCT source.id) AS current_source_paths
+OPTIONAL MATCH (gap)-[:HAS_OBSERVATION]->(observation:DDGapObservation)
+WITH gap, current_source_paths,
+     collect(DISTINCT observation.id) AS current_observation_ids
+WHERE size(current_source_paths) = size($evidence_source_paths)
+  AND all(path IN current_source_paths WHERE path IN $evidence_source_paths)
+  AND all(path IN $evidence_source_paths WHERE path IN current_source_paths)
+  AND size(current_observation_ids) = size($evidence_observation_ids)
+  AND all(id IN current_observation_ids WHERE id IN $evidence_observation_ids)
+  AND all(id IN $evidence_observation_ids WHERE id IN current_observation_ids)
+  AND coalesce(gap.example_count, 0) = $evidence_example_count
+  AND ((gap.first_seen_at IS NULL AND $evidence_first_seen_at IS NULL)
+       OR gap.first_seen_at = $evidence_first_seen_at)
+  AND ((gap.last_seen_at IS NULL AND $evidence_last_seen_at IS NULL)
+       OR gap.last_seen_at = $evidence_last_seen_at)
 CALL {
     WITH gap
     WITH gap WHERE $new_status <> 'resolved_upstream'
@@ -672,14 +734,18 @@ def transition_dd_gap(
     new_status: str,
     actor: str,
     reason: str,
+    expected_evidence_token: str,
     upstream_url: str | None = None,
     resolved_dd_version: str | None = None,
     registry_backend: str | None = None,
     validation_evidence: str | None = None,
     gc: GraphClient | None = None,
 ) -> dict[str, Any]:
-    """Apply one human-authorized lifecycle transition with status CAS."""
+    """Apply one human-authorized transition with status and evidence CAS."""
     clean_gap_id = _validate_gap_id(gap_id)
+    clean_evidence_token = _optional_text(expected_evidence_token)
+    if not clean_evidence_token:
+        raise ValueError("DD-gap transition requires expected_evidence_token")
     expected, target, clean_actor, clean_reason = _validate_transition_request(
         expected_status=expected_status,
         new_status=new_status,
@@ -698,6 +764,7 @@ def transition_dd_gap(
                 new_status=target,
                 actor=clean_actor,
                 reason=clean_reason,
+                expected_evidence_token=clean_evidence_token,
                 upstream_url=upstream_url,
                 resolved_dd_version=resolved_dd_version,
                 registry_backend=registry_backend,
@@ -705,6 +772,16 @@ def transition_dd_gap(
                 gc=owned,
             )
 
+    fact = get_dd_gap(clean_gap_id, gc=gc)
+    if fact is None:
+        raise DDGapTransitionConflict(f"DD gap {clean_gap_id!r} does not exist")
+    current_evidence_token = str(fact["evidence_token"])
+    if current_evidence_token != clean_evidence_token:
+        raise DDGapTransitionConflict(
+            f"DD gap {clean_gap_id!r} evidence changed; expected "
+            f"{clean_evidence_token!r}, found {current_evidence_token!r}"
+        )
+    evidence = _evidence_snapshot(fact)
     rows = gc.query(
         _TRANSITION_QUERY,
         gap_id=clean_gap_id,
@@ -712,6 +789,20 @@ def transition_dd_gap(
         new_status=target,
         actor=clean_actor,
         reason=clean_reason,
+        evidence_path=evidence["path"],
+        evidence_kind=evidence["kind"],
+        evidence_observed_dd_version=evidence["observed_dd_version"],
+        evidence_observed_value=evidence["observed_value"],
+        evidence_expected_value=evidence["expected_value"],
+        evidence_rule=evidence["evidence_rule"],
+        evidence_reference_path=evidence["reference_path"],
+        evidence_reference_value=evidence["reference_value"],
+        evidence_registry_backend=evidence["registry_backend"],
+        evidence_source_paths=evidence["source_paths"],
+        evidence_observation_ids=evidence["observation_ids"],
+        evidence_example_count=evidence["example_count"],
+        evidence_first_seen_at=evidence["first_seen_at"],
+        evidence_last_seen_at=evidence["last_seen_at"],
         changed_at=datetime.now(UTC).isoformat(),
         upstream_url=_optional_text(upstream_url),
         resolved_dd_version=_optional_text(resolved_dd_version),
@@ -720,8 +811,8 @@ def transition_dd_gap(
     )
     if not rows:
         raise DDGapTransitionConflict(
-            f"DD gap {clean_gap_id!r} did not have expected {expected!r} status "
-            "or the published resolution version does not exist"
+            f"DD gap {clean_gap_id!r} did not match expected {expected!r} status, "
+            "reviewed evidence, or published resolution version"
         )
     return dict(rows[0])
 
@@ -766,9 +857,20 @@ WHERE gap.status = item.expected_status
 OPTIONAL MATCH (source:IMASNode)-[:HAS_DD_GAP]->(gap)
 WITH version, gap, gap.status AS from_status, item,
      collect(DISTINCT source.id) AS current_source_paths
+OPTIONAL MATCH (gap)-[:HAS_OBSERVATION]->(observation:DDGapObservation)
+WITH version, gap, from_status, item, current_source_paths,
+     collect(DISTINCT observation.id) AS current_observation_ids
 WHERE size(current_source_paths) = size(item.source_paths)
   AND all(path IN current_source_paths WHERE path IN item.source_paths)
   AND all(path IN item.source_paths WHERE path IN current_source_paths)
+  AND size(current_observation_ids) = size(item.observation_ids)
+  AND all(id IN current_observation_ids WHERE id IN item.observation_ids)
+  AND all(id IN item.observation_ids WHERE id IN current_observation_ids)
+  AND coalesce(gap.example_count, 0) = item.example_count
+  AND ((gap.first_seen_at IS NULL AND item.first_seen_at IS NULL)
+       OR gap.first_seen_at = item.first_seen_at)
+  AND ((gap.last_seen_at IS NULL AND item.last_seen_at IS NULL)
+       OR gap.last_seen_at = item.last_seen_at)
 SET gap.status = 'resolved_upstream',
     gap.triaged_at = datetime($changed_at),
     gap.triage_actor = $actor,
@@ -835,15 +937,21 @@ def reconcile_dd_gaps(
         MATCH (gap:DDGap)
         WHERE gap.status IN $statuses
         OPTIONAL MATCH (node:IMASNode)-[:HAS_DD_GAP]->(gap)
+        WITH gap, collect(DISTINCT node.id) AS source_paths
+        OPTIONAL MATCH (gap)-[:HAS_OBSERVATION]->(observation:DDGapObservation)
         RETURN gap.id AS id, gap.path AS path, gap.kind AS kind,
                gap.status AS status, gap.expected_value AS expected_value,
+               gap.example_count AS example_count,
+               gap.first_seen_at AS first_seen_at,
+               gap.last_seen_at AS last_seen_at,
                gap.observed_dd_version AS observed_dd_version,
                gap.observed_value AS observed_value,
                gap.evidence_rule AS evidence_rule,
                gap.reference_path AS reference_path,
                gap.reference_value AS reference_value,
                gap.registry_backend AS registry_backend,
-               collect(DISTINCT node.id) AS source_paths
+               source_paths,
+               collect(DISTINCT observation.id) AS observation_ids
         ORDER BY id
         """,
         statuses=list(_RECONCILABLE_STATUSES),
@@ -905,24 +1013,12 @@ def reconcile_dd_gaps(
             validation = f"{dd_version} raw unit equals {expected!r} on " + ", ".join(
                 source_paths
             )
+            evidence = _evidence_snapshot(gap)
             candidates.append(
                 {
                     "id": gap_id,
                     "expected_status": str(gap["status"]),
-                    "path": _optional_text(gap.get("path")) or "",
-                    "kind": kind,
-                    "observed_dd_version": _optional_text(
-                        gap.get("observed_dd_version")
-                    )
-                    or "",
-                    "observed_value": _optional_text(gap.get("observed_value")) or "",
-                    "expected_value": expected,
-                    "evidence_rule": rule,
-                    "reference_path": _optional_text(gap.get("reference_path")) or "",
-                    "reference_value": _optional_text(gap.get("reference_value")) or "",
-                    "registry_backend": _optional_text(gap.get("registry_backend"))
-                    or "",
-                    "source_paths": source_paths,
+                    **evidence,
                     "validation_evidence": validation,
                 }
             )
@@ -978,15 +1074,26 @@ WHERE source.source_type = 'dd' AND source.source_id IN source_paths
 WITH gap, source_paths, collect(DISTINCT name.id) AS affected_name_ids
 WHERE size($name_ids) = 0
    OR any(name_id IN affected_name_ids WHERE name_id IN $name_ids)
+OPTIONAL MATCH (gap)-[:HAS_OBSERVATION]->(observation:DDGapObservation)
 RETURN gap.id AS id,
        gap.path AS path,
        gap.kind AS kind,
        gap.status AS status,
+       gap.example_count AS example_count,
+       gap.first_seen_at AS first_seen_at,
+       gap.last_seen_at AS last_seen_at,
+       gap.observed_dd_version AS observed_dd_version,
+       gap.observed_value AS observed_value,
+       gap.expected_value AS expected_value,
+       gap.evidence_rule AS evidence_rule,
+       gap.reference_path AS reference_path,
+       gap.reference_value AS reference_value,
        source_paths,
        affected_name_ids,
        gap.upstream_url AS upstream_url,
        gap.registry_backend AS registry_backend,
        gap.resolved_dd_version AS resolved_dd_version,
+       collect(DISTINCT observation.id) AS observation_ids,
        size(source_paths) AS affected_path_count
 ORDER BY gap.id
 """
@@ -1029,10 +1136,16 @@ def list_dd_gaps(
     )
     result = [dict(row) for row in rows]
     for row in result:
-        row["source_paths"] = sorted(str(item) for item in row["source_paths"])
-        row["affected_name_ids"] = sorted(
-            str(item) for item in row["affected_name_ids"]
+        row["source_paths"] = sorted(
+            str(item) for item in (row.get("source_paths") or [])
         )
+        row["affected_name_ids"] = sorted(
+            str(item) for item in (row.get("affected_name_ids") or [])
+        )
+        row["observation_ids"] = sorted(
+            str(item) for item in (row.get("observation_ids") or [])
+        )
+        row["evidence_token"] = _evidence_token(row)
     return sorted(result, key=lambda row: str(row["id"]))
 
 
@@ -1067,8 +1180,12 @@ def get_dd_gap(
                gap.evidence_rule AS evidence_rule,
                gap.reference_path AS reference_path,
                gap.reference_value AS reference_value,
+               gap.triaged_at AS triaged_at,
                gap.triage_actor AS triage_actor,
                gap.triage_reason AS triage_reason,
+               gap.status_changed_at AS status_changed_at,
+               gap.status_changed_by AS status_changed_by,
+               gap.status_change_reason AS status_change_reason,
                gap.upstream_url AS upstream_url,
                gap.registry_backend AS registry_backend,
                gap.resolved_dd_version AS resolved_dd_version,
@@ -1093,6 +1210,8 @@ def get_dd_gap(
                item.observed_value AS observed_value,
                item.expected_value AS expected_value,
                item.evidence_rule AS evidence_rule,
+               item.reference_path AS reference_path,
+               item.reference_value AS reference_value,
                item.first_observed_at AS first_observed_at,
                item.last_observed_at AS last_observed_at
         ORDER BY item.first_observed_at, item.id
@@ -1128,6 +1247,7 @@ def get_dd_gap(
         (dict(row) for row in state_changes),
         key=lambda row: (str(row.get("changed_at") or ""), str(row["id"])),
     )
+    result["evidence_token"] = _evidence_token(result)
     return result
 
 

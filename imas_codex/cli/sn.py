@@ -6282,12 +6282,17 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
         "evidence_rule",
         "reference_path",
         "reference_value",
+        "triaged_at",
         "triage_actor",
         "triage_reason",
+        "status_changed_at",
+        "status_changed_by",
+        "status_change_reason",
         "upstream_url",
         "registry_backend",
         "resolved_dd_version",
         "validation_evidence",
+        "evidence_token",
     ):
         value = fact.get(key)
         if value is not None:
@@ -6310,6 +6315,8 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
             "observed_value",
             "expected_value",
             "evidence_rule",
+            "reference_path",
+            "reference_value",
             "first_observed_at",
             "last_observed_at",
         ):
@@ -6354,6 +6361,10 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
     "--expected-status",
     type=_DD_GAP_STATUS_CHOICE,
     help="Current lifecycle status required by the transition compare-and-set.",
+)
+@click.option(
+    "--expected-evidence-token",
+    help="Exact evidence token printed by --show and required by transition CAS.",
 )
 @click.option(
     "--to-status", type=_DD_GAP_STATUS_CHOICE, help="Human-authorized target status."
@@ -6403,6 +6414,7 @@ def sn_ddgap(
     show_id: str | None,
     triage_id: str | None,
     expected_status: str | None,
+    expected_evidence_token: str | None,
     to_status: str | None,
     actor: str | None,
     reason: str | None,
@@ -6455,6 +6467,7 @@ def sn_ddgap(
                 for value in (
                     reason,
                     expected_status,
+                    expected_evidence_token,
                     to_status,
                     actor,
                     upstream_url,
@@ -6483,11 +6496,12 @@ def sn_ddgap(
         if not rows:
             click.echo("No DD gaps matched.")
             return
-        click.echo("ID\tSTATUS\tKIND\tPATHS\tPATH")
+        click.echo("ID\tSTATUS\tKIND\tPATHS\tPATH\tEVIDENCE_TOKEN")
         for row in rows:
             click.echo(
                 f"{row['id']}\t{row['status']}\t{row['kind']}\t"
-                f"{row['affected_path_count']}\t{row.get('path') or ''}"
+                f"{row['affected_path_count']}\t{row.get('path') or ''}\t"
+                f"{row['evidence_token']}"
             )
         return
 
@@ -6502,6 +6516,7 @@ def sn_ddgap(
                     name_ids,
                     reason,
                     expected_status,
+                    expected_evidence_token,
                     to_status,
                     actor,
                     upstream_url,
@@ -6536,9 +6551,16 @@ def sn_ddgap(
             )
         if not apply_changes:
             raise click.UsageError("--triage requires --apply")
-        if not expected_status or not to_status or not actor or not reason:
+        if (
+            not expected_status
+            or not expected_evidence_token
+            or not to_status
+            or not actor
+            or not reason
+        ):
             raise click.UsageError(
-                "--triage requires --expected-status, --to-status, --actor, and --reason"
+                "--triage requires --expected-status, --expected-evidence-token, "
+                "--to-status, --actor, and --reason"
             )
         try:
             result = transition_dd_gap(
@@ -6547,6 +6569,7 @@ def sn_ddgap(
                 new_status=to_status,
                 actor=actor,
                 reason=reason,
+                expected_evidence_token=expected_evidence_token,
                 upstream_url=upstream_url,
                 resolved_dd_version=resolved_dd_version,
                 registry_backend=registry_backend,
@@ -6571,6 +6594,7 @@ def sn_ddgap(
                 name_ids,
                 reason,
                 expected_status,
+                expected_evidence_token,
                 to_status,
                 actor,
                 upstream_url,
@@ -6628,6 +6652,7 @@ def sn_ddgap(
                 value
                 for value in (
                     expected_status,
+                    expected_evidence_token,
                     to_status,
                     actor,
                     upstream_url,
@@ -6661,6 +6686,7 @@ def sn_ddgap(
                 status,
                 name_ids,
                 expected_status,
+                expected_evidence_token,
                 to_status,
                 actor,
                 upstream_url,
