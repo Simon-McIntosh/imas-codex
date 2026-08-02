@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="36">
-<meta name="plan-impl" content="0.97">
+<meta name="plan-version" content="37">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -568,7 +568,7 @@ Done-when
      hole closed with a regression test; this followup resolved with numbers.</pre>
     <p class="r-fu-outcome">All production StandardName deletion paths now write an atomic StandardNameChange record. The 301 legacy missing-target rows are durably classified as unexplained legacy history. Live recovery deterministically rebound 10 of the final 19 provenance orphans to catalog evidence and retired the remaining nine exact unrecoverable ghosts through remove_provenance_orphan ledger rows; an independent graph audit reports zero live provenance orphans.</p>
     </article>
-<article class="r-fu" data-id="f-sgwi-004" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-01T12:10:00+02:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-004" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-01T12:10:00+02:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-02T17:26:35+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Land a fail-closed bounded manifest drain after the rejected scope prototype</h4>
     <div class="r-fu-body"><p>An optional bounded-drain prototype was independently rejected and remains unmerged at <code>b2ed7943</code>. The review found seven safety defects: refined successors lose manifest scope; stranded-doc promotion bypasses name and link hygiene; supported invocation can fall back to global promotion; multiple-live refusal is not transactionally fenced before writes; drafted/reviewed bindings are misclassified as true gaps; boundedness depends on a second operator flag; and scope stamps survive completion/failure. Preserve the useful tests and design intent, but do not merge or run the prototype.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -592,6 +592,7 @@ Validation
 - Full Standard Names suite on a debug compute node.
 
 Do not execute a live drain until review approves the implementation. The global 961 provenance violations and 15 legacy parser/stamp residues remain separate work under f-sgwi-001.</pre>
+    <p class="r-fu-outcome">Bounded manifest draining is merged and independently approved. Exact executable-schema dry-run on a corrected-audit-derived 17-root current-DD cohort exited zero with genuine_gap=17, ambiguous=0, no embed preflight, and byte-identical graph/cost/WEST/test state. The evidence-only audit artifact remains rejected, and live execution is separately capped at USD 50 per cohort under the lead-authorized USD 200 cumulative budget.</p>
     </article>
 </section>
 
@@ -682,6 +683,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="identity-fold-cli-stage-20260802" data-who="reckon-ship" data-when="2026-08-02T20:20:00+02:00">
     <div class="r-comment-body"><p><strong>The identity-fold CLI now reports the preserved predecessor stage exactly.</strong> Commit <code>8e97e017</code> renders authoritative <code>old_prior_stage</code> for fresh, dry-run, and idempotent results instead of hardcoding <code>accepted</code>; missing contract data fails loudly. Focused CliRunner regressions cover a reviewed dry-run and exhausted idempotent replay, and both passed on <code>sun_debug</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="bounded-cohort-dry-run-20260802" data-who="reckon-ship" data-when="2026-08-02T20:38:00+02:00">
+    <div class="r-comment-body"><p><strong>The supported bounded-drain dry run is zero-write and the first executable cohort is ready.</strong> An edit-oriented 17-root proposal was rejected because its immutable sources are pinned DD 4.1.0 while current authority is DD 4.1.1; all 17 correctly classified ambiguous. The replacement contains 17 current DD 4.1.1 quantity roots with no source, excludes every candidate fold and all WEST/test closure, and classified <code>genuine_gap=17</code>, <code>ambiguous=0</code>. The modeled full-chain bound with 20 percent reserve is USD 48.6726864. Dry-run exit was zero and all budget, SNRun/LLMCost, scope/claim, source/name, review/change/revision, DD authority, parser, provenance, WEST, and test hashes were identical before/after. Manifest SHA-256 <code>2e9567189b2a8249df64f3254c486fd6530ab72787a10f7811a993f8dbc771e7</code>; evidence SHA-256 <code>775c3d5fd4b0c91a8e66f6b9e67d5201c4263b86ea0b3bbc422ba2e31343d46c</code>. One live cohort is warranted as a bounded production proof and useful current-DD coverage; further spend requires a fresh outcome audit.</p></div>
 </div>
 </section>
 </main>
