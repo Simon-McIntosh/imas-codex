@@ -238,6 +238,7 @@ def _compute_pool_progress(
     rotation_cap: int,
     min_score: float,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
 ) -> dict[str, dict[str, int]]:
     """Return per-pool ``{"pending": int, "done": int}`` from one query.
@@ -286,6 +287,11 @@ def _compute_pool_progress(
     domain_filter_src = "AND s.physics_domain IN $domains" if domains else ""
     scope_filter_src = "AND s.run_id = $scope_run_id" if scope_run_id else ""
     scope_filter_sn = "AND sn.run_id = $scope_run_id" if scope_run_id else ""
+    if drain_scope_id:
+        scope_filter_src = (
+            "AND s.drain_scope_id = $drain_scope_id AND s.drain_scope_actionable = true"
+        )
+        scope_filter_sn = "AND sn.drain_scope_id = $drain_scope_id"
     pending_filter_src = scope_filter_src + (" AND false" if edits_only else "")
     pending_filter_sn = scope_filter_sn + (
         " AND coalesce(sn.edit_status, '') = 'open'" if edits_only else ""
@@ -312,7 +318,9 @@ def _compute_pool_progress(
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE sn.name_stage = 'drafted'
+      WHERE (sn.name_stage = 'drafted' OR
+             ($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed'
+              AND sn.reviewer_score_name >= $min_score))
         AND sn.description IS NOT NULL
         AND sn.description <> $parent_desc_placeholder
         AND coalesce(sn.origin, '') <> 'derived'
@@ -344,7 +352,9 @@ def _compute_pool_progress(
     }}
     CALL {{
       MATCH (sn:StandardName)
-      WHERE sn.docs_stage = 'drafted'
+      WHERE (sn.docs_stage = 'drafted' OR
+             ($drain_scope_id IS NOT NULL AND sn.docs_stage = 'reviewed'
+              AND sn.reviewer_score_docs >= $min_score))
         AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
         {docs_score_gate}
         {domain_filter_sn}
@@ -438,6 +448,7 @@ def _compute_pool_progress(
         "rotation_cap": rotation_cap,
         "min_score": min_score,
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        "drain_scope_id": drain_scope_id,
     }
     from imas_codex.standard_names.graph_ops import _MAX_COMPOSE_CLAIM_ATTEMPTS
 
@@ -446,6 +457,8 @@ def _compute_pool_progress(
         params["domains"] = list(domains)
     if scope_run_id:
         params["scope_run_id"] = scope_run_id
+    if drain_scope_id:
+        params["drain_scope_id"] = drain_scope_id
     pools = (
         "generate_name",
         "review_name",
@@ -471,6 +484,7 @@ def _compute_pool_pending(
     rotation_cap: int,
     min_score: float,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
     edits_only: bool = False,
 ) -> dict[str, int]:
     """Per-pool pending counts mirroring ``claim_*_batch`` predicates.
@@ -485,6 +499,7 @@ def _compute_pool_pending(
         rotation_cap=rotation_cap,
         min_score=min_score,
         scope_run_id=scope_run_id,
+        drain_scope_id=drain_scope_id,
         edits_only=edits_only,
     )
     return {k: v["pending"] for k, v in progress.items()}
@@ -515,8 +530,12 @@ def _run_sn_cmd(
     only: str | None = None,
     max_sources: int | None = None,
     scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
+    drain_paths: tuple[str, ...] = (),
+    drain_dd_version: str | None = None,
     edits_only: bool = False,
     skip_global_maintenance: bool = False,
+    scope_started_callback: Callable[[], None] | None = None,
 ) -> dict[str, Any] | None:
     """Execute the pool-based SN orchestrator with Rich progress display.
 
@@ -569,6 +588,7 @@ def _run_sn_cmd(
     _rc = rotation_cap if rotation_cap is not None else 3
     _ms = min_score if min_score is not None else DEFAULT_MIN_SCORE
     _scope_run_id = scope_run_id
+    _drain_scope_id = drain_scope_id
     _POOLS = (
         "generate_name",
         "review_name",
@@ -598,6 +618,7 @@ def _run_sn_cmd(
                         rotation_cap=_rc,
                         min_score=_ms,
                         scope_run_id=_scope_run_id,
+                        drain_scope_id=_drain_scope_id,
                         edits_only=edits_only,
                     )
             except Exception:
@@ -648,7 +669,7 @@ def _run_sn_cmd(
                 f"{', dry-run' if dry_run else ''})"
             )
 
-    if not dry_run:
+    if not dry_run and not drain_scope_id:
         _require_embed_ready("sn run")
 
     # Build harness config — the SERVERS row mirrors the endpoints this
@@ -678,7 +699,7 @@ def _run_sn_cmd(
         facility_config={},  # SN has no facility YAML
         display=display,
         check_graph=not dry_run,
-        check_embed=not dry_run,
+        check_embed=not dry_run and not drain_scope_id,
         check_ssh=False,
         check_auth=False,
         check_model=False,  # proxy check is misleading — SN uses direct bypass
@@ -721,6 +742,9 @@ def _run_sn_cmd(
             on_event=_on_event,
             display=display,
             scope_run_id=scope_run_id,
+            drain_scope_id=drain_scope_id,
+            drain_paths=drain_paths,
+            drain_dd_version=drain_dd_version,
             edits_only=edits_only,
             names_only=names_only,
             docs_only=docs_only,
@@ -730,6 +754,7 @@ def _run_sn_cmd(
             attach_only=(only == "attach"),
             reconcile_only=(only == "reconcile"),
             skip_global_maintenance=skip_global_maintenance,
+            scope_started_callback=scope_started_callback,
         )
         return {"summary": summary}
 
@@ -1113,6 +1138,17 @@ def _reject_unscoped_accepted_reset(
         "west_task_2e.yaml and behaves exactly like --focus <that file>. The "
         "same token drives sn release --batch, keeping one batch identity "
         "across mop-up, release, and merge."
+    ),
+)
+@click.option(
+    "--drain-batch",
+    "drain_batch",
+    type=str,
+    default=None,
+    help=(
+        "Drain one validated sn-sources manifest through the ordinary pools "
+        "under an exact ephemeral graph scope. Incompatible with all other "
+        "focus, reset, maintenance, family, signal, and campaign modes."
     ),
 )
 @click.option(
@@ -1543,6 +1579,7 @@ def sn_run(
     focus_paths: tuple[str, ...],
     paths: tuple[str, ...],
     batch_name: str | None,
+    drain_batch: str | None,
     reseed: bool,
     reset_to: str | None,
     from_model: str | None,
@@ -1613,6 +1650,168 @@ def sn_run(
       imas-codex sn run --min-score 0.85 --rotation-cap 5    # tighter thresholds
     """
     import os as _os
+
+    if drain_batch:
+        incompatible = {
+            "--source": source != "dd",
+            "--domain": bool(domains),
+            "--facility": facility is not None,
+            "--focus/paths": bool(focus_paths or paths),
+            "--batch": batch_name is not None,
+            "--scope-run-id": scope_run_id is not None,
+            "--skip-global-maintenance": skip_global_maintenance,
+            "--reseed": reseed,
+            "--reset-to/--reset-only": reset_to is not None or reset_only,
+            "--force": force,
+            "--revalidate": revalidate,
+            "--selection filters": any(
+                value is not None
+                for value in (from_model, since, before, below_score, tier)
+            ),
+            "--retry selectors": any(
+                (retry_quarantined, retry_skipped, retry_vocab_gap)
+            ),
+            "--pool modes": any(
+                (skip_review, names_only, docs_only, flush, edits_only)
+            ),
+            "--maintenance mode": only_phase is not None,
+            "--families": families is not None,
+            "--rename": rename_spec is not None,
+            "--campaign": campaign is not None or campaign_manifest is not None,
+            "--accepted/edit overrides": include_accepted or bool(override_edits),
+            "--source limits": limit is not None or max_sources is not None,
+        }
+        conflicts = [flag for flag, present in incompatible.items() if present]
+        if conflicts:
+            raise click.UsageError(
+                "--drain-batch is incompatible with " + ", ".join(conflicts)
+            )
+
+        from collections import Counter
+
+        from imas_codex.settings import get_dd_version
+        from imas_codex.standard_names.graph_ops import (
+            ManifestDrainConflict,
+            build_manifest_drain_plan,
+            canonicalize_manifest_drain_paths,
+            clear_manifest_drain_scope,
+            prepare_manifest_drain_scope,
+        )
+        from imas_codex.standard_names.sources_manifest import (
+            SourcesManifestError,
+            load_sources_file,
+            resolve_batch_token,
+        )
+
+        resolved = resolve_batch_token(drain_batch)
+        if resolved is None:
+            raise click.UsageError(
+                f"--drain-batch {drain_batch!r}: no such sn-sources manifest"
+            )
+        try:
+            drain_paths = canonicalize_manifest_drain_paths(load_sources_file(resolved))
+        except (SourcesManifestError, ValueError) as exc:
+            raise click.UsageError(str(exc)) from exc
+        dd_version = get_dd_version()
+
+        if dry_run:
+            plan = build_manifest_drain_plan(drain_paths, dd_version=dd_version)
+            counts = Counter(item["disposition"] for item in plan)
+            console.print(
+                "[bold]Bounded drain dry run[/bold]: "
+                f"{len(plan)} exact DD path(s), DD {dd_version}; "
+                + ", ".join(
+                    f"{key}={counts[key]}"
+                    for key in (
+                        "accepted",
+                        "active_in_flight",
+                        "genuine_gap",
+                        "non_nameable",
+                        "ambiguous",
+                    )
+                )
+            )
+            return
+
+        scope_id: str | None = None
+        scope_owned_by_loop = False
+
+        def mark_scope_started() -> None:
+            nonlocal scope_owned_by_loop
+            scope_owned_by_loop = True
+
+        try:
+            scope_id, initial_plan = prepare_manifest_drain_scope(
+                drain_paths, dd_version=dd_version
+            )
+            initial_counts = Counter(item["disposition"] for item in initial_plan)
+            console.print(
+                "[bold]Bounded drain[/bold]: "
+                f"{len(initial_plan)} exact DD path(s); "
+                + ", ".join(
+                    f"{key}={initial_counts[key]}"
+                    for key in (
+                        "accepted",
+                        "active_in_flight",
+                        "genuine_gap",
+                        "non_nameable",
+                        "ambiguous",
+                    )
+                )
+            )
+            final_row = _run_sn_cmd(
+                cost_limit=cost_limit,
+                time_limit=time_limit,
+                compose_model=compose_model,
+                per_domain_limit=None,
+                dry_run=False,
+                quiet=quiet,
+                verbose=verbose,
+                min_score=min_score,
+                rotation_cap=rotation_cap,
+                escalation_model=escalation_model,
+                review_name_backlog_cap=review_name_backlog_cap,
+                review_docs_backlog_cap=review_docs_backlog_cap,
+                source="dd",
+                drain_scope_id=scope_id,
+                drain_paths=tuple(drain_paths),
+                drain_dd_version=dd_version,
+                skip_global_maintenance=True,
+                scope_started_callback=mark_scope_started,
+            )
+            final_report = (final_row or {}).get("drain_report") or []
+            final_counts = Counter(item["disposition"] for item in final_report)
+            if final_report:
+                console.print(
+                    "[bold]Bounded drain final[/bold]: "
+                    f"{len(final_report)} exact DD path(s); "
+                    + ", ".join(
+                        f"{key}={final_counts[key]}"
+                        for key in (
+                            "accepted",
+                            "active_in_flight",
+                            "genuine_gap",
+                            "non_nameable",
+                            "ambiguous",
+                        )
+                    )
+                )
+        except ManifestDrainConflict as exc:
+            raise click.UsageError(str(exc)) from exc
+        finally:
+            if scope_id and not scope_owned_by_loop:
+                import sys
+
+                primary_exc = sys.exc_info()[1]
+                try:
+                    clear_manifest_drain_scope(scope_id)
+                except Exception as cleanup_exc:  # noqa: BLE001
+                    if primary_exc is None:
+                        raise
+                    logger.error(
+                        "bounded drain pre-loop cleanup failed: %s", cleanup_exc
+                    )
+        return
 
     if skip_global_maintenance and rename_spec is not None:
         raise click.UsageError(

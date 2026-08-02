@@ -797,6 +797,22 @@ classes:
           ID of the sn run that produced this standard name. Propagated from
           the originating StandardNameSource at compose time. Used for
           run-scoped filtering (``--focus``) and provenance.
+      drain_scope_id:
+        description: >-
+          Ephemeral owner of one exact bounded manifest drain. This is
+          independent of run_id provenance and is cleared when that drain
+          completes or its lease is recovered.
+      drain_scope_claimed_at:
+        description: >-
+          Heartbeat timestamp for drain_scope_id. This lease is independent of
+          the worker claimed_at/claim_token pair.
+        range: datetime
+      drain_scope_paths:
+        description: Exact DD paths that admitted this node to the bounded drain.
+        multivalued: true
+      drain_claim_scope_id:
+        description: >-
+          Ephemeral bounded-drain owner written atomically with a worker claim.
       semantic_sim:
         description: >-
           Semantic-similarity score (0-1) from the duplicate-detection gate.
@@ -2243,6 +2259,26 @@ classes:
       claimed_at:
         description: Timestamp when a worker claimed this source for processing
         range: datetime
+      drain_scope_id:
+        description: >-
+          Ephemeral owner of one exact bounded manifest drain. This is never
+          used as production provenance and never replaces run_id.
+      drain_scope_claimed_at:
+        description: >-
+          Heartbeat timestamp for drain_scope_id. This lease is independent of
+          the worker claimed_at/claim_token pair.
+        range: datetime
+      drain_scope_paths:
+        description: Exact DD paths that admitted this source to the bounded drain.
+        multivalued: true
+      drain_claim_scope_id:
+        description: >-
+          Ephemeral bounded-drain owner written atomically with a worker claim.
+      drain_scope_actionable:
+        description: >-
+          Ephemeral bounded-drain eligibility. Set only on exact DD sources
+          that the owning drain may compose and removed with the scope lease.
+        range: boolean
       claim_token:
         description: UUID token for claim verification
       claim_seq:
