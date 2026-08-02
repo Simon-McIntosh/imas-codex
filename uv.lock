@@ -1222,7 +1222,7 @@ dev = [
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "hdbscan", specifier = ">=0.8.41" },
     { name = "imas-python", specifier = ">=2.0.1" },
-    { name = "imas-standard-names", git = "https://github.com/Simon-McIntosh/IMAS-Standard-Names.git?rev=a948c20359a57e946a0451e7cdcea818c5e6c354" },
+    { name = "imas-standard-names", git = "https://github.com/Simon-McIntosh/IMAS-Standard-Names.git?rev=7e16c45d4571c79b9fd7399088c847c853266a5f" },
     { name = "ipykernel", specifier = ">=6.29.5" },
     { name = "ipython", specifier = ">=9.2.0" },
     { name = "jellyfish", specifier = ">=1.2.1" },
@@ -1303,8 +1303,8 @@ wheels = [
 
 [[package]]
 name = "imas-standard-names"
-version = "0.8.0rc64"
-source = { git = "https://github.com/Simon-McIntosh/IMAS-Standard-Names.git?rev=a948c20359a57e946a0451e7cdcea818c5e6c354#a948c20359a57e946a0451e7cdcea818c5e6c354" }
+version = "0.8.0rc65.dev2+g7e16c45d4"
+source = { git = "https://github.com/Simon-McIntosh/IMAS-Standard-Names.git?rev=7e16c45d4571c79b9fd7399088c847c853266a5f#7e16c45d4571c79b9fd7399088c847c853266a5f" }
 dependencies = [
     { name = "click" },
     { name = "pint" },
