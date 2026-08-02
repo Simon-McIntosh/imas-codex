@@ -241,15 +241,31 @@ class _Transaction:
 
     def _source_row(self, source_id: str) -> dict[str, Any]:
         source = self.state.sources[source_id]
+        scalar_id = source["properties"].get("produced_sn_id")
+        scalar = self.state.nodes.get(scalar_id)
         return {
             "id": source_id,
             "element_id": self._element_id("source", source_id),
             "labels": ["StandardNameSource"],
             "properties": copy.deepcopy(source["properties"]),
+            "scalar_target": (
+                {
+                    "element_id": self._element_id("name", scalar_id),
+                    "labels": ["StandardName"],
+                    "properties": copy.deepcopy(scalar),
+                    "target_id": scalar_id,
+                    "target_stage": scalar["name_stage"],
+                }
+                if scalar is not None
+                else None
+            ),
             "bindings": [
                 {
                     "element_id": f"rel:PRODUCED_NAME:{source_id}:{index}:{target}",
                     "properties": {},
+                    "target_element_id": self._element_id("name", target),
+                    "target_labels": ["StandardName"],
+                    "target_properties": copy.deepcopy(self.state.nodes[target]),
                     "target_id": target,
                     "target_stage": self.state.nodes[target]["name_stage"],
                 }
@@ -306,6 +322,9 @@ class _Transaction:
                         f"rel:HAS_STANDARD_NAME:{backing_id}:{index}:{target}"
                     ),
                     "properties": {},
+                    "target_element_id": self._element_id("name", target),
+                    "target_labels": ["StandardName"],
+                    "target_properties": copy.deepcopy(self.state.nodes[target]),
                     "target_id": target,
                     "target_stage": self.state.nodes[target]["name_stage"],
                 }
@@ -315,6 +334,8 @@ class _Transaction:
                 {
                     "element_id": f"rel:HAS_UNIT:{backing_id}:{index}:{unit}",
                     "properties": {},
+                    "unit_element_id": self._element_id("unit", unit),
+                    "unit_labels": ["Unit"],
                     "unit_id": unit,
                     "unit_properties": {"id": unit},
                 }
@@ -428,6 +449,8 @@ class _Transaction:
             {
                 "element_id": f"rel:HAS_UNIT:{name}:{index}:{unit}",
                 "properties": {},
+                "unit_element_id": self._element_id("unit", unit),
+                "unit_labels": ["Unit"],
                 "unit_id": unit,
                 "unit_properties": {"id": unit},
             }
@@ -470,6 +493,10 @@ class _Transaction:
             self.write_markers.append("lock")
             if self.graph.fail_at == "race":
                 self.state.nodes[self.graph.target]["documentation"] = "concurrent"
+            elif self.graph.fail_at == "competitor_race":
+                self.state.nodes["retired_density"]["name_stage"] = "accepted"
+            elif self.graph.fail_at == "unit_race":
+                next(iter(self.state.backings.values()))["units"] = ["K"]
             return [{"locked": len(params["element_ids"])}]
         if "RETURN source_id," in cypher and "already_bound" in cypher:
             target = params["sn_id"]
@@ -797,23 +824,31 @@ def test_scalar_only_source_is_discovered_and_repaired() -> None:
     ]
 
 
-@pytest.mark.parametrize("competitor_stage", ["approved", "refining"])
-def test_live_competitor_binding_and_projection_are_canonicalized(
-    competitor_stage: str,
+@pytest.mark.parametrize("competitor_stage", ["accepted", "approved", "refining"])
+@pytest.mark.parametrize("channel", ["scalar", "binding", "projection"])
+def test_live_competitor_is_a_write_free_refusal(
+    competitor_stage: str, channel: str
 ) -> None:
     state = _state()
     state.nodes["competing_density"] = _node(
         "competing_density", stage=competitor_stage
     )
     source = next(iter(state.sources.values()))
-    source["bindings"].append("competing_density")
-    next(iter(state.backings.values()))["projections"].append("competing_density")
+    backing = next(iter(state.backings.values()))
+    if channel == "scalar":
+        source["properties"]["produced_sn_id"] = "competing_density"
+        source["bindings"] = []
+    elif channel == "binding":
+        source["bindings"].append("competing_density")
+    else:
+        backing["projections"].append("competing_density")
     graph = _Graph(state)
-    assert _run(graph)["ok"] is True
-    assert next(iter(graph.state.sources.values()))["bindings"] == ["electron_density"]
-    assert next(iter(graph.state.backings.values()))["projections"] == [
-        "electron_density"
-    ]
+    before = copy.deepcopy(graph.state)
+    result = _run(graph)
+    assert result["ok"] is False
+    assert "third live" in result["reason"]
+    assert graph.state == before
+    assert graph.transactions[0].write_markers == []
 
 
 def test_third_historical_binding_and_projection_are_preserved() -> None:
@@ -966,6 +1001,20 @@ def test_transaction_failure_rolls_back_everything(failure: str) -> None:
         "partial_source": "partial source migration",
     }[failure]
     with pytest.raises(RuntimeError, match=match):
+        _run(graph)
+    assert graph.state == before
+    assert graph.commits == 0
+    assert graph.rollbacks == 1
+
+
+@pytest.mark.parametrize("failure", ["competitor_race", "unit_race"])
+def test_locked_snapshot_detects_competitor_and_unit_races(failure: str) -> None:
+    state = _state()
+    state.nodes["retired_density"] = _node("retired_density", stage="superseded")
+    next(iter(state.sources.values()))["bindings"].append("retired_density")
+    graph = _Graph(state, fail_at=failure)
+    before = copy.deepcopy(graph.state)
+    with pytest.raises(RuntimeError, match="changed after preflight"):
         _run(graph)
     assert graph.state == before
     assert graph.commits == 0

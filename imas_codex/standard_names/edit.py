@@ -88,6 +88,7 @@ from pathlib import Path
 from typing import Any
 
 from imas_standard_names.grammar import parser as _isn_parser
+from neo4j.time import DateTime
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
@@ -675,14 +676,26 @@ CALL (old, target) {
        WHERE EXISTS { (backing)-[:HAS_STANDARD_NAME]->(old) }
           OR EXISTS { (backing)-[:HAS_STANDARD_NAME]->(target) }
      }
+  OPTIONAL MATCH (scalar_target:StandardName {id: source.produced_sn_id})
+  WITH source, scalar_target
   RETURN collect({
     id: source.id,
     element_id: elementId(source),
     labels: labels(source),
     properties: properties(source),
+    scalar_target: CASE WHEN scalar_target IS NULL THEN null ELSE {
+      element_id: elementId(scalar_target),
+      labels: labels(scalar_target),
+      properties: properties(scalar_target),
+      target_id: scalar_target.id,
+      target_stage: scalar_target.name_stage
+    } END,
     bindings: [(source)-[binding:PRODUCED_NAME]->(bound:StandardName) | {
       element_id: elementId(binding),
       properties: properties(binding),
+      target_element_id: elementId(bound),
+      target_labels: labels(bound),
+      target_properties: properties(bound),
       target_id: bound.id,
       target_stage: bound.name_stage
     }],
@@ -726,12 +739,17 @@ CALL (old, target) {
                   ->(projected:StandardName) | {
       element_id: elementId(projection),
       properties: properties(projection),
+      target_element_id: elementId(projected),
+      target_labels: labels(projected),
+      target_properties: properties(projected),
       target_id: projected.id,
       target_stage: projected.name_stage
     }],
     units: [(backing)-[unit_link:HAS_UNIT]->(unit:Unit) | {
       element_id: elementId(unit_link),
       properties: properties(unit_link),
+      unit_element_id: elementId(unit),
+      unit_labels: labels(unit),
       unit_id: unit.id,
       unit_properties: properties(unit)
     }]
@@ -797,7 +815,7 @@ CALL (old, target) {
   WHERE owner = old OR owner = target
   WITH link, change
   WHERE link IS NOT NULL
-  RETURN collect({
+  RETURN collect(DISTINCT {
     element_id: elementId(change),
     labels: labels(change),
     properties: properties(change),
@@ -811,10 +829,12 @@ CALL (old, target) {
 WITH old, target, sources, backings, relationships, reviews, revisions, changes,
      [(old)-[link:HAS_UNIT]->(unit:Unit) | {
        element_id: elementId(link), properties: properties(link),
+       unit_element_id: elementId(unit), unit_labels: labels(unit),
        unit_id: unit.id, unit_properties: properties(unit)
      }] AS old_units,
      [(target)-[link:HAS_UNIT]->(unit:Unit) | {
        element_id: elementId(link), properties: properties(link),
+       unit_element_id: elementId(unit), unit_labels: labels(unit),
        unit_id: unit.id, unit_properties: properties(unit)
      }] AS target_units
 RETURN elementId(old) AS old_element_id,
@@ -1195,11 +1215,47 @@ def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | N
 
     old_sources = _fold_source_rows(snapshot, old)
     old_backings = _fold_old_backings(snapshot, old_sources, old)
+    allowed = {old, into}
+    for source in old_sources:
+        scalar_target = source.get("scalar_target") or {}
+        if (
+            scalar_target.get("target_id") not in allowed
+            and scalar_target.get("target_stage") in _FOLD_LIVE_STAGES
+        ):
+            return (
+                f"source {source['id']!r} has a third live scalar target: "
+                f"{scalar_target['target_id']}"
+            )
+        third_live = sorted(
+            {
+                binding["target_id"]
+                for binding in source.get("bindings") or []
+                if binding.get("target_id") not in allowed
+                and binding.get("target_stage") in _FOLD_LIVE_STAGES
+            }
+        )
+        if third_live:
+            return f"source {source['id']!r} has third live bindings: " + ", ".join(
+                third_live
+            )
     source_ids = {source["id"] for source in snapshot.get("sources") or []}
     for backing in old_backings:
         owners = backing.get("owners") or []
         if len(owners) != 1 or owners[0].get("source_id") not in source_ids:
             return f"backing {backing['id']!r} has ambiguous owner cardinality"
+        third_live = sorted(
+            {
+                projection["target_id"]
+                for projection in backing.get("projections") or []
+                if projection.get("target_id") not in allowed
+                and projection.get("target_stage") in _FOLD_LIVE_STAGES
+            }
+        )
+        if third_live:
+            return (
+                f"backing {backing['id']!r} has third live projections: "
+                + ", ".join(third_live)
+            )
         _, backing_unit_reason = _fold_unit_authority(
             backing.get("properties") or {},
             backing.get("units") or [],
@@ -1385,17 +1441,44 @@ def _fold_expected_state(
         if old_properties.get("edit_status") == "open":
             old_properties["edit_status"] = "applied"
         expected["names"]["target"]["source_paths"] = target_paths
+        target_reference = {
+            "target_element_id": snapshot["target_element_id"],
+            "target_labels": snapshot["target_labels"],
+            "target_properties": expected["names"]["target"],
+            "target_id": into,
+            "target_stage": "accepted",
+        }
         for source in expected["sources"]:
+            if (source.get("scalar_target") or {}).get("target_id") == into:
+                source["scalar_target"] = {
+                    "element_id": snapshot["target_element_id"],
+                    "labels": snapshot["target_labels"],
+                    "properties": expected["names"]["target"],
+                    "target_id": into,
+                    "target_stage": "accepted",
+                }
+            for binding in source["bindings"]:
+                if binding.get("target_id") == into:
+                    binding.update(target_reference)
             if source["id"] not in old_source_ids:
                 continue
             source["properties"]["produced_sn_id"] = into
+            source["scalar_target"] = {
+                "element_id": snapshot["target_element_id"],
+                "labels": snapshot["target_labels"],
+                "properties": expected["names"]["target"],
+                "target_id": into,
+                "target_stage": "accepted",
+            }
             source["bindings"] = [
                 binding
                 for binding in source["bindings"]
                 if binding.get("target_id") not in {old, into}
-                and binding.get("target_stage") not in _FOLD_LIVE_STAGES
-            ] + [{"properties": {}, "target_id": into, "target_stage": "accepted"}]
+            ] + [{"properties": {}, **target_reference}]
         for backing in expected["backings"]:
+            for projection in backing["projections"]:
+                if projection.get("target_id") == into:
+                    projection.update(target_reference)
             if backing["element_id"] not in old_backing_ids:
                 continue
             if "standard_name_id" in backing["properties"]:
@@ -1404,8 +1487,7 @@ def _fold_expected_state(
                 projection
                 for projection in backing["projections"]
                 if projection.get("target_id") not in {old, into}
-                and projection.get("target_stage") not in _FOLD_LIVE_STAGES
-            ] + [{"properties": {}, "target_id": into, "target_stage": "accepted"}]
+            ] + [{"properties": {}, **target_reference}]
         direct_lineage = [
             relationship
             for relationship in expected["lineage"]
@@ -1500,23 +1582,43 @@ def _fold_receipt(
 
 
 def _fold_participant_ids(snapshot: dict[str, Any]) -> list[str]:
-    return sorted(
-        {
-            snapshot["old_element_id"],
-            snapshot["target_element_id"],
-            *(
-                record["element_id"]
-                for key in ("sources", "backings", "reviews", "revisions", "changes")
-                for record in snapshot.get(key) or []
-                if record.get("element_id")
-            ),
-            *(
-                relationship["other_element_id"]
-                for relationship in snapshot.get("relationships") or []
-                if relationship.get("other_element_id")
-            ),
-        }
+    participants = {snapshot["old_element_id"], snapshot["target_element_id"]}
+    for key in ("sources", "backings", "reviews", "revisions", "changes"):
+        participants.update(
+            record["element_id"]
+            for record in snapshot.get(key) or []
+            if record.get("element_id")
+        )
+    participants.update(
+        relationship["other_element_id"]
+        for relationship in snapshot.get("relationships") or []
+        if relationship.get("other_element_id")
     )
+    for source in snapshot.get("sources") or []:
+        scalar_target = source.get("scalar_target") or {}
+        if scalar_target.get("element_id"):
+            participants.add(scalar_target["element_id"])
+        for binding in source.get("bindings") or []:
+            if binding.get("target_element_id"):
+                participants.add(binding["target_element_id"])
+        for reference in source.get("backing_refs") or []:
+            if reference.get("backing_element_id"):
+                participants.add(reference["backing_element_id"])
+    for backing in snapshot.get("backings") or []:
+        for owner in backing.get("owners") or []:
+            if owner.get("source_element_id"):
+                participants.add(owner["source_element_id"])
+        for projection in backing.get("projections") or []:
+            if projection.get("target_element_id"):
+                participants.add(projection["target_element_id"])
+        for unit in backing.get("units") or []:
+            if unit.get("unit_element_id"):
+                participants.add(unit["unit_element_id"])
+    for key in ("old_units", "target_units"):
+        for unit in snapshot.get(key) or []:
+            if unit.get("unit_element_id"):
+                participants.add(unit["unit_element_id"])
+    return sorted(participants)
 
 
 def _fold_idempotent_result(
@@ -1637,7 +1739,7 @@ def supersede_into(
                 )
                 change_id = f"sn-change:{uuid.uuid4()}"
                 run_id = f"sn-fold:{uuid.uuid4()}"
-                changed_at = datetime.now(UTC).isoformat()
+                changed_at = DateTime.from_native(datetime.now(UTC)).iso_format()
                 receipt_text, receipt = _fold_receipt(
                     snapshot,
                     old,
@@ -1763,7 +1865,6 @@ def supersede_into(
                                     binding["element_id"]
                                     for binding in source.get("bindings") or []
                                     if binding.get("target_id") in {old, into}
-                                    or binding.get("target_stage") in _FOLD_LIVE_STAGES
                                 ],
                             }
                             for source in old_sources
@@ -1778,8 +1879,6 @@ def supersede_into(
                                     projection["element_id"]
                                     for projection in backing.get("projections") or []
                                     if projection.get("target_id") in {old, into}
-                                    or projection.get("target_stage")
-                                    in _FOLD_LIVE_STAGES
                                 ],
                             }
                             for backing in old_backings
