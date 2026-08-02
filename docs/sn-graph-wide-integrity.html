@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="33">
+<meta name="plan-version" content="34">
 <meta name="plan-impl" content="0.95">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -673,6 +673,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="bounded-generation-budget-20260802" data-who="Simon McIntosh" data-when="2026-08-02T19:30:00+02:00" data-quote="A budget of 200 USD is authorized for generation work using the SN pipeline if warranted.">
     <div class="r-comment-body"><p><strong>A hard cumulative budget of USD 200 is authorized for warranted SN pipeline generation/review work.</strong> Execution remains conditional on independent approval and integration of the bounded-drain instrument plus an exact executable DD-path manifest derived from the corrected transitive WEST closure. The operator will use at most USD 50 guarded cohorts, remeasure integrity, WEST invariants, and attributable spend after every cohort, and stop at USD 200 or earlier when no safe executable work remains. Unscoped review, the evidence-only audit artifact, WEST paths/names, and semantically unadjudicated atomic candidates remain unauthorized.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="corrected-transitive-audit-20260802" data-who="reckon-ship" data-when="2026-08-02T19:48:00+02:00">
+    <div class="r-comment-body"><p><strong>The post-fold audit is reproducible with full transitive WEST closure.</strong> Two complete reads matched component-for-component at snapshot <code>b922fc4a…</code>. Current executable/deferred partitions are: provenance <strong>373/358</strong>, orphans <strong>95/32</strong>, attachment rejections <strong>26/133</strong>, competing families <strong>145/190</strong> (executable: 15 candidate folds plus 130 ordinary reviews), live parser residues <strong>5/1</strong>, hidden pending residues <strong>0/2</strong>, and open edits <strong>14/3</strong>. The closure reached 2,807 sources, 1,509 names, and 141 components in 27 rounds; the test closure contains 71 sources. Every direct and transitive WEST/test intersection in the executable partition is zero. The vorticity source/family/parser residue is absent as expected; cross-section is deferred through <code>area_of_flux_surface</code>'s two WEST target paths. Evidence-only artifact: <code>/tmp/bounded_integrity_manifest_corrected.json</code>, schema v2, SHA-256 <code>3277d9ea45aef8fa6683df6e316b1e5d09581e8acc0a7a6cfc9f2f3b5c7299fc</code>; it remains explicitly non-executable.</p></div>
 </div>
 </section>
 </main>
