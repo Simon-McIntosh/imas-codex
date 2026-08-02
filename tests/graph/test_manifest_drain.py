@@ -12,11 +12,20 @@ from neo4j import GraphDatabase
 from imas_codex.graph.client import GraphClient
 from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names import graph_ops
+from imas_codex.standard_names.defaults import (
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+)
 from imas_codex.standard_names.graph_ops import (
     ManifestDrainConflict,
     build_manifest_drain_plan,
+    claim_enrich_parents_batch,
+    claim_generate_docs_batch,
     claim_generate_name_batch,
     claim_manifest_drain_scope,
+    claim_refine_docs_batch,
+    claim_refine_name_batch,
+    claim_review_docs_batch,
+    claim_review_name_batch,
     clear_manifest_drain_scope,
     prepare_manifest_drain_scope,
     release_manifest_drain_claims,
@@ -228,6 +237,185 @@ def test_exact_source_creation_and_cleanup_are_scope_owned(
         "pinned": True,
         "scope": None,
     }
+
+
+@pytest.mark.parametrize(
+    ("claim_fn", "eligible"),
+    [
+        pytest.param(
+            claim_review_name_batch,
+            {"name_stage": "drafted", "docs_stage": "pending"},
+            id="review-name",
+        ),
+        pytest.param(
+            claim_refine_name_batch,
+            {
+                "name_stage": "reviewed",
+                "docs_stage": "pending",
+                "reviewer_score_name": 0.2,
+                "chain_length": 0,
+            },
+            id="refine-name",
+        ),
+        pytest.param(
+            claim_generate_docs_batch,
+            {
+                "name_stage": "accepted",
+                "docs_stage": "pending",
+                "reviewer_score_name": 0.9,
+            },
+            id="generate-docs",
+        ),
+        pytest.param(
+            claim_review_docs_batch,
+            {
+                "name_stage": "accepted",
+                "docs_stage": "drafted",
+                "reviewer_score_name": 0.9,
+            },
+            id="review-docs",
+        ),
+        pytest.param(
+            claim_refine_docs_batch,
+            {
+                "name_stage": "accepted",
+                "docs_stage": "reviewed",
+                "reviewer_score_name": 0.9,
+                "reviewer_score_docs": 0.2,
+                "docs_chain_length": 0,
+            },
+            id="refine-docs",
+        ),
+        pytest.param(
+            claim_enrich_parents_batch,
+            {
+                "name_stage": "drafted",
+                "docs_stage": "pending",
+                "origin": "derived",
+                "description": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+            },
+            id="enrich-parents",
+        ),
+    ],
+)
+def test_public_name_claims_are_exactly_scope_owned(
+    ephemeral_driver,
+    graph_case,
+    claim_fn,
+    eligible: dict,
+) -> None:
+    claim_name = claim_fn.__name__.removeprefix("claim_").removesuffix("_batch")
+    scope = f"test/{graph_case['namespace']}/scope"
+    wrong_scope = f"test/{graph_case['namespace']}/wrong-scope"
+    external_owner = f"test/{graph_case['namespace']}/external-owner"
+    target_id = f"test/{graph_case['namespace']}/{claim_name}/target"
+    wrong_id = f"test/{graph_case['namespace']}/{claim_name}/wrong"
+    external_id = f"test/{graph_case['namespace']}/{claim_name}/external"
+    common = {
+        "name": "plasma_current",
+        "description": "A test quantity.",
+        "documentation": "Test documentation.",
+        "kind": "scalar",
+        "unit": "A",
+        "physics_domain": "magnetics",
+        "validation_status": "valid",
+        "origin": "pipeline",
+        **eligible,
+    }
+    rows = [
+        {
+            **common,
+            "id": target_id,
+            "drain_scope_id": scope,
+            "drain_scope_paths": [graph_case["good"]],
+        },
+        {
+            **common,
+            "id": wrong_id,
+            "drain_scope_id": wrong_scope,
+            "drain_scope_paths": [graph_case["good"]],
+        },
+        {
+            **common,
+            "id": external_id,
+            "drain_scope_id": scope,
+            "drain_scope_paths": [graph_case["good"]],
+            "drain_claim_scope_id": external_owner,
+            "claim_token": "external-token",
+        },
+    ]
+    with ephemeral_driver.session() as session:
+        session.run(
+            """
+            UNWIND $rows AS row
+            CREATE (name:StandardName)
+            SET name = row,
+                name.claimed_at = CASE WHEN row.claim_token IS NULL THEN null
+                                       ELSE datetime() END
+            """,
+            rows=rows,
+        ).consume()
+        if claim_name == "enrich_parents":
+            session.run(
+                """
+                MATCH (parent:StandardName)
+                WHERE parent.id IN $parent_ids
+                CREATE (child:StandardName {
+                  id: parent.id + '/child', name_stage: 'accepted',
+                  docs_stage: 'accepted', validation_status: 'valid'
+                })-[:HAS_PARENT]->(parent)
+                """,
+                parent_ids=[target_id, wrong_id, external_id],
+            ).consume()
+
+    claimed = claim_fn(drain_scope_id=scope, batch_size=10)
+
+    assert [item["id"] for item in claimed] == [target_id]
+    token = claimed[0]["claim_token"]
+    assert token and token != "external-token"
+    with ephemeral_driver.session() as session:
+        before_release = session.run(
+            """
+            MATCH (name:StandardName)
+            WHERE name.id IN $ids
+            RETURN name.id AS id, name.claim_token AS token,
+                   name.drain_claim_scope_id AS owner
+            ORDER BY id
+            """,
+            ids=[target_id, wrong_id, external_id],
+        ).data()
+    ownership = {row["id"]: (row["token"], row["owner"]) for row in before_release}
+    assert ownership == {
+        external_id: ("external-token", external_owner),
+        target_id: (token, scope),
+        wrong_id: (None, None),
+    }
+
+    with _client() as gc:
+        assert release_manifest_drain_claims(scope, gc=gc) == {
+            "sources": 0,
+            "names": 1,
+        }
+    with ephemeral_driver.session() as session:
+        after_release = session.run(
+            """
+            MATCH (name:StandardName)
+            WHERE name.id IN $ids
+            RETURN name.id AS id, name.claim_token AS token,
+                   name.drain_claim_scope_id AS owner,
+                   name.name_stage AS name_stage,
+                   name.docs_stage AS docs_stage
+            ORDER BY id
+            """,
+            ids=[target_id, wrong_id, external_id],
+        ).data()
+    released = {row["id"]: row for row in after_release}
+    assert released[target_id]["token"] is None
+    assert released[target_id]["name_stage"] == eligible["name_stage"]
+    assert released[target_id]["docs_stage"] == eligible["docs_stage"]
+    assert released[wrong_id]["token"] is None
+    assert released[external_id]["token"] == "external-token"
+    assert released[external_id]["owner"] == external_owner
 
 
 def test_stale_scope_recovery_preserves_a_fresh_worker_token(
