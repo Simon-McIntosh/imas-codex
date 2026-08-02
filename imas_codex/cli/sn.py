@@ -6201,11 +6201,17 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
     is_flag=True,
     help="Apply the atomic migration; the default is a zero-write dry run.",
 )
+@click.option(
+    "--manifest-sha256",
+    "expected_manifest_hash",
+    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
+)
 def sn_migrate_source_snapshots(
     manifest_path: str,
     expected_from_version: str,
     reason: str,
     apply: bool,
+    expected_manifest_hash: str | None,
 ) -> None:
     """Plan or apply exact DD source snapshot migrations with full CAS fencing."""
     import json
@@ -6214,11 +6220,14 @@ def sn_migrate_source_snapshots(
         migrate_source_snapshots,
     )
 
+    if apply and not expected_manifest_hash:
+        raise click.UsageError("--apply requires --manifest-sha256")
     receipt = migrate_source_snapshots(
         manifest_path,
         expected_from_version=expected_from_version,
         reason=reason,
         apply=apply,
+        expected_manifest_hash=expected_manifest_hash,
     )
     click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
 

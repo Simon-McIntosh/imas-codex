@@ -100,6 +100,7 @@ def test_source_snapshot_migration_is_dry_run_by_default(tmp_path: Path) -> None
     assert result.exit_code == 0, result.output
     assert json.loads(result.output) == receipt
     assert migrate.call_args.kwargs["apply"] is False
+    assert migrate.call_args.kwargs["expected_manifest_hash"] is None
 
 
 def test_source_snapshot_migration_requires_explicit_apply_flag(tmp_path: Path) -> None:
@@ -126,9 +127,65 @@ def test_source_snapshot_migration_requires_explicit_apply_flag(tmp_path: Path) 
                 "--reason",
                 "refresh immutable authority",
                 "--apply",
+                "--manifest-sha256",
+                "a" * 64,
             ],
         )
 
     assert result.exit_code == 0, result.output
     assert json.loads(result.output) == receipt
     assert migrate.call_args.kwargs["apply"] is True
+    assert migrate.call_args.kwargs["expected_manifest_hash"] == "a" * 64
+
+
+def test_source_snapshot_apply_requires_manifest_hash(tmp_path: Path) -> None:
+    manifest = tmp_path / "bounded.json"
+    manifest.write_text("{}")
+    with patch(
+        "imas_codex.standard_names.source_snapshot_migration.migrate_source_snapshots"
+    ) as migrate:
+        result = CliRunner().invoke(
+            sn,
+            [
+                "migrate-source-snapshots",
+                "--manifest",
+                str(manifest),
+                "--from-version",
+                "old-dd",
+                "--reason",
+                "refresh immutable authority",
+                "--apply",
+            ],
+        )
+
+    assert result.exit_code != 0
+    assert "--apply requires --manifest-sha256" in result.output
+    migrate.assert_not_called()
+
+
+def test_source_snapshot_dry_run_may_verify_manifest_hash(tmp_path: Path) -> None:
+    manifest = tmp_path / "bounded.json"
+    manifest.write_text("{}")
+    receipt = {"mode": "dry_run"}
+    with patch(
+        "imas_codex.standard_names.source_snapshot_migration.migrate_source_snapshots",
+        return_value=receipt,
+    ) as migrate:
+        result = CliRunner().invoke(
+            sn,
+            [
+                "migrate-source-snapshots",
+                "--manifest",
+                str(manifest),
+                "--from-version",
+                "old-dd",
+                "--reason",
+                "refresh immutable authority",
+                "--manifest-sha256",
+                "b" * 64,
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert migrate.call_args.kwargs["apply"] is False
+    assert migrate.call_args.kwargs["expected_manifest_hash"] == "b" * 64

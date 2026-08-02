@@ -7,6 +7,7 @@ import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
+from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -164,6 +165,10 @@ def _manifest(
     return path
 
 
+def _manifest_hash(path: Path) -> str:
+    return sha256(path.read_bytes()).hexdigest()
+
+
 def _seed(driver) -> None:
     with driver.session() as session:
         session.run("MATCH (node) DETACH DELETE node").consume()
@@ -288,6 +293,7 @@ def test_migrates_all_classifications_without_name_or_relationship_churn(
             expected_from_version="old-dd",
             reason="refresh immutable authority",
             apply=True,
+            expected_manifest_hash=_manifest_hash(manifest),
             run_id="source-snapshot-migration:test",
             gc=ephemeral_neo4j.client(),
         )
@@ -329,6 +335,7 @@ def test_migrates_all_classifications_without_name_or_relationship_churn(
             expected_from_version="old-dd",
             reason="refresh immutable authority",
             apply=True,
+            expected_manifest_hash=_manifest_hash(manifest),
             gc=ephemeral_neo4j.client(),
         )
         assert repeated["mode"] == "already_current"
@@ -377,6 +384,7 @@ def test_ambiguous_topology_refuses_without_writes(
             expected_from_version="old-dd",
             reason="refresh immutable authority",
             apply=True,
+            expected_manifest_hash=_manifest_hash(manifest),
             gc=ephemeral_neo4j.client(),
         )
 
@@ -411,6 +419,7 @@ def test_active_source_and_name_claims_refuse(
             expected_from_version="old-dd",
             reason="refresh immutable authority",
             apply=True,
+            expected_manifest_hash=_manifest_hash(manifest),
             gc=ephemeral_neo4j.client(),
         )
 
@@ -432,6 +441,7 @@ def test_injected_cas_or_ledger_failure_rolls_back_source_and_event(
                 expected_from_version="old-dd",
                 reason="refresh immutable authority",
                 apply=True,
+                expected_manifest_hash=_manifest_hash(manifest),
                 gc=ephemeral_neo4j.client(failure),
             )
 

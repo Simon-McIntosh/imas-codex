@@ -11,7 +11,9 @@ event.  This module never mutates a :class:`StandardName`.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
+import re
 import uuid
 from collections import Counter
 from dataclasses import dataclass
@@ -58,6 +60,7 @@ class SourceSnapshotAllowlist:
     paths: tuple[str, ...]
     allowlist_hash: str
     excluded_counts: dict[str, int]
+    excluded_source_ids: dict[str, tuple[str, ...]]
 
 
 class SourceSnapshotMigrationConflict(RuntimeError):
@@ -188,6 +191,59 @@ def _dd_gap_source_ids(manifest: dict[str, Any]) -> set[str]:
     return excluded
 
 
+def _manifest_records(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for partition_records in manifest["partitions"].values():
+        if not isinstance(partition_records, list):
+            raise ValueError("bounded manifest partitions must contain record arrays")
+        for record in partition_records:
+            if not isinstance(record, dict):
+                raise ValueError("bounded manifest records must be objects")
+            records.append(record)
+    for record in (manifest.get("special_checks") or {}).values():
+        if isinstance(record, dict):
+            records.append(record)
+    return records
+
+
+def _protected_source_ids(records: list[dict[str, Any]], protection: str) -> set[str]:
+    protected: set[str] = set()
+    for record in records:
+        evidence = record.get("scope_evidence") or {}
+        evidence_maps = [record, evidence] if isinstance(evidence, dict) else [record]
+        state = " ".join(
+            str(record.get(field) or "").casefold()
+            for field in ("classification", "scope_status")
+        )
+        has_protected_closure = protection in state
+        for mapping in evidence_maps:
+            for key, value in mapping.items():
+                normalized_key = str(key).casefold()
+                if protection not in normalized_key or not value:
+                    continue
+                if any(
+                    marker in normalized_key
+                    for marker in (
+                        "closure",
+                        "source_hit",
+                        "name_hit",
+                        "component_hit",
+                        "direct_",
+                    )
+                ):
+                    has_protected_closure = True
+                if "source" in normalized_key:
+                    values = value if isinstance(value, list | tuple | set) else [value]
+                    protected.update(
+                        str(source_id)
+                        for source_id in values
+                        if str(source_id).startswith("dd:")
+                    )
+        if has_protected_closure:
+            protected.update(_record_source_ids(record))
+    return protected
+
+
 def load_source_snapshot_allowlist(
     manifest_path: str | Path,
 ) -> SourceSnapshotAllowlist:
@@ -212,19 +268,18 @@ def load_source_snapshot_allowlist(
             "migration requires a bounded integrity manifest with the supported schema"
         )
 
+    records = _manifest_records(manifest)
     dd_gap_ids = _dd_gap_source_ids(manifest)
+    west_ids = _protected_source_ids(records, "west")
+    test_ids = _protected_source_ids(records, "test")
     selected: set[str] = set()
     excluded: dict[str, set[str]] = {}
 
     def exclude(reason: str, source_id: str) -> None:
         excluded.setdefault(reason, set()).add(source_id)
 
-    for records in manifest["partitions"].values():
-        if not isinstance(records, list):
-            raise ValueError("bounded manifest partitions must contain record arrays")
-        for record in records:
-            if not isinstance(record, dict):
-                raise ValueError("bounded manifest records must be objects")
+    for partition_records in manifest["partitions"].values():
+        for record in partition_records:
             source_ids = _record_source_ids(record)
             if record.get("scope_status") != "executable":
                 for source_id in source_ids:
@@ -254,6 +309,15 @@ def load_source_snapshot_allowlist(
                     _validate_source_id(source_id)
                     selected.add(source_id)
 
+    for reason, protected_ids in (
+        ("dd_gap", dd_gap_ids),
+        ("west", west_ids),
+        ("test", test_ids),
+    ):
+        for source_id in protected_ids:
+            exclude(reason, source_id)
+        selected.difference_update(protected_ids)
+
     if not selected:
         raise ValueError(
             "bounded manifest resolved to zero migratable exact DD sources"
@@ -268,6 +332,10 @@ def load_source_snapshot_allowlist(
         allowlist_hash=_hash(source_ids),
         excluded_counts={
             reason: len(source_ids) for reason, source_ids in sorted(excluded.items())
+        },
+        excluded_source_ids={
+            reason: tuple(sorted(source_ids))
+            for reason, source_ids in sorted(excluded.items())
         },
     )
 
@@ -631,6 +699,7 @@ def _ledger_idempotence(
 def _plan_rows(
     rows: list[dict[str, Any]],
     *,
+    manifest_hash: str,
     expected_from_version: str,
     reason: str,
     run_id: str | None,
@@ -665,7 +734,9 @@ def _plan_rows(
         after = _authority_snapshot(path, node, version)
         authority_hash = _hash({"path": path, "version": version, "node": node})
         preserved_state_hash = _hash(_preserved_state(source, node))
-        precondition_hash = _hash(row)
+        precondition_hash = _hash(
+            {"manifest_hash": manifest_hash, "graph_snapshot": row}
+        )
 
         status = "planned"
         event: dict[str, Any] | None = None
@@ -778,6 +849,7 @@ def _receipt(
         "manifest_hash": allowlist.manifest_hash,
         "allowlist_hash": allowlist.allowlist_hash,
         "excluded_counts": allowlist.excluded_counts,
+        "excluded_source_ids": allowlist.excluded_source_ids,
         "run_id": run_id if apply else None,
         "counts": {
             "allowlisted": len(allowlist.source_ids),
@@ -829,6 +901,7 @@ def _read_plan(
         )
     planned, refusals = _plan_rows(
         rows,
+        manifest_hash=allowlist.manifest_hash,
         expected_from_version=expected_from_version,
         reason=reason,
         run_id=run_id,
@@ -842,6 +915,7 @@ def plan_source_snapshot_migration(
     *,
     expected_from_version: str,
     reason: str,
+    expected_manifest_hash: str | None = None,
     gc: Any | None = None,
 ) -> dict[str, Any]:
     """Read and hash an exact migration plan, always rolling back the transaction."""
@@ -849,6 +923,7 @@ def plan_source_snapshot_migration(
         manifest_path,
         expected_from_version=expected_from_version,
         reason=reason,
+        expected_manifest_hash=expected_manifest_hash,
         apply=False,
         gc=gc,
     )
@@ -861,6 +936,7 @@ def migrate_source_snapshots(
     expected_from_version: str,
     reason: str,
     apply: bool = False,
+    expected_manifest_hash: str | None = None,
     run_id: str | None = None,
     gc: Any | None = None,
 ) -> dict[str, Any]:
@@ -871,8 +947,29 @@ def migrate_source_snapshots(
         raise ValueError("an exact expected source DD version is required")
     if not reason:
         raise ValueError("a migration reason is required")
+    normalized_manifest_hash = (
+        expected_manifest_hash.strip().casefold()
+        if isinstance(expected_manifest_hash, str)
+        else None
+    )
+    if apply and normalized_manifest_hash is None:
+        raise ValueError("apply requires an expected manifest SHA-256")
+    if (
+        normalized_manifest_hash is not None
+        and re.fullmatch(r"[0-9a-f]{64}", normalized_manifest_hash) is None
+    ):
+        raise ValueError("expected manifest SHA-256 must be exactly 64 hex characters")
     allowlist = load_source_snapshot_allowlist(manifest_path)
-    invocation_run_id = run_id or (_RUN_PREFIX + str(uuid.uuid4()) if apply else None)
+    if normalized_manifest_hash is not None and not hmac.compare_digest(
+        allowlist.manifest_hash, normalized_manifest_hash
+    ):
+        raise ValueError("manifest SHA-256 does not match the exact parsed bytes")
+    base_run_id = run_id or (_RUN_PREFIX + str(uuid.uuid4()) if apply else None)
+    invocation_run_id = (
+        f"{base_run_id}:manifest:{allowlist.manifest_hash}"
+        if base_run_id is not None
+        else None
+    )
     changed_at = datetime.now(UTC).isoformat() if apply else None
     own = gc is None
     client = GraphClient() if own else gc
@@ -989,6 +1086,7 @@ def migrate_source_snapshots(
                 post_rows = _rows(transaction, allowlist.paths)
                 post_plan, post_refusals = _plan_rows(
                     post_rows,
+                    manifest_hash=allowlist.manifest_hash,
                     expected_from_version=expected_from_version,
                     reason=reason,
                     run_id=invocation_run_id,

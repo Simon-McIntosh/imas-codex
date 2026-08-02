@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+from hashlib import sha256
 from pathlib import Path
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -11,6 +13,7 @@ from imas_codex.standard_names.source_snapshot_migration import (
     canonical_payload,
     classify_snapshot_change,
     load_source_snapshot_allowlist,
+    migrate_source_snapshots,
 )
 
 
@@ -81,8 +84,52 @@ def test_allowlist_is_exact_and_excludes_deferred_or_defect_sources(
         "non_dd": 1,
         "non_executable": 1,
         "test": 1,
-        "west": 1,
+        "west": 2,
     }
+    assert allowlist.excluded_source_ids["west"] == (
+        "dd:deferred/path",
+        "dd:west/path",
+    )
+
+
+@pytest.mark.parametrize("protected_kind", ["west", "test"])
+@pytest.mark.parametrize("protected_first", [False, True])
+def test_allowlist_globally_subtracts_protected_source_regardless_of_order(
+    tmp_path: Path, protected_kind: str, protected_first: bool
+) -> None:
+    duplicate = "dd:duplicated/protected"
+    clean = _record(duplicate)
+    protected = _record(duplicate, **{protected_kind: True})
+    duplicate_records = [protected, clean] if protected_first else [clean, protected]
+    manifest = _write_manifest(
+        tmp_path / "bounded.json",
+        [_record("dd:kept/path"), *duplicate_records],
+    )
+
+    allowlist = load_source_snapshot_allowlist(manifest)
+
+    assert allowlist.source_ids == ("dd:kept/path",)
+    assert allowlist.excluded_counts[protected_kind] == 1
+    assert allowlist.excluded_source_ids[protected_kind] == (duplicate,)
+
+
+def test_allowlist_subtracts_sources_protected_by_special_check(tmp_path: Path) -> None:
+    manifest = _write_manifest(
+        tmp_path / "bounded.json",
+        [_record("dd:kept/path"), _record("dd:special/protected")],
+    )
+    payload = json.loads(manifest.read_text())
+    payload["special_checks"]["protected_source"] = {
+        "classification": "deferred_west_closure",
+        "source_id": "dd:special/protected",
+        "target_identity_west_closure": True,
+    }
+    manifest.write_text(json.dumps(payload))
+
+    allowlist = load_source_snapshot_allowlist(manifest)
+
+    assert allowlist.source_ids == ("dd:kept/path",)
+    assert allowlist.excluded_source_ids["west"] == ("dd:special/protected",)
 
 
 @pytest.mark.parametrize(
@@ -119,3 +166,67 @@ def test_snapshot_classification_distinguishes_byte_semantic_and_material() -> N
         )
         == "changed"
     )
+
+
+@pytest.mark.parametrize("expected_hash", [None, "not-a-sha256", "0" * 64])
+def test_apply_rejects_unbound_manifest_before_graph_access(
+    tmp_path: Path, expected_hash: str | None
+) -> None:
+    manifest = _write_manifest(tmp_path / "bounded.json", [_record("dd:kept/path")])
+    with (
+        patch(
+            "imas_codex.standard_names.source_snapshot_migration.GraphClient"
+        ) as graph_client,
+        pytest.raises(ValueError, match="manifest SHA-256"),
+    ):
+        migrate_source_snapshots(
+            manifest,
+            expected_from_version="old-dd",
+            reason="refresh immutable authority",
+            apply=True,
+            expected_manifest_hash=expected_hash,
+        )
+
+    graph_client.assert_not_called()
+
+
+def test_correct_manifest_hash_reaches_graph_session(tmp_path: Path) -> None:
+    manifest = _write_manifest(tmp_path / "bounded.json", [_record("dd:kept/path")])
+    expected_hash = sha256(manifest.read_bytes()).hexdigest()
+    graph = Mock()
+    graph.session.side_effect = RuntimeError("graph reached")
+
+    with pytest.raises(RuntimeError, match="graph reached"):
+        migrate_source_snapshots(
+            manifest,
+            expected_from_version="old-dd",
+            reason="refresh immutable authority",
+            apply=True,
+            expected_manifest_hash=expected_hash,
+            gc=graph,
+        )
+
+    graph.session.assert_called_once_with()
+
+
+def test_apply_rejects_manifest_changed_after_prior_plan(tmp_path: Path) -> None:
+    manifest = _write_manifest(tmp_path / "bounded.json", [_record("dd:kept/path")])
+    planned_hash = sha256(manifest.read_bytes()).hexdigest()
+    payload = json.loads(manifest.read_text())
+    payload["generated_at"] = "changed after planning"
+    manifest.write_text(json.dumps(payload))
+    with (
+        patch(
+            "imas_codex.standard_names.source_snapshot_migration.GraphClient"
+        ) as graph_client,
+        pytest.raises(ValueError, match="does not match"),
+    ):
+        migrate_source_snapshots(
+            manifest,
+            expected_from_version="old-dd",
+            reason="refresh immutable authority",
+            apply=True,
+            expected_manifest_hash=planned_hash,
+        )
+
+    graph_client.assert_not_called()
