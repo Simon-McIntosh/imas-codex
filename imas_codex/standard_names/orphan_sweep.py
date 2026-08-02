@@ -241,9 +241,10 @@ def recover_manifest_drain_scope(
     *,
     scope_timeout_s: int,
     worker_timeout_s: int,
+    paths: list[str] | None = None,
     gc: Any | None = None,
 ) -> dict[str, int]:
-    """Recover one stale drain lease while preserving live worker claims.
+    """Recover the exact-path portion of one expired drain lease.
 
     Recovery is all-or-nothing for the lease: if any scoped node has a fresh
     drain heartbeat, this function performs no writes.  A stale scoped node in
@@ -255,15 +256,23 @@ def recover_manifest_drain_scope(
     own = gc is None
     client = GraphClient() if own else gc
     try:
+        source_ids = [f"dd:{path}" for path in paths] if paths is not None else None
         with client.session() as session:
             tx = session.begin_transaction()
             try:
                 probe = list(
                     tx.run(
                         """
-                        MATCH (node)
-                        WHERE (node:StandardName OR node:StandardNameSource)
-                          AND node.drain_scope_id = $scope_id
+                        MATCH (source:StandardNameSource)
+                        WHERE source.drain_scope_id = $scope_id
+                          AND ($source_ids IS NULL OR source.id IN $source_ids)
+                        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
+                        OPTIONAL MATCH (name)-[:HAS_PARENT*1..]->(parent:StandardName)
+                        WITH collect(DISTINCT source) + collect(DISTINCT name)
+                             + collect(DISTINCT parent) AS candidates
+                        UNWIND [node IN candidates
+                                WHERE node IS NOT NULL
+                                  AND node.drain_scope_id = $scope_id] AS node
                         RETURN count(node) AS total,
                                count(CASE
                                  WHEN node.drain_scope_claimed_at IS NULL
@@ -273,6 +282,7 @@ def recover_manifest_drain_scope(
                         """,
                         scope_id=drain_scope_id,
                         scope_cutoff=scope_cutoff,
+                        source_ids=source_ids,
                     )
                 )
                 total = int(probe[0]["total"]) if probe else 0
@@ -284,7 +294,15 @@ def recover_manifest_drain_scope(
                 names = list(
                     tx.run(
                         """
-                        MATCH (sn:StandardName {drain_scope_id: $scope_id})
+                        MATCH (source:StandardNameSource)
+                        WHERE source.drain_scope_id = $scope_id
+                          AND ($source_ids IS NULL OR source.id IN $source_ids)
+                        MATCH (source)-[:PRODUCED_NAME]->(sn:StandardName)
+                        WHERE sn.drain_scope_id = $scope_id
+                        OPTIONAL MATCH (sn)-[:HAS_PARENT*1..]->(parent:StandardName)
+                        WITH collect(DISTINCT sn) + collect(DISTINCT parent) AS names
+                        UNWIND [entry IN names WHERE entry IS NOT NULL
+                                AND entry.drain_scope_id = $scope_id] AS sn
                         WITH sn,
                           (sn.name_stage = 'refining'
                            OR sn.docs_stage = 'refining') AS was_refining,
@@ -309,16 +327,20 @@ def recover_manifest_drain_scope(
                         """,
                         scope_id=drain_scope_id,
                         worker_cutoff=worker_cutoff,
+                        source_ids=source_ids,
                     )
                 )
                 sources = list(
                     tx.run(
                         """
                         MATCH (s:StandardNameSource {drain_scope_id: $scope_id})
-                        REMOVE s.drain_scope_id, s.drain_scope_claimed_at
+                        WHERE $source_ids IS NULL OR s.id IN $source_ids
+                        REMOVE s.drain_scope_id, s.drain_scope_claimed_at,
+                               s.drain_scope_actionable
                         RETURN count(s) AS sources
                         """,
                         scope_id=drain_scope_id,
+                        source_ids=source_ids,
                     )
                 )
                 tx.commit()
@@ -333,6 +355,34 @@ def recover_manifest_drain_scope(
                 with suppress(Exception):
                     tx.rollback()
                 raise
+    finally:
+        if own:
+            client.close()
+
+
+def find_expired_manifest_drain_scopes(
+    paths: list[str], *, scope_timeout_s: int, gc: Any | None = None
+) -> list[str]:
+    """Return expired scope owners intersecting the exact DD source set."""
+    source_ids = [f"dd:{path}" for path in paths]
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            MATCH (source:StandardNameSource)
+            WHERE source.id IN $source_ids
+              AND source.drain_scope_id IS NOT NULL
+              AND (source.drain_scope_claimed_at IS NULL
+                   OR source.drain_scope_claimed_at < datetime()
+                        - duration($scope_cutoff))
+            RETURN DISTINCT source.drain_scope_id AS scope_id
+            ORDER BY scope_id
+            """,
+            source_ids=source_ids,
+            scope_cutoff=f"PT{scope_timeout_s}S",
+        )
+        return [row["scope_id"] for row in rows]
     finally:
         if own:
             client.close()

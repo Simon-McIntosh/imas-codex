@@ -154,6 +154,7 @@ def _build_pool_specs(
     flush: bool = False,
     skip_review: bool = False,
     skip_generate: bool = False,
+    owned_drain_claims: list[dict[str, str]] | None = None,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -235,6 +236,8 @@ def _build_pool_specs(
 
     def _make_claim_adapter(
         claim_fn: Callable[..., list[dict[str, Any]]],
+        *,
+        pool_name: str,
         **kwargs: Any,
     ) -> Callable[[], Awaitable[dict[str, Any] | None]]:
         """Wrap a sync claim function as an async ``ClaimFn``."""
@@ -243,6 +246,16 @@ def _build_pool_specs(
             items = await asyncio.to_thread(claim_fn, **kwargs)
             if not items:
                 return None
+            if owned_drain_claims is not None:
+                owned_drain_claims.extend(
+                    {
+                        "pool": pool_name,
+                        "id": str(item["id"]),
+                        "token": str(item["claim_token"]),
+                    }
+                    for item in items
+                    if item.get("id") and item.get("claim_token")
+                )
             # Alias source_id → path for DD items so compose/grouping helpers
             # that key on `item["path"]` (a legacy convention from the
             # extract-time batch shape) work uniformly with claim-shaped items.
@@ -422,6 +435,7 @@ def _build_pool_specs(
             name="generate_name",
             claim=_make_claim_adapter(
                 claim_generate_name_batch,
+                pool_name="generate_name",
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
@@ -438,6 +452,7 @@ def _build_pool_specs(
             name="review_name",
             claim=_make_claim_adapter(
                 claim_review_name_batch,
+                pool_name="review_name",
                 min_score=regen_score,
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
@@ -452,6 +467,7 @@ def _build_pool_specs(
             name="refine_name",
             claim=_make_claim_adapter(
                 claim_refine_name_batch,
+                pool_name="refine_name",
                 min_score=regen_score,
                 **_rotation_cap_kwargs,
                 **({"domain": only_domain} if only_domain else {}),
@@ -467,6 +483,7 @@ def _build_pool_specs(
             name="generate_docs",
             claim=_make_claim_adapter(
                 claim_generate_docs_batch,
+                pool_name="generate_docs",
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
@@ -480,6 +497,7 @@ def _build_pool_specs(
             name="review_docs",
             claim=_make_claim_adapter(
                 claim_review_docs_batch,
+                pool_name="review_docs",
                 min_score=regen_score,
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
@@ -494,6 +512,7 @@ def _build_pool_specs(
             name="refine_docs",
             claim=_make_claim_adapter(
                 claim_refine_docs_batch,
+                pool_name="refine_docs",
                 min_score=regen_score,
                 **_rotation_cap_kwargs,
                 **({"domain": only_domain} if only_domain else {}),
@@ -509,6 +528,7 @@ def _build_pool_specs(
             name="enrich_parents",
             claim=_make_claim_adapter(
                 claim_enrich_parents_batch,
+                pool_name="enrich_parents",
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
@@ -797,6 +817,7 @@ async def run_sn_pools(
     attach_only: bool = False,
     reconcile_only: bool = False,
     skip_global_maintenance: bool = False,
+    scope_started_callback: Callable[[], None] | None = None,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
 
@@ -1036,6 +1057,12 @@ async def run_sn_pools(
         _a3_route,
         _a3_or_key_src if _a3_or_key else "NONE",
     )
+
+    owned_drain_claims: list[dict[str, str]] = []
+    primary_error: BaseException | None = None
+    cleanup_error: BaseException | None = None
+    if drain_scope_id and scope_started_callback is not None:
+        scope_started_callback()
 
     try:
         if skip_global_maintenance:
@@ -1613,6 +1640,7 @@ async def run_sn_pools(
             flush=flush,
             skip_review=skip_review,
             skip_generate=skip_generate,
+            owned_drain_claims=owned_drain_claims if drain_scope_id else None,
         )
 
         # ── Wire pool health into display state ───────────────────
@@ -1917,9 +1945,11 @@ async def run_sn_pools(
             summary.stop_reason = "completed"
 
     except KeyboardInterrupt:
+        primary_error = KeyboardInterrupt()
         summary.stop_reason = "interrupted"
         logger.warning("run_sn_pools interrupted by user")
     except Exception as exc:
+        primary_error = exc
         summary.stop_reason = "failed"
         logger.error("run_sn_pools failed: %s", exc, exc_info=True)
     finally:
@@ -1932,26 +1962,28 @@ async def run_sn_pools(
 
         if drain_scope_id:
             from imas_codex.standard_names.graph_ops import (
-                build_manifest_drain_plan,
-                clear_manifest_drain_scope,
+                finalize_manifest_drain_scope,
             )
 
             try:
-                summary.drain_report = await asyncio.to_thread(
-                    build_manifest_drain_plan,
-                    list(drain_paths),
-                    dd_version=drain_dd_version,
-                    drain_scope_id=drain_scope_id,
-                )
-            except Exception as report_exc:  # noqa: BLE001
-                logger.warning("bounded drain final report failed: %s", report_exc)
-            finally:
-                try:
-                    await asyncio.shield(
-                        asyncio.to_thread(clear_manifest_drain_scope, drain_scope_id)
+                cleanup_task = asyncio.create_task(
+                    asyncio.to_thread(
+                        finalize_manifest_drain_scope,
+                        drain_scope_id,
+                        claims=owned_drain_claims,
+                        paths=list(drain_paths),
+                        dd_version=drain_dd_version,
                     )
-                except Exception as clear_exc:  # noqa: BLE001
-                    logger.error("bounded drain scope cleanup failed: %s", clear_exc)
+                )
+                summary.drain_report = await asyncio.shield(cleanup_task)
+            except asyncio.CancelledError:
+                logger.warning(
+                    "bounded drain cancellation received; exact cleanup continues"
+                )
+                raise
+            except Exception as finalization_exc:  # noqa: BLE001
+                cleanup_error = finalization_exc
+                logger.error("bounded drain finalization failed: %s", finalization_exc)
 
         # ── Shutdown timeouts ─────────────────────────────────────
         # Each sync graph call is wrapped in to_thread + wait_for so
@@ -2222,4 +2254,10 @@ async def run_sn_pools(
                 "cost_is_exact=False. Check logs for details."
             )
 
+    if (
+        cleanup_error is not None
+        and primary_error is None
+        and summary.stop_reason != "interrupted"
+    ):
+        raise cleanup_error
     return summary

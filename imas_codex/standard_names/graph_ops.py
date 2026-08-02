@@ -798,6 +798,15 @@ def canonicalize_manifest_drain_paths(paths: list[str]) -> list[str]:
     for raw in paths:
         if not isinstance(raw, str):
             raise ValueError("bounded drain paths must be strings")
+        if raw.strip().startswith("dd:"):
+            raise ValueError(f"bounded drain accepts DD paths, not source IDs: {raw!r}")
+        if raw.strip().split(":", 1)[0] in {
+            "catalog",
+            "derived",
+            "signal",
+            "signals",
+        }:
+            raise ValueError(f"bounded drain accepts only canonical DD paths: {raw!r}")
         path = raw.strip().strip("/")
         if (
             not path
@@ -835,6 +844,9 @@ def classify_manifest_drain_item(item: dict[str, Any]) -> dict[str, Any]:
         reasons.append("IMAS node category is missing")
 
     if source:
+        unit_ids = node.get("unit_ids") or []
+        dd_parents = node.get("dd_parents") or []
+        authoritative_unit = node.get("unit") or (unit_ids[0] if unit_ids else None)
         if (
             source.get("id") != f"dd:{path}"
             or source.get("source_type") != "dd"
@@ -844,6 +856,34 @@ def classify_manifest_drain_item(item: dict[str, Any]) -> dict[str, Any]:
             or sorted(source.get("dd_target_ids") or []) != [path]
         ):
             reasons.append("exact source identity or immutable DD pin is inconsistent")
+        if (
+            len(unit_ids) > 1
+            or len(dd_parents) > 1
+            or (
+                node.get("unit") is not None
+                and unit_ids
+                and unit_ids != [node.get("unit")]
+            )
+        ):
+            reasons.append("DD authority relationship cardinality is ambiguous")
+        elif (
+            source.get("description") != node.get("documentation")
+            or source.get("dd_documentation") != node.get("documentation")
+            or source.get("dd_data_type") != node.get("data_type")
+            or source.get("dd_unit") != authoritative_unit
+            or sorted(source.get("dd_coordinates") or [])
+            != sorted(node.get("coordinate_ids") or [])
+            or source.get("dd_lifecycle_status") != node.get("lifecycle_status")
+            or source.get("dd_lifecycle_version") != node.get("lifecycle_version")
+            or source.get("enhanced_description") != node.get("description")
+            or source.get("enhancement_kind") != node.get("enrichment_source")
+            or source.get("physics_domain") != node.get("physics_domain")
+            or source.get("dd_parent_path")
+            != (dd_parents[0].get("id") if dd_parents else None)
+            or source.get("dd_parent_documentation")
+            != (dd_parents[0].get("documentation") if dd_parents else None)
+        ):
+            reasons.append("immutable DD snapshot no longer matches authority")
         produced_sn_id = source.get("produced_sn_id")
         if produced_sn_id and produced_sn_id not in all_name_ids:
             reasons.append("produced_sn_id has no matching PRODUCED_NAME edge")
@@ -911,9 +951,7 @@ CALL (source) {
     validation_status: live.validation_status,
     claim_token: live.claim_token,
     claim_seq: live.claim_seq,
-    claimed_at: live.claimed_at,
     drain_scope_id: live.drain_scope_id,
-    drain_scope_claimed_at: live.drain_scope_claimed_at,
     drain_scope_claimed_at_epoch_ms:
       live.drain_scope_claimed_at.epochMillis,
     scope_conflict: live.drain_scope_id IS NOT NULL
@@ -934,9 +972,7 @@ CALL (source) {
     validation_status: parent.validation_status,
     claim_token: parent.claim_token,
     claim_seq: parent.claim_seq,
-    claimed_at: parent.claimed_at,
     drain_scope_id: parent.drain_scope_id,
-    drain_scope_claimed_at: parent.drain_scope_claimed_at,
     drain_scope_claimed_at_epoch_ms:
       parent.drain_scope_claimed_at.epochMillis,
     scope_conflict: parent.drain_scope_id IS NOT NULL
@@ -952,6 +988,20 @@ CALL (path, node) {
     id: gap.id, kind: gap.kind, status: gap.status, linked: owned IS NOT NULL
   } END) WHERE entry IS NOT NULL] AS dd_gaps
 }
+CALL (node) {
+  OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit_node:Unit)
+  RETURN [id IN collect(unit_node.id) WHERE id IS NOT NULL] AS unit_ids
+}
+CALL (node) {
+  OPTIONAL MATCH (node)-[:HAS_COORDINATE]->(coordinate)
+  RETURN [id IN collect(coordinate.id) WHERE id IS NOT NULL] AS coordinate_ids
+}
+CALL (node) {
+  OPTIONAL MATCH (node)-[:HAS_PARENT]->(dd_parent:IMASNode)
+  RETURN [entry IN collect(CASE WHEN dd_parent IS NULL THEN null ELSE {
+    id: dd_parent.id, documentation: dd_parent.documentation
+  } END) WHERE entry IS NOT NULL] AS dd_parents
+}
 RETURN path, $dd_version AS dd_version,
        version_count = 1 AS configured_version_present,
        CASE WHEN node IS NULL THEN null ELSE {
@@ -959,13 +1009,16 @@ RETURN path, $dd_version AS dd_version,
          lifecycle_status: node.lifecycle_status,
          lifecycle_version: node.lifecycle_version,
          documentation: node.documentation, data_type: node.data_type,
-         physics_domain: node.physics_domain, unit: node.unit
+         physics_domain: node.physics_domain, unit: node.unit,
+         description: node.description,
+         enrichment_source: node.enrichment_source,
+         unit_ids: unit_ids, coordinate_ids: coordinate_ids,
+         dd_parents: dd_parents
        } END AS node,
        CASE WHEN source IS NULL THEN null ELSE {
          id: source.id, source_type: source.source_type,
          source_id: source.source_id, status: source.status,
          claim_token: source.claim_token, claim_seq: source.claim_seq,
-         claimed_at: source.claimed_at,
          worker_claim_live: source.claim_token IS NOT NULL
            AND source.claimed_at IS NOT NULL
            AND source.claimed_at >= datetime() - duration($worker_cutoff),
@@ -973,8 +1026,19 @@ RETURN path, $dd_version AS dd_version,
          produced_sn_id: source.produced_sn_id,
          dd_version: source.dd_version,
          dd_snapshot_pinned: source.dd_snapshot_pinned,
+         description: source.description,
+         physics_domain: source.physics_domain,
+         dd_documentation: source.dd_documentation,
+         dd_parent_path: source.dd_parent_path,
+         dd_parent_documentation: source.dd_parent_documentation,
+         dd_data_type: source.dd_data_type,
+         dd_unit: source.dd_unit,
+         dd_coordinates: source.dd_coordinates,
+         dd_lifecycle_status: source.dd_lifecycle_status,
+         dd_lifecycle_version: source.dd_lifecycle_version,
+         enhanced_description: source.enhanced_description,
+         enhancement_kind: source.enhancement_kind,
          drain_scope_id: source.drain_scope_id,
-         drain_scope_claimed_at: source.drain_scope_claimed_at,
          drain_scope_claimed_at_epoch_ms:
            source.drain_scope_claimed_at.epochMillis,
          scope_conflict: source.drain_scope_id IS NOT NULL
@@ -1021,6 +1085,42 @@ class ManifestDrainConflict(RuntimeError):
     """The bounded manifest changed or contains an ambiguous identity."""
 
 
+def _manifest_plan_fingerprint(plan: list[dict[str, Any]]) -> str:
+    """Return a typed, order-stable snapshot of every projected authority."""
+    import json
+
+    def normalize(value: Any) -> Any:
+        if isinstance(value, dict):
+            return {key: normalize(value[key]) for key in sorted(value)}
+        if isinstance(value, list):
+            normalized = [normalize(item) for item in value]
+            return sorted(normalized, key=lambda item: json.dumps(item, sort_keys=True))
+        return value
+
+    return json.dumps(normalize(plan), sort_keys=True, separators=(",", ":"))
+
+
+def _lock_manifest_drain_authority(gc: Any, paths: list[str]) -> None:
+    """Take write locks on the exact DD authority and its current bindings."""
+    gc.query(
+        """
+        UNWIND $paths AS path
+        MATCH (node:IMASNode {id: path})
+        OPTIONAL MATCH (node)-[:HAS_UNIT|HAS_COORDINATE|HAS_PARENT]->(authority)
+        OPTIONAL MATCH (source:StandardNameSource {id: 'dd:' + path})
+        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
+        OPTIONAL MATCH (name)-[:HAS_PARENT*1..]->(parent:StandardName)
+        WITH collect(DISTINCT node) + collect(DISTINCT authority)
+             + collect(DISTINCT source) + collect(DISTINCT name)
+             + collect(DISTINCT parent) AS nodes
+        UNWIND [entry IN nodes WHERE entry IS NOT NULL] AS locked
+        SET locked._drain_scope_lock = true
+        REMOVE locked._drain_scope_lock
+        """,
+        paths=paths,
+    )
+
+
 @retry_on_deadlock()
 def claim_manifest_drain_scope(
     paths: list[str],
@@ -1050,6 +1150,22 @@ def claim_manifest_drain_scope(
                     terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
                 )
                 plan = [classify_manifest_drain_item(dict(row)) for row in rows]
+                initial_fingerprint = _manifest_plan_fingerprint(plan)
+                _lock_manifest_drain_authority(tx_gc, exact_paths)
+                locked_rows = tx_gc.query(
+                    _MANIFEST_DRAIN_PLAN_QUERY,
+                    paths=exact_paths,
+                    dd_version=dd_version,
+                    drain_scope_id=scope_id,
+                    scope_cutoff=f"PT{scope_timeout_seconds}S",
+                    worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
+                    terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
+                )
+                plan = [classify_manifest_drain_item(dict(row)) for row in locked_rows]
+                if _manifest_plan_fingerprint(plan) != initial_fingerprint:
+                    raise ManifestDrainConflict(
+                        "DD authority or binding state changed during manifest claim"
+                    )
                 ambiguous = [
                     item for item in plan if item["disposition"] == "ambiguous"
                 ]
@@ -1112,7 +1228,8 @@ def claim_manifest_drain_scope(
                           enhancement_kind: src.enhancement_kind,
                           attempt_count: 0,
                           drain_scope_id: $scope_id,
-                          drain_scope_claimed_at: datetime()
+                          drain_scope_claimed_at: datetime(),
+                          drain_scope_actionable: true
                         })
                         CREATE (source)-[:FROM_DD_PATH]->(node)
                         RETURN collect(source.id) AS ids
@@ -1156,17 +1273,19 @@ def claim_manifest_drain_scope(
                         "produced_sn_id": item["source"].get("produced_sn_id"),
                         "dd_version": item["source"].get("dd_version"),
                         "prior_scope_id": item["source"].get("drain_scope_id"),
-                        "prior_scope_claimed_at": item["source"].get(
-                            "drain_scope_claimed_at"
-                        ),
                         "prior_scope_claimed_at_epoch_ms": item["source"].get(
                             "drain_scope_claimed_at_epoch_ms"
                         ),
                         "dd_target_ids": item["source"].get("dd_target_ids") or [],
                         "all_name_ids": item.get("all_name_ids") or [],
+                        "actionable": (
+                            item["disposition"] == "genuine_gap"
+                            and item["source"].get("status") == "extracted"
+                        ),
                     }
                     for item in plan
                     if item["source"] is not None
+                    and item["disposition"] in {"active_in_flight", "genuine_gap"}
                 ]
                 stamped_sources: set[str] = set()
                 if existing:
@@ -1210,22 +1329,13 @@ def claim_manifest_drain_scope(
                                  item.prior_scope_claimed_at_epoch_ms OR
                                (node.drain_scope_claimed_at IS NULL AND
                                 item.prior_scope_claimed_at_epoch_ms IS NULL))
-                        WITH node, item,
-                          (node.claim_token IS NOT NULL
-                           AND (node.claimed_at IS NULL
-                                OR node.claimed_at < datetime()
-                                     - duration($worker_cutoff))) AS worker_stale
                         SET node.drain_scope_id = $scope_id,
                             node.drain_scope_claimed_at = datetime(),
-                            node.claim_token = CASE WHEN worker_stale THEN null
-                              ELSE node.claim_token END,
-                            node.claimed_at = CASE WHEN worker_stale THEN null
-                              ELSE node.claimed_at END
+                            node.drain_scope_actionable = item.actionable
                         RETURN collect(node.id) AS ids
                         """,
                         items=existing,
                         scope_id=scope_id,
-                        worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
                     )
                     stamped_sources = set(stamped[0]["ids"] if stamped else [])
                     if stamped_sources != {item["id"] for item in existing}:
@@ -1235,6 +1345,8 @@ def claim_manifest_drain_scope(
 
                 expected_names: dict[str, dict[str, Any]] = {}
                 for item in plan:
+                    if item["disposition"] != "active_in_flight":
+                        continue
                     for name in [
                         *(item.get("live_names") or []),
                         *(item.get("parents") or []),
@@ -1266,27 +1378,12 @@ def claim_manifest_drain_scope(
                                  item.drain_scope_claimed_at_epoch_ms OR
                                (node.drain_scope_claimed_at IS NULL AND
                                 item.drain_scope_claimed_at_epoch_ms IS NULL))
-                        WITH node, item,
-                          (node.claim_token IS NULL OR node.claimed_at IS NULL
-                           OR node.claimed_at < datetime()
-                                - duration($worker_cutoff)) AS worker_stale
-                        SET node.name_stage = CASE
-                              WHEN node.name_stage = 'refining' AND worker_stale
-                              THEN 'reviewed' ELSE node.name_stage END,
-                            node.docs_stage = CASE
-                              WHEN node.docs_stage = 'refining' AND worker_stale
-                              THEN 'reviewed' ELSE node.docs_stage END,
-                            node.claim_token = CASE WHEN worker_stale THEN null
-                              ELSE node.claim_token END,
-                            node.claimed_at = CASE WHEN worker_stale THEN null
-                              ELSE node.claimed_at END,
-                            node.drain_scope_id = $scope_id,
+                        SET node.drain_scope_id = $scope_id,
                             node.drain_scope_claimed_at = datetime()
                         RETURN collect(node.id) AS ids
                         """,
                         items=list(expected_names.values()),
                         scope_id=scope_id,
-                        worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
                     )
                     stamped_names = set(stamped[0]["ids"] if stamped else [])
                     if stamped_names != set(expected_names):
@@ -1304,6 +1401,35 @@ def claim_manifest_drain_scope(
             client.close()
 
 
+def prepare_manifest_drain_scope(
+    paths: list[str],
+    *,
+    dd_version: str,
+    scope_timeout_seconds: int = 600,
+) -> tuple[str, list[dict[str, Any]]]:
+    """Recover expired intersecting leases, then claim a freshly planned scope."""
+    from imas_codex.standard_names.orphan_sweep import (
+        find_expired_manifest_drain_scopes,
+        recover_manifest_drain_scope,
+    )
+
+    exact_paths = canonicalize_manifest_drain_paths(paths)
+    for stale_scope_id in find_expired_manifest_drain_scopes(
+        exact_paths, scope_timeout_s=scope_timeout_seconds
+    ):
+        recover_manifest_drain_scope(
+            stale_scope_id,
+            scope_timeout_s=scope_timeout_seconds,
+            worker_timeout_s=_CLAIM_TIMEOUT_SECONDS,
+            paths=exact_paths,
+        )
+    return claim_manifest_drain_scope(
+        exact_paths,
+        dd_version=dd_version,
+        scope_timeout_seconds=scope_timeout_seconds,
+    )
+
+
 @retry_on_deadlock()
 def clear_manifest_drain_scope(
     drain_scope_id: str, *, gc: Any | None = None
@@ -1316,7 +1442,8 @@ def clear_manifest_drain_scope(
             """
             CALL {
               MATCH (source:StandardNameSource {drain_scope_id: $scope_id})
-              REMOVE source.drain_scope_id, source.drain_scope_claimed_at
+              REMOVE source.drain_scope_id, source.drain_scope_claimed_at,
+                     source.drain_scope_actionable
               RETURN count(source) AS sources
             }
             CALL {
@@ -1332,6 +1459,79 @@ def clear_manifest_drain_scope(
     finally:
         if own:
             client.close()
+
+
+@retry_on_deadlock()
+def release_manifest_drain_claims(
+    claims: list[dict[str, str]], *, gc: Any | None = None
+) -> dict[str, int]:
+    """CAS-release only worker tokens minted by this bounded invocation."""
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        rows = client.query(
+            """
+            UNWIND $claims AS claim
+            CALL (claim) {
+              WITH claim WHERE claim.pool = 'generate_name'
+              MATCH (source:StandardNameSource {id: claim.id})
+              WHERE source.claim_token = claim.token
+              REMOVE source.claim_token, source.claimed_at
+              RETURN 1 AS sources, 0 AS names
+              UNION
+              WITH claim WHERE claim.pool <> 'generate_name'
+              MATCH (name:StandardName {id: claim.id})
+              WHERE name.claim_token = claim.token
+              SET name.name_stage = CASE
+                    WHEN claim.pool = 'refine_name'
+                         AND name.name_stage = 'refining'
+                    THEN 'reviewed' ELSE name.name_stage END,
+                  name.docs_stage = CASE
+                    WHEN claim.pool = 'refine_docs'
+                         AND name.docs_stage = 'refining'
+                    THEN 'reviewed' ELSE name.docs_stage END
+              REMOVE name.claim_token, name.claimed_at
+              RETURN 0 AS sources, 1 AS names
+            }
+            RETURN sum(sources) AS sources, sum(names) AS names
+            """,
+            claims=claims,
+        )
+        return dict(rows[0]) if rows else {"sources": 0, "names": 0}
+    finally:
+        if own:
+            client.close()
+
+
+def finalize_manifest_drain_scope(
+    drain_scope_id: str,
+    *,
+    claims: list[dict[str, str]],
+    paths: list[str],
+    dd_version: str,
+) -> list[dict[str, Any]]:
+    """Release exact claims, report final state, and always clear the lease."""
+    primary_error: BaseException | None = None
+    try:
+        if claims:
+            release_manifest_drain_claims(claims)
+        return build_manifest_drain_plan(
+            paths,
+            dd_version=dd_version,
+            drain_scope_id=drain_scope_id,
+        )
+    except BaseException as exc:
+        primary_error = exc
+        raise
+    finally:
+        try:
+            clear_manifest_drain_scope(drain_scope_id)
+        except Exception:
+            if primary_error is None:
+                raise
+            logger.exception(
+                "bounded drain scope clear failed while preserving primary error"
+            )
 
 
 @retry_on_deadlock()
@@ -12408,8 +12608,14 @@ def claim_generate_name_batch(
         scope_sns2_where += " AND sns2.run_id = $scope_run_id"
         extra_params["scope_run_id"] = scope_run_id
     if drain_scope_id:
-        scope_sns_where += " AND sns.drain_scope_id = $drain_scope_id"
-        scope_sns2_where += " AND sns2.drain_scope_id = $drain_scope_id"
+        scope_sns_where += (
+            " AND sns.drain_scope_id = $drain_scope_id"
+            " AND sns.drain_scope_actionable = true"
+        )
+        scope_sns2_where += (
+            " AND sns2.drain_scope_id = $drain_scope_id"
+            " AND sns2.drain_scope_actionable = true"
+        )
         extra_params["drain_scope_id"] = drain_scope_id
     if edits_only:
         scope_sns_where += " AND coalesce(sns.edit_status, '') = 'open'"

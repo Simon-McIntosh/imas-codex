@@ -9,12 +9,13 @@ from unittest.mock import MagicMock
 import pytest
 from click.testing import CliRunner
 
-from imas_codex.cli.sn import sn_run
+from imas_codex.cli.sn import _run_sn_cmd, sn_run
 from imas_codex.standard_names.graph_ops import (
     MANIFEST_DRAIN_DISPOSITIONS,
     _claim_sn_atomic,
     canonicalize_manifest_drain_paths,
     classify_manifest_drain_item,
+    finalize_manifest_drain_scope,
 )
 
 
@@ -62,7 +63,16 @@ def test_exact_paths_are_canonical_and_order_preserving() -> None:
 
 @pytest.mark.parametrize(
     "paths",
-    [[], [""], ["dd:magnetics/ip"], ["magnetics/*"], ["magnetics /ip"]],
+    [
+        [],
+        [""],
+        ["dd:magnetics/ip"],
+        ["catalog:plasma_current"],
+        ["derived:plasma_current"],
+        ["signals:tcv:ip"],
+        ["magnetics/*"],
+        ["magnetics /ip"],
+    ],
 )
 def test_non_exact_path_collections_fail_closed(paths: list[str]) -> None:
     with pytest.raises(ValueError):
@@ -250,9 +260,10 @@ def test_live_operator_reports_owned_scope_and_cleans_it(
         )
     )
     monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
-    monkeypatch.setattr("imas_codex.cli.sn._require_embed_ready", lambda command: None)
+    embed = MagicMock(side_effect=AssertionError("bounded drain probed embedding"))
+    monkeypatch.setattr("imas_codex.cli.sn._require_embed_ready", embed)
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.claim_manifest_drain_scope",
+        "imas_codex.standard_names.graph_ops.prepare_manifest_drain_scope",
         lambda paths, **kwargs: ("owned-scope", [item]),
     )
     run = MagicMock(return_value={"drain_report": [item]})
@@ -268,7 +279,109 @@ def test_live_operator_reports_owned_scope_and_cleans_it(
     assert "Bounded drain final" in result.output
     assert run.call_args.kwargs["drain_scope_id"] == "owned-scope"
     assert run.call_args.kwargs["skip_global_maintenance"] is True
+    embed.assert_not_called()
     clear.assert_called_once_with("owned-scope")
+
+
+def test_inner_bounded_run_disables_embedding_preflight_and_monitor(
+    monkeypatch,
+) -> None:
+    forbidden = MagicMock(side_effect=AssertionError("embedding preflight called"))
+    captured: dict[str, object] = {}
+
+    def run_discovery(config, async_main):
+        captured["check_embed"] = config.check_embed
+        return {"summary": None}
+
+    monkeypatch.setattr("imas_codex.cli.sn._require_embed_ready", forbidden)
+    monkeypatch.setattr("imas_codex.cli.discover.common.use_rich_output", lambda: False)
+    monkeypatch.setattr("imas_codex.cli.discover.common.run_discovery", run_discovery)
+
+    assert (
+        _run_sn_cmd(
+            cost_limit=1.0,
+            time_limit=None,
+            compose_model=None,
+            per_domain_limit=None,
+            dry_run=False,
+            quiet=True,
+            verbose=False,
+            drain_scope_id="owned-scope",
+            drain_paths=("magnetics/ip",),
+            drain_dd_version="4.1.0",
+            skip_global_maintenance=True,
+        )
+        is None
+    )
+    forbidden.assert_not_called()
+    assert captured["check_embed"] is False
+
+
+def test_pre_loop_cleanup_does_not_mask_the_primary_failure(
+    monkeypatch, tmp_path: Path
+) -> None:
+    manifest = tmp_path / "batch.yaml"
+    _write_manifest(manifest)
+    item = classify_manifest_drain_item(
+        _plan_item(
+            path="magnetics/ip",
+            node={"id": "magnetics/ip", "node_category": "quantity"},
+        )
+    )
+    monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.prepare_manifest_drain_scope",
+        lambda paths, **kwargs: ("owned-scope", [item]),
+    )
+    monkeypatch.setattr(
+        "imas_codex.cli.sn._run_sn_cmd",
+        MagicMock(side_effect=RuntimeError("primary failure")),
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        MagicMock(side_effect=RuntimeError("cleanup failure")),
+    )
+
+    result = CliRunner().invoke(sn_run, ["--drain-batch", str(manifest)])
+
+    assert result.exit_code == 1
+    assert isinstance(result.exception, RuntimeError)
+    assert str(result.exception) == "primary failure"
+
+
+def test_scope_finalization_preserves_primary_cleanup_failure(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.release_manifest_drain_claims",
+        MagicMock(side_effect=RuntimeError("release failure")),
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        MagicMock(side_effect=RuntimeError("clear failure")),
+    )
+
+    with pytest.raises(RuntimeError, match="release failure"):
+        finalize_manifest_drain_scope(
+            "owned-scope",
+            claims=[{"pool": "generate_name", "id": "dd:path", "token": "owned"}],
+            paths=["path"],
+            dd_version="4.1.0",
+        )
+
+
+def test_scope_finalization_surfaces_clear_failure_after_success(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.build_manifest_drain_plan",
+        MagicMock(return_value=[]),
+    )
+    monkeypatch.setattr(
+        "imas_codex.standard_names.graph_ops.clear_manifest_drain_scope",
+        MagicMock(side_effect=RuntimeError("clear failure")),
+    )
+
+    with pytest.raises(RuntimeError, match="clear failure"):
+        finalize_manifest_drain_scope(
+            "owned-scope", claims=[], paths=["path"], dd_version="4.1.0"
+        )
 
 
 @pytest.mark.parametrize(

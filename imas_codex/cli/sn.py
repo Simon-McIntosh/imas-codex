@@ -533,6 +533,7 @@ def _run_sn_cmd(
     drain_dd_version: str | None = None,
     edits_only: bool = False,
     skip_global_maintenance: bool = False,
+    scope_started_callback: Callable[[], None] | None = None,
 ) -> dict[str, Any] | None:
     """Execute the pool-based SN orchestrator with Rich progress display.
 
@@ -666,7 +667,7 @@ def _run_sn_cmd(
                 f"{', dry-run' if dry_run else ''})"
             )
 
-    if not dry_run:
+    if not dry_run and not drain_scope_id:
         _require_embed_ready("sn run")
 
     # Build harness config — the SERVERS row mirrors the endpoints this
@@ -696,7 +697,7 @@ def _run_sn_cmd(
         facility_config={},  # SN has no facility YAML
         display=display,
         check_graph=not dry_run,
-        check_embed=not dry_run,
+        check_embed=not dry_run and not drain_scope_id,
         check_ssh=False,
         check_auth=False,
         check_model=False,  # proxy check is misleading — SN uses direct bypass
@@ -751,6 +752,7 @@ def _run_sn_cmd(
             attach_only=(only == "attach"),
             reconcile_only=(only == "reconcile"),
             skip_global_maintenance=skip_global_maintenance,
+            scope_started_callback=scope_started_callback,
         )
         return {"summary": summary}
 
@@ -1690,8 +1692,8 @@ def sn_run(
             ManifestDrainConflict,
             build_manifest_drain_plan,
             canonicalize_manifest_drain_paths,
-            claim_manifest_drain_scope,
             clear_manifest_drain_scope,
+            prepare_manifest_drain_scope,
         )
         from imas_codex.standard_names.sources_manifest import (
             SourcesManifestError,
@@ -1729,10 +1731,15 @@ def sn_run(
             )
             return
 
-        _require_embed_ready("sn run --drain-batch")
         scope_id: str | None = None
+        scope_owned_by_loop = False
+
+        def mark_scope_started() -> None:
+            nonlocal scope_owned_by_loop
+            scope_owned_by_loop = True
+
         try:
-            scope_id, initial_plan = claim_manifest_drain_scope(
+            scope_id, initial_plan = prepare_manifest_drain_scope(
                 drain_paths, dd_version=dd_version
             )
             initial_counts = Counter(item["disposition"] for item in initial_plan)
@@ -1768,6 +1775,7 @@ def sn_run(
                 drain_paths=tuple(drain_paths),
                 drain_dd_version=dd_version,
                 skip_global_maintenance=True,
+                scope_started_callback=mark_scope_started,
             )
             final_report = (final_row or {}).get("drain_report") or []
             final_counts = Counter(item["disposition"] for item in final_report)
@@ -1789,8 +1797,18 @@ def sn_run(
         except ManifestDrainConflict as exc:
             raise click.UsageError(str(exc)) from exc
         finally:
-            if scope_id:
-                clear_manifest_drain_scope(scope_id)
+            if scope_id and not scope_owned_by_loop:
+                import sys
+
+                primary_exc = sys.exc_info()[1]
+                try:
+                    clear_manifest_drain_scope(scope_id)
+                except Exception as cleanup_exc:  # noqa: BLE001
+                    if primary_exc is None:
+                        raise
+                    logger.error(
+                        "bounded drain pre-loop cleanup failed: %s", cleanup_exc
+                    )
         return
 
     if skip_global_maintenance and rename_spec is not None:

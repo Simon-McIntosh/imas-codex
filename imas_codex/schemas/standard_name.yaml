@@ -2262,6 +2262,11 @@ classes:
           Heartbeat timestamp for drain_scope_id. This lease is independent of
           the worker claimed_at/claim_token pair.
         range: datetime
+      drain_scope_actionable:
+        description: >-
+          Ephemeral bounded-drain eligibility. Set only on exact DD sources
+          that the owning drain may compose and removed with the scope lease.
+        range: boolean
       claim_token:
         description: UUID token for claim verification
       claim_seq:
