@@ -16,8 +16,8 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="43">
+<meta name="plan-modified" content="2026-08-03">
+<meta name="plan-version" content="44">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -716,6 +716,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260802T215336074915" data-who="" data-when="">
     <div class="r-comment-body"><p><strong>The false postflight conflict is repaired at <code>356d9953</code>.</strong> Two independent audits proved that 111 sources across 52 shared names embedded authorized peer-source snapshot changes in their preserved-state closures; authority mismatches were zero. The repair strips snapshot fields only from related <code>StandardNameSource</code> nodes in the exact atomic cohort, while all non-snapshot fields and all out-of-cohort sources remain protected. Validation on <code>sun_debug</code> passed 26 focused unit/CLI tests and 17 actual disposable-Neo4j cases, including the exact 203-source 162/1/40 mix with 12 co-producers, rich authority relationships, external-peer rejection, non-snapshot rejection, and large-cohort rollback. No production migration has run after the repair; independent source audit and repeat reduced-manifest dry-run proof are required before reauthorization.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260802T221244549479" data-who="" data-when="">
+    <div class="r-comment-body"><p><strong>The repaired cohort-aware postflight gate is independently approved for one new apply.</strong> Artifact <code>/tmp/s7_cohort_postflight_repair_verification.json</code> (SHA-256 <code>008875bedc4e1c3d0258ccb27f6d82d7ce53be73940c9c81c71f3b1e46645747</code>) passed all 24 checks. Fresh <code>sun_debug</code> validation passed 26 unit/CLI and 17 disposable-Neo4j tests. The production control reproduced the prior normalization's exact 111 preserved mismatches and affected-set hash, while repaired normalization yielded zero authority and zero preserved mismatches across all 203 simulated post-states. Two direct dry-runs were identical at 203 planned, zero refused, and 162/1/40 classifications; protected graph hash <code>352f667cb674ba29bd56c98baa0151bdc377a408dacf90150cd6024dc5184e39</code> was unchanged before, between, and after. One atomic apply under commit <code>356d9953</code> is now authorized, with no retry on failure.</p></div>
 </div>
 </section>
 </main>
