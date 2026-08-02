@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -722,6 +722,12 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260802T223011547319" data-who="" data-when="">
     <div class="r-comment-body"><p><strong>The guarded DD source-snapshot migration is landed, atomic, and idempotent.</strong> Apply artifact <code>/tmp/s7_source_snapshot_migration_apply_repaired.json</code> (SHA-256 <code>1a51e44697dcf449e65bd4fa93cec0838083a24541941895694cd307a584e804</code>) records one successful apply receipt <code>d232cde5d5d4e717d1f42a529ff534e0e71951f6c5e36a2db197cde225652b49</code>: 203 applied, zero refused, classified 162 byte-unchanged, one semantic-unchanged, and 40 materially changed. All 203 sources are pinned to DD 4.1.1 with zero authority, preserved-state, topology, payload, or ledger mismatches and exact one-to-one migration ledgers. Names, DD attachments, WEST, fixtures, and the 10 excluded sources were unchanged; claims/scopes are zero. One read-only post-commit preview returned 203 already-current and zero planned/applied/refused. The next paid gate is limited to the 40 materially changed sources; the other 163 require no generation.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260802T224537534566" data-who="" data-when="">
+    <div class="r-comment-body"><p><strong>Post-migration paid scope is five paths, not 40.</strong> Audit <code>/tmp/s7_material_change_cohort_audit.json</code> (SHA-256 <code>a97acb4409a03abab38006820f073ea95a2b82d7b56eb543b3443cd59b6a8f51</code>) mechanically derived the 40 materially changed receipt rows and proved a zero-write bounded dry-run. The planner classified five paths across three open-edit names as active and 35 as ambiguous; the full-40 live run is rejected. The exact five-path action manifest has SHA-256 <code>07d018dbbed1e14ae11bf8804c4c4aa246eb0da1b40798419dcb97938ce0bf4e</code>. Its empirical worst-case model is $8.0133 across 93 calls, so a conditional $12 hard cap is sufficient. Separate deterministic findings remain: one strict-parser failure and three direct attachment-guard rejections.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260802T224537534590" data-who="" data-when="">
+    <div class="r-comment-body"><p><strong>The 10 snapshot exclusions remain stable and are not generation work.</strong> Disposition artifact <code>/tmp/s7_excluded_source_dispositions.json</code> (SHA-256 <code>5efa4b5377d7c2599910f7045adf48a46d48bfe6fe55f8974907c64b6ccd859b</code>) partitions them into eight exact source-identity/topology relinks followed by ordinary snapshot refresh, one same-version adoption with payload reconciliation and audit proof, and one from-null admission. Their combined closure hash is unchanged, with zero WEST/test/claim intersection. Thirteen bound names are strict-parse valid; eight attachment-guard failures remain separate name-quality findings. No sanctioned operator currently covers these three migration modes, so they stay fail-closed pending implementation.</p></div>
 </div>
 </section>
 </main>
