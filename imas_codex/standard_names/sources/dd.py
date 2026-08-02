@@ -53,6 +53,70 @@ def _is_unparseable_dd_unit(unit: str) -> bool:
     return normalize_unit_symbol(unit) is None
 
 
+def _unit_declaration_conflict_reports(
+    rows: list[dict], observed_dd_version: str | None
+) -> list[dict]:
+    """Build evidence when a DD node property contradicts its unit edge."""
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+    reports: list[dict] = []
+    seen: set[str] = set()
+    for row in rows:
+        path = str(row.get("path") or "").strip()
+        declared = str(row.get("unit") or "").strip()
+        related = str(row.get("unit_from_rel") or "").strip()
+        if not path or not declared or not related or declared == related:
+            continue
+        declared_canonical = canonical_or_none(declared)
+        related_canonical = canonical_or_none(related)
+        if (
+            declared_canonical is not None
+            and related_canonical is not None
+            and declared_canonical == related_canonical
+        ):
+            continue
+        if path in seen:
+            continue
+        seen.add(path)
+        reports.append(
+            {
+                "path": path,
+                "kind": "self_contradiction",
+                "reason": (
+                    "The DD node unit property contradicts its authoritative "
+                    "HAS_UNIT relationship."
+                ),
+                "observed_dd_version": observed_dd_version,
+                "observed_value": declared,
+                "expected_value": related,
+                "evidence_rule": "unit_equals_expected",
+                "reporter": "dd-unit-injection",
+            }
+        )
+    return reports
+
+
+def _persist_unit_declaration_conflicts(
+    rows: list[dict], observed_dd_version: str | None
+) -> int:
+    """Persist unit-authority contradictions without blocking extraction."""
+    reports = _unit_declaration_conflict_reports(rows, observed_dd_version)
+    if not reports:
+        return 0
+    try:
+        from imas_codex.standard_names.dd_gaps import write_dd_gaps
+
+        result = write_dd_gaps(reports)
+        return int(result.get("reported", 0))
+    except Exception:
+        logger.warning(
+            "Failed to persist DD unit self-contradiction evidence; extraction "
+            "continues unchanged",
+            exc_info=True,
+        )
+        return 0
+
+
 def _qualify_sources(
     results: list[dict],
     *,
@@ -616,6 +680,9 @@ def extract_dd_candidates(
 
         _status(f"found {len(results)} paths, resolving units…")
 
+        if write_skipped:
+            _persist_unit_declaration_conflicts(results, dd_version)
+
         # Resolve authoritative unit: prefer HAS_UNIT relationship, fall back to node property
         for row in results:
             row["unit"] = row.get("unit_from_rel") or row.get("unit") or None
@@ -826,6 +893,8 @@ def extract_specific_paths(
     if not results:
         logger.info("No targeted paths found in graph")
         return []
+
+    _persist_unit_declaration_conflicts(results, dd_version)
 
     # Pre-resolve authoritative unit (prefer HAS_UNIT relationship), then
     # apply DD unit override/skip config before further processing.

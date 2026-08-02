@@ -458,6 +458,97 @@ def _claimed_source_ids(batch: list[dict[str, Any]]) -> set[str]:
     }
 
 
+def _review_dd_source_ids(item: dict[str, Any]) -> set[str]:
+    """Return exact DD paths that a review item is authorized to discuss."""
+    raw_paths = item.get("source_paths") or []
+    if isinstance(raw_paths, str):
+        raw_paths = [raw_paths]
+    paths: set[str] = set()
+    for raw_path in raw_paths:
+        if not isinstance(raw_path, str) or raw_path.startswith("signals:"):
+            continue
+        path = strip_dd_prefix(raw_path)
+        if path:
+            paths.add(path)
+    return paths
+
+
+def _sanitize_dd_gap_evidence(
+    evidence: list[Any],
+    allowed_source_ids: set[str],
+    *,
+    phase: str,
+) -> list[Any]:
+    """Fence DD evidence to exact paths owned by the current claimed batch."""
+    kept: list[Any] = []
+    rejected: set[str] = set()
+    for report in evidence:
+        if isinstance(report, dict):
+            path = report.get("path")
+            reference_path = report.get("reference_path")
+        else:
+            path = getattr(report, "path", None)
+            reference_path = getattr(report, "reference_path", None)
+        report_paths = {value for value in (path, reference_path) if value}
+        if path not in allowed_source_ids or not report_paths.issubset(
+            allowed_source_ids
+        ):
+            rejected.update(str(value) for value in report_paths)
+            continue
+        kept.append(report)
+    if rejected:
+        logger.warning(
+            "Pool %s: ignored %d DD-gap path proposal(s) outside the claimed batch: %s",
+            phase,
+            len(rejected),
+            ", ".join(sorted(rejected)[:8]),
+        )
+    return kept
+
+
+def _persist_dd_gap_evidence(
+    evidence: list[Any],
+    allowed_source_ids: set[str],
+    *,
+    phase: str,
+    reporter: str,
+    observed_dd_version: str | None = None,
+) -> int:
+    """Best-effort evidence persistence, isolated from pipeline outcomes."""
+    fenced = _sanitize_dd_gap_evidence(
+        evidence,
+        allowed_source_ids,
+        phase=phase,
+    )
+    if not fenced:
+        return 0
+
+    reports: list[dict[str, Any]] = []
+    for evidence_item in fenced:
+        if hasattr(evidence_item, "model_dump"):
+            report = evidence_item.model_dump(exclude_none=True)
+        else:
+            report = dict(evidence_item)
+        report["reporter"] = reporter
+        if observed_dd_version and not report.get("observed_dd_version"):
+            report["observed_dd_version"] = observed_dd_version
+        reports.append(report)
+
+    try:
+        from imas_codex.standard_names.dd_gaps import write_dd_gaps
+
+        result = write_dd_gaps(reports)
+        return int(result.get("reported", 0))
+    except Exception:
+        logger.warning(
+            "Pool %s: DD-gap evidence persistence failed without changing the "
+            "pipeline outcome",
+            phase,
+            exc_info=True,
+        )
+        return 0
+
+
 def _claimed_source_outcome(
     batch: list[dict[str, Any]],
     source_id: str,
@@ -541,6 +632,12 @@ def _sanitize_compose_result_sources(
         else:
             rejected.add(gap.source_id)
     result.vocab_gaps = kept_gaps
+
+    result.dd_gaps = _sanitize_dd_gap_evidence(
+        list(getattr(result, "dd_gaps", None) or []),
+        allowed_source_ids,
+        phase=phase,
+    )
 
     if rejected:
         logger.warning(
@@ -3419,6 +3516,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
         _total_tokens_out = 0
         _total_cache_read = 0
         _total_cache_creation = 0
+        _collected_dd_gaps: list[Any] = []
         _max_retries = _retry_attempts()
         # Token-reuse hits from the FINAL attempt: candidate-new tokens the
         # agent re-emitted after being shown a near-synonym registered token.
@@ -3448,6 +3546,12 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     return []
                 raise
             result, cost, tokens = llm_out
+            _sanitize_compose_result_sources(
+                result,
+                _claimed_source_ids(batch.items),
+                phase="generate_name",
+            )
+            _collected_dd_gaps.extend(result.dd_gaps)
             _total_compose_cost += cost
             _total_tokens_in += getattr(llm_out, "input_tokens", 0) or 0
             _total_tokens_out += getattr(llm_out, "output_tokens", 0) or 0
@@ -3616,6 +3720,16 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ]
+
+        if not state.dry_run:
+            await asyncio.to_thread(
+                _persist_dd_gap_evidence,
+                _collected_dd_gaps,
+                _claimed_source_ids(batch.items),
+                phase="generate_name",
+                reporter="compose",
+                observed_dd_version=batch.dd_version,
+            )
 
         state.compose_stats.cost += _total_compose_cost
         state.compose_stats.processed += len(batch.items)
@@ -5242,6 +5356,7 @@ async def compose_batch(
         _total_tokens_out = 0
         _total_cache_read = 0
         _total_cache_creation = 0
+        _collected_dd_gaps: list[Any] = []
 
         for _compose_attempt in range(_max_retries + 1):
             try:
@@ -5271,6 +5386,7 @@ async def compose_batch(
                 _claimed_source_ids(batch),
                 phase=phase_tag,
             )
+            _collected_dd_gaps.extend(result.dd_gaps)
 
             # Accumulate token/cost totals across retries
             _total_compose_cost += cost
@@ -5800,6 +5916,17 @@ async def compose_batch(
             candidates,
             current_source_ids,
             phase=phase_tag,
+        )
+
+        await asyncio.to_thread(
+            _persist_dd_gap_evidence,
+            _collected_dd_gaps,
+            current_source_ids,
+            phase=phase_tag,
+            reporter="compose",
+            observed_dd_version=(
+                current_claims[0].get("dd_version") if current_claims else None
+            ),
         )
 
         # ── Vocab gaps — persist + clear sources ──────────────────────
@@ -7035,6 +7162,7 @@ async def _run_rd_quorum_cycles(
                 comments_per_dim = result_obj.comments.model_dump()
         except Exception:
             comments_per_dim = None
+        dd_gaps = list(getattr(result_obj, "dd_gaps", None) or [])
 
         return {
             "cycle_index": cycle_idx,
@@ -7048,6 +7176,7 @@ async def _run_rd_quorum_cycles(
             "tokens_out": tokens_out,
             "cached_read": cached_read,
             "cached_write": cached_write,
+            "dd_gaps": dd_gaps,
         }
 
     # ── Cycle 0 (primary, blind) ───────────────────────────────────────
@@ -7253,6 +7382,7 @@ async def _run_rd_quorum_cycles(
         "total_tokens_out": total_tokens_out,
         "review_group_id": review_group_id,
         "disagreement": disagreement,
+        "dd_gaps": [gap for cycle in cycles for gap in cycle["dd_gaps"]],
     }
 
 
@@ -7712,6 +7842,14 @@ async def process_review_name_batch(
             from imas_codex.standard_names.graph_ops import write_reviews
 
             await _asyncio.to_thread(write_reviews, quorum["records"])
+            await _asyncio.to_thread(
+                _persist_dd_gap_evidence,
+                quorum["dd_gaps"],
+                _review_dd_source_ids(item),
+                phase="review_name",
+                reporter="review-name",
+                observed_dd_version=item.get("dd_version"),
+            )
 
             # ── Stage transition with winning score ────────────────────
             new_stage = await _asyncio.to_thread(
@@ -9062,6 +9200,14 @@ async def process_review_docs_batch(
             from imas_codex.standard_names.graph_ops import write_reviews
 
             await _asyncio.to_thread(write_reviews, quorum["records"])
+            await _asyncio.to_thread(
+                _persist_dd_gap_evidence,
+                quorum["dd_gaps"],
+                _review_dd_source_ids(item),
+                phase="review_docs",
+                reporter="review-docs",
+                observed_dd_version=item.get("dd_version"),
+            )
 
             new_stage = await _asyncio.to_thread(
                 persist_reviewed_docs,
