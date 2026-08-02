@@ -31,6 +31,10 @@ class DDGapTransitionConflict(RuntimeError):
     """The fact no longer has the lifecycle state expected by the caller."""
 
 
+class DDGapRegistrySyncConflict(RuntimeError):
+    """Registry identity reconciliation is ambiguous or changed during apply."""
+
+
 _DISPOSITION_FIELDS = frozenset(
     {
         "status",
@@ -574,6 +578,870 @@ RETURN size(node_ids) AS reported, relationships,
 """
 
 
+_REGISTRY_FACTS_QUERY = """
+MATCH (gap:DDGap)
+CALL {
+    WITH gap
+    OPTIONAL MATCH (node:IMASNode)-[report:HAS_DD_GAP]->(gap)
+    WITH node, report ORDER BY node.id, elementId(report)
+    RETURN [item IN collect(CASE WHEN node IS NULL THEN null ELSE {
+        source_id: node.id,
+        relationship_properties: properties(report),
+        relationship_fingerprint: [property_key IN keys(report) | {
+            key: property_key,
+            type: valueType(report[property_key]),
+            value: CASE
+                WHEN valueType(report[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(report[property_key].epochSeconds) + ':' +
+                     toString(report[property_key].nanosecond)
+                ELSE toString(report[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS path_links
+}
+WITH gap, path_links, [item IN path_links | item.source_id] AS source_paths
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link:HAS_OBSERVATION]->
+                   (observation:DDGapObservation)
+    WITH observation, link ORDER BY observation.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN observation IS NULL THEN null ELSE {
+        id: observation.id,
+        node_properties: properties(observation),
+        node_fingerprint: [property_key IN keys(observation) | {
+            key: property_key,
+            type: valueType(observation[property_key]),
+            value: CASE
+                WHEN valueType(observation[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(observation[property_key].epochSeconds) + ':' +
+                     toString(observation[property_key].nanosecond)
+                ELSE toString(observation[property_key])
+            END
+        }],
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS observation_records
+}
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link:HAS_STATE_CHANGE]->(change:DDGapStateChange)
+    WITH change, link ORDER BY change.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
+        id: change.id,
+        node_properties: properties(change),
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS state_change_records
+}
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link:HAS_IDENTITY_CHANGE]->
+                   (change:DDGapIdentityChange)
+    WITH change, link ORDER BY change.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
+        id: change.id,
+        node_properties: properties(change),
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS identity_change_records
+}
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link]-(other)
+    WITH gap, link, other ORDER BY elementId(link)
+    RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
+        relationship_id: elementId(link),
+        relationship_type: type(link),
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }],
+        outgoing: startNode(link) = gap,
+        other_id: other.id,
+        other_labels: labels(other)
+    } END) WHERE item IS NOT NULL] AS incident_links
+}
+CALL {
+    WITH source_paths
+    OPTIONAL MATCH (node:IMASNode)-[link:HAS_STANDARD_NAME]->
+                   (name:StandardName)
+    WHERE node.id IN source_paths
+    WITH node, link, name ORDER BY node.id, name.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
+        source_id: node.id,
+        name_id: name.id,
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS direct_name_links
+}
+CALL {
+    WITH source_paths
+    OPTIONAL MATCH (source:StandardNameSource)-[link:PRODUCED_NAME]->
+                   (name:StandardName)
+    WHERE source.source_type = 'dd' AND source.source_id IN source_paths
+    WITH source, link, name ORDER BY source.id, name.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
+        source_node_id: source.id,
+        source_id: source.source_id,
+        name_id: name.id,
+        relationship_properties: properties(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS source_name_links
+}
+RETURN gap.id AS id,
+       gap.path AS path,
+       gap.kind AS kind,
+       gap.registry_backend AS registry_backend,
+       gap.upstream_url AS upstream_url,
+       properties(gap) AS gap_properties,
+       [property_key IN keys(gap) | {
+           key: property_key,
+           type: valueType(gap[property_key]),
+           value: CASE
+               WHEN valueType(gap[property_key]) STARTS WITH 'ZONED DATETIME'
+               THEN toString(gap[property_key].epochSeconds) + ':' +
+                    toString(gap[property_key].nanosecond)
+               ELSE toString(gap[property_key])
+           END
+       }] AS gap_property_fingerprint,
+       source_paths,
+       path_links,
+       observation_records,
+       state_change_records,
+       identity_change_records,
+       incident_links,
+       direct_name_links,
+       source_name_links
+ORDER BY gap.id
+"""
+
+
+def _registry_identity(
+    fact: Mapping[str, Any], source_paths: Sequence[str]
+) -> tuple[str, str, str, tuple[str, ...]]:
+    """Return the conservative registry identity independent of gap kind."""
+    return (
+        _optional_text(fact.get("registry_backend")) or "",
+        _optional_text(fact.get("path")) or "",
+        _optional_text(fact.get("upstream_url")) or "",
+        tuple(sorted(str(path) for path in source_paths)),
+    )
+
+
+def _registry_sync_snapshot(fact: Mapping[str, Any]) -> dict[str, Any]:
+    """Capture every lifecycle, evidence, and link field guarded during sync."""
+    return {
+        "gap_properties": dict(fact.get("gap_properties") or {}),
+        "gap_property_fingerprint": list(fact.get("gap_property_fingerprint") or []),
+        "path_links": list(fact.get("path_links") or []),
+        "observation_records": list(fact.get("observation_records") or []),
+        "state_change_records": list(fact.get("state_change_records") or []),
+        "identity_change_records": list(fact.get("identity_change_records") or []),
+        "incident_links": list(fact.get("incident_links") or []),
+        "direct_name_links": list(fact.get("direct_name_links") or []),
+        "source_name_links": list(fact.get("source_name_links") or []),
+    }
+
+
+def _canonical_graph_value(value: Any) -> Any:
+    """Normalize Neo4j values into a stable JSON-compatible representation."""
+    if isinstance(value, Mapping):
+        return {
+            str(key): _canonical_graph_value(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes):
+        return [_canonical_graph_value(item) for item in value]
+    if value is None or isinstance(value, str | int | float | bool):
+        return value
+    iso_format = getattr(value, "iso_format", None)
+    if callable(iso_format):
+        return iso_format()
+    if isinstance(value, datetime):
+        return value.isoformat()
+    return str(value)
+
+
+def _registry_sync_token(fact: Mapping[str, Any]) -> str:
+    """Identify the exact registry fact state used to plan a rewrite."""
+    serializable = _canonical_graph_value(_registry_sync_snapshot(fact))
+    digest = hashlib.sha256(
+        json.dumps(serializable, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    return f"dd-gap-registry-sync:{digest}"
+
+
+def _registry_sync_plan(
+    nodes: list[dict[str, Any]],
+    observations: list[dict[str, Any]],
+    existing_facts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Classify registry identities without mutating or guessing intent."""
+    paths_by_id: dict[str, set[str]] = {}
+    for observation in observations:
+        paths_by_id.setdefault(str(observation["gap_id"]), set()).add(
+            str(observation["source_path"])
+        )
+
+    existing_by_id = {str(fact["id"]): fact for fact in existing_facts}
+    existing_by_identity: dict[tuple[str, str, str, tuple[str, ...]], list[dict]] = {}
+    for fact in existing_facts:
+        identity = _registry_identity(fact, fact.get("source_paths") or [])
+        existing_by_identity.setdefault(identity, []).append(fact)
+
+    creates: list[str] = []
+    updates: list[str] = []
+    reclassifications: list[dict[str, Any]] = []
+    manual_required: list[dict[str, Any]] = []
+    for node in sorted(nodes, key=lambda item: str(item["id"])):
+        target_id = str(node["id"])
+        intended_paths = sorted(paths_by_id.get(target_id, set()))
+        intended_identity = _registry_identity(node, intended_paths)
+        target = existing_by_id.get(target_id)
+        candidates = [
+            fact
+            for fact in existing_by_identity.get(intended_identity, [])
+            if str(fact["id"]) != target_id
+        ]
+        related_candidates = [
+            fact
+            for fact in existing_facts
+            if str(fact["id"]) != target_id
+            and (
+                _optional_text(fact.get("registry_backend")) or "",
+                _optional_text(fact.get("path")) or "",
+                _optional_text(fact.get("upstream_url")) or "",
+            )
+            == intended_identity[:3]
+        ]
+
+        if target is not None:
+            target_identity = _registry_identity(
+                target, target.get("source_paths") or []
+            )
+            if target_identity != intended_identity:
+                manual_required.append(
+                    {
+                        "id": target_id,
+                        "reason": "target id belongs to different registry evidence",
+                    }
+                )
+            elif candidates:
+                manual_required.append(
+                    {
+                        "id": target_id,
+                        "reason": "target id collides with another matching registry fact",
+                        "candidate_ids": sorted(str(item["id"]) for item in candidates),
+                    }
+                )
+            else:
+                updates.append(target_id)
+            continue
+
+        if len(candidates) > 1:
+            manual_required.append(
+                {
+                    "id": target_id,
+                    "reason": "multiple facts match the authoritative registry identity",
+                    "candidate_ids": sorted(str(item["id"]) for item in candidates),
+                }
+            )
+        elif len(candidates) == 1:
+            old = candidates[0]
+            reclassifications.append(
+                {
+                    "old_id": str(old["id"]),
+                    "new_id": target_id,
+                    "old_kind": _optional_text(old.get("kind")) or "",
+                    "new_kind": str(node["kind"]),
+                    "expected_sync_token": _registry_sync_token(old),
+                    "expected": _registry_sync_snapshot(old),
+                    "target": dict(node),
+                }
+            )
+        elif related_candidates:
+            manual_required.append(
+                {
+                    "id": target_id,
+                    "reason": "registry evidence path set differs from existing fact",
+                    "candidate_ids": sorted(
+                        str(item["id"]) for item in related_candidates
+                    ),
+                }
+            )
+        else:
+            creates.append(target_id)
+
+    return {
+        "create": creates,
+        "update": updates,
+        "reclassify": reclassifications,
+        "manual_required": manual_required,
+    }
+
+
+_REGISTRY_IDENTITY_CHANGE_ACTOR = "registry-sync"
+_REGISTRY_IDENTITY_CHANGE_REASON = (
+    "authoritative registry classification changed while lifecycle and evidence "
+    "remained fixed"
+)
+
+
+_RECLASSIFY_REGISTRY_FACT_QUERY = """
+MATCH (gap:DDGap {id: $old_id})
+WHERE NOT EXISTS { MATCH (:DDGap {id: $new_id}) }
+  AND [property_key IN keys(gap) | {
+      key: property_key,
+      type: valueType(gap[property_key]),
+      value: CASE
+          WHEN valueType(gap[property_key]) STARTS WITH 'ZONED DATETIME'
+          THEN toString(gap[property_key].epochSeconds) + ':' +
+               toString(gap[property_key].nanosecond)
+          ELSE toString(gap[property_key])
+      END
+  }] = $expected_gap_property_fingerprint
+CALL {
+    WITH gap
+    OPTIONAL MATCH (node:IMASNode)-[report:HAS_DD_GAP]->(gap)
+    WITH node, report ORDER BY node.id, elementId(report)
+    RETURN [item IN collect(CASE WHEN node IS NULL THEN null ELSE {
+        source_id: node.id,
+        relationship_fingerprint: [property_key IN keys(report) | {
+            key: property_key,
+            type: valueType(report[property_key]),
+            value: CASE
+                WHEN valueType(report[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(report[property_key].epochSeconds) + ':' +
+                     toString(report[property_key].nanosecond)
+                ELSE toString(report[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS path_links
+}
+WITH gap, path_links, [item IN path_links | item.source_id] AS source_paths
+WHERE path_links = $expected_cas_path_links
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link:HAS_OBSERVATION]->
+                   (observation:DDGapObservation)
+    WITH observation, link ORDER BY observation.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN observation IS NULL THEN null ELSE {
+        id: observation.id,
+        node_fingerprint: [property_key IN keys(observation) | {
+            key: property_key,
+            type: valueType(observation[property_key]),
+            value: CASE
+                WHEN valueType(observation[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(observation[property_key].epochSeconds) + ':' +
+                     toString(observation[property_key].nanosecond)
+                ELSE toString(observation[property_key])
+            END
+        }],
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS observation_records
+}
+WITH gap, source_paths, observation_records
+WHERE observation_records = $expected_cas_observation_records
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link:HAS_STATE_CHANGE]->(change:DDGapStateChange)
+    WITH change, link ORDER BY change.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
+        id: change.id,
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS state_change_records
+}
+WITH gap, source_paths, observation_records, state_change_records
+WHERE state_change_records = $expected_cas_state_change_records
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link:HAS_IDENTITY_CHANGE]->
+                   (change:DDGapIdentityChange)
+    WITH change, link ORDER BY change.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN change IS NULL THEN null ELSE {
+        id: change.id,
+        node_fingerprint: [property_key IN keys(change) | {
+            key: property_key,
+            type: valueType(change[property_key]),
+            value: CASE
+                WHEN valueType(change[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(change[property_key].epochSeconds) + ':' +
+                     toString(change[property_key].nanosecond)
+                ELSE toString(change[property_key])
+            END
+        }],
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS identity_change_records
+}
+WITH gap, source_paths, observation_records, state_change_records,
+     identity_change_records
+WHERE identity_change_records = $expected_cas_identity_change_records
+CALL {
+    WITH gap
+    OPTIONAL MATCH (gap)-[link]-(other)
+    WITH gap, link, other ORDER BY elementId(link)
+    RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
+        relationship_id: elementId(link),
+        relationship_type: type(link),
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }],
+        outgoing: startNode(link) = gap,
+        other_id: other.id,
+        other_labels: labels(other)
+    } END) WHERE item IS NOT NULL] AS incident_links
+}
+WITH gap, source_paths, observation_records, state_change_records,
+     identity_change_records, incident_links
+WHERE incident_links = $expected_cas_incident_links
+CALL {
+    WITH source_paths
+    OPTIONAL MATCH (node:IMASNode)-[link:HAS_STANDARD_NAME]->
+                   (name:StandardName)
+    WHERE node.id IN source_paths
+    WITH node, link, name ORDER BY node.id, name.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
+        source_id: node.id,
+        name_id: name.id,
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS direct_name_links
+}
+WITH gap, source_paths, observation_records, state_change_records,
+     identity_change_records, direct_name_links
+WHERE direct_name_links = $expected_cas_direct_name_links
+CALL {
+    WITH source_paths
+    OPTIONAL MATCH (source:StandardNameSource)-[link:PRODUCED_NAME]->
+                   (name:StandardName)
+    WHERE source.source_type = 'dd' AND source.source_id IN source_paths
+    WITH source, link, name ORDER BY source.id, name.id, elementId(link)
+    RETURN [item IN collect(CASE WHEN link IS NULL THEN null ELSE {
+        source_node_id: source.id,
+        source_id: source.source_id,
+        name_id: name.id,
+        relationship_fingerprint: [property_key IN keys(link) | {
+            key: property_key,
+            type: valueType(link[property_key]),
+            value: CASE
+                WHEN valueType(link[property_key]) STARTS WITH 'ZONED DATETIME'
+                THEN toString(link[property_key].epochSeconds) + ':' +
+                     toString(link[property_key].nanosecond)
+                ELSE toString(link[property_key])
+            END
+        }]
+    } END) WHERE item IS NOT NULL] AS source_name_links
+}
+WITH gap, source_paths, observation_records, state_change_records,
+     identity_change_records, source_name_links
+WHERE source_name_links = $expected_cas_source_name_links
+SET gap.id = $new_id,
+    gap.path = $target_path,
+    gap.kind = $target_kind,
+    gap.registry_backend = $target_registry_backend,
+    gap.affected_path_count = $target_affected_path_count,
+    gap.observed_dd_version = $target_observed_dd_version,
+    gap.observed_value = $target_observed_value,
+    gap.expected_value = $target_expected_value,
+    gap.evidence_rule = $target_evidence_rule
+CREATE (gap)-[:HAS_IDENTITY_CHANGE]->(change:DDGapIdentityChange {
+    id: 'dd_gap_identity_change:' + randomUUID(),
+    dd_gap_id: $new_id,
+    old_id: $old_id,
+    new_id: $new_id,
+    old_kind: $old_kind,
+    new_kind: $target_kind,
+    changed_by: $identity_change_actor,
+    reason: $identity_change_reason,
+    changed_at: datetime($changed_at)
+})
+WITH gap, source_paths, observation_records, state_change_records,
+     identity_change_records, change, $observation_rekeys AS observation_rekeys
+CALL {
+    WITH gap, observation_rekeys
+    MATCH (gap)-[:HAS_OBSERVATION]->(observation:DDGapObservation)
+    WHERE observation.id IN [item IN observation_rekeys | item.old_id]
+    WITH observation_rekeys, collect(observation) AS observations
+    WHERE size(observations) = size(observation_rekeys)
+    FOREACH (observation IN observations |
+        SET observation.id = [
+                item IN observation_rekeys
+                WHERE item.old_id = observation.id | item.new_id
+            ][0],
+            observation.dd_gap_id = $new_id
+    )
+    RETURN size(observations) AS observation_rekey_count
+    UNION
+    WITH gap, observation_rekeys
+    WITH observation_rekeys WHERE size(observation_rekeys) = 0
+    RETURN 0 AS observation_rekey_count
+}
+WITH gap, source_paths, observation_records, state_change_records,
+     identity_change_records, change, observation_rekey_count
+WHERE observation_rekey_count = size($observation_rekeys)
+RETURN gap.id AS id,
+       size(source_paths) AS source_path_count,
+       size(observation_records) AS observation_count,
+       size(state_change_records) AS state_change_count,
+       size(identity_change_records) + 1 AS identity_change_count,
+       change.id AS identity_change_id
+"""
+
+
+_VERIFY_REGISTRY_SYNC_QUERY = """
+UNWIND $expected AS item
+OPTIONAL MATCH (gap:DDGap {id: item.id})
+WITH item, collect(gap) AS exact_gaps
+CALL {
+    WITH item
+    OPTIONAL MATCH (node:IMASNode)-[:HAS_DD_GAP]->
+                   (gap:DDGap {id: item.id})
+    WITH node ORDER BY node.id
+    RETURN [path IN collect(node.id) WHERE path IS NOT NULL] AS source_paths
+}
+RETURN item.id AS id,
+       size(exact_gaps) AS exact_count,
+       [gap IN exact_gaps | gap.kind] AS kinds,
+       source_paths
+ORDER BY id
+"""
+
+
+_VERIFY_REGISTRY_OBSERVATION_REKEYS_QUERY = """
+UNWIND $expected AS item
+OPTIONAL MATCH (current:DDGapObservation {id: item.new_id})
+WITH item, collect(current) AS current_nodes
+OPTIONAL MATCH (owner:DDGap)-[ownership:HAS_OBSERVATION]->
+               (:DDGapObservation {id: item.new_id})
+WITH item, current_nodes,
+     [owner_id IN collect(CASE WHEN ownership IS NULL THEN null ELSE owner.id END)
+      WHERE owner_id IS NOT NULL] AS owner_ids,
+     count(ownership) AS ownership_count
+OPTIONAL MATCH (stale:DDGapObservation {id: item.old_id})
+RETURN item.old_id AS old_id,
+       item.new_id AS new_id,
+       size(current_nodes) AS new_exact_count,
+       [node IN current_nodes | node.dd_gap_id] AS dd_gap_ids,
+       owner_ids,
+       ownership_count,
+       count(stale) AS old_exact_count
+ORDER BY old_id, new_id
+"""
+
+
+_VERIFY_REGISTRY_IDENTITY_CHANGES_QUERY = """
+UNWIND $expected AS item
+OPTIONAL MATCH (:DDGap {id: item.new_id})-[:HAS_IDENTITY_CHANGE]->
+               (change:DDGapIdentityChange {id: item.id})
+WITH item, collect(change) AS exact_changes
+RETURN item.id AS id,
+       size(exact_changes) AS exact_count,
+       [change IN exact_changes | {
+           property_count: size(keys(change)),
+           dd_gap_id: change.dd_gap_id,
+           old_id: change.old_id,
+           new_id: change.new_id,
+           old_kind: change.old_kind,
+           new_kind: change.new_kind,
+           changed_by: change.changed_by,
+           reason: change.reason,
+           changed_at_matches: change.changed_at = datetime(item.changed_at)
+       }] AS details
+ORDER BY id
+"""
+
+
+def _schema_identifier_constraint_name(gc: GraphClient, label: str) -> str:
+    """Resolve one identifier constraint name from the active LinkML schema."""
+    statements = [
+        statement
+        for statement in gc.schema.constraint_statements()
+        if f"FOR (n:{label})" in statement
+    ]
+    if len(statements) != 1:
+        raise DDGapRegistrySyncConflict(
+            f"schema does not declare exactly one {label} identifier constraint"
+        )
+    parts = statements[0].split()
+    if len(parts) < 3 or parts[:2] != ["CREATE", "CONSTRAINT"]:
+        raise DDGapRegistrySyncConflict(
+            f"schema emitted an unreadable {label} identifier constraint"
+        )
+    return parts[2]
+
+
+_REGISTRY_IDENTITY_LABELS = (
+    "DDGap",
+    "DDGapObservation",
+    "DDGapIdentityChange",
+)
+
+
+def _require_online_registry_identity_constraints(
+    gc: GraphClient,
+) -> dict[str, str]:
+    """Require every schema-owned identity constraint used by reclassification."""
+    expected = {
+        label: _schema_identifier_constraint_name(gc, label)
+        for label in _REGISTRY_IDENTITY_LABELS
+    }
+    constraints = gc.query(
+        """
+        SHOW CONSTRAINTS
+        YIELD name, type, labelsOrTypes, properties, ownedIndex
+        WHERE name IN $constraint_names
+        RETURN name, type, labelsOrTypes, properties, ownedIndex
+        """,
+        constraint_names=list(expected.values()),
+    )
+    constraints_by_name = {str(row["name"]): row for row in constraints}
+    owned_indexes: dict[str, str] = {}
+    for label, constraint_name in expected.items():
+        constraint = constraints_by_name.get(constraint_name)
+        if constraint is None:
+            raise DDGapRegistrySyncConflict(
+                f"schema constraint {constraint_name!r} for {label}.id is missing"
+            )
+        if (
+            str(constraint.get("type") or "") != "UNIQUENESS"
+            or list(constraint.get("labelsOrTypes") or []) != [label]
+            or list(constraint.get("properties") or []) != ["id"]
+            or not constraint.get("ownedIndex")
+        ):
+            raise DDGapRegistrySyncConflict(
+                f"schema constraint {constraint_name!r} for {label}.id has an "
+                "unexpected definition"
+            )
+        owned_indexes[label] = str(constraint["ownedIndex"])
+
+    indexes = gc.query(
+        """
+        SHOW INDEXES
+        YIELD name, state
+        WHERE name IN $index_names
+        RETURN name, state
+        """,
+        index_names=list(owned_indexes.values()),
+    )
+    indexes_by_name = {str(row["name"]): row for row in indexes}
+    for label, index_name in owned_indexes.items():
+        if str(indexes_by_name.get(index_name, {}).get("state") or "") != "ONLINE":
+            raise DDGapRegistrySyncConflict(
+                f"schema constraint {expected[label]!r} for {label}.id is not ONLINE"
+            )
+    return expected
+
+
+def _registry_migration_parameters(item: Mapping[str, Any]) -> dict[str, Any]:
+    """Build the complete CAS parameter set for one planned reclassification."""
+    expected = item["expected"]
+    target = item["target"]
+
+    def cas_records(
+        records: Sequence[Mapping[str, Any]], identity_fields: Sequence[str]
+    ) -> list[dict[str, Any]]:
+        return [
+            {
+                **{field: record[field] for field in identity_fields},
+                **(
+                    {"node_fingerprint": record["node_fingerprint"]}
+                    if "node_fingerprint" in record
+                    else {}
+                ),
+                "relationship_fingerprint": record["relationship_fingerprint"],
+            }
+            for record in records
+        ]
+
+    observation_rekeys = []
+    for record in expected["observation_records"]:
+        properties = dict(record["node_properties"])
+        payload = {**properties, "gap_id": item["new_id"]}
+        observation_rekeys.append(
+            {
+                "old_id": str(record["id"]),
+                "new_id": _observation_id(payload),
+            }
+        )
+    return {
+        "old_id": item["old_id"],
+        "new_id": item["new_id"],
+        "old_kind": item["old_kind"],
+        "expected_gap_properties": expected["gap_properties"],
+        "expected_gap_property_fingerprint": expected["gap_property_fingerprint"],
+        "expected_path_links": expected["path_links"],
+        "expected_observation_records": expected["observation_records"],
+        "expected_state_change_records": expected["state_change_records"],
+        "expected_identity_change_records": expected["identity_change_records"],
+        "expected_incident_links": expected["incident_links"],
+        "expected_direct_name_links": expected["direct_name_links"],
+        "expected_source_name_links": expected["source_name_links"],
+        "expected_cas_path_links": cas_records(expected["path_links"], ("source_id",)),
+        "expected_cas_observation_records": cas_records(
+            expected["observation_records"], ("id",)
+        ),
+        "expected_cas_state_change_records": cas_records(
+            expected["state_change_records"], ("id",)
+        ),
+        "expected_cas_identity_change_records": cas_records(
+            expected["identity_change_records"], ("id",)
+        ),
+        "expected_cas_incident_links": cas_records(
+            expected["incident_links"],
+            (
+                "relationship_id",
+                "relationship_type",
+                "outgoing",
+                "other_id",
+                "other_labels",
+            ),
+        ),
+        "expected_cas_direct_name_links": cas_records(
+            expected["direct_name_links"], ("source_id", "name_id")
+        ),
+        "expected_cas_source_name_links": cas_records(
+            expected["source_name_links"],
+            ("source_node_id", "source_id", "name_id"),
+        ),
+        "observation_rekeys": observation_rekeys,
+        "target_path": target["path"],
+        "target_kind": target["kind"],
+        "target_registry_backend": target["registry_backend"],
+        "target_affected_path_count": target["affected_path_count"],
+        "target_observed_dd_version": target["observed_dd_version"],
+        "target_observed_value": target["observed_value"],
+        "target_expected_value": target["expected_value"],
+        "target_evidence_rule": target["evidence_rule"],
+        "identity_change_actor": _REGISTRY_IDENTITY_CHANGE_ACTOR,
+        "identity_change_reason": _REGISTRY_IDENTITY_CHANGE_REASON,
+        "changed_at": datetime.now(UTC).isoformat(),
+    }
+
+
 @retry_on_deadlock()
 def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
     """Mirror curated unit exceptions into provenance without changing behavior."""
@@ -592,6 +1460,21 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
             for row in gc.query("MATCH (node:IMASNode) RETURN node.id AS id")
         ]
         nodes, observations = _registry_inventory(current_paths, observed_dd_version)
+        existing_facts = [dict(row) for row in gc.query(_REGISTRY_FACTS_QUERY)]
+        plan = _registry_sync_plan(nodes, observations, existing_facts)
+        public_reclassifications = [
+            {
+                key: item[key]
+                for key in (
+                    "old_id",
+                    "new_id",
+                    "old_kind",
+                    "new_kind",
+                    "expected_sync_token",
+                )
+            }
+            for item in plan["reclassify"]
+        ]
         intended = {
             "registry_entries": len(registry_entries),
             "reported": len({node["id"] for node in nodes}),
@@ -600,16 +1483,216 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
             ),
             "observations": len({str(item["observation_id"]) for item in observations}),
             "matched_paths": len({str(item["source_path"]) for item in observations}),
+            "create": plan["create"],
+            "update": plan["update"],
+            "reclassify": public_reclassifications,
+            "manual_required": plan["manual_required"],
             "dry_run": dry_run,
         }
         if dry_run:
             return intended
 
-        rows = gc.query(
-            _SYNC_REGISTRY_QUERY,
-            nodes=nodes,
-            observations=observations,
-        )
+        if plan["manual_required"]:
+            raise DDGapRegistrySyncConflict(
+                "registry identity sync requires manual resolution: "
+                + json.dumps(plan["manual_required"], sort_keys=True)
+            )
+        if plan["reclassify"]:
+            _require_online_registry_identity_constraints(gc)
+
+        paths_by_id: dict[str, set[str]] = {}
+        for observation in observations:
+            paths_by_id.setdefault(str(observation["gap_id"]), set()).add(
+                str(observation["source_path"])
+            )
+
+        with gc.session() as session:
+            tx = session.begin_transaction()
+            try:
+                current_facts = {
+                    str(row["id"]): dict(row) for row in tx.run(_REGISTRY_FACTS_QUERY)
+                }
+                expected_observation_rekeys: list[dict[str, str]] = []
+                expected_identity_changes: list[dict[str, str]] = []
+                for item in plan["reclassify"]:
+                    old_id = str(item["old_id"])
+                    current = current_facts.get(old_id)
+                    if (
+                        current is None
+                        or _registry_sync_token(current) != item["expected_sync_token"]
+                    ):
+                        raise DDGapRegistrySyncConflict(
+                            f"registry fact {old_id!r} changed after preflight"
+                        )
+
+                    migration_parameters = _registry_migration_parameters(item)
+                    migrated = [
+                        dict(row)
+                        for row in tx.run(
+                            _RECLASSIFY_REGISTRY_FACT_QUERY,
+                            **migration_parameters,
+                        )
+                    ]
+                    if len(migrated) != 1:
+                        raise DDGapRegistrySyncConflict(
+                            f"registry fact {old_id!r} no longer matches reviewed "
+                            "lifecycle evidence and links"
+                        )
+                    expected_observation_rekeys.extend(
+                        {
+                            **rekey,
+                            "new_gap_id": str(item["new_id"]),
+                        }
+                        for rekey in migration_parameters["observation_rekeys"]
+                    )
+                    expected_identity_changes.append(
+                        {
+                            "id": str(migrated[0]["identity_change_id"]),
+                            "dd_gap_id": str(item["new_id"]),
+                            "old_id": str(item["old_id"]),
+                            "new_id": str(item["new_id"]),
+                            "old_kind": str(item["old_kind"]),
+                            "new_kind": str(item["new_kind"]),
+                            "changed_by": str(
+                                migration_parameters["identity_change_actor"]
+                            ),
+                            "reason": str(
+                                migration_parameters["identity_change_reason"]
+                            ),
+                            "changed_at": str(migration_parameters["changed_at"]),
+                        }
+                    )
+
+                rows = [
+                    dict(row)
+                    for row in tx.run(
+                        _SYNC_REGISTRY_QUERY,
+                        nodes=nodes,
+                        observations=observations,
+                    )
+                ]
+                expected_nodes = [
+                    {
+                        "id": str(node["id"]),
+                        "kind": str(node["kind"]),
+                        "source_paths": sorted(paths_by_id.get(str(node["id"]), set())),
+                    }
+                    for node in nodes
+                ]
+                verified = [
+                    dict(row)
+                    for row in tx.run(
+                        _VERIFY_REGISTRY_SYNC_QUERY,
+                        expected=expected_nodes,
+                    )
+                ]
+                verified_by_id = {str(row["id"]): row for row in verified}
+                invalid = [
+                    item["id"]
+                    for item in expected_nodes
+                    if int(verified_by_id.get(item["id"], {}).get("exact_count") or 0)
+                    != 1
+                    or [
+                        str(kind)
+                        for kind in (verified_by_id[item["id"]].get("kinds") or [])
+                    ]
+                    != [item["kind"]]
+                    or sorted(
+                        str(path)
+                        for path in (
+                            verified_by_id[item["id"]].get("source_paths") or []
+                        )
+                    )
+                    != item["source_paths"]
+                ]
+                old_ids = [str(item["old_id"]) for item in plan["reclassify"]]
+                stale_ids = [
+                    str(row["id"])
+                    for row in tx.run(
+                        "UNWIND $ids AS id "
+                        "OPTIONAL MATCH (gap:DDGap {id: id}) "
+                        "RETURN id, count(gap) AS exact_count ORDER BY id",
+                        ids=old_ids,
+                    )
+                    if int(row.get("exact_count") or 0) != 0
+                ]
+                observation_verification = [
+                    dict(row)
+                    for row in tx.run(
+                        _VERIFY_REGISTRY_OBSERVATION_REKEYS_QUERY,
+                        expected=expected_observation_rekeys,
+                    )
+                ]
+                invalid_observations = [
+                    str(row["new_id"])
+                    for row in observation_verification
+                    if int(row.get("new_exact_count") or 0) != 1
+                    or [str(value) for value in (row.get("dd_gap_ids") or [])]
+                    != [
+                        item["new_gap_id"]
+                        for item in expected_observation_rekeys
+                        if item["new_id"] == str(row["new_id"])
+                        and item["old_id"] == str(row["old_id"])
+                    ]
+                    or [str(value) for value in (row.get("owner_ids") or [])]
+                    != [
+                        item["new_gap_id"]
+                        for item in expected_observation_rekeys
+                        if item["new_id"] == str(row["new_id"])
+                        and item["old_id"] == str(row["old_id"])
+                    ]
+                    or int(row.get("ownership_count") or 0) != 1
+                    or int(row.get("old_exact_count") or 0) != 0
+                ]
+                identity_verification = [
+                    dict(row)
+                    for row in tx.run(
+                        _VERIFY_REGISTRY_IDENTITY_CHANGES_QUERY,
+                        expected=expected_identity_changes,
+                    )
+                ]
+                identity_by_id = {
+                    str(item["id"]): item for item in expected_identity_changes
+                }
+                invalid_identity_changes = [
+                    str(row["id"])
+                    for row in identity_verification
+                    if int(row.get("exact_count") or 0) != 1
+                    or (row.get("details") or [])
+                    != [
+                        {
+                            "property_count": 9,
+                            "dd_gap_id": identity_by_id[str(row["id"])]["dd_gap_id"],
+                            "old_id": identity_by_id[str(row["id"])]["old_id"],
+                            "new_id": identity_by_id[str(row["id"])]["new_id"],
+                            "old_kind": identity_by_id[str(row["id"])]["old_kind"],
+                            "new_kind": identity_by_id[str(row["id"])]["new_kind"],
+                            "changed_by": identity_by_id[str(row["id"])]["changed_by"],
+                            "reason": identity_by_id[str(row["id"])]["reason"],
+                            "changed_at_matches": True,
+                        }
+                    ]
+                ]
+                if (
+                    invalid
+                    or stale_ids
+                    or invalid_observations
+                    or invalid_identity_changes
+                ):
+                    raise DDGapRegistrySyncConflict(
+                        "registry identity verification failed: "
+                        f"invalid={sorted(invalid)} stale={sorted(stale_ids)} "
+                        f"observations={sorted(invalid_observations)} "
+                        f"identity_changes={sorted(invalid_identity_changes)}"
+                    )
+                tx.commit()
+            except BaseException:
+                try:
+                    tx.rollback()
+                except Exception:
+                    tx.close()
+                raise
+
         row = rows[0] if rows else {}
         return {
             "registry_entries": len(registry_entries),
@@ -617,6 +1700,10 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
             "relationships": int(row.get("relationships", 0)),
             "observations": int(row.get("observations", 0)),
             "matched_paths": intended["matched_paths"],
+            "create": plan["create"],
+            "update": plan["update"],
+            "reclassify": public_reclassifications,
+            "manual_required": [],
             "dry_run": False,
         }
 

@@ -2067,6 +2067,41 @@ classes:
       validation_evidence:
         description: Structured or human validation result proving a resolution.
 
+  DDGapIdentityChange:
+    description: >-
+      Immutable audit event recording an in-place DDGap identity
+      reclassification while preserving the fact's lifecycle and evidence.
+    class_uri: sn:DDGapIdentityChange
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: "Unique identity: dd_gap_identity_change:{uuid}"
+      dd_gap_id:
+        required: true
+        description: Current DDGap identity immediately after this reclassification.
+      old_id:
+        required: true
+        description: DDGap identity immediately before this reclassification.
+      new_id:
+        required: true
+        description: DDGap identity immediately after this reclassification.
+      old_kind:
+        required: true
+        range: DDGapKind
+      new_kind:
+        required: true
+        range: DDGapKind
+      changed_at:
+        required: true
+        range: datetime
+      changed_by:
+        required: true
+        description: Governed mechanism applying the identity reclassification.
+      reason:
+        required: true
+        description: Evidence-backed justification for the identity change.
+
   DDGap:
     description: >-
       Records evidence that a Data Dictionary path or path pattern carries a
@@ -2155,6 +2190,12 @@ classes:
         range: DDGapStateChange
         annotations:
           relationship_type: HAS_STATE_CHANGE
+      identity_changes:
+        description: Immutable history of governed identity reclassifications.
+        multivalued: true
+        range: DDGapIdentityChange
+        annotations:
+          relationship_type: HAS_IDENTITY_CHANGE
 
   StandardNameSource:
     description: >-

@@ -6445,6 +6445,7 @@ def sn_ddgap(
       imas-codex sn ddgap --show dd_gap:equilibrium/path:unit_defect
     """
     from imas_codex.standard_names.dd_gaps import (
+        DDGapRegistrySyncConflict,
         DDGapTransitionConflict,
         get_dd_gap,
         list_dd_gaps,
@@ -6671,7 +6672,7 @@ def sn_ddgap(
             raise click.UsageError("--apply and --dry-run are mutually exclusive")
         try:
             result = sync_dd_unit_exception_gaps(dry_run=not apply_changes)
-        except ValueError as exc:
+        except (ValueError, DDGapRegistrySyncConflict) as exc:
             raise click.ClickException(str(exc)) from exc
         verb = "synced" if apply_changes else "would sync"
         click.echo(
@@ -6679,6 +6680,16 @@ def sn_ddgap(
             f"{result['reported']} DD-gap facts; "
             f"{result['relationships']} path evidence link(s)"
         )
+        click.echo(
+            f"identity actions: create={len(result.get('create', []))} "
+            f"update={len(result.get('update', []))} "
+            f"reclassify={len(result.get('reclassify', []))} "
+            f"manual={len(result.get('manual_required', []))}"
+        )
+        for item in result.get("reclassify", []):
+            click.echo(f"reclassify: {item['old_id']} -> {item['new_id']}")
+        for item in result.get("manual_required", []):
+            click.echo(f"manual: {item['id']}: {item['reason']}")
         return
 
     if (
