@@ -1251,6 +1251,7 @@ class TestOperatorUnitConsistency:
 
         assert name_unit_consistency_check({"id": name, "unit": "1"}) == []
 
+    @pytest.mark.parametrize("unit", ["1", "-", "none"])
     @pytest.mark.parametrize(
         "name",
         [
@@ -1261,29 +1262,44 @@ class TestOperatorUnitConsistency:
             ),
         ],
     )
-    def test_equal_dimension_ratios_accept_dimensionless_unit(self, name: str):
+    def test_equal_dimension_ratios_accept_dimensionless_unit(
+        self, name: str, unit: str
+    ):
         """A proven quotient result wins over flat operand-token heuristics."""
         from imas_codex.standard_names.audits import name_unit_consistency_check
 
-        assert name_unit_consistency_check({"id": name, "unit": "1"}) == []
+        assert name_unit_consistency_check({"id": name, "unit": unit}) == []
 
-    def test_dimensioned_ratio_accepts_quotient_unit(self):
-        from imas_codex.standard_names.audits import name_unit_consistency_check
-
-        assert (
-            name_unit_consistency_check(
-                {"id": "ratio_of_vorticity_to_major_radius", "unit": "m^-1.s^-1"}
-            )
-            == []
-        )
-
-    def test_dimensioned_ratio_rejects_dimensionless_unit(self):
+    @pytest.mark.parametrize("unit", ["J.K^-1", "K.J^-1"])
+    def test_equal_dimension_ratios_reject_cross_family_quotients(self, unit: str):
         from imas_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
-            {"id": "ratio_of_vorticity_to_major_radius", "unit": "1"}
+            {
+                "id": (
+                    "ratio_of_particle_temperature_to_particle_reference_temperature"
+                ),
+                "unit": unit,
+            }
         )
         assert issues and "operator expression" in issues[0]
+
+    def test_vorticity_per_major_radius_dimensions_use_quotient(self):
+        from imas_codex.standard_names.audits import (
+            _dimensions_overlap,
+            _quotient_dimensions,
+            _unit_dimensions,
+        )
+
+        vorticity_dimensions = {"1 / [time]"}
+        major_radius_dimensions = {"[length]"}
+        quotient = _quotient_dimensions(vorticity_dimensions, major_radius_dimensions)
+        expected = _unit_dimensions({"m^-1.s^-1"})
+        dimensionless = _unit_dimensions({"1"})
+        assert quotient is not None
+        assert expected is not None and _dimensions_overlap(quotient, expected)
+        assert dimensionless is not None
+        assert not _dimensions_overlap(quotient, dimensionless)
 
     def test_nested_derivative_transforms_dimensionless_ratio(self):
         from imas_codex.standard_names.audits import name_unit_consistency_check
@@ -1323,6 +1339,11 @@ class TestOperatorUnitConsistency:
             ],
         )
         assert _ir_unit_dimensions(incomplete) == (None, False)
+
+    def test_malformed_declared_unit_remains_unknown(self):
+        from imas_codex.standard_names.audits import _unit_dimensions
+
+        assert _unit_dimensions({"not a pint unit"}) is None
 
     def test_nested_ratio_with_unknown_operand_does_not_partially_transform(self):
         from imas_codex.standard_names.audits import name_unit_consistency_check

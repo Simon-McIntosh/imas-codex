@@ -194,10 +194,6 @@ _NAME_TOKEN_UNIT_EXPECTATIONS: dict[str, set[str]] = {
     "mass": {"kg", "u"},
     # Frequency implies Hz.
     "frequency": {"Hz", "kHz", "MHz", "GHz", "rad.s^-1", "s^-1"},
-    # Vorticity is the curl of velocity and therefore inverse time.
-    "vorticity": {"s^-1"},
-    # Geometric radius is a length.
-    "radius": {"m"},
 }
 
 
@@ -222,6 +218,9 @@ def _unit_dimensions(units: set[str]) -> set[str] | None:
 
     dimensions: set[str] = set()
     for unit in units:
+        if unit.strip().lower() in {"1", "dimensionless", "-", "none"}:
+            dimensions.add("dimensionless")
+            continue
         canonical = canonical_or_none(unit)
         if canonical is None:
             return None
@@ -254,6 +253,13 @@ def _dimensions_overlap(left: set[str], right: set[str]) -> bool:
     )
 
 
+def _dimension_sets_equivalent(left: set[str], right: set[str]) -> bool:
+    """Return whether two alternatives describe the same dimension choices."""
+    return all(_dimensions_overlap({dimension}, right) for dimension in left) and all(
+        _dimensions_overlap({dimension}, left) for dimension in right
+    )
+
+
 def _per_time_dimensions(dimensions: set[str]) -> set[str] | None:
     """Divide dimensionalities by time through the shared Pint registry."""
     from imas_codex.units import unit_registry
@@ -273,18 +279,23 @@ def _per_time_dimensions(dimensions: set[str]) -> set[str] | None:
 def _quotient_dimensions(
     numerators: set[str], denominators: set[str]
 ) -> set[str] | None:
-    """Divide every inferable numerator dimension by every denominator."""
+    """Infer a quotient only when operand dimension alternatives are decisive."""
 
-    quotients: set[str] = set()
-    for numerator in numerators:
-        for denominator in denominators:
-            try:
-                numerator_dims = _dimension_container(numerator)
-                denominator_dims = _dimension_container(denominator)
-                quotients.add(str(numerator_dims / denominator_dims))
-            except Exception:
-                return None
-    return quotients
+    if not numerators or not denominators:
+        return None
+    if _dimension_sets_equivalent(numerators, denominators):
+        return {"dimensionless"}
+    if _dimensions_overlap(numerators, denominators):
+        return None
+    if len(numerators) != 1 or len(denominators) != 1:
+        return None
+
+    try:
+        numerator_dims = _dimension_container(next(iter(numerators)))
+        denominator_dims = _dimension_container(next(iter(denominators)))
+        return {str(numerator_dims / denominator_dims)}
+    except Exception:
+        return None
 
 
 def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
