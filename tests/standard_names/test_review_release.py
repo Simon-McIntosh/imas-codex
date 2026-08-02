@@ -79,6 +79,16 @@ _PR_TARGET = {
 }
 
 
+@pytest.fixture(autouse=True)
+def _isolate_release_tests_from_live_dd_gaps(monkeypatch):
+    """Release orchestration tests must not read the operator's live graph."""
+    monkeypatch.setattr(
+        "imas_codex.standard_names.dd_gaps.list_dd_gaps",
+        lambda **_kwargs: [],
+        raising=False,
+    )
+
+
 def _write_names_focus(tmp_path, *, name="demo-batch", filename="batch.yaml"):
     p = tmp_path / filename
     p.write_text(
@@ -373,6 +383,217 @@ def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
     )
     assert title == "WEST batch"
     assert "v0.1.0rc1" in body and "3 standard name(s)" in body
+    assert "No linked DD defects were reported" in body
+
+
+def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
+    from imas_codex.standard_names.release_notes import summarize_dd_gap_facts
+
+    facts = [
+        {
+            "id": "dd_gap:equilibrium/a:unit_defect",
+            "path": "equilibrium/a",
+            "kind": "unit_defect",
+            "status": "flagged",
+            "source_paths": ["equilibrium/a"],
+        },
+        {
+            "id": "dd_gap:equilibrium/b:type_wiring",
+            "path": "equilibrium/b",
+            "kind": "type_wiring",
+            "status": "upstream_issue",
+            "source_paths": ["equilibrium/b", "equilibrium/b"],
+            "upstream_url": "https://example.invalid/dd/12",
+        },
+        {
+            "id": "dd_gap:equilibrium/c:unit_defect",
+            "path": "equilibrium/*/c",
+            "kind": "unit_defect",
+            "status": "resolved_upstream",
+            "source_paths": ["equilibrium/0/c"],
+            "registry_backend": "dd_unit_exceptions",
+            "resolved_dd_version": "4.2.0",
+        },
+        {
+            "id": "dd_gap:equilibrium/d:doc_mismatch",
+            "path": "equilibrium/d",
+            "kind": "doc_mismatch",
+            "status": "rejected",
+            "source_paths": ["equilibrium/d"],
+        },
+    ]
+
+    summary = summarize_dd_gap_facts(facts)
+
+    assert summary["total"] == 4
+    assert summary["open_count"] == 1
+    assert summary["triaged_count"] == 1
+    assert summary["unresolved_count"] == 2
+    assert summary["retired_count"] == 2
+    assert summary["stale_registry_count"] == 1
+    assert summary["by_kind"] == {
+        "doc_mismatch": 1,
+        "type_wiring": 1,
+        "unit_defect": 2,
+    }
+    assert summary["warning_only"] is True
+    assert summary["blocks_release"] is False
+    upstream = next(
+        fact for fact in summary["facts"] if fact["status"] == "upstream_issue"
+    )
+    assert upstream["exact_paths"] == ["equilibrium/b"]
+    assert upstream["upstream_url"] == "https://example.invalid/dd/12"
+
+
+def test_static_notes_list_exact_dd_paths_without_blocking_release():
+    from imas_codex.standard_names.release_notes import (
+        static_pr_notes,
+        summarize_dd_gap_facts,
+    )
+
+    summary = summarize_dd_gap_facts(
+        [
+            {
+                "id": "dd_gap:equilibrium/path:type_wiring",
+                "path": "equilibrium/path",
+                "kind": "type_wiring",
+                "status": "upstream_issue",
+                "source_paths": ["equilibrium/path"],
+                "upstream_url": "https://example.invalid/dd/27",
+            }
+        ]
+    )
+    _title, body = static_pr_notes(
+        message="Batch",
+        rc_version="v0.1.0rc1",
+        batch_size=1,
+        minted_from="batch.yaml",
+        dd_gaps=summary,
+    )
+
+    assert "`equilibrium/path`" in body
+    assert "https://example.invalid/dd/27" in body
+    assert "do not suppress sources or block this release" in body
+
+
+def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
+    from imas_codex.standard_names import release_notes
+
+    seen: dict = {}
+
+    def _ok(**kw):
+        seen["messages"] = kw["messages"]
+        return release_notes.PrNotes(title="Batch", body="Body"), 0.0, {}
+
+    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _ok)
+    summary = release_notes.summarize_dd_gap_facts(
+        [
+            {
+                "id": "dd_gap:equilibrium/path:unit_defect",
+                "path": "equilibrium/path",
+                "kind": "unit_defect",
+                "status": "registered_exception",
+                "source_paths": ["equilibrium/path"],
+                "registry_backend": "dd_unit_exceptions",
+            }
+        ]
+    )
+
+    title, body = release_notes.build_pr_notes(
+        message="Batch",
+        rc_version="v0.1.0rc1",
+        batch_size=1,
+        minted_from="batch.yaml",
+        dd_gaps=summary,
+    )
+
+    assert title == "Batch"
+    assert body.startswith("Body\n\n## Data Dictionary caveats")
+    assert body.count("## Data Dictionary caveats") == 1
+    assert "`equilibrium/path`" in body
+    assert "registered_exception" in body
+    assert "evidence_token" not in body
+    system, user = (message["content"] for message in seen["messages"])
+    assert "DD defects stay visible and observational" in system
+    assert "equilibrium/path" in user
+    assert "registered_exception" in user
+    assert "Release-blocking: no" in user
+
+
+def test_model_authored_dd_caveats_are_replaced_not_duplicated(monkeypatch):
+    from imas_codex.standard_names import release_notes
+
+    model_body = (
+        "Summary.\n\n"
+        "## Data Dictionary caveats\n\nNo linked DD defects were reported.\n\n"
+        "## Data Dictionary caveats\n\nRelease-blocking: yes.\n\n"
+        "## How to review\n\nInspect the catalog diff."
+    )
+
+    def _misleading(**_kwargs):
+        return release_notes.PrNotes(title="Batch", body=model_body), 0.0, {}
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.llm.call_llm_structured", _misleading
+    )
+    summary = release_notes.summarize_dd_gap_facts(
+        [
+            {
+                "id": "dd_gap:equilibrium/path:type_wiring",
+                "path": "equilibrium/path",
+                "kind": "type_wiring",
+                "status": "upstream_issue",
+                "source_paths": ["equilibrium/z", "equilibrium/a"],
+                "upstream_url": "https://example.invalid/dd/27",
+                "evidence_token": "must-not-leak",
+            }
+        ]
+    )
+
+    _title, body = release_notes.build_pr_notes(
+        message="Batch",
+        rc_version="v0.1.0rc1",
+        batch_size=1,
+        minted_from="batch.yaml",
+        dd_gaps=summary,
+    )
+
+    assert body.count("## Data Dictionary caveats") == 1
+    assert "No linked DD defects were reported" not in body
+    assert "Release-blocking: yes" not in body
+    assert "## How to review" in body
+    assert "`equilibrium/a`, `equilibrium/z`" in body
+    assert "https://example.invalid/dd/27" in body
+    assert "must-not-leak" not in body
+
+
+def test_model_cannot_invent_dd_caveats_for_empty_fact_set(monkeypatch):
+    from imas_codex.standard_names import release_notes
+
+    def _invented(**_kwargs):
+        return (
+            release_notes.PrNotes(
+                title="Batch",
+                body=(
+                    "Summary.\n\n## Data Dictionary caveats\n\n99 unresolved defects."
+                ),
+            ),
+            0.0,
+            {},
+        )
+
+    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _invented)
+    _title, body = release_notes.build_pr_notes(
+        message="Batch",
+        rc_version="v0.1.0rc1",
+        batch_size=1,
+        minted_from="batch.yaml",
+        dd_gaps=release_notes.summarize_dd_gap_facts([]),
+    )
+
+    assert body.count("## Data Dictionary caveats") == 1
+    assert "99 unresolved defects" not in body
+    assert "No linked DD defects were reported" in body
 
 
 def test_build_merge_notes_falls_back_to_empty_on_llm_failure(monkeypatch):
@@ -442,6 +663,112 @@ def test_review_release_uses_injected_notes_builder(isnc_repo, tmp_path):
     assert seen["batch_size"] == 2
     assert seen["pr_title"] == "Custom title"
     assert seen["pr_body"] == "Custom body"
+
+
+def test_review_release_scopes_dd_caveats_to_batch_names(isnc_repo, tmp_path):
+    """The release reads exact batch facts once and never mutates graph state."""
+    focus = _write_names_focus(tmp_path)
+    seen: dict = {"reader_calls": []}
+
+    def gap_reader(**kwargs):
+        seen["reader_calls"].append(kwargs)
+        return [
+            {
+                "id": "dd_gap:equilibrium/path:type_wiring",
+                "path": "equilibrium/path",
+                "kind": "type_wiring",
+                "status": "upstream_issue",
+                "source_paths": ["equilibrium/path"],
+                "affected_name_ids": ["plasma_current"],
+                "upstream_url": "https://example.invalid/dd/27",
+            }
+        ]
+
+    def pr_creator(*, branch, base, title, body, repo, head_owner):
+        seen["pr_body"] = body
+        return 5, f"https://github.com/{repo}/pull/5"
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "msg",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=pr_creator,
+        dd_gap_reader=gap_reader,
+        **_PR_TARGET,
+    )
+
+    assert report.errors == []
+    assert seen["reader_calls"] == [
+        {
+            "name_ids": ["plasma_current", "poloidal_flux"],
+            "gc": None,
+        }
+    ]
+    assert report.dd_gap_summary["unresolved_count"] == 1
+    assert report.dd_gap_summary["blocks_release"] is False
+    assert "`equilibrium/path`" in seen["pr_body"]
+    assert "https://example.invalid/dd/27" in seen["pr_body"]
+
+
+def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
+    isnc_repo, tmp_path, monkeypatch
+):
+    from imas_codex.standard_names import release_notes
+
+    focus = _write_names_focus(tmp_path)
+    seen: dict = {}
+
+    def gap_reader(**_kwargs):
+        raise RuntimeError("graph unavailable")
+
+    def _misleading(**_kwargs):
+        return (
+            release_notes.PrNotes(
+                title="Batch",
+                body=(
+                    "Summary.\n\n## Data Dictionary caveats\n\n"
+                    "No linked DD defects were reported."
+                ),
+            ),
+            0.0,
+            {},
+        )
+
+    def pr_creator(*, branch, base, title, body, repo, head_owner):
+        seen["body"] = body
+        return 5, f"https://github.com/{repo}/pull/5"
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.llm.call_llm_structured", _misleading
+    )
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "msg",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=pr_creator,
+        dd_gap_reader=gap_reader,
+        notes_builder=release_notes.build_pr_notes,
+        **_PR_TARGET,
+    )
+
+    assert report.errors == []
+    assert report.dd_gap_summary["available"] is False
+    assert report.dd_gap_summary["read_error"] == "graph unavailable"
+    assert report.dd_gap_summary["blocks_release"] is False
+    assert seen["body"].count("## Data Dictionary caveats") == 1
+    assert "could not be read (graph unavailable)" in seen["body"]
+    assert "No linked DD defects were reported" not in seen["body"]
 
 
 # ── the batch label in the version (semver build metadata) ─────────────────
