@@ -80,8 +80,11 @@ from __future__ import annotations
 import json
 import uuid
 from contextlib import suppress
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
+from functools import lru_cache
+from pathlib import Path
 from typing import Any
 
 from imas_standard_names.grammar import parser as _isn_parser
@@ -655,86 +658,187 @@ _FOLD_PREDECESSOR_STAGES = frozenset(
     {"pending", "drafted", "reviewed", "accepted", "exhausted"}
 )
 _FOLD_REASON = "fold parser-invalid duplicate into accepted authoritative identity"
+_FOLD_RECEIPT_TYPE = "standard_name_identity_fold"
+_FOLD_RECEIPT_SCHEMA = 1
 
 _FOLD_SNAPSHOT_QUERY = """
 // ATOMIC_FOLD_SNAPSHOT
 MATCH (old:StandardName {id: $old_id}),
       (target:StandardName {id: $into_id})
 CALL (old, target) {
-  MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(bound:StandardName)
-  WHERE bound = old OR bound = target
-  WITH source, collect(DISTINCT bound.id) AS bound_ids
-  CALL (source) {
-    OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
-    OPTIONAL MATCH (backing)-[:HAS_UNIT]->(unit:Unit)
-    OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(projected:StandardName)
-    WITH backing, collect(DISTINCT unit.id) AS units,
-         collect(DISTINCT {
-           id: projected.id,
-           stage: projected.name_stage
-         }) AS projected
-    RETURN collect(DISTINCT {
-      id: backing.id,
-      element_id: elementId(backing),
-      labels: labels(backing),
-      properties: properties(backing),
-      units: [value IN units WHERE value IS NOT NULL],
-      projected: [value IN projected WHERE value.id IS NOT NULL]
-    }) AS backings
-  }
-  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(live:StandardName)
-  WHERE live.name_stage IN $live_stages
-  WITH source, bound_ids, backings, collect(DISTINCT live.id) AS live_targets
-  RETURN collect(DISTINCT {
+  MATCH (source:StandardNameSource)
+  WHERE source.produced_sn_id IN [old.id, target.id]
+     OR EXISTS { (source)-[:PRODUCED_NAME]->(old) }
+     OR EXISTS { (source)-[:PRODUCED_NAME]->(target) }
+     OR EXISTS {
+       MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+       WHERE EXISTS { (backing)-[:HAS_STANDARD_NAME]->(old) }
+          OR EXISTS { (backing)-[:HAS_STANDARD_NAME]->(target) }
+     }
+  RETURN collect({
     id: source.id,
     element_id: elementId(source),
+    labels: labels(source),
     properties: properties(source),
-    bound_ids: bound_ids,
-    live_targets: live_targets,
-    backings: [value IN backings WHERE value.id IS NOT NULL]
+    bindings: [(source)-[binding:PRODUCED_NAME]->(bound:StandardName) | {
+      element_id: elementId(binding),
+      properties: properties(binding),
+      target_id: bound.id,
+      target_stage: bound.name_stage
+    }],
+    backing_refs: [(source)-[owner:FROM_DD_PATH|FROM_SIGNAL]->(backing) | {
+      element_id: elementId(owner),
+      properties: properties(owner),
+      type: type(owner),
+      backing_element_id: elementId(backing),
+      backing_id: backing.id
+    }]
   }) AS sources
 }
 CALL (old, target) {
-  OPTIONAL MATCH (endpoint:StandardName)-[relationship]-(other)
-  WHERE endpoint = old OR endpoint = target
-  WITH relationship, other
+  MATCH (backing)
+  WHERE (backing:IMASNode OR backing:FacilitySignal)
+    AND (
+      EXISTS { (backing)-[:HAS_STANDARD_NAME]->(old) }
+      OR EXISTS { (backing)-[:HAS_STANDARD_NAME]->(target) }
+      OR EXISTS {
+        MATCH (source:StandardNameSource)
+              -[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+        WHERE source.produced_sn_id IN [old.id, target.id]
+           OR EXISTS { (source)-[:PRODUCED_NAME]->(old) }
+           OR EXISTS { (source)-[:PRODUCED_NAME]->(target) }
+      }
+    )
+  RETURN collect({
+    id: backing.id,
+    element_id: elementId(backing),
+    labels: labels(backing),
+    properties: properties(backing),
+    owners: [(owner:StandardNameSource)
+             -[owner_link:FROM_DD_PATH|FROM_SIGNAL]->(backing) | {
+      source_id: owner.id,
+      source_element_id: elementId(owner),
+      relationship_element_id: elementId(owner_link),
+      relationship_properties: properties(owner_link),
+      relationship_type: type(owner_link)
+    }],
+    projections: [(backing)-[projection:HAS_STANDARD_NAME]
+                  ->(projected:StandardName) | {
+      element_id: elementId(projection),
+      properties: properties(projection),
+      target_id: projected.id,
+      target_stage: projected.name_stage
+    }],
+    units: [(backing)-[unit_link:HAS_UNIT]->(unit:Unit) | {
+      element_id: elementId(unit_link),
+      properties: properties(unit_link),
+      unit_id: unit.id,
+      unit_properties: properties(unit)
+    }]
+  }) AS backings
+}
+CALL (old, target) {
+  OPTIONAL MATCH (start)-[relationship]->(end)
+  WHERE start = old OR start = target OR end = old OR end = target
+  WITH relationship, start, end
   WHERE relationship IS NOT NULL
   RETURN collect(DISTINCT {
     element_id: elementId(relationship),
     type: type(relationship),
     start_element_id: elementId(startNode(relationship)),
     end_element_id: elementId(endNode(relationship)),
-    other_element_id: elementId(other),
+    start_id: start.id,
+    end_id: end.id,
+    start_labels: labels(start),
+    end_labels: labels(end),
+    other_element_id: CASE
+      WHEN start = old OR start = target THEN elementId(end)
+      ELSE elementId(start)
+    END,
     properties: properties(relationship)
   }) AS relationships
 }
 CALL (old, target) {
-  OPTIONAL MATCH (owner:StandardName)-[:HAS_INTERNAL_CHANGE]
-                 ->(change:StandardNameChange)
-  WHERE (owner = old OR owner = target)
-    AND change.operation = 'fold_identity'
-    AND change.from_name = old.id
-    AND change.to_name = target.id
-  RETURN collect(DISTINCT properties(change)) AS fold_events
+  MATCH (review:StandardNameReview)
+  WHERE review.standard_name_id IN [old.id, target.id]
+     OR EXISTS { (old)-[:HAS_REVIEW]->(review) }
+     OR EXISTS { (target)-[:HAS_REVIEW]->(review) }
+  RETURN collect({
+    element_id: elementId(review),
+    labels: labels(review),
+    properties: properties(review),
+    owners: [(owner:StandardName)-[link:HAS_REVIEW]->(review) | {
+      owner_id: owner.id,
+      element_id: elementId(link),
+      properties: properties(link)
+    }]
+  }) AS reviews
 }
-OPTIONAL MATCH (target)-[:HAS_UNIT]->(target_unit:Unit)
+CALL (old, target) {
+  OPTIONAL MATCH (owner:StandardName)-[link:DOCS_REVISION_OF]
+                 ->(revision:DocsRevision)
+  WHERE owner = old OR owner = target
+  WITH link, revision
+  WHERE link IS NOT NULL
+  RETURN collect({
+    element_id: elementId(revision),
+    labels: labels(revision),
+    properties: properties(revision),
+    owners: [(owner:StandardName)-[owner_link:DOCS_REVISION_OF]->(revision) | {
+      owner_id: owner.id,
+      element_id: elementId(owner_link),
+      properties: properties(owner_link)
+    }]
+  }) AS revisions
+}
+CALL (old, target) {
+  OPTIONAL MATCH (owner:StandardName)-[link:HAS_INTERNAL_CHANGE]
+                 ->(change:StandardNameChange)
+  WHERE owner = old OR owner = target
+  WITH link, change
+  WHERE link IS NOT NULL
+  RETURN collect({
+    element_id: elementId(change),
+    labels: labels(change),
+    properties: properties(change),
+    owners: [(owner:StandardName)-[owner_link:HAS_INTERNAL_CHANGE]->(change) | {
+      owner_id: owner.id,
+      element_id: elementId(owner_link),
+      properties: properties(owner_link)
+    }]
+  }) AS changes
+}
+WITH old, target, sources, backings, relationships, reviews, revisions, changes,
+     [(old)-[link:HAS_UNIT]->(unit:Unit) | {
+       element_id: elementId(link), properties: properties(link),
+       unit_id: unit.id, unit_properties: properties(unit)
+     }] AS old_units,
+     [(target)-[link:HAS_UNIT]->(unit:Unit) | {
+       element_id: elementId(link), properties: properties(link),
+       unit_id: unit.id, unit_properties: properties(unit)
+     }] AS target_units
 RETURN elementId(old) AS old_element_id,
        elementId(target) AS target_element_id,
+       labels(old) AS old_labels,
+       labels(target) AS target_labels,
        properties(old) AS old_properties,
        properties(target) AS target_properties,
        EXISTS { (old)-[:REFINED_FROM*1..]->(target) } AS cycle,
        sources,
+       backings,
        relationships,
-       fold_events,
-       collect(DISTINCT target_unit.id) AS target_units
+       reviews,
+       revisions,
+       changes,
+       old_units,
+       target_units
 """
 
 _FOLD_LOCK_QUERY = """
 // ATOMIC_FOLD_LOCK
 MATCH (participant)
-WHERE elementId(participant) IN $element_ids
-SET participant._atomic_fold_lock = true
-REMOVE participant._atomic_fold_lock
+WHERE elementId(participant) IN $element_ids AND participant.id IS NOT NULL
+SET participant.id = participant.id
 RETURN count(participant) AS locked
 """
 
@@ -751,6 +855,7 @@ CREATE (change:StandardNameChange {
   operation: 'fold_identity',
   reason: $receipt,
   origin: 'catalog_edit',
+  run_id: $run_id,
   changed_at: datetime($changed_at),
   internal: true
 })
@@ -761,23 +866,38 @@ RETURN change.id AS change_id
 
 _FOLD_SOURCE_MUTATION_QUERY = """
 // ATOMIC_FOLD_MOVE_SOURCES
-UNWIND $sources AS expected
-MATCH (source:StandardNameSource {id: expected.id})
-WHERE properties(source) = expected.properties
-MATCH (source)-[old_binding:PRODUCED_NAME]
-      ->(old:StandardName {id: $old_id})
 MATCH (target:StandardName {id: $into_id})
-DELETE old_binding
-MERGE (source)-[:PRODUCED_NAME]->(target)
-SET source.produced_sn_id = target.id
-WITH DISTINCT source, old, target
-OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
-OPTIONAL MATCH (backing)-[old_projection:HAS_STANDARD_NAME]->(old)
-DELETE old_projection
-FOREACH (_ IN CASE WHEN backing IS NULL THEN [] ELSE [1] END |
-  MERGE (backing)-[:HAS_STANDARD_NAME]->(target))
-RETURN count(DISTINCT source) AS sources_moved,
-       count(DISTINCT backing) AS projections_moved
+CALL (target) {
+  UNWIND $sources AS expected
+  MATCH (source:StandardNameSource {id: expected.id})
+  WHERE elementId(source) = expected.element_id
+    AND properties(source) = expected.properties
+  OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(bound:StandardName)
+  WHERE elementId(binding) IN expected.remove_binding_element_ids
+  WITH source, target, collect(binding) AS bindings
+  FOREACH (binding IN bindings | DELETE binding)
+  CREATE (source)-[:PRODUCED_NAME]->(target)
+  SET source.produced_sn_id = target.id
+  RETURN count(DISTINCT source) AS sources_moved
+}
+CALL (target) {
+  UNWIND $backings AS expected
+  MATCH (backing)
+  WHERE elementId(backing) = expected.element_id
+    AND properties(backing) = expected.properties
+  OPTIONAL MATCH (backing)-[projection:HAS_STANDARD_NAME]
+                 ->(bound:StandardName)
+  WHERE elementId(projection) IN expected.remove_projection_element_ids
+  WITH backing, target, expected, collect(projection) AS projections
+  FOREACH (projection IN projections | DELETE projection)
+  CREATE (backing)-[:HAS_STANDARD_NAME]->(target)
+  SET backing.standard_name_id = CASE
+    WHEN expected.has_standard_name_id THEN target.id
+    ELSE backing.standard_name_id
+  END
+  RETURN count(DISTINCT backing) AS projections_moved
+}
+RETURN sources_moved, projections_moved
 """
 
 _FOLD_NAME_MUTATION_QUERY = """
@@ -801,46 +921,9 @@ RETURN old.name_stage AS old_stage,
        old.superseded_from_stage AS predecessor_stage
 """
 
-_FOLD_POSTFLIGHT_QUERY = """
-// ATOMIC_FOLD_POSTFLIGHT
-MATCH (old:StandardName {id: $old_id}),
-      (target:StandardName {id: $into_id})
-OPTIONAL MATCH (source:StandardNameSource)
-WHERE source.id IN $source_ids
-WITH old, target, collect(DISTINCT source) AS sources
-OPTIONAL MATCH (target)-[lineage:REFINED_FROM]->(old)
-WITH old, target, sources, count(DISTINCT lineage) AS lineage_count
-OPTIONAL MATCH (old)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange {
-  id: $change_id
-})
-WITH old, target, sources, lineage_count, count(DISTINCT change) AS event_count
-RETURN old.name_stage AS old_stage,
-       old.superseded_from_stage AS predecessor_stage,
-       old.claim_token AS old_claim_token,
-       old.claimed_at AS old_claimed_at,
-       old.source_paths AS old_paths,
-       old.edit_status AS old_edit_status,
-       target.name_stage AS target_stage,
-       target.validation_status AS target_validation,
-       target.claim_token AS target_claim_token,
-       target.claimed_at AS target_claimed_at,
-       target.source_paths AS target_paths,
-       lineage_count,
-       event_count,
-       size(sources) AS source_count,
-       size([source IN sources
-             WHERE source.produced_sn_id = $into_id
-               AND EXISTS { (source)-[:PRODUCED_NAME]->(target) }
-               AND NOT EXISTS { (source)-[:PRODUCED_NAME]->(old) }])
-         AS correct_sources,
-       size([source IN sources
-             WHERE all(backing IN [
-               (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(node) | node
-             ] WHERE EXISTS { (backing)-[:HAS_STANDARD_NAME]->(target) }
-                     AND NOT EXISTS {
-                       (backing)-[:HAS_STANDARD_NAME]->(old)
-                     })]) AS correct_projections
-"""
+_FOLD_POSTFLIGHT_QUERY = _FOLD_SNAPSHOT_QUERY.replace(
+    "// ATOMIC_FOLD_SNAPSHOT", "// ATOMIC_FOLD_POSTFLIGHT", 1
+)
 
 
 class _FoldTransactionQuery:
@@ -853,10 +936,54 @@ class _FoldTransactionQuery:
         return [dict(row) for row in self._transaction.run(cypher, **params)]
 
 
-def _fold_snapshot(transaction: Any, old: str, into: str) -> dict[str, Any] | None:
+def _fold_json_safe(value: Any) -> Any:
+    if isinstance(value, dict):
+        return {str(key): _fold_json_safe(item) for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [_fold_json_safe(item) for item in value]
+    if isinstance(value, set | frozenset):
+        return sorted((_fold_json_safe(item) for item in value), key=repr)
+    if value is None or isinstance(value, str | int | float | bool):
+        return value
+    if hasattr(value, "iso_format"):
+        return value.iso_format()
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
+
+
+def _fold_sort_key(value: Any) -> str:
+    return json.dumps(_fold_json_safe(value), sort_keys=True, separators=(",", ":"))
+
+
+def _fold_normalize(value: Any, *, key: str = "") -> Any:
+    if isinstance(value, dict):
+        return {
+            str(name): _fold_normalize(item, key=str(name))
+            for name, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, list | tuple):
+        normalized = [_fold_normalize(item) for item in value]
+        if (
+            key == "labels"
+            or normalized
+            and all(isinstance(item, dict) for item in normalized)
+        ):
+            normalized.sort(key=_fold_sort_key)
+        return normalized
+    return _fold_json_safe(value)
+
+
+def _fold_snapshot(
+    transaction: Any,
+    old: str,
+    into: str,
+    *,
+    query: str = _FOLD_SNAPSHOT_QUERY,
+) -> dict[str, Any] | None:
     rows = list(
         transaction.run(
-            _FOLD_SNAPSHOT_QUERY,
+            query,
             old_id=old,
             into_id=into,
             live_stages=sorted(_FOLD_LIVE_STAGES),
@@ -864,88 +991,144 @@ def _fold_snapshot(transaction: Any, old: str, into: str) -> dict[str, Any] | No
     )
     if not rows:
         return None
-    snapshot = dict(rows[0])
-    snapshot["sources"] = sorted(
-        (dict(value) for value in snapshot.get("sources") or []),
-        key=lambda value: value.get("id") or "",
-    )
-    snapshot["relationships"] = sorted(
-        (dict(value) for value in snapshot.get("relationships") or []),
-        key=lambda value: value.get("element_id") or "",
-    )
-    snapshot["fold_events"] = sorted(
-        (dict(value) for value in snapshot.get("fold_events") or []),
-        key=lambda value: value.get("id") or "",
-    )
-    snapshot["target_units"] = sorted(
-        value for value in snapshot.get("target_units") or [] if value
-    )
+    snapshot = _fold_normalize(dict(rows[0]))
+    snapshot["fold_events"] = [
+        change
+        for change in snapshot.get("changes") or []
+        if (change.get("properties") or {}).get("operation") == "fold_identity"
+        and (change.get("properties") or {}).get("from_name") == old
+        and (change.get("properties") or {}).get("to_name") == into
+    ]
     return snapshot
 
 
-def _fold_source_rows(snapshot: dict[str, Any], old: str) -> list[dict[str, Any]]:
-    return [row for row in snapshot["sources"] if old in (row.get("bound_ids") or [])]
+def _fold_binding_ids(source: dict[str, Any]) -> list[str]:
+    return [
+        binding["target_id"]
+        for binding in source.get("bindings") or []
+        if binding.get("target_id")
+    ]
 
 
-def _fold_receipt(
-    old: str,
-    into: str,
-    predecessor_stage: str,
-    sources: list[dict[str, Any]],
-) -> tuple[str, dict[str, Any]]:
-    source_ids = sorted(row["id"] for row in sources)
-    backing_ids = sorted(
-        {
-            backing["id"]
-            for row in sources
-            for backing in row.get("backings") or []
-            if backing.get("id")
-        }
-    )
-    receipt = {
-        "mechanism": _FOLD_REASON,
-        "old_id": old,
-        "into_id": into,
-        "predecessor_stage": predecessor_stage,
-        "source_ids": source_ids,
-        "backing_ids": backing_ids,
-        "source_count": len(source_ids),
-        "projection_count": len(backing_ids),
+def _fold_backing_map(snapshot: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {
+        backing["element_id"]: backing
+        for backing in snapshot.get("backings") or []
+        if backing.get("element_id")
     }
-    return json.dumps(receipt, sort_keys=True, separators=(",", ":")), receipt
+
+
+def _fold_old_backings(
+    snapshot: dict[str, Any], old_sources: list[dict[str, Any]], old: str
+) -> list[dict[str, Any]]:
+    referenced = {
+        ref["backing_element_id"]
+        for source in old_sources
+        for ref in source.get("backing_refs") or []
+        if ref.get("backing_element_id")
+    }
+    return [
+        backing
+        for backing in snapshot.get("backings") or []
+        if backing.get("element_id") in referenced
+        or old
+        in {
+            projection.get("target_id")
+            for projection in backing.get("projections") or []
+        }
+    ]
+
+
+def _fold_source_rows(snapshot: dict[str, Any], old: str) -> list[dict[str, Any]]:
+    old_projected = {
+        backing["element_id"]
+        for backing in snapshot.get("backings") or []
+        if old
+        in {
+            projection.get("target_id")
+            for projection in backing.get("projections") or []
+        }
+    }
+    return [
+        source
+        for source in snapshot.get("sources") or []
+        if (source.get("properties") or {}).get("produced_sn_id") == old
+        or old in _fold_binding_ids(source)
+        or any(
+            ref.get("backing_element_id") in old_projected
+            for ref in source.get("backing_refs") or []
+        )
+    ]
 
 
 def _fold_refusal(reason: str) -> dict[str, Any]:
     return {"ok": False, "reason": reason}
 
 
+@lru_cache(maxsize=1)
+def _fold_west_dd_paths() -> frozenset[str]:
+    from imas_codex.standard_names.sources_manifest import load_sources_file
+
+    manifest = Path(__file__).parent / "manifests" / "west_task_2e.yaml"
+    return frozenset(load_sources_file(manifest))
+
+
+def _fold_unit_authority(
+    properties: dict[str, Any], unit_edges: list[dict[str, Any]], label: str
+) -> tuple[str | None, str | None]:
+    if len(unit_edges) > 1:
+        return None, f"{label} has multiple HAS_UNIT authorities"
+    scalar = properties.get("unit")
+    edge = unit_edges[0].get("unit_id") if unit_edges else None
+    if scalar and edge:
+        from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+        scalar_canonical = canonical_or_none(str(scalar))
+        edge_canonical = canonical_or_none(str(edge))
+        agree = (
+            scalar_canonical == edge_canonical
+            if scalar_canonical is not None and edge_canonical is not None
+            else str(scalar) == str(edge)
+        )
+        if not agree:
+            return None, f"{label} scalar unit disagrees with HAS_UNIT authority"
+    return (str(edge or scalar) if edge or scalar else None), None
+
+
 def _fold_target_paths(
-    snapshot: dict[str, Any], old_sources: list[dict[str, Any]], into: str
+    snapshot: dict[str, Any],
+    old_sources: list[dict[str, Any]],
+    old_backings: list[dict[str, Any]],
+    into: str,
 ) -> list[str]:
+    old_source_ids = {source["id"] for source in old_sources}
+    old_backing_ids = {backing["element_id"] for backing in old_backings}
     paths: set[str] = set()
-    for row in snapshot["sources"]:
-        if into not in (row.get("bound_ids") or []) and row not in old_sources:
+    for backing in snapshot.get("backings") or []:
+        projected = {
+            projection.get("target_id")
+            for projection in backing.get("projections") or []
+        }
+        if backing.get("element_id") not in old_backing_ids and into not in projected:
             continue
-        source_properties = row.get("properties") or {}
-        backings = row.get("backings") or []
-        for backing in backings:
-            labels = set(backing.get("labels") or [])
-            if "IMASNode" in labels:
-                paths.add("dd:" + backing["id"])
-            elif "FacilitySignal" in labels:
-                paths.add(backing["id"])
-        if not backings and source_properties.get("source_type") == "derived":
-            paths.add(source_properties.get("source_id") or row["id"])
+        labels = set(backing.get("labels") or [])
+        if "IMASNode" in labels:
+            paths.add("dd:" + backing["id"])
+        elif "FacilitySignal" in labels:
+            paths.add(backing["id"])
+    for source in snapshot.get("sources") or []:
+        if source["id"] not in old_source_ids and into not in _fold_binding_ids(source):
+            continue
+        properties = source.get("properties") or {}
+        if (
+            not source.get("backing_refs")
+            and properties.get("source_type") == "derived"
+        ):
+            paths.add(properties.get("source_id") or source["id"])
     return sorted(path for path in paths if path)
 
 
-def _fold_guard_reason(
-    snapshot: dict[str, Any],
-    old: str,
-    into: str,
-    *,
-    include_west: bool,
-) -> str | None:
+def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | None:
     old_properties = snapshot["old_properties"]
     target_properties = snapshot["target_properties"]
     old_stage = old_properties.get("name_stage")
@@ -965,15 +1148,23 @@ def _fold_guard_reason(
         return (
             f"{old!r} already descends from {into!r} (REFINED_FROM cycle) — cannot fold"
         )
-    if old_stage != "superseded":
-        existing_successors = [
-            relationship
-            for relationship in snapshot["relationships"]
-            if relationship.get("type") == "REFINED_FROM"
-            and relationship.get("end_element_id") == snapshot["old_element_id"]
-        ]
-        if existing_successors:
-            return f"name {old!r} already has successor lineage; fold is ambiguous"
+
+    successors = [
+        relationship
+        for relationship in snapshot.get("relationships") or []
+        if relationship.get("type") == "REFINED_FROM"
+        and relationship.get("end_element_id") == snapshot["old_element_id"]
+    ]
+    direct = [
+        relationship
+        for relationship in successors
+        if relationship.get("start_element_id") == snapshot["target_element_id"]
+    ]
+    if len(direct) > 1:
+        return f"name {old!r} has duplicate target successor lineage"
+    if any(relationship not in direct for relationship in successors):
+        return f"name {old!r} has another successor lineage; fold is ambiguous"
+
     for label, properties in (("old", old_properties), ("target", target_properties)):
         if (
             properties.get("claim_token") is not None
@@ -983,78 +1174,70 @@ def _fold_guard_reason(
     parseable, detail = _isn_round_trip_ok(into)
     if not parseable:
         return f"target {into!r} fails strict ISN parse/round-trip: {detail}"
-    if len(snapshot["target_units"]) > 1:
-        return f"target {into!r} has multiple HAS_UNIT authorities"
+    target_unit, unit_reason = _fold_unit_authority(
+        target_properties, snapshot.get("target_units") or [], f"target {into!r}"
+    )
+    if unit_reason:
+        return unit_reason
 
-    old_sources = _fold_source_rows(snapshot, old)
-    for source in snapshot["sources"]:
-        source_properties = source.get("properties") or {}
+    for source in snapshot.get("sources") or []:
+        properties = source.get("properties") or {}
         if (
-            source_properties.get("claim_token") is not None
-            or source_properties.get("claimed_at") is not None
+            properties.get("claim_token") is not None
+            or properties.get("claimed_at") is not None
         ):
             return f"source {source['id']!r} is actively claimed"
-    target_unit = (
-        snapshot["target_units"][0]
-        if snapshot["target_units"]
-        else target_properties.get("unit")
-    )
+        if (
+            properties.get("source_type") in {"dd", "signals"}
+            and len(source.get("backing_refs") or []) != 1
+        ):
+            return f"source {source['id']!r} has ambiguous backing cardinality"
+
+    old_sources = _fold_source_rows(snapshot, old)
+    old_backings = _fold_old_backings(snapshot, old_sources, old)
+    source_ids = {source["id"] for source in snapshot.get("sources") or []}
+    for backing in old_backings:
+        owners = backing.get("owners") or []
+        if len(owners) != 1 or owners[0].get("source_id") not in source_ids:
+            return f"backing {backing['id']!r} has ambiguous owner cardinality"
+        _, backing_unit_reason = _fold_unit_authority(
+            backing.get("properties") or {},
+            backing.get("units") or [],
+            f"backing {backing['id']!r}",
+        )
+        if backing_unit_reason:
+            return backing_unit_reason
+        if (
+            "IMASNode" in set(backing.get("labels") or [])
+            and backing.get("id") in _fold_west_dd_paths()
+        ):
+            return (
+                f"DD path {backing['id']!r} is in the WEST task manifest; "
+                "identity fold is not authorized"
+            )
+
     existing_paths = sorted(
-        {
-            backing["id"]
-            for row in snapshot["sources"]
-            if into in (row.get("bound_ids") or [])
-            for backing in row.get("backings") or []
-            if "IMASNode" in set(backing.get("labels") or [])
+        backing["id"]
+        for backing in snapshot.get("backings") or []
+        if "IMASNode" in set(backing.get("labels") or [])
+        and into
+        in {
+            projection.get("target_id")
+            for projection in backing.get("projections") or []
         }
     )
     from imas_codex.standard_names.workers import _is_attachment_consistent
 
+    backings = _fold_backing_map(snapshot)
     for source in old_sources:
-        properties = source.get("properties") or {}
-        live_targets = set(source.get("live_targets") or [])
-        if live_targets - {old, into}:
-            return f"source {source['id']!r} has multiple live targets: " + ", ".join(
-                sorted(live_targets)
-            )
-        bound_ids = set(source.get("bound_ids") or [])
-        if bound_ids - {old, into}:
-            return (
-                f"source {source['id']!r} has ambiguous historical bindings: "
-                + ", ".join(sorted(bound_ids))
-            )
-        if properties.get("produced_sn_id") not in {old, into}:
-            return f"source {source['id']!r} scalar target conflicts with the fold"
-        backings = source.get("backings") or []
-        if len(backings) != 1 and properties.get("source_type") in {"dd", "signals"}:
-            return f"source {source['id']!r} has ambiguous backing cardinality"
-        for backing in backings:
-            projected_live = {
-                value["id"]
-                for value in backing.get("projected") or []
-                if value.get("stage") in _FOLD_LIVE_STAGES
-            }
-            if projected_live - {old, into}:
-                return (
-                    f"backing {backing['id']!r} has multiple live projections: "
-                    + ", ".join(sorted(projected_live))
-                )
-            if len(backing.get("units") or []) > 1:
-                return f"backing {backing['id']!r} has multiple HAS_UNIT authorities"
-            facility = str((backing.get("properties") or {}).get("facility_id") or "")
-            if not include_west and (
-                facility.casefold() == "west"
-                or source["id"].casefold().startswith("signals:west:")
-            ):
-                return (
-                    "WEST sources require an explicit include_west=True authorization"
-                )
+        for reference in source.get("backing_refs") or []:
+            backing = backings[reference["backing_element_id"]]
             if "IMASNode" not in set(backing.get("labels") or []):
                 continue
-            dd_unit = (
-                backing["units"][0]
-                if backing.get("units")
-                else (backing.get("properties") or {}).get("unit")
+            dd_unit, _ = _fold_unit_authority(
+                backing.get("properties") or {},
+                backing.get("units") or [],
+                f"backing {backing['id']!r}",
             )
             ok, reason = _is_attachment_consistent(
                 backing["id"],
@@ -1070,18 +1253,290 @@ def _fold_guard_reason(
     return None
 
 
+def _fold_relationship_semantics(record: dict[str, Any]) -> dict[str, Any]:
+    return {
+        key: deepcopy(value)
+        for key, value in record.items()
+        if key not in {"element_id", "other_element_id"}
+    }
+
+
+def _fold_link_semantics(
+    records: list[dict[str, Any]], *, node_element_id: bool = False
+) -> list[dict[str, Any]]:
+    result = []
+    for record in records:
+        item = deepcopy(record)
+        if not node_element_id:
+            item.pop("element_id", None)
+        for nested_key in (
+            "owners",
+            "bindings",
+            "backing_refs",
+            "projections",
+            "units",
+        ):
+            for nested in item.get(nested_key) or []:
+                nested.pop("element_id", None)
+                nested.pop("relationship_element_id", None)
+        result.append(item)
+    return _fold_normalize(result)
+
+
+def _fold_receipt_summary(reason: str) -> dict[str, Any] | None:
+    try:
+        receipt = json.loads(reason)
+    except (TypeError, ValueError):
+        return None
+    return {
+        "receipt_type": receipt.get("receipt_type"),
+        "schema_version": receipt.get("schema_version"),
+        "run_id": receipt.get("run_id"),
+        "old_id": receipt.get("old_id"),
+        "into_id": receipt.get("into_id"),
+    }
+
+
+def _fold_verification_state(
+    snapshot: dict[str, Any], *, fold_change_id: str | None = None
+) -> dict[str, Any]:
+    changes = []
+    for change in snapshot.get("changes") or []:
+        item = deepcopy(change)
+        item.pop("element_id", None)
+        for owner in item.get("owners") or []:
+            owner.pop("element_id", None)
+        properties = item.get("properties") or {}
+        if properties.get("id") == fold_change_id:
+            properties["reason"] = _fold_receipt_summary(properties.get("reason") or "")
+        changes.append(item)
+    excluded = {
+        "PRODUCED_NAME",
+        "HAS_STANDARD_NAME",
+        "REFINED_FROM",
+        "HAS_REVIEW",
+        "DOCS_REVISION_OF",
+        "HAS_INTERNAL_CHANGE",
+        "HAS_UNIT",
+    }
+    return _fold_normalize(
+        {
+            "names": {
+                "old": snapshot["old_properties"],
+                "target": snapshot["target_properties"],
+            },
+            "sources": _fold_link_semantics(
+                snapshot.get("sources") or [], node_element_id=True
+            ),
+            "backings": _fold_link_semantics(
+                snapshot.get("backings") or [], node_element_id=True
+            ),
+            "lineage": [
+                _fold_relationship_semantics(relationship)
+                for relationship in snapshot.get("relationships") or []
+                if relationship.get("type") == "REFINED_FROM"
+            ],
+            "other_relationships": [
+                _fold_relationship_semantics(relationship)
+                for relationship in snapshot.get("relationships") or []
+                if relationship.get("type") not in excluded
+            ],
+            "reviews": _fold_link_semantics(
+                snapshot.get("reviews") or [], node_element_id=True
+            ),
+            "revisions": _fold_link_semantics(
+                snapshot.get("revisions") or [], node_element_id=True
+            ),
+            "changes": changes,
+            "old_units": _fold_link_semantics(snapshot.get("old_units") or []),
+            "target_units": _fold_link_semantics(snapshot.get("target_units") or []),
+        }
+    )
+
+
+def _fold_expected_state(
+    snapshot: dict[str, Any],
+    old: str,
+    into: str,
+    predecessor_stage: str,
+    old_sources: list[dict[str, Any]],
+    old_backings: list[dict[str, Any]],
+    target_paths: list[str],
+    *,
+    change_id: str,
+    run_id: str,
+    changed_at: str,
+    include_domain_mutation: bool,
+) -> dict[str, Any]:
+    expected = _fold_verification_state(snapshot)
+    old_source_ids = {source["id"] for source in old_sources}
+    old_backing_ids = {backing["element_id"] for backing in old_backings}
+    if include_domain_mutation:
+        old_properties = expected["names"]["old"]
+        old_properties.update(
+            {
+                "name_stage": "superseded",
+                "superseded_from_stage": predecessor_stage,
+                "claim_token": None,
+                "claimed_at": None,
+                "source_paths": [],
+            }
+        )
+        if old_properties.get("edit_status") == "open":
+            old_properties["edit_status"] = "applied"
+        expected["names"]["target"]["source_paths"] = target_paths
+        for source in expected["sources"]:
+            if source["id"] not in old_source_ids:
+                continue
+            source["properties"]["produced_sn_id"] = into
+            source["bindings"] = [
+                binding
+                for binding in source["bindings"]
+                if binding.get("target_id") not in {old, into}
+                and binding.get("target_stage") not in _FOLD_LIVE_STAGES
+            ] + [{"properties": {}, "target_id": into, "target_stage": "accepted"}]
+        for backing in expected["backings"]:
+            if backing["element_id"] not in old_backing_ids:
+                continue
+            if "standard_name_id" in backing["properties"]:
+                backing["properties"]["standard_name_id"] = into
+            backing["projections"] = [
+                projection
+                for projection in backing["projections"]
+                if projection.get("target_id") not in {old, into}
+                and projection.get("target_stage") not in _FOLD_LIVE_STAGES
+            ] + [{"properties": {}, "target_id": into, "target_stage": "accepted"}]
+        direct_lineage = [
+            relationship
+            for relationship in expected["lineage"]
+            if relationship.get("start_id") == into
+            and relationship.get("end_id") == old
+        ]
+        if not direct_lineage:
+            expected["lineage"].append(
+                {
+                    "type": "REFINED_FROM",
+                    "start_element_id": snapshot["target_element_id"],
+                    "end_element_id": snapshot["old_element_id"],
+                    "start_id": into,
+                    "end_id": old,
+                    "start_labels": snapshot["target_labels"],
+                    "end_labels": snapshot["old_labels"],
+                    "properties": {},
+                }
+            )
+    event = {
+        "labels": ["StandardNameChange"],
+        "properties": {
+            "id": change_id,
+            "from_name": old,
+            "to_name": into,
+            "operation": "fold_identity",
+            "reason": {
+                "receipt_type": _FOLD_RECEIPT_TYPE,
+                "schema_version": _FOLD_RECEIPT_SCHEMA,
+                "run_id": run_id,
+                "old_id": old,
+                "into_id": into,
+            },
+            "origin": "catalog_edit",
+            "run_id": run_id,
+            "changed_at": changed_at,
+            "internal": True,
+        },
+        "owners": [
+            {"owner_id": old, "properties": {}},
+            {"owner_id": into, "properties": {}},
+        ],
+    }
+    expected["changes"].append(event)
+    return _fold_normalize(expected)
+
+
+def _fold_receipt(
+    snapshot: dict[str, Any],
+    old: str,
+    into: str,
+    predecessor_stage: str,
+    old_sources: list[dict[str, Any]],
+    old_backings: list[dict[str, Any]],
+    target_paths: list[str],
+    *,
+    change_id: str,
+    run_id: str,
+    changed_at: str,
+) -> tuple[str, dict[str, Any]]:
+    source_ids = sorted(source["id"] for source in old_sources)
+    backing_ids = sorted(backing["id"] for backing in old_backings)
+    receipt = {
+        "receipt_type": _FOLD_RECEIPT_TYPE,
+        "schema_version": _FOLD_RECEIPT_SCHEMA,
+        "mechanism": _FOLD_REASON,
+        "run_id": run_id,
+        "change_id": change_id,
+        "old_id": old,
+        "into_id": into,
+        "predecessor_stage": predecessor_stage,
+        "source_ids": source_ids,
+        "backing_ids": backing_ids,
+        "source_count": len(source_ids),
+        "projection_count": len(backing_ids),
+        "before": snapshot,
+        "expected_after": _fold_expected_state(
+            snapshot,
+            old,
+            into,
+            predecessor_stage,
+            old_sources,
+            old_backings,
+            target_paths,
+            change_id=change_id,
+            run_id=run_id,
+            changed_at=changed_at,
+            include_domain_mutation=True,
+        ),
+    }
+    return json.dumps(receipt, sort_keys=True, separators=(",", ":")), receipt
+
+
+def _fold_participant_ids(snapshot: dict[str, Any]) -> list[str]:
+    return sorted(
+        {
+            snapshot["old_element_id"],
+            snapshot["target_element_id"],
+            *(
+                record["element_id"]
+                for key in ("sources", "backings", "reviews", "revisions", "changes")
+                for record in snapshot.get(key) or []
+                if record.get("element_id")
+            ),
+            *(
+                relationship["other_element_id"]
+                for relationship in snapshot.get("relationships") or []
+                if relationship.get("other_element_id")
+            ),
+        }
+    )
+
+
 def _fold_idempotent_result(
     snapshot: dict[str, Any], old: str, into: str, *, dry_run: bool
 ) -> dict[str, Any]:
-    events = snapshot["fold_events"]
+    events = snapshot.get("fold_events") or []
     if len(events) != 1:
         return _fold_refusal("superseded identity has missing or ambiguous fold ledger")
+    event = events[0]
+    properties = event.get("properties") or {}
     try:
-        receipt = json.loads(events[0].get("reason") or "")
+        receipt = json.loads(properties.get("reason") or "")
     except (TypeError, ValueError):
         return _fold_refusal("superseded identity has an unreadable fold receipt")
-    expected_keys = {
+    required = {
+        "receipt_type",
+        "schema_version",
         "mechanism",
+        "run_id",
+        "change_id",
         "old_id",
         "into_id",
         "predecessor_stage",
@@ -1089,46 +1544,31 @@ def _fold_idempotent_result(
         "backing_ids",
         "source_count",
         "projection_count",
+        "before",
+        "expected_after",
     }
-    if set(receipt) != expected_keys or receipt.get("mechanism") != _FOLD_REASON:
+    if set(receipt) != required:
         return _fold_refusal("superseded identity fold receipt has schema drift")
+    if (
+        receipt.get("receipt_type") != _FOLD_RECEIPT_TYPE
+        or receipt.get("schema_version") != _FOLD_RECEIPT_SCHEMA
+        or receipt.get("mechanism") != _FOLD_REASON
+        or receipt.get("change_id") != properties.get("id")
+        or receipt.get("run_id") != properties.get("run_id")
+    ):
+        return _fold_refusal("superseded identity fold receipt has typed-ledger drift")
     if receipt.get("old_id") != old or receipt.get("into_id") != into:
         return _fold_refusal(
             "superseded identity fold receipt targets a different pair"
         )
-    old_properties = snapshot["old_properties"]
-    if old_properties.get("superseded_from_stage") != receipt.get(
-        "predecessor_stage"
-    ) or old_properties.get("source_paths") not in (None, []):
-        return _fold_refusal("superseded identity stage/cache drifted from its receipt")
-    direct_lineage = [
-        rel
-        for rel in snapshot["relationships"]
-        if rel.get("type") == "REFINED_FROM"
-        and rel.get("start_element_id") == snapshot["target_element_id"]
-        and rel.get("end_element_id") == snapshot["old_element_id"]
-    ]
-    if len(direct_lineage) != 1:
-        return _fold_refusal("superseded identity lineage drifted from its receipt")
-    by_id = {row["id"]: row for row in snapshot["sources"]}
-    for source_id in receipt.get("source_ids") or []:
-        source = by_id.get(source_id)
-        if source is None:
-            return _fold_refusal(f"receipt source {source_id!r} is missing")
-        if source.get("bound_ids") != [into]:
-            return _fold_refusal(f"receipt source {source_id!r} binding drifted")
-        if (source.get("properties") or {}).get("produced_sn_id") != into:
-            return _fold_refusal(f"receipt source {source_id!r} scalar drifted")
-        for backing in source.get("backings") or []:
-            projection_ids = {value["id"] for value in backing.get("projected") or []}
-            if into not in projection_ids or old in projection_ids:
-                return _fold_refusal(
-                    f"receipt backing {backing['id']!r} projection drifted"
-                )
-    if len(receipt.get("source_ids") or []) != receipt.get("source_count"):
-        return _fold_refusal("fold receipt source count is inconsistent")
-    if len(receipt.get("backing_ids") or []) != receipt.get("projection_count"):
-        return _fold_refusal("fold receipt projection count is inconsistent")
+    if (
+        len(receipt["source_ids"]) != receipt["source_count"]
+        or len(receipt["backing_ids"]) != receipt["projection_count"]
+    ):
+        return _fold_refusal("fold receipt cardinalities are inconsistent")
+    current = _fold_verification_state(snapshot, fold_change_id=properties["id"])
+    if current != receipt.get("expected_after"):
+        return _fold_refusal("superseded identity graph drifted from its receipt")
     return {
         "ok": True,
         "old_id": old,
@@ -1140,7 +1580,8 @@ def _fold_idempotent_result(
         "projections_carried": receipt["projection_count"],
         "attachments_rejected": 0,
         "attachments_detached": 0,
-        "change_id": events[0].get("id"),
+        "change_id": properties["id"],
+        "run_id": properties["run_id"],
         "dry_run": dry_run,
     }
 
@@ -1151,15 +1592,14 @@ def supersede_into(
     into: str,
     *,
     dry_run: bool = False,
-    include_west: bool = False,
 ) -> dict[str, Any]:
     """Atomically fold one identity into an accepted authoritative target.
 
-    The complete snapshot, target/source guards, durable change event, source
-    and projection migration, tombstone, lineage update, and post-write receipt
-    validation share one explicit transaction. A guard failure is a write-free
-    refusal; any mutation failure rolls the transaction back. Repeating an
-    already-complete fold validates its stored receipt and performs no writes.
+    The transaction snapshots every identity-bearing scalar and relationship,
+    writes a typed before/expected-after receipt, locks the snapshotted nodes by
+    assigning their immutable identifiers to themselves, rechecks the complete
+    state, applies only the declared fold fields and edges, then compares the
+    complete semantic post-state with the receipt before commit.
     """
     old = (old or "").strip()
     into = (into or "").strip()
@@ -1178,9 +1618,7 @@ def supersede_into(
                     return _fold_refusal(
                         f"name {old!r} or target {into!r} was not found"
                     )
-                guard_reason = _fold_guard_reason(
-                    snapshot, old, into, include_west=include_west
-                )
+                guard_reason = _fold_guard_reason(snapshot, old, into)
                 if guard_reason:
                     transaction.rollback()
                     return _fold_refusal(guard_reason)
@@ -1192,14 +1630,34 @@ def supersede_into(
                     return result
 
                 old_sources = _fold_source_rows(snapshot, old)
+                old_backings = _fold_old_backings(snapshot, old_sources, old)
                 predecessor_stage = snapshot["old_properties"]["name_stage"]
+                target_paths = _fold_target_paths(
+                    snapshot, old_sources, old_backings, into
+                )
+                change_id = f"sn-change:{uuid.uuid4()}"
+                run_id = f"sn-fold:{uuid.uuid4()}"
+                changed_at = datetime.now(UTC).isoformat()
                 receipt_text, receipt = _fold_receipt(
-                    old, into, predecessor_stage, old_sources
+                    snapshot,
+                    old,
+                    into,
+                    predecessor_stage,
+                    old_sources,
+                    old_backings,
+                    target_paths,
+                    change_id=change_id,
+                    run_id=run_id,
+                    changed_at=changed_at,
                 )
                 would_strand = sum(
                     1
                     for source in old_sources
-                    if set(source.get("live_targets") or []) == {old}
+                    if all(
+                        binding.get("target_id") == old
+                        or binding.get("target_stage") not in _FOLD_LIVE_STAGES
+                        for binding in source.get("bindings") or []
+                    )
                 )
                 result = {
                     "ok": True,
@@ -1212,6 +1670,7 @@ def supersede_into(
                     "projections_carried": receipt["projection_count"],
                     "attachments_rejected": 0,
                     "attachments_detached": 0,
+                    "run_id": run_id,
                     "dry_run": dry_run,
                 }
                 if dry_run:
@@ -1219,66 +1678,14 @@ def supersede_into(
                         "predecessor_stage": predecessor_stage,
                         "source_ids": receipt["source_ids"],
                         "backing_ids": receipt["backing_ids"],
-                        "target_paths": _fold_target_paths(snapshot, old_sources, into),
+                        "target_paths": target_paths,
                         "lineage": {"from": into, "to": old},
                         "change_operation": "fold_identity",
+                        "run_id": run_id,
                     }
                     transaction.rollback()
                     return result
 
-                participant_ids = {
-                    snapshot["old_element_id"],
-                    snapshot["target_element_id"],
-                    *(row["element_id"] for row in snapshot["sources"]),
-                    *(
-                        backing["element_id"]
-                        for row in snapshot["sources"]
-                        for backing in row.get("backings") or []
-                    ),
-                    *(
-                        rel["other_element_id"]
-                        for rel in snapshot["relationships"]
-                        if rel.get("other_element_id")
-                    ),
-                }
-                lock_rows = list(
-                    transaction.run(
-                        _FOLD_LOCK_QUERY,
-                        element_ids=sorted(participant_ids),
-                    )
-                )
-                locked = int(dict(lock_rows[0]).get("locked") or 0) if lock_rows else 0
-                if locked != len(participant_ids):
-                    raise RuntimeError("fold participant set changed before locking")
-                locked_snapshot = _fold_snapshot(transaction, old, into)
-                if locked_snapshot != snapshot:
-                    raise RuntimeError(
-                        "fold graph state changed after preflight snapshot"
-                    )
-
-                # Re-run the exact attachment query through the caller-owned
-                # transaction after locks are held. The local guard above checks
-                # every old pairing; this shared guard additionally prevents a
-                # writer from diverging from the canonical query boundary.
-                from imas_codex.standard_names.attachment_audit import (
-                    guard_source_pairings,
-                )
-
-                guarded = guard_source_pairings(
-                    _FoldTransactionQuery(transaction),
-                    into,
-                    [row["id"] for row in old_sources],
-                )
-                if guarded.rejected or set(guarded.accepted_source_ids) != {
-                    row["id"] for row in old_sources
-                }:
-                    detail = "; ".join(item.reason for item in guarded.rejected)
-                    raise RuntimeError(
-                        "attachment authority changed after fold locks: "
-                        + (detail or "source set was not admitted")
-                    )
-
-                change_id = f"sn-change:{uuid.uuid4()}"
                 event_rows = list(
                     transaction.run(
                         _FOLD_EVENT_QUERY,
@@ -1287,42 +1694,107 @@ def supersede_into(
                         old_properties=snapshot["old_properties"],
                         target_properties=snapshot["target_properties"],
                         change_id=change_id,
+                        run_id=run_id,
                         receipt=receipt_text,
-                        changed_at=datetime.now(UTC).isoformat(),
+                        changed_at=changed_at,
                     )
                 )
                 if len(event_rows) != 1:
                     raise RuntimeError("fold change event was not written exactly once")
 
-                moved_sources = moved_projections = 0
-                if old_sources:
-                    source_rows = list(
-                        transaction.run(
-                            _FOLD_SOURCE_MUTATION_QUERY,
-                            old_id=old,
-                            into_id=into,
-                            sources=[
-                                {
-                                    "id": row["id"],
-                                    "properties": row["properties"],
-                                }
-                                for row in old_sources
-                            ],
-                        )
+                participants = _fold_participant_ids(snapshot)
+                lock_rows = list(
+                    transaction.run(_FOLD_LOCK_QUERY, element_ids=participants)
+                )
+                locked = int(dict(lock_rows[0]).get("locked") or 0) if lock_rows else 0
+                if locked != len(participants):
+                    raise RuntimeError("fold participant set changed before locking")
+                locked_snapshot = _fold_snapshot(transaction, old, into)
+                expected_locked = _fold_expected_state(
+                    snapshot,
+                    old,
+                    into,
+                    predecessor_stage,
+                    old_sources,
+                    old_backings,
+                    target_paths,
+                    change_id=change_id,
+                    run_id=run_id,
+                    changed_at=changed_at,
+                    include_domain_mutation=False,
+                )
+                if (
+                    _fold_verification_state(locked_snapshot, fold_change_id=change_id)
+                    != expected_locked
+                ):
+                    raise RuntimeError(
+                        "fold graph state changed after preflight snapshot"
                     )
-                    if len(source_rows) != 1:
-                        raise RuntimeError("fold source migration returned no receipt")
-                    source_receipt = dict(source_rows[0])
-                    moved_sources = int(source_receipt.get("sources_moved") or 0)
-                    moved_projections = int(
-                        source_receipt.get("projections_moved") or 0
+
+                from imas_codex.standard_names.attachment_audit import (
+                    guard_source_pairings,
+                )
+
+                guarded = guard_source_pairings(
+                    _FoldTransactionQuery(transaction),
+                    into,
+                    [source["id"] for source in old_sources],
+                )
+                if guarded.rejected or set(guarded.accepted_source_ids) != {
+                    source["id"] for source in old_sources
+                }:
+                    detail = "; ".join(item.reason for item in guarded.rejected)
+                    raise RuntimeError(
+                        "attachment authority changed after fold locks: "
+                        + (detail or "source set was not admitted")
                     )
-                    if moved_sources != receipt["source_count"]:
-                        raise RuntimeError("fold source set changed during migration")
-                    if moved_projections != receipt["projection_count"]:
-                        raise RuntimeError(
-                            "fold projection set changed during migration"
-                        )
+
+                source_rows = list(
+                    transaction.run(
+                        _FOLD_SOURCE_MUTATION_QUERY,
+                        old_id=old,
+                        into_id=into,
+                        sources=[
+                            {
+                                "id": source["id"],
+                                "element_id": source["element_id"],
+                                "properties": source["properties"],
+                                "remove_binding_element_ids": [
+                                    binding["element_id"]
+                                    for binding in source.get("bindings") or []
+                                    if binding.get("target_id") in {old, into}
+                                    or binding.get("target_stage") in _FOLD_LIVE_STAGES
+                                ],
+                            }
+                            for source in old_sources
+                        ],
+                        backings=[
+                            {
+                                "element_id": backing["element_id"],
+                                "properties": backing["properties"],
+                                "has_standard_name_id": "standard_name_id"
+                                in backing["properties"],
+                                "remove_projection_element_ids": [
+                                    projection["element_id"]
+                                    for projection in backing.get("projections") or []
+                                    if projection.get("target_id") in {old, into}
+                                    or projection.get("target_stage")
+                                    in _FOLD_LIVE_STAGES
+                                ],
+                            }
+                            for backing in old_backings
+                        ],
+                    )
+                )
+                if len(source_rows) != 1:
+                    raise RuntimeError("fold source migration returned no receipt")
+                source_result = dict(source_rows[0])
+                moved_sources = int(source_result.get("sources_moved") or 0)
+                moved_projections = int(source_result.get("projections_moved") or 0)
+                if moved_sources != receipt["source_count"]:
+                    raise RuntimeError("fold source set changed during migration")
+                if moved_projections != receipt["projection_count"]:
+                    raise RuntimeError("fold projection set changed during migration")
 
                 name_rows = list(
                     transaction.run(
@@ -1332,45 +1804,21 @@ def supersede_into(
                         old_properties=snapshot["old_properties"],
                         target_properties=snapshot["target_properties"],
                         predecessor_stage=predecessor_stage,
-                        target_paths=_fold_target_paths(snapshot, old_sources, into),
+                        target_paths=target_paths,
                     )
                 )
                 if len(name_rows) != 1:
                     raise RuntimeError("fold name state changed during mutation")
 
-                post_rows = list(
-                    transaction.run(
-                        _FOLD_POSTFLIGHT_QUERY,
-                        old_id=old,
-                        into_id=into,
-                        source_ids=receipt["source_ids"],
-                        change_id=change_id,
-                    )
+                post_snapshot = _fold_snapshot(
+                    transaction, old, into, query=_FOLD_POSTFLIGHT_QUERY
                 )
-                if len(post_rows) != 1:
-                    raise RuntimeError("fold postflight returned no receipt")
-                post = dict(post_rows[0])
-                expected_paths = _fold_target_paths(snapshot, old_sources, into)
-                post_ok = (
-                    post.get("old_stage") == "superseded"
-                    and post.get("predecessor_stage") == predecessor_stage
-                    and post.get("old_claim_token") is None
-                    and post.get("old_claimed_at") is None
-                    and post.get("old_paths") in (None, [])
-                    and post.get("target_stage") == "accepted"
-                    and post.get("target_validation") == "valid"
-                    and post.get("target_claim_token") is None
-                    and post.get("target_claimed_at") is None
-                    and sorted(post.get("target_paths") or []) == expected_paths
-                    and int(post.get("lineage_count") or 0) == 1
-                    and int(post.get("event_count") or 0) == 1
-                    and int(post.get("source_count") or 0) == receipt["source_count"]
-                    and int(post.get("correct_sources") or 0) == receipt["source_count"]
-                    and int(post.get("correct_projections") or 0)
-                    == receipt["source_count"]
-                )
-                if not post_ok:
-                    raise RuntimeError("fold postflight invariants did not hold")
+                if (
+                    post_snapshot is None
+                    or _fold_verification_state(post_snapshot, fold_change_id=change_id)
+                    != receipt["expected_after"]
+                ):
+                    raise RuntimeError("fold postflight exact-state proof did not hold")
                 transaction.commit()
                 result["change_id"] = change_id
                 result["receipt_counts"] = {

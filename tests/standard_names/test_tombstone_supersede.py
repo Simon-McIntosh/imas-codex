@@ -39,14 +39,19 @@ class _State:
     nodes: dict[str, dict[str, Any]]
     sources: dict[str, dict[str, Any]] = field(default_factory=dict)
     backings: dict[str, dict[str, Any]] = field(default_factory=dict)
-    refined_from: set[tuple[str, str]] = field(default_factory=set)
+    refined_from: list[tuple[str, str]] = field(default_factory=list)
     changes: dict[str, dict[str, Any]] = field(default_factory=dict)
-    change_links: set[tuple[str, str]] = field(default_factory=set)
+    change_links: list[tuple[str, str]] = field(default_factory=list)
+    reviews: dict[str, dict[str, Any]] = field(default_factory=dict)
+    review_links: list[tuple[str, str]] = field(default_factory=list)
+    revisions: dict[str, dict[str, Any]] = field(default_factory=dict)
+    revision_links: list[tuple[str, str]] = field(default_factory=list)
+    other_relationships: list[dict[str, Any]] = field(default_factory=list)
     unrelated: dict[str, Any] = field(default_factory=lambda: {"sentinel": [1, 2, 3]})
 
 
 class _Transaction:
-    """Copy-on-write graph transaction with injectable failure boundaries."""
+    """Copy-on-write graph transaction that mirrors the production queries."""
 
     def __init__(self, graph: _Graph) -> None:
         self.graph = graph
@@ -60,61 +65,149 @@ class _Transaction:
     def _element_id(kind: str, identifier: str) -> str:
         return f"{kind}:{identifier}"
 
-    def _relationships(self, old: str, target: str) -> list[dict[str, Any]]:
+    @staticmethod
+    def _relationship(
+        kind: str,
+        key: str,
+        start_kind: str,
+        start_id: str,
+        end_kind: str,
+        end_id: str,
+        *,
+        properties: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        return {
+            "element_id": f"rel:{kind}:{key}",
+            "type": kind,
+            "start_element_id": f"{start_kind}:{start_id}",
+            "end_element_id": f"{end_kind}:{end_id}",
+            "start_id": start_id,
+            "end_id": end_id,
+            "start_labels": [_label(start_kind)],
+            "end_labels": [_label(end_kind)],
+            "properties": copy.deepcopy(properties or {}),
+        }
+
+    def _all_relationships(self) -> list[dict[str, Any]]:
         relationships: list[dict[str, Any]] = []
-        old_element_id = self._element_id("name", old)
-        target_element_id = self._element_id("name", target)
-
-        def add(kind: str, key: str, start: str, end: str) -> None:
-            if start not in {old_element_id, target_element_id} and end not in {
-                old_element_id,
-                target_element_id,
-            }:
-                return
-            relationships.append(
-                {
-                    "element_id": f"rel:{kind}:{key}",
-                    "type": kind,
-                    "start_element_id": start,
-                    "end_element_id": end,
-                    "other_element_id": (
-                        end if start in {old_element_id, target_element_id} else start
-                    ),
-                    "properties": {},
-                }
-            )
-
         for source_id, source in self.state.sources.items():
-            for bound in source["bound"]:
-                add(
-                    "PRODUCED_NAME",
-                    f"{source_id}:{bound}",
-                    self._element_id("source", source_id),
-                    self._element_id("name", bound),
+            for index, bound in enumerate(source["bindings"]):
+                relationships.append(
+                    self._relationship(
+                        "PRODUCED_NAME",
+                        f"{source_id}:{index}:{bound}",
+                        "source",
+                        source_id,
+                        "name",
+                        bound,
+                    )
+                )
+            for index, backing_id in enumerate(source.get("backings", [])):
+                kind = (
+                    "FROM_DD_PATH"
+                    if "IMASNode" in self.state.backings[backing_id]["labels"]
+                    else "FROM_SIGNAL"
+                )
+                relationships.append(
+                    self._relationship(
+                        kind,
+                        f"{source_id}:{index}:{backing_id}",
+                        "source",
+                        source_id,
+                        "backing",
+                        backing_id,
+                    )
                 )
         for backing_id, backing in self.state.backings.items():
-            for projected in backing["projected"]:
-                add(
-                    "HAS_STANDARD_NAME",
-                    f"{backing_id}:{projected}",
-                    self._element_id("backing", backing_id),
-                    self._element_id("name", projected),
+            for index, projected in enumerate(backing["projections"]):
+                relationships.append(
+                    self._relationship(
+                        "HAS_STANDARD_NAME",
+                        f"{backing_id}:{index}:{projected}",
+                        "backing",
+                        backing_id,
+                        "name",
+                        projected,
+                    )
                 )
-        for successor, predecessor in self.state.refined_from:
-            add(
-                "REFINED_FROM",
-                f"{successor}:{predecessor}",
-                self._element_id("name", successor),
-                self._element_id("name", predecessor),
+            for index, unit in enumerate(backing.get("units", [])):
+                relationships.append(
+                    self._relationship(
+                        "HAS_UNIT",
+                        f"{backing_id}:{index}:{unit}",
+                        "backing",
+                        backing_id,
+                        "unit",
+                        unit,
+                    )
+                )
+        for index, (successor, predecessor) in enumerate(self.state.refined_from):
+            relationships.append(
+                self._relationship(
+                    "REFINED_FROM",
+                    f"{index}:{successor}:{predecessor}",
+                    "name",
+                    successor,
+                    "name",
+                    predecessor,
+                )
             )
-        for owner, change_id in self.state.change_links:
-            add(
-                "HAS_INTERNAL_CHANGE",
-                f"{owner}:{change_id}",
-                self._element_id("name", owner),
-                self._element_id("change", change_id),
+        for index, (owner, change_id) in enumerate(self.state.change_links):
+            relationships.append(
+                self._relationship(
+                    "HAS_INTERNAL_CHANGE",
+                    f"{index}:{owner}:{change_id}",
+                    "name",
+                    owner,
+                    "change",
+                    change_id,
+                )
             )
-        return sorted(relationships, key=lambda value: value["element_id"])
+        for index, (owner, review_id) in enumerate(self.state.review_links):
+            relationships.append(
+                self._relationship(
+                    "HAS_REVIEW",
+                    f"{index}:{owner}:{review_id}",
+                    "name",
+                    owner,
+                    "review",
+                    review_id,
+                )
+            )
+        for index, (owner, revision_id) in enumerate(self.state.revision_links):
+            relationships.append(
+                self._relationship(
+                    "DOCS_REVISION_OF",
+                    f"{index}:{owner}:{revision_id}",
+                    "name",
+                    owner,
+                    "revision",
+                    revision_id,
+                )
+            )
+        relationships.extend(copy.deepcopy(self.state.other_relationships))
+        return relationships
+
+    def _incident_relationships(self, old: str, target: str) -> list[dict[str, Any]]:
+        name_ids = {
+            self._element_id("name", old),
+            self._element_id("name", target),
+        }
+        relationships = []
+        for relationship in self._all_relationships():
+            if (
+                relationship["start_element_id"] not in name_ids
+                and relationship["end_element_id"] not in name_ids
+            ):
+                continue
+            item = copy.deepcopy(relationship)
+            item["other_element_id"] = (
+                item["end_element_id"]
+                if item["start_element_id"] in name_ids
+                else item["start_element_id"]
+            )
+            relationships.append(item)
+        return relationships
 
     def _descends(self, successor: str, predecessor: str) -> bool:
         seen: set[str] = set()
@@ -130,117 +223,222 @@ class _Transaction:
                 frontier.append(parent)
         return False
 
-    def _source_row(self, source_id: str, source: dict[str, Any]) -> dict[str, Any]:
-        backings = []
-        for backing_id in source.get("backings", []):
-            backing = self.state.backings[backing_id]
-            backings.append(
-                {
-                    "id": backing_id,
-                    "element_id": self._element_id("backing", backing_id),
-                    "labels": list(backing["labels"]),
-                    "properties": copy.deepcopy(backing["properties"]),
-                    "units": list(backing.get("units", [])),
-                    "projected": sorted(
-                        [
-                            {
-                                "id": name,
-                                "stage": self.state.nodes[name]["name_stage"],
-                            }
-                            for name in backing["projected"]
-                        ],
-                        key=lambda value: value["id"],
-                    ),
-                }
-            )
+    def _candidate_source_ids(self, old: str, target: str) -> set[str]:
+        ids = set()
+        for source_id, source in self.state.sources.items():
+            projected = {
+                name
+                for backing_id in source.get("backings", [])
+                for name in self.state.backings[backing_id]["projections"]
+            }
+            if (
+                source["properties"].get("produced_sn_id") in {old, target}
+                or set(source["bindings"]) & {old, target}
+                or projected & {old, target}
+            ):
+                ids.add(source_id)
+        return ids
+
+    def _source_row(self, source_id: str) -> dict[str, Any]:
+        source = self.state.sources[source_id]
         return {
             "id": source_id,
             "element_id": self._element_id("source", source_id),
+            "labels": ["StandardNameSource"],
             "properties": copy.deepcopy(source["properties"]),
-            "bound_ids": sorted(source["bound"]),
-            "live_targets": sorted(
-                name
-                for name in source["bound"]
-                if self.state.nodes[name]["name_stage"] in edit._FOLD_LIVE_STAGES
-            ),
-            "backings": sorted(backings, key=lambda value: value["id"]),
+            "bindings": [
+                {
+                    "element_id": f"rel:PRODUCED_NAME:{source_id}:{index}:{target}",
+                    "properties": {},
+                    "target_id": target,
+                    "target_stage": self.state.nodes[target]["name_stage"],
+                }
+                for index, target in enumerate(source["bindings"])
+            ],
+            "backing_refs": [
+                {
+                    "element_id": f"rel:owner:{source_id}:{index}:{backing_id}",
+                    "properties": {},
+                    "type": (
+                        "FROM_DD_PATH"
+                        if "IMASNode" in self.state.backings[backing_id]["labels"]
+                        else "FROM_SIGNAL"
+                    ),
+                    "backing_element_id": self._element_id("backing", backing_id),
+                    "backing_id": backing_id,
+                }
+                for index, backing_id in enumerate(source.get("backings", []))
+            ],
+        }
+
+    def _backing_row(self, backing_id: str) -> dict[str, Any]:
+        backing = self.state.backings[backing_id]
+        owners = [
+            (source_id, index)
+            for source_id, source in self.state.sources.items()
+            for index, owned in enumerate(source.get("backings", []))
+            if owned == backing_id
+        ]
+        return {
+            "id": backing_id,
+            "element_id": self._element_id("backing", backing_id),
+            "labels": list(backing["labels"]),
+            "properties": copy.deepcopy(backing["properties"]),
+            "owners": [
+                {
+                    "source_id": source_id,
+                    "source_element_id": self._element_id("source", source_id),
+                    "relationship_element_id": (
+                        f"rel:owner:{source_id}:{index}:{backing_id}"
+                    ),
+                    "relationship_properties": {},
+                    "relationship_type": (
+                        "FROM_DD_PATH"
+                        if "IMASNode" in backing["labels"]
+                        else "FROM_SIGNAL"
+                    ),
+                }
+                for source_id, index in owners
+            ],
+            "projections": [
+                {
+                    "element_id": (
+                        f"rel:HAS_STANDARD_NAME:{backing_id}:{index}:{target}"
+                    ),
+                    "properties": {},
+                    "target_id": target,
+                    "target_stage": self.state.nodes[target]["name_stage"],
+                }
+                for index, target in enumerate(backing["projections"])
+            ],
+            "units": [
+                {
+                    "element_id": f"rel:HAS_UNIT:{backing_id}:{index}:{unit}",
+                    "properties": {},
+                    "unit_id": unit,
+                    "unit_properties": {"id": unit},
+                }
+                for index, unit in enumerate(backing.get("units", []))
+            ],
+        }
+
+    def _owned_record(
+        self,
+        kind: str,
+        identifier: str,
+        properties: dict[str, Any],
+        links: list[tuple[str, str]],
+        relationship: str,
+    ) -> dict[str, Any]:
+        return {
+            "element_id": self._element_id(kind, identifier),
+            "labels": [_label(kind)],
+            "properties": copy.deepcopy(properties),
+            "owners": [
+                {
+                    "owner_id": owner,
+                    "element_id": f"rel:{relationship}:{index}:{owner}:{identifier}",
+                    "properties": {},
+                }
+                for index, (owner, owned) in enumerate(links)
+                if owned == identifier
+            ],
         }
 
     def _snapshot(self, old: str, target: str) -> list[dict[str, Any]]:
         self.snapshot_count += 1
         if old not in self.state.nodes or target not in self.state.nodes:
             return []
-        sources = [
-            self._source_row(source_id, source)
-            for source_id, source in self.state.sources.items()
-            if source["bound"] & {old, target}
+        candidate_sources = self._candidate_source_ids(old, target)
+        candidate_backings = {
+            backing_id
+            for backing_id, backing in self.state.backings.items()
+            if set(backing["projections"]) & {old, target}
+            or any(
+                source_id in candidate_sources
+                and backing_id in self.state.sources[source_id].get("backings", [])
+                for source_id in self.state.sources
+            )
+        }
+        reviews = [
+            self._owned_record(
+                "review",
+                review_id,
+                properties,
+                self.state.review_links,
+                "HAS_REVIEW",
+            )
+            for review_id, properties in self.state.reviews.items()
+            if properties.get("standard_name_id") in {old, target}
+            or any(
+                owner in {old, target} and owned == review_id
+                for owner, owned in self.state.review_links
+            )
         ]
-        fold_events = [
-            copy.deepcopy(change)
-            for change_id, change in self.state.changes.items()
-            if change.get("operation") == "fold_identity"
-            and change.get("from_name") == old
-            and change.get("to_name") == target
-            and any(
-                (owner, change_id) in self.state.change_links for owner in (old, target)
+        revisions = [
+            self._owned_record(
+                "revision",
+                revision_id,
+                properties,
+                self.state.revision_links,
+                "DOCS_REVISION_OF",
+            )
+            for revision_id, properties in self.state.revisions.items()
+            if any(
+                owner in {old, target} and owned == revision_id
+                for owner, owned in self.state.revision_links
+            )
+        ]
+        changes = [
+            self._owned_record(
+                "change",
+                change_id,
+                properties,
+                self.state.change_links,
+                "HAS_INTERNAL_CHANGE",
+            )
+            for change_id, properties in self.state.changes.items()
+            if any(
+                owner in {old, target} and owned == change_id
+                for owner, owned in self.state.change_links
             )
         ]
         return [
             {
                 "old_element_id": self._element_id("name", old),
                 "target_element_id": self._element_id("name", target),
+                "old_labels": ["StandardName"],
+                "target_labels": ["StandardName"],
                 "old_properties": copy.deepcopy(self.state.nodes[old]),
                 "target_properties": copy.deepcopy(self.state.nodes[target]),
                 "cycle": self._descends(old, target),
-                "sources": sorted(sources, key=lambda value: value["id"]),
-                "relationships": self._relationships(old, target),
-                "fold_events": sorted(fold_events, key=lambda value: value["id"]),
-                "target_units": list(
-                    self.state.nodes[target].get("relationship_units", [])
-                ),
+                "sources": [self._source_row(value) for value in candidate_sources],
+                "backings": [self._backing_row(value) for value in candidate_backings],
+                "relationships": self._incident_relationships(old, target),
+                "reviews": reviews,
+                "revisions": revisions,
+                "changes": changes,
+                "old_units": self._name_units(old),
+                "target_units": self._name_units(target),
             }
         ]
 
-    def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
-        if "ATOMIC_FOLD_SNAPSHOT" in cypher:
-            return self._snapshot(params["old_id"], params["into_id"])
-        if "ATOMIC_FOLD_LOCK" in cypher:
-            if self.graph.fail_at == "race":
-                self.state.nodes[self.graph.target]["documentation"] = "concurrent"
-            return [{"locked": len(params["element_ids"])}]
-        if "RETURN source_id," in cypher and "already_bound" in cypher:
-            target = params["sn_id"]
-            existing = sorted(
-                {
-                    backing_id
-                    for source in self.state.sources.values()
-                    if target in source["bound"]
-                    for backing_id in source.get("backings", [])
-                    if "IMASNode" in self.state.backings[backing_id]["labels"]
-                }
+    def _name_units(self, name: str) -> list[dict[str, Any]]:
+        return [
+            {
+                "element_id": f"rel:HAS_UNIT:{name}:{index}:{unit}",
+                "properties": {},
+                "unit_id": unit,
+                "unit_properties": {"id": unit},
+            }
+            for index, unit in enumerate(
+                self.state.nodes[name].get("relationship_units", [])
             )
-            rows = []
-            for source_id in params["source_ids"]:
-                source = self.state.sources[source_id]
-                backing = self.state.backings[source["backings"][0]]
-                is_dd = "IMASNode" in backing["labels"]
-                rows.append(
-                    {
-                        "source_id": source_id,
-                        "source_type": source["properties"]["source_type"],
-                        "dd_path": backing["properties"]["id"] if is_dd else None,
-                        "dd_unit": (
-                            backing["units"][0]
-                            if backing.get("units")
-                            else backing["properties"].get("unit")
-                        ),
-                        "sn_unit": self.state.nodes[target]["unit"],
-                        "already_bound": target in source["bound"],
-                        "existing_dd_paths": existing,
-                        "name_stage": self.state.nodes[target]["name_stage"],
-                    }
-                )
-            return rows
+        ]
+
+    def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        if "ATOMIC_FOLD_SNAPSHOT" in cypher or "ATOMIC_FOLD_POSTFLIGHT" in cypher:
+            return self._snapshot(params["old_id"], params["into_id"])
         if "ATOMIC_FOLD_EVENT" in cypher:
             self.write_markers.append("event")
             if self.graph.fail_at == "event":
@@ -256,34 +454,102 @@ class _Transaction:
                 "operation": "fold_identity",
                 "reason": params["receipt"],
                 "origin": "catalog_edit",
+                "run_id": params["run_id"],
                 "changed_at": params["changed_at"],
                 "internal": True,
             }
             self.state.changes[change["id"]] = change
-            self.state.change_links.add((params["old_id"], change["id"]))
-            self.state.change_links.add((params["into_id"], change["id"]))
+            self.state.change_links.extend(
+                [
+                    (params["old_id"], change["id"]),
+                    (params["into_id"], change["id"]),
+                ]
+            )
             return [{"change_id": change["id"]}]
+        if "ATOMIC_FOLD_LOCK" in cypher:
+            self.write_markers.append("lock")
+            if self.graph.fail_at == "race":
+                self.state.nodes[self.graph.target]["documentation"] = "concurrent"
+            return [{"locked": len(params["element_ids"])}]
+        if "RETURN source_id," in cypher and "already_bound" in cypher:
+            target = params["sn_id"]
+            existing = sorted(
+                {
+                    backing_id
+                    for source in self.state.sources.values()
+                    if target in source["bindings"]
+                    for backing_id in source.get("backings", [])
+                    if "IMASNode" in self.state.backings[backing_id]["labels"]
+                }
+            )
+            rows = []
+            for source_id in params["source_ids"]:
+                source = self.state.sources[source_id]
+                backing_ids = source.get("backings", [])
+                backing = self.state.backings[backing_ids[0]] if backing_ids else None
+                is_dd = backing is not None and "IMASNode" in backing["labels"]
+                rows.append(
+                    {
+                        "source_id": source_id,
+                        "source_type": source["properties"]["source_type"],
+                        "dd_path": backing["properties"]["id"] if is_dd else None,
+                        "dd_unit": (
+                            backing["units"][0]
+                            if is_dd and backing.get("units")
+                            else backing["properties"].get("unit")
+                            if is_dd
+                            else None
+                        ),
+                        "sn_unit": self.state.nodes[target]["unit"],
+                        "already_bound": target in source["bindings"],
+                        "existing_dd_paths": existing,
+                        "name_stage": self.state.nodes[target]["name_stage"],
+                    }
+                )
+            return rows
         if "ATOMIC_FOLD_MOVE_SOURCES" in cypher:
             self.write_markers.append("sources")
-            moved_backings: set[str] = set()
+            moved_sources = 0
             for index, expected in enumerate(params["sources"]):
                 source = self.state.sources[expected["id"]]
-                if source["properties"] != expected["properties"]:
+                if (
+                    self._element_id("source", expected["id"]) != expected["element_id"]
+                    or source["properties"] != expected["properties"]
+                ):
                     continue
-                source["bound"].discard(params["old_id"])
-                source["bound"].add(params["into_id"])
+                remove = set(expected["remove_binding_element_ids"])
+                source["bindings"] = [
+                    name
+                    for binding_index, name in enumerate(source["bindings"])
+                    if f"rel:PRODUCED_NAME:{expected['id']}:{binding_index}:{name}"
+                    not in remove
+                ]
+                source["bindings"].append(params["into_id"])
                 source["properties"]["produced_sn_id"] = params["into_id"]
-                for backing_id in source["backings"]:
-                    backing = self.state.backings[backing_id]
-                    backing["projected"].discard(params["old_id"])
-                    backing["projected"].add(params["into_id"])
-                    moved_backings.add(backing_id)
+                moved_sources += 1
                 if self.graph.fail_at == "partial_source" and index == 0:
                     raise RuntimeError("injected partial source migration")
+            moved_backings = 0
+            for expected in params["backings"]:
+                backing_id = expected["properties"]["id"]
+                backing = self.state.backings[backing_id]
+                if backing["properties"] != expected["properties"]:
+                    continue
+                remove = set(expected["remove_projection_element_ids"])
+                backing["projections"] = [
+                    name
+                    for projection_index, name in enumerate(backing["projections"])
+                    if (f"rel:HAS_STANDARD_NAME:{backing_id}:{projection_index}:{name}")
+                    not in remove
+                ]
+                backing["projections"].append(params["into_id"])
+                if expected["has_standard_name_id"]:
+                    backing["properties"]["standard_name_id"] = params["into_id"]
+                moved_backings += 1
             return [
                 {
-                    "sources_moved": len(params["sources"]),
-                    "projections_moved": len(moved_backings),
+                    "sources_moved": moved_sources,
+                    "projections_moved": moved_backings,
                 }
             ]
         if "ATOMIC_FOLD_MUTATE_NAMES" in cypher:
@@ -300,53 +566,13 @@ class _Transaction:
             if old.get("edit_status") == "open":
                 old["edit_status"] = "applied"
             target["source_paths"] = list(params["target_paths"])
-            self.state.refined_from.add((params["into_id"], params["old_id"]))
+            lineage = (params["into_id"], params["old_id"])
+            if lineage not in self.state.refined_from:
+                self.state.refined_from.append(lineage)
             return [
                 {
                     "old_stage": "superseded",
                     "predecessor_stage": params["predecessor_stage"],
-                }
-            ]
-        if "ATOMIC_FOLD_POSTFLIGHT" in cypher:
-            old = self.state.nodes[params["old_id"]]
-            target = self.state.nodes[params["into_id"]]
-            sources = [self.state.sources[value] for value in params["source_ids"]]
-            correct_sources = sum(
-                1
-                for source in sources
-                if source["properties"]["produced_sn_id"] == params["into_id"]
-                and source["bound"] == {params["into_id"]}
-            )
-            correct_projections = sum(
-                1
-                for source in sources
-                if all(
-                    params["into_id"] in self.state.backings[backing]["projected"]
-                    and params["old_id"]
-                    not in self.state.backings[backing]["projected"]
-                    for backing in source["backings"]
-                )
-            )
-            return [
-                {
-                    "old_stage": old["name_stage"],
-                    "predecessor_stage": old.get("superseded_from_stage"),
-                    "old_claim_token": old.get("claim_token"),
-                    "old_claimed_at": old.get("claimed_at"),
-                    "old_paths": old.get("source_paths"),
-                    "old_edit_status": old.get("edit_status"),
-                    "target_stage": target["name_stage"],
-                    "target_validation": target["validation_status"],
-                    "target_claim_token": target.get("claim_token"),
-                    "target_claimed_at": target.get("claimed_at"),
-                    "target_paths": target.get("source_paths"),
-                    "lineage_count": int(
-                        (params["into_id"], params["old_id"]) in self.state.refined_from
-                    ),
-                    "event_count": int(params["change_id"] in self.state.changes),
-                    "source_count": len(sources),
-                    "correct_sources": correct_sources,
-                    "correct_projections": correct_projections,
                 }
             ]
         raise AssertionError(f"unexpected query: {cypher}")
@@ -359,6 +585,18 @@ class _Transaction:
     def rollback(self) -> None:
         self.graph.rollbacks += 1
         self.rolled_back = True
+
+
+def _label(kind: str) -> str:
+    return {
+        "name": "StandardName",
+        "source": "StandardNameSource",
+        "backing": "IMASNode",
+        "unit": "Unit",
+        "change": "StandardNameChange",
+        "review": "StandardNameReview",
+        "revision": "DocsRevision",
+    }[kind]
 
 
 class _Session:
@@ -404,10 +642,10 @@ def _state(
     target_unit: str = "m^-3",
     dd_unit: str = "m^-3",
     old_extra: dict[str, Any] | None = None,
+    backing_id: str = "core_profiles/profiles_1d/electrons/density",
 ) -> _State:
     old = "invalid_duplicate"
-    source_id = "dd:core_profiles/profiles_1d/electrons/density"
-    backing_id = "core_profiles/profiles_1d/electrons/density"
+    source_id = "dd:" + backing_id
     return _State(
         nodes={
             old: _node(
@@ -437,7 +675,7 @@ def _state(
                     "claim_token": None,
                     "claimed_at": None,
                 },
-                "bound": {old},
+                "bindings": [old],
                 "backings": [backing_id],
             }
         },
@@ -446,7 +684,7 @@ def _state(
                 "labels": ["IMASNode"],
                 "properties": {"id": backing_id, "unit": dd_unit},
                 "units": [dd_unit],
-                "projected": {old},
+                "projections": [old],
             }
         },
     )
@@ -458,24 +696,21 @@ def _run(
     old: str = "invalid_duplicate",
     target: str = "electron_density",
     dry_run: bool = False,
-    include_west: bool = False,
     parseable: bool = True,
+    use_west_manifest: bool = False,
 ) -> dict[str, Any]:
     graph.target = target
+    west_paths = edit._fold_west_dd_paths() if use_west_manifest else frozenset()
     with (
         patch.object(edit, "GraphClient", return_value=graph),
+        patch.object(edit, "_fold_west_dd_paths", return_value=west_paths),
         patch.object(
             edit,
             "_isn_round_trip_ok",
             return_value=(parseable, None if parseable else "strict parse failed"),
         ),
     ):
-        return edit.supersede_into(
-            old,
-            target,
-            dry_run=dry_run,
-            include_west=include_west,
-        )
+        return edit.supersede_into(old, target, dry_run=dry_run)
 
 
 @pytest.mark.parametrize(
@@ -487,31 +722,28 @@ def test_fold_preserves_actual_predecessor_stage(stage: str) -> None:
     assert result["ok"] is True
     assert result["old_prior_stage"] == stage
     assert graph.state.nodes["invalid_duplicate"]["superseded_from_stage"] == stage
-    assert graph.state.nodes["invalid_duplicate"]["name_stage"] == "superseded"
 
 
-def test_pending_quarantined_and_accepted_fold_through_same_transaction() -> None:
-    pending = _Graph(_state(old_stage="pending", old_validation="quarantined"))
-    accepted = _Graph(_state(old_stage="accepted", old_validation="valid"))
-    assert _run(pending)["ok"]
-    assert _run(accepted)["ok"]
-    assert pending.commits == accepted.commits == 1
-    assert pending.transactions[0].write_markers == ["event", "sources", "names"]
-
-
-def test_fold_migrates_sources_projections_scalars_cache_and_lineage() -> None:
-    graph = _Graph(_state())
+def test_fold_migrates_scalars_edges_cache_and_lineage_exactly() -> None:
+    state = _state()
+    source = next(iter(state.sources.values()))
+    backing = next(iter(state.backings.values()))
+    source["bindings"].extend(["invalid_duplicate", "electron_density"])
+    backing["projections"].extend(["invalid_duplicate", "electron_density"])
+    backing["properties"]["standard_name_id"] = "invalid_duplicate"
+    graph = _Graph(state)
     result = _run(graph)
     source = next(iter(graph.state.sources.values()))
     backing = next(iter(graph.state.backings.values()))
-    assert source["bound"] == {"electron_density"}
+    assert source["bindings"] == ["electron_density"]
     assert source["properties"]["produced_sn_id"] == "electron_density"
-    assert backing["projected"] == {"electron_density"}
+    assert backing["projections"] == ["electron_density"]
+    assert backing["properties"]["standard_name_id"] == "electron_density"
     assert graph.state.nodes["invalid_duplicate"]["source_paths"] == []
     assert graph.state.nodes["electron_density"]["source_paths"] == [
         "dd:core_profiles/profiles_1d/electrons/density"
     ]
-    assert ("electron_density", "invalid_duplicate") in graph.state.refined_from
+    assert graph.state.refined_from == [("electron_density", "invalid_duplicate")]
     assert result["receipt_counts"] == {
         "sources": 1,
         "projections": 1,
@@ -520,67 +752,122 @@ def test_fold_migrates_sources_projections_scalars_cache_and_lineage() -> None:
     }
 
 
-def test_open_edit_resolves_only_on_folded_identity_with_mechanism_receipt() -> None:
-    graph = _Graph(_state(old_extra={"edit_status": "open", "edit_reason": "dedupe"}))
-    _run(graph)
-    assert graph.state.nodes["invalid_duplicate"]["edit_status"] == "applied"
-    assert graph.state.nodes["electron_density"].get("edit_status") is None
-    change = next(iter(graph.state.changes.values()))
-    receipt = json.loads(change["reason"])
-    assert receipt["mechanism"] == edit._FOLD_REASON
-    assert ("invalid_duplicate", change["id"]) in graph.state.change_links
-    assert ("electron_density", change["id"]) in graph.state.change_links
+def test_exact_preexisting_target_lineage_is_admitted_without_duplicate() -> None:
+    state = _state()
+    state.refined_from.append(("electron_density", "invalid_duplicate"))
+    graph = _Graph(state)
+    assert _run(graph, dry_run=True)["ok"] is True
+    assert _run(graph)["ok"] is True
+    assert graph.state.refined_from == [("electron_density", "invalid_duplicate")]
 
 
-def test_dry_run_has_exact_plan_and_zero_writes_or_commit() -> None:
-    graph = _Graph(_state())
-    before = copy.deepcopy(graph.state)
-    result = _run(graph, dry_run=True)
-    assert result["mutation_plan"]["source_ids"] == [
-        "dd:core_profiles/profiles_1d/electrons/density"
-    ]
-    assert result["mutation_plan"]["predecessor_stage"] == "accepted"
-    assert graph.state == before
-    assert graph.commits == 0
-    assert graph.transactions[0].write_markers == []
+def test_other_duplicate_and_cyclic_lineage_are_refused() -> None:
+    other = _Graph(_state())
+    other.state.nodes["other_density"] = _node("other_density", stage="accepted")
+    other.state.refined_from.append(("other_density", "invalid_duplicate"))
+    assert "another successor" in _run(other)["reason"]
+
+    duplicate = _Graph(_state())
+    duplicate.state.refined_from.extend(
+        [
+            ("electron_density", "invalid_duplicate"),
+            ("electron_density", "invalid_duplicate"),
+        ]
+    )
+    assert "duplicate target successor" in _run(duplicate)["reason"]
+
+    cycle = _Graph(_state())
+    cycle.state.refined_from.append(("invalid_duplicate", "electron_density"))
+    assert "cycle" in _run(cycle)["reason"]
 
 
-def test_concurrent_edit_after_snapshot_rolls_back_everything() -> None:
-    graph = _Graph(_state(), fail_at="race")
-    before = copy.deepcopy(graph.state)
-    with pytest.raises(RuntimeError, match="changed after preflight"):
-        _run(graph)
-    assert graph.state == before
-    assert graph.commits == 0
-    assert graph.rollbacks == 1
-
-
-def test_event_failure_rolls_back_without_tombstone_or_retarget() -> None:
-    graph = _Graph(_state(), fail_at="event")
-    before = copy.deepcopy(graph.state)
-    with pytest.raises(RuntimeError, match="event failure"):
-        _run(graph)
-    assert graph.state == before
-    assert graph.commits == 0
-
-
-def test_partial_retarget_failure_rolls_back_event_and_source() -> None:
-    graph = _Graph(_state(), fail_at="partial_source")
-    before = copy.deepcopy(graph.state)
-    with pytest.raises(RuntimeError, match="partial source migration"):
-        _run(graph)
-    assert graph.state == before
-    assert graph.commits == 0
-
-
-def test_unit_mismatch_is_a_write_free_refusal() -> None:
-    graph = _Graph(_state(dd_unit="K"))
-    before = copy.deepcopy(graph.state)
+def test_scalar_only_source_is_discovered_and_repaired() -> None:
+    state = _state()
+    source = next(iter(state.sources.values()))
+    backing = next(iter(state.backings.values()))
+    source["bindings"] = []
+    backing["projections"] = []
+    graph = _Graph(state)
     result = _run(graph)
-    assert result["ok"] is False
-    assert "unit dimensionality mismatch" in result["reason"]
-    assert graph.state == before
-    assert graph.transactions[0].write_markers == []
+    assert result["sources_carried"] == 1
+    assert source is not next(iter(graph.state.sources.values()))
+    assert next(iter(graph.state.sources.values()))["bindings"] == ["electron_density"]
+    assert next(iter(graph.state.backings.values()))["projections"] == [
+        "electron_density"
+    ]
+
+
+@pytest.mark.parametrize("competitor_stage", ["approved", "refining"])
+def test_live_competitor_binding_and_projection_are_canonicalized(
+    competitor_stage: str,
+) -> None:
+    state = _state()
+    state.nodes["competing_density"] = _node(
+        "competing_density", stage=competitor_stage
+    )
+    source = next(iter(state.sources.values()))
+    source["bindings"].append("competing_density")
+    next(iter(state.backings.values()))["projections"].append("competing_density")
+    graph = _Graph(state)
+    assert _run(graph)["ok"] is True
+    assert next(iter(graph.state.sources.values()))["bindings"] == ["electron_density"]
+    assert next(iter(graph.state.backings.values()))["projections"] == [
+        "electron_density"
+    ]
+
+
+def test_third_historical_binding_and_projection_are_preserved() -> None:
+    state = _state()
+    state.nodes["retired_density"] = _node("retired_density", stage="superseded")
+    next(iter(state.sources.values()))["bindings"].append("retired_density")
+    next(iter(state.backings.values()))["projections"].append("retired_density")
+    graph = _Graph(state)
+    assert _run(graph)["ok"] is True
+    assert next(iter(graph.state.sources.values()))["bindings"] == [
+        "retired_density",
+        "electron_density",
+    ]
+    assert next(iter(graph.state.backings.values()))["projections"] == [
+        "retired_density",
+        "electron_density",
+    ]
+
+
+def test_backing_owner_ambiguity_is_refused() -> None:
+    state = _state()
+    source_id = next(iter(state.sources))
+    state.sources[source_id]["backings"].append(next(iter(state.backings)))
+    assert "ambiguous backing cardinality" in _run(_Graph(state))["reason"]
+
+    state = _state()
+    backing_id = next(iter(state.backings))
+    state.sources["dd:second"] = {
+        "properties": {
+            "id": "dd:second",
+            "source_type": "dd",
+            "source_id": backing_id,
+            "status": "composed",
+            "produced_sn_id": "electron_density",
+            "claim_token": None,
+            "claimed_at": None,
+        },
+        "bindings": ["electron_density"],
+        "backings": [backing_id],
+    }
+    assert "ambiguous owner cardinality" in _run(_Graph(state))["reason"]
+
+
+def test_scalar_and_relationship_unit_drift_is_refused() -> None:
+    target = _state()
+    target.nodes["electron_density"]["relationship_units"] = ["K"]
+    assert "target" in _run(_Graph(target))["reason"]
+    assert "scalar unit disagrees" in _run(_Graph(target))["reason"]
+
+    backing = _state()
+    next(iter(backing.backings.values()))["units"] = ["K"]
+    result = _run(_Graph(backing))
+    assert "backing" in result["reason"]
+    assert "scalar unit disagrees" in result["reason"]
 
 
 def test_attachment_mismatch_is_a_write_free_refusal() -> None:
@@ -592,92 +879,173 @@ def test_attachment_mismatch_is_a_write_free_refusal() -> None:
     assert graph.state == before
 
 
-def test_target_must_be_valid_accepted_and_strict_parseable() -> None:
-    reviewed = _Graph(_state())
-    reviewed.state.nodes["electron_density"]["name_stage"] = "reviewed"
-    assert "not 'accepted'" in _run(reviewed)["reason"]
-    invalid = _Graph(_state())
-    invalid.state.nodes["electron_density"]["validation_status"] = "quarantined"
-    assert "not 'valid'" in _run(invalid)["reason"]
-    unparsable = _Graph(_state())
-    assert "strict ISN" in _run(unparsable, parseable=False)["reason"]
+def test_exact_west_manifest_membership_fails_closed() -> None:
+    west_path = sorted(edit._fold_west_dd_paths())[0]
+    graph = _Graph(_state(backing_id=west_path))
+    result = _run(graph, use_west_manifest=True)
+    assert result["ok"] is False
+    assert "WEST task manifest" in result["reason"]
 
-
-def test_claim_and_third_live_target_refuse_ambiguity() -> None:
-    claimed = _Graph(_state())
-    claimed.state.nodes["invalid_duplicate"]["claim_token"] = "busy"
-    assert "actively claimed" in _run(claimed)["reason"]
-
-    ambiguous = _Graph(_state())
-    ambiguous.state.nodes["other_density"] = _node(
-        "other_density", stage="accepted", validation="valid"
+    same_prefix_not_member = west_path.rsplit("/", 1)[0] + "/not_in_manifest"
+    assert same_prefix_not_member not in edit._fold_west_dd_paths()
+    assert (
+        _run(_Graph(_state(backing_id=same_prefix_not_member)), use_west_manifest=True)[
+            "ok"
+        ]
+        is True
     )
-    source = next(iter(ambiguous.state.sources.values()))
-    source["bound"].add("other_density")
-    assert "multiple live targets" in _run(ambiguous)["reason"]
 
 
-def test_west_signal_requires_explicit_authorization() -> None:
-    state = _state()
-    source_id = next(iter(state.sources))
-    backing_id = next(iter(state.backings))
-    state.sources[source_id]["properties"].update(
-        {"id": "signals:west:density", "source_type": "signals"}
-    )
-    state.sources["signals:west:density"] = state.sources.pop(source_id)
-    state.backings[backing_id]["labels"] = ["FacilitySignal"]
-    state.backings[backing_id]["properties"]["facility_id"] = "west"
+def test_receipt_is_full_typed_and_preserves_audit_subgraphs() -> None:
+    state = _state(old_extra={"edit_status": "open", "edit_reason": "dedupe"})
+    state.reviews["review:scalar-only"] = {
+        "id": "review:scalar-only",
+        "standard_name_id": "invalid_duplicate",
+        "score": 0.7,
+    }
+    state.reviews["review:linked"] = {
+        "id": "review:linked",
+        "standard_name_id": "invalid_duplicate",
+        "score": 0.8,
+    }
+    state.review_links.append(("invalid_duplicate", "review:linked"))
+    state.revisions["revision:one"] = {"id": "revision:one", "documentation": "old"}
+    state.revision_links.append(("invalid_duplicate", "revision:one"))
+    state.changes["change:existing"] = {
+        "id": "change:existing",
+        "operation": "reclassify_domain",
+        "reason": "kept",
+    }
+    state.change_links.append(("invalid_duplicate", "change:existing"))
+    before_reviews = copy.deepcopy(state.reviews)
+    before_revisions = copy.deepcopy(state.revisions)
     graph = _Graph(state)
-    assert "WEST" in _run(graph)["reason"]
-    authorized = _Graph(copy.deepcopy(state))
-    assert _run(authorized, include_west=True)["ok"]
+    result = _run(graph)
+    event = graph.state.changes[result["change_id"]]
+    receipt = json.loads(event["reason"])
+    assert receipt["receipt_type"] == edit._FOLD_RECEIPT_TYPE
+    assert receipt["schema_version"] == edit._FOLD_RECEIPT_SCHEMA
+    assert receipt["run_id"] == event["run_id"] == result["run_id"]
+    assert receipt["before"]["reviews"]
+    assert receipt["before"]["revisions"]
+    assert receipt["before"]["changes"]
+    assert receipt["expected_after"]["names"]["old"]["edit_status"] == "applied"
+    assert graph.state.reviews == before_reviews
+    assert graph.state.revisions == before_revisions
+    assert graph.state.changes["change:existing"]["reason"] == "kept"
+    assert (
+        graph.state.change_links.count(("invalid_duplicate", result["change_id"])) == 1
+    )
+    assert (
+        graph.state.change_links.count(("electron_density", result["change_id"])) == 1
+    )
 
 
-def test_exact_second_run_is_write_free_and_drift_is_refused() -> None:
+def test_dry_run_has_exact_plan_and_no_write() -> None:
+    graph = _Graph(_state())
+    before = copy.deepcopy(graph.state)
+    result = _run(graph, dry_run=True)
+    assert result["mutation_plan"]["source_ids"] == [
+        "dd:core_profiles/profiles_1d/electrons/density"
+    ]
+    assert result["mutation_plan"]["backing_ids"] == [
+        "core_profiles/profiles_1d/electrons/density"
+    ]
+    assert graph.state == before
+    assert graph.commits == 0
+    assert graph.transactions[0].write_markers == []
+
+
+@pytest.mark.parametrize("failure", ["race", "event", "partial_source"])
+def test_transaction_failure_rolls_back_everything(failure: str) -> None:
+    graph = _Graph(_state(), fail_at=failure)
+    before = copy.deepcopy(graph.state)
+    match = {
+        "race": "changed after preflight",
+        "event": "event failure",
+        "partial_source": "partial source migration",
+    }[failure]
+    with pytest.raises(RuntimeError, match=match):
+        _run(graph)
+    assert graph.state == before
+    assert graph.commits == 0
+    assert graph.rollbacks == 1
+
+
+def test_exact_second_run_is_noop_and_all_partial_drift_is_refused() -> None:
     graph = _Graph(_state())
     first = _run(graph)
     committed = copy.deepcopy(graph.state)
     second = _run(graph)
     assert first["ok"] and second["ok"]
     assert second["already_superseded"] is True
-    assert second["old_prior_stage"] == "accepted"
     assert graph.commits == 1
     assert graph.state == committed
     assert graph.transactions[-1].write_markers == []
 
-    graph.state.nodes["invalid_duplicate"]["source_paths"] = ["stale"]
-    drift = _run(graph)
-    assert drift["ok"] is False
-    assert "drift" in drift["reason"]
-    assert graph.commits == 1
+    drifts = []
+    stale_cache = copy.deepcopy(committed)
+    stale_cache.nodes["electron_density"]["source_paths"] = ["stale"]
+    drifts.append(stale_cache)
+    third_target = copy.deepcopy(committed)
+    third_target.nodes["third"] = _node("third", stage="superseded")
+    next(iter(third_target.sources.values()))["bindings"].append("third")
+    drifts.append(third_target)
+    third_projection = copy.deepcopy(committed)
+    third_projection.nodes["third"] = _node("third", stage="superseded")
+    next(iter(third_projection.backings.values()))["projections"].append("third")
+    drifts.append(third_projection)
+    changed_backing = copy.deepcopy(committed)
+    backing = next(iter(changed_backing.backings.values()))
+    backing["properties"]["id"] = "changed/path"
+    drifts.append(changed_backing)
+    duplicate_binding = copy.deepcopy(committed)
+    next(iter(duplicate_binding.sources.values()))["bindings"].append(
+        "electron_density"
+    )
+    drifts.append(duplicate_binding)
+    partial_links = copy.deepcopy(committed)
+    partial_links.change_links.remove(("electron_density", first["change_id"]))
+    drifts.append(partial_links)
+
+    for drifted in drifts:
+        result = _run(_Graph(drifted))
+        assert result["ok"] is False
+        assert "drift" in result["reason"] or "ambiguous" in result["reason"]
 
 
-def test_unrelated_state_is_invariant() -> None:
+def test_guards_target_claim_parse_and_stage_without_writes() -> None:
+    reviewed = _Graph(_state())
+    reviewed.state.nodes["electron_density"]["name_stage"] = "reviewed"
+    assert "not 'accepted'" in _run(reviewed)["reason"]
+    invalid = _Graph(_state())
+    invalid.state.nodes["electron_density"]["validation_status"] = "quarantined"
+    assert "not 'valid'" in _run(invalid)["reason"]
+    claimed = _Graph(_state())
+    claimed.state.nodes["invalid_duplicate"]["claim_token"] = "busy"
+    assert "actively claimed" in _run(claimed)["reason"]
+    unparsable = _Graph(_state())
+    assert "strict ISN" in _run(unparsable, parseable=False)["reason"]
+
+
+def test_self_missing_and_unrelated_state_are_safe() -> None:
     graph = _Graph(_state())
     unrelated = copy.deepcopy(graph.state.unrelated)
-    _run(graph)
+    assert "same" in _run(graph, old="electron_density")["reason"]
+    assert "not found" in _run(_Graph(_state()), old="missing")["reason"]
+    assert _run(graph)["ok"] is True
     assert graph.state.unrelated == unrelated
 
 
-def test_self_missing_and_target_cycle_are_write_free_refusals() -> None:
-    graph = _Graph(_state())
-    assert "same" in _run(graph, old="electron_density")["reason"]
-    missing = _Graph(_state())
-    assert "not found" in _run(missing, old="missing")["reason"]
-
-    cycle = _Graph(_state())
-    cycle.state.refined_from.add(("invalid_duplicate", "electron_density"))
-    # The exact relationship snapshot makes a reverse lineage visible. The
-    # operation must refuse before adding the closing edge.
-    result = _run(cycle)
-    assert result["ok"] is False
-    assert "cycle" in result["reason"]
-
-    successor = _Graph(_state())
-    successor.state.nodes["other_density"] = _node(
-        "other_density", stage="accepted", validation="valid"
-    )
-    successor.state.refined_from.add(("other_density", "invalid_duplicate"))
-    result = _run(successor)
-    assert result["ok"] is False
-    assert "successor lineage" in result["reason"]
+def test_production_queries_use_six_transaction_boundaries_without_temp_props() -> None:
+    queries = [
+        edit._FOLD_SNAPSHOT_QUERY,
+        edit._FOLD_EVENT_QUERY,
+        edit._FOLD_LOCK_QUERY,
+        edit._FOLD_SOURCE_MUTATION_QUERY,
+        edit._FOLD_NAME_MUTATION_QUERY,
+        edit._FOLD_POSTFLIGHT_QUERY,
+    ]
+    assert len(queries) == 6
+    assert all("_atomic_fold_lock" not in query for query in queries)
+    assert "SET participant.id = participant.id" in edit._FOLD_LOCK_QUERY
