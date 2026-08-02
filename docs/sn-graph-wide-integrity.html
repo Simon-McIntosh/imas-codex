@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -625,6 +625,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="fanout-exact-repair-20260802" data-who="reckon-ship" data-when="2026-08-02T13:40:00+02:00">
     <div class="r-comment-body"><p><strong>The first graph-wide fan-out repair was admitted conservatively and landed exactly.</strong> Read-only adjudication classified only two of 340 competing sources as safe automatically; 338 remain review-required because 316 are genuinely ambiguous, 13 lack decisive competitor authority, and nine have no safe target. The exact two-source transaction repaired the x/z first-measurement direction-vector bindings, wrote two <code>repair_semantic_source_binding</code> audit rows, changed no other source fingerprint, and was idempotent on a second apply. Global violations are <strong>961 → 959</strong>, entirely from multi-live <strong>340 → 338</strong>; the other three classes are unchanged and WEST remains zero. Evidence artifact: <code>/tmp/s7_fanout_adjudication.json</code>, SHA-256 <code>b692cfdf5146d911c2ff7ffbee0f4a83e2701e6e7788b1a2e8107f3d4a0826b2</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="parser-residue-adjudication-20260802" data-who="reckon-ship" data-when="2026-08-02T13:52:00+02:00">
+    <div class="r-comment-body"><p><strong>The 15 legacy parser residues now have exact sanctioned dispositions.</strong> A read-only audit checked 2,837 live names against ISN 0.8.0rc64 and confirmed 15 strict failures plus one parseable stale segment mirror, with zero WEST intersection. Six failures have exact strict-round-trip-valid reviewed renames, five have mechanism-grounded <code>sn edit --hint</code> repairs, and four need prerequisite consolidation, lineage recovery, or unit repair; none qualifies for rescore because none of the current spellings is strict-lossless. <code>cumulative_inside_flux_surface_torque</code> is the only zero-risk stamp-only repair. Evidence artifact: <code>/tmp/s7_parser_residue_adjudication.json</code>, SHA-256 <code>3ec62a8c59b4a295ca3a15d8c8c55ef9c16b0302ea1167f1fdb5493477b3663f</code>. No graph mutation or paid call occurred during adjudication.</p></div>
 </div>
 </section>
 </main>
