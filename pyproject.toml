@@ -574,15 +574,13 @@ api-key-env = "AMBIX_API_KEY"
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
-# Production reviewer quorum: dual-blind claude-sonnet-5 + grok-4.5 + a
-# gpt-5.6-luna breaker. The blind pair is vendor-diverse and uses providers
-# that sustain the review pool's concurrency. Selection evidence belongs in
-# the benchmark result artifacts. Switch-back:
-# "openrouter/qwen/qwen3.7-max","openrouter/minimax/minimax-m3".
+# Production reviewer quorum: vendor-diverse Grok 4.5 and GPT-5.6 Luna form
+# the dual-blind base pair. Claude Sonnet 5 is the context-aware disagreement
+# breaker, retaining a three-seat chain without a single-review fallback.
 models = [
-  "openrouter/anthropic/claude-sonnet-5",
   "openrouter/x-ai/grok-4.5",
   "openrouter/openai/gpt-5.6-luna",
+  "openrouter/anthropic/claude-sonnet-5",
 ]
 disagreement-threshold = 0.20
 

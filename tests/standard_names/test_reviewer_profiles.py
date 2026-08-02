@@ -107,6 +107,29 @@ def test_default_profile_loads_three_models(monkeypatch):
     assert models == _DEFAULT_MODELS
 
 
+def test_configured_default_profile_uses_blind_pair_and_disagreement_breaker(
+    monkeypatch,
+):
+    """The live default keeps two blind reviewers and one distinct breaker."""
+    from imas_codex import settings as settings_mod
+
+    expected = [
+        "openrouter/x-ai/grok-4.5",
+        "openrouter/openai/gpt-5.6-luna",
+        "openrouter/anthropic/claude-sonnet-5",
+    ]
+    configured = settings_mod.get_sn_review_profile_models("default")
+
+    assert configured == expected
+    assert len(configured) == len(set(configured)) == 3
+    assert configured[:2] == expected[:2]
+    assert configured[2] == expected[2]
+
+    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+    assert settings_mod.get_sn_review_names_models() == expected
+    assert settings_mod.get_sn_review_max_cycles() == 3
+
+
 def test_quality_cost_balanced_profile_loads_configured_chain(monkeypatch):
     """'quality-cost-balanced' profile is sonnet-primary + opus arbiter (no Haiku)."""
     from imas_codex import settings as settings_mod
