@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -628,6 +628,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="parser-residue-adjudication-20260802" data-who="reckon-ship" data-when="2026-08-02T13:52:00+02:00">
     <div class="r-comment-body"><p><strong>The 15 legacy parser residues now have exact sanctioned dispositions.</strong> A read-only audit checked 2,837 live names against ISN 0.8.0rc64 and confirmed 15 strict failures plus one parseable stale segment mirror, with zero WEST intersection. Six failures have exact strict-round-trip-valid reviewed renames, five have mechanism-grounded <code>sn edit --hint</code> repairs, and four need prerequisite consolidation, lineage recovery, or unit repair; none qualifies for rescore because none of the current spellings is strict-lossless. <code>cumulative_inside_flux_surface_torque</code> is the only zero-risk stamp-only repair. Evidence artifact: <code>/tmp/s7_parser_residue_adjudication.json</code>, SHA-256 <code>3ec62a8c59b4a295ca3a15d8c8c55ef9c16b0302ea1167f1fdb5493477b3663f</code>. No graph mutation or paid call occurred during adjudication.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="grammar-stamp-live-20260802" data-who="reckon-ship" data-when="2026-08-02T14:04:00+02:00">
+    <div class="r-comment-body"><p><strong>The sole parseable grammar-mirror residue is repaired.</strong> Exact reconcile changed only <code>cumulative_inside_flux_surface_torque</code>'s stored <code>physical_base</code> from null to <code>torque</code>. Identity, unit, lifecycle, scores, sources, and its structural-parent edge were unchanged. A second exact reconcile returned zero realignments with identical node/source/edge hashes. Fresh census remains 15 strict parser failures but now has zero parseable stale mirrors and zero WEST intersection.</p></div>
 </div>
 </section>
 </main>
