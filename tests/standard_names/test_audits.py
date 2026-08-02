@@ -1266,9 +1266,15 @@ class TestOperatorUnitConsistency:
         self, name: str, unit: str
     ):
         """A proven quotient result wins over flat operand-token heuristics."""
-        from imas_codex.standard_names.audits import name_unit_consistency_check
+        from unittest.mock import patch
 
-        assert name_unit_consistency_check({"id": name, "unit": unit}) == []
+        from imas_codex.standard_names import audits
+
+        ir = audits._parse_audit_ir(name)
+        with patch.dict(audits._NAME_TOKEN_UNIT_EXPECTATIONS, {}, clear=True):
+            assert audits._ir_unit_dimensions(ir) == ({"dimensionless"}, True)
+            assert audits._structured_unit_consistency_issues(name, unit) == []
+            assert audits.name_unit_consistency_check({"id": name, "unit": unit}) == []
 
     @pytest.mark.parametrize("unit", ["J.K^-1", "K.J^-1"])
     def test_equal_dimension_ratios_reject_cross_family_quotients(self, unit: str):
@@ -1300,6 +1306,32 @@ class TestOperatorUnitConsistency:
         assert expected is not None and _dimensions_overlap(quotient, expected)
         assert dimensionless is not None
         assert not _dimensions_overlap(quotient, dimensionless)
+
+    def test_same_subject_different_physical_bases_are_not_dimensionless(self):
+        from unittest.mock import patch
+
+        from imas_codex.standard_names import audits
+
+        name = "ratio_of_ion_temperature_to_ion_density"
+        with patch.dict(audits._NAME_TOKEN_UNIT_EXPECTATIONS, {}, clear=True):
+            assert audits._ir_unit_dimensions(audits._parse_audit_ir(name)) == (
+                None,
+                False,
+            )
+            assert audits._structured_unit_consistency_issues(name, "1") is None
+
+    def test_dimensioned_live_ratio_remains_uninferred_without_unit_metadata(self):
+        from imas_codex.standard_names import audits
+
+        name = "ratio_of_vorticity_to_major_radius"
+        assert audits._ir_unit_dimensions(audits._parse_audit_ir(name)) == (
+            None,
+            False,
+        )
+        assert audits._structured_unit_consistency_issues(name, "m^-1.s^-1") is None
+        assert (
+            audits.name_unit_consistency_check({"id": name, "unit": "m^-1.s^-1"}) == []
+        )
 
     def test_nested_derivative_transforms_dimensionless_ratio(self):
         from imas_codex.standard_names.audits import name_unit_consistency_check

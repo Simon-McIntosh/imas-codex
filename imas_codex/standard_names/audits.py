@@ -203,6 +203,39 @@ def _operator_kind(operator: Any) -> str:
     return str(getattr(kind, "value", kind))
 
 
+def _ir_physical_quantity_signature(ir: Any) -> tuple[Any, ...] | None:
+    """Return the public IR identity that determines a quantity's dimensions.
+
+    Qualifiers, loci, mechanisms, and projections specialize where or for what
+    a physical quantity is evaluated without changing the identity of its
+    physical base. Operators remain part of the signature because they can
+    transform dimensions.
+    """
+    base = getattr(ir, "base", None)
+    base_token = str(getattr(base, "token", "") or "")
+    base_kind = getattr(base, "kind", "")
+    base_kind = str(getattr(base_kind, "value", base_kind) or "")
+    if not base_token or not base_kind:
+        return None
+
+    operator_signatures: list[tuple[Any, ...]] = []
+    for operator in list(getattr(ir, "operators", ()) or ()):
+        kind = _operator_kind(operator)
+        op = str(getattr(operator, "op", "") or "")
+        if not kind or not op:
+            return None
+        args = list(getattr(operator, "args", ()) or ())
+        argument_signatures: list[tuple[Any, ...]] = []
+        for argument in args:
+            signature = _ir_physical_quantity_signature(argument)
+            if signature is None:
+                return None
+            argument_signatures.append(signature)
+        operator_signatures.append((kind, op, tuple(argument_signatures)))
+
+    return base_kind, base_token, tuple(operator_signatures)
+
+
 @lru_cache(maxsize=1024)
 def _parse_audit_ir(name: str) -> Any:
     """Parse one canonical name once for all structure-aware audits."""
@@ -329,6 +362,13 @@ def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
             args = list(getattr(operator, "args", ()) or ())
             if len(args) != 2:
                 return None, False
+            if op == "ratio":
+                left_signature = _ir_physical_quantity_signature(args[0])
+                right_signature = _ir_physical_quantity_signature(args[1])
+                if left_signature is not None and left_signature == right_signature:
+                    dimensions = {"dimensionless"}
+                    transformed = True
+                    continue
             left, _left_transformed = _ir_unit_dimensions(args[0])
             right, _right_transformed = _ir_unit_dimensions(args[1])
             if left is None or right is None:
