@@ -458,19 +458,21 @@ def _claimed_source_ids(batch: list[dict[str, Any]]) -> set[str]:
     }
 
 
-def _review_dd_source_ids(item: dict[str, Any]) -> set[str]:
-    """Return exact DD paths that a review item is authorized to discuss."""
-    raw_paths = item.get("source_paths") or []
-    if isinstance(raw_paths, str):
-        raw_paths = [raw_paths]
-    paths: set[str] = set()
-    for raw_path in raw_paths:
-        if not isinstance(raw_path, str) or raw_path.startswith("signals:"):
+def _review_dd_source_bindings(item: dict[str, Any]) -> dict[str, str | None]:
+    """Return exact DD paths and versions from authoritative source edges."""
+    bindings: dict[str, str | None] = {}
+    for binding in item.get("source_bindings") or []:
+        if not isinstance(binding, dict) or binding.get("source_type") != "dd":
             continue
-        path = strip_dd_prefix(raw_path)
-        if path:
-            paths.add(path)
-    return paths
+        path = binding.get("dd_path") or binding.get("source_id")
+        if isinstance(path, str) and (path := strip_dd_prefix(path)):
+            bindings[path] = binding.get("dd_version")
+    return bindings
+
+
+def _review_dd_source_ids(item: dict[str, Any]) -> set[str]:
+    """Return exact DD paths authorized by source-binding relationships."""
+    return set(_review_dd_source_bindings(item))
 
 
 def _sanitize_dd_gap_evidence(
@@ -513,6 +515,7 @@ def _persist_dd_gap_evidence(
     phase: str,
     reporter: str,
     observed_dd_version: str | None = None,
+    source_versions: dict[str, str | None] | None = None,
 ) -> int:
     """Best-effort evidence persistence, isolated from pipeline outcomes."""
     fenced = _sanitize_dd_gap_evidence(
@@ -530,7 +533,10 @@ def _persist_dd_gap_evidence(
         else:
             report = dict(evidence_item)
         report["reporter"] = reporter
-        if observed_dd_version and not report.get("observed_dd_version"):
+        binding_version = (source_versions or {}).get(str(report.get("path") or ""))
+        if binding_version:
+            report["observed_dd_version"] = binding_version
+        elif observed_dd_version and not report.get("observed_dd_version"):
             report["observed_dd_version"] = observed_dd_version
         reports.append(report)
 
@@ -1249,6 +1255,7 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 paths=paths,
                 existing_names=existing,
                 on_status=_on_status,
+                write_side_effects=not state.dry_run,
             )
             return batches
 
@@ -1277,6 +1284,7 @@ async def extract_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 name_only_batch_size=state.name_only_batch_size,
                 max_batch_size=batch_cfg["batch_size"],
                 max_tokens=batch_cfg["max_tokens"],
+                write_skipped=not state.dry_run,
             )
         else:
             wlog.error("Unknown source: %s", state.source)
@@ -3721,16 +3729,6 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 {"role": "user", "content": user_prompt},
             ]
 
-        if not state.dry_run:
-            await asyncio.to_thread(
-                _persist_dd_gap_evidence,
-                _collected_dd_gaps,
-                _claimed_source_ids(batch.items),
-                phase="generate_name",
-                reporter="compose",
-                observed_dd_version=batch.dd_version,
-            )
-
         state.compose_stats.cost += _total_compose_cost
         state.compose_stats.processed += len(batch.items)
         state.compose_stats.record_batch(len(batch.items))
@@ -3947,6 +3945,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     "cocos_transformation_type": cocos_type,
                     "cocos": batch.cocos_version,
                     "dd_version": batch.dd_version,
+                    "source_claim_token": (source_item or {}).get("claim_token"),
+                    "source_claim_seq": (source_item or {}).get("claim_seq"),
                     # Track grammar-retry exhaustion
                     **({"_grammar_retry_exhausted": True} if grammar_failed else {}),
                 }
@@ -4079,7 +4079,7 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 for c in candidates:
                     c["regen_increment"] = True
 
-            written = await asyncio.to_thread(
+            persisted = await asyncio.to_thread(
                 persist_generated_name_batch,
                 candidates,
                 compose_model=model,
@@ -4088,7 +4088,24 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 run_id=getattr(state.budget_manager, "run_id", None)
                 if state.budget_manager
                 else None,
+                return_winner_ids=True,
             )
+            winner_ids = persisted if isinstance(persisted, list) else []
+            winner_source_ids = {
+                winner.split(":", 1)[1]
+                for winner in winner_ids
+                if isinstance(winner, str) and ":" in winner
+            }
+            if not state.dry_run:
+                await asyncio.to_thread(
+                    _persist_dd_gap_evidence,
+                    _collected_dd_gaps,
+                    winner_source_ids,
+                    phase="generate_name",
+                    reporter="compose",
+                    observed_dd_version=batch.dd_version,
+                )
+            written = len(winner_ids)
             wlog.debug("Persisted %d names from batch %s", written, batch.group_key)
 
         # Update StandardNameSource nodes to composed status
@@ -5918,17 +5935,6 @@ async def compose_batch(
             phase=phase_tag,
         )
 
-        await asyncio.to_thread(
-            _persist_dd_gap_evidence,
-            _collected_dd_gaps,
-            current_source_ids,
-            phase=phase_tag,
-            reporter="compose",
-            observed_dd_version=(
-                current_claims[0].get("dd_version") if current_claims else None
-            ),
-        )
-
         # ── Vocab gaps — persist + clear sources ──────────────────────
         if result.vocab_gaps:
             gap_dicts = [
@@ -6007,20 +6013,35 @@ async def compose_batch(
                 run_id=mgr.run_id,
                 return_winner_ids=True,
             )
-            if isinstance(persisted, int):
-                winner_ids = [
-                    f"{source_kind}:{candidate.get('source_id')}"
-                    for candidate in candidates[:persisted]
-                ]
-            else:
-                winner_ids = persisted
+            # Only the exact ID-returning persistence contract proves which
+            # source claims won the CAS. A legacy count cannot authorize a
+            # source-specific evidence mutation.
+            winner_ids = persisted if isinstance(persisted, list) else []
             winner_id_set = set(winner_ids)
-            candidates = [
-                candidate
-                for candidate in candidates
-                if f"{source_kind}:{candidate.get('source_id')}" in winner_id_set
-            ]
-            written = len(candidates)
+            winner_source_ids = {
+                winner.split(":", 1)[1]
+                for winner in winner_ids
+                if isinstance(winner, str) and ":" in winner
+            }
+            if isinstance(persisted, list):
+                candidates = [
+                    candidate
+                    for candidate in candidates
+                    if f"{source_kind}:{candidate.get('source_id')}" in winner_id_set
+                ]
+                written = len(candidates)
+            else:
+                written = int(persisted)
+            await asyncio.to_thread(
+                _persist_dd_gap_evidence,
+                _collected_dd_gaps,
+                winner_source_ids,
+                phase=phase_tag,
+                reporter="compose",
+                observed_dd_version=(
+                    current_claims[0].get("dd_version") if current_claims else None
+                ),
+            )
             logger.debug("Pool %s: persisted %d candidates", phase_tag, written)
 
             # Derive auto-gaps only from finalized source winners. A losing
@@ -7842,20 +7863,13 @@ async def process_review_name_batch(
             from imas_codex.standard_names.graph_ops import write_reviews
 
             await _asyncio.to_thread(write_reviews, quorum["records"])
-            await _asyncio.to_thread(
-                _persist_dd_gap_evidence,
-                quorum["dd_gaps"],
-                _review_dd_source_ids(item),
-                phase="review_name",
-                reporter="review-name",
-                observed_dd_version=item.get("dd_version"),
-            )
 
             # ── Stage transition with winning score ────────────────────
             new_stage = await _asyncio.to_thread(
                 persist_reviewed_name,
                 sn_id=sn_id,
                 claim_token=claim_token,
+                claim_seq=item.get("claim_seq"),
                 score=quorum["winning_score"],
                 scores=quorum["winning_scores"],
                 comments=quorum["winning_comments"],
@@ -7872,6 +7886,16 @@ async def process_review_name_batch(
                 run_id=mgr.run_id,
                 skip_review_node=True,
             )
+            if new_stage:
+                source_versions = _review_dd_source_bindings(item)
+                await _asyncio.to_thread(
+                    _persist_dd_gap_evidence,
+                    quorum["dd_gaps"],
+                    set(source_versions),
+                    phase="review_name",
+                    reporter="review-name",
+                    source_versions=source_versions,
+                )
 
             # ── Update aggregates so review_count / disagreement reflect group ─
             try:
@@ -9200,19 +9224,12 @@ async def process_review_docs_batch(
             from imas_codex.standard_names.graph_ops import write_reviews
 
             await _asyncio.to_thread(write_reviews, quorum["records"])
-            await _asyncio.to_thread(
-                _persist_dd_gap_evidence,
-                quorum["dd_gaps"],
-                _review_dd_source_ids(item),
-                phase="review_docs",
-                reporter="review-docs",
-                observed_dd_version=item.get("dd_version"),
-            )
 
             new_stage = await _asyncio.to_thread(
                 persist_reviewed_docs,
                 sn_id=sn_id,
                 claim_token=claim_token,
+                claim_seq=item.get("claim_seq"),
                 score=quorum["winning_score"],
                 scores=quorum["winning_scores"],
                 comments=quorum["winning_comments"],
@@ -9229,6 +9246,16 @@ async def process_review_docs_batch(
                 run_id=mgr.run_id,
                 skip_review_node=True,
             )
+            if new_stage:
+                source_versions = _review_dd_source_bindings(item)
+                await _asyncio.to_thread(
+                    _persist_dd_gap_evidence,
+                    quorum["dd_gaps"],
+                    set(source_versions),
+                    phase="review_docs",
+                    reporter="review-docs",
+                    source_versions=source_versions,
+                )
 
             try:
                 await _asyncio.to_thread(update_review_aggregates, [sn_id])

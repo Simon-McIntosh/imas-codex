@@ -155,11 +155,15 @@ RETURN src.id            AS source_node_id,
        sn.id             AS sn_id,
        sn.name_stage     AS name_stage,
        sn.origin         AS origin,
-       coalesce(du.id, dd.unit) AS dd_unit,
+       CASE size(collect(DISTINCT du.id))
+         WHEN 0 THEN dd.unit
+         WHEN 1 THEN head(collect(DISTINCT du.id))
+         ELSE null
+       END AS dd_unit,
        dd.unit           AS dd_declared_unit,
-       du.id             AS dd_relationship_unit,
+       collect(DISTINCT du.id) AS dd_relationship_units,
        ids.dd_version    AS dd_version,
-       coalesce(nu.id, sn.unit) AS sn_unit,
+       coalesce(head(collect(DISTINCT nu.id)), sn.unit) AS sn_unit,
        count(DISTINCT other) AS other_live_names
 """
 
@@ -519,10 +523,34 @@ def _attachment_dd_gap_evidence(rows: list[dict]) -> list[dict[str, Any]]:
 
     reports_by_path: dict[str, dict[str, Any]] = {}
     for row in rows:
+        relationship_units = sorted(
+            {
+                str(unit).strip()
+                for unit in row.get("dd_relationship_units") or []
+                if str(unit).strip()
+            }
+        )
+        if len(relationship_units) > 1:
+            path = str(row.get("dd_path") or "").strip()
+            if path:
+                reports_by_path[path] = {
+                    "path": path,
+                    "kind": "self_contradiction",
+                    "reason": (
+                        "The DD node has multiple authoritative HAS_UNIT "
+                        "relationships, so no unique unit declaration exists."
+                    ),
+                    "observed_dd_version": row.get("dd_version"),
+                    "observed_value": str(row.get("dd_declared_unit") or ""),
+                    "expected_value": ",".join(relationship_units),
+                    "evidence_rule": "unit_relationship_is_unique",
+                    "reporter": "attachment-audit",
+                }
+            continue
         unit_row = {
             "path": row.get("dd_path"),
             "unit": row.get("dd_declared_unit"),
-            "unit_from_rel": row.get("dd_relationship_unit"),
+            "unit_from_rel": relationship_units[0] if relationship_units else None,
         }
         for report in _unit_declaration_conflict_reports(
             [unit_row], row.get("dd_version")

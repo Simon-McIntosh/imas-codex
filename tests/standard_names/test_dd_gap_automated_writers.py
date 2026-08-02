@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
+from contextlib import ExitStack
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -179,7 +181,7 @@ def test_attachment_evidence_uses_fetched_unit_property_and_relationship() -> No
             {
                 "dd_path": PATH,
                 "dd_declared_unit": "1",
-                "dd_relationship_unit": "Pa",
+                "dd_relationship_units": ["Pa"],
                 "dd_version": "4.1.1",
             }
         ]
@@ -191,6 +193,26 @@ def test_attachment_evidence_uses_fetched_unit_property_and_relationship() -> No
     assert reports[0]["expected_value"] == "Pa"
     assert reports[0]["reporter"] == "attachment-audit"
     assert reports[0]["observed_dd_version"] == "4.1.1"
+
+
+def test_attachment_evidence_reports_multiple_unit_edges_deterministically() -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        _attachment_dd_gap_evidence,
+    )
+
+    reports = _attachment_dd_gap_evidence(
+        [
+            {
+                "dd_path": PATH,
+                "dd_declared_unit": "1",
+                "dd_relationship_units": ["Pa", "eV", "Pa"],
+                "dd_version": "4.1.1",
+            }
+        ]
+    )
+
+    assert reports[0]["expected_value"] == "Pa,eV"
+    assert reports[0]["evidence_rule"] == "unit_relationship_is_unique"
 
 
 @pytest.mark.asyncio
@@ -243,7 +265,7 @@ def test_attachment_reconcile_dry_run_never_writes_evidence() -> None:
             "origin": "pipeline",
             "dd_unit": "Pa",
             "dd_declared_unit": "1",
-            "dd_relationship_unit": "Pa",
+            "dd_relationship_units": ["Pa"],
             "sn_unit": "Pa",
             "other_live_names": 0,
         }
@@ -254,3 +276,190 @@ def test_attachment_reconcile_dry_run_never_writes_evidence() -> None:
 
     assert result.dd_gap_evidence
     write.assert_not_called()
+
+
+def test_targeted_extraction_dry_run_has_no_graph_writers() -> None:
+    from imas_codex.standard_names.sources.dd import extract_specific_paths
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [{"dd_version": "4.1.1", "cocos_version": None, "cocos_params": None}],
+        [{"path": PATH, "unit": "1", "unit_from_rel": "Pa"}],
+    ]
+    gc.__enter__.return_value = gc
+    gc.__exit__.return_value = False
+
+    with (
+        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch(
+            "imas_codex.standard_names.sources.dd._persist_unit_declaration_conflicts"
+        ) as persist_conflicts,
+        patch(
+            "imas_codex.standard_names.sources.dd._apply_unit_overrides",
+            side_effect=lambda rows, **_: rows,
+        ) as apply_units,
+        patch(
+            "imas_codex.standard_names.sources.dd._qualify_sources", return_value=[]
+        ) as qualify,
+    ):
+        assert extract_specific_paths([PATH], write_side_effects=False) == []
+
+    persist_conflicts.assert_not_called()
+    assert apply_units.call_args.kwargs["write_skipped"] is False
+    assert qualify.call_args.kwargs["write_skipped"] is False
+
+
+@pytest.mark.parametrize("axis", ["name", "docs"])
+def test_review_claim_projects_authoritative_dd_bindings(axis: str) -> None:
+    from imas_codex.standard_names import graph_ops
+
+    claim_name = f"claim_review_{axis}_batch"
+    with (
+        patch.object(graph_ops, "_claim_sn_atomic", return_value=[]) as claim,
+        patch.object(graph_ops, f"_verify_{axis}_claim_winners", return_value=[]),
+    ):
+        getattr(graph_ops, claim_name)(batch_size=1)
+
+    projection = claim.call_args.kwargs["extra_return_fields"]
+    assert "PRODUCED_NAME" in projection
+    assert "source.dd_path" in projection
+    assert "source.dd_version" in projection
+
+
+def _review_item(axis: str) -> dict:
+    item = {
+        "id": "electron_temperature",
+        "name": "electron_temperature",
+        "description": "Electron temperature.",
+        "documentation": "Electron temperature documentation.",
+        "kind": "scalar",
+        "unit": "eV",
+        "physics_domain": "core_plasma_physics",
+        "validation_status": "valid",
+        "claim_token": "claim-token",
+        "claim_seq": 4,
+        # Deliberately stale: evidence authorization must ignore this cache.
+        "source_paths": ["dd:stale/scalar/path"],
+        "source_bindings": [
+            {
+                "id": f"dd:{PATH}",
+                "source_type": "dd",
+                "source_id": PATH,
+                "dd_path": PATH,
+                "dd_version": "4.1.1",
+            }
+        ],
+    }
+    item[f"{axis}_stage"] = "drafted"
+    item[f"{axis}_chain_length"] = 0
+    return item
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("axis", ["name", "docs"])
+@pytest.mark.parametrize("transition", [None, "accepted"])
+async def test_review_writer_requires_successful_owned_transition(
+    axis: str, transition: str | None
+) -> None:
+    from imas_codex.standard_names import workers
+
+    dims = (
+        {"grammar": 18, "semantic": 18, "convention": 18, "completeness": 18}
+        if axis == "name"
+        else {
+            "description_quality": 18,
+            "documentation_quality": 18,
+            "completeness": 18,
+            "physics_accuracy": 18,
+        }
+    )
+    llm_result = SimpleNamespace(
+        scores=SimpleNamespace(score=0.9, model_dump=lambda: dims),
+        comments=None,
+        reasoning="Evidence is independent of the review score.",
+        dd_gaps=[_evidence()],
+    )
+    mgr = MagicMock(run_id="test-run")
+    mgr.reserve.return_value = MagicMock()
+    process = (
+        workers.process_review_name_batch
+        if axis == "name"
+        else workers.process_review_docs_batch
+    )
+    persist_name = (
+        "persist_reviewed_name" if axis == "name" else "persist_reviewed_docs"
+    )
+
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new=AsyncMock(return_value=(llm_result, 0.01, 100)),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.settings.get_sn_review_names_models",
+                return_value=["reviewer"],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.settings.get_sn_review_docs_models",
+                return_value=["reviewer"],
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.context.fetch_review_neighbours",
+                return_value={
+                    "vector_neighbours": [],
+                    "same_base_neighbours": [],
+                    "same_path_neighbours": [],
+                },
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.context._build_enum_lists", return_value={}
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.context.build_compose_context",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.example_loader.load_review_examples",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                f"imas_codex.standard_names.graph_ops.{persist_name}",
+                return_value=transition,
+            )
+        )
+        stack.enter_context(patch("imas_codex.standard_names.graph_ops.write_reviews"))
+        stack.enter_context(
+            patch("imas_codex.standard_names.graph_ops.update_review_aggregates")
+        )
+        write = stack.enter_context(
+            patch(
+                "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+                return_value={"reported": 1},
+            )
+        )
+        await process([_review_item(axis)], mgr, asyncio.Event())
+
+    if transition is None:
+        write.assert_not_called()
+    else:
+        report = write.call_args.args[0][0]
+        assert report["path"] == PATH
+        assert report["observed_dd_version"] == "4.1.1"

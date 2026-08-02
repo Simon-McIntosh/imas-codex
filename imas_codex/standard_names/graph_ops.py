@@ -12245,6 +12245,7 @@ def persist_reviewed_name(
     *,
     sn_id: str,
     claim_token: str,
+    claim_seq: int | None = None,
     score: float,
     scores: dict[str, Any] | None = None,
     comments: str | None = None,
@@ -12320,7 +12321,9 @@ def persist_reviewed_name(
             """
             MATCH (sn:StandardName {id: $id})
             WHERE sn.name_stage = 'drafted'
-              AND (sn.claim_token = $token OR sn.claim_token IS NULL)
+              AND (($claim_seq IS NULL
+                    AND (sn.claim_token = $token OR sn.claim_token IS NULL))
+                   OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
             RETURN coalesce(sn.chain_length, 0) AS chain_length,
                    sn.validation_status AS validation_status,
                    sn.edit_status AS edit_status,
@@ -12330,6 +12333,7 @@ def persist_reviewed_name(
             """,
             id=sn_id,
             token=claim_token,
+            claim_seq=claim_seq,
         )
 
     if not rows:
@@ -12458,7 +12462,9 @@ def persist_reviewed_name(
             """
             MATCH (sn:StandardName {id: $id})
             WHERE sn.name_stage = 'drafted'
-              AND (sn.claim_token = $token OR sn.claim_token IS NULL)
+              AND (($claim_seq IS NULL
+                    AND (sn.claim_token = $token OR sn.claim_token IS NULL))
+                   OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
             SET sn.reviewer_score_name        = $score,
                 sn.reviewer_scores_name       = $scores_json,
                 sn.reviewer_comments_name     = $comments,
@@ -12482,6 +12488,7 @@ def persist_reviewed_name(
             """,
             id=sn_id,
             token=claim_token,
+            claim_seq=claim_seq,
             score=score,
             scores_json=scores_json,
             comments=comments,
@@ -12734,6 +12741,13 @@ def claim_review_docs_batch(
             ", sn.docs_hint AS docs_hint"
             ", sn.edit_reason AS edit_reason"
             ", sn.edit_origin AS edit_origin"
+            ", [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {"
+            "     id: source.id,"
+            "     source_type: source.source_type,"
+            "     source_id: source.source_id,"
+            "     dd_path: source.dd_path,"
+            "     dd_version: source.dd_version"
+            " }] AS source_bindings"
         ),
         domain=domain,
         scope_run_id=scope_run_id,
@@ -12752,6 +12766,7 @@ def persist_reviewed_docs(
     *,
     sn_id: str,
     claim_token: str,
+    claim_seq: int | None = None,
     score: float,
     scores: dict[str, Any] | None = None,
     comments: str | None = None,
@@ -12823,7 +12838,9 @@ def persist_reviewed_docs(
         rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
+            WHERE (($claim_seq IS NULL
+                    AND (sn.claim_token = $token OR sn.claim_token IS NULL))
+                   OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
               AND sn.docs_stage = 'drafted'
               AND sn.name_stage = 'accepted'
             RETURN coalesce(sn.docs_chain_length, 0) AS docs_chain_length,
@@ -12832,6 +12849,7 @@ def persist_reviewed_docs(
             """,
             id=sn_id,
             token=claim_token,
+            claim_seq=claim_seq,
         )
 
     if not rows:
@@ -12918,7 +12936,9 @@ def persist_reviewed_docs(
         write_rows = gc.query(
             """
             MATCH (sn:StandardName {id: $id})
-            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
+            WHERE (($claim_seq IS NULL
+                    AND (sn.claim_token = $token OR sn.claim_token IS NULL))
+                   OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
               AND sn.name_stage = 'accepted'
               AND sn.docs_stage = 'drafted'
             SET sn.reviewer_score_docs        = $score,
@@ -12935,6 +12955,7 @@ def persist_reviewed_docs(
             """,
             id=sn_id,
             token=claim_token,
+            claim_seq=claim_seq,
             score=score,
             scores_json=scores_json,
             comments=comments,

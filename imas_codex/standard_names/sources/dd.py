@@ -835,6 +835,7 @@ def extract_specific_paths(
     *,
     existing_names: set[str] | None = None,
     on_status: Callable[[str], None] | None = None,
+    write_side_effects: bool = True,
 ) -> list[ExtractionBatch]:
     """Extract specific DD paths with full context — bypasses classifier.
 
@@ -894,16 +895,21 @@ def extract_specific_paths(
         logger.info("No targeted paths found in graph")
         return []
 
-    _persist_unit_declaration_conflicts(results, dd_version)
+    if write_side_effects:
+        _persist_unit_declaration_conflicts(results, dd_version)
 
     # Pre-resolve authoritative unit (prefer HAS_UNIT relationship), then
     # apply DD unit override/skip config before further processing.
     for row in results:
         row["unit"] = row.get("unit_from_rel") or row.get("unit") or None
 
-    results = _apply_unit_overrides(results, source_type="dd")
+    results = _apply_unit_overrides(
+        results, source_type="dd", write_skipped=write_side_effects
+    )
 
-    results = _qualify_sources(results, source_type="dd")
+    results = _qualify_sources(
+        results, source_type="dd", write_skipped=write_side_effects
+    )
     if not results:
         logger.info("No targeted DD paths remain after source qualification")
         return []
