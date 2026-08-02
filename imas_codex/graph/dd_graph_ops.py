@@ -675,8 +675,19 @@ def reset_imas_nodes(
     return count
 
 
+def _exact_unit_correction_scope(
+    path_ids: Collection[str] | None,
+) -> frozenset[str] | None:
+    """Normalize an optional exact-path scope without accepting one string."""
+    if isinstance(path_ids, str):
+        raise TypeError("path_ids must be a collection of exact paths, not a string")
+    return None if path_ids is None else frozenset(path_ids)
+
+
 def find_dd_unit_correction_drift(
     gc: GraphClient | None = None,
+    *,
+    path_ids: Collection[str] | None = None,
 ) -> list[dict[str, str]]:
     """Stored DD units that a ``correct_in_graph`` registry entry contradicts.
 
@@ -686,19 +697,29 @@ def find_dd_unit_correction_drift(
     ``correct_in_graph`` entries can produce a difference: a suppression-only
     entry deliberately leaves the DD unit as declared so the standard-name
     mismatch axis keeps reporting it, and ``resolve_dd_unit`` returns those
-    unchanged.
+    unchanged. When ``path_ids`` is provided, both the graph selector and a
+    defensive in-process fence restrict results to those exact paths. An empty
+    collection is a no-op, which makes operator-supplied bounded scopes safe.
     """
     from imas_codex.units import resolve_dd_unit
+
+    scope = _exact_unit_correction_scope(path_ids)
+    if scope is not None and not scope:
+        return []
 
     own = gc is None
     client = GraphClient() if own else gc
     try:
+        path_clause = "" if scope is None else "AND n.id IN $path_ids"
+        params = {} if scope is None else {"path_ids": sorted(scope)}
         rows = client.query(
-            """
+            f"""
             MATCH (n:IMASNode)
             WHERE n.unit IS NOT NULL AND n.unit <> ''
+              {path_clause}
             RETURN n.id AS path, n.unit AS unit
-            """
+            """,
+            **params,
         )
     finally:
         if own:
@@ -706,6 +727,8 @@ def find_dd_unit_correction_drift(
 
     drift: list[dict[str, str]] = []
     for r in rows:
+        if scope is not None and r["path"] not in scope:
+            continue
         stored = r["unit"]
         expected = resolve_dd_unit(r["path"], stored)
         if expected is not None and expected != stored:
@@ -713,7 +736,11 @@ def find_dd_unit_correction_drift(
     return drift
 
 
-def reconcile_dd_unit_corrections(gc: GraphClient | None = None) -> dict[str, int]:
+def reconcile_dd_unit_corrections(
+    gc: GraphClient | None = None,
+    *,
+    path_ids: Collection[str] | None = None,
+) -> dict[str, int]:
     """Apply registered self-contradiction unit corrections to the stored graph.
 
     ``resolve_dd_unit`` rewrites a DD-declared unit when the exceptions registry
@@ -726,17 +753,23 @@ def reconcile_dd_unit_corrections(gc: GraphClient | None = None) -> dict[str, in
     registry whose entries only take effect on a rebuild is a registry that
     silently does not work; this is the net.
 
-    Rewrites both the ``unit`` scalar and the ``HAS_UNIT`` edge, dropping the
-    stale edge rather than adding a second one, so the cardinality-one invariant
-    holds. Idempotent: once every stored unit equals what the registry resolves,
-    the selector matches nothing.
+    Rewrites both the ``unit`` scalar and the ``HAS_UNIT`` edge, replacing any
+    existing unit edges with exactly one edge to the expected unit so the
+    cardinality-one invariant holds even when legacy duplicate edges exist.
+    Idempotent: once every stored unit equals what the registry resolves, the
+    selector matches nothing. ``path_ids`` constrains both discovery and mutation
+    to an exact caller-supplied set; an empty set performs no query.
 
     Returns dict: {checked, corrected}.
     """
+    scope = _exact_unit_correction_scope(path_ids)
+    if scope is not None and not scope:
+        return {"checked": 0, "corrected": 0}
+
     own = gc is None
     client = GraphClient() if own else gc
     try:
-        drift = find_dd_unit_correction_drift(client)
+        drift = find_dd_unit_correction_drift(client, path_ids=scope)
         if not drift:
             return {"checked": 0, "corrected": 0}
 
@@ -744,8 +777,7 @@ def reconcile_dd_unit_corrections(gc: GraphClient | None = None) -> dict[str, in
             """
             UNWIND $items AS item
             MATCH (n:IMASNode {id: item.path})
-            OPTIONAL MATCH (n)-[r:HAS_UNIT]->(stale:Unit)
-            WHERE stale.id <> item.expected
+            OPTIONAL MATCH (n)-[r:HAS_UNIT]->(:Unit)
             DELETE r
             WITH DISTINCT n, item
             SET n.unit = item.expected
