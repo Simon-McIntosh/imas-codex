@@ -6155,11 +6155,11 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
         " (already superseded — re-stamped)" if result.get("already_superseded") else ""
     )
     click.echo(f"{verb} {result['old_id']} into {result['into_id']}{note}")
-    if dry_run:
-        click.echo(
-            f"  old prior stage: {result.get('old_prior_stage')} "
-            "→ superseded (superseded_from_stage=accepted)"
-        )
+    old_prior_stage = result["old_prior_stage"]
+    click.echo(
+        f"  old prior stage: {old_prior_stage} "
+        f"→ superseded (superseded_from_stage={old_prior_stage})"
+    )
     carried = result.get("sources_carried") or 0
     strand = result.get("sources_would_strand") or 0
     click.echo(
