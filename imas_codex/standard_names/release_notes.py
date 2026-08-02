@@ -207,6 +207,8 @@ def summarize_dd_gap_facts(facts: list[Mapping[str, Any]]) -> dict[str, Any]:
         and item["registry_backend"]
     ]
     return {
+        "available": True,
+        "read_error": "",
         "total": len(normalized),
         "open_count": sum(by_status[status] for status in open_statuses),
         "triaged_count": sum(by_status[status] for status in triaged_statuses),
@@ -224,8 +226,24 @@ def summarize_dd_gap_facts(facts: list[Mapping[str, Any]]) -> dict[str, Any]:
     }
 
 
+def unavailable_dd_gap_summary(error: str) -> dict[str, Any]:
+    """Represent a read failure visibly without converting it into a gate."""
+    summary = summarize_dd_gap_facts([])
+    summary["available"] = False
+    summary["read_error"] = error.strip() or "unknown read failure"
+    return summary
+
+
 def _static_dd_gap_caveat(summary: Mapping[str, Any]) -> str:
     """Render exact lifecycle evidence for the deterministic PR fallback."""
+    if not bool(summary.get("available", True)):
+        return (
+            "\n\n## Data Dictionary caveats\n\n"
+            "Warning only: linked DD-defect evidence could not be read "
+            f"({summary.get('read_error', 'unknown read failure')}). The release "
+            "continues, but this is not evidence that the batch has zero DD "
+            "caveats."
+        )
     total = int(summary.get("total", 0) or 0)
     if not total:
         return "\n\n## Data Dictionary caveats\n\nNo linked DD defects were reported."

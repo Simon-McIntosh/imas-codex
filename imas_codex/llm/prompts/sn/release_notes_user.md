@@ -40,6 +40,10 @@ schema_needs: []
 
 ## Data Dictionary caveats (read-only lifecycle evidence)
 
+{% if not dd_gaps.available %}
+Warning only: linked DD-defect evidence could not be read (`{{ dd_gaps.read_error }}`).
+This is not evidence that the batch has zero DD caveats. Do not infer any count.
+{% else %}
 - Total linked facts: {{ dd_gaps.total }}
 - Awaiting triage: {{ dd_gaps.open_count }}
 - Human-triaged or governed dispositions still unresolved: {{ dd_gaps.triaged_count }}
@@ -58,6 +62,7 @@ schema_needs: []
 {% endfor %}
 {% else %}
 (no linked DD defects were reported)
+{% endif %}
 {% endif %}
 
 Write the `title` and markdown `body` now, grounded strictly on the evidence

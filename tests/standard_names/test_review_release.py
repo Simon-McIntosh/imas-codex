@@ -79,6 +79,16 @@ _PR_TARGET = {
 }
 
 
+@pytest.fixture(autouse=True)
+def _isolate_release_tests_from_live_dd_gaps(monkeypatch):
+    """Release orchestration tests must not read the operator's live graph."""
+    monkeypatch.setattr(
+        "imas_codex.standard_names.dd_gaps.list_dd_gaps",
+        lambda **_kwargs: [],
+        raising=False,
+    )
+
+
 def _write_names_focus(tmp_path, *, name="demo-batch", filename="batch.yaml"):
     p = tmp_path / filename
     p.write_text(
@@ -572,6 +582,85 @@ def test_review_release_uses_injected_notes_builder(isnc_repo, tmp_path):
     assert seen["batch_size"] == 2
     assert seen["pr_title"] == "Custom title"
     assert seen["pr_body"] == "Custom body"
+
+
+def test_review_release_scopes_dd_caveats_to_batch_names(isnc_repo, tmp_path):
+    """The release reads exact batch facts once and never mutates graph state."""
+    focus = _write_names_focus(tmp_path)
+    seen: dict = {"reader_calls": []}
+
+    def gap_reader(**kwargs):
+        seen["reader_calls"].append(kwargs)
+        return [
+            {
+                "id": "dd_gap:equilibrium/path:type_wiring",
+                "path": "equilibrium/path",
+                "kind": "type_wiring",
+                "status": "upstream_issue",
+                "source_paths": ["equilibrium/path"],
+                "affected_name_ids": ["plasma_current"],
+                "upstream_url": "https://example.invalid/dd/27",
+            }
+        ]
+
+    def pr_creator(*, branch, base, title, body, repo, head_owner):
+        seen["pr_body"] = body
+        return 5, f"https://github.com/{repo}/pull/5"
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "msg",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=pr_creator,
+        dd_gap_reader=gap_reader,
+        **_PR_TARGET,
+    )
+
+    assert report.errors == []
+    assert seen["reader_calls"] == [
+        {
+            "name_ids": ["plasma_current", "poloidal_flux"],
+            "gc": None,
+        }
+    ]
+    assert report.dd_gap_summary["unresolved_count"] == 1
+    assert report.dd_gap_summary["blocks_release"] is False
+    assert "`equilibrium/path`" in seen["pr_body"]
+    assert "https://example.invalid/dd/27" in seen["pr_body"]
+
+
+def test_unavailable_dd_gap_read_is_visible_but_not_release_blocking(
+    isnc_repo, tmp_path
+):
+    focus = _write_names_focus(tmp_path)
+
+    def gap_reader(**_kwargs):
+        raise RuntimeError("graph unavailable")
+
+    report = run_review_release(
+        isnc_repo,
+        focus,
+        "msg",
+        staging_dir=tmp_path / "staging",
+        bump="minor",
+        dry_run=True,
+        reviews_dir=tmp_path / "reviews",
+        exporter=_stub_exporter({}),
+        publisher=_stub_publisher(isnc_repo),
+        pr_creator=_stub_pr(),
+        dd_gap_reader=gap_reader,
+        **_PR_TARGET,
+    )
+
+    assert report.errors == []
+    assert report.dd_gap_summary["available"] is False
+    assert report.dd_gap_summary["read_error"] == "graph unavailable"
+    assert report.dd_gap_summary["blocks_release"] is False
 
 
 # ── the batch label in the version (semver build metadata) ─────────────────

@@ -775,6 +775,7 @@ class ReviewReleaseReport:
     pushed: bool = False
     pr_number: int | None = None
     pr_url: str | None = None
+    dd_gap_summary: dict[str, Any] = field(default_factory=dict)
     errors: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
@@ -790,6 +791,7 @@ class ReviewReleaseReport:
             "pushed": self.pushed,
             "pr_number": self.pr_number,
             "pr_url": self.pr_url,
+            "dd_gap_summary": self.dd_gap_summary,
             "errors": self.errors,
         }
 
@@ -926,6 +928,7 @@ def run_review_release(
     pr_target: str = "upstream",
     notes_builder: Any | None = None,
     llm_notes: bool = False,
+    dd_gap_reader: Any | None = None,
 ) -> ReviewReleaseReport:
     """Mint → freeze → export → branch → push → PR → back-fill, in one call.
 
@@ -982,6 +985,33 @@ def run_review_release(
     report.names = sorted(names)
     report.batch_size = len(report.names)
     report.unmatched_sources = sorted(unmatched)
+
+    # DD-gap lifecycle evidence is a read-only release caveat, never an export
+    # gate. The canonical reader owns graph queries and exact batch-name
+    # filtering; this orchestrator only normalizes its projection for reports.
+    from imas_codex.standard_names.release_notes import (
+        summarize_dd_gap_facts,
+        unavailable_dd_gap_summary,
+    )
+
+    if dd_gap_reader is None:
+        try:
+            from imas_codex.standard_names.dd_gaps import list_dd_gaps
+
+            dd_gap_reader = list_dd_gaps
+        except Exception as exc:
+            report.dd_gap_summary = unavailable_dd_gap_summary(str(exc))
+    if dd_gap_reader is not None:
+        try:
+            gap_facts = dd_gap_reader(name_ids=report.names, gc=gc)
+            report.dd_gap_summary = summarize_dd_gap_facts(gap_facts)
+        except Exception as exc:
+            logger.warning(
+                "DD-gap release evidence could not be read; reporting the "
+                "unavailable state without blocking the release",
+                exc_info=True,
+            )
+            report.dd_gap_summary = unavailable_dd_gap_summary(str(exc))
 
     # ── 2. Pre-flight ISNC + compute the RC version ────────────────────
     try:
@@ -1117,6 +1147,7 @@ def run_review_release(
             minted_from=str(focus_file),
             unmatched_count=len(report.unmatched_sources),
             changes=changes,
+            dd_gaps=report.dd_gap_summary,
         )
     else:
         title, body = static_pr_notes(
@@ -1124,6 +1155,7 @@ def run_review_release(
             rc_version=git_tag,
             batch_size=report.batch_size,
             minted_from=str(focus_file),
+            dd_gaps=report.dd_gap_summary,
         )
     try:
         pr_number, pr_url = pr_creator(
