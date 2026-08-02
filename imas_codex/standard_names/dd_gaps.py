@@ -31,6 +31,10 @@ class DDGapTransitionConflict(RuntimeError):
     """The fact no longer has the lifecycle state expected by the caller."""
 
 
+class DDGapRegistrySyncConflict(RuntimeError):
+    """Registry identity reconciliation is ambiguous or changed during apply."""
+
+
 _DISPOSITION_FIELDS = frozenset(
     {
         "status",
@@ -574,6 +578,293 @@ RETURN size(node_ids) AS reported, relationships,
 """
 
 
+_REGISTRY_FACTS_QUERY = """
+MATCH (gap:DDGap)
+OPTIONAL MATCH (node:IMASNode)-[:HAS_DD_GAP]->(gap)
+WITH gap, collect(DISTINCT node.id) AS source_paths
+OPTIONAL MATCH (gap)-[:HAS_OBSERVATION]->(observation:DDGapObservation)
+WITH gap, source_paths, collect(DISTINCT observation.id) AS observation_ids
+OPTIONAL MATCH (gap)-[:HAS_STATE_CHANGE]->(change:DDGapStateChange)
+RETURN gap.id AS id,
+       gap.path AS path,
+       gap.kind AS kind,
+       gap.status AS status,
+       gap.registry_backend AS registry_backend,
+       gap.upstream_url AS upstream_url,
+       gap.resolved_dd_version AS resolved_dd_version,
+       gap.triaged_at AS triaged_at,
+       gap.triage_actor AS triage_actor,
+       gap.triage_reason AS triage_reason,
+       gap.status_changed_at AS status_changed_at,
+       gap.status_changed_by AS status_changed_by,
+       gap.status_change_reason AS status_change_reason,
+       gap.validation_evidence AS validation_evidence,
+       gap.first_seen_at AS first_seen_at,
+       gap.last_seen_at AS last_seen_at,
+       gap.example_count AS example_count,
+       gap.affected_path_count AS affected_path_count,
+       gap.observed_dd_version AS observed_dd_version,
+       gap.observed_value AS observed_value,
+       gap.expected_value AS expected_value,
+       gap.evidence_rule AS evidence_rule,
+       gap.reference_path AS reference_path,
+       gap.reference_value AS reference_value,
+       source_paths,
+       observation_ids,
+       collect(DISTINCT change.id) AS state_change_ids
+ORDER BY gap.id
+"""
+
+
+def _registry_identity(
+    fact: Mapping[str, Any], source_paths: Sequence[str]
+) -> tuple[str, str, str, tuple[str, ...]]:
+    """Return the conservative registry identity independent of gap kind."""
+    return (
+        _optional_text(fact.get("registry_backend")) or "",
+        _optional_text(fact.get("path")) or "",
+        _optional_text(fact.get("upstream_url")) or "",
+        tuple(sorted(str(path) for path in source_paths)),
+    )
+
+
+def _registry_sync_snapshot(fact: Mapping[str, Any]) -> dict[str, Any]:
+    """Capture every lifecycle, evidence, and link field guarded during sync."""
+    evidence = _evidence_snapshot(fact)
+    return {
+        **evidence,
+        "id": str(fact["id"]),
+        "status": _optional_text(fact.get("status")) or "",
+        "upstream_url": _optional_text(fact.get("upstream_url")) or "",
+        "resolved_dd_version": _optional_text(fact.get("resolved_dd_version")) or "",
+        "triaged_at": fact.get("triaged_at"),
+        "triage_actor": _optional_text(fact.get("triage_actor")) or "",
+        "triage_reason": _optional_text(fact.get("triage_reason")) or "",
+        "status_changed_at": fact.get("status_changed_at"),
+        "status_changed_by": _optional_text(fact.get("status_changed_by")) or "",
+        "status_change_reason": _optional_text(fact.get("status_change_reason")) or "",
+        "validation_evidence": _optional_text(fact.get("validation_evidence")) or "",
+        "affected_path_count": int(fact.get("affected_path_count") or 0),
+        "state_change_ids": sorted(
+            str(item) for item in (fact.get("state_change_ids") or [])
+        ),
+    }
+
+
+def _registry_sync_token(fact: Mapping[str, Any]) -> str:
+    """Identify the exact registry fact state used to plan a rewrite."""
+    snapshot = _registry_sync_snapshot(fact)
+    serializable = {
+        key: str(value or "") if key.endswith("_at") else value
+        for key, value in snapshot.items()
+    }
+    digest = hashlib.sha256(
+        json.dumps(serializable, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    return f"dd-gap-registry-sync:{digest}"
+
+
+def _registry_sync_plan(
+    nodes: list[dict[str, Any]],
+    observations: list[dict[str, Any]],
+    existing_facts: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Classify registry identities without mutating or guessing intent."""
+    paths_by_id: dict[str, set[str]] = {}
+    for observation in observations:
+        paths_by_id.setdefault(str(observation["gap_id"]), set()).add(
+            str(observation["source_path"])
+        )
+
+    existing_by_id = {str(fact["id"]): fact for fact in existing_facts}
+    existing_by_identity: dict[tuple[str, str, str, tuple[str, ...]], list[dict]] = {}
+    for fact in existing_facts:
+        identity = _registry_identity(fact, fact.get("source_paths") or [])
+        existing_by_identity.setdefault(identity, []).append(fact)
+
+    creates: list[str] = []
+    updates: list[str] = []
+    reclassifications: list[dict[str, Any]] = []
+    manual_required: list[dict[str, Any]] = []
+    for node in sorted(nodes, key=lambda item: str(item["id"])):
+        target_id = str(node["id"])
+        intended_paths = sorted(paths_by_id.get(target_id, set()))
+        intended_identity = _registry_identity(node, intended_paths)
+        target = existing_by_id.get(target_id)
+        candidates = [
+            fact
+            for fact in existing_by_identity.get(intended_identity, [])
+            if str(fact["id"]) != target_id
+        ]
+        related_candidates = [
+            fact
+            for fact in existing_facts
+            if str(fact["id"]) != target_id
+            and (
+                _optional_text(fact.get("registry_backend")) or "",
+                _optional_text(fact.get("path")) or "",
+                _optional_text(fact.get("upstream_url")) or "",
+            )
+            == intended_identity[:3]
+        ]
+
+        if target is not None:
+            target_identity = _registry_identity(
+                target, target.get("source_paths") or []
+            )
+            if target_identity != intended_identity:
+                manual_required.append(
+                    {
+                        "id": target_id,
+                        "reason": "target id belongs to different registry evidence",
+                    }
+                )
+            elif candidates:
+                manual_required.append(
+                    {
+                        "id": target_id,
+                        "reason": "target id collides with another matching registry fact",
+                        "candidate_ids": sorted(str(item["id"]) for item in candidates),
+                    }
+                )
+            else:
+                updates.append(target_id)
+            continue
+
+        if len(candidates) > 1:
+            manual_required.append(
+                {
+                    "id": target_id,
+                    "reason": "multiple facts match the authoritative registry identity",
+                    "candidate_ids": sorted(str(item["id"]) for item in candidates),
+                }
+            )
+        elif len(candidates) == 1:
+            old = candidates[0]
+            reclassifications.append(
+                {
+                    "old_id": str(old["id"]),
+                    "new_id": target_id,
+                    "old_kind": _optional_text(old.get("kind")) or "",
+                    "new_kind": str(node["kind"]),
+                    "expected_sync_token": _registry_sync_token(old),
+                    "expected": _registry_sync_snapshot(old),
+                    "target": dict(node),
+                }
+            )
+        elif related_candidates:
+            manual_required.append(
+                {
+                    "id": target_id,
+                    "reason": "registry evidence path set differs from existing fact",
+                    "candidate_ids": sorted(
+                        str(item["id"]) for item in related_candidates
+                    ),
+                }
+            )
+        else:
+            creates.append(target_id)
+
+    return {
+        "create": creates,
+        "update": updates,
+        "reclassify": reclassifications,
+        "manual_required": manual_required,
+    }
+
+
+_RECLASSIFY_REGISTRY_FACT_QUERY = """
+MATCH (gap:DDGap {id: $old_id})
+WHERE NOT EXISTS { MATCH (:DDGap {id: $new_id}) }
+  AND coalesce(gap.path, '') = $expected_path
+  AND coalesce(gap.kind, '') = $expected_kind
+  AND coalesce(gap.status, '') = $expected_status
+  AND coalesce(gap.registry_backend, '') = $expected_registry_backend
+  AND coalesce(gap.upstream_url, '') = $expected_upstream_url
+  AND coalesce(gap.resolved_dd_version, '') = $expected_resolved_dd_version
+  AND coalesce(gap.triage_actor, '') = $expected_triage_actor
+  AND coalesce(gap.triage_reason, '') = $expected_triage_reason
+  AND coalesce(gap.status_changed_by, '') = $expected_status_changed_by
+  AND coalesce(gap.status_change_reason, '') = $expected_status_change_reason
+  AND coalesce(gap.validation_evidence, '') = $expected_validation_evidence
+  AND coalesce(gap.observed_dd_version, '') = $expected_observed_dd_version
+  AND coalesce(gap.observed_value, '') = $expected_observed_value
+  AND coalesce(gap.expected_value, '') = $expected_expected_value
+  AND coalesce(gap.evidence_rule, '') = $expected_evidence_rule
+  AND coalesce(gap.reference_path, '') = $expected_reference_path
+  AND coalesce(gap.reference_value, '') = $expected_reference_value
+  AND coalesce(gap.example_count, 0) = $expected_example_count
+  AND coalesce(gap.affected_path_count, 0) = $expected_affected_path_count
+  AND ((gap.first_seen_at IS NULL AND $expected_first_seen_at IS NULL)
+       OR gap.first_seen_at = $expected_first_seen_at)
+  AND ((gap.last_seen_at IS NULL AND $expected_last_seen_at IS NULL)
+       OR gap.last_seen_at = $expected_last_seen_at)
+  AND ((gap.triaged_at IS NULL AND $expected_triaged_at IS NULL)
+       OR gap.triaged_at = $expected_triaged_at)
+  AND ((gap.status_changed_at IS NULL AND $expected_status_changed_at IS NULL)
+       OR gap.status_changed_at = $expected_status_changed_at)
+OPTIONAL MATCH (source:IMASNode)-[:HAS_DD_GAP]->(gap)
+WITH gap, collect(DISTINCT source.id) AS source_paths
+WHERE size(source_paths) = size($expected_source_paths)
+  AND all(path IN source_paths WHERE path IN $expected_source_paths)
+  AND all(path IN $expected_source_paths WHERE path IN source_paths)
+OPTIONAL MATCH (gap)-[:HAS_OBSERVATION]->(observation:DDGapObservation)
+WITH gap, source_paths, collect(DISTINCT observation) AS observation_nodes
+WHERE size(observation_nodes) = size($expected_observation_ids)
+  AND all(item IN observation_nodes WHERE item.id IN $expected_observation_ids)
+  AND all(id IN $expected_observation_ids
+          WHERE any(item IN observation_nodes WHERE item.id = id))
+OPTIONAL MATCH (gap)-[:HAS_STATE_CHANGE]->(prior_change:DDGapStateChange)
+WITH gap, source_paths, observation_nodes,
+     collect(DISTINCT prior_change) AS prior_changes
+WHERE size(prior_changes) = size($expected_state_change_ids)
+  AND all(item IN prior_changes WHERE item.id IN $expected_state_change_ids)
+  AND all(id IN $expected_state_change_ids
+          WHERE any(item IN prior_changes WHERE item.id = id))
+SET gap.id = $new_id,
+    gap.path = $target_path,
+    gap.kind = $target_kind,
+    gap.registry_backend = $target_registry_backend,
+    gap.affected_path_count = $target_affected_path_count,
+    gap.observed_dd_version = $target_observed_dd_version,
+    gap.observed_value = $target_observed_value,
+    gap.expected_value = $target_expected_value,
+    gap.evidence_rule = $target_evidence_rule
+CREATE (gap)-[:HAS_STATE_CHANGE]->(change:DDGapStateChange {
+    id: 'dd_gap_state_change:' + randomUUID(),
+    dd_gap_id: $new_id,
+    from_status: gap.status,
+    to_status: gap.status,
+    actor: 'registry-sync',
+    reason: 'authoritative registry identity changed classification from '
+            + $old_id + ' to ' + $new_id,
+    changed_at: datetime($changed_at)
+})
+WITH gap, source_paths, observation_nodes, prior_changes, change
+MATCH (verified:DDGap {id: $new_id})
+WHERE verified = gap
+  AND NOT EXISTS { MATCH (:DDGap {id: $old_id}) }
+RETURN gap.id AS id,
+       size(source_paths) AS source_path_count,
+       size(observation_nodes) AS observation_count,
+       size(prior_changes) + 1 AS state_change_count,
+       change.id AS state_change_id
+"""
+
+
+_VERIFY_REGISTRY_SYNC_QUERY = """
+UNWIND $expected AS item
+OPTIONAL MATCH (gap:DDGap {id: item.id})
+OPTIONAL MATCH (node:IMASNode)-[:HAS_DD_GAP]->(gap)
+WITH item, gap, collect(DISTINCT node.id) AS source_paths
+RETURN item.id AS id,
+       gap.id IS NOT NULL AS exists,
+       gap.kind AS kind,
+       source_paths
+ORDER BY id
+"""
+
+
 @retry_on_deadlock()
 def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
     """Mirror curated unit exceptions into provenance without changing behavior."""
@@ -592,6 +883,21 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
             for row in gc.query("MATCH (node:IMASNode) RETURN node.id AS id")
         ]
         nodes, observations = _registry_inventory(current_paths, observed_dd_version)
+        existing_facts = [dict(row) for row in gc.query(_REGISTRY_FACTS_QUERY)]
+        plan = _registry_sync_plan(nodes, observations, existing_facts)
+        public_reclassifications = [
+            {
+                key: item[key]
+                for key in (
+                    "old_id",
+                    "new_id",
+                    "old_kind",
+                    "new_kind",
+                    "expected_sync_token",
+                )
+            }
+            for item in plan["reclassify"]
+        ]
         intended = {
             "registry_entries": len(registry_entries),
             "reported": len({node["id"] for node in nodes}),
@@ -600,16 +906,164 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
             ),
             "observations": len({str(item["observation_id"]) for item in observations}),
             "matched_paths": len({str(item["source_path"]) for item in observations}),
+            "create": plan["create"],
+            "update": plan["update"],
+            "reclassify": public_reclassifications,
+            "manual_required": plan["manual_required"],
             "dry_run": dry_run,
         }
         if dry_run:
             return intended
 
-        rows = gc.query(
-            _SYNC_REGISTRY_QUERY,
-            nodes=nodes,
-            observations=observations,
-        )
+        if plan["manual_required"]:
+            raise DDGapRegistrySyncConflict(
+                "registry identity sync requires manual resolution: "
+                + json.dumps(plan["manual_required"], sort_keys=True)
+            )
+
+        paths_by_id: dict[str, set[str]] = {}
+        for observation in observations:
+            paths_by_id.setdefault(str(observation["gap_id"]), set()).add(
+                str(observation["source_path"])
+            )
+
+        with gc.session() as session:
+            tx = session.begin_transaction()
+            try:
+                current_facts = {
+                    str(row["id"]): dict(row) for row in tx.run(_REGISTRY_FACTS_QUERY)
+                }
+                for item in plan["reclassify"]:
+                    old_id = str(item["old_id"])
+                    current = current_facts.get(old_id)
+                    if (
+                        current is None
+                        or _registry_sync_token(current) != item["expected_sync_token"]
+                    ):
+                        raise DDGapRegistrySyncConflict(
+                            f"registry fact {old_id!r} changed after preflight"
+                        )
+
+                    expected = item["expected"]
+                    target = item["target"]
+                    migrated = [
+                        dict(row)
+                        for row in tx.run(
+                            _RECLASSIFY_REGISTRY_FACT_QUERY,
+                            old_id=old_id,
+                            new_id=item["new_id"],
+                            expected_path=expected["path"],
+                            expected_kind=expected["kind"],
+                            expected_status=expected["status"],
+                            expected_registry_backend=expected["registry_backend"],
+                            expected_upstream_url=expected["upstream_url"],
+                            expected_resolved_dd_version=expected[
+                                "resolved_dd_version"
+                            ],
+                            expected_triaged_at=expected["triaged_at"],
+                            expected_triage_actor=expected["triage_actor"],
+                            expected_triage_reason=expected["triage_reason"],
+                            expected_status_changed_at=expected["status_changed_at"],
+                            expected_status_changed_by=expected["status_changed_by"],
+                            expected_status_change_reason=expected[
+                                "status_change_reason"
+                            ],
+                            expected_validation_evidence=expected[
+                                "validation_evidence"
+                            ],
+                            expected_first_seen_at=expected["first_seen_at"],
+                            expected_last_seen_at=expected["last_seen_at"],
+                            expected_example_count=expected["example_count"],
+                            expected_affected_path_count=expected[
+                                "affected_path_count"
+                            ],
+                            expected_observed_dd_version=expected[
+                                "observed_dd_version"
+                            ],
+                            expected_observed_value=expected["observed_value"],
+                            expected_expected_value=expected["expected_value"],
+                            expected_evidence_rule=expected["evidence_rule"],
+                            expected_reference_path=expected["reference_path"],
+                            expected_reference_value=expected["reference_value"],
+                            expected_source_paths=expected["source_paths"],
+                            expected_observation_ids=expected["observation_ids"],
+                            expected_state_change_ids=expected["state_change_ids"],
+                            target_path=target["path"],
+                            target_kind=target["kind"],
+                            target_registry_backend=target["registry_backend"],
+                            target_affected_path_count=target["affected_path_count"],
+                            target_observed_dd_version=target["observed_dd_version"],
+                            target_observed_value=target["observed_value"],
+                            target_expected_value=target["expected_value"],
+                            target_evidence_rule=target["evidence_rule"],
+                            changed_at=datetime.now(UTC).isoformat(),
+                        )
+                    ]
+                    if len(migrated) != 1:
+                        raise DDGapRegistrySyncConflict(
+                            f"registry fact {old_id!r} no longer matches reviewed "
+                            "lifecycle evidence and links"
+                        )
+
+                rows = [
+                    dict(row)
+                    for row in tx.run(
+                        _SYNC_REGISTRY_QUERY,
+                        nodes=nodes,
+                        observations=observations,
+                    )
+                ]
+                expected_nodes = [
+                    {
+                        "id": str(node["id"]),
+                        "kind": str(node["kind"]),
+                        "source_paths": sorted(paths_by_id.get(str(node["id"]), set())),
+                    }
+                    for node in nodes
+                ]
+                verified = [
+                    dict(row)
+                    for row in tx.run(
+                        _VERIFY_REGISTRY_SYNC_QUERY,
+                        expected=expected_nodes,
+                    )
+                ]
+                verified_by_id = {str(row["id"]): row for row in verified}
+                invalid = [
+                    item["id"]
+                    for item in expected_nodes
+                    if not verified_by_id.get(item["id"], {}).get("exists")
+                    or str(verified_by_id[item["id"]].get("kind") or "") != item["kind"]
+                    or sorted(
+                        str(path)
+                        for path in (
+                            verified_by_id[item["id"]].get("source_paths") or []
+                        )
+                    )
+                    != item["source_paths"]
+                ]
+                old_ids = [str(item["old_id"]) for item in plan["reclassify"]]
+                stale_ids = [
+                    str(row["id"])
+                    for row in tx.run(
+                        "MATCH (gap:DDGap) WHERE gap.id IN $ids "
+                        "RETURN gap.id AS id ORDER BY id",
+                        ids=old_ids,
+                    )
+                ]
+                if invalid or stale_ids:
+                    raise DDGapRegistrySyncConflict(
+                        "registry identity verification failed: "
+                        f"invalid={sorted(invalid)} stale={sorted(stale_ids)}"
+                    )
+                tx.commit()
+            except BaseException:
+                try:
+                    tx.rollback()
+                except Exception:
+                    tx.close()
+                raise
+
         row = rows[0] if rows else {}
         return {
             "registry_entries": len(registry_entries),
@@ -617,6 +1071,10 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
             "relationships": int(row.get("relationships", 0)),
             "observations": int(row.get("observations", 0)),
             "matched_paths": intended["matched_paths"],
+            "create": plan["create"],
+            "update": plan["update"],
+            "reclassify": public_reclassifications,
+            "manual_required": [],
             "dry_run": False,
         }
 

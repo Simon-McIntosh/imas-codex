@@ -7,8 +7,10 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.dd_gaps import (
+    DDGapRegistrySyncConflict,
     _evidence_token,
     _registry_inventory,
+    _registry_sync_plan,
     get_dd_gap,
     get_dd_gap_stats,
     list_dd_gaps,
@@ -36,6 +38,56 @@ def _evidence(path: str = "equilibrium/path") -> dict[str, str]:
         "expected_value": "Pa",
         "evidence_rule": "unit_equals_expected",
     }
+
+
+def _registry_fact(
+    *,
+    gap_id: str = "dd_gap:*/direction/[xyz]:unit_defect",
+    path: str = "*/direction/[xyz]",
+    kind: str = "unit_defect",
+    source_paths: list[str] | None = None,
+    status: str = "registered_exception",
+    backend: str | None = "dd_unit_exceptions",
+    upstream_url: str | None = None,
+) -> dict[str, object]:
+    return {
+        "id": gap_id,
+        "path": path,
+        "kind": kind,
+        "status": status,
+        "registry_backend": backend,
+        "upstream_url": upstream_url,
+        "resolved_dd_version": None,
+        "triaged_at": "2026-08-01T00:00:00Z",
+        "triage_actor": "operator@example.org",
+        "triage_reason": "curated registry entry",
+        "status_changed_at": "2026-08-01T00:00:00Z",
+        "status_changed_by": "operator@example.org",
+        "status_change_reason": "curated registry entry",
+        "validation_evidence": None,
+        "first_seen_at": "2026-07-01T00:00:00Z",
+        "last_seen_at": "2026-08-01T00:00:00Z",
+        "example_count": 1,
+        "observed_dd_version": "4.1.0",
+        "observed_value": "m",
+        "expected_value": "1",
+        "evidence_rule": "unit_equals_expected",
+        "reference_path": None,
+        "reference_value": None,
+        "source_paths": source_paths or ["launcher/direction/x"],
+        "observation_ids": ["observation:1"],
+        "state_change_ids": ["change:1"],
+    }
+
+
+def _transaction(mock_gc: MagicMock, side_effect: list[object]):
+    session = MagicMock()
+    transaction = MagicMock()
+    mock_gc.session.return_value.__enter__.return_value = session
+    mock_gc.session.return_value.__exit__.return_value = False
+    session.begin_transaction.return_value = transaction
+    transaction.run.side_effect = side_effect
+    return transaction
 
 
 def test_empty_report_is_a_noop() -> None:
@@ -234,15 +286,31 @@ def test_registry_sync_returns_persisted_counts() -> None:
     mock_gc.query.side_effect = [
         [{"id": "4.1.0"}],
         [{"id": "launcher/direction/x"}],
-        [
-            {
-                "reported": 1,
-                "relationships": 1,
-                "observations": 1,
-                "ids": ["dd_gap:*/direction/[xyz]:unit_defect"],
-            }
-        ],
+        [_registry_fact()],
     ]
+    transaction = _transaction(
+        mock_gc,
+        [
+            [_registry_fact()],
+            [
+                {
+                    "reported": 1,
+                    "relationships": 1,
+                    "observations": 1,
+                    "ids": ["dd_gap:*/direction/[xyz]:unit_defect"],
+                }
+            ],
+            [
+                {
+                    "id": "dd_gap:*/direction/[xyz]:unit_defect",
+                    "exists": True,
+                    "kind": "unit_defect",
+                    "source_paths": ["launcher/direction/x"],
+                }
+            ],
+            [],
+        ],
+    )
     entries = {
         "dd_unit_bugs": [
             {
@@ -268,12 +336,18 @@ def test_registry_sync_returns_persisted_counts() -> None:
         "relationships": 1,
         "observations": 1,
         "matched_paths": 1,
+        "create": [],
+        "update": ["dd_gap:*/direction/[xyz]:unit_defect"],
+        "reclassify": [],
+        "manual_required": [],
         "dry_run": False,
     }
-    sync_query = mock_gc.query.call_args_list[2].args[0]
+    sync_query = transaction.run.call_args_list[1].args[0]
     assert "DDGapObservation" in sync_query
     assert "ON CREATE SET observation.dd_gap_id" in sync_query
     assert "SET observation.last_observed_at" not in sync_query
+    transaction.commit.assert_called_once_with()
+    transaction.rollback.assert_not_called()
 
 
 def test_registry_dry_run_reads_version_and_paths_only() -> None:
@@ -281,6 +355,7 @@ def test_registry_dry_run_reads_version_and_paths_only() -> None:
     mock_gc.query.side_effect = [
         [{"id": "4.1.0"}],
         [{"id": "launcher/direction/x"}],
+        [],
     ]
     entries = {
         "dd_unit_bugs": [
@@ -304,7 +379,371 @@ def test_registry_dry_run_reads_version_and_paths_only() -> None:
     assert result["dry_run"] is True
     assert result["relationships"] == 1
     assert result["observations"] == 1
-    assert mock_gc.query.call_count == 2
+    assert result["create"] == ["dd_gap:*/direction/[xyz]:unit_defect"]
+    assert result["update"] == []
+    assert result["reclassify"] == []
+    assert result["manual_required"] == []
+    assert mock_gc.query.call_count == 3
+    mock_gc.session.assert_not_called()
+
+
+def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
+    path_pattern = "spi/injector/*_gas/flow_rate"
+    old_id = f"dd_gap:{path_pattern}:unit_defect"
+    new_id = f"dd_gap:{path_pattern}:self_contradiction"
+    source_paths = [
+        "spi/injector/fragmentation_gas/flow_rate",
+        "spi/injector/propellant_gas/flow_rate",
+    ]
+    old = _registry_fact(
+        gap_id=old_id,
+        path=path_pattern,
+        source_paths=source_paths,
+    )
+    old["observed_value"] = "s^-1"
+    old["expected_value"] = "Pa.m^3.s^-1"
+    entries = {
+        "dd_unit_bugs": [
+            {
+                "path": path_pattern,
+                "dd_unit": "s^-1",
+                "correct_unit": "Pa.m^3.s^-1",
+                "correct_in_graph": True,
+                "reason": "flow rate carries pressure-volume throughput",
+            }
+        ]
+    }
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": p} for p in source_paths],
+        [old],
+    ]
+    transaction = _transaction(
+        mock_gc,
+        [
+            [old],
+            [
+                {
+                    "id": new_id,
+                    "source_path_count": 2,
+                    "observation_count": 1,
+                    "state_change_count": 2,
+                    "state_change_id": "change:registry-reclassification",
+                }
+            ],
+            [
+                {
+                    "reported": 1,
+                    "relationships": 2,
+                    "observations": 2,
+                    "ids": [new_id],
+                }
+            ],
+            [
+                {
+                    "id": new_id,
+                    "exists": True,
+                    "kind": "self_contradiction",
+                    "source_paths": source_paths,
+                }
+            ],
+            [],
+        ],
+    )
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+    ):
+        result = sync_dd_unit_exception_gaps()
+
+    assert result["create"] == []
+    assert result["update"] == []
+    assert result["manual_required"] == []
+    assert result["reclassify"] == [
+        {
+            "old_id": old_id,
+            "new_id": new_id,
+            "old_kind": "unit_defect",
+            "new_kind": "self_contradiction",
+            "expected_sync_token": result["reclassify"][0]["expected_sync_token"],
+        }
+    ]
+    assert result["reclassify"][0]["expected_sync_token"].startswith(
+        "dd-gap-registry-sync:"
+    )
+    migration = transaction.run.call_args_list[1]
+    assert migration.kwargs["old_id"] == old_id
+    assert migration.kwargs["new_id"] == new_id
+    assert migration.kwargs["expected_status"] == "registered_exception"
+    assert migration.kwargs["target_kind"] == "self_contradiction"
+    assert migration.kwargs["expected_source_paths"] == source_paths
+    assert migration.kwargs["expected_observation_ids"] == ["observation:1"]
+    assert migration.kwargs["expected_state_change_ids"] == ["change:1"]
+    query = migration.args[0]
+    assert "SET gap.id = $new_id" in query
+    assert "SET item.dd_gap_id" not in query
+    assert "authoritative registry identity changed classification from" in query
+    assert "DELETE" not in query
+    set_clause = query.split("SET gap.id = $new_id", 1)[1].split("FOREACH", 1)[0]
+    assert "first_seen_at" not in set_clause
+    assert "triaged_at" not in set_clause
+    assert "resolved_dd_version" not in set_clause
+    assert _evidence_token(old) != _evidence_token(
+        {**old, "id": new_id, "kind": "self_contradiction"}
+    )
+    transaction.commit.assert_called_once_with()
+    transaction.rollback.assert_not_called()
+
+
+def test_registry_sync_dry_run_reports_reclassification_without_mutation() -> None:
+    pattern = "spi/injector/*_gas/flow_rate"
+    old = _registry_fact(
+        gap_id=f"dd_gap:{pattern}:unit_defect",
+        path=pattern,
+        source_paths=["spi/injector/fragmentation_gas/flow_rate"],
+    )
+    entries = {
+        "dd_unit_bugs": [
+            {
+                "path": pattern,
+                "dd_unit": "s^-1",
+                "correct_unit": "Pa.m^3.s^-1",
+                "correct_in_graph": True,
+                "reason": "flow rate carries pressure-volume throughput",
+            }
+        ]
+    }
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": "spi/injector/fragmentation_gas/flow_rate"}],
+        [old],
+    ]
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+    ):
+        result = sync_dd_unit_exception_gaps(dry_run=True)
+
+    assert result["create"] == []
+    assert result["update"] == []
+    assert result["reclassify"][0]["old_id"].endswith(":unit_defect")
+    assert result["reclassify"][0]["new_id"].endswith(":self_contradiction")
+    mock_gc.session.assert_not_called()
+
+
+def test_registry_plan_fails_closed_on_ambiguous_identity() -> None:
+    target = {
+        "id": "dd_gap:pattern:self_contradiction",
+        "path": "pattern",
+        "kind": "self_contradiction",
+        "registry_backend": "dd_unit_exceptions",
+        "upstream_url": None,
+    }
+    observations = [{"gap_id": target["id"], "source_path": "exact/path"}]
+    first = _registry_fact(
+        gap_id="dd_gap:pattern:unit_defect",
+        path="pattern",
+        source_paths=["exact/path"],
+    )
+    second = _registry_fact(
+        gap_id="dd_gap:pattern:doc_mismatch",
+        path="pattern",
+        kind="doc_mismatch",
+        source_paths=["exact/path"],
+    )
+
+    plan = _registry_sync_plan([target], observations, [first, second])
+
+    assert plan["create"] == []
+    assert plan["update"] == []
+    assert plan["reclassify"] == []
+    assert plan["manual_required"] == [
+        {
+            "id": target["id"],
+            "reason": "multiple facts match the authoritative registry identity",
+            "candidate_ids": sorted([first["id"], second["id"]]),
+        }
+    ]
+
+
+def test_registry_plan_rejects_target_collision_without_merging() -> None:
+    target = {
+        "id": "dd_gap:pattern:self_contradiction",
+        "path": "pattern",
+        "kind": "self_contradiction",
+        "registry_backend": "dd_unit_exceptions",
+        "upstream_url": None,
+    }
+    observations = [{"gap_id": target["id"], "source_path": "exact/path"}]
+    existing_target = _registry_fact(
+        gap_id=target["id"],
+        path="pattern",
+        kind="self_contradiction",
+        source_paths=["exact/path"],
+    )
+    old = _registry_fact(
+        gap_id="dd_gap:pattern:unit_defect",
+        path="pattern",
+        source_paths=["exact/path"],
+    )
+
+    plan = _registry_sync_plan([target], observations, [existing_target, old])
+
+    assert plan["reclassify"] == []
+    assert plan["manual_required"][0]["reason"] == (
+        "target id collides with another matching registry fact"
+    )
+    assert plan["manual_required"][0]["candidate_ids"] == [old["id"]]
+
+
+def test_registry_plan_refuses_related_fact_with_different_path_links() -> None:
+    target = {
+        "id": "dd_gap:pattern:self_contradiction",
+        "path": "pattern",
+        "kind": "self_contradiction",
+        "registry_backend": "dd_unit_exceptions",
+        "upstream_url": None,
+    }
+    observations = [{"gap_id": target["id"], "source_path": "current/path"}]
+    old = _registry_fact(
+        gap_id="dd_gap:pattern:unit_defect",
+        path="pattern",
+        source_paths=["stale/path"],
+    )
+
+    plan = _registry_sync_plan([target], observations, [old])
+
+    assert plan["create"] == []
+    assert plan["reclassify"] == []
+    assert plan["manual_required"] == [
+        {
+            "id": target["id"],
+            "reason": "registry evidence path set differs from existing fact",
+            "candidate_ids": [old["id"]],
+        }
+    ]
+
+
+def test_registry_plan_is_idempotent_and_ignores_unrelated_facts() -> None:
+    target = {
+        "id": "dd_gap:pattern:self_contradiction",
+        "path": "pattern",
+        "kind": "self_contradiction",
+        "registry_backend": "dd_unit_exceptions",
+        "upstream_url": None,
+    }
+    observations = [{"gap_id": target["id"], "source_path": "exact/path"}]
+    existing_target = _registry_fact(
+        gap_id=target["id"],
+        path="pattern",
+        kind="self_contradiction",
+        source_paths=["exact/path"],
+    )
+    unrelated = _registry_fact(
+        gap_id="dd_gap:other/path:unit_defect",
+        path="other/path",
+        source_paths=["other/path"],
+    )
+
+    plan = _registry_sync_plan([target], observations, [existing_target, unrelated])
+
+    assert plan == {
+        "create": [],
+        "update": [target["id"]],
+        "reclassify": [],
+        "manual_required": [],
+    }
+
+
+def test_registry_sync_rejects_concurrent_lifecycle_drift_and_rolls_back() -> None:
+    pattern = "spi/injector/*_gas/flow_rate"
+    old = _registry_fact(
+        gap_id=f"dd_gap:{pattern}:unit_defect",
+        path=pattern,
+        source_paths=["spi/injector/fragmentation_gas/flow_rate"],
+    )
+    changed = {**old, "status": "resolved_upstream"}
+    entries = {
+        "dd_unit_bugs": [
+            {
+                "path": pattern,
+                "dd_unit": "s^-1",
+                "correct_unit": "Pa.m^3.s^-1",
+                "correct_in_graph": True,
+                "reason": "flow rate carries pressure-volume throughput",
+            }
+        ]
+    }
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": "spi/injector/fragmentation_gas/flow_rate"}],
+        [old],
+    ]
+    transaction = _transaction(mock_gc, [[changed]])
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(DDGapRegistrySyncConflict, match="changed after preflight"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+    assert transaction.run.call_count == 1
+
+
+def test_registry_sync_rolls_back_when_atomic_rewrite_matches_nothing() -> None:
+    pattern = "spi/injector/*_gas/flow_rate"
+    old = _registry_fact(
+        gap_id=f"dd_gap:{pattern}:unit_defect",
+        path=pattern,
+        source_paths=["spi/injector/fragmentation_gas/flow_rate"],
+    )
+    entries = {
+        "dd_unit_bugs": [
+            {
+                "path": pattern,
+                "dd_unit": "s^-1",
+                "correct_unit": "Pa.m^3.s^-1",
+                "correct_in_graph": True,
+                "reason": "flow rate carries pressure-volume throughput",
+            }
+        ]
+    }
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": "spi/injector/fragmentation_gas/flow_rate"}],
+        [old],
+    ]
+    transaction = _transaction(mock_gc, [[old], []])
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(DDGapRegistrySyncConflict, match="no longer matches"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
 
 
 def test_status_counts_are_grouped_on_both_axes() -> None:

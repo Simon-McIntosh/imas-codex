@@ -9,7 +9,10 @@ from unittest.mock import patch
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
-from imas_codex.standard_names.dd_gaps import DDGapTransitionConflict
+from imas_codex.standard_names.dd_gaps import (
+    DDGapRegistrySyncConflict,
+    DDGapTransitionConflict,
+)
 
 
 def test_human_flag_requires_path_kind_and_reason() -> None:
@@ -81,6 +84,30 @@ def test_registry_sync_reports_provenance_counts() -> None:
     sync.assert_called_once_with(dry_run=True)
 
 
+def test_registry_sync_reports_exact_identity_reclassification() -> None:
+    old_id = "dd_gap:spi/injector/*_gas/flow_rate:unit_defect"
+    new_id = "dd_gap:spi/injector/*_gas/flow_rate:self_contradiction"
+    with patch(
+        "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
+        return_value={
+            "registry_entries": 34,
+            "reported": 35,
+            "relationships": 451,
+            "matched_paths": 371,
+            "create": [],
+            "update": ["dd_gap:unrelated/path:unit_defect"],
+            "reclassify": [{"old_id": old_id, "new_id": new_id}],
+            "manual_required": [],
+            "dry_run": True,
+        },
+    ):
+        result = CliRunner().invoke(sn, ["ddgap", "--sync-registry"])
+
+    assert result.exit_code == 0, result.output
+    assert "identity actions: create=0 update=1 reclassify=1 manual=0" in result.output
+    assert f"reclassify: {old_id} -> {new_id}" in result.output
+
+
 def test_registry_sync_mutation_requires_explicit_apply() -> None:
     with patch(
         "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
@@ -97,6 +124,17 @@ def test_registry_sync_mutation_requires_explicit_apply() -> None:
     assert result.exit_code == 0, result.output
     assert "synced 34 registry entries into 35 DD-gap facts" in result.output
     sync.assert_called_once_with(dry_run=False)
+
+
+def test_registry_sync_surfaces_ambiguous_identity_as_operator_error() -> None:
+    with patch(
+        "imas_codex.standard_names.dd_gaps.sync_dd_unit_exception_gaps",
+        side_effect=DDGapRegistrySyncConflict("manual resolution required"),
+    ):
+        result = CliRunner().invoke(sn, ["ddgap", "--sync-registry", "--apply"])
+
+    assert result.exit_code == 1
+    assert "manual resolution required" in result.output
 
 
 def test_list_uses_exact_read_filters_and_does_not_call_writers() -> None:
