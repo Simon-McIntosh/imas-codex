@@ -46,6 +46,26 @@ def test_compose_sanitizer_keeps_only_exact_claimed_dd_evidence() -> None:
     assert [report.path for report in result.dd_gaps] == [PATH]
 
 
+def test_compose_sanitizer_resolves_multiple_dispositions_by_fixed_priority() -> None:
+    from imas_codex.standard_names.workers import _sanitize_compose_result_sources
+
+    source = SimpleNamespace(source_id=PATH, dd_paths=[PATH])
+    result = SimpleNamespace(
+        candidates=[source],
+        attachments=[source],
+        skipped=[PATH],
+        vocab_gaps=[source],
+        dd_gaps=[_evidence()],
+    )
+
+    _sanitize_compose_result_sources(result, {PATH}, phase="generate_name")
+
+    assert result.vocab_gaps == [source]
+    assert result.attachments == []
+    assert result.skipped == []
+    assert result.candidates == []
+
+
 def test_reference_evidence_must_also_be_in_claimed_batch() -> None:
     from imas_codex.standard_names.workers import _sanitize_dd_gap_evidence
 
@@ -309,6 +329,60 @@ def test_targeted_extraction_dry_run_has_no_graph_writers() -> None:
     assert qualify.call_args.kwargs["write_skipped"] is False
 
 
+@pytest.mark.parametrize("extractor", ["full", "targeted"])
+@pytest.mark.parametrize("edge_units", [["Pa", "eV"], ["eV", "Pa"]])
+def test_extraction_refuses_multiple_unit_edges_deterministically(
+    extractor: str, edge_units: list[str]
+) -> None:
+    from imas_codex.standard_names.sources.dd import (
+        extract_dd_candidates,
+        extract_specific_paths,
+    )
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [{"dd_version": "4.1.1", "cocos_version": None, "cocos_params": None}],
+        [
+            {
+                "path": PATH,
+                "unit": "1",
+                "unit_from_rel": edge_units[0],
+                "unit_relationships": edge_units,
+            }
+        ],
+    ]
+    gc.__enter__.return_value = gc
+    gc.__exit__.return_value = False
+
+    with (
+        patch("imas_codex.graph.client.GraphClient", return_value=gc),
+        patch(
+            "imas_codex.standard_names.sources.dd.report_extract_breakdown",
+            side_effect=RuntimeError("not needed"),
+        ),
+        patch(
+            "imas_codex.standard_names.sources.dd._apply_unit_overrides",
+            side_effect=lambda rows, **_: rows,
+        ) as apply_units,
+        patch("imas_codex.standard_names.sources.dd._qualify_sources", return_value=[]),
+        patch(
+            "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+            return_value={"reported": 1},
+        ) as write,
+    ):
+        if extractor == "full":
+            batches = extract_dd_candidates(explicit_paths=[PATH])
+        else:
+            batches = extract_specific_paths([PATH])
+
+    assert batches == []
+    report = write.call_args.args[0][0]
+    assert report["expected_value"] == "Pa,eV"
+    assert report["evidence_rule"] == "unit_relationship_is_unique"
+    assert apply_units.call_args.args[0][0]["unit"] is None
+    assert "unit_rels[0]" not in gc.query.call_args_list[1].args[0]
+
+
 @pytest.mark.parametrize("axis", ["name", "docs"])
 def test_review_claim_projects_authoritative_dd_bindings(axis: str) -> None:
     from imas_codex.standard_names import graph_ops
@@ -463,3 +537,208 @@ async def test_review_writer_requires_successful_owned_transition(
         report = write.call_args.args[0][0]
         assert report["path"] == PATH
         assert report["observed_dd_version"] == "4.1.1"
+
+
+def _compose_response(disposition: str) -> object:
+    candidate = SimpleNamespace(
+        source_id=PATH,
+        dd_paths=[PATH],
+        description="Electron temperature.",
+        kind="scalar",
+        reason="generated",
+        compose_name=lambda: "electron_temperature",
+    )
+    attachment = SimpleNamespace(
+        source_id=PATH,
+        standard_name="electron_temperature",
+        reason="existing name",
+    )
+    vocab_gap = SimpleNamespace(
+        source_id=PATH,
+        segment="physical_base",
+        token="temperature",
+        reason="missing token",
+    )
+    result = SimpleNamespace(
+        candidates=[candidate] if disposition == "generated" else [],
+        attachments=[attachment] if disposition == "attachment" else [],
+        vocab_gaps=[vocab_gap] if disposition == "vocab_gap" else [],
+        skipped=[PATH] if disposition == "skip" else [],
+        dd_gaps=[_evidence()],
+    )
+
+    class LLMResult:
+        input_tokens = 50
+        output_tokens = 50
+        cache_read_tokens = 0
+        cache_creation_tokens = 0
+
+        def __iter__(self):
+            return iter((result, 0.01, 100))
+
+    return LLMResult()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "disposition", ["generated", "attachment", "vocab_gap", "skip"]
+)
+@pytest.mark.parametrize("claim_won", [False, True])
+async def test_compose_evidence_follows_each_committed_disposition(
+    disposition: str, claim_won: bool
+) -> None:
+    from imas_codex.standard_names.workers import process_generate_name_batch
+
+    batch = [
+        {
+            "id": f"dd:{PATH}",
+            "path": PATH,
+            "claim_token": "winner",
+            "claim_seq": 3,
+            "description": "Electron temperature.",
+            "physics_domain": "core_plasma_physics",
+            "unit": "eV",
+            "dd_version": "4.1.1",
+            "cocos_version": None,
+        }
+    ]
+    winner_ids = [f"dd:{PATH}"] if claim_won else []
+    mgr = MagicMock(run_id="test-run")
+    mgr.reserve.return_value = MagicMock()
+
+    with ExitStack() as stack:
+        stack.enter_context(
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                new=AsyncMock(return_value=_compose_response(disposition)),
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.settings.get_model", return_value="model")
+        )
+        stack.enter_context(
+            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.context.build_compose_context",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.context.build_domain_vocabulary_preseed",
+                return_value="",
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.standard_names.workers._enrich_batch_items")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._search_nearby_names",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.standard_names.workers._enrich_ids_context")
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._compute_token_reuse_hits",
+                return_value={},
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._active_editorial_gap_guidance",
+                return_value=("", False),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_ops._verify_source_claim_winners",
+                return_value=batch,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers.is_well_formed_candidate",
+                return_value=(True, None),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers.is_non_nameable_coordinate",
+                return_value=(False, None),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._is_attachment_consistent",
+                return_value=(True, ""),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._auto_detect_physical_base_gaps",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.example_loader.load_compose_examples",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+                return_value=winner_ids,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._process_attachments_core",
+                return_value={
+                    "accepted": int(claim_won),
+                    "rejected": int(not claim_won),
+                    "winner_ids": winner_ids,
+                },
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._consume_claimed_vocab_gaps",
+                return_value=(
+                    [
+                        {
+                            "source_id": PATH,
+                            "segment": "physical_base",
+                            "token": "temperature",
+                            "reason": "missing token",
+                        }
+                    ],
+                    winner_ids,
+                ),
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.workers._persist_claimed_skips",
+                return_value=winner_ids,
+            )
+        )
+        stack.enter_context(patch("imas_codex.graph.client.GraphClient"))
+        write = stack.enter_context(
+            patch(
+                "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+                return_value={"reported": 1},
+            )
+        )
+        await process_generate_name_batch(batch, mgr, asyncio.Event())
+
+    if claim_won:
+        assert write.call_args.args[0][0]["path"] == PATH
+    else:
+        write.assert_not_called()
