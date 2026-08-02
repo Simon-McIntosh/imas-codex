@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     Field,
     ValidationError,
     computed_field,
@@ -708,6 +709,82 @@ class StandardNameVocabGap(BaseModel):
         return value
 
 
+DDGapKindValue = Literal[
+    "unit_defect",
+    "self_contradiction",
+    "doc_mismatch",
+    "type_wiring",
+    "missing_declaration",
+    "rename_inconsistency",
+]
+
+
+class DDGapEvidence(BaseModel):
+    """Flag-only evidence that one exact DD source declaration is defective.
+
+    This response object deliberately has no lifecycle, disposition, or
+    enforcement field. It records an observation for later graph persistence;
+    the graph owns triage state and curated registries own pipeline behavior.
+    """
+
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+
+    path: str = Field(
+        min_length=1,
+        description=(
+            "Exact claimed DD source-binding path carrying the suspected defect; "
+            "patterns, parent paths, and unclaimed neighbours are forbidden"
+        ),
+    )
+    kind: DDGapKindValue = Field(
+        description="Schema-owned category of contradicted DD declaration"
+    )
+    reason: str = Field(
+        min_length=12,
+        description="Substantive evidence explaining the concrete contradiction",
+    )
+    observed_dd_version: str | None = Field(
+        default=None, description="DD version in which the evidence was observed"
+    )
+    observed_value: str | None = Field(
+        default=None,
+        description="Observed declared value, serialized without interpretation",
+    )
+    expected_value: str | None = Field(
+        default=None,
+        description="Expected declaration grounded in the stated evidence rule",
+    )
+    evidence_rule: str | None = Field(
+        default=None,
+        description="Physical or schema invariant used to compare the values",
+    )
+    reference_path: str | None = Field(
+        default=None,
+        description="Exact DD path supplying independent comparison evidence",
+    )
+    reference_value: str | None = Field(
+        default=None,
+        description="Declaration observed at reference_path",
+    )
+
+    @field_validator("path", "reference_path")
+    @classmethod
+    def _require_exact_path(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        if any(marker in value for marker in ("*", "?", "[", "]")):
+            raise ValueError("DD-gap evidence requires an exact DD path, not a pattern")
+        return value
+
+    @model_validator(mode="after")
+    def _reference_evidence_is_complete(self) -> DDGapEvidence:
+        if (self.reference_path is None) != (self.reference_value is None):
+            raise ValueError(
+                "reference_path and reference_value must be supplied together"
+            )
+        return self
+
+
 class StandardNameAttachment(BaseModel):
     """A DD path that should attach to an existing standard name without regeneration."""
 
@@ -733,6 +810,13 @@ class StandardNameComposeBatch(BaseModel):
     vocab_gaps: list[StandardNameVocabGap] = Field(
         default_factory=list,
         description="Paths where naming requires vocabulary expansion in imas-standard-names",
+    )
+    dd_gaps: list[DDGapEvidence] = Field(
+        default_factory=list,
+        description=(
+            "Flag-only DD declaration evidence for exact claimed source paths; "
+            "does not alter composition outcomes"
+        ),
     )
 
     @model_validator(mode="before")
@@ -1275,6 +1359,13 @@ class StandardNameQualityReviewNameOnly(BaseModel):
         ),
     )
     issues: list[str] = Field(default_factory=list, description="Specific issues found")
+    dd_gaps: list[DDGapEvidence] = Field(
+        default_factory=list,
+        description=(
+            "Flag-only DD declaration evidence; independent of review scores and "
+            "name-stage decisions"
+        ),
+    )
 
 
 class StandardNameQualityReviewNameOnlyBatch(BaseModel):
@@ -1361,6 +1452,13 @@ class StandardNameQualityReviewDocs(BaseModel):
         default=None, description="Suggested revised documentation body"
     )
     issues: list[str] = Field(default_factory=list, description="Specific issues found")
+    dd_gaps: list[DDGapEvidence] = Field(
+        default_factory=list,
+        description=(
+            "Flag-only DD declaration evidence; independent of review scores and "
+            "docs-stage decisions"
+        ),
+    )
 
 
 class StandardNameQualityReviewDocsBatch(BaseModel):

@@ -25,7 +25,7 @@ is a `vocab_gap` report, not a novel token.
 **Critical:** the dominant failure mode is LLMs **absorbing registered tokens
 into `physical_base`** rather than placing them in their correct segment
 (e.g. `toroidal_torque` instead of decomposing as `component=toroidal` +
-`physical_base=torque`). Apply the **[I4.6] Decomposition audit** below
+`physical_base=torque`). Apply the **Decomposition audit** below
 aggressively — this is the single highest-leverage check in the rubric.
 
 Compound `physical_base` tokens like `poloidal_flux`, `minor_radius`,
@@ -55,18 +55,18 @@ grammar and convention scores.
 - Are postfix operators (`_magnitude`, `_real_part`, etc.) correctly appended (not prefix `_of_` form)?
 - Is locus correctly expressed with `_of_`/`_at_`/`_over_` prepositions?
 - Is mechanism expressed with `_due_to_`?
-- **[I1.7] Field-at-region preposition (HARD)** — when the locus relation is `_of_<locus>` and the `locus_type` is `position` or `region`, check the physical base:
+- **Field-at-region preposition (HARD)** — when the locus relation is `_of_<locus>` and the `locus_type` is `position` or `region`, check the physical base:
     - If the base is an **evaluated field** (`temperature`, `density`, `pressure`, `magnetic_field`, `electric_field`, `magnetic_flux`, `flux`, `current`, `current_density`, `voltage`, `velocity`, `magnetic_shear`, `safety_factor`, `particle_flux`, `energy_flux`, `momentum_flux`, `power`, `power_density`, `loop_voltage`, `electric_potential`), the preposition MUST be `_at_`. Dock `Grammar` to **≤ 5** for this defect alone.
     - If the base is an **intrinsic geometric property** (`area`, `radius`, `major_radius`, `length`, `elongation`, `triangularity`, `vertical_coordinate`, `toroidal_angle`, `coordinate`), `_of_` is correct.
     - Examples to refine: `poloidal_magnetic_flux_of_plasma_boundary → poloidal_magnetic_flux_at_plasma_boundary`; `electron_density_of_pedestal → electron_density_at_pedestal`.
-- **[I1.7b] Shape parameter requires a surface (HARD)** — a plasma-shape parameter (`triangularity`, `elongation`, `squareness`, `ellipticity`, and their `upper`/`lower`/`inner`/`outer` variants) is a property OF a specific surface and is meaningless without it ("of WHICH surface?"). It MUST carry a surface locus: `_of_plasma_boundary` for the LCFS contour, `_of_flux_surface` (or the named interior surface) otherwise. A bare shape parameter (e.g. `outer_triangularity`, `upper_inner_squareness`) parses but is **NON-CANONICAL** even in the equilibrium domain — the surface locus is distinguishing, never redundant. Dock `Convention` to **≤ 5** and propose `revised_name` adding the surface (`outer_triangularity → outer_triangularity_of_plasma_boundary`). **NEVER** score a bare shape parameter at or above its surface-qualified sibling.
-- **[I1.8] Grammar-owned advisory aliases (HARD)** — every injected registered locus is authoritative and distinct. Never collapse one registered locus into another. Dock `Convention` to **≤ 5** and propose a rewrite only when the installed grammar publishes the spelling under `advisory_aliases`:
+- **Shape parameter requires a surface (HARD)** — a plasma-shape parameter (`triangularity`, `elongation`, `squareness`, `ellipticity`, and their `upper`/`lower`/`inner`/`outer` variants) is a property OF a specific surface and is meaningless without it ("of WHICH surface?"). It MUST carry a surface locus: `_of_plasma_boundary` for the LCFS contour, `_of_flux_surface` (or the named interior surface) otherwise. A bare shape parameter (e.g. `outer_triangularity`, `upper_inner_squareness`) parses but is **NON-CANONICAL** even in the equilibrium domain — the surface locus is distinguishing, never redundant. Dock `Convention` to **≤ 5** and propose `revised_name` adding the surface (`outer_triangularity → outer_triangularity_of_plasma_boundary`). **NEVER** score a bare shape parameter at or above its surface-qualified sibling.
+- **Grammar-owned advisory aliases (HARD)** — every injected registered locus is authoritative and distinct. Never collapse one registered locus into another. Dock `Convention` to **≤ 5** and propose a rewrite only when the installed grammar publishes the spelling under `advisory_aliases`:
 {% if grammar and grammar.advisory_aliases %}
 {% for segment, aliases in grammar.advisory_aliases.items() %}{% for alias, details in aliases.items() %}
     - `{{ alias }}` ({{ segment }}) → **`{{ details.canonical }}`**: {{ details.reason }}
 {% endfor %}{% endfor %}
 {% endif %}
-- **[I4.6] Decomposition audit** — inspect the `physical_base` slot for
+- **Decomposition audit** — inspect the `physical_base` slot for
   potential group absorption. Flag any known group token (from operators,
   subjects, components, coordinates, locus, process registries) that
   appears as a whole underscore-separated substring of the `physical_base`
@@ -90,7 +90,7 @@ grammar and convention scores.
   A name must be unambiguous in isolation. Score ≤ 5 if the name is semantically
   incomplete — e.g. `co_passing_density` (density of what?), `trapped_pressure`
   (pressure of what species/component?), `beam_fraction` (fraction of what?).
-- **[I1.9] Measurement principle (HARD)**: does the name describe the **physical
+- **Measurement principle (HARD)**: does the name describe the **physical
   observable** — what the quantity physically IS — rather than the diagnostic
   instrument's internal state? Diagnostic standard names describe what is
   measured, not the device's own reading. A Rogowski coil measures the current
@@ -102,7 +102,7 @@ grammar and convention scores.
   reaching the detector (not "power of the bolometer"). **Score ≤ 5** when the
   name attributes the measured quantity to the device rather than to the physical
   system being probed.
-- **[I1.10] Qualifier fidelity — dropped (HARD)**: does the name drop a
+- **Qualifier fidelity — dropped (HARD)**: does the name drop a
   physically-essential qualifier that the source description states? Compare the
   name against the provided source description and flag a dropped **kind**
   (`neutron` vs `heat` flux), **extremum** (`maximum`, `peak`, `minimum`),
@@ -114,14 +114,14 @@ grammar and convention scores.
   kind). Do NOT penalise the inverse — qualifiers absent from the source that are
   merely domain-implied boilerplate (`equilibrium_`, `_of_plasma`) should still
   be dropped.
-- **[I1.10] Qualifier fidelity — over-qualified (HARD)**: does the name add a
+- **Qualifier fidelity — over-qualified (HARD)**: does the name add a
   qualifier that is neither stated by the source nor physically necessary? A
   modifier that restates something already inherent in the base
   over-qualifies and is wrong — plasma current is inherently toroidal, so
   `toroidal_plasma_current` adds nothing; a quantity already scalar-per-species
   needs no `total_` if the source does not state it. **Score ≤ 5** for an
   unwarranted added modifier.
-- **[I1.11] Source fidelity vs the AUTHORITATIVE DD doc (HARD)**: the rich
+- **Source-fidelity check against the AUTHORITATIVE DD doc (HARD)**: the rich
   `description` is LLM-enriched and may itself over-state the physics. When an
   **authoritative DD documentation** line is provided for a path (the terse,
   DD-XML-backed `documentation`), grade the name against THAT, not only the
@@ -148,6 +148,20 @@ grammar and convention scores.
 - No missing `subject` when required (e.g. ``temperature`` without species)?
 - Unit and kind consistent with the decomposed name?
 - Tags (if present) cover the expected physics domain?
+
+## Optional DD-gap evidence — flag only
+
+When an exact DD source definition contains a concrete contradiction, include
+it in that review's `dd_gaps` array. Report only an **exact source-binding
+path** shown for the candidate; never report patterns, parent paths, neighbours,
+siblings, or paths bound to another candidate. Each report has `path`, `kind`,
+and a substantive `reason`, with structured observed/expected and reference
+fields when available.
+
+This evidence is independent of review. It **must not change** any score,
+suggestion, verdict, or stage outcome you would otherwise return. Never choose
+a DD-gap status, disposition, enforcement action, or registry change. **Lexical
+name or attachment disagreement alone is not a DD defect.**
 
 ## Quality Tiers
 
@@ -197,7 +211,7 @@ call them out explicitly in `comments`:
 
 These names already exist in the catalog. Flag a candidate as a duplicate **only** when it is a TRUE duplicate — the SAME physical quantity in a redundant spelling (a synonym). **Do NOT flag a candidate that is RELATED but DISTINCT** — these are family members to KEEP, linked via `HAS_PARENT`, never collapsed:
 - a **surface or projection variant** of an existing name is a *different quantity*: `triangularity_of_flux_surface` (interior profile) vs `triangularity_of_plasma_boundary` (boundary scalar); `upper_triangularity_of_plasma_boundary` vs `lower_…`. Keep both.
-- a **more-specific child of a bare family head** is NOT a duplicate of its parent: `triangularity_of_plasma_boundary` is a child of the headline `triangularity`, not a duplicate of it. Keep the specific leaf; never dock it as a "near-duplicate" of the bare form, and never prefer the bare leaf over its surface-qualified sibling (see [I1.7b]).
+- a **more-specific child of a bare family head** is NOT a duplicate of its parent: `triangularity_of_plasma_boundary` is a child of the headline `triangularity`, not a duplicate of it. Keep the specific leaf; never dock it as a "near-duplicate" of the bare form, and never prefer the bare leaf over its surface-qualified sibling (see the shape-parameter rule above).
 Collapse only exact same-quantity synonyms:
 {% for name in nearby_existing_names %}
 - **{{ name.id }}**: {{ name.description | default('', true) }} ({{ name.kind | default('scalar', true) }}, {{ name.unit | default('dimensionless', true) }})
@@ -234,7 +248,7 @@ real defects, not phantom ones.
 {% if item.dd_source_docs %}
 **Source DD definitions** (physics reference for semantic accuracy):
 {% for p in item.dd_source_docs %}  - `{{ p.id }}` [{{ p.unit }}]: {{ p.description or p.documentation }}
-{% if p.documentation and p.documentation != p.description %}    ↳ **authoritative DD doc** (grade [I1.11] against THIS — the line above is LLM-enriched and may over-state): {{ p.documentation }}
+{% if p.documentation and p.documentation != p.description %}    ↳ **authoritative DD doc** (apply the Source-fidelity check to THIS — the line above is LLM-enriched and may over-state): {{ p.documentation }}
 {% endif %}{% endfor %}{% endif %}
 
 {% if item.data_type %}- **Data type:** {{ item.data_type }}{% endif %}
@@ -331,7 +345,8 @@ Return a JSON object with a `reviews` array. Each review MUST include:
       "revised_fields": null,
       "suggested_name": null,
       "suggestion_justification": null,
-      "issues": []
+      "issues": [],
+      "dd_gaps": []
     }
   ]
 }

@@ -49,6 +49,20 @@ For sibling-comparison context (your primary cross-check signal):
 
 When sibling lists are empty (greenfield IDS), score on grammar + DD provenance alone — do not invent missing peers.
 
+## Optional DD-gap evidence — flag only
+
+When the supplied immutable DD evidence itself contains a concrete
+contradiction, return a typed object in that review's `dd_gaps` array. Report
+only an **exact source-binding path** shown for that candidate. Do not report a
+wildcard, parent, semantic neighbour, sibling, or path bound to another
+candidate. Each object has `path`, `kind`, and a substantive `reason`, with
+structured observed/expected and reference fields when available.
+
+This evidence is independent of the name review and **must not change** any
+score, suggested name, verdict, or stage outcome you would otherwise return.
+Do not choose a DD-gap status, disposition, enforcement action, or registry
+change. **Lexical name or attachment disagreement alone is not a DD defect.**
+
 ## Token vocabulary
 
 Use only registered tokens. The closed `physical_base` registry holds lexical bases like `temperature`, `pressure`, `current_density`, `velocity`, `magnetic_field`. A name using an unregistered token is a grammar defect — dock grammar and completeness points. **Before flagging a token as unregistered, check EVERY registry listed below — including population, orbit, aggregation, and qualifier.** Tokens like `thermal`, `fast` (population), `trapped` (orbit), `total`, `net` (aggregation), and `launched`, `absorbed`, `reflected` (qualifier) are registered; calling them unregistered is a review error.

@@ -192,6 +192,52 @@ class TestStaleGuidanceStripped:
         )
 
 
+class TestDDGapEvidencePromptContract:
+    """Every production response seat keeps DD-defect evidence flag-only."""
+
+    @pytest.mark.parametrize(
+        "seat",
+        [
+            "sn/generate_name_dd",
+            "sn/review_names",
+            "sn/review_docs",
+            "sn/review_names_system",
+            "sn/review_docs_system",
+        ],
+    )
+    def test_prompt_preserves_exact_path_and_behavior_independence(self, seat):
+        text = (PROMPTS_DIR / f"{seat}.md").read_text(encoding="utf-8")
+        normalized = " ".join(text.replace("*", "").split())
+
+        assert "exact claimed" in normalized or "exact source-binding" in normalized
+        assert "Lexical name or attachment disagreement alone" in normalized
+        assert "must not change" in normalized
+        assert "score" in normalized
+        assert "status" in normalized
+        assert "enforcement" in normalized
+
+    @pytest.mark.parametrize(
+        "seat",
+        [
+            "sn/review_names_user",
+            "sn/review_docs_user",
+        ],
+    )
+    def test_live_review_user_prompt_requests_typed_evidence_field(self, seat):
+        text = (PROMPTS_DIR / f"{seat}.md").read_text(encoding="utf-8")
+
+        assert '"dd_gaps"' in text
+        assert '"path"' in text
+        assert '"kind"' in text
+        assert '"reason"' in text
+
+    def test_dead_source_fidelity_anchor_is_removed(self):
+        text = (PROMPTS_DIR / "sn" / "review_names.md").read_text(encoding="utf-8")
+
+        assert re.search(r"\[[A-Z]\d+\.\d+[a-z]?\]", text) is None
+        assert "Source-fidelity check" in text
+
+
 class TestClosedVocabFullSegments:
     """Verify closed_vocab_full includes ALL expected segments with tokens."""
 

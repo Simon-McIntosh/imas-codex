@@ -208,8 +208,13 @@ Return a JSON object with a `reviews` array. Each review MUST include:
       "reasoning": "Brief specific justification covering each dimension",
       "revised_name": null,
       "revised_fields": null,
-      "issues": []
+      "issues": [],
+      "dd_gaps": []
     }
   ]
 }
 ```
+
+Leave `"dd_gaps": []` unless the system prompt's flag-only contract is met.
+When reporting evidence, every entry requires `"path"`, `"kind"`, and a
+substantive `"reason"`.

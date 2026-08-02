@@ -51,6 +51,20 @@ Rate each dimension from 0 to 20. The total score is the sum (0-80).
 - Is the physics qualifier appropriate (no ``flux_surface_averaged_elongation`` when elongation is a geometric property)?
 - Does the documentation correctly position the quantity against related ones (no false equivalences)?
 
+## Optional DD-gap evidence — flag only
+
+When an exact DD source definition contains a concrete contradiction, include
+it in that review's `dd_gaps` array. Report only an **exact source-binding
+path** shown for the candidate; never report patterns, parent paths, neighbours,
+siblings, or paths bound to another candidate. Each report has `path`, `kind`,
+and a substantive `reason`, with structured observed/expected and reference
+fields when available.
+
+This evidence is independent of review. It **must not change** any score,
+rewrite, verdict, or stage outcome you would otherwise return. Never choose a
+DD-gap status, disposition, enforcement action, or registry change. **Lexical
+name or attachment disagreement alone is not a DD defect.**
+
 ## Quality Tiers
 
 Map the total score (0-80) to a tier:
@@ -175,7 +189,8 @@ Return a JSON object with a `reviews` array. Each review MUST include:
       "reasoning": "Brief specific justification covering each dimension",
       "revised_description": null,
       "revised_documentation": null,
-      "issues": []
+      "issues": [],
+      "dd_gaps": []
     }
   ]
 }
