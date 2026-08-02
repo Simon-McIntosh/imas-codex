@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -622,6 +622,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="gas-cache-live-20260802" data-who="reckon-ship" data-when="2026-08-02T13:28:00+02:00">
     <div class="r-comment-body"><p><strong>The two stale gas-unit mirrors are repaired on the live graph.</strong> An exact preflight admitted only <code>spi/injector/fragmentation_gas/flow_rate</code> and <code>spi/injector/propellant_gas/flow_rate</code>. The bounded transaction changed both from <code>s^-1</code> to <code>Pa.m^3.s^-1</code>, preserved exactly one matching <code>HAS_UNIT</code> edge apiece, and refreshed only <code>gas_flow.source_unit</code>. A 61,366-node global before/after snapshot proved no third DD scalar or unit edge changed; the authoritative <code>gas_flow</code> unit/edge and all six source bindings remained identical. Fresh-client verification found no drift and an exact second reconcile returned 0 checked / 0 corrected.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="fanout-exact-repair-20260802" data-who="reckon-ship" data-when="2026-08-02T13:40:00+02:00">
+    <div class="r-comment-body"><p><strong>The first graph-wide fan-out repair was admitted conservatively and landed exactly.</strong> Read-only adjudication classified only two of 340 competing sources as safe automatically; 338 remain review-required because 316 are genuinely ambiguous, 13 lack decisive competitor authority, and nine have no safe target. The exact two-source transaction repaired the x/z first-measurement direction-vector bindings, wrote two <code>repair_semantic_source_binding</code> audit rows, changed no other source fingerprint, and was idempotent on a second apply. Global violations are <strong>961 → 959</strong>, entirely from multi-live <strong>340 → 338</strong>; the other three classes are unchanged and WEST remains zero. Evidence artifact: <code>/tmp/s7_fanout_adjudication.json</code>, SHA-256 <code>b692cfdf5146d911c2ff7ffbee0f4a83e2701e6e7788b1a2e8107f3d4a0826b2</code>.</p></div>
 </div>
 </section>
 </main>
