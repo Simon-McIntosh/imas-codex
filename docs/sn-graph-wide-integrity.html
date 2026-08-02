@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="42">
+<meta name="plan-version" content="43">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -713,6 +713,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260802T212654880231" data-who="" data-when="">
     <div class="r-comment-body"><p><strong>The first authorized 203-source apply failed closed and rolled back completely.</strong> The single invocation raised <code>SourceSnapshotMigrationConflict: postflight authority or preserved graph state changed</code> inside the explicit transaction; it was not retried. Artifact <code>/tmp/s7_source_snapshot_migration_apply.json</code> (SHA-256 <code>42279a11ce9a048177e02844ed76ebfd6d0188fffbdae6334d78074bb3a05a24</code>) proves the protected graph hash remained <code>352f667cb674ba29bd56c98baa0151bdc377a408dacf90150cd6024dc5184e39</code> before and after, with zero committed source mutations, zero migration ledgers, zero claims/scopes, unchanged WEST and fixtures, and the 10 excluded sources unchanged. The safety fence worked as designed; production remains unmigrated. Root-cause investigation of the postflight predicate is required before any new apply authorization.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260802T215336074915" data-who="" data-when="">
+    <div class="r-comment-body"><p><strong>The false postflight conflict is repaired at <code>356d9953</code>.</strong> Two independent audits proved that 111 sources across 52 shared names embedded authorized peer-source snapshot changes in their preserved-state closures; authority mismatches were zero. The repair strips snapshot fields only from related <code>StandardNameSource</code> nodes in the exact atomic cohort, while all non-snapshot fields and all out-of-cohort sources remain protected. Validation on <code>sun_debug</code> passed 26 focused unit/CLI tests and 17 actual disposable-Neo4j cases, including the exact 203-source 162/1/40 mix with 12 co-producers, rich authority relationships, external-peer rejection, non-snapshot rejection, and large-cohort rollback. No production migration has run after the repair; independent source audit and repeat reduced-manifest dry-run proof are required before reauthorization.</p></div>
 </div>
 </section>
 </main>
