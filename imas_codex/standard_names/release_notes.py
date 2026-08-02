@@ -17,10 +17,14 @@ fallback body is used so a release never blocks on the notes model.
 from __future__ import annotations
 
 import logging
+from collections import Counter
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+from imas_codex.graph.models import DDGapStatus
 
 logger = logging.getLogger(__name__)
 
@@ -144,12 +148,119 @@ def collect_catalog_changes(
     return out
 
 
+def summarize_dd_gap_facts(facts: list[Mapping[str, Any]]) -> dict[str, Any]:
+    """Build deterministic, warning-only release evidence from DD-gap facts.
+
+    The input is the canonical read-only lifecycle projection supplied by
+    :mod:`imas_codex.standard_names.dd_gaps`. This function deliberately has no
+    graph access and no mutation path: a release report may expose authoritative
+    DD defects, but it cannot turn observational evidence into an export gate.
+    """
+    open_statuses = frozenset({DDGapStatus.flagged.value})
+    triaged_statuses = frozenset(
+        {
+            DDGapStatus.triaged.value,
+            DDGapStatus.registered_exception.value,
+            DDGapStatus.upstream_issue.value,
+        }
+    )
+    retired_statuses = frozenset(
+        {DDGapStatus.rejected.value, DDGapStatus.resolved_upstream.value}
+    )
+
+    normalized: list[dict[str, Any]] = []
+    for fact in facts:
+        status = str(fact.get("status") or "")
+        exact_paths = sorted(
+            {
+                str(path)
+                for path in fact.get("source_paths", []) or []
+                if str(path).strip()
+            }
+        )
+        normalized.append(
+            {
+                "id": str(fact.get("id") or ""),
+                "path": str(fact.get("path") or ""),
+                "kind": str(fact.get("kind") or ""),
+                "status": status,
+                "exact_paths": exact_paths,
+                "upstream_url": str(fact.get("upstream_url") or ""),
+                "registry_backend": str(fact.get("registry_backend") or ""),
+                "resolved_dd_version": str(fact.get("resolved_dd_version") or ""),
+            }
+        )
+    normalized.sort(key=lambda item: (item["status"], item["kind"], item["id"]))
+
+    by_status = Counter(item["status"] for item in normalized)
+    by_kind = Counter(item["kind"] for item in normalized)
+    unresolved = [
+        item
+        for item in normalized
+        if item["status"] in open_statuses | triaged_statuses
+    ]
+    retired = [item for item in normalized if item["status"] in retired_statuses]
+    stale_registry = [
+        item
+        for item in retired
+        if item["status"] == DDGapStatus.resolved_upstream.value
+        and item["registry_backend"]
+    ]
+    return {
+        "total": len(normalized),
+        "open_count": sum(by_status[status] for status in open_statuses),
+        "triaged_count": sum(by_status[status] for status in triaged_statuses),
+        "retired_count": len(retired),
+        "unresolved_count": len(unresolved),
+        "stale_registry_count": len(stale_registry),
+        "by_status": dict(sorted(by_status.items())),
+        "by_kind": dict(sorted(by_kind.items())),
+        "facts": normalized,
+        "unresolved_facts": unresolved,
+        "retired_facts": retired,
+        "stale_registry_facts": stale_registry,
+        "warning_only": True,
+        "blocks_release": False,
+    }
+
+
+def _static_dd_gap_caveat(summary: Mapping[str, Any]) -> str:
+    """Render exact lifecycle evidence for the deterministic PR fallback."""
+    total = int(summary.get("total", 0) or 0)
+    if not total:
+        return "\n\n## Data Dictionary caveats\n\nNo linked DD defects were reported."
+
+    lines = [
+        "\n\n## Data Dictionary caveats",
+        "",
+        (
+            f"Warning only: {summary.get('unresolved_count', 0)} unresolved, "
+            f"{summary.get('triaged_count', 0)} triaged, "
+            f"{summary.get('retired_count', 0)} retired, and "
+            f"{summary.get('stale_registry_count', 0)} stale registry fact(s). "
+            "These observations do not suppress sources or block this release."
+        ),
+    ]
+    for fact in summary.get("facts", []) or []:
+        exact_paths = (
+            ", ".join(f"`{path}`" for path in fact.get("exact_paths", []))
+            or "(no linked exact path)"
+        )
+        upstream = fact.get("upstream_url")
+        suffix = f" — [upstream]({upstream})" if upstream else ""
+        lines.append(
+            f"- `{fact.get('kind')}` / `{fact.get('status')}`: {exact_paths}{suffix}"
+        )
+    return "\n".join(lines)
+
+
 def static_pr_notes(
     *,
     message: str,
     rc_version: str,
     batch_size: int,
     minted_from: str,
+    dd_gaps: Mapping[str, Any] | None = None,
 ) -> tuple[str, str]:
     """The deterministic fallback title/body (no LLM)."""
     title = message or f"Standard-name review batch {rc_version}"
@@ -157,6 +268,7 @@ def static_pr_notes(
         f"Review batch **{rc_version}** — {batch_size} standard name(s) for "
         f"first human review.\n\nMinted from `{minted_from}`."
     )
+    body += _static_dd_gap_caveat(dd_gaps or summarize_dd_gap_facts([]))
     return title, body
 
 
@@ -168,6 +280,7 @@ def build_pr_notes(
     minted_from: str,
     unmatched_count: int = 0,
     changes: list[dict[str, Any]] | None = None,
+    dd_gaps: Mapping[str, Any] | None = None,
 ) -> tuple[str, str]:
     """Synthesize a grounded PR title/body; fall back to the static form.
 
@@ -189,6 +302,7 @@ def build_pr_notes(
                 "minted_from": minted_from,
                 "unmatched_count": unmatched_count,
                 "domains": changes or [],
+                "dd_gaps": dd_gaps or summarize_dd_gap_facts([]),
             },
         )
         notes, _cost, _tokens = call_llm_structured(
@@ -212,4 +326,5 @@ def build_pr_notes(
             rc_version=rc_version,
             batch_size=batch_size,
             minted_from=minted_from,
+            dd_gaps=dd_gaps,
         )

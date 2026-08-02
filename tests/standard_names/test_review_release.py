@@ -373,6 +373,136 @@ def test_build_pr_notes_falls_back_on_llm_failure(monkeypatch):
     )
     assert title == "WEST batch"
     assert "v0.1.0rc1" in body and "3 standard name(s)" in body
+    assert "No linked DD defects were reported" in body
+
+
+def test_dd_gap_release_summary_is_warning_only_and_lifecycle_complete():
+    from imas_codex.standard_names.release_notes import summarize_dd_gap_facts
+
+    facts = [
+        {
+            "id": "dd_gap:equilibrium/a:unit_defect",
+            "path": "equilibrium/a",
+            "kind": "unit_defect",
+            "status": "flagged",
+            "source_paths": ["equilibrium/a"],
+        },
+        {
+            "id": "dd_gap:equilibrium/b:type_wiring",
+            "path": "equilibrium/b",
+            "kind": "type_wiring",
+            "status": "upstream_issue",
+            "source_paths": ["equilibrium/b", "equilibrium/b"],
+            "upstream_url": "https://example.invalid/dd/12",
+        },
+        {
+            "id": "dd_gap:equilibrium/c:unit_defect",
+            "path": "equilibrium/*/c",
+            "kind": "unit_defect",
+            "status": "resolved_upstream",
+            "source_paths": ["equilibrium/0/c"],
+            "registry_backend": "dd_unit_exceptions",
+            "resolved_dd_version": "4.2.0",
+        },
+        {
+            "id": "dd_gap:equilibrium/d:doc_mismatch",
+            "path": "equilibrium/d",
+            "kind": "doc_mismatch",
+            "status": "rejected",
+            "source_paths": ["equilibrium/d"],
+        },
+    ]
+
+    summary = summarize_dd_gap_facts(facts)
+
+    assert summary["total"] == 4
+    assert summary["open_count"] == 1
+    assert summary["triaged_count"] == 1
+    assert summary["unresolved_count"] == 2
+    assert summary["retired_count"] == 2
+    assert summary["stale_registry_count"] == 1
+    assert summary["by_kind"] == {
+        "doc_mismatch": 1,
+        "type_wiring": 1,
+        "unit_defect": 2,
+    }
+    assert summary["warning_only"] is True
+    assert summary["blocks_release"] is False
+    upstream = next(
+        fact for fact in summary["facts"] if fact["status"] == "upstream_issue"
+    )
+    assert upstream["exact_paths"] == ["equilibrium/b"]
+    assert upstream["upstream_url"] == "https://example.invalid/dd/12"
+
+
+def test_static_notes_list_exact_dd_paths_without_blocking_release():
+    from imas_codex.standard_names.release_notes import (
+        static_pr_notes,
+        summarize_dd_gap_facts,
+    )
+
+    summary = summarize_dd_gap_facts(
+        [
+            {
+                "id": "dd_gap:equilibrium/path:type_wiring",
+                "path": "equilibrium/path",
+                "kind": "type_wiring",
+                "status": "upstream_issue",
+                "source_paths": ["equilibrium/path"],
+                "upstream_url": "https://example.invalid/dd/27",
+            }
+        ]
+    )
+    _title, body = static_pr_notes(
+        message="Batch",
+        rc_version="v0.1.0rc1",
+        batch_size=1,
+        minted_from="batch.yaml",
+        dd_gaps=summary,
+    )
+
+    assert "`equilibrium/path`" in body
+    assert "https://example.invalid/dd/27" in body
+    assert "do not suppress sources or block this release" in body
+
+
+def test_release_notes_prompt_receives_structured_dd_gap_evidence(monkeypatch):
+    from imas_codex.standard_names import release_notes
+
+    seen: dict = {}
+
+    def _ok(**kw):
+        seen["messages"] = kw["messages"]
+        return release_notes.PrNotes(title="Batch", body="Body"), 0.0, {}
+
+    monkeypatch.setattr("imas_codex.discovery.base.llm.call_llm_structured", _ok)
+    summary = release_notes.summarize_dd_gap_facts(
+        [
+            {
+                "id": "dd_gap:equilibrium/path:unit_defect",
+                "path": "equilibrium/path",
+                "kind": "unit_defect",
+                "status": "registered_exception",
+                "source_paths": ["equilibrium/path"],
+                "registry_backend": "dd_unit_exceptions",
+            }
+        ]
+    )
+
+    title, body = release_notes.build_pr_notes(
+        message="Batch",
+        rc_version="v0.1.0rc1",
+        batch_size=1,
+        minted_from="batch.yaml",
+        dd_gaps=summary,
+    )
+
+    assert (title, body) == ("Batch", "Body")
+    system, user = (message["content"] for message in seen["messages"])
+    assert "DD defects stay visible and observational" in system
+    assert "equilibrium/path" in user
+    assert "registered_exception" in user
+    assert "Release-blocking: no" in user
 
 
 def test_build_merge_notes_falls_back_to_empty_on_llm_failure(monkeypatch):

@@ -14,9 +14,9 @@ review and merge the batch.
 ## Hard rules
 
 - **Grounded only.** Every statement must be supported by the supplied
-  evidence (release message, batch record, catalog diff). Never invent
-  physics, counts, provenance, or motivations. If a fact is not in the
-  evidence, leave it out.
+  evidence (release message, batch record, catalog diff, DD-gap lifecycle
+  facts). Never invent physics, counts, provenance, or motivations. If a fact
+  is not in the evidence, leave it out.
 - **Concise.** A reviewer should grasp the batch in under a minute: what it
   contains, where it came from, how to review it. No filler, no marketing
   prose, no restating the obvious mechanics of pull requests.
@@ -28,6 +28,11 @@ review and merge the batch.
 - **Honest numbers.** Counts come from the diff evidence verbatim. If the
   diff shows removals or changes to existing entries, say so explicitly —
   reviewers must never discover an unstated change.
+- **DD defects stay visible and observational.** Include a short Data
+  Dictionary caveats section with the supplied open, triaged, retired,
+  unresolved, and stale-registry counts. List each supplied exact path and
+  upstream link. These facts are warnings: never claim that they suppress a
+  source, change a name, or block the release.
 - **Title** ≤ 70 characters: the batch identity and its size, e.g.
   "Standard-name review batch v0.2.0rc65 — 312 WEST names".
 

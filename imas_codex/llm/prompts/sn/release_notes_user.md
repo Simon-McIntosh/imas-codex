@@ -38,5 +38,27 @@ schema_needs: []
 (no per-domain diff evidence available — describe only the batch record)
 {% endif %}
 
+## Data Dictionary caveats (read-only lifecycle evidence)
+
+- Total linked facts: {{ dd_gaps.total }}
+- Awaiting triage: {{ dd_gaps.open_count }}
+- Human-triaged or governed dispositions still unresolved: {{ dd_gaps.triaged_count }}
+- Unresolved total: {{ dd_gaps.unresolved_count }}
+- Retired: {{ dd_gaps.retired_count }}
+- Retired facts whose enforcement registry entry is now stale: {{ dd_gaps.stale_registry_count }}
+- Release-blocking: no (warning-only evidence)
+
+{% if dd_gaps.facts %}
+{% for gap in dd_gaps.facts %}
+- **{{ gap.kind }} / {{ gap.status }}**{% if gap.upstream_url %} — upstream: {{ gap.upstream_url }}{% endif %}
+  - Fact path or pattern: `{{ gap.path }}`
+  - Exact linked path(s): {% if gap.exact_paths %}{% for path in gap.exact_paths %}`{{ path }}`{% if not loop.last %}, {% endif %}{% endfor %}{% else %}(none linked){% endif %}
+  {% if gap.registry_backend %}- Registry backend: `{{ gap.registry_backend }}`{% endif %}
+  {% if gap.resolved_dd_version %}- Corrected in published DD: `{{ gap.resolved_dd_version }}`{% endif %}
+{% endfor %}
+{% else %}
+(no linked DD defects were reported)
+{% endif %}
+
 Write the `title` and markdown `body` now, grounded strictly on the evidence
 above.
