@@ -41,13 +41,13 @@ def _is_unparseable_dd_unit(unit: str) -> bool:
     # (see the unit-eligibility check in ``dd_qualifier.qualify_dd``).
     if unit in ("1", "dimensionless", "-", "none"):
         return False
-    # C1: whitespace in unit string
+    # Whitespace separates unit factors without the explicit DD product syntax.
     if re.search(r"\s", unit):
         return True
-    # C2: non-numeric exponents (e.g. m^dimension)
+    # Exponents must be numeric rather than unresolved dimension labels.
     if re.search(r"\^[a-zA-Z]", unit):
         return True
-    # C3: attempt pint parse — catches everything else
+    # The canonical parser catches all remaining invalid unit expressions.
     from imas_codex.units import normalize_unit_symbol
 
     return normalize_unit_symbol(unit) is None
