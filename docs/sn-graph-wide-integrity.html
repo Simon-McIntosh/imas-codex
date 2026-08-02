@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -692,6 +692,12 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="reviewer-schema-stall-20260802" data-who="reckon-ship" data-when="2026-08-02T21:03:00+02:00">
     <div class="r-comment-body"><p><strong>Resume is blocked on a provider/schema compatibility defect, not graph scope or budget.</strong> Sonnet 5 through OpenRouter rejects the exact 4,950-byte name-review wire schema before content with <code>Schema is too complex</code>; Grok returned valid responses, but completeness correctly deferred 13 one-of-three quorums. The bounded CLI also returns before propagating <code>--reviewer-profile</code>, while the only existing fallback is a single Anthropic seat and is not a quorum. Durable cleanup leaves 17 paths as 8 accepted, 7 active-in-flight, and 2 genuine gaps; remaining cohort cap is USD 49.067144. Diagnosis: <code>/tmp/s7_reviewer_schema_stall.json</code>, SHA-256 <code>c2d38d729da9357c9defa028ee2534ca5a40712f7fe040ede188db5da0501e8c</code>. Resume is prohibited until a lean schema passes the real provider and profile propagation is fixed.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="dd-source-snapshot-drift-census" data-who="reckon-ship" data-when="2026-08-02T20:28:00+02:00">
+    <div class="r-comment-body"><p><strong>DD source-snapshot migration is now the executable-cohort gate.</strong> A twice-identical live census found 9,128 DD sources: 8,741 pinned to DD 4.1.0, 179 to current 4.1.1, and 208 legacy unpinned. Of 215 executable sources, 213 are stale-pinned; the 213 exact snapshot comparisons split into 172 byte-unchanged, one semantically equivalent, 32 materially changed, and eight topology-ambiguous. All 174 bounded-review participants remain planner-ambiguous. Configuration rollback to 4.1.0 is unsafe because current IMASNode authority is uniquely 4.1.1. No sanctioned migration path exists, so the next implementation is a typed immutable snapshot-change ledger plus exact-allowlist, full-CAS, atomic in-place migration; the eight topology cases must refuse until sanctioned relink, and the 32 changed rows retain their name/edit state and return only through bounded review. Evidence: <code>/tmp/s7_dd_source_version_drift.json</code>, SHA-256 <code>8a0e9c09a340ff4e9f2a3a543edcaf399545eef4d24f3e586dac4dc7cc82634f</code>; repeated census/planner hashes <code>88c45f7f…</code>/<code>cbf2e791…</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="reviewer-wire-schema-compatibility" data-who="reckon-ship" data-when="2026-08-02T20:28:00+02:00">
+    <div class="r-comment-body"><p><strong>Bounded reviewer compatibility fixes landed.</strong> Commits <code>c2a3b216</code> and <code>eba69937</code> propagate the resolved reviewer profile before bounded-drain returns and remove only the open-ended <code>revised_fields</code> map from the name-only wire model; eight targeted files passed on <code>sun_debug</code>. The one-call Sonnet 5 probe advanced beyond immediate schema rejection into HTTPS response-body streaming but timed out after 141.23 s, so live compatibility remains <strong>INDETERMINATE</strong>, not PASS. No retry or cohort resume occurred; exact provider cost is unavailable. Evidence: <code>/tmp/s7_name_review_schema_compat.json</code>, SHA-256 <code>50db94644e16b050a83fad72df99360eb2a1cf15a43e1f97590f7445f582bb3b</code>.</p></div>
 </div>
 </section>
 </main>
