@@ -194,6 +194,10 @@ _NAME_TOKEN_UNIT_EXPECTATIONS: dict[str, set[str]] = {
     "mass": {"kg", "u"},
     # Frequency implies Hz.
     "frequency": {"Hz", "kHz", "MHz", "GHz", "rad.s^-1", "s^-1"},
+    # Vorticity is the curl of velocity and therefore inverse time.
+    "vorticity": {"s^-1"},
+    # Geometric radius is a length.
+    "radius": {"m"},
 }
 
 
@@ -222,10 +226,32 @@ def _unit_dimensions(units: set[str]) -> set[str] | None:
         if canonical is None:
             return None
         try:
-            dimensions.add(str(unit_registry(canonical).dimensionality))
+            dimensions.add(str(unit_registry.Quantity(1, canonical).dimensionality))
         except Exception:
             return None
     return dimensions
+
+
+def _dimension_container(dimension: str) -> Any:
+    """Parse one stored dimensionality, including Pint's empty dimension."""
+    from imas_codex.units import unit_registry
+
+    expression = "" if dimension == "dimensionless" else dimension
+    return unit_registry.get_dimensionality(expression)
+
+
+def _dimensions_overlap(left: set[str], right: set[str]) -> bool:
+    """Return whether either set contains a Pint-equivalent dimensionality."""
+    try:
+        left_dimensions = [_dimension_container(dimension) for dimension in left]
+        right_dimensions = [_dimension_container(dimension) for dimension in right]
+    except Exception:
+        return False
+    return any(
+        left_dimension == right_dimension
+        for left_dimension in left_dimensions
+        for right_dimension in right_dimensions
+    )
 
 
 def _per_time_dimensions(dimensions: set[str]) -> set[str] | None:
@@ -237,11 +263,28 @@ def _per_time_dimensions(dimensions: set[str]) -> set[str] | None:
         try:
             # Pint accepts a dimensionality expression as a UnitsContainer,
             # so this remains dimensional algebra rather than a unit alias.
-            parsed = unit_registry.get_dimensionality(dimension)
+            parsed = _dimension_container(dimension)
             transformed.add(str(parsed / unit_registry.second.dimensionality))
         except Exception:
             return None
     return transformed
+
+
+def _quotient_dimensions(
+    numerators: set[str], denominators: set[str]
+) -> set[str] | None:
+    """Divide every inferable numerator dimension by every denominator."""
+
+    quotients: set[str] = set()
+    for numerator in numerators:
+        for denominator in denominators:
+            try:
+                numerator_dims = _dimension_container(numerator)
+                denominator_dims = _dimension_container(denominator)
+                quotients.add(str(numerator_dims / denominator_dims))
+            except Exception:
+                return None
+    return quotients
 
 
 def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
@@ -270,7 +313,7 @@ def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
         kind = _operator_kind(operator)
         op = str(getattr(operator, "op", ""))
         if kind == "binary":
-            if op != "difference":
+            if op not in {"difference", "ratio"}:
                 return None, False
             args = list(getattr(operator, "args", ()) or ())
             if len(args) != 2:
@@ -279,7 +322,16 @@ def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
             right, _right_transformed = _ir_unit_dimensions(args[1])
             if left is None or right is None:
                 return None, False
-            dimensions = left & right
+            if op == "difference":
+                dimensions = {
+                    left_dimension
+                    for left_dimension in left
+                    if _dimensions_overlap({left_dimension}, right)
+                }
+            else:
+                dimensions = _quotient_dimensions(left, right)
+                if dimensions is None:
+                    return None, False
             transformed = True
         elif kind == "unary_prefix" and op == "time_derivative":
             if dimensions is None:
@@ -314,7 +366,7 @@ def _structured_unit_consistency_issues(name: str, unit: str) -> list[str] | Non
     candidate_dimensions = _unit_dimensions({unit})
     if candidate_dimensions is None:
         return None
-    if candidate_dimensions & dimensions:
+    if _dimensions_overlap(candidate_dimensions, dimensions):
         return []
     return [
         "audit:name_unit_consistency_check: operator expression "

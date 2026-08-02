@@ -1251,22 +1251,90 @@ class TestOperatorUnitConsistency:
 
         assert name_unit_consistency_check({"id": name, "unit": "1"}) == []
 
-    def test_non_difference_operator_retains_flat_audit(self):
+    @pytest.mark.parametrize(
+        "name",
+        [
+            "ratio_of_particle_temperature_to_particle_reference_temperature",
+            (
+                "ratio_of_ion_average_temperature_to_"
+                "volume_averaged_ion_average_temperature"
+            ),
+        ],
+    )
+    def test_equal_dimension_ratios_accept_dimensionless_unit(self, name: str):
+        """A proven quotient result wins over flat operand-token heuristics."""
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        assert name_unit_consistency_check({"id": name, "unit": "1"}) == []
+
+    def test_dimensioned_ratio_accepts_quotient_unit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        assert (
+            name_unit_consistency_check(
+                {"id": "ratio_of_vorticity_to_major_radius", "unit": "m^-1.s^-1"}
+            )
+            == []
+        )
+
+    def test_dimensioned_ratio_rejects_dimensionless_unit(self):
         from imas_codex.standard_names.audits import name_unit_consistency_check
 
         issues = name_unit_consistency_check(
-            {"id": "ratio_of_plasma_energy_to_ion_energy", "unit": "A"}
+            {"id": "ratio_of_vorticity_to_major_radius", "unit": "1"}
         )
-        assert issues and "operator expression" not in issues[0]
+        assert issues and "operator expression" in issues[0]
 
-    def test_nested_unknown_operator_does_not_partially_transform(self):
+    def test_nested_derivative_transforms_dimensionless_ratio(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        name = (
+            "time_derivative_of_ratio_of_particle_temperature_to_"
+            "particle_reference_temperature"
+        )
+        assert name_unit_consistency_check({"id": name, "unit": "s^-1"}) == []
+        issues = name_unit_consistency_check({"id": name, "unit": "1"})
+        assert issues and "operator expression" in issues[0]
+
+    def test_ratio_with_unknown_operand_retains_flat_audit(self):
+        from imas_codex.standard_names.audits import name_unit_consistency_check
+
+        issues = name_unit_consistency_check(
+            {"id": "ratio_of_safety_factor_to_particle_temperature", "unit": "1"}
+        )
+        assert issues and "contains 'temperature'" in issues[0]
+
+    def test_ratio_with_missing_argument_is_unknown(self):
+        from types import SimpleNamespace
+
+        from imas_codex.standard_names.audits import (
+            _ir_unit_dimensions,
+            _parse_audit_ir,
+        )
+
+        incomplete = SimpleNamespace(
+            base=SimpleNamespace(token="placeholder"),
+            operators=[
+                SimpleNamespace(
+                    kind="binary",
+                    op="ratio",
+                    args=[_parse_audit_ir("particle_temperature")],
+                )
+            ],
+        )
+        assert _ir_unit_dimensions(incomplete) == (None, False)
+
+    def test_nested_ratio_with_unknown_operand_does_not_partially_transform(self):
         from imas_codex.standard_names.audits import name_unit_consistency_check
 
         assert (
             name_unit_consistency_check(
                 {
-                    "id": "time_derivative_of_ratio_of_plasma_energy_to_ion_energy",
-                    "unit": "A",
+                    "id": (
+                        "time_derivative_of_ratio_of_safety_factor_to_"
+                        "particle_temperature"
+                    ),
+                    "unit": "K",
                 }
             )
             == []
