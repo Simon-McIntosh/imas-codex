@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-commits" content="c7c2d3d3,baeb7614">
-<meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html">
+<meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
 <meta name="plan-impl" content="0.4">
 </head>
 <body>
@@ -242,6 +242,9 @@ CONSTRAINTS
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="s6-foundation-closure-20260801" data-who="reckon-ship" data-when="2026-08-01T12:15:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 foundation scope is complete.</strong> The schema-driven <code>DDGap</code> fact, evidence edges, evidence-only CLI, status reporting, and registry backfill landed with zero enforcement behavior change; the sprint's done-when is satisfied. <code>f-ddg-002</code> remains deliberately open for the storage-authority decision, automated writer/triage/reconcile policy, and release reporting. That work is moved to S7 rather than silently expanding S6.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddgap-policy-20260802" data-who="reckon-ship" data-when="2026-08-02T12:50:00+02:00">
+    <div class="r-comment-body"><p><strong>Storage authority, governed lifecycle, and typed evidence contracts landed.</strong> Graph facts now own durable observation and compare-and-set lifecycle while YAML remains the only unit-enforcement backend. Automated responses can report exact-path evidence but cannot select a disposition or affect score/stage. Commits <code>33639686</code> and <code>27a03a7d</code> passed 36 and 68 independent tests; integrated verification passed 179. Automated writer wiring, human CLI, DD-release execution, and deterministic review-release reporting remain open.</p></div>
 </div>
 </section>
 </main>

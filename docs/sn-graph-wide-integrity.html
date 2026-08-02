@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html">
+<meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html,docs/archive/sn-graph-wide-integrity-guards-landed.html,docs/archive/sn-gas-unit-cache-repair-landed.html">
 </head>
 <body>
   <main class="plan-doc">
@@ -616,6 +616,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-slice-closure-20260801" data-who="reckon-ship" data-when="2026-08-01T12:10:00+02:00">
     <div class="r-comment-body"><p><strong>The sprint-scoped correctness slice is closed.</strong> Unit authority and deletion-ledger work remain resolved. The exact WEST semantic-source repair changed 38 sources transactionally, wrote 38 audit rows, left zero WEST invariant violations or duplicate accepted identities, and reduced the global violation count from 999 to 961. Every remaining violation is outside WEST and stays with <code>f-sgwi-001</code>. The 15 older graph-wide strict-parser/stamp residues are likewise deferred here; accepted WEST is strict-lossless with zero drift. This deferral is explicit scope, not a failed stability gate.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="integrity-prevention-20260802" data-who="reckon-ship" data-when="2026-08-02T12:50:00+02:00">
+    <div class="r-comment-body"><p><strong>Writer prevention and bounded gas correction landed in code.</strong> Commit <code>3f64e5b7</code> makes fresh pairing writes transactional and fully guarded, separates solid hardware geometry from optical loci, and quarantines strict-parser failures; independent verification passed 52 tests. Commits <code>4891c359</code> and <code>b8cb9956</code> bound the SPI gas-flow correction to two exact DD paths plus the <code>gas_flow</code> cache; independent verification passed 66 tests. Integrated verification passed 179 tests. The live 961-source repair, 15 residue corrections, and exact gas apply remain open operational nodes; WEST is still excluded.</p></div>
 </div>
 </section>
 </main>

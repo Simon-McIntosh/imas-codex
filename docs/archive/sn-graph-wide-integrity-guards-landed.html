@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-graph-wide-integrity-guards-landed">
+  <meta name="plan-title" content="Semantic-source writer guards — landed record">
+  <meta name="plan-summary" content="Fresh source/name pairings are transactionally guarded, hardware geometry is separated from optical loci, and strict-parser failures cannot enter accepted lifecycle state.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="sn-graph-wide-integrity">
+  <meta name="plan-commits" content="3f64e5b7,37a0edcd">
+  <title>Semantic-source writer guards — landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h2>Outcome</h2>
+  <p>Fresh source/name pairings now pass the complete attachment predicate in bulk writes, exclusive rebinding, retargeting, and DD projection reconciliation. The recovery replay remains the only explicit ungated reconstruction path. Strict parse failures are quarantined and exhausted rather than promoted, and grammar mirrors are overwritten from the current parser.</p>
+  <svg viewBox="0 0 820 150" role="img" aria-label="Fresh pairing flows through a transactional consistency gate to one live target, while recovery replay remains an audited carve-out." style="max-width:100%;height:auto">
+    <g font-family="system-ui" font-size="14" text-anchor="middle">
+      <rect x="20" y="46" width="180" height="52" rx="8" fill="#f3f5f7" stroke="#59636e"/><text x="110" y="76">fresh source pairing</text>
+      <rect x="300" y="32" width="220" height="80" rx="8" fill="#e8f4ef" stroke="#087f5b"/><text x="410" y="62">transaction + full guard</text><text x="410" y="84">geometry · unit · parser</text>
+      <rect x="620" y="46" width="180" height="52" rx="8" fill="#f3f5f7" stroke="#59636e"/><text x="710" y="68">one live target</text><text x="710" y="88">or atomic refusal</text>
+      <path d="M200 72H294" stroke="#59636e" stroke-width="2"/><path d="M520 72H614" stroke="#59636e" stroke-width="2"/>
+    </g>
+  </svg>
+  <h2>Measured evidence</h2>
+  <table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+    <tr><td>Worker regressions</td><td>128 passed; 58 review/counter regressions passed</td></tr>
+    <tr><td>Independent focused verification</td><td>52 passed</td></tr>
+    <tr><td>Integrated wave verification</td><td>179 passed after model generation</td></tr>
+    <tr><td>Live baseline before repair</td><td>961 non-WEST violations; WEST 0</td></tr>
+  </tbody></table>
+  <p>The live count is intentionally unchanged at this landing. Repair requires an exact reviewed allowlist after these prevention gates are deployed; blind corpus-wide mutation is prohibited.</p>
+</main></body></html>

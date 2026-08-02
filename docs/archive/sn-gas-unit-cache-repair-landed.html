@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-gas-unit-cache-repair-landed">
+  <meta name="plan-title" content="Bounded gas-flow unit correction — landed code record">
+  <meta name="plan-summary" content="The DD correction and cache refresh are exactly scoped to two SPI gas-flow paths and gas_flow; live application remains a separately verified operational step.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-informs" content="sn-graph-wide-integrity">
+  <meta name="plan-commits" content="4891c359,b8cb9956,9a76a60a">
+  <title>Bounded gas-flow unit correction — landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h2>Outcome</h2>
+  <p>The curated SPI gas-flow exception now authorizes graph correction. Reconciliation accepts an exact path set, fences both its query and mutation, treats an empty scope as a no-op, and replaces target unit edges with one authoritative edge. Existing exact-name snapshot refresh is pinned to update cache fields without changing <code>StandardName.unit</code>.</p>
+  <table><thead><tr><th>Object</th><th>Before live apply</th><th>Target</th></tr></thead><tbody>
+    <tr><td>fragmentation gas flow DD path</td><td><code>s^-1</code></td><td><code>Pa.m^3.s^-1</code></td></tr>
+    <tr><td>propellant gas flow DD path</td><td><code>s^-1</code></td><td><code>Pa.m^3.s^-1</code></td></tr>
+    <tr><td><code>gas_flow.source_unit</code> cache</td><td><code>s^-1</code></td><td><code>Pa.m^3.s^-1</code></td></tr>
+    <tr><td><code>gas_flow.unit</code> authority</td><td><code>Pa.m^3.s^-1</code></td><td>unchanged</td></tr>
+  </tbody></table>
+  <p>Worker and independent verification both passed 66 tests; the integrated wave passed 179. The live graph was not mutated during implementation. The operational node must prove exactly two DD paths changed, one cache refreshed, no third path changed, and an identical rerun is a no-op.</p>
+</main></body></html>
