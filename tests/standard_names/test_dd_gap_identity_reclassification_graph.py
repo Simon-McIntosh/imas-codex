@@ -32,7 +32,8 @@ def ephemeral_driver() -> Iterator:
         pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
     if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
         pytest.fail("stateful DD-gap tests require an explicitly ephemeral graph")
-    if uri == get_graph_uri():
+    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+    if uri == project_uri:
         pytest.fail("stateful DD-gap tests refuse the configured project graph")
 
     driver = GraphDatabase.driver(uri, auth=None)
