@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="26">
-<meta name="plan-impl" content="0.92">
+<meta name="plan-version" content="27">
+<meta name="plan-impl" content="0.94">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -652,6 +652,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="bounded-integrity-audit-20260802" data-who="reckon-ship" data-when="2026-08-02T16:40:00+02:00">
     <div class="r-comment-body"><p><strong>The bounded audit closure is reproducible but deliberately not executable as one batch.</strong> Two identical read snapshots partitioned 732 provenance violations into 593 non-WEST executable findings plus 139 WEST-name dependencies, and 159 attachment rejections into 49 executable plus 110 WEST exclusions. The dependency closure contains 2,884 sources, 2,223 names, 1,917 edges, 336 competing families, and all 16 non-WEST open human edits with zero WEST/test membership intersection. Of 336 families, 208 are in scope (19 candidate atomic folds and 189 ordinary bounded reviews); 128 remain WEST-dependent. A complete name-and-doc chain is bounded at 32 calls and $2.385916 at historical medians; safe cohorts reserve 20 percent. Evidence: <code>/tmp/bounded_integrity_manifest.json</code>, SHA-256 <code>cff1f0d95509cc340a2d84ab053804a6678fd914422c38fa0d9a0c1fb5a0ed75</code>. The artifact declares <code>is_executable_drain_batch=false</code>; only separately derived exact DD-path cohorts may be run.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="atomic-identity-fold-guard-20260802" data-who="reckon-ship" data-when="2026-08-02T17:15:00+02:00">
+    <div class="r-comment-body"><p><strong>The atomic identity-fold instrument is integrated, but no live fold has yet been applied.</strong> Merge <code>7145986a</code> adds a typed before/expected-after receipt, exact scalar/edge/projection/owner/review/revision/change/unit snapshots, pure-Cypher identity locks with a second exact snapshot, full rollback on competitor, unit, event, or postflight races, WEST DD-manifest exclusion, and exact idempotence. Independent verification at exact tip <code>4c5f570c</code> passed Ruff, 34 stateful tests, five disposable-Neo4j tests, six production-query EXPLAIN checks, and rollback-only production dry runs for the cross-section and vorticity pairs with identical before/after hashes and zero WEST intersection. Live application remains a separate gated step.</p></div>
 </div>
 </section>
 </main>
