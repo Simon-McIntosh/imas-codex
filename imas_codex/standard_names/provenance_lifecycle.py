@@ -309,6 +309,8 @@ def retarget_standard_name_sources(
     origin: str | None = None,
     run_id: str | None = None,
     record_change: bool = True,
+    enforce_consistency: bool = True,
+    _transactional: bool = False,
 ) -> int:
     """Move every semantic source from ``old_name`` to ``new_name``.
 
@@ -319,6 +321,56 @@ def retarget_standard_name_sources(
     """
     if not old_name or not new_name or old_name == new_name:
         return 0
+
+    if enforce_consistency and not _transactional:
+        from imas_codex.graph.client import GraphClient
+
+        if isinstance(gc, GraphClient):
+            from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+
+            with gc.session() as session:
+                tx = session.begin_transaction()
+                try:
+                    moved = retarget_standard_name_sources(
+                        _TransactionQueryAdapter(tx),
+                        old_name,
+                        new_name,
+                        operation=operation,
+                        reason=reason,
+                        origin=origin,
+                        run_id=run_id,
+                        record_change=record_change,
+                        enforce_consistency=True,
+                        _transactional=True,
+                    )
+                    tx.commit()
+                    return moved
+                except Exception:
+                    tx.rollback()
+                    raise
+
+    admitted_source_ids: list[str] | None = None
+    if enforce_consistency:
+        candidate_rows = gc.query(
+            """
+            MATCH (new:StandardName {id: $new_name})
+            OPTIONAL MATCH (old:StandardName {id: $old_name})
+            OPTIONAL MATCH (sns:StandardNameSource)
+            WHERE (sns)-[:PRODUCED_NAME]->(old)
+               OR sns.produced_sn_id = $old_name
+               OR (sns)-[:PRODUCED_NAME]->(new)
+            RETURN DISTINCT sns.id AS source_id
+            """,
+            old_name=old_name,
+            new_name=new_name,
+        )
+        candidate_ids = [r["source_id"] for r in candidate_rows if r.get("source_id")]
+        from imas_codex.standard_names.attachment_audit import guard_source_pairings
+
+        guarded = guard_source_pairings(gc, new_name, candidate_ids)
+        admitted_source_ids = list(guarded.accepted_source_ids)
+        if not admitted_source_ids:
+            return 0
     rows = gc.query(
         """
         MATCH (new:StandardName {id: $new_name})
@@ -329,6 +381,8 @@ def retarget_standard_name_sources(
         WHERE (sns)-[:PRODUCED_NAME]->(old)
            OR sns.produced_sn_id = $old_name
            OR (sns)-[:PRODUCED_NAME]->(new)
+        WITH new, old, sns
+        WHERE $source_ids IS NULL OR sns.id IN $source_ids
         WITH new, old, collect(DISTINCT sns) AS sources
         SET new.source_paths = []
         WITH new, old, sources
@@ -372,6 +426,7 @@ def retarget_standard_name_sources(
         """,
         old_name=old_name,
         new_name=new_name,
+        source_ids=admitted_source_ids,
     )
     moved = int(rows[0].get("moved", 0)) if rows else 0
     if record_change:
@@ -387,10 +442,46 @@ def retarget_standard_name_sources(
     return moved
 
 
-def bind_sources_exclusively(gc: Any, name: str, source_ids: list[str]) -> int:
+def bind_sources_exclusively(
+    gc: Any,
+    name: str,
+    source_ids: list[str],
+    *,
+    enforce_consistency: bool = True,
+    _transactional: bool = False,
+) -> int:
     """Make listed source ids point exclusively at ``name`` and repair mirrors."""
     if not name or not source_ids:
         return 0
+    if enforce_consistency and not _transactional:
+        from imas_codex.graph.client import GraphClient
+
+        if isinstance(gc, GraphClient):
+            from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+
+            with gc.session() as session:
+                tx = session.begin_transaction()
+                try:
+                    bound = bind_sources_exclusively(
+                        _TransactionQueryAdapter(tx),
+                        name,
+                        source_ids,
+                        enforce_consistency=True,
+                        _transactional=True,
+                    )
+                    tx.commit()
+                    return bound
+                except Exception:
+                    tx.rollback()
+                    raise
+    admitted = sorted(set(source_ids))
+    if enforce_consistency:
+        from imas_codex.standard_names.attachment_audit import guard_source_pairings
+
+        guarded = guard_source_pairings(gc, name, admitted)
+        admitted = list(guarded.accepted_source_ids)
+        if not admitted:
+            return 0
     rows = gc.query(
         """
         MATCH (sn:StandardName {id: $name})
@@ -420,7 +511,7 @@ def bind_sources_exclusively(gc: Any, name: str, source_ids: list[str]) -> int:
         RETURN size(bound) AS bound
         """,
         name=name,
-        source_ids=sorted(set(source_ids)),
+        source_ids=admitted,
     )
     return int(rows[0]["bound"]) if rows else 0
 

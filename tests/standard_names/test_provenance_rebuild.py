@@ -320,7 +320,12 @@ def test_rebuild_routes_orphans_by_anchor_authority():
     bound = dict(bind_calls)
     assert bound["in_map_name"][0]["source_type"] == "dd"
     assert bound["scalar_name"][0]["dd_path"] == "magnetics/flux_loop/area"
-    bind_history.assert_called_once_with(gc, "history_name", ["dd:historical/path"])
+    bind_history.assert_called_once_with(
+        gc,
+        "history_name",
+        ["dd:historical/path"],
+        enforce_consistency=False,
+    )
     assert "residue_name" not in bound
 
     assert summary["bound_from_map"] == 1

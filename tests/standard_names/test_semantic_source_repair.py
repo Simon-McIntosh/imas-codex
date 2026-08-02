@@ -12,6 +12,45 @@ from imas_codex.standard_names.provenance_lifecycle import (
 )
 
 
+def test_dd_projection_reconcile_uses_full_attachment_guard() -> None:
+    from imas_codex.standard_names.graph_ops import reconcile_standard_name_dd_edges
+
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [
+            {
+                "dd_path": "pf_active/coil/element/geometry/rectangle/r",
+                "sn_id": "radial_coordinate_of_line_of_sight",
+                "name": "radial_coordinate_of_line_of_sight",
+                "sn_unit": "m",
+                "dd_unit": "m",
+                "existing_dd_paths": [],
+            },
+            {
+                "dd_path": (
+                    "bremsstrahlung_visible/channel/line_of_sight/first_point/r"
+                ),
+                "sn_id": "radial_coordinate_of_line_of_sight",
+                "name": "radial_coordinate_of_line_of_sight",
+                "sn_unit": "m",
+                "dd_unit": "m",
+                "existing_dd_paths": [],
+            },
+        ],
+        [],
+    ]
+
+    result = reconcile_standard_name_dd_edges(gc=gc)
+
+    assert result == {"edges_created": 1, "pairs_dropped": 1}
+    assert gc.query.call_args_list[1].kwargs["pairs"] == [
+        {
+            "dd_path": ("bremsstrahlung_visible/channel/line_of_sight/first_point/r"),
+            "sn_id": "radial_coordinate_of_line_of_sight",
+        }
+    ]
+
+
 def _row(
     source_id: str,
     *,

@@ -129,6 +129,44 @@ def _origin(gc, sn_id: str) -> str | None:
     return rows[0]["o"] if rows else None
 
 
+def test_name_review_quarantines_strict_parser_failure() -> None:
+    """A high reviewer score cannot promote a grammar-invalid identity."""
+    from unittest.mock import MagicMock, patch
+
+    from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+    gc = MagicMock()
+    gc.__enter__.return_value = gc
+    gc.query.side_effect = [
+        [{"chain_length": 0, "validation_status": "valid"}],
+        [{"id": "invalid_name"}],
+    ]
+    with (
+        patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=gc),
+        patch(
+            "imas_codex.standard_names.grammar_adapter.parse_canonical_name",
+            side_effect=ValueError("strict parse failed"),
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops._parse_grammar",
+            return_value={"grammar_parse_version": "current"},
+        ),
+    ):
+        stage = persist_reviewed_name(
+            sn_id="invalid_name",
+            claim_token="claim",
+            score=0.99,
+            model="test/model",
+            skip_review_node=True,
+        )
+
+    assert stage == "exhausted"
+    write = gc.query.call_args_list[1]
+    assert write.kwargs["grammar_valid"] is False
+    assert write.kwargs["target_stage"] == "exhausted"
+    assert write.kwargs["grammar_identity"] == {"grammar_parse_version": "current"}
+
+
 # ---------------------------------------------------------------------------
 # Part A — persist_refined_name advances a placeholder-merged successor
 # ---------------------------------------------------------------------------
