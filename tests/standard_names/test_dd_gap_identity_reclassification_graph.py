@@ -18,6 +18,7 @@ from imas_codex.standard_names.dd_gaps import (
     _RECLASSIFY_REGISTRY_FACT_QUERY,
     _REGISTRY_FACTS_QUERY,
     _SYNC_REGISTRY_QUERY,
+    _VERIFY_REGISTRY_OBSERVATION_REKEYS_QUERY,
     DDGapRegistrySyncConflict,
     _observation_id,
     _registry_migration_parameters,
@@ -398,6 +399,95 @@ def test_reclassification_rejects_relationship_property_race(
                     old_id=case["old_id"],
                 ).single(strict=True)["count"]
                 == 1
+            )
+        finally:
+            tx.rollback()
+
+
+@pytest.mark.parametrize(
+    "ownership_case",
+    ["missing", "wrong-owner", "duplicate-relationship"],
+)
+def test_observation_postverify_detects_invalid_graph_ownership(
+    ephemeral_driver,
+    registry_constraints,
+    ownership_case: str,
+) -> None:
+    case = _case()
+    with ephemeral_driver.session() as session:
+        tx = session.begin_transaction()
+        try:
+            _seed_fact(tx, case)
+            old = _fact_snapshot(tx, str(case["old_id"]))
+            plan = _registry_sync_plan(
+                [case["target"]],
+                [case["target_observation"]],
+                [old],
+            )
+            migration_parameters = _registry_migration_parameters(plan["reclassify"][0])
+            assert (
+                len(
+                    list(
+                        tx.run(_RECLASSIFY_REGISTRY_FACT_QUERY, **migration_parameters)
+                    )
+                )
+                == 1
+            )
+            tx.run(
+                _SYNC_REGISTRY_QUERY,
+                nodes=[case["target"]],
+                observations=[case["target_observation"]],
+            ).consume()
+            new_observation_id = migration_parameters["observation_rekeys"][0]["new_id"]
+            if ownership_case == "missing":
+                tx.run(
+                    """
+                    MATCH (:DDGap {id: $new_id})-[link:HAS_OBSERVATION]->
+                          (:DDGapObservation {id: $observation_id})
+                    DELETE link
+                    """,
+                    new_id=case["new_id"],
+                    observation_id=new_observation_id,
+                ).consume()
+            elif ownership_case == "wrong-owner":
+                tx.run(
+                    """
+                    MATCH (:DDGap {id: $new_id})-[link:HAS_OBSERVATION]->
+                          (observation:DDGapObservation {id: $observation_id})
+                    DELETE link
+                    CREATE (wrong:DDGap {id: $wrong_id})
+                    CREATE (wrong)-[:HAS_OBSERVATION]->(observation)
+                    """,
+                    new_id=case["new_id"],
+                    observation_id=new_observation_id,
+                    wrong_id=f"dd_gap:test/{case['namespace']}/wrong:unit_defect",
+                ).consume()
+            else:
+                tx.run(
+                    """
+                    MATCH (gap:DDGap {id: $new_id}),
+                          (observation:DDGapObservation {id: $observation_id})
+                    CREATE (gap)-[:HAS_OBSERVATION]->(observation)
+                    """,
+                    new_id=case["new_id"],
+                    observation_id=new_observation_id,
+                ).consume()
+
+            result = tx.run(
+                _VERIFY_REGISTRY_OBSERVATION_REKEYS_QUERY,
+                expected=[
+                    {
+                        **migration_parameters["observation_rekeys"][0],
+                        "new_gap_id": case["new_id"],
+                    }
+                ],
+            ).single(strict=True)
+            assert result["new_exact_count"] == 1
+            assert result["dd_gap_ids"] == [case["new_id"]]
+            assert result["old_exact_count"] == 0
+            assert (
+                result["owner_ids"] != [case["new_id"]]
+                or result["ownership_count"] != 1
             )
         finally:
             tx.rollback()

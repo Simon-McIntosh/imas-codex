@@ -1235,11 +1235,19 @@ _VERIFY_REGISTRY_OBSERVATION_REKEYS_QUERY = """
 UNWIND $expected AS item
 OPTIONAL MATCH (current:DDGapObservation {id: item.new_id})
 WITH item, collect(current) AS current_nodes
+OPTIONAL MATCH (owner:DDGap)-[ownership:HAS_OBSERVATION]->
+               (:DDGapObservation {id: item.new_id})
+WITH item, current_nodes,
+     [owner_id IN collect(CASE WHEN ownership IS NULL THEN null ELSE owner.id END)
+      WHERE owner_id IS NOT NULL] AS owner_ids,
+     count(ownership) AS ownership_count
 OPTIONAL MATCH (stale:DDGapObservation {id: item.old_id})
 RETURN item.old_id AS old_id,
        item.new_id AS new_id,
        size(current_nodes) AS new_exact_count,
        [node IN current_nodes | node.dd_gap_id] AS dd_gap_ids,
+       owner_ids,
+       ownership_count,
        count(stale) AS old_exact_count
 ORDER BY old_id, new_id
 """
@@ -1319,7 +1327,7 @@ def _require_online_registry_identity_constraints(
                 f"schema constraint {constraint_name!r} for {label}.id is missing"
             )
         if (
-            str(constraint.get("type") or "") not in {"UNIQUENESS", "NODE_KEY"}
+            str(constraint.get("type") or "") != "UNIQUENESS"
             or list(constraint.get("labelsOrTypes") or []) != [label]
             or list(constraint.get("properties") or []) != ["id"]
             or not constraint.get("ownedIndex")
@@ -1626,6 +1634,14 @@ def sync_dd_unit_exception_gaps(*, dry_run: bool = False) -> dict[str, Any]:
                         if item["new_id"] == str(row["new_id"])
                         and item["old_id"] == str(row["old_id"])
                     ]
+                    or [str(value) for value in (row.get("owner_ids") or [])]
+                    != [
+                        item["new_gap_id"]
+                        for item in expected_observation_rekeys
+                        if item["new_id"] == str(row["new_id"])
+                        and item["old_id"] == str(row["old_id"])
+                    ]
+                    or int(row.get("ownership_count") or 0) != 1
                     or int(row.get("old_exact_count") or 0) != 0
                 ]
                 identity_verification = [

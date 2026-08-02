@@ -278,6 +278,7 @@ def _reclassification_transaction_rows(
     old: dict[str, object],
     observation_new_count: int = 1,
     observation_old_count: int = 0,
+    observation_owner_ids: list[str] | None = None,
     identity_count: int = 1,
     identity_old_kind: str = "unit_defect",
 ) -> list[object]:
@@ -290,6 +291,7 @@ def _reclassification_transaction_rows(
             "gap_id": new_id,
         }
     )
+    owner_ids = observation_owner_ids if observation_owner_ids is not None else [new_id]
     return [
         [old],
         [
@@ -321,6 +323,8 @@ def _reclassification_transaction_rows(
                 "new_id": new_observation_id,
                 "new_exact_count": observation_new_count,
                 "dd_gap_ids": [new_id] * observation_new_count,
+                "owner_ids": owner_ids,
+                "ownership_count": len(owner_ids),
                 "old_exact_count": observation_old_count,
             }
         ],
@@ -729,6 +733,19 @@ def test_registry_apply_rejects_wrong_observation_constraint_definition(
         _require_online_registry_identity_constraints(gc)
 
 
+def test_registry_apply_rejects_node_key_for_schema_uniqueness_constraint() -> None:
+    gc = MagicMock()
+    constraints, _ = _online_constraint(gc)
+    changed = copy.deepcopy(constraints)
+    next(row for row in changed if row["name"] == "ddgap_id")["type"] = "NODE_KEY"
+    gc.query.return_value = changed
+
+    with pytest.raises(DDGapRegistrySyncConflict, match="unexpected definition"):
+        _require_online_registry_identity_constraints(gc)
+
+    gc.session.assert_not_called()
+
+
 @pytest.mark.parametrize(
     "mutation",
     [
@@ -886,6 +903,8 @@ def test_registry_sync_reclassifies_exact_identity_in_one_transaction() -> None:
                     "new_id": new_observation_id,
                     "new_exact_count": 1,
                     "dd_gap_ids": [new_id],
+                    "owner_ids": [new_id],
+                    "ownership_count": 1,
                     "old_exact_count": 0,
                 }
             ],
@@ -1355,6 +1374,51 @@ def test_registry_sync_rolls_back_on_observation_rekey_postverify_failure(
             old=old,
             observation_new_count=new_count,
             observation_old_count=old_count,
+        ),
+    )
+
+    with (
+        _graph_context(mock_gc),
+        patch(
+            "imas_codex.standard_names.dd_gaps.load_exceptions",
+            return_value=entries,
+        ),
+        pytest.raises(DDGapRegistrySyncConflict, match="observations=.*"),
+    ):
+        sync_dd_unit_exception_gaps()
+
+    transaction.commit.assert_not_called()
+    transaction.rollback.assert_called_once_with()
+
+
+@pytest.mark.parametrize(
+    "ownership_case",
+    ["missing", "wrong-owner", "duplicate-relationship"],
+)
+def test_registry_sync_rolls_back_on_observation_ownership_postverify_failure(
+    ownership_case: str,
+) -> None:
+    pattern, source_path, old, entries = _reclassification_case()
+    new_id = f"dd_gap:{pattern}:self_contradiction"
+    owner_ids = {
+        "missing": [],
+        "wrong-owner": ["dd_gap:other:unit_defect"],
+        "duplicate-relationship": [new_id, new_id],
+    }[ownership_case]
+    mock_gc = MagicMock()
+    mock_gc.query.side_effect = [
+        [{"id": "4.1.0"}],
+        [{"id": source_path}],
+        [old],
+        *_online_constraint(mock_gc),
+    ]
+    transaction = _transaction(
+        mock_gc,
+        _reclassification_transaction_rows(
+            pattern=pattern,
+            source_path=source_path,
+            old=old,
+            observation_owner_ids=owner_ids,
         ),
     )
 
