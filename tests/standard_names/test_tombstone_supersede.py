@@ -539,6 +539,10 @@ class _Transaction:
             return rows
         if "ATOMIC_FOLD_MOVE_SOURCES" in cypher:
             self.write_markers.append("sources")
+            assert "WHERE elementId(target) = $target_element_id" in cypher
+            assert params["target_element_id"] == self._element_id(
+                "name", params["into_id"]
+            )
             moved_sources = 0
             for index, expected in enumerate(params["sources"]):
                 source = self.state.sources[expected["id"]]
@@ -753,6 +757,13 @@ def test_cas_signature_preserves_temporal_scalar_type() -> None:
     assert edit._fold_cas_signature(
         {"created_at": timestamp}
     ) != edit._fold_cas_signature({"created_at": text})
+
+
+def test_source_mutation_is_fenced_to_locked_target() -> None:
+    assert "WHERE elementId(target) = $target_element_id" in (
+        edit._FOLD_SOURCE_MUTATION_QUERY
+    )
+    assert _run(_Graph(_state()))["ok"] is True
 
 
 @pytest.mark.parametrize(

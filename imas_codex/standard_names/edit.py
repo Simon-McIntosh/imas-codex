@@ -888,6 +888,7 @@ RETURN change.id AS change_id
 _FOLD_SOURCE_MUTATION_QUERY = """
 // ATOMIC_FOLD_MOVE_SOURCES
 MATCH (target:StandardName {id: $into_id})
+WHERE elementId(target) = $target_element_id
 CALL (target) {
   UNWIND $sources AS expected
   MATCH (source:StandardNameSource {id: expected.id})
@@ -1901,6 +1902,7 @@ def supersede_into(
                         _FOLD_SOURCE_MUTATION_QUERY,
                         old_id=old,
                         into_id=into,
+                        target_element_id=snapshot["target_element_id"],
                         sources=[
                             {
                                 "id": source["id"],
