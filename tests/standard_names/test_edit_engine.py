@@ -389,30 +389,6 @@ class FakeGraph:
                 self._rename_node_id(r["from"], r["to"])
             return []
 
-        # ---- graph_ops.py: persist_refined_name propagation pre-read ----
-        if (
-            "MATCH (old:StandardName {id: $old_name})" in cypher
-            and "RETURN old.edit_status AS edit_status" in cypher
-        ):
-            old_name = params.get("old_name")
-            node = self.nodes.get(old_name)
-            if node is None:
-                return []
-            return [
-                {
-                    "edit_status": node.get("edit_status"),
-                    "edit_mode": node.get("edit_mode"),
-                    "name_hint": node.get("name_hint"),
-                    "docs_hint": node.get("docs_hint"),
-                    "edit_reason": node.get("edit_reason"),
-                    "edit_origin": node.get("edit_origin"),
-                    "edit_scope": node.get("edit_scope"),
-                    "edit_requested_at": node.get("edit_requested_at"),
-                    "edit_override_edits": node.get("edit_override_edits"),
-                    "edit_include_accepted": node.get("edit_include_accepted"),
-                }
-            ]
-
         # ---- graph_ops.py: persist_reviewed_name ----
         if (
             "sn.edit_status AS edit_status" in cypher
@@ -560,12 +536,44 @@ class FakeGraph:
     # -- transaction surface (persist_refined_name / persist_refined_docs) --
 
     def _tx_run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
-        if "new_name" in params and "old_name" in params:
+        if "// REFINE_ATOMIC_PREFLIGHT" in cypher:
             old_name = params["old_name"]
             new_name = params["new_name"]
             old = self.nodes.get(old_name)
-            if old is None or old.get("name_stage") != "refining":
+            expected_stage = params.get("expected_old_stage") or "refining"
+            if old is None or old.get("name_stage") != expected_stage:
                 return []
+            existing = self.nodes.get(new_name)
+            if existing is not None and not (
+                params.get("edit_mode") is None
+                and (existing.get("name_stage") or "") in ("", "pending")
+                and (existing.get("origin") or "") != "derived"
+            ):
+                return []
+            old["superseded_from_stage"] = (
+                old.get("superseded_from_stage") or old["name_stage"]
+            )
+            old["name_stage"] = "refining"
+            edit_fields = (
+                "edit_mode",
+                "name_hint",
+                "docs_hint",
+                "edit_reason",
+                "edit_origin",
+                "edit_scope",
+                "edit_status",
+                "edit_requested_at",
+                "edit_override_edits",
+                "edit_include_accepted",
+            )
+            source_edit_state = {field: old.get(field) for field in edit_fields}
+            carry_open_edit = bool(params.get("inherit_open_edit")) and (
+                old.get("edit_status") == "open"
+            )
+            successor_edit_state = {
+                field: old.get(field) if carry_open_edit else params.get(field)
+                for field in edit_fields
+            }
             new_row = dict(_DEFAULT_NODE_FIELDS)
             new_row.update(
                 name_stage="drafted",
@@ -580,30 +588,81 @@ class FakeGraph:
                 tags=params["tags"],
                 model=params["model"],
                 run_id=params.get("run_id"),
-                edit_mode=params.get("edit_mode"),
-                name_hint=params.get("name_hint"),
-                docs_hint=params.get("docs_hint"),
-                edit_reason=params.get("edit_reason"),
-                edit_origin=params.get("edit_origin"),
-                edit_scope=params.get("edit_scope"),
-                edit_status=params.get("edit_status"),
-                edit_requested_at=params.get("edit_requested_at"),
-                edit_override_edits=params.get("edit_override_edits"),
-                edit_include_accepted=params.get("edit_include_accepted"),
+                **successor_edit_state,
             )
-            self.nodes[new_name] = new_row
+            if existing is None:
+                self.nodes[new_name] = new_row
+            else:
+                existing["name_stage"] = "drafted"
+                existing["origin"] = "pipeline"
+                existing.update(successor_edit_state)
+            return [
+                {
+                    "new_name": new_name,
+                    "old_name": old_name,
+                    "source_ids": sorted(
+                        sid
+                        for sid, target in self.produced_name.items()
+                        if target == old_name
+                    ),
+                    **{
+                        f"source_{field}": value
+                        for field, value in source_edit_state.items()
+                    },
+                    **{
+                        f"effective_{field}": value
+                        for field, value in successor_edit_state.items()
+                    },
+                }
+            ]
+
+        if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+            old_name = params["old_name"]
+            new_name = params["new_name"]
+            old = self.nodes.get(old_name)
+            if old is None or old.get("name_stage") != "refining":
+                return []
+            fenced_fields = (
+                "edit_mode",
+                "name_hint",
+                "docs_hint",
+                "edit_reason",
+                "edit_origin",
+                "edit_scope",
+                "edit_status",
+                "edit_requested_at",
+                "edit_override_edits",
+                "edit_include_accepted",
+            )
+            if any(
+                old.get(field) != params.get(f"source_{field}")
+                for field in fenced_fields
+            ):
+                return []
             self.refined_from[new_name] = old_name
             old["name_stage"] = "superseded"
             old["claim_token"] = None
             old["claimed_at"] = None
-            for sid, tgt in list(self.produced_name.items()):
-                if tgt == old_name:
-                    self.produced_name[sid] = new_name
             for _child, edges in self.edges_by_child.items():
                 for e in edges:
                     if e["parent_id"] == old_name:
                         e["parent_id"] = new_name
             return [{"new_name": new_name, "old_name": old_name}]
+
+        if "RETURN size(moved) AS moved" in cypher:
+            old_name = params["old_name"]
+            new_name = params["new_name"]
+            selected = set(params.get("source_ids") or [])
+            moved = 0
+            for sid, target in list(self.produced_name.items()):
+                if target == old_name and sid in selected:
+                    self.produced_name[sid] = new_name
+                    moved += 1
+            self.nodes[new_name]["source_paths"] = sorted(selected)
+            return [{"moved": moved}]
+
+        if "CREATE (change:StandardNameChange" in cypher:
+            return []
 
         if "cur_desc" in params:
             sn_id = params["sn_id"]

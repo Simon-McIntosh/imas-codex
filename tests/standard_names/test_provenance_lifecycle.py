@@ -147,7 +147,7 @@ def test_retarget_cache_uses_surviving_edge_bound_sources() -> None:
     ]
     assert "(sns)-[:PRODUCED_NAME]->(new)" in selector
     assert "sns.produced_sn_id = $new_name" not in selector
-    assert "SET new.source_paths = []" in cypher
+    assert "SET old.source_paths = [], new.source_paths = []" in cypher
     assert "coalesce(old.source_paths" not in cache_projection
     assert "coalesce(new.source_paths" not in cache_projection
     assert "source.source_id STARTS WITH 'derived:'" in cypher
@@ -175,7 +175,7 @@ def test_retarget_query_repairs_all_source_mirrors() -> None:
     assert "MERGE (dd)-[:HAS_STANDARD_NAME]->(new)" in cypher
     assert "MERGE (signal)-[:HAS_STANDARD_NAME]->(new)" in cypher
     assert "'dd:' + dd.id" in cypher
-    assert "SET new.source_paths" in cypher
+    assert "SET old.source_paths = [], new.source_paths = []" in cypher
     assert (
         "FROM_DD_PATH" in cypher
         and "DELETE" not in cypher.split("FROM_DD_PATH")[1].split("FROM_SIGNAL")[0]
@@ -191,7 +191,7 @@ def test_retarget_query_separates_cache_reset_from_source_unwind() -> None:
     )
 
     cypher = gc.query.call_args.args[0]
-    cache_reset = cypher.index("SET new.source_paths = []")
+    cache_reset = cypher.index("SET old.source_paths = [], new.source_paths = []")
     source_unwind = cypher.index("UNWIND sources AS source")
     boundary = cypher[cache_reset:source_unwind]
 

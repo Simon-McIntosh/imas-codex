@@ -18,7 +18,7 @@ import os
 import re
 import time
 import uuid
-from contextlib import nullcontext
+from contextlib import nullcontext, suppress
 from datetime import UTC
 from pathlib import Path
 from typing import Any
@@ -13371,25 +13371,28 @@ def persist_refined_name(
     edit_requested_at: str | None = None,
     edit_override_edits: bool | None = None,
     edit_include_accepted: bool | None = None,
+    expected_old_stage: str | None = None,
+    expected_claim_token: str | None = None,
 ) -> dict[str, str]:
     """Persist a refined StandardName as a NEW node with source-edge migration.
 
-    This is the **Option B** persist: since ``StandardName.id`` IS the name
-    string, refining a name produces a new node identity.  In a single
-    transaction:
+    Since ``StandardName.id`` is the name string, refining a name produces a
+    new node identity. In a single transaction:
 
-    1. MERGE new StandardName with ``name_stage='drafted'``,
-       ``chain_length = old_chain_length + 1``.
-    2. Create ``(new)-[:REFINED_FROM]->(old)`` edge.
-    3. Mark old SN as ``name_stage='superseded'``, clear its claim.
-    4. Migrate ``PRODUCED_NAME`` edges from StandardNameSource to new SN.
-    5. Migrate ``HAS_STANDARD_NAME`` edges from IMASNode/FacilitySignal to
-       new SN.
+    1. Compare-and-set the predecessor stage and claim, then provision a
+       drafted successor carrying the unit and semantic fields the attachment
+       guard needs.
+    2. Require the full authoritative source set to pass the attachment guard.
+    3. Create lineage, supersede the predecessor, and migrate every source
+       edge, scalar, upstream projection, and source-path cache.
+    4. Record one internal rename/refine event and commit all writes together.
 
     Returns ``{"new_name": <new_id>, "old_name": <old_id>}``.
 
     Raises ``ValueError`` if ``new_name == old_name`` — self-referential
-    refinement would create a ``REFINED_FROM`` self-loop.
+    refinement would create a ``REFINED_FROM`` self-loop, or if any source is
+    inconsistent with the successor. A failed stage/claim CAS, partial source
+    migration, or ledger failure also rolls the complete transaction back.
 
     Edit-steering fields (``edit_mode``, ``name_hint``, ``docs_hint``,
     ``edit_reason``, ``edit_origin``, ``edit_scope``, ``edit_status``,
@@ -13408,45 +13411,9 @@ def persist_refined_name(
         )
     new_chain_length = old_chain_length + 1
 
-    # Edit-field propagation for the "regular pipeline refine" caller (no
-    # edit kwargs passed explicitly): if the predecessor's edit is still
-    # open, ride its steering fields forward onto the successor. The
-    # `imas-codex sn edit` rename-mode caller always passes edit_mode,
-    # edit_reason, and edit_status explicitly, so this lookup is skipped
-    # for that path.
-    if edit_mode is None and edit_reason is None and edit_status is None:
-        with GraphClient() as gc:
-            _old_rows = gc.query(
-                """
-                MATCH (old:StandardName {id: $old_name})
-                RETURN old.edit_status AS edit_status,
-                       old.edit_mode AS edit_mode,
-                       old.name_hint AS name_hint,
-                       old.docs_hint AS docs_hint,
-                       old.edit_reason AS edit_reason,
-                       old.edit_origin AS edit_origin,
-                       old.edit_scope AS edit_scope,
-                       old.edit_requested_at AS edit_requested_at,
-                       old.edit_override_edits AS edit_override_edits,
-                       old.edit_include_accepted AS edit_include_accepted
-                """,
-                old_name=old_name,
-            )
-        if _old_rows and _old_rows[0].get("edit_status") == "open":
-            _old = _old_rows[0]
-            edit_mode = _old.get("edit_mode")
-            name_hint = _old.get("name_hint")
-            docs_hint = _old.get("docs_hint")
-            edit_reason = _old.get("edit_reason")
-            edit_origin = _old.get("edit_origin")
-            edit_scope = _old.get("edit_scope")
-            edit_status = _old.get("edit_status")
-            edit_requested_at = _old.get("edit_requested_at")
-            # Carry the cascade-authorization opt-in forward so a rename edit
-            # that rotates through refine still respects the operator's
-            # override_edits / include_accepted choice when finally accepted.
-            edit_override_edits = _old.get("edit_override_edits")
-            edit_include_accepted = _old.get("edit_include_accepted")
+    inherit_open_edit = (
+        edit_mode is None and edit_reason is None and edit_status is None
+    )
 
     escalation_set = ""
     if escalated:
@@ -13456,10 +13423,76 @@ def persist_refined_name(
         with gc.session() as session:
             tx = session.begin_transaction()
             try:
-                result = list(
+                preflight = list(
                     tx.run(
                         f"""
-                        // 1. Create (or match) new SN with new id
+                        // REFINE_ATOMIC_PREFLIGHT
+                        MATCH (old:StandardName {{id: $old_name}})
+                        WHERE old.name_stage = coalesce(
+                            $expected_old_stage, 'refining'
+                        )
+                          AND (
+                            ($expected_old_stage IS NOT NULL
+                             AND old.claim_token IS NULL
+                             AND old.claimed_at IS NULL)
+                            OR ($expected_old_stage IS NULL
+                                AND ($expected_claim_token IS NULL
+                                     OR old.claim_token = $expected_claim_token))
+                          )
+                        OPTIONAL MATCH (existing:StandardName {{id: $new_name}})
+                        WITH old, existing
+                        WHERE existing IS NULL
+                           OR ($edit_mode IS NULL
+                               AND coalesce(existing.name_stage, '') IN ['', 'pending']
+                               AND coalesce(existing.origin, '') <> 'derived')
+                        WITH old, existing,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_mode ELSE $edit_mode END
+                               AS successor_edit_mode,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.name_hint ELSE $name_hint END
+                               AS successor_name_hint,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.docs_hint ELSE $docs_hint END
+                               AS successor_docs_hint,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_reason ELSE $edit_reason END
+                               AS successor_edit_reason,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_origin ELSE $edit_origin END
+                               AS successor_edit_origin,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_scope ELSE $edit_scope END
+                               AS successor_edit_scope,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_status ELSE $edit_status END
+                               AS successor_edit_status,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_requested_at
+                                  ELSE $edit_requested_at END
+                               AS successor_edit_requested_at,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_override_edits
+                                  ELSE $edit_override_edits END
+                               AS successor_edit_override_edits,
+                             CASE WHEN $inherit_open_edit
+                                        AND old.edit_status = 'open'
+                                  THEN old.edit_include_accepted
+                                  ELSE $edit_include_accepted END
+                               AS successor_edit_include_accepted
+                        SET old.superseded_from_stage = coalesce(
+                                old.superseded_from_stage, old.name_stage
+                            ),
+                            old.name_stage = 'refining'
                         MERGE (new:StandardName {{id: $new_name}})
                         ON CREATE SET
                           new.name_stage        = 'drafted',
@@ -13479,30 +13512,18 @@ def persist_refined_name(
                           new.generated_at      = datetime(),
                           new.refine_reason     = $reason,
                           new.run_id            = $run_id,
-                          new.edit_mode         = $edit_mode,
-                          new.name_hint         = $name_hint,
-                          new.docs_hint         = $docs_hint,
-                          new.edit_reason       = $edit_reason,
-                          new.edit_origin       = $edit_origin,
-                          new.edit_scope        = $edit_scope,
-                          new.edit_status       = $edit_status,
-                          new.edit_requested_at = $edit_requested_at,
-                          new.edit_override_edits = $edit_override_edits,
-                          new.edit_include_accepted = $edit_include_accepted
+                          new.edit_mode         = successor_edit_mode,
+                          new.name_hint         = successor_name_hint,
+                          new.docs_hint         = successor_docs_hint,
+                          new.edit_reason       = successor_edit_reason,
+                          new.edit_origin       = successor_edit_origin,
+                          new.edit_scope        = successor_edit_scope,
+                          new.edit_status       = successor_edit_status,
+                          new.edit_requested_at = successor_edit_requested_at,
+                          new.edit_override_edits = successor_edit_override_edits,
+                          new.edit_include_accepted = successor_edit_include_accepted,
+                          new.embed_text_hash   = null
                           {escalation_set}
-
-                        // 1b. Adopt a pre-existing placeholder as the successor.
-                        // The successor id may already exist as an un-reviewed
-                        // scaffold — a locus/parent placeholder minted at
-                        // name_stage='pending' by the derivation writer, or a
-                        // bare node with no stage. ON CREATE does not fire for
-                        // it, so without this the refined name would keep the
-                        // placeholder stage and never be claimed by the name
-                        // review pool (which claims 'drafted'), even though this
-                        // refine migrates its produced sources below. Advance
-                        // such a placeholder into review; leave a structural
-                        // 'derived' parent (reviewed structurally, not by the
-                        // name quorum) and any live/terminal stage untouched.
                         ON MATCH SET
                           new.name_stage = CASE
                             WHEN coalesce(new.name_stage, '') IN ['', 'pending']
@@ -13511,22 +13532,200 @@ def persist_refined_name(
                           new.origin = CASE
                             WHEN coalesce(new.name_stage, '') IN ['', 'pending']
                              AND coalesce(new.origin, '') <> 'derived'
-                            THEN 'pipeline' ELSE new.origin END
+                            THEN 'pipeline' ELSE new.origin END,
+                          new.edit_mode = successor_edit_mode,
+                          new.name_hint = successor_name_hint,
+                          new.docs_hint = successor_docs_hint,
+                          new.edit_reason = successor_edit_reason,
+                          new.edit_origin = successor_edit_origin,
+                          new.edit_scope = successor_edit_scope,
+                          new.edit_status = successor_edit_status,
+                          new.edit_requested_at = successor_edit_requested_at,
+                          new.edit_override_edits = successor_edit_override_edits,
+                          new.edit_include_accepted = successor_edit_include_accepted,
+                          new.embed_text_hash = null
+                        WITH old, new, successor_edit_mode,
+                             successor_name_hint, successor_docs_hint,
+                             successor_edit_reason, successor_edit_origin,
+                             successor_edit_scope, successor_edit_status,
+                             successor_edit_requested_at,
+                             successor_edit_override_edits,
+                             successor_edit_include_accepted
+                        OPTIONAL MATCH (source:StandardNameSource)
+                        WHERE (source)-[:PRODUCED_NAME]->(old)
+                           OR source.produced_sn_id = old.id
+                        RETURN old.id AS old_name, new.id AS new_name,
+                               [source_id IN collect(DISTINCT source.id)
+                                WHERE source_id IS NOT NULL] AS source_ids,
+                               old.edit_mode AS source_edit_mode,
+                               old.name_hint AS source_name_hint,
+                               old.docs_hint AS source_docs_hint,
+                               old.edit_reason AS source_edit_reason,
+                               old.edit_origin AS source_edit_origin,
+                               old.edit_scope AS source_edit_scope,
+                               old.edit_status AS source_edit_status,
+                               old.edit_requested_at AS source_edit_requested_at,
+                               old.edit_override_edits
+                                 AS source_edit_override_edits,
+                               old.edit_include_accepted
+                                 AS source_edit_include_accepted,
+                               successor_edit_mode AS effective_edit_mode,
+                               successor_name_hint AS effective_name_hint,
+                               successor_docs_hint AS effective_docs_hint,
+                               successor_edit_reason AS effective_edit_reason,
+                               successor_edit_origin AS effective_edit_origin,
+                               successor_edit_scope AS effective_edit_scope,
+                               successor_edit_status AS effective_edit_status,
+                               successor_edit_requested_at
+                                 AS effective_edit_requested_at,
+                               successor_edit_override_edits
+                                 AS effective_edit_override_edits,
+                               successor_edit_include_accepted
+                                 AS effective_edit_include_accepted
+                        """,
+                        old_name=old_name,
+                        new_name=new_name,
+                        expected_old_stage=expected_old_stage,
+                        expected_claim_token=expected_claim_token,
+                        inherit_open_edit=inherit_open_edit,
+                        new_chain_length=new_chain_length,
+                        description=description,
+                        kind=kind,
+                        unit=unit,
+                        physics_domain=physics_domain,
+                        source_domains=source_domains
+                        or ([physics_domain] if physics_domain else []),
+                        tags=tags or [],
+                        model=model,
+                        reason=reason,
+                        run_id=run_id,
+                        edit_mode=edit_mode,
+                        name_hint=name_hint,
+                        docs_hint=docs_hint,
+                        edit_reason=edit_reason,
+                        edit_origin=edit_origin,
+                        edit_scope=edit_scope,
+                        edit_status=edit_status,
+                        edit_requested_at=edit_requested_at,
+                        edit_override_edits=edit_override_edits,
+                        edit_include_accepted=edit_include_accepted,
+                    )
+                )
+                if not preflight:
+                    raise RuntimeError(
+                        f"persist_refined_name no-op: {old_name} → {new_name} — "
+                        "the predecessor stage or successor collision changed "
+                        "before the atomic rename began"
+                    )
 
-                        // 2. Link to predecessor
-                        WITH new
-                        MATCH (old:StandardName {{id: $old_name}})
+                preflight_row = dict(preflight[0])
+                candidate_source_ids = sorted(
+                    set(preflight_row.get("source_ids") or [])
+                )
+                edit_mode = preflight_row.get("effective_edit_mode", edit_mode)
+                name_hint = preflight_row.get("effective_name_hint", name_hint)
+                docs_hint = preflight_row.get("effective_docs_hint", docs_hint)
+                edit_reason = preflight_row.get("effective_edit_reason", edit_reason)
+                edit_origin = preflight_row.get("effective_edit_origin", edit_origin)
+                edit_scope = preflight_row.get("effective_edit_scope", edit_scope)
+                edit_status = preflight_row.get("effective_edit_status", edit_status)
+                edit_requested_at = preflight_row.get(
+                    "effective_edit_requested_at", edit_requested_at
+                )
+                edit_override_edits = preflight_row.get(
+                    "effective_edit_override_edits", edit_override_edits
+                )
+                edit_include_accepted = preflight_row.get(
+                    "effective_edit_include_accepted", edit_include_accepted
+                )
+                source_edit_state = {
+                    field: preflight_row.get(f"source_{field}")
+                    for field in (
+                        "edit_mode",
+                        "name_hint",
+                        "docs_hint",
+                        "edit_reason",
+                        "edit_origin",
+                        "edit_scope",
+                        "edit_status",
+                        "edit_requested_at",
+                        "edit_override_edits",
+                        "edit_include_accepted",
+                    )
+                }
+                from imas_codex.standard_names.attachment_audit import (
+                    guard_source_pairings,
+                )
+
+                query_handle = _TransactionQuery(tx)
+                guarded = guard_source_pairings(
+                    query_handle, new_name, candidate_source_ids
+                )
+                if guarded.rejected or set(guarded.accepted_source_ids) != set(
+                    candidate_source_ids
+                ):
+                    rejected = (
+                        ", ".join(
+                            f"{item.source_node_id}: {item.reason}"
+                            for item in guarded.rejected
+                        )
+                        or "the pairing guard did not admit every source"
+                    )
+                    raise ValueError(
+                        f"refined-name attachment rejected; rename rolled back: "
+                        f"{rejected}"
+                    )
+
+                result = list(
+                    tx.run(
+                        """
+                        // Finalize the provisionally guarded successor.
+                        MATCH (new:StandardName {id: $new_name}),
+                              (old:StandardName {id: $old_name})
                         WHERE old.name_stage = 'refining'
+                          AND (old.edit_mode = $source_edit_mode OR
+                               (old.edit_mode IS NULL AND
+                                $source_edit_mode IS NULL))
+                          AND (old.name_hint = $source_name_hint OR
+                               (old.name_hint IS NULL AND
+                                $source_name_hint IS NULL))
+                          AND (old.docs_hint = $source_docs_hint OR
+                               (old.docs_hint IS NULL AND
+                                $source_docs_hint IS NULL))
+                          AND (old.edit_reason = $source_edit_reason OR
+                               (old.edit_reason IS NULL AND
+                                $source_edit_reason IS NULL))
+                          AND (old.edit_origin = $source_edit_origin OR
+                               (old.edit_origin IS NULL AND
+                                $source_edit_origin IS NULL))
+                          AND (old.edit_scope = $source_edit_scope OR
+                               (old.edit_scope IS NULL AND
+                                $source_edit_scope IS NULL))
+                          AND (old.edit_status = $source_edit_status OR
+                               (old.edit_status IS NULL AND
+                                $source_edit_status IS NULL))
+                          AND (old.edit_requested_at =
+                               $source_edit_requested_at OR
+                               (old.edit_requested_at IS NULL AND
+                                $source_edit_requested_at IS NULL))
+                          AND (old.edit_override_edits =
+                               $source_edit_override_edits OR
+                               (old.edit_override_edits IS NULL AND
+                                $source_edit_override_edits IS NULL))
+                          AND (old.edit_include_accepted =
+                               $source_edit_include_accepted OR
+                               (old.edit_include_accepted IS NULL AND
+                                $source_edit_include_accepted IS NULL))
                         MERGE (new)-[:REFINED_FROM]->(old)
 
                         // 3. Mark old as superseded, clear claim
                         //
                         // Record whether the predecessor had reached the
                         // published bar so the export boundary can decide
-                        // whether to emit a deprecation stub. The caller has
-                        // already flipped name_stage to 'refining' (the WHERE
-                        // gate above), so the pre-refining name-axis stage is
-                        // no longer legible here; the durable "was published"
+                        // whether to emit a deprecation stub. The atomic
+                        // preflight has flipped name_stage to 'refining', so
+                        // the prior name-axis stage is carried by
+                        // superseded_from_stage; the durable "was published"
                         // signal that survives that flip is docs_stage —
                         // a name only reaches consumers once its docs review
                         // has accepted it. A pipeline refine of a merely
@@ -13561,29 +13760,7 @@ def persist_refined_name(
                                 WHEN coalesce(old.edit_status, '') = 'open'
                                 THEN 'applied' ELSE old.edit_status END
 
-                        // 4. Migrate PRODUCED_NAME edges
-                        WITH new, old
-                        OPTIONAL MATCH (src:StandardNameSource)-[r:PRODUCED_NAME]->(old)
-                        WITH new, old,
-                             collect(src) AS pn_sources,
-                             collect(r)   AS pn_rels
-                        FOREACH (rel IN pn_rels | DELETE rel)
-                        WITH new, old, pn_sources
-                        FOREACH (s IN pn_sources |
-                            MERGE (s)-[:PRODUCED_NAME]->(new)
-                            SET s.produced_sn_id = new.id)
-
-                        // 5. Migrate HAS_STANDARD_NAME edges
-                        WITH DISTINCT new, old
-                        OPTIONAL MATCH (n)-[r2:HAS_STANDARD_NAME]->(old)
-                        WITH new, old,
-                             collect(n)  AS hsn_nodes,
-                             collect(r2) AS hsn_rels
-                        FOREACH (rel IN hsn_rels | DELETE rel)
-                        WITH new, old, hsn_nodes
-                        FOREACH (n IN hsn_nodes | MERGE (n)-[:HAS_STANDARD_NAME]->(new))
-
-                        // 5b. Migrate inbound HAS_PARENT edges
+                        // 4. Migrate inbound HAS_PARENT edges
                         // (child)-[:HAS_PARENT]->(old) → (child)-[:HAS_PARENT]->(new)
                         // Preserves edge properties so the SPA's parent
                         // widget points at the live successor, not the
@@ -13595,23 +13772,23 @@ def persist_refined_name(
                         WITH DISTINCT new, old
                         OPTIONAL MATCH (child)-[c_old:HAS_PARENT]->(old)
                         WITH new, old,
-                             collect({{
+                             collect({
                                  child: child,
                                  props: properties(c_old),
                                  rel:   c_old
-                             }}) AS comp_links
+                             }) AS comp_links
                         FOREACH (link IN comp_links | DELETE link.rel)
                         WITH new, old, comp_links
-                        CALL {{
+                        CALL {
                             WITH new, comp_links
                             UNWIND comp_links AS link
                             WITH link.child AS ch, link.props AS p, new
                             WHERE ch IS NOT NULL AND ch.id <> new.id
                             MERGE (ch)-[c_new:HAS_PARENT]->(new)
                             SET   c_new = p
-                        }}
+                        }
 
-                        // 6. Inherit HAS_UNIT and IN_CLUSTER edges from the
+                        // 5. Inherit HAS_UNIT and IN_CLUSTER edges from the
                         // predecessor so that downstream claim-expand
                         // (which scopes by cluster+unit) can pick up the
                         // refined node. Without this, chain>0 SNs are
@@ -13651,68 +13828,64 @@ def persist_refined_name(
                         edit_requested_at=edit_requested_at,
                         edit_override_edits=edit_override_edits,
                         edit_include_accepted=edit_include_accepted,
+                        **{
+                            f"source_{field}": value
+                            for field, value in source_edit_state.items()
+                        },
                     )
+                )
+                if not result:
+                    raise RuntimeError(
+                        f"persist_refined_name no-op: {old_name} → {new_name} — "
+                        "the predecessor left name_stage='refining' during "
+                        "the atomic rename"
+                    )
+
+                from imas_codex.standard_names.provenance_lifecycle import (
+                    record_standard_name_change,
+                    retarget_standard_name_sources,
+                )
+
+                moved = retarget_standard_name_sources(
+                    query_handle,
+                    old_name,
+                    new_name,
+                    operation="human_edit" if edit_mode else "refine",
+                    reason=edit_reason or reason,
+                    origin=edit_origin,
+                    run_id=run_id,
+                    record_change=False,
+                    enforce_consistency=False,
+                    source_ids=candidate_source_ids,
+                )
+                if moved != len(candidate_source_ids):
+                    raise RuntimeError(
+                        "semantic source set changed during atomic rename: "
+                        f"guarded {len(candidate_source_ids)}, moved {moved}"
+                    )
+                record_standard_name_change(
+                    query_handle,
+                    old_name,
+                    new_name,
+                    operation="human_edit" if edit_mode else "refine",
+                    reason=edit_reason or reason,
+                    origin=edit_origin,
+                    run_id=run_id,
                 )
                 tx.commit()
             except BaseException:
-                if tx.closed is False:
-                    tx.close()
+                with suppress(Exception):
+                    tx.rollback()
                 raise
 
     if result:
         row = dict(result[0])
-        # The migration above re-pairs a HISTORICAL source set with a NEW name,
-        # and the consistency guard is what judges a pairing. Compose consults it
-        # before creating an edge; this path creates edges without ever asking, so
-        # ask now, scoped to the successor. Anything the guard refuses is detached
-        # and its source rewound to re-compose, exactly as a bad compose would
-        # have been — otherwise a rename can launder an edge the guard rejects.
-        from imas_codex.standard_names.attachment_audit import (
-            gate_migrated_attachments,
-        )
-
-        gate = gate_migrated_attachments(sn_id=new_name)
-        if gate.rejected:
-            logger.warning(
-                "persist_refined_name: %d attachment(s) migrated onto '%s' fail "
-                "the consistency guard (detached %d, name-level defect %d)",
-                len(gate.rejected),
-                new_name,
-                gate.detached,
-                len(gate.names_misnamed),
-            )
-
-        from imas_codex.standard_names.provenance_lifecycle import (
-            retarget_standard_name_sources,
-        )
-
-        with GraphClient() as provenance_gc:
-            retarget_standard_name_sources(
-                provenance_gc,
-                old_name,
-                new_name,
-                operation="human_edit" if edit_mode else "refine",
-                reason=edit_reason or reason,
-                origin=edit_origin,
-                run_id=run_id,
-            )
         logger.debug(
             "persist_refined_name: %s → %s (chain_length=%d)",
             old_name,
             new_name,
             new_chain_length,
         )
-
-        # --- Embed the new refined name ---
-        # Clear embed_text_hash so the dedicated embed worker picks it up.
-        with GraphClient() as gc:
-            gc.query(
-                """
-                MATCH (sn:StandardName {id: $id})
-                SET sn.embed_text_hash = null
-                """,
-                id=new_name,
-            )
 
         # Async counter bump — live progress visibility for ``sn status``
         bump_sn_run_counter(run_id, "names_regenerated")

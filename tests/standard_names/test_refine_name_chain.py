@@ -249,6 +249,19 @@ class TestPersistCreatesNewNode:
 class TestPersistCypherContent:
     """Verify the Cypher query contains required operations."""
 
+    @staticmethod
+    def _cypher(tx) -> str:
+        return "\n".join(call.args[0] for call in tx.run.call_args_list)
+
+    @staticmethod
+    def _preflight_params(tx) -> dict:
+        call = next(
+            call
+            for call in tx.run.call_args_list
+            if "REFINE_ATOMIC_PREFLIGHT" in call.args[0]
+        )
+        return call.kwargs
+
     def test_cypher_contains_refined_from(self):
         from imas_codex.standard_names.graph_ops import persist_refined_name
 
@@ -263,7 +276,7 @@ class TestPersistCypherContent:
                 old_chain_length=1,
             )
 
-        cypher = tx.run.call_args.args[0]
+        cypher = self._cypher(tx)
         assert "REFINED_FROM" in cypher
         assert "superseded" in cypher
         assert "PRODUCED_NAME" in cypher
@@ -287,7 +300,7 @@ class TestPersistCypherContent:
                 old_chain_length=1,
             )
 
-        cypher = " ".join(tx.run.call_args.args[0].split())
+        cypher = " ".join(self._cypher(tx).split())
         assert "old.edit_status = CASE" in cypher, (
             "the superseded predecessor's open edit must be reconciled in the "
             f"same write:\n{cypher}"
@@ -312,8 +325,8 @@ class TestPersistCypherContent:
                 old_chain_length=1,
             )
 
-        cypher = " ".join(tx.run.call_args.args[0].split())
-        assert "SET s.produced_sn_id = new.id" in cypher, (
+        cypher = " ".join(self._cypher(tx).split())
+        assert "SET source.produced_sn_id = new.id" in cypher, (
             "the migrated source must repoint its produced_sn_id scalar to the "
             f"successor, not the superseded predecessor:\n{cypher}"
         )
@@ -332,7 +345,7 @@ class TestPersistCypherContent:
                 old_chain_length=2,
             )
 
-        kwargs = tx.run.call_args.kwargs
+        kwargs = self._preflight_params(tx)
         assert kwargs["new_chain_length"] == 3
 
     def test_escalation_sets_timestamp(self):
@@ -350,7 +363,7 @@ class TestPersistCypherContent:
                 escalated=True,
             )
 
-        cypher = tx.run.call_args.args[0]
+        cypher = self._cypher(tx)
         assert "refine_name_escalated_at" in cypher
 
     def test_no_escalation_no_timestamp(self):
@@ -368,7 +381,7 @@ class TestPersistCypherContent:
                 escalated=False,
             )
 
-        cypher = tx.run.call_args.args[0]
+        cypher = self._cypher(tx)
         assert "refine_name_escalated_at" not in cypher
 
     def test_old_sn_marked_superseded(self):
@@ -385,7 +398,7 @@ class TestPersistCypherContent:
                 old_chain_length=0,
             )
 
-        cypher = tx.run.call_args.args[0]
+        cypher = self._cypher(tx)
         assert (
             "old.name_stage  = 'superseded'" in cypher
             or "old.name_stage = 'superseded'" in cypher
@@ -1140,7 +1153,7 @@ class TestPersistWithEdgeMigration:
                 old_chain_length=0,
             )
 
-        cypher = tx.run.call_args.args[0]
+        cypher = "\n".join(call.args[0] for call in tx.run.call_args_list)
         # Check for edge migration patterns
         assert "PRODUCED_NAME" in cypher
         assert "HAS_STANDARD_NAME" in cypher

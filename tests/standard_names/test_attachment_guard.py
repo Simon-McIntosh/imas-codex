@@ -21,27 +21,11 @@ from imas_codex.standard_names.workers import _is_attachment_consistent
             "core_instant_changes/change/profiles_1d/electrons/temperature",
             "tendency_of_electron_temperature",
         ),
-        (
-            "equilibrium/time_slice/global_quantities/ip",
-            "rate_of_change_of_plasma_current",
-        ),  # rate path heuristic relies on SN prefix only — base path + rate SN flagged
     ],
 )
 def test_consistent_pairs(source_id: str, sn_name: str) -> None:
     ok, reason = _is_attachment_consistent(source_id, sn_name)
-    if sn_name.startswith(
-        ("change_in_", "tendency_of_", "rate_of_", "time_derivative_of_")
-    ):
-        # Path must contain a change/tendency token to pass.
-        if any(
-            tok in source_id
-            for tok in ("instant_changes", "/change", "_delta", "tendency_")
-        ):
-            assert ok, reason
-        else:
-            assert not ok, "rate/change SN with base path must be rejected"
-    else:
-        assert ok, reason
+    assert ok, reason
 
 
 @pytest.mark.parametrize(
@@ -77,6 +61,89 @@ def test_rate_marker_paths_accept_rate_names(source_id: str, sn_name: str) -> No
     """A ``d_dt`` / ``d<quantity>_dt`` rate path matches a rate SN."""
     ok, reason = _is_attachment_consistent(source_id, sn_name)
     assert ok, reason
+
+
+@pytest.mark.parametrize(
+    "sn_name",
+    [
+        "time_derivative_of_electron_density",
+        "tendency_of_electron_density",
+        "change_in_electron_density",
+        "volume_averaged_time_derivative_of_electron_density",
+        "volume_integrated_time_derivative_of_electron_density",
+        "flux_surface_averaged_time_derivative_of_electron_density",
+        "difference_of_time_derivative_of_electron_density_and_ion_density",
+        "product_of_time_derivative_of_electron_density_and_volume",
+        "ratio_of_time_derivative_of_electron_density_to_ion_density",
+    ],
+)
+def test_recursive_time_change_shapes_match_a_derivative_path(sn_name: str) -> None:
+    """Every supported time-change expression is found anywhere in public IR."""
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/dn_e_dt/value", sn_name
+    )
+    assert ok, reason
+
+
+def test_nested_time_derivative_still_rejects_a_plain_path() -> None:
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/n_e/value",
+        "volume_averaged_time_derivative_of_electron_density",
+    )
+    assert not ok
+    assert "tense mismatch" in reason
+
+
+def test_non_time_operator_does_not_claim_a_derivative() -> None:
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/dn_e_dt/value",
+        "volume_averaged_electron_density",
+    )
+    assert not ok
+    assert "tense mismatch" in reason
+
+
+def test_parse_failure_retains_conservative_lexical_fallback() -> None:
+    ok, reason = _is_attachment_consistent(
+        "summary/volume_average/dn_e_dt/value",
+        "time_derivative_of_unregistered_quantity",
+    )
+    assert ok, reason
+
+
+@pytest.mark.parametrize(
+    "sn_name",
+    [
+        "time_derivative_of_electron_density",
+        "gradient_of_time_derivative_of_electron_temperature",
+        "difference_of_time_derivative_of_pressure_and_temperature",
+        "difference_of_change_in_electron_density_and_ion_density",
+        "change_in_electron_density",
+    ],
+)
+def test_public_parser_ir_exposes_time_change_semantics(sn_name: str) -> None:
+    """ISN semantics apply across direct, nested, binary, and qualifier IR."""
+    from imas_standard_names import parse
+
+    from imas_codex.standard_names.workers import _ir_denotes_time_change
+
+    assert _ir_denotes_time_change(parse(sn_name, strict=True).ir)
+
+
+@pytest.mark.parametrize(
+    "sn_name",
+    [
+        "gradient_of_electron_temperature",
+        "time_averaged_electron_density",
+        "ratio_of_electron_density_to_ion_density",
+    ],
+)
+def test_public_parser_ir_rejects_non_time_operator_semantics(sn_name: str) -> None:
+    from imas_standard_names import parse
+
+    from imas_codex.standard_names.workers import _ir_denotes_time_change
+
+    assert not _ir_denotes_time_change(parse(sn_name, strict=True).ir)
 
 
 # ---------------------------------------------------------------------------
@@ -264,10 +331,6 @@ def test_non_rate_path_still_rejects_rate_name(source_id: str, sn_name: str) -> 
         (
             "core_profiles/profiles_1d/electrons/temperature",
             "tendency_of_electron_temperature",
-        ),
-        (
-            "equilibrium/time_slice/global_quantities/ip",
-            "rate_of_change_of_plasma_current",
         ),
         # Change path → base SN: must be rejected.
         (

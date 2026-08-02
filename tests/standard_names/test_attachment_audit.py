@@ -866,22 +866,27 @@ def test_attachment_read_has_one_row_and_deterministic_unit_ambiguity(_gc, _clea
 
 
 def test_refine_successor_migration_is_gated() -> None:
-    """The migration re-pairs a historical source set, so it must ask the guard.
+    """The migration re-pairs a historical source set inside its transaction.
 
     ``persist_refined_name`` moves every ``PRODUCED_NAME`` and
     ``HAS_STANDARD_NAME`` edge from the predecessor onto a DIFFERENT name. The
     set is historical but the pairing is new, and a new pairing is what the
     guard judges — ungated, this channel launders an edge that compose would
-    have refused. The gate must stay scoped to the successor: a corpus-wide
-    audit per refine is unaffordable on this path.
+    have refused. Every source must be admitted before the first lineage or
+    mirror mutation, on the same query handle that owns the transaction.
     """
     import inspect
 
     from imas_codex.standard_names import graph_ops
 
     src = inspect.getsource(graph_ops.persist_refined_name)
-    assert "MERGE (s)-[:PRODUCED_NAME]->(new)" in src, "migration shape changed"
-    assert "gate_migrated_attachments(sn_id=new_name)" in src
+    assert "REFINE_ATOMIC_PREFLIGHT" in src
+    assert "guard_source_pairings(" in src
+    assert "query_handle, new_name, candidate_source_ids" in src
+    assert "guarded.rejected" in src
+    assert "retarget_standard_name_sources(" in src
+    assert "source_ids=candidate_source_ids" in src
+    assert "gate_migrated_attachments(sn_id=new_name)" not in src
 
 
 def test_gate_validates_only_the_successor() -> None:
