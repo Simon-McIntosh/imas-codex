@@ -68,6 +68,21 @@ enums:
           origin rather than leaving the name orphaned — never a fabricated
           DD path.
 
+  StandardNameSourceSnapshotClassification:
+    description: >-
+      Semantic relationship between one pinned DD source snapshot and the
+      uniquely current DD authority that replaced it.
+    permissible_values:
+      byte_unchanged:
+        description: Every canonical snapshot field is identical.
+      semantic_unchanged:
+        description: >-
+          Canonical bytes differ only by an explicitly governed semantic
+          equivalence such as an equivalent unit spelling or registered DD
+          unit correction.
+      changed:
+        description: At least one authoritative semantic field changed.
+
   StandardNameOrigin:
     description: >-
       Provenance of the most recent editorial edit to a StandardName.
@@ -2323,6 +2338,16 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_RETRY_EVENT
+      snapshot_changes:
+        description: >-
+          Immutable governed migrations of this source's pinned DD snapshot.
+          Each event records complete canonical before/after payloads and the
+          authority and preservation hashes proven by the atomic transaction.
+        multivalued: true
+        range: StandardNameSourceSnapshotChange
+        inlined: false
+        annotations:
+          relationship_type: HAS_SNAPSHOT_CHANGE
       last_error:
         description: Error message from most recent failed attempt
       failed_at:
@@ -2459,6 +2484,68 @@ classes:
           sources, from the FacilitySignal. Plain string provenance — drives
           the batch_key grouping and is promoted onto the produced
           StandardName. Set in batch_create_sources (see graph_ops.py).
+
+  StandardNameSourceSnapshotChange:
+    description: >-
+      Immutable receipt for one atomic in-place migration of a stable DD
+      StandardNameSource identity to a newer uniquely current DD authority.
+      The event never changes a StandardName or its review lifecycle.
+    class_uri: sn:StandardNameSourceSnapshotChange
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable content-derived event identifier.
+      source_id:
+        required: true
+        description: Exact StandardNameSource identity migrated by this event.
+      from_dd_version:
+        required: true
+        description: Exact pinned DD version before migration.
+      to_dd_version:
+        required: true
+        description: Exact uniquely current DD version after migration.
+      before_snapshot_hash:
+        required: true
+        description: SHA-256 of the canonical pre-migration source snapshot.
+      after_snapshot_hash:
+        required: true
+        description: SHA-256 of the canonical post-migration source snapshot.
+      before_snapshot_payload:
+        required: true
+        description: Complete canonical JSON source snapshot before migration.
+      after_snapshot_payload:
+        required: true
+        description: Complete canonical JSON source snapshot after migration.
+      authority_hash:
+        required: true
+        description: >-
+          SHA-256 of the complete current DD node, version, unit, parent, and
+          coordinate authority proven by the transaction.
+      precondition_hash:
+        required: true
+        description: >-
+          SHA-256 of all source, backing, projection, name, review, edit, and
+          relationship state fenced before mutation.
+      preserved_state_hash:
+        required: true
+        description: >-
+          SHA-256 of every non-snapshot property and relationship required to
+          remain unchanged by the migration.
+      classification:
+        required: true
+        range: StandardNameSourceSnapshotClassification
+        description: Semantic classification of the authority change.
+      reason:
+        required: true
+        description: Operator-provided reason for the governed migration.
+      run_id:
+        required: true
+        description: Identifier shared by every event in one atomic invocation.
+      changed_at:
+        required: true
+        range: datetime
+        description: Transaction timestamp at which the migration committed.
 
   StandardNameSourceRetry:
     description: >-

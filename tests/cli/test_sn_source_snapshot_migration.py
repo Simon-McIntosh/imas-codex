@@ -1,5 +1,7 @@
 """CLI safety coverage for bounded source maintenance."""
 
+import json
+from pathlib import Path
 from unittest.mock import patch
 
 from click.testing import CliRunner
@@ -67,3 +69,66 @@ def test_bounded_drain_refuses_environment_single_reviewer_profile() -> None:
     assert result.exit_code != 0
     assert "at least two reviewer models" in result.output
     resolve.assert_not_called()
+
+
+def test_source_snapshot_migration_is_dry_run_by_default(tmp_path: Path) -> None:
+    manifest = tmp_path / "bounded.json"
+    manifest.write_text("{}")
+    receipt = {
+        "schema": "imas-codex.source-snapshot-migration-receipt",
+        "mode": "dry_run",
+        "counts": {"planned": 1, "applied": 0},
+        "receipt_hash": "abc",
+    }
+    with patch(
+        "imas_codex.standard_names.source_snapshot_migration.migrate_source_snapshots",
+        return_value=receipt,
+    ) as migrate:
+        result = CliRunner().invoke(
+            sn,
+            [
+                "migrate-source-snapshots",
+                "--manifest",
+                str(manifest),
+                "--from-version",
+                "old-dd",
+                "--reason",
+                "refresh immutable authority",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output) == receipt
+    assert migrate.call_args.kwargs["apply"] is False
+
+
+def test_source_snapshot_migration_requires_explicit_apply_flag(tmp_path: Path) -> None:
+    manifest = tmp_path / "bounded.json"
+    manifest.write_text("{}")
+    receipt = {
+        "schema": "imas-codex.source-snapshot-migration-receipt",
+        "mode": "applied",
+        "counts": {"planned": 1, "applied": 1},
+        "receipt_hash": "def",
+    }
+    with patch(
+        "imas_codex.standard_names.source_snapshot_migration.migrate_source_snapshots",
+        return_value=receipt,
+    ) as migrate:
+        result = CliRunner().invoke(
+            sn,
+            [
+                "migrate-source-snapshots",
+                "--manifest",
+                str(manifest),
+                "--from-version",
+                "old-dd",
+                "--reason",
+                "refresh immutable authority",
+                "--apply",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output) == receipt
+    assert migrate.call_args.kwargs["apply"] is True

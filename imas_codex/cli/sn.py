@@ -6177,6 +6177,52 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
         )
 
 
+@sn.command("migrate-source-snapshots")
+@click.option(
+    "--manifest",
+    "manifest_path",
+    type=click.Path(exists=True, dir_okay=False),
+    required=True,
+    help="Bounded integrity manifest from which to derive the exact DD allowlist.",
+)
+@click.option(
+    "--from-version",
+    "expected_from_version",
+    required=True,
+    help="Exact DD version every non-current allowlisted source must be pinned to.",
+)
+@click.option(
+    "--reason",
+    required=True,
+    help="Operator reason recorded on every immutable migration event.",
+)
+@click.option(
+    "--apply",
+    is_flag=True,
+    help="Apply the atomic migration; the default is a zero-write dry run.",
+)
+def sn_migrate_source_snapshots(
+    manifest_path: str,
+    expected_from_version: str,
+    reason: str,
+    apply: bool,
+) -> None:
+    """Plan or apply exact DD source snapshot migrations with full CAS fencing."""
+    import json
+
+    from imas_codex.standard_names.source_snapshot_migration import (
+        migrate_source_snapshots,
+    )
+
+    receipt = migrate_source_snapshots(
+        manifest_path,
+        expected_from_version=expected_from_version,
+        reason=reason,
+        apply=apply,
+    )
+    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
+
+
 @sn.command("source-hint")
 @click.argument("exact_dd_path")
 @click.option(
