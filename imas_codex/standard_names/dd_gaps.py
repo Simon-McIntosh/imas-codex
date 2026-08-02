@@ -987,9 +987,6 @@ CALL {
 WITH gap, source_paths, observation_records, state_change_records,
      identity_change_records, change, observation_rekey_count
 WHERE observation_rekey_count = size($observation_rekeys)
-MATCH (verified:DDGap {id: $new_id})
-WHERE verified = gap
-  AND NOT EXISTS { MATCH (:DDGap {id: $old_id}) }
 RETURN gap.id AS id,
        size(source_paths) AS source_path_count,
        size(observation_records) AS observation_count,
