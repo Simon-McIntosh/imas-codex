@@ -1644,7 +1644,7 @@ def sn_run(
       imas-codex sn run --reset-to drafted --below-score 0.6 --reset-only
       imas-codex sn run --only link                   # resolve links only
       imas-codex sn run --override-edits foo --override-edits bar  # bypass protection on foo, bar
-      imas-codex sn run --reviewer-profile pilot -c 5  # use cheap Haiku+Opus reviewer
+      imas-codex sn run --reviewer-profile quality-cost-balanced -c 5
       imas-codex sn run --min-score 0.85 --rotation-cap 5    # tighter thresholds
     """
     import os as _os
@@ -1656,6 +1656,14 @@ def sn_run(
     _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
 
     if drain_batch:
+        from imas_codex.settings import get_sn_review_profile_models
+
+        drain_review_models = get_sn_review_profile_models(reviewer_profile)
+        if len(drain_review_models) < 2:
+            raise click.UsageError(
+                "--drain-batch requires a reviewer profile resolving to at least "
+                "two reviewer models"
+            )
         incompatible = {
             "--source": source != "dd",
             "--domain": bool(domains),
@@ -5429,7 +5437,7 @@ def sn_review(
       imas-codex sn review --force --physics-domain magnetics
       imas-codex sn review --target names --unreviewed
       imas-codex sn review --target docs --physics-domain equilibrium
-      imas-codex sn review --reviewer-profile pilot --unreviewed -c 2.0
+      imas-codex sn review --reviewer-profile quality-cost-balanced --unreviewed -c 2.0
     """
     import asyncio
 

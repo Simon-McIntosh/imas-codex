@@ -82,7 +82,7 @@ _DEFAULT_MODELS = [
     "openrouter/openai/gpt-5.4",
     "openrouter/anthropic/claude-sonnet-4.6",
 ]
-_PILOT_MODELS = [
+_QUALITY_COST_MODELS = [
     "openrouter/anthropic/claude-sonnet-4.6",
     "openrouter/openai/gpt-5.4",
     "openrouter/anthropic/claude-opus-4.6",
@@ -107,7 +107,7 @@ def test_default_profile_loads_three_models(monkeypatch):
     assert models == _DEFAULT_MODELS
 
 
-def test_pilot_profile_loads_haiku_primary(monkeypatch):
+def test_quality_cost_balanced_profile_loads_configured_chain(monkeypatch):
     """'quality-cost-balanced' profile is sonnet-primary + opus arbiter (no Haiku)."""
     from imas_codex import settings as settings_mod
 
@@ -115,7 +115,7 @@ def test_pilot_profile_loads_haiku_primary(monkeypatch):
         monkeypatch,
         {
             "quality-cost-balanced": {
-                "models": _PILOT_MODELS,
+                "models": _QUALITY_COST_MODELS,
                 "disagreement-threshold": 0.20,
             }
         },
@@ -146,11 +146,8 @@ def test_opus_only_loads_one_model(monkeypatch):
     assert "opus" in models[0].lower()
 
 
-def test_haiku_only_loads_one_model(monkeypatch):
-    """Removed: haiku-only profile dropped (Sonnet 4.6 reviewer floor).
-
-    Asserting it is now an unknown profile preserves the constraint.
-    """
+def test_unconfigured_low_tier_profile_is_rejected(monkeypatch):
+    """A profile outside the configured reviewer floor is unknown."""
     from imas_codex import settings as settings_mod
 
     _patch_profiles(monkeypatch, {})
@@ -185,7 +182,7 @@ def test_profile_threshold_default(monkeypatch):
     )
 
 
-def test_profile_threshold_pilot(monkeypatch):
+def test_quality_cost_balanced_profile_threshold(monkeypatch):
     """quality-cost-balanced profile threshold is 0.20."""
     from imas_codex import settings as settings_mod
 
@@ -193,7 +190,7 @@ def test_profile_threshold_pilot(monkeypatch):
         monkeypatch,
         {
             "quality-cost-balanced": {
-                "models": _PILOT_MODELS,
+                "models": _QUALITY_COST_MODELS,
                 "disagreement-threshold": 0.20,
             }
         },
@@ -271,7 +268,7 @@ def test_legacy_accessor_respects_active_env_var_profile(monkeypatch):
         monkeypatch,
         {
             "quality-cost-balanced": {
-                "models": _PILOT_MODELS,
+                "models": _QUALITY_COST_MODELS,
                 "disagreement-threshold": 0.20,
             }
         },
