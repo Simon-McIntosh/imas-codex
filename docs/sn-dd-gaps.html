@@ -7,8 +7,8 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-dd-gaps">
   <meta name="plan-title" content="DD gaps — first-class authority for the pipeline to flag Data-Dictionary defects">
-  <meta name="plan-summary" content="Give the pipeline and its agents a first-class channel to flag errors in the DD itself — a DDGap mechanism mirroring vocab_gaps: flagged by any seat or audit, triaged into registered-exception / upstream-issue / rejected, reconciled against new DD releases, and surfaced in release reporting.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-summary" content="Shipped: graph-owned DD-gap lifecycle and typed evidence, governed human triage and DD-release reconciliation, deterministic release caveats, and fail-closed registry identity history. The live registry is idempotently converged at 35 facts and 451 exact owned observations; DD-gap evidence remains warning-only and never controls pipeline behavior.">
+  <meta name="plan-status" content="done">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -205,7 +205,7 @@ Done-when
   3. Both decisions surfaced to the lead; step 3 queued as the next followup.</pre>
     <p class="r-fu-outcome">Foundation landed in c7c2d3d3 with idempotency hardening in baeb7614. Added schema-driven DDGap kind/status enums, one fact per (path, kind), HAS_DD_GAP evidence edges, evidence-only `sn ddgap` and registry-sync commands, and a `sn status` lifecycle table. The live backfill mirrored 34 curated unit-exception entries plus one upstream filing into 35 facts: 34 registered_exception and 1 upstream_issue; kinds = 24 unit_defect, 10 self_contradiction, 1 type_wiring; 450 distinct current DD paths and 451 evidence edges. Repeated sync preserves observation/triage timestamps and example counts. Schema generation and the reporting/CLI/status/registry/unit tests passed; schema-context checks exited zero. No unit resolution, suppression, source eligibility, or other pipeline behavior changed. D-ddgap-authority remains locked flag-only; D-ddgap-storage remains open before agent-side flagging. Record: docs/archive/sn-dd-gaps-foundation-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-ddg-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-07-29T13:30:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ddg-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-07-29T13:30:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="2026-08-02T14:30:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Decide storage authority, then connect agent flags, triage, reconcile, and release reporting</h4>
     <div class="r-fu-body"><p>The evidence foundation is live with flag-only semantics and the known record back-filled. Before any automated pipeline seat writes a DDGap, lock D-ddgap-storage. Then add the writer response fields and prompts, a human triage/upstream workflow, DD-release reconciliation, and reviewer-facing release reporting without allowing a flag to suppress behavior.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -236,6 +236,7 @@ VERIFY
 
 CONSTRAINTS
   TDD; generated enums only; no hardcoded DD facility data in Python; pre-stage naming checks; no AI attribution; record every landing in the plan immediately.</pre>
+    <p class="r-fu-outcome">Storage authority was locked to graph lifecycle facts plus the curated YAML enforcement backend. Typed automated evidence writers, compare-and-set human triage, DD-release reconciliation, deterministic release caveats, and a fail-closed identity migration are integrated. The live registry converged once to 35 facts and 451 owned observations with one audited gas-fact identity change; a second dry-run found zero creates, reclassifications, or manual items. Flags remain warning-only and cannot change eligibility, scoring, stage, acceptance, units, or release blocking.</p>
     </article>
 </section>
 
@@ -251,6 +252,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddgap-identity-guard-20260802" data-who="reckon-ship" data-when="2026-08-02T16:15:00+02:00">
     <div class="r-comment-body"><p><strong>Governed registry identity changes are now fail-closed and auditable.</strong> Merge <code>37242f3c</code> adds schema-owned <code>DDGapIdentityChange</code> history plus a typed compare-and-set migration that requires exact online uniqueness constraints for fact, observation, and event identities. It verifies observation rekeys by node id, scalar owner, and exact <code>HAS_OBSERVATION</code> ownership, and verifies the nine-property identity event before commit. Independent validation passed 20 targeted unit cases and seven isolated Neo4j cases, including missing, wrong, and duplicate ownership rollback. The production registry remains unchanged until the reviewed 35-fact dry-run is applied and proven idempotent.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddgap-live-convergence-20260802" data-who="reckon-ship" data-when="2026-08-02T16:30:00+02:00">
+    <div class="r-comment-body"><p><strong>Live registry convergence is complete and idempotent.</strong> Three canonical schema-owned identity constraints were created and verified online. One guarded sync preserved 35 facts, materialized 451 exact owned observations, and reclassified the stale gas-unit identity with receipt <code>dd_gap_identity_change:0e87f61e-bb0e-4c94-9f11-8fc06b549851</code>; the old identity is absent and the new identity is unique. A repeated dry-run reported zero creates, reclassifications, or manual items. Release reporting remains warning-only and nonblocking. Evidence: <code>/tmp/s7_ddgap_identity_reclassification.json</code>, SHA-256 <code>cba46de23ac64181352ea5cae730c9dd084357a4d19855c29e841ea10e0bf814</code>.</p></div>
 </div>
 </section>
 </main>
