@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -634,6 +634,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="parser-reviewed-renames-20260802" data-who="reckon-ship" data-when="2026-08-02T14:28:00+02:00">
     <div class="r-comment-body"><p><strong>Six exact parser repairs are staged for ordinary review with zero spend.</strong> Canonical <code>sn edit --rename --stage-only</code> superseded six invalid spellings and created six strict-round-trip-valid drafted successors; five retained their exact migrated sources. Fresh strict failures are <strong>15 → 9</strong>, with zero WEST intersection and no direct acceptance or review calls. The operation exposed two guard defects that remain active repair nodes: the dimensionless particle-temperature ratio was falsely quarantined as temperature-dimensional, and <code>dd:summary/volume_average/dn_e_dt/value</code> was detached from <code>volume_averaged_time_derivative_of_electron_density</code> by a false tense mismatch, leaving that successor as the sole scoped provenance orphan. The sixth path also lacks the expected <code>human_edit</code> change row. No further parser edits were attempted after this fail-closed stop.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ratio-unit-live-repair-20260802" data-who="reckon-ship" data-when="2026-08-02T16:05:00+02:00">
+    <div class="r-comment-body"><p><strong>Semantic ratio unit inference is live and the false quarantine is cleared.</strong> Merge <code>13ff5b54</code> derives equal-dimensional ratios from public IR physical-quantity signatures without duplicating grammar vocabulary. Independent live census checked all 52 live ratios: exactly three legitimate dimensionless ratios changed verdict, all 15 dimensioned ratios were unchanged, and WEST intersection was zero. Scoped <code>default_audit_revalidate</code> then moved <code>ratio_of_particle_temperature_to_particle_reference_temperature</code> from quarantined to valid with zero admission issues; the ion-average ratio was already valid and remained byte-identical. Only validation fields changed, stages/scores/text/units/sources/edges/reviews were preserved, and the second run selected nothing. Fresh strict failures remain nine.</p></div>
 </div>
 </section>
 </main>
