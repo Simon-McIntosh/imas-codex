@@ -63,7 +63,7 @@ def claim_paths_for_enrichment(
         params["ids_filter"] = list(ids_filter)
 
     with GraphClient() as gc:
-        # Step 1: Claim with ORDER BY depth then rand()
+        # Claim with shallow paths first, randomizing peers at the same depth.
         gc.query(
             f"""
             MATCH (p:IMASNode)
@@ -81,7 +81,7 @@ def claim_paths_for_enrichment(
             **params,
         )
 
-        # Step 2: Read back only paths we won
+        # Read back only paths fenced by this claim token.
         result = gc.query(
             """
             MATCH (p:IMASNode {claim_token: $token})
@@ -208,7 +208,7 @@ def claim_paths_for_refinement(
         params["ids_filter"] = list(ids_filter)
 
     with GraphClient() as gc:
-        # Step 1: Claim enriched nodes with sibling-readiness barrier
+        # Claim enriched nodes only after their sibling context is ready.
         gc.query(
             f"""
             MATCH (p:IMASNode)
@@ -231,7 +231,7 @@ def claim_paths_for_refinement(
             **params,
         )
 
-        # Step 2: Read back only paths we won
+        # Read back only paths fenced by this claim token.
         result = gc.query(
             """
             MATCH (p:IMASNode {claim_token: $token})
@@ -339,7 +339,7 @@ def claim_paths_for_embedding(limit: int = 500) -> list[dict]:
     cutoff = f"PT{CLAIM_TIMEOUT_SECONDS}S"
 
     with GraphClient() as gc:
-        # Step 1: Claim refined data nodes for embedding.
+        # Claim refined data nodes for embedding.
         # Prefer LLM-enriched nodes over template-enriched ones, but include
         # template-enriched nodes that have no embedding (e.g. after
         # --reset-to refined) to avoid an infinite spin where the worker
@@ -364,7 +364,7 @@ def claim_paths_for_embedding(limit: int = 500) -> list[dict]:
             token=token,
         )
 
-        # Step 2: Read back
+        # Read back only paths fenced by this claim token.
         result = gc.query(
             """
             MATCH (p:IMASNode {claim_token: $token})
