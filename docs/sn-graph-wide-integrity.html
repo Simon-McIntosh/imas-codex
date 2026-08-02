@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="44">
+<meta name="plan-version" content="45">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -719,6 +719,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260802T221244549479" data-who="" data-when="">
     <div class="r-comment-body"><p><strong>The repaired cohort-aware postflight gate is independently approved for one new apply.</strong> Artifact <code>/tmp/s7_cohort_postflight_repair_verification.json</code> (SHA-256 <code>008875bedc4e1c3d0258ccb27f6d82d7ce53be73940c9c81c71f3b1e46645747</code>) passed all 24 checks. Fresh <code>sun_debug</code> validation passed 26 unit/CLI and 17 disposable-Neo4j tests. The production control reproduced the prior normalization's exact 111 preserved mismatches and affected-set hash, while repaired normalization yielded zero authority and zero preserved mismatches across all 203 simulated post-states. Two direct dry-runs were identical at 203 planned, zero refused, and 162/1/40 classifications; protected graph hash <code>352f667cb674ba29bd56c98baa0151bdc377a408dacf90150cd6024dc5184e39</code> was unchanged before, between, and after. One atomic apply under commit <code>356d9953</code> is now authorized, with no retry on failure.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260802T223011547319" data-who="" data-when="">
+    <div class="r-comment-body"><p><strong>The guarded DD source-snapshot migration is landed, atomic, and idempotent.</strong> Apply artifact <code>/tmp/s7_source_snapshot_migration_apply_repaired.json</code> (SHA-256 <code>1a51e44697dcf449e65bd4fa93cec0838083a24541941895694cd307a584e804</code>) records one successful apply receipt <code>d232cde5d5d4e717d1f42a529ff534e0e71951f6c5e36a2db197cde225652b49</code>: 203 applied, zero refused, classified 162 byte-unchanged, one semantic-unchanged, and 40 materially changed. All 203 sources are pinned to DD 4.1.1 with zero authority, preserved-state, topology, payload, or ledger mismatches and exact one-to-one migration ledgers. Names, DD attachments, WEST, fixtures, and the 10 excluded sources were unchanged; claims/scopes are zero. One read-only post-commit preview returned 203 already-current and zero planned/applied/refused. The next paid gate is limited to the 40 materially changed sources; the other 163 require no generation.</p></div>
 </div>
 </section>
 </main>
