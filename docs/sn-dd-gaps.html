@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="7">
+<meta name="plan-version" content="8">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="c7c2d3d3,baeb7614">
+<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-impl" content="0.95">
 </head>
 <body>
   <main class="plan-doc">
@@ -248,6 +248,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddgap-governance-live-20260802" data-who="reckon-ship" data-when="2026-08-02T15:05:00+02:00">
     <div class="r-comment-body"><p><strong>Governed automated writers and human controls are integrated.</strong> Merge <code>fe75dacd</code> adds deterministic list/show, evidence-token-fenced triage, DD-release reconcile, stale-YAML reporting, and explicit <code>--apply</code> safety; three independent review rounds drove the evidence set into the atomic CAS. Merge <code>e2e95ac1</code> adds exact claimed-path evidence from compose/name-review/docs-review and deterministic attachment audits. It is dry-run non-mutating, authorizes only exact committed disposition winners, uses relationship-backed DD versions, and refuses ambiguous multiple unit edges. Independent final verification passed 60 CLI/lifecycle tests and 239 writer/integrity tests. Flags remain evidence-only: no unit correction, source suppression, score, stage, or acceptance behavior is controlled by a DDGap. Release-note surfacing remains the last implementation node before lifecycle exercise and closure.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddgap-identity-guard-20260802" data-who="reckon-ship" data-when="2026-08-02T16:15:00+02:00">
+    <div class="r-comment-body"><p><strong>Governed registry identity changes are now fail-closed and auditable.</strong> Merge <code>37242f3c</code> adds schema-owned <code>DDGapIdentityChange</code> history plus a typed compare-and-set migration that requires exact online uniqueness constraints for fact, observation, and event identities. It verifies observation rekeys by node id, scalar owner, and exact <code>HAS_OBSERVATION</code> ownership, and verifies the nine-property identity event before commit. Independent validation passed 20 targeted unit cases and seven isolated Neo4j cases, including missing, wrong, and duplicate ownership rollback. The production registry remains unchanged until the reviewed 35-fact dry-run is applied and proven idempotent.</p></div>
 </div>
 </section>
 </main>
