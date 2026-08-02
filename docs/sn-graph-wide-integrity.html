@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-impl" content="0.94">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -664,6 +664,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="bounded-drain-second-rejection-20260802" data-who="reckon-ship" data-when="2026-08-02T18:35:00+02:00">
     <div class="r-comment-body"><p><strong>The second bounded-drain tip remains rejected and unmerged.</strong> Independent audit of <code>952b8a91</code> confirmed seven residual safety gaps: report-only genuine gaps are still scope-stamped; hard-kill recovery does not clear exact stale source claims or refined-predecessor residue; cancellation can land between a claim commit and local token registration; the supported loop swallows its primary exception; configured DD-version authority is not locked and rechecked; and progress counts non-actionable sources that no pool can consume. Static lint, formatting, schema generation, and focused tests passed. The real graph module executed 27 cases with zero skips but its disposable server exhausted a verifier-imposed 128 MiB metaspace cap, leaving 1 pass, 2 failures, and 24 fixture errors; it was not rerun. A consolidated repair is active with explicit coverage for all seven mechanisms and a correctly sized disposable server. Followup <code>f-sgwi-004</code> remains open; no live drain is authorized.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="atomic-fold-temporal-repair-20260802" data-who="reckon-ship" data-when="2026-08-02T19:05:00+02:00">
+    <div class="r-comment-body"><p><strong>The production temporal-CAS repair is independently approved and merged at <code>6161dfd6</code>.</strong> The final helper locks the complete participant closure, compares a type-sensitive second snapshot, creates its event and mutates only exact locked element IDs in the same transaction, and preserves duplicate/cardinality and postflight checks. The parent repair passed 35 stateful and seven disposable-Neo4j tests plus six live EXPLAIN checks. The final two-line target fence passed its focused unit, live EXPLAIN, and an exact production vorticity execution through expected-after under explicit rollback: full snapshot <code>19353d27…</code>, event count zero, and the 355-path WEST census were identical before and after. Evidence: <code>/tmp/atomic_fold_b347459b_production_rollback.json</code>, SHA-256 <code>986ed3a0fe0129524a82dc116950710e15d1c5f685bb22ed8dc0ab0c1ddbe4a1</code>. The undersized 128 MiB disposable verifier instance failed environmentally before mutation and was not rerun; the changed production query itself is verified. Live vorticity application remains a separate exact gated step.</p></div>
 </div>
 </section>
 </main>
