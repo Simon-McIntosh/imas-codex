@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-02">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -619,6 +619,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="integrity-prevention-20260802" data-who="reckon-ship" data-when="2026-08-02T12:50:00+02:00">
     <div class="r-comment-body"><p><strong>Writer prevention and bounded gas correction landed in code.</strong> Commit <code>3f64e5b7</code> makes fresh pairing writes transactional and fully guarded, separates solid hardware geometry from optical loci, and quarantines strict-parser failures; independent verification passed 52 tests. Commits <code>4891c359</code> and <code>b8cb9956</code> bound the SPI gas-flow correction to two exact DD paths plus the <code>gas_flow</code> cache; independent verification passed 66 tests. Integrated verification passed 179 tests. The live 961-source repair, 15 residue corrections, and exact gas apply remain open operational nodes; WEST is still excluded.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="gas-cache-live-20260802" data-who="reckon-ship" data-when="2026-08-02T13:28:00+02:00">
+    <div class="r-comment-body"><p><strong>The two stale gas-unit mirrors are repaired on the live graph.</strong> An exact preflight admitted only <code>spi/injector/fragmentation_gas/flow_rate</code> and <code>spi/injector/propellant_gas/flow_rate</code>. The bounded transaction changed both from <code>s^-1</code> to <code>Pa.m^3.s^-1</code>, preserved exactly one matching <code>HAS_UNIT</code> edge apiece, and refreshed only <code>gas_flow.source_unit</code>. A 61,366-node global before/after snapshot proved no third DD scalar or unit edge changed; the authoritative <code>gas_flow</code> unit/edge and all six source bindings remained identical. Fresh-client verification found no drift and an exact second reconcile returned 0 checked / 0 corrected.</p></div>
 </div>
 </section>
 </main>
