@@ -9,6 +9,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from imas_codex.standard_names import source_snapshot_migration as migration
 from imas_codex.standard_names.source_snapshot_migration import (
     canonical_payload,
     classify_snapshot_change,
@@ -213,6 +214,90 @@ def test_snapshot_classification_distinguishes_byte_semantic_and_material() -> N
         )
         == "changed"
     )
+
+
+def test_preserved_state_normalizes_only_authorized_peer_snapshot_fields() -> None:
+    source = {
+        "element_id": "source-one-element",
+        "labels": ["StandardNameSource"],
+        "properties": {
+            "id": "dd:shared/one",
+            "dd_version": "old-dd",
+            "description": "old documentation",
+            "batch_key": "source-one-batch",
+        },
+        "relationships": [],
+        "names": [
+            {
+                "element_id": "shared-name-element",
+                "properties": {"id": "shared_name"},
+                "relationships": [
+                    {
+                        "other_element_id": "source-one-element",
+                        "other_labels": ["StandardNameSource"],
+                        "other_id": "dd:shared/one",
+                        "other_properties": {
+                            "id": "dd:shared/one",
+                            "dd_version": "old-dd",
+                            "description": "old documentation",
+                            "batch_key": "source-one-batch",
+                        },
+                    },
+                    {
+                        "other_element_id": "source-two-element",
+                        "other_labels": ["StandardNameSource"],
+                        "other_id": "dd:shared/two",
+                        "other_properties": {
+                            "id": "dd:shared/two",
+                            "dd_version": "old-dd",
+                            "description": "old documentation",
+                            "batch_key": "source-two-batch",
+                        },
+                    },
+                    {
+                        "other_element_id": "external-source-element",
+                        "other_labels": ["StandardNameSource"],
+                        "other_id": "dd:external/path",
+                        "other_properties": {
+                            "id": "dd:external/path",
+                            "dd_version": "old-dd",
+                            "description": "external documentation",
+                            "batch_key": "external-batch",
+                        },
+                    },
+                ],
+            }
+        ],
+    }
+
+    preserved = migration._preserved_state(
+        source,
+        {"projections": []},
+        authorized_source_ids=frozenset({"dd:shared/one", "dd:shared/two"}),
+    )
+
+    related = {
+        item["other_id"]: item["other_properties"]
+        for item in preserved["names"][0]["relationships"]
+    }
+    assert preserved["source_properties"] == {
+        "id": "dd:shared/one",
+        "batch_key": "source-one-batch",
+    }
+    assert related["dd:shared/one"] == {
+        "id": "dd:shared/one",
+        "batch_key": "source-one-batch",
+    }
+    assert related["dd:shared/two"] == {
+        "id": "dd:shared/two",
+        "batch_key": "source-two-batch",
+    }
+    assert related["dd:external/path"] == {
+        "id": "dd:external/path",
+        "dd_version": "old-dd",
+        "description": "external documentation",
+        "batch_key": "external-batch",
+    }
 
 
 @pytest.mark.parametrize("expected_hash", [None, "not-a-sha256", "0" * 64])

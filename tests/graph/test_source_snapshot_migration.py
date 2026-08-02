@@ -64,6 +64,28 @@ class _InjectedTransaction:
         if "SOURCE_SNAPSHOT_MIGRATION_APPLY" in cypher and self._failure == "event":
             list(self._transaction.run(cypher, **params))
             raise RuntimeError("injected ledger failure")
+        if "SOURCE_SNAPSHOT_MIGRATION_APPLY" in cypher and self._failure in {
+            "external_snapshot",
+            "cohort_non_snapshot",
+            "large_preserved",
+        }:
+            rows = list(self._transaction.run(cypher, **params))
+            mutations = {
+                "external_snapshot": (
+                    "MATCH (source:StandardNameSource {id: 'dd:external/path'}) "
+                    "SET source.description = 'concurrent external documentation'"
+                ),
+                "cohort_non_snapshot": (
+                    "MATCH (source:StandardNameSource {id: 'dd:cohort/001'}) "
+                    "SET source.batch_key = 'concurrent cohort batch'"
+                ),
+                "large_preserved": (
+                    "MATCH (source:StandardNameSource {id: 'dd:cohort/202'}) "
+                    "SET source.batch_key = 'concurrent large-cohort batch'"
+                ),
+            }
+            self._transaction.run(mutations[self._failure]).consume()
+            return rows
         return self._transaction.run(cypher, **params)
 
     def commit(self) -> None:
@@ -235,6 +257,86 @@ def _seed(driver) -> None:
               status: 'extracted', dd_version: 'old-dd', dd_snapshot_pinned: true
             })-[:FROM_DD_PATH]->(node)
             """
+        ).consume()
+
+
+def _cohort_items(count: int, *, shared_sources: int) -> list[dict[str, str]]:
+    items: list[dict[str, str]] = []
+    for index in range(count):
+        if count == 203 and index < 162:
+            old_unit = new_unit = "Pa"
+            old_domain = new_domain = "transport"
+        elif count == 203 and index == 162:
+            old_unit, new_unit = "Hz", "s^-1"
+            old_domain = new_domain = "transport"
+        else:
+            old_unit = new_unit = "Pa"
+            old_domain, new_domain = "transport", "equilibrium"
+        path = f"cohort/{index:03d}"
+        items.append(
+            {
+                "path": path,
+                "name": "shared_cohort_name"
+                if index < shared_sources
+                else f"cohort_name_{index:03d}",
+                "old_unit": old_unit,
+                "new_unit": new_unit,
+                "old_domain": old_domain,
+                "new_domain": new_domain,
+                "old_description": "stale documentation mirror",
+            }
+        )
+    return items
+
+
+def _seed_cohort(driver, items: list[dict[str, str]]) -> None:
+    with driver.session() as session:
+        session.run("MATCH (node) DETACH DELETE node").consume()
+        session.run(
+            "CREATE (:DDVersion {id: 'old-dd', is_current: false, owner: 'preserve'}) "
+            "CREATE (:DDVersion {id: 'new-dd', is_current: true, owner: 'preserve'})"
+        ).consume()
+        session.run(
+            """
+            UNWIND $items AS item
+            MERGE (unit:Unit {id: item.new_unit})
+            CREATE (parent:IMASNode {
+              id: item.path + '/parent', documentation: 'parent', owner: 'preserve'
+            })
+            CREATE (coordinate:IMASNode {
+              id: item.path + '/coordinate', owner: 'preserve'
+            })
+            CREATE (node:IMASNode {
+              id: item.path, documentation: 'documentation', data_type: 'FLT_1D',
+              unit: item.new_unit, physics_domain: item.new_domain,
+              lifecycle_status: 'active', lifecycle_version: 'new-dd',
+              description: 'enhanced', enrichment_source: 'template',
+              owner: 'preserve'
+            })
+            CREATE (node)-[:HAS_UNIT {owner: 'preserve'}]->(unit)
+            CREATE (node)-[:HAS_PARENT {owner: 'preserve'}]->(parent)
+            CREATE (node)-[:HAS_COORDINATE {owner: 'preserve'}]->(coordinate)
+            CREATE (source:StandardNameSource {
+              id: 'dd:' + item.path, source_type: 'dd', source_id: item.path,
+              status: 'attached', attempt_count: 3, batch_key: 'preserved',
+              produced_sn_id: item.name, dd_version: 'old-dd',
+              description: item.old_description, physics_domain: item.old_domain,
+              dd_documentation: 'documentation', dd_snapshot_pinned: true,
+              dd_parent_path: item.path + '/parent',
+              dd_parent_documentation: 'parent', dd_data_type: 'FLT_1D',
+              dd_unit: item.old_unit, dd_coordinates: [item.path + '/coordinate'],
+              dd_lifecycle_status: 'active', dd_lifecycle_version: 'new-dd',
+              enhanced_description: 'enhanced', enhancement_kind: 'template'
+            })
+            MERGE (name:StandardName {id: item.name})
+            ON CREATE SET name.name_stage = 'accepted', name.docs_stage = 'accepted',
+                          name.validation_status = 'valid', name.description = 'docs',
+                          name.owner = 'preserve'
+            CREATE (source)-[:FROM_DD_PATH {owner: 'preserve'}]->(node)
+            CREATE (source)-[:PRODUCED_NAME {owner: 'preserve'}]->(name)
+            CREATE (node)-[:HAS_STANDARD_NAME {owner: 'preserve'}]->(name)
+            """,
+            items=items,
         ).consume()
 
 
@@ -476,3 +578,200 @@ def test_injected_cas_or_ledger_failure_rolls_back_source_and_event(
             "RETURN source.dd_version AS version, count(event) AS events, "
             "name.edit_status AS edit_status",
         ) == [{"version": "old-dd", "events": 0, "edit_status": "open"}]
+
+
+def test_shared_name_cohort_migrates_without_authority_relationship_churn(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    with ephemeral_neo4j.driver() as driver:
+        items = _cohort_items(2, shared_sources=2)
+        _seed_cohort(driver, items)
+        paths = [item["path"] for item in items]
+        manifest = _manifest(tmp_path / "shared-cohort.json", paths)
+        before_relationships = _query(
+            driver,
+            "MATCH (start)-[relationship]->(end) "
+            "WHERE type(relationship) <> 'HAS_SNAPSHOT_CHANGE' "
+            "RETURN start.id AS start, type(relationship) AS type, end.id AS end, "
+            "properties(relationship) AS props ORDER BY start, type, end",
+        )
+
+        applied = migration.migrate_source_snapshots(
+            manifest,
+            expected_from_version="old-dd",
+            reason="refresh immutable authority",
+            apply=True,
+            expected_manifest_hash=_manifest_hash(manifest),
+            gc=ephemeral_neo4j.client(),
+        )
+
+        assert applied["mode"] == "applied"
+        assert applied["counts"]["applied"] == 2
+        assert _query(
+            driver,
+            "MATCH (source:StandardNameSource)-[:HAS_SNAPSHOT_CHANGE]->(event) "
+            "RETURN count(DISTINCT source) AS sources, count(event) AS events",
+        ) == [{"sources": 2, "events": 2}]
+        assert (
+            _query(
+                driver,
+                "MATCH (start)-[relationship]->(end) "
+                "WHERE type(relationship) <> 'HAS_SNAPSHOT_CHANGE' "
+                "RETURN start.id AS start, type(relationship) AS type, end.id AS end, "
+                "properties(relationship) AS props ORDER BY start, type, end",
+            )
+            == before_relationships
+        )
+
+
+def test_out_of_cohort_peer_snapshot_drift_fails_and_rolls_back(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    with ephemeral_neo4j.driver() as driver:
+        items = _cohort_items(2, shared_sources=2)
+        external = dict(items[0])
+        external["path"] = "external/path"
+        items.append(external)
+        _seed_cohort(driver, items)
+        manifest = _manifest(
+            tmp_path / "external-peer.json", [item["path"] for item in items[:2]]
+        )
+
+        with pytest.raises(
+            migration.SourceSnapshotMigrationConflict,
+            match="preserved graph state changed",
+        ):
+            migration.migrate_source_snapshots(
+                manifest,
+                expected_from_version="old-dd",
+                reason="refresh immutable authority",
+                apply=True,
+                expected_manifest_hash=_manifest_hash(manifest),
+                gc=ephemeral_neo4j.client("external_snapshot"),
+            )
+
+        assert _query(
+            driver,
+            "MATCH (source:StandardNameSource) "
+            "OPTIONAL MATCH (source)-[:HAS_SNAPSHOT_CHANGE]->(event) "
+            "RETURN collect(DISTINCT source.dd_version) AS versions, "
+            "count(event) AS events, "
+            "max(CASE WHEN source.id = 'dd:external/path' "
+            "THEN source.description END) AS external_description",
+        ) == [
+            {
+                "versions": ["old-dd"],
+                "events": 0,
+                "external_description": "stale documentation mirror",
+            }
+        ]
+
+
+def test_in_cohort_peer_non_snapshot_drift_fails_and_rolls_back(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    with ephemeral_neo4j.driver() as driver:
+        items = _cohort_items(2, shared_sources=2)
+        _seed_cohort(driver, items)
+        manifest = _manifest(
+            tmp_path / "cohort-peer.json", [item["path"] for item in items]
+        )
+
+        with pytest.raises(
+            migration.SourceSnapshotMigrationConflict,
+            match="preserved graph state changed",
+        ):
+            migration.migrate_source_snapshots(
+                manifest,
+                expected_from_version="old-dd",
+                reason="refresh immutable authority",
+                apply=True,
+                expected_manifest_hash=_manifest_hash(manifest),
+                gc=ephemeral_neo4j.client("cohort_non_snapshot"),
+            )
+
+        assert _query(
+            driver,
+            "MATCH (source:StandardNameSource) "
+            "OPTIONAL MATCH (source)-[:HAS_SNAPSHOT_CHANGE]->(event) "
+            "RETURN collect(DISTINCT source.dd_version) AS versions, "
+            "collect(DISTINCT source.batch_key) AS batch_keys, count(event) AS events",
+        ) == [{"versions": ["old-dd"], "batch_keys": ["preserved"], "events": 0}]
+
+
+def test_production_shaped_shared_cohort_commits_exact_ledgers(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    with ephemeral_neo4j.driver() as driver:
+        items = _cohort_items(203, shared_sources=12)
+        _seed_cohort(driver, items)
+        manifest = _manifest(
+            tmp_path / "production-shaped.json", [item["path"] for item in items]
+        )
+
+        applied = migration.migrate_source_snapshots(
+            manifest,
+            expected_from_version="old-dd",
+            reason="refresh immutable authority",
+            apply=True,
+            expected_manifest_hash=_manifest_hash(manifest),
+            gc=ephemeral_neo4j.client(),
+        )
+
+        assert applied["mode"] == "applied"
+        assert applied["counts"] == {
+            "allowlisted": 203,
+            "planned": 203,
+            "already_current": 0,
+            "applied": 203,
+            "refused": 0,
+            "byte_unchanged": 162,
+            "semantic_unchanged": 1,
+            "changed": 40,
+        }
+        assert _query(
+            driver,
+            "MATCH (source:StandardNameSource)-[:HAS_SNAPSHOT_CHANGE]->(event) "
+            "RETURN count(DISTINCT source) AS sources, count(DISTINCT event) AS events, "
+            "count(DISTINCT event.run_id) AS runs",
+        ) == [{"sources": 203, "events": 203, "runs": 1}]
+        assert _query(
+            driver,
+            "MATCH (:StandardNameSource)-[:PRODUCED_NAME]->"
+            "(:StandardName {id: 'shared_cohort_name'}) "
+            "RETURN count(*) AS co_producers",
+        ) == [{"co_producers": 12}]
+
+
+def test_large_cohort_preserved_mutation_fails_and_rolls_back_atomically(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    with ephemeral_neo4j.driver() as driver:
+        items = _cohort_items(203, shared_sources=12)
+        _seed_cohort(driver, items)
+        manifest = _manifest(
+            tmp_path / "large-rollback.json", [item["path"] for item in items]
+        )
+
+        with pytest.raises(
+            migration.SourceSnapshotMigrationConflict,
+            match="preserved graph state changed",
+        ):
+            migration.migrate_source_snapshots(
+                manifest,
+                expected_from_version="old-dd",
+                reason="refresh immutable authority",
+                apply=True,
+                expected_manifest_hash=_manifest_hash(manifest),
+                gc=ephemeral_neo4j.client("large_preserved"),
+            )
+
+        assert _query(
+            driver,
+            "MATCH (source:StandardNameSource) "
+            "OPTIONAL MATCH (source)-[:HAS_SNAPSHOT_CHANGE]->(event) "
+            "RETURN count(source) AS sources, "
+            "count(CASE WHEN source.dd_version = 'old-dd' THEN 1 END) AS old_sources, "
+            "count(CASE WHEN source.batch_key = 'preserved' THEN 1 END) AS preserved, "
+            "count(event) AS events",
+        ) == [{"sources": 203, "old_sources": 203, "preserved": 203, "events": 0}]

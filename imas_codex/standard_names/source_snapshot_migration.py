@@ -551,7 +551,12 @@ def _authority_snapshot(
     }
 
 
-def _preserved_state(source: dict[str, Any], node: dict[str, Any]) -> dict[str, Any]:
+def _preserved_state(
+    source: dict[str, Any],
+    node: dict[str, Any],
+    *,
+    authorized_source_ids: frozenset[str],
+) -> dict[str, Any]:
     properties = {
         key: value
         for key, value in source["properties"].items()
@@ -560,7 +565,10 @@ def _preserved_state(source: dict[str, Any], node: dict[str, Any]) -> dict[str, 
     names = _json_safe(source.get("names") or [])
     for name in names:
         for relationship in name.get("relationships") or []:
-            if relationship.get("other_element_id") != source["element_id"]:
+            if (
+                "StandardNameSource" not in (relationship.get("other_labels") or [])
+                or relationship.get("other_id") not in authorized_source_ids
+            ):
                 continue
             relationship["other_properties"] = {
                 key: value
@@ -730,6 +738,7 @@ def _plan_rows(
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     planned: list[dict[str, Any]] = []
     refusals: list[dict[str, Any]] = []
+    authorized_source_ids = frozenset(f"dd:{row['path']}" for row in rows)
     for row in rows:
         path = row["path"]
         row_reasons: list[str] = []
@@ -756,7 +765,13 @@ def _plan_rows(
         before = _source_snapshot(source_properties)
         after = _authority_snapshot(path, node, version)
         authority_hash = _hash({"path": path, "version": version, "node": node})
-        preserved_state_hash = _hash(_preserved_state(source, node))
+        preserved_state_hash = _hash(
+            _preserved_state(
+                source,
+                node,
+                authorized_source_ids=authorized_source_ids,
+            )
+        )
         precondition_hash = _hash(
             {"manifest_hash": manifest_hash, "graph_snapshot": row}
         )
