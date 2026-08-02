@@ -1,11 +1,11 @@
 {
-  "updated": "2026-08-01T11:06:48",
+  "updated": "2026-08-02T14:50:19",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": null,
+    "active_sprint_id": "S7",
     "sprints": [
       {
         "id": "S1",
@@ -194,7 +194,7 @@
       },
       {
         "id": "S7",
-        "status": "planned",
+        "status": "active",
         "theme": "Graph-wide integrity programme",
         "items": [
           {
@@ -267,6 +267,6 @@
       }
     ],
     "blockers": [],
-    "_version": 18
+    "_version": 19
   }
 }
