@@ -8,7 +8,9 @@ import pytest
 
 from imas_codex.standard_names.dd_gaps import (
     _registry_inventory,
+    get_dd_gap,
     get_dd_gap_stats,
+    list_dd_gaps,
     sync_dd_unit_exception_gaps,
     write_dd_gaps,
 )
@@ -314,3 +316,104 @@ def test_status_counts_are_grouped_on_both_axes() -> None:
         "by_status": {"registered_exception": 3, "upstream_issue": 1},
         "by_kind": {"unit_defect": 3, "type_wiring": 1},
     }
+
+
+def test_list_filters_exact_paths_names_and_generated_lifecycle_values() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [
+        {
+            "id": "dd_gap:equilibrium/path:unit_defect",
+            "path": "equilibrium/path",
+            "kind": "unit_defect",
+            "status": "upstream_issue",
+            "source_paths": ["equilibrium/path"],
+            "affected_name_ids": ["plasma_pressure"],
+            "upstream_url": "https://example.invalid/issue/1",
+            "registry_backend": None,
+            "resolved_dd_version": None,
+            "affected_path_count": 1,
+        }
+    ]
+
+    rows = list_dd_gaps(
+        statuses=["upstream_issue"],
+        kinds=["unit_defect"],
+        path_ids=["equilibrium/path"],
+        name_ids=["plasma_pressure"],
+        gc=gc,
+    )
+
+    assert rows[0]["source_paths"] == ["equilibrium/path"]
+    call = gc.query.call_args
+    assert call.kwargs == {
+        "statuses": ["upstream_issue"],
+        "kinds": ["unit_defect"],
+        "path_ids": ["equilibrium/path"],
+        "name_ids": ["plasma_pressure"],
+    }
+    query = call.args[0]
+    assert "ORDER BY gap.id" in query
+    assert "source.source_id IN source_paths" in query
+    assert not any(token in query for token in ("CREATE ", "MERGE ", "SET ", "DELETE "))
+
+
+@pytest.mark.parametrize("parameter", ["statuses", "kinds", "path_ids", "name_ids"])
+def test_list_rejects_bare_string_filters(parameter: str) -> None:
+    gc = MagicMock()
+    with pytest.raises(ValueError, match="bare string"):
+        list_dd_gaps(gc=gc, **{parameter: "equilibrium/path"})
+    gc.query.assert_not_called()
+
+
+def test_list_rejects_pattern_where_exact_path_is_required() -> None:
+    gc = MagicMock()
+    with pytest.raises(ValueError, match="exact paths"):
+        list_dd_gaps(path_ids=["*/pressure"], gc=gc)
+    gc.query.assert_not_called()
+
+
+def test_get_exact_gap_includes_observations_and_state_history() -> None:
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [
+            {
+                "id": "dd_gap:equilibrium/path:unit_defect",
+                "path": "equilibrium/path",
+                "kind": "unit_defect",
+                "status": "triaged",
+                "source_paths": ["equilibrium/path"],
+                "affected_name_ids": ["plasma_pressure"],
+                "affected_path_count": 1,
+            }
+        ],
+        [{"id": "observation:1", "reason": "measured twin declares Pa"}],
+        [
+            {
+                "id": "change:1",
+                "from_status": "flagged",
+                "to_status": "triaged",
+            }
+        ],
+    ]
+
+    fact = get_dd_gap("dd_gap:equilibrium/path:unit_defect", gc=gc)
+
+    assert fact is not None
+    assert fact["observations"] == [
+        {"id": "observation:1", "reason": "measured twin declares Pa"}
+    ]
+    assert fact["state_changes"][0]["to_status"] == "triaged"
+    assert gc.query.call_count == 3
+    assert all(
+        not any(
+            token in call.args[0] for token in ("CREATE ", "MERGE ", "SET ", "DELETE ")
+        )
+        for call in gc.query.call_args_list
+    )
+
+
+def test_get_gap_rejects_invalid_identity_before_graph_access() -> None:
+    gc = MagicMock()
+    with pytest.raises(ValueError, match="exact 'dd_gap"):
+        get_dd_gap("equilibrium/path", gc=gc)
+    gc.query.assert_not_called()

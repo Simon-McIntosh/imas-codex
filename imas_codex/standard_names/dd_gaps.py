@@ -12,7 +12,7 @@ import fnmatch
 import hashlib
 import json
 from collections import Counter
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from typing import Any
 from urllib.parse import urlparse
@@ -134,6 +134,44 @@ def _observation_time(value: Any) -> str:
 
 def _gap_id(path: str, kind: str) -> str:
     return f"dd_gap:{path}:{kind}"
+
+
+def _validate_gap_id(gap_id: str) -> str:
+    """Validate one exact DD-gap identity without querying the graph."""
+    clean_id = _optional_text(gap_id)
+    prefix = "dd_gap:"
+    if not clean_id or not clean_id.startswith(prefix):
+        raise ValueError("DD-gap id must use the exact 'dd_gap:{path}:{kind}' form")
+    path, separator, kind = clean_id.removeprefix(prefix).rpartition(":")
+    if not separator or not path:
+        raise ValueError("DD-gap id must use the exact 'dd_gap:{path}:{kind}' form")
+    _enum_value(kind, DDGapKind)
+    return clean_id
+
+
+def _filter_sequence(
+    values: Sequence[str] | None,
+    *,
+    label: str,
+    enum_type: type | None = None,
+    exact_paths: bool = False,
+) -> list[str]:
+    """Normalize one explicit read filter while rejecting scalar strings."""
+    if values is None:
+        return []
+    if isinstance(values, str | bytes) or not isinstance(values, Sequence):
+        raise ValueError(f"{label} must be a sequence, not a bare string")
+    normalized: list[str] = []
+    for value in values:
+        if not isinstance(value, str):
+            raise ValueError(f"{label} must contain strings")
+        clean = _optional_text(value)
+        if not clean:
+            raise ValueError(f"{label} cannot contain empty values")
+        if exact_paths and ("*" in clean or "?" in clean):
+            raise ValueError(f"{label} must contain exact paths, not patterns")
+        normalized.append(_enum_value(clean, enum_type) if enum_type else clean)
+    return sorted(set(normalized))
 
 
 def _observation_id(payload: Mapping[str, Any]) -> str:
@@ -641,6 +679,7 @@ def transition_dd_gap(
     gc: GraphClient | None = None,
 ) -> dict[str, Any]:
     """Apply one human-authorized lifecycle transition with status CAS."""
+    clean_gap_id = _validate_gap_id(gap_id)
     expected, target, clean_actor, clean_reason = _validate_transition_request(
         expected_status=expected_status,
         new_status=new_status,
@@ -654,7 +693,7 @@ def transition_dd_gap(
     if gc is None:
         with GraphClient() as owned:
             return transition_dd_gap(
-                gap_id,
+                clean_gap_id,
                 expected_status=expected,
                 new_status=target,
                 actor=clean_actor,
@@ -668,7 +707,7 @@ def transition_dd_gap(
 
     rows = gc.query(
         _TRANSITION_QUERY,
-        gap_id=gap_id,
+        gap_id=clean_gap_id,
         expected_status=expected,
         new_status=target,
         actor=clean_actor,
@@ -681,7 +720,7 @@ def transition_dd_gap(
     )
     if not rows:
         raise DDGapTransitionConflict(
-            f"DD gap {gap_id!r} did not have expected {expected!r} status "
+            f"DD gap {clean_gap_id!r} did not have expected {expected!r} status "
             "or the published resolution version does not exist"
         )
     return dict(rows[0])
@@ -890,6 +929,157 @@ def reconcile_dd_gaps(
     result["stale_registry_entries"] = sorted(
         registry_candidates.intersection(resolved_ids)
     )
+    return result
+
+
+_LIST_DD_GAPS_QUERY = """
+MATCH (gap:DDGap)
+WHERE size($statuses) = 0 OR gap.status IN $statuses
+WITH gap
+WHERE size($kinds) = 0 OR gap.kind IN $kinds
+OPTIONAL MATCH (node:IMASNode)-[:HAS_DD_GAP]->(gap)
+WITH gap, collect(DISTINCT node.id) AS source_paths
+WHERE size($path_ids) = 0
+   OR any(path_id IN source_paths WHERE path_id IN $path_ids)
+OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(name:StandardName)
+WHERE source.source_type = 'dd' AND source.source_id IN source_paths
+WITH gap, source_paths, collect(DISTINCT name.id) AS affected_name_ids
+WHERE size($name_ids) = 0
+   OR any(name_id IN affected_name_ids WHERE name_id IN $name_ids)
+RETURN gap.id AS id,
+       gap.path AS path,
+       gap.kind AS kind,
+       gap.status AS status,
+       source_paths,
+       affected_name_ids,
+       gap.upstream_url AS upstream_url,
+       gap.registry_backend AS registry_backend,
+       gap.resolved_dd_version AS resolved_dd_version,
+       size(source_paths) AS affected_path_count
+ORDER BY gap.id
+"""
+
+
+def list_dd_gaps(
+    *,
+    statuses: Sequence[str] | None = None,
+    kinds: Sequence[str] | None = None,
+    path_ids: Sequence[str] | None = None,
+    name_ids: Sequence[str] | None = None,
+    gc: GraphClient | None = None,
+) -> list[dict[str, Any]]:
+    """List lifecycle facts through deterministic, exact read filters.
+
+    ``path_ids`` matches the exact IMAS paths carrying evidence, not the
+    possibly patterned canonical ``DDGap.path``. ``name_ids`` matches names
+    produced from those exact DD sources. All filters are sequences so callers
+    cannot accidentally turn one string into a character-wise filter.
+    """
+    clean_statuses = _filter_sequence(statuses, label="statuses", enum_type=DDGapStatus)
+    clean_kinds = _filter_sequence(kinds, label="kinds", enum_type=DDGapKind)
+    clean_path_ids = _filter_sequence(path_ids, label="path_ids", exact_paths=True)
+    clean_name_ids = _filter_sequence(name_ids, label="name_ids")
+    if gc is None:
+        with GraphClient() as owned:
+            return list_dd_gaps(
+                statuses=clean_statuses,
+                kinds=clean_kinds,
+                path_ids=clean_path_ids,
+                name_ids=clean_name_ids,
+                gc=owned,
+            )
+    rows = gc.query(
+        _LIST_DD_GAPS_QUERY,
+        statuses=clean_statuses,
+        kinds=clean_kinds,
+        path_ids=clean_path_ids,
+        name_ids=clean_name_ids,
+    )
+    return [dict(row) for row in rows]
+
+
+def get_dd_gap(
+    gap_id: str,
+    *,
+    gc: GraphClient | None = None,
+) -> dict[str, Any] | None:
+    """Return one exact lifecycle fact with evidence and state-change history."""
+    clean_id = _validate_gap_id(gap_id)
+    if gc is None:
+        with GraphClient() as owned:
+            return get_dd_gap(clean_id, gc=owned)
+
+    facts = gc.query(
+        """
+        MATCH (gap:DDGap {id: $gap_id})
+        OPTIONAL MATCH (node:IMASNode)-[:HAS_DD_GAP]->(gap)
+        WITH gap, collect(DISTINCT node.id) AS source_paths
+        OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(name:StandardName)
+        WHERE source.source_type = 'dd' AND source.source_id IN source_paths
+        RETURN gap.id AS id,
+               gap.path AS path,
+               gap.kind AS kind,
+               gap.status AS status,
+               gap.example_count AS example_count,
+               gap.first_seen_at AS first_seen_at,
+               gap.last_seen_at AS last_seen_at,
+               gap.observed_dd_version AS observed_dd_version,
+               gap.observed_value AS observed_value,
+               gap.expected_value AS expected_value,
+               gap.evidence_rule AS evidence_rule,
+               gap.reference_path AS reference_path,
+               gap.reference_value AS reference_value,
+               gap.triage_actor AS triage_actor,
+               gap.triage_reason AS triage_reason,
+               gap.upstream_url AS upstream_url,
+               gap.registry_backend AS registry_backend,
+               gap.resolved_dd_version AS resolved_dd_version,
+               gap.validation_evidence AS validation_evidence,
+               source_paths,
+               collect(DISTINCT name.id) AS affected_name_ids,
+               size(source_paths) AS affected_path_count
+        """,
+        gap_id=clean_id,
+    )
+    if not facts:
+        return None
+
+    observations = gc.query(
+        """
+        MATCH (:DDGap {id: $gap_id})-[:HAS_OBSERVATION]->(item:DDGapObservation)
+        RETURN item.id AS id,
+               item.source_path AS source_path,
+               item.reason AS reason,
+               item.reporter AS reporter,
+               item.observed_dd_version AS observed_dd_version,
+               item.observed_value AS observed_value,
+               item.expected_value AS expected_value,
+               item.evidence_rule AS evidence_rule,
+               item.first_observed_at AS first_observed_at,
+               item.last_observed_at AS last_observed_at
+        ORDER BY item.first_observed_at, item.id
+        """,
+        gap_id=clean_id,
+    )
+    state_changes = gc.query(
+        """
+        MATCH (:DDGap {id: $gap_id})-[:HAS_STATE_CHANGE]->(item:DDGapStateChange)
+        RETURN item.id AS id,
+               item.from_status AS from_status,
+               item.to_status AS to_status,
+               item.actor AS actor,
+               item.reason AS reason,
+               item.changed_at AS changed_at,
+               item.upstream_url AS upstream_url,
+               item.resolved_dd_version AS resolved_dd_version,
+               item.validation_evidence AS validation_evidence
+        ORDER BY item.changed_at, item.id
+        """,
+        gap_id=clean_id,
+    )
+    result = dict(facts[0])
+    result["observations"] = [dict(row) for row in observations]
+    result["state_changes"] = [dict(row) for row in state_changes]
     return result
 
 

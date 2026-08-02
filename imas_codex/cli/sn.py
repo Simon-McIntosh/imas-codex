@@ -11,7 +11,7 @@ import click
 from rich.console import Console
 
 from imas_codex.core.physics_domain import PhysicsDomain
-from imas_codex.graph.models import DDGapKind, EditScope
+from imas_codex.graph.models import DDGapKind, DDGapStatus, EditScope
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DEFAULT_MIN_SCORE,
@@ -191,6 +191,9 @@ _PHYSICS_DOMAIN_CHOICE = click.Choice(
 )
 _DD_GAP_KIND_CHOICE = click.Choice(
     [kind.value for kind in DDGapKind], case_sensitive=False
+)
+_DD_GAP_STATUS_CHOICE = click.Choice(
+    [status.value for status in DDGapStatus], case_sensitive=False
 )
 
 
@@ -6229,16 +6232,101 @@ def sn_vocab_adjudicate(
         click.echo(f"receipt: {receipt}")
 
 
+def _load_dd_gap_release_facts(path: str) -> dict[str, object]:
+    """Load exact raw DD declarations from one explicit JSON artifact."""
+    import json
+    from collections.abc import Mapping
+    from pathlib import Path
+
+    from imas_codex.standard_names.dd_gaps import build_unit_release_facts
+
+    try:
+        payload = json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"cannot read DD release facts from {path!r}: {exc}") from exc
+
+    if isinstance(payload, list):
+        facts: dict[str, object] = build_unit_release_facts(payload)
+    elif isinstance(payload, dict):
+        facts = {}
+        for raw_path, value in payload.items():
+            exact_path = str(raw_path).strip()
+            if not exact_path or "*" in exact_path or "?" in exact_path:
+                raise ValueError("DD release facts require exact non-pattern paths")
+            if not isinstance(value, Mapping | str):
+                raise ValueError(
+                    f"DD release fact for {exact_path!r} must be an object or string"
+                )
+            facts[exact_path] = dict(value) if isinstance(value, Mapping) else value
+    else:
+        raise ValueError("DD release facts must be a JSON object or list of rows")
+
+    for exact_path in facts:
+        if not exact_path or "*" in exact_path or "?" in exact_path:
+            raise ValueError("DD release facts require exact non-pattern paths")
+    return facts
+
+
+def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
+    """Render one lifecycle fact with exact affected identities."""
+    for key in (
+        "id",
+        "path",
+        "kind",
+        "status",
+        "affected_path_count",
+        "upstream_url",
+        "registry_backend",
+        "resolved_dd_version",
+    ):
+        value = fact.get(key)
+        if value is not None:
+            click.echo(f"{key}: {value}")
+    for key in ("source_paths", "affected_name_ids"):
+        values = fact.get(key) or []
+        click.echo(f"{key}:")
+        for value in values:
+            click.echo(f"  - {value}")
+
+
 @sn.command("ddgap")
 @click.argument("path", required=False)
 @click.option(
     "--kind",
     type=_DD_GAP_KIND_CHOICE,
-    help="Which DD declaration mechanism the evidence contradicts.",
+    help="Which DD declaration mechanism the evidence contradicts or lists.",
+)
+@click.option("--status", type=_DD_GAP_STATUS_CHOICE, help="Exact list status filter.")
+@click.option("--name", "name_ids", multiple=True, help="Exact affected name filter.")
+@click.option(
+    "--list", "list_gaps", is_flag=True, help="List matching lifecycle facts."
+)
+@click.option("--show", "show_id", help="Show one exact dd_gap:{path}:{kind} id.")
+@click.option("--triage", "triage_id", help="Transition one exact DD-gap id.")
+@click.option(
+    "--expected-status",
+    type=_DD_GAP_STATUS_CHOICE,
+    help="Current lifecycle status required by the transition compare-and-set.",
 )
 @click.option(
-    "--reason",
-    help="The evidence-backed argument for the flag.",
+    "--to-status", type=_DD_GAP_STATUS_CHOICE, help="Human-authorized target status."
+)
+@click.option("--actor", help="Human authority recorded on a lifecycle transition.")
+@click.option("--reason", help="Evidence-backed flag or transition justification.")
+@click.option("--upstream-url", help="Absolute HTTPS DD issue or change URL.")
+@click.option("--registry-backend", help="Governed enforcement registry provenance.")
+@click.option("--resolved-dd-version", help="Exact published correcting DD version.")
+@click.option("--validation-evidence", help="Evidence proving an upstream resolution.")
+@click.option("--reconcile", "reconcile_version", help="Exact published DD version.")
+@click.option(
+    "--release-facts",
+    type=click.Path(exists=True, dir_okay=False, path_type=str),
+    help="JSON object or row list of raw exact-path declarations from that release.",
+)
+@click.option(
+    "--allow-noncurrent",
+    is_flag=True,
+    help="Permit reconciliation against a published version not marked current.",
 )
 @click.option(
     "--sync-registry",
@@ -6249,38 +6337,262 @@ def sn_vocab_adjudicate(
     ),
 )
 @click.option(
+    "--apply",
+    "apply_changes",
+    is_flag=True,
+    help="Apply an explicit transition or proven release reconciliation.",
+)
+@click.option(
     "--dry-run",
     is_flag=True,
-    help="Validate and report the intended graph writes without mutating the graph.",
+    help="Validate and report intended evidence or registry writes without mutation.",
 )
 def sn_ddgap(
     path: str | None,
     kind: str | None,
+    status: str | None,
+    name_ids: tuple[str, ...],
+    list_gaps: bool,
+    show_id: str | None,
+    triage_id: str | None,
+    expected_status: str | None,
+    to_status: str | None,
+    actor: str | None,
     reason: str | None,
+    upstream_url: str | None,
+    registry_backend: str | None,
+    resolved_dd_version: str | None,
+    validation_evidence: str | None,
+    reconcile_version: str | None,
+    release_facts: str | None,
+    allow_noncurrent: bool,
     sync_registry: bool,
+    apply_changes: bool,
     dry_run: bool,
 ) -> None:
-    """Flag a Data Dictionary defect as evidence only.
+    """Report, inspect, and disposition Data Dictionary defect evidence.
 
-    A flag never suppresses a mismatch or changes composition behavior. Human
-    triage and the existing curated registries remain authoritative.
+    Flags and reads never suppress mismatches or change composition behavior.
+    Human transitions are expected-state compare-and-set operations. Release
+    reconciliation consumes raw exact-path declarations and resolves only a
+    predicate that the governed lifecycle recognizes.
 
     \b
-    Example:
-      imas-codex sn ddgap equilibrium/path --kind unit_defect \\
-        --reason "The measured twin declares pressure while this twin is unitless."
+    Examples:
+      imas-codex sn ddgap equilibrium/path --kind unit_defect --reason "..."
+      imas-codex sn ddgap --list --status flagged
+      imas-codex sn ddgap --show dd_gap:equilibrium/path:unit_defect
     """
     from imas_codex.standard_names.dd_gaps import (
+        DDGapTransitionConflict,
+        get_dd_gap,
+        list_dd_gaps,
+        reconcile_dd_gaps,
         sync_dd_unit_exception_gaps,
+        transition_dd_gap,
         write_dd_gaps,
     )
 
-    if sync_registry:
-        if path or kind or reason:
-            raise click.UsageError(
-                "--sync-registry cannot be combined with PATH, --kind, or --reason"
+    modes = [list_gaps, show_id is not None, triage_id is not None]
+    modes.extend([reconcile_version is not None, sync_registry])
+    if sum(modes) > 1:
+        raise click.UsageError(
+            "select exactly one DD-gap operation: --list, --show, --triage, "
+            "--reconcile, or --sync-registry"
+        )
+
+    if list_gaps:
+        if (
+            any(
+                value
+                for value in (
+                    reason,
+                    expected_status,
+                    to_status,
+                    actor,
+                    upstream_url,
+                    registry_backend,
+                    resolved_dd_version,
+                    validation_evidence,
+                    release_facts,
+                )
             )
-        result = sync_dd_unit_exception_gaps(dry_run=dry_run)
+            or apply_changes
+            or dry_run
+            or allow_noncurrent
+        ):
+            raise click.UsageError(
+                "--list accepts only PATH, --kind, --status, and --name"
+            )
+        try:
+            rows = list_dd_gaps(
+                statuses=[status] if status else None,
+                kinds=[kind] if kind else None,
+                path_ids=[path] if path else None,
+                name_ids=name_ids or None,
+            )
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+        if not rows:
+            click.echo("No DD gaps matched.")
+            return
+        click.echo("ID\tSTATUS\tKIND\tPATHS\tPATH")
+        for row in rows:
+            click.echo(
+                f"{row['id']}\t{row['status']}\t{row['kind']}\t"
+                f"{row['affected_path_count']}\t{row.get('path') or ''}"
+            )
+        return
+
+    if show_id is not None:
+        if (
+            any(
+                value
+                for value in (
+                    path,
+                    kind,
+                    status,
+                    name_ids,
+                    reason,
+                    expected_status,
+                    to_status,
+                    actor,
+                    upstream_url,
+                    registry_backend,
+                    resolved_dd_version,
+                    validation_evidence,
+                    release_facts,
+                )
+            )
+            or apply_changes
+            or dry_run
+            or allow_noncurrent
+        ):
+            raise click.UsageError("--show accepts only one exact DD-gap id")
+        try:
+            fact = get_dd_gap(show_id)
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+        if fact is None:
+            raise click.ClickException(f"DD gap {show_id!r} was not found")
+        _echo_dd_gap_fact(fact)
+        click.echo(f"observations: {len(fact['observations'])}")
+        click.echo(f"state_changes: {len(fact['state_changes'])}")
+        return
+
+    if triage_id is not None:
+        if any(value for value in (path, kind, status, name_ids, release_facts)):
+            raise click.UsageError(
+                "--triage cannot be combined with path/name filters or release facts"
+            )
+        if reconcile_version or allow_noncurrent or dry_run:
+            raise click.UsageError(
+                "--triage is an explicit mutation; use --apply after reviewing --show"
+            )
+        if not apply_changes:
+            raise click.UsageError("--triage requires --apply")
+        if not expected_status or not to_status or not actor or not reason:
+            raise click.UsageError(
+                "--triage requires --expected-status, --to-status, --actor, and --reason"
+            )
+        try:
+            result = transition_dd_gap(
+                triage_id,
+                expected_status=expected_status,
+                new_status=to_status,
+                actor=actor,
+                reason=reason,
+                upstream_url=upstream_url,
+                resolved_dd_version=resolved_dd_version,
+                registry_backend=registry_backend,
+                validation_evidence=validation_evidence,
+            )
+        except DDGapTransitionConflict as exc:
+            raise click.ClickException(f"stale DD-gap state: {exc}") from exc
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+        click.echo(
+            f"transitioned {result['id']}: {result['from_status']} -> {result['status']}"
+        )
+        return
+
+    if reconcile_version is not None:
+        if any(
+            value
+            for value in (
+                path,
+                kind,
+                status,
+                name_ids,
+                reason,
+                expected_status,
+                to_status,
+                actor,
+                upstream_url,
+                registry_backend,
+                resolved_dd_version,
+                validation_evidence,
+            )
+        ):
+            raise click.UsageError(
+                "--reconcile cannot be combined with evidence or transition options"
+            )
+        if not release_facts:
+            raise click.UsageError("--reconcile requires --release-facts")
+        if apply_changes and dry_run:
+            raise click.UsageError("--apply and --dry-run are mutually exclusive")
+        try:
+            facts = _load_dd_gap_release_facts(release_facts)
+            result = reconcile_dd_gaps(
+                reconcile_version,
+                facts,
+                require_current=not allow_noncurrent,
+                dry_run=not apply_changes,
+            )
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+        mode = "dry-run" if result["dry_run"] else "applied"
+        click.echo(
+            f"{mode}: DD={result['dd_version']} evaluated={result['evaluated']} "
+            f"resolved={result['resolved']} would_resolve="
+            f"{len(result['would_resolve'])} manual_required="
+            f"{len(result['manual_required'])} conflicts={len(result['conflicts'])}"
+        )
+        for gap_id in result["would_resolve"]:
+            click.echo(f"would resolve: {gap_id}")
+        for item in result["manual_required"]:
+            click.echo(f"manual: {item['id']}: {item['reason']}")
+        for gap_id in result["conflicts"]:
+            click.echo(f"conflict: {gap_id}")
+        return
+
+    if sync_registry:
+        if any(value for value in (path, kind, status, name_ids, reason)):
+            raise click.UsageError(
+                "--sync-registry cannot be combined with evidence or list filters"
+            )
+        if (
+            any(
+                value
+                for value in (
+                    expected_status,
+                    to_status,
+                    actor,
+                    upstream_url,
+                    registry_backend,
+                    resolved_dd_version,
+                    validation_evidence,
+                    release_facts,
+                )
+            )
+            or apply_changes
+            or allow_noncurrent
+        ):
+            raise click.UsageError("--sync-registry received unrelated control options")
+        try:
+            result = sync_dd_unit_exception_gaps(dry_run=dry_run)
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
         verb = "would sync" if dry_run else "synced"
         click.echo(
             f"{verb} {result['registry_entries']} registry entries into "
@@ -6289,16 +6601,40 @@ def sn_ddgap(
         )
         return
 
+    if (
+        any(
+            value
+            for value in (
+                status,
+                name_ids,
+                expected_status,
+                to_status,
+                actor,
+                upstream_url,
+                registry_backend,
+                resolved_dd_version,
+                validation_evidence,
+                release_facts,
+            )
+        )
+        or apply_changes
+        or allow_noncurrent
+    ):
+        raise click.UsageError(
+            "management options require an explicit DD-gap operation"
+        )
     if not path or not kind or not reason or not reason.strip():
         raise click.UsageError(
-            "PATH, --kind, and a non-empty --reason are required unless "
-            "--sync-registry is used"
+            "PATH, --kind, and a non-empty --reason are required unless a "
+            "read, transition, reconcile, or registry operation is selected"
         )
-
-    result = write_dd_gaps(
-        [{"path": path, "kind": kind, "reason": reason, "reporter": "human"}],
-        dry_run=dry_run,
-    )
+    try:
+        result = write_dd_gaps(
+            [{"path": path, "kind": kind, "reason": reason, "reporter": "human"}],
+            dry_run=dry_run,
+        )
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
     verb = "would flag" if dry_run else "flagged"
     click.echo(f"{verb} {result['reported']} DD-gap fact: {result['ids'][0]}")
 
