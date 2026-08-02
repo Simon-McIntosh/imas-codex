@@ -16,8 +16,8 @@
   <title>DD gaps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-01">
-<meta name="plan-version" content="4">
+<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-version" content="5">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -156,13 +156,13 @@
       </p>
     <p class="r-dec-rat">Locked by the lead 2026-07-29: flag only. A DD-gap flag is evidence; pipeline behaviour changes only through the existing registry/reconcile instruments after human triage. Mirrors the vocab_gaps model and keeps the DD authoritative until a human rules.</p>
     </div>
-<div class="r-dec" data-key="ddgap-storage" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="ddgap-storage" data-choice="graph-nodes-registry-backend" data-by="reckon-ship" data-when="2026-08-02T10:09:20+00:00">
     <p class="r-dec-q">D-ddgap-storage — where does DD-gap truth live?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="graph-nodes-registry-backend">Graph DDGap nodes carry lifecycle/provenance; the yaml registry stays the enforcement backend for the unit kind (Recommended — no dual-write of behaviour)</button>
+      <button class="r-opt chosen" data-value="graph-nodes-registry-backend">Graph DDGap nodes carry lifecycle/provenance; the yaml registry stays the enforcement backend for the unit kind (Recommended — no dual-write of behaviour)</button>
       <button class="r-opt" data-value="registry-only">Extend the yaml registry with lifecycle fields; no graph nodes</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The live foundation already contains 35 DDGap facts and 451 path-evidence edges. Graph storage provides transactional concurrent observations, multiplicity, provenance, lifecycle, and DD-version traversal, while the curated YAML registry remains the sole unit-enforcement backend under the locked flag-only policy. Registry-only storage would require destructive export/removal or create two lifecycle authorities, and installed workers cannot safely mutate a tracked package YAML. Keep graph facts observational and require separate governed registry changes for behavior.</p>
     </div>
 </section>
 

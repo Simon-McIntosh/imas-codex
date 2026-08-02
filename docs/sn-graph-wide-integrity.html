@@ -16,8 +16,8 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-01">
-<meta name="plan-version" content="12">
+<meta name="plan-modified" content="2026-08-02">
+<meta name="plan-version" content="13">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -337,13 +337,13 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="fanout-invariant" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="fanout-invariant" data-choice="one-name" data-by="reckon-ship" data-when="2026-08-02T10:09:20+00:00">
     <p class="r-dec-q">D-fanout — may one DD path legitimately produce two live standard names, or is single-valued PRODUCED_NAME the invariant?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="amend-checker">Fan-out is legitimate — amend the checker, and the 240 violations are not defects (Recommended: a line-of-sight point plausibly carries both a sightline and a beam-tracing name)</button>
-      <button class="r-opt" data-value="one-name">One source, one live name — the 240 are genuine and need repair</button>
+      <button class="r-opt chosen" data-value="one-name">One source, one live name — the 240 are genuine and need repair</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Fresh live audit on 2026-08-02 found 340 competing non-WEST sources. Of these, 334 already had a scalar selecting one candidate, 239 included a catalog-edit candidate, only 222 had exclusively accepted-valid targets, and representative pairs were competing generic versus specific or geometrically incompatible interpretations. WEST repair proves one live source target is achievable while semantic hierarchy remains represented by name relationships. Therefore fan-out is a provenance defect; retain the strict checker and repair the data and writers.</p>
     </div>
 <div class="r-dec" data-key="orphan-policy" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">D-orphans — how to treat the 151 names left with no producing source?</p>
