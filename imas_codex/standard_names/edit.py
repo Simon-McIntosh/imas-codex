@@ -77,6 +77,7 @@ corrected to match.)
 
 from __future__ import annotations
 
+import hashlib
 import json
 import uuid
 from contextlib import suppress
@@ -866,8 +867,8 @@ _FOLD_EVENT_QUERY = """
 // ATOMIC_FOLD_EVENT
 MATCH (old:StandardName {id: $old_id}),
       (target:StandardName {id: $into_id})
-WHERE properties(old) = $old_properties
-  AND properties(target) = $target_properties
+WHERE elementId(old) = $old_element_id
+  AND elementId(target) = $target_element_id
 CREATE (change:StandardNameChange {
   id: $change_id,
   from_name: $old_id,
@@ -887,11 +888,11 @@ RETURN change.id AS change_id
 _FOLD_SOURCE_MUTATION_QUERY = """
 // ATOMIC_FOLD_MOVE_SOURCES
 MATCH (target:StandardName {id: $into_id})
+WHERE elementId(target) = $target_element_id
 CALL (target) {
   UNWIND $sources AS expected
   MATCH (source:StandardNameSource {id: expected.id})
   WHERE elementId(source) = expected.element_id
-    AND properties(source) = expected.properties
   OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(bound:StandardName)
   WHERE elementId(binding) IN expected.remove_binding_element_ids
   WITH source, target, collect(binding) AS bindings
@@ -904,7 +905,6 @@ CALL (target) {
   UNWIND $backings AS expected
   MATCH (backing)
   WHERE elementId(backing) = expected.element_id
-    AND properties(backing) = expected.properties
   OPTIONAL MATCH (backing)-[projection:HAS_STANDARD_NAME]
                  ->(bound:StandardName)
   WHERE elementId(projection) IN expected.remove_projection_element_ids
@@ -924,8 +924,8 @@ _FOLD_NAME_MUTATION_QUERY = """
 // ATOMIC_FOLD_MUTATE_NAMES
 MATCH (old:StandardName {id: $old_id}),
       (target:StandardName {id: $into_id})
-WHERE properties(old) = $old_properties
-  AND properties(target) = $target_properties
+WHERE elementId(old) = $old_element_id
+  AND elementId(target) = $target_element_id
 SET old.superseded_from_stage = $predecessor_stage,
     old.name_stage = 'superseded',
     old.claim_token = null,
@@ -972,6 +972,56 @@ def _fold_json_safe(value: Any) -> Any:
     return str(value)
 
 
+def _fold_cas_value(value: Any, *, key: str = "") -> Any:
+    """Encode graph state deterministically without erasing scalar types."""
+    if isinstance(value, dict):
+        return [
+            "mapping",
+            [
+                [str(name), _fold_cas_value(item, key=str(name))]
+                for name, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+            ],
+        ]
+    if isinstance(value, list | tuple):
+        items = [_fold_cas_value(item) for item in value]
+        if key == "labels" or value and all(isinstance(item, dict) for item in value):
+            items.sort(
+                key=lambda item: json.dumps(item, sort_keys=True, separators=(",", ":"))
+            )
+        return [type(value).__name__, items]
+    if isinstance(value, set | frozenset):
+        items = [_fold_cas_value(item) for item in value]
+        items.sort(
+            key=lambda item: json.dumps(item, sort_keys=True, separators=(",", ":"))
+        )
+        return [type(value).__name__, items]
+    if value is None:
+        return ["none"]
+    if isinstance(value, bool):
+        return ["bool", value]
+    if isinstance(value, int):
+        return ["int", str(value)]
+    if isinstance(value, float):
+        return ["float", repr(value)]
+    if isinstance(value, str):
+        return ["str", value]
+    if isinstance(value, bytes):
+        return ["bytes", value.hex()]
+    scalar_type = f"{type(value).__module__}.{type(value).__qualname__}"
+    if hasattr(value, "iso_format"):
+        return [scalar_type, value.iso_format()]
+    if hasattr(value, "isoformat"):
+        return [scalar_type, value.isoformat()]
+    return [scalar_type, str(value)]
+
+
+def _fold_cas_signature(value: Any) -> str:
+    encoded = json.dumps(
+        _fold_cas_value(value), sort_keys=True, separators=(",", ":")
+    ).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def _fold_sort_key(value: Any) -> str:
     return json.dumps(_fold_json_safe(value), sort_keys=True, separators=(",", ":"))
 
@@ -1011,7 +1061,11 @@ def _fold_snapshot(
     )
     if not rows:
         return None
-    snapshot = _fold_normalize(dict(rows[0]))
+    if len(rows) != 1:
+        raise RuntimeError("fold identity pair is not unique")
+    raw_snapshot = dict(rows[0])
+    snapshot = _fold_normalize(raw_snapshot)
+    snapshot["_cas_signature"] = _fold_cas_signature(raw_snapshot)
     snapshot["fold_events"] = [
         change
         for change in snapshot.get("changes") or []
@@ -1433,11 +1487,11 @@ def _fold_expected_state(
             {
                 "name_stage": "superseded",
                 "superseded_from_stage": predecessor_stage,
-                "claim_token": None,
-                "claimed_at": None,
                 "source_paths": [],
             }
         )
+        old_properties.pop("claim_token", None)
+        old_properties.pop("claimed_at", None)
         if old_properties.get("edit_status") == "open":
             old_properties["edit_status"] = "applied"
         expected["names"]["target"]["source_paths"] = target_paths
@@ -1550,6 +1604,8 @@ def _fold_receipt(
 ) -> tuple[str, dict[str, Any]]:
     source_ids = sorted(source["id"] for source in old_sources)
     backing_ids = sorted(backing["id"] for backing in old_backings)
+    receipt_snapshot = deepcopy(snapshot)
+    receipt_snapshot.pop("_cas_signature", None)
     receipt = {
         "receipt_type": _FOLD_RECEIPT_TYPE,
         "schema_version": _FOLD_RECEIPT_SCHEMA,
@@ -1563,7 +1619,7 @@ def _fold_receipt(
         "backing_ids": backing_ids,
         "source_count": len(source_ids),
         "projection_count": len(backing_ids),
-        "before": snapshot,
+        "before": receipt_snapshot,
         "expected_after": _fold_expected_state(
             snapshot,
             old,
@@ -1788,22 +1844,6 @@ def supersede_into(
                     transaction.rollback()
                     return result
 
-                event_rows = list(
-                    transaction.run(
-                        _FOLD_EVENT_QUERY,
-                        old_id=old,
-                        into_id=into,
-                        old_properties=snapshot["old_properties"],
-                        target_properties=snapshot["target_properties"],
-                        change_id=change_id,
-                        run_id=run_id,
-                        receipt=receipt_text,
-                        changed_at=changed_at,
-                    )
-                )
-                if len(event_rows) != 1:
-                    raise RuntimeError("fold change event was not written exactly once")
-
                 participants = _fold_participant_ids(snapshot)
                 lock_rows = list(
                     transaction.run(_FOLD_LOCK_QUERY, element_ids=participants)
@@ -1812,26 +1852,32 @@ def supersede_into(
                 if locked != len(participants):
                     raise RuntimeError("fold participant set changed before locking")
                 locked_snapshot = _fold_snapshot(transaction, old, into)
-                expected_locked = _fold_expected_state(
-                    snapshot,
-                    old,
-                    into,
-                    predecessor_stage,
-                    old_sources,
-                    old_backings,
-                    target_paths,
-                    change_id=change_id,
-                    run_id=run_id,
-                    changed_at=changed_at,
-                    include_domain_mutation=False,
-                )
-                if (
-                    _fold_verification_state(locked_snapshot, fold_change_id=change_id)
-                    != expected_locked
-                ):
+                if locked_snapshot is None or locked_snapshot.get(
+                    "_cas_signature"
+                ) != snapshot.get("_cas_signature"):
                     raise RuntimeError(
                         "fold graph state changed after preflight snapshot"
                     )
+
+                event_rows = list(
+                    transaction.run(
+                        _FOLD_EVENT_QUERY,
+                        old_id=old,
+                        into_id=into,
+                        old_element_id=snapshot["old_element_id"],
+                        target_element_id=snapshot["target_element_id"],
+                        change_id=change_id,
+                        run_id=run_id,
+                        receipt=receipt_text,
+                        changed_at=changed_at,
+                    )
+                )
+                if not event_rows:
+                    raise RuntimeError(
+                        "fold identity pair changed before event creation"
+                    )
+                if len(event_rows) != 1:
+                    raise RuntimeError("fold event cardinality was not exactly one")
 
                 from imas_codex.standard_names.attachment_audit import (
                     guard_source_pairings,
@@ -1856,11 +1902,11 @@ def supersede_into(
                         _FOLD_SOURCE_MUTATION_QUERY,
                         old_id=old,
                         into_id=into,
+                        target_element_id=snapshot["target_element_id"],
                         sources=[
                             {
                                 "id": source["id"],
                                 "element_id": source["element_id"],
-                                "properties": source["properties"],
                                 "remove_binding_element_ids": [
                                     binding["element_id"]
                                     for binding in source.get("bindings") or []
@@ -1872,7 +1918,6 @@ def supersede_into(
                         backings=[
                             {
                                 "element_id": backing["element_id"],
-                                "properties": backing["properties"],
                                 "has_standard_name_id": "standard_name_id"
                                 in backing["properties"],
                                 "remove_projection_element_ids": [
@@ -1900,8 +1945,8 @@ def supersede_into(
                         _FOLD_NAME_MUTATION_QUERY,
                         old_id=old,
                         into_id=into,
-                        old_properties=snapshot["old_properties"],
-                        target_properties=snapshot["target_properties"],
+                        old_element_id=snapshot["old_element_id"],
+                        target_element_id=snapshot["target_element_id"],
                         predecessor_stage=predecessor_stage,
                         target_paths=target_paths,
                     )
