@@ -34,6 +34,7 @@ from imas_codex.standard_names.source_authority import (
     participant_ids,
     payload_hash,
     read_source_authority_rows,
+    read_source_target_protection_rows,
     require_complete_paths,
     source_identity_payload,
     validate_source_id,
@@ -525,6 +526,74 @@ def _protected_reasons(value: Any) -> list[str]:
     return reasons
 
 
+def _target_protection_reasons(protection: dict[str, Any]) -> list[str]:
+    """Refuse incomplete target closures and direct or shared protected producers."""
+    reasons: list[str] = []
+    for direct_entry in protection.get("direct_sources") or []:
+        requested_source_id = direct_entry.get("requested_source_id")
+        matches = direct_entry.get("matches") or []
+        if len(matches) != 1:
+            reasons.append(
+                f"protected closure source {requested_source_id!r} is missing or ambiguous"
+            )
+            continue
+        direct_reasons = _protected_reasons(matches[0])
+        reasons.extend(
+            reason.replace("current graph closure", "direct source identity")
+            for reason in direct_reasons
+        )
+
+    target_entries = protection.get("targets") or []
+    prospective_ids = set(protection.get("prospective_target_ids") or [])
+    seen_target_ids: set[str] = set()
+    for target_entry in target_entries:
+        requested_target_id = target_entry.get("requested_target_id")
+        if isinstance(requested_target_id, str):
+            if requested_target_id in seen_target_ids:
+                reasons.append(
+                    f"protected closure target {requested_target_id!r} is duplicated"
+                )
+            seen_target_ids.add(requested_target_id)
+        matches = target_entry.get("matches") or []
+        if len(matches) != 1:
+            reasons.append(
+                f"protected closure target {requested_target_id!r} is missing or ambiguous"
+            )
+            continue
+        target = matches[0]
+        producers = target.get("producers") or []
+        producer_bindings = [
+            (producer.get("source_element_id"), producer.get("binding_element_id"))
+            for producer in producers
+        ]
+        if any(
+            not source_id or not binding_id
+            for source_id, binding_id in producer_bindings
+        ):
+            reasons.append(
+                f"protected producer closure for target {requested_target_id!r} is incomplete"
+            )
+        if len(producer_bindings) != len(set(producer_bindings)):
+            reasons.append(
+                f"protected producer closure for target {requested_target_id!r} is ambiguous"
+            )
+        for producer in producers:
+            producer_reasons = _protected_reasons(producer)
+            reasons.extend(
+                (
+                    f"target {requested_target_id!r} has a protected producer: "
+                    + reason.replace("current graph closure intersects ", "")
+                )
+                for reason in producer_reasons
+            )
+    missing_prospective = prospective_ids - seen_target_ids
+    reasons.extend(
+        f"prospective protected closure target {target_id!r} is missing"
+        for target_id in sorted(missing_prospective)
+    )
+    return reasons
+
+
 def _authority_topology_reasons(
     path: str, source: dict[str, Any], node: dict[str, Any]
 ) -> list[str]:
@@ -692,6 +761,21 @@ def _row_relationship_ids(row: dict[str, Any]) -> set[str]:
                 for relationship in node.get(key) or []
                 if relationship.get("relationship_element_id")
             )
+    protection = row.get("target_protection") or {}
+    for direct_source in protection.get("direct_sources") or []:
+        for source in direct_source.get("matches") or []:
+            relationship_ids.update(
+                str(binding["element_id"])
+                for binding in source.get("bindings") or []
+                if binding.get("element_id")
+            )
+    for target_entry in protection.get("targets") or []:
+        for target in target_entry.get("matches") or []:
+            relationship_ids.update(
+                str(producer["binding_element_id"])
+                for producer in target.get("producers") or []
+                if producer.get("binding_element_id")
+            )
     return relationship_ids
 
 
@@ -852,7 +936,11 @@ def _base_plan_context(
     source = closure.source
     node = closure.node
     reasons.extend(_authority_topology_reasons(str(path), source, node))
-    reasons.extend(_protected_reasons(row))
+    protection = row.get("target_protection") or {}
+    if not protection:
+        reasons.append("protected target closure is missing")
+    else:
+        reasons.extend(_target_protection_reasons(protection))
     current_version = closure.version["properties"].get("id")
     if not current_version:
         reasons.append("current DDVersion has no exact id")
@@ -1499,6 +1587,34 @@ def _read_plan(
         manifest.paths,
         conflict_type=SourceAuthorityReconciliationConflict,
     )
+    manifest_by_source = {row["source_id"]: row for row in manifest.rows}
+    protection_candidates = []
+    for source_id, path in zip(manifest.source_ids, manifest.paths, strict=True):
+        manifest_row = manifest_by_source[source_id]
+        source_ids = [source_id]
+        if manifest.operation == FOLD_DUPLICATE_SOURCE_IDENTITY:
+            source_ids.append(str(manifest_row["duplicate_source_id"]))
+        prospective_target_ids = []
+        if manifest.operation == RETIRE_NONPARTICIPATING_SOURCE:
+            prospective_target_ids.append(str(manifest_row["expected_target_id"]))
+        protection_candidates.append(
+            {
+                "path": path,
+                "source_ids": source_ids,
+                "prospective_target_ids": prospective_target_ids,
+            }
+        )
+    protection_rows = read_source_target_protection_rows(
+        transaction, protection_candidates
+    )
+    require_complete_paths(
+        protection_rows,
+        manifest.paths,
+        conflict_type=SourceAuthorityReconciliationConflict,
+        message="protected target closure did not return the complete exact allowlist",
+    )
+    for row, protection in zip(rows, protection_rows, strict=True):
+        row["target_protection"] = protection
     event_sources = list(manifest.source_ids)
     duplicate_ids: tuple[str, ...] = ()
     if manifest.operation == FOLD_DUPLICATE_SOURCE_IDENTITY:

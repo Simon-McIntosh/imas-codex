@@ -168,7 +168,7 @@ def _base_row(
                 "properties": name["properties"],
             }
         )
-    return {
+    row = {
         "path": path,
         "versions": [
             {
@@ -179,6 +179,78 @@ def _base_row(
         ],
         "sources": [source],
         "nodes": [node],
+    }
+    _attach_target_protection(
+        row, prospective_target_ids=[target_id] if target_id else []
+    )
+    return row
+
+
+def _attach_target_protection(
+    row: dict[str, object], *, prospective_target_ids: list[str]
+) -> None:
+    """Attach the exact batched-protection shape returned by the graph query."""
+    source = row["sources"][0]
+    bindings = [
+        {
+            "element_id": relationship["element_id"],
+            "properties": relationship["properties"],
+            "target_element_id": relationship["other_element_id"],
+            "target_id": relationship["other_id"],
+        }
+        for relationship in source["relationships"]
+        if relationship["type"] == "PRODUCED_NAME"
+    ]
+    targets = []
+    for name in source["names"]:
+        target_id = name["properties"]["id"]
+        target_binding = next(
+            binding for binding in bindings if binding["target_id"] == target_id
+        )
+        targets.append(
+            {
+                "requested_target_id": target_id,
+                "matches": [
+                    {
+                        "element_id": name["element_id"],
+                        "labels": name["labels"],
+                        "properties": name["properties"],
+                        "producers": [
+                            {
+                                "source_element_id": source["element_id"],
+                                "source_labels": source["labels"],
+                                "source_properties": source["properties"],
+                                "binding_element_id": target_binding["element_id"],
+                                "binding_properties": target_binding["properties"],
+                            }
+                        ],
+                    }
+                ],
+            }
+        )
+    existing_target_ids = {entry["requested_target_id"] for entry in targets}
+    targets.extend(
+        {"requested_target_id": target_id, "matches": []}
+        for target_id in prospective_target_ids
+        if target_id not in existing_target_ids
+    )
+    row["target_protection"] = {
+        "path": row["path"],
+        "prospective_target_ids": prospective_target_ids,
+        "direct_sources": [
+            {
+                "requested_source_id": source["properties"]["id"],
+                "matches": [
+                    {
+                        "element_id": source["element_id"],
+                        "labels": source["labels"],
+                        "properties": source["properties"],
+                        "bindings": bindings,
+                    }
+                ],
+            }
+        ],
+        "targets": targets,
     }
 
 

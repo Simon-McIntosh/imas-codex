@@ -36,7 +36,12 @@ class _EphemeralNeo4j:
         return GraphDatabase.driver(self.uri, auth=None)
 
     def client(
-        self, *, bad_cardinality: bool = False, relationship_drift: bool = False
+        self,
+        *,
+        bad_cardinality: bool = False,
+        relationship_drift: bool = False,
+        protection_relationship_drift: bool = False,
+        protection_query_counter: list[int] | None = None,
     ):
         client = GraphClient(
             uri=self.uri,
@@ -48,6 +53,10 @@ class _EphemeralNeo4j:
             return _BadCardinalityClient(client)
         if relationship_drift:
             return _RelationshipDriftClient(client, self.uri)
+        if protection_relationship_drift:
+            return _ProtectionRelationshipDriftClient(client, self.uri)
+        if protection_query_counter is not None:
+            return _ProtectionQueryCountingClient(client, protection_query_counter)
         return client
 
 
@@ -155,6 +164,99 @@ class _RelationshipDriftClient:
     def session(self):
         with self._client.session() as session:
             yield _RelationshipDriftSession(session, self._uri)
+
+
+class _ProtectionRelationshipDriftTransaction:
+    def __init__(self, transaction, uri: str) -> None:
+        self._transaction = transaction
+        self._uri = uri
+        self._drifted = False
+
+    def run(self, cypher: str, **params: Any):
+        if "SOURCE_SNAPSHOT_MIGRATION_LOCK" in cypher and not self._drifted:
+            with GraphDatabase.driver(self._uri, auth=None) as driver:
+                driver.execute_query(
+                    """
+                    MATCH (:StandardNameSource {id: 'signals:iter:disjoint'})
+                          -[binding:PRODUCED_NAME]->(:StandardName)
+                    SET binding.authority = 'concurrent-protection-drift'
+                    """
+                )
+            self._drifted = True
+        return self._transaction.run(cypher, **params)
+
+    def commit(self) -> None:
+        self._transaction.commit()
+
+    def rollback(self) -> None:
+        self._transaction.rollback()
+
+
+class _ProtectionRelationshipDriftSession:
+    def __init__(self, session, uri: str) -> None:
+        self._session = session
+        self._uri = uri
+
+    def begin_transaction(self) -> _ProtectionRelationshipDriftTransaction:
+        return _ProtectionRelationshipDriftTransaction(
+            self._session.begin_transaction(), self._uri
+        )
+
+
+class _ProtectionRelationshipDriftClient:
+    def __init__(self, client: GraphClient, uri: str) -> None:
+        self._client = client
+        self._uri = uri
+
+    def close(self) -> None:
+        self._client.close()
+
+    @contextmanager
+    def session(self):
+        with self._client.session() as session:
+            yield _ProtectionRelationshipDriftSession(session, self._uri)
+
+
+class _ProtectionQueryCountingTransaction:
+    def __init__(self, transaction, counter: list[int]) -> None:
+        self._transaction = transaction
+        self._counter = counter
+
+    def run(self, cypher: str, **params: Any):
+        if "SOURCE_AUTHORITY_TARGET_PROTECTION_CLOSURE" in cypher:
+            self._counter[0] += 1
+        return self._transaction.run(cypher, **params)
+
+    def commit(self) -> None:
+        self._transaction.commit()
+
+    def rollback(self) -> None:
+        self._transaction.rollback()
+
+
+class _ProtectionQueryCountingSession:
+    def __init__(self, session, counter: list[int]) -> None:
+        self._session = session
+        self._counter = counter
+
+    def begin_transaction(self) -> _ProtectionQueryCountingTransaction:
+        return _ProtectionQueryCountingTransaction(
+            self._session.begin_transaction(), self._counter
+        )
+
+
+class _ProtectionQueryCountingClient:
+    def __init__(self, client: GraphClient, counter: list[int]) -> None:
+        self._client = client
+        self._counter = counter
+
+    def close(self) -> None:
+        self._client.close()
+
+    @contextmanager
+    def session(self):
+        with self._client.session() as session:
+            yield _ProtectionQueryCountingSession(session, self._counter)
 
 
 def _clear(graph: _EphemeralNeo4j) -> None:
@@ -292,6 +394,51 @@ def _seed_additional_repair_source(graph: _EphemeralNeo4j, path: str) -> None:
             """,
             path=path,
             source_properties=source_properties,
+        ).consume()
+
+
+def _seed_shared_target(
+    graph: _EphemeralNeo4j,
+    *,
+    protected: bool,
+    target_id: str = "shared_target",
+) -> None:
+    source_id = "signals:west:protected" if protected else "signals:iter:disjoint"
+    facility_id = "west" if protected else "iter"
+    with graph.driver() as driver, driver.session() as session:
+        session.run(
+            """
+            MATCH (source:StandardNameSource {id: 'dd:diagnostic/channel/value'})
+            MATCH (node:IMASNode {id: 'diagnostic/channel/value'})
+            MERGE (target:StandardName {id: $target_id})
+            MERGE (source)-[:PRODUCED_NAME]->(target)
+            MERGE (node)-[:HAS_STANDARD_NAME]->(target)
+            CREATE (producer:StandardNameSource {
+              id: $source_id, source_type: 'signal', facility_id: $facility_id,
+              status: 'attached'
+            })
+            CREATE (producer)-[:PRODUCED_NAME {authority: 'shared'}]->(target)
+            """,
+            target_id=target_id,
+            source_id=source_id,
+            facility_id=facility_id,
+        ).consume()
+
+
+def _seed_protected_target_only(
+    graph: _EphemeralNeo4j, target_id: str = "prospective_target"
+) -> None:
+    with graph.driver() as driver, driver.session() as session:
+        session.run(
+            """
+            CREATE (target:StandardName {id: $target_id})
+            CREATE (producer:StandardNameSource {
+              id: 'signals:west:prospective', source_type: 'signal',
+              facility_id: 'west', status: 'attached'
+            })
+            CREATE (producer)-[:PRODUCED_NAME {authority: 'prospective'}]->(target)
+            """,
+            target_id=target_id,
         ).consume()
 
 
@@ -879,3 +1026,240 @@ def test_snapshot_admission_can_precede_nonparticipating_retirement(
     assert row["status"] == "stale"
     assert row["admissions"] == 1
     assert row["retirements"] == 1
+
+
+@pytest.mark.parametrize(
+    ("property_name", "property_value", "expected_reason"),
+    [
+        ("facility_id", "west", "direct source identity intersects WEST"),
+        ("origin", "fixture", "direct source identity intersects test fixtures"),
+    ],
+)
+def test_direct_protected_source_identity_is_refused(
+    ephemeral_neo4j: _EphemeralNeo4j,
+    tmp_path: Path,
+    property_name: str,
+    property_value: str,
+    expected_reason: str,
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.REPAIR_IDENTITY_SCALAR)
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        session.run(
+            """
+            MATCH (source:StandardNameSource {id: 'dd:diagnostic/channel/value'})
+            SET source += $properties
+            """,
+            properties={property_name: property_value},
+        ).consume()
+    manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / f"direct-{property_name}.json",
+        reconciliation.REPAIR_IDENTITY_SCALAR,
+    )
+    client = ephemeral_neo4j.client()
+    try:
+        receipt = reconciliation.reconcile_source_authority(
+            manifest,
+            reason="refuse protected direct source",
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert receipt["mode"] == "refused", receipt
+    assert expected_reason in receipt["refusals"][0]["reasons"]
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        reconciliation.REPAIR_IDENTITY_SCALAR,
+        reconciliation.ADOPT_CURRENT_SNAPSHOT,
+        reconciliation.ADMIT_CURRENT_SNAPSHOT,
+        reconciliation.FOLD_DUPLICATE_SOURCE_IDENTITY,
+        reconciliation.RETIRE_NONPARTICIPATING_SOURCE,
+    ],
+)
+def test_shared_target_with_protected_producer_is_refused_for_every_operation(
+    ephemeral_neo4j: _EphemeralNeo4j,
+    tmp_path: Path,
+    operation: str,
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, operation)
+    target_id = (
+        "null_placeholder"
+        if operation == reconciliation.RETIRE_NONPARTICIPATING_SOURCE
+        else "shared_target"
+    )
+    _seed_shared_target(ephemeral_neo4j, protected=True, target_id=target_id)
+    manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / f"protected-shared-{operation}.json",
+        operation,
+    )
+    client = ephemeral_neo4j.client()
+    try:
+        receipt = reconciliation.reconcile_source_authority(
+            manifest,
+            reason="refuse protected shared target",
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert receipt["mode"] == "refused", receipt
+    assert any(
+        f"target {target_id!r} has a protected producer" in reason
+        for reason in receipt["refusals"][0]["reasons"]
+    )
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        reconciliation.REPAIR_IDENTITY_SCALAR,
+        reconciliation.ADOPT_CURRENT_SNAPSHOT,
+        reconciliation.ADMIT_CURRENT_SNAPSHOT,
+        reconciliation.FOLD_DUPLICATE_SOURCE_IDENTITY,
+        reconciliation.RETIRE_NONPARTICIPATING_SOURCE,
+    ],
+)
+def test_disjoint_target_producer_does_not_trigger_protection(
+    ephemeral_neo4j: _EphemeralNeo4j,
+    tmp_path: Path,
+    operation: str,
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, operation)
+    target_id = (
+        "null_placeholder"
+        if operation == reconciliation.RETIRE_NONPARTICIPATING_SOURCE
+        else "shared_target"
+    )
+    _seed_shared_target(ephemeral_neo4j, protected=False, target_id=target_id)
+    manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / f"disjoint-shared-{operation}.json",
+        operation,
+    )
+    client = ephemeral_neo4j.client()
+    try:
+        receipt = reconciliation.reconcile_source_authority(
+            manifest,
+            reason="allow disjoint shared target",
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert receipt["mode"] == "dry_run", receipt
+    assert receipt["counts"]["planned"] == 1
+
+
+def test_prospective_retirement_target_with_protected_producer_is_refused(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.RETIRE_NONPARTICIPATING_SOURCE)
+    _seed_protected_target_only(ephemeral_neo4j)
+    manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / "prospective-template.json",
+        reconciliation.RETIRE_NONPARTICIPATING_SOURCE,
+    )
+    payload = json.loads(manifest.read_text())
+    payload["rows"][0]["expected_target_id"] = "prospective_target"
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        transaction = session.begin_transaction()
+        row = read_source_authority_rows(transaction, ("diagnostic/channel/value",))[0]
+        transaction.rollback()
+    payload["rows"][0]["expected_retirement_destructive_closure_hash"] = payload_hash(
+        reconciliation._retirement_destructive_closure(row, "prospective_target")
+    )
+    prospective_manifest = tmp_path / "prospective-target.json"
+    prospective_manifest.write_text(json.dumps(payload, indent=2) + "\n")
+    client = ephemeral_neo4j.client()
+    try:
+        receipt = reconciliation.reconcile_source_authority(
+            prospective_manifest,
+            reason="refuse protected prospective target",
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert receipt["mode"] == "refused", receipt
+    assert any(
+        "target 'prospective_target' has a protected producer" in reason
+        for reason in receipt["refusals"][0]["reasons"]
+    )
+
+
+def test_protected_binding_drift_between_plan_and_apply_rolls_back(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.REPAIR_IDENTITY_SCALAR)
+    _seed_shared_target(ephemeral_neo4j, protected=False)
+    manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / "protected-binding-drift.json",
+        reconciliation.REPAIR_IDENTITY_SCALAR,
+    )
+    client = ephemeral_neo4j.client(protection_relationship_drift=True)
+    try:
+        with pytest.raises(
+            reconciliation.SourceAuthorityReconciliationConflict,
+            match="changed after locks",
+        ):
+            reconciliation.reconcile_source_authority(
+                manifest,
+                reason="reject protected closure relationship drift",
+                apply=True,
+                expected_manifest_hash=sha256(manifest.read_bytes()).hexdigest(),
+                gc=client,
+            )
+    finally:
+        client.close()
+
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        row = session.run(
+            """
+            MATCH (source:StandardNameSource {id: 'dd:diagnostic/channel/value'})
+            OPTIONAL MATCH (event:StandardNameSourceIdentityRepair)
+            RETURN source.source_id AS source_id, count(event) AS events
+            """
+        ).single()
+    assert row["source_id"] is None
+    assert row["events"] == 0
+
+
+def test_target_protection_query_is_batched_once_for_multirow_manifest(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.REPAIR_IDENTITY_SCALAR)
+    paths = (
+        "diagnostic/channel/value",
+        "diagnostic/channel/value_two",
+    )
+    _seed_additional_repair_source(ephemeral_neo4j, paths[1])
+    manifest = _write_live_repair_manifest(
+        ephemeral_neo4j, tmp_path / "batched-protection.json", paths
+    )
+    counter = [0]
+    client = ephemeral_neo4j.client(protection_query_counter=counter)
+    try:
+        receipt = reconciliation.reconcile_source_authority(
+            manifest,
+            reason="prove one batched protection query",
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert receipt["mode"] == "dry_run", receipt
+    assert receipt["counts"]["planned"] == 2
+    assert counter == [1]
