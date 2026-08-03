@@ -190,6 +190,9 @@ def _write_manifest(graph: GraphClient, path: Path, paths: tuple[str, ...]) -> s
             authorized_source_ids=frozenset(source_ids),
             mutable_source_fields=frozenset({"dd_unit"}),
         )
+        authority_identity_hash, authority_relationships_hash = (
+            reconciliation._unit_cache_authority_hashes(closure)
+        )
         manifest_rows.append(
             {
                 "source_id": f"dd:{row['path']}",
@@ -204,6 +207,8 @@ def _write_manifest(graph: GraphClient, path: Path, paths: tuple[str, ...]) -> s
                     tuple(sorted(participant_ids(row)))
                 ),
                 "expected_dd_unit": "s^-1",
+                "expected_authority_identity_hash": authority_identity_hash,
+                "expected_authority_relationships_hash": authority_relationships_hash,
                 "west_intersection": 0,
                 "test_intersection": 0,
             }
@@ -250,6 +255,23 @@ def test_unit_cache_cohort_is_atomic_narrow_and_idempotent(
         "applied": 0,
         "refused": 0,
     }
+    assert {
+        row["source_id"]: {
+            "source_dd_version": row["source_dd_version"],
+            "authority_dd_version": row["authority_dd_version"],
+            "from_unit": row["from_unit"],
+            "to_unit": row["to_unit"],
+        }
+        for row in dry_run["rows"]
+    } == {
+        f"dd:{path}": {
+            "source_dd_version": "4.1.0",
+            "authority_dd_version": "4.1.1",
+            "from_unit": "s^-1",
+            "to_unit": "Pa.m^3.s^-1",
+        }
+        for path in paths
+    }
 
     applied = reconciliation.reconcile_source_authority(
         manifest,
@@ -273,12 +295,26 @@ def test_unit_cache_cohort_is_atomic_narrow_and_idempotent(
         assert after_row == {"id": before_row["id"], "properties": expected}
     assert unit_cache_graph.query(
         """
-        MATCH (:StandardNameSource)-[:HAS_SNAPSHOT_ADOPTION]->
-              (event:StandardNameSourceSnapshotAdoption)
+        MATCH (:StandardNameSource)-[:HAS_UNIT_CACHE_CORRECTION]->
+              (event:StandardNameSourceUnitCacheCorrection)
         WHERE event.id STARTS WITH 'source-unit-cache-reconciliation:'
-        RETURN count(event) AS count
+        RETURN count(event) AS count,
+               collect(DISTINCT event.source_dd_version) AS source_versions,
+               collect(DISTINCT event.authority_dd_version) AS authority_versions,
+               collect(DISTINCT event.from_unit) AS from_units,
+               collect(DISTINCT event.to_unit) AS to_units,
+               collect(DISTINCT event.manifest_hash) AS manifest_hashes
         """
-    ) == [{"count": 2}]
+    ) == [
+        {
+            "count": 2,
+            "source_versions": ["4.1.0"],
+            "authority_versions": ["4.1.1"],
+            "from_units": ["s^-1"],
+            "to_units": ["Pa.m^3.s^-1"],
+            "manifest_hashes": [manifest_hash],
+        }
+    ]
 
     repeated = reconciliation.reconcile_source_authority(
         manifest,
@@ -323,7 +359,8 @@ def test_unit_cache_authority_disagreement_rolls_back_whole_cohort(
         """
     ) == [{"units": ["s^-1"]}]
     assert unit_cache_graph.query(
-        "MATCH (event:StandardNameSourceSnapshotAdoption) RETURN count(event) AS count"
+        "MATCH (event:StandardNameSourceUnitCacheCorrection) "
+        "RETURN count(event) AS count"
     ) == [{"count": 0}]
 
 

@@ -74,6 +74,7 @@ _AUTHORITY_RELATIONSHIPS = frozenset(
         "HAS_SNAPSHOT_ADMISSION",
         "HAS_IDENTITY_FOLD",
         "HAS_AUTHORITY_RETIREMENT",
+        "HAS_UNIT_CACHE_CORRECTION",
     }
 )
 
@@ -83,7 +84,7 @@ _EVENT_LABELS = {
     ADMIT_CURRENT_SNAPSHOT: "StandardNameSourceSnapshotAdmission",
     FOLD_DUPLICATE_SOURCE_IDENTITY: "StandardNameSourceIdentityFold",
     RETIRE_NONPARTICIPATING_SOURCE: "StandardNameSourceAuthorityRetirement",
-    RECONCILE_UNIT_CACHE: "StandardNameSourceSnapshotAdoption",
+    RECONCILE_UNIT_CACHE: "StandardNameSourceUnitCacheCorrection",
 }
 
 _EVENT_PREFIXES = {
@@ -132,7 +133,13 @@ _EXTRA_ROW_FIELDS = {
             "expected_retirement_destructive_closure_hash",
         }
     ),
-    RECONCILE_UNIT_CACHE: frozenset({"expected_dd_unit"}),
+    RECONCILE_UNIT_CACHE: frozenset(
+        {
+            "expected_dd_unit",
+            "expected_authority_identity_hash",
+            "expected_authority_relationships_hash",
+        }
+    ),
 }
 
 _AUTHORITY_EVENTS_QUERY = """
@@ -278,9 +285,9 @@ _UNIT_CACHE_APPLY_QUERY = """
 UNWIND $items AS item
 MATCH (source:StandardNameSource {id: item.source_id})
 WHERE elementId(source) = item.source_element_id
-CREATE (event:StandardNameSourceSnapshotAdoption)
-SET event = item.event, event.adopted_at = datetime(item.event.adopted_at)
-CREATE (source)-[:HAS_SNAPSHOT_ADOPTION]->(event)
+CREATE (event:StandardNameSourceUnitCacheCorrection)
+SET event = item.event, event.corrected_at = datetime(item.event.corrected_at)
+CREATE (source)-[:HAS_UNIT_CACHE_CORRECTION]->(event)
 SET source.dd_unit = item.after_dd_unit
 RETURN collect(source.id) AS source_ids, collect(event.id) AS event_ids
 """
@@ -447,6 +454,15 @@ def load_source_authority_manifest(path: str | Path) -> SourceAuthorityManifest:
             or not row["expected_dd_unit"].strip()
         ):
             raise ValueError("expected_dd_unit must be one non-empty unit string")
+        if operation == RECONCILE_UNIT_CACHE:
+            _require_sha(
+                row["expected_authority_identity_hash"],
+                "expected_authority_identity_hash",
+            )
+            _require_sha(
+                row["expected_authority_relationships_hash"],
+                "expected_authority_relationships_hash",
+            )
         normalized_rows.append(copy.deepcopy(row))
 
     normalized_rows.sort(key=lambda row: row["source_id"])
@@ -1162,17 +1178,56 @@ def _plan_snapshot(
     return "planned", event, reasons, {"after": after}
 
 
+def _unit_cache_authority_hashes(closure: Any) -> tuple[str, str]:
+    """Hash exact identities and relationships that authorize one unit correction."""
+    source = closure.source
+    node = closure.node
+    version = closure.version
+    source_identity = source_identity_payload(source)
+    units = node.get("units") or []
+    identity_payload = {
+        "source_element_id": source.get("element_id"),
+        "source_id": (source.get("properties") or {}).get("id"),
+        "authority_node_element_id": node.get("element_id"),
+        "authority_node_id": (node.get("properties") or {}).get("id"),
+        "authority_version_element_id": version.get("element_id"),
+        "authority_version_id": (version.get("properties") or {}).get("id"),
+        "authority_units": [
+            {
+                "element_id": unit.get("element_id"),
+                "id": unit.get("id"),
+                "labels": unit.get("labels") or [],
+            }
+            for unit in units
+        ],
+    }
+    relationship_payload = {
+        "from_dd_paths": source_identity["from_dd_paths"],
+        "has_units": [
+            {
+                "relationship_element_id": unit.get("relationship_element_id"),
+                "relationship_properties": unit.get("relationship_properties") or {},
+                "unit_element_id": unit.get("element_id"),
+                "unit_id": unit.get("id"),
+            }
+            for unit in units
+        ],
+    }
+    return _hash(identity_payload), _hash(relationship_payload)
+
+
 def _plan_unit_cache(
     closure: Any,
     manifest_row: dict[str, Any],
     events: list[dict[str, Any]],
     *,
     current_version: str,
+    manifest_hash: str,
     reason: str,
     run_id: str | None,
     changed_at: str | None,
 ) -> tuple[str, dict[str, Any] | None, list[str], dict[str, Any]]:
-    """Plan one same-version repair of the DD-authoritative unit cache only."""
+    """Plan one cross-version correction of the DD-authoritative unit cache only."""
     source = closure.source
     node = closure.node
     properties = source["properties"]
@@ -1184,23 +1239,40 @@ def _plan_unit_cache(
     after["dd_unit"] = authoritative_unit
     before_hash = _hash(before)
     after_hash = _hash(after)
+    authority_identity_hash, authority_relationships_hash = (
+        _unit_cache_authority_hashes(closure)
+    )
     event_identity = {
         "source_id": manifest_row["source_id"],
-        "before_snapshot_hash": before_hash,
-        "after_snapshot_hash": after_hash,
-        "authority_hash": closure.authority_hash,
+        "source_dd_version": properties.get("dd_version"),
+        "authority_dd_version": current_version,
+        "from_unit": before.get("dd_unit"),
+        "to_unit": authoritative_unit,
+        "authority_identity_hash": authority_identity_hash,
+        "authority_relationships_hash": authority_relationships_hash,
     }
     event_id = _event_id(RECONCILE_UNIT_CACHE, event_identity)
     expected_event = {
         "source_id": manifest_row["source_id"],
+        "operation": RECONCILE_UNIT_CACHE,
+        "source_dd_version": properties.get("dd_version"),
+        "authority_dd_version": current_version,
+        "authority_node_id": node_properties.get("id"),
+        "to_unit": authoritative_unit,
         "after_snapshot_hash": after_hash,
         "authority_hash": closure.authority_hash,
+        "authority_identity_hash": authority_identity_hash,
+        "authority_relationships_hash": authority_relationships_hash,
+        "manifest_hash": manifest_hash,
     }
     identity_fields = (
         "source_id",
-        "before_snapshot_hash",
-        "after_snapshot_hash",
-        "authority_hash",
+        "source_dd_version",
+        "authority_dd_version",
+        "from_unit",
+        "to_unit",
+        "authority_identity_hash",
+        "authority_relationships_hash",
     )
     if before.get("dd_unit") == authoritative_unit:
         matches = _matching_state_events(
@@ -1238,6 +1310,13 @@ def _plan_unit_cache(
         )
     elif node_properties.get("unit") != authoritative_unit:
         reasons.append("unit property and HAS_UNIT authority must agree exactly")
+    if authority_identity_hash != manifest_row["expected_authority_identity_hash"]:
+        reasons.append("manifest expected_authority_identity_hash drifted")
+    if (
+        authority_relationships_hash
+        != manifest_row["expected_authority_relationships_hash"]
+    ):
+        reasons.append("manifest expected_authority_relationships_hash drifted")
     if any(
         (entry.get("event_properties") or {}).get("id") == event_id for entry in events
     ):
@@ -1245,20 +1324,25 @@ def _plan_unit_cache(
     event = {
         "id": event_id,
         "source_id": manifest_row["source_id"],
-        "dd_version": properties.get("dd_version"),
+        "operation": RECONCILE_UNIT_CACHE,
+        "source_dd_version": properties.get("dd_version"),
+        "authority_dd_version": current_version,
+        "authority_node_id": node_properties.get("id"),
+        "from_unit": before.get("dd_unit"),
+        "to_unit": authoritative_unit,
         "before_snapshot_hash": before_hash,
         "after_snapshot_hash": after_hash,
         "before_snapshot_payload": canonical_payload(before),
         "after_snapshot_payload": canonical_payload(after),
         "authority_hash": closure.authority_hash,
+        "authority_identity_hash": authority_identity_hash,
+        "authority_relationships_hash": authority_relationships_hash,
         "precondition_hash": closure.precondition_hash,
         "preserved_state_hash": closure.preserved_state_hash,
-        "classification": classify_snapshot_change(
-            manifest_row["expected_from_dd_path"], before, after
-        ),
+        "manifest_hash": manifest_hash,
         "reason": reason,
         "run_id": run_id,
-        "adopted_at": changed_at,
+        "corrected_at": changed_at,
     }
     return (
         "planned",
@@ -1617,6 +1701,7 @@ def _plan_rows(
                 manifest_row,
                 events,
                 current_version=str(current_version),
+                manifest_hash=manifest.manifest_hash,
                 reason=reason,
                 run_id=run_id,
                 changed_at=changed_at,
@@ -1823,21 +1908,38 @@ def _receipt(
             "refused": len(refusals),
         },
         "rows": [
-            {
-                key: plan[key]
-                for key in (
-                    "source_id",
-                    "path",
-                    "operation",
-                    "status",
-                    "before_snapshot_hash",
-                    "after_snapshot_hash",
-                    "authority_hash",
-                    "precondition_hash",
-                    "preserved_state_hash",
-                )
-            }
-            | {"event_id": (plan.get("event") or {}).get("id")}
+            (
+                {
+                    key: plan[key]
+                    for key in (
+                        "source_id",
+                        "path",
+                        "operation",
+                        "status",
+                        "before_snapshot_hash",
+                        "after_snapshot_hash",
+                        "authority_hash",
+                        "precondition_hash",
+                        "preserved_state_hash",
+                    )
+                }
+                | {"event_id": (plan.get("event") or {}).get("id")}
+            )
+            | (
+                {
+                    key: (plan.get("event") or {}).get(key)
+                    for key in (
+                        "source_dd_version",
+                        "authority_dd_version",
+                        "from_unit",
+                        "to_unit",
+                        "authority_identity_hash",
+                        "authority_relationships_hash",
+                    )
+                }
+                if manifest.operation == RECONCILE_UNIT_CACHE
+                else {}
+            )
             for plan in sorted(plans, key=lambda item: item["source_id"])
         ],
         "refusals": sorted(refusals, key=lambda item: item["source_id"]),

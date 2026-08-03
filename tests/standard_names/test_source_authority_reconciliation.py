@@ -9,14 +9,17 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+import yaml
 
 from imas_codex.standard_names import source_authority_reconciliation as reconciliation
 from imas_codex.standard_names.source_authority import (
     SNAPSHOT_FIELDS,
     SNAPSHOT_MUTABLE_FIELDS,
+    canonical_payload,
     capture_source_authority_closure,
     participant_ids,
     payload_hash,
+    source_snapshot,
 )
 
 
@@ -301,6 +304,16 @@ def _manifest_for(
         authorized_source_ids=frozenset({f"dd:{path}"}),
         mutable_source_fields=mutable,
     )
+    if operation == reconciliation.RECONCILE_UNIT_CACHE:
+        authority_identity_hash, authority_relationships_hash = (
+            reconciliation._unit_cache_authority_hashes(closure)
+        )
+        extras.update(
+            {
+                "expected_authority_identity_hash": authority_identity_hash,
+                "expected_authority_relationships_hash": (authority_relationships_hash),
+            }
+        )
     preserved_closure = capture_source_authority_closure(
         preserved,
         manifest_hash="manifest-hash",
@@ -397,7 +410,13 @@ def _minimal_manifest_row(operation: str, source_id: str) -> dict[str, object]:
             }
         )
     elif operation == reconciliation.RECONCILE_UNIT_CACHE:
-        row["expected_dd_unit"] = "stale-unit"
+        row.update(
+            {
+                "expected_dd_unit": "stale-unit",
+                "expected_authority_identity_hash": "e" * 64,
+                "expected_authority_relationships_hash": "f" * 64,
+            }
+        )
     return row
 
 
@@ -841,7 +860,39 @@ def test_unit_cache_plan_is_independent_of_target_presence(
     event = plans[0]["event"]
     assert event["id"].startswith("source-unit-cache-reconciliation:")
     assert event["before_snapshot_payload"] != event["after_snapshot_payload"]
-    assert event["classification"] == "changed"
+    assert event["operation"] == reconciliation.RECONCILE_UNIT_CACHE
+    assert event["source_dd_version"] == "4.1.1"
+    assert event["authority_dd_version"] == "4.1.1"
+    assert event["from_unit"] == "stale-unit"
+    assert event["to_unit"] == "V"
+    assert event["manifest_hash"] == manifest.manifest_hash
+    assert "classification" not in event
+
+
+def test_unit_cache_event_records_cross_version_authority_without_migration() -> None:
+    row = _stale_unit_row()
+    row["sources"][0]["properties"]["dd_version"] = "4.1.0"
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+
+    plans, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert not refusals
+    event = plans[0]["event"]
+    expected_before = source_snapshot(row["sources"][0]["properties"])
+    expected_after = copy.deepcopy(expected_before)
+    expected_after["dd_unit"] = "V"
+    assert event["source_dd_version"] == "4.1.0"
+    assert event["authority_dd_version"] == "4.1.1"
+    assert event["before_snapshot_payload"] == canonical_payload(expected_before)
+    assert event["after_snapshot_payload"] == canonical_payload(expected_after)
 
 
 @pytest.mark.parametrize(
@@ -914,6 +965,27 @@ def test_unit_cache_refuses_cache_drift_from_manifest_precondition() -> None:
     )
 
 
+def test_unit_cache_refuses_manifest_relationship_authority_drift() -> None:
+    row = _stale_unit_row()
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+    manifest.rows[0]["expected_authority_relationships_hash"] = "0" * 64
+
+    _, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert (
+        "manifest expected_authority_relationships_hash drifted"
+        in (refusals[0]["reasons"])
+    )
+
+
 def test_unit_cache_refuses_protected_direct_source_but_not_target_producer() -> None:
     row = _stale_unit_row(target_id="accepted_target")
     protection = row["target_protection"]
@@ -976,8 +1048,8 @@ def test_unit_cache_idempotence_requires_exact_immutable_event() -> None:
     current = copy.deepcopy(row)
     current["sources"][0]["properties"]["dd_unit"] = "V"
     event_entry = {
-        "relationship_type": "HAS_SNAPSHOT_ADOPTION",
-        "event_labels": ["StandardNameSourceSnapshotAdoption"],
+        "relationship_type": "HAS_UNIT_CACHE_CORRECTION",
+        "event_labels": ["StandardNameSourceUnitCacheCorrection"],
         "event_properties": event,
     }
 
@@ -1014,7 +1086,35 @@ def test_unit_cache_apply_query_mutates_only_cache_and_ledger() -> None:
     query = reconciliation._APPLY_QUERIES[reconciliation.RECONCILE_UNIT_CACHE]
 
     assert "SET source.dd_unit = item.after_dd_unit" in query
-    assert "HAS_SNAPSHOT_ADOPTION" in query
+    assert "HAS_UNIT_CACHE_CORRECTION" in query
+    assert "StandardNameSourceUnitCacheCorrection" in query
+    assert "HAS_SNAPSHOT_ADOPTION" not in query
     for field in SNAPSHOT_FIELDS:
         if field != "dd_unit":
             assert f"source.{field}" not in query
+
+
+def test_unit_cache_correction_has_a_distinct_linkml_contract() -> None:
+    schema_path = (
+        Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
+    )
+    schema = yaml.safe_load(schema_path.read_text())
+    source = schema["classes"]["StandardNameSource"]["attributes"]
+    correction = schema["classes"]["StandardNameSourceUnitCacheCorrection"]
+
+    assert source["unit_cache_corrections"]["range"] == (
+        "StandardNameSourceUnitCacheCorrection"
+    )
+    assert (
+        source["unit_cache_corrections"]["annotations"]["relationship_type"]
+        == "HAS_UNIT_CACHE_CORRECTION"
+    )
+    assert {
+        "source_dd_version",
+        "authority_dd_version",
+        "from_unit",
+        "to_unit",
+        "authority_identity_hash",
+        "authority_relationships_hash",
+        "manifest_hash",
+    } <= set(correction["attributes"])
