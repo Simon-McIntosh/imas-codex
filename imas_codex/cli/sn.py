@@ -6279,6 +6279,53 @@ def sn_reconcile_source_authority(
     click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
 
 
+@sn.command("reconcile-grammar-segments")
+@click.option(
+    "--manifest",
+    "manifest_path",
+    type=click.Path(exists=True, dir_okay=False),
+    required=True,
+    help="Exact grammar-segment projection reconciliation manifest.",
+)
+@click.option(
+    "--reason",
+    required=True,
+    help="Operator reason bound into every immutable name-change event.",
+)
+@click.option(
+    "--apply",
+    is_flag=True,
+    help="Apply the atomic reconciliation; the default is a zero-write dry run.",
+)
+@click.option(
+    "--manifest-sha256",
+    "expected_manifest_hash",
+    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
+)
+def sn_reconcile_grammar_segments(
+    manifest_path: str,
+    reason: str,
+    apply: bool,
+    expected_manifest_hash: str | None,
+) -> None:
+    """Plan or apply one exact grammar projection cohort with CAS fencing."""
+    import json
+
+    from imas_codex.standard_names.grammar_segment_reconciliation import (
+        reconcile_grammar_segments,
+    )
+
+    if apply and not expected_manifest_hash:
+        raise click.UsageError("--apply requires --manifest-sha256")
+    receipt = reconcile_grammar_segments(
+        manifest_path,
+        reason=reason,
+        apply=apply,
+        expected_manifest_hash=expected_manifest_hash,
+    )
+    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
+
+
 @sn.command("recover-terminal-attachments")
 @click.option(
     "--manifest",

@@ -1,15 +1,13 @@
-"""Grammar-segment reconcile — structured segments must match the canonical id.
+"""Read-only startup visibility for stale grammar compatibility projections.
 
-The bare-name segment columns (``position``, ``component``, ``subject``, …) are
-a deterministic function of the canonical name id via the ISN parser. A name
-written by an out-of-grammar path can carry stale segments that disagree with
-its own id (observed: ``…_at_pedestal_top`` storing ``position='pedestal'``).
-``reconcile_grammar_segments`` re-parses every live name and realigns drift.
+Bare-name segment columns are deterministic projections of the canonical name
+identifier. Startup audits that invariant and routes drift to the governed,
+manifest-bound operator instead of performing an untracked graph mutation.
 """
 
 from __future__ import annotations
 
-import pytest
+from unittest.mock import MagicMock, patch
 
 from imas_codex.standard_names.graph_ops import (
     _GRAMMAR_SEGMENT_COLUMNS,
@@ -26,29 +24,24 @@ def test_reconcile_grammar_segments_returns_count():
     assert callable(reconcile_grammar_segments)
 
 
-@pytest.mark.graph
-def test_reconcile_grammar_segments_idempotent_and_no_drift():
-    """After reconcile, no parseable live name's stored segments disagree with
-    the parse of its own id, and a second run is a no-op (idempotent)."""
-    from imas_codex.graph.client import GraphClient
-    from imas_codex.standard_names.ledger import LIVE_NAME
+def test_startup_compatibility_call_is_read_only_and_surfaces_governed_work():
+    """Startup audits projection drift but cannot mutate the live catalog."""
+    name = "electron_density"
+    parsed = _parse_grammar(name)
+    row = {"id": name, **dict.fromkeys(_GRAMMAR_SEGMENT_COLUMNS)}
+    graph = MagicMock()
+    graph.query.return_value = [row]
+    graph_client = MagicMock()
+    graph_client.return_value.__enter__.return_value = graph
 
-    reconcile_grammar_segments()
-    second = reconcile_grammar_segments()
-    assert second["names_realigned"] == 0, "reconcile must be idempotent"
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", graph_client):
+        result = reconcile_grammar_segments()
 
-    cols = _GRAMMAR_SEGMENT_COLUMNS
-    select = ", ".join(f"sn.{c} AS {c}" for c in cols)
-    with GraphClient() as gc:
-        rows = gc.query(
-            f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
-        )
-    drift = []
-    for r in rows:
-        parsed = _parse_grammar(r["id"])
-        # Names the ISN model rejects are not realigned (segments stay as-is).
-        if not parsed.get("physical_base"):
-            continue
-        if any(parsed.get(c) != r.get(c) for c in cols):
-            drift.append(r["id"])
-    assert not drift, f"{len(drift)} names drift from their id parse: {drift[:10]}"
+    assert result == {
+        "names_realigned": 0,
+        "names_planned": 1,
+        "governed_apply_required": True,
+    }
+    assert parsed["physical_base"] == "density"
+    assert graph.query.call_count == 1
+    assert "SET " not in graph.query.call_args.args[0]
