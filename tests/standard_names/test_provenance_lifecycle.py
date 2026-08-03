@@ -298,8 +298,45 @@ def test_invariant_audit_checks_edge_scalar_and_backing_projection() -> None:
     assert find_semantic_source_invariant_violations(gc) == []
     cypher = gc.query.call_args.args[0]
     assert "size(live_targets) <> 1" in cypher
+    assert "source.produced_sn_id IS NULL" in cypher
     assert "source.produced_sn_id <> live_targets[0].id" in cypher
+    assert "source.source_type IN $projection_source_types" in cypher
     assert "HAS_STANDARD_NAME" in cypher
+    assert gc.query.call_args.kwargs["projection_source_types"] == ["dd", "signals"]
+
+
+@pytest.mark.parametrize(
+    ("source_type", "live_targets", "scalar", "mapped_ids", "is_violation"),
+    [
+        ("dd", ["density"], "density", [], True),
+        ("signals", ["density"], "density", [], True),
+        ("catalog", ["density"], "density", [], False),
+        ("manual", ["density"], "density", [], False),
+        ("derived", ["density"], "density", [], False),
+        ("catalog", ["density"], "temperature", [], True),
+        ("derived", ["density"], None, [], True),
+        ("manual", ["density", "temperature"], "density", [], True),
+        ("manual", [], None, [], True),
+        ("dd", ["density"], "density", ["density"], False),
+    ],
+)
+def test_invariant_audit_applies_projection_only_to_carrier_sources(
+    source_type, live_targets, scalar, mapped_ids, is_violation
+) -> None:
+    row = {
+        "source_id": f"{source_type}:example",
+        "source_type": source_type,
+        "produced_targets": live_targets,
+        "live_targets": live_targets,
+        "produced_sn_id": scalar,
+        "mapped_ids": mapped_ids,
+    }
+    gc = MagicMock()
+    gc.query.return_value = [row]
+
+    violations = find_semantic_source_invariant_violations(gc)
+
+    assert bool(violations) is is_violation
 
 
 def test_trace_separates_semantic_sources_and_internal_changes() -> None:

@@ -1,9 +1,10 @@
 """Ledger invariants — read-only queries that assert provenance integrity.
 
-The graph is the provenance ledger: every non-superseded/-exhausted
-``StandardName`` MUST resolve to >=1 ``StandardNameSource`` via ``PRODUCED_NAME``
-(``dd`` / ``derived`` / ``signal`` / ``manual`` — none privileged). These
-queries surface the two ways that invariant breaks:
+The graph is the provenance ledger: every materialized ``StandardName`` that
+is neither superseded nor exhausted MUST resolve to >=1
+``StandardNameSource`` via ``PRODUCED_NAME``. DD, derived, facility-signal,
+and manual sources are equally authoritative for this invariant. These queries
+surface the two ways that invariant breaks:
 
 - **orphans** — a live name with no ``PRODUCED_NAME`` source at all.
 - **edge/scalar desyncs** — a source whose ``produced_sn_id`` scalar names a
@@ -23,18 +24,41 @@ from imas_codex.graph.client import GraphClient
 
 #: Canonical "live" predicate used across the SN codebase — a name is live
 #: unless it has been refined away (``superseded``) or hit the rotation cap
-#: (``exhausted``). Both retain their producing source, so both are in scope.
+#: (``exhausted``). Those terminal nodes retain historical edges but are not
+#: current provenance targets.
 LIVE_NAME = "NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted']"
+
+#: An id-only ``StandardName`` created as the endpoint of a structural
+#: relationship is graph scaffolding, not a lifecycle name. Any populated
+#: lifecycle axis or origin proves that the node has begun materialization.
+_MATERIALIZED_LIFECYCLE = """
+    (sn.name_stage IS NOT NULL
+     OR sn.docs_stage IS NOT NULL
+     OR sn.status IS NOT NULL
+     OR sn.validation_status IS NOT NULL
+     OR sn.origin IS NOT NULL)
+"""
+
+_LIFECYCLE_FIELDS = (
+    "name_stage",
+    "docs_stage",
+    "status",
+    "validation_status",
+    "origin",
+)
 
 #: Deterministic error-siblings carry no StandardNameSource by construction.
 _NOT_ERROR_SIBLING = "coalesce(sn.model, '') <> 'deterministic:dd_error_modifier'"
 
 _FIND_ORPHANS = f"""
     MATCH (sn:StandardName)
-    WHERE {LIVE_NAME}
+    WHERE {_MATERIALIZED_LIFECYCLE}
+      AND {LIVE_NAME}
       AND {_NOT_ERROR_SIBLING}
       AND NOT (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-    RETURN sn.id AS sn_id, sn.name_stage AS name_stage, sn.origin AS origin
+    RETURN sn.id AS sn_id, sn.name_stage AS name_stage,
+           sn.docs_stage AS docs_stage, sn.status AS status,
+           sn.validation_status AS validation_status, sn.origin AS origin
     ORDER BY sn.id
 """
 
@@ -70,14 +94,27 @@ _REATTACH_DESYNCS = f"""
 
 
 def find_provenance_orphans(*, gc: GraphClient | None = None) -> list[dict[str, Any]]:
-    """Return live names with no ``PRODUCED_NAME`` source (excluding error-siblings).
+    """Return materialized live names without a ``PRODUCED_NAME`` source.
 
-    An empty list means the ledger invariant holds. Read-only.
+    Id-only relationship endpoints have no lifecycle state and are excluded as
+    structural scaffolds. Partially materialized names remain in scope as soon
+    as any lifecycle axis or origin is populated. An empty list means the
+    ledger invariant holds. Read-only.
     """
     owns = gc is None
     gc = gc or GraphClient()
     try:
-        return list(gc.query(_FIND_ORPHANS))
+        rows = gc.query(_FIND_ORPHANS)
+        return [
+            {
+                "sn_id": row["sn_id"],
+                "name_stage": row.get("name_stage"),
+                "origin": row.get("origin"),
+            }
+            for row in rows or []
+            if any(row.get(field) is not None for field in _LIFECYCLE_FIELDS)
+            and row.get("name_stage") not in {"superseded", "exhausted"}
+        ]
     finally:
         if owns:
             gc.close()

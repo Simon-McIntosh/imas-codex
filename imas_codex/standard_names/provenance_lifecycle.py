@@ -550,8 +550,28 @@ def refresh_renamed_source_mirrors(gc: Any, renames: list[dict[str, str]]) -> in
     return int(rows[0]["refreshed"]) if rows else 0
 
 
+_UPSTREAM_PROJECTION_SOURCE_TYPES = frozenset({"dd", "signals"})
+
+
+def _semantic_source_mirrors_disagree(row: Mapping[str, Any]) -> bool:
+    """Return whether one source violates its applicable current-target mirrors."""
+    live_targets = list(row.get("live_targets") or [])
+    if len(live_targets) != 1:
+        return True
+    if row.get("produced_sn_id") != live_targets[0]:
+        return True
+    return row.get("source_type") in _UPSTREAM_PROJECTION_SOURCE_TYPES and live_targets[
+        0
+    ] not in (row.get("mapped_ids") or [])
+
+
 def find_semantic_source_invariant_violations(gc: Any) -> list[dict[str, Any]]:
-    """Find composed/attached sources whose current-target mirrors disagree."""
+    """Find composed/attached sources whose applicable mirrors disagree.
+
+    Every source has one live target and an equal scalar mirror. Only DD and
+    facility-signal sources additionally have a real upstream graph carrier,
+    so projection parity applies only to those two source kinds.
+    """
     rows = gc.query(
         """
         MATCH (source:StandardNameSource)
@@ -566,17 +586,27 @@ def find_semantic_source_invariant_violations(gc: Any) -> list[dict[str, Any]]:
         WITH source, targets, live_targets,
              collect(DISTINCT mapped.id) AS mapped_ids
         WHERE size(live_targets) <> 1
-           OR source.produced_sn_id <> live_targets[0].id
-           OR NOT live_targets[0].id IN mapped_ids
+           OR (size(live_targets) = 1
+               AND (source.produced_sn_id IS NULL
+                    OR source.produced_sn_id <> live_targets[0].id))
+           OR (source.source_type IN $projection_source_types
+               AND size(live_targets) = 1
+               AND NOT (live_targets[0].id IN mapped_ids))
         RETURN source.id AS source_id,
+               source.source_type AS source_type,
                [target IN targets | target.id] AS produced_targets,
                [target IN live_targets | target.id] AS live_targets,
                source.produced_sn_id AS produced_sn_id,
                mapped_ids
         ORDER BY source.id
-        """
+        """,
+        projection_source_types=sorted(_UPSTREAM_PROJECTION_SOURCE_TYPES),
     )
-    return [dict(row) for row in rows or []]
+    return [
+        item
+        for row in rows or []
+        if _semantic_source_mirrors_disagree(item := dict(row))
+    ]
 
 
 _SEMANTIC_SOURCE_REPAIR_INSPECTION = """

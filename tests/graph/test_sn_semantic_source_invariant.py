@@ -11,9 +11,10 @@ kept in three places which must agree:
 1. the ``PRODUCED_NAME`` edge — the source of truth, and single-valued: exactly
    one *live* target (a target at ``superseded``/``exhausted`` is dead history);
 2. the ``produced_sn_id`` scalar mirror, denormalised for cheap filtering;
-3. the upstream projection — the backing ``IMASNode``/``FacilitySignal`` reached
-   via ``FROM_DD_PATH``/``FROM_SIGNAL`` must carry a ``HAS_STANDARD_NAME`` edge
-   to that same name.
+3. for DD and facility-signal sources, the upstream projection — the backing
+   ``IMASNode``/``FacilitySignal`` reached via ``FROM_DD_PATH``/``FROM_SIGNAL``
+   must carry a ``HAS_STANDARD_NAME`` edge to that same name. Catalog, manual,
+   and derived sources have no such upstream carrier.
 
 Every name-changing route (refine, edit, compact, cascade rename) is required to
 move all three together — that is what ``retarget_standard_name_sources`` and
@@ -66,7 +67,9 @@ def _classify(violation: dict[str, Any]) -> str:
         return "more than one live PRODUCED_NAME target"
     if violation.get("produced_sn_id") != live[0]:
         return "produced_sn_id scalar disagrees with the PRODUCED_NAME edge"
-    if live[0] not in (violation.get("mapped_ids") or []):
+    if violation.get("source_type") in {"dd", "signals"} and live[0] not in (
+        violation.get("mapped_ids") or []
+    ):
         return "backing DD path / signal lacks the HAS_STANDARD_NAME projection"
     return "unclassified mirror disagreement"
 
@@ -81,7 +84,7 @@ def _describe(violation: dict[str, Any]) -> str:
 
 
 class TestSemanticSourceLedgerInvariant:
-    """The three current-target mirrors of a live semantic source must agree."""
+    """Each source's applicable current-target mirrors must agree."""
 
     def test_no_semantic_source_mirror_disagreements(self, sn_graph):
         """Every composed/attached source has exactly one agreed current target.
@@ -90,8 +93,8 @@ class TestSemanticSourceLedgerInvariant:
         ``extracted``, or retired to ``vocab_gap``/``failed``/``stale``, has no
         current target to agree about. For the in-scope sources the assertion is
         the full invariant: one live ``PRODUCED_NAME`` target, the
-        ``produced_sn_id`` scalar equal to it, and the backing DD path / signal
-        projecting ``HAS_STANDARD_NAME`` onto it.
+        ``produced_sn_id`` scalar equal to it, and, for DD/signal sources, the
+        backing node projecting ``HAS_STANDARD_NAME`` onto it.
 
         The failure message groups offenders by which mirror disagrees, so the
         count per class points straight at the writer that stranded it.

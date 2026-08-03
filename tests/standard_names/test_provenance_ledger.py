@@ -57,6 +57,74 @@ def test_find_provenance_orphans_query_excludes_dead_and_error_siblings():
     assert "NOT" in flat
 
 
+@pytest.mark.parametrize(
+    ("row", "expected_ids"),
+    [
+        (
+            {
+                "sn_id": "relationship_scaffold",
+                "name_stage": None,
+                "docs_stage": None,
+                "status": None,
+                "validation_status": None,
+                "origin": None,
+            },
+            [],
+        ),
+        (
+            {
+                "sn_id": "pending_materialized_name",
+                "name_stage": "pending",
+                "docs_stage": None,
+                "status": None,
+                "validation_status": None,
+                "origin": "derived",
+            },
+            ["pending_materialized_name"],
+        ),
+        (
+            {
+                "sn_id": "partial_catalog_name",
+                "name_stage": None,
+                "docs_stage": None,
+                "status": "draft",
+                "validation_status": None,
+                "origin": "catalog_edit",
+            },
+            ["partial_catalog_name"],
+        ),
+        (
+            {
+                "sn_id": "dead_name",
+                "name_stage": "superseded",
+                "docs_stage": "accepted",
+                "status": "draft",
+                "validation_status": "valid",
+                "origin": "pipeline",
+            },
+            [],
+        ),
+    ],
+)
+def test_find_provenance_orphans_requires_live_lifecycle_materialization(
+    row, expected_ids
+):
+    from imas_codex.standard_names.ledger import find_provenance_orphans
+
+    gc = MagicMock()
+    gc.query.return_value = [row]
+
+    orphans = find_provenance_orphans(gc=gc)
+
+    assert [item["sn_id"] for item in orphans] == expected_ids
+    flat = " ".join(_captured_query(gc).split())
+    assert "sn.name_stage IS NOT NULL" in flat
+    assert "sn.docs_stage IS NOT NULL" in flat
+    assert "sn.status IS NOT NULL" in flat
+    assert "sn.validation_status IS NOT NULL" in flat
+    assert "sn.origin IS NOT NULL" in flat
+
+
 # ---------------------------------------------------------------------------
 # reattach_produced_name_edges — heal live scalar/missing-edge desyncs
 # ---------------------------------------------------------------------------
