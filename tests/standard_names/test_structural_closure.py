@@ -6,6 +6,7 @@ import json
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
+from datetime import UTC, datetime, timedelta, timezone
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
@@ -68,6 +69,15 @@ def test_manifest_is_exact_deterministic_and_hash_bound(tmp_path: Path) -> None:
     assert manifest.root_ids == ("convected_velocity", "velocity_due_to_convection")
     assert manifest.manifest_hash == sha256(manifest_path.read_bytes()).hexdigest()
     assert tuple(row["root_id"] for row in manifest.rows) == manifest.root_ids
+
+
+def test_event_hash_is_stable_across_equivalent_temporal_hydration() -> None:
+    instant = datetime(2026, 8, 3, 16, 25, 40, 931156, tzinfo=UTC)
+    hydrated = instant.astimezone(timezone(timedelta(hours=2)))
+
+    assert closure._event_hash({"changed_at": instant}) == closure._event_hash(
+        {"changed_at": hydrated}
+    )
 
 
 def test_manifest_refuses_duplicates_unknown_actions_and_protected_rows(
@@ -373,6 +383,107 @@ def _seed_electric_vector_parent(client: GraphClient) -> None:
         }]->(parent)
         """
     )
+
+
+def _seed_production_shaped_structural_cohort(
+    client: GraphClient,
+) -> dict[str, dict[str, Any]]:
+    """Seed fourteen roots whose mutations emit twenty-eight ledger events."""
+    _seed_vector_parent(client)
+    _seed_electric_vector_parent(client)
+    client.query(
+        """
+        CREATE (parent:StandardName {
+          id: 'vacuum_magnetic_field', origin: 'derived', name_stage: 'accepted'
+        })
+        CREATE (radial:StandardName {
+          id: 'radial_vacuum_magnetic_field', origin: 'derived',
+          name_stage: 'accepted', unit: 'T'
+        })
+        CREATE (toroidal:StandardName {
+          id: 'toroidal_vacuum_magnetic_field', origin: 'derived',
+          name_stage: 'accepted', unit: 'T'
+        })
+        CREATE (unit:Unit {id: 'T'})
+        CREATE (:StandardNameSource {
+          id: 'derived:radial_vacuum_magnetic_field', status: 'composed'
+        })-[:PRODUCED_NAME]->(radial)
+        CREATE (:StandardNameSource {
+          id: 'derived:toroidal_vacuum_magnetic_field', status: 'composed'
+        })-[:PRODUCED_NAME]->(toroidal)
+        CREATE (radial)-[:HAS_UNIT]->(unit)
+        CREATE (toroidal)-[:HAS_UNIT]->(unit)
+        CREATE (radial)-[:HAS_PARENT {
+          operator_kind: 'projection', axis: 'radial'
+        }]->(parent)
+        CREATE (toroidal)-[:HAS_PARENT {
+          operator_kind: 'projection', axis: 'toroidal'
+        }]->(parent)
+        """
+    )
+    retired_roots = [
+        "count_due_to_gas_injection",
+        "count_due_to_pellet_injection",
+        "field_aligned_convection_velocity",
+        "flux_due_to_perturbed_parallel_vector_potential",
+        "flux_due_to_recycling",
+        "opacity_at_ece_channel_emission_position",
+        "phase_of_fiber_optic_current_sensor",
+        "power_at_wall",
+        "pressure_of_gyrokinetic_eigenmode",
+        "temperature_over_scrape_off_layer",
+        "volumetric_source_rate",
+    ]
+    rows = []
+    for index, root_id in enumerate(retired_roots):
+        scaffold_count = 2 if index < 3 else 1
+        rows.append(
+            {
+                "root_id": root_id,
+                "scaffold_ids": [
+                    f"unmaterialized_operand_{word}_of_{root_id}"
+                    for word in ("first", "second")[:scaffold_count]
+                ],
+            }
+        )
+    client.query(
+        """
+        UNWIND $rows AS row
+        CREATE (root:StandardName {
+          id: row.root_id, origin: 'derived', name_stage: 'drafted'
+        })
+        WITH root, row
+        UNWIND row.scaffold_ids AS scaffold_id
+        CREATE (scaffold:StandardName {id: scaffold_id, origin: 'derived'})
+        CREATE (scaffold)-[:HAS_PARENT {operator_kind: 'binary'}]->(root)
+        """,
+        rows=rows,
+    )
+    specifications: dict[str, dict[str, Any]] = {
+        "magnetic_field": {
+            "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+        },
+        "electric_field": {
+            "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+        },
+        "vacuum_magnetic_field": {
+            "expected_actions": [SEED_ACCEPTED_PARENT_SOURCE],
+        },
+    }
+    specifications.update(
+        {
+            row["root_id"]: {
+                "expected_actions": [
+                    EXCLUDE_NULL_SCAFFOLD,
+                    RETIRE_UNREACHABLE_CHAIN,
+                ],
+                "retire_ids": [row["root_id"]],
+                "scaffold_ids": row["scaffold_ids"],
+            }
+            for row in rows
+        }
+    )
+    return specifications
 
 
 class _CountingTransaction:
@@ -1161,3 +1272,50 @@ def test_event_record_tamper_fails_hash_postflight_and_rolls_back(
         RETURN parent.name_stage AS stage, count(source) AS sources
         """
     ) == [{"stage": None, "sources": 0}]
+
+
+@pytest.mark.graph
+def test_production_shaped_event_batch_round_trips_and_tamper_rolls_back(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    specifications = _seed_production_shaped_structural_cohort(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path, structural_graph, specifications
+    )
+
+    applied = closure.reconcile_structural_closure(
+        manifest,
+        dry_run=False,
+        expected_manifest_hash=manifest_hash,
+        gc=structural_graph,
+    )
+
+    assert applied["counts"]["allowlisted"] == 14
+    assert applied["counts"]["changed"] == 28
+    assert len(applied["events"]) == 28
+    persisted = structural_graph.query(
+        """
+        MATCH (change:StandardNameChange)
+        RETURN change.id AS id, properties(change) AS record
+        ORDER BY id
+        """
+    )
+    assert {row["id"]: closure._event_hash(row["record"]) for row in persisted} == {
+        event["id"]: event["hash"] for event in applied["events"]
+    }
+
+    structural_graph.query("MATCH (node) DETACH DELETE node")
+    specifications = _seed_production_shaped_structural_cohort(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path, structural_graph, specifications
+    )
+    with pytest.raises(StructuralClosureConflict, match="record hash changed"):
+        closure.reconcile_structural_closure(
+            manifest,
+            dry_run=False,
+            expected_manifest_hash=manifest_hash,
+            gc=_EventTamperClient(structural_graph),
+        )
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
