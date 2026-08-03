@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -749,6 +749,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-integrated-guard-verification" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>The previously landed deterministic guards passed integrated verification.</strong> Exact main <code>a74966f4</code> passed 124 focused tests with four graph-marked cases deselected on <code>sun_debug</code>. Checker semantics, atomic generated supersession, recovery replay post-consistency ordering, exact adjudication, and the source-authority substrate all passed. Evidence: <code>/tmp/s7_integrated_guards_verification.json</code>, SHA-256 <code>9d3cb21e1bb57d2e10f446f890c024f7b4cc4e2672baffdfcc5e69bcae69c95e</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-source-authority-operators" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Source-authority closure now has one independently verified operator surface.</strong> Merge <code>05848f47</code> lands dry-run-first, hash-bound, typed reconciliation for identity-scalar repair, current-snapshot adoption, from-null admission, duplicate-source fold, and nonparticipating-source retirement. Exact manifests are homogeneous; participant and relationship closures are locked and reread; mixed, stale, overlapping, competing, protected, generated, cardinality, and postflight states fail closed; multirow mutation is atomic and idempotent. Final disposable-Neo4j verification at <code>1c7ee751</code> passed 30/30 with zero skips using a correctly provisioned server and a normal allocation exit. Evidence: <code>/tmp/s7_authority_operator_final2_verification.json</code>, SHA-256 <code>8db045596d6d3efc85747435ca53d09fde7480e44eb070c4277137a2a8fab5e7</code>. No live repair has been applied; exact current dry-run manifests and independent approval remain required.</p></div>
 </div>
 </section>
 </main>
