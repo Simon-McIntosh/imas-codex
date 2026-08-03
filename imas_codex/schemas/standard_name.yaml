@@ -2370,6 +2370,17 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_SNAPSHOT_ADOPTION
+      unit_cache_corrections:
+        description: >-
+          Immutable governed corrections of only the non-authoritative DD unit
+          cache from a uniquely current DD node and HAS_UNIT relationship. The
+          source's pinned historical DD version and every other snapshot field
+          remain unchanged.
+        multivalued: true
+        range: StandardNameSourceUnitCacheCorrection
+        inlined: false
+        annotations:
+          relationship_type: HAS_UNIT_CACHE_CORRECTION
       snapshot_admissions:
         description: >-
           Immutable governed admissions of a previously unpinned source to the
@@ -2513,7 +2524,11 @@ classes:
       dd_data_type:
         description: Immutable DD data type captured at extraction.
       dd_unit:
-        description: Immutable normalized DD unit captured at extraction.
+        description: >-
+          Normalized DD unit cache initialized at extraction. Current IMASNode
+          and HAS_UNIT state remain authoritative; a governed unit-cache
+          correction may update this cache without rewriting the pinned
+          historical snapshot.
       dd_coordinates:
         description: Immutable coordinate path/spec identifiers at extraction.
         multivalued: true
@@ -2636,6 +2651,40 @@ classes:
       reason: {required: true, description: Operator-provided reason for the governed adoption.}
       run_id: {required: true, description: Identifier shared by every event in one atomic invocation.}
       adopted_at: {required: true, range: datetime, description: Transaction timestamp at which adoption committed.}
+
+  StandardNameSourceUnitCacheCorrection:
+    description: >-
+      Immutable receipt for an atomic correction of only a DD source's
+      non-authoritative unit cache from a uniquely current IMASNode and exact
+      HAS_UNIT relationship. The pinned source DD version and every other
+      source property and relationship remain unchanged.
+    class_uri: sn:StandardNameSourceUnitCacheCorrection
+    attributes:
+      id: {identifier: true, required: true, description: Stable content-derived event identifier.}
+      source_id: {required: true, description: Exact stable StandardNameSource identity corrected.}
+      operation: {required: true, description: Governed operation name recorded by the manifest-bound transaction.}
+      source_dd_version: {required: true, description: Historical DD version that remains pinned on the source.}
+      authority_dd_version: {required: true, description: Uniquely current DD version supplying unit authority.}
+      authority_node_id: {required: true, description: Exact IMASNode path supplying current unit authority.}
+      from_unit: {required: true, description: Exact source dd_unit cache value before correction.}
+      to_unit: {required: true, description: Exact agreeing IMASNode unit and HAS_UNIT target value.}
+      before_snapshot_hash: {required: true, description: SHA-256 of the complete source snapshot before correction.}
+      after_snapshot_hash: {required: true, description: SHA-256 of the snapshot with only dd_unit corrected.}
+      before_snapshot_payload: {required: true, description: Complete canonical source snapshot before correction.}
+      after_snapshot_payload: {required: true, description: Complete canonical snapshot with only dd_unit corrected.}
+      authority_hash: {required: true, description: SHA-256 of the complete current DD node and version authority closure.}
+      authority_identity_hash:
+        required: true
+        description: >-
+          SHA-256 of exact source, backing node, current DD version, and unit
+          identities.
+      authority_relationships_hash: {required: true, description: SHA-256 of exact FROM_DD_PATH and HAS_UNIT relationship identities and properties.}
+      precondition_hash: {required: true, description: SHA-256 of the exact fenced graph precondition.}
+      preserved_state_hash: {required: true, description: SHA-256 of every source property other than dd_unit and every preserved relationship.}
+      manifest_hash: {required: true, description: SHA-256 of the exact manifest bytes authorizing the correction.}
+      reason: {required: true, description: Operator-provided reason for the governed correction.}
+      run_id: {required: true, description: Identifier shared by every event in one atomic invocation.}
+      corrected_at: {required: true, range: datetime, description: Transaction timestamp at which the correction committed.}
 
   StandardNameSourceSnapshotAdmission:
     description: >-

@@ -9,14 +9,17 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+import yaml
 
 from imas_codex.standard_names import source_authority_reconciliation as reconciliation
 from imas_codex.standard_names.source_authority import (
     SNAPSHOT_FIELDS,
     SNAPSHOT_MUTABLE_FIELDS,
+    canonical_payload,
     capture_source_authority_closure,
     participant_ids,
     payload_hash,
+    source_snapshot,
 )
 
 
@@ -268,6 +271,9 @@ def _manifest_for(
     extras: dict[str, object] = {}
     if operation == reconciliation.REPAIR_IDENTITY_SCALAR:
         mutable = frozenset({"source_id"})
+    elif operation == reconciliation.RECONCILE_UNIT_CACHE:
+        mutable = frozenset({"dd_unit"})
+        extras = {"expected_dd_unit": row["sources"][0]["properties"]["dd_unit"]}
     elif operation == reconciliation.RETIRE_NONPARTICIPATING_SOURCE:
         assert target_id is not None
         preserved = reconciliation._retirement_preserved_row(row, target_id)
@@ -298,6 +304,16 @@ def _manifest_for(
         authorized_source_ids=frozenset({f"dd:{path}"}),
         mutable_source_fields=mutable,
     )
+    if operation == reconciliation.RECONCILE_UNIT_CACHE:
+        authority_identity_hash, authority_relationships_hash = (
+            reconciliation._unit_cache_authority_hashes(closure)
+        )
+        extras.update(
+            {
+                "expected_authority_identity_hash": authority_identity_hash,
+                "expected_authority_relationships_hash": (authority_relationships_hash),
+            }
+        )
     preserved_closure = capture_source_authority_closure(
         preserved,
         manifest_hash="manifest-hash",
@@ -391,6 +407,14 @@ def _minimal_manifest_row(operation: str, source_id: str) -> dict[str, object]:
                 "expected_node_category": "structural",
                 "expected_target_id": "placeholder_name",
                 "expected_retirement_destructive_closure_hash": "e" * 64,
+            }
+        )
+    elif operation == reconciliation.RECONCILE_UNIT_CACHE:
+        row.update(
+            {
+                "expected_dd_unit": "stale-unit",
+                "expected_authority_identity_hash": "e" * 64,
+                "expected_authority_relationships_hash": "f" * 64,
             }
         )
     return row
@@ -800,3 +824,297 @@ def test_relationship_lock_requires_exact_cardinality() -> None:
     cypher = transaction.run.call_args.args[0]
     assert "SET relationship._source_authority_lock" in cypher
     assert "REMOVE relationship._source_authority_lock" in cypher
+
+
+def _stale_unit_row(*, target_id: str | None = None) -> dict[str, object]:
+    row = _base_row(
+        source_id_value="diagnostic/channel/value",
+        snapshot="current",
+        target_id=target_id,
+        target_stage="accepted" if target_id else None,
+    )
+    row["sources"][0]["properties"]["dd_unit"] = "stale-unit"
+    return row
+
+
+@pytest.mark.parametrize("target_id", [None, "accepted_target"])
+def test_unit_cache_plan_is_independent_of_target_presence(
+    target_id: str | None,
+) -> None:
+    row = _stale_unit_row(target_id=target_id)
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+
+    plans, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert not refusals
+    assert plans[0]["status"] == "planned"
+    assert plans[0]["mutation"] == {"after_dd_unit": "V"}
+    event = plans[0]["event"]
+    assert event["id"].startswith("source-unit-cache-reconciliation:")
+    assert event["before_snapshot_payload"] != event["after_snapshot_payload"]
+    assert event["operation"] == reconciliation.RECONCILE_UNIT_CACHE
+    assert event["source_dd_version"] == "4.1.1"
+    assert event["authority_dd_version"] == "4.1.1"
+    assert event["from_unit"] == "stale-unit"
+    assert event["to_unit"] == "V"
+    assert event["manifest_hash"] == manifest.manifest_hash
+    assert "classification" not in event
+
+
+def test_unit_cache_event_records_cross_version_authority_without_migration() -> None:
+    row = _stale_unit_row()
+    row["sources"][0]["properties"]["dd_version"] = "4.1.0"
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+
+    plans, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert not refusals
+    event = plans[0]["event"]
+    expected_before = source_snapshot(row["sources"][0]["properties"])
+    expected_after = copy.deepcopy(expected_before)
+    expected_after["dd_unit"] = "V"
+    assert event["source_dd_version"] == "4.1.0"
+    assert event["authority_dd_version"] == "4.1.1"
+    assert event["before_snapshot_payload"] == canonical_payload(expected_before)
+    assert event["after_snapshot_payload"] == canonical_payload(expected_after)
+
+
+@pytest.mark.parametrize(
+    ("mutate", "expected_reason"),
+    [
+        (
+            lambda row: row["sources"][0]["properties"].__setitem__(
+                "claim_token", "claimed"
+            ),
+            "source has an active worker or bounded-drain claim",
+        ),
+        (
+            lambda row: row["sources"][0]["properties"].__setitem__(
+                "source_type", "generated"
+            ),
+            "stable source identity or source type is inconsistent",
+        ),
+        (
+            lambda row: row["nodes"][0]["properties"].__setitem__("unit", "A"),
+            "unit scalar and relationship authority disagree",
+        ),
+        (
+            lambda row: row["nodes"][0].__setitem__("units", []),
+            "unit cache reconciliation requires one exact HAS_UNIT authority",
+        ),
+        (
+            lambda row: row["sources"][0]["properties"].__setitem__("dd_version", None),
+            "unit cache reconciliation requires an exact pinned source DD version",
+        ),
+    ],
+)
+def test_unit_cache_refuses_untrusted_authority_or_source_state(
+    mutate, expected_reason: str
+) -> None:
+    row = _stale_unit_row()
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+    mutate(row)
+
+    _, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert expected_reason in refusals[0]["reasons"]
+
+
+def test_unit_cache_refuses_cache_drift_from_manifest_precondition() -> None:
+    row = _stale_unit_row()
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+    row["sources"][0]["properties"]["dd_unit"] = "another-stale-unit"
+
+    _, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert (
+        "cached dd_unit differs from the manifest precondition"
+        in refusals[0]["reasons"]
+    )
+
+
+def test_unit_cache_refuses_manifest_relationship_authority_drift() -> None:
+    row = _stale_unit_row()
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+    manifest.rows[0]["expected_authority_relationships_hash"] = "0" * 64
+
+    _, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert (
+        "manifest expected_authority_relationships_hash drifted"
+        in (refusals[0]["reasons"])
+    )
+
+
+def test_unit_cache_refuses_protected_direct_source_but_not_target_producer() -> None:
+    row = _stale_unit_row(target_id="accepted_target")
+    protection = row["target_protection"]
+    protection["targets"][0]["matches"][0]["producers"].append(
+        {
+            "source_element_id": "west-source-element",
+            "source_labels": ["StandardNameSource"],
+            "source_properties": {
+                "id": "signals:west:diagnostic/value",
+                "source_type": "signal",
+            },
+            "binding_element_id": "west-binding",
+            "binding_properties": {},
+        }
+    )
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+
+    plans, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert not refusals
+    assert plans[0]["status"] == "planned"
+
+    protection["direct_sources"][0]["matches"][0]["properties"]["id"] = (
+        "signals:west:diagnostic/value"
+    )
+    _, protected_refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+    assert "direct source identity intersects WEST" in protected_refusals[0]["reasons"]
+
+
+def test_unit_cache_idempotence_requires_exact_immutable_event() -> None:
+    row = _stale_unit_row()
+    manifest = _manifest_for(row, reconciliation.RECONCILE_UNIT_CACHE)
+    planned, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+    assert not refusals
+    event = planned[0]["event"]
+    current = copy.deepcopy(row)
+    current["sources"][0]["properties"]["dd_unit"] = "V"
+    event_entry = {
+        "relationship_type": "HAS_UNIT_CACHE_CORRECTION",
+        "event_labels": ["StandardNameSourceUnitCacheCorrection"],
+        "event_properties": event,
+    }
+
+    repeated, repeated_refusals = reconciliation._plan_rows(
+        [current],
+        manifest,
+        events_by_source={manifest.source_ids[0]: [event_entry]},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="repeat",
+        changed_at="2026-08-03T00:01:00+00:00",
+    )
+    assert not repeated_refusals
+    assert repeated[0]["status"] == "already_current"
+
+    tampered = copy.deepcopy(event_entry)
+    tampered["event_properties"]["authority_hash"] = "0" * 64
+    _, tampered_refusals = reconciliation._plan_rows(
+        [current],
+        manifest,
+        events_by_source={manifest.source_ids[0]: [tampered]},
+        duplicates_by_source={},
+        reason="align the source unit cache with DD authority",
+        run_id="repeat",
+        changed_at="2026-08-03T00:01:00+00:00",
+    )
+    assert (
+        "current unit cache lacks one matching reconciliation event"
+        in (tampered_refusals[0]["reasons"])
+    )
+
+
+def test_unit_cache_apply_query_mutates_only_cache_and_ledger() -> None:
+    query = reconciliation._APPLY_QUERIES[reconciliation.RECONCILE_UNIT_CACHE]
+
+    assert "SET source.dd_unit = item.after_dd_unit" in query
+    assert "HAS_UNIT_CACHE_CORRECTION" in query
+    assert "StandardNameSourceUnitCacheCorrection" in query
+    assert "HAS_SNAPSHOT_ADOPTION" not in query
+    for field in SNAPSHOT_FIELDS:
+        if field != "dd_unit":
+            assert f"source.{field}" not in query
+
+
+def test_unit_cache_correction_has_a_distinct_linkml_contract() -> None:
+    schema_path = (
+        Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
+    )
+    schema = yaml.safe_load(schema_path.read_text())
+    source = schema["classes"]["StandardNameSource"]["attributes"]
+    correction = schema["classes"]["StandardNameSourceUnitCacheCorrection"]
+
+    assert source["unit_cache_corrections"]["range"] == (
+        "StandardNameSourceUnitCacheCorrection"
+    )
+    assert (
+        source["unit_cache_corrections"]["annotations"]["relationship_type"]
+        == "HAS_UNIT_CACHE_CORRECTION"
+    )
+    assert {
+        "source_dd_version",
+        "authority_dd_version",
+        "from_unit",
+        "to_unit",
+        "authority_identity_hash",
+        "authority_relationships_hash",
+        "manifest_hash",
+    } <= set(correction["attributes"])
