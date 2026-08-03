@@ -4730,7 +4730,10 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                 r.comments_per_dim_json = b.comments_per_dim_json,
                 r.suggested_name = b.suggested_name,
                 r.suggestion_justification = b.suggestion_justification,
-                r.reviewed_at = b.reviewed_at,
+                r.reviewed_at = CASE
+                    WHEN b.reviewed_at IS NULL THEN NULL
+                    ELSE datetime(b.reviewed_at)
+                END,
                 r.review_axis = b.review_axis,
                 r.cycle_index = b.cycle_index,
                 r.review_group_id = b.review_group_id,
@@ -4742,7 +4745,10 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                 r.llm_tokens_out = b.llm_tokens_out,
                 r.llm_tokens_cached_read = b.llm_tokens_cached_read,
                 r.llm_tokens_cached_write = b.llm_tokens_cached_write,
-                r.llm_at = b.llm_at,
+                r.llm_at = CASE
+                    WHEN b.llm_at IS NULL THEN NULL
+                    ELSE datetime(b.llm_at)
+                END,
                 r.llm_service = b.llm_service,
                 r.codex_version = b.codex_version,
                 r.isn_version = b.isn_version
