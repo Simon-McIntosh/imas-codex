@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="48">
+<meta name="plan-version" content="49">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -737,6 +737,18 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260802T233326484861" data-who="" data-when="">
     <div class="r-comment-body"><p><strong>WEST remains semantically isolated but has visible quality findings.</strong> All 355 manifest sources are present and semantic-source violations remain zero. The current global guard flags eight direct WEST attachments, and one produced name (<code>inner_normalized…half_width</code>) fails strict parsing; these are separate repair nodes and were not changed by the graph-wide bounded work. Test fixtures remain 72 isolated nodes with zero edges or integrity intersections.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-process-termination-diagnosis" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Repeated <code>Killed</code> output has three proven causes, not one code defect.</strong> The login user slice is capped at 64 GiB with zero swap; about 38 GiB of duplicated worktree virtual environments had been placed on <code>/run/user/39486</code> tmpfs and charged as shared memory, so ordinary editable <code>uv run</code> rebuilds crossed the cap and received kernel SIGKILL. Conservative fleet cleanup removed only clean, main-reachable worktrees, reducing tmpfs use from 43 GiB to 7.1 GiB and slice use from about 64 GiB to 26.7 GiB without terminating a process. Separately, old search regressions hit pytest's 30-second watchdog during Bolt reads; a later <code>srun: task 0: Killed</code> occurred only after pytest completed when the verifier explicitly cancelled its SLURM allocation at 535 MiB RSS. Future worktrees use persistent compute-visible storage, heavy runs stay on SLURM, and allocations exit normally.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-search-workload-runtime" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Search workload scoping is integrated but its runtime gate remains open.</strong> Merges <code>a6aca549</code> and <code>3807fbd5</code> preserve explicit process-environment precedence, avoid graph probes for non-graph collections, retain DDv4 COCOS 17 plus <code>psi_like</code>/<code>ip_like</code>, and move the complete 269-configuration grid to explicit benchmark CI. Unit/cache checks passed 15 tests and all 27 ordinary graph bodies executed, but the gate took 227.21 s with three 60+ s Bolt phases and failed current vector P@1 and BM25 MRR thresholds. The runtime result is FAIL, not hidden: exhaustive 203-query quality remains destined for slow benchmark CI while the default regression is being reduced to a representative production contract and corpus-once in-memory scoring.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-corrected-live-census" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Corrected checker semantics establish the new live baseline.</strong> Read-only artifact <code>/tmp/s7_corrected_checker_census.json</code> (SHA-256 <code>002a0cd6e983a82c3cb1cd295b071df7ef046e00365aac8836bedd801cea00bd</code>) reports 503 semantic violations: 335 multiple-live, 149 scalar mismatch, 17 missing-live, and two projection mismatch; materialized provenance orphans are 83. WEST intersects four semantic rows, all missing only the scalar while edge/projection agree, and zero orphans; fixtures intersect neither class. Mutation guards were identical before and after, with zero writes and zero paid calls.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-integrated-guard-verification" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>The previously landed deterministic guards passed integrated verification.</strong> Exact main <code>a74966f4</code> passed 124 focused tests with four graph-marked cases deselected on <code>sun_debug</code>. Checker semantics, atomic generated supersession, recovery replay post-consistency ordering, exact adjudication, and the source-authority substrate all passed. Evidence: <code>/tmp/s7_integrated_guards_verification.json</code>, SHA-256 <code>9d3cb21e1bb57d2e10f446f890c024f7b4cc4e2672baffdfcc5e69bcae69c95e</code>.</p></div>
 </div>
 </section>
 </main>
