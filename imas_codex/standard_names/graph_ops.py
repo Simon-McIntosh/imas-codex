@@ -3231,13 +3231,16 @@ def _materialize_derived_parent_rows(
         parent_id = row["parent_id"]
         child_data = row.get("child_data") or []
         edge_kinds = row.get("edge_kinds") or []
+        authorized_unit = row.get("authorized_unit")
         is_geometric = any(k == "coordinate" for k in edge_kinds)
 
         if infer_kind_from_existing_topology:
             kind = recompute_parent_kind(parent_id, gc)
         else:
             seedable_edge_kinds = {"projection", "coordinate", "unary_postfix"}
-            if not any(k in seedable_edge_kinds for k in edge_kinds):
+            if authorized_unit is None and not any(
+                k in seedable_edge_kinds for k in edge_kinds
+            ):
                 logger.debug(
                     "Parent %s has only non-seedable edges (%s) — skipping",
                     parent_id,
@@ -3271,7 +3274,9 @@ def _materialize_derived_parent_rows(
                 if not any(m in (c.get("id") or "").split("_") for m in _norm_markers)
             ]
         child_units = {c["unit"] for c in unit_children if c.get("unit")}
-        if is_geometric:
+        if authorized_unit is not None:
+            unit = str(authorized_unit)
+        elif is_geometric:
             unit = None
         elif len(child_units) > 1:
             logger.warning(
@@ -3494,6 +3499,8 @@ def _materialize_derived_parent_rows_batched(
     """Run the sanctioned parent materializer in two cohort-wide queries."""
     capture = _ParentMaterializationCapture()
     prepared_count = _materialize_derived_parent_rows(capture, parents)
+    if prepared_count != len(parents):
+        raise RuntimeError("authorized derived-parent materialization row was dropped")
     if len(capture.calls) != 2 * prepared_count:
         raise RuntimeError("derived-parent materialization preparation is incomplete")
     rows = []
@@ -3577,7 +3584,17 @@ def _materialize_derived_parent_rows_batched(
           SET change = row.event
           CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change)
         )
-        RETURN collect(parent.id) AS ids
+        WITH parent, row
+        OPTIONAL MATCH (parent)-[internal_change:HAS_INTERNAL_CHANGE]->
+                       (change:StandardNameChange {id: row.event.id})
+        RETURN collect(DISTINCT parent.id) AS ids,
+               collect(DISTINCT change.id) AS event_ids,
+               collect(DISTINCT CASE
+                   WHEN change IS NULL THEN null
+                   ELSE {event_id: change.id, parent_id: parent.id}
+               END) AS event_links,
+               count(DISTINCT change) AS event_count,
+               count(DISTINCT internal_change) AS event_link_count
         """,
         rows=rows,
     )
@@ -3597,13 +3614,45 @@ def _materialize_derived_parent_rows_batched(
         rows=rows,
     )
     expected = {str(row["parent_id"]) for row in rows}
+    expected_event_links = {
+        (str(row["event"]["id"]), str(row["parent_id"]))
+        for row in rows
+        if row["event"] is not None
+    }
+    expected_event_ids = {event_id for event_id, _ in expected_event_links}
     materialized_ids = (
         set(materialized[0].get("ids") or []) if len(materialized) == 1 else set()
+    )
+    materialized_event_ids = (
+        set(materialized[0].get("event_ids") or []) if len(materialized) == 1 else set()
+    )
+    materialized_event_links = (
+        {
+            (str(link["event_id"]), str(link["parent_id"]))
+            for link in materialized[0].get("event_links") or []
+        }
+        if len(materialized) == 1
+        else set()
+    )
+    event_count = (
+        int(materialized[0].get("event_count") or 0) if len(materialized) == 1 else 0
+    )
+    event_link_count = (
+        int(materialized[0].get("event_link_count") or 0)
+        if len(materialized) == 1
+        else 0
     )
     unit_ids = (
         set(linked_units[0].get("ids") or []) if len(linked_units) == 1 else set()
     )
-    if materialized_ids != expected or unit_ids != expected:
+    if (
+        materialized_ids != expected
+        or unit_ids != expected
+        or materialized_event_ids != expected_event_ids
+        or materialized_event_links != expected_event_links
+        or event_count != len(expected_event_ids)
+        or event_link_count != len(expected_event_links)
+    ):
         raise RuntimeError("batched derived-parent materialization cardinality changed")
     return len(expected)
 
