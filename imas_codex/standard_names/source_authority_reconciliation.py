@@ -54,6 +54,7 @@ ADOPT_CURRENT_SNAPSHOT = "adopt_current_snapshot"
 ADMIT_CURRENT_SNAPSHOT = "admit_current_snapshot"
 FOLD_DUPLICATE_SOURCE_IDENTITY = "fold_duplicate_source_identity"
 RETIRE_NONPARTICIPATING_SOURCE = "retire_nonparticipating_source"
+RECONCILE_UNIT_CACHE = "reconcile_unit_cache"
 
 _OPERATIONS = frozenset(
     {
@@ -62,6 +63,7 @@ _OPERATIONS = frozenset(
         ADMIT_CURRENT_SNAPSHOT,
         FOLD_DUPLICATE_SOURCE_IDENTITY,
         RETIRE_NONPARTICIPATING_SOURCE,
+        RECONCILE_UNIT_CACHE,
     }
 )
 
@@ -81,6 +83,7 @@ _EVENT_LABELS = {
     ADMIT_CURRENT_SNAPSHOT: "StandardNameSourceSnapshotAdmission",
     FOLD_DUPLICATE_SOURCE_IDENTITY: "StandardNameSourceIdentityFold",
     RETIRE_NONPARTICIPATING_SOURCE: "StandardNameSourceAuthorityRetirement",
+    RECONCILE_UNIT_CACHE: "StandardNameSourceSnapshotAdoption",
 }
 
 _EVENT_PREFIXES = {
@@ -89,6 +92,7 @@ _EVENT_PREFIXES = {
     ADMIT_CURRENT_SNAPSHOT: "source-snapshot-admission:",
     FOLD_DUPLICATE_SOURCE_IDENTITY: "source-identity-fold:",
     RETIRE_NONPARTICIPATING_SOURCE: "source-authority-retirement:",
+    RECONCILE_UNIT_CACHE: "source-unit-cache-reconciliation:",
 }
 
 _COMMON_ROW_FIELDS = frozenset(
@@ -128,6 +132,7 @@ _EXTRA_ROW_FIELDS = {
             "expected_retirement_destructive_closure_hash",
         }
     ),
+    RECONCILE_UNIT_CACHE: frozenset({"expected_dd_unit"}),
 }
 
 _AUTHORITY_EVENTS_QUERY = """
@@ -268,12 +273,25 @@ SET source.status = 'stale',
 RETURN collect(source.id) AS source_ids, collect(event.id) AS event_ids
 """
 
+_UNIT_CACHE_APPLY_QUERY = """
+// SOURCE_AUTHORITY_RECONCILE_UNIT_CACHE_APPLY
+UNWIND $items AS item
+MATCH (source:StandardNameSource {id: item.source_id})
+WHERE elementId(source) = item.source_element_id
+CREATE (event:StandardNameSourceSnapshotAdoption)
+SET event = item.event, event.adopted_at = datetime(item.event.adopted_at)
+CREATE (source)-[:HAS_SNAPSHOT_ADOPTION]->(event)
+SET source.dd_unit = item.after_dd_unit
+RETURN collect(source.id) AS source_ids, collect(event.id) AS event_ids
+"""
+
 _APPLY_QUERIES = {
     REPAIR_IDENTITY_SCALAR: _REPAIR_APPLY_QUERY,
     ADOPT_CURRENT_SNAPSHOT: _ADOPT_APPLY_QUERY,
     ADMIT_CURRENT_SNAPSHOT: _ADMIT_APPLY_QUERY,
     FOLD_DUPLICATE_SOURCE_IDENTITY: _FOLD_APPLY_QUERY,
     RETIRE_NONPARTICIPATING_SOURCE: _RETIRE_APPLY_QUERY,
+    RECONCILE_UNIT_CACHE: _UNIT_CACHE_APPLY_QUERY,
 }
 
 
@@ -424,6 +442,11 @@ def load_source_authority_manifest(path: str | Path) -> SourceAuthorityManifest:
                 row["expected_retirement_destructive_closure_hash"],
                 "expected_retirement_destructive_closure_hash",
             )
+        if operation == RECONCILE_UNIT_CACHE and (
+            not isinstance(row["expected_dd_unit"], str)
+            or not row["expected_dd_unit"].strip()
+        ):
+            raise ValueError("expected_dd_unit must be one non-empty unit string")
         normalized_rows.append(copy.deepcopy(row))
 
     normalized_rows.sort(key=lambda row: row["source_id"])
@@ -729,7 +752,13 @@ def _events_for_operation(
     events: list[dict[str, Any]], operation: str
 ) -> list[dict[str, Any]]:
     label = _EVENT_LABELS[operation]
-    return [event for event in events if label in (event.get("event_labels") or [])]
+    prefix = _EVENT_PREFIXES[operation]
+    return [
+        event
+        for event in events
+        if label in (event.get("event_labels") or [])
+        and str((event.get("event_properties") or {}).get("id", "")).startswith(prefix)
+    ]
 
 
 def _row_relationship_ids(row: dict[str, Any]) -> set[str]:
@@ -903,6 +932,8 @@ def _base_plan_context(
     mutable_fields = SNAPSHOT_MUTABLE_FIELDS
     if operation == REPAIR_IDENTITY_SCALAR:
         mutable_fields = frozenset({"source_id"})
+    elif operation == RECONCILE_UNIT_CACHE:
+        mutable_fields = frozenset({"dd_unit"})
     elif operation == RETIRE_NONPARTICIPATING_SOURCE:
         preserved_row = _retirement_preserved_row(
             row, str(manifest_row["expected_target_id"])
@@ -939,6 +970,16 @@ def _base_plan_context(
     protection = row.get("target_protection") or {}
     if not protection:
         reasons.append("protected target closure is missing")
+    elif operation == RECONCILE_UNIT_CACHE:
+        reasons.extend(
+            _target_protection_reasons(
+                {
+                    "direct_sources": protection.get("direct_sources") or [],
+                    "targets": [],
+                    "prospective_target_ids": [],
+                }
+            )
+        )
     else:
         reasons.extend(_target_protection_reasons(protection))
     current_version = closure.version["properties"].get("id")
@@ -1119,6 +1160,112 @@ def _plan_snapshot(
             "admitted_at": changed_at,
         }
     return "planned", event, reasons, {"after": after}
+
+
+def _plan_unit_cache(
+    closure: Any,
+    manifest_row: dict[str, Any],
+    events: list[dict[str, Any]],
+    *,
+    current_version: str,
+    reason: str,
+    run_id: str | None,
+    changed_at: str | None,
+) -> tuple[str, dict[str, Any] | None, list[str], dict[str, Any]]:
+    """Plan one same-version repair of the DD-authoritative unit cache only."""
+    source = closure.source
+    node = closure.node
+    properties = source["properties"]
+    node_properties = node["properties"]
+    units = node.get("units") or []
+    before = closure.before_snapshot
+    after = copy.deepcopy(before)
+    authoritative_unit = units[0].get("id") if len(units) == 1 else None
+    after["dd_unit"] = authoritative_unit
+    before_hash = _hash(before)
+    after_hash = _hash(after)
+    event_identity = {
+        "source_id": manifest_row["source_id"],
+        "before_snapshot_hash": before_hash,
+        "after_snapshot_hash": after_hash,
+        "authority_hash": closure.authority_hash,
+    }
+    event_id = _event_id(RECONCILE_UNIT_CACHE, event_identity)
+    expected_event = {
+        "source_id": manifest_row["source_id"],
+        "after_snapshot_hash": after_hash,
+        "authority_hash": closure.authority_hash,
+    }
+    identity_fields = (
+        "source_id",
+        "before_snapshot_hash",
+        "after_snapshot_hash",
+        "authority_hash",
+    )
+    if before.get("dd_unit") == authoritative_unit:
+        matches = _matching_state_events(
+            events,
+            RECONCILE_UNIT_CACHE,
+            expected=expected_event,
+            identity_fields=identity_fields,
+        )
+        if len(matches) == 1:
+            return (
+                "already_current",
+                matches[0],
+                [],
+                {"after_dd_unit": authoritative_unit},
+            )
+        return (
+            "refused",
+            None,
+            ["current unit cache lacks one matching reconciliation event"],
+            {},
+        )
+
+    reasons: list[str] = []
+    if properties.get("dd_unit") != manifest_row["expected_dd_unit"]:
+        reasons.append("cached dd_unit differs from the manifest precondition")
+    if not properties.get("dd_version"):
+        reasons.append(
+            "unit cache reconciliation requires an exact pinned source DD version"
+        )
+    if properties.get("dd_snapshot_pinned") is not True:
+        reasons.append("unit cache reconciliation requires a pinned source snapshot")
+    if len(units) != 1 or not authoritative_unit:
+        reasons.append(
+            "unit cache reconciliation requires one exact HAS_UNIT authority"
+        )
+    elif node_properties.get("unit") != authoritative_unit:
+        reasons.append("unit property and HAS_UNIT authority must agree exactly")
+    if any(
+        (entry.get("event_properties") or {}).get("id") == event_id for entry in events
+    ):
+        reasons.append("deterministic unit cache event already exists before repair")
+    event = {
+        "id": event_id,
+        "source_id": manifest_row["source_id"],
+        "dd_version": properties.get("dd_version"),
+        "before_snapshot_hash": before_hash,
+        "after_snapshot_hash": after_hash,
+        "before_snapshot_payload": canonical_payload(before),
+        "after_snapshot_payload": canonical_payload(after),
+        "authority_hash": closure.authority_hash,
+        "precondition_hash": closure.precondition_hash,
+        "preserved_state_hash": closure.preserved_state_hash,
+        "classification": classify_snapshot_change(
+            manifest_row["expected_from_dd_path"], before, after
+        ),
+        "reason": reason,
+        "run_id": run_id,
+        "adopted_at": changed_at,
+    }
+    return (
+        "planned",
+        event,
+        reasons,
+        {"after_dd_unit": authoritative_unit},
+    )
 
 
 def _plan_fold(
@@ -1464,6 +1611,16 @@ def _plan_rows(
                 run_id=run_id,
                 changed_at=changed_at,
             )
+        elif manifest.operation == RECONCILE_UNIT_CACHE:
+            status, event, operation_reasons, mutation = _plan_unit_cache(
+                closure,
+                manifest_row,
+                events,
+                current_version=str(current_version),
+                reason=reason,
+                run_id=run_id,
+                changed_at=changed_at,
+            )
         elif manifest.operation == FOLD_DUPLICATE_SOURCE_IDENTITY:
             status, event, operation_reasons, mutation = _plan_fold(
                 closure,
@@ -1538,7 +1695,9 @@ def _plan_rows(
             "status": status,
             "source_element_id": closure.source["element_id"],
             "before_snapshot_hash": before_snapshot_hash,
-            "after_snapshot_hash": _hash(closure.after_snapshot),
+            "after_snapshot_hash": (event or {}).get(
+                "after_snapshot_hash", _hash(closure.after_snapshot)
+            ),
             "authority_hash": plan_authority_hash,
             "precondition_hash": _hash(
                 {
