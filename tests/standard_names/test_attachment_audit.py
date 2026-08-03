@@ -464,6 +464,9 @@ class _GraphFixtureScope:
 
     _DELETE_ORDER = (
         "StandardNameChange",
+        "StandardNameSourceRetry",
+        "DocsRevision",
+        "Review",
         "StandardNameSource",
         "IMASNode",
         "StandardName",
@@ -524,6 +527,18 @@ class _GraphFixtureScope:
             dd_paths=dd_paths,
         )
         self.track("StandardNameChange", *(row["id"] for row in rows))
+        source_ids = sorted(self.created["StandardNameSource"])
+        if source_ids:
+            retry_rows = self.gc.query(
+                """
+                MATCH (source:StandardNameSource)-[:HAS_RETRY_EVENT]->
+                      (retry:StandardNameSourceRetry)
+                WHERE source.id IN $source_ids
+                RETURN DISTINCT retry.id AS id
+                """,
+                source_ids=source_ids,
+            )
+            self.track("StandardNameSourceRetry", *(row["id"] for row in retry_rows))
 
     def remaining_count(self) -> int:
         remaining = 0
@@ -585,6 +600,7 @@ def _seed_attachment(
     name_stage: str = "drafted",
     dd_unit: str = "m",
     sn_unit: str = "m",
+    source_status: str = "composed",
 ) -> str:
     """Create (source)-[:PRODUCED_NAME]->(name) with the DD-side projection."""
     source_node_id = f"dd:{dd_path}"
@@ -608,7 +624,7 @@ def _seed_attachment(
                 THEN sn.source_paths
                 ELSE coalesce(sn.source_paths, []) + ('dd:' + $dd_path) END
         MERGE (src:StandardNameSource {id: $source_node_id})
-          SET src.status      = 'composed',
+          SET src.status      = $source_status,
               src.source_type = 'dd',
               src.source_id   = $dd_path,
               src.produced_sn_id = $sn_id,
@@ -623,6 +639,7 @@ def _seed_attachment(
         dd_unit=dd_unit,
         sn_unit=sn_unit,
         source_node_id=source_node_id,
+        source_status=source_status,
     )
     return source_node_id
 
@@ -1956,12 +1973,28 @@ def _terminal_recovery_closure_row(
 def _terminal_recovery_manifest_payload(rows: list[dict[str, Any]]) -> dict[str, Any]:
     from imas_codex.standard_names import attachment_audit as mod
 
+    cohort_context: dict[str, dict[str, set[str]]] = {}
+    for row in rows:
+        target = cohort_context.setdefault(
+            row["sn_id"],
+            {
+                "source_ids": set(),
+                "dd_paths": set(),
+                "retry_event_ids": set(),
+                "change_event_ids": set(),
+            },
+        )
+        target["source_ids"].add(row["source_id"])
+        target["dd_paths"].add(row["dd_path"])
+        target["retry_event_ids"].add(f"future-retry:{row['source_id']}")
+        target["change_event_ids"].add(f"future-change:{row['source_id']}")
     manifest_rows = []
     for row in rows:
         hashes = mod._terminal_recovery_snapshot_hashes(
             row,
-            retry_event_id="future-retry-event",
-            change_event_id="future-change-event",
+            retry_event_id=f"future-retry:{row['source_id']}",
+            change_event_id=f"future-change:{row['source_id']}",
+            cohort_context=cohort_context,
         )
         manifest_rows.append(
             {
@@ -1987,7 +2020,33 @@ def _terminal_recovery_manifest_payload(rows: list[dict[str, Any]]) -> dict[str,
     }
 
 
+def _share_terminal_recovery_targets(rows: list[dict[str, Any]]) -> None:
+    """Make repeated target ids one shared in-memory graph participant."""
+    by_target: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        target_id = row["sn_id"]
+        candidate = row["names"][0]
+        shared = by_target.get(target_id)
+        if shared is None:
+            by_target[target_id] = candidate
+            continue
+        existing_relationship_ids = {
+            relationship["element_id"] for relationship in shared["relationships"]
+        }
+        shared["relationships"].extend(
+            relationship
+            for relationship in candidate["relationships"]
+            if relationship["type"] in {"PRODUCED_NAME", "HAS_STANDARD_NAME"}
+            and relationship["element_id"] not in existing_relationship_ids
+        )
+        for source_path in candidate["properties"]["source_paths"]:
+            if source_path not in shared["properties"]["source_paths"]:
+                shared["properties"]["source_paths"].append(source_path)
+        row["names"] = [shared]
+
+
 def _write_terminal_recovery_manifest(path: Path, rows: list[dict[str, Any]]) -> str:
+    _share_terminal_recovery_targets(rows)
     path.write_text(
         json.dumps(_terminal_recovery_manifest_payload(rows), sort_keys=True),
         encoding="utf-8",
@@ -2012,8 +2071,30 @@ class _BatchRecoveryTransaction:
         self.rolled_back = False
 
     def run(self, query: str, **params: Any):
-        if "TERMINAL_ATTACHMENT_RECOVERY_CLOSURE" in query:
-            return deepcopy(sorted(self.working, key=lambda row: row["source_id"]))
+        if "TERMINAL_ATTACHMENT_RECOVERY_SOURCES" in query:
+            return [
+                {
+                    "source_id": row["source_id"],
+                    "participants": deepcopy(row["sources"]),
+                }
+                for row in sorted(self.working, key=lambda item: item["source_id"])
+            ]
+        if "TERMINAL_ATTACHMENT_RECOVERY_NODES" in query:
+            return [
+                {
+                    "participant_id": row["dd_path"],
+                    "participants": deepcopy(row["nodes"]),
+                }
+                for row in sorted(self.working, key=lambda item: item["dd_path"])
+            ]
+        if "TERMINAL_ATTACHMENT_RECOVERY_NAMES" in query:
+            by_name: dict[str, list[dict[str, Any]]] = {}
+            for row in self.working:
+                by_name.setdefault(row["sn_id"], row["names"])
+            return [
+                {"participant_id": sn_id, "participants": deepcopy(by_name[sn_id])}
+                for sn_id in sorted(by_name)
+            ]
         if "SOURCE_SNAPSHOT_MIGRATION_LOCK" in query:
             if self.race and not self.raced:
                 self.working[0]["names"][0]["relationships"][-1]["properties"][
@@ -2022,7 +2103,7 @@ class _BatchRecoveryTransaction:
                 self.raced = True
             return [{"locked": len(params["element_ids"])}]
         if "TERMINAL_ATTACHMENT_RECOVERY_RELATIONSHIP_LOCK" in query:
-            return [{"locked": len(params["element_ids"])}]
+            return [{"locked": len(params["relationships"])}]
         if "TERMINAL_ATTACHMENT_RECOVERY_APPLY" not in query:
             raise AssertionError(query)
         source_ids: list[str] = []
@@ -2238,11 +2319,15 @@ def test_terminal_recovery_batch_is_atomic_and_idempotent(tmp_path: Path) -> Non
 
     assert first["mode"] == "applied"
     assert first["counts"]["applied"] == 9
+    assert {row["status"] for row in first["rows"]} == {"applied"}
     assert second["mode"] == "already_current"
     assert second["counts"]["already_current"] == 9
     for row in client.rows:
         source = row["sources"][0]
         name = row["names"][0]
+        cohort_size = sum(
+            candidate["sn_id"] == row["sn_id"] for candidate in client.rows
+        )
         assert source["properties"]["status"] == "extracted"
         assert source["properties"]["produced_sn_id"] is None
         assert row["source_id"] not in name["properties"]["source_paths"]
@@ -2266,7 +2351,7 @@ def test_terminal_recovery_batch_is_atomic_and_idempotent(tmp_path: Path) -> Non
                     == "recover_terminal_source_binding"
                 ]
             )
-            == 1
+            == cohort_size
         )
 
 
@@ -2402,6 +2487,375 @@ def test_terminal_recovery_race_and_partial_apply_roll_back(
     assert client.last_transaction is not None
     assert client.last_transaction.rolled_back is True
     assert client.last_transaction.committed is False
+
+
+def _seed_terminal_recovery_graph_cohort(
+    scope: _GraphFixtureScope,
+    target_sizes: list[int],
+) -> list[dict[str, str]]:
+    pairs: list[dict[str, str]] = []
+    for target_index, size in enumerate(target_sizes):
+        sn_id = scope.uid(f"terminal_target_{target_index}")
+        for source_index in range(size):
+            dd_path = scope.path(f"terminal/{target_index}/source/{source_index}")
+            source_id = _seed_attachment(
+                scope,
+                dd_path=dd_path,
+                sn_id=sn_id,
+                name_stage="superseded",
+                dd_unit="1",
+                sn_unit="1",
+                source_status="attached" if source_index % 2 else "composed",
+            )
+            pairs.append({"source_id": source_id, "dd_path": dd_path, "sn_id": sn_id})
+        unit_id = scope.uid(f"unit_{target_index}")
+        review_id = scope.uid(f"review_{target_index}")
+        revision_id = scope.uid(f"revision_{target_index}")
+        predecessor_id = scope.uid(f"predecessor_{target_index}")
+        scope.track("Unit", unit_id)
+        scope.track("Review", review_id)
+        scope.track("DocsRevision", revision_id)
+        scope.track("StandardName", predecessor_id)
+        scope.gc.query(
+            """
+            MATCH (name:StandardName {id: $sn_id})
+            SET name.protected_marker = 'preserved',
+                name.reviewer_score_name = 0.93,
+                name.reviewer_score_docs = 0.95,
+                name.cocos = 17
+            MERGE (unit:Unit {id: $unit_id}) SET unit.symbol = '1'
+            MERGE (review:Review {id: $review_id}) SET review.score = 0.93
+            MERGE (revision:DocsRevision {id: $revision_id})
+              SET revision.description = 'preserved revision'
+            MERGE (predecessor:StandardName {id: $predecessor_id})
+              SET predecessor.name_stage = 'superseded'
+            MERGE (name)-[:HAS_UNIT]->(unit)
+            MERGE (name)-[:HAS_REVIEW]->(review)
+            MERGE (revision)-[:DOCS_REVISION_OF]->(name)
+            MERGE (name)-[:REFINED_FROM]->(predecessor)
+            """,
+            sn_id=sn_id,
+            unit_id=unit_id,
+            review_id=review_id,
+            revision_id=revision_id,
+            predecessor_id=predecessor_id,
+        )
+    return sorted(pairs, key=lambda item: item["source_id"])
+
+
+def _write_graph_terminal_recovery_manifest(
+    gc: Any,
+    path: Path,
+    pairs: list[dict[str, str]],
+) -> str:
+    from imas_codex.standard_names import attachment_audit as mod
+
+    with gc.session() as session:
+        transaction = session.begin_transaction()
+        try:
+            rows = mod._read_terminal_recovery_rows(transaction, tuple(pairs))
+        finally:
+            transaction.rollback()
+    return _write_terminal_recovery_manifest(path, rows)
+
+
+def _terminal_recovery_graph_counts(gc: Any, pairs: list[dict[str, str]]) -> dict:
+    source_ids = [pair["source_id"] for pair in pairs]
+    dd_paths = [pair["dd_path"] for pair in pairs]
+    sn_ids = sorted({pair["sn_id"] for pair in pairs})
+    rows = gc.query(
+        """
+        MATCH (source:StandardNameSource)
+        WHERE source.id IN $source_ids
+        OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(:StandardName)
+        OPTIONAL MATCH (source)-[:HAS_RETRY_EVENT]->(retry:StandardNameSourceRetry)
+        WITH count(DISTINCT binding) AS bindings,
+             count(DISTINCT retry) AS retries
+        MATCH (node:IMASNode)
+        WHERE node.id IN $dd_paths
+        OPTIONAL MATCH (node)-[projection:HAS_STANDARD_NAME]->(:StandardName)
+        WITH bindings, retries, count(DISTINCT projection) AS projections
+        MATCH (name:StandardName)
+        WHERE name.id IN $sn_ids
+        OPTIONAL MATCH (name)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange)
+        OPTIONAL MATCH (name)-[:HAS_REVIEW]->(review:Review)
+        OPTIONAL MATCH (revision:DocsRevision)-[:DOCS_REVISION_OF]->(name)
+        OPTIONAL MATCH (name)-[:REFINED_FROM]->(predecessor:StandardName)
+        OPTIONAL MATCH (name)-[:HAS_UNIT]->(unit:Unit)
+        RETURN bindings, projections, retries,
+               count(DISTINCT change) AS changes,
+               count(DISTINCT review) AS reviews,
+               count(DISTINCT revision) AS revisions,
+               count(DISTINCT predecessor) AS predecessors,
+               count(DISTINCT unit) AS units,
+               collect(DISTINCT name.protected_marker) AS protected_markers
+        """,
+        source_ids=source_ids,
+        dd_paths=dd_paths,
+        sn_ids=sn_ids,
+    )
+    return dict(rows[0])
+
+
+class _TerminalRecoveryInjectedTransaction:
+    def __init__(
+        self,
+        transaction: Any,
+        *,
+        failure: str,
+        source_id: str,
+        target_id: str,
+    ) -> None:
+        self.transaction = transaction
+        self.failure = failure
+        self.source_id = source_id
+        self.target_id = target_id
+        self.injected = False
+
+    def run(self, query: str, **params: Any):
+        if (
+            "TERMINAL_ATTACHMENT_RECOVERY_RELATIONSHIP_LOCK" in query
+            and self.failure == "relationship_drift"
+            and not self.injected
+        ):
+            list(
+                self.transaction.run(
+                    """
+                    MATCH (source:StandardNameSource {id: $source_id})
+                          -[binding:PRODUCED_NAME]->
+                          (name:StandardName {id: $target_id})
+                    SET binding.concurrent_marker = 'drifted'
+                    RETURN count(binding) AS changed
+                    """,
+                    source_id=self.source_id,
+                    target_id=self.target_id,
+                )
+            )
+            self.injected = True
+            return self.transaction.run(query, **params)
+        if (
+            "TERMINAL_ATTACHMENT_RECOVERY_APPLY" in query
+            and self.failure == "mid_batch"
+        ):
+            list(self.transaction.run(query, **params))
+            raise RuntimeError("injected mid-batch failure")
+        return self.transaction.run(query, **params)
+
+    def commit(self) -> None:
+        self.transaction.commit()
+
+    def rollback(self) -> None:
+        self.transaction.rollback()
+
+
+class _TerminalRecoveryInjectedSession:
+    def __init__(
+        self,
+        session: Any,
+        *,
+        failure: str,
+        source_id: str,
+        target_id: str,
+    ) -> None:
+        self.session = session
+        self.failure = failure
+        self.source_id = source_id
+        self.target_id = target_id
+
+    def begin_transaction(self) -> _TerminalRecoveryInjectedTransaction:
+        return _TerminalRecoveryInjectedTransaction(
+            self.session.begin_transaction(),
+            failure=self.failure,
+            source_id=self.source_id,
+            target_id=self.target_id,
+        )
+
+
+class _TerminalRecoveryInjectedClient:
+    def __init__(
+        self,
+        gc: Any,
+        *,
+        failure: str,
+        source_id: str,
+        target_id: str,
+    ) -> None:
+        self.gc = gc
+        self.failure = failure
+        self.source_id = source_id
+        self.target_id = target_id
+
+    @contextmanager
+    def session(self):
+        with self.gc.session() as session:
+            yield _TerminalRecoveryInjectedSession(
+                session,
+                failure=self.failure,
+                source_id=self.source_id,
+                target_id=self.target_id,
+            )
+
+
+@pytest.mark.graph
+@pytest.mark.parametrize("shared_count", [2, 6])
+def test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent(
+    _gc: Any,
+    _clean: _GraphFixtureScope,
+    tmp_path: Path,
+    shared_count: int,
+) -> None:
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+
+    pairs = _seed_terminal_recovery_graph_cohort(_clean, [shared_count])
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest_hash = _write_graph_terminal_recovery_manifest(_gc, manifest, pairs)
+
+    first = recover_terminal_attachments(
+        manifest,
+        reason="recover exact shared terminal bindings",
+        apply=True,
+        expected_manifest_hash=manifest_hash,
+        gc=_gc,
+    )
+    second = recover_terminal_attachments(
+        manifest,
+        reason="recover exact shared terminal bindings",
+        apply=True,
+        expected_manifest_hash=manifest_hash,
+        gc=_gc,
+    )
+    counts = _terminal_recovery_graph_counts(_gc, pairs)
+
+    assert first["mode"] == "applied"
+    assert first["counts"]["applied"] == shared_count
+    assert {row["status"] for row in first["rows"]} == {"applied"}
+    assert second["mode"] == "already_current"
+    assert second["counts"]["already_current"] == shared_count
+    assert counts == {
+        "bindings": 0,
+        "projections": 0,
+        "retries": shared_count,
+        "changes": shared_count,
+        "reviews": 1,
+        "revisions": 1,
+        "predecessors": 1,
+        "units": 1,
+        "protected_markers": ["preserved"],
+    }
+
+
+@pytest.mark.graph
+def test_terminal_recovery_graph_mixed_unique_and_shared_targets(
+    _gc: Any, _clean: _GraphFixtureScope, tmp_path: Path
+) -> None:
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+
+    pairs = _seed_terminal_recovery_graph_cohort(_clean, [2, 1, 1])
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest_hash = _write_graph_terminal_recovery_manifest(_gc, manifest, pairs)
+
+    receipt = recover_terminal_attachments(
+        manifest,
+        reason="recover mixed exact terminal bindings",
+        apply=True,
+        expected_manifest_hash=manifest_hash,
+        gc=_gc,
+    )
+
+    assert receipt["mode"] == "applied"
+    assert receipt["counts"]["applied"] == 4
+    counts = _terminal_recovery_graph_counts(_gc, pairs)
+    assert counts["bindings"] == counts["projections"] == 0
+    assert counts["retries"] == counts["changes"] == 4
+    assert counts["reviews"] == counts["revisions"] == 3
+
+
+@pytest.mark.graph
+def test_terminal_recovery_graph_stale_sibling_refuses_before_writes(
+    _gc: Any, _clean: _GraphFixtureScope, tmp_path: Path
+) -> None:
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+
+    pairs = _seed_terminal_recovery_graph_cohort(_clean, [2])
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest_hash = _write_graph_terminal_recovery_manifest(_gc, manifest, pairs)
+    _gc.query(
+        "MATCH (name:StandardName {id: $sn_id}) SET name.protected_marker = 'stale'",
+        sn_id=pairs[0]["sn_id"],
+    )
+
+    receipt = recover_terminal_attachments(
+        manifest,
+        reason="recover exact shared terminal bindings",
+        apply=True,
+        expected_manifest_hash=manifest_hash,
+        gc=_gc,
+    )
+    counts = _terminal_recovery_graph_counts(_gc, pairs)
+
+    assert receipt["mode"] == "refused"
+    assert counts["bindings"] == counts["projections"] == 2
+    assert counts["retries"] == counts["changes"] == 0
+
+
+@pytest.mark.graph
+@pytest.mark.parametrize(
+    ("failure", "expected_exception"),
+    [
+        ("relationship_drift", "TerminalAttachmentRecoveryConflict"),
+        ("mid_batch", "RuntimeError"),
+    ],
+)
+def test_terminal_recovery_graph_races_roll_back_complete_cohort(
+    _gc: Any,
+    _clean: _GraphFixtureScope,
+    tmp_path: Path,
+    failure: str,
+    expected_exception: str,
+) -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        TerminalAttachmentRecoveryConflict,
+        recover_terminal_attachments,
+    )
+
+    pairs = _seed_terminal_recovery_graph_cohort(_clean, [2])
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest_hash = _write_graph_terminal_recovery_manifest(_gc, manifest, pairs)
+    client = _TerminalRecoveryInjectedClient(
+        _gc,
+        failure=failure,
+        source_id=pairs[0]["source_id"],
+        target_id=pairs[0]["sn_id"],
+    )
+    exception_type = (
+        TerminalAttachmentRecoveryConflict
+        if expected_exception == "TerminalAttachmentRecoveryConflict"
+        else RuntimeError
+    )
+
+    with pytest.raises(exception_type):
+        recover_terminal_attachments(
+            manifest,
+            reason="recover exact shared terminal bindings",
+            apply=True,
+            expected_manifest_hash=manifest_hash,
+            gc=client,
+        )
+    counts = _terminal_recovery_graph_counts(_gc, pairs)
+
+    assert counts["bindings"] == counts["projections"] == 2
+    assert counts["retries"] == counts["changes"] == 0
+
+
+@pytest.mark.graph
+def test_terminal_recovery_graph_fixture_refuses_production_uri() -> None:
+    from imas_codex.settings import get_graph_uri
+
+    test_uri = os.environ["IMAS_CODEX_TEST_NEO4J_URI"]
+    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+
+    assert os.environ["IMAS_CODEX_TEST_NEO4J_EPHEMERAL"] == "1"
+    assert test_uri != project_uri
 
 
 # ---------------------------------------------------------------------------

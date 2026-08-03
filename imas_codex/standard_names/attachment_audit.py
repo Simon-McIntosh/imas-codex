@@ -391,12 +391,12 @@ _TERMINAL_RECOVERY_MUTABLE_SOURCE_FIELDS = frozenset(
     }
 )
 
-_TERMINAL_RECOVERY_CLOSURE_QUERY = """
-// TERMINAL_ATTACHMENT_RECOVERY_CLOSURE
+_TERMINAL_RECOVERY_SOURCES_QUERY = """
+// TERMINAL_ATTACHMENT_RECOVERY_SOURCES
 UNWIND $pairs AS item
-CALL (item) {
-  OPTIONAL MATCH (source:StandardNameSource {id: item.source_id})
-  RETURN [candidate IN collect(DISTINCT source) WHERE candidate IS NOT NULL | {
+OPTIONAL MATCH (source:StandardNameSource {id: item.source_id})
+RETURN item.source_id AS source_id,
+  [candidate IN collect(DISTINCT source) WHERE candidate IS NOT NULL | {
     element_id: elementId(candidate), labels: labels(candidate),
     properties: properties(candidate),
     relationships: [(candidate)-[relationship]-(other) | {
@@ -406,45 +406,57 @@ CALL (item) {
       other_labels: labels(other), other_id: other.id,
       other_properties: properties(other)
     }]
-  }] AS sources
-}
-CALL (item) {
-  OPTIONAL MATCH (node:IMASNode {id: item.dd_path})
-  RETURN [candidate IN collect(DISTINCT node) WHERE candidate IS NOT NULL | {
-    element_id: elementId(candidate), labels: labels(candidate),
-    properties: properties(candidate),
-    relationships: [(candidate)-[relationship]-(other) | {
-      element_id: elementId(relationship), type: type(relationship),
-      direction: CASE WHEN startNode(relationship) = candidate THEN 'out' ELSE 'in' END,
-      properties: properties(relationship), other_element_id: elementId(other),
-      other_labels: labels(other), other_id: other.id,
-      other_properties: properties(other)
-    }]
-  }] AS nodes
-}
-CALL (item) {
-  OPTIONAL MATCH (name:StandardName {id: item.sn_id})
-  RETURN [candidate IN collect(DISTINCT name) WHERE candidate IS NOT NULL | {
-    element_id: elementId(candidate), labels: labels(candidate),
-    properties: properties(candidate),
-    relationships: [(candidate)-[relationship]-(other) | {
-      element_id: elementId(relationship), type: type(relationship),
-      direction: CASE WHEN startNode(relationship) = candidate THEN 'out' ELSE 'in' END,
-      properties: properties(relationship), other_element_id: elementId(other),
-      other_labels: labels(other), other_id: other.id,
-      other_properties: properties(other)
-    }]
-  }] AS names
-}
-RETURN item.source_id AS source_id, item.dd_path AS dd_path, item.sn_id AS sn_id,
-       sources, nodes, names
+  }] AS participants
 ORDER BY source_id
+"""
+
+_TERMINAL_RECOVERY_NODES_QUERY = """
+// TERMINAL_ATTACHMENT_RECOVERY_NODES
+UNWIND $pairs AS item
+OPTIONAL MATCH (node:IMASNode {id: item.dd_path})
+RETURN item.dd_path AS participant_id,
+  [candidate IN collect(DISTINCT node) WHERE candidate IS NOT NULL | {
+    element_id: elementId(candidate), labels: labels(candidate),
+    properties: properties(candidate),
+    relationships: [(candidate)-[relationship]-(other) | {
+      element_id: elementId(relationship), type: type(relationship),
+      direction: CASE WHEN startNode(relationship) = candidate THEN 'out' ELSE 'in' END,
+      properties: properties(relationship), other_element_id: elementId(other),
+      other_labels: labels(other), other_id: other.id,
+      other_properties: properties(other)
+    }]
+  }] AS participants
+ORDER BY participant_id
+"""
+
+_TERMINAL_RECOVERY_NAMES_QUERY = """
+// TERMINAL_ATTACHMENT_RECOVERY_NAMES
+UNWIND $sn_ids AS sn_id
+OPTIONAL MATCH (name:StandardName {id: sn_id})
+RETURN sn_id AS participant_id,
+  [candidate IN collect(DISTINCT name) WHERE candidate IS NOT NULL | {
+    element_id: elementId(candidate), labels: labels(candidate),
+    properties: properties(candidate),
+    relationships: [(candidate)-[relationship]-(other) | {
+      element_id: elementId(relationship), type: type(relationship),
+      direction: CASE WHEN startNode(relationship) = candidate THEN 'out' ELSE 'in' END,
+      properties: properties(relationship), other_element_id: elementId(other),
+      other_labels: labels(other), other_id: other.id,
+      other_properties: properties(other)
+    }]
+  }] AS participants
+ORDER BY participant_id
 """
 
 _TERMINAL_RECOVERY_RELATIONSHIP_LOCK_QUERY = """
 // TERMINAL_ATTACHMENT_RECOVERY_RELATIONSHIP_LOCK
-MATCH ()-[relationship]->()
-WHERE elementId(relationship) IN $element_ids
+UNWIND $relationships AS item
+MATCH (owner)-[relationship]-(other)
+WHERE elementId(owner) = item.owner_element_id
+  AND elementId(relationship) = item.element_id
+  AND type(relationship) = item.type
+  AND elementId(other) = item.other_element_id
+  AND CASE WHEN startNode(relationship) = owner THEN 'out' ELSE 'in' END = item.direction
 SET relationship._terminal_attachment_recovery_lock = true
 REMOVE relationship._terminal_attachment_recovery_lock
 RETURN count(relationship) AS locked
@@ -1133,15 +1145,49 @@ def _terminal_recovery_participant_ids(row: dict[str, Any]) -> tuple[str, ...]:
 
 def _terminal_recovery_relationship_ids(row: dict[str, Any]) -> tuple[str, ...]:
     return tuple(
-        sorted(
-            {
-                str(relationship["element_id"])
-                for key in ("sources", "nodes", "names")
-                for participant in row.get(key) or []
-                for relationship in participant.get("relationships") or []
-                if relationship.get("element_id")
-            }
+        descriptor["element_id"]
+        for descriptor in _terminal_recovery_relationship_descriptors(row)
+    )
+
+
+def _terminal_recovery_relationship_descriptors(
+    row: dict[str, Any],
+) -> tuple[dict[str, str], ...]:
+    """Return one participant-anchored descriptor per exact relationship."""
+    candidates: dict[str, list[dict[str, str]]] = {}
+    for key in ("sources", "nodes", "names"):
+        for participant in row.get(key) or []:
+            owner_element_id = participant.get("element_id")
+            if not owner_element_id:
+                continue
+            for relationship in participant.get("relationships") or []:
+                element_id = relationship.get("element_id")
+                other_element_id = relationship.get("other_element_id")
+                relationship_type = relationship.get("type")
+                direction = relationship.get("direction")
+                if not all(
+                    (element_id, other_element_id, relationship_type, direction)
+                ):
+                    continue
+                candidates.setdefault(str(element_id), []).append(
+                    {
+                        "element_id": str(element_id),
+                        "owner_element_id": str(owner_element_id),
+                        "other_element_id": str(other_element_id),
+                        "type": str(relationship_type),
+                        "direction": str(direction),
+                    }
+                )
+    return tuple(
+        min(
+            descriptors,
+            key=lambda item: (
+                item["owner_element_id"],
+                item["other_element_id"],
+                item["direction"],
+            ),
         )
+        for _, descriptors in sorted(candidates.items())
     )
 
 
@@ -1190,10 +1236,17 @@ def _terminal_recovery_preserved_payload(
     *,
     retry_event_id: str,
     change_event_id: str,
+    cohort_context: dict[str, dict[str, set[str]]] | None = None,
 ) -> dict[str, Any]:
     source_id = str(row["source_id"])
     dd_path = str(row["dd_path"])
     sn_id = str(row["sn_id"])
+    target_context = (cohort_context or {}).get(sn_id) or {
+        "source_ids": {source_id},
+        "dd_paths": {dd_path},
+        "retry_event_ids": {retry_event_id},
+        "change_event_ids": {change_event_id},
+    }
 
     def normalized_relationships(
         participant: dict[str, Any], *, owner: str
@@ -1221,13 +1274,13 @@ def _terminal_recovery_preserved_payload(
             if owner == "name" and (
                 relationship_type == "PRODUCED_NAME"
                 and direction == "in"
-                and other_id == source_id
+                and other_id in target_context["source_ids"]
                 or relationship_type == "HAS_STANDARD_NAME"
                 and direction == "in"
-                and other_id == dd_path
+                and other_id in target_context["dd_paths"]
                 or relationship_type == "HAS_INTERNAL_CHANGE"
                 and direction == "out"
-                and other_id == change_event_id
+                and other_id in target_context["change_event_ids"]
             ):
                 continue
             if other_id == source_id:
@@ -1253,7 +1306,8 @@ def _terminal_recovery_preserved_payload(
     name_properties["source_paths"] = [
         path
         for path in name_properties.get("source_paths") or []
-        if path not in {dd_path, source_id}
+        if path not in target_context["dd_paths"]
+        and path not in target_context["source_ids"]
     ]
     return {
         "source": {
@@ -1295,8 +1349,37 @@ def _terminal_recovery_event_ids(
     )
 
 
+def _terminal_recovery_cohort_context(
+    manifest: TerminalAttachmentRecoveryManifest,
+) -> dict[str, dict[str, set[str]]]:
+    """Group every authorized mutation by its shared terminal target."""
+    context: dict[str, dict[str, set[str]]] = {}
+    for manifest_row in manifest.rows:
+        retry_event_id, change_event_id = _terminal_recovery_event_ids(
+            manifest, manifest_row
+        )
+        target = context.setdefault(
+            str(manifest_row["sn_id"]),
+            {
+                "source_ids": set(),
+                "dd_paths": set(),
+                "retry_event_ids": set(),
+                "change_event_ids": set(),
+            },
+        )
+        target["source_ids"].add(str(manifest_row["source_id"]))
+        target["dd_paths"].add(str(manifest_row["dd_path"]))
+        target["retry_event_ids"].add(retry_event_id)
+        target["change_event_ids"].add(change_event_id)
+    return context
+
+
 def _terminal_recovery_snapshot_hashes(
-    row: dict[str, Any], *, retry_event_id: str, change_event_id: str
+    row: dict[str, Any],
+    *,
+    retry_event_id: str,
+    change_event_id: str,
+    cohort_context: dict[str, dict[str, set[str]]] | None = None,
 ) -> dict[str, str]:
     participant_ids = _terminal_recovery_participant_ids(row)
     relationship_ids = _terminal_recovery_relationship_ids(row)
@@ -1307,6 +1390,7 @@ def _terminal_recovery_snapshot_hashes(
                 row,
                 retry_event_id=retry_event_id,
                 change_event_id=change_event_id,
+                cohort_context=cohort_context,
             )
         ),
         "participant_ids_hash": payload_hash(participant_ids),
@@ -1413,6 +1497,7 @@ def _terminal_recovery_plan_row(
     reason: str,
     run_id: str | None,
     changed_at: str | None,
+    cohort_context: dict[str, dict[str, set[str]]],
 ) -> tuple[dict[str, Any] | None, list[str]]:
     retry_event_id, change_event_id = _terminal_recovery_event_ids(
         manifest, manifest_row
@@ -1435,6 +1520,7 @@ def _terminal_recovery_plan_row(
         row,
         retry_event_id=retry_event_id,
         change_event_id=change_event_id,
+        cohort_context=cohort_context,
     )
     if _terminal_recovery_is_already_current(
         row,
@@ -1457,6 +1543,9 @@ def _terminal_recovery_plan_row(
                 "preserved_state_hash": current_hashes["preserved_state_hash"],
                 "participant_ids": list(_terminal_recovery_participant_ids(row)),
                 "relationship_ids": list(_terminal_recovery_relationship_ids(row)),
+                "relationship_descriptors": list(
+                    _terminal_recovery_relationship_descriptors(row)
+                ),
                 "retry_event_id": retry_event_id,
                 "change_event_id": change_event_id,
             },
@@ -1602,6 +1691,9 @@ def _terminal_recovery_plan_row(
         "preserved_state_hash": current_hashes["preserved_state_hash"],
         "participant_ids": list(_terminal_recovery_participant_ids(row)),
         "relationship_ids": list(_terminal_recovery_relationship_ids(row)),
+        "relationship_descriptors": list(
+            _terminal_recovery_relationship_descriptors(row)
+        ),
         "source_element_id": source.get("element_id"),
         "node_element_id": node.get("element_id"),
         "name_element_id": name.get("element_id"),
@@ -1621,6 +1713,60 @@ def _terminal_recovery_plan_row(
     return plan, sorted(set(reasons))
 
 
+def _read_terminal_recovery_rows(
+    transaction: Any,
+    pairs: tuple[dict[str, str], ...],
+) -> list[dict[str, Any]]:
+    """Read each source/DD participant once and each shared target once."""
+    source_rows = [
+        dict(row)
+        for row in transaction.run(_TERMINAL_RECOVERY_SOURCES_QUERY, pairs=list(pairs))
+    ]
+    node_rows = [
+        dict(row)
+        for row in transaction.run(_TERMINAL_RECOVERY_NODES_QUERY, pairs=list(pairs))
+    ]
+    source_ids = sorted(str(pair["source_id"]) for pair in pairs)
+    dd_paths = sorted(str(pair["dd_path"]) for pair in pairs)
+    sn_ids = sorted({str(pair["sn_id"]) for pair in pairs})
+    name_rows = [
+        dict(row)
+        for row in transaction.run(_TERMINAL_RECOVERY_NAMES_QUERY, sn_ids=sn_ids)
+    ]
+    if [row.get("source_id") for row in source_rows] != source_ids:
+        raise TerminalAttachmentRecoveryConflict(
+            "terminal recovery source closure did not return the exact allowlist"
+        )
+    if [row.get("participant_id") for row in node_rows] != dd_paths:
+        raise TerminalAttachmentRecoveryConflict(
+            "terminal recovery DD closure did not return the exact allowlist"
+        )
+    if [row.get("participant_id") for row in name_rows] != sn_ids:
+        raise TerminalAttachmentRecoveryConflict(
+            "terminal recovery target closure did not return the exact allowlist"
+        )
+    sources_by_id = {
+        str(row["source_id"]): row.get("participants") or [] for row in source_rows
+    }
+    nodes_by_id = {
+        str(row["participant_id"]): row.get("participants") or [] for row in node_rows
+    }
+    names_by_id = {
+        str(row["participant_id"]): row.get("participants") or [] for row in name_rows
+    }
+    return [
+        {
+            "source_id": pair["source_id"],
+            "dd_path": pair["dd_path"],
+            "sn_id": pair["sn_id"],
+            "sources": sources_by_id[str(pair["source_id"])],
+            "nodes": nodes_by_id[str(pair["dd_path"])],
+            "names": names_by_id[str(pair["sn_id"])],
+        }
+        for pair in pairs
+    ]
+
+
 def _read_terminal_recovery_plan(
     transaction: Any,
     manifest: TerminalAttachmentRecoveryManifest,
@@ -1629,18 +1775,9 @@ def _read_terminal_recovery_plan(
     run_id: str | None,
     changed_at: str | None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    rows = [
-        dict(row)
-        for row in transaction.run(
-            _TERMINAL_RECOVERY_CLOSURE_QUERY,
-            pairs=list(manifest.pairs),
-        )
-    ]
-    if [row.get("source_id") for row in rows] != list(manifest.source_ids):
-        raise TerminalAttachmentRecoveryConflict(
-            "terminal recovery closure did not return the complete exact allowlist"
-        )
+    rows = _read_terminal_recovery_rows(transaction, manifest.pairs)
     manifest_by_source = {row["source_id"]: row for row in manifest.rows}
+    cohort_context = _terminal_recovery_cohort_context(manifest)
     plans: list[dict[str, Any]] = []
     refusals: list[dict[str, Any]] = []
     for row in rows:
@@ -1652,6 +1789,7 @@ def _read_terminal_recovery_plan(
             reason=reason,
             run_id=run_id,
             changed_at=changed_at,
+            cohort_context=cohort_context,
         )
         if reasons or plan is None:
             refusals.append(
@@ -1698,17 +1836,23 @@ def _terminal_recovery_receipt(
         },
         "rows": [
             {
-                key: plan[key]
-                for key in (
-                    "source_id",
-                    "dd_path",
-                    "sn_id",
-                    "status",
-                    "precondition_hash",
-                    "preserved_state_hash",
-                    "retry_event_id",
-                    "change_event_id",
-                )
+                **{
+                    key: plan[key]
+                    for key in (
+                        "source_id",
+                        "dd_path",
+                        "sn_id",
+                        "precondition_hash",
+                        "preserved_state_hash",
+                        "retry_event_id",
+                        "change_event_id",
+                    )
+                },
+                "status": (
+                    "applied"
+                    if mode == "applied" and plan["status"] == "planned"
+                    else plan["status"]
+                ),
             }
             for plan in sorted(plans, key=lambda item: item["source_id"])
         ],
@@ -1719,13 +1863,17 @@ def _terminal_recovery_receipt(
 
 
 def _lock_terminal_recovery_relationships(
-    transaction: Any, relationship_ids: set[str]
+    transaction: Any, relationships: list[dict[str, str]]
 ) -> tuple[str, ...]:
-    exact_ids = tuple(sorted(relationship_ids))
+    by_id = {relationship["element_id"]: relationship for relationship in relationships}
+    exact_relationships = [by_id[element_id] for element_id in sorted(by_id)]
+    exact_ids = tuple(
+        relationship["element_id"] for relationship in exact_relationships
+    )
     rows = list(
         transaction.run(
             _TERMINAL_RECOVERY_RELATIONSHIP_LOCK_QUERY,
-            element_ids=list(exact_ids),
+            relationships=exact_relationships,
         )
     )
     locked = int(dict(rows[0]).get("locked") or 0) if rows else 0
@@ -1835,11 +1983,11 @@ def recover_terminal_attachments(
                 )
                 _lock_terminal_recovery_relationships(
                     transaction,
-                    {
+                    [
                         relationship
                         for plan in pending
-                        for relationship in plan["relationship_ids"]
-                    },
+                        for relationship in plan["relationship_descriptors"]
+                    ],
                 )
                 locked_plans, locked_refusals = _read_terminal_recovery_plan(
                     transaction,
