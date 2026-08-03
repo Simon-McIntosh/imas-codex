@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="54">
+<meta name="plan-version" content="55">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -767,6 +767,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-deterministic-manifest-independent-rejection" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>The frozen deterministic repair manifests reproduce exactly but remain non-executable.</strong> Independent verification matched 503 semantic rows, 83 provenance orphans, DD 4.1.1 / COCOS 17, disjoint partitions, zero WEST/fixture/claim intersections, unchanged mutation guards, and the stable 308 semantic / four structural dry-runs. Apply is still rejected: the semantic operator cannot consume or verify the artifact and per-row hashes; the parent-source operator mutates rows individually without cohort transaction, CAS, manifest binding, or immutable change events. The 458-read diagnostic builder is confirmed N+1 amplification—parent admission alone costs an estimated 79–118 reads for 39 candidates; an aggregate topology query plus batched attachment inputs should reduce the complete census to roughly 12–20 reads. Evidence: <code>/tmp/s7_deterministic_repair_verification.json</code>, SHA-256 <code>ad57a132a20906cb04a132eecb2ebd677f2a45524abb2a2ab95901eeea0deae1</code>. No apply is authorized.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-terminal-recovery-disposable-rejection" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Candidate terminal-recovery commit <code>7b2e1476</code> is rejected and remains unmerged.</strong> Focused mocks passed 76 tests, but the candidate added zero new graph-marked transaction tests. A disposable Neo4j 2026.01.4 proof showed the shared-target defect directly: two sources sharing one terminal name dry-ran as planned, then apply failed postflight and rolled back to two bindings, two projections, and zero change events. Six of the intended nine rows share one target, so the real cohort cannot apply. The audit also found three repeated full-neighborhood materializations, a graph-wide relationship scan, and applied receipt rows still labelled planned. A scoped repair is active for cohort-aware preservation, participant-anchored batched locking, deduplicated closure reads, correct receipts, and real shared-target/rollback/idempotence graph tests. Evidence: <code>/tmp/s7_terminal_recovery_verification.json</code>, SHA-256 <code>74fa800fbca21dcfafb3ab94206ff496d11e70454f835d53b0d0b43d7391798b</code>. No live graph was contacted.</p></div>
 </div>
 </section>
 </main>
