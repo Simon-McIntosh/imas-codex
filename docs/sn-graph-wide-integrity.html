@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -779,6 +779,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-test-endpoint-and-memory-stability" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>Test isolation and process-memory stability are both verified.</strong> Merge <code>b860aa84</code> makes an explicit test Neo4j URI bypass project profile and tunnel resolution, so disposable graph tests no longer skip their bodies after probing the live endpoint; focused validation passed seven tests without production contact. The user slice currently holds about 29.2 GiB of its 64 GiB cap, <code>/run/user/39486</code> remains 4.9 GiB, swap remains zero, and <code>memory.events oom_kill</code> remains 474 with no increase during the guarded work. Long-lived <code>imas-codex serve</code> processes each use roughly 0.55 GiB and are a secondary baseline, not a justification for broad process termination.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-structural-closure-operator-landed" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Manifest-bound structural closure is independently verified and merged at <code>efd5eda1</code>.</strong> The operator plans six typed actions across the exact 17-root allowlist and applies every nonempty cohort in a constant 10 graph queries, independent of root count or action mix. Receipts bind ordered deterministic <code>StandardNameChange</code> IDs and exact immutable-record hashes, re-read before commit; duplicate/tampered events, claim/property/admission drift, shared-descendant hazards, and unauthorized accepted deletion fail closed with whole-cohort rollback. Independent validation passed 11 focused non-graph/CLI tests and 15 fresh Neo4j 2026.01.4 mutation tests with zero skips; EXPLAIN used index/element-ID seeks plus bounded <code>HAS_PARENT*0..12</code> expansion and no relationship-wide scan. Production read-only state remained 14 planned, three expected refusals (<code>density</code>, <code>parameter_at_pedestal</code>, <code>pressure_bessel_1</code>), and zero changed, with all node/relationship/claim/event/cost guards identical. Evidence: <code>/tmp/s7_structural_closure_final_verification.json</code>, SHA-256 <code>c4c7c2d7d9df8995239c5290bd1fdca9e2bde5c428ca54d7a707bd18623a63ec</code>. No live apply, provider call, or paid generation occurred; fresh exact manifests and approval remain required before mutation.</p></div>
 </div>
 </section>
 </main>
