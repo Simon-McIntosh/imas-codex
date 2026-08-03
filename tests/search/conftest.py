@@ -6,16 +6,100 @@ import hashlib
 import json
 import logging
 import time
+from collections.abc import Awaitable, Callable, Mapping
 from pathlib import Path
+from typing import Any
+from unittest.mock import patch
 
 import pytest
 
+from imas_codex.core.node_categories import SEARCHABLE_CATEGORIES
+from imas_codex.embeddings.config import EmbeddingBackend, EncoderConfig
+from imas_codex.embeddings.encoder import Encoder
 from tests.search.benchmark_data import ALL_QUERIES
 
 logger = logging.getLogger(__name__)
 
 _CACHE_FILE = Path(__file__).parent / ".expected_paths_cache.json"
 _CACHE_MAX_AGE_DAYS = 7
+_REAL_SENTENCE_TRANSFORMER_IMPORT = Encoder._import_sentence_transformers
+
+
+def _freeze_cache_input(value: Any) -> Any:
+    """Convert nested configuration inputs into a deterministic cache key."""
+    if isinstance(value, Mapping):
+        return tuple(
+            sorted((str(key), _freeze_cache_input(item)) for key, item in value.items())
+        )
+    if isinstance(value, set | frozenset):
+        return tuple(sorted(_freeze_cache_input(item) for item in value))
+    if isinstance(value, list | tuple):
+        return tuple(_freeze_cache_input(item) for item in value)
+    if isinstance(value, str | int | float | bool | type(None)):
+        return value
+    raise TypeError(f"Unsupported search-cache input type: {type(value).__name__}")
+
+
+class SearchEvaluationCache:
+    """Module-local cache for identical search evaluations.
+
+    Callers provide every graph, encoder, retrieval, and scoring input in
+    ``inputs``. The cache deliberately rejects opaque inputs so a changed
+    configuration cannot accidentally reuse another evaluation.
+    """
+
+    def __init__(self) -> None:
+        self._values: dict[tuple[str, Any], Any] = {}
+
+    def get_or_compute(
+        self,
+        namespace: str,
+        inputs: Mapping[str, Any],
+        compute: Callable[[], Any],
+    ) -> Any:
+        """Return a cached value or compute it once for the exact inputs."""
+        key = (namespace, _freeze_cache_input(inputs))
+        if key not in self._values:
+            self._values[key] = compute()
+        return self._values[key]
+
+    async def get_or_compute_async(
+        self,
+        namespace: str,
+        inputs: Mapping[str, Any],
+        compute: Callable[[], Awaitable[Any]],
+    ) -> Any:
+        """Async equivalent of :meth:`get_or_compute`."""
+        key = (namespace, _freeze_cache_input(inputs))
+        if key not in self._values:
+            self._values[key] = await compute()
+        return self._values[key]
+
+
+@pytest.fixture(scope="module")
+def search_evaluation_cache() -> SearchEvaluationCache:
+    """Share identical graph-search work within one explicit test module."""
+    return SearchEvaluationCache()
+
+
+def load_benchmark_encoder() -> Encoder:
+    """Load the configured benchmark encoder without the unit-test model stub.
+
+    The repository-wide unit fixture replaces local SentenceTransformer loading
+    with a tiny deterministic stub. Graph quality tests must instead use the
+    encoder that produced the graph's vector index. Remote encoders bypass the
+    stub naturally; local benchmark CI temporarily restores the real loader
+    while constructing the encoder.
+    """
+    config = EncoderConfig()
+    if config.backend != EmbeddingBackend.LOCAL:
+        return Encoder(config=config)
+    with patch.object(
+        Encoder,
+        "_import_sentence_transformers",
+        new=staticmethod(_REAL_SENTENCE_TRANSFORMER_IMPORT),
+    ):
+        return Encoder(config=config)
 
 
 def _cache_key(gc) -> str:
@@ -27,12 +111,13 @@ def _cache_key(gc) -> str:
             WITH count(v) AS vc
             OPTIONAL MATCH (v2:DDVersion) WHERE v2.is_current = true
             WITH vc, v2.version AS current_version
-            MATCH (n:IMASNode) WHERE n.node_category = 'data'
+            MATCH (n:IMASNode) WHERE n.node_category IN $categories
             WITH vc, current_version, count(n) AS nc
             MATCH (c:IMASSemanticCluster)
             WITH vc, current_version, nc, count(c) AS cc
             RETURN vc, current_version, nc, cc
-            """
+            """,
+            categories=sorted(SEARCHABLE_CATEGORIES),
         )
         if info:
             row = info[0]
@@ -41,6 +126,7 @@ def _cache_key(gc) -> str:
                 f"_current={row.get('current_version', 'unknown')}"
                 f"_nodes={row['nc']}"
                 f"_clusters={row['cc']}"
+                f"_categories={','.join(sorted(SEARCHABLE_CATEGORIES))}"
             )
             return hashlib.sha256(raw.encode()).hexdigest()[:16]
     except Exception:

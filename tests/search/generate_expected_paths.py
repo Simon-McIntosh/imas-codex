@@ -17,6 +17,10 @@ from __future__ import annotations
 
 import logging
 
+from imas_codex.core.node_categories import (
+    CLUSTERABLE_CATEGORIES,
+    SEARCHABLE_CATEGORIES,
+)
 from imas_codex.graph.client import GraphClient
 from tests.search.benchmark_data import BenchmarkQuery
 
@@ -34,8 +38,7 @@ def generate_expected_paths(
     2. Collect all cluster member paths
     3. Find paths whose terminal segment matches any expected path terminal
     4. Union with hand-curated expected_paths
-    5. Filter to data-category paths (exclude /data, /time subpaths unless
-       they appear in the hand-curated set)
+    5. Filter generic leaf paths unless they appear in the hand-curated set
     """
     expanded = set(query.expected_paths)
 
@@ -54,11 +57,12 @@ def generate_expected_paths(
             MATCH (cl:IMASSemanticCluster)
             WHERE cl.scope = 'global' AND ({where_clauses})
             MATCH (cl)<-[:IN_CLUSTER]-(member:IMASNode)
-            WHERE member.node_category = 'data'
+            WHERE member.node_category IN $categories
               AND NOT (member)-[:DEPRECATED_IN]->(:DDVersion)
             RETURN DISTINCT member.id AS id
             """,
             **params,
+            categories=sorted(CLUSTERABLE_CATEGORIES),
         )
         for r in cluster_members or []:
             expanded.add(r["id"])
@@ -77,11 +81,12 @@ def generate_expected_paths(
             UNWIND $terminals AS term
             MATCH (n:IMASNode)
             WHERE n.name = term
-              AND n.node_category = 'data'
+              AND n.node_category IN $categories
               AND NOT (n)-[:DEPRECATED_IN]->(:DDVersion)
             RETURN DISTINCT n.id AS id
             """,
             terminals=list(expected_terminals),
+            categories=sorted(SEARCHABLE_CATEGORIES),
         )
         for r in terminal_matches or []:
             expanded.add(r["id"])
@@ -94,11 +99,12 @@ def generate_expected_paths(
             """
             MATCH (n:IMASNode)
             WHERE n.name = $abbrev
-              AND n.node_category = 'data'
+              AND n.node_category IN $categories
               AND NOT (n)-[:DEPRECATED_IN]->(:DDVersion)
             RETURN DISTINCT n.id AS id
             """,
             abbrev=query_stripped,
+            categories=sorted(SEARCHABLE_CATEGORIES),
         )
         for r in abbrev_matches or []:
             expanded.add(r["id"])
