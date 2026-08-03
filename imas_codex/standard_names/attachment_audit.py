@@ -451,12 +451,28 @@ ORDER BY participant_id
 _TERMINAL_RECOVERY_RELATIONSHIP_LOCK_QUERY = """
 // TERMINAL_ATTACHMENT_RECOVERY_RELATIONSHIP_LOCK
 UNWIND $relationships AS item
-MATCH (owner)-[relationship]-(other)
-WHERE elementId(owner) = item.owner_element_id
-  AND elementId(relationship) = item.element_id
-  AND type(relationship) = item.type
-  AND elementId(other) = item.other_element_id
-  AND CASE WHEN startNode(relationship) = owner THEN 'out' ELSE 'in' END = item.direction
+CALL (item) {
+  MATCH (owner)
+  WHERE elementId(owner) = item.owner_element_id
+  CALL (item, owner) {
+    WITH item, owner
+    WHERE item.direction = 'out'
+    MATCH (owner)-[relationship]->(other)
+    WHERE elementId(relationship) = item.element_id
+      AND type(relationship) = item.type
+      AND elementId(other) = item.other_element_id
+    RETURN relationship
+    UNION ALL
+    WITH item, owner
+    WHERE item.direction = 'in'
+    MATCH (owner)<-[relationship]-(other)
+    WHERE elementId(relationship) = item.element_id
+      AND type(relationship) = item.type
+      AND elementId(other) = item.other_element_id
+    RETURN relationship
+  }
+  RETURN relationship
+}
 SET relationship._terminal_attachment_recovery_lock = true
 REMOVE relationship._terminal_attachment_recovery_lock
 RETURN count(relationship) AS locked

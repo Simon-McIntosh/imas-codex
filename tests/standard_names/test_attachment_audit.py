@@ -2697,6 +2697,56 @@ class _TerminalRecoveryInjectedClient:
 
 
 @pytest.mark.graph
+def test_terminal_recovery_relationship_lock_plan_is_participant_anchored(
+    _gc: Any,
+) -> None:
+    from imas_codex.standard_names import attachment_audit as mod
+
+    descriptor = {
+        "element_id": "4:terminal-recovery-relationship:0",
+        "owner_element_id": "4:terminal-recovery-owner:0",
+        "other_element_id": "4:terminal-recovery-other:0",
+        "type": "PRODUCED_NAME",
+        "direction": "out",
+    }
+    with _gc.session() as session:
+        plan = (
+            session.run(
+                f"EXPLAIN {mod._TERMINAL_RECOVERY_RELATIONSHIP_LOCK_QUERY}",
+                relationships=[descriptor],
+            )
+            .consume()
+            .plan
+        )
+
+    assert plan is not None
+    pending = [plan]
+    operators: list[str] = []
+    while pending:
+        operator = pending.pop()
+        if isinstance(operator, dict):
+            operator_type = str(operator["operatorType"]).partition("@")[0]
+            children = operator.get("children") or []
+        else:
+            operator_type = operator.operator_type
+            children = operator.children
+        operators.append(operator_type)
+        pending.extend(children)
+
+    forbidden = {
+        "AllRelationshipsScan",
+        "DirectedAllRelationshipsScan",
+        "UndirectedAllRelationshipsScan",
+    }
+    assert forbidden.isdisjoint(operators), operators
+    assert any(
+        operator == "NodeByElementIdSeek" or "NodeIndexSeek" in operator
+        for operator in operators
+    ), operators
+    assert any(operator.startswith("Expand(") for operator in operators), operators
+
+
+@pytest.mark.graph
 @pytest.mark.parametrize("shared_count", [2, 6])
 def test_terminal_recovery_graph_shared_target_is_atomic_and_idempotent(
     _gc: Any,
