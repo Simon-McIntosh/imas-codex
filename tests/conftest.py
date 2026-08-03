@@ -97,16 +97,20 @@ def _check_neo4j() -> bool:
 
 def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     """Auto-skip graph/integration-marked tests when Neo4j is unreachable."""
-    if _check_neo4j():
-        return
-    skip_marker = pytest.mark.skip(reason="Neo4j not available")
-    for item in items:
+    graph_items = [
+        item
+        for item in items
         if (
             item.get_closest_marker("graph")
             or item.get_closest_marker("integration")
             or item.get_closest_marker("requires_graph")
-        ):
-            item.add_marker(skip_marker)
+        )
+    ]
+    if not graph_items or _check_neo4j():
+        return
+    skip_marker = pytest.mark.skip(reason="Neo4j not available")
+    for item in graph_items:
+        item.add_marker(skip_marker)
 
 
 @pytest.fixture(scope="session")
