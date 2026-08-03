@@ -2351,6 +2351,53 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_SNAPSHOT_CHANGE
+      identity_repairs:
+        description: >-
+          Immutable governed repairs of the source identity scalar. The
+          existing DD relationship and every source snapshot property remain
+          unchanged by this transition.
+        multivalued: true
+        range: StandardNameSourceIdentityRepair
+        inlined: false
+        annotations:
+          relationship_type: HAS_IDENTITY_REPAIR
+      snapshot_adoptions:
+        description: >-
+          Immutable governed adoptions of current DD authority when the source
+          already names that exact DD version but its complete snapshot differs.
+        multivalued: true
+        range: StandardNameSourceSnapshotAdoption
+        inlined: false
+        annotations:
+          relationship_type: HAS_SNAPSHOT_ADOPTION
+      snapshot_admissions:
+        description: >-
+          Immutable governed admissions of a previously unpinned source to the
+          uniquely current complete DD snapshot.
+        multivalued: true
+        range: StandardNameSourceSnapshotAdmission
+        inlined: false
+        annotations:
+          relationship_type: HAS_SNAPSHOT_ADMISSION
+      identity_folds:
+        description: >-
+          Immutable governed retirements of a duplicate DD source identity in
+          favor of this canonical source. No semantic targets move between the
+          two source rows.
+        multivalued: true
+        range: StandardNameSourceIdentityFold
+        inlined: false
+        annotations:
+          relationship_type: HAS_IDENTITY_FOLD
+      authority_retirements:
+        description: >-
+          Immutable governed retirements of sources whose backing DD node is
+          outside standard-name participation.
+        multivalued: true
+        range: StandardNameSourceAuthorityRetirement
+        inlined: false
+        annotations:
+          relationship_type: HAS_AUTHORITY_RETIREMENT
       last_error:
         description: Error message from most recent failed attempt
       failed_at:
@@ -2549,6 +2596,108 @@ classes:
         required: true
         range: datetime
         description: Transaction timestamp at which the migration committed.
+
+  StandardNameSourceIdentityRepair:
+    description: >-
+      Immutable receipt for an atomic repair of one DD source identity scalar.
+      The existing FROM_DD_PATH relationship is preserved exactly.
+    class_uri: sn:StandardNameSourceIdentityRepair
+    attributes:
+      id: {identifier: true, required: true, description: Stable content-derived event identifier.}
+      source_id: {required: true, description: Exact stable StandardNameSource identity repaired.}
+      before_source_identity_payload: {required: true, description: Canonical complete identity payload before repair.}
+      after_source_identity_payload: {required: true, description: Canonical complete identity payload after repair.}
+      before_identity_hash: {required: true, description: SHA-256 of the canonical pre-repair identity payload.}
+      after_identity_hash: {required: true, description: SHA-256 of the canonical post-repair identity payload.}
+      authority_hash: {required: true, description: SHA-256 of the exact current DD authority closure.}
+      precondition_hash: {required: true, description: SHA-256 of the exact fenced graph precondition.}
+      preserved_state_hash: {required: true, description: SHA-256 of graph state other than the identity scalar.}
+      reason: {required: true, description: Operator-provided reason for the governed repair.}
+      run_id: {required: true, description: Identifier shared by every event in one atomic invocation.}
+      changed_at: {required: true, range: datetime, description: Transaction timestamp at which the repair committed.}
+
+  StandardNameSourceSnapshotAdoption:
+    description: >-
+      Immutable receipt for atomic reconciliation to current DD authority when
+      no DD version transition occurred.
+    class_uri: sn:StandardNameSourceSnapshotAdoption
+    attributes:
+      id: {identifier: true, required: true, description: Stable content-derived event identifier.}
+      source_id: {required: true, description: Exact stable StandardNameSource identity reconciled.}
+      dd_version: {required: true, description: Exact DD version named before and after adoption.}
+      before_snapshot_hash: {required: true, description: SHA-256 of the complete pre-adoption snapshot.}
+      after_snapshot_hash: {required: true, description: SHA-256 of the complete adopted snapshot.}
+      before_snapshot_payload: {required: true, description: Complete canonical snapshot before adoption.}
+      after_snapshot_payload: {required: true, description: Complete canonical snapshot after adoption.}
+      authority_hash: {required: true, description: SHA-256 of the exact current DD authority closure.}
+      precondition_hash: {required: true, description: SHA-256 of the exact fenced graph precondition.}
+      preserved_state_hash: {required: true, description: SHA-256 of every non-snapshot property and relationship.}
+      classification: {required: true, range: StandardNameSourceSnapshotClassification, description: Semantic classification of the adopted authority change.}
+      reason: {required: true, description: Operator-provided reason for the governed adoption.}
+      run_id: {required: true, description: Identifier shared by every event in one atomic invocation.}
+      adopted_at: {required: true, range: datetime, description: Transaction timestamp at which adoption committed.}
+
+  StandardNameSourceSnapshotAdmission:
+    description: >-
+      Immutable receipt for atomic admission of a source with no prior pinned
+      DD snapshot. No prior DD version is invented by this event.
+    class_uri: sn:StandardNameSourceSnapshotAdmission
+    attributes:
+      id: {identifier: true, required: true, description: Stable content-derived event identifier.}
+      source_id: {required: true, description: Exact stable StandardNameSource identity admitted.}
+      to_dd_version: {required: true, description: Exact uniquely current DD version admitted.}
+      before_snapshot_hash: {required: true, description: SHA-256 of the complete null pre-admission snapshot.}
+      after_snapshot_hash: {required: true, description: SHA-256 of the complete admitted snapshot.}
+      before_snapshot_payload: {required: true, description: Complete canonical null snapshot before admission.}
+      after_snapshot_payload: {required: true, description: Complete canonical snapshot after admission.}
+      authority_hash: {required: true, description: SHA-256 of the exact current DD authority closure.}
+      precondition_hash: {required: true, description: SHA-256 of the exact fenced graph precondition.}
+      preserved_state_hash: {required: true, description: SHA-256 of every non-snapshot property and relationship.}
+      reason: {required: true, description: Operator-provided reason for the governed admission.}
+      run_id: {required: true, description: Identifier shared by every event in one atomic invocation.}
+      admitted_at: {required: true, range: datetime, description: Transaction timestamp at which admission committed.}
+
+  StandardNameSourceIdentityFold:
+    description: >-
+      Immutable receipt for retiring one duplicate DD source identity while
+      preserving the canonical source and all historical retry evidence.
+    class_uri: sn:StandardNameSourceIdentityFold
+    attributes:
+      id: {identifier: true, required: true, description: Stable content-derived event identifier.}
+      canonical_source_id: {required: true, description: Exact canonical StandardNameSource identity retained.}
+      duplicate_source_id: {required: true, description: Exact duplicate StandardNameSource identity retired.}
+      before_duplicate_identity_payload: {required: true, description: Canonical complete duplicate identity before retirement.}
+      after_duplicate_identity_payload: {required: true, description: Canonical complete duplicate identity after retirement.}
+      before_duplicate_identity_hash: {required: true, description: SHA-256 of the duplicate pre-retirement identity payload.}
+      after_duplicate_identity_hash: {required: true, description: SHA-256 of the duplicate post-retirement identity payload.}
+      authority_hash: {required: true, description: SHA-256 of the canonical current DD authority closure.}
+      precondition_hash: {required: true, description: SHA-256 of the complete canonical and duplicate precondition.}
+      preserved_state_hash: {required: true, description: SHA-256 of graph state outside the authorized duplicate retirement.}
+      reason: {required: true, description: Operator-provided reason for the governed fold.}
+      run_id: {required: true, description: Identifier shared by every event in one atomic invocation.}
+      folded_at: {required: true, range: datetime, description: Transaction timestamp at which the fold committed.}
+
+  StandardNameSourceAuthorityRetirement:
+    description: >-
+      Immutable receipt for retiring a DD source whose exact backing category
+      does not participate in standard-name generation.
+    class_uri: sn:StandardNameSourceAuthorityRetirement
+    attributes:
+      id: {identifier: true, required: true, description: Stable content-derived event identifier.}
+      source_id: {required: true, description: Exact StandardNameSource identity retired.}
+      dd_path: {required: true, description: Exact backing IMASNode identity.}
+      node_category: {required: true, description: Nonparticipating DD node category proven at retirement.}
+      removed_target_ids: {multivalued: true, description: Exact null-lifecycle target identities detached by the retirement.}
+      before_source_payload: {required: true, description: Canonical complete source payload before retirement.}
+      after_source_payload: {required: true, description: Canonical complete source payload after retirement.}
+      before_source_hash: {required: true, description: SHA-256 of the complete pre-retirement source payload.}
+      after_source_hash: {required: true, description: SHA-256 of the complete post-retirement source payload.}
+      authority_hash: {required: true, description: SHA-256 of the exact current DD authority closure.}
+      precondition_hash: {required: true, description: SHA-256 of the complete fenced graph precondition.}
+      preserved_state_hash: {required: true, description: SHA-256 of graph state outside the authorized retirement.}
+      reason: {required: true, description: Operator-provided reason for the governed retirement.}
+      run_id: {required: true, description: Identifier shared by every event in one atomic invocation.}
+      retired_at: {required: true, range: datetime, description: Transaction timestamp at which retirement committed.}
 
   StandardNameSourceRetry:
     description: >-
