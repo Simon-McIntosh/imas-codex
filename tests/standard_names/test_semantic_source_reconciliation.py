@@ -663,9 +663,11 @@ def test_queries_are_batched_and_relationship_locks_are_anchored():
     assert "elementId(relationship) IN $relationship_element_ids" in (
         reconciliation.RELATIONSHIP_LOCK_QUERY
     )
-    assert (
-        "elementId(start) IN $start_element_ids"
-        in reconciliation.RELATIONSHIP_LOCK_QUERY
+    assert "UNWIND $start_element_ids AS start_element_id" in (
+        reconciliation.RELATIONSHIP_LOCK_QUERY
+    )
+    assert "elementId(start) = start_element_id" in (
+        reconciliation.RELATIONSHIP_LOCK_QUERY
     )
 
 
@@ -1053,22 +1055,20 @@ def test_graph_lock_plans_reject_global_scans(
             .consume()
             .plan
         )
-        relationship_plan = None
-        if size == 1:
-            relationship_plan = (
-                session.run(
-                    f"EXPLAIN {reconciliation.RELATIONSHIP_LOCK_QUERY}",
-                    locks=relationship_locks,
-                    relationship_element_ids=[
-                        item["relationship_element_id"] for item in relationship_locks
-                    ],
-                    start_element_ids=[
-                        item["start_element_id"] for item in relationship_locks
-                    ],
-                )
-                .consume()
-                .plan
+        relationship_plan = (
+            session.run(
+                f"EXPLAIN {reconciliation.RELATIONSHIP_LOCK_QUERY}",
+                locks=relationship_locks,
+                relationship_element_ids=[
+                    item["relationship_element_id"] for item in relationship_locks
+                ],
+                start_element_ids=[
+                    item["start_element_id"] for item in relationship_locks
+                ],
             )
+            .consume()
+            .plan
+        )
 
     forbidden = {
         "AllNodesScan",
@@ -1076,10 +1076,10 @@ def test_graph_lock_plans_reject_global_scans(
         "DirectedAllRelationshipsScan",
         "UndirectedAllRelationshipsScan",
     }
-    plans = [("participant", participant_plan)]
-    if relationship_plan is not None:
-        plans.append(("relationship", relationship_plan))
-    for label, plan in plans:
+    for label, plan in (
+        ("participant", participant_plan),
+        ("relationship", relationship_plan),
+    ):
         assert plan is not None
         operators = _plan_operator_names(plan)
         assert forbidden.isdisjoint(operators), f"{label}: {operators}"

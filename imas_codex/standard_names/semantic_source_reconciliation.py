@@ -145,8 +145,9 @@ RETURN count(participant) AS locked
 
 RELATIONSHIP_LOCK_QUERY = """
 // SEMANTIC_SOURCE_RECONCILIATION_RELATIONSHIP_LOCK
+UNWIND $start_element_ids AS start_element_id
 MATCH (start)
-WHERE elementId(start) IN $start_element_ids
+WHERE elementId(start) = start_element_id
 CALL (start) {
   MATCH (start)-[relationship:PRODUCED_NAME|FROM_DD_PATH|FROM_FACILITY_SIGNAL|
     HAS_STANDARD_NAME|HAS_INTERNAL_CHANGE|HAS_PARENT]->(end)
