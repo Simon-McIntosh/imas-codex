@@ -1075,6 +1075,82 @@ class _EventTamperClient:
             yield _EventTamperSession(session)
 
 
+class _DiagnosticMutationTransaction:
+    def __init__(
+        self,
+        transaction: Any,
+        statement: str | None,
+        *,
+        raise_on_read: bool,
+    ) -> None:
+        self.transaction = transaction
+        self.statement = statement
+        self.raise_on_read = raise_on_read
+        self.mutated = False
+
+    def run(self, cypher: str, **params: Any):
+        if "STRUCTURAL_CLOSURE_EVENT_ROUNDTRIP_READ" in cypher and not self.mutated:
+            self.mutated = True
+            if self.statement is not None:
+                list(
+                    self.transaction.run(
+                        self.statement,
+                        event_ids=params["event_ids"],
+                    )
+                )
+            if self.raise_on_read:
+                raise RuntimeError("injected diagnostic read failure")
+        return self.transaction.run(cypher, **params)
+
+    def rollback(self) -> None:
+        self.transaction.rollback()
+
+
+class _DiagnosticMutationSession:
+    def __init__(
+        self,
+        session: Any,
+        statement: str | None,
+        *,
+        raise_on_read: bool,
+    ) -> None:
+        self.session = session
+        self.statement = statement
+        self.raise_on_read = raise_on_read
+
+    def begin_transaction(self) -> _DiagnosticMutationTransaction:
+        return _DiagnosticMutationTransaction(
+            self.session.begin_transaction(),
+            self.statement,
+            raise_on_read=self.raise_on_read,
+        )
+
+
+class _DiagnosticMutationClient:
+    def __init__(
+        self,
+        client: GraphClient,
+        statement: str | None = None,
+        *,
+        raise_on_read: bool = False,
+    ) -> None:
+        self.client = client
+        self.statement = statement
+        self.raise_on_read = raise_on_read
+
+    @contextmanager
+    def session(self):
+        with self.client.session() as session:
+            yield _DiagnosticMutationSession(
+                session,
+                self.statement,
+                raise_on_read=self.raise_on_read,
+            )
+
+    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        return self.client.query(cypher, **params)
+
+
 @pytest.mark.graph
 def test_relationship_drift_rolls_back_before_mutation(
     tmp_path: Path,
@@ -1290,13 +1366,22 @@ def test_event_record_tamper_fails_hash_postflight_and_rolls_back(
         },
     )
 
-    with pytest.raises(StructuralClosureConflict, match="record hash changed"):
+    with pytest.raises(
+        StructuralClosureConflict, match="record hash changed"
+    ) as captured:
         closure.reconcile_structural_closure(
             manifest,
             dry_run=False,
             expected_manifest_hash=manifest_hash,
             gc=_EventTamperClient(structural_graph),
         )
+
+    mismatch = captured.value.diagnostic["mismatches"][0]
+    assert mismatch["mismatch_fields"] == ["reason"]
+    assert mismatch["fields"]["reason"]["expected"]["canonical_hash"]
+    assert mismatch["fields"]["reason"]["actual"]["canonical_hash"]
+    assert "canonical_value" not in mismatch["fields"]["reason"]["expected"]
+    assert "canonical_value" not in mismatch["fields"]["reason"]["actual"]
 
     assert structural_graph.query(
         "MATCH (change:StandardNameChange) RETURN count(change) AS events"
@@ -1309,6 +1394,248 @@ def test_event_record_tamper_fails_hash_postflight_and_rolls_back(
         RETURN parent.name_stage AS stage, count(source) AS sources
         """
     ) == [{"stage": None, "sources": 0}]
+
+
+@pytest.mark.graph
+def test_event_roundtrip_diagnostic_matches_and_always_rolls_back(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        },
+    )
+    before = structural_graph.query(
+        """
+        MATCH (node)
+        OPTIONAL MATCH ()-[relationship]->()
+        RETURN count(DISTINCT node) AS nodes,
+               count(DISTINCT relationship) AS relationships
+        """
+    )
+
+    with pytest.raises(ValueError, match="does not match"):
+        closure.diagnose_structural_event_roundtrip(
+            manifest,
+            expected_manifest_hash="0" * 64,
+            gc=structural_graph,
+        )
+    receipt = closure.diagnose_structural_event_roundtrip(
+        manifest,
+        expected_manifest_hash=manifest_hash,
+        gc=structural_graph,
+    )
+
+    assert receipt["rolled_back"] is True
+    assert receipt["all_records_match"] is True
+    assert receipt["durable_event_count"] == 0
+    assert receipt["diagnostic_transaction_queries"] == 4
+    assert receipt["postrollback_queries"] == 1
+    assert receipt["query_count"] == 5
+    assert receipt["transaction_count"] == 2
+    assert receipt["rollback_count"] == 1
+    assert receipt["commit_count"] == 0
+    assert len(receipt["events"]) == 1
+    assert receipt["mismatch_event_ids"] == []
+    assert receipt["comparisons"][0]["matches"] is True
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
+    assert (
+        structural_graph.query(
+            """
+        MATCH (node)
+        OPTIONAL MATCH ()-[relationship]->()
+        RETURN count(DISTINCT node) AS nodes,
+               count(DISTINCT relationship) AS relationships
+        """
+        )
+        == before
+    )
+
+
+@pytest.mark.graph
+def test_event_roundtrip_diagnostic_identifies_temporal_string_and_type_drift(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    specifications = _seed_production_shaped_structural_cohort(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path, structural_graph, specifications
+    )
+    receipt = closure.diagnose_structural_event_roundtrip(
+        manifest,
+        expected_manifest_hash=manifest_hash,
+        gc=_DiagnosticMutationClient(
+            structural_graph,
+            """
+            MATCH (temporal:StandardNameChange {id: $event_ids[0]})
+            MATCH (textual:StandardNameChange {id: $event_ids[1]})
+            MATCH (typed:StandardNameChange {id: $event_ids[2]})
+            SET temporal.changed_at = temporal.changed_at
+                                      + duration({microseconds: 1}),
+                textual.reason = textual.reason + ' drift',
+                typed.internal = toString(typed.internal)
+            """,
+        ),
+    )
+
+    comparisons = {item["event_id"]: item for item in receipt["comparisons"]}
+    event_ids = sorted(comparisons)
+    assert len(event_ids) == 28
+    assert comparisons[event_ids[0]]["mismatch_fields"] == ["changed_at"]
+    assert comparisons[event_ids[1]]["mismatch_fields"] == ["reason"]
+    assert comparisons[event_ids[2]]["mismatch_fields"] == ["internal"]
+    assert comparisons[event_ids[2]]["fields"]["internal"]["expected"]["type"] == (
+        "bool"
+    )
+    assert comparisons[event_ids[2]]["fields"]["internal"]["actual"]["type"] == ("str")
+    assert (
+        "canonical_value"
+        not in comparisons[event_ids[1]]["fields"]["reason"]["expected"]
+    )
+    assert receipt["all_records_match"] is False
+    assert receipt["mismatch_event_ids"] == event_ids[:3]
+    assert receipt["durable_event_count"] == 0
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
+
+
+@pytest.mark.graph
+def test_event_roundtrip_diagnostic_identifies_missing_and_extra_properties(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        },
+    )
+    receipt = closure.diagnose_structural_event_roundtrip(
+        manifest,
+        expected_manifest_hash=manifest_hash,
+        gc=_DiagnosticMutationClient(
+            structural_graph,
+            """
+            MATCH (change:StandardNameChange {id: $event_ids[0]})
+            REMOVE change.reason
+            SET change.unexpected_property = 'diagnostic drift'
+            """,
+        ),
+    )
+
+    comparison = receipt["comparisons"][0]
+    assert comparison["missing_keys"] == ["reason"]
+    assert comparison["extra_keys"] == ["unexpected_property"]
+    assert comparison["mismatch_fields"] == ["reason", "unexpected_property"]
+    assert comparison["fields"]["reason"]["actual"] is None
+    assert comparison["fields"]["unexpected_property"]["expected"] is None
+    assert (
+        "canonical_value" not in comparison["fields"]["unexpected_property"]["actual"]
+    )
+    assert receipt["durable_event_count"] == 0
+
+
+@pytest.mark.graph
+def test_event_roundtrip_diagnostic_refuses_existing_duplicate_ids(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        },
+    )
+    first = closure.diagnose_structural_event_roundtrip(
+        manifest,
+        expected_manifest_hash=manifest_hash,
+        gc=structural_graph,
+    )
+    event_id = first["events"][0]["id"]
+    structural_graph.query(
+        """
+        UNWIND range(1, 2) AS ignored
+        CREATE (:StandardNameChange {id: $event_id})
+        """,
+        event_id=event_id,
+    )
+
+    with pytest.raises(
+        StructuralClosureConflict, match="requires absent event ids"
+    ) as captured:
+        closure.diagnose_structural_event_roundtrip(
+            manifest,
+            expected_manifest_hash=manifest_hash,
+            gc=structural_graph,
+        )
+
+    assert captured.value.diagnostic["existing_event_counts"] == {event_id: 2}
+    assert structural_graph.query(
+        """
+        MATCH (change:StandardNameChange {id: $event_id})
+        RETURN count(change) AS events
+        """,
+        event_id=event_id,
+    ) == [{"events": 2}]
+
+
+@pytest.mark.graph
+def test_event_roundtrip_diagnostic_exception_path_rolls_back(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    before = structural_graph.query(
+        """
+        MATCH (node)
+        OPTIONAL MATCH ()-[relationship]->()
+        RETURN count(DISTINCT node) AS nodes,
+               count(DISTINCT relationship) AS relationships
+        """
+    )
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        },
+    )
+
+    with pytest.raises(RuntimeError, match="injected diagnostic read failure"):
+        closure.diagnose_structural_event_roundtrip(
+            manifest,
+            expected_manifest_hash=manifest_hash,
+            gc=_DiagnosticMutationClient(structural_graph, raise_on_read=True),
+        )
+
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
+    assert (
+        structural_graph.query(
+            """
+        MATCH (node)
+        OPTIONAL MATCH ()-[relationship]->()
+        RETURN count(DISTINCT node) AS nodes,
+               count(DISTINCT relationship) AS relationships
+        """
+        )
+        == before
+    )
 
 
 @pytest.mark.graph
