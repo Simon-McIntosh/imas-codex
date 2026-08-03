@@ -469,6 +469,7 @@ def test_fold_manifest_participant_overlap_refuses_before_graph_mutation(
     repeated = json.loads(json.dumps(first))
     repeated["source_id"] = "dd:second/path"
     repeated["expected_from_dd_path"] = "second/path"
+    repeated["expected_duplicate_from_dd_path"] = "second/path"
     repeated_path = tmp_path / "fold-repeated-participant.json"
     repeated_path.write_text(
         json.dumps(
