@@ -729,6 +729,26 @@ def test_production_shaped_shared_cohort_commits_exact_ledgers(
             "semantic_unchanged": 1,
             "changed": 40,
         }
+        assert len(applied["rows"]) == 203
+        assert [row["source_id"] for row in applied["rows"]] == [
+            f"dd:cohort/{index:03d}" for index in range(203)
+        ]
+        assert all(
+            set(row)
+            == {
+                "source_id",
+                "path",
+                "status",
+                "classification",
+                "before_snapshot_hash",
+                "after_snapshot_hash",
+                "authority_hash",
+                "precondition_hash",
+                "preserved_state_hash",
+                "event_id",
+            }
+            for row in applied["rows"]
+        )
         assert _query(
             driver,
             "MATCH (source:StandardNameSource)-[:HAS_SNAPSHOT_CHANGE]->(event) "
@@ -741,6 +761,25 @@ def test_production_shaped_shared_cohort_commits_exact_ledgers(
             "(:StandardName {id: 'shared_cohort_name'}) "
             "RETURN count(*) AS co_producers",
         ) == [{"co_producers": 12}]
+
+        repeated = migration.migrate_source_snapshots(
+            manifest,
+            expected_from_version="old-dd",
+            reason="refresh immutable authority",
+            apply=True,
+            expected_manifest_hash=_manifest_hash(manifest),
+            gc=ephemeral_neo4j.client(),
+        )
+
+        assert repeated["mode"] == "already_current"
+        assert repeated["counts"]["already_current"] == 203
+        assert repeated["counts"]["applied"] == 0
+        assert len(repeated["rows"]) == 203
+        assert _query(
+            driver,
+            "MATCH (source:StandardNameSource)-[:HAS_SNAPSHOT_CHANGE]->(event) "
+            "RETURN count(DISTINCT source) AS sources, count(DISTINCT event) AS events",
+        ) == [{"sources": 203, "events": 203}]
 
 
 def test_large_cohort_preserved_mutation_fails_and_rolls_back_atomically(

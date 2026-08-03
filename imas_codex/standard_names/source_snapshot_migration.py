@@ -13,7 +13,6 @@ from __future__ import annotations
 import hashlib
 import hmac
 import json
-import re
 import uuid
 from collections import Counter
 from dataclasses import dataclass
@@ -23,6 +22,18 @@ from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
+from imas_codex.standard_names.source_authority import (
+    DD_AUTHORITY_CLASSIFICATION_FIELDS as _DD_AUTHORITY_CLASSIFICATION_FIELDS,
+    canonical_payload,
+    capture_source_authority_closure,
+    lock_participants,
+    normalize_manifest_hash_binding,
+    payload_hash,
+    read_source_authority_rows,
+    require_complete_paths,
+    source_identity_payload,
+    validate_source_id,
+)
 from imas_codex.units.dd_unit_exceptions import units_agree
 
 _MANIFEST_SCHEMA = "imas-codex.bounded-integrity-manifest"
@@ -31,46 +42,6 @@ _RECEIPT_SCHEMA = "imas-codex.source-snapshot-migration-receipt"
 _RECEIPT_SCHEMA_VERSION = 1
 _EVENT_PREFIX = "source-snapshot-change:"
 _RUN_PREFIX = "source-snapshot-migration:"
-
-_SNAPSHOT_FIELDS = (
-    "dd_version",
-    "description",
-    "physics_domain",
-    "dd_documentation",
-    "dd_snapshot_pinned",
-    "dd_parent_path",
-    "dd_parent_documentation",
-    "dd_data_type",
-    "dd_unit",
-    "dd_coordinates",
-    "dd_lifecycle_status",
-    "dd_lifecycle_version",
-    "enhanced_description",
-    "enhancement_kind",
-)
-
-_DD_AUTHORITY_CLASSIFICATION_FIELDS = (
-    "physics_domain",
-    "dd_documentation",
-    "dd_snapshot_pinned",
-    "dd_parent_path",
-    "dd_parent_documentation",
-    "dd_data_type",
-    "dd_unit",
-    "dd_coordinates",
-    "dd_lifecycle_status",
-    "dd_lifecycle_version",
-    "enhanced_description",
-    "enhancement_kind",
-)
-
-if set(_DD_AUTHORITY_CLASSIFICATION_FIELDS) != set(_SNAPSHOT_FIELDS) - {
-    "dd_version",
-    "description",
-}:
-    raise RuntimeError(
-        "DD source classification fields must cover every authoritative snapshot field"
-    )
 
 
 @dataclass(frozen=True)
@@ -90,106 +61,12 @@ class SourceSnapshotMigrationConflict(RuntimeError):
     """The bounded migration preconditions do not hold exactly."""
 
 
-def _json_safe(value: Any) -> Any:
-    if isinstance(value, dict):
-        return {str(key): _json_safe(item) for key, item in value.items()}
-    if isinstance(value, list | tuple):
-        return [_json_safe(item) for item in value]
-    if isinstance(value, set | frozenset):
-        return sorted((_json_safe(item) for item in value), key=repr)
-    if value is None or isinstance(value, str | int | float | bool):
-        return value
-    if isinstance(value, bytes):
-        return {"bytes": value.hex()}
-    if hasattr(value, "iso_format"):
-        return {"temporal": value.iso_format()}
-    if hasattr(value, "isoformat"):
-        return {"temporal": value.isoformat()}
-    return {
-        "typed_repr": f"{type(value).__module__}.{type(value).__qualname__}:{value}"
-    }
-
-
-def _typed_value(value: Any, *, key: str = "") -> Any:
-    if isinstance(value, dict):
-        return [
-            "mapping",
-            [
-                [str(name), _typed_value(item, key=str(name))]
-                for name, item in sorted(value.items(), key=lambda pair: str(pair[0]))
-            ],
-        ]
-    if isinstance(value, list | tuple):
-        items = [_typed_value(item) for item in value]
-        if (
-            key
-            in {
-                "coordinates",
-                "dd_coordinates",
-                "labels",
-                "names",
-                "nodes",
-                "relationships",
-                "sources",
-                "versions",
-            }
-            or value
-            and all(isinstance(item, dict) for item in value)
-        ):
-            items.sort(
-                key=lambda item: json.dumps(item, sort_keys=True, separators=(",", ":"))
-            )
-        return [type(value).__name__, items]
-    if isinstance(value, set | frozenset):
-        items = [_typed_value(item) for item in value]
-        items.sort(
-            key=lambda item: json.dumps(item, sort_keys=True, separators=(",", ":"))
-        )
-        return [type(value).__name__, items]
-    if value is None:
-        return ["none"]
-    if isinstance(value, bool):
-        return ["bool", value]
-    if isinstance(value, int):
-        return ["int", str(value)]
-    if isinstance(value, float):
-        return ["float", repr(value)]
-    if isinstance(value, str):
-        return ["str", value]
-    if isinstance(value, bytes):
-        return ["bytes", value.hex()]
-    scalar_type = f"{type(value).__module__}.{type(value).__qualname__}"
-    if hasattr(value, "iso_format"):
-        return [scalar_type, value.iso_format()]
-    if hasattr(value, "isoformat"):
-        return [scalar_type, value.isoformat()]
-    return [scalar_type, str(value)]
-
-
-def canonical_payload(value: Any) -> str:
-    """Encode values with stable ordering while preserving scalar types."""
-    return json.dumps(_typed_value(value), sort_keys=True, separators=(",", ":"))
-
-
 def _hash(value: Any) -> str:
-    return hashlib.sha256(canonical_payload(value).encode()).hexdigest()
+    return payload_hash(value)
 
 
 def _validate_source_id(source_id: str) -> str:
-    if not isinstance(source_id, str) or not source_id.startswith("dd:"):
-        raise ValueError(f"exact DD source identity required, got {source_id!r}")
-    path = source_id.removeprefix("dd:")
-    if (
-        not path
-        or path.startswith("/")
-        or path.endswith("/")
-        or ":" in path
-        or "*" in path
-        or "?" in path
-        or any(char.isspace() for char in path)
-    ):
-        raise ValueError(f"exact DD source identity required, got {source_id!r}")
-    return path
+    return validate_source_id(source_id)
 
 
 def _record_source_ids(record: dict[str, Any]) -> list[str]:
@@ -388,89 +265,6 @@ def classify_snapshot_change(
     return "changed"
 
 
-_SNAPSHOT_QUERY = """
-// SOURCE_SNAPSHOT_MIGRATION_SNAPSHOT
-UNWIND $paths AS path
-CALL () {
-  MATCH (version:DDVersion {is_current: true})
-  RETURN collect({element_id: elementId(version), labels: labels(version),
-                  properties: properties(version)}) AS versions
-}
-OPTIONAL MATCH (source:StandardNameSource {id: 'dd:' + path})
-OPTIONAL MATCH (node:IMASNode {id: path})
-WITH path, versions, collect(DISTINCT source) AS source_nodes,
-     collect(DISTINCT node) AS authority_nodes
-RETURN path, versions,
-  [source IN source_nodes WHERE source IS NOT NULL | {
-    element_id: elementId(source), labels: labels(source),
-    properties: properties(source),
-    relationships: [(source)-[relationship]-(other)
-      WHERE type(relationship) <> 'HAS_SNAPSHOT_CHANGE' | {
-        element_id: elementId(relationship), type: type(relationship),
-        direction: CASE WHEN startNode(relationship) = source THEN 'out' ELSE 'in' END,
-        properties: properties(relationship),
-        other_element_id: elementId(other), other_labels: labels(other),
-        other_id: other.id, other_properties: properties(other)
-      }],
-    ledger: [(source)-[link:HAS_SNAPSHOT_CHANGE]
-                    ->(event:StandardNameSourceSnapshotChange) | {
-      link_element_id: elementId(link), link_properties: properties(link),
-      event_element_id: elementId(event), event_labels: labels(event),
-      event_properties: properties(event)
-    }],
-    names: [(source)-[binding:PRODUCED_NAME]->(name:StandardName) | {
-      binding_element_id: elementId(binding), binding_properties: properties(binding),
-      element_id: elementId(name), labels: labels(name), properties: properties(name),
-      relationships: [(name)-[name_link]-(related) | {
-        element_id: elementId(name_link), type: type(name_link),
-        direction: CASE WHEN startNode(name_link) = name THEN 'out' ELSE 'in' END,
-        properties: properties(name_link),
-        other_element_id: elementId(related), other_labels: labels(related),
-        other_id: related.id, other_properties: properties(related)
-      }]
-    }]
-  }] AS sources,
-  [authority IN authority_nodes WHERE authority IS NOT NULL | {
-    element_id: elementId(authority), labels: labels(authority),
-    properties: properties(authority),
-    units: [(authority)-[unit_link:HAS_UNIT]->(unit:Unit) | {
-      relationship_element_id: elementId(unit_link),
-      relationship_properties: properties(unit_link),
-      element_id: elementId(unit), labels: labels(unit), id: unit.id,
-      properties: properties(unit)
-    }],
-    parents: [(authority)-[parent_link:HAS_PARENT]->(parent:IMASNode) | {
-      relationship_element_id: elementId(parent_link),
-      relationship_properties: properties(parent_link),
-      element_id: elementId(parent), labels: labels(parent), id: parent.id,
-      properties: properties(parent)
-    }],
-    coordinates: [(authority)-[coordinate_link:HAS_COORDINATE]->(coordinate) | {
-      relationship_element_id: elementId(coordinate_link),
-      relationship_properties: properties(coordinate_link),
-      element_id: elementId(coordinate), labels: labels(coordinate), id: coordinate.id,
-      properties: properties(coordinate)
-    }],
-    projections: [(authority)-[projection:HAS_STANDARD_NAME]
-                              ->(name:StandardName) | {
-      relationship_element_id: elementId(projection),
-      relationship_properties: properties(projection),
-      element_id: elementId(name), labels: labels(name), id: name.id,
-      properties: properties(name)
-    }]
-  }] AS nodes
-ORDER BY path
-"""
-
-_LOCK_QUERY = """
-// SOURCE_SNAPSHOT_MIGRATION_LOCK
-MATCH (participant)
-WHERE elementId(participant) IN $element_ids AND participant.id IS NOT NULL
-SET participant._source_snapshot_migration_lock = true
-REMOVE participant._source_snapshot_migration_lock
-RETURN count(participant) AS locked
-"""
-
 _APPLY_QUERY = """
 // SOURCE_SNAPSHOT_MIGRATION_APPLY
 UNWIND $items AS item
@@ -510,98 +304,6 @@ SET source.dd_version = item.after.dd_version,
     source.enhancement_kind = item.after.enhancement_kind
 RETURN collect(source.id) AS source_ids, collect(event.id) AS event_ids
 """
-
-
-def _rows(transaction: Any, paths: tuple[str, ...]) -> list[dict[str, Any]]:
-    return [dict(row) for row in transaction.run(_SNAPSHOT_QUERY, paths=list(paths))]
-
-
-def _source_snapshot(properties: dict[str, Any]) -> dict[str, Any]:
-    return {field: _json_safe(properties.get(field)) for field in _SNAPSHOT_FIELDS}
-
-
-def _authority_snapshot(
-    path: str, node: dict[str, Any], version: dict[str, Any]
-) -> dict[str, Any]:
-    properties = node["properties"]
-    units = node.get("units") or []
-    parents = node.get("parents") or []
-    coordinates = node.get("coordinates") or []
-    unit = properties.get("unit") or (units[0].get("id") if units else None)
-    parent = parents[0] if parents else None
-    return {
-        "dd_version": version["properties"].get("id"),
-        "description": properties.get("documentation"),
-        "physics_domain": properties.get("physics_domain"),
-        "dd_documentation": properties.get("documentation"),
-        "dd_snapshot_pinned": True,
-        "dd_parent_path": parent.get("id") if parent else None,
-        "dd_parent_documentation": (
-            parent.get("properties", {}).get("documentation") if parent else None
-        ),
-        "dd_data_type": properties.get("data_type"),
-        "dd_unit": unit,
-        "dd_coordinates": sorted(
-            coordinate.get("id") for coordinate in coordinates if coordinate.get("id")
-        ),
-        "dd_lifecycle_status": properties.get("lifecycle_status"),
-        "dd_lifecycle_version": properties.get("lifecycle_version"),
-        "enhanced_description": properties.get("description"),
-        "enhancement_kind": properties.get("enrichment_source"),
-    }
-
-
-def _preserved_state(
-    source: dict[str, Any],
-    node: dict[str, Any],
-    *,
-    authorized_source_ids: frozenset[str],
-) -> dict[str, Any]:
-    properties = {
-        key: value
-        for key, value in source["properties"].items()
-        if key not in _SNAPSHOT_FIELDS
-    }
-    names = _json_safe(source.get("names") or [])
-    for name in names:
-        for relationship in name.get("relationships") or []:
-            if (
-                "StandardNameSource" not in (relationship.get("other_labels") or [])
-                or relationship.get("other_id") not in authorized_source_ids
-            ):
-                continue
-            relationship["other_properties"] = {
-                key: value
-                for key, value in (relationship.get("other_properties") or {}).items()
-                if key not in _SNAPSHOT_FIELDS
-            }
-    return {
-        "source_element_id": source["element_id"],
-        "source_labels": source["labels"],
-        "source_properties": properties,
-        "source_relationships": source.get("relationships") or [],
-        "names": names,
-        "projections": node.get("projections") or [],
-    }
-
-
-def _participant_ids(row: dict[str, Any]) -> set[str]:
-    ids = {
-        item.get("element_id")
-        for key in ("versions", "sources", "nodes")
-        for item in row.get(key) or []
-    }
-    for source in row.get("sources") or []:
-        for relationship in source.get("relationships") or []:
-            ids.add(relationship.get("other_element_id"))
-        for name in source.get("names") or []:
-            ids.add(name.get("element_id"))
-            for relationship in name.get("relationships") or []:
-                ids.add(relationship.get("other_element_id"))
-    for node in row.get("nodes") or []:
-        for key in ("units", "parents", "coordinates", "projections"):
-            ids.update(item.get("element_id") for item in node.get(key) or [])
-    return {str(element_id) for element_id in ids if element_id}
 
 
 def _event_id(event: dict[str, Any]) -> str:
@@ -655,20 +357,16 @@ def _topology_reasons(
 ) -> list[str]:
     reasons: list[str] = []
     source_properties = source["properties"]
+    identity = source_identity_payload(source)
     if (
-        source_properties.get("id") != f"dd:{path}"
-        or source_properties.get("source_type") != "dd"
-        or source_properties.get("source_id") != path
+        identity["stable_id"] != f"dd:{path}"
+        or identity["source_type"] != "dd"
+        or identity["source_id"] != path
     ):
         reasons.append("exact source identity or type is inconsistent")
     if source_properties.get("dd_snapshot_pinned") is not True:
         reasons.append("source snapshot is not pinned")
-    from_dd = [
-        relationship
-        for relationship in source.get("relationships") or []
-        if relationship.get("type") == "FROM_DD_PATH"
-        and relationship.get("direction") == "out"
-    ]
+    from_dd = identity["from_dd_paths"]
     if len(from_dd) != 1 or from_dd[0].get("other_id") != path:
         reasons.append("FROM_DD_PATH is not exact")
     units = node.get("units") or []
@@ -754,27 +452,24 @@ def _plan_rows(
         if row_reasons:
             refusals.append({"source_id": f"dd:{path}", "reasons": row_reasons})
             continue
-        source = sources[0]
-        node = nodes[0]
-        version = versions[0]
+        closure = capture_source_authority_closure(
+            row,
+            manifest_hash=manifest_hash,
+            authorized_source_ids=authorized_source_ids,
+        )
+        source = closure.source
+        node = closure.node
+        version = closure.version
         row_reasons.extend(_topology_reasons(path, source, node))
         target_version = version["properties"].get("id")
         if not target_version:
             row_reasons.append("current DDVersion has no exact id")
         source_properties = source["properties"]
-        before = _source_snapshot(source_properties)
-        after = _authority_snapshot(path, node, version)
-        authority_hash = _hash({"path": path, "version": version, "node": node})
-        preserved_state_hash = _hash(
-            _preserved_state(
-                source,
-                node,
-                authorized_source_ids=authorized_source_ids,
-            )
-        )
-        precondition_hash = _hash(
-            {"manifest_hash": manifest_hash, "graph_snapshot": row}
-        )
+        before = closure.before_snapshot
+        after = closure.after_snapshot
+        authority_hash = closure.authority_hash
+        preserved_state_hash = closure.preserved_state_hash
+        precondition_hash = closure.precondition_hash
 
         status = "planned"
         event: dict[str, Any] | None = None
@@ -857,7 +552,7 @@ def _plan_rows(
                 "precondition_hash": precondition_hash,
                 "preserved_state_hash": preserved_state_hash,
                 "event": event_properties,
-                "participant_ids": sorted(_participant_ids(row)),
+                "participant_ids": list(closure.participant_ids),
             }
         )
     return planned, refusals
@@ -932,11 +627,12 @@ def _read_plan(
     run_id: str | None,
     changed_at: str | None,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
-    rows = _rows(transaction, allowlist.paths)
-    if [row.get("path") for row in rows] != list(allowlist.paths):
-        raise SourceSnapshotMigrationConflict(
-            "graph snapshot did not return the complete exact allowlist"
-        )
+    rows = read_source_authority_rows(transaction, allowlist.paths)
+    require_complete_paths(
+        rows,
+        allowlist.paths,
+        conflict_type=SourceSnapshotMigrationConflict,
+    )
     planned, refusals = _plan_rows(
         rows,
         manifest_hash=allowlist.manifest_hash,
@@ -985,18 +681,9 @@ def migrate_source_snapshots(
         raise ValueError("an exact expected source DD version is required")
     if not reason:
         raise ValueError("a migration reason is required")
-    normalized_manifest_hash = (
-        expected_manifest_hash.strip().casefold()
-        if isinstance(expected_manifest_hash, str)
-        else None
+    normalized_manifest_hash = normalize_manifest_hash_binding(
+        expected_manifest_hash, apply=apply
     )
-    if apply and normalized_manifest_hash is None:
-        raise ValueError("apply requires an expected manifest SHA-256")
-    if (
-        normalized_manifest_hash is not None
-        and re.fullmatch(r"[0-9a-f]{64}", normalized_manifest_hash) is None
-    ):
-        raise ValueError("expected manifest SHA-256 must be exactly 64 hex characters")
     allowlist = load_source_snapshot_allowlist(manifest_path)
     if normalized_manifest_hash is not None and not hmac.compare_digest(
         allowlist.manifest_hash, normalized_manifest_hash
@@ -1070,14 +757,12 @@ def migrate_source_snapshots(
                         for participant in item["participant_ids"]
                     }
                 )
-                lock_rows = list(
-                    transaction.run(_LOCK_QUERY, element_ids=participant_ids)
+                lock_participants(
+                    transaction,
+                    participant_ids,
+                    conflict_type=SourceSnapshotMigrationConflict,
+                    message="snapshot migration participant set changed before locking",
                 )
-                locked = int(dict(lock_rows[0]).get("locked") or 0) if lock_rows else 0
-                if locked != len(participant_ids):
-                    raise SourceSnapshotMigrationConflict(
-                        "snapshot migration participant set changed before locking"
-                    )
                 _, locked_plan, locked_refusals = _read_plan(
                     transaction,
                     allowlist,
@@ -1121,7 +806,7 @@ def migrate_source_snapshots(
                         "snapshot mutation cardinality changed inside the transaction"
                     )
 
-                post_rows = _rows(transaction, allowlist.paths)
+                post_rows = read_source_authority_rows(transaction, allowlist.paths)
                 post_plan, post_refusals = _plan_rows(
                     post_rows,
                     manifest_hash=allowlist.manifest_hash,

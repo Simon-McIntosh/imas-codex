@@ -9,8 +9,12 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from imas_codex.standard_names import source_snapshot_migration as migration
+from imas_codex.standard_names import (
+    source_authority as authority,
+    source_snapshot_migration as migration,
+)
 from imas_codex.standard_names.source_snapshot_migration import (
+    SourceSnapshotAllowlist,
     canonical_payload,
     classify_snapshot_change,
     load_source_snapshot_allowlist,
@@ -153,6 +157,101 @@ def test_canonical_payload_preserves_types_and_normalizes_order() -> None:
     assert canonical_payload(first) == canonical_payload(second)
 
 
+def test_source_authority_closure_has_exact_identity_and_participants() -> None:
+    source = {
+        "element_id": "source-element",
+        "labels": ["StandardNameSource"],
+        "properties": {
+            "id": "dd:diagnostic/path",
+            "source_type": "dd",
+            "source_id": "diagnostic/path",
+            "dd_version": "old-dd",
+            "dd_snapshot_pinned": True,
+            "batch_key": "preserved",
+        },
+        "relationships": [
+            {
+                "element_id": "source-node-link",
+                "type": "FROM_DD_PATH",
+                "direction": "out",
+                "properties": {"owner": "preserved"},
+                "other_element_id": "node-element",
+                "other_labels": ["IMASNode"],
+                "other_id": "diagnostic/path",
+                "other_properties": {"id": "diagnostic/path"},
+            }
+        ],
+        "ledger": [],
+        "names": [],
+    }
+    node = {
+        "element_id": "node-element",
+        "labels": ["IMASNode"],
+        "properties": {
+            "id": "diagnostic/path",
+            "documentation": "authoritative documentation",
+            "unit": "Pa",
+        },
+        "units": [
+            {
+                "element_id": "unit-element",
+                "labels": ["Unit"],
+                "id": "Pa",
+                "properties": {"id": "Pa"},
+            }
+        ],
+        "parents": [],
+        "coordinates": [],
+        "projections": [],
+    }
+    row = {
+        "path": "diagnostic/path",
+        "versions": [
+            {
+                "element_id": "version-element",
+                "labels": ["DDVersion"],
+                "properties": {"id": "new-dd", "is_current": True},
+            }
+        ],
+        "sources": [source],
+        "nodes": [node],
+    }
+
+    closure = authority.capture_source_authority_closure(
+        row,
+        manifest_hash="manifest-digest",
+        authorized_source_ids=frozenset({"dd:diagnostic/path"}),
+    )
+
+    assert closure.identity_payload == {
+        "stable_id": "dd:diagnostic/path",
+        "source_type": "dd",
+        "source_id": "diagnostic/path",
+        "from_dd_paths": [
+            {
+                "element_id": "source-node-link",
+                "properties": {"owner": "preserved"},
+                "other_element_id": "node-element",
+                "other_labels": ["IMASNode"],
+                "other_id": "diagnostic/path",
+            }
+        ],
+    }
+    assert closure.participant_ids == (
+        "node-element",
+        "source-element",
+        "unit-element",
+        "version-element",
+    )
+    assert closure.after_snapshot["dd_version"] == "new-dd"
+    assert closure.after_snapshot["dd_unit"] == "Pa"
+    assert closure.before_snapshot["dd_version"] == "old-dd"
+    assert len(closure.authority_hash) == 64
+    assert len(closure.precondition_hash) == 64
+    assert len(closure.preserved_state_hash) == 64
+    assert len(closure.participant_ids_hash) == 64
+
+
 def test_snapshot_classification_distinguishes_byte_semantic_and_material() -> None:
     base = {
         "description": "operational mirror",
@@ -270,7 +369,7 @@ def test_preserved_state_normalizes_only_authorized_peer_snapshot_fields() -> No
         ],
     }
 
-    preserved = migration._preserved_state(
+    preserved = authority.preserved_state(
         source,
         {"projections": []},
         authorized_source_ids=frozenset({"dd:shared/one", "dd:shared/two"}),
@@ -298,6 +397,76 @@ def test_preserved_state_normalizes_only_authorized_peer_snapshot_fields() -> No
         "description": "external documentation",
         "batch_key": "external-batch",
     }
+
+
+def test_preserved_state_accepts_an_operation_specific_mutable_field() -> None:
+    preserved = authority.preserved_state(
+        {
+            "element_id": "source-element",
+            "labels": ["StandardNameSource"],
+            "properties": {
+                "id": "dd:diagnostic/path",
+                "source_id": None,
+                "dd_version": "old-dd",
+                "batch_key": "preserved",
+            },
+            "relationships": [],
+            "names": [],
+        },
+        {"projections": []},
+        authorized_source_ids=frozenset({"dd:diagnostic/path"}),
+        mutable_source_fields=frozenset({"source_id"}),
+    )
+
+    assert preserved["source_properties"] == {
+        "id": "dd:diagnostic/path",
+        "dd_version": "old-dd",
+        "batch_key": "preserved",
+    }
+
+
+def test_receipt_bytes_remain_stable_for_one_exact_row() -> None:
+    allowlist = SourceSnapshotAllowlist(
+        manifest_path=Path("/tmp/exact-source-manifest.json"),
+        manifest_hash="a" * 64,
+        source_ids=("dd:diagnostic/path",),
+        paths=("diagnostic/path",),
+        allowlist_hash="b" * 64,
+        excluded_counts={"west": 1},
+        excluded_source_ids={"west": ("dd:west/path",)},
+    )
+    planned = [
+        {
+            "source_id": "dd:diagnostic/path",
+            "path": "diagnostic/path",
+            "status": "planned",
+            "classification": "changed",
+            "before_snapshot_hash": "c" * 64,
+            "after_snapshot_hash": "d" * 64,
+            "authority_hash": "e" * 64,
+            "precondition_hash": "f" * 64,
+            "preserved_state_hash": "0" * 64,
+            "event": {"id": "source-snapshot-change:exact"},
+        }
+    ]
+
+    receipt = migration._receipt(
+        allowlist,
+        planned,
+        [],
+        apply=False,
+        run_id=None,
+    )
+    receipt_bytes = json.dumps(receipt, sort_keys=True, separators=(",", ":")).encode()
+
+    assert (
+        sha256(receipt_bytes).hexdigest()
+        == "89c8fd1b70312d9c1e8e2a88094b912f34366dd2c641e05e3edc750aaced5e87"
+    )
+    assert (
+        receipt["receipt_hash"]
+        == "2ac66ca5db4f4b004a5074bcce530b21beee34a5bb5196c32c0a30ae625ae8ac"
+    )
 
 
 @pytest.mark.parametrize("expected_hash", [None, "not-a-sha256", "0" * 64])
