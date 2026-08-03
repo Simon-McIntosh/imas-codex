@@ -3,11 +3,15 @@
 from __future__ import annotations
 
 import copy
+import os
+from collections.abc import Iterator
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
+from imas_codex.graph.client import GraphClient
+from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names import grammar_segment_reconciliation as reconciliation
 from imas_codex.standard_names.source_authority import payload_hash
 
@@ -18,6 +22,21 @@ _NAMES = (
     "ratio_of_particle_temperature_to_particle_reference_temperature",
     "volume_averaged_time_derivative_of_electron_density",
 )
+
+
+def _protected(
+    *,
+    west: tuple[str, ...] = (),
+    fixtures: tuple[str, ...] = (),
+) -> reconciliation.ProtectedSourceSets:
+    west_ids = frozenset(west)
+    fixture_ids = frozenset(fixtures)
+    return reconciliation.ProtectedSourceSets(
+        west_source_ids=west_ids,
+        fixture_source_ids=fixture_ids,
+        present_source_ids=west_ids | fixture_ids,
+        protected_set_hash=reconciliation._protected_set_hash(west_ids, fixture_ids),
+    )
 
 
 def _candidate(name: str, *, current: bool = False) -> dict[str, object]:
@@ -59,7 +78,10 @@ def _candidate(name: str, *, current: bool = False) -> dict[str, object]:
 
 def _manifest(
     candidates: list[dict[str, object]],
+    *,
+    protected: reconciliation.ProtectedSourceSets | None = None,
 ) -> reconciliation.GrammarSegmentManifest:
+    protected = protected or _protected()
     rows = []
     for candidate in candidates:
         name = str(candidate["properties"]["id"])
@@ -89,6 +111,7 @@ def _manifest(
         manifest_hash="a" * 64,
         source_manifest_hash="b" * 64,
         catalog_contract_hash="c" * 64,
+        protected_set_hash=protected.protected_set_hash,
         rows=tuple(sorted(rows, key=lambda row: row["name"])),
         names=names,
         allowlist_hash=payload_hash(names),
@@ -109,6 +132,7 @@ def test_exact_production_shape_plans_five_without_mutating_catalog_guards() -> 
     plans, refusals = reconciliation._plan_rows(
         _closure_rows(candidates),
         manifest,
+        _protected(),
         reason="align exact parser-derived compatibility projections",
         changed_at=None,
     )
@@ -127,19 +151,23 @@ def test_planning_query_count_is_constant_in_cohort_size(size: int) -> None:
     candidates = [_candidate(name) for name in _NAMES[:size]]
     manifest = _manifest(candidates)
     transaction = Mock()
-    transaction.run.return_value = _closure_rows(candidates)
+    transaction.run.side_effect = [
+        [{"present_west_source_ids": [], "fixture_source_ids": []}],
+        _closure_rows(candidates),
+    ]
 
-    plans, refusals = reconciliation._read_plan(
-        transaction,
-        manifest,
-        reason="audit exact projections",
-        changed_at=None,
-    )
+    with patch.object(reconciliation, "_west_source_ids", return_value=frozenset()):
+        plans, refusals, _ = reconciliation._read_plan(
+            transaction,
+            manifest,
+            reason="audit exact projections",
+            changed_at=None,
+        )
 
     assert not refusals
     assert len(plans) == size
-    assert transaction.run.call_count == 1
-    assert "UNWIND $names" in transaction.run.call_args.args[0]
+    assert transaction.run.call_count == 2
+    assert "UNWIND $names" in transaction.run.call_args_list[1].args[0]
 
 
 def test_mixed_current_and_pending_cohort_is_not_an_atomic_apply_candidate() -> None:
@@ -149,6 +177,7 @@ def test_mixed_current_and_pending_cohort_is_not_an_atomic_apply_candidate() -> 
     current_plan, _ = reconciliation._plan_rows(
         _closure_rows([current]),
         _manifest([current]),
+        _protected(),
         reason="align projections",
         changed_at="2026-08-03T00:00:00+00:00",
     )
@@ -183,6 +212,7 @@ def test_mixed_current_and_pending_cohort_is_not_an_atomic_apply_candidate() -> 
     plans, refusals = reconciliation._plan_rows(
         _closure_rows([stale, current]),
         manifest,
+        _protected(),
         reason="align projections",
         changed_at="2026-08-03T00:00:00+00:00",
     )
@@ -198,7 +228,11 @@ def test_mixed_current_and_pending_cohort_is_not_an_atomic_apply_candidate() -> 
         patch.object(
             reconciliation, "load_grammar_segment_manifest", return_value=manifest
         ),
-        patch.object(reconciliation, "_read_plan", return_value=(plans, [])),
+        patch.object(
+            reconciliation,
+            "_read_plan",
+            return_value=(plans, [], _protected()),
+        ),
     ):
         receipt = reconciliation.reconcile_grammar_segments(
             manifest.path,
@@ -226,6 +260,7 @@ def test_refuses_unparseable_nonlive_west_and_fixture_rows() -> None:
         _, refusals = reconciliation._plan_rows(
             _closure_rows([candidate]),
             manifest,
+            _protected(),
             reason="audit projections",
             changed_at=None,
         )
@@ -242,6 +277,7 @@ def test_refuses_unparseable_nonlive_west_and_fixture_rows() -> None:
     _, fixture_refusals = reconciliation._plan_rows(
         _closure_rows([fixture]),
         fixture_manifest,
+        _protected(),
         reason="audit projections",
         changed_at=None,
     )
@@ -251,12 +287,87 @@ def test_refuses_unparseable_nonlive_west_and_fixture_rows() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("source_id", "source_path", "kind", "expected_reason"),
+    [
+        (
+            "dd:hard_x_rays/emissivity_profile_1d/half_width_internal",
+            "hard_x_rays/emissivity_profile_1d/half_width_internal",
+            "west",
+            "current graph closure intersects WEST",
+        ),
+        (
+            "dd:test_review_entry__src_01035615",
+            "test/path",
+            "fixture",
+            "current graph closure intersects test fixtures",
+        ),
+    ],
+)
+def test_real_protected_source_shapes_refuse_dry_run_and_apply(
+    source_id: str,
+    source_path: str,
+    kind: str,
+    expected_reason: str,
+) -> None:
+    candidate = _candidate(_NAMES[0])
+    source = candidate["relationships"][0]
+    source["other_id"] = source_id
+    source["other_properties"] = {
+        "id": source_id,
+        "source_id": source_path,
+        "source_type": "dd",
+    }
+    protected = _protected(
+        west=(source_id,) if kind == "west" else (),
+        fixtures=(source_id,) if kind == "fixture" else (),
+    )
+    manifest = _manifest([candidate], protected=protected)
+    plans, refusals = reconciliation._plan_rows(
+        _closure_rows([candidate]),
+        manifest,
+        protected,
+        reason="audit exact protected ownership",
+        changed_at=None,
+    )
+
+    assert not plans
+    assert expected_reason in refusals[0]["reasons"]
+    transaction = Mock()
+    session = MagicMock()
+    session.begin_transaction.return_value = transaction
+    client = MagicMock()
+    client.session.return_value.__enter__.return_value = session
+    with (
+        patch.object(
+            reconciliation, "load_grammar_segment_manifest", return_value=manifest
+        ),
+        patch.object(
+            reconciliation,
+            "_read_plan",
+            return_value=(plans, refusals, protected),
+        ),
+    ):
+        receipt = reconciliation.reconcile_grammar_segments(
+            manifest.path,
+            reason="audit exact protected ownership",
+            apply=True,
+            expected_manifest_hash=manifest.manifest_hash,
+            gc=client,
+        )
+
+    assert receipt["mode"] == "refused"
+    assert receipt["counts"]["applied"] == 0
+    transaction.rollback.assert_called_once()
+
+
 def test_duplicate_or_tampered_event_refuses_and_exact_event_is_idempotent() -> None:
     stale = _candidate(_NAMES[0])
     manifest = _manifest([stale])
     plans, refusals = reconciliation._plan_rows(
         _closure_rows([stale]),
         manifest,
+        _protected(),
         reason="align projections",
         changed_at="2026-08-03T00:00:00+00:00",
     )
@@ -278,6 +389,7 @@ def test_duplicate_or_tampered_event_refuses_and_exact_event_is_idempotent() -> 
     repeated, repeated_refusals = reconciliation._plan_rows(
         _closure_rows([current]),
         manifest,
+        _protected(),
         reason="align projections",
         changed_at="2026-08-03T01:00:00+00:00",
     )
@@ -289,6 +401,7 @@ def test_duplicate_or_tampered_event_refuses_and_exact_event_is_idempotent() -> 
     _, duplicate_refusals = reconciliation._plan_rows(
         _closure_rows([duplicate]),
         manifest,
+        _protected(),
         reason="align projections",
         changed_at="2026-08-03T01:00:00+00:00",
     )
@@ -299,6 +412,7 @@ def test_duplicate_or_tampered_event_refuses_and_exact_event_is_idempotent() -> 
     _, tampered_refusals = reconciliation._plan_rows(
         _closure_rows([tampered]),
         manifest,
+        _protected(),
         reason="align projections",
         changed_at="2026-08-03T01:00:00+00:00",
     )
@@ -331,6 +445,7 @@ def test_apply_fails_closed_when_locked_reread_drifts() -> None:
     plans, refusals = reconciliation._plan_rows(
         _closure_rows([candidate]),
         manifest,
+        _protected(),
         reason="align projections",
         changed_at="2026-08-03T00:00:00+00:00",
     )
@@ -350,9 +465,15 @@ def test_apply_fails_closed_when_locked_reread_drifts() -> None:
             reconciliation, "load_grammar_segment_manifest", return_value=manifest
         ),
         patch.object(
-            reconciliation, "_read_plan", side_effect=[(plans, []), (drifted, [])]
+            reconciliation,
+            "_read_plan",
+            side_effect=[
+                (plans, [], _protected()),
+                (drifted, [], _protected()),
+            ],
         ),
-        patch.object(reconciliation, "lock_participants"),
+        patch.object(reconciliation, "_lock_participants"),
+        patch.object(reconciliation, "_lock_protected_sources"),
         patch.object(reconciliation, "_lock_relationships"),
         pytest.raises(
             reconciliation.GrammarSegmentReconciliationConflict,
@@ -368,3 +489,84 @@ def test_apply_fails_closed_when_locked_reread_drifts() -> None:
         )
 
     transaction.rollback.assert_called()
+
+
+def _plan_operator_names(plan: object) -> list[str]:
+    pending = [plan]
+    operators: list[str] = []
+    while pending:
+        operator = pending.pop()
+        if isinstance(operator, dict):
+            operators.append(str(operator.get("operatorType", "")).partition("@")[0])
+            pending.extend(operator.get("children") or [])
+        else:
+            operators.append(str(operator.operator_type).partition("@")[0])
+            pending.extend(operator.children)
+    return operators
+
+
+@pytest.fixture(scope="module")
+def ephemeral_graph() -> Iterator[GraphClient]:
+    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if not uri:
+        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.fail("grammar-segment plan tests require an ephemeral graph")
+    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+    if uri == project_uri:
+        pytest.fail("grammar-segment plan tests refuse the project graph")
+    graph = GraphClient(
+        uri=uri,
+        username=os.environ.get("NEO4J_USERNAME", "neo4j"),
+        password=os.environ.get("NEO4J_PASSWORD", ""),
+        graph_name="ephemeral-grammar-segment-plan",
+    )
+    graph.get_stats()
+    try:
+        yield graph
+    finally:
+        graph.close()
+
+
+@pytest.mark.graph
+@pytest.mark.parametrize(
+    ("query", "parameters"),
+    [
+        (reconciliation._PARTICIPANT_LOCK_QUERY, {"names": ["electron_density"]}),
+        (
+            reconciliation._RELATIONSHIP_LOCK_QUERY,
+            {"names": ["electron_density"]},
+        ),
+        (
+            reconciliation._PROTECTED_SOURCE_LOCK_QUERY,
+            {"source_ids": ["dd:test_review_entry__src_01035615"]},
+        ),
+        (
+            reconciliation._PROTECTED_SOURCES_QUERY,
+            {
+                "west_source_ids": [
+                    "dd:hard_x_rays/emissivity_profile_1d/half_width_internal"
+                ],
+                "fixture_source_id_prefix": "dd:test_review_entry__",
+            },
+        ),
+    ],
+)
+def test_lock_query_plans_are_exactly_anchored(
+    query: str,
+    parameters: dict[str, object],
+    ephemeral_graph: GraphClient,
+) -> None:
+    with ephemeral_graph.session() as session:
+        plan = session.run(f"EXPLAIN {query}", **parameters).consume().plan
+
+    assert plan is not None
+    operators = _plan_operator_names(plan)
+    forbidden = {
+        "AllNodesScan",
+        "AllRelationshipsScan",
+        "DirectedAllRelationshipsScan",
+        "UndirectedAllRelationshipsScan",
+    }
+    assert forbidden.isdisjoint(operators), operators
+    assert any("IndexSeek" in operator for operator in operators), operators

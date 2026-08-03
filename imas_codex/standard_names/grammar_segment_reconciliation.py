@@ -22,10 +22,10 @@ from typing import Any
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.source_authority import (
-    lock_participants,
     normalize_manifest_hash_binding,
     payload_hash,
 )
+from imas_codex.standard_names.sources_manifest import load_sources_file
 
 _MANIFEST_SCHEMA = "imas-codex.grammar-segment-reconciliation-manifest"
 _RECEIPT_SCHEMA = "imas-codex.grammar-segment-reconciliation-receipt"
@@ -34,6 +34,9 @@ _OPERATION = "reconcile_grammar_segment_projection"
 _ORIGIN = "governed_grammar_segment_reconciliation"
 _EVENT_PREFIX = "sn-change:grammar-segment-reconciliation:"
 _RUN_PREFIX = "grammar-segment-reconciliation:"
+_FIXTURE_SOURCE_ID_PREFIX = "dd:test_review_entry__"
+_FIXTURE_PATH_PREFIX = "test/"
+_WEST_MANIFEST = Path(__file__).parent / "manifests" / "west_task_2e.yaml"
 
 _ROW_FIELDS = frozenset(
     {
@@ -71,13 +74,70 @@ RETURN requested_name AS name,
 ORDER BY name
 """
 
+_PROTECTED_SOURCES_QUERY = """
+// GRAMMAR_SEGMENT_RECONCILIATION_PROTECTED_SOURCES
+WITH $west_source_ids AS west_source_ids
+CALL (west_source_ids) {
+  UNWIND west_source_ids AS source_id
+  OPTIONAL MATCH (source:StandardNameSource {id: source_id})
+  RETURN collect(DISTINCT source.id) AS present_west_source_ids
+}
+CALL {
+  MATCH (source:StandardNameSource)
+  WHERE source.id STARTS WITH $fixture_source_id_prefix
+  RETURN collect(DISTINCT source.id) AS fixture_source_ids
+}
+RETURN present_west_source_ids, fixture_source_ids
+"""
+
+_PARTICIPANT_LOCK_QUERY = """
+// GRAMMAR_SEGMENT_RECONCILIATION_PARTICIPANT_LOCK
+UNWIND $names AS requested_name
+MATCH (name:StandardName {id: requested_name})
+WITH name,
+     [name] +
+     [(source:StandardNameSource)-[:PRODUCED_NAME]->(name) | source] +
+     [(node:IMASNode)-[:HAS_STANDARD_NAME]->(name) | node] +
+     [(name)-[:HAS_UNIT]->(unit:Unit) | unit] +
+     [(name)-[:HAS_PARENT]->(parent:StandardName) | parent] +
+     [(child:StandardName)-[:HAS_PARENT]->(name) | child] +
+     [(name)-[:REFINED_FROM]->(predecessor:StandardName) | predecessor] +
+     [(successor:StandardName)-[:REFINED_FROM]->(name) | successor]
+     AS participants
+UNWIND participants AS participant
+WITH DISTINCT participant
+SET participant._grammar_segment_reconciliation_lock = true
+REMOVE participant._grammar_segment_reconciliation_lock
+RETURN collect(elementId(participant)) AS locked_element_ids
+"""
+
+_PROTECTED_SOURCE_LOCK_QUERY = """
+// GRAMMAR_SEGMENT_RECONCILIATION_PROTECTED_SOURCE_LOCK
+UNWIND $source_ids AS source_id
+MATCH (source:StandardNameSource {id: source_id})
+SET source._grammar_segment_reconciliation_lock = true
+REMOVE source._grammar_segment_reconciliation_lock
+RETURN collect(source.id) AS locked_source_ids
+"""
+
 _RELATIONSHIP_LOCK_QUERY = """
 // GRAMMAR_SEGMENT_RECONCILIATION_RELATIONSHIP_LOCK
-MATCH ()-[relationship]->()
-WHERE elementId(relationship) IN $element_ids
+UNWIND $names AS requested_name
+MATCH (name:StandardName {id: requested_name})
+WITH name,
+     [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(name) | binding] +
+     [(node:IMASNode)-[projection:HAS_STANDARD_NAME]->(name) | projection] +
+     [(name)-[unit_link:HAS_UNIT]->(unit:Unit) | unit_link] +
+     [(name)-[parent_link:HAS_PARENT]->(parent:StandardName) | parent_link] +
+     [(child:StandardName)-[child_link:HAS_PARENT]->(name) | child_link] +
+     [(name)-[prior_link:REFINED_FROM]->(predecessor:StandardName) | prior_link] +
+     [(successor:StandardName)-[next_link:REFINED_FROM]->(name) | next_link]
+     AS relationships
+UNWIND relationships AS relationship
+WITH DISTINCT relationship
 SET relationship._grammar_segment_reconciliation_lock = true
 REMOVE relationship._grammar_segment_reconciliation_lock
-RETURN count(relationship) AS locked
+RETURN collect(elementId(relationship)) AS locked_element_ids
 """
 
 
@@ -93,9 +153,20 @@ class GrammarSegmentManifest:
     manifest_hash: str
     source_manifest_hash: str
     catalog_contract_hash: str
+    protected_set_hash: str
     rows: tuple[dict[str, Any], ...]
     names: tuple[str, ...]
     allowlist_hash: str
+
+
+@dataclass(frozen=True)
+class ProtectedSourceSets:
+    """Canonical WEST ownership plus the current persistent fixture identities."""
+
+    west_source_ids: frozenset[str]
+    fixture_source_ids: frozenset[str]
+    present_source_ids: frozenset[str]
+    protected_set_hash: str
 
 
 def _sha_bytes(value: bytes) -> str:
@@ -133,6 +204,15 @@ def _canonical_relationship(relationship: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _is_relevant_relationship(relationship: dict[str, Any]) -> bool:
+    relationship_type = relationship.get("type")
+    direction = relationship.get("direction")
+    return (
+        relationship_type in {"PRODUCED_NAME", "HAS_STANDARD_NAME"}
+        and direction == "in"
+    ) or relationship_type in {"HAS_UNIT", "HAS_PARENT", "REFINED_FROM"}
+
+
 def _is_own_event_relationship(relationship: dict[str, Any]) -> bool:
     return (
         relationship.get("type") == "HAS_INTERNAL_CHANGE"
@@ -140,7 +220,60 @@ def _is_own_event_relationship(relationship: dict[str, Any]) -> bool:
     )
 
 
-def _protected_reasons(value: Any) -> list[str]:
+def _west_source_ids() -> frozenset[str]:
+    """Load canonical WEST ownership from the shipped source manifest."""
+    return frozenset(f"dd:{path}" for path in load_sources_file(_WEST_MANIFEST))
+
+
+def _protected_set_hash(
+    west_source_ids: frozenset[str], fixture_source_ids: frozenset[str]
+) -> str:
+    return payload_hash(
+        {
+            "west_source_ids": tuple(sorted(west_source_ids)),
+            "fixture_source_ids": tuple(sorted(fixture_source_ids)),
+            "fixture_identity_policy": {
+                "source_id_prefix": _FIXTURE_SOURCE_ID_PREFIX,
+                "source_path_prefix": _FIXTURE_PATH_PREFIX,
+            },
+        }
+    )
+
+
+def _read_protected_source_sets(transaction: Any) -> ProtectedSourceSets:
+    west_source_ids = _west_source_ids()
+    rows = list(
+        transaction.run(
+            _PROTECTED_SOURCES_QUERY,
+            west_source_ids=sorted(west_source_ids),
+            fixture_source_id_prefix=_FIXTURE_SOURCE_ID_PREFIX,
+        )
+    )
+    if len(rows) != 1:
+        raise GrammarSegmentReconciliationConflict(
+            "protected source query did not return exactly one snapshot"
+        )
+    row = dict(rows[0])
+    fixture_source_ids = frozenset(
+        str(item) for item in row.get("fixture_source_ids") or []
+    )
+    present_west_source_ids = frozenset(
+        str(item) for item in row.get("present_west_source_ids") or []
+    )
+    unexpected_west = present_west_source_ids - west_source_ids
+    if unexpected_west:
+        raise GrammarSegmentReconciliationConflict(
+            "protected WEST source query returned identities outside its manifest"
+        )
+    return ProtectedSourceSets(
+        west_source_ids=west_source_ids,
+        fixture_source_ids=fixture_source_ids,
+        present_source_ids=present_west_source_ids | fixture_source_ids,
+        protected_set_hash=_protected_set_hash(west_source_ids, fixture_source_ids),
+    )
+
+
+def _protected_reasons(value: Any, protected: ProtectedSourceSets) -> list[str]:
     west = False
     test = False
 
@@ -162,6 +295,12 @@ def _protected_reasons(value: Any) -> list[str]:
                 test = test or normalized.startswith(
                     ("test:", "fixture:", "signals:test:")
                 )
+                west = west or normalized in protected.west_source_ids
+                west = west or f"dd:{normalized}" in protected.west_source_ids
+                test = test or normalized in protected.fixture_source_ids
+                test = test or normalized.startswith(_FIXTURE_SOURCE_ID_PREFIX)
+                if normalized_key == "source_id":
+                    test = test or normalized.startswith(_FIXTURE_PATH_PREFIX)
             if normalized_key in {"origin", "source_type"}:
                 test = test or normalized in {"test", "fixture"}
 
@@ -197,7 +336,8 @@ def _snapshots(candidate: dict[str, Any], parsed: dict[str, Any]) -> dict[str, A
         (
             _canonical_relationship(relationship)
             for relationship in candidate.get("relationships") or []
-            if not _is_own_event_relationship(relationship)
+            if _is_relevant_relationship(relationship)
+            and not _is_own_event_relationship(relationship)
         ),
         key=lambda item: str(item["element_id"]),
     )
@@ -303,6 +443,7 @@ def load_grammar_segment_manifest(path: str | Path) -> GrammarSegmentManifest:
         "schema_version",
         "source_manifest_sha256",
         "catalog_contract_hash",
+        "protected_set_hash",
         "rows",
     }:
         raise ValueError("grammar-segment manifest fields are not exact")
@@ -316,6 +457,9 @@ def load_grammar_segment_manifest(path: str | Path) -> GrammarSegmentManifest:
     )
     catalog_contract_hash = _require_sha(
         payload.get("catalog_contract_hash"), "catalog_contract_hash"
+    )
+    protected_set_hash = _require_sha(
+        payload.get("protected_set_hash"), "protected_set_hash"
     )
     rows = payload.get("rows")
     if not isinstance(rows, list) or not rows:
@@ -349,6 +493,7 @@ def load_grammar_segment_manifest(path: str | Path) -> GrammarSegmentManifest:
         manifest_hash=_sha_bytes(raw),
         source_manifest_hash=source_hash,
         catalog_contract_hash=catalog_contract_hash,
+        protected_set_hash=protected_set_hash,
         rows=tuple(normalized),
         names=tuple(names),
         allowlist_hash=payload_hash(tuple(names)),
@@ -358,6 +503,7 @@ def load_grammar_segment_manifest(path: str | Path) -> GrammarSegmentManifest:
 def _plan_rows(
     rows: list[dict[str, Any]],
     manifest: GrammarSegmentManifest,
+    protected: ProtectedSourceSets,
     *,
     reason: str,
     changed_at: str | None,
@@ -365,6 +511,7 @@ def _plan_rows(
     manifest_rows = {row["name"]: row for row in manifest.rows}
     plans: list[dict[str, Any]] = []
     refusals: list[dict[str, Any]] = []
+    protected_set_drift = protected.protected_set_hash != manifest.protected_set_hash
     for row in rows:
         name = str(row["name"])
         manifest_row = manifest_rows[name]
@@ -378,6 +525,8 @@ def _plan_rows(
         properties = candidate.get("properties") or {}
         if properties.get("name_stage") in {"superseded", "exhausted"}:
             reasons.append("standard name is not live")
+        if protected_set_drift:
+            reasons.append("manifest protected_set_hash drifted")
         parsed = _segment_projection(name)
         if not parsed.get("physical_base"):
             reasons.append("strict public ISN parser rejected the canonical name")
@@ -405,7 +554,7 @@ def _plan_rows(
             and hashes["before_hash"] != manifest_row["expected_before_hash"]
         ):
             reasons.append("manifest expected_before_hash drifted")
-        reasons.extend(_protected_reasons(snapshots["protection"]))
+        reasons.extend(_protected_reasons(snapshots["protection"], protected))
         event = _event_payload(
             name=name,
             reason=reason,
@@ -464,20 +613,57 @@ def _read_plan(
     *,
     reason: str,
     changed_at: str | None,
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    return _plan_rows(
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]], ProtectedSourceSets]:
+    protected = _read_protected_source_sets(transaction)
+    plans, refusals = _plan_rows(
         _read_closure(transaction, manifest.names),
         manifest,
+        protected,
         reason=reason,
         changed_at=changed_at,
     )
+    return plans, refusals, protected
 
 
-def _lock_relationships(transaction: Any, element_ids: set[str]) -> None:
-    exact = sorted(element_ids)
-    rows = list(transaction.run(_RELATIONSHIP_LOCK_QUERY, element_ids=exact))
-    locked = int(dict(rows[0]).get("locked") or 0) if rows else 0
-    if locked != len(exact):
+def _lock_participants(
+    transaction: Any, names: tuple[str, ...], expected_element_ids: set[str]
+) -> None:
+    rows = list(transaction.run(_PARTICIPANT_LOCK_QUERY, names=list(names)))
+    locked = {
+        str(item) for row in rows for item in dict(row).get("locked_element_ids") or []
+    }
+    if locked != expected_element_ids:
+        raise GrammarSegmentReconciliationConflict(
+            "grammar reconciliation participant set changed before locking"
+        )
+
+
+def _lock_protected_sources(
+    transaction: Any, expected_source_ids: frozenset[str]
+) -> None:
+    rows = list(
+        transaction.run(
+            _PROTECTED_SOURCE_LOCK_QUERY,
+            source_ids=sorted(expected_source_ids),
+        )
+    )
+    locked = {
+        str(item) for row in rows for item in dict(row).get("locked_source_ids") or []
+    }
+    if locked != set(expected_source_ids):
+        raise GrammarSegmentReconciliationConflict(
+            "protected source set changed before locking"
+        )
+
+
+def _lock_relationships(
+    transaction: Any, names: tuple[str, ...], expected_element_ids: set[str]
+) -> None:
+    rows = list(transaction.run(_RELATIONSHIP_LOCK_QUERY, names=list(names)))
+    locked = {
+        str(item) for row in rows for item in dict(row).get("locked_element_ids") or []
+    }
+    if locked != expected_element_ids:
         raise GrammarSegmentReconciliationConflict(
             "grammar reconciliation relationship set changed before locking"
         )
@@ -531,6 +717,7 @@ def _receipt(
         "manifest_hash": manifest.manifest_hash,
         "source_manifest_hash": manifest.source_manifest_hash,
         "catalog_contract_hash": manifest.catalog_contract_hash,
+        "protected_set_hash": manifest.protected_set_hash,
         "allowlist_hash": manifest.allowlist_hash,
         "run_id": run_id if apply else None,
         "counts": {
@@ -560,7 +747,7 @@ def _receipt(
         ],
         "refusals": sorted(refusals, key=lambda item: item["name"]),
         "query_audit": {
-            "planning_reads": 1,
+            "planning_reads": 2,
             "cohort_size_independent": True,
         },
         "safety": {
@@ -624,6 +811,7 @@ def build_grammar_segment_manifest(
         with client.session() as session:
             transaction = session.begin_transaction()
             try:
+                protected = _read_protected_source_sets(transaction)
                 rows = _read_closure(transaction, names)
             finally:
                 transaction.rollback()
@@ -644,7 +832,7 @@ def build_grammar_segment_manifest(
             raise GrammarSegmentReconciliationConflict(
                 f"standard name {name!r} is not one live parser-valid stale projection"
             )
-        protection_reasons = _protected_reasons(snapshots["protection"])
+        protection_reasons = _protected_reasons(snapshots["protection"], protected)
         if protection_reasons:
             raise GrammarSegmentReconciliationConflict("; ".join(protection_reasons))
         evidence = evidence_by_name[name]
@@ -679,6 +867,7 @@ def build_grammar_segment_manifest(
         "schema_version": _SCHEMA_VERSION,
         "source_manifest_sha256": source_hash,
         "catalog_contract_hash": payload_hash(contract),
+        "protected_set_hash": protected.protected_set_hash,
         "rows": manifest_rows,
     }
     rendered = json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n"
@@ -689,8 +878,9 @@ def build_grammar_segment_manifest(
         "manifest_hash": _sha_bytes(rendered.encode()),
         "source_manifest_hash": source_hash,
         "catalog_contract_hash": payload_hash(contract),
+        "protected_set_hash": protected.protected_set_hash,
         "allowlist_hash": payload_hash(names),
-        "query_count": 1,
+        "query_count": 2,
         "rows": len(manifest_rows),
     }
 
@@ -742,7 +932,7 @@ def reconcile_grammar_segments(
         with client.session() as session:
             transaction = session.begin_transaction()
             try:
-                plans, refusals = _read_plan(
+                plans, refusals, protected = _read_plan(
                     transaction,
                     manifest,
                     reason=normalized_reason,
@@ -778,33 +968,37 @@ def reconcile_grammar_segments(
                     return _receipt(
                         manifest, plans, [], apply=apply, run_id=invocation_run_id
                     )
-                lock_participants(
+                _lock_participants(
                     transaction,
+                    manifest.names,
                     {
                         participant
                         for plan in pending
                         for participant in plan["participant_ids"]
                     },
-                    conflict_type=GrammarSegmentReconciliationConflict,
-                    message="grammar reconciliation participant set changed before locking",
                 )
+                _lock_protected_sources(transaction, protected.present_source_ids)
                 _lock_relationships(
                     transaction,
+                    manifest.names,
                     {
                         relationship
                         for plan in pending
                         for relationship in plan["relationship_ids"]
                     },
                 )
-                locked_plans, locked_refusals = _read_plan(
+                locked_plans, locked_refusals, locked_protected = _read_plan(
                     transaction,
                     manifest,
                     reason=normalized_reason,
                     changed_at=changed_at,
                 )
-                if locked_refusals or [
-                    plan["precondition_hash"] for plan in locked_plans
-                ] != [plan["precondition_hash"] for plan in plans]:
+                if (
+                    locked_protected != protected
+                    or locked_refusals
+                    or [plan["precondition_hash"] for plan in locked_plans]
+                    != [plan["precondition_hash"] for plan in plans]
+                ):
                     raise GrammarSegmentReconciliationConflict(
                         "name, event, lifecycle, protection, or relationship state changed after locks"
                     )
@@ -835,14 +1029,16 @@ def reconcile_grammar_segments(
                     raise GrammarSegmentReconciliationConflict(
                         "grammar reconciliation mutation returned an incomplete cohort"
                     )
-                post_plans, post_refusals = _read_plan(
+                post_plans, post_refusals, post_protected = _read_plan(
                     transaction,
                     manifest,
                     reason=normalized_reason,
                     changed_at=changed_at,
                 )
-                if post_refusals or any(
-                    plan["status"] != "already_current" for plan in post_plans
+                if (
+                    post_protected != protected
+                    or post_refusals
+                    or any(plan["status"] != "already_current" for plan in post_plans)
                 ):
                     raise GrammarSegmentReconciliationConflict(
                         "postflight projection or immutable event proof did not hold"
