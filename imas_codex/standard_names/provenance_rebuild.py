@@ -25,6 +25,7 @@ new provenance for that residue.
 
 from __future__ import annotations
 
+import json
 import logging
 import subprocess
 from pathlib import Path
@@ -33,6 +34,11 @@ from typing import Any
 import yaml
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.standard_names.attachment_audit import (
+    AttachmentAuditResult,
+    audit_attachments,
+    reconcile_attachment_consistency,
+)
 from imas_codex.standard_names.graph_ops import (
     classify_orphan_parent_source_candidates,
     find_orphan_parent_source_candidates,
@@ -51,6 +57,7 @@ from imas_codex.standard_names.ledger import (
 from imas_codex.standard_names.provenance_lifecycle import (
     DELETION_OPERATIONS,
     bind_sources_exclusively,
+    find_semantic_source_invariant_violations,
     retire_unrecoverable_provenance_orphans,
 )
 from imas_codex.standard_names.source_paths import parse_source_path
@@ -451,6 +458,104 @@ def _run_deterministic_fixpoints() -> None:
     reconcile_standard_name_sources("signals")
 
 
+_ADJUDICATION_KEYS = frozenset({"attachment_violations", "semantic_source_violations"})
+
+
+def _attachment_violation_rows(result: AttachmentAuditResult) -> list[dict[str, Any]]:
+    """Serialize attachment findings for exact adjudication and reporting."""
+    return [
+        {
+            "source_node_id": verdict.source_node_id,
+            "dd_path": verdict.dd_path,
+            "sn_id": verdict.sn_id,
+            "name_stage": verdict.name_stage,
+            "reason": verdict.reason,
+            "other_live_names": verdict.other_live_names,
+        }
+        for verdict in result.rejected
+    ]
+
+
+def _canonical_row(row: dict[str, Any]) -> str:
+    """Return a stable exact-match key for a graph consistency finding."""
+    return json.dumps(row, sort_keys=True, separators=(",", ":"), default=str)
+
+
+def _unadjudicated_rows(
+    rows: list[dict[str, Any]],
+    manifest_rows: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Split current findings from stale entries in an exact-row manifest."""
+    current = {_canonical_row(row): row for row in rows}
+    manifested = {_canonical_row(row): row for row in manifest_rows}
+    unresolved = [row for key, row in current.items() if key not in manifested]
+    stale = [row for key, row in manifested.items() if key not in current]
+    return unresolved, stale
+
+
+def _reconcile_recovery_consistency(
+    gc: GraphClient,
+    *,
+    dry_run: bool,
+    adjudication_manifest: dict[str, list[dict[str, Any]]] | None,
+) -> dict[str, Any]:
+    """Run canonical post-replay consistency checks in dependency order.
+
+    Attachment reconciliation runs first because it may detach a rejected
+    pairing and update its scalar/projection mirrors. The one-live-source audit
+    must therefore observe the post-attachment graph. Findings may be excluded
+    from completion only by an exact-row manifest; partial matches and stale
+    manifest rows keep completion fail-closed.
+    """
+    manifest = adjudication_manifest or {}
+    unknown_keys = sorted(set(manifest) - _ADJUDICATION_KEYS)
+    if unknown_keys:
+        raise ValueError(
+            "unknown recovery adjudication manifest fields: " + ", ".join(unknown_keys)
+        )
+    for key in _ADJUDICATION_KEYS:
+        value = manifest.get(key, [])
+        if not isinstance(value, list) or any(
+            not isinstance(row, dict) for row in value
+        ):
+            raise TypeError(
+                f"recovery adjudication manifest {key!r} must be a list of rows"
+            )
+
+    attachment_result = reconcile_attachment_consistency(gc=gc, dry_run=dry_run)
+    attachment_postcheck = attachment_result if dry_run else audit_attachments(gc=gc)
+    attachment_rows = _attachment_violation_rows(attachment_postcheck)
+    semantic_rows = find_semantic_source_invariant_violations(gc)
+
+    unresolved_attachments, stale_attachments = _unadjudicated_rows(
+        attachment_rows,
+        manifest.get("attachment_violations", []),
+    )
+    unresolved_semantic, stale_semantic = _unadjudicated_rows(
+        semantic_rows,
+        manifest.get("semantic_source_violations", []),
+    )
+    stale_manifest = {
+        "attachment_violations": stale_attachments,
+        "semantic_source_violations": stale_semantic,
+    }
+    return {
+        "attachment_reconcile": attachment_result.as_dict(),
+        "attachment_postcheck": attachment_postcheck.as_dict(),
+        "attachment_violation_rows": attachment_rows,
+        "semantic_source_violation_rows": semantic_rows,
+        "unresolved_attachment_rows": unresolved_attachments,
+        "unresolved_semantic_source_rows": unresolved_semantic,
+        "stale_adjudication_rows": stale_manifest,
+        "consistent": not (
+            unresolved_attachments
+            or unresolved_semantic
+            or stale_attachments
+            or stale_semantic
+        ),
+    }
+
+
 def rebuild_provenance(
     *,
     gc: GraphClient | None = None,
@@ -460,6 +565,7 @@ def rebuild_provenance(
     dry_run: bool = False,
     retire_unresolved: bool = False,
     include_accepted_retirement: bool = False,
+    adjudication_manifest: dict[str, list[dict[str, Any]]] | None = None,
 ) -> dict[str, Any]:
     """Rebuild provenance for every orphaned live name to fresh-parity.
 
@@ -471,8 +577,15 @@ def rebuild_provenance(
     dd/signal (an authoritative in-graph anchor); (3) latest non-deletion change
     predecessor → that predecessor's existing semantic sources. Childful
     structural parents are repaired by :func:`reconcile_orphan_parent_sources`.
-    Residue without evidence stays unresolved. Content
-    (name/description/docs/stage) is never touched.
+    Residue without evidence stays unresolved. After all replay bindings, the
+    canonical attachment reconcile runs before the one-live-source invariant
+    audit. Completion is false when either check still has an exact finding not
+    covered by *adjudication_manifest*, or when that manifest is stale. The
+    manifest accepts two keys, ``attachment_violations`` and
+    ``semantic_source_violations``; values must be full rows copied from the
+    corresponding consistency result. A dry run reports ``would_complete`` but
+    never claims applied completion. Content (name/description/docs/stage) is
+    never touched.
     """
     owns = gc is None
     gc = gc or GraphClient()
@@ -595,6 +708,31 @@ def rebuild_provenance(
                 summary["orphans_after"] = len(remaining)
                 summary["unresolved"] = len(remaining)
                 summary["unresolved_names"] = [row["sn_id"] for row in remaining]
+
+        consistency = _reconcile_recovery_consistency(
+            gc,
+            dry_run=dry_run,
+            adjudication_manifest=adjudication_manifest,
+        )
+        summary["consistency"] = consistency
+        summary["would_complete"] = bool(
+            consistency["consistent"] and summary["unresolved"] == 0
+        )
+        summary["completed"] = bool(not dry_run and summary["would_complete"])
+        summary["completion_status"] = (
+            "dry_run"
+            if dry_run
+            else ("complete" if summary["completed"] else "incomplete")
+        )
+        if not summary["would_complete"]:
+            logger.error(
+                "rebuild_provenance completion refused: unresolved_names=%s, "
+                "attachment_rows=%s, semantic_source_rows=%s, stale_manifest=%s",
+                summary["unresolved_names"],
+                consistency["unresolved_attachment_rows"],
+                consistency["unresolved_semantic_source_rows"],
+                consistency["stale_adjudication_rows"],
+            )
 
         logger.info("rebuild_provenance: %s", summary)
         return summary
