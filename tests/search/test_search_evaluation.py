@@ -35,6 +35,10 @@ from typing import Any
 
 import pytest
 
+from imas_codex.core.node_categories import (
+    EMBEDDABLE_CATEGORIES,
+    SEARCHABLE_CATEGORIES,
+)
 from tests.search.benchmark_data import (
     ALL_QUERIES,
     CATEGORY_NAMES,
@@ -42,6 +46,7 @@ from tests.search.benchmark_data import (
     compute_mrr,
 )
 from tests.search.benchmark_helpers import QueryResult
+from tests.search.conftest import SearchEvaluationCache, load_benchmark_encoder
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +100,52 @@ class MixConfig:
 # Locked optimal configuration from current tuned defaults.
 # Composite target: 0.5*MRR + 0.3*P@10 + 0.2*IDS_Recall@10
 OPTIMAL_CONFIG = MixConfig()
+
+
+@dataclass(frozen=True)
+class PrecomputedSearchChannels:
+    """Raw retrieval channels reusable across compatible score configurations."""
+
+    graph_identity: int
+    encoder_identity: int
+    query: str
+    expanded_query: str
+    query_type: str
+    max_results: int
+    hnsw_candidates: int
+    vector_limit: int
+    text_limit: int
+    embeddable_categories: tuple[str, ...]
+    searchable_categories: tuple[str, ...]
+    path_results: tuple[str, ...] = ()
+    vector_results: tuple[tuple[str, float], ...] = ()
+    text_results: tuple[tuple[str, float], ...] = ()
+
+    def supports(
+        self,
+        *,
+        gc: Any,
+        encoder: Any,
+        config: MixConfig,
+        query: str,
+        expanded_query: str,
+        query_type: str,
+        max_results: int,
+    ) -> bool:
+        """Return whether this retrieval superset covers every requested input."""
+        return (
+            self.graph_identity == id(gc)
+            and self.encoder_identity == id(encoder)
+            and self.query == query
+            and self.expanded_query == expanded_query
+            and self.query_type == query_type
+            and self.max_results >= max_results
+            and self.hnsw_candidates == config.hnsw_candidates
+            and self.vector_limit >= config.vector_limit
+            and self.text_limit >= config.text_limit
+            and self.embeddable_categories == tuple(sorted(EMBEDDABLE_CATEGORIES))
+            and self.searchable_categories == tuple(sorted(SEARCHABLE_CATEGORIES))
+        )
 
 
 # ── Metric computation ────────────────────────────────────────────────────────
@@ -287,6 +338,7 @@ def _search_with_config(
     config: MixConfig,
     query: str,
     max_results: int = 50,
+    precomputed: PrecomputedSearchChannels | None = None,
 ) -> list[str]:
     """Run search with configurable parameters, return ranked path IDs.
 
@@ -312,14 +364,29 @@ def _search_with_config(
 
     analyzer = QueryAnalyzer()
     intent = analyzer.analyze(query)
+    expanded = " ".join(intent.expanded_terms) if intent.expanded_terms else query
 
-    # Path queries bypass scoring entirely
+    embeddable_categories = sorted(EMBEDDABLE_CATEGORIES)
+    searchable_categories = sorted(SEARCHABLE_CATEGORIES)
+
+    if precomputed is not None and not precomputed.supports(
+        gc=gc,
+        encoder=encoder,
+        config=config,
+        query=query,
+        expanded_query=expanded,
+        query_type=intent.query_type,
+        max_results=max_results,
+    ):
+        raise ValueError("Precomputed search channels do not cover this configuration")
+
     if intent.query_type in ("path_exact", "path_partial"):
-        # Inline path search — exact + suffix + contains matching
+        if precomputed is not None:
+            return list(precomputed.path_results[:max_results])
         results = gc.query(
             """
             MATCH (p:IMASNode)
-            WHERE p.node_category = 'data'
+            WHERE p.node_category IN $categories
               AND (toLower(p.id) = $q OR toLower(p.id) ENDS WITH $q
                    OR toLower(p.id) CONTAINS $q)
             RETURN DISTINCT p.id AS id
@@ -327,47 +394,55 @@ def _search_with_config(
             """,
             q=query.lower().strip(),
             limit=max_results,
+            categories=searchable_categories,
         )
         return [r["id"] for r in results] if results else []
 
-    # Expand abbreviations for better recall
-    expanded = " ".join(intent.expanded_terms) if intent.expanded_terms else query
+    if precomputed is None:
+        embedding = encoder.embed_texts([expanded])[0].tolist()
+        try:
+            vector_results = gc.query(
+                """
+                CYPHER 25
+                MATCH (path:IMASNode)
+                SEARCH path IN (
+                  VECTOR INDEX imas_node_embedding
+                  FOR $embedding
+                  LIMIT $k
+                ) SCORE AS score
+                WHERE path.node_category IN $categories
+                  AND NOT (path)-[:DEPRECATED_IN]->(:DDVersion)
+                RETURN path.id AS id, score
+                ORDER BY score DESC
+                LIMIT $vector_limit
+                """,
+                embedding=embedding,
+                k=config.hnsw_candidates,
+                vector_limit=config.vector_limit,
+                categories=embeddable_categories,
+            )
+        except Exception as e:
+            if "dimensionality" in str(e).lower():
+                logger.warning("Vector index dimension mismatch: %s", e)
+                vector_results = []
+            else:
+                raise
 
-    # --- Vector search with config limits ---
-    embedding = encoder.embed_texts([expanded])[0].tolist()
-    try:
-        vector_results = gc.query(
-            """
-            CYPHER 25
-            MATCH (path:IMASNode)
-            SEARCH path IN (
-              VECTOR INDEX imas_node_embedding
-              FOR $embedding
-              LIMIT $k
-            ) SCORE AS score
-            WHERE path.node_category = 'data' AND NOT (path)-[:DEPRECATED_IN]->(:DDVersion)
-            RETURN path.id AS id, score
-            ORDER BY score DESC
-            LIMIT $vector_limit
-            """,
-            embedding=embedding,
-            k=config.hnsw_candidates,
-            vector_limit=config.vector_limit,
+        text_results = _text_search_dd_paths(
+            gc,
+            expanded,
+            config.text_limit,
+            ids_filter=None,
         )
-    except Exception as e:
-        if "dimensionality" in str(e).lower():
-            logger.warning("Vector index dimension mismatch: %s", e)
-            vector_results = []
-        else:
-            raise
-
-    # --- Text search with config limit ---
-    text_results = _text_search_dd_paths(
-        gc,
-        expanded,
-        config.text_limit,
-        ids_filter=None,
-    )
+    else:
+        vector_results = [
+            {"id": path_id, "score": score}
+            for path_id, score in precomputed.vector_results[: config.vector_limit]
+        ]
+        text_results = [
+            {"id": path_id, "score": score}
+            for path_id, score in precomputed.text_results[: config.text_limit]
+        ]
 
     # --- Score mixing ---
     scores = _apply_score_mixing(
@@ -384,6 +459,163 @@ def _search_with_config(
     return sorted_ids[:max_results]
 
 
+def precompute_search_channels(
+    gc: Any,
+    encoder: Any,
+    configs: list[MixConfig],
+    queries: list[BenchmarkQuery],
+    *,
+    max_results: int,
+    search_evaluation_cache: Any,
+) -> dict[str, PrecomputedSearchChannels]:
+    """Retrieve each query channel once at the maximum requested limits."""
+    from imas_codex.tools.graph_search import _text_search_dd_paths
+    from imas_codex.tools.query_analysis import QueryAnalyzer
+
+    if not configs:
+        return {}
+
+    max_candidates = max(config.hnsw_candidates for config in configs)
+    max_vector_limit = max(config.vector_limit for config in configs)
+    max_text_limit = max(config.text_limit for config in configs)
+    embeddable_categories = tuple(sorted(EMBEDDABLE_CATEGORIES))
+    searchable_categories = tuple(sorted(SEARCHABLE_CATEGORIES))
+    analyzer = QueryAnalyzer()
+    analyzed: list[tuple[BenchmarkQuery, Any, str]] = []
+    for benchmark_query in queries:
+        intent = analyzer.analyze(benchmark_query.query_text)
+        expanded = (
+            " ".join(intent.expanded_terms)
+            if intent.expanded_terms
+            else benchmark_query.query_text
+        )
+        analyzed.append((benchmark_query, intent, expanded))
+
+    semantic_queries = [
+        expanded
+        for _, intent, expanded in analyzed
+        if intent.query_type not in ("path_exact", "path_partial")
+    ]
+    embeddings = (
+        search_evaluation_cache.get_or_compute(
+            "doe-embedding-batch",
+            {
+                "encoder": id(encoder),
+                "queries": semantic_queries,
+            },
+            lambda: encoder.embed_texts(semantic_queries),
+        )
+        if semantic_queries
+        else []
+    )
+    embedding_iter = iter(embeddings)
+    channels: dict[str, PrecomputedSearchChannels] = {}
+
+    for benchmark_query, intent, expanded in analyzed:
+        query_text = benchmark_query.query_text
+        common_inputs = {
+            "graph_identity": id(gc),
+            "encoder_identity": id(encoder),
+            "query": query_text,
+            "expanded_query": expanded,
+            "query_type": intent.query_type,
+            "max_results": max_results,
+            "hnsw_candidates": max_candidates,
+            "vector_limit": max_vector_limit,
+            "text_limit": max_text_limit,
+            "embeddable_categories": embeddable_categories,
+            "searchable_categories": searchable_categories,
+        }
+
+        if intent.query_type in ("path_exact", "path_partial"):
+            path_results = search_evaluation_cache.get_or_compute(
+                "doe-path-channel",
+                common_inputs,
+                lambda query_text=query_text: [
+                    row["id"]
+                    for row in (
+                        gc.query(
+                            """
+                            MATCH (p:IMASNode)
+                            WHERE p.node_category IN $categories
+                              AND (toLower(p.id) = $q
+                                   OR toLower(p.id) ENDS WITH $q
+                                   OR toLower(p.id) CONTAINS $q)
+                            RETURN DISTINCT p.id AS id
+                            LIMIT $limit
+                            """,
+                            q=query_text.lower().strip(),
+                            limit=max_results,
+                            categories=list(searchable_categories),
+                        )
+                        or []
+                    )
+                ],
+            )
+            channels[query_text] = PrecomputedSearchChannels(
+                **common_inputs,
+                path_results=tuple(path_results),
+            )
+            continue
+
+        embedding = next(embedding_iter).tolist()
+
+        def _vector_query(embedding=embedding) -> list[dict[str, Any]]:
+            try:
+                return gc.query(
+                    """
+                    CYPHER 25
+                    MATCH (path:IMASNode)
+                    SEARCH path IN (
+                      VECTOR INDEX imas_node_embedding
+                      FOR $embedding
+                      LIMIT $k
+                    ) SCORE AS score
+                    WHERE path.node_category IN $categories
+                      AND NOT (path)-[:DEPRECATED_IN]->(:DDVersion)
+                    RETURN path.id AS id, score
+                    ORDER BY score DESC
+                    LIMIT $vector_limit
+                    """,
+                    embedding=embedding,
+                    k=max_candidates,
+                    vector_limit=max_vector_limit,
+                    categories=list(embeddable_categories),
+                )
+            except Exception as exc:
+                if "dimensionality" in str(exc).lower():
+                    logger.warning("Vector index dimension mismatch: %s", exc)
+                    return []
+                raise
+
+        vector_results = search_evaluation_cache.get_or_compute(
+            "doe-vector-channel",
+            common_inputs,
+            _vector_query,
+        )
+        text_results = search_evaluation_cache.get_or_compute(
+            "doe-text-channel",
+            common_inputs,
+            lambda expanded=expanded: _text_search_dd_paths(
+                gc,
+                expanded,
+                max_text_limit,
+                ids_filter=None,
+            ),
+        )
+        channels[query_text] = PrecomputedSearchChannels(
+            **common_inputs,
+            vector_results=tuple(
+                (row["id"], float(row["score"])) for row in vector_results or []
+            ),
+            text_results=tuple(
+                (row["id"], float(row["score"])) for row in text_results or []
+            ),
+        )
+
+    return channels
+
+
 # ── Evaluation harness ────────────────────────────────────────────────────────
 
 
@@ -394,6 +626,7 @@ def evaluate_config(
     queries: list[BenchmarkQuery] | None = None,
     max_results: int = 50,
     expanded_expected: dict[str, set[str]] | None = None,
+    precomputed_channels: dict[str, PrecomputedSearchChannels] | None = None,
 ) -> dict[str, Any]:
     """Run all benchmark queries with given config, return metrics.
 
@@ -431,7 +664,18 @@ def evaluate_config(
     ids_r10_values: list[float] = []
 
     for q in queries:
-        ranked = _search_with_config(gc, encoder, config, q.query_text, max_results)
+        ranked = _search_with_config(
+            gc,
+            encoder,
+            config,
+            q.query_text,
+            max_results,
+            precomputed=(
+                precomputed_channels.get(q.query_text)
+                if precomputed_channels is not None
+                else None
+            ),
+        )
 
         # Use expanded paths when available, fall back to hand-curated
         effective_expected = (
@@ -489,21 +733,21 @@ def evaluate_config(
 # ── DoE grid search ──────────────────────────────────────────────────────────
 
 
-def generate_doe_grid(two_phase: bool = True) -> list[MixConfig]:
+def generate_doe_grid(include_graph_boost_sweep: bool = True) -> list[MixConfig]:
     """Generate Design of Experiments configurations.
 
-    When *two_phase* is ``True`` (default), generates a manageable grid:
+    The default combines two independently interpretable sweeps:
 
-    - Phase A: 243 configs sweeping fusion weights
-    - Phase B: 27 configs sweeping graph boosts with optimal fusion defaults
+    - 243 configurations sweeping fusion weights
+    - 27 configurations sweeping graph boosts with fixed fusion defaults
 
     Total: up to 270 configs (vs 6561 for full factorial), with duplicates
-    removed so configs that appear in both phases are not repeated.
+    removed so configs shared by both sweeps are not repeated.
     """
     configs: list[MixConfig] = []
     seen: set[tuple] = set()
 
-    # Phase A: Fusion parameter sweep (full fusion factorial)
+    # Full factorial over fusion parameters.
     fusion_grid = {
         "vector_limit": [200, 500, 800],
         "text_limit": [200, 500, 800],
@@ -520,8 +764,8 @@ def generate_doe_grid(two_phase: bool = True) -> list[MixConfig]:
             seen.add(key)
             configs.append(config)
 
-    if two_phase:
-        # Phase B: Graph boost sweep with default fusion params
+    if include_graph_boost_sweep:
+        # Graph-boost factorial with fixed fusion parameters.
         boost_grid = {
             "cluster_boost": [0.0, 0.02, 0.05],
             "hierarchy_boost": [0.0, 0.02, 0.05],
@@ -544,6 +788,8 @@ def run_doe_grid(
     encoder: Any,
     queries: list[BenchmarkQuery] | None = None,
     grid: list[MixConfig] | None = None,
+    *,
+    search_evaluation_cache: Any | None = None,
 ) -> list[dict[str, Any]]:
     """Run factorial grid search across key parameters.
 
@@ -565,12 +811,31 @@ def run_doe_grid(
     """
     if grid is None:
         grid = generate_doe_grid()
+    if queries is None:
+        queries = ALL_QUERIES
+
+    precomputed_channels = None
+    if search_evaluation_cache is not None:
+        precomputed_channels = precompute_search_channels(
+            gc,
+            encoder,
+            grid,
+            queries,
+            max_results=50,
+            search_evaluation_cache=search_evaluation_cache,
+        )
 
     results = []
     total = len(grid)
     for i, config in enumerate(grid, 1):
         logger.info("DoE grid: evaluating config %d/%d", i, total)
-        metrics = evaluate_config(config, gc, encoder, queries)
+        metrics = evaluate_config(
+            config,
+            gc,
+            encoder,
+            queries,
+            precomputed_channels=precomputed_channels,
+        )
         results.append(metrics)
 
     results.sort(key=lambda r: r["composite_score"], reverse=True)
@@ -690,19 +955,126 @@ class TestMixConfig:
         """Guard against accidentally adding fields without tests."""
         assert len(fields(MixConfig)) == 13
 
+    def test_precomputed_channels_reject_changed_retrieval_input(self):
+        """A changed retrieval setting cannot consume another config's channels."""
+        graph = object()
+        encoder = object()
+        channels = PrecomputedSearchChannels(
+            graph_identity=id(graph),
+            encoder_identity=id(encoder),
+            query="temperature",
+            expanded_query="temperature",
+            query_type="semantic",
+            max_results=50,
+            hnsw_candidates=500,
+            vector_limit=500,
+            text_limit=500,
+            embeddable_categories=tuple(sorted(EMBEDDABLE_CATEGORIES)),
+            searchable_categories=tuple(sorted(SEARCHABLE_CATEGORIES)),
+        )
+
+        assert channels.supports(
+            gc=graph,
+            encoder=encoder,
+            config=MixConfig(),
+            query="temperature",
+            expanded_query="temperature",
+            query_type="semantic",
+            max_results=50,
+        )
+        assert not channels.supports(
+            gc=graph,
+            encoder=encoder,
+            config=MixConfig(hnsw_candidates=200),
+            query="temperature",
+            expanded_query="temperature",
+            query_type="semantic",
+            max_results=50,
+        )
+
+    def test_score_grid_reuses_each_retrieval_channel(self, monkeypatch):
+        """Scoring multiple compatible configs performs one retrieval per channel."""
+
+        class EmbeddingRow(list):
+            def tolist(self):
+                return list(self)
+
+        class CountingEncoder:
+            def __init__(self):
+                self.calls = 0
+
+            def embed_texts(self, texts):
+                self.calls += 1
+                return [EmbeddingRow([0.1, 0.2]) for _ in texts]
+
+        class CountingGraph:
+            def __init__(self):
+                self.calls = 0
+
+            def query(self, _cypher, **_params):
+                self.calls += 1
+                return [{"id": "core_profiles/temperature", "score": 0.9}]
+
+        text_calls = 0
+
+        def count_text_search(_gc, _query, _limit, *, ids_filter):
+            nonlocal text_calls
+            assert ids_filter is None
+            text_calls += 1
+            return [{"id": "core_profiles/temperature", "score": 0.8}]
+
+        monkeypatch.setattr(
+            "imas_codex.tools.graph_search._text_search_dd_paths",
+            count_text_search,
+        )
+        graph = CountingGraph()
+        encoder = CountingEncoder()
+        cache = SearchEvaluationCache()
+        query = BenchmarkQuery(
+            query_text="electron temperature",
+            expected_paths=["core_profiles/temperature"],
+            category="exact_concept",
+        )
+        configs = [
+            MixConfig(vector_limit=200, text_limit=200),
+            MixConfig(vector_limit=800, text_limit=800),
+        ]
+
+        channels = precompute_search_channels(
+            graph,
+            encoder,
+            configs,
+            [query],
+            max_results=50,
+            search_evaluation_cache=cache,
+        )
+        retrieval_counts = (graph.calls, text_calls, encoder.calls)
+        for config in configs:
+            metrics = evaluate_config(
+                config,
+                graph,
+                encoder,
+                [query],
+                precomputed_channels=channels,
+            )
+            assert metrics["mrr"] == 1.0
+
+        assert retrieval_counts == (1, 1, 1)
+        assert (graph.calls, text_calls, encoder.calls) == retrieval_counts
+
 
 class TestDoEGrid:
     """Verify DoE grid generation."""
 
     def test_grid_size(self):
-        """Grid has at least 243 fusion configs plus boost phase configs."""
+        """Grid has the fusion configurations plus graph-boost configurations."""
         grid = generate_doe_grid()
         assert len(grid) >= 243  # At least the original fusion grid
         assert len(grid) <= 270  # Plus boost grid minus overlaps
 
-    def test_grid_size_single_phase(self):
-        """Single-phase grid (two_phase=False) has exactly 3^5 = 243 configs."""
-        grid = generate_doe_grid(two_phase=False)
+    def test_grid_size_fusion_only(self):
+        """Fusion-only grid has exactly 3^5 = 243 configurations."""
+        grid = generate_doe_grid(include_graph_boost_sweep=False)
         assert len(grid) == 243
 
     def test_grid_contains_default_config(self):
@@ -1041,19 +1413,25 @@ class TestDoEEvaluation:
 
     @pytest.fixture(scope="class")
     def encoder(self):
-        """Real remote encoder for DoE evaluation.
+        """Encoder matching the graph's 256-dimensional vector index.
 
-        Temporarily restores production embedding env vars to bypass
-        the session-scoped conftest that forces local/MiniLM.
+        Temporarily restores benchmark embedding settings to bypass the
+        session-scoped MiniLM unit-test configuration.
         """
         from imas_codex.settings import _get_section
 
         embed_config = _get_section("embedding")
-        real_location = embed_config.get("location", "")
-        real_model = embed_config.get("model", "")
+        real_location = os.environ.get(
+            "IMAS_CODEX_BENCHMARK_EMBEDDING_LOCATION",
+            embed_config.get("location", ""),
+        )
+        real_model = os.environ.get(
+            "IMAS_CODEX_BENCHMARK_EMBEDDING_MODEL",
+            embed_config.get("model", ""),
+        )
 
-        if not real_location or real_location == "local":
-            pytest.skip("No remote embedding location configured")
+        if not real_location:
+            pytest.skip("No benchmark embedding location configured")
 
         old_location = os.environ.get("IMAS_CODEX_EMBEDDING_LOCATION")
         old_model = os.environ.get("IMAS_CODEX_EMBEDDING_MODEL")
@@ -1064,10 +1442,7 @@ class TestDoEEvaluation:
             elif "IMAS_CODEX_EMBEDDING_MODEL" in os.environ:
                 del os.environ["IMAS_CODEX_EMBEDDING_MODEL"]
 
-            from imas_codex.embeddings.encoder import Encoder, EncoderConfig
-
-            config = EncoderConfig()
-            enc = Encoder(config=config)
+            enc = load_benchmark_encoder()
             result = enc.embed_texts(["test"])
             if result is None or len(result) == 0:
                 pytest.skip("Embed server returned empty results")
@@ -1089,14 +1464,36 @@ class TestDoEEvaluation:
             elif "IMAS_CODEX_EMBEDDING_MODEL" in os.environ:
                 del os.environ["IMAS_CODEX_EMBEDDING_MODEL"]
 
-    def test_default_config_mrr(self, graph_client, encoder, expanded_expected_paths):
-        """Default config meets MRR target."""
-        metrics = evaluate_config(
-            MixConfig(),
+    @pytest.fixture(scope="class")
+    def default_config_metrics(
+        self,
+        graph_client,
+        encoder,
+        expanded_expected_paths,
+        search_evaluation_cache,
+    ):
+        """Compute the default corpus once for all metric assertions."""
+        config = MixConfig()
+        channels = precompute_search_channels(
+            graph_client,
+            encoder,
+            [config],
+            ALL_QUERIES,
+            max_results=50,
+            search_evaluation_cache=search_evaluation_cache,
+        )
+        return evaluate_config(
+            config,
             graph_client,
             encoder,
             expanded_expected=expanded_expected_paths,
+            precomputed_channels=channels,
         )
+
+    @pytest.mark.timeout(300)
+    def test_default_config_mrr(self, default_config_metrics):
+        """Default config meets MRR target."""
+        metrics = default_config_metrics
         logger.info(
             "Default: MRR=%.3f P@10=%.3f IDS-R@10=%.3f composite=%.3f",
             metrics["mrr"],
@@ -1113,16 +1510,9 @@ class TestDoEEvaluation:
             f"Default MRR {metrics['mrr']:.3f} below 0.20 target"
         )
 
-    def test_default_config_precision(
-        self, graph_client, encoder, expanded_expected_paths
-    ):
+    def test_default_config_precision(self, default_config_metrics):
         """Default config meets P@10 target."""
-        metrics = evaluate_config(
-            MixConfig(),
-            graph_client,
-            encoder,
-            expanded_expected=expanded_expected_paths,
-        )
+        metrics = default_config_metrics
         if metrics["precision_at_10"] < 0.05:
             pytest.xfail(
                 f"Default P@10 {metrics['precision_at_10']:.3f} below 0.05 target "
@@ -1132,28 +1522,25 @@ class TestDoEEvaluation:
             f"Default P@10 {metrics['precision_at_10']:.3f} below 0.05 target"
         )
 
-    def test_per_category_coverage(
-        self, graph_client, encoder, expanded_expected_paths
-    ):
+    def test_per_category_coverage(self, default_config_metrics):
         """Log per-category MRR for diagnostic purposes."""
-        metrics = evaluate_config(
-            MixConfig(),
-            graph_client,
-            encoder,
-            expanded_expected=expanded_expected_paths,
-        )
+        metrics = default_config_metrics
         cat_mrr = metrics["per_category_mrr"]
         for cat in CATEGORY_NAMES:
             if cat in cat_mrr:
                 logger.info("  %s MRR: %.3f", cat, cat_mrr[cat])
 
     @pytest.mark.slow
-    def test_doe_grid_search(self, graph_client, encoder):
+    def test_doe_grid_search(self, graph_client, encoder, search_evaluation_cache):
         """Full grid search — produces JSON results for analysis.
 
         Run with: ``uv run pytest ... -k test_doe_grid -m slow``
         """
-        results = run_doe_grid(graph_client, encoder)
+        results = run_doe_grid(
+            graph_client,
+            encoder,
+            search_evaluation_cache=search_evaluation_cache,
+        )
         assert len(results) > 0
 
         # Best by composite score (already sorted)
@@ -1233,7 +1620,7 @@ class TestDimensionComparison:
                 """
                 MATCH (n:IMASNode)
                 WHERE n.description IS NOT NULL
-                  AND n.node_category = 'data'
+                  AND n.node_category IN $categories
                   AND n.embedding IS NOT NULL
                 WITH n, rand() AS r
                 ORDER BY r
@@ -1241,6 +1628,7 @@ class TestDimensionComparison:
                 RETURN n.id AS id, n.description AS description
                 """,
                 limit=remaining,
+                categories=sorted(EMBEDDABLE_CATEGORIES),
             )
             all_nodes = (expected_nodes or []) + (random_nodes or [])
         else:
@@ -1394,8 +1782,7 @@ class TestDimensionComparison:
             len(rrs),
         )
 
-        # No hard assertion — this is diagnostic
-        # Decision criteria from plan:
+        # No hard assertion — this is diagnostic. The measured decision rule is:
         # Upgrade to 512 if vector MRR improves by >=0.10 (from ~0.15 to >=0.25)
         # Upgrade to 1024 only if additional gain over 512 is >=0.05
 
@@ -1698,15 +2085,18 @@ class TestMultiDomainDimensionEval:
         corpus: dict[str, list[dict[str, str]]] = defaultdict(list)
 
         # IMAS DD nodes (English, from enriched descriptions)
-        imas_nodes = graph_client.query("""
+        imas_nodes = graph_client.query(
+            """
             MATCH (n:IMASNode)
             WHERE n.description IS NOT NULL
-              AND n.node_category = 'data'
+              AND n.node_category IN $categories
               AND n.embedding IS NOT NULL
             WITH n, rand() AS r ORDER BY r LIMIT 50
             RETURN n.id AS id,
                    (n.id + '. ' + n.description) AS text
-        """)
+        """,
+            categories=sorted(EMBEDDABLE_CATEGORIES),
+        )
         for n in imas_nodes or []:
             corpus["imas_dd"].append(
                 {"id": n["id"], "text": n["text"], "lang": "en", "domain": "imas_dd"}

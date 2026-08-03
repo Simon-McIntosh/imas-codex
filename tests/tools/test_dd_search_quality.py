@@ -6,7 +6,7 @@ Covers:
 - find_related_dd_paths exposes a cocos_kin section for COCOS-tagged paths.
 - search_dd_paths supports cocos_transformation_type filtering.
 - list_dd_paths supports cocos_transformation_type filtering.
-- search_formatters renders the new COCOS line, node_category badges,
+- search_formatters renders COCOS metadata, node_category badges,
   and cocos_kin section.
 
 All tests require a live Neo4j connection; they are skipped automatically
@@ -20,11 +20,14 @@ import os
 
 import pytest
 
+from imas_codex.cocos.calculator import cocos_from_dd_version
 from imas_codex.llm.search_formatters import (
     format_path_context_report,
     format_search_dd_report,
 )
 from imas_codex.llm.server import _get_imas_tools
+from imas_codex.settings import get_dd_version
+from tests.search.conftest import load_benchmark_encoder
 
 pytestmark = pytest.mark.graph
 
@@ -46,8 +49,14 @@ def _use_production_embedder():
             "IMAS_CODEX_EMBEDDING_DIMENSION"
         ),
     }
-    os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = "Qwen/Qwen3-Embedding-0.6B"
-    os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = "titan"
+    os.environ["IMAS_CODEX_EMBEDDING_MODEL"] = os.environ.get(
+        "IMAS_CODEX_BENCHMARK_EMBEDDING_MODEL",
+        "Qwen/Qwen3-Embedding-0.6B",
+    )
+    os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = os.environ.get(
+        "IMAS_CODEX_BENCHMARK_EMBEDDING_LOCATION",
+        "titan",
+    )
     os.environ["IMAS_CODEX_EMBEDDING_DIMENSION"] = "256"
     yield
     for key, value in prior.items():
@@ -59,11 +68,16 @@ def _use_production_embedder():
 
 @pytest.fixture(scope="module")
 def live_tools(_use_production_embedder):
-    return _get_imas_tools(semantic_search=True)
+    from imas_codex.tools import graph_search
+
+    prior_encoder = graph_search._encoder
+    graph_search._encoder = load_benchmark_encoder()
+    yield _get_imas_tools(semantic_search=True)
+    graph_search._encoder = prior_encoder
 
 
 # ---------------------------------------------------------------------------
-# find_related_dd_paths — Feature A regressions
+# Related-path unit and COCOS behavior
 # ---------------------------------------------------------------------------
 
 
@@ -88,8 +102,12 @@ async def test_unit_companions_cross_domain_for_psi(live_tools):
 
 @pytest.mark.asyncio
 async def test_cocos_kin_populated_for_ip(live_tools):
-    """magnetics/ip is ip_like; cocos_kin section should expose other ip_like
-    paths from across the DD."""
+    """Transformation labels expose same-label kin within the DD convention."""
+    # DDv4 fixes the catalog-wide convention at COCOS 17; per-path labels
+    # identify the transformation law and do not select another convention.
+    dd_version = get_dd_version()
+    assert dd_version.startswith("4.")
+    assert cocos_from_dd_version(dd_version) == 17
     res = await live_tools.path_context_tool.find_related_dd_paths(
         path="magnetics/ip",
         relationship_types="cocos",
@@ -100,22 +118,31 @@ async def test_cocos_kin_populated_for_ip(live_tools):
     for entry in cocos_kin:
         assert entry.get("cocos_type") == "ip_like"
 
+    psi_res = await live_tools.path_context_tool.find_related_dd_paths(
+        path="equilibrium/time_slice/profiles_1d/psi",
+        relationship_types="cocos",
+        max_results=10,
+    )
+    psi_kin = psi_res["sections"].get("cocos_kin", [])
+    assert psi_kin, "cocos_kin should be populated for psi-like flux paths"
+    assert all(entry.get("cocos_type") == "psi_like" for entry in psi_kin)
+
 
 @pytest.mark.asyncio
 async def test_cocos_kin_absent_when_source_has_no_cocos(live_tools):
     """Paths without cocos_transformation_type should produce an empty
     cocos_kin section (not an error)."""
     res = await live_tools.path_context_tool.find_related_dd_paths(
-        path="equilibrium/time_slice/profiles_1d/psi",
+        path="core_profiles/profiles_1d/electrons/temperature",
         relationship_types="cocos",
         max_results=10,
     )
-    # psi itself has no cocos_transformation_type (coordinate), so kin is empty
+    # Electron temperature has no per-path COCOS transformation metadata.
     assert res["sections"].get("cocos_kin", []) == []
 
 
 # ---------------------------------------------------------------------------
-# search_dd_paths / list_dd_paths — Feature B filter
+# Search and listing filters
 # ---------------------------------------------------------------------------
 
 
