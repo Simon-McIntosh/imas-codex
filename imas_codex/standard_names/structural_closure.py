@@ -864,10 +864,24 @@ class _TransactionQueryAdapter:
 def _normalized_event_record(record: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(record)
     changed_at = normalized.get("changed_at")
+    nanosecond = getattr(changed_at, "nanosecond", None)
     if hasattr(changed_at, "to_native"):
         changed_at = changed_at.to_native()
     if isinstance(changed_at, datetime):
-        normalized["changed_at"] = changed_at.isoformat(timespec="microseconds")
+        if changed_at.tzinfo is None or changed_at.utcoffset() is None:
+            raise StructuralClosureConflict(
+                "structural event timestamp lost its timezone authority"
+            )
+        utc_instant = changed_at.astimezone(UTC)
+        since_epoch = utc_instant - datetime(1970, 1, 1, tzinfo=UTC)
+        normalized["changed_at"] = {
+            "epoch_seconds": since_epoch.days * 86_400 + since_epoch.seconds,
+            "nanosecond": (
+                int(nanosecond)
+                if nanosecond is not None
+                else utc_instant.microsecond * 1000
+            ),
+        }
     return normalized
 
 
