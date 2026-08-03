@@ -17,6 +17,7 @@ from __future__ import annotations
 
 from unittest.mock import patch
 
+from imas_codex.standard_names.attachment_audit import AttachmentPairingGuardResult
 from imas_codex.standard_names.graph_ops import (
     persist_refined_name,
     supersede_prior_source_names,
@@ -30,6 +31,45 @@ class TestSupersedePriorSourceNamesRecording:
     def test_records_live_stage(self):
         captured: dict[str, str] = {}
 
+        class _Tx:
+            def run(self, cypher, **kwargs):
+                if "GENERATED_SUPERSESSION_PREFLIGHT" in cypher:
+                    return [
+                        {
+                            "requested_source_id": "some/dd/path",
+                            "new_name": "new_name",
+                            "requested_source_exists": True,
+                            "successor_exists": True,
+                            "old_name": "old_name",
+                            "old_stage": "accepted",
+                            "source_ids": ["dd:some/dd/path"],
+                        }
+                    ]
+                captured["cypher"] = cypher
+                plan = kwargs["plans"][0]
+                return [
+                    {
+                        "old_name": plan["old_name"],
+                        "new_name": plan["new_name"],
+                    }
+                ]
+
+            def commit(self):
+                return None
+
+            def rollback(self):
+                return None
+
+        class _Session:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *exc):
+                return False
+
+            def begin_transaction(self):
+                return _Tx()
+
         class _GC:
             def __enter__(self):
                 return self
@@ -37,11 +77,21 @@ class TestSupersedePriorSourceNamesRecording:
             def __exit__(self, *exc):
                 return False
 
-            def query(self, cypher, **kwargs):
-                captured["cypher"] = cypher
-                return []
+            def session(self):
+                return _Session()
 
-        with patch(_GC_PATH, return_value=_GC()):
+        with (
+            patch(_GC_PATH, return_value=_GC()),
+            patch(
+                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                return_value=AttachmentPairingGuardResult(("dd:some/dd/path",), ()),
+            ),
+            patch(
+                "imas_codex.standard_names.provenance_lifecycle."
+                "retarget_standard_name_sources",
+                return_value=1,
+            ),
+        ):
             supersede_prior_source_names(
                 [{"new_name": "new_name", "source_id": "some/dd/path"}]
             )
@@ -60,7 +110,10 @@ class TestPersistRefinedNameRecording:
             closed = False
 
             def run(self, cypher, **kwargs):
-                captured["cypher"] = cypher
+                if "new_name" not in kwargs or "old_name" not in kwargs:
+                    return []
+                if "MERGE (new)-[:REFINED_FROM]->(old)" in cypher:
+                    captured["cypher"] = cypher
                 return [
                     {"new_name": kwargs["new_name"], "old_name": kwargs["old_name"]}
                 ]

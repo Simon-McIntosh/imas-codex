@@ -14878,34 +14878,222 @@ def supersede_prior_source_names(
       which is how one coordinate axis resolved to a single name while another
       stayed split across two.
 
+    Before changing lifecycle, lineage, or provenance, the helper discovers
+    the complete semantic-source set for every predecessor-to-successor pair
+    and requires the canonical attachment guard to admit every pairing.  It
+    then retargets exactly that set and compare-and-sets the predecessor state
+    before marking it superseded.  A missing source, guard rejection, partial
+    move, or concurrent drift raises so the caller-owned transaction rolls the
+    generated successor and every associated mutation back together.
+
     For each superseded predecessor the helper marks it
     ``name_stage='superseded'``, clears its claim, and creates a
     ``(new)-[:REFINED_FROM]->(old)`` edge so chain history and the SPA's
-    lineage widget stay intact.  ``HAS_STANDARD_NAME`` edges are **left in
-    place** on the predecessor (they form the historical record); live
-    accept/export queries already filter superseded names, so the source's
-    effective name is unambiguous.
+    lineage widget stay intact. Historical relationships remain represented by
+    the change ledger; the live provenance binding is moved exclusively to the
+    successor.
 
     Returns the number of predecessor names superseded.
     """
-    pairs = [p for p in pairs if p.get("new_name") and p.get("source_id")]
+    pairs = sorted(
+        {
+            (p["new_name"], p["source_id"])
+            for p in pairs
+            if p.get("new_name") and p.get("source_id")
+        }
+    )
     if not pairs:
         return 0
 
-    with nullcontext(gc) if gc is not None else GraphClient() as write_gc:
-        rows = list(
-            write_gc.query(
+    normalized_pairs = [
+        {"new_name": new_name, "source_id": source_id} for new_name, source_id in pairs
+    ]
+
+    def _apply(query_handle: Any) -> int:
+        preflight_rows = list(
+            query_handle.query(
                 """
+                // GENERATED_SUPERSESSION_PREFLIGHT
                 UNWIND $pairs AS pr
-                MATCH (src:IMASNode {id: pr.source_id})-[:HAS_STANDARD_NAME]->(old:StandardName)
+                OPTIONAL MATCH (src:IMASNode {id: pr.source_id})
+                OPTIONAL MATCH (new:StandardName {id: pr.new_name})
+                OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(old:StandardName)
                 WHERE old.id <> pr.new_name
                   AND NOT coalesce(old.name_stage, '') IN ['superseded', 'exhausted', 'contested']
                   AND coalesce(old.origin, 'pipeline') <> 'derived'
-                MATCH (new:StandardName {id: pr.new_name})
                 // Skip self and any case where old already descends from new
                 // along the REFINED_FROM chain (would form a cycle).
-                WHERE new.id <> old.id
+                  AND new.id <> old.id
                   AND NOT (old)-[:REFINED_FROM*1..]->(new)
+                WITH pr, src, new, old
+                OPTIONAL MATCH (source:StandardNameSource)
+                WHERE old IS NOT NULL
+                  AND ((source)-[:PRODUCED_NAME]->(old)
+                       OR source.produced_sn_id = old.id
+                       OR (source)-[:PRODUCED_NAME]->(new))
+                RETURN pr.source_id AS requested_source_id,
+                       pr.new_name AS new_name,
+                       src IS NOT NULL AS requested_source_exists,
+                       new IS NOT NULL AS successor_exists,
+                       old.id AS old_name,
+                       old.name_stage AS old_stage,
+                       [source_id IN collect(DISTINCT source.id)
+                        WHERE source_id IS NOT NULL] AS source_ids
+                """,
+                pairs=normalized_pairs,
+            )
+            or []
+        )
+
+        returned_pairs = {
+            (row.get("new_name"), row.get("requested_source_id"))
+            for row in preflight_rows
+        }
+        expected_pairs = {
+            (pair["new_name"], pair["source_id"]) for pair in normalized_pairs
+        }
+        if returned_pairs != expected_pairs:
+            raise RuntimeError(
+                "generated-name supersession preflight changed before it could "
+                "enumerate every requested source"
+            )
+        missing_requested = [
+            row["requested_source_id"]
+            for row in preflight_rows
+            if not row.get("requested_source_exists")
+        ]
+        missing_successors = [
+            row["new_name"] for row in preflight_rows if not row.get("successor_exists")
+        ]
+        if missing_requested or missing_successors:
+            details = []
+            if missing_requested:
+                details.append(
+                    "missing DD sources " + ", ".join(sorted(set(missing_requested)))
+                )
+            if missing_successors:
+                details.append(
+                    "missing successors " + ", ".join(sorted(set(missing_successors)))
+                )
+            raise RuntimeError(
+                "generated-name supersession preflight failed: " + "; ".join(details)
+            )
+
+        plans_by_pair: dict[tuple[str, str], dict[str, Any]] = {}
+        winners_by_old: dict[str, set[str]] = {}
+        for row in preflight_rows:
+            old_name = row.get("old_name")
+            if not old_name:
+                continue
+            new_name = row["new_name"]
+            source_ids = sorted(set(row.get("source_ids") or []))
+            if not source_ids:
+                raise RuntimeError(
+                    "generated-name supersession preflight found predecessor "
+                    f"{old_name!r} without a semantic source"
+                )
+            key = (old_name, new_name)
+            plan = plans_by_pair.setdefault(
+                key,
+                {
+                    "old_name": old_name,
+                    "new_name": new_name,
+                    "old_stage": row.get("old_stage"),
+                    "source_ids": [],
+                },
+            )
+            if plan["old_stage"] != row.get("old_stage"):
+                raise RuntimeError(
+                    "generated-name supersession predecessor stage changed "
+                    f"during preflight for {old_name!r}"
+                )
+            plan["source_ids"] = sorted(set(plan["source_ids"]) | set(source_ids))
+            winners_by_old.setdefault(old_name, set()).add(new_name)
+
+        conflicting = {
+            old_name: sorted(winners)
+            for old_name, winners in winners_by_old.items()
+            if len(winners) != 1
+        }
+        if conflicting:
+            raise RuntimeError(
+                "generated-name supersession cannot route one predecessor to "
+                f"multiple successors: {conflicting}"
+            )
+
+        plans = [plans_by_pair[key] for key in sorted(plans_by_pair)]
+        if not plans:
+            return 0
+
+        from imas_codex.standard_names.attachment_audit import guard_source_pairings
+
+        for plan in plans:
+            guarded = guard_source_pairings(
+                query_handle, plan["new_name"], plan["source_ids"]
+            )
+            expected = set(plan["source_ids"])
+            accepted = set(guarded.accepted_source_ids)
+            if guarded.rejected or accepted != expected:
+                rejected = (
+                    ", ".join(
+                        f"{item.source_node_id}: {item.reason}"
+                        for item in guarded.rejected
+                    )
+                    or "the pairing guard did not admit every source"
+                )
+                raise ValueError(
+                    "generated-name attachment rejected; supersession rolled "
+                    f"back for {plan['old_name']} -> {plan['new_name']}: {rejected}"
+                )
+
+        from imas_codex.standard_names.provenance_lifecycle import (
+            retarget_standard_name_sources,
+        )
+
+        for plan in plans:
+            moved = retarget_standard_name_sources(
+                query_handle,
+                plan["old_name"],
+                plan["new_name"],
+                operation="regenerate",
+                enforce_consistency=False,
+                source_ids=plan["source_ids"],
+            )
+            expected = len(plan["source_ids"])
+            if moved != expected:
+                raise RuntimeError(
+                    "semantic source set changed during generated-name "
+                    f"supersession: expected {expected}, moved {moved} for "
+                    f"{plan['old_name']} -> {plan['new_name']}"
+                )
+
+        rows = list(
+            query_handle.query(
+                """
+                // GENERATED_SUPERSESSION_FINALIZE
+                UNWIND $plans AS plan
+                MATCH (old:StandardName {id: plan.old_name}),
+                      (new:StandardName {id: plan.new_name})
+                WHERE coalesce(old.name_stage, '') =
+                      coalesce(plan.old_stage, '')
+                  AND NOT coalesce(old.name_stage, '') IN
+                      ['superseded', 'exhausted', 'contested']
+                  AND coalesce(old.origin, 'pipeline') <> 'derived'
+                  AND new.id <> old.id
+                  AND NOT (old)-[:REFINED_FROM*1..]->(new)
+                OPTIONAL MATCH (remaining:StandardNameSource)
+                WHERE (remaining)-[:PRODUCED_NAME]->(old)
+                   OR remaining.produced_sn_id = old.id
+                WITH plan, old, new,
+                     count(DISTINCT remaining) AS remaining_sources
+                WHERE remaining_sources = 0
+                UNWIND plan.source_ids AS expected_source_id
+                MATCH (moved:StandardNameSource {id: expected_source_id})
+                      -[:PRODUCED_NAME]->(new)
+                WHERE moved.produced_sn_id = new.id
+                WITH plan, old, new,
+                     count(DISTINCT moved) AS moved_sources
+                WHERE moved_sources = size(plan.source_ids)
                 // A still-open steered edit (name-hint regeneration) must ride
                 // the recomposed successor so its lifecycle can resolve at
                 // review time; capture the predecessor's edit fields BEFORE any
@@ -14970,32 +15158,39 @@ def supersede_prior_source_names(
                 MERGE (new)-[:REFINED_FROM]->(old)
                 RETURN old.id AS old_name, new.id AS new_name
                 """,
-                pairs=pairs,
+                plans=plans,
             )
             or []
         )
-
-    superseded = len(rows)
-    if superseded:
-        from imas_codex.standard_names.provenance_lifecycle import (
-            retarget_standard_name_sources,
-        )
-
-        with nullcontext(gc) if gc is not None else GraphClient() as provenance_gc:
-            for row in rows:
-                retarget_standard_name_sources(
-                    provenance_gc,
-                    row["old_name"],
-                    row["new_name"],
-                    operation="regenerate",
-                )
-        for r in rows:
+        expected_results = {(plan["old_name"], plan["new_name"]) for plan in plans}
+        actual_results = {(row.get("old_name"), row.get("new_name")) for row in rows}
+        if actual_results != expected_results or len(rows) != len(plans):
+            raise RuntimeError(
+                "generated-name supersession state changed before lifecycle "
+                f"finalization: expected {len(plans)}, finalized {len(rows)}"
+            )
+        for row in rows:
             logger.info(
                 "supersede_prior_source_names: %s superseded by %s (same source)",
-                r.get("old_name"),
-                r.get("new_name"),
+                row.get("old_name"),
+                row.get("new_name"),
             )
-    return superseded
+        return len(rows)
+
+    if isinstance(gc, _TransactionQuery):
+        return _apply(gc)
+
+    with nullcontext(gc) if gc is not None else GraphClient() as graph:
+        with graph.session() as session:
+            tx = session.begin_transaction()
+            try:
+                superseded = _apply(_TransactionQuery(tx))
+                tx.commit()
+                return superseded
+            except BaseException:
+                with suppress(Exception):
+                    tx.rollback()
+                raise
 
 
 @retry_on_deadlock()
