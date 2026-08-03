@@ -9,18 +9,27 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-try:
-    from dotenv import load_dotenv
 
-    load_dotenv(override=True)
-except ImportError:
-    pass
+def _load_test_environment(dotenv_path=None) -> bool:
+    """Load developer defaults without replacing explicit process values."""
+    try:
+        from dotenv import load_dotenv
+    except ImportError:
+        return False
+    return load_dotenv(dotenv_path=dotenv_path, override=False)
 
-from imas_codex.clusters.search import ClusterSearchResult
-from imas_codex.embeddings.encoder import Encoder
-from imas_codex.search.document_store import Document, DocumentMetadata, DocumentStore
-from imas_codex.search.engines.base_engine import MockSearchEngine
-from imas_codex.tools import Tools
+
+_load_test_environment()
+
+from imas_codex.clusters.search import ClusterSearchResult  # noqa: E402
+from imas_codex.embeddings.encoder import Encoder  # noqa: E402
+from imas_codex.search.document_store import (  # noqa: E402
+    Document,
+    DocumentMetadata,
+    DocumentStore,
+)
+from imas_codex.search.engines.base_engine import MockSearchEngine  # noqa: E402
+from imas_codex.tools import Tools  # noqa: E402
 
 
 def pytest_addoption(parser):
@@ -113,8 +122,8 @@ def configure_embedding_model(embedding_model_name):
     Forces local backend with all-MiniLM-L6-v2 for all tests unless
     explicitly overridden via --embedding-model CLI option.
 
-    Uses direct assignment (not setdefault) to ensure test values
-    override any values loaded from .env by load_dotenv(override=True).
+    Uses direct assignment (not setdefault) to ensure deterministic test values
+    regardless of developer defaults loaded from ``.env``.
     """
     os.environ["IMAS_CODEX_EMBEDDING_LOCATION"] = "local"
     if embedding_model_name:
