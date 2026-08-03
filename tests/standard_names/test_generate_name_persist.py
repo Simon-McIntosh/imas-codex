@@ -30,6 +30,19 @@ def _mock_gc_tx():
     gc.__exit__ = MagicMock(return_value=False)
 
     def _run(_cypher, **params):
+        if "GENERATED_SUPERSESSION_PREFLIGHT" in _cypher:
+            return [
+                {
+                    "requested_source_id": pair["source_id"],
+                    "new_name": pair["new_name"],
+                    "requested_source_exists": True,
+                    "successor_exists": True,
+                    "old_name": None,
+                    "old_stage": None,
+                    "source_ids": [],
+                }
+                for pair in params["pairs"]
+            ]
         return [
             {"id": item["sns_id"]}
             for item in params.get("batch", [])
@@ -1518,6 +1531,35 @@ class TestPersistGeneratedNameBatch:
         self.atomic_tx.commit.assert_not_called()
         self.atomic_tx.close.assert_called_once()
 
+    def test_supersession_failure_rolls_back_generated_successor(self):
+        """A fail-closed predecessor migration aborts the whole name write."""
+        from imas_codex.standard_names.graph_ops import persist_generated_name_batch
+
+        candidate = _make_candidate()
+
+        def _reject_supersession(_pairs, *, gc):
+            assert gc._transaction is self.atomic_tx
+            raise ValueError("generated-name attachment rejected")
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops.write_standard_names",
+                return_value=[candidate["id"]],
+            ),
+            patch("imas_codex.standard_names.graph_ops._backfill_cluster_from_sources"),
+            patch(
+                "imas_codex.standard_names.graph_ops.supersede_prior_source_names",
+                side_effect=_reject_supersession,
+            ),
+            patch("imas_codex.standard_names.graph_ops.bump_sn_run_counter") as counter,
+            pytest.raises(ValueError, match="attachment rejected"),
+        ):
+            persist_generated_name_batch([candidate], compose_model="test/model")
+
+        self.atomic_tx.commit.assert_not_called()
+        self.atomic_tx.close.assert_called_once()
+        counter.assert_not_called()
+
     def test_partial_rich_write_keeps_reservation_unfinalized(self):
         from imas_codex.standard_names.graph_ops import persist_generated_name_batch
 
@@ -1593,6 +1635,62 @@ class TestPersistGeneratedNameBatch:
 # ---------------------------------------------------------------------------
 
 
+def _supersession_preflight(
+    *,
+    old_name: str | None = "old_pipeline_name",
+    new_name: str = "new_pipeline_name",
+    requested_source_id: str = "eq/q_95",
+    source_ids: list[str] | None = None,
+) -> dict[str, object]:
+    return {
+        "requested_source_id": requested_source_id,
+        "new_name": new_name,
+        "requested_source_exists": True,
+        "successor_exists": True,
+        "old_name": old_name,
+        "old_stage": "accepted" if old_name else None,
+        "source_ids": source_ids if source_ids is not None else ["dd:eq/q_95"],
+    }
+
+
+def _supersession_graph(
+    preflight_rows: list[dict[str, object]],
+    *,
+    finalized_rows: list[dict[str, str]] | None = None,
+):
+    tx = MagicMock()
+    tx.closed = False
+
+    def _run(cypher, **params):
+        if "GENERATED_SUPERSESSION_PREFLIGHT" in cypher:
+            return preflight_rows
+        if "GENERATED_SUPERSESSION_FINALIZE" in cypher:
+            if finalized_rows is not None:
+                return finalized_rows
+            return [
+                {
+                    "old_name": plan["old_name"],
+                    "new_name": plan["new_name"],
+                }
+                for plan in params["plans"]
+            ]
+        raise AssertionError(f"unexpected supersession query: {cypher}")
+
+    tx.run.side_effect = _run
+    session = MagicMock()
+    session.begin_transaction.return_value = tx
+
+    @contextmanager
+    def _session():
+        yield session
+
+    graph = MagicMock()
+    graph.__enter__.return_value = graph
+    graph.__exit__.return_value = False
+    graph.session = _session
+    return graph, tx
+
+
 class TestSupersedePriorSourceNames:
     """``supersede_prior_source_names`` retires stale pipeline names left on a
     source by a ``--force``/regen pass, enforcing the invariant
@@ -1618,27 +1716,31 @@ class TestSupersedePriorSourceNames:
     def test_supersedes_prior_pipeline_name(self):
         """A regen that produced a *different* name supersedes the prior
         accepted pipeline name on the same source — leaving one live name."""
+        from imas_codex.standard_names.attachment_audit import (
+            AttachmentPairingGuardResult,
+        )
         from imas_codex.standard_names.graph_ops import supersede_prior_source_names
 
-        gc = _mock_gc_query()
-        # The Cypher returns the (old, new) row for each predecessor it retired.
-        gc.query = MagicMock(
-            return_value=[
-                {"old_name": "old_pipeline_name", "new_name": "new_pipeline_name"}
-            ]
-        )
-
-        with _patch_gc(gc):
+        graph, tx = _supersession_graph([_supersession_preflight()])
+        admitted = AttachmentPairingGuardResult(("dd:eq/q_95",), ())
+        with (
+            _patch_gc(graph),
+            patch(
+                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                return_value=admitted,
+            ),
+            patch(
+                "imas_codex.standard_names.provenance_lifecycle."
+                "retarget_standard_name_sources",
+                return_value=1,
+            ),
+        ):
             n = supersede_prior_source_names(
-                [{"new_name": "new_pipeline_name", "source_id": "dd:eq/q_95"}]
+                [{"new_name": "new_pipeline_name", "source_id": "eq/q_95"}]
             )
 
         assert n == 1
-        cypher = next(
-            call.args[0]
-            for call in gc.query.call_args_list
-            if "old.name_stage = 'superseded'" in call.args[0]
-        )
+        cypher = _transaction_call(tx, "old.name_stage = 'superseded'").args[0]
         # The predecessor is marked superseded and linked via REFINED_FROM.
         assert "old.name_stage = 'superseded'" in cypher
         assert "MERGE (new)-[:REFINED_FROM]->(old)" in cypher
@@ -1651,30 +1753,42 @@ class TestSupersedePriorSourceNames:
         # Already-retired / frozen names are never re-superseded.
         assert "['superseded', 'exhausted', 'contested']" in cypher
         # The new name itself is never superseded (byte-identical regen no-op).
-        assert "old.id <> pr.new_name" in cypher
+        preflight_cypher = _transaction_call(
+            tx, "GENERATED_SUPERSESSION_PREFLIGHT"
+        ).args[0]
+        assert "old.id <> pr.new_name" in preflight_cypher
 
     def test_open_edit_propagated_to_successor_and_predecessor_reconciled(self):
         """A name-hint regen that supersedes the edited predecessor must ride
         the still-open edit forward onto the recomposed successor and reconcile
         the predecessor to 'applied' — otherwise the edit is stuck 'open' on a
         superseded node forever."""
+        from imas_codex.standard_names.attachment_audit import (
+            AttachmentPairingGuardResult,
+        )
         from imas_codex.standard_names.graph_ops import supersede_prior_source_names
 
-        gc = _mock_gc_query()
-        gc.query = MagicMock(
-            return_value=[{"old_name": "old_name", "new_name": "new_name"}]
+        graph, tx = _supersession_graph(
+            [_supersession_preflight(old_name="old_name", new_name="new_name")]
         )
-
-        with _patch_gc(gc):
+        admitted = AttachmentPairingGuardResult(("dd:eq/q_95",), ())
+        with (
+            _patch_gc(graph),
+            patch(
+                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                return_value=admitted,
+            ),
+            patch(
+                "imas_codex.standard_names.provenance_lifecycle."
+                "retarget_standard_name_sources",
+                return_value=1,
+            ),
+        ):
             supersede_prior_source_names(
-                [{"new_name": "new_name", "source_id": "dd:eq/q_95"}]
+                [{"new_name": "new_name", "source_id": "eq/q_95"}]
             )
 
-        cypher = next(
-            call.args[0]
-            for call in gc.query.call_args_list
-            if "carry_edit" in call.args[0]
-        )
+        cypher = _transaction_call(tx, "carry_edit").args[0]
         # The propagation is gated on the predecessor's edit still being open.
         assert "(coalesce(old.edit_status, '') = 'open') AS carry_edit" in cypher
         # Predecessor reconciled to 'applied', not left stuck 'open'.
@@ -1695,15 +1809,92 @@ class TestSupersedePriorSourceNames:
         superseded."""
         from imas_codex.standard_names.graph_ops import supersede_prior_source_names
 
-        gc = _mock_gc_query()
-        gc.query = MagicMock(return_value=[])  # no predecessor distinct from new
-
-        with _patch_gc(gc):
+        graph, tx = _supersession_graph(
+            [_supersession_preflight(old_name=None, new_name="same_name")]
+        )
+        with _patch_gc(graph):
             n = supersede_prior_source_names(
-                [{"new_name": "same_name", "source_id": "dd:eq/q_95"}]
+                [{"new_name": "same_name", "source_id": "eq/q_95"}]
             )
 
         assert n == 0
+        tx.commit.assert_called_once_with()
+
+    def test_guard_rejection_rolls_back_before_any_mutation(self):
+        from imas_codex.standard_names.attachment_audit import (
+            AttachmentPairingGuardResult,
+            AttachmentVerdict,
+        )
+        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+
+        graph, tx = _supersession_graph([_supersession_preflight()])
+        rejected = AttachmentVerdict(
+            "dd:eq/q_95",
+            "eq/q_95",
+            "new_pipeline_name",
+            "drafted",
+            "unit dimensionality mismatch",
+        )
+        guard_result = AttachmentPairingGuardResult((), (rejected,))
+        with (
+            _patch_gc(graph),
+            patch(
+                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                return_value=guard_result,
+            ),
+            patch(
+                "imas_codex.standard_names.provenance_lifecycle."
+                "retarget_standard_name_sources"
+            ) as retarget,
+            pytest.raises(ValueError, match="supersession rolled back"),
+        ):
+            supersede_prior_source_names(
+                [{"new_name": "new_pipeline_name", "source_id": "eq/q_95"}]
+            )
+
+        tx.rollback.assert_called_once_with()
+        tx.commit.assert_not_called()
+        retarget.assert_not_called()
+        assert not any(
+            "GENERATED_SUPERSESSION_FINALIZE" in call.args[0]
+            for call in tx.run.call_args_list
+        )
+
+    def test_partial_source_move_rolls_back_without_lifecycle_effects(self):
+        from imas_codex.standard_names.attachment_audit import (
+            AttachmentPairingGuardResult,
+        )
+        from imas_codex.standard_names.graph_ops import supersede_prior_source_names
+
+        source_ids = ["dd:eq/q_95", "dd:eq/q_axis"]
+        graph, tx = _supersession_graph(
+            [_supersession_preflight(source_ids=source_ids)]
+        )
+        admitted = AttachmentPairingGuardResult(tuple(source_ids), ())
+        with (
+            _patch_gc(graph),
+            patch(
+                "imas_codex.standard_names.attachment_audit.guard_source_pairings",
+                return_value=admitted,
+            ),
+            patch(
+                "imas_codex.standard_names.provenance_lifecycle."
+                "retarget_standard_name_sources",
+                return_value=1,
+            ) as retarget,
+            pytest.raises(RuntimeError, match="expected 2, moved 1"),
+        ):
+            supersede_prior_source_names(
+                [{"new_name": "new_pipeline_name", "source_id": "eq/q_95"}]
+            )
+
+        tx.rollback.assert_called_once_with()
+        tx.commit.assert_not_called()
+        assert retarget.call_args.kwargs["source_ids"] == source_ids
+        assert not any(
+            "GENERATED_SUPERSESSION_FINALIZE" in call.args[0]
+            for call in tx.run.call_args_list
+        )
 
     def test_persist_regen_supersedes_one_live_name(self):
         """End-to-end: a forced regen producing a different name for an
