@@ -19,8 +19,14 @@ against a live graph (``@pytest.mark.graph``).
 
 from __future__ import annotations
 
+import json
+import os
 import uuid
+from collections import Counter
+from contextlib import contextmanager
 from copy import deepcopy
+from hashlib import sha256
+from pathlib import Path
 from types import TracebackType
 from typing import Any
 from unittest.mock import MagicMock
@@ -426,11 +432,24 @@ def test_as_dict_reports_name_level_defects() -> None:
 
 @pytest.fixture()
 def _gc():
-    client = None
-    try:
-        from imas_codex.graph.client import GraphClient
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.settings import get_graph_uri
 
-        client = GraphClient()
+    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if not uri:
+        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.fail("attachment graph tests require an ephemeral graph")
+    project_uri = os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()
+    if uri == project_uri:
+        pytest.fail("attachment graph tests refuse the configured project graph")
+    client = GraphClient(
+        uri=uri,
+        username="neo4j",
+        password="",
+        graph_name="ephemeral-attachment-audit",
+    )
+    try:
         client.get_stats()
     except Exception as exc:  # pragma: no cover - env-dependent
         pytest.skip(f"Neo4j not available: {exc}")
@@ -1106,7 +1125,8 @@ def test_terminal_recovery_is_one_exact_transaction() -> None:
     }
     assert tx.run.call_count == 1
     cypher = tx.run.call_args.args[0]
-    assert "src.status = 'composed'" in cypher
+    assert "src.status IN $source_statuses" in cypher
+    assert "src.claim_token IS NULL" in cypher
     assert "src.produced_sn_id = sn.id" in cypher
     assert "COUNT { (src)-[:PRODUCED_NAME]->(:StandardName) } = 1" in cypher
     assert "MATCH (dd)-[hsn:HAS_STANDARD_NAME]->(sn)" in cypher
@@ -1122,6 +1142,7 @@ def test_terminal_recovery_is_one_exact_transaction() -> None:
     assert params["source_node_id"] == f"dd:{path}"
     assert params["dd_path"] == path
     assert params["sn_id"] == "hydrogen_fraction"
+    assert params["source_statuses"] == ["attached", "composed"]
     tx.commit.assert_called_once()
 
 
@@ -1213,6 +1234,7 @@ def _terminal_graph_state(
     projected_edge: bool = True,
     scalar_matches: bool = True,
     source_status: str = "composed",
+    claimed: bool = False,
     name_stage: str = "superseded",
 ) -> dict:
     """Small graph model for exercising the recovery predicate and mutation."""
@@ -1241,8 +1263,8 @@ def _terminal_graph_state(
             "attempt_count": 7,
             "last_error": "candidate collided with terminal lineage",
             "composed_at": "2026-07-31T12:00:00Z",
-            "claimed_at": "2026-07-31T11:59:00Z",
-            "claim_token": "claim:test",
+            "claimed_at": "2026-07-31T11:59:00Z" if claimed else None,
+            "claim_token": "claim:test" if claimed else None,
             "failed_at": "2026-07-31T11:58:00Z",
             "retry_events": ["source-retry:earlier"],
         },
@@ -1285,7 +1307,9 @@ def _state_is_terminal_recovery_eligible(state: dict, params: dict) -> bool:
             state["from_dd_path"],
             source["source_type"] == "dd",
             source["source_id"] == path,
-            source["status"] == "composed",
+            source["status"] in params["source_statuses"],
+            source["claimed_at"] is None,
+            source["claim_token"] is None,
             source["produced_sn_id"] == target_id,
             target["name_stage"] in params["terminal_stages"],
             state["source_outputs"] == [target_id],
@@ -1521,6 +1545,18 @@ def test_terminal_recovery_exact_mirror_preserves_unrelated_entries() -> None:
     assert client.state["target"]["source_paths"] == ["dd:unrelated/path"]
 
 
+def test_terminal_recovery_accepts_attached_source_status() -> None:
+    client = _StatefulTerminalClient(
+        _terminal_graph_state(source_paths=[], source_status="attached")
+    )
+
+    result = _recover_with_state(client)
+
+    assert result["ok"] is True
+    assert client.state["source"]["status"] == "extracted"
+    assert client.state["retries"][0]["previous_status"] == "attached"
+
+
 @pytest.mark.parametrize(
     "source_path_entry",
     ["spectrometer/channel/isotope_ratio", "dd:spectrometer/channel/isotope_ratio"],
@@ -1590,6 +1626,7 @@ def test_terminal_recovery_empty_mirror_requires_isolated_target(
         {"scalar_matches": False},
         {"name_stage": "accepted"},
         {"source_status": "extracted"},
+        {"claimed": True},
     ],
 )
 def test_terminal_recovery_still_requires_every_authoritative_predicate(
@@ -1678,6 +1715,693 @@ def test_terminal_recovery_repeat_refuses_without_duplicate_events() -> None:
     assert len(client.state["changes"]) == 1
     assert client.state["source_retry_links"] == [first["retry_event_id"]]
     assert client.state["name_change_links"] == [first["change_event_id"]]
+
+
+# ---------------------------------------------------------------------------
+# Exact batch recovery — manifest, CAS, rollback, and idempotence
+# ---------------------------------------------------------------------------
+
+
+_TERMINAL_RECOVERY_FIXTURES = (
+    (
+        "core_instant_changes/change/profiles_1d/rotation_frequency_tor_sonic",
+        "toroidal_change_in_rotation_frequency_due_to_e_cross_b_drift",
+        "composed",
+    ),
+    (
+        "gas_injection/pipe/species/fraction",
+        "ratio_of_neutral_species_gas_count_to_total_gas_count",
+        "attached",
+    ),
+    (
+        "gas_injection/valve/species/fraction",
+        "ratio_of_neutral_species_gas_count_to_total_gas_count",
+        "composed",
+    ),
+    (
+        "mhd_linear/time_slice/toroidal_mode/plasma/psi_potential_perturbed",
+        "perturbed_magnetic_vector_potential",
+        "composed",
+    ),
+    (
+        "pellets/time_slice/pellet/species/fraction",
+        "ratio_of_neutral_species_gas_count_to_total_gas_count",
+        "attached",
+    ),
+    (
+        "pulse_schedule/density_control/valve/species/fraction",
+        "ratio_of_neutral_species_gas_count_to_total_gas_count",
+        "attached",
+    ),
+    (
+        "pulse_schedule/nbi/unit/species/fraction",
+        "ratio_of_neutral_species_gas_count_to_total_gas_count",
+        "attached",
+    ),
+    (
+        "spi/injector/fragmentation_gas/species/fraction",
+        "ratio_of_neutral_species_gas_count_to_total_gas_count",
+        "attached",
+    ),
+    (
+        "spi/injector/propellant_gas/species/fraction",
+        "ratio_of_neutral_species_gas_count_to_total_gas_count",
+        "attached",
+    ),
+)
+
+
+def _recovery_relationship(
+    element_id: str,
+    relationship_type: str,
+    direction: str,
+    other_element_id: str,
+    other_labels: list[str],
+    other_id: str,
+    other_properties: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "element_id": element_id,
+        "type": relationship_type,
+        "direction": direction,
+        "properties": {},
+        "other_element_id": other_element_id,
+        "other_labels": other_labels,
+        "other_id": other_id,
+        "other_properties": deepcopy(other_properties),
+    }
+
+
+def _terminal_recovery_closure_row(
+    dd_path: str, sn_id: str, status: str
+) -> dict[str, Any]:
+    source_id = f"dd:{dd_path}"
+    safe_id = source_id.replace("/", "_").replace(":", "_")
+    source_element_id = f"source:{safe_id}"
+    node_element_id = f"node:{dd_path}"
+    name_element_id = f"name:{sn_id}"
+    source_properties = {
+        "id": source_id,
+        "source_type": "dd",
+        "source_id": dd_path,
+        "status": status,
+        "produced_sn_id": sn_id,
+        "attempt_count": 4,
+        "last_error": "terminal collision",
+        "claimed_at": None,
+        "claim_token": None,
+        "dd_version": "4.1.1",
+        "dd_snapshot_pinned": True,
+        "dd_unit": "1",
+        "physics_domain": "general",
+        "retry_events": [],
+    }
+    node_properties = {
+        "id": dd_path,
+        "node_category": "quantity",
+        "unit": "1",
+        "cocos": 17,
+    }
+    name_properties = {
+        "id": sn_id,
+        "name_stage": "superseded",
+        "docs_stage": "accepted",
+        "status": "draft",
+        "validation_status": "valid",
+        "reviewer_score_name": 0.93,
+        "reviewer_score_docs": 0.95,
+        "unit": "1",
+        "cocos": 17,
+        "origin": "pipeline",
+        "source_paths": [source_id, "dd:unrelated/preserved"],
+    }
+    source_relationships = [
+        _recovery_relationship(
+            f"from:{safe_id}",
+            "FROM_DD_PATH",
+            "out",
+            node_element_id,
+            ["IMASNode"],
+            dd_path,
+            node_properties,
+        ),
+        _recovery_relationship(
+            f"binding:{safe_id}",
+            "PRODUCED_NAME",
+            "out",
+            name_element_id,
+            ["StandardName"],
+            sn_id,
+            name_properties,
+        ),
+    ]
+    node_relationships = [
+        _recovery_relationship(
+            f"from:{safe_id}",
+            "FROM_DD_PATH",
+            "in",
+            source_element_id,
+            ["StandardNameSource"],
+            source_id,
+            source_properties,
+        ),
+        _recovery_relationship(
+            f"projection:{safe_id}",
+            "HAS_STANDARD_NAME",
+            "out",
+            name_element_id,
+            ["StandardName"],
+            sn_id,
+            name_properties,
+        ),
+        _recovery_relationship(
+            f"dd-unit:{safe_id}",
+            "HAS_UNIT",
+            "out",
+            "unit:1",
+            ["Unit"],
+            "1",
+            {"id": "1", "symbol": "1"},
+        ),
+    ]
+    name_relationships = [
+        _recovery_relationship(
+            f"binding:{safe_id}",
+            "PRODUCED_NAME",
+            "in",
+            source_element_id,
+            ["StandardNameSource"],
+            source_id,
+            source_properties,
+        ),
+        _recovery_relationship(
+            f"projection:{safe_id}",
+            "HAS_STANDARD_NAME",
+            "in",
+            node_element_id,
+            ["IMASNode"],
+            dd_path,
+            node_properties,
+        ),
+        _recovery_relationship(
+            f"review:{safe_id}",
+            "HAS_REVIEW",
+            "out",
+            f"review-node:{safe_id}",
+            ["Review"],
+            f"review:{source_id}",
+            {"id": f"review:{source_id}", "score": 0.93},
+        ),
+        _recovery_relationship(
+            f"lineage:{safe_id}",
+            "REFINED_FROM",
+            "out",
+            f"lineage-name:{safe_id}",
+            ["StandardName"],
+            f"{sn_id}_predecessor",
+            {"id": f"{sn_id}_predecessor", "name_stage": "superseded"},
+        ),
+    ]
+    return {
+        "source_id": source_id,
+        "dd_path": dd_path,
+        "sn_id": sn_id,
+        "sources": [
+            {
+                "element_id": source_element_id,
+                "labels": ["StandardNameSource"],
+                "properties": source_properties,
+                "relationships": source_relationships,
+            }
+        ],
+        "nodes": [
+            {
+                "element_id": node_element_id,
+                "labels": ["IMASNode"],
+                "properties": node_properties,
+                "relationships": node_relationships,
+            }
+        ],
+        "names": [
+            {
+                "element_id": name_element_id,
+                "labels": ["StandardName"],
+                "properties": name_properties,
+                "relationships": name_relationships,
+            }
+        ],
+    }
+
+
+def _terminal_recovery_manifest_payload(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    from imas_codex.standard_names import attachment_audit as mod
+
+    manifest_rows = []
+    for row in rows:
+        hashes = mod._terminal_recovery_snapshot_hashes(
+            row,
+            retry_event_id="future-retry-event",
+            change_event_id="future-change-event",
+        )
+        manifest_rows.append(
+            {
+                "operation": "recover_terminal_attachment",
+                "source_id": row["source_id"],
+                "dd_path": row["dd_path"],
+                "sn_id": row["sn_id"],
+                "expected_source_status": row["sources"][0]["properties"]["status"],
+                "expected_name_stage": row["names"][0]["properties"]["name_stage"],
+                "expected_closure_hash": hashes["closure_hash"],
+                "expected_preserved_state_hash": hashes["preserved_state_hash"],
+                "expected_participant_ids_hash": hashes["participant_ids_hash"],
+                "expected_relationship_ids_hash": hashes["relationship_ids_hash"],
+                "west_intersection": 0,
+                "test_intersection": 0,
+            }
+        )
+    return {
+        "schema": "imas-codex.terminal-attachment-recovery-manifest",
+        "schema_version": 1,
+        "operation": "recover_terminal_attachment",
+        "rows": manifest_rows,
+    }
+
+
+def _write_terminal_recovery_manifest(path: Path, rows: list[dict[str, Any]]) -> str:
+    path.write_text(
+        json.dumps(_terminal_recovery_manifest_payload(rows), sort_keys=True),
+        encoding="utf-8",
+    )
+    return sha256(path.read_bytes()).hexdigest()
+
+
+class _BatchRecoveryTransaction:
+    def __init__(
+        self,
+        client: _BatchRecoveryClient,
+        *,
+        race: bool,
+        partial: bool,
+    ) -> None:
+        self.client = client
+        self.working = deepcopy(client.rows)
+        self.race = race
+        self.partial = partial
+        self.raced = False
+        self.committed = False
+        self.rolled_back = False
+
+    def run(self, query: str, **params: Any):
+        if "TERMINAL_ATTACHMENT_RECOVERY_CLOSURE" in query:
+            return deepcopy(sorted(self.working, key=lambda row: row["source_id"]))
+        if "SOURCE_SNAPSHOT_MIGRATION_LOCK" in query:
+            if self.race and not self.raced:
+                self.working[0]["names"][0]["relationships"][-1]["properties"][
+                    "concurrent"
+                ] = True
+                self.raced = True
+            return [{"locked": len(params["element_ids"])}]
+        if "TERMINAL_ATTACHMENT_RECOVERY_RELATIONSHIP_LOCK" in query:
+            return [{"locked": len(params["element_ids"])}]
+        if "TERMINAL_ATTACHMENT_RECOVERY_APPLY" not in query:
+            raise AssertionError(query)
+        source_ids: list[str] = []
+        retry_ids: list[str] = []
+        change_ids: list[str] = []
+        for item in params["items"]:
+            row = next(
+                candidate
+                for candidate in self.working
+                if candidate["source_id"] == item["source_id"]
+            )
+            source = row["sources"][0]
+            node = row["nodes"][0]
+            name = row["names"][0]
+            previous = deepcopy(source["properties"])
+            source["relationships"] = [
+                relationship
+                for relationship in source["relationships"]
+                if not (
+                    relationship["type"] == "PRODUCED_NAME"
+                    and relationship["other_id"] == item["sn_id"]
+                )
+            ]
+            node["relationships"] = [
+                relationship
+                for relationship in node["relationships"]
+                if not (
+                    relationship["type"] == "HAS_STANDARD_NAME"
+                    and relationship["other_id"] == item["sn_id"]
+                )
+            ]
+            name["relationships"] = [
+                relationship
+                for relationship in name["relationships"]
+                if not (
+                    relationship["type"] in {"PRODUCED_NAME", "HAS_STANDARD_NAME"}
+                    and relationship["other_id"] in {item["source_id"], item["dd_path"]}
+                )
+            ]
+            name["properties"]["source_paths"] = [
+                path
+                for path in name["properties"]["source_paths"]
+                if path not in {item["source_id"], item["dd_path"]}
+            ]
+            retry = deepcopy(item["retry_event"])
+            retry.update(
+                {
+                    "previous_status": previous["status"],
+                    "previous_attempt_count": previous["attempt_count"],
+                    "previous_error": previous["last_error"],
+                }
+            )
+            change = deepcopy(item["change_event"])
+            source["relationships"].append(
+                _recovery_relationship(
+                    f"retry-link:{retry['id']}",
+                    "HAS_RETRY_EVENT",
+                    "out",
+                    f"retry-node:{retry['id']}",
+                    ["StandardNameSourceRetry"],
+                    retry["id"],
+                    retry,
+                )
+            )
+            name["relationships"].append(
+                _recovery_relationship(
+                    f"change-link:{change['id']}",
+                    "HAS_INTERNAL_CHANGE",
+                    "out",
+                    f"change-node:{change['id']}",
+                    ["StandardNameChange"],
+                    change["id"],
+                    change,
+                )
+            )
+            source["properties"].update(
+                {
+                    "status": "extracted",
+                    "produced_sn_id": None,
+                    "composed_at": None,
+                    "attempt_count": 0,
+                    "claimed_at": None,
+                    "claim_token": None,
+                    "failed_at": None,
+                    "last_error": None,
+                    "retry_events": previous.get("retry_events", []) + [retry["id"]],
+                }
+            )
+            for relationship in node["relationships"]:
+                if relationship["other_id"] == item["source_id"]:
+                    relationship["other_properties"] = deepcopy(source["properties"])
+            source_ids.append(item["source_id"])
+            retry_ids.append(retry["id"])
+            change_ids.append(change["id"])
+        applied = len(source_ids) - 1 if self.partial else len(source_ids)
+        return [
+            {
+                "applied": applied,
+                "source_ids": source_ids[:applied],
+                "retry_event_ids": retry_ids[:applied],
+                "change_event_ids": change_ids[:applied],
+            }
+        ]
+
+    def commit(self) -> None:
+        self.client.rows = self.working
+        self.committed = True
+
+    def rollback(self) -> None:
+        self.rolled_back = True
+
+
+class _BatchRecoverySession:
+    def __init__(self, client: _BatchRecoveryClient) -> None:
+        self.client = client
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args: Any) -> None:
+        return None
+
+    def begin_transaction(self) -> _BatchRecoveryTransaction:
+        transaction = _BatchRecoveryTransaction(
+            self.client,
+            race=self.client.race,
+            partial=self.client.partial,
+        )
+        self.client.last_transaction = transaction
+        return transaction
+
+
+class _BatchRecoveryClient:
+    def __init__(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        race: bool = False,
+        partial: bool = False,
+    ) -> None:
+        self.rows = deepcopy(rows)
+        self.race = race
+        self.partial = partial
+        self.last_transaction: _BatchRecoveryTransaction | None = None
+
+    def session(self) -> _BatchRecoverySession:
+        return _BatchRecoverySession(self)
+
+
+def test_terminal_recovery_manifest_covers_exact_fixture_cohort(
+    tmp_path: Path,
+) -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        recover_terminal_attachments,
+    )
+
+    rows = [
+        _terminal_recovery_closure_row(*fixture)
+        for fixture in _TERMINAL_RECOVERY_FIXTURES
+    ]
+    manifest = tmp_path / "terminal-recovery.json"
+    _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(rows)
+
+    receipt = recover_terminal_attachments(
+        manifest,
+        reason="recover exact terminal source bindings",
+        gc=client,
+    )
+
+    assert receipt["mode"] == "dry_run"
+    assert receipt["counts"] == {
+        "allowlisted": 9,
+        "planned": 9,
+        "already_current": 0,
+        "applied": 0,
+        "refused": 0,
+    }
+    assert Counter(row["sources"][0]["properties"]["status"] for row in rows) == {
+        "composed": 3,
+        "attached": 6,
+    }
+    assert client.rows == rows
+    assert client.last_transaction is not None
+    assert client.last_transaction.rolled_back is True
+
+
+def test_terminal_recovery_batch_is_atomic_and_idempotent(tmp_path: Path) -> None:
+    from imas_codex.standard_names import attachment_audit as mod
+
+    rows = [
+        _terminal_recovery_closure_row(*fixture)
+        for fixture in _TERMINAL_RECOVERY_FIXTURES
+    ]
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest_hash = _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(rows)
+
+    first = mod.recover_terminal_attachments(
+        manifest,
+        reason="recover exact terminal source bindings",
+        apply=True,
+        expected_manifest_hash=manifest_hash,
+        gc=client,
+    )
+    second = mod.recover_terminal_attachments(
+        manifest,
+        reason="recover exact terminal source bindings",
+        apply=True,
+        expected_manifest_hash=manifest_hash,
+        gc=client,
+    )
+
+    assert first["mode"] == "applied"
+    assert first["counts"]["applied"] == 9
+    assert second["mode"] == "already_current"
+    assert second["counts"]["already_current"] == 9
+    for row in client.rows:
+        source = row["sources"][0]
+        name = row["names"][0]
+        assert source["properties"]["status"] == "extracted"
+        assert source["properties"]["produced_sn_id"] is None
+        assert row["source_id"] not in name["properties"]["source_paths"]
+        assert (
+            len(
+                [
+                    relationship
+                    for relationship in source["relationships"]
+                    if relationship["type"] == "HAS_RETRY_EVENT"
+                ]
+            )
+            == 1
+        )
+        assert (
+            len(
+                [
+                    relationship
+                    for relationship in name["relationships"]
+                    if relationship["type"] == "HAS_INTERNAL_CHANGE"
+                    and relationship["other_properties"].get("operation")
+                    == "recover_terminal_source_binding"
+                ]
+            )
+            == 1
+        )
+
+
+def test_terminal_recovery_stale_closure_refuses_before_writes(tmp_path: Path) -> None:
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+
+    rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
+    manifest = tmp_path / "terminal-recovery.json"
+    _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(rows)
+    client.rows[0]["sources"][0]["properties"]["attempt_count"] = 5
+    before = deepcopy(client.rows)
+
+    receipt = recover_terminal_attachments(
+        manifest,
+        reason="recover exact terminal source binding",
+        gc=client,
+    )
+
+    assert receipt["mode"] == "refused"
+    assert "expected_closure_hash" in " ".join(receipt["refusals"][0]["reasons"])
+    assert client.rows == before
+
+
+def test_terminal_recovery_apply_requires_exact_manifest_hash(tmp_path: Path) -> None:
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+
+    rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
+    manifest = tmp_path / "terminal-recovery.json"
+    _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(rows)
+
+    with pytest.raises(ValueError, match="does not match"):
+        recover_terminal_attachments(
+            manifest,
+            reason="recover exact terminal source binding",
+            apply=True,
+            expected_manifest_hash="0" * 64,
+            gc=client,
+        )
+
+    assert client.last_transaction is None
+
+
+@pytest.mark.parametrize("defect", ["duplicate", "mixed"])
+def test_terminal_recovery_manifest_rejects_duplicate_and_mixed_rows(
+    tmp_path: Path, defect: str
+) -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        load_terminal_attachment_recovery_manifest,
+    )
+
+    rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
+    payload = _terminal_recovery_manifest_payload(rows)
+    payload["rows"].append(deepcopy(payload["rows"][0]))
+    if defect == "mixed":
+        payload["rows"][1]["operation"] = "another_operation"
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest.write_text(json.dumps(payload), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="homogeneous|duplicate|overlapping"):
+        load_terminal_attachment_recovery_manifest(manifest)
+
+
+@pytest.mark.parametrize("defect", ["competing", "west", "fixture"])
+def test_terminal_recovery_refuses_unsafe_current_scope(
+    tmp_path: Path, defect: str
+) -> None:
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+
+    rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
+    source = rows[0]["sources"][0]
+    if defect == "competing":
+        source["relationships"].append(
+            _recovery_relationship(
+                "binding:competitor",
+                "PRODUCED_NAME",
+                "out",
+                "name:competing",
+                ["StandardName"],
+                "competing_live_name",
+                {"id": "competing_live_name", "name_stage": "accepted"},
+            )
+        )
+    elif defect == "west":
+        source["properties"]["facility_id"] = "west"
+    else:
+        source["properties"]["origin"] = "fixture"
+    manifest = tmp_path / "terminal-recovery.json"
+    _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(rows)
+
+    receipt = recover_terminal_attachments(
+        manifest,
+        reason="recover exact terminal source binding",
+        gc=client,
+    )
+
+    assert receipt["mode"] == "refused"
+    assert client.last_transaction is not None
+    assert client.last_transaction.committed is False
+
+
+@pytest.mark.parametrize("failure", ["relationship_race", "partial_cardinality"])
+def test_terminal_recovery_race_and_partial_apply_roll_back(
+    tmp_path: Path, failure: str
+) -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        TerminalAttachmentRecoveryConflict,
+        recover_terminal_attachments,
+    )
+
+    rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest_hash = _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(
+        rows,
+        race=failure == "relationship_race",
+        partial=failure == "partial_cardinality",
+    )
+    before = deepcopy(client.rows)
+
+    with pytest.raises(TerminalAttachmentRecoveryConflict):
+        recover_terminal_attachments(
+            manifest,
+            reason="recover exact terminal source binding",
+            apply=True,
+            expected_manifest_hash=manifest_hash,
+            gc=client,
+        )
+
+    assert client.rows == before
+    assert client.last_transaction is not None
+    assert client.last_transaction.rolled_back is True
+    assert client.last_transaction.committed is False
 
 
 # ---------------------------------------------------------------------------

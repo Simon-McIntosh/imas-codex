@@ -82,12 +82,25 @@ attachment the guard accepts is never touched, so a second pass acts on nothing.
 
 from __future__ import annotations
 
+import copy
+import hashlib
+import hmac
+import json
 import logging
 import uuid
+from collections import Counter
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
+from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.models import NameStage
+from imas_codex.standard_names.source_authority import (
+    lock_participants,
+    normalize_manifest_hash_binding,
+    payload_hash,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -99,6 +112,7 @@ __all__ = [
     "audit_attachments",
     "guard_source_pairings",
     "recover_terminal_attachment",
+    "recover_terminal_attachments",
     "reconcile_attachment_consistency",
 ]
 
@@ -109,6 +123,8 @@ _TERMINAL_RECOVERY_STAGES: frozenset[str] = frozenset(
         NameStage.contested.value,
     }
 )
+
+_TERMINAL_RECOVERY_SOURCE_STATUSES: frozenset[str] = frozenset({"composed", "attached"})
 
 #: Name stages whose attachments are catalog-authoritative. Detaching a source
 #: from one of these is gated behind ``include_accepted``, mirroring how the
@@ -268,7 +284,9 @@ MATCH (src)-[:PRODUCED_NAME]->(sn:StandardName {id: $sn_id})
 MATCH (dd)-[:HAS_STANDARD_NAME]->(sn)
 WHERE src.source_type = 'dd'
   AND src.source_id = $dd_path
-  AND src.status = 'composed'
+  AND src.status IN $source_statuses
+  AND src.claimed_at IS NULL
+  AND src.claim_token IS NULL
   AND src.produced_sn_id = sn.id
   AND sn.name_stage IN $terminal_stages
   AND COUNT { (src)-[:PRODUCED_NAME]->(:StandardName) } = 1
@@ -296,7 +314,9 @@ MATCH (src)-[pn:PRODUCED_NAME]->(sn:StandardName {id: $sn_id})
 MATCH (dd)-[hsn:HAS_STANDARD_NAME]->(sn)
 WHERE src.source_type = 'dd'
   AND src.source_id = $dd_path
-  AND src.status = 'composed'
+  AND src.status IN $source_statuses
+  AND src.claimed_at IS NULL
+  AND src.claim_token IS NULL
   AND src.produced_sn_id = sn.id
   AND sn.name_stage IN $terminal_stages
   AND COUNT { (src)-[:PRODUCED_NAME]->(:StandardName) } = 1
@@ -352,6 +372,156 @@ RETURN src.id AS source_node_id,
        retry.id AS retry_event_id,
        change.id AS change_event_id
 """
+
+
+_TERMINAL_RECOVERY_MANIFEST_SCHEMA = "imas-codex.terminal-attachment-recovery-manifest"
+_TERMINAL_RECOVERY_RECEIPT_SCHEMA = "imas-codex.terminal-attachment-recovery-receipt"
+_TERMINAL_RECOVERY_OPERATION = "recover_terminal_attachment"
+_TERMINAL_RECOVERY_MUTABLE_SOURCE_FIELDS = frozenset(
+    {
+        "attempt_count",
+        "claimed_at",
+        "claim_token",
+        "composed_at",
+        "failed_at",
+        "last_error",
+        "produced_sn_id",
+        "retry_events",
+        "status",
+    }
+)
+
+_TERMINAL_RECOVERY_CLOSURE_QUERY = """
+// TERMINAL_ATTACHMENT_RECOVERY_CLOSURE
+UNWIND $pairs AS item
+CALL (item) {
+  OPTIONAL MATCH (source:StandardNameSource {id: item.source_id})
+  RETURN [candidate IN collect(DISTINCT source) WHERE candidate IS NOT NULL | {
+    element_id: elementId(candidate), labels: labels(candidate),
+    properties: properties(candidate),
+    relationships: [(candidate)-[relationship]-(other) | {
+      element_id: elementId(relationship), type: type(relationship),
+      direction: CASE WHEN startNode(relationship) = candidate THEN 'out' ELSE 'in' END,
+      properties: properties(relationship), other_element_id: elementId(other),
+      other_labels: labels(other), other_id: other.id,
+      other_properties: properties(other)
+    }]
+  }] AS sources
+}
+CALL (item) {
+  OPTIONAL MATCH (node:IMASNode {id: item.dd_path})
+  RETURN [candidate IN collect(DISTINCT node) WHERE candidate IS NOT NULL | {
+    element_id: elementId(candidate), labels: labels(candidate),
+    properties: properties(candidate),
+    relationships: [(candidate)-[relationship]-(other) | {
+      element_id: elementId(relationship), type: type(relationship),
+      direction: CASE WHEN startNode(relationship) = candidate THEN 'out' ELSE 'in' END,
+      properties: properties(relationship), other_element_id: elementId(other),
+      other_labels: labels(other), other_id: other.id,
+      other_properties: properties(other)
+    }]
+  }] AS nodes
+}
+CALL (item) {
+  OPTIONAL MATCH (name:StandardName {id: item.sn_id})
+  RETURN [candidate IN collect(DISTINCT name) WHERE candidate IS NOT NULL | {
+    element_id: elementId(candidate), labels: labels(candidate),
+    properties: properties(candidate),
+    relationships: [(candidate)-[relationship]-(other) | {
+      element_id: elementId(relationship), type: type(relationship),
+      direction: CASE WHEN startNode(relationship) = candidate THEN 'out' ELSE 'in' END,
+      properties: properties(relationship), other_element_id: elementId(other),
+      other_labels: labels(other), other_id: other.id,
+      other_properties: properties(other)
+    }]
+  }] AS names
+}
+RETURN item.source_id AS source_id, item.dd_path AS dd_path, item.sn_id AS sn_id,
+       sources, nodes, names
+ORDER BY source_id
+"""
+
+_TERMINAL_RECOVERY_RELATIONSHIP_LOCK_QUERY = """
+// TERMINAL_ATTACHMENT_RECOVERY_RELATIONSHIP_LOCK
+MATCH ()-[relationship]->()
+WHERE elementId(relationship) IN $element_ids
+SET relationship._terminal_attachment_recovery_lock = true
+REMOVE relationship._terminal_attachment_recovery_lock
+RETURN count(relationship) AS locked
+"""
+
+_TERMINAL_RECOVERY_BATCH_QUERY = """
+// TERMINAL_ATTACHMENT_RECOVERY_APPLY
+UNWIND $items AS item
+MATCH (source:StandardNameSource {id: item.source_id})
+MATCH (node:IMASNode {id: item.dd_path})
+MATCH (name:StandardName {id: item.sn_id})
+MATCH (source)-[binding:PRODUCED_NAME]->(name)
+MATCH (node)-[projection:HAS_STANDARD_NAME]->(name)
+WHERE elementId(source) = item.source_element_id
+  AND elementId(node) = item.node_element_id
+  AND elementId(name) = item.name_element_id
+  AND elementId(binding) = item.binding_element_id
+  AND elementId(projection) = item.projection_element_id
+  AND source.source_type = 'dd'
+  AND source.source_id = item.dd_path
+  AND source.status = item.previous_status
+  AND source.status IN $source_statuses
+  AND source.claimed_at IS NULL
+  AND source.claim_token IS NULL
+  AND source.produced_sn_id = name.id
+  AND name.name_stage = item.terminal_stage
+  AND name.name_stage IN $terminal_stages
+WITH item, source, node, name, binding, projection,
+     source.status AS previous_status,
+     coalesce(source.attempt_count, 0) AS previous_attempt_count,
+     source.last_error AS previous_error
+DELETE binding, projection
+SET name.source_paths = [
+      path IN coalesce(name.source_paths, [])
+      WHERE NOT (path = 'dd:' + item.dd_path OR path = item.dd_path)
+    ]
+CREATE (retry:StandardNameSourceRetry)
+SET retry = item.retry_event,
+    retry.retried_at = datetime(item.retry_event.retried_at),
+    retry.previous_status = previous_status,
+    retry.previous_attempt_count = previous_attempt_count,
+    retry.previous_error = previous_error
+CREATE (source)-[:HAS_RETRY_EVENT]->(retry)
+SET source.retry_events = coalesce(source.retry_events, []) + retry.id,
+    source.status = 'extracted',
+    source.produced_sn_id = null,
+    source.composed_at = null,
+    source.attempt_count = 0,
+    source.claimed_at = null,
+    source.claim_token = null,
+    source.failed_at = null,
+    source.last_error = null
+CREATE (change:StandardNameChange)
+SET change = item.change_event,
+    change.changed_at = datetime(item.change_event.changed_at)
+CREATE (name)-[:HAS_INTERNAL_CHANGE]->(change)
+RETURN count(*) AS applied,
+       collect(source.id) AS source_ids,
+       collect(retry.id) AS retry_event_ids,
+       collect(change.id) AS change_event_ids
+"""
+
+
+class TerminalAttachmentRecoveryConflict(RuntimeError):
+    """The exact manifest-bound terminal attachment closure changed."""
+
+
+@dataclass(frozen=True)
+class TerminalAttachmentRecoveryManifest:
+    """One exact terminal-binding recovery cohort."""
+
+    path: Path
+    manifest_hash: str
+    rows: tuple[dict[str, Any], ...]
+    source_ids: tuple[str, ...]
+    pairs: tuple[dict[str, str], ...]
+    allowlist_hash: str
 
 
 @dataclass(frozen=True)
@@ -834,6 +1004,922 @@ def reconcile_attachment_consistency(
     return result
 
 
+def _require_terminal_recovery_sha(value: Any, field: str) -> str:
+    normalized = str(value or "").strip().casefold()
+    if len(normalized) != 64 or any(
+        character not in "0123456789abcdef" for character in normalized
+    ):
+        raise ValueError(f"{field} must be exactly one SHA-256 hex digest")
+    return normalized
+
+
+def load_terminal_attachment_recovery_manifest(
+    path: str | Path,
+) -> TerminalAttachmentRecoveryManifest:
+    """Load one exact homogeneous terminal-binding recovery manifest."""
+    manifest_path = Path(path).expanduser().resolve()
+    raw = manifest_path.read_bytes()
+    try:
+        payload = json.loads(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            f"terminal attachment recovery manifest is not valid JSON: {manifest_path}"
+        ) from exc
+    expected_top_level = {"schema", "schema_version", "operation", "rows"}
+    if not isinstance(payload, dict) or set(payload) != expected_top_level:
+        raise ValueError(
+            "terminal attachment recovery manifest must contain only schema, "
+            "schema_version, operation, and rows"
+        )
+    if (
+        payload.get("schema") != _TERMINAL_RECOVERY_MANIFEST_SCHEMA
+        or payload.get("schema_version") != 1
+        or payload.get("operation") != _TERMINAL_RECOVERY_OPERATION
+    ):
+        raise ValueError("terminal attachment recovery manifest schema is unsupported")
+    rows = payload.get("rows")
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("terminal attachment recovery manifest requires rows")
+    expected_fields = {
+        "operation",
+        "source_id",
+        "dd_path",
+        "sn_id",
+        "expected_source_status",
+        "expected_name_stage",
+        "expected_closure_hash",
+        "expected_preserved_state_hash",
+        "expected_participant_ids_hash",
+        "expected_relationship_ids_hash",
+        "west_intersection",
+        "test_intersection",
+    }
+    normalized_rows: list[dict[str, Any]] = []
+    seen_sources: set[str] = set()
+    seen_paths: set[str] = set()
+    seen_pairs: set[tuple[str, str]] = set()
+    for row in rows:
+        if not isinstance(row, dict) or set(row) != expected_fields:
+            missing = sorted(
+                expected_fields - set(row) if isinstance(row, dict) else []
+            )
+            extra = sorted(set(row) - expected_fields if isinstance(row, dict) else [])
+            raise ValueError(
+                "terminal recovery row fields are not exact; "
+                f"missing={missing}, extra={extra}"
+            )
+        if row["operation"] != _TERMINAL_RECOVERY_OPERATION:
+            raise ValueError("terminal recovery manifest must be homogeneous")
+        source_id = str(row["source_id"])
+        dd_path = str(row["dd_path"])
+        sn_id = str(row["sn_id"])
+        if source_id != f"dd:{dd_path}" or not dd_path or not sn_id:
+            raise ValueError("each row requires one exact dd:{path} source binding")
+        pair = (dd_path, sn_id)
+        if source_id in seen_sources or dd_path in seen_paths or pair in seen_pairs:
+            raise ValueError(
+                "terminal recovery manifest contains duplicate or overlapping rows"
+            )
+        seen_sources.add(source_id)
+        seen_paths.add(dd_path)
+        seen_pairs.add(pair)
+        if row["expected_source_status"] not in _TERMINAL_RECOVERY_SOURCE_STATUSES:
+            raise ValueError("terminal recovery source status is not eligible")
+        if row["expected_name_stage"] not in _TERMINAL_RECOVERY_STAGES:
+            raise ValueError("terminal recovery target stage is not terminal")
+        for field_name in (
+            "expected_closure_hash",
+            "expected_preserved_state_hash",
+            "expected_participant_ids_hash",
+            "expected_relationship_ids_hash",
+        ):
+            _require_terminal_recovery_sha(row[field_name], field_name)
+        if row["west_intersection"] != 0 or row["test_intersection"] != 0:
+            raise ValueError("WEST and test intersections must both be exactly zero")
+        normalized_rows.append(copy.deepcopy(row))
+    normalized_rows.sort(key=lambda item: item["source_id"])
+    source_ids = tuple(str(row["source_id"]) for row in normalized_rows)
+    pairs = tuple(
+        {
+            "source_id": str(row["source_id"]),
+            "dd_path": str(row["dd_path"]),
+            "sn_id": str(row["sn_id"]),
+        }
+        for row in normalized_rows
+    )
+    return TerminalAttachmentRecoveryManifest(
+        path=manifest_path,
+        manifest_hash=hashlib.sha256(raw).hexdigest(),
+        rows=tuple(normalized_rows),
+        source_ids=source_ids,
+        pairs=pairs,
+        allowlist_hash=payload_hash(source_ids),
+    )
+
+
+def _terminal_recovery_participant_ids(row: dict[str, Any]) -> tuple[str, ...]:
+    ids: set[str] = set()
+    for key in ("sources", "nodes", "names"):
+        for participant in row.get(key) or []:
+            if participant.get("element_id"):
+                ids.add(str(participant["element_id"]))
+            ids.update(
+                str(relationship["other_element_id"])
+                for relationship in participant.get("relationships") or []
+                if relationship.get("other_element_id")
+            )
+    return tuple(sorted(ids))
+
+
+def _terminal_recovery_relationship_ids(row: dict[str, Any]) -> tuple[str, ...]:
+    return tuple(
+        sorted(
+            {
+                str(relationship["element_id"])
+                for key in ("sources", "nodes", "names")
+                for participant in row.get(key) or []
+                for relationship in participant.get("relationships") or []
+                if relationship.get("element_id")
+            }
+        )
+    )
+
+
+def _terminal_recovery_protected_reasons(row: dict[str, Any]) -> list[str]:
+    west = False
+    fixture = False
+
+    def visit(value: Any, key: str = "") -> None:
+        nonlocal west, fixture
+        if isinstance(value, dict):
+            for child_key, child in value.items():
+                visit(child, str(child_key))
+            return
+        if isinstance(value, list | tuple):
+            for child in value:
+                visit(child, key)
+            return
+        if not isinstance(value, str):
+            return
+        normalized = value.casefold()
+        normalized_key = key.casefold()
+        if normalized_key in {"facility", "facility_id"} and normalized == "west":
+            west = True
+        if normalized_key in {"id", "other_id", "source_id"}:
+            west = west or normalized.startswith(("west:", "signals:west:"))
+            fixture = fixture or normalized.startswith(
+                ("fixture:", "test:", "signals:test:")
+            )
+        if normalized_key in {"origin", "source_type"} and normalized in {
+            "fixture",
+            "test",
+        }:
+            fixture = True
+
+    visit(row)
+    reasons: list[str] = []
+    if west:
+        reasons.append("current graph closure intersects WEST")
+    if fixture:
+        reasons.append("current graph closure intersects test fixtures")
+    return reasons
+
+
+def _terminal_recovery_preserved_payload(
+    row: dict[str, Any],
+    *,
+    retry_event_id: str,
+    change_event_id: str,
+) -> dict[str, Any]:
+    source_id = str(row["source_id"])
+    dd_path = str(row["dd_path"])
+    sn_id = str(row["sn_id"])
+
+    def normalized_relationships(
+        participant: dict[str, Any], *, owner: str
+    ) -> list[dict[str, Any]]:
+        normalized: list[dict[str, Any]] = []
+        for relationship in copy.deepcopy(participant.get("relationships") or []):
+            relationship_type = relationship.get("type")
+            other_id = relationship.get("other_id")
+            direction = relationship.get("direction")
+            if owner == "source" and (
+                relationship_type == "PRODUCED_NAME"
+                and direction == "out"
+                and other_id == sn_id
+                or relationship_type == "HAS_RETRY_EVENT"
+                and direction == "out"
+                and other_id == retry_event_id
+            ):
+                continue
+            if owner == "node" and (
+                relationship_type == "HAS_STANDARD_NAME"
+                and direction == "out"
+                and other_id == sn_id
+            ):
+                continue
+            if owner == "name" and (
+                relationship_type == "PRODUCED_NAME"
+                and direction == "in"
+                and other_id == source_id
+                or relationship_type == "HAS_STANDARD_NAME"
+                and direction == "in"
+                and other_id == dd_path
+                or relationship_type == "HAS_INTERNAL_CHANGE"
+                and direction == "out"
+                and other_id == change_event_id
+            ):
+                continue
+            if other_id == source_id:
+                relationship["other_properties"] = {
+                    key: value
+                    for key, value in (
+                        relationship.get("other_properties") or {}
+                    ).items()
+                    if key not in _TERMINAL_RECOVERY_MUTABLE_SOURCE_FIELDS
+                }
+            normalized.append(relationship)
+        return normalized
+
+    source = copy.deepcopy((row.get("sources") or [{}])[0])
+    node = copy.deepcopy((row.get("nodes") or [{}])[0])
+    name = copy.deepcopy((row.get("names") or [{}])[0])
+    source_properties = {
+        key: value
+        for key, value in (source.get("properties") or {}).items()
+        if key not in _TERMINAL_RECOVERY_MUTABLE_SOURCE_FIELDS
+    }
+    name_properties = copy.deepcopy(name.get("properties") or {})
+    name_properties["source_paths"] = [
+        path
+        for path in name_properties.get("source_paths") or []
+        if path not in {dd_path, source_id}
+    ]
+    return {
+        "source": {
+            "element_id": source.get("element_id"),
+            "labels": source.get("labels") or [],
+            "properties": source_properties,
+            "relationships": normalized_relationships(source, owner="source"),
+        },
+        "node": {
+            "element_id": node.get("element_id"),
+            "labels": node.get("labels") or [],
+            "properties": node.get("properties") or {},
+            "relationships": normalized_relationships(node, owner="node"),
+        },
+        "name": {
+            "element_id": name.get("element_id"),
+            "labels": name.get("labels") or [],
+            "properties": name_properties,
+            "relationships": normalized_relationships(name, owner="name"),
+        },
+    }
+
+
+def _terminal_recovery_event_ids(
+    manifest: TerminalAttachmentRecoveryManifest, manifest_row: dict[str, Any]
+) -> tuple[str, str]:
+    identity_hash = payload_hash(
+        {
+            "manifest_hash": manifest.manifest_hash,
+            "source_id": manifest_row["source_id"],
+            "dd_path": manifest_row["dd_path"],
+            "sn_id": manifest_row["sn_id"],
+            "before_closure_hash": manifest_row["expected_closure_hash"],
+        }
+    )
+    return (
+        f"source-retry:terminal-attachment:{identity_hash}",
+        f"sn-change:terminal-attachment:{identity_hash}",
+    )
+
+
+def _terminal_recovery_snapshot_hashes(
+    row: dict[str, Any], *, retry_event_id: str, change_event_id: str
+) -> dict[str, str]:
+    participant_ids = _terminal_recovery_participant_ids(row)
+    relationship_ids = _terminal_recovery_relationship_ids(row)
+    return {
+        "closure_hash": payload_hash(row),
+        "preserved_state_hash": payload_hash(
+            _terminal_recovery_preserved_payload(
+                row,
+                retry_event_id=retry_event_id,
+                change_event_id=change_event_id,
+            )
+        ),
+        "participant_ids_hash": payload_hash(participant_ids),
+        "relationship_ids_hash": payload_hash(relationship_ids),
+    }
+
+
+def _terminal_recovery_relationships(
+    participant: dict[str, Any],
+    relationship_type: str,
+    *,
+    direction: str,
+    other_id: str,
+) -> list[dict[str, Any]]:
+    return [
+        relationship
+        for relationship in participant.get("relationships") or []
+        if relationship.get("type") == relationship_type
+        and relationship.get("direction") == direction
+        and relationship.get("other_id") == other_id
+    ]
+
+
+def _terminal_recovery_is_already_current(
+    row: dict[str, Any],
+    manifest_row: dict[str, Any],
+    *,
+    retry_event_id: str,
+    change_event_id: str,
+) -> bool:
+    if not (
+        len(row.get("sources") or []) == 1
+        and len(row.get("nodes") or []) == 1
+        and len(row.get("names") or []) == 1
+    ):
+        return False
+    source = row["sources"][0]
+    node = row["nodes"][0]
+    name = row["names"][0]
+    source_properties = source.get("properties") or {}
+    name_properties = name.get("properties") or {}
+    retry_links = _terminal_recovery_relationships(
+        source,
+        "HAS_RETRY_EVENT",
+        direction="out",
+        other_id=retry_event_id,
+    )
+    change_links = _terminal_recovery_relationships(
+        name,
+        "HAS_INTERNAL_CHANGE",
+        direction="out",
+        other_id=change_event_id,
+    )
+    retry = (
+        (retry_links[0].get("other_properties") or {}) if len(retry_links) == 1 else {}
+    )
+    change = (
+        (change_links[0].get("other_properties") or {})
+        if len(change_links) == 1
+        else {}
+    )
+    return all(
+        (
+            source_properties.get("status") == "extracted",
+            source_properties.get("produced_sn_id") is None,
+            source_properties.get("attempt_count") in {None, 0},
+            source_properties.get("claimed_at") is None,
+            source_properties.get("claim_token") is None,
+            not _terminal_recovery_relationships(
+                source,
+                "PRODUCED_NAME",
+                direction="out",
+                other_id=str(manifest_row["sn_id"]),
+            ),
+            not _terminal_recovery_relationships(
+                node,
+                "HAS_STANDARD_NAME",
+                direction="out",
+                other_id=str(manifest_row["sn_id"]),
+            ),
+            str(manifest_row["dd_path"])
+            not in (name_properties.get("source_paths") or []),
+            str(manifest_row["source_id"])
+            not in (name_properties.get("source_paths") or []),
+            retry.get("before_closure_hash") == manifest_row["expected_closure_hash"],
+            retry.get("preserved_state_hash")
+            == manifest_row["expected_preserved_state_hash"],
+            retry.get("previous_status") == manifest_row["expected_source_status"],
+            retry.get("terminal_sn_id") == manifest_row["sn_id"],
+            change.get("before_closure_hash") == manifest_row["expected_closure_hash"],
+            change.get("preserved_state_hash")
+            == manifest_row["expected_preserved_state_hash"],
+            change.get("operation") == "recover_terminal_source_binding",
+            change.get("source_id") == manifest_row["source_id"],
+        )
+    )
+
+
+def _terminal_recovery_plan_row(
+    row: dict[str, Any],
+    manifest: TerminalAttachmentRecoveryManifest,
+    manifest_row: dict[str, Any],
+    *,
+    reason: str,
+    run_id: str | None,
+    changed_at: str | None,
+) -> tuple[dict[str, Any] | None, list[str]]:
+    retry_event_id, change_event_id = _terminal_recovery_event_ids(
+        manifest, manifest_row
+    )
+    reasons = _terminal_recovery_protected_reasons(row)
+    if not (
+        len(row.get("sources") or []) == 1
+        and len(row.get("nodes") or []) == 1
+        and len(row.get("names") or []) == 1
+    ):
+        reasons.append("source, DD path, or terminal target is not unique")
+        return None, reasons
+    source = row["sources"][0]
+    node = row["nodes"][0]
+    name = row["names"][0]
+    source_properties = source.get("properties") or {}
+    node_properties = node.get("properties") or {}
+    name_properties = name.get("properties") or {}
+    current_hashes = _terminal_recovery_snapshot_hashes(
+        row,
+        retry_event_id=retry_event_id,
+        change_event_id=change_event_id,
+    )
+    if _terminal_recovery_is_already_current(
+        row,
+        manifest_row,
+        retry_event_id=retry_event_id,
+        change_event_id=change_event_id,
+    ):
+        if (
+            current_hashes["preserved_state_hash"]
+            != manifest_row["expected_preserved_state_hash"]
+        ):
+            reasons.append("preserved terminal graph state drifted after recovery")
+        return (
+            {
+                "source_id": manifest_row["source_id"],
+                "dd_path": manifest_row["dd_path"],
+                "sn_id": manifest_row["sn_id"],
+                "status": "already_current",
+                "precondition_hash": current_hashes["closure_hash"],
+                "preserved_state_hash": current_hashes["preserved_state_hash"],
+                "participant_ids": list(_terminal_recovery_participant_ids(row)),
+                "relationship_ids": list(_terminal_recovery_relationship_ids(row)),
+                "retry_event_id": retry_event_id,
+                "change_event_id": change_event_id,
+            },
+            reasons,
+        )
+
+    from_dd = _terminal_recovery_relationships(
+        source,
+        "FROM_DD_PATH",
+        direction="out",
+        other_id=str(manifest_row["dd_path"]),
+    )
+    bindings = _terminal_recovery_relationships(
+        source,
+        "PRODUCED_NAME",
+        direction="out",
+        other_id=str(manifest_row["sn_id"]),
+    )
+    projections = _terminal_recovery_relationships(
+        node,
+        "HAS_STANDARD_NAME",
+        direction="out",
+        other_id=str(manifest_row["sn_id"]),
+    )
+    all_outputs = [
+        relationship
+        for relationship in source.get("relationships") or []
+        if relationship.get("type") == "PRODUCED_NAME"
+        and relationship.get("direction") == "out"
+    ]
+    target_sources = [
+        relationship
+        for relationship in name.get("relationships") or []
+        if relationship.get("type") == "PRODUCED_NAME"
+        and relationship.get("direction") == "in"
+    ]
+    target_projections = [
+        relationship
+        for relationship in name.get("relationships") or []
+        if relationship.get("type") == "HAS_STANDARD_NAME"
+        and relationship.get("direction") == "in"
+    ]
+    source_paths = name_properties.get("source_paths") or []
+    mirror_exact = (
+        manifest_row["dd_path"] in source_paths
+        or manifest_row["source_id"] in source_paths
+    )
+    isolated_empty_mirror = (
+        not source_paths and len(target_sources) == 1 and len(target_projections) == 1
+    )
+    expected_values = {
+        "source stable identity": (
+            source_properties.get("id"),
+            manifest_row["source_id"],
+        ),
+        "source type": (source_properties.get("source_type"), "dd"),
+        "source DD scalar": (
+            source_properties.get("source_id"),
+            manifest_row["dd_path"],
+        ),
+        "source status": (
+            source_properties.get("status"),
+            manifest_row["expected_source_status"],
+        ),
+        "source target scalar": (
+            source_properties.get("produced_sn_id"),
+            manifest_row["sn_id"],
+        ),
+        "DD identity": (node_properties.get("id"), manifest_row["dd_path"]),
+        "target identity": (name_properties.get("id"), manifest_row["sn_id"]),
+        "terminal target stage": (
+            name_properties.get("name_stage"),
+            manifest_row["expected_name_stage"],
+        ),
+    }
+    reasons.extend(
+        f"{label} changed"
+        for label, (actual, expected) in expected_values.items()
+        if actual != expected
+    )
+    claim_fields = (
+        "claimed_at",
+        "claim_token",
+        "drain_scope_id",
+        "drain_scope_claimed_at",
+        "drain_claim_scope_id",
+    )
+    if any(
+        source_properties.get(field_name) is not None for field_name in claim_fields
+    ):
+        reasons.append("source has an active claim")
+    if any(name_properties.get(field_name) is not None for field_name in claim_fields):
+        reasons.append("terminal target has an active claim")
+    if len(from_dd) != 1:
+        reasons.append("source does not have one exact FROM_DD_PATH edge")
+    if len(bindings) != 1 or len(all_outputs) != 1:
+        reasons.append("source does not have one exact terminal binding")
+    if len(projections) != 1:
+        reasons.append("DD path does not have one exact terminal projection")
+    if not (mirror_exact or isolated_empty_mirror):
+        reasons.append("target source-path mirror is not exact or isolated-empty")
+    for field_name, current in current_hashes.items():
+        expected_field = f"expected_{field_name}"
+        if manifest_row[expected_field] != current:
+            reasons.append(f"manifest {expected_field} drifted")
+    event_reason = (
+        f'{reason} [terminal target "{manifest_row["sn_id"]}" at name_stage '
+        f'"{manifest_row["expected_name_stage"]}"]'
+    )
+    retry_event = {
+        "id": retry_event_id,
+        "source_id": manifest_row["source_id"],
+        "terminal_sn_id": manifest_row["sn_id"],
+        "terminal_stage": manifest_row["expected_name_stage"],
+        "before_closure_hash": manifest_row["expected_closure_hash"],
+        "preserved_state_hash": manifest_row["expected_preserved_state_hash"],
+        "manifest_hash": manifest.manifest_hash,
+        "run_id": run_id,
+        "reason": event_reason,
+        "retried_at": changed_at,
+    }
+    change_event = {
+        "id": change_event_id,
+        "from_name": manifest_row["sn_id"],
+        "source_id": manifest_row["source_id"],
+        "dd_path": manifest_row["dd_path"],
+        "operation": "recover_terminal_source_binding",
+        "origin": "terminal_binding_recovery",
+        "internal": True,
+        "before_closure_hash": manifest_row["expected_closure_hash"],
+        "preserved_state_hash": manifest_row["expected_preserved_state_hash"],
+        "manifest_hash": manifest.manifest_hash,
+        "run_id": run_id,
+        "reason": event_reason,
+        "changed_at": changed_at,
+    }
+    plan = {
+        "source_id": manifest_row["source_id"],
+        "dd_path": manifest_row["dd_path"],
+        "sn_id": manifest_row["sn_id"],
+        "status": "planned",
+        "precondition_hash": current_hashes["closure_hash"],
+        "preserved_state_hash": current_hashes["preserved_state_hash"],
+        "participant_ids": list(_terminal_recovery_participant_ids(row)),
+        "relationship_ids": list(_terminal_recovery_relationship_ids(row)),
+        "source_element_id": source.get("element_id"),
+        "node_element_id": node.get("element_id"),
+        "name_element_id": name.get("element_id"),
+        "binding_element_id": bindings[0].get("element_id")
+        if len(bindings) == 1
+        else None,
+        "projection_element_id": (
+            projections[0].get("element_id") if len(projections) == 1 else None
+        ),
+        "previous_status": manifest_row["expected_source_status"],
+        "terminal_stage": manifest_row["expected_name_stage"],
+        "retry_event": retry_event,
+        "change_event": change_event,
+        "retry_event_id": retry_event_id,
+        "change_event_id": change_event_id,
+    }
+    return plan, sorted(set(reasons))
+
+
+def _read_terminal_recovery_plan(
+    transaction: Any,
+    manifest: TerminalAttachmentRecoveryManifest,
+    *,
+    reason: str,
+    run_id: str | None,
+    changed_at: str | None,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    rows = [
+        dict(row)
+        for row in transaction.run(
+            _TERMINAL_RECOVERY_CLOSURE_QUERY,
+            pairs=list(manifest.pairs),
+        )
+    ]
+    if [row.get("source_id") for row in rows] != list(manifest.source_ids):
+        raise TerminalAttachmentRecoveryConflict(
+            "terminal recovery closure did not return the complete exact allowlist"
+        )
+    manifest_by_source = {row["source_id"]: row for row in manifest.rows}
+    plans: list[dict[str, Any]] = []
+    refusals: list[dict[str, Any]] = []
+    for row in rows:
+        source_id = str(row["source_id"])
+        plan, reasons = _terminal_recovery_plan_row(
+            row,
+            manifest,
+            manifest_by_source[source_id],
+            reason=reason,
+            run_id=run_id,
+            changed_at=changed_at,
+        )
+        if reasons or plan is None:
+            refusals.append(
+                {
+                    "source_id": source_id,
+                    "reasons": sorted(set(reasons or ["terminal recovery refused"])),
+                }
+            )
+        else:
+            plans.append(plan)
+    return plans, refusals
+
+
+def _terminal_recovery_receipt(
+    manifest: TerminalAttachmentRecoveryManifest,
+    plans: list[dict[str, Any]],
+    refusals: list[dict[str, Any]],
+    *,
+    apply: bool,
+    run_id: str | None,
+) -> dict[str, Any]:
+    counts = Counter(plan["status"] for plan in plans)
+    if refusals:
+        mode = "refused"
+    elif plans and counts["already_current"] == len(plans):
+        mode = "already_current"
+    else:
+        mode = "applied" if apply else "dry_run"
+    receipt = {
+        "schema": _TERMINAL_RECOVERY_RECEIPT_SCHEMA,
+        "schema_version": 1,
+        "mode": mode,
+        "operation": _TERMINAL_RECOVERY_OPERATION,
+        "manifest_path": str(manifest.path),
+        "manifest_hash": manifest.manifest_hash,
+        "allowlist_hash": manifest.allowlist_hash,
+        "run_id": run_id if apply else None,
+        "counts": {
+            "allowlisted": len(manifest.rows),
+            "planned": counts["planned"],
+            "already_current": counts["already_current"],
+            "applied": counts["planned"] if mode == "applied" else 0,
+            "refused": len(refusals),
+        },
+        "rows": [
+            {
+                key: plan[key]
+                for key in (
+                    "source_id",
+                    "dd_path",
+                    "sn_id",
+                    "status",
+                    "precondition_hash",
+                    "preserved_state_hash",
+                    "retry_event_id",
+                    "change_event_id",
+                )
+            }
+            for plan in sorted(plans, key=lambda item: item["source_id"])
+        ],
+        "refusals": sorted(refusals, key=lambda item: item["source_id"]),
+    }
+    receipt["receipt_hash"] = payload_hash(receipt)
+    return receipt
+
+
+def _lock_terminal_recovery_relationships(
+    transaction: Any, relationship_ids: set[str]
+) -> tuple[str, ...]:
+    exact_ids = tuple(sorted(relationship_ids))
+    rows = list(
+        transaction.run(
+            _TERMINAL_RECOVERY_RELATIONSHIP_LOCK_QUERY,
+            element_ids=list(exact_ids),
+        )
+    )
+    locked = int(dict(rows[0]).get("locked") or 0) if rows else 0
+    if locked != len(exact_ids):
+        raise TerminalAttachmentRecoveryConflict(
+            "terminal recovery relationship set changed before locking"
+        )
+    return exact_ids
+
+
+@retry_on_deadlock()
+def recover_terminal_attachments(
+    manifest_path: str | Path,
+    *,
+    reason: str,
+    apply: bool = False,
+    expected_manifest_hash: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Plan or atomically recover one exact terminal-binding cohort."""
+    reason = (reason or "").strip()
+    if not reason:
+        raise ValueError("a terminal attachment recovery reason is required")
+    normalized_hash = normalize_manifest_hash_binding(
+        expected_manifest_hash, apply=apply
+    )
+    manifest = load_terminal_attachment_recovery_manifest(manifest_path)
+    if normalized_hash is not None and not hmac.compare_digest(
+        manifest.manifest_hash, normalized_hash
+    ):
+        raise ValueError("manifest SHA-256 does not match the exact parsed bytes")
+    base_run_id = run_id or (
+        f"terminal-attachment-recovery:{uuid.uuid4()}" if apply else None
+    )
+    invocation_run_id = (
+        f"{base_run_id}:manifest:{manifest.manifest_hash}"
+        if base_run_id is not None
+        else None
+    )
+    changed_at = datetime.now(UTC).isoformat() if apply else None
+    own = gc is None
+    if own:
+        from imas_codex.graph.client import GraphClient
+
+        client: Any = GraphClient()
+    else:
+        client = gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                plans, refusals = _read_terminal_recovery_plan(
+                    transaction,
+                    manifest,
+                    reason=reason,
+                    run_id=invocation_run_id,
+                    changed_at=changed_at,
+                )
+                if refusals:
+                    transaction.rollback()
+                    return _terminal_recovery_receipt(
+                        manifest,
+                        plans,
+                        refusals,
+                        apply=apply,
+                        run_id=invocation_run_id,
+                    )
+                pending = [plan for plan in plans if plan["status"] == "planned"]
+                current = [
+                    plan for plan in plans if plan["status"] == "already_current"
+                ]
+                if pending and current:
+                    transaction.rollback()
+                    return _terminal_recovery_receipt(
+                        manifest,
+                        plans,
+                        [
+                            {
+                                "source_id": "<allowlist>",
+                                "reasons": [
+                                    "mixed pending and recovered rows cannot prove one atomic cohort"
+                                ],
+                            }
+                        ],
+                        apply=apply,
+                        run_id=invocation_run_id,
+                    )
+                if not apply or not pending:
+                    transaction.rollback()
+                    return _terminal_recovery_receipt(
+                        manifest,
+                        plans,
+                        [],
+                        apply=apply,
+                        run_id=invocation_run_id,
+                    )
+                lock_participants(
+                    transaction,
+                    {
+                        participant
+                        for plan in pending
+                        for participant in plan["participant_ids"]
+                    },
+                    conflict_type=TerminalAttachmentRecoveryConflict,
+                    message="terminal recovery participant set changed before locking",
+                )
+                _lock_terminal_recovery_relationships(
+                    transaction,
+                    {
+                        relationship
+                        for plan in pending
+                        for relationship in plan["relationship_ids"]
+                    },
+                )
+                locked_plans, locked_refusals = _read_terminal_recovery_plan(
+                    transaction,
+                    manifest,
+                    reason=reason,
+                    run_id=invocation_run_id,
+                    changed_at=changed_at,
+                )
+                if locked_refusals or [
+                    plan["precondition_hash"] for plan in locked_plans
+                ] != [plan["precondition_hash"] for plan in plans]:
+                    raise TerminalAttachmentRecoveryConflict(
+                        "terminal source, target, authority, or relationship state changed after locks"
+                    )
+                mutation_rows = list(
+                    transaction.run(
+                        _TERMINAL_RECOVERY_BATCH_QUERY,
+                        items=pending,
+                        source_statuses=sorted(_TERMINAL_RECOVERY_SOURCE_STATUSES),
+                        terminal_stages=sorted(_TERMINAL_RECOVERY_STAGES),
+                    )
+                )
+                if len(mutation_rows) != 1:
+                    raise TerminalAttachmentRecoveryConflict(
+                        "terminal recovery mutation cardinality changed"
+                    )
+                mutation = dict(mutation_rows[0])
+                expected_sources = {plan["source_id"] for plan in pending}
+                if (
+                    int(mutation.get("applied") or 0) != len(pending)
+                    or set(mutation.get("source_ids") or []) != expected_sources
+                    or set(mutation.get("retry_event_ids") or [])
+                    != {plan["retry_event_id"] for plan in pending}
+                    or set(mutation.get("change_event_ids") or [])
+                    != {plan["change_event_id"] for plan in pending}
+                ):
+                    raise TerminalAttachmentRecoveryConflict(
+                        "terminal recovery mutation cardinality changed"
+                    )
+                post_plans, post_refusals = _read_terminal_recovery_plan(
+                    transaction,
+                    manifest,
+                    reason=reason,
+                    run_id=invocation_run_id,
+                    changed_at=changed_at,
+                )
+                if post_refusals or any(
+                    plan["status"] != "already_current" for plan in post_plans
+                ):
+                    raise TerminalAttachmentRecoveryConflict(
+                        "terminal recovery postflight proof did not hold"
+                    )
+                before = {plan["source_id"]: plan for plan in pending}
+                if any(
+                    plan["preserved_state_hash"]
+                    != before[plan["source_id"]]["preserved_state_hash"]
+                    for plan in post_plans
+                ):
+                    raise TerminalAttachmentRecoveryConflict(
+                        "terminal recovery changed protected graph state"
+                    )
+                transaction.commit()
+                return _terminal_recovery_receipt(
+                    manifest,
+                    pending,
+                    [],
+                    apply=True,
+                    run_id=invocation_run_id,
+                )
+            except BaseException:
+                try:
+                    transaction.rollback()
+                except Exception:
+                    pass
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 def recover_terminal_attachment(
     dd_path: str,
     sn_id: str,
@@ -846,9 +1932,9 @@ def recover_terminal_attachment(
 
     This is deliberately narrower than ordinary semantic detachment. The
     source must be the exact DD provenance node for *dd_path*, be finalized as
-    ``composed`` with both realization edges and scalar mirror pointing only to
-    *sn_id*, and the target must still be terminal. Any mismatch refuses the
-    operation without mutation.
+    ``composed`` or ``attached`` and unclaimed, with both realization edges and
+    scalar mirror pointing only to *sn_id*, and the target must still be
+    terminal. Any mismatch refuses the operation without mutation.
 
     The live write is one transaction: it removes both realization edges and
     the target's source-path projection, returns the source to a fresh
@@ -884,6 +1970,7 @@ def recover_terminal_attachment(
                     dd_path=dd_path,
                     sn_id=sn_id,
                     terminal_stages=terminal_stages,
+                    source_statuses=sorted(_TERMINAL_RECOVERY_SOURCE_STATUSES),
                 )
             )
             if not rows:
@@ -910,6 +1997,7 @@ def recover_terminal_attachment(
                         dd_path=dd_path,
                         sn_id=sn_id,
                         terminal_stages=terminal_stages,
+                        source_statuses=sorted(_TERMINAL_RECOVERY_SOURCE_STATUSES),
                         reason=reason,
                         retry_event_id=f"source-retry:{uuid.uuid4()}",
                         change_event_id=f"sn-change:{uuid.uuid4()}",
