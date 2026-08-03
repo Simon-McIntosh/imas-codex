@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-02T14:50:19",
+  "updated": "2026-08-03T09:06:16",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -206,6 +206,22 @@
             "slug": "sn-dd-gaps",
             "why_now": "The S6 evidence-only DDGap foundation is complete. The remaining storage-authority decision and automated writer/triage/reconcile/release-reporting policy are explicitly deferred rather than hidden inside sprint closure.",
             "done_when": "f-ddg-002 closes: storage authority is locked; agent-side facts are evidence-grounded and idempotent; triage/reconcile semantics and release reporting are implemented with no silent suppression of source eligibility; tests and status surfaces are green."
+          },
+          {
+            "slug": "mast-semantic-source-repair",
+            "why_now": "The MAST DD and facility-source audit found six absent semantic identities, incorrect or under-specific DD attachments, stale DD provenance, and no MAST facility discovery roots. This scoped repair should use the fail-closed source and writer invariants completed by the graph-wide integrity plan rather than live in the ISN grammar repository.",
+            "done_when": "The exact MAST manifest is adjudicated through ISN grammar, targeted graph detach/attach/create operations and facility-source discovery pass dry-run and stable-id parity gates, and\u2014only after explicit publication authority\u2014one scoped graph transaction and ISNC release candidate re-query cleanly through imas-cx.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {
+                "reasoning": "deep",
+                "context": "extended",
+                "tool_autonomy": "guided",
+                "verification": "strict",
+                "risk": "elevated"
+              }
+            }
           }
         ],
         "starts": "2026-08-14",
@@ -267,6 +283,6 @@
       }
     ],
     "blockers": [],
-    "_version": 19
+    "_version": 20
   }
 }
