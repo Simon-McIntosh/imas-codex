@@ -35,7 +35,9 @@ class _EphemeralNeo4j:
     def driver(self):
         return GraphDatabase.driver(self.uri, auth=None)
 
-    def client(self, *, bad_cardinality: bool = False):
+    def client(
+        self, *, bad_cardinality: bool = False, relationship_drift: bool = False
+    ):
         client = GraphClient(
             uri=self.uri,
             username="neo4j",
@@ -44,6 +46,8 @@ class _EphemeralNeo4j:
         )
         if bad_cardinality:
             return _BadCardinalityClient(client)
+        if relationship_drift:
+            return _RelationshipDriftClient(client, self.uri)
         return client
 
 
@@ -101,6 +105,56 @@ class _BadCardinalityClient:
     def session(self):
         with self._client.session() as session:
             yield _BadCardinalitySession(session)
+
+
+class _RelationshipDriftTransaction:
+    def __init__(self, transaction, uri: str) -> None:
+        self._transaction = transaction
+        self._uri = uri
+        self._drifted = False
+
+    def run(self, cypher: str, **params: Any):
+        if "SOURCE_SNAPSHOT_MIGRATION_LOCK" in cypher and not self._drifted:
+            with GraphDatabase.driver(self._uri, auth=None) as driver:
+                driver.execute_query(
+                    """
+                    MATCH (:StandardNameSource)-[backing:FROM_DD_PATH]->(:IMASNode)
+                    SET backing.authority = 'concurrent-drift'
+                    """
+                )
+            self._drifted = True
+        return self._transaction.run(cypher, **params)
+
+    def commit(self) -> None:
+        self._transaction.commit()
+
+    def rollback(self) -> None:
+        self._transaction.rollback()
+
+
+class _RelationshipDriftSession:
+    def __init__(self, session, uri: str) -> None:
+        self._session = session
+        self._uri = uri
+
+    def begin_transaction(self) -> _RelationshipDriftTransaction:
+        return _RelationshipDriftTransaction(
+            self._session.begin_transaction(), self._uri
+        )
+
+
+class _RelationshipDriftClient:
+    def __init__(self, client: GraphClient, uri: str) -> None:
+        self._client = client
+        self._uri = uri
+
+    def close(self) -> None:
+        self._client.close()
+
+    @contextmanager
+    def session(self):
+        with self._client.session() as session:
+            yield _RelationshipDriftSession(session, self._uri)
 
 
 def _clear(graph: _EphemeralNeo4j) -> None:
@@ -208,6 +262,92 @@ def _seed(graph: _EphemeralNeo4j, operation: str) -> None:
             ).consume()
 
 
+def _seed_additional_repair_source(graph: _EphemeralNeo4j, path: str) -> None:
+    source_properties = {
+        "id": f"dd:{path}",
+        "source_type": "dd",
+        "source_id": None,
+        "status": "failed",
+        "batch_key": "preserved",
+        "dd_version": "4.1.0",
+        "description": "Older DD documentation",
+        "dd_snapshot_pinned": True,
+    }
+    with graph.driver() as driver, driver.session() as session:
+        session.run(
+            """
+            MATCH (unit:Unit {id: 'V'})
+            CREATE (node:IMASNode {
+              id: $path,
+              documentation: 'Authoritative DD documentation',
+              description: 'Enhanced DD description',
+              physics_domain: 'diagnostics', data_type: 'FLT_0D', unit: 'V',
+              node_category: 'quantity', lifecycle_status: 'active',
+              lifecycle_version: '4.1.1', enrichment_source: 'template'
+            })
+            CREATE (node)-[:HAS_UNIT]->(unit)
+            CREATE (source:StandardNameSource)
+            SET source = $source_properties
+            CREATE (source)-[:FROM_DD_PATH {authority: 'preserved'}]->(node)
+            """,
+            path=path,
+            source_properties=source_properties,
+        ).consume()
+
+
+def _write_live_repair_manifest(
+    graph: _EphemeralNeo4j, path: Path, dd_paths: tuple[str, ...]
+) -> Path:
+    source_ids = tuple(f"dd:{dd_path}" for dd_path in dd_paths)
+    client = graph.client()
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            rows = read_source_authority_rows(transaction, dd_paths)
+            manifest_rows = []
+            for row in rows:
+                dd_path = row["path"]
+                normalized = reconciliation._without_authority_relationships(row)
+                closure = capture_source_authority_closure(
+                    normalized,
+                    manifest_hash="planning",
+                    authorized_source_ids=frozenset(source_ids),
+                    mutable_source_fields=frozenset({"source_id"}),
+                )
+                manifest_rows.append(
+                    {
+                        "source_id": f"dd:{dd_path}",
+                        "operation": reconciliation.REPAIR_IDENTITY_SCALAR,
+                        "expected_source_element_id": closure.source["element_id"],
+                        "expected_source_id": None,
+                        "expected_from_dd_path": dd_path,
+                        "expected_before_snapshot_hash": payload_hash(
+                            closure.before_snapshot
+                        ),
+                        "expected_authority_hash": closure.authority_hash,
+                        "expected_preserved_state_hash": closure.preserved_state_hash,
+                        "expected_participant_ids_hash": payload_hash(
+                            tuple(sorted(participant_ids(row)))
+                        ),
+                        "west_intersection": 0,
+                        "test_intersection": 0,
+                    }
+                )
+            transaction.rollback()
+    finally:
+        client.close()
+    path.write_text(
+        json.dumps(
+            {
+                "schema": "imas-codex.source-authority-reconciliation-manifest",
+                "schema_version": 1,
+                "rows": manifest_rows,
+            }
+        )
+    )
+    return path
+
+
 def _write_live_manifest(
     graph: _EphemeralNeo4j,
     path: Path,
@@ -221,13 +361,14 @@ def _write_live_manifest(
             transaction = session.begin_transaction()
             rows = read_source_authority_rows(transaction, (dd_path,))
             row = rows[0]
-            normalized = reconciliation._without_authority_relationships(row)
+            operational = reconciliation._without_authority_relationships(row)
+            preserved = operational
             mutable = SNAPSHOT_MUTABLE_FIELDS
             extras: dict[str, Any] = {}
             if operation == reconciliation.REPAIR_IDENTITY_SCALAR:
                 mutable = frozenset({"source_id"})
             elif operation == reconciliation.RETIRE_NONPARTICIPATING_SOURCE:
-                normalized = reconciliation._retirement_preserved_row(
+                preserved = reconciliation._retirement_preserved_row(
                     row, "null_placeholder"
                 )
                 mutable = frozenset(
@@ -247,9 +388,20 @@ def _write_live_manifest(
                 extras = {
                     "expected_node_category": "structural",
                     "expected_target_id": "null_placeholder",
+                    "expected_retirement_destructive_closure_hash": payload_hash(
+                        reconciliation._retirement_destructive_closure(
+                            row, "null_placeholder"
+                        )
+                    ),
                 }
             closure = capture_source_authority_closure(
-                normalized,
+                operational,
+                manifest_hash="planning",
+                authorized_source_ids=frozenset({source_id}),
+                mutable_source_fields=mutable,
+            )
+            preserved_closure = capture_source_authority_closure(
+                preserved,
                 manifest_hash="planning",
                 authorized_source_ids=frozenset({source_id}),
                 mutable_source_fields=mutable,
@@ -267,6 +419,9 @@ def _write_live_manifest(
                     "expected_duplicate_preserved_state_hash": payload_hash(
                         reconciliation._duplicate_preserved_state(duplicate)
                     ),
+                    "expected_duplicate_destructive_closure_hash": payload_hash(
+                        reconciliation._duplicate_destructive_closure(duplicate)
+                    ),
                 }
             transaction.rollback()
     finally:
@@ -279,7 +434,7 @@ def _write_live_manifest(
         "expected_from_dd_path": dd_path,
         "expected_before_snapshot_hash": payload_hash(closure.before_snapshot),
         "expected_authority_hash": closure.authority_hash,
-        "expected_preserved_state_hash": closure.preserved_state_hash,
+        "expected_preserved_state_hash": preserved_closure.preserved_state_hash,
         "expected_participant_ids_hash": payload_hash(
             tuple(sorted(participant_ids(row)))
         ),
@@ -297,6 +452,77 @@ def _write_live_manifest(
         )
     )
     return path
+
+
+def test_fold_manifest_participant_overlap_refuses_before_graph_mutation(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.FOLD_DUPLICATE_SOURCE_IDENTITY)
+    template_path = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / "fold-participant-template.json",
+        reconciliation.FOLD_DUPLICATE_SOURCE_IDENTITY,
+    )
+    first = json.loads(template_path.read_text())["rows"][0]
+
+    repeated = json.loads(json.dumps(first))
+    repeated["source_id"] = "dd:second/path"
+    repeated["expected_from_dd_path"] = "second/path"
+    repeated_path = tmp_path / "fold-repeated-participant.json"
+    repeated_path.write_text(
+        json.dumps(
+            {
+                "schema": "imas-codex.source-authority-reconciliation-manifest",
+                "schema_version": 1,
+                "rows": [first, repeated],
+            }
+        )
+    )
+
+    overlap = json.loads(json.dumps(first))
+    overlap["source_id"] = first["duplicate_source_id"]
+    overlap["expected_from_dd_path"] = "legacy/duplicate"
+    overlap["duplicate_source_id"] = "dd:other/duplicate"
+    overlap_path = tmp_path / "fold-overlapping-participant.json"
+    overlap_path.write_text(
+        json.dumps(
+            {
+                "schema": "imas-codex.source-authority-reconciliation-manifest",
+                "schema_version": 1,
+                "rows": [first, overlap],
+            }
+        )
+    )
+
+    client = ephemeral_neo4j.client()
+    try:
+        with pytest.raises(ValueError, match="globally unique"):
+            reconciliation.reconcile_source_authority(
+                repeated_path,
+                reason="refuse repeated fold participant",
+                gc=client,
+            )
+        with pytest.raises(ValueError, match="disjoint"):
+            reconciliation.reconcile_source_authority(
+                overlap_path,
+                reason="refuse overlapping fold participant",
+                gc=client,
+            )
+    finally:
+        client.close()
+
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        row = session.run(
+            """
+            MATCH (source:StandardNameSource)
+            OPTIONAL MATCH (event:StandardNameSourceIdentityFold)
+            RETURN count(DISTINCT source) AS sources,
+                   count(DISTINCT event) AS events
+            """
+        ).single()
+    assert row["sources"] == 2
+    assert row["events"] == 0
 
 
 @pytest.mark.parametrize(
@@ -434,7 +660,10 @@ def test_retirement_refuses_multiple_targets_without_partial_detachment(
         client.close()
 
     assert receipt["mode"] == "refused"
-    assert "one exact null-lifecycle target" in receipt["refusals"][0]["reasons"]
+    assert any(
+        "one exact null-lifecycle target" in reason
+        for reason in receipt["refusals"][0]["reasons"]
+    )
     with ephemeral_neo4j.driver() as driver, driver.session() as session:
         row = session.run(
             """
@@ -445,3 +674,206 @@ def test_retirement_refuses_multiple_targets_without_partial_detachment(
         ).single()
     assert row["status"] == "attached"
     assert row["targets"] == 2
+
+
+def test_multirow_identity_repair_commits_and_repeats_atomically(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.REPAIR_IDENTITY_SCALAR)
+    paths = (
+        "diagnostic/channel/value",
+        "diagnostic/channel/value_two",
+    )
+    _seed_additional_repair_source(ephemeral_neo4j, paths[1])
+    manifest = _write_live_repair_manifest(
+        ephemeral_neo4j, tmp_path / "multirow-success.json", paths
+    )
+    manifest_hash = sha256(manifest.read_bytes()).hexdigest()
+    client = ephemeral_neo4j.client()
+    try:
+        applied = reconciliation.reconcile_source_authority(
+            manifest,
+            reason="repair exact identity cohort",
+            apply=True,
+            expected_manifest_hash=manifest_hash,
+            gc=client,
+        )
+        repeated = reconciliation.reconcile_source_authority(
+            manifest,
+            reason="repair exact identity cohort",
+            apply=True,
+            expected_manifest_hash=manifest_hash,
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert applied["mode"] == "applied", applied
+    assert applied["counts"]["applied"] == 2
+    assert repeated["mode"] == "already_current", repeated
+    assert repeated["counts"]["already_current"] == 2
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        row = session.run(
+            """
+            MATCH (source:StandardNameSource)
+            WHERE source.id IN $source_ids
+            OPTIONAL MATCH (source)-[:HAS_IDENTITY_REPAIR]->(event)
+            RETURN count(DISTINCT source) AS sources,
+                   count(event) AS events,
+                   collect(source.source_id) AS repaired_ids
+            """,
+            source_ids=[f"dd:{path}" for path in paths],
+        ).single()
+    assert row["sources"] == 2
+    assert row["events"] == 2
+    assert set(row["repaired_ids"]) == set(paths)
+
+
+def test_multirow_late_failure_rolls_back_every_source_and_event(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.REPAIR_IDENTITY_SCALAR)
+    paths = (
+        "diagnostic/channel/value",
+        "diagnostic/channel/value_two",
+    )
+    _seed_additional_repair_source(ephemeral_neo4j, paths[1])
+    manifest = _write_live_repair_manifest(
+        ephemeral_neo4j, tmp_path / "multirow-rollback.json", paths
+    )
+    client = ephemeral_neo4j.client(bad_cardinality=True)
+    try:
+        with pytest.raises(
+            reconciliation.SourceAuthorityReconciliationConflict,
+            match="cardinality",
+        ):
+            reconciliation.reconcile_source_authority(
+                manifest,
+                reason="repair exact identity cohort",
+                apply=True,
+                expected_manifest_hash=sha256(manifest.read_bytes()).hexdigest(),
+                gc=client,
+            )
+    finally:
+        client.close()
+
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        row = session.run(
+            """
+            MATCH (source:StandardNameSource)
+            WHERE source.id IN $source_ids
+            OPTIONAL MATCH (event:StandardNameSourceIdentityRepair)
+            RETURN count(source.source_id) AS repaired,
+                   count(DISTINCT event) AS events
+            """,
+            source_ids=[f"dd:{path}" for path in paths],
+        ).single()
+    assert row["repaired"] == 0
+    assert row["events"] == 0
+
+
+def test_externally_committed_relationship_drift_refuses_before_mutation(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.REPAIR_IDENTITY_SCALAR)
+    manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / "relationship-drift.json",
+        reconciliation.REPAIR_IDENTITY_SCALAR,
+    )
+    client = ephemeral_neo4j.client(relationship_drift=True)
+    try:
+        with pytest.raises(
+            reconciliation.SourceAuthorityReconciliationConflict,
+            match="changed after locks",
+        ):
+            reconciliation.reconcile_source_authority(
+                manifest,
+                reason="repair exact identity",
+                apply=True,
+                expected_manifest_hash=sha256(manifest.read_bytes()).hexdigest(),
+                gc=client,
+            )
+    finally:
+        client.close()
+
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        row = session.run(
+            """
+            MATCH (source:StandardNameSource)-[backing:FROM_DD_PATH]->(:IMASNode)
+            OPTIONAL MATCH (event:StandardNameSourceIdentityRepair)
+            RETURN source.source_id AS source_id,
+                   backing.authority AS authority,
+                   count(event) AS events
+            """
+        ).single()
+    assert row["source_id"] is None
+    assert row["authority"] == "concurrent-drift"
+    assert row["events"] == 0
+
+
+def test_snapshot_admission_can_precede_nonparticipating_retirement(
+    ephemeral_neo4j: _EphemeralNeo4j, tmp_path: Path
+) -> None:
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.RETIRE_NONPARTICIPATING_SOURCE)
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        session.run(
+            """
+            MATCH (source:StandardNameSource {id: 'dd:diagnostic/channel/value'})
+            REMOVE source.dd_version, source.description, source.physics_domain,
+                   source.dd_documentation, source.dd_snapshot_pinned,
+                   source.dd_parent_path, source.dd_parent_documentation,
+                   source.dd_data_type, source.dd_unit, source.dd_coordinates,
+                   source.dd_lifecycle_status, source.dd_lifecycle_version,
+                   source.enhanced_description, source.enhancement_kind
+            """
+        ).consume()
+    admission_manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / "admission-before-retirement.json",
+        reconciliation.ADMIT_CURRENT_SNAPSHOT,
+    )
+    client = ephemeral_neo4j.client()
+    try:
+        admission = reconciliation.reconcile_source_authority(
+            admission_manifest,
+            reason="admit current snapshot",
+            apply=True,
+            expected_manifest_hash=sha256(admission_manifest.read_bytes()).hexdigest(),
+            gc=client,
+        )
+        retirement_manifest = _write_live_manifest(
+            ephemeral_neo4j,
+            tmp_path / "retirement-after-admission.json",
+            reconciliation.RETIRE_NONPARTICIPATING_SOURCE,
+        )
+        retirement = reconciliation.reconcile_source_authority(
+            retirement_manifest,
+            reason="retire nonparticipating source",
+            apply=True,
+            expected_manifest_hash=sha256(retirement_manifest.read_bytes()).hexdigest(),
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert admission["mode"] == "applied", admission
+    assert retirement["mode"] == "applied", retirement
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        row = session.run(
+            """
+            MATCH (source:StandardNameSource {id: 'dd:diagnostic/channel/value'})
+            OPTIONAL MATCH (source)-[:HAS_SNAPSHOT_ADMISSION]->(admission)
+            OPTIONAL MATCH (source)-[:HAS_AUTHORITY_RETIREMENT]->(retirement)
+            RETURN source.status AS status,
+                   count(DISTINCT admission) AS admissions,
+                   count(DISTINCT retirement) AS retirements
+            """
+        ).single()
+    assert row["status"] == "stale"
+    assert row["admissions"] == 1
+    assert row["retirements"] == 1

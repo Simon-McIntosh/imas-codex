@@ -6,7 +6,7 @@ import copy
 import json
 from hashlib import sha256
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -190,14 +190,15 @@ def _manifest_for(
     target_id: str | None = None,
 ) -> reconciliation.SourceAuthorityManifest:
     path = str(row["path"])
-    normalized = reconciliation._without_authority_relationships(row)
+    operational = reconciliation._without_authority_relationships(row)
+    preserved = operational
     mutable = SNAPSHOT_MUTABLE_FIELDS
     extras: dict[str, object] = {}
     if operation == reconciliation.REPAIR_IDENTITY_SCALAR:
         mutable = frozenset({"source_id"})
     elif operation == reconciliation.RETIRE_NONPARTICIPATING_SOURCE:
         assert target_id is not None
-        normalized = reconciliation._retirement_preserved_row(row, target_id)
+        preserved = reconciliation._retirement_preserved_row(row, target_id)
         mutable = frozenset(
             {
                 "status",
@@ -215,9 +216,18 @@ def _manifest_for(
         extras = {
             "expected_node_category": row["nodes"][0]["properties"]["node_category"],
             "expected_target_id": target_id,
+            "expected_retirement_destructive_closure_hash": payload_hash(
+                reconciliation._retirement_destructive_closure(row, target_id)
+            ),
         }
     closure = capture_source_authority_closure(
-        normalized,
+        operational,
+        manifest_hash="manifest-hash",
+        authorized_source_ids=frozenset({f"dd:{path}"}),
+        mutable_source_fields=mutable,
+    )
+    preserved_closure = capture_source_authority_closure(
+        preserved,
         manifest_hash="manifest-hash",
         authorized_source_ids=frozenset({f"dd:{path}"}),
         mutable_source_fields=mutable,
@@ -233,6 +243,9 @@ def _manifest_for(
             "expected_duplicate_preserved_state_hash": payload_hash(
                 reconciliation._duplicate_preserved_state(duplicate)
             ),
+            "expected_duplicate_destructive_closure_hash": payload_hash(
+                reconciliation._duplicate_destructive_closure(duplicate)
+            ),
         }
     manifest_row = {
         "source_id": f"dd:{path}",
@@ -242,7 +255,7 @@ def _manifest_for(
         "expected_from_dd_path": path,
         "expected_before_snapshot_hash": payload_hash(closure.before_snapshot),
         "expected_authority_hash": closure.authority_hash,
-        "expected_preserved_state_hash": closure.preserved_state_hash,
+        "expected_preserved_state_hash": preserved_closure.preserved_state_hash,
         "expected_participant_ids_hash": payload_hash(
             tuple(sorted(participant_ids(row)))
         ),
@@ -297,6 +310,7 @@ def _minimal_manifest_row(operation: str, source_id: str) -> dict[str, object]:
                 "expected_duplicate_source_id": path,
                 "expected_duplicate_from_dd_path": path,
                 "expected_duplicate_preserved_state_hash": "e" * 64,
+                "expected_duplicate_destructive_closure_hash": "f" * 64,
             }
         )
     elif operation == reconciliation.RETIRE_NONPARTICIPATING_SOURCE:
@@ -304,6 +318,7 @@ def _minimal_manifest_row(operation: str, source_id: str) -> dict[str, object]:
             {
                 "expected_node_category": "structural",
                 "expected_target_id": "placeholder_name",
+                "expected_retirement_destructive_closure_hash": "e" * 64,
             }
         )
     return row
@@ -340,6 +355,24 @@ def test_manifest_rejects_protected_and_nonexact_rows(tmp_path: Path) -> None:
     manifest = _write_manifest(tmp_path / "extra.json", [row])
     with pytest.raises(ValueError, match="fields are not exact"):
         reconciliation.load_source_authority_manifest(manifest)
+
+
+def test_fold_manifest_requires_globally_disjoint_participants(tmp_path: Path) -> None:
+    first = _minimal_manifest_row(
+        reconciliation.FOLD_DUPLICATE_SOURCE_IDENTITY, "dd:first/path"
+    )
+    second = _minimal_manifest_row(
+        reconciliation.FOLD_DUPLICATE_SOURCE_IDENTITY, "dd:second/path"
+    )
+    second["duplicate_source_id"] = first["duplicate_source_id"]
+    repeated = _write_manifest(tmp_path / "repeated.json", [first, second])
+    with pytest.raises(ValueError, match="globally unique"):
+        reconciliation.load_source_authority_manifest(repeated)
+
+    second["duplicate_source_id"] = first["source_id"]
+    overlapping = _write_manifest(tmp_path / "overlap.json", [first, second])
+    with pytest.raises(ValueError, match="disjoint"):
+        reconciliation.load_source_authority_manifest(overlapping)
 
 
 def test_apply_rejects_changed_manifest_before_graph_access(tmp_path: Path) -> None:
@@ -487,6 +520,70 @@ def test_duplicate_fold_rejects_a_semantic_target() -> None:
     assert "duplicate source owns a semantic target" in refusals[0]["reasons"]
 
 
+def test_duplicate_fold_binds_destructive_relationship_properties() -> None:
+    row = _base_row(source_id_value="diagnostic/channel/value", snapshot="current")
+    duplicate = copy.deepcopy(row["sources"][0])
+    duplicate["element_id"] = "duplicate-element"
+    duplicate["properties"]["id"] = "dd:legacy/duplicate"
+    duplicate["properties"]["source_id"] = row["path"]
+    duplicate["properties"]["status"] = "failed"
+    manifest = _manifest_for(
+        row,
+        reconciliation.FOLD_DUPLICATE_SOURCE_IDENTITY,
+        duplicate=duplicate,
+    )
+    duplicate["relationships"][0]["properties"]["authority"] = "drifted"
+
+    _, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={duplicate["properties"]["id"]: [duplicate]},
+        reason="retire duplicate owner",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert (
+        "manifest expected_duplicate_destructive_closure_hash drifted"
+        in refusals[0]["reasons"]
+    )
+
+
+def test_retirement_binds_replacement_relationship_identity() -> None:
+    row = _base_row(
+        source_id_value="diagnostic/channel/value",
+        snapshot="current",
+        node_category="structural",
+        target_id="null_placeholder",
+    )
+    manifest = _manifest_for(
+        row,
+        reconciliation.RETIRE_NONPARTICIPATING_SOURCE,
+        target_id="null_placeholder",
+    )
+    row["sources"][0]["relationships"][1]["element_id"] = "replacement-binding"
+    row["sources"][0]["names"][0]["binding_element_id"] = "replacement-binding"
+    row["nodes"][0]["projections"][0]["relationship_element_id"] = (
+        "replacement-projection"
+    )
+
+    _, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="retire nonparticipating source",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert (
+        "manifest expected_retirement_destructive_closure_hash drifted"
+        in refusals[0]["reasons"]
+    )
+
+
 def test_retirement_rejects_a_generation_participating_category() -> None:
     row = _base_row(
         source_id_value="diagnostic/channel/value",
@@ -514,3 +611,120 @@ def test_retirement_rejects_a_generation_participating_category() -> None:
         "backing node category participates in standard-name generation"
         in refusals[0]["reasons"]
     )
+
+
+def test_retirement_accepts_a_prior_snapshot_admission_event() -> None:
+    row = _base_row(
+        source_id_value="diagnostic/channel/value",
+        snapshot="current",
+        node_category="structural",
+        target_id="null_placeholder",
+    )
+    manifest = _manifest_for(
+        row,
+        reconciliation.RETIRE_NONPARTICIPATING_SOURCE,
+        target_id="null_placeholder",
+    )
+    admission_event = {
+        "relationship_type": "HAS_SNAPSHOT_ADMISSION",
+        "event_labels": ["StandardNameSourceSnapshotAdmission"],
+        "event_properties": {"id": "source-snapshot-admission:prior"},
+    }
+
+    plans, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: [admission_event]},
+        duplicates_by_source={},
+        reason="retire nonparticipating source",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert not refusals
+    assert plans[0]["status"] == "planned"
+
+
+def test_retirement_idempotence_uses_the_authorized_pre_retirement_authority() -> None:
+    row = _base_row(
+        source_id_value="diagnostic/channel/value",
+        snapshot="current",
+        node_category="structural",
+        target_id="null_placeholder",
+    )
+    manifest = _manifest_for(
+        row,
+        reconciliation.RETIRE_NONPARTICIPATING_SOURCE,
+        target_id="null_placeholder",
+    )
+    planned, refusals = reconciliation._plan_rows(
+        [row],
+        manifest,
+        events_by_source={manifest.source_ids[0]: []},
+        duplicates_by_source={},
+        reason="retire nonparticipating source",
+        run_id="run",
+        changed_at="2026-08-03T00:00:00+00:00",
+    )
+    assert not refusals
+    event = planned[0]["event"]
+
+    retired = copy.deepcopy(row)
+    source = retired["sources"][0]
+    source["properties"].update(
+        {
+            "status": "stale",
+            "skip_reason": "nonparticipating_dd_source",
+            "skip_reason_detail": "retire nonparticipating source",
+        }
+    )
+    for field in (
+        "produced_sn_id",
+        "claimed_at",
+        "claim_token",
+        "drain_scope_id",
+        "drain_scope_claimed_at",
+        "drain_claim_scope_id",
+        "drain_scope_actionable",
+    ):
+        source["properties"].pop(field, None)
+    source["relationships"] = [source["relationships"][0]]
+    source["names"] = []
+    retired["nodes"][0]["projections"] = []
+    event_entry = {
+        "relationship_type": "HAS_AUTHORITY_RETIREMENT",
+        "event_labels": ["StandardNameSourceAuthorityRetirement"],
+        "event_properties": event,
+    }
+
+    repeated, repeated_refusals = reconciliation._plan_rows(
+        [retired],
+        manifest,
+        events_by_source={manifest.source_ids[0]: [event_entry]},
+        duplicates_by_source={},
+        reason="retire nonparticipating source",
+        run_id="repeat",
+        changed_at="2026-08-03T00:01:00+00:00",
+    )
+
+    assert not repeated_refusals
+    assert repeated[0]["status"] == "already_current"
+    assert repeated[0]["authority_hash"] == event["authority_hash"]
+
+
+def test_relationship_lock_requires_exact_cardinality() -> None:
+    transaction = Mock()
+    transaction.run.return_value = [{"locked": 1}]
+
+    with pytest.raises(
+        reconciliation.SourceAuthorityReconciliationConflict,
+        match="relationship set changed",
+    ):
+        reconciliation._lock_relationships(
+            transaction,
+            {"relationship-one", "relationship-two"},
+        )
+
+    cypher = transaction.run.call_args.args[0]
+    assert "SET relationship._source_authority_lock" in cypher
+    assert "REMOVE relationship._source_authority_lock" in cypher

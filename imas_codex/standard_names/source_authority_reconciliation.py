@@ -117,10 +117,15 @@ _EXTRA_ROW_FIELDS = {
             "expected_duplicate_source_id",
             "expected_duplicate_from_dd_path",
             "expected_duplicate_preserved_state_hash",
+            "expected_duplicate_destructive_closure_hash",
         }
     ),
     RETIRE_NONPARTICIPATING_SOURCE: frozenset(
-        {"expected_node_category", "expected_target_id"}
+        {
+            "expected_node_category",
+            "expected_target_id",
+            "expected_retirement_destructive_closure_hash",
+        }
     ),
 }
 
@@ -169,6 +174,15 @@ RETURN source_id,
     }]
   }] AS sources
 ORDER BY source_id
+"""
+
+_RELATIONSHIP_LOCK_QUERY = """
+// SOURCE_AUTHORITY_RECONCILIATION_RELATIONSHIP_LOCK
+MATCH ()-[relationship]->()
+WHERE elementId(relationship) IN $element_ids
+SET relationship._source_authority_lock = true
+REMOVE relationship._source_authority_lock
+RETURN count(relationship) AS locked
 """
 
 _REPAIR_APPLY_QUERY = """
@@ -333,6 +347,7 @@ def load_source_authority_manifest(path: str | Path) -> SourceAuthorityManifest:
 
     normalized_rows: list[dict[str, Any]] = []
     seen: set[str] = set()
+    duplicate_ids: list[str] = []
     for row in rows:
         if not isinstance(row, dict):
             raise ValueError("source-authority manifest rows must be objects")
@@ -388,6 +403,11 @@ def load_source_authority_manifest(path: str | Path) -> SourceAuthorityManifest:
                 row["expected_duplicate_preserved_state_hash"],
                 "expected_duplicate_preserved_state_hash",
             )
+            _require_sha(
+                row["expected_duplicate_destructive_closure_hash"],
+                "expected_duplicate_destructive_closure_hash",
+            )
+            duplicate_ids.append(duplicate_id)
         if operation == RETIRE_NONPARTICIPATING_SOURCE:
             if (
                 not isinstance(row["expected_node_category"], str)
@@ -399,10 +419,21 @@ def load_source_authority_manifest(path: str | Path) -> SourceAuthorityManifest:
                 or not row["expected_target_id"]
             ):
                 raise ValueError("expected_target_id is required")
+            _require_sha(
+                row["expected_retirement_destructive_closure_hash"],
+                "expected_retirement_destructive_closure_hash",
+            )
         normalized_rows.append(copy.deepcopy(row))
 
     normalized_rows.sort(key=lambda row: row["source_id"])
     source_ids = tuple(row["source_id"] for row in normalized_rows)
+    if operation == FOLD_DUPLICATE_SOURCE_IDENTITY:
+        if len(duplicate_ids) != len(set(duplicate_ids)):
+            raise ValueError("fold duplicate participants must be globally unique")
+        if set(source_ids) & set(duplicate_ids):
+            raise ValueError(
+                "fold canonical and duplicate participants must be disjoint"
+            )
     return SourceAuthorityManifest(
         path=manifest_path,
         manifest_hash=hashlib.sha256(raw).hexdigest(),
@@ -582,6 +613,119 @@ def _duplicate_preserved_state(source: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def _duplicate_destructive_closure(source: dict[str, Any]) -> dict[str, Any]:
+    """Return every exact backing relationship a fold is authorized to remove."""
+    return {
+        "source_element_id": source.get("element_id"),
+        "from_dd_paths": [
+            relationship
+            for relationship in source.get("relationships") or []
+            if relationship.get("type") == "FROM_DD_PATH"
+            and relationship.get("direction") == "out"
+        ],
+    }
+
+
+def _retirement_destructive_closure(
+    row: dict[str, Any], target_id: str
+) -> dict[str, Any]:
+    """Return the exact target and relationships a retirement may detach."""
+    sources = row.get("sources") or []
+    nodes = row.get("nodes") or []
+    source = sources[0] if len(sources) == 1 else {}
+    node = nodes[0] if len(nodes) == 1 else {}
+    return {
+        "source_element_id": source.get("element_id"),
+        "targets": [
+            name
+            for name in source.get("names") or []
+            if (name.get("properties") or {}).get("id") == target_id
+        ],
+        "bindings": [
+            relationship
+            for relationship in source.get("relationships") or []
+            if relationship.get("type") == "PRODUCED_NAME"
+            and relationship.get("direction") == "out"
+            and relationship.get("other_id") == target_id
+        ],
+        "projections": [
+            projection
+            for projection in node.get("projections") or []
+            if projection.get("id") == target_id
+        ],
+    }
+
+
+def _events_for_operation(
+    events: list[dict[str, Any]], operation: str
+) -> list[dict[str, Any]]:
+    label = _EVENT_LABELS[operation]
+    return [event for event in events if label in (event.get("event_labels") or [])]
+
+
+def _row_relationship_ids(row: dict[str, Any]) -> set[str]:
+    """Return relationship element ids from one exact authority closure."""
+    relationship_ids: set[str] = set()
+    for source in row.get("sources") or []:
+        relationship_ids.update(
+            str(relationship["element_id"])
+            for relationship in source.get("relationships") or []
+            if relationship.get("element_id")
+        )
+        relationship_ids.update(
+            str(entry["link_element_id"])
+            for entry in source.get("ledger") or []
+            if entry.get("link_element_id")
+        )
+        for name in source.get("names") or []:
+            if name.get("binding_element_id"):
+                relationship_ids.add(str(name["binding_element_id"]))
+            relationship_ids.update(
+                str(relationship["element_id"])
+                for relationship in name.get("relationships") or []
+                if relationship.get("element_id")
+            )
+    for node in row.get("nodes") or []:
+        for key in ("units", "parents", "coordinates", "projections"):
+            relationship_ids.update(
+                str(relationship["relationship_element_id"])
+                for relationship in node.get(key) or []
+                if relationship.get("relationship_element_id")
+            )
+    return relationship_ids
+
+
+def _source_relationship_ids(source: dict[str, Any]) -> set[str]:
+    relationship_ids = {
+        str(relationship["element_id"])
+        for relationship in source.get("relationships") or []
+        if relationship.get("element_id")
+    }
+    for name in source.get("names") or []:
+        if name.get("binding_element_id"):
+            relationship_ids.add(str(name["binding_element_id"]))
+        relationship_ids.update(
+            str(relationship["element_id"])
+            for relationship in name.get("relationships") or []
+            if relationship.get("element_id")
+        )
+    return relationship_ids
+
+
+def _lock_relationships(
+    transaction: Any, relationship_ids: set[str] | list[str] | tuple[str, ...]
+) -> tuple[str, ...]:
+    """Write-lock every exact relationship and prove its cardinality."""
+    exact_ids = tuple(sorted(set(relationship_ids)))
+    rows = list(transaction.run(_RELATIONSHIP_LOCK_QUERY, element_ids=list(exact_ids)))
+    locked = int(dict(rows[0]).get("locked") or 0) if rows else 0
+    if locked != len(exact_ids):
+        raise SourceAuthorityReconciliationConflict(
+            "source-authority relationship set changed before locking"
+        )
+    return exact_ids
+
+
 def _retirement_source_payload(
     source: dict[str, Any], target_ids: list[str]
 ) -> dict[str, Any]:
@@ -651,7 +795,14 @@ def _base_plan_context(
     manifest_hash: str,
     operation: str,
     authorized_source_ids: frozenset[str],
-) -> tuple[Any | None, list[str], str | None, str | None, tuple[str, ...]]:
+) -> tuple[
+    Any | None,
+    list[str],
+    str | None,
+    str | None,
+    tuple[str, ...],
+    str | None,
+]:
     path = row.get("path")
     reasons: list[str] = []
     if len(row.get("versions") or []) != 1:
@@ -661,14 +812,15 @@ def _base_plan_context(
     if len(row.get("nodes") or []) != 1:
         reasons.append("current IMASNode is not unique")
     if reasons:
-        return None, reasons, None, None, ()
+        return None, reasons, None, None, (), None
 
-    normalized = _without_authority_relationships(row)
+    operational_row = _without_authority_relationships(row)
+    preserved_row = operational_row
     mutable_fields = SNAPSHOT_MUTABLE_FIELDS
     if operation == REPAIR_IDENTITY_SCALAR:
         mutable_fields = frozenset({"source_id"})
     elif operation == RETIRE_NONPARTICIPATING_SOURCE:
-        normalized = _retirement_preserved_row(
+        preserved_row = _retirement_preserved_row(
             row, str(manifest_row["expected_target_id"])
         )
         mutable_fields = frozenset(
@@ -686,7 +838,13 @@ def _base_plan_context(
             }
         )
     closure = capture_source_authority_closure(
-        normalized,
+        operational_row,
+        manifest_hash=manifest_hash,
+        authorized_source_ids=authorized_source_ids,
+        mutable_source_fields=mutable_fields,
+    )
+    preserved_closure = capture_source_authority_closure(
+        preserved_row,
         manifest_hash=manifest_hash,
         authorized_source_ids=authorized_source_ids,
         mutable_source_fields=mutable_fields,
@@ -705,6 +863,7 @@ def _base_plan_context(
         str(current_version) if current_version else None,
         _hash(participant_set),
         participant_set,
+        preserved_closure.preserved_state_hash,
     )
 
 
@@ -752,7 +911,7 @@ def _plan_repair(
     reasons = []
     if before.get("source_id") is not None:
         reasons.append("source.source_id is not null")
-    if events:
+    if _events_for_operation(events, REPAIR_IDENTITY_SCALAR):
         reasons.append("source authority event exists before identity repair")
     event = {
         "id": event_id,
@@ -820,7 +979,7 @@ def _plan_snapshot(
 
     properties = closure.source["properties"]
     reasons: list[str] = []
-    if events:
+    if _events_for_operation(events, operation):
         reasons.append("source authority event exists before snapshot reconciliation")
     if operation == ADOPT_CURRENT_SNAPSHOT:
         if properties.get("dd_version") != current_version:
@@ -954,13 +1113,19 @@ def _plan_fold(
         != manifest_row["expected_duplicate_preserved_state_hash"]
     ):
         reasons.append("manifest expected_duplicate_preserved_state_hash drifted")
+    duplicate_destructive_hash = _hash(_duplicate_destructive_closure(duplicate))
+    if (
+        duplicate_destructive_hash
+        != manifest_row["expected_duplicate_destructive_closure_hash"]
+    ):
+        reasons.append("manifest expected_duplicate_destructive_closure_hash drifted")
     if (
         closure.before_snapshot != closure.after_snapshot
         or closure.source["properties"].get("dd_version") != current_version
         or closure.source["properties"].get("dd_snapshot_pinned") is not True
     ):
         reasons.append("canonical source snapshot is not exact current authority")
-    if events:
+    if _events_for_operation(events, FOLD_DUPLICATE_SOURCE_IDENTITY):
         reasons.append("canonical source authority event exists before duplicate fold")
     combined_precondition = _hash(
         {
@@ -1026,17 +1191,20 @@ def _plan_retirement(
     after_properties.update(
         {
             "status": "stale",
-            "produced_sn_id": None,
-            "claimed_at": None,
-            "claim_token": None,
-            "drain_scope_id": None,
-            "drain_scope_claimed_at": None,
-            "drain_claim_scope_id": None,
-            "drain_scope_actionable": None,
             "skip_reason": "nonparticipating_dd_source",
             "skip_reason_detail": reason,
         }
     )
+    for cleared_field in (
+        "produced_sn_id",
+        "claimed_at",
+        "claim_token",
+        "drain_scope_id",
+        "drain_scope_claimed_at",
+        "drain_claim_scope_id",
+        "drain_scope_actionable",
+    ):
+        after_properties.pop(cleared_field, None)
     after_payload = _retirement_source_payload(after_source, [])
     before_hash = _hash(before_payload)
     after_hash = _hash(after_payload)
@@ -1050,6 +1218,16 @@ def _plan_retirement(
     }
     event_id = _event_id(RETIRE_NONPARTICIPATING_SOURCE, event_identity)
     if not names and source["properties"].get("status") == "stale":
+        if any(
+            projection.get("id") == target_id
+            for projection in node.get("projections") or []
+        ):
+            return (
+                "refused",
+                None,
+                ["retired source retains its DD projection mirror"],
+                {},
+            )
         matches = _matching_state_events(
             events,
             RETIRE_NONPARTICIPATING_SOURCE,
@@ -1058,7 +1236,7 @@ def _plan_retirement(
                 "node_category": node_category,
                 "removed_target_ids": [target_id],
                 "after_source_hash": after_hash,
-                "authority_hash": closure.authority_hash,
+                "authority_hash": manifest_row["expected_authority_hash"],
             },
             identity_fields=(
                 "source_id",
@@ -1099,7 +1277,21 @@ def _plan_retirement(
         reasons.append("retirement requires one exact DD projection mirror")
     if source["properties"].get("produced_sn_id") != target_id:
         reasons.append("produced_sn_id does not equal the exact retirement target")
-    if events:
+    retirement_destructive_hash = _hash(
+        _retirement_destructive_closure(
+            {
+                "sources": [source],
+                "nodes": [node],
+            },
+            target_id,
+        )
+    )
+    if (
+        retirement_destructive_hash
+        != manifest_row["expected_retirement_destructive_closure_hash"]
+    ):
+        reasons.append("manifest expected_retirement_destructive_closure_hash drifted")
+    if _events_for_operation(events, RETIRE_NONPARTICIPATING_SOURCE):
         reasons.append("source authority event exists before retirement")
     event = {
         "id": event_id,
@@ -1146,14 +1338,19 @@ def _plan_rows(
     for row in rows:
         source_id = f"dd:{row['path']}"
         manifest_row = manifest_by_source[source_id]
-        closure, reasons, current_version, participant_hash, participant_set = (
-            _base_plan_context(
-                row,
-                manifest_row,
-                manifest_hash=manifest.manifest_hash,
-                operation=manifest.operation,
-                authorized_source_ids=authorized_source_ids,
-            )
+        (
+            closure,
+            reasons,
+            current_version,
+            participant_hash,
+            participant_set,
+            preserved_state_hash,
+        ) = _base_plan_context(
+            row,
+            manifest_row,
+            manifest_hash=manifest.manifest_hash,
+            operation=manifest.operation,
+            authorized_source_ids=authorized_source_ids,
         )
         if closure is None:
             refusals.append({"source_id": source_id, "reasons": reasons})
@@ -1200,13 +1397,26 @@ def _plan_rows(
                 changed_at=changed_at,
             )
         reasons.extend(operation_reasons)
+        if (
+            status == "already_current"
+            and event is not None
+            and manifest.operation != FOLD_DUPLICATE_SOURCE_IDENTITY
+            and event.get("preserved_state_hash") != preserved_state_hash
+        ):
+            reasons.append("matching event preserved state drifted")
+        if (
+            event is not None
+            and status == "planned"
+            and manifest.operation != FOLD_DUPLICATE_SOURCE_IDENTITY
+        ):
+            event["preserved_state_hash"] = preserved_state_hash
         before_snapshot_hash = _hash(closure.before_snapshot)
         if status == "planned":
             reasons.extend(
                 _expected_hash_reasons(
                     manifest_row,
                     closure=closure,
-                    preserved_state_hash=closure.preserved_state_hash,
+                    preserved_state_hash=str(preserved_state_hash),
                     participant_ids_hash=str(participant_hash),
                     before_snapshot_hash=before_snapshot_hash,
                 )
@@ -1222,6 +1432,17 @@ def _plan_rows(
                 }
             )
             continue
+        plan_preserved_state_hash = (
+            str((event or {}).get("preserved_state_hash"))
+            if manifest.operation == FOLD_DUPLICATE_SOURCE_IDENTITY
+            else str(preserved_state_hash)
+        )
+        plan_authority_hash = (
+            str((event or {}).get("authority_hash"))
+            if manifest.operation == RETIRE_NONPARTICIPATING_SOURCE
+            and status == "already_current"
+            else closure.authority_hash
+        )
         plan = {
             "source_id": source_id,
             "path": row["path"],
@@ -1230,7 +1451,7 @@ def _plan_rows(
             "source_element_id": closure.source["element_id"],
             "before_snapshot_hash": before_snapshot_hash,
             "after_snapshot_hash": _hash(closure.after_snapshot),
-            "authority_hash": closure.authority_hash,
+            "authority_hash": plan_authority_hash,
             "precondition_hash": _hash(
                 {
                     "closure": row,
@@ -1238,8 +1459,9 @@ def _plan_rows(
                     "duplicates": duplicates_by_source,
                 }
             ),
-            "preserved_state_hash": closure.preserved_state_hash,
+            "preserved_state_hash": plan_preserved_state_hash,
             "participant_ids": list(participant_set),
+            "relationship_ids": sorted(_row_relationship_ids(row)),
             "event": event,
             "mutation": mutation,
         }
@@ -1255,6 +1477,9 @@ def _plan_rows(
                         if relationship.get("other_element_id")
                     ),
                 }
+            )
+            plan["relationship_ids"] = sorted(
+                set(plan["relationship_ids"]) | _source_relationship_ids(duplicate)
             )
         plans.append(plan)
     return plans, refusals
@@ -1454,6 +1679,14 @@ def reconcile_source_authority(
                     conflict_type=SourceAuthorityReconciliationConflict,
                     message="source-authority participant set changed before locking",
                 )
+                _lock_relationships(
+                    transaction,
+                    {
+                        relationship
+                        for plan in pending
+                        for relationship in plan["relationship_ids"]
+                    },
+                )
                 locked_plans, locked_refusals = _read_plan(
                     transaction,
                     manifest,
@@ -1484,7 +1717,7 @@ def reconcile_source_authority(
                 )
                 if len(mutation_rows) != 1:
                     raise SourceAuthorityReconciliationConflict(
-                        "source-authority mutation returned no atomic receipt"
+                        "source-authority mutation result cardinality changed inside the transaction"
                     )
                 mutation = dict(mutation_rows[0])
                 if set(mutation.get("source_ids") or []) != {
