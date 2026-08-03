@@ -29,7 +29,7 @@ from imas_codex.llm.server import _get_imas_tools
 from imas_codex.settings import get_dd_version
 from tests.search.conftest import load_benchmark_encoder
 
-pytestmark = pytest.mark.graph
+pytestmark = [pytest.mark.graph, pytest.mark.timeout(30)]
 
 
 @pytest.fixture(scope="module", autouse=True)

@@ -468,8 +468,8 @@ def precompute_search_channels(
     max_results: int,
     search_evaluation_cache: Any,
 ) -> dict[str, PrecomputedSearchChannels]:
-    """Retrieve each query channel once at the maximum requested limits."""
-    from imas_codex.tools.graph_search import _text_search_dd_paths
+    """Retrieve each candidate channel in one batched graph round trip."""
+    from imas_codex.tools.graph_search import _build_phrase_aware_query
     from imas_codex.tools.query_analysis import QueryAnalyzer
 
     if not configs:
@@ -491,9 +491,17 @@ def precompute_search_channels(
         )
         analyzed.append((benchmark_query, intent, expanded))
 
+    seen_queries: set[str] = set()
+    unique_analyzed = []
+    for item in analyzed:
+        query_text = item[0].query_text
+        if query_text not in seen_queries:
+            seen_queries.add(query_text)
+            unique_analyzed.append(item)
+
     semantic_queries = [
         expanded
-        for _, intent, expanded in analyzed
+        for _, intent, expanded in unique_analyzed
         if intent.query_type not in ("path_exact", "path_partial")
     ]
     embeddings = (
@@ -509,11 +517,13 @@ def precompute_search_channels(
         else []
     )
     embedding_iter = iter(embeddings)
-    channels: dict[str, PrecomputedSearchChannels] = {}
+    path_items: list[dict[str, Any]] = []
+    semantic_items: list[dict[str, Any]] = []
+    metadata: dict[str, dict[str, Any]] = {}
 
-    for benchmark_query, intent, expanded in analyzed:
+    for benchmark_query, intent, expanded in unique_analyzed:
         query_text = benchmark_query.query_text
-        common_inputs = {
+        metadata[query_text] = {
             "graph_identity": id(gc),
             "encoder_identity": id(encoder),
             "query": query_text,
@@ -526,49 +536,73 @@ def precompute_search_channels(
             "embeddable_categories": embeddable_categories,
             "searchable_categories": searchable_categories,
         }
-
         if intent.query_type in ("path_exact", "path_partial"):
-            path_results = search_evaluation_cache.get_or_compute(
-                "doe-path-channel",
-                common_inputs,
-                lambda query_text=query_text: [
-                    row["id"]
-                    for row in (
-                        gc.query(
-                            """
-                            MATCH (p:IMASNode)
-                            WHERE p.node_category IN $categories
-                              AND (toLower(p.id) = $q
-                                   OR toLower(p.id) ENDS WITH $q
-                                   OR toLower(p.id) CONTAINS $q)
-                            RETURN DISTINCT p.id AS id
-                            LIMIT $limit
-                            """,
-                            q=query_text.lower().strip(),
-                            limit=max_results,
-                            categories=list(searchable_categories),
-                        )
-                        or []
-                    )
-                ],
+            path_items.append(
+                {"query": query_text, "lookup": query_text.lower().strip()}
             )
-            channels[query_text] = PrecomputedSearchChannels(
-                **common_inputs,
-                path_results=tuple(path_results),
+        else:
+            semantic_items.append(
+                {
+                    "query": query_text,
+                    "embedding": next(embedding_iter).tolist(),
+                    "fulltext_query": _build_phrase_aware_query(expanded),
+                }
             )
-            continue
 
-        embedding = next(embedding_iter).tolist()
+    batch_inputs = {
+        "graph_identity": id(gc),
+        "encoder_identity": id(encoder),
+        "path_items": path_items,
+        "semantic_items": [
+            {"query": item["query"], "fulltext_query": item["fulltext_query"]}
+            for item in semantic_items
+        ],
+        "max_results": max_results,
+        "hnsw_candidates": max_candidates,
+        "vector_limit": max_vector_limit,
+        "text_limit": max_text_limit,
+        "embeddable_categories": embeddable_categories,
+        "searchable_categories": searchable_categories,
+    }
 
-        def _vector_query(embedding=embedding) -> list[dict[str, Any]]:
-            try:
-                return gc.query(
-                    """
-                    CYPHER 25
+    path_rows = (
+        search_evaluation_cache.get_or_compute(
+            "doe-path-corpus",
+            batch_inputs,
+            lambda: gc.query(
+                """
+                UNWIND $items AS item
+                CALL (item) {
+                    MATCH (p:IMASNode)
+                    WHERE p.node_category IN $categories
+                      AND (toLower(p.id) = item.lookup
+                           OR toLower(p.id) ENDS WITH item.lookup
+                           OR toLower(p.id) CONTAINS item.lookup)
+                    RETURN DISTINCT p.id AS id
+                    LIMIT $limit
+                }
+                RETURN item.query AS query, id
+                """,
+                items=path_items,
+                limit=max_results,
+                categories=list(searchable_categories),
+            ),
+        )
+        if path_items
+        else []
+    )
+
+    def _vector_batch() -> list[dict[str, Any]]:
+        try:
+            return gc.query(
+                """
+                CYPHER 25
+                UNWIND $items AS item
+                CALL (item) {
                     MATCH (path:IMASNode)
                     SEARCH path IN (
                       VECTOR INDEX imas_node_embedding
-                      FOR $embedding
+                      FOR item.embedding
                       LIMIT $k
                     ) SCORE AS score
                     WHERE path.node_category IN $categories
@@ -576,41 +610,89 @@ def precompute_search_channels(
                     RETURN path.id AS id, score
                     ORDER BY score DESC
                     LIMIT $vector_limit
-                    """,
-                    embedding=embedding,
-                    k=max_candidates,
-                    vector_limit=max_vector_limit,
-                    categories=list(embeddable_categories),
-                )
-            except Exception as exc:
-                if "dimensionality" in str(exc).lower():
-                    logger.warning("Vector index dimension mismatch: %s", exc)
-                    return []
-                raise
+                }
+                RETURN item.query AS query, id, score
+                """,
+                items=semantic_items,
+                k=max_candidates,
+                vector_limit=max_vector_limit,
+                categories=list(embeddable_categories),
+            )
+        except Exception as exc:
+            if "dimensionality" in str(exc).lower():
+                logger.warning("Vector index dimension mismatch: %s", exc)
+                return []
+            raise
 
-        vector_results = search_evaluation_cache.get_or_compute(
-            "doe-vector-channel",
-            common_inputs,
-            _vector_query,
+    vector_rows = (
+        search_evaluation_cache.get_or_compute(
+            "doe-vector-corpus",
+            batch_inputs,
+            _vector_batch,
         )
-        text_results = search_evaluation_cache.get_or_compute(
-            "doe-text-channel",
-            common_inputs,
-            lambda expanded=expanded: _text_search_dd_paths(
-                gc,
-                expanded,
-                max_text_limit,
-                ids_filter=None,
+        if semantic_items
+        else []
+    )
+    text_rows = (
+        search_evaluation_cache.get_or_compute(
+            "doe-text-corpus",
+            batch_inputs,
+            lambda: gc.query(
+                """
+                UNWIND $items AS item
+                CALL (item) {
+                    CALL db.index.fulltext.queryNodes(
+                        'imas_node_text', item.fulltext_query
+                    ) YIELD node AS path, score
+                    WHERE NOT (path)-[:DEPRECATED_IN]->(:DDVersion)
+                      AND path.node_category IN $categories
+                      AND (path.node_category <> 'identifier'
+                           OR path.description IS NOT NULL)
+                      AND (size(coalesce(path.documentation, '')) > 10
+                           OR path.description IS NOT NULL)
+                    RETURN path.id AS id, score
+                    ORDER BY score DESC
+                    LIMIT $text_limit
+                }
+                RETURN item.query AS query, id, score
+                """,
+                items=semantic_items,
+                text_limit=max_text_limit,
+                categories=list(searchable_categories),
             ),
+        )
+        if semantic_items
+        else []
+    )
+
+    paths_by_query: dict[str, list[str]] = defaultdict(list)
+    vectors_by_query: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    raw_text_by_query: dict[str, list[tuple[str, float]]] = defaultdict(list)
+    for row in path_rows or []:
+        paths_by_query[row["query"]].append(row["id"])
+    for row in vector_rows or []:
+        vectors_by_query[row["query"]].append((row["id"], float(row["score"])))
+    for row in text_rows or []:
+        raw_text_by_query[row["query"]].append((row["id"], float(row["score"])))
+
+    channels: dict[str, PrecomputedSearchChannels] = {}
+    for query_text, common_inputs in metadata.items():
+        raw_text = sorted(
+            raw_text_by_query[query_text], key=lambda item: item[1], reverse=True
+        )
+        vector_results = sorted(
+            vectors_by_query[query_text], key=lambda item: item[1], reverse=True
+        )
+        max_score = max((score for _, score in raw_text), default=1.0)
+        normalized_text = tuple(
+            (path_id, score / max_score if max_score > 0 else 0.0)
+            for path_id, score in raw_text
         )
         channels[query_text] = PrecomputedSearchChannels(
             **common_inputs,
-            vector_results=tuple(
-                (row["id"], float(row["score"])) for row in vector_results or []
-            ),
-            text_results=tuple(
-                (row["id"], float(row["score"])) for row in text_results or []
-            ),
+            path_results=tuple(paths_by_query[query_text]),
+            vector_results=tuple(vector_results),
+            text_results=normalized_text,
         )
 
     return channels
@@ -992,8 +1074,12 @@ class TestMixConfig:
             max_results=50,
         )
 
-    def test_score_grid_reuses_each_retrieval_channel(self, monkeypatch):
-        """Scoring multiple compatible configs performs one retrieval per channel."""
+    def test_score_grid_batches_each_candidate_corpus(self):
+        """A 203-query evaluation uses at most one Bolt call per corpus."""
+
+        expected_by_query = {
+            query.query_text: query.expected_paths[0] for query in ALL_QUERIES
+        }
 
         class EmbeddingRow(list):
             def tolist(self):
@@ -1011,60 +1097,75 @@ class TestMixConfig:
             def __init__(self):
                 self.calls = 0
 
-            def query(self, _cypher, **_params):
+            def query(self, cypher, **params):
                 self.calls += 1
-                return [{"id": "core_profiles/temperature", "score": 0.9}]
+                rows = []
+                for item in params["items"]:
+                    if "VECTOR INDEX" in cypher:
+                        rows.append(
+                            {
+                                "query": item["query"],
+                                "id": expected_by_query[item["query"]],
+                                "score": 0.9,
+                            }
+                        )
+                    elif "fulltext.queryNodes" in cypher:
+                        rows.append(
+                            {
+                                "query": item["query"],
+                                "id": expected_by_query[item["query"]],
+                                "score": 0.8,
+                            }
+                        )
+                    else:
+                        rows.append(
+                            {
+                                "query": item["query"],
+                                "id": expected_by_query[item["query"]],
+                            }
+                        )
+                return rows
 
-        text_calls = 0
-
-        def count_text_search(_gc, _query, _limit, *, ids_filter):
-            nonlocal text_calls
-            assert ids_filter is None
-            text_calls += 1
-            return [{"id": "core_profiles/temperature", "score": 0.8}]
-
-        monkeypatch.setattr(
-            "imas_codex.tools.graph_search._text_search_dd_paths",
-            count_text_search,
-        )
         graph = CountingGraph()
         encoder = CountingEncoder()
         cache = SearchEvaluationCache()
-        query = BenchmarkQuery(
-            query_text="electron temperature",
-            expected_paths=["core_profiles/temperature"],
-            category="exact_concept",
-        )
-        configs = [
-            MixConfig(vector_limit=200, text_limit=200),
-            MixConfig(vector_limit=800, text_limit=800),
-        ]
+        queries = ALL_QUERIES
+        configs = generate_doe_grid()
 
         channels = precompute_search_channels(
             graph,
             encoder,
             configs,
-            [query],
+            queries,
             max_results=50,
             search_evaluation_cache=cache,
         )
-        retrieval_counts = (graph.calls, text_calls, encoder.calls)
+        retrieval_counts = (graph.calls, encoder.calls)
         for config in configs:
             metrics = evaluate_config(
                 config,
                 graph,
                 encoder,
-                [query],
+                queries,
                 precomputed_channels=channels,
             )
-            assert metrics["mrr"] == 1.0
+            assert metrics["mrr"] > 0.99
+            assert metrics["query_count"] == 203
 
-        assert retrieval_counts == (1, 1, 1)
-        assert (graph.calls, text_calls, encoder.calls) == retrieval_counts
+        assert retrieval_counts == (3, 1)
+        assert (graph.calls, encoder.calls) == retrieval_counts
+        assert len(configs) == 269
+        assert len(channels) == len({query.query_text for query in ALL_QUERIES})
 
 
 class TestDoEGrid:
     """Verify DoE grid generation."""
+
+    def test_exhaustive_evaluation_is_graph_and_slow(self):
+        marker_names = {
+            marker.name for marker in getattr(TestDoEEvaluation, "pytestmark", [])
+        }
+        assert marker_names >= {"graph", "slow"}
 
     def test_grid_size(self):
         """Grid has the fusion configurations plus graph-boost configurations."""
@@ -1390,6 +1491,7 @@ class TestParetoOptimal:
 
 
 @pytest.mark.graph
+@pytest.mark.slow
 class TestDoEEvaluation:
     """Design of experiments for search score mixing.
 

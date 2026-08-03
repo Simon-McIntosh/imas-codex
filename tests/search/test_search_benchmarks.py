@@ -24,6 +24,7 @@ Run with::
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 
 import pytest
 
@@ -518,6 +519,7 @@ async def _extract_paths_from_hybrid(
 
 
 @pytest.mark.graph
+@pytest.mark.slow
 class TestVectorSearchBenchmark:
     """Vector/semantic search quality — requires embed server + graph.
 
@@ -565,6 +567,7 @@ class TestVectorSearchBenchmark:
 
 
 @pytest.mark.graph
+@pytest.mark.slow
 class TestBM25SearchBenchmark:
     """BM25/fulltext search quality — requires graph only (no embed server).
 
@@ -600,6 +603,7 @@ class TestBM25SearchBenchmark:
 
 
 @pytest.mark.graph
+@pytest.mark.slow
 class TestPathLookupBenchmark:
     """Exact path lookup — the simplest search mode.
 
@@ -639,6 +643,7 @@ class TestPathLookupBenchmark:
 
 
 @pytest.mark.graph
+@pytest.mark.slow
 class TestHybridSearchBenchmark:
     """Combined hybrid search — must exceed best individual method.
 
@@ -701,6 +706,7 @@ class TestHybridSearchBenchmark:
 
 
 @pytest.mark.graph
+@pytest.mark.timeout(30)
 class TestSearchQualityRegression:
     """Cross-cutting regression checks.
 
@@ -817,6 +823,7 @@ class TestSearchQualityRegression:
 
 
 @pytest.mark.graph
+@pytest.mark.slow
 class TestSearchQualityGate:
     """CI regression gate — fail if search quality drops below thresholds.
 
@@ -946,3 +953,61 @@ class TestSearchQualityGate:
             f"{len(empty_queries)} benchmark queries returned zero results "
             f"(max allowed: {max_allowed}): {empty_queries[:10]}"
         )
+
+
+class TestSearchWorkloadRouting:
+    """Keep representative contracts separate from exhaustive measurements."""
+
+    @staticmethod
+    def _marker_names(target) -> set[str]:
+        return {marker.name for marker in getattr(target, "pytestmark", [])}
+
+    def test_exhaustive_benchmark_classes_are_slow(self):
+        exhaustive_classes = (
+            TestVectorSearchBenchmark,
+            TestBM25SearchBenchmark,
+            TestPathLookupBenchmark,
+            TestHybridSearchBenchmark,
+            TestSearchQualityGate,
+        )
+        for test_class in exhaustive_classes:
+            assert "graph" in self._marker_names(test_class)
+            assert "slow" in self._marker_names(test_class)
+
+    def test_representative_contract_is_bounded_and_non_slow(self):
+        from tests.tools import test_dd_search_quality
+
+        marker_names = self._marker_names(TestSearchQualityRegression)
+        assert "graph" in marker_names
+        assert "timeout" in marker_names
+        assert "slow" not in marker_names
+        tool_marker_names = {
+            marker.name for marker in test_dd_search_quality.pytestmark
+        }
+        assert tool_marker_names >= {"graph", "timeout"}
+        assert (
+            len(
+                [
+                    name
+                    for name in vars(TestSearchQualityRegression)
+                    if name.startswith("test_")
+                ]
+            )
+            == 5
+        )
+
+    def test_benchmark_workflow_routes_bounded_and_exhaustive_suites(self):
+        workflow = (
+            Path(__file__).parents[2] / ".github" / "workflows" / "benchmark.yml"
+        ).read_text()
+        bounded = workflow.split("Run bounded graph search regression", 1)[1].split(
+            "Run exhaustive search quality and score grid", 1
+        )[0]
+        exhaustive = workflow.split("Run exhaustive search quality and score grid", 1)[
+            1
+        ].split("Retain search quality results", 1)[0]
+
+        assert '-m "graph and not slow"' in bounded
+        assert '-m "graph and slow"' in exhaustive
+        assert "tests/search/test_search_benchmarks.py" in exhaustive
+        assert "tests/search/test_search_evaluation.py::TestDoEEvaluation" in exhaustive
