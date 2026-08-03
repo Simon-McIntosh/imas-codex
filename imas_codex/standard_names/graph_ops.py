@@ -3474,6 +3474,140 @@ def _materialize_derived_parent_rows(
     return seeded
 
 
+class _ParentMaterializationCapture:
+    """Capture sanctioned materializer parameters without graph access."""
+
+    def __init__(self) -> None:
+        self.calls: list[dict[str, Any]] = []
+
+    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        self.calls.append({"cypher": cypher, "params": params})
+        return []
+
+
+def _materialize_derived_parent_rows_batched(
+    gc: Any,
+    parents: list[dict[str, Any]],
+    *,
+    event_by_parent: dict[str, dict[str, Any]] | None = None,
+) -> int:
+    """Run the sanctioned parent materializer in two cohort-wide queries."""
+    capture = _ParentMaterializationCapture()
+    prepared_count = _materialize_derived_parent_rows(capture, parents)
+    if len(capture.calls) != 2 * prepared_count:
+        raise RuntimeError("derived-parent materialization preparation is incomplete")
+    rows = []
+    for index in range(0, len(capture.calls), 2):
+        properties = dict(capture.calls[index]["params"])
+        parent_id = str(properties["parent_id"])
+        properties["event"] = (event_by_parent or {}).get(parent_id)
+        rows.append(properties)
+
+    materialized = gc.query(
+        """
+        // STRUCTURAL_CLOSURE_BATCH_MATERIALIZE
+        UNWIND $rows AS row
+        MATCH (parent:StandardName {id: row.parent_id})
+        WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }
+        SET parent.name_stage = CASE
+                WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'
+                WHEN trim(coalesce(parent.description, '')) <> ''
+                     AND parent.description <> row.description
+                     AND parent.embedding IS NOT NULL THEN 'drafted'
+                ELSE 'accepted'
+            END,
+            parent.docs_stage = coalesce(parent.docs_stage, 'pending'),
+            parent.validation_status = coalesce(parent.validation_status, 'valid'),
+            parent.origin = 'derived',
+            parent.kind = row.kind,
+            parent.unit = coalesce(row.unit, parent.unit),
+            parent.cocos_transformation_type =
+                coalesce(row.cocos_transformation_type,
+                         parent.cocos_transformation_type),
+            parent.physics_domain =
+                coalesce(row.physics_domain, parent.physics_domain),
+            parent.source_domains = CASE
+                WHEN row.source_domains IS NOT NULL AND size(row.source_domains) > 0
+                THEN row.source_domains ELSE parent.source_domains
+            END,
+            parent.description = CASE
+                WHEN trim(coalesce(parent.description, '')) = ''
+                THEN row.description ELSE parent.description
+            END,
+            parent.needs_composition = null,
+            parent.chain_length = coalesce(parent.chain_length, 0),
+            parent.docs_chain_length = coalesce(parent.docs_chain_length, 0),
+            parent.physical_base = coalesce(row.physical_base, parent.physical_base),
+            parent.geometric_base = coalesce(row.geometric_base, parent.geometric_base),
+            parent.subject = coalesce(row.subject, parent.subject),
+            parent.transformation = coalesce(row.transformation, parent.transformation),
+            parent.component = coalesce(row.component, parent.component),
+            parent.coordinate = coalesce(row.coordinate, parent.coordinate),
+            parent.position = coalesce(row.position, parent.position),
+            parent.process = coalesce(row.process, parent.process),
+            parent.device = coalesce(row.device, parent.device),
+            parent.region = coalesce(row.region, parent.region),
+            parent.aggregation = coalesce(row.aggregation, parent.aggregation),
+            parent.orbit = coalesce(row.orbit, parent.orbit),
+            parent.population = coalesce(row.population, parent.population),
+            parent.object = coalesce(row.object, parent.object),
+            parent.geometry = coalesce(row.geometry, parent.geometry),
+            parent.is_geometric_coordinate =
+                coalesce(parent.is_geometric_coordinate,
+                         row.is_geometric_coordinate)
+        MERGE (source:StandardNameSource {id: row.source_node_id})
+          ON CREATE SET source.created_at = datetime(), source.attempt_count = 0
+        SET source.status = 'composed',
+            source.source_type = row.source_type,
+            source.source_id = row.source_id,
+            source.batch_key = coalesce(source.batch_key, row.batch_key),
+            source.description = CASE
+                WHEN trim(coalesce(source.description, '')) = ''
+                THEN parent.description ELSE source.description
+            END,
+            source.physics_domain =
+                coalesce(parent.physics_domain, source.physics_domain),
+            source.composed_at = coalesce(source.composed_at, datetime()),
+            source.produced_sn_id = parent.id,
+            source.claimed_at = null,
+            source.claim_token = null
+        MERGE (source)-[:PRODUCED_NAME]->(parent)
+        FOREACH (_ IN CASE WHEN row.event IS NULL THEN [] ELSE [1] END |
+          CREATE (change:StandardNameChange)
+          SET change = row.event
+          CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change)
+        )
+        RETURN collect(parent.id) AS ids
+        """,
+        rows=rows,
+    )
+    linked_units = gc.query(
+        """
+        // STRUCTURAL_CLOSURE_BATCH_PARENT_UNITS
+        UNWIND $rows AS row
+        MATCH (parent:StandardName {id: row.parent_id})
+        WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }
+        OPTIONAL MATCH (parent)-[old_unit:HAS_UNIT]->(:Unit)
+        DELETE old_unit
+        WITH parent, row
+        MERGE (unit:Unit {id: row.unit})
+        MERGE (parent)-[:HAS_UNIT]->(unit)
+        RETURN collect(parent.id) AS ids
+        """,
+        rows=rows,
+    )
+    expected = {str(row["parent_id"]) for row in rows}
+    materialized_ids = (
+        set(materialized[0].get("ids") or []) if len(materialized) == 1 else set()
+    )
+    unit_ids = (
+        set(linked_units[0].get("ids") or []) if len(linked_units) == 1 else set()
+    )
+    if materialized_ids != expected or unit_ids != expected:
+        raise RuntimeError("batched derived-parent materialization cardinality changed")
+    return len(expected)
+
+
 def repair_normalization_peel_parent_units(gc: Any) -> list[str]:
     """Unset the dimensionless unit mis-inherited across a normalization peel.
 
@@ -17946,6 +18080,59 @@ def reconcile_orphan_parent_sources(
             seeded,
         )
     return seeded
+
+
+def reconcile_orphan_parent_sources_batched(
+    gc: Any,
+    rows: list[dict[str, Any]],
+    *,
+    event_by_parent: dict[str, dict[str, Any]] | None = None,
+) -> int:
+    """Seed an exact accepted-parent cohort in one graph query."""
+    items = []
+    for row in rows:
+        parent_id = str(row["parent_id"])
+        items.append(
+            {
+                "parent_id": parent_id,
+                **_derived_parent_source_metadata(parent_id),
+                "event": (event_by_parent or {}).get(parent_id),
+            }
+        )
+    result = gc.query(
+        """
+        // STRUCTURAL_CLOSURE_BATCH_SEED_SOURCES
+        UNWIND $items AS item
+        MATCH (parent:StandardName {id: item.parent_id})
+        WHERE parent.name_stage = 'accepted'
+          AND NOT EXISTS {
+            MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(parent)
+          }
+        MERGE (source:StandardNameSource {id: item.source_node_id})
+          ON CREATE SET source.created_at = datetime(), source.attempt_count = 0
+        SET source.status = coalesce(source.status, 'composed'),
+            source.source_type = item.source_type,
+            source.source_id = item.source_id,
+            source.batch_key = coalesce(source.batch_key, item.batch_key),
+            source.composed_at = coalesce(source.composed_at, datetime()),
+            source.produced_sn_id = parent.id,
+            source.claimed_at = null,
+            source.claim_token = null
+        MERGE (source)-[:PRODUCED_NAME]->(parent)
+        FOREACH (_ IN CASE WHEN item.event IS NULL THEN [] ELSE [1] END |
+          CREATE (change:StandardNameChange)
+          SET change = item.event
+          CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change)
+        )
+        RETURN collect(parent.id) AS ids
+        """,
+        items=items,
+    )
+    expected = {str(item["parent_id"]) for item in items}
+    seeded_ids = set(result[0].get("ids") or []) if len(result) == 1 else set()
+    if seeded_ids != expected:
+        raise RuntimeError("batched accepted-parent source cardinality changed")
+    return len(expected)
 
 
 @retry_on_deadlock()

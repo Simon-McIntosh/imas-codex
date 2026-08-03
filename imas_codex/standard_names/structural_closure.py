@@ -7,17 +7,17 @@ import hashlib
 import hmac
 import json
 import re
-import uuid
 from collections import Counter
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.graph_ops import (
-    _materialize_derived_parent_rows,
-    reconcile_orphan_parent_sources,
+    _materialize_derived_parent_rows_batched,
+    reconcile_orphan_parent_sources_batched,
 )
 from imas_codex.standard_names.parents import is_admissible_parent_name
 from imas_codex.standard_names.provenance_lifecycle import (
@@ -138,22 +138,25 @@ _DELETE_QUERY = """
 UNWIND $items AS item
 MATCH (name:StandardName {id: item.id})
 WHERE NOT EXISTS { MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(name) }
-CALL (name, item) {
-  WITH name, item
-  WHERE name.name_stage IS NOT NULL
-  CREATE (change:StandardNameChange)
-  SET change = item.change
-  SET change.changed_at = datetime()
-  RETURN count(change) AS ledgered
-  UNION
-  WITH name, item
-  WHERE name.name_stage IS NULL
-  RETURN 0 AS ledgered
-}
-WITH name, item, ledgered
+OPTIONAL MATCH (existing:StandardNameChange {id: item.event.id})
+WITH name, item, collect(existing) AS existing_events
+WHERE size(existing_events) = 0
+CREATE (change:StandardNameChange)
+SET change = item.event
+WITH name, item, change
 DETACH DELETE name
 RETURN collect(item.id) AS deleted_ids,
-       sum(ledgered) AS ledgered
+       collect(change.id) AS event_ids
+"""
+
+_EVENT_READ_QUERY = """
+// STRUCTURAL_CLOSURE_EVENT_POSTFLIGHT
+UNWIND $event_ids AS event_id
+OPTIONAL MATCH (event:StandardNameChange {id: event_id})
+WITH event_id, collect(event) AS matches
+RETURN event_id,
+       [event IN matches WHERE event IS NOT NULL | properties(event)] AS records
+ORDER BY event_id
 """
 
 
@@ -858,6 +861,104 @@ class _TransactionQueryAdapter:
         return [dict(row) for row in self.transaction.run(cypher, **params)]
 
 
+def _normalized_event_record(record: dict[str, Any]) -> dict[str, Any]:
+    normalized = dict(record)
+    changed_at = normalized.get("changed_at")
+    if hasattr(changed_at, "to_native"):
+        changed_at = changed_at.to_native()
+    if isinstance(changed_at, datetime):
+        normalized["changed_at"] = changed_at.isoformat(timespec="microseconds")
+    return normalized
+
+
+def _event_hash(record: dict[str, Any]) -> str:
+    return payload_hash(_normalized_event_record(record))
+
+
+def _event_record(
+    manifest: StructuralClosureManifest,
+    *,
+    action: str,
+    root_id: str,
+    target_id: str,
+    reason: str,
+    changed_at: datetime,
+) -> dict[str, Any]:
+    identity = {
+        "manifest_hash": manifest.manifest_hash,
+        "action": action,
+        "root_id": root_id,
+        "target_id": target_id,
+    }
+    operation = {
+        MATERIALIZE_ADMISSIBLE_PARENT: "materialize_structural_parent",
+        SEED_ACCEPTED_PARENT_SOURCE: "seed_structural_parent_source",
+        RETIRE_UNREACHABLE_CHAIN: "reconcile_structural_closure",
+        EXCLUDE_NULL_SCAFFOLD: "reconcile_structural_closure",
+    }[action]
+    return {
+        "id": "sn-change:structural:" + payload_hash(identity),
+        "from_name": target_id,
+        "to_name": target_id,
+        "operation": operation,
+        "reason": reason,
+        "origin": "structural_reconciliation",
+        "run_id": "structural:" + manifest.manifest_hash,
+        "changed_at": changed_at,
+        "internal": True,
+        **identity,
+    }
+
+
+def _event_bindings(
+    manifest: StructuralClosureManifest,
+    plans: list[dict[str, Any]],
+    manifest_by_root: dict[str, dict[str, Any]],
+) -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]]]:
+    changed_at = datetime.now(UTC)
+    records: dict[str, dict[str, Any]] = {}
+    receipts: list[dict[str, Any]] = []
+    for plan in sorted(plans, key=lambda item: item["root_id"]):
+        root_id = str(plan["root_id"])
+        manifest_row = manifest_by_root[root_id]
+        targets: list[tuple[str, str]] = []
+        if plan["mutation"].get("materialize"):
+            targets.append((MATERIALIZE_ADMISSIBLE_PARENT, root_id))
+        if plan["mutation"].get("seed_parent_id"):
+            targets.append((SEED_ACCEPTED_PARENT_SOURCE, root_id))
+        scaffold_ids = {str(item) for item in manifest_row["scaffold_ids"]}
+        for target_id in plan["mutation"].get("delete_ids") or []:
+            action = (
+                EXCLUDE_NULL_SCAFFOLD
+                if target_id in scaffold_ids
+                else RETIRE_UNREACHABLE_CHAIN
+            )
+            targets.append((action, str(target_id)))
+        for action, target_id in targets:
+            record = _event_record(
+                manifest,
+                action=action,
+                root_id=root_id,
+                target_id=target_id,
+                reason=str(manifest_row["reason"]),
+                changed_at=changed_at,
+            )
+            event_id = str(record["id"])
+            if event_id in records:
+                raise StructuralClosureConflict("structural event identity collided")
+            records[event_id] = record
+            receipts.append(
+                {
+                    "id": event_id,
+                    "hash": _event_hash(record),
+                    "action": action,
+                    "root_id": root_id,
+                    "target_id": target_id,
+                }
+            )
+    return records, sorted(receipts, key=lambda item: item["id"])
+
+
 def _lock_relationships(
     transaction: Any, relationship_ids: set[str], root_ids: tuple[str, ...]
 ) -> None:
@@ -876,39 +977,44 @@ def _lock_relationships(
 
 def _apply_plans(
     transaction: Any,
+    manifest: StructuralClosureManifest,
     plans: list[dict[str, Any]],
     manifest_by_root: dict[str, dict[str, Any]],
-) -> int:
+) -> tuple[int, list[dict[str, Any]], dict[str, dict[str, Any]]]:
     adapter = _TransactionQueryAdapter(transaction)
-    changed = 0
-    for plan in plans:
-        materialize = plan["mutation"].get("materialize")
-        if materialize:
-            seeded = _materialize_derived_parent_rows(adapter, [materialize])
-            if seeded != 1:
-                raise StructuralClosureConflict(
-                    "sanctioned parent materialization refused"
-                )
-            changed += seeded
-        seed_parent_id = plan["mutation"].get("seed_parent_id")
-        if seed_parent_id:
-            seeded = reconcile_orphan_parent_sources(
-                gc=adapter,
-                classification={
-                    "repairable": [{"parent_id": seed_parent_id, "origin": "derived"}],
-                    "rejected_derived": [],
-                },
-            )
-            if seeded != 1:
-                raise StructuralClosureConflict(
-                    "accepted parent provenance seeding refused"
-                )
-            changed += seeded
+    records, event_receipts = _event_bindings(manifest, plans, manifest_by_root)
+    events_by_target = {str(record["target_id"]): record for record in records.values()}
+    materializations = [
+        plan["mutation"]["materialize"]
+        for plan in plans
+        if plan["mutation"].get("materialize")
+    ]
+    source_seeds = [
+        {
+            "parent_id": plan["mutation"]["seed_parent_id"],
+            "origin": "derived",
+        }
+        for plan in plans
+        if plan["mutation"].get("seed_parent_id")
+    ]
+    try:
+        materialized = _materialize_derived_parent_rows_batched(
+            adapter,
+            materializations,
+            event_by_parent=events_by_target,
+        )
+        seeded = reconcile_orphan_parent_sources_batched(
+            adapter,
+            source_seeds,
+            event_by_parent=events_by_target,
+        )
+    except RuntimeError as exc:
+        raise StructuralClosureConflict(str(exc)) from exc
     delete_items = []
     for plan in plans:
         manifest_row = manifest_by_root[plan["root_id"]]
         for target_id in plan["mutation"].get("delete_ids") or []:
-            change = deletion_change_params(
+            deletion_change_params(
                 "reconcile_structural_closure",
                 reason=str(manifest_row["reason"]),
                 origin="structural_reconciliation",
@@ -916,27 +1022,42 @@ def _apply_plans(
             delete_items.append(
                 {
                     "id": target_id,
-                    "change": {
-                        "id": "sn-change:" + str(uuid.uuid4()),
-                        "from_name": target_id,
-                        "to_name": target_id,
-                        "operation": change["deletion_operation"],
-                        "reason": change["deletion_reason"],
-                        "origin": change["deletion_origin"],
-                        "run_id": change["deletion_run_id"],
-                        "internal": True,
-                    },
+                    "event": events_by_target[str(target_id)],
                 }
             )
-    if delete_items:
-        rows = list(transaction.run(_DELETE_QUERY, items=delete_items))
-        deleted = (
-            set(dict(rows[0]).get("deleted_ids") or []) if len(rows) == 1 else set()
-        )
-        if deleted != {item["id"] for item in delete_items}:
-            raise StructuralClosureConflict("structural deletion cardinality changed")
-        changed += len(deleted)
-    return changed
+    rows = list(transaction.run(_DELETE_QUERY, items=delete_items))
+    mutation = dict(rows[0]) if len(rows) == 1 else {}
+    deleted = set(mutation.get("deleted_ids") or [])
+    deletion_event_ids = set(mutation.get("event_ids") or [])
+    if deleted != {item["id"] for item in delete_items} or deletion_event_ids != {
+        item["event"]["id"] for item in delete_items
+    }:
+        raise StructuralClosureConflict("structural deletion cardinality changed")
+    changed = materialized + seeded + len(deleted)
+    return changed, event_receipts, records
+
+
+def _verify_events(
+    transaction: Any,
+    records: dict[str, dict[str, Any]],
+    event_receipts: list[dict[str, Any]],
+) -> None:
+    rows = [
+        dict(row)
+        for row in transaction.run(_EVENT_READ_QUERY, event_ids=sorted(records))
+    ]
+    by_id = {str(row["event_id"]): row.get("records") or [] for row in rows}
+    expected_hashes = {item["id"]: item["hash"] for item in event_receipts}
+    if set(by_id) != set(records):
+        raise StructuralClosureConflict("structural event postflight omitted an event")
+    for event_id, matches in by_id.items():
+        if (
+            len(matches) != 1
+            or _event_hash(dict(matches[0])) != expected_hashes[event_id]
+        ):
+            raise StructuralClosureConflict(
+                "structural event postflight record hash changed"
+            )
 
 
 def _receipt(
@@ -945,6 +1066,7 @@ def _receipt(
     *,
     apply: bool,
     changed: int = 0,
+    events: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     counts = Counter(plan["status"] for plan in plans)
     mode = (
@@ -980,6 +1102,7 @@ def _receipt(
             }
             for plan in plans
         ],
+        "events": sorted(events or [], key=lambda item: item["id"]),
     }
     receipt["receipt_hash"] = payload_hash(receipt)
     return receipt
@@ -1049,7 +1172,10 @@ def reconcile_structural_closure(
                         "structural closure changed after locks"
                     )
                 by_root = {str(row["root_id"]): row for row in manifest.rows}
-                changed = _apply_plans(transaction, pending, by_root)
+                changed, events, event_records = _apply_plans(
+                    transaction, manifest, pending, by_root
+                )
+                _verify_events(transaction, event_records, events)
                 post = _read_plan(
                     transaction, manifest, include_accepted=include_accepted
                 )
@@ -1075,7 +1201,13 @@ def reconcile_structural_closure(
                         "structural closure unresolved set changed during apply"
                     )
                 transaction.commit()
-                return _receipt(manifest, post, apply=True, changed=changed)
+                return _receipt(
+                    manifest,
+                    post,
+                    apply=True,
+                    changed=changed,
+                    events=events,
+                )
             except Exception:
                 transaction.rollback()
                 raise

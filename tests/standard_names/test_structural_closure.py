@@ -275,6 +275,12 @@ def structural_graph(ephemeral_neo4j: _EphemeralNeo4j) -> Iterator[GraphClient]:
         yield client
     finally:
         client.query("MATCH (node) DETACH DELETE node")
+        assert client.query("MATCH (node) RETURN count(node) AS nodes") == [
+            {"nodes": 0}
+        ]
+        assert client.query(
+            "MATCH ()-[relationship]->() RETURN count(relationship) AS relationships"
+        ) == [{"relationships": 0}]
         client.close()
 
 
@@ -338,6 +344,73 @@ def _seed_vector_parent(client: GraphClient) -> None:
     )
 
 
+def _seed_electric_vector_parent(client: GraphClient) -> None:
+    client.query(
+        """
+        CREATE (parent:StandardName {id: 'electric_field', origin: 'derived'})
+        CREATE (radial:StandardName {
+          id: 'radial_electric_field', origin: 'derived', name_stage: 'accepted',
+          unit: 'V.m^-1', physics_domain: 'magnetics'
+        })
+        CREATE (toroidal:StandardName {
+          id: 'toroidal_electric_field', origin: 'derived', name_stage: 'accepted',
+          unit: 'V.m^-1', physics_domain: 'magnetics'
+        })
+        CREATE (unit:Unit {id: 'V.m^-1'})
+        CREATE (radial_source:StandardNameSource {
+          id: 'derived:radial_electric_field', status: 'composed'
+        })-[:PRODUCED_NAME]->(radial)
+        CREATE (toroidal_source:StandardNameSource {
+          id: 'derived:toroidal_electric_field', status: 'composed'
+        })-[:PRODUCED_NAME]->(toroidal)
+        CREATE (radial)-[:HAS_UNIT]->(unit)
+        CREATE (toroidal)-[:HAS_UNIT]->(unit)
+        CREATE (radial)-[:HAS_PARENT {
+          operator_kind: 'projection', axis: 'radial'
+        }]->(parent)
+        CREATE (toroidal)-[:HAS_PARENT {
+          operator_kind: 'projection', axis: 'toroidal'
+        }]->(parent)
+        """
+    )
+
+
+class _CountingTransaction:
+    def __init__(self, transaction: Any, counter: list[int]) -> None:
+        self.transaction = transaction
+        self.counter = counter
+
+    def run(self, cypher: str, **params: Any):
+        self.counter[0] += 1
+        return self.transaction.run(cypher, **params)
+
+    def commit(self) -> None:
+        self.transaction.commit()
+
+    def rollback(self) -> None:
+        self.transaction.rollback()
+
+
+class _CountingSession:
+    def __init__(self, session: Any, counter: list[int]) -> None:
+        self.session = session
+        self.counter = counter
+
+    def begin_transaction(self) -> _CountingTransaction:
+        return _CountingTransaction(self.session.begin_transaction(), self.counter)
+
+
+class _CountingClient:
+    def __init__(self, client: GraphClient, counter: list[int]) -> None:
+        self.client = client
+        self.counter = counter
+
+    @contextmanager
+    def session(self):
+        with self.client.session() as session:
+            yield _CountingSession(session, self.counter)
+
+
 @pytest.mark.graph
 def test_materialization_is_dry_run_safe_hash_bound_and_idempotent(
     tmp_path: Path, structural_graph: GraphClient, monkeypatch: pytest.MonkeyPatch
@@ -381,6 +454,16 @@ def test_materialization_is_dry_run_safe_hash_bound_and_idempotent(
     )
     assert applied["mode"] == "applied"
     assert applied["counts"]["changed"] == 1
+    assert len(applied["events"]) == 1
+    assert applied["events"][0]["action"] == MATERIALIZE_ADMISSIBLE_PARENT
+    persisted_event = structural_graph.query(
+        """
+        MATCH (change:StandardNameChange {id: $event_id})
+        RETURN properties(change) AS record
+        """,
+        event_id=applied["events"][0]["id"],
+    )[0]["record"]
+    assert closure._event_hash(persisted_event) == applied["events"][0]["hash"]
     assert reads == 3
     rows = structural_graph.query(
         """
@@ -403,6 +486,139 @@ def test_materialization_is_dry_run_safe_hash_bound_and_idempotent(
     )
     assert repeated["mode"] == "already_current"
     assert repeated["counts"]["changed"] == 0
+    assert repeated["events"] == []
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 1}]
+
+
+@pytest.mark.graph
+def test_apply_query_count_is_constant_for_single_multi_and_mixed_cohorts(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    def apply_count(specifications: dict[str, dict[str, Any]]) -> tuple[int, int]:
+        manifest, manifest_hash = _bound_manifest(
+            tmp_path, structural_graph, specifications
+        )
+        counter = [0]
+        receipt = closure.reconcile_structural_closure(
+            manifest,
+            dry_run=False,
+            expected_manifest_hash=manifest_hash,
+            gc=_CountingClient(structural_graph, counter),
+        )
+        return counter[0], receipt["counts"]["changed"]
+
+    _seed_vector_parent(structural_graph)
+    single_count, single_changed = apply_count(
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        }
+    )
+
+    structural_graph.query("MATCH (node) DETACH DELETE node")
+    _seed_vector_parent(structural_graph)
+    _seed_electric_vector_parent(structural_graph)
+    multi_count, multi_changed = apply_count(
+        {
+            "electric_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            },
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            },
+        }
+    )
+
+    structural_graph.query("MATCH (node) DETACH DELETE node")
+    _seed_vector_parent(structural_graph)
+    _seed_electric_vector_parent(structural_graph)
+    structural_graph.query(
+        """
+        MATCH (parent:StandardName {id: 'electric_field'})
+        SET parent.name_stage = 'accepted', parent.unit = 'V.m^-1'
+        CREATE (:StandardName {id: 'temperature_over_scrape_off_layer',
+                               name_stage: 'drafted', origin: 'derived'})
+        """
+    )
+    mixed_count, mixed_changed = apply_count(
+        {
+            "electric_field": {
+                "expected_actions": [SEED_ACCEPTED_PARENT_SOURCE],
+            },
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            },
+            "temperature_over_scrape_off_layer": {
+                "expected_actions": [RETIRE_UNREACHABLE_CHAIN],
+                "retire_ids": ["temperature_over_scrape_off_layer"],
+            },
+        }
+    )
+
+    assert (single_count, multi_count, mixed_count) == (10, 10, 10)
+    assert (single_changed, multi_changed, mixed_changed) == (1, 2, 3)
+
+
+@pytest.mark.graph
+def test_shared_descendant_cohort_materializes_each_root_once(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    structural_graph.query(
+        """
+        MATCH (shared:StandardName {id: 'radial_magnetic_field'}),
+              (unit:Unit {id: 'T'})
+        CREATE (parent:StandardName {
+          id: 'perturbed_magnetic_field', origin: 'derived'
+        })
+        CREATE (toroidal:StandardName {
+          id: 'toroidal_perturbed_magnetic_field', origin: 'derived',
+          name_stage: 'accepted', unit: 'T', physics_domain: 'magnetics'
+        })
+        CREATE (source:StandardNameSource {
+          id: 'derived:toroidal_perturbed_magnetic_field', status: 'composed'
+        })-[:PRODUCED_NAME]->(toroidal)
+        CREATE (toroidal)-[:HAS_UNIT]->(unit)
+        CREATE (shared)-[:HAS_PARENT {
+          operator_kind: 'projection', axis: 'radial'
+        }]->(parent)
+        CREATE (toroidal)-[:HAS_PARENT {
+          operator_kind: 'projection', axis: 'toroidal'
+        }]->(parent)
+        """
+    )
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            },
+            "perturbed_magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            },
+        },
+    )
+
+    receipt = closure.reconcile_structural_closure(
+        manifest,
+        dry_run=False,
+        expected_manifest_hash=manifest_hash,
+        gc=structural_graph,
+    )
+
+    assert receipt["counts"]["changed"] == 2
+    assert len(receipt["events"]) == 2
+    assert structural_graph.query(
+        """
+        MATCH (shared:StandardName {id: 'radial_magnetic_field'})
+        RETURN count(shared) AS shared_nodes,
+               size([(shared)-[:HAS_PARENT]->() | 1]) AS parent_count
+        """
+    ) == [{"shared_nodes": 1, "parent_count": 2}]
 
 
 @pytest.mark.graph
@@ -443,22 +659,81 @@ def test_scaffold_exclusion_and_retirement_are_ledgered_by_lifecycle(
     assert structural_graph.query(
         "MATCH (name:StandardName) RETURN count(name) AS names"
     ) == [{"names": 0}]
-    assert structural_graph.query(
+    event_rows = structural_graph.query(
         """
         MATCH (change:StandardNameChange)
         RETURN change.from_name AS name, change.operation AS operation,
-               change.changed_at IS NOT NULL AS timestamped
+               change.changed_at IS NOT NULL AS timestamped,
+               change.action AS action
+        ORDER BY name
         """
-    ) == [
+    )
+    assert event_rows == [
+        {
+            "name": "phase_of_fiber_optic_current_sensor",
+            "operation": "reconcile_structural_closure",
+            "timestamped": True,
+            "action": EXCLUDE_NULL_SCAFFOLD,
+        },
         {
             "name": "temperature_over_scrape_off_layer",
             "operation": "reconcile_structural_closure",
             "timestamped": True,
-        }
+            "action": RETIRE_UNREACHABLE_CHAIN,
+        },
     ]
+    assert len(receipt["events"]) == 2
     assert structural_graph.query(
         "MATCH (:StandardNameSource) RETURN count(*) AS sources"
     ) == [{"sources": 0}]
+
+
+@pytest.mark.graph
+def test_accepted_deletion_refuses_then_applies_only_with_authorization(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    structural_graph.query(
+        """
+        CREATE (:StandardName {id: 'temperature_over_scrape_off_layer',
+                               name_stage: 'accepted', origin: 'derived'})
+        """
+    )
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "temperature_over_scrape_off_layer": {
+                "expected_actions": [RETIRE_UNREACHABLE_CHAIN],
+                "retire_ids": ["temperature_over_scrape_off_layer"],
+            }
+        },
+    )
+
+    guarded = closure.reconcile_structural_closure(
+        manifest,
+        dry_run=True,
+        include_accepted=False,
+        gc=structural_graph,
+    )
+    assert guarded["mode"] == "refused"
+    assert structural_graph.query(
+        "MATCH (:StandardName {id: 'temperature_over_scrape_off_layer'}) "
+        "RETURN count(*) AS names"
+    ) == [{"names": 1}]
+
+    applied = closure.reconcile_structural_closure(
+        manifest,
+        dry_run=False,
+        include_accepted=True,
+        expected_manifest_hash=manifest_hash,
+        gc=structural_graph,
+    )
+    assert applied["mode"] == "applied"
+    assert applied["events"][0]["action"] == RETIRE_UNREACHABLE_CHAIN
+    assert structural_graph.query(
+        "MATCH (:StandardName {id: 'temperature_over_scrape_off_layer'}) "
+        "RETURN count(*) AS names"
+    ) == [{"names": 0}]
 
 
 @pytest.mark.graph
@@ -504,6 +779,8 @@ def test_accepted_parent_source_seeding_preserves_catalog_state(
         """
     )[0]["properties"]
     assert receipt["mode"] == "applied"
+    assert len(receipt["events"]) == 1
+    assert receipt["events"][0]["action"] == SEED_ACCEPTED_PARENT_SOURCE
     assert after == before
     assert structural_graph.query(
         """
@@ -560,6 +837,96 @@ class _RelationshipDriftSession:
         return _RelationshipDriftTransaction(self.session.begin_transaction(), self.uri)
 
 
+class _ParticipantDriftTransaction:
+    def __init__(self, transaction: Any, uri: str, statement: str) -> None:
+        self.transaction = transaction
+        self.uri = uri
+        self.statement = statement
+        self.drifted = False
+
+    def run(self, cypher: str, **params: Any):
+        if "SOURCE_SNAPSHOT_MIGRATION_LOCK" in cypher and not self.drifted:
+            with GraphDatabase.driver(self.uri, auth=None) as driver:
+                driver.execute_query(self.statement)
+            self.drifted = True
+        return self.transaction.run(cypher, **params)
+
+    def commit(self) -> None:
+        self.transaction.commit()
+
+    def rollback(self) -> None:
+        self.transaction.rollback()
+
+
+class _ParticipantDriftSession:
+    def __init__(self, session: Any, uri: str, statement: str) -> None:
+        self.session = session
+        self.uri = uri
+        self.statement = statement
+
+    def begin_transaction(self) -> _ParticipantDriftTransaction:
+        return _ParticipantDriftTransaction(
+            self.session.begin_transaction(), self.uri, self.statement
+        )
+
+
+class _ParticipantDriftClient:
+    def __init__(self, client: GraphClient, uri: str, statement: str) -> None:
+        self.client = client
+        self.uri = uri
+        self.statement = statement
+
+    @contextmanager
+    def session(self):
+        with self.client.session() as session:
+            yield _ParticipantDriftSession(session, self.uri, self.statement)
+
+
+class _EventTamperTransaction:
+    def __init__(self, transaction: Any) -> None:
+        self.transaction = transaction
+        self.tampered = False
+
+    def run(self, cypher: str, **params: Any):
+        if "STRUCTURAL_CLOSURE_EVENT_POSTFLIGHT" in cypher and not self.tampered:
+            list(
+                self.transaction.run(
+                    """
+                    MATCH (change:StandardNameChange)
+                    WHERE change.id IN $event_ids
+                    SET change.reason = 'tampered inside transaction'
+                    """,
+                    event_ids=params["event_ids"],
+                )
+            )
+            self.tampered = True
+        return self.transaction.run(cypher, **params)
+
+    def commit(self) -> None:
+        self.transaction.commit()
+
+    def rollback(self) -> None:
+        self.transaction.rollback()
+
+
+class _EventTamperSession:
+    def __init__(self, session: Any) -> None:
+        self.session = session
+
+    def begin_transaction(self) -> _EventTamperTransaction:
+        return _EventTamperTransaction(self.session.begin_transaction())
+
+
+class _EventTamperClient:
+    def __init__(self, client: GraphClient) -> None:
+        self.client = client
+
+    @contextmanager
+    def session(self):
+        with self.client.session() as session:
+            yield _EventTamperSession(session)
+
+
 @pytest.mark.graph
 def test_relationship_drift_rolls_back_before_mutation(
     tmp_path: Path,
@@ -584,6 +951,208 @@ def test_relationship_drift_rolls_back_before_mutation(
             expected_manifest_hash=manifest_hash,
             gc=_RelationshipDriftClient(structural_graph, ephemeral_neo4j.uri),
         )
+    assert structural_graph.query(
+        """
+        MATCH (parent:StandardName {id: 'magnetic_field'})
+        OPTIONAL MATCH (source:StandardNameSource {id: 'derived:magnetic_field'})
+                       -[:PRODUCED_NAME]->(parent)
+        RETURN parent.name_stage AS stage, count(source) AS sources
+        """
+    ) == [{"stage": None, "sources": 0}]
+
+
+@pytest.mark.graph
+@pytest.mark.parametrize("participant", ["unit", "dd"])
+def test_claimed_unit_and_dd_participants_refuse_without_mutation(
+    tmp_path: Path, structural_graph: GraphClient, participant: str
+) -> None:
+    _seed_vector_parent(structural_graph)
+    if participant == "unit":
+        structural_graph.query(
+            "MATCH (unit:Unit {id: 'T'}) SET unit.claimed_at = datetime()"
+        )
+    else:
+        structural_graph.query(
+            """
+            MATCH (child:StandardName {id: 'radial_magnetic_field'})
+            CREATE (node:IMASNode {
+              id: 'equilibrium/time_slice/magnetic_field/radial',
+              claimed_at: datetime()
+            })-[:HAS_STANDARD_NAME]->(child)
+            """
+        )
+    manifest, _ = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        },
+    )
+
+    receipt = closure.reconcile_structural_closure(
+        manifest, dry_run=True, gc=structural_graph
+    )
+
+    assert receipt["mode"] == "refused"
+    assert any(
+        "active structural closure claims" in reason
+        for reason in receipt["rows"][0]["unresolved"]
+    )
+    assert receipt["events"] == []
+
+
+@pytest.mark.graph
+def test_generic_protected_participant_property_refuses_without_mutation(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    structural_graph.query("MATCH (unit:Unit {id: 'T'}) SET unit.facility_id = 'west'")
+    rows = _snapshot(structural_graph, ["magnetic_field"])
+    manifest_row = build_structural_closure_manifest_row(
+        rows[0],
+        root_id="magnetic_field",
+        expected_actions=[MATERIALIZE_ADMISSIBLE_PARENT],
+        reason="refuse protected structural participants",
+    )
+
+    assert manifest_row["west_intersection"] == 1
+
+
+@pytest.mark.graph
+@pytest.mark.parametrize(
+    "statement",
+    [
+        "MATCH (unit:Unit {id: 'T'}) SET unit.claimed_at = datetime()",
+        "MATCH (node:IMASNode {id: 'equilibrium/time_slice/magnetic_field/radial'}) "
+        "SET node.claimed_at = datetime()",
+        "MATCH (unit:Unit {id: 'T'}) SET unit.facility_id = 'west'",
+    ],
+)
+def test_unit_claim_and_generic_property_drift_roll_back_the_cohort(
+    tmp_path: Path,
+    structural_graph: GraphClient,
+    ephemeral_neo4j: _EphemeralNeo4j,
+    statement: str,
+) -> None:
+    _seed_vector_parent(structural_graph)
+    structural_graph.query(
+        """
+        MATCH (child:StandardName {id: 'radial_magnetic_field'})
+        CREATE (:IMASNode {
+          id: 'equilibrium/time_slice/magnetic_field/radial'
+        })-[:HAS_STANDARD_NAME]->(child)
+        """
+    )
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        },
+    )
+
+    with pytest.raises(StructuralClosureConflict, match="changed after locks"):
+        closure.reconcile_structural_closure(
+            manifest,
+            dry_run=False,
+            expected_manifest_hash=manifest_hash,
+            gc=_ParticipantDriftClient(
+                structural_graph, ephemeral_neo4j.uri, statement
+            ),
+        )
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
+    assert structural_graph.query(
+        "MATCH (:StandardNameSource {id: 'derived:magnetic_field'}) "
+        "RETURN count(*) AS sources"
+    ) == [{"sources": 0}]
+
+
+@pytest.mark.graph
+def test_admission_drift_on_retirement_target_rolls_back_whole_cohort(
+    tmp_path: Path,
+    structural_graph: GraphClient,
+    ephemeral_neo4j: _EphemeralNeo4j,
+) -> None:
+    structural_graph.query(
+        """
+        CREATE (root:StandardName {id: 'temperature_over_scrape_off_layer',
+                                   name_stage: 'drafted', origin: 'derived'})
+        CREATE (child:StandardName {
+          id: 'average_temperature_over_scrape_off_layer',
+          name_stage: 'drafted', origin: 'derived'
+        })-[:HAS_PARENT {operator_kind: 'qualifier'}]->(root)
+        """
+    )
+    targets = [
+        "average_temperature_over_scrape_off_layer",
+        "temperature_over_scrape_off_layer",
+    ]
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "temperature_over_scrape_off_layer": {
+                "expected_actions": [RETIRE_UNREACHABLE_CHAIN],
+                "retire_ids": targets,
+            }
+        },
+    )
+    statement = """
+        MATCH (:StandardName {id: 'average_temperature_over_scrape_off_layer'})
+              -[edge:HAS_PARENT]->(:StandardName)
+        SET edge.operator_kind = 'binary'
+    """
+
+    with pytest.raises(StructuralClosureConflict, match="changed after locks"):
+        closure.reconcile_structural_closure(
+            manifest,
+            dry_run=False,
+            expected_manifest_hash=manifest_hash,
+            gc=_ParticipantDriftClient(
+                structural_graph, ephemeral_neo4j.uri, statement
+            ),
+        )
+    remaining_ids = structural_graph.query(
+        "MATCH (name:StandardName) RETURN collect(name.id) AS ids"
+    )[0]["ids"]
+    assert sorted(remaining_ids) == sorted(targets)
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
+
+
+@pytest.mark.graph
+def test_event_record_tamper_fails_hash_postflight_and_rolls_back(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {
+            "magnetic_field": {
+                "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
+            }
+        },
+    )
+
+    with pytest.raises(StructuralClosureConflict, match="record hash changed"):
+        closure.reconcile_structural_closure(
+            manifest,
+            dry_run=False,
+            expected_manifest_hash=manifest_hash,
+            gc=_EventTamperClient(structural_graph),
+        )
+
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
     assert structural_graph.query(
         """
         MATCH (parent:StandardName {id: 'magnetic_field'})
