@@ -84,7 +84,9 @@ CALL (candidate, source_nodes) {
     producers: [(producer:StandardNameSource)-[binding:PRODUCED_NAME]->
       (protected_name) | {source_element_id: elementId(producer),
         source_properties: properties(producer),
-        relationship_element_id: elementId(binding)}]
+        relationship_element_id: elementId(binding),
+        start_element_id: elementId(producer),
+        end_element_id: elementId(protected_name)}]
   }) AS protected_names
 }
 RETURN candidate.source_id AS source_id,
@@ -93,25 +95,31 @@ RETURN candidate.source_id AS source_id,
     element_id: elementId(source), labels: labels(source), properties: properties(source),
     bindings: [(source)-[binding:PRODUCED_NAME]->(target:StandardName) | {
       relationship_element_id: elementId(binding), properties: properties(binding),
+      start_element_id: elementId(source), end_element_id: elementId(target),
       target_element_id: elementId(target), target_id: target.id,
       target_properties: properties(target)}],
     dd_backings: [(source)-[backing:FROM_DD_PATH]->(entity:IMASNode) | {
       relationship_element_id: elementId(backing), relationship_properties: properties(backing),
+      start_element_id: elementId(source), end_element_id: elementId(entity),
       element_id: elementId(entity), labels: labels(entity), properties: properties(entity),
       projections: [(entity)-[projection:HAS_STANDARD_NAME]->(name:StandardName) | {
         relationship_element_id: elementId(projection), properties: properties(projection),
+        start_element_id: elementId(entity), end_element_id: elementId(name),
         target_element_id: elementId(name), target_id: name.id,
         target_properties: properties(name)}]}],
     signal_backings: [(source)-[backing:FROM_FACILITY_SIGNAL]->(entity:FacilitySignal) | {
       relationship_element_id: elementId(backing), relationship_properties: properties(backing),
+      start_element_id: elementId(source), end_element_id: elementId(entity),
       element_id: elementId(entity), labels: labels(entity), properties: properties(entity),
       projections: [(entity)-[projection:HAS_STANDARD_NAME]->(name:StandardName) | {
         relationship_element_id: elementId(projection), properties: properties(projection),
+        start_element_id: elementId(entity), end_element_id: elementId(name),
         target_element_id: elementId(name), target_id: name.id,
         target_properties: properties(name)}]}],
     events: [(source)-[event_link:HAS_INTERNAL_CHANGE]->
       (event:StandardNameChange) WHERE event.operation = 'reconcile_semantic_source' | {
         relationship_element_id: elementId(event_link), properties: properties(event_link),
+        start_element_id: elementId(source), end_element_id: elementId(event),
         event_element_id: elementId(event), event_properties: properties(event)}]
   }] AS sources,
   prospective_targets,
@@ -119,6 +127,7 @@ RETURN candidate.source_id AS source_id,
       (target:StandardName {id: candidate.prospective_target_id}) | {
     source_element_id: elementId(producer), source_properties: properties(producer),
     relationship_element_id: elementId(binding), target_element_id: elementId(target),
+    start_element_id: elementId(producer), end_element_id: elementId(target),
     target_properties: properties(target)}] AS prospective_producers,
   dd_versions, protected_names
 ORDER BY source_id
@@ -126,7 +135,8 @@ ORDER BY source_id
 
 PARTICIPANT_LOCK_QUERY = """
 // SEMANTIC_SOURCE_RECONCILIATION_PARTICIPANT_LOCK
-MATCH (participant) WHERE elementId(participant) IN $element_ids
+MATCH (participant)
+WHERE elementId(participant) IN $element_ids
 SET participant._semantic_source_lock = true
 REMOVE participant._semantic_source_lock
 RETURN count(participant) AS locked
@@ -134,10 +144,21 @@ RETURN count(participant) AS locked
 
 RELATIONSHIP_LOCK_QUERY = """
 // SEMANTIC_SOURCE_RECONCILIATION_RELATIONSHIP_LOCK
-UNWIND $locks AS item
-MATCH (anchor) WHERE elementId(anchor) = item.anchor_element_id
-MATCH (anchor)-[relationship]-()
-WHERE elementId(relationship) = item.relationship_element_id
+MATCH (start)
+WHERE elementId(start) IN $start_element_ids
+CALL (start) {
+  MATCH (start)-[relationship:PRODUCED_NAME|FROM_DD_PATH|FROM_FACILITY_SIGNAL|
+    HAS_STANDARD_NAME|HAS_INTERNAL_CHANGE|HAS_PARENT]->(end)
+  RETURN relationship, end
+}
+WITH start, relationship, end
+WHERE elementId(relationship) IN $relationship_element_ids
+WITH start, relationship, end,
+  [item IN $locks WHERE
+    item.relationship_element_id = elementId(relationship)][0] AS item
+WHERE item IS NOT NULL
+  AND elementId(start) = item.start_element_id
+  AND elementId(end) = item.end_element_id
 SET relationship._semantic_source_lock = true
 REMOVE relationship._semantic_source_lock
 RETURN count(DISTINCT relationship) AS locked
@@ -278,8 +299,14 @@ def load_semantic_source_manifest(path: str | Path) -> SemanticSourceManifest:
             raise ValueError("semantic-source manifest requires an exact target id")
         if not isinstance(row["reviewed_override"], bool):
             raise ValueError("reviewed_override must be boolean")
-        if row["reviewed_override"] != bool(row["review_approval"]):
-            raise ValueError("reviewed overrides require independent approval")
+        approval = row["review_approval"]
+        if row["reviewed_override"]:
+            if not isinstance(approval, str) or not approval.strip():
+                raise ValueError(
+                    "reviewed overrides require a non-empty string approval"
+                )
+        elif approval is not None:
+            raise ValueError("non-override rows require null review approval")
         for field in MANIFEST_ROW_FIELDS:
             if field.startswith("expected_") and field.endswith("_hash"):
                 _require_hash(row[field], field)
@@ -461,52 +488,74 @@ def _relationship_ids(row: dict[str, Any]) -> tuple[str, ...]:
 
 def _relationship_lock_items(rows: list[dict[str, Any]]) -> list[dict[str, str]]:
     """Anchor exact relationship locks at already-bound participant nodes."""
-    locks: dict[str, str] = {}
+    locks: dict[str, tuple[str, str]] = {}
 
-    def add(relationship_id: Any, anchor_id: Any) -> None:
-        if relationship_id and anchor_id:
+    def add(relationship_id: Any, start_id: Any, end_id: Any) -> None:
+        if relationship_id and start_id and end_id:
             normalized_relationship = str(relationship_id)
-            normalized_anchor = str(anchor_id)
+            endpoints = (str(start_id), str(end_id))
             prior = locks.get(normalized_relationship)
-            if prior is not None and prior != normalized_anchor:
+            if prior is not None and prior != endpoints:
                 raise SemanticSourceConflict(
-                    "relationship closure has conflicting lock anchors"
+                    "relationship closure has conflicting endpoints"
                 )
-            locks[normalized_relationship] = normalized_anchor
+            locks[normalized_relationship] = endpoints
 
     for row in rows:
         for source in row.get("sources") or []:
             source_element_id = source.get("element_id")
             for binding in source.get("bindings") or []:
-                add(binding.get("relationship_element_id"), source_element_id)
+                add(
+                    binding.get("relationship_element_id"),
+                    binding.get("start_element_id", source_element_id),
+                    binding.get("end_element_id", binding.get("target_element_id")),
+                )
             for backing in _backings(source):
-                add(backing.get("relationship_element_id"), source_element_id)
+                add(
+                    backing.get("relationship_element_id"),
+                    backing.get("start_element_id", source_element_id),
+                    backing.get("end_element_id", backing.get("element_id")),
+                )
                 for projection in backing.get("projections") or []:
                     add(
                         projection.get("relationship_element_id"),
-                        backing.get("element_id"),
+                        projection.get("start_element_id", backing.get("element_id")),
+                        projection.get(
+                            "end_element_id", projection.get("target_element_id")
+                        ),
                     )
             for event in source.get("events") or []:
-                add(event.get("relationship_element_id"), source_element_id)
+                add(
+                    event.get("relationship_element_id"),
+                    event.get("start_element_id", source_element_id),
+                    event.get("end_element_id", event.get("event_element_id")),
+                )
         for producer in row.get("prospective_producers") or []:
             add(
                 producer.get("relationship_element_id"),
-                producer.get("source_element_id"),
+                producer.get("start_element_id", producer.get("source_element_id")),
+                producer.get("end_element_id", producer.get("target_element_id")),
             )
         for protected_name in row.get("protected_names") or []:
             for relationship in protected_name.get("path_relationships") or []:
                 add(
                     relationship.get("relationship_element_id"),
                     relationship.get("start_element_id"),
+                    relationship.get("end_element_id"),
                 )
             for producer in protected_name.get("producers") or []:
                 add(
                     producer.get("relationship_element_id"),
-                    producer.get("source_element_id"),
+                    producer.get("start_element_id", producer.get("source_element_id")),
+                    producer.get("end_element_id", protected_name.get("element_id")),
                 )
     return [
-        {"relationship_element_id": relationship_id, "anchor_element_id": anchor_id}
-        for relationship_id, anchor_id in sorted(locks.items())
+        {
+            "relationship_element_id": relationship_id,
+            "start_element_id": endpoints[0],
+            "end_element_id": endpoints[1],
+        }
+        for relationship_id, endpoints in sorted(locks.items())
     ]
 
 
@@ -537,6 +586,11 @@ def _participant_ids(row: dict[str, Any]) -> tuple[str, ...]:
         str(producer["source_element_id"])
         for producer in row.get("prospective_producers") or []
         if producer.get("source_element_id")
+    )
+    ids.update(
+        str(version["element_id"])
+        for version in row.get("dd_versions") or []
+        if version.get("element_id")
     )
     for protected_name in row.get("protected_names") or []:
         if protected_name.get("element_id"):
@@ -789,8 +843,23 @@ def _event_record(
         "review_approval": manifest_row["review_approval"],
         "reason": reason,
     }
+    record = _neo4j_event_record(record)
     record["record_hash"] = payload_hash(record)
     return record
+
+
+def _neo4j_event_record(record: dict[str, Any]) -> dict[str, Any]:
+    """Return the exact non-null scalar map Neo4j can store losslessly."""
+    canonical = {
+        str(key): value
+        for key, value in record.items()
+        if value is not None and key != "record_hash"
+    }
+    if any(
+        isinstance(value, dict | list | tuple | set) for value in canonical.values()
+    ):
+        raise ValueError("semantic event properties must be Neo4j scalar values")
+    return canonical
 
 
 def _valid_event(
@@ -800,14 +869,16 @@ def _valid_event(
     *,
     reason: str | None,
 ) -> bool:
-    event = copy.deepcopy(entry.get("event_properties") or {})
-    stored_hash = event.pop("record_hash", None)
+    stored = copy.deepcopy(entry.get("event_properties") or {})
+    stored_hash = stored.pop("record_hash", None)
+    event = _neo4j_event_record(stored)
+    expected = _event_record(manifest_row, event_id, reason=reason)
     return (
         event.get("id") == event_id
         and event.get("source_id") == manifest_row["source_id"]
         and event.get("target_id") == manifest_row["prospective_target_id"]
-        and event.get("reason") == reason
         and stored_hash == payload_hash(event)
+        and {**event, "record_hash": stored_hash} == expected
     )
 
 
@@ -884,10 +955,81 @@ def _lock_relationships(
     locks = _relationship_lock_items(rows)
     if {item["relationship_element_id"] for item in locks} != expected_ids:
         raise SemanticSourceConflict("relationship lock closure changed")
-    result = list(transaction.run(RELATIONSHIP_LOCK_QUERY, locks=locks))
+    result = list(
+        transaction.run(
+            RELATIONSHIP_LOCK_QUERY,
+            locks=locks,
+            relationship_element_ids=sorted(expected_ids),
+            start_element_ids=sorted({item["start_element_id"] for item in locks}),
+        )
+    )
     count = int(dict(result[0]).get("locked") or 0) if result else 0
     if count != len(locks):
         raise SemanticSourceConflict("relationship set changed before locking")
+
+
+def _read_global_events(
+    transaction: Any, manifest: SemanticSourceManifest
+) -> list[dict[str, Any]]:
+    event_ids = [_event_id(row) for row in manifest.rows]
+    rows = [
+        dict(row) for row in transaction.run(EVENT_COLLISION_QUERY, event_ids=event_ids)
+    ]
+    if [row.get("event_id") for row in rows] != sorted(event_ids):
+        raise SemanticSourceConflict("global event lookup omitted the exact allowlist")
+    return rows
+
+
+def _global_event_reasons(
+    rows: list[dict[str, Any]],
+    manifest: SemanticSourceManifest,
+    *,
+    reason: str,
+    expected_present: bool,
+) -> dict[str, list[str]]:
+    by_event = {str(row["event_id"]): row.get("matches") or [] for row in rows}
+    reasons: dict[str, list[str]] = {}
+    for manifest_row in manifest.rows:
+        source_id = str(manifest_row["source_id"])
+        event_id = _event_id(manifest_row)
+        matches = by_event.get(event_id, [])
+        row_reasons: list[str] = []
+        if not expected_present:
+            if matches:
+                row_reasons.append("deterministic event identity already exists")
+        elif len(matches) != 1:
+            row_reasons.append("deterministic event cardinality is not exactly one")
+        else:
+            match = matches[0]
+            links = match.get("links") or []
+            if len(links) != 1 or links[0].get("source_id") != source_id:
+                row_reasons.append("deterministic event owner link is not exact")
+            if not _valid_event(
+                {"event_properties": match.get("properties") or {}},
+                manifest_row,
+                event_id,
+                reason=reason,
+            ):
+                row_reasons.append("deterministic event record hash is not exact")
+        if row_reasons:
+            reasons[source_id] = row_reasons
+    return reasons
+
+
+def _refuse_plans(
+    plans: list[dict[str, Any]], reasons: dict[str, list[str]]
+) -> list[dict[str, Any]]:
+    return [
+        {
+            **plan,
+            "status": "refused",
+            "unresolved": sorted(
+                set(plan.get("unresolved") or [])
+                | set(reasons.get(plan["source_id"], []))
+            ),
+        }
+        for plan in plans
+    ]
 
 
 def _receipt(
@@ -991,24 +1133,54 @@ def reconcile_semantic_sources(
             try:
                 before_rows, plans = _plan(counted, manifest, reason=reason.strip())
                 statuses = {plan["status"] for plan in plans}
-                if (
-                    "refused" in statuses
-                    or len(statuses) > 1
-                    or not apply
-                    or statuses == {"already_current"}
-                ):
+                if "refused" in statuses or len(statuses) > 1:
                     counted.rollback()
                     if len(statuses) > 1 and "refused" not in statuses:
-                        plans = [
+                        plans = _refuse_plans(
+                            plans,
                             {
-                                **plan,
-                                "status": "refused",
-                                "unresolved": [
+                                plan["source_id"]: [
                                     "mixed pending and already-current cohort"
-                                ],
-                            }
-                            for plan in plans
-                        ]
+                                ]
+                                for plan in plans
+                            },
+                        )
+                    return _receipt(
+                        manifest,
+                        plans,
+                        applied=False,
+                        query_count=counted.query_count,
+                        transaction_count=1,
+                    )
+                if statuses == {"already_current"}:
+                    global_rows = _read_global_events(counted, manifest)
+                    replay_reasons = _global_event_reasons(
+                        global_rows,
+                        manifest,
+                        reason=reason.strip(),
+                        expected_present=True,
+                    )
+                    if replay_reasons:
+                        plans = _refuse_plans(plans, replay_reasons)
+                    counted.rollback()
+                    return _receipt(
+                        manifest,
+                        plans,
+                        applied=False,
+                        query_count=counted.query_count,
+                        transaction_count=1,
+                    )
+                if not apply:
+                    global_rows = _read_global_events(counted, manifest)
+                    collision_reasons = _global_event_reasons(
+                        global_rows,
+                        manifest,
+                        reason=reason.strip(),
+                        expected_present=False,
+                    )
+                    if collision_reasons:
+                        plans = _refuse_plans(plans, collision_reasons)
+                    counted.rollback()
                     return _receipt(
                         manifest,
                         plans,
@@ -1041,13 +1213,13 @@ def reconcile_semantic_sources(
                         "semantic source closure changed after locks"
                     )
                 event_ids = [_event_id(row) for row in manifest.rows]
-                collision_rows = [
-                    dict(row)
-                    for row in counted.run(EVENT_COLLISION_QUERY, event_ids=event_ids)
-                ]
-                if any(row.get("matches") for row in collision_rows) or len(
-                    collision_rows
-                ) != len(event_ids):
+                collision_rows = _read_global_events(counted, manifest)
+                if _global_event_reasons(
+                    collision_rows,
+                    manifest,
+                    reason=reason.strip(),
+                    expected_present=False,
+                ):
                     raise SemanticSourceConflict(
                         "semantic change event identity already exists"
                     )
@@ -1069,6 +1241,16 @@ def reconcile_semantic_sources(
                 _, after_plans = _plan(counted, manifest, reason=reason.strip())
                 if any(plan["status"] != "already_current" for plan in after_plans):
                     raise SemanticSourceConflict("semantic source postflight failed")
+                post_event_rows = _read_global_events(counted, manifest)
+                if _global_event_reasons(
+                    post_event_rows,
+                    manifest,
+                    reason=reason.strip(),
+                    expected_present=True,
+                ):
+                    raise SemanticSourceConflict(
+                        "semantic source global event postflight failed"
+                    )
                 counted.commit()
                 return _receipt(
                     manifest,
