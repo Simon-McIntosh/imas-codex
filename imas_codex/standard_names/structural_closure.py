@@ -57,7 +57,22 @@ _MUTATING_ACTIONS = frozenset(
 _TERMINAL_STAGES = frozenset({"superseded", "exhausted", "contested"})
 _MANIFEST_SCHEMA = "imas-codex.structural-closure-reconciliation-manifest"
 _RECEIPT_SCHEMA = "imas-codex.structural-closure-reconciliation-receipt"
+_EVENT_DIAGNOSTIC_SCHEMA = "imas-codex.structural-event-roundtrip-diagnostic"
 _MAX_DESCENDANT_DEPTH = 12
+_SAFE_EVENT_LITERAL_FIELDS = frozenset(
+    {
+        "action",
+        "changed_at",
+        "from_name",
+        "id",
+        "internal",
+        "operation",
+        "origin",
+        "root_id",
+        "target_id",
+        "to_name",
+    }
+)
 
 STRUCTURAL_CLOSURE_QUERY = f"""
 // STRUCTURAL_CLOSURE_RECONCILIATION_SNAPSHOT
@@ -159,9 +174,50 @@ RETURN event_id,
 ORDER BY event_id
 """
 
+_DIAGNOSTIC_EVENT_ABSENCE_QUERY = """
+// STRUCTURAL_CLOSURE_EVENT_ROUNDTRIP_ABSENCE
+UNWIND $event_ids AS event_id
+OPTIONAL MATCH (event:StandardNameChange {id: event_id})
+RETURN event_id, count(event) AS matches
+ORDER BY event_id
+"""
+
+_DIAGNOSTIC_EVENT_WRITE_QUERY = """
+// STRUCTURAL_CLOSURE_EVENT_ROUNDTRIP_WRITE
+UNWIND $records AS record
+CREATE (change:StandardNameChange)
+SET change = record
+RETURN collect(change.id) AS event_ids
+"""
+
+_DIAGNOSTIC_EVENT_READ_QUERY = """
+// STRUCTURAL_CLOSURE_EVENT_ROUNDTRIP_READ
+UNWIND $event_ids AS event_id
+OPTIONAL MATCH (event:StandardNameChange {id: event_id})
+WITH event_id, collect(event) AS matches
+RETURN event_id,
+       [event IN matches WHERE event IS NOT NULL | properties(event)] AS records
+ORDER BY event_id
+"""
+
+_DIAGNOSTIC_DURABILITY_QUERY = """
+// STRUCTURAL_CLOSURE_EVENT_ROUNDTRIP_DURABILITY
+UNWIND $event_ids AS event_id
+OPTIONAL MATCH (event:StandardNameChange {id: event_id})
+RETURN count(event) AS durable_events
+"""
+
 
 class StructuralClosureConflict(RuntimeError):
     """The exact manifest-bound structural closure changed."""
+
+    def __init__(
+        self, message: str, *, diagnostic: dict[str, Any] | None = None
+    ) -> None:
+        self.diagnostic = copy.deepcopy(diagnostic)
+        if diagnostic is not None:
+            message = f"{message}: {json.dumps(diagnostic, sort_keys=True)}"
+        super().__init__(message)
 
 
 @dataclass(frozen=True)
@@ -861,6 +917,19 @@ class _TransactionQueryAdapter:
         return [dict(row) for row in self.transaction.run(cypher, **params)]
 
 
+class _DiagnosticTransaction:
+    def __init__(self, transaction: Any) -> None:
+        self.transaction = transaction
+        self.query_count = 0
+
+    def run(self, cypher: str, **params: Any) -> Any:
+        self.query_count += 1
+        return self.transaction.run(cypher, **params)
+
+    def rollback(self) -> None:
+        self.transaction.rollback()
+
+
 def _normalized_event_record(record: dict[str, Any]) -> dict[str, Any]:
     normalized = dict(record)
     changed_at = normalized.get("changed_at")
@@ -887,6 +956,109 @@ def _normalized_event_record(record: dict[str, Any]) -> dict[str, Any]:
 
 def _event_hash(record: dict[str, Any]) -> str:
     return payload_hash(_normalized_event_record(record))
+
+
+def _event_value_type(value: Any) -> str:
+    if value is None:
+        return "none"
+    if isinstance(value, bool):
+        return "bool"
+    if isinstance(value, int):
+        return "int"
+    if isinstance(value, float):
+        return "float"
+    if isinstance(value, str):
+        return "str"
+    if isinstance(value, dict):
+        return "mapping"
+    if isinstance(value, list | tuple):
+        return type(value).__name__
+    return f"{type(value).__module__}.{type(value).__qualname__}"
+
+
+def _event_field_summary(key: str, value: Any) -> dict[str, Any]:
+    canonical_value = _normalized_event_record({key: value})[key]
+    summary = {
+        "type": _event_value_type(value),
+        "canonical_hash": payload_hash(canonical_value),
+    }
+    if key in _SAFE_EVENT_LITERAL_FIELDS:
+        summary["canonical_value"] = canonical_value
+    return summary
+
+
+def _event_record_comparison(
+    event_id: str,
+    expected_record: dict[str, Any],
+    actual_records: list[dict[str, Any]],
+) -> dict[str, Any]:
+    normalized_expected = _normalized_event_record(expected_record)
+    normalized_actual = [
+        _normalized_event_record(dict(record)) for record in actual_records
+    ]
+    expected_hash = payload_hash(normalized_expected)
+    actual_hashes = [payload_hash(record) for record in normalized_actual]
+    actual_record = actual_records[0] if len(actual_records) == 1 else None
+    normalized_single = normalized_actual[0] if len(normalized_actual) == 1 else {}
+    expected_keys = set(expected_record)
+    actual_keys = set(actual_record or {})
+    fields = {}
+    for key in sorted(expected_keys | actual_keys):
+        expected = (
+            _event_field_summary(key, expected_record[key])
+            if key in expected_record
+            else None
+        )
+        actual = (
+            _event_field_summary(key, actual_record[key])
+            if actual_record is not None and key in actual_record
+            else None
+        )
+        fields[key] = {
+            "expected": expected,
+            "actual": actual,
+            "matches": expected is not None
+            and actual is not None
+            and expected["canonical_hash"] == actual["canonical_hash"],
+        }
+    missing_keys = sorted(expected_keys - actual_keys)
+    extra_keys = sorted(actual_keys - expected_keys)
+    mismatch_fields = sorted(
+        key for key, comparison in fields.items() if not comparison["matches"]
+    )
+    match = (
+        len(actual_records) == 1
+        and not missing_keys
+        and not extra_keys
+        and expected_hash == actual_hashes[0]
+    )
+    return {
+        "event_id": event_id,
+        "matches": match,
+        "actual_record_count": len(actual_records),
+        "expected_record_hash": expected_hash,
+        "actual_record_hash": actual_hashes[0] if len(actual_hashes) == 1 else None,
+        "actual_record_hashes": actual_hashes,
+        "missing_keys": missing_keys,
+        "extra_keys": extra_keys,
+        "mismatch_fields": mismatch_fields,
+        "fields": fields,
+        "canonical_actual_keys": sorted(normalized_single),
+    }
+
+
+def _event_record_comparisons(
+    records: dict[str, dict[str, Any]], rows: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    by_id = {str(row["event_id"]): row.get("records") or [] for row in rows}
+    return [
+        _event_record_comparison(
+            event_id,
+            records[event_id],
+            [dict(record) for record in by_id.get(event_id, [])],
+        )
+        for event_id in sorted(records)
+    ]
 
 
 def _event_record(
@@ -1060,18 +1232,22 @@ def _verify_events(
         dict(row)
         for row in transaction.run(_EVENT_READ_QUERY, event_ids=sorted(records))
     ]
-    by_id = {str(row["event_id"]): row.get("records") or [] for row in rows}
-    expected_hashes = {item["id"]: item["hash"] for item in event_receipts}
-    if set(by_id) != set(records):
-        raise StructuralClosureConflict("structural event postflight omitted an event")
-    for event_id, matches in by_id.items():
-        if (
-            len(matches) != 1
-            or _event_hash(dict(matches[0])) != expected_hashes[event_id]
-        ):
-            raise StructuralClosureConflict(
-                "structural event postflight record hash changed"
-            )
+    comparisons = _event_record_comparisons(records, rows)
+    expected_hashes = {str(item["id"]): str(item["hash"]) for item in event_receipts}
+    mismatches = [
+        comparison
+        for comparison in comparisons
+        if not comparison["matches"]
+        or comparison["expected_record_hash"] != expected_hashes[comparison["event_id"]]
+    ]
+    if mismatches:
+        raise StructuralClosureConflict(
+            "structural event postflight record hash changed",
+            diagnostic={
+                "schema": _EVENT_DIAGNOSTIC_SCHEMA,
+                "mismatches": mismatches,
+            },
+        )
 
 
 def _receipt(
@@ -1120,6 +1296,174 @@ def _receipt(
     }
     receipt["receipt_hash"] = payload_hash(receipt)
     return receipt
+
+
+def diagnose_structural_event_roundtrip(
+    manifest_path: str | Path,
+    *,
+    expected_manifest_hash: str,
+    include_accepted: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Round-trip planned event records in one transaction that always rolls back."""
+    normalized_hash = _require_sha(expected_manifest_hash, "expected_manifest_hash")
+    manifest = load_structural_closure_manifest(manifest_path)
+    if not hmac.compare_digest(normalized_hash, manifest.manifest_hash):
+        raise ValueError("manifest SHA-256 does not match the exact parsed bytes")
+    own = gc is None
+    client = GraphClient() if own else gc
+    event_ids: list[str] = []
+    writes_started = False
+    transaction_query_count = 0
+    diagnostic: dict[str, Any] | None = None
+    error: Exception | None = None
+    try:
+        with client.session() as session:
+            transaction = _DiagnosticTransaction(session.begin_transaction())
+            try:
+                plans = _read_plan(
+                    transaction, manifest, include_accepted=include_accepted
+                )
+                refused = [
+                    str(plan["root_id"])
+                    for plan in plans
+                    if plan["status"] == "refused"
+                ]
+                if refused:
+                    raise StructuralClosureConflict(
+                        "structural event diagnostic refuses unresolved roots",
+                        diagnostic={"root_ids": sorted(refused)},
+                    )
+                pending = [plan for plan in plans if plan["status"] == "planned"]
+                by_root = {str(row["root_id"]): row for row in manifest.rows}
+                records, event_receipts = _event_bindings(manifest, pending, by_root)
+                event_ids = sorted(records)
+                if not event_ids:
+                    raise StructuralClosureConflict(
+                        "structural event diagnostic requires planned events"
+                    )
+                absence_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _DIAGNOSTIC_EVENT_ABSENCE_QUERY,
+                        event_ids=event_ids,
+                    )
+                ]
+                existing = {
+                    str(row["event_id"]): int(row.get("matches") or 0)
+                    for row in absence_rows
+                    if int(row.get("matches") or 0) != 0
+                }
+                returned_ids = {str(row["event_id"]) for row in absence_rows}
+                if returned_ids != set(event_ids) or existing:
+                    raise StructuralClosureConflict(
+                        "structural event diagnostic requires absent event ids",
+                        diagnostic={
+                            "expected_event_ids": event_ids,
+                            "existing_event_counts": existing,
+                            "omitted_event_ids": sorted(set(event_ids) - returned_ids),
+                        },
+                    )
+                writes_started = True
+                write_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _DIAGNOSTIC_EVENT_WRITE_QUERY,
+                        records=[records[event_id] for event_id in event_ids],
+                    )
+                ]
+                written_ids = sorted(
+                    str(event_id)
+                    for row in write_rows
+                    for event_id in row.get("event_ids") or []
+                )
+                if written_ids != event_ids:
+                    raise StructuralClosureConflict(
+                        "structural event diagnostic write cardinality changed",
+                        diagnostic={
+                            "expected_event_ids": event_ids,
+                            "written_event_ids": written_ids,
+                        },
+                    )
+                hydrated_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _DIAGNOSTIC_EVENT_READ_QUERY,
+                        event_ids=event_ids,
+                    )
+                ]
+                comparisons = _event_record_comparisons(records, hydrated_rows)
+                diagnostic = {
+                    "schema": _EVENT_DIAGNOSTIC_SCHEMA,
+                    "schema_version": 1,
+                    "manifest_hash": manifest.manifest_hash,
+                    "allowlist_hash": manifest.allowlist_hash,
+                    "planned_root_ids": sorted(
+                        str(plan["root_id"]) for plan in pending
+                    ),
+                    "events": event_receipts,
+                    "comparisons": comparisons,
+                    "matching_event_ids": sorted(
+                        comparison["event_id"]
+                        for comparison in comparisons
+                        if comparison["matches"]
+                    ),
+                    "mismatch_event_ids": sorted(
+                        comparison["event_id"]
+                        for comparison in comparisons
+                        if not comparison["matches"]
+                    ),
+                    "all_records_match": all(
+                        comparison["matches"] for comparison in comparisons
+                    ),
+                }
+            except Exception as exc:
+                error = exc
+            finally:
+                transaction_query_count = transaction.query_count
+                transaction.rollback()
+
+        durable_events = 0
+        if writes_started:
+            durability_rows = list(
+                client.query(_DIAGNOSTIC_DURABILITY_QUERY, event_ids=event_ids)
+            )
+            durable_events = (
+                int(durability_rows[0].get("durable_events") or 0)
+                if len(durability_rows) == 1
+                else -1
+            )
+            if durable_events != 0:
+                raise StructuralClosureConflict(
+                    "structural event diagnostic rollback left durable events",
+                    diagnostic={
+                        "event_ids": event_ids,
+                        "durable_events": durable_events,
+                    },
+                ) from error
+        if error is not None:
+            raise error
+        if diagnostic is None:
+            raise StructuralClosureConflict(
+                "structural event diagnostic produced no receipt"
+            )
+        diagnostic.update(
+            {
+                "rolled_back": True,
+                "durable_event_count": durable_events,
+                "diagnostic_transaction_queries": transaction_query_count,
+                "postrollback_queries": 1,
+                "query_count": transaction_query_count + 1,
+                "transaction_count": 2,
+                "rollback_count": 1,
+                "commit_count": 0,
+            }
+        )
+        diagnostic["receipt_hash"] = payload_hash(diagnostic)
+        return diagnostic
+    finally:
+        if own:
+            client.close()
 
 
 @retry_on_deadlock()
