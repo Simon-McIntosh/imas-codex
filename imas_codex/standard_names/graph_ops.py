@@ -1631,6 +1631,216 @@ def scope_focus_names(
     return rows[0]["n"] if rows else 0
 
 
+class ExactNameScopeConflict(ValueError):
+    """An exact existing-name scope is unsafe or no longer exact."""
+
+
+_EXACT_NAME_SCOPE_PREFLIGHT_QUERY = """
+// EXACT_NAME_SCOPE_PREFLIGHT
+UNWIND $names AS requested_name
+OPTIONAL MATCH (requested:StandardName {id: requested_name})
+WITH requested_name, collect(DISTINCT requested) AS matches
+CALL (matches) {
+  WITH matches
+  UNWIND matches AS selected
+  OPTIONAL MATCH (selected)-[:HAS_PARENT*0..]->(ancestor:StandardName)
+  WITH selected, collect(DISTINCT ancestor) AS ancestors
+  OPTIONAL MATCH (descendant:StandardName)-[:HAS_PARENT*1..]->(selected)
+  WITH ancestors, collect(DISTINCT descendant) AS descendants
+  WITH ancestors + descendants AS lineage
+  UNWIND CASE WHEN lineage = [] THEN [null] ELSE lineage END AS member
+  OPTIONAL MATCH (producer:StandardNameSource)-[:PRODUCED_NAME]->(member)
+  RETURN collect(DISTINCT producer.id) AS producer_ids
+}
+RETURN requested_name,
+       [candidate IN matches | {
+         id: candidate.id,
+         name_stage: candidate.name_stage,
+         status: candidate.status,
+         claimed_at: candidate.claimed_at,
+         claim_token: candidate.claim_token,
+         run_id: candidate.run_id,
+         drain_scope_id: candidate.drain_scope_id,
+         drain_scope_claimed_at: candidate.drain_scope_claimed_at,
+         drain_claim_scope_id: candidate.drain_claim_scope_id
+       }] AS matches,
+       [producer_id IN producer_ids
+        WHERE producer_id IN $west_source_ids
+           OR producer_id STARTS WITH $fixture_source_id_prefix] AS protected_producers
+ORDER BY requested_name
+"""
+
+_EXACT_NAME_SCOPE_STAMP_QUERY = """
+// EXACT_NAME_SCOPE_STAMP
+UNWIND $names AS requested_name
+MATCH (name:StandardName {id: requested_name})
+WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
+  AND NOT coalesce(name.status, '') IN $terminal_statuses
+  AND name.claimed_at IS NULL
+  AND name.claim_token IS NULL
+  AND name.run_id IS NULL
+  AND name.drain_scope_id IS NULL
+  AND name.drain_scope_claimed_at IS NULL
+  AND name.drain_claim_scope_id IS NULL
+  AND NOT EXISTS {
+    MATCH (name)-[:HAS_PARENT*0..]->(ancestor:StandardName)
+    MATCH (protected_source:StandardNameSource)-[:PRODUCED_NAME]->(ancestor)
+    WHERE protected_source.id IN $west_source_ids
+       OR protected_source.id STARTS WITH $fixture_source_id_prefix
+  }
+  AND NOT EXISTS {
+    MATCH (descendant:StandardName)-[:HAS_PARENT*1..]->(name)
+    MATCH (protected_source:StandardNameSource)-[:PRODUCED_NAME]->(descendant)
+    WHERE protected_source.id IN $west_source_ids
+       OR protected_source.id STARTS WITH $fixture_source_id_prefix
+  }
+SET name.run_id = $run_id
+RETURN collect(name.id) AS stamped_ids
+"""
+
+_EXACT_SCOPE_TERMINAL_NAME_STAGES = frozenset({"superseded", "exhausted", "contested"})
+_EXACT_SCOPE_TERMINAL_STATUSES = frozenset({"deprecated", "superseded"})
+
+
+def _exact_name_scope_refusals(rows: list[dict[str, Any]]) -> list[str]:
+    """Return deterministic refusal messages for one preflight snapshot."""
+    refusals: list[str] = []
+    for row in rows:
+        requested_name = str(row.get("requested_name") or "")
+        matches = row.get("matches") or []
+        if len(matches) != 1:
+            state = "missing" if not matches else "ambiguous"
+            refusals.append(f"{requested_name}: {state} StandardName identity")
+            continue
+        candidate = matches[0]
+        if candidate.get("name_stage") in _EXACT_SCOPE_TERMINAL_NAME_STAGES or (
+            candidate.get("status") in _EXACT_SCOPE_TERMINAL_STATUSES
+        ):
+            refusals.append(f"{requested_name}: terminal StandardName lifecycle")
+        if (
+            candidate.get("claimed_at") is not None
+            or candidate.get("claim_token") is not None
+        ):
+            refusals.append(f"{requested_name}: current worker claim")
+        if any(
+            candidate.get(field) is not None
+            for field in (
+                "run_id",
+                "drain_scope_id",
+                "drain_scope_claimed_at",
+                "drain_claim_scope_id",
+            )
+        ):
+            refusals.append(f"{requested_name}: current run or drain scope")
+        protected_producers = sorted(set(row.get("protected_producers") or []))
+        if protected_producers:
+            refusals.append(
+                f"{requested_name}: HAS_PARENT lineage is produced by protected "
+                f"source(s): {', '.join(protected_producers)}"
+            )
+    return refusals
+
+
+@retry_on_deadlock()
+def scope_exact_standard_names(
+    name_ids: list[str],
+    run_id: str,
+    *,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Preflight and bind one exact set of existing names to a fresh run scope.
+
+    The read covers the complete requested set and both directions of its
+    transitive ``HAS_PARENT`` lineage.  Any missing, ambiguous, terminal,
+    claimed, already-scoped, or protected-lineage identity refuses the whole
+    invocation.  A live invocation stamps ``run_id`` on exactly the requested
+    ``StandardName`` nodes in the same transaction; it never touches
+    ``StandardNameSource`` nodes.  Dry-run performs only the preflight read.
+    """
+    normalized = [str(name_id).strip() for name_id in name_ids]
+    if not normalized or any(not name_id for name_id in normalized):
+        raise ExactNameScopeConflict("--name requires at least one non-empty identity")
+    duplicates = sorted(
+        name_id for name_id in set(normalized) if normalized.count(name_id) > 1
+    )
+    if duplicates:
+        raise ExactNameScopeConflict(
+            "duplicate exact StandardName identity: " + ", ".join(duplicates)
+        )
+
+    from imas_codex.standard_names.grammar_segment_reconciliation import (
+        _FIXTURE_SOURCE_ID_PREFIX,
+        _west_source_ids,
+    )
+
+    requested = sorted(normalized)
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
+                        names=requested,
+                        west_source_ids=sorted(_west_source_ids()),
+                        fixture_source_id_prefix=_FIXTURE_SOURCE_ID_PREFIX,
+                    )
+                ]
+                returned = [str(row.get("requested_name") or "") for row in rows]
+                if returned != requested:
+                    raise ExactNameScopeConflict(
+                        "exact-name preflight did not return the complete requested set"
+                    )
+                refusals = _exact_name_scope_refusals(rows)
+                if refusals:
+                    raise ExactNameScopeConflict("; ".join(refusals))
+
+                stamped_ids: list[str] = []
+                if not dry_run:
+                    stamp_rows = list(
+                        transaction.run(
+                            _EXACT_NAME_SCOPE_STAMP_QUERY,
+                            names=requested,
+                            run_id=run_id,
+                            terminal_name_stages=sorted(
+                                _EXACT_SCOPE_TERMINAL_NAME_STAGES
+                            ),
+                            terminal_statuses=sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
+                            west_source_ids=sorted(_west_source_ids()),
+                            fixture_source_id_prefix=_FIXTURE_SOURCE_ID_PREFIX,
+                        )
+                    )
+                    if len(stamp_rows) != 1:
+                        raise ExactNameScopeConflict(
+                            "exact-name stamp did not return one cardinality result"
+                        )
+                    stamped_ids = sorted(dict(stamp_rows[0]).get("stamped_ids") or [])
+                    if stamped_ids != requested:
+                        raise ExactNameScopeConflict(
+                            "exact-name state changed between preflight and stamp"
+                        )
+                    transaction.commit()
+                else:
+                    transaction.close()
+                return {
+                    "name_ids": requested,
+                    "run_id": run_id,
+                    "dry_run": dry_run,
+                    "stamped": len(stamped_ids),
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.close()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 def get_source_name_mapping(*, rich: bool = False) -> dict[str, dict]:
     """Return mapping of source_id → previous standard name details.
 
