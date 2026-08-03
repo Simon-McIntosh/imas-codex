@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="62">
+<meta name="plan-version" content="63">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -794,6 +794,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-structural-event-timestamp-repair-landed" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>The structural event-record hash defect is independently verified and merged at <code>d1888265</code>.</strong> The root cause was offset-dependent timestamp text: equal instants hydrated with different timezone offsets hashed differently. The landed operator canonicalizes event time as UTC epoch seconds plus nanoseconds using exact integer timedelta floor semantics, so <code>1969-12-31T23:59:59.5Z</code> encodes as second <code>-1</code> plus <code>500000000</code> nanoseconds; it preserves Neo4j nanoseconds, treats equivalent offsets identically, and rejects timezone-naive values. The successful structural apply contract remains ten constant queries: immutable-event postflight is query nine and the final exact authority reread is query ten. Independent <code>sun_debug</code> validation passed seven boundary tests, 15 default tests, and 16 disposable-Neo4j graph tests with zero skips; timestamp/reason/record/precondition corruption and duplicate IDs all failed closed with atomic rollback. Evidence: <code>/tmp/s7_structural_timestamp_correction_verification.json</code>, SHA-256 <code>a3acb3b5752d66a23685c2723c357f4e95fdd07c8dbf9e4012f8ce37b63a88fd</code>. The production 14-root repair remains unapplied after the earlier rollback; a fresh merged-code manifest and independent approval are required before the one permitted retry.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-structural-postfix-apply-rollback" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>The post-fix 14-root structural apply again failed closed at immutable-event postflight and left zero durable mutation.</strong> Preflight reproduced the independently approved manifest exactly: 14 planned rows, three unchanged excluded-root refusals, 28 absent deterministic event IDs, and exact global/protected/catalog/cost guards. The sole public apply opened one transaction and reached query nine, then raised <code>StructuralClosureConflict: structural event postflight record hash changed</code>; query ten was not reached. The transaction rolled back, with zero commits and zero retries. Two bounded read-only rollback queries proved all 28 events absent and every authority, node, relationship, change, claim, scope, run, cost, WEST, fixture, DD <code>4.1.1</code>, COCOS <code>17</code>, and label guard unchanged. Evidence: <code>/tmp/s7_structural_postfix_apply.json</code>, SHA-256 <code>35f4a7dac54e823c80b0448cd616417c3dc10143aeab3b0a2b06350522bb22f3</code>. The offset/floor correction remains valid but incomplete; no further production attempt is authorized until postflight reports the exact normalized field difference and that production-only mismatch is independently fixed.</p></div>
 </div>
 </section>
 </main>
