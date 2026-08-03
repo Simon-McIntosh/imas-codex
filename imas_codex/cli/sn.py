@@ -1110,6 +1110,18 @@ def _reject_unscoped_accepted_reset(
 @click.option("-v", "--verbose", is_flag=True, help="Enable verbose logging")
 @click.option("-q", "--quiet", is_flag=True, help="Suppress non-error output")
 @click.option(
+    "--name",
+    "exact_names",
+    multiple=True,
+    cls=_SpaceSplitMultiple,
+    default=(),
+    help=(
+        "Scope the normal worker pools to existing StandardName identities. "
+        "Repeatable; quoted whitespace-separated values are accepted. The "
+        "complete set is preflighted atomically and never seeds DD sources."
+    ),
+)
+@click.option(
     "--focus",
     "focus_paths",
     multiple=True,
@@ -1374,7 +1386,8 @@ def _reject_unscoped_accepted_reset(
     is_flag=True,
     default=False,
     help=(
-        "For a run bounded by --focus/--batch or --scope-run-id, bypass all "
+        "For a run bounded by --focus/--batch, --name, or --scope-run-id, "
+        "bypass all "
         "global startup, background, and post-drain maintenance writes while "
         "running the normal scoped worker pools. Invalid without an explicit "
         "scope and with reset/reseed/revalidate or maintenance-only modes. With "
@@ -1405,6 +1418,7 @@ def _reject_unscoped_accepted_reset(
             "validate",
             "consolidate",
             "persist",
+            "enrich",
             "review",
             "link",
         ],
@@ -1413,7 +1427,8 @@ def _reject_unscoped_accepted_reset(
     default=None,
     help=(
         "Run only this phase — all others are skipped. "
-        "extract/compose/validate/consolidate/persist select the generate phase. "
+        "extract/compose/validate/consolidate/persist select generation plus "
+        "parent enrichment; enrich selects only ENRICH_PARENTS. "
         "attach backfills the DD-side HAS_STANDARD_NAME edge from provenance "
         "(no LLM, no pools)."
     ),
@@ -1574,6 +1589,7 @@ def sn_run(
     compose_model: str | None,
     verbose: bool,
     quiet: bool,
+    exact_names: tuple[str, ...],
     focus_paths: tuple[str, ...],
     paths: tuple[str, ...],
     batch_name: str | None,
@@ -1654,6 +1670,29 @@ def sn_run(
     # any profile left in the process environment by an earlier invocation.
     reviewer_profile = reviewer_profile.lower()
     _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
+
+    if exact_names:
+        scope_conflicts = {
+            "--focus/paths": bool(focus_paths or paths),
+            "--batch": batch_name is not None,
+            "--drain-batch": drain_batch is not None,
+            "--scope-run-id": scope_run_id is not None,
+            "--families": families is not None,
+            "--source/--facility": source != "dd" or facility is not None,
+            "--reset/--reseed/--revalidate": (
+                reset_to is not None or reset_only or reseed or revalidate
+            ),
+            "--retry-quarantined": retry_quarantined,
+            "--retry-skipped": retry_skipped,
+            "--retry-vocab-gap": retry_vocab_gap,
+            "--rename": rename_spec is not None,
+            "--campaign": campaign is not None or campaign_manifest is not None,
+        }
+        conflicts = [flag for flag, present in scope_conflicts.items() if present]
+        if conflicts:
+            raise click.UsageError(
+                "--name is mutually exclusive with " + ", ".join(conflicts)
+            )
 
     if drain_batch:
         from imas_codex.settings import get_sn_review_profile_models
@@ -1852,6 +1891,12 @@ def sn_run(
             force = False
         if overrides.get("skip_review", False):
             skip_review = True
+        if only_phase == "enrich":
+            # The existing pool filters can express an enrich-only run without
+            # adding another orchestrator flag: names-only removes docs,
+            # skip-generate removes compose, and skip-review removes both review
+            # and refine axes, leaving ENRICH_PARENTS alone.
+            names_only = True
         # skip_generate handled via the overrides dict below
         skip_generate_from_only = overrides.get("skip_generate", False)
     else:
@@ -1909,9 +1954,10 @@ def sn_run(
             raise click.UsageError(
                 "--skip-global-maintenance requires the DD pool orchestrator"
             )
-        if not flat_focus and not scope_run_id:
+        if not flat_focus and not scope_run_id and not exact_names:
             raise click.UsageError(
-                "--skip-global-maintenance requires --focus/--batch or --scope-run-id"
+                "--skip-global-maintenance requires --focus/--batch, --name, "
+                "or --scope-run-id"
             )
         if reseed:
             raise click.UsageError(
@@ -1938,7 +1984,7 @@ def sn_run(
             raise click.UsageError(
                 "--skip-global-maintenance cannot be combined with campaign modes"
             )
-        if dry_run:
+        if dry_run and not exact_names:
             scope_label = (
                 f"{len(flat_focus)} focused DD path(s)"
                 if flat_focus
@@ -2039,6 +2085,62 @@ def sn_run(
             # failed preflight aborts before ANY graph access, even reads
             # (--skip-clear-gate is a deprecated no-op kept for compatibility).
             _note_pipeline_version_drift()
+
+    # Existing-name routing: one protected-aware preflight, then the ordinary
+    # run_id-scoped worker predicates. No source is seeded or stamped, so the
+    # generate pool has no eligible source and unrelated graph work remains
+    # outside every claim query. --edits is passed through as an additional AND
+    # predicate at the shared claim layer.
+    if exact_names:
+        import uuid as _uuid
+
+        from imas_codex.standard_names.graph_ops import (
+            ExactNameScopeConflict,
+            scope_exact_standard_names,
+        )
+
+        exact_scope_run_id = str(_uuid.uuid4())
+        try:
+            scoped = scope_exact_standard_names(
+                list(exact_names), exact_scope_run_id, dry_run=dry_run
+            )
+        except ExactNameScopeConflict as exc:
+            raise click.UsageError(str(exc)) from exc
+        if dry_run:
+            console.print(
+                "[green]Exact-name dry run:[/green] "
+                f"{len(scoped['name_ids'])} existing name(s) eligible; "
+                "no graph writes performed"
+            )
+            return
+        _run_sn_cmd(
+            cost_limit=cost_limit,
+            time_limit=time_limit,
+            compose_model=compose_model,
+            per_domain_limit=limit,
+            dry_run=False,
+            quiet=quiet,
+            domains=domains,
+            verbose=verbose,
+            min_score=min_score,
+            rotation_cap=rotation_cap,
+            escalation_model=escalation_model,
+            review_name_backlog_cap=review_name_backlog_cap,
+            review_docs_backlog_cap=review_docs_backlog_cap,
+            skip_generate=skip_generate_from_only,
+            skip_review=skip_review,
+            names_only=names_only,
+            docs_only=docs_only,
+            flush=flush,
+            source="dd",
+            override_edits=_override_edits,
+            only=only_phase,
+            max_sources=max_sources,
+            scope_run_id=exact_scope_run_id,
+            edits_only=edits_only,
+            skip_global_maintenance=skip_global_maintenance,
+        )
+        return
 
     # ── --focus routing: full 6-pool pipeline scoped by run_id ────────
     if flat_focus:
