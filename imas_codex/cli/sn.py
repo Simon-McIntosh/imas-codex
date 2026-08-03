@@ -6326,6 +6326,53 @@ def sn_recover_terminal_attachments(
     click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
 
 
+@sn.command("reconcile-structural-closure")
+@click.option(
+    "--manifest",
+    "manifest_path",
+    type=click.Path(exists=True, dir_okay=False),
+    required=True,
+    help="Exact structural closure reconciliation manifest.",
+)
+@click.option(
+    "--dry-run",
+    is_flag=True,
+    help="Plan the exact closure without graph mutation.",
+)
+@click.option(
+    "--include-accepted",
+    is_flag=True,
+    help="Authorize exact manifest-bound deletion of accepted names.",
+)
+@click.option(
+    "--manifest-sha256",
+    "expected_manifest_hash",
+    help="Expected SHA-256 of exact manifest bytes; required unless --dry-run.",
+)
+def sn_reconcile_structural_closure(
+    manifest_path: str,
+    dry_run: bool,
+    include_accepted: bool,
+    expected_manifest_hash: str | None,
+) -> None:
+    """Reconcile one exact structural closure cohort with full CAS fencing."""
+    import json
+
+    from imas_codex.standard_names.structural_closure import (
+        reconcile_structural_closure,
+    )
+
+    if not dry_run and not expected_manifest_hash:
+        raise click.UsageError("apply requires --manifest-sha256 or use --dry-run")
+    receipt = reconcile_structural_closure(
+        manifest_path,
+        dry_run=dry_run,
+        include_accepted=include_accepted,
+        expected_manifest_hash=expected_manifest_hash,
+    )
+    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
+
+
 @sn.command("source-hint")
 @click.argument("exact_dd_path")
 @click.option(

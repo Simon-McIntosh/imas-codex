@@ -30,6 +30,7 @@ DELETION_OPERATIONS = frozenset(
         "remove_provenance_orphan",
         "remove_derived_parent",
         "remove_skeleton_placeholder",
+        "reconcile_structural_closure",
     }
 )
 
