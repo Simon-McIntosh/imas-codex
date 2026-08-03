@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="56">
+<meta name="plan-version" content="57">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -773,6 +773,12 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-transitive-source-protection-landed" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>Transitive source-authority protection is independently verified and merged at <code>b4f90099</code>.</strong> The repair hashes direct identities plus current/prospective targets, protected WEST/fixture producers, and binding relationships; locks and rereads that closure inside the apply transaction; and fails closed on missing, ambiguous, or drifting evidence across all five operation families. Query work is constant in cohort size: one batched protection query per planning pass, with three passes for apply, not per-row N+1. Independent validation passed 18 unit/CLI and 27 disposable-Neo4j tests with zero skips and no production contact. Evidence: <code>/tmp/s7_transitive_protection_verification.json</code>, SHA-256 <code>e3034270a9b1f3a8a817c77f11430281fe71bb9d153d1c2eda4ff3ddca681d09</code>. Existing broad manifests remain invalid and no live apply is authorized; exact reviewed manifests must be regenerated from the repaired surface.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-terminal-recovery-landed" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Governed terminal attachment recovery is independently verified and merged at <code>34fd6ccf</code>.</strong> The final stack makes shared-target cohorts atomic and idempotent, binds exact manifest and precondition hashes, emits applied receipts and immutable events, and locks only named participant relationships. Independent <code>sun_debug</code> validation passed 76 focused tests, seven disposable-Neo4j recovery tests, and one query-plan regression; the exact plan starts with <code>NodeByElementIdSeek</code> and bounded directional expansion, with no relationship-wide scan. Disposable residue was zero nodes and zero relationships, and the production graph was not contacted. Evidence: <code>/tmp/s7_terminal_relationship_seek_verification.json</code>, SHA-256 <code>82a328af512bcd01c5f28bfa5c46f4ddcc34d30e426df03466441f203ce4ff7b</code>. No live recovery has been applied; the exact nine-row manifest still requires a fresh repaired dry-run and independent approval.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-test-endpoint-and-memory-stability" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Test isolation and process-memory stability are both verified.</strong> Merge <code>b860aa84</code> makes an explicit test Neo4j URI bypass project profile and tunnel resolution, so disposable graph tests no longer skip their bodies after probing the live endpoint; focused validation passed seven tests without production contact. The user slice currently holds about 29.2 GiB of its 64 GiB cap, <code>/run/user/39486</code> remains 4.9 GiB, swap remains zero, and <code>memory.events oom_kill</code> remains 474 with no increase during the guarded work. Long-lived <code>imas-codex serve</code> processes each use roughly 0.55 GiB and are a secondary baseline, not a justification for broad process termination.</p></div>
 </div>
 </section>
 </main>
