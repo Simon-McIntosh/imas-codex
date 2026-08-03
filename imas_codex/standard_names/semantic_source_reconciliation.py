@@ -135,8 +135,9 @@ ORDER BY source_id
 
 PARTICIPANT_LOCK_QUERY = """
 // SEMANTIC_SOURCE_RECONCILIATION_PARTICIPANT_LOCK
+UNWIND $element_ids AS element_id
 MATCH (participant)
-WHERE elementId(participant) IN $element_ids
+WHERE elementId(participant) = element_id
 SET participant._semantic_source_lock = true
 REMOVE participant._semantic_source_lock
 RETURN count(participant) AS locked

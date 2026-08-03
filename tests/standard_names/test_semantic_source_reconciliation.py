@@ -654,7 +654,10 @@ def test_constant_query_count_for_one_and_large_cohorts(tmp_path):
 def test_queries_are_batched_and_relationship_locks_are_anchored():
     assert "UNWIND $candidates" in reconciliation.CLOSURE_QUERY
     assert "UNWIND $items" in reconciliation.APPLY_QUERY
-    assert "elementId(participant) IN $element_ids" in (
+    assert "UNWIND $element_ids AS element_id" in (
+        reconciliation.PARTICIPANT_LOCK_QUERY
+    )
+    assert "elementId(participant) = element_id" in (
         reconciliation.PARTICIPANT_LOCK_QUERY
     )
     assert "elementId(relationship) IN $relationship_element_ids" in (
@@ -1015,22 +1018,33 @@ def _plan_operator_names(plan: Any) -> list[str]:
 
 
 @pytest.mark.graph
-def test_graph_lock_plans_reject_global_scans(ephemeral_graph: GraphClient) -> None:
-    rows = _seed_graph_cohort(ephemeral_graph, source_type="dd", size=1)
+@pytest.mark.parametrize("size", [1, 40])
+def test_graph_lock_plans_reject_global_scans(
+    ephemeral_graph: GraphClient, size: int
+) -> None:
+    rows = _seed_graph_cohort(ephemeral_graph, source_type="dd", size=size)
     candidates = [
         {
-            "source_id": rows[0]["source_id"],
-            "prospective_target_id": rows[0]["target_id"],
+            "source_id": row["source_id"],
+            "prospective_target_id": row["target_id"],
         }
+        for row in rows
     ]
     with ephemeral_graph.session() as session:
-        closure = dict(
-            session.run(reconciliation.CLOSURE_QUERY, candidates=candidates).single(
-                strict=True
+        closures = [
+            dict(record)
+            for record in session.run(
+                reconciliation.CLOSURE_QUERY, candidates=candidates
             )
+        ]
+        participant_ids = sorted(
+            {
+                element_id
+                for closure in closures
+                for element_id in reconciliation._participant_ids(closure)
+            }
         )
-        participant_ids = list(reconciliation._participant_ids(closure))
-        relationship_locks = reconciliation._relationship_lock_items([closure])
+        relationship_locks = reconciliation._relationship_lock_items(closures)
         participant_plan = (
             session.run(
                 f"EXPLAIN {reconciliation.PARTICIPANT_LOCK_QUERY}",
@@ -1039,20 +1053,22 @@ def test_graph_lock_plans_reject_global_scans(ephemeral_graph: GraphClient) -> N
             .consume()
             .plan
         )
-        relationship_plan = (
-            session.run(
-                f"EXPLAIN {reconciliation.RELATIONSHIP_LOCK_QUERY}",
-                locks=relationship_locks,
-                relationship_element_ids=[
-                    item["relationship_element_id"] for item in relationship_locks
-                ],
-                start_element_ids=[
-                    item["start_element_id"] for item in relationship_locks
-                ],
+        relationship_plan = None
+        if size == 1:
+            relationship_plan = (
+                session.run(
+                    f"EXPLAIN {reconciliation.RELATIONSHIP_LOCK_QUERY}",
+                    locks=relationship_locks,
+                    relationship_element_ids=[
+                        item["relationship_element_id"] for item in relationship_locks
+                    ],
+                    start_element_ids=[
+                        item["start_element_id"] for item in relationship_locks
+                    ],
+                )
+                .consume()
+                .plan
             )
-            .consume()
-            .plan
-        )
 
     forbidden = {
         "AllNodesScan",
@@ -1060,10 +1076,10 @@ def test_graph_lock_plans_reject_global_scans(ephemeral_graph: GraphClient) -> N
         "DirectedAllRelationshipsScan",
         "UndirectedAllRelationshipsScan",
     }
-    for label, plan in (
-        ("participant", participant_plan),
-        ("relationship", relationship_plan),
-    ):
+    plans = [("participant", participant_plan)]
+    if relationship_plan is not None:
+        plans.append(("relationship", relationship_plan))
+    for label, plan in plans:
         assert plan is not None
         operators = _plan_operator_names(plan)
         assert forbidden.isdisjoint(operators), f"{label}: {operators}"
