@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -752,6 +752,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-source-authority-operators" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>Source-authority closure now has one independently verified operator surface.</strong> Merge <code>05848f47</code> lands dry-run-first, hash-bound, typed reconciliation for identity-scalar repair, current-snapshot adoption, from-null admission, duplicate-source fold, and nonparticipating-source retirement. Exact manifests are homogeneous; participant and relationship closures are locked and reread; mixed, stale, overlapping, competing, protected, generated, cardinality, and postflight states fail closed; multirow mutation is atomic and idempotent. Final disposable-Neo4j verification at <code>1c7ee751</code> passed 30/30 with zero skips using a correctly provisioned server and a normal allocation exit. Evidence: <code>/tmp/s7_authority_operator_final2_verification.json</code>, SHA-256 <code>8db045596d6d3efc85747435ca53d09fde7480e44eb070c4277137a2a8fab5e7</code>. No live repair has been applied; exact current dry-run manifests and independent approval remain required.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-search-workload-closure" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>The search workload split is independently green at merge <code>6c19500e</code>.</strong> The default live graph contract executed 12 tests with zero skips/failures in 16.16 s (53 s wall), 262 MiB maximum RSS, and no timeout dump, BufferError, OOM, or <code>Killed</code>. Exhaustive 203-query vector/BM25/path/hybrid/quality evaluation and the unchanged 269-configuration grid remain visible as <code>graph+slow</code> in explicit benchmark CI with retained JUnit/DoE artifacts; candidate retrieval is exactly three batched Bolt calls plus one embedding batch, followed by in-memory scoring. Thresholds and expected paths remain unchanged, so current quality drift stays a visible CI failure rather than being relaxed. DDv4 remains catalog-wide COCOS 17, <code>psi_like</code>/<code>ip_like</code> labels remain downstream metadata, and electron temperature is the unlabeled negative fixture. Evidence: <code>/tmp/s7_search_workload_final_verification.json</code>, SHA-256 <code>59e2a41e1b7e1c66cc43ab7cc426a0b79051f9ff4ab2ac1a3a9a92678c48ed16</code>.</p></div>
 </div>
 </section>
 </main>
