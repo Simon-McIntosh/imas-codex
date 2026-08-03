@@ -508,6 +508,14 @@ def test_rebuild_dry_run_binds_nothing():
         patch.object(pr, "_fetch_pending_source_names", return_value=set()),
         patch.object(pr, "bind_recovery_sources") as m_bind,
         patch.object(pr, "bind_sources_exclusively") as m_bind_history,
+        patch.object(
+            pr,
+            "reconcile_attachment_consistency",
+            return_value=pr.AttachmentAuditResult(),
+        ) as reconcile_attachments,
+        patch.object(
+            pr, "find_semantic_source_invariant_violations", return_value=[]
+        ) as reconcile_semantic_sources,
     ):
         summary = pr.rebuild_provenance(gc=gc, recovery_map={}, dry_run=True)
 
@@ -519,8 +527,13 @@ def test_rebuild_dry_run_binds_nothing():
     assert summary["parent_sources_reconciled"] == 0
     assert not m_bind.called
     assert not m_bind_history.called
+    reconcile_attachments.assert_called_once_with(gc=gc, dry_run=True)
+    reconcile_semantic_sources.assert_called_once_with(gc)
     assert summary["dry_run"] is True
     assert summary["unresolved"] == 0
+    assert summary["would_complete"] is True
+    assert summary["completed"] is False
+    assert summary["completion_status"] == "dry_run"
 
 
 def test_rebuild_excludes_reattachable_desyncs_from_fallback_binding():
@@ -642,3 +655,220 @@ def test_rebuild_can_retire_explicit_unrecoverable_residue() -> None:
     assert summary["retired_unresolved_names"] == ["lost_name"]
     assert summary["orphans_after"] == 0
     assert summary["unresolved"] == 0
+
+
+def test_rebuild_replays_all_bindings_before_consistency_reconciliation() -> None:
+    """Raw recovery replay finishes before attachment and semantic checks."""
+    import imas_codex.standard_names.provenance_rebuild as pr
+
+    orphan = {
+        "sn_id": "restored_quantity",
+        "name_stage": "accepted",
+        "origin": "catalog_edit",
+    }
+    recovery_map = {
+        "restored_quantity": [
+            {
+                "id": "dd:example/path",
+                "source_type": "dd",
+                "dd_path": "example/path",
+                "status": "attached",
+            }
+        ]
+    }
+    events: list[str] = []
+    gc = MagicMock()
+    empty_audit = pr.AttachmentAuditResult()
+
+    with (
+        patch.object(
+            pr, "find_provenance_orphans", side_effect=[[orphan], [orphan], []]
+        ),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(pr, "reattach_produced_name_edges", return_value=0),
+        patch.object(pr, "_run_deterministic_fixpoints"),
+        patch.object(pr, "find_orphan_parent_source_candidates", return_value=[]),
+        patch.object(
+            pr,
+            "classify_orphan_parent_source_candidates",
+            return_value={"repairable": [], "rejected_derived": []},
+        ),
+        patch.object(pr, "reconcile_orphan_parent_sources", return_value=0),
+        patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_change_history_sources", return_value={}),
+        patch.object(pr, "_fetch_pending_source_names", return_value=set()),
+        patch.object(
+            pr,
+            "bind_recovery_sources",
+            side_effect=lambda *args, **kwargs: events.append("replay") or 1,
+        ),
+        patch.object(
+            pr,
+            "reconcile_attachment_consistency",
+            side_effect=lambda **kwargs: events.append("attachment") or empty_audit,
+        ),
+        patch.object(
+            pr,
+            "audit_attachments",
+            side_effect=lambda **kwargs: (
+                events.append("attachment_postcheck") or empty_audit
+            ),
+        ),
+        patch.object(
+            pr,
+            "find_semantic_source_invariant_violations",
+            side_effect=lambda client: events.append("semantic") or [],
+        ),
+    ):
+        summary = pr.rebuild_provenance(gc=gc, recovery_map=recovery_map)
+
+    assert events == ["replay", "attachment", "attachment_postcheck", "semantic"]
+    assert summary["completed"] is True
+
+
+def test_rebuild_reports_exact_consistency_rows_and_refuses_completion() -> None:
+    """Committed replay stays visible when postchecks find unadjudicated rows."""
+    import imas_codex.standard_names.provenance_rebuild as pr
+    from imas_codex.standard_names.attachment_audit import (
+        AttachmentAuditResult,
+        AttachmentVerdict,
+    )
+
+    attachment = AttachmentVerdict(
+        source_node_id="dd:example/path",
+        dd_path="example/path",
+        sn_id="published_quantity",
+        name_stage="accepted",
+        reason="unit mismatch: incompatible dimensionality",
+    )
+    postcheck = AttachmentAuditResult(
+        checked=1,
+        rejected=[attachment],
+        skipped_protected=1,
+    )
+    semantic_row = {
+        "source_id": "dd:other/path",
+        "produced_targets": ["generic_quantity", "specific_quantity"],
+        "live_targets": ["generic_quantity", "specific_quantity"],
+        "produced_sn_id": "specific_quantity",
+        "mapped_ids": ["generic_quantity", "specific_quantity"],
+    }
+    gc = MagicMock()
+
+    with (
+        patch.object(pr, "find_provenance_orphans", side_effect=[[], [], []]),
+        patch.object(pr, "find_edge_scalar_desyncs", return_value=[]),
+        patch.object(pr, "reattach_produced_name_edges", return_value=0),
+        patch.object(pr, "_run_deterministic_fixpoints"),
+        patch.object(pr, "find_orphan_parent_source_candidates", return_value=[]),
+        patch.object(
+            pr,
+            "classify_orphan_parent_source_candidates",
+            return_value={"repairable": [], "rejected_derived": []},
+        ),
+        patch.object(pr, "reconcile_orphan_parent_sources", return_value=0),
+        patch.object(pr, "_fetch_dd_source_paths", return_value={}),
+        patch.object(pr, "_fetch_change_history_sources", return_value={}),
+        patch.object(pr, "_fetch_pending_source_names", return_value=set()),
+        patch.object(
+            pr,
+            "reconcile_attachment_consistency",
+            return_value=AttachmentAuditResult(checked=1, rejected=[attachment]),
+        ) as reconcile_attachments,
+        patch.object(pr, "audit_attachments", return_value=postcheck),
+        patch.object(
+            pr,
+            "find_semantic_source_invariant_violations",
+            return_value=[semantic_row],
+        ),
+        patch.object(pr, "retire_unrecoverable_provenance_orphans") as retire,
+    ):
+        summary = pr.rebuild_provenance(gc=gc, recovery_map={})
+
+    reconcile_attachments.assert_called_once_with(gc=gc, dry_run=False)
+    retire.assert_not_called()
+    consistency = summary["consistency"]
+    assert consistency["attachment_postcheck"]["skipped_protected"] == 1
+    assert consistency["unresolved_attachment_rows"] == [
+        {
+            "source_node_id": "dd:example/path",
+            "dd_path": "example/path",
+            "sn_id": "published_quantity",
+            "name_stage": "accepted",
+            "reason": "unit mismatch: incompatible dimensionality",
+            "other_live_names": 0,
+        }
+    ]
+    assert consistency["unresolved_semantic_source_rows"] == [semantic_row]
+    assert summary["completed"] is False
+    assert summary["completion_status"] == "incomplete"
+
+
+def test_exact_adjudication_manifest_is_required_for_remaining_findings() -> None:
+    """Only full current rows authorize a qualified consistency completion."""
+    import imas_codex.standard_names.provenance_rebuild as pr
+    from imas_codex.standard_names.attachment_audit import (
+        AttachmentAuditResult,
+        AttachmentVerdict,
+    )
+
+    attachment = AttachmentVerdict(
+        source_node_id="dd:example/path",
+        dd_path="example/path",
+        sn_id="published_quantity",
+        name_stage="accepted",
+        reason="unit mismatch: incompatible dimensionality",
+    )
+    attachment_row = {
+        "source_node_id": attachment.source_node_id,
+        "dd_path": attachment.dd_path,
+        "sn_id": attachment.sn_id,
+        "name_stage": attachment.name_stage,
+        "reason": attachment.reason,
+        "other_live_names": attachment.other_live_names,
+    }
+    semantic_row = {
+        "source_id": "dd:other/path",
+        "produced_targets": ["generic_quantity", "specific_quantity"],
+        "live_targets": ["generic_quantity", "specific_quantity"],
+        "produced_sn_id": "specific_quantity",
+        "mapped_ids": ["generic_quantity", "specific_quantity"],
+    }
+    audit = AttachmentAuditResult(checked=1, rejected=[attachment])
+    gc = MagicMock()
+
+    with (
+        patch.object(pr, "reconcile_attachment_consistency", return_value=audit),
+        patch.object(pr, "audit_attachments", return_value=audit),
+        patch.object(
+            pr,
+            "find_semantic_source_invariant_violations",
+            return_value=[semantic_row],
+        ),
+    ):
+        exact = pr._reconcile_recovery_consistency(
+            gc,
+            dry_run=False,
+            adjudication_manifest={
+                "attachment_violations": [attachment_row],
+                "semantic_source_violations": [semantic_row],
+            },
+        )
+        partial = pr._reconcile_recovery_consistency(
+            gc,
+            dry_run=False,
+            adjudication_manifest={
+                "attachment_violations": [
+                    {"source_node_id": attachment.source_node_id}
+                ],
+                "semantic_source_violations": [semantic_row],
+            },
+        )
+
+    assert exact["consistent"] is True
+    assert exact["unresolved_attachment_rows"] == []
+    assert partial["consistent"] is False
+    assert partial["unresolved_attachment_rows"] == [attachment_row]
+    assert partial["stale_adjudication_rows"]["attachment_violations"] == [
+        {"source_node_id": attachment.source_node_id}
+    ]
