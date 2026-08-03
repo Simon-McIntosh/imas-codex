@@ -50,18 +50,40 @@ def pytest_configure(config):
 _neo4j_available: bool | None = None
 
 
+def _neo4j_probe_client():
+    """Build a client for the selected test endpoint without profile resolution."""
+    from imas_codex.graph.client import GraphClient
+
+    if test_uri := os.environ.get("IMAS_CODEX_TEST_NEO4J_URI"):
+        return GraphClient(
+            uri=test_uri,
+            username=os.environ.get("NEO4J_USERNAME", "neo4j"),
+            password=os.environ.get("NEO4J_PASSWORD", ""),
+            graph_name="pytest-explicit-endpoint",
+        )
+    return GraphClient()
+
+
+def _neo4j_unavailable_reason() -> str:
+    """Describe the selected graph endpoint without triggering resolution."""
+    if test_uri := os.environ.get("IMAS_CODEX_TEST_NEO4J_URI"):
+        return f"Explicit Neo4j test endpoint is not available: {test_uri}"
+    return "Configured project Neo4j graph is not available"
+
+
 def _check_neo4j() -> bool:
     """Probe whether Neo4j is reachable (cached per session).
 
-    Constructing a ``GraphClient`` resolves the active graph profile, which
-    for a remote location establishes an SSH tunnel. When the host is
-    unreachable that resolution can block far longer than the repo's
-    ``faulthandler_timeout``, which would SIGSEGV the whole pytest session at
-    collection time. To keep collection bounded regardless of reachability,
-    the probe runs on a daemon thread with a bounded join: if it hasn't
-    answered within the timeout the host is treated as unavailable and the
-    still-blocked thread is abandoned (it dies with the process, so pytest can
-    still exit and the main thread never stalls long enough to trip
+    Without an explicit test URI, constructing a ``GraphClient`` resolves the
+    active graph profile, which for a remote location establishes an SSH
+    tunnel. An explicit test URI bypasses that resolution entirely. When the
+    selected host is unreachable, connection setup can block longer than the
+    repo's ``faulthandler_timeout``, which would SIGSEGV the whole pytest
+    session at collection time. To keep collection bounded regardless of
+    reachability, the probe runs on a daemon thread with a bounded join: if it
+    hasn't answered within the timeout the host is treated as unavailable and
+    the still-blocked thread is abandoned (it dies with the process, so pytest
+    can still exit and the main thread never stalls long enough to trip
     faulthandler). The generous default comfortably covers a cold-tunnel
     reachable case while staying well under any faulthandler timeout.
     """
@@ -76,9 +98,7 @@ def _check_neo4j() -> bool:
 
     def _probe() -> None:
         try:
-            from imas_codex.graph.client import GraphClient
-
-            client = GraphClient()
+            client = _neo4j_probe_client()
             try:
                 client.get_stats()
                 result["ok"] = True
@@ -108,7 +128,7 @@ def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     ]
     if not graph_items or _check_neo4j():
         return
-    skip_marker = pytest.mark.skip(reason="Neo4j not available")
+    skip_marker = pytest.mark.skip(reason=_neo4j_unavailable_reason())
     for item in graph_items:
         item.add_marker(skip_marker)
 
