@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="52">
+<meta name="plan-version" content="54">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -761,6 +761,12 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-deterministic-manifest-and-terminal-candidate" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>Current deterministic manifests and terminal recovery remain fail-closed verification inputs, not executable approvals.</strong> A read-only rebuild preserves the exact 503 semantic / 83 provenance baseline and partitions 308 semantic rows as deterministic candidates while excluding 195; it identifies four parent-source candidates, seven invalid-parent cleanup rows, 37 childless rows, and 35 excluded or unresolved provenance rows. Its 458 graph calls are diagnostic N+1 overhead from checker reruns, per-row evidence/protection reads, dry-runs, cache selectors, and guards; this must be replaced by batched projections before becoming routine. The artifact changed once while the producer finalized it, so the independent verifier restarted from stable hashes <code>72be1b68…</code> and <code>10a5dce1…</code>. Separately, candidate commit <code>7b2e1476</code> adds hash-bound composed/attached terminal recovery and passes 76 focused tests, but is unmerged until a disposable-Neo4j audit proves its one-transaction CAS, rollback, preservation, and idempotence contracts. No graph mutation or paid call occurred.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-source-authority-transitive-protection-rejection" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Independent verification rejects every current source-authority apply manifest.</strong> The dry-run machinery itself is sound and zero-write, but its protected-set proof is direct-source-only. Thirty-eight candidate sources feed 20 names also produced by the 355-source WEST manifest, including the reviewed camera-dimensions row sharing two WEST names; broad cohorts also contain 10 identity, 162 adoption, and 19 admission rows beyond the reviewed design. Therefore no current cohort is safe to apply. Duplicate fold must follow canonical snapshot migration; nonparticipating retirement must follow exact admission and projection repair. A narrow repair is active to hash and recheck the complete protected producer/name closure in batched queries. Evidence: <code>/tmp/s7_source_authority_live_verification.json</code>, SHA-256 <code>43242eaad08fb119c65dfad4085f90ed3f509fca6a3eb5edc05d607e32c3c739</code>. No writes, paid calls, or OOM-counter delta occurred.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-deterministic-manifest-independent-rejection" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>The frozen deterministic repair manifests reproduce exactly but remain non-executable.</strong> Independent verification matched 503 semantic rows, 83 provenance orphans, DD 4.1.1 / COCOS 17, disjoint partitions, zero WEST/fixture/claim intersections, unchanged mutation guards, and the stable 308 semantic / four structural dry-runs. Apply is still rejected: the semantic operator cannot consume or verify the artifact and per-row hashes; the parent-source operator mutates rows individually without cohort transaction, CAS, manifest binding, or immutable change events. The 458-read diagnostic builder is confirmed N+1 amplification—parent admission alone costs an estimated 79–118 reads for 39 candidates; an aggregate topology query plus batched attachment inputs should reduce the complete census to roughly 12–20 reads. Evidence: <code>/tmp/s7_deterministic_repair_verification.json</code>, SHA-256 <code>ad57a132a20906cb04a132eecb2ebd677f2a45524abb2a2ab95901eeea0deae1</code>. No apply is authorized.</p></div>
 </div>
 </section>
 </main>
