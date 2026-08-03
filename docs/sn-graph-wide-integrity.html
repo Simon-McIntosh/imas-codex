@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-03">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="56">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -770,6 +770,9 @@ Do not execute a live drain until review approves the implementation. The global
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260803-terminal-recovery-disposable-rejection" data-who="reckon-ship" data-when="2026-08-03">
     <div class="r-comment-body"><p><strong>Candidate terminal-recovery commit <code>7b2e1476</code> is rejected and remains unmerged.</strong> Focused mocks passed 76 tests, but the candidate added zero new graph-marked transaction tests. A disposable Neo4j 2026.01.4 proof showed the shared-target defect directly: two sources sharing one terminal name dry-ran as planned, then apply failed postflight and rolled back to two bindings, two projections, and zero change events. Six of the intended nine rows share one target, so the real cohort cannot apply. The audit also found three repeated full-neighborhood materializations, a graph-wide relationship scan, and applied receipt rows still labelled planned. A scoped repair is active for cohort-aware preservation, participant-anchored batched locking, deduplicated closure reads, correct receipts, and real shared-target/rollback/idempotence graph tests. Evidence: <code>/tmp/s7_terminal_recovery_verification.json</code>, SHA-256 <code>74fa800fbca21dcfafb3ab94206ff496d11e70454f835d53b0d0b43d7391798b</code>. No live graph was contacted.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260803-transitive-source-protection-landed" data-who="reckon-ship" data-when="2026-08-03">
+    <div class="r-comment-body"><p><strong>Transitive source-authority protection is independently verified and merged at <code>b4f90099</code>.</strong> The repair hashes direct identities plus current/prospective targets, protected WEST/fixture producers, and binding relationships; locks and rereads that closure inside the apply transaction; and fails closed on missing, ambiguous, or drifting evidence across all five operation families. Query work is constant in cohort size: one batched protection query per planning pass, with three passes for apply, not per-row N+1. Independent validation passed 18 unit/CLI and 27 disposable-Neo4j tests with zero skips and no production contact. Evidence: <code>/tmp/s7_transitive_protection_verification.json</code>, SHA-256 <code>e3034270a9b1f3a8a817c77f11430281fe71bb9d153d1c2eda4ff3ddca681d09</code>. Existing broad manifests remain invalid and no live apply is authorized; exact reviewed manifests must be regenerated from the repaired surface.</p></div>
 </div>
 </section>
 </main>
