@@ -1678,7 +1678,6 @@ WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
   AND NOT coalesce(name.status, '') IN $terminal_statuses
   AND name.claimed_at IS NULL
   AND name.claim_token IS NULL
-  AND name.run_id IS NULL
   AND name.drain_scope_id IS NULL
   AND name.drain_scope_claimed_at IS NULL
   AND name.drain_claim_scope_id IS NULL
@@ -1725,13 +1724,12 @@ def _exact_name_scope_refusals(rows: list[dict[str, Any]]) -> list[str]:
         if any(
             candidate.get(field) is not None
             for field in (
-                "run_id",
                 "drain_scope_id",
                 "drain_scope_claimed_at",
                 "drain_claim_scope_id",
             )
         ):
-            refusals.append(f"{requested_name}: current run or drain scope")
+            refusals.append(f"{requested_name}: current drain scope")
         protected_producers = sorted(set(row.get("protected_producers") or []))
         if protected_producers:
             refusals.append(
@@ -1753,10 +1751,12 @@ def scope_exact_standard_names(
 
     The read covers the complete requested set and both directions of its
     transitive ``HAS_PARENT`` lineage.  Any missing, ambiguous, terminal,
-    claimed, already-scoped, or protected-lineage identity refuses the whole
-    invocation.  A live invocation stamps ``run_id`` on exactly the requested
-    ``StandardName`` nodes in the same transaction; it never touches
-    ``StandardNameSource`` nodes.  Dry-run performs only the preflight read.
+    claimed, drain-scoped, or protected-lineage identity refuses the whole
+    invocation.  ``run_id`` is durable provenance rather than a live lock, so a
+    live invocation atomically replaces it on exactly the requested
+    ``StandardName`` nodes after every live claim and drain field is clear.  It
+    never touches ``StandardNameSource`` nodes.  Dry-run performs only the
+    preflight read.
     """
     normalized = [str(name_id).strip() for name_id in name_ids]
     if not normalized or any(not name_id for name_id in normalized):

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 import uuid
 from contextlib import contextmanager
@@ -191,9 +192,10 @@ def test_duplicate_request_refuses_before_graph_access() -> None:
         ),
         (
             _preflight_row(
-                "scoped", matches=[_candidate("scoped", run_id="other-run")]
+                "draining",
+                matches=[_candidate("draining", drain_scope_id="active-drain")],
             ),
-            "current run or drain scope",
+            "current drain scope",
         ),
         (
             _preflight_row("protected", protected=["dd:west/protected"]),
@@ -223,6 +225,46 @@ def test_stamp_cardinality_drift_rolls_back() -> None:
 
     assert transaction.committed is False
     assert transaction.closed is True
+
+
+def test_durable_edit_provenance_is_replaced_by_exact_scope() -> None:
+    transaction = _Transaction(
+        [
+            _preflight_row(
+                "edited_name",
+                matches=[_candidate("edited_name", run_id="edit-provenance")],
+            )
+        ],
+        stamped_ids=["edited_name"],
+    )
+
+    result = _scope(["edited_name"], transaction)
+
+    assert result["stamped"] == 1
+    assert transaction.committed is True
+    assert len(transaction.calls) == 2
+    stamp_query = transaction.calls[1][0]
+    assert "name.run_id IS NULL" not in stamp_query
+    assert "SET name.run_id = $run_id" in stamp_query
+
+
+@pytest.mark.parametrize("cohort_size", [1, 40])
+def test_exact_scope_uses_a_constant_two_queries(cohort_size: int) -> None:
+    names = [f"bounded_name_{index}" for index in range(cohort_size)]
+    sorted_names = sorted(names)
+    transaction = _Transaction(
+        [_preflight_row(name_id) for name_id in sorted_names],
+        stamped_ids=sorted_names,
+    )
+
+    result = _scope(names, transaction)
+
+    assert result["stamped"] == cohort_size
+    assert len(transaction.calls) == 2
+    assert all(
+        call_params["names"] == sorted_names
+        for _query, call_params in transaction.calls
+    )
 
 
 def test_exact_name_dry_run_splits_values_and_uses_zero_write_helper() -> None:
@@ -274,6 +316,17 @@ def test_exact_name_rejects_other_scope_selectors(
 
     assert result.exit_code == 2
     assert "--name is mutually exclusive" in result.output
+
+
+@pytest.mark.parametrize(
+    "retry_flag",
+    ["--retry-quarantined", "--retry-skipped", "--retry-vocab-gap"],
+)
+def test_exact_name_rejects_retry_selectors(retry_flag: str) -> None:
+    result = CliRunner().invoke(sn, ["run", "--name", "alpha", "--dry-run", retry_flag])
+
+    assert result.exit_code == 2
+    assert f"--name is mutually exclusive with {retry_flag}" in result.output
 
 
 @pytest.mark.parametrize("skip_global", [False, True])
@@ -414,7 +467,8 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
     selected = f"exact_scope_selected_{suffix}"
     unrelated = f"exact_scope_unrelated_{suffix}"
     source_id = f"dd:exact_scope_unrelated/{suffix}"
-    scope_id = str(uuid.uuid4())
+    first_scope_id = str(uuid.uuid4())
+    second_scope_id = str(uuid.uuid4())
     ids = [selected, unrelated]
     with GraphClient(
         uri=uri,
@@ -429,6 +483,8 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
               id: name_id, name: name_id, name_stage: 'drafted',
               docs_stage: 'pending', status: 'draft',
               validation_status: 'valid', origin: 'pipeline',
+              run_id: CASE WHEN name_id = $selected THEN $edit_run_id ELSE null END,
+              edit_status: CASE WHEN name_id = $selected THEN 'open' ELSE null END,
               description: 'Disposable exact-scope regression identity.'
             })
             WITH count(*) AS ignored
@@ -438,11 +494,17 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
             })
             """,
             ids=ids,
+            selected=selected,
+            edit_run_id=f"edit:{suffix}",
             source_id=source_id,
         )
         try:
-            result = scope_exact_standard_names([selected], scope_id, gc=gc)
-            assert result["stamped"] == 1
+            first_result = scope_exact_standard_names([selected], first_scope_id, gc=gc)
+            second_result = scope_exact_standard_names(
+                [selected], second_scope_id, gc=gc
+            )
+            assert first_result["stamped"] == 1
+            assert second_result["stamped"] == 1
             rows = gc.query(
                 """
                 MATCH (name:StandardName) WHERE name.id IN $ids
@@ -455,7 +517,7 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
                 source_id=source_id,
             )
             by_id = {row["id"]: row for row in rows}
-            assert by_id[selected]["run_id"] == scope_id
+            assert by_id[selected]["run_id"] == second_scope_id
             assert by_id[unrelated]["run_id"] is None
             assert all(row["source_run_id"] is None for row in rows)
 
@@ -471,7 +533,11 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
                 "imas_codex.standard_names.graph_ops.GraphClient",
                 side_effect=_ephemeral_client,
             ):
-                reviewed = claim_review_name_batch(scope_run_id=scope_id, batch_size=10)
+                reviewed = claim_review_name_batch(
+                    scope_run_id=second_scope_id,
+                    edits_only=True,
+                    batch_size=10,
+                )
                 assert {item["id"] for item in reviewed} == {selected}
                 if reviewed:
                     release_review_names_claims(
@@ -479,7 +545,9 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
                         claim_token=str(reviewed[0]["claim_token"]),
                     )
                 assert (
-                    claim_generate_name_batch(scope_run_id=scope_id, batch_size=10)
+                    claim_generate_name_batch(
+                        scope_run_id=second_scope_id, batch_size=10
+                    )
                     == []
                 )
         finally:
@@ -487,3 +555,92 @@ def test_disposable_graph_keeps_unrelated_names_and_sources_unclaimable() -> Non
                 "MATCH (node) WHERE node.id IN $ids DETACH DELETE node",
                 ids=[*ids, source_id],
             )
+
+
+def _plan_operator_types(plan: object) -> list[str]:
+    """Flatten Neo4j plan operators without depending on driver internals."""
+    if plan is None:
+        return []
+    if isinstance(plan, dict):
+        operator = plan.get("operatorType") or plan.get("operator_type")
+        children = plan.get("children", [])
+    else:
+        operator = getattr(plan, "operator_type", None)
+        children = getattr(plan, "children", [])
+    operators = [str(operator)] if operator else []
+    for child in children:
+        operators.extend(_plan_operator_types(child))
+    return operators
+
+
+@pytest.mark.graph
+def test_disposable_graph_exact_scope_query_plans_are_index_bounded() -> None:
+    """Cohorts of one and forty retain indexed starts and bounded expansion."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import (
+        _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
+        _EXACT_NAME_SCOPE_STAMP_QUERY,
+        _EXACT_SCOPE_TERMINAL_NAME_STAGES,
+        _EXACT_SCOPE_TERMINAL_STATUSES,
+    )
+
+    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if not uri:
+        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.fail("exact-name scope graph test requires an ephemeral graph")
+    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    suffix = uuid.uuid4().hex
+    ids = [f"exact_scope_plan_{suffix}_{index}" for index in range(40)]
+    plans: dict[str, dict[str, list[str]]] = {}
+    with GraphClient(
+        uri=uri,
+        username=os.environ.get("NEO4J_USERNAME", "neo4j"),
+        password=password,
+        graph_name="ephemeral-exact-name-scope-plans",
+    ) as gc:
+        gc.query(
+            "CREATE CONSTRAINT exact_scope_name_id IF NOT EXISTS "
+            "FOR (name:StandardName) REQUIRE name.id IS UNIQUE"
+        )
+        gc.query(
+            "UNWIND $ids AS name_id CREATE (:StandardName {"
+            "id: name_id, name_stage: 'drafted', status: 'draft'})",
+            ids=ids,
+        )
+        try:
+            for cohort_size in (1, 40):
+                names = ids[:cohort_size]
+                common_params = {
+                    "names": names,
+                    "west_source_ids": [],
+                    "fixture_source_id_prefix": "dd:test_review_entry__",
+                }
+                query_specs = {
+                    "preflight": (
+                        _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
+                        common_params,
+                    ),
+                    "stamp": (
+                        _EXACT_NAME_SCOPE_STAMP_QUERY,
+                        {
+                            **common_params,
+                            "run_id": "explain-only",
+                            "terminal_name_stages": sorted(
+                                _EXACT_SCOPE_TERMINAL_NAME_STAGES
+                            ),
+                            "terminal_statuses": sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
+                        },
+                    ),
+                }
+                plans[str(cohort_size)] = {}
+                with gc.session() as session:
+                    for label, (query, params) in query_specs.items():
+                        result = session.run("EXPLAIN " + query, **params)
+                        operators = _plan_operator_types(result.consume().plan)
+                        plans[str(cohort_size)][label] = operators
+                        assert "AllNodesScan" not in operators
+                        assert not any("AllRelationshipsScan" in op for op in operators)
+            print("EXACT_SCOPE_PLAN_EVIDENCE=" + json.dumps(plans, sort_keys=True))
+        finally:
+            gc.query("MATCH (node) WHERE node.id IN $ids DETACH DELETE node", ids=ids)

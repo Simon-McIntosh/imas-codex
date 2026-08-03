@@ -212,7 +212,7 @@ def test_cli_help_documents_scoped_maintenance_bypass() -> None:
 
     assert result.exit_code == 0
     assert "--skip-global-maintenance" in result.output
-    assert "--focus/--batch or --scope-run-id" in normalized_help
+    assert "--focus/--batch, --name, or --scope-run-id" in normalized_help
 
 
 @pytest.mark.parametrize(

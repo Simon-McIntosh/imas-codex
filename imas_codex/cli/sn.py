@@ -1682,6 +1682,9 @@ def sn_run(
             "--reset/--reseed/--revalidate": (
                 reset_to is not None or reset_only or reseed or revalidate
             ),
+            "--retry-quarantined": retry_quarantined,
+            "--retry-skipped": retry_skipped,
+            "--retry-vocab-gap": retry_vocab_gap,
             "--rename": rename_spec is not None,
             "--campaign": campaign is not None or campaign_manifest is not None,
         }
