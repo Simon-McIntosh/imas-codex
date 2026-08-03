@@ -422,12 +422,44 @@ def _seed_electric_vector_parent(client: GraphClient) -> None:
     )
 
 
+def _seed_qualifier_materialization_parents(client: GraphClient) -> None:
+    client.query(
+        """
+        MERGE (unit:Unit {id: 'm.s^-1'})
+        WITH unit
+        UNWIND [
+          {
+            parent_id: 'convected_velocity',
+            child_id: 'energy_convected_velocity',
+            operator: 'energy'
+          },
+          {
+            parent_id: 'velocity_due_to_convection',
+            child_id: 'energy_velocity_due_to_convection',
+            operator: 'energy'
+          }
+        ] AS row
+        CREATE (parent:StandardName {id: row.parent_id, origin: 'derived'})
+        CREATE (child:StandardName {
+          id: row.child_id, origin: 'derived', name_stage: 'accepted',
+          unit: 'm.s^-1', physics_domain: 'transport'
+        })
+        CREATE (source:StandardNameSource {
+          id: 'derived:' + row.child_id, status: 'composed'
+        })-[:PRODUCED_NAME]->(child)
+        CREATE (child)-[:HAS_UNIT]->(unit)
+        CREATE (child)-[:HAS_PARENT {
+          operator_kind: 'qualifier', operator: row.operator
+        }]->(parent)
+        """
+    )
+
+
 def _seed_production_shaped_structural_cohort(
     client: GraphClient,
 ) -> dict[str, dict[str, Any]]:
     """Seed fourteen roots whose mutations emit twenty-eight ledger events."""
-    _seed_vector_parent(client)
-    _seed_electric_vector_parent(client)
+    _seed_qualifier_materialization_parents(client)
     client.query(
         """
         CREATE (parent:StandardName {
@@ -497,10 +529,10 @@ def _seed_production_shaped_structural_cohort(
         rows=rows,
     )
     specifications: dict[str, dict[str, Any]] = {
-        "magnetic_field": {
+        "convected_velocity": {
             "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
         },
-        "electric_field": {
+        "velocity_due_to_convection": {
             "expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT],
         },
         "vacuum_magnetic_field": {
@@ -1075,6 +1107,54 @@ class _EventTamperClient:
             yield _EventTamperSession(session)
 
 
+class _EventDeleteTransaction:
+    def __init__(self, transaction: Any) -> None:
+        self.transaction = transaction
+        self.deleted = False
+
+    def run(self, cypher: str, **params: Any):
+        if "STRUCTURAL_CLOSURE_EVENT_POSTFLIGHT" in cypher and not self.deleted:
+            list(
+                self.transaction.run(
+                    """
+                    MATCH (change:StandardNameChange)
+                    WHERE change.id IN $event_ids
+                      AND change.action = $action
+                    WITH change ORDER BY change.id LIMIT 1
+                    DETACH DELETE change
+                    """,
+                    event_ids=params["event_ids"],
+                    action=MATERIALIZE_ADMISSIBLE_PARENT,
+                )
+            )
+            self.deleted = True
+        return self.transaction.run(cypher, **params)
+
+    def commit(self) -> None:
+        self.transaction.commit()
+
+    def rollback(self) -> None:
+        self.transaction.rollback()
+
+
+class _EventDeleteSession:
+    def __init__(self, session: Any) -> None:
+        self.session = session
+
+    def begin_transaction(self) -> _EventDeleteTransaction:
+        return _EventDeleteTransaction(self.session.begin_transaction())
+
+
+class _EventDeleteClient:
+    def __init__(self, client: GraphClient) -> None:
+        self.client = client
+
+    @contextmanager
+    def session(self):
+        with self.client.session() as session:
+            yield _EventDeleteSession(session)
+
+
 class _DiagnosticMutationTransaction:
     def __init__(
         self,
@@ -1647,13 +1727,15 @@ def test_production_shaped_event_batch_round_trips_and_tamper_rolls_back(
         tmp_path, structural_graph, specifications
     )
 
+    counter = [0]
     applied = closure.reconcile_structural_closure(
         manifest,
         dry_run=False,
         expected_manifest_hash=manifest_hash,
-        gc=structural_graph,
+        gc=_CountingClient(structural_graph, counter),
     )
 
+    assert counter == [10]
     assert applied["counts"]["allowlisted"] == 14
     assert applied["counts"]["changed"] == 28
     assert len(applied["events"]) == 28
@@ -1667,6 +1749,37 @@ def test_production_shaped_event_batch_round_trips_and_tamper_rolls_back(
     assert {row["id"]: closure._event_hash(row["record"]) for row in persisted} == {
         event["id"]: event["hash"] for event in applied["events"]
     }
+    materialization_events = {
+        event["id"]: event["target_id"]
+        for event in applied["events"]
+        if event["action"] == MATERIALIZE_ADMISSIBLE_PARENT
+    }
+    assert set(materialization_events.values()) == {
+        "convected_velocity",
+        "velocity_due_to_convection",
+    }
+    materialization_links = structural_graph.query(
+        """
+        MATCH (parent:StandardName)-[:HAS_INTERNAL_CHANGE]->
+              (change:StandardNameChange {action: $action})
+        RETURN change.id AS event_id, parent.id AS parent_id
+        ORDER BY event_id
+        """,
+        action=MATERIALIZE_ADMISSIBLE_PARENT,
+    )
+    assert {
+        row["event_id"]: row["parent_id"] for row in materialization_links
+    } == materialization_events
+
+    repeated = closure.reconcile_structural_closure(
+        manifest,
+        dry_run=False,
+        expected_manifest_hash=manifest_hash,
+        gc=structural_graph,
+    )
+    assert repeated["mode"] == "already_current"
+    assert repeated["counts"]["changed"] == 0
+    assert repeated["events"] == []
 
     structural_graph.query("MATCH (node) DETACH DELETE node")
     specifications = _seed_production_shaped_structural_cohort(structural_graph)
@@ -1683,3 +1796,36 @@ def test_production_shaped_event_batch_round_trips_and_tamper_rolls_back(
     assert structural_graph.query(
         "MATCH (change:StandardNameChange) RETURN count(change) AS events"
     ) == [{"events": 0}]
+
+
+@pytest.mark.graph
+def test_missing_materialization_event_rolls_back_production_shaped_cohort(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    specifications = _seed_production_shaped_structural_cohort(structural_graph)
+    manifest, manifest_hash = _bound_manifest(
+        tmp_path, structural_graph, specifications
+    )
+
+    with pytest.raises(StructuralClosureConflict, match="record hash changed"):
+        closure.reconcile_structural_closure(
+            manifest,
+            dry_run=False,
+            expected_manifest_hash=manifest_hash,
+            gc=_EventDeleteClient(structural_graph),
+        )
+
+    assert structural_graph.query(
+        "MATCH (change:StandardNameChange) RETURN count(change) AS events"
+    ) == [{"events": 0}]
+    assert structural_graph.query(
+        """
+        MATCH (parent:StandardName)
+        WHERE parent.id IN ['convected_velocity', 'velocity_due_to_convection']
+        RETURN parent.id AS id, parent.name_stage AS stage
+        ORDER BY id
+        """
+    ) == [
+        {"id": "convected_velocity", "stage": None},
+        {"id": "velocity_due_to_convection", "stage": None},
+    ]
