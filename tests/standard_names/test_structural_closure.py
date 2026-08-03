@@ -13,6 +13,7 @@ from typing import Any
 
 import pytest
 from neo4j import GraphDatabase
+from neo4j.time import DateTime
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.settings import get_graph_uri
@@ -71,6 +72,24 @@ def test_manifest_is_exact_deterministic_and_hash_bound(tmp_path: Path) -> None:
     assert tuple(row["root_id"] for row in manifest.rows) == manifest.root_ids
 
 
+@pytest.mark.parametrize(
+    ("instant", "epoch_seconds", "nanosecond"),
+    [
+        (datetime(1969, 12, 31, 23, 59, 59, 500_000, tzinfo=UTC), -1, 500_000_000),
+        (datetime(1969, 12, 31, 23, 59, 59, tzinfo=UTC), -1, 0),
+        (datetime(1970, 1, 1, tzinfo=UTC), 0, 0),
+        (datetime(1970, 1, 1, 0, 0, 0, 999_999, tzinfo=UTC), 0, 999_999_000),
+    ],
+)
+def test_event_timestamp_uses_exact_epoch_floor_semantics(
+    instant: datetime, epoch_seconds: int, nanosecond: int
+) -> None:
+    assert closure._normalized_event_record({"changed_at": instant})["changed_at"] == {
+        "epoch_seconds": epoch_seconds,
+        "nanosecond": nanosecond,
+    }
+
+
 def test_event_hash_is_stable_across_equivalent_temporal_hydration() -> None:
     instant = datetime(2026, 8, 3, 16, 25, 40, 931156, tzinfo=UTC)
     hydrated = instant.astimezone(timezone(timedelta(hours=2)))
@@ -78,6 +97,24 @@ def test_event_hash_is_stable_across_equivalent_temporal_hydration() -> None:
     assert closure._event_hash({"changed_at": instant}) == closure._event_hash(
         {"changed_at": hydrated}
     )
+
+
+def test_event_timestamp_preserves_neo4j_nanosecond_precision() -> None:
+    instant = DateTime(1969, 12, 31, 23, 59, 59, nanosecond=999_999_999, tzinfo=UTC)
+
+    assert closure._normalized_event_record({"changed_at": instant})["changed_at"] == {
+        "epoch_seconds": -1,
+        "nanosecond": 999_999_999,
+    }
+
+
+def test_event_timestamp_refuses_missing_timezone_authority() -> None:
+    with pytest.raises(
+        StructuralClosureConflict, match="timestamp lost its timezone authority"
+    ):
+        closure._normalized_event_record(
+            {"changed_at": datetime(1970, 1, 1, 0, 0, 0, 1)}
+        )
 
 
 def test_manifest_refuses_duplicates_unknown_actions_and_protected_rows(

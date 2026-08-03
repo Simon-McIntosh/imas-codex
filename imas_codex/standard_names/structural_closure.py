@@ -873,8 +873,9 @@ def _normalized_event_record(record: dict[str, Any]) -> dict[str, Any]:
                 "structural event timestamp lost its timezone authority"
             )
         utc_instant = changed_at.astimezone(UTC)
+        since_epoch = utc_instant - datetime(1970, 1, 1, tzinfo=UTC)
         normalized["changed_at"] = {
-            "epoch_seconds": int(utc_instant.timestamp()),
+            "epoch_seconds": since_epoch.days * 86_400 + since_epoch.seconds,
             "nanosecond": (
                 int(nanosecond)
                 if nanosecond is not None
