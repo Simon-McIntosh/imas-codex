@@ -130,6 +130,57 @@ RETURN path, versions,
 ORDER BY path
 """
 
+SOURCE_TARGET_PROTECTION_QUERY = """
+// SOURCE_AUTHORITY_TARGET_PROTECTION_CLOSURE
+UNWIND $candidates AS candidate
+CALL (candidate) {
+  UNWIND candidate.source_ids AS requested_source_id
+  OPTIONAL MATCH (source:StandardNameSource {id: requested_source_id})
+  WITH requested_source_id, collect(DISTINCT source) AS source_nodes
+  RETURN collect({
+    requested_source_id: requested_source_id,
+    matches: [source IN source_nodes WHERE source IS NOT NULL | {
+      element_id: elementId(source), labels: labels(source),
+      properties: properties(source),
+      bindings: [(source)-[binding:PRODUCED_NAME]->(target:StandardName) | {
+        element_id: elementId(binding), properties: properties(binding),
+        target_element_id: elementId(target), target_id: target.id
+      }]
+    }]
+  }) AS direct_sources
+}
+CALL (candidate) {
+  UNWIND candidate.source_ids AS requested_source_id
+  OPTIONAL MATCH (source:StandardNameSource {id: requested_source_id})
+  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(current_target:StandardName)
+  RETURN collect(DISTINCT current_target.id) AS current_target_ids
+}
+CALL (candidate, current_target_ids) {
+  UNWIND current_target_ids + candidate.prospective_target_ids AS requested_target_id
+  WITH DISTINCT requested_target_id
+  WHERE requested_target_id IS NOT NULL
+  OPTIONAL MATCH (target:StandardName {id: requested_target_id})
+  WITH requested_target_id, collect(DISTINCT target) AS target_nodes
+  RETURN collect({
+    requested_target_id: requested_target_id,
+    matches: [target IN target_nodes WHERE target IS NOT NULL | {
+      element_id: elementId(target), labels: labels(target),
+      properties: properties(target),
+      producers: [(producer:StandardNameSource)-[binding:PRODUCED_NAME]->(target) | {
+        source_element_id: elementId(producer), source_labels: labels(producer),
+        source_properties: properties(producer),
+        binding_element_id: elementId(binding),
+        binding_properties: properties(binding)
+      }]
+    }]
+  }) AS targets
+}
+RETURN candidate.path AS path,
+       candidate.prospective_target_ids AS prospective_target_ids,
+       direct_sources, targets
+ORDER BY path
+"""
+
 PARTICIPANT_LOCK_QUERY = """
 // SOURCE_SNAPSHOT_MIGRATION_LOCK
 MATCH (participant)
@@ -387,6 +438,14 @@ def participant_ids(row: dict[str, Any]) -> set[str]:
     for node in row.get("nodes") or []:
         for key in ("units", "parents", "coordinates", "projections"):
             ids.update(item.get("element_id") for item in node.get(key) or [])
+    protection = row.get("target_protection") or {}
+    for target_entry in protection.get("targets") or []:
+        for target in target_entry.get("matches") or []:
+            ids.add(target.get("element_id"))
+            ids.update(
+                producer.get("source_element_id")
+                for producer in target.get("producers") or []
+            )
     return {str(element_id) for element_id in ids if element_id}
 
 
@@ -436,6 +495,19 @@ def read_source_authority_rows(
     return [
         dict(row)
         for row in transaction.run(SOURCE_AUTHORITY_CLOSURE_QUERY, paths=list(paths))
+    ]
+
+
+def read_source_target_protection_rows(
+    transaction: Any, candidates: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Read protected producers for all current and prospective targets in one batch."""
+    return [
+        dict(row)
+        for row in transaction.run(
+            SOURCE_TARGET_PROTECTION_QUERY,
+            candidates=candidates,
+        )
     ]
 
 
