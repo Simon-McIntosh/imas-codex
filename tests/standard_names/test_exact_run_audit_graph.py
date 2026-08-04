@@ -28,7 +28,7 @@ def _operator_types(plan: object) -> list[str]:
     else:
         operator = getattr(plan, "operator_type", None)
         children = getattr(plan, "children", [])
-    operators = [str(operator)] if operator else []
+    operators = [str(operator).partition("@")[0]] if operator else []
     for child in children:
         operators.extend(_operator_types(child))
     return operators
