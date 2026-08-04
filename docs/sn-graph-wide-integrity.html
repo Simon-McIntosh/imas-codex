@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="84">
+<meta name="plan-version" content="85">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -368,7 +368,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sgwi-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28T07:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-28T07:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-04T09:44:08+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Settle the fan-out invariant, fix the embed dimension, then gate the write paths</h4>
     <div class="r-fu-body"><p>The first three steps of §7, in order, because each is cheap and each changes how much work the rest is. Settling the fan-out question is free and decides whether 240 of the 1458 ledger violations exist at all; the embed-dimension mismatch is independent and breaks semantic search outright; finding the supersede-without-retarget path likely collapses the largest violation class in one fix. Only then gate the write paths, so the defect classes stop regenerating before any money is spent on review. <strong>Do not start the graph-wide review pass, and do not touch anything in the WEST manifest — that is the parent plan's release set.</strong></p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -481,6 +481,7 @@ Done-when
      test proving the 29 reject and sightline pairs still accept.
   5. Full SN suite no worse than baseline; committed and pushed; outcomes
      recorded and the next followup queued.</pre>
+    <p class="r-fu-outcome"><p>Fan-out was locked to one live identity; embedding dimension and search workload were corrected; supersede/retarget and write guards, geometry rules, exact bounded scopes, protected closure, and canonical pre/postflight operators landed. Graph repairs and bounded reviews reduced and classified the live surface; final Standard Names validation passed 6247 tests with 10 skips at pushed main 594f761d.</p></p>
     </article>
 <article class="r-fu" data-id="f-sgwi-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T10:10:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity §6b" data-resolved-at="2026-07-29T19:12:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Unit authority: lock D-parent-units, close the null-unit validator gap, repair the eight, exorcise the ghost disposition</h4>
@@ -593,6 +594,39 @@ Validation
 
 Do not execute a live drain until review approves the implementation. The global 961 provenance violations and 15 legacy parser/stamp residues remain separate work under f-sgwi-001.</pre>
     <p class="r-fu-outcome">Bounded manifest draining is merged and independently approved. Exact executable-schema dry-run on a corrected-audit-derived 17-root current-DD cohort exited zero with genuine_gap=17, ambiguous=0, no embed preflight, and byte-identical graph/cost/WEST/test state. The evidence-only audit artifact remains rejected, and live execution is separately capped at USD 50 per cohort under the lead-authorized USD 200 cumulative budget.</p>
+    </article>
+<article class="r-fu" data-id="f-sgwi-005" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04T12:05:00+02:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close protected structural identities and partition residual provenance</h4>
+    <div class="r-fu-body"><p>The remaining work is no longer a broad repair pass: 498 semantic-source conflicts and 68 orphans have zero currently signed bulk actions, while two open structural identities need exact DD 4.1.1 and WEST-aware lifecycle authority. Build or reuse only hash-pinned exact operators, preserve ambiguity, and prove COCOS/label/protected closure after every action.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-graph-wide-integrity (http://localhost:8765/imas-codex/sn-graph-wide-integrity.html)
+Section: §3 / §4 / §7 — protected structural closure and residual provenance classification
+Capability: orchestrator
+Requirements: deep reasoning, extended context, strict verification, elevated graph-mutation risk
+
+Context
+  Writer, bounded-scope, review, preflight, and postflight safeguards are landed and the full Standard Names suite is green. The fresh one-query census still exposes 498 semantic-source violations, 68 provenance orphans with zero mutation-ready actions, and four strict-parser residues. Finish only evidence-backed exact closure; ambiguity stays visible.
+
+State to read
+  docs/sn-graph-wide-integrity.html, especially the latest three _top comments
+  /tmp/s7_final_completion_census_corrected.json
+  /tmp/s7_cross_section_structural_closure.json
+  /tmp/s7_flux_surface_average_structural_closure.json
+  imas_codex/standard_names/AGENTS.md
+  existing exact source-authority, protection, preflight, and postflight operators/tests
+
+Scope locks / constraints
+  WEST and fixtures are immutable protected closure, not exclusions to bypass.
+  DD 4.1.1 and catalog COCOS 17 are authoritative; retain downstream psi_like/ip_like labels and the null negative fixture label.
+  Never hand-accept names or raw-Cypher edit graph text. Do not infer mutation authority from semantic plausibility.
+  No graph-wide paid review or per-row query loop. Every apply requires a signed exact manifest, hash/CAS protection, dry-run, independent preflight/postflight, and idempotent replay.
+  Preserve unresolved 68 orphans and ambiguous semantic rows unless new exact authority is proven.
+
+Done-when
+  1. cross_section_of_flux_surface is adjudicated against its sixth current DD 4.1.1 source and folded only if the full protected closure proves the accepted WEST-connected target unchanged.
+  2. the stale DD 4.1.0 flux_surface_average_magnetic_field_magnitude branch is retired only through a hash-pinned protected lifecycle operator that preserves the accepted WEST target and source edge.
+  3. all 498 semantic-source rows are partitioned by explicit evidence into signed exact actions versus named non-actionable classes; no ambiguous bulk mutation occurs.
+  4. fresh one-query census, protected hashes, COCOS/label invariants, and full Standard Names suite are green; outcomes are recorded and this followup is resolved.</pre>
     </article>
 </section>
 
