@@ -1801,8 +1801,6 @@ def _row_reasons(
         reasons.append("protected target is not accepted")
     if snapshot.get("target_properties", {}).get("validation_status") != "valid":
         reasons.append("protected target is not valid")
-    if snapshot.get("target_properties", {}).get("cocos") != _CATALOG_COCOS:
-        reasons.append("protected target does not carry COCOS 17")
     labels = {
         (backing.get("properties") or {}).get("cocos_transformation_type")
         for backing in snapshot.get("backings") or []

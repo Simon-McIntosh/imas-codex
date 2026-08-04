@@ -151,6 +151,7 @@ def _seed(client: GraphClient, action: str, *, count: int) -> list[dict[str, str
             "target_id": target,
             "source_id": f"dd:test_review_entry__{namespace}_{index}",
             "backing_id": f"test/{namespace}/{index}/{target}",
+            "downstream_label": "psi_like" if index % 2 == 0 else "ip_like",
         }
         for index, target in enumerate(targets)
     ]
@@ -174,17 +175,18 @@ def _seed(client: GraphClient, action: str, *, count: int) -> list[dict[str, str
         })
         CREATE (target:StandardName {
           id: row.target_id, name_stage: 'accepted', validation_status: 'valid',
-          unit: 'm^2', cocos: 17, source_paths: [],
+          unit: 'm^2', source_paths: [],
           claim_token: null, claimed_at: null
         })
         CREATE (source:StandardNameSource {
           id: row.source_id, source_type: 'dd', source_id: row.backing_id,
-          status: $source_status, produced_sn_id: row.old_id,
+          status: $source_status, produced_sn_id: row.old_id, dd_version: '4.1.0',
           claim_token: null, claimed_at: null
         })
         CREATE (backing:IMASNode {
           id: row.backing_id, unit: 'm^2', node_category: 'quantity',
-          standard_name_id: row.old_id, cocos_transformation_type: 'psi_like'
+          standard_name_id: row.old_id,
+          cocos_transformation_type: row.downstream_label
         })
         CREATE (old)-[:HAS_UNIT]->(unit)
         CREATE (target)-[:HAS_UNIT]->(unit)
@@ -368,8 +370,11 @@ def _protected_identity(client: GraphClient, target_id: str) -> dict[str, Any]:
         MATCH (backing)-[projection:HAS_STANDARD_NAME]->(target)
         MATCH (backing)-[backing_unit:HAS_UNIT]->(unit)
         RETURN elementId(target) AS target,
+               properties(target) AS target_properties,
                elementId(west) AS west_source,
+               properties(west) AS west_source_properties,
                elementId(backing) AS west_backing,
+               properties(backing) AS west_backing_properties,
                elementId(unit) AS unit,
                elementId(binding) AS binding,
                elementId(ownership) AS ownership,
@@ -380,7 +385,9 @@ def _protected_identity(client: GraphClient, target_id: str) -> dict[str, Any]:
         target_id=target_id,
     )
     assert len(rows) == 1
-    return rows[0]
+    identity = rows[0]
+    identity["target_properties"].pop("source_paths", None)
+    return identity
 
 
 def _transactional_after_state(client: GraphClient, path: Path) -> dict[str, Any]:
@@ -465,6 +472,9 @@ def test_fold_dry_apply_second_apply_and_event_drift(
         actual_after, rows[0]["expected_after"]
     )
 
+    protected_identity_before = _protected_identity(
+        graph_client, seeded[0]["target_id"]
+    )
     apply_counter = _CountingGraphClient(graph_client)
     receipt = sut.reconcile_protected_structure(
         path, apply=True, expected_manifest_hash=digest, gc=apply_counter
@@ -478,24 +488,32 @@ def test_fold_dry_apply_second_apply_and_event_drift(
         gc=graph_client,
     )
     assert census["release_ready"] is True
+    assert (
+        _protected_identity(graph_client, seeded[0]["target_id"])
+        == protected_identity_before
+    )
     preserved = graph_client.query(
         """
         MATCH (target:StandardName {id: $target})-[:HAS_UNIT]->(unit:Unit)
         MATCH (west:StandardNameSource)-[:PRODUCED_NAME]->(target)
         WHERE west.id STARTS WITH 'dd:' AND NOT west.id STARTS WITH 'dd:test_review_entry__'
         MATCH (west)-[:FROM_DD_PATH]->(backing:IMASNode)
+        MATCH (source:StandardNameSource {id: $source})
         RETURN target.cocos AS cocos, unit.id AS unit,
                backing.cocos_transformation_type AS label,
-               backing.standard_name_id AS mirror
+               backing.standard_name_id AS mirror,
+               source.dd_version AS source_dd_version
         """,
         target=seeded[0]["target_id"],
+        source=seeded[0]["source_id"],
     )
     assert preserved == [
         {
-            "cocos": 17,
+            "cocos": None,
             "unit": "m^2",
             "label": "psi_like",
             "mirror": seeded[0]["target_id"],
+            "source_dd_version": "4.1.0",
         }
     ]
 
@@ -503,6 +521,11 @@ def test_fold_dry_apply_second_apply_and_event_drift(
         path, apply=True, expected_manifest_hash=digest, gc=graph_client
     )
     assert repeated["mode"] == "already_current"
+    assert graph_client.query(
+        "MATCH (source:StandardNameSource {id: $source}) "
+        "RETURN source.dd_version AS dd_version",
+        source=seeded[0]["source_id"],
+    ) == [{"dd_version": "4.1.0"}]
     event_id = _event_ids(rows[0])[0]
     graph_client.query(
         "MATCH (event {id: $id}) SET event.origin = 'tampered'", id=event_id
