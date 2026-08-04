@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-04T17:54:18",
+  "updated": "2026-08-04T22:49:58",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -226,7 +226,8 @@
         ],
         "starts": "2026-08-14",
         "ends": "2026-08-28",
-        "description": "Graph-wide integrity and evidence-policy follow-on after S6: 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, writer/fan-out/embedding debt, a safe bounded-manifest operator, and DDGap storage/writer/triage policy. WEST remains excluded and must retain its zero-invariant baseline."
+        "description": "Graph-wide integrity and evidence-policy follow-on after S6: 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, writer/fan-out/embedding debt, a safe bounded-manifest operator, and DDGap storage/writer/triage policy. WEST remains excluded and must retain its zero-invariant baseline.",
+        "summary": "Restart checkpoint 2026-08-04: 1/3 plans are lifecycle-complete and S7 is 66.3% implemented. sn-dd-gaps is done; sn-graph-wide-integrity is 0.99 with one protected-closure followup open; mast-semantic-source-repair is correctly 0/5 and dependency-blocked. Remaining order: repair and verify honest flush terminality plus hard budget reservations; complete one corrected aggregate census; close graph integrity with protected rows held unless separately authorized; execute MAST manifest/adjudication/discovery/dry-run work and separately authorized apply/publication; then run the bounded MAST cohort and the final global sn run --flush under the shared USD 200 ceiling, followed only by a fresh census, full suite, and closure."
       }
     ],
     "milestones": [],
@@ -280,9 +281,14 @@
         "when": "2026-08-01",
         "who": "reckon-ship",
         "what": "S6 closed at the exact ISN rc64 pin. The 159-token adjudication, strict ordered grammar and prompt truth, pipeline stability mechanics, unit/deletion-ledger work, DDGap foundation, and scoped WEST provenance repair are complete. Final five-gate matrix HOLD/HOLD/HOLD/HOLD/HOLD; WEST 355 partitions with zero unexplained and zero source-invariant violations. S5 remains planned for the human review rehearsal; global and DDGap policy debt moves explicitly to S7."
+      },
+      {
+        "when": "2026-08-04",
+        "who": "reckon-ship",
+        "what": "S7 handoff recorded at main cb6ca67f. Landed graph-integrity machinery and validation remain green; exact attributable spend is $5.310418/$200. A fresh completion audit found global flush terminality and hard-budget proof gaps, and the single attempted aggregate census stopped safely on a compile error with zero writes and no retry. Five ordered restart tasks are now recorded in the graph and MAST plans; no paid generation or MAST mutation/publication occurred."
       }
     ],
     "blockers": [],
-    "_version": 21
+    "_version": 22
   }
 }

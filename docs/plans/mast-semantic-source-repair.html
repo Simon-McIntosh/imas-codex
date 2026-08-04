@@ -26,6 +26,8 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-impl" content="0.0">
+<meta name="plan-modified" content="2026-08-04">
+<meta name="plan-version" content="1">
 </head>
 <body>
 <main class="plan-doc">
@@ -305,6 +307,11 @@ Done when
 - Graph and authorized ISNC release candidate agree by stable id, name, stage and complete sources; ISN strict parse/compose and catalog validation pass.
 - The Nova MAST ledger re-queries cleanly through imas-cx with all residual gaps explicitly explained.</pre>
     </article>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-20260804-restart-handoff" data-who="reckon-ship" data-when="2026-08-04T23:05:00+02:00">
+    <div class="r-comment-body"><p><strong>Restart checkpoint.</strong> This plan is still correctly at <code>0.0</code> and dependency-blocked; the displayed <code>0/5</code> refers to this MAST execution checklist, not to total S7 progress. No MAST graph mutation, catalog write, ISNC publication, provider call, or generation run occurred in the restart pass. Begin only after <code>sn-graph-wide-integrity</code> closes.</p><ol><li>Freeze the exact DD 4.1.1 focus manifest and current graph/catalog/facility-source baseline.</li><li>Strictly adjudicate the six absent identities and R/Z family consistency through the public ISN grammar boundary.</li><li>Implement typed MAST discovery/source support and exact transaction machinery only where a generic gap is proved.</li><li>Run read-only discovery, transaction, export, and parity dry-runs; stop at the existing authority boundary.</li><li>With separate explicit graph-apply and catalog/ISNC publication authority, apply the exact transaction, run the bounded generation cohort, publish one release candidate, and re-query through imas-cx before closing.</li></ol><p>The final global <code>sn run --flush</code> belongs after this plan, not before it.</p></div>
+</div>
 </section>
 </main>
 </body>
