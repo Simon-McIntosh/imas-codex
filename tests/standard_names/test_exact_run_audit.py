@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from copy import deepcopy
 from decimal import Decimal
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from imas_codex.standard_names.run_audit import (
-    _DELTA_EVIDENCE_QUERY,
+    _DD_EVIDENCE_QUERY,
     _RUN_EVIDENCE_QUERY,
     _TARGET_EVIDENCE_QUERY,
     audit_exact_standard_name_run,
@@ -56,7 +57,17 @@ def _target_row(*, element_id: str = "target-1") -> dict:
             }
         ],
         "target_units": ["rad"],
-        "current_versions": [{"id": "4.1.1", "cocos": 17, "cocos_ids": [17]}],
+    }
+
+
+def _dd_row() -> dict:
+    return {
+        "version": {
+            "id": "4.1.1",
+            "is_current": True,
+            "cocos": 17,
+            "cocos_ids": [17],
+        }
     }
 
 
@@ -79,6 +90,7 @@ def _run_row() -> dict:
             {
                 "id": "cost-1",
                 "run_id": _RUN_ID,
+                "linked_run_id": _RUN_ID,
                 "pool": "review",
                 "phase": "review_names",
                 "llm_cost": 0.031,
@@ -87,6 +99,7 @@ def _run_row() -> dict:
             {
                 "id": "cost-2",
                 "run_id": _RUN_ID,
+                "linked_run_id": _RUN_ID,
                 "pool": "review",
                 "phase": "review_names",
                 "llm_cost": 0.033326,
@@ -105,6 +118,8 @@ def _run_row() -> dict:
                 "resolution_role": "primary",
                 "resolution_method": None,
                 "score": 0.91,
+                "linked_run_id": _RUN_ID,
+                "linked_cost_ids": ["cost-1"],
             },
             {
                 "id": "review-1",
@@ -114,14 +129,11 @@ def _run_row() -> dict:
                 "resolution_role": "secondary",
                 "resolution_method": "consensus",
                 "score": 0.928,
+                "linked_run_id": _RUN_ID,
+                "linked_cost_ids": ["cost-2"],
             },
         ],
         "review_count": 2,
-    }
-
-
-def _delta_row() -> dict:
-    return {
         "predecessor_ids": ["toroidal_offset_at_measurement_location"],
         "refined_successor_ids": [],
         "docs_revision_ids": [],
@@ -148,14 +160,19 @@ def _audit(query_results: list[object]):
 
 
 def test_complete_receipt_preserves_evidence_and_exact_cost() -> None:
-    receipt, client = _audit([[_target_row()], [_run_row()], [_delta_row()]])
+    receipt, client = _audit([[_target_row()], [_dd_row()], [_run_row()]])
 
     assert receipt.passed is True
     assert receipt.query_count == 3
     assert client.query.call_count == 3
-    assert set(receipt.raw_rows) == {"target", "run", "deltas"}
+    assert set(receipt.raw_rows) == {"target", "dd", "run"}
     assert receipt.ledger_cost == Decimal("0.064326")
     assert receipt.cumulative_cost == Decimal("0.064326")
+    assert receipt.cost_total == Decimal("0.064326")
+    assert receipt.cost_is_exact is True
+    assert receipt.events_total == receipt.cost_event_count == 2
+    assert receipt.target_scope_run_id == _SCOPE
+    assert receipt.run_id == _RUN_ID
     assert receipt.pool_counts == {"review": 2}
     assert receipt.review_count == 2
     assert receipt.review_cycles == [0, 1]
@@ -177,11 +194,11 @@ def test_complete_receipt_preserves_evidence_and_exact_cost() -> None:
 
 
 def test_missing_target_returns_failed_receipt_after_constant_queries() -> None:
-    receipt, client = _audit([[], [_run_row()], []])
+    receipt, client = _audit([[], [_run_row()]])
 
     assert receipt.passed is False
-    assert receipt.query_count == 3
-    assert client.query.call_count == 3
+    assert receipt.query_count == 2
+    assert client.query.call_count == 2
     assert receipt.raw_rows["target"] == []
     assert receipt.raw_rows["run"] == [_run_row()]
     assert any("target identity resolved to 0" in item for item in receipt.diagnostics)
@@ -191,8 +208,8 @@ def test_ambiguous_target_and_run_are_reported_without_losing_rows() -> None:
     receipt, client = _audit(
         [
             [_target_row(), _target_row(element_id="target-2")],
+            [_dd_row()],
             [_run_row(), _run_row()],
-            [_delta_row()],
         ]
     )
 
@@ -205,21 +222,128 @@ def test_ambiguous_target_and_run_are_reported_without_losing_rows() -> None:
     assert any("run identity resolved to 2" in item for item in receipt.diagnostics)
 
 
+def test_wrong_exact_scope_fails_without_conflating_the_sn_run() -> None:
+    target = _target_row()
+    target["target"]["run_id"] = "wrong-scope"
+
+    receipt, _client = _audit([[target], [_dd_row()], [_run_row()]])
+
+    assert receipt.passed is False
+    assert receipt.target_scope_run_id == "wrong-scope"
+    assert receipt.run_id == _RUN_ID
+    assert any("does not match exact scope" in item for item in receipt.diagnostics)
+
+
+def test_ambiguous_run_prefix_fails_with_both_raw_candidates_retained() -> None:
+    receipt, _client = _audit([[_target_row()], [_dd_row()], [_run_row(), _run_row()]])
+
+    assert receipt.passed is False
+    assert len(receipt.raw_rows["run"]) == 2
+    assert any("run identity resolved to 2" in item for item in receipt.diagnostics)
+
+
+def test_unrelated_run_evidence_is_rejected_even_when_mock_returns_it() -> None:
+    run_row = _run_row()
+    run_row["run"]["id"] = "unrelated-run"
+
+    receipt, _client = _audit([[_target_row()], [_dd_row()], [run_row]])
+
+    assert receipt.passed is False
+    assert any(
+        "does not match supplied identity" in item for item in receipt.diagnostics
+    )
+
+
+@pytest.mark.parametrize("evidence_kind", ["cost", "review"])
+def test_unrelated_child_evidence_is_rejected(evidence_kind: str) -> None:
+    run_row = _run_row()
+    if evidence_kind == "cost":
+        run_row["costs"][0]["linked_run_id"] = "unrelated-run"
+    else:
+        run_row["reviews"][0]["linked_cost_ids"] = ["unrelated-cost"]
+
+    receipt, _client = _audit([[_target_row()], [_dd_row()], [run_row]])
+
+    assert receipt.passed is False
+    assert any(evidence_kind in item for item in receipt.diagnostics)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "diagnostic"),
+    [
+        ("cost_is_exact", None, "inexact cost"),
+        ("cost_is_exact", False, "inexact cost"),
+        ("cost_total", None, "no exact cost total"),
+        ("cost_total", 0.064325, "differs from exact ledger sum"),
+        ("events_total", None, "no event total"),
+        ("events_total", 3, "event total differs"),
+    ],
+)
+def test_missing_or_inconsistent_run_cost_fields_fail_closed(
+    field: str, value: object, diagnostic: str
+) -> None:
+    run_row = _run_row()
+    run_row["run"][field] = value
+
+    receipt, _client = _audit([[_target_row()], [_dd_row()], [run_row]])
+
+    assert receipt.passed is False
+    assert receipt.raw_rows["run"] == [run_row]
+    assert any(diagnostic in item for item in receipt.diagnostics)
+
+
+@pytest.mark.parametrize("mismatch", ["aggregate", "cardinality", "duplicate"])
+def test_cost_event_cardinality_mismatches_fail_closed(mismatch: str) -> None:
+    run_row = _run_row()
+    if mismatch == "aggregate":
+        run_row["cost_events"] = 1
+    elif mismatch == "cardinality":
+        run_row["costs"].pop()
+    else:
+        run_row["costs"][1]["id"] = "cost-1"
+
+    receipt, _client = _audit([[_target_row()], [_dd_row()], [run_row]])
+
+    assert receipt.passed is False
+    assert any("event total differs" in item for item in receipt.diagnostics)
+
+
+def test_disagreeing_source_snapshots_skip_the_dd_query_and_fail_closed() -> None:
+    target = _target_row()
+    second_source = deepcopy(target["sources"][0])
+    second_source["source_id"] = "dd:magnetics/measurement/other_offset"
+    second_source["backing_id"] = "magnetics/measurement/other_offset"
+    second_source["dd_snapshot"] = "4.1.0"
+    target["sources"].append(second_source)
+
+    receipt, client = _audit([[target], [_run_row()]])
+
+    assert receipt.passed is False
+    assert receipt.query_count == 2
+    assert set(receipt.raw_rows) == {"target", "run"}
+    assert (
+        "EXACT_STANDARD_NAME_DD_EVIDENCE" not in client.query.call_args_list[1].args[0]
+    )
+    assert any(
+        "snapshot identity is missing or ambiguous" in item
+        for item in receipt.diagnostics
+    )
+
+
 def test_later_query_failure_retains_all_earlier_raw_evidence() -> None:
     receipt, client = _audit(
-        [[_target_row()], [_run_row()], RuntimeError("compile scope error")]
+        [[_target_row()], [_dd_row()], RuntimeError("compile scope error")]
     )
 
     assert receipt.passed is False
     assert receipt.query_count == 3
     assert client.query.call_count == 3
-    assert set(receipt.raw_rows) == {"target", "run"}
-    assert receipt.ledger_cost == Decimal("0.064326")
-    assert any("deltas evidence query failed" in item for item in receipt.diagnostics)
+    assert set(receipt.raw_rows) == {"target", "dd"}
+    assert any("run evidence query failed" in item for item in receipt.diagnostics)
 
 
 def test_queries_are_bounded_and_keep_aggregates_in_with_scope() -> None:
-    queries = (_TARGET_EVIDENCE_QUERY, _RUN_EVIDENCE_QUERY, _DELTA_EVIDENCE_QUERY)
+    queries = (_TARGET_EVIDENCE_QUERY, _DD_EVIDENCE_QUERY, _RUN_EVIDENCE_QUERY)
 
     for query in queries:
         assert "*0.." not in query
@@ -231,17 +355,11 @@ def test_queries_are_bounded_and_keep_aggregates_in_with_scope() -> None:
     assert "MATCH (target:StandardName {id: $name_id})" in _TARGET_EVIDENCE_QUERY
     assert "WITH target, source, backing" in _TARGET_EVIDENCE_QUERY
     assert "WITH source, backing, backing_unit_ids" in _TARGET_EVIDENCE_QUERY
+    assert "DDVersion {is_current: true}" not in _TARGET_EVIDENCE_QUERY
+    assert "MATCH (version:DDVersion {id: $dd_version})" in _DD_EVIDENCE_QUERY
+    assert "WITH run, cost" in _RUN_EVIDENCE_QUERY
     assert "AS ledger_cost" in _RUN_EVIDENCE_QUERY
     assert (
         "RETURN costs, ledger_cost, overspend_cost, cost_events" in _RUN_EVIDENCE_QUERY
     )
     assert "run.id STARTS WITH $run_id_prefix" in _RUN_EVIDENCE_QUERY
-
-
-@pytest.mark.parametrize("cohort_noise", [0, 40])
-def test_query_count_is_independent_of_unrelated_graph_size(cohort_noise: int) -> None:
-    receipt, client = _audit([[_target_row()], [_run_row()], [_delta_row()]])
-
-    assert cohort_noise >= 0
-    assert receipt.query_count == 3
-    assert client.query.call_count == 3

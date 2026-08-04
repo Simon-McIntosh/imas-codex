@@ -1,4 +1,8 @@
-"""Disposable-Neo4j compilation and access-plan checks for exact run audit."""
+"""Disposable-Neo4j compilation and access-plan checks for exact run audit.
+
+Run explicitly with ``uv run pytest tests/standard_names/test_exact_run_audit_graph.py
+-m graph``. The default suite intentionally excludes graph tests.
+"""
 
 from __future__ import annotations
 
@@ -7,7 +11,7 @@ import os
 import pytest
 
 from imas_codex.standard_names.run_audit import (
-    _DELTA_EVIDENCE_QUERY,
+    _DD_EVIDENCE_QUERY,
     _RUN_EVIDENCE_QUERY,
     _TARGET_EVIDENCE_QUERY,
 )
@@ -42,8 +46,9 @@ def test_disposable_graph_compiles_all_bounded_queries_without_global_scans() ->
 
     params = {
         "name_id": "exact_run_audit_compile_fixture",
-        "scope_uuid": "80a80eaa-f2d4-4162-8027-45ee1ae2d07e",
+        "scope_run_id": "80a80eaa-f2d4-4162-8027-45ee1ae2d07e",
         "run_id_prefix": "run-prefix",
+        "dd_version": "4.1.1",
         "launched_at": "2026-08-04T00:00:00+00:00",
         "completed_at": "2026-08-04T00:05:00+00:00",
         "west_source_ids": [],
@@ -59,13 +64,13 @@ def test_disposable_graph_compiles_all_bounded_queries_without_global_scans() ->
         with gc.session() as session:
             for label, query in (
                 ("target", _TARGET_EVIDENCE_QUERY),
+                ("dd", _DD_EVIDENCE_QUERY),
                 ("run", _RUN_EVIDENCE_QUERY),
-                ("deltas", _DELTA_EVIDENCE_QUERY),
             ):
                 result = session.run("EXPLAIN " + query, **params)
                 plans[label] = _operator_types(result.consume().plan)
 
-    assert set(plans) == {"target", "run", "deltas"}
+    assert set(plans) == {"target", "dd", "run"}
     for operators in plans.values():
         assert "AllNodesScan" not in operators
         assert not any("AllRelationshipsScan" in operator for operator in operators)

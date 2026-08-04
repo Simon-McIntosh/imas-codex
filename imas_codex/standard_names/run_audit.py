@@ -50,16 +50,6 @@ CALL (target) {
   OPTIONAL MATCH (target)-[:HAS_UNIT]->(target_unit:Unit)
   RETURN collect(DISTINCT target_unit.id) AS target_units
 }
-CALL () {
-  OPTIONAL MATCH (version:DDVersion {is_current: true})
-  OPTIONAL MATCH (version)-[:HAS_COCOS]->(cocos:COCOS)
-  WITH version, collect(DISTINCT cocos.id) AS cocos_ids
-  RETURN collect(DISTINCT CASE WHEN version IS NULL THEN null ELSE {
-    id: version.id,
-    cocos: version.cocos,
-    cocos_ids: cocos_ids
-  } END) AS current_versions
-}
 RETURN {
   element_id: elementId(target),
   id: target.id,
@@ -84,7 +74,21 @@ RETURN {
   review_docs_count: target.review_docs_count,
   refine_docs_count: target.refine_docs_count
 } AS target,
-sources, target_units, current_versions
+sources, target_units
+"""
+
+
+_DD_EVIDENCE_QUERY = """
+// EXACT_STANDARD_NAME_DD_EVIDENCE
+MATCH (version:DDVersion {id: $dd_version})
+OPTIONAL MATCH (version)-[:HAS_COCOS]->(cocos:COCOS)
+WITH version, collect(DISTINCT cocos.id) AS cocos_ids
+RETURN {
+  id: version.id,
+  is_current: version.is_current,
+  cocos: version.cocos,
+  cocos_ids: cocos_ids
+} AS version
 """
 
 
@@ -96,14 +100,16 @@ WHERE run.id STARTS WITH $run_id_prefix
   AND run.started_at <= datetime($completed_at)
 CALL (run) {
   OPTIONAL MATCH (cost:LLMCost)-[:FOR_RUN]->(run)
-  WITH cost
+  WITH run, cost
   WHERE cost IS NULL
      OR cost.llm_at IS NULL
      OR (cost.llm_at >= datetime($launched_at)
          AND cost.llm_at <= datetime($completed_at))
-  WITH collect(CASE WHEN cost IS NULL THEN null ELSE {
+  WITH run, collect(CASE WHEN cost IS NULL THEN null ELSE {
          id: cost.id,
          run_id: cost.run_id,
+         for_run: cost.for_run,
+         linked_run_id: run.id,
          pool: cost.pool,
          phase: cost.phase,
          event_type: cost.event_type,
@@ -118,14 +124,20 @@ CALL (run) {
        count(cost) AS cost_events
   RETURN costs, ledger_cost, overspend_cost, cost_events
 }
-CALL () {
+CALL (run) {
   OPTIONAL MATCH (target:StandardName {id: $name_id})
                  -[:HAS_REVIEW]->(review:StandardNameReview)
-  WITH review
+  WITH run, target, review
   WHERE review IS NULL
      OR review.reviewed_at IS NULL
      OR (review.reviewed_at >= datetime($launched_at)
          AND review.reviewed_at <= datetime($completed_at))
+  OPTIONAL MATCH (review_cost:LLMCost)-[:FOR_RUN]->(run)
+  WHERE review_cost.run_id = run.id
+    AND target.id IN coalesce(review_cost.sn_ids, [])
+    AND review_cost.pool = 'review'
+    AND review_cost.llm_at = review.llm_at
+  WITH review, run, collect(DISTINCT review_cost.id) AS linked_cost_ids
   WITH collect(CASE WHEN review IS NULL THEN null ELSE {
          id: review.id,
          review_axis: review.review_axis,
@@ -136,10 +148,34 @@ CALL () {
          score: review.score,
          is_canonical: review.is_canonical,
          reviewed_at: review.reviewed_at,
-         llm_at: review.llm_at
+         llm_at: review.llm_at,
+         linked_run_id: run.id,
+         linked_cost_ids: linked_cost_ids
        } END) AS reviews,
        count(review) AS review_count
   RETURN reviews, review_count
+}
+CALL (run) {
+  OPTIONAL MATCH (target:StandardName {id: $name_id})
+  OPTIONAL MATCH (target)-[:REFINED_FROM]->(predecessor:StandardName)
+  WITH run, target, collect(DISTINCT predecessor.id) AS predecessor_ids
+  OPTIONAL MATCH (successor:StandardName)-[:REFINED_FROM]->(target)
+  WHERE successor.run_id = $scope_run_id
+    AND successor.last_run_id = run.id
+  WITH run, target, predecessor_ids,
+       collect(DISTINCT successor.id) AS refined_successor_ids
+  OPTIONAL MATCH (target)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
+  WHERE revision.created_at IS NULL
+     OR (revision.created_at >= datetime($launched_at)
+         AND revision.created_at <= datetime($completed_at))
+  WITH run, target, predecessor_ids, refined_successor_ids,
+       collect(DISTINCT revision.id) AS docs_revision_ids
+  OPTIONAL MATCH (target)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange)
+  WHERE change.changed_at IS NULL
+     OR (change.changed_at >= datetime($launched_at)
+         AND change.changed_at <= datetime($completed_at))
+  RETURN predecessor_ids, refined_successor_ids, docs_revision_ids,
+         collect(DISTINCT change.id) AS internal_change_ids
 }
 RETURN {
   id: run.id,
@@ -154,39 +190,8 @@ RETURN {
   cost_is_exact: run.cost_is_exact,
   events_total: run.events_total
 } AS run,
-costs, ledger_cost, overspend_cost, cost_events, reviews, review_count
-"""
-
-
-_DELTA_EVIDENCE_QUERY = """
-// EXACT_STANDARD_NAME_DELTA_EVIDENCE
-MATCH (target:StandardName {id: $name_id})
-CALL (target) {
-  OPTIONAL MATCH (target)-[:REFINED_FROM]->(predecessor:StandardName)
-  RETURN collect(DISTINCT predecessor.id) AS predecessor_ids
-}
-CALL (target) {
-  OPTIONAL MATCH (successor:StandardName)-[:REFINED_FROM]->(target)
-  WHERE successor.run_id = $scope_uuid
-     OR successor.last_run_id STARTS WITH $run_id_prefix
-  RETURN collect(DISTINCT successor.id) AS refined_successor_ids
-}
-CALL (target) {
-  OPTIONAL MATCH (target)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
-  WHERE revision.created_at IS NULL
-     OR (revision.created_at >= datetime($launched_at)
-         AND revision.created_at <= datetime($completed_at))
-  RETURN collect(DISTINCT revision.id) AS docs_revision_ids
-}
-CALL (target) {
-  OPTIONAL MATCH (target)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange)
-  WHERE change.changed_at IS NULL
-     OR (change.changed_at >= datetime($launched_at)
-         AND change.changed_at <= datetime($completed_at))
-  RETURN collect(DISTINCT change.id) AS internal_change_ids
-}
-RETURN predecessor_ids, refined_successor_ids,
-       docs_revision_ids, internal_change_ids
+costs, ledger_cost, overspend_cost, cost_events, reviews, review_count,
+predecessor_ids, refined_successor_ids, docs_revision_ids, internal_change_ids
 """
 
 
@@ -199,7 +204,7 @@ class ExactStandardNameRunAuditReceipt(BaseModel):
     diagnostics: list[str] = Field(default_factory=list)
     query_count: int = 0
     name_id: str
-    scope_uuid: str
+    scope_run_id: str
     run_id_prefix: str
     launched_at: str
     completed_at: str
@@ -210,7 +215,7 @@ class ExactStandardNameRunAuditReceipt(BaseModel):
     target_status: str | None = None
     target_score_name: Decimal | None = None
     target_score_docs: Decimal | None = None
-    target_run_id: str | None = None
+    target_scope_run_id: str | None = None
     target_last_run_id: str | None = None
     target_protected: bool = False
 
@@ -226,7 +231,10 @@ class ExactStandardNameRunAuditReceipt(BaseModel):
     ledger_cost: Decimal = Decimal("0")
     cumulative_cost: Decimal = Decimal("0")
     cost_limit: Decimal | None = None
+    cost_total: Decimal | None = None
     cost_is_exact: bool | None = None
+    events_total: int | None = None
+    cost_event_count: int = 0
     overspend_cost: Decimal = Decimal("0")
     overspent: bool = False
 
@@ -293,8 +301,8 @@ def _sorted_strings(values: Any) -> list[str]:
 
 def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
     target_rows = receipt.raw_rows.get("target", [])
+    dd_rows = receipt.raw_rows.get("dd", [])
     run_rows = receipt.raw_rows.get("run", [])
-    delta_rows = receipt.raw_rows.get("deltas", [])
 
     if len(target_rows) != 1:
         receipt.diagnostics.append(
@@ -308,7 +316,7 @@ def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
         receipt.target_status = target.get("status")
         receipt.target_score_name = _decimal(target.get("reviewer_score_name"))
         receipt.target_score_docs = _decimal(target.get("reviewer_score_docs"))
-        receipt.target_run_id = target.get("run_id")
+        receipt.target_scope_run_id = target.get("run_id")
         receipt.target_last_run_id = target.get("last_run_id")
         receipt.target_protected = bool(
             target.get("origin") == "catalog_edit"
@@ -346,30 +354,38 @@ def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
         }
         receipt.west = any(bool(source.get("west")) for source in sources)
         receipt.fixture = any(bool(source.get("fixture")) for source in sources)
-        current_versions = row.get("current_versions") or []
-        receipt.current_dd_versions = _sorted_strings(
-            version.get("id") for version in current_versions
+        if receipt.target_scope_run_id != receipt.scope_run_id:
+            receipt.diagnostics.append(
+                "target run provenance does not match exact scope"
+            )
+        if receipt.target_protected or receipt.west or receipt.fixture:
+            receipt.diagnostics.append("target closure intersects protected state")
+
+    if len(receipt.dd_snapshot_versions) != 1:
+        receipt.diagnostics.append(
+            "source DD snapshot identity is missing or ambiguous"
         )
+    if len(dd_rows) != 1:
+        receipt.diagnostics.append(
+            f"exact DD snapshot identity resolved to {len(dd_rows)} rows"
+        )
+    else:
+        version = dd_rows[0].get("version") or {}
+        version_id = version.get("id")
+        receipt.current_dd_versions = _sorted_strings([version_id])
         receipt.global_cocos = sorted(
             {
                 int(cocos)
-                for version in current_versions
                 for cocos in [version.get("cocos"), *(version.get("cocos_ids") or [])]
                 if cocos is not None
             }
         )
-        if receipt.target_run_id != receipt.scope_uuid:
-            receipt.diagnostics.append(
-                "target run provenance does not match exact scope"
-            )
-        if len(receipt.current_dd_versions) != 1:
-            receipt.diagnostics.append(
-                "current DD version identity is missing or ambiguous"
-            )
+        if receipt.dd_snapshot_versions != receipt.current_dd_versions:
+            receipt.diagnostics.append("DD evidence does not match source snapshot")
+        if version.get("is_current") is not True:
+            receipt.diagnostics.append("source DD snapshot is not current")
         if receipt.global_cocos != [17]:
             receipt.diagnostics.append("current DD catalog COCOS is not exactly 17")
-        if receipt.target_protected or receipt.west or receipt.fixture:
-            receipt.diagnostics.append("target closure intersects protected state")
 
     if len(run_rows) != 1:
         receipt.diagnostics.append(
@@ -382,13 +398,49 @@ def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
         receipt.run_status = run.get("status")
         receipt.run_stop_reason = run.get("stop_reason")
         receipt.run_open = receipt.run_status == "started" or not run.get("ended_at")
-        receipt.ledger_cost = _decimal(row.get("ledger_cost")) or Decimal("0")
+        if not receipt.run_id or not receipt.run_id.startswith(receipt.run_id_prefix):
+            receipt.diagnostics.append("run evidence does not match supplied identity")
+        try:
+            run_started = _bounded_datetime(
+                str(run.get("started_at")), field_name="run.started_at"
+            )
+            launch = _bounded_datetime(receipt.launched_at, field_name="launched_at")
+            completion = _bounded_datetime(
+                receipt.completed_at, field_name="completed_at"
+            )
+        except ValueError:
+            receipt.diagnostics.append("run evidence has an invalid start timestamp")
+        else:
+            if not launch <= run_started <= completion:
+                receipt.diagnostics.append("run evidence falls outside supplied bounds")
+        costs = row.get("costs") or []
+        event_costs = [_decimal(cost.get("llm_cost")) for cost in costs]
+        if any(cost is None for cost in event_costs):
+            receipt.diagnostics.append("cost evidence contains a missing event cost")
+        receipt.ledger_cost = sum(
+            (cost for cost in event_costs if cost is not None), Decimal("0")
+        )
         receipt.cumulative_cost = _decimal(run.get("cost_spent")) or Decimal("0")
         receipt.cost_limit = _decimal(run.get("cost_limit"))
+        receipt.cost_total = _decimal(run.get("cost_total"))
         receipt.cost_is_exact = run.get("cost_is_exact")
+        receipt.events_total = (
+            int(run["events_total"]) if run.get("events_total") is not None else None
+        )
+        receipt.cost_event_count = int(row.get("cost_events") or 0)
         receipt.overspend_cost = _decimal(row.get("overspend_cost")) or Decimal("0")
         receipt.overspent = receipt.overspend_cost > 0
-        costs = row.get("costs") or []
+        cost_ids = [str(cost.get("id")) for cost in costs if cost.get("id") is not None]
+        unrelated_costs = [
+            cost
+            for cost in costs
+            if cost.get("run_id") != receipt.run_id
+            or cost.get("linked_run_id") != receipt.run_id
+        ]
+        if unrelated_costs:
+            receipt.diagnostics.append(
+                "cost evidence is not linked to the selected run"
+            )
         for cost in costs:
             pool = str(cost.get("pool") or cost.get("phase") or "unknown")
             receipt.pool_counts[pool] = receipt.pool_counts.get(pool, 0) + 1
@@ -404,22 +456,47 @@ def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
         receipt.review_resolutions = _sorted_strings(
             review.get("resolution_method") for review in reviews
         )
-        run_total = _decimal(run.get("cost_total"))
-        if run_total is not None and run_total != receipt.ledger_cost:
+        unrelated_reviews = [
+            review
+            for review in reviews
+            if review.get("linked_run_id") != receipt.run_id
+            or not review.get("linked_cost_ids")
+            or not set(map(str, review.get("linked_cost_ids") or [])).issubset(cost_ids)
+        ]
+        if unrelated_reviews:
+            receipt.diagnostics.append(
+                "review evidence is not linked to the selected run"
+            )
+        review_ids = [
+            str(review.get("id")) for review in reviews if review.get("id") is not None
+        ]
+        if not (receipt.review_count == len(reviews) == len(set(review_ids))):
+            receipt.diagnostics.append("review count differs from review evidence")
+        if receipt.cost_total is None:
+            receipt.diagnostics.append("selected run has no exact cost total")
+        elif receipt.cost_total != receipt.ledger_cost:
             receipt.diagnostics.append("run cost total differs from exact ledger sum")
+        if receipt.cumulative_cost != receipt.ledger_cost:
+            receipt.diagnostics.append(
+                "run cumulative cost differs from exact ledger sum"
+            )
+        if receipt.events_total is None:
+            receipt.diagnostics.append("selected run has no event total")
+        elif not (
+            receipt.events_total
+            == receipt.cost_event_count
+            == len(costs)
+            == len(set(cost_ids))
+        ):
+            receipt.diagnostics.append("run event total differs from cost evidence")
         if receipt.run_open:
             receipt.diagnostics.append("selected run remains open")
-        if receipt.cost_is_exact is False:
+        if receipt.cost_is_exact is not True:
             receipt.diagnostics.append("selected run reports inexact cost")
         if receipt.overspent:
             receipt.diagnostics.append("selected run contains overspend")
 
-    if len(delta_rows) != 1:
-        receipt.diagnostics.append(
-            f"exact target delta query resolved to {len(delta_rows)} rows"
-        )
-    else:
-        row = delta_rows[0]
+        row = run_rows[0]
         receipt.predecessor_ids = _sorted_strings(row.get("predecessor_ids"))
         receipt.predecessor_count = len(receipt.predecessor_ids)
         receipt.refined_successor_ids = _sorted_strings(
@@ -437,7 +514,7 @@ def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
 
 def audit_exact_standard_name_run(
     name_id: str,
-    scope_uuid: str,
+    scope_run_id: str,
     run_id_or_prefix: str,
     launched_at: datetime | str,
     completed_at: datetime | str,
@@ -451,18 +528,18 @@ def audit_exact_standard_name_run(
     of discarding it or raising past the receipt boundary.
     """
     normalized_name = name_id.strip()
-    normalized_scope = scope_uuid.strip()
+    normalized_scope = scope_run_id.strip()
     normalized_run = run_id_or_prefix.strip()
     launch = _bounded_datetime(launched_at, field_name="launched_at")
     completion = _bounded_datetime(completed_at, field_name="completed_at")
     if not normalized_name or not normalized_scope or not normalized_run:
-        raise ValueError("name_id, scope_uuid, and run_id_or_prefix are required")
+        raise ValueError("name_id, scope_run_id, and run_id_or_prefix are required")
     if completion < launch:
         raise ValueError("completed_at must not precede launched_at")
 
     receipt = ExactStandardNameRunAuditReceipt(
         name_id=normalized_name,
-        scope_uuid=normalized_scope,
+        scope_run_id=normalized_scope,
         run_id_prefix=normalized_run,
         launched_at=launch.isoformat(),
         completed_at=completion.isoformat(),
@@ -474,18 +551,13 @@ def audit_exact_standard_name_run(
 
     params = {
         "name_id": normalized_name,
-        "scope_uuid": normalized_scope,
+        "scope_run_id": normalized_scope,
         "run_id_prefix": normalized_run,
         "launched_at": launch.isoformat(),
         "completed_at": completion.isoformat(),
         "west_source_ids": sorted(_west_source_ids()),
         "fixture_source_id_prefix": _FIXTURE_SOURCE_ID_PREFIX,
     }
-    queries = (
-        ("target", _TARGET_EVIDENCE_QUERY),
-        ("run", _RUN_EVIDENCE_QUERY),
-        ("deltas", _DELTA_EVIDENCE_QUERY),
-    )
     if gc is None:
         from imas_codex.graph.client import GraphClient
 
@@ -494,16 +566,43 @@ def audit_exact_standard_name_run(
         manager = nullcontext(gc)
     with manager as client:
         assert client is not None
-        for group, query in queries:
+        receipt.query_count += 1
+        try:
+            target_rows = client.query(_TARGET_EVIDENCE_QUERY, **params)
+        except Exception as exc:
+            receipt.diagnostics.append(
+                f"target evidence query failed: {type(exc).__name__}: {exc}"
+            )
+        else:
+            receipt.raw_rows["target"] = _primitive(target_rows)
+
+        snapshot_versions = {
+            str(source["dd_snapshot"])
+            for row in receipt.raw_rows.get("target", [])
+            for source in row.get("sources") or []
+            if source.get("dd_snapshot") is not None
+        }
+        if len(snapshot_versions) == 1:
+            params["dd_version"] = next(iter(snapshot_versions))
             receipt.query_count += 1
             try:
-                rows = client.query(query, **params)
+                dd_rows = client.query(_DD_EVIDENCE_QUERY, **params)
             except Exception as exc:
                 receipt.diagnostics.append(
-                    f"{group} evidence query failed: {type(exc).__name__}: {exc}"
+                    f"dd evidence query failed: {type(exc).__name__}: {exc}"
                 )
-                break
-            receipt.raw_rows[group] = _primitive(rows)
+            else:
+                receipt.raw_rows["dd"] = _primitive(dd_rows)
+
+        receipt.query_count += 1
+        try:
+            run_rows = client.query(_RUN_EVIDENCE_QUERY, **params)
+        except Exception as exc:
+            receipt.diagnostics.append(
+                f"run evidence query failed: {type(exc).__name__}: {exc}"
+            )
+        else:
+            receipt.raw_rows["run"] = _primitive(run_rows)
 
     _populate_receipt(receipt)
     return receipt
