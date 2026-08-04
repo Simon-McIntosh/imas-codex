@@ -23,9 +23,9 @@ def _row(
     *,
     index: int = 0,
 ) -> dict[str, Any]:
-    row_key = sha256(f"row:{index}".encode()).hexdigest()
-    return {
-        "row_key": row_key,
+    expected_after = {"cohort_index": index, "state": "expected"}
+    row = {
+        "row_key": "",
         "action": action,
         "old_id": f"invalid_identity_{index}",
         "target_id": f"accepted_identity_{index}",
@@ -36,12 +36,19 @@ def _row(
         "expected_relationship_ids_hash": _HASH,
         "expected_protected_subclosure_hash": _HASH,
         "expected_mutation_hash": _HASH,
+        "expected_after": expected_after,
+        "expected_after_hash": sut.payload_hash(expected_after),
+        "allowlisted_delta": {"action": action},
         "authority_evidence_sha256": (
             _HASH if action == sut.PROTECTED_IDENTITY_FOLD else None
         ),
         "event_timestamp": "2026-08-04T12:00:00+02:00",
         "reason": "exact structural repair",
     }
+    row["row_key"] = sut.payload_hash(
+        {key: value for key, value in row.items() if key != "row_key"}
+    )
+    return row
 
 
 def _payload(
@@ -122,6 +129,28 @@ def test_manifest_refuses_mixed_actions_and_authority_drift(tmp_path: Path) -> N
     fold["authority_evidence_sha256"] = "b" * 64
     path, _ = _write(tmp_path / "authority.json", [fold])
     with pytest.raises(ValueError, match="authority evidence"):
+        sut.load_protected_structural_manifest(path)
+
+
+def test_manifest_refuses_overlapping_targets_and_expected_after_drift(
+    tmp_path: Path,
+) -> None:
+    first = _row(index=0)
+    second = _row(index=1)
+    second["target_id"] = first["target_id"]
+    second["row_key"] = sut.payload_hash(
+        {key: value for key, value in second.items() if key != "row_key"}
+    )
+    rows = sorted([first, second], key=lambda item: item["row_key"])
+    path, _ = _write(tmp_path / "overlap.json", rows)
+    with pytest.raises(ValueError, match="overlap"):
+        sut.load_protected_structural_manifest(path)
+
+    row = _row()
+    row["expected_after"]["state"] = "tampered"
+    path = tmp_path / "after-drift.json"
+    path.write_text(json.dumps(_payload([row])))
+    with pytest.raises(ValueError, match="expected_after_hash"):
         sut.load_protected_structural_manifest(path)
 
 
@@ -252,6 +281,9 @@ def _patch_retirement_execution(monkeypatch: pytest.MonkeyPatch) -> None:
                     ),
                     "event_ids": event_ids,
                     "mutation": mutation,
+                    "expected_after": row["expected_after"],
+                    "expected_after_hash": row["expected_after_hash"],
+                    "allowlisted_delta": row["allowlisted_delta"],
                 }
             )
         return plans, _protected(), _catalog()
@@ -270,6 +302,7 @@ def _patch_retirement_execution(monkeypatch: pytest.MonkeyPatch) -> None:
         sut.identity_fold, "_fold_verification_state", lambda *_args, **_kwargs: {}
     )
     monkeypatch.setattr(sut, "_validate_authority_evidence", lambda *_args: None)
+    monkeypatch.setattr(sut, "_expected_after_matches", lambda *_args: True)
 
 
 def test_dry_run_is_zero_write_and_apply_requires_exact_hash(
@@ -283,6 +316,8 @@ def test_dry_run_is_zero_write_and_apply_requires_exact_hash(
 
     assert receipt["mode"] == "dry_run"
     assert receipt["counts"]["planned"] == 1
+    assert receipt["rows"][0]["expected_after"] == _row()["expected_after"]
+    assert receipt["rows"][0]["allowlisted_delta"] == _row()["allowlisted_delta"]
     assert graph.transaction.mutation_queries == 0
     assert graph.transaction.rolled_back
 
@@ -320,10 +355,10 @@ def test_apply_query_count_is_constant_in_cohort_size(
     assert receipt["mode"] == "applied"
     assert receipt["counts"]["applied"] == size
     assert receipt["query_audit"] == {
-        "query_count": 13,
+        "query_count": 14,
         "cohort_size_independent": True,
     }
-    assert graph.transaction.mutation_queries == 2
+    assert graph.transaction.mutation_queries == 1
     assert graph.transaction.committed
 
 
@@ -347,8 +382,8 @@ def test_fold_apply_query_count_is_constant_in_cohort_size(
     )
 
     assert receipt["counts"]["applied"] == size
-    assert receipt["query_audit"]["query_count"] == 13
-    assert graph.transaction.mutation_queries == 2
+    assert receipt["query_audit"]["query_count"] == 12
+    assert graph.transaction.mutation_queries == 1
     assert graph.transaction.committed
 
 
@@ -389,12 +424,29 @@ def test_fold_requires_exact_authority_evidence_before_graph_access(
 def test_fold_accepts_generic_current_catalog_authority_artifact(
     tmp_path: Path,
 ) -> None:
+    row = _row(sut.PROTECTED_IDENTITY_FOLD)
+    authorized_disposition = f"authorized_for_{sut.PROTECTED_IDENTITY_FOLD}"
     evidence = {
         "authority_verdict": {
             "semantic_decision_remaining": False,
+            "user_decision_remaining": False,
             "confidence": 0.97,
             "verdict": "equivalent_to_catalog_identity",
         },
+        "mutation_authorized": True,
+        "final_disposition": authorized_disposition,
+        "mutation_scopes": [
+            {
+                "operation": sut.PROTECTED_IDENTITY_FOLD,
+                "old_id": row["old_id"],
+                "target_id": row["target_id"],
+                "source_ids": row["source_ids"],
+                "dd_version": "4.1.1",
+                "cocos": 17,
+                "mutation_authorized": True,
+                "final_disposition": authorized_disposition,
+            }
+        ],
         "cocos_contract": {
             "catalog_check_passed": True,
             "catalog_constant": 17,
@@ -409,8 +461,10 @@ def test_fold_accepts_generic_current_catalog_authority_artifact(
     evidence_path = tmp_path / "authority.json"
     evidence_path.write_text(json.dumps(evidence, sort_keys=True))
     evidence_hash = sha256(evidence_path.read_bytes()).hexdigest()
-    row = _row(sut.PROTECTED_IDENTITY_FOLD)
     row["authority_evidence_sha256"] = evidence_hash
+    row["row_key"] = sut.payload_hash(
+        {key: value for key, value in row.items() if key != "row_key"}
+    )
     payload = sut.build_manifest_payload(
         [row],
         protected_set_hash=_HASH,
@@ -425,6 +479,50 @@ def test_fold_accepts_generic_current_catalog_authority_artifact(
     manifest = sut.load_protected_structural_manifest(manifest_path)
 
     sut._validate_authority_evidence(manifest)
+
+
+def test_read_only_authority_artifact_is_a_negative_fixture(tmp_path: Path) -> None:
+    row = _row(sut.PROTECTED_IDENTITY_FOLD)
+    evidence = {
+        "authority_verdict": {
+            "semantic_decision_remaining": False,
+            "user_decision_remaining": True,
+            "confidence": 0.99,
+            "verdict": "equivalent_to_catalog_identity",
+        },
+        "mutation_authorized": False,
+        "final_disposition": "equivalent_read_only",
+        "mutation_scopes": [],
+        "cocos_contract": {
+            "catalog_check_passed": True,
+            "catalog_constant": 17,
+            "change_made": False,
+        },
+        "graph_evidence": {
+            "raw_evidence": {
+                "catalogs": [{"id": "4.1.1", "is_current": True, "cocos": 17}]
+            }
+        },
+    }
+    evidence_path = tmp_path / "read-only-authority.json"
+    evidence_path.write_text(json.dumps(evidence, sort_keys=True))
+    evidence_hash = sha256(evidence_path.read_bytes()).hexdigest()
+    row["authority_evidence_sha256"] = evidence_hash
+    row["row_key"] = sut.payload_hash(
+        {key: value for key, value in row.items() if key != "row_key"}
+    )
+    payload = sut.build_manifest_payload(
+        [row],
+        protected_set_hash=_HASH,
+        authority_evidence_sha256=evidence_hash,
+        authority_evidence_path=evidence_path,
+    )
+    manifest_path = tmp_path / "read-only-manifest.json"
+    manifest_path.write_text(json.dumps(payload, sort_keys=True))
+    manifest = sut.load_protected_structural_manifest(manifest_path)
+
+    with pytest.raises(ValueError, match="does not authorize"):
+        sut._validate_authority_evidence(manifest)
 
 
 def test_mutation_failure_rolls_back_without_partial_commit(
@@ -444,6 +542,110 @@ def test_mutation_failure_rolls_back_without_partial_commit(
 
     assert graph.transaction.rolled_back
     assert not graph.transaction.committed
+
+
+def test_retirement_second_apply_requires_exact_events_and_after_closure(
+    tmp_path: Path,
+) -> None:
+    row = _row()
+    state = {
+        "old_count": 0,
+        "targets": [
+            {"labels": ["StandardName"], "properties": {"id": row["target_id"]}}
+        ],
+        "sources": [],
+        "backings": [],
+        "events": [
+            {
+                "labels": ["StandardNameSourceAuthorityRetirement"],
+                "properties": {
+                    "id": "source-authority-retirement:"
+                    + sut._event_identity(row, "source")
+                },
+            },
+            {
+                "labels": ["StandardNameChange"],
+                "properties": {
+                    "id": "sn-change:protected-retirement:"
+                    + sut._event_identity(row, "name")
+                },
+            },
+        ],
+        "old_mirror_count": 0,
+        "orphan_source_cache_count": 0,
+        "orphan_backing_cache_count": 0,
+    }
+    row["expected_after"] = sut._retirement_state_semantics(state)
+    row["expected_after_hash"] = sut.payload_hash(row["expected_after"])
+    row["row_key"] = sut.payload_hash(
+        {key: value for key, value in row.items() if key != "row_key"}
+    )
+    path, _ = _write(tmp_path / "already-current.json", [row])
+    manifest = sut.load_protected_structural_manifest(path)
+
+    current = sut._plan(manifest, {}, {row["row_key"]: state}, _protected(), _catalog())
+    assert current[0]["status"] == "already_current"
+
+    drifted = copy.deepcopy(state)
+    drifted["events"][0]["properties"]["id"] = "tampered"
+    refused = sut._plan(
+        manifest, {}, {row["row_key"]: drifted}, _protected(), _catalog()
+    )
+    assert refused[0]["status"] == "refused"
+    assert any("expected-after" in reason for reason in refused[0]["unresolved"])
+
+
+def test_release_census_is_separate_and_receipt_bound(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    row = _row()
+    state = {
+        "old_count": 0,
+        "targets": [],
+        "sources": [],
+        "backings": [],
+        "events": [],
+        "old_mirror_count": 0,
+        "orphan_source_cache_count": 0,
+        "orphan_backing_cache_count": 0,
+    }
+    row["expected_after"] = sut._retirement_state_semantics(state)
+    row["expected_after_hash"] = sut.payload_hash(row["expected_after"])
+    row["row_key"] = sut.payload_hash(
+        {key: value for key, value in row.items() if key != "row_key"}
+    )
+    path, _ = _write(tmp_path / "release.json", [row])
+    manifest = sut.load_protected_structural_manifest(path)
+    plan = {
+        "row_key": row["row_key"],
+        "status": "already_current",
+        "unresolved": [],
+        "event_ids": [],
+        "expected_after": row["expected_after"],
+        "expected_after_hash": row["expected_after_hash"],
+        "allowlisted_delta": row["allowlisted_delta"],
+    }
+    receipt = sut._receipt(manifest, [plan], applied=True, query_count=4)
+    assert receipt["release_postflight"] == {"required": True, "certified": False}
+    monkeypatch.setattr(sut, "_read_snapshots", lambda *_args: {})
+    monkeypatch.setattr(
+        sut,
+        "_read_retirement_states",
+        lambda *_args: {row["row_key"]: state},
+    )
+    monkeypatch.setattr(sut, "_read_catalog_contract", lambda _tx: _catalog())
+    monkeypatch.setattr(sut, "_read_protected_source_sets", lambda _tx: _protected())
+
+    census = sut.census_protected_structural_release(
+        path,
+        receipt,
+        expected_receipt_hash=receipt["receipt_hash"],
+        gc=_Graph(),
+    )
+
+    assert census["release_ready"] is True
+    assert census["receipt_hash"] == receipt["receipt_hash"]
+    assert census["query_audit"]["query_count"] == 4
 
 
 def test_protected_subclosure_hash_detects_target_and_west_drift() -> None:

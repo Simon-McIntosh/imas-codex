@@ -102,7 +102,9 @@ CALL (item) {
     element_id: elementId(source), labels: labels(source),
     properties: properties(source),
     relationships: [(source)-[relationship]-(other)
-      WHERE type(relationship) IN ['PRODUCED_NAME', 'FROM_DD_PATH', 'FROM_SIGNAL'] | {
+      WHERE type(relationship) IN
+            ['PRODUCED_NAME', 'FROM_DD_PATH', 'FROM_SIGNAL',
+             'HAS_AUTHORITY_RETIREMENT'] | {
       element_id: elementId(relationship), type: type(relationship),
       properties: properties(relationship), other_element_id: elementId(other),
       other_id: other.id, other_labels: labels(other)
@@ -131,6 +133,30 @@ CALL (item) {
     element_id: elementId(event), labels: labels(event), properties: properties(event)
   } END) AS events
 }
+CALL (item) {
+  OPTIONAL MATCH (mirror)
+  WHERE mirror.produced_sn_id = item.old_id
+     OR mirror.standard_name_id = item.old_id
+  RETURN count(mirror) AS old_mirror_count
+}
+CALL (item) {
+  OPTIONAL MATCH (source:StandardNameSource)
+  WHERE source.id IN item.source_ids
+    AND source.produced_sn_id IS NOT NULL
+    AND NOT EXISTS {
+      MATCH (:StandardName {id: source.produced_sn_id})
+    }
+  RETURN count(source) AS orphan_source_cache_count
+}
+CALL (item) {
+  OPTIONAL MATCH (backing)
+  WHERE backing.id IN item.backing_ids
+    AND backing.standard_name_id IS NOT NULL
+    AND NOT EXISTS {
+      MATCH (:StandardName {id: backing.standard_name_id})
+    }
+  RETURN count(backing) AS orphan_backing_cache_count
+}
 RETURN item.row_key AS row_key,
        count(DISTINCT old) AS old_count,
        collect(DISTINCT CASE WHEN target IS NULL THEN null ELSE {
@@ -142,7 +168,10 @@ RETURN item.row_key AS row_key,
            other_id: other.id, other_labels: labels(other)
          }]
        } END) AS targets,
-       sources, backings, events
+       sources, backings, events,
+       old_mirror_count,
+       orphan_source_cache_count,
+       orphan_backing_cache_count
 ORDER BY row_key
 """
 
@@ -157,6 +186,7 @@ CREATE (change:StandardNameChange)
 SET change = item.event, change.changed_at = datetime(item.event.changed_at)
 CREATE (old)-[:HAS_INTERNAL_CHANGE]->(change)
 CREATE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+WITH item, old, target, change
 CALL (item, target) {
   UNWIND item.sources AS expected
   MATCH (source:StandardNameSource {id: expected.id})
@@ -223,7 +253,11 @@ SET source.status = 'stale', source.produced_sn_id = null,
     source.drain_scope_id = null, source.drain_scope_claimed_at = null,
     source.drain_claim_scope_id = null, source.drain_scope_actionable = null,
     source.skip_reason = 'stale_source_branch',
-    source.skip_reason_detail = item.reason
+    source.skip_reason_detail = item.reason,
+    backing.standard_name_id = CASE
+      WHEN backing.standard_name_id = item.old_id THEN null
+      ELSE backing.standard_name_id
+    END
 DETACH DELETE old
 RETURN collect({row_key: item.row_key, retirement_id: retirement.id,
                 deletion_id: deletion.id}) AS results
@@ -527,6 +561,125 @@ def _retirement_post_protected_state(
     )
 
 
+def _state_without_element_identity(value: Any) -> Any:
+    """Project closure semantics without database-local element identifiers."""
+    if isinstance(value, dict):
+        return {
+            key: _state_without_element_identity(item)
+            for key, item in value.items()
+            if "element_id" not in key
+        }
+    if isinstance(value, list | tuple):
+        return [_state_without_element_identity(item) for item in value]
+    return value
+
+
+def _retirement_state_semantics(state: dict[str, Any]) -> dict[str, Any]:
+    return _canonical(
+        _state_without_element_identity(
+            {
+                "old_count": int(state.get("old_count") or 0),
+                "targets": [item for item in state.get("targets") or [] if item],
+                "sources": [item for item in state.get("sources") or [] if item],
+                "backings": [item for item in state.get("backings") or [] if item],
+                "events": [item for item in state.get("events") or [] if item],
+                "old_mirror_count": int(state.get("old_mirror_count") or 0),
+                "orphan_source_cache_count": int(
+                    state.get("orphan_source_cache_count") or 0
+                ),
+                "orphan_backing_cache_count": int(
+                    state.get("orphan_backing_cache_count") or 0
+                ),
+            }
+        )
+    )
+
+
+def _retirement_expected_state(
+    snapshot: dict[str, Any], item: dict[str, Any]
+) -> dict[str, Any]:
+    """Derive the complete semantic state produced by one retirement mutation."""
+    protected = ProtectedSourceSets(
+        west_source_ids=frozenset(item["postflight_source_ids"]),
+        fixture_source_ids=frozenset(),
+        present_source_ids=frozenset(item["postflight_source_ids"]),
+        protected_set_hash="",
+    )
+    expected = _retirement_protected_state(snapshot, protected)
+    source_ids = {item["source_id"]}
+    backing_ids = {item["backing_id"]}
+    for source in expected["sources"]:
+        source_id = (source.get("properties") or {}).get("id")
+        if source_id not in source_ids:
+            continue
+        properties = source["properties"]
+        for key in (
+            "produced_sn_id",
+            "claimed_at",
+            "claim_token",
+            "drain_scope_id",
+            "drain_scope_claimed_at",
+            "drain_claim_scope_id",
+            "drain_scope_actionable",
+        ):
+            properties.pop(key, None)
+        properties.update(
+            {
+                "status": "stale",
+                "skip_reason": "stale_source_branch",
+                "skip_reason_detail": item["reason"],
+            }
+        )
+        source["relationships"] = [
+            relationship
+            for relationship in source.get("relationships") or []
+            if not (
+                relationship.get("type") == "PRODUCED_NAME"
+                and relationship.get("other_id") == item["old_id"]
+            )
+        ]
+        source["relationships"].append(
+            {
+                "type": "HAS_AUTHORITY_RETIREMENT",
+                "properties": {},
+                "other_id": item["retirement_event"]["id"],
+                "other_labels": ["StandardNameSourceAuthorityRetirement"],
+            }
+        )
+    for backing in expected["backings"]:
+        if (backing.get("properties") or {}).get("id") not in backing_ids:
+            continue
+        if backing["properties"].get("standard_name_id") == item["old_id"]:
+            backing["properties"].pop("standard_name_id")
+        backing["relationships"] = [
+            relationship
+            for relationship in backing.get("relationships") or []
+            if not (
+                relationship.get("type") == "HAS_STANDARD_NAME"
+                and relationship.get("other_id") == item["old_id"]
+            )
+        ]
+    return _retirement_state_semantics(
+        {
+            "old_count": 0,
+            **expected,
+            "events": [
+                {
+                    "labels": ["StandardNameSourceAuthorityRetirement"],
+                    "properties": item["retirement_event"],
+                },
+                {
+                    "labels": ["StandardNameChange"],
+                    "properties": item["deletion_event"],
+                },
+            ],
+            "old_mirror_count": 0,
+            "orphan_source_cache_count": 0,
+            "orphan_backing_cache_count": 0,
+        }
+    )
+
+
 def _mutation_payload(
     snapshot: dict[str, Any], action: str, old_id: str
 ) -> dict[str, Any]:
@@ -553,6 +706,123 @@ def _mutation_payload(
     }
 
 
+def _allowlisted_delta(row: dict[str, Any], mutation: dict[str, Any]) -> dict[str, Any]:
+    """Describe every graph element and field the selected action may change."""
+    if row["action"] == PROTECTED_IDENTITY_FOLD:
+        return _canonical(
+            {
+                "action": row["action"],
+                "deleted_node_ids": [],
+                "deleted_relationship_element_ids": sorted(
+                    {
+                        element_id
+                        for source in mutation["sources"]
+                        for element_id in source["remove_binding_element_ids"]
+                    }
+                    | {
+                        element_id
+                        for backing in mutation["backings"]
+                        for element_id in backing["remove_projection_element_ids"]
+                    }
+                ),
+                "created_relationships": [
+                    {
+                        "type": "PRODUCED_NAME",
+                        "start_id": source["id"],
+                        "end_id": row["target_id"],
+                    }
+                    for source in mutation["sources"]
+                ]
+                + [
+                    {
+                        "type": "HAS_STANDARD_NAME",
+                        "start_id": backing["id"],
+                        "end_id": row["target_id"],
+                    }
+                    for backing in mutation["backings"]
+                ]
+                + [
+                    {
+                        "type": "REFINED_FROM",
+                        "start_id": row["target_id"],
+                        "end_id": row["old_id"],
+                    },
+                    {
+                        "type": "HAS_INTERNAL_CHANGE",
+                        "start_id": row["old_id"],
+                        "end_id": mutation["event"]["id"],
+                    },
+                    {
+                        "type": "HAS_INTERNAL_CHANGE",
+                        "start_id": row["target_id"],
+                        "end_id": mutation["event"]["id"],
+                    },
+                ],
+                "node_property_fields": {
+                    row["old_id"]: [
+                        "claim_token",
+                        "claimed_at",
+                        "edit_status",
+                        "name_stage",
+                        "source_paths",
+                        "superseded_from_stage",
+                    ],
+                    row["target_id"]: ["source_paths"],
+                    **{
+                        source["id"]: ["produced_sn_id"]
+                        for source in mutation["sources"]
+                    },
+                    **{
+                        backing["id"]: ["standard_name_id"]
+                        for backing in mutation["backings"]
+                        if backing["has_standard_name_id"]
+                    },
+                },
+                "created_event_ids": [mutation["event"]["id"]],
+            }
+        )
+    return _canonical(
+        {
+            "action": row["action"],
+            "deleted_node_ids": [row["old_id"]],
+            "deleted_relationship_element_ids": sorted(
+                [
+                    mutation["binding_element_id"],
+                    mutation["projection_element_id"],
+                ]
+            ),
+            "created_relationships": [
+                {
+                    "type": "HAS_AUTHORITY_RETIREMENT",
+                    "start_id": mutation["source_id"],
+                    "end_id": mutation["retirement_event"]["id"],
+                }
+            ],
+            "node_property_fields": {
+                mutation["source_id"]: [
+                    "claim_token",
+                    "claimed_at",
+                    "drain_claim_scope_id",
+                    "drain_scope_actionable",
+                    "drain_scope_claimed_at",
+                    "drain_scope_id",
+                    "produced_sn_id",
+                    "skip_reason",
+                    "skip_reason_detail",
+                    "status",
+                ],
+                mutation["backing_id"]: ["standard_name_id"],
+            },
+            "created_event_ids": sorted(
+                [
+                    mutation["retirement_event"]["id"],
+                    mutation["deletion_event"]["id"],
+                ]
+            ),
+        }
+    )
+
+
 def build_manifest_row(
     snapshot: dict[str, Any],
     *,
@@ -575,18 +845,8 @@ def build_manifest_row(
         else None
     )
     mutation = _mutation_payload(snapshot, action, old_id)
-    row_key = payload_hash(
-        {
-            "action": action,
-            "old_id": old_id,
-            "target_id": target_id,
-            "before_hash": _snapshot_hash(snapshot),
-            "mutation": mutation,
-            "authority_evidence_sha256": evidence,
-        }
-    )
-    return {
-        "row_key": row_key,
+    row = {
+        "row_key": "",
         "action": action,
         "old_id": old_id,
         "target_id": target_id,
@@ -605,6 +865,23 @@ def build_manifest_row(
         "event_timestamp": event_timestamp,
         "reason": reason.strip(),
     }
+    item = (
+        _fold_item(row, snapshot)
+        if action == PROTECTED_IDENTITY_FOLD
+        else _retirement_item(row, snapshot)
+    )
+    expected_after = (
+        item["expected_after"]
+        if action == PROTECTED_IDENTITY_FOLD
+        else _retirement_expected_state(snapshot, item)
+    )
+    row["expected_after"] = expected_after
+    row["expected_after_hash"] = payload_hash(expected_after)
+    row["allowlisted_delta"] = _allowlisted_delta(row, item)
+    row["row_key"] = payload_hash(
+        {key: value for key, value in row.items() if key != "row_key"}
+    )
+    return row
 
 
 def build_manifest_payload(
@@ -652,6 +929,9 @@ _ROW_FIELDS = {
     "expected_relationship_ids_hash",
     "expected_protected_subclosure_hash",
     "expected_mutation_hash",
+    "expected_after",
+    "expected_after_hash",
+    "allowlisted_delta",
     "authority_evidence_sha256",
     "event_timestamp",
     "reason",
@@ -741,18 +1021,32 @@ def load_protected_structural_manifest(
             values = row[field]
             if not isinstance(values, list) or values != sorted(set(values)):
                 raise ValueError(f"{field} must be a sorted unique list")
-        overlap = mutable_ids & ({row["old_id"]} | set(row["source_ids"]))
+        row_mutable_ids = {
+            row["old_id"],
+            row["target_id"],
+            *row["source_ids"],
+        }
+        overlap = mutable_ids & row_mutable_ids
         if overlap:
             raise ValueError(f"mutable participants overlap rows: {sorted(overlap)}")
-        mutable_ids.update({row["old_id"], *row["source_ids"]})
+        mutable_ids.update(row_mutable_ids)
         for field in (
             "expected_before_hash",
             "expected_participant_ids_hash",
             "expected_relationship_ids_hash",
             "expected_protected_subclosure_hash",
             "expected_mutation_hash",
+            "expected_after_hash",
         ):
             row[field] = _require_sha(row[field], field)
+        if not isinstance(row["expected_after"], dict) or not isinstance(
+            row["allowlisted_delta"], dict
+        ):
+            raise ValueError("manifest expected-after and delta must be objects")
+        if payload_hash(row["expected_after"]) != row["expected_after_hash"]:
+            raise ValueError("manifest expected_after_hash does not match its state")
+        if row["allowlisted_delta"].get("action") != action:
+            raise ValueError("manifest allowlisted delta action differs from row")
         if action == PROTECTED_IDENTITY_FOLD:
             row["authority_evidence_sha256"] = _require_sha(
                 row["authority_evidence_sha256"], "authority_evidence_sha256"
@@ -767,6 +1061,11 @@ def load_protected_structural_manifest(
             raise ValueError("retirement rows do not carry semantic authority evidence")
         if not str(row["event_timestamp"]).strip() or not str(row["reason"]).strip():
             raise ValueError("manifest rows require event timestamp and reason")
+        if (
+            payload_hash({key: value for key, value in row.items() if key != "row_key"})
+            != row_key
+        ):
+            raise ValueError("manifest row key does not bind the complete row")
         normalized.append(row)
     if len(actions) != 1:
         raise ValueError("protected structural manifest must be homogeneous")
@@ -835,8 +1134,40 @@ def _validate_authority_evidence(manifest: ProtectedStructuralManifest) -> None:
         and current_catalogs[0].get("id") == contract["dd_version"]
         and current_catalogs[0].get("cocos") == contract["cocos"]
     )
+    authorized_disposition = f"authorized_for_{manifest.action}"
+    expected_scopes = _canonical(
+        [
+            {
+                "operation": row["action"],
+                "old_id": row["old_id"],
+                "target_id": row["target_id"],
+                "source_ids": row["source_ids"],
+                "dd_version": contract["dd_version"],
+                "cocos": contract["cocos"],
+                "mutation_authorized": True,
+                "final_disposition": authorized_disposition,
+            }
+            for row in manifest.rows
+        ]
+    )
+
+    def collect_fields(value: Any, field: str) -> list[Any]:
+        found: list[Any] = []
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key == field:
+                    found.append(item)
+                found.extend(collect_fields(item, field))
+        elif isinstance(value, list):
+            for item in value:
+                found.extend(collect_fields(item, field))
+        return found
+
+    mutation_authorizations = collect_fields(evidence, "mutation_authorized")
+    final_dispositions = collect_fields(evidence, "final_disposition")
     if (
         verdict.get("semantic_decision_remaining") is not False
+        or verdict.get("user_decision_remaining") is not False
         or not 0.0 <= confidence <= 1.0
         or confidence < contract["minimum_authority_confidence"]
         or not artifact_verdict.startswith(contract["authority_verdict"])
@@ -844,6 +1175,11 @@ def _validate_authority_evidence(manifest: ProtectedStructuralManifest) -> None:
         or cocos.get("catalog_check_passed") is not True
         or cocos.get("catalog_constant") != contract["cocos"]
         or cocos.get("change_made") is not False
+        or not mutation_authorizations
+        or any(value is not True for value in mutation_authorizations)
+        or not final_dispositions
+        or any(value != authorized_disposition for value in final_dispositions)
+        or _canonical(evidence.get("mutation_scopes") or []) != expected_scopes
     ):
         raise ValueError(
             "authority evidence does not authorize current-DD semantic equivalence"
@@ -877,6 +1213,61 @@ def _read_snapshots(
             raise ProtectedStructuralConflict("snapshot returned an unexpected pair")
         snapshots[manifest_row["row_key"]] = snapshot
     return snapshots
+
+
+def _read_retirement_states(
+    transaction: Any, manifest: ProtectedStructuralManifest
+) -> dict[str, dict[str, Any]]:
+    if manifest.action != RETIRE_STALE_SOURCE_BRANCH:
+        return {}
+    items = [
+        {
+            "row_key": row["row_key"],
+            "old_id": row["old_id"],
+            "target_id": row["target_id"],
+            "source_ids": sorted(
+                item["properties"]["id"]
+                for item in row["expected_after"].get("sources") or []
+            ),
+            "backing_ids": sorted(
+                item["properties"]["id"]
+                for item in row["expected_after"].get("backings") or []
+            ),
+            "event_ids": sorted(
+                [
+                    "source-authority-retirement:" + _event_identity(row, "source"),
+                    "sn-change:protected-retirement:" + _event_identity(row, "name"),
+                ]
+            ),
+        }
+        for row in manifest.rows
+    ]
+    return {
+        str(item["row_key"]): dict(item)
+        for item in transaction.run(RETIREMENT_STATE_QUERY, items=items)
+    }
+
+
+def _expected_after_matches(
+    row: dict[str, Any],
+    snapshot: dict[str, Any] | None,
+    retirement_state: dict[str, Any] | None,
+) -> bool:
+    if row["action"] == PROTECTED_IDENTITY_FOLD:
+        if snapshot is None:
+            return False
+        change_id = "sn-change:protected-fold:" + _event_identity(row, "fold")
+        state = identity_fold._fold_verification_state(
+            snapshot, fold_change_id=change_id
+        )
+    else:
+        if retirement_state is None:
+            return False
+        state = _retirement_state_semantics(retirement_state)
+    return (
+        state == row["expected_after"]
+        and payload_hash(state) == row["expected_after_hash"]
+    )
 
 
 def _read_catalog_contract(transaction: Any) -> dict[str, Any]:
@@ -990,6 +1381,24 @@ def _row_reasons(
             reasons.append(
                 "retirement would alter the accepted target relationship closure"
             )
+    if not reasons:
+        item = (
+            _fold_item(row, snapshot)
+            if row["action"] == PROTECTED_IDENTITY_FOLD
+            else _retirement_item(row, snapshot)
+        )
+        expected_after = (
+            item["expected_after"]
+            if row["action"] == PROTECTED_IDENTITY_FOLD
+            else _retirement_expected_state(snapshot, item)
+        )
+        if (
+            expected_after != row["expected_after"]
+            or payload_hash(expected_after) != row["expected_after_hash"]
+        ):
+            reasons.append("manifest expected-after closure drifted")
+        if _allowlisted_delta(row, item) != row["allowlisted_delta"]:
+            reasons.append("manifest allowlisted delta drifted")
     return sorted(set(reasons))
 
 
@@ -1002,7 +1411,28 @@ def _lock_relationships(transaction: Any, element_ids: set[str]) -> None:
 
 
 def _event_identity(row: dict[str, Any], kind: str) -> str:
-    return payload_hash({"row_key": row["row_key"], "kind": kind})
+    return payload_hash(
+        {
+            "kind": kind,
+            "action": row["action"],
+            "old_id": row["old_id"],
+            "target_id": row["target_id"],
+            "source_ids": row["source_ids"],
+            "backing_ids": row["backing_ids"],
+            "event_timestamp": row["event_timestamp"],
+        }
+    )
+
+
+def _normalize_event_timestamp(value: str) -> str:
+    match = re.fullmatch(
+        r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d{1,9}))?(Z|[+-]\d{2}:\d{2})",
+        value,
+    )
+    if match is None:
+        raise ValueError("event timestamp must be an ISO-8601 timestamp with timezone")
+    prefix, fraction, offset = match.groups()
+    return f"{prefix}.{(fraction or '').ljust(9, '0')}{'+00:00' if offset == 'Z' else offset}"
 
 
 def _fold_item(row: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
@@ -1014,7 +1444,8 @@ def _fold_item(row: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
         snapshot, old_sources, old_backings, row["target_id"]
     )
     change_id = "sn-change:protected-fold:" + _event_identity(row, "fold")
-    run_id = "sn-protected:" + row["row_key"]
+    run_id = "sn-protected:" + _event_identity(row, "run")
+    event_timestamp = _normalize_event_timestamp(row["event_timestamp"])
     receipt_text, receipt = identity_fold._fold_receipt(
         snapshot,
         row["old_id"],
@@ -1025,7 +1456,7 @@ def _fold_item(row: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
         target_paths,
         change_id=change_id,
         run_id=run_id,
-        changed_at=row["event_timestamp"],
+        changed_at=event_timestamp,
     )
     event = {
         "id": change_id,
@@ -1035,7 +1466,7 @@ def _fold_item(row: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any]:
         "reason": receipt_text,
         "origin": "catalog_edit",
         "run_id": run_id,
-        "changed_at": row["event_timestamp"],
+        "changed_at": event_timestamp,
         "internal": True,
     }
     return {
@@ -1089,7 +1520,8 @@ def _retirement_item(row: dict[str, Any], snapshot: dict[str, Any]) -> dict[str,
         for item in backing["projections"]
         if item.get("target_id") == row["old_id"]
     )
-    run_id = "sn-protected:" + row["row_key"]
+    run_id = "sn-protected:" + _event_identity(row, "run")
+    event_timestamp = _normalize_event_timestamp(row["event_timestamp"])
     retirement_id = "source-authority-retirement:" + _event_identity(row, "source")
     deletion_id = "sn-change:protected-retirement:" + _event_identity(row, "name")
     return {
@@ -1118,8 +1550,7 @@ def _retirement_item(row: dict[str, Any], snapshot: dict[str, Any]) -> dict[str,
             "removed_target_ids": [row["old_id"]],
             "reason": row["reason"],
             "run_id": run_id,
-            "manifest_row_key": row["row_key"],
-            "retired_at": row["event_timestamp"],
+            "retired_at": event_timestamp,
         },
         "deletion_event": {
             "id": deletion_id,
@@ -1129,8 +1560,7 @@ def _retirement_item(row: dict[str, Any], snapshot: dict[str, Any]) -> dict[str,
             "reason": row["reason"],
             "origin": "structural_reconciliation",
             "run_id": run_id,
-            "manifest_row_key": row["row_key"],
-            "changed_at": row["event_timestamp"],
+            "changed_at": event_timestamp,
             "internal": True,
         },
     }
@@ -1143,22 +1573,28 @@ def _receipt(
     applied: bool,
     query_count: int,
 ) -> dict[str, Any]:
+    planned_count = sum(plan["status"] == "planned" for plan in plans)
+    mode = (
+        "applied"
+        if applied and planned_count
+        else "already_current"
+        if applied
+        else "dry_run"
+    )
     receipt = {
         "schema": _RECEIPT_SCHEMA,
         "schema_version": 1,
         "manifest_hash": manifest.manifest_hash,
         "action": manifest.action,
-        "mode": "applied" if applied else "dry_run",
+        "mode": mode,
         "counts": {
             "allowlisted": len(plans),
-            "planned": sum(plan["status"] == "planned" for plan in plans),
+            "planned": planned_count,
             "already_current": sum(
                 plan["status"] == "already_current" for plan in plans
             ),
             "refused": sum(plan["status"] == "refused" for plan in plans),
-            "applied": sum(plan["status"] == "planned" for plan in plans)
-            if applied
-            else 0,
+            "applied": planned_count if applied else 0,
         },
         "rows": [
             {
@@ -1168,6 +1604,9 @@ def _receipt(
                 "before_hash": plan.get("before_hash"),
                 "protected_subclosure_hash": plan.get("protected_subclosure_hash"),
                 "expected_event_ids": plan.get("event_ids", []),
+                "expected_after": plan["expected_after"],
+                "expected_after_hash": plan["expected_after_hash"],
+                "allowlisted_delta": plan["allowlisted_delta"],
             }
             for plan in plans
         ],
@@ -1181,6 +1620,10 @@ def _receipt(
             "downstream_labels": list(_DOWNSTREAM_LABELS),
             "llm_calls": 0,
         },
+        "release_postflight": {
+            "required": True,
+            "certified": False,
+        },
     }
     receipt["receipt_hash"] = payload_hash(receipt)
     return receipt
@@ -1189,16 +1632,42 @@ def _receipt(
 def _plan(
     manifest: ProtectedStructuralManifest,
     snapshots: dict[str, dict[str, Any]],
+    retirement_states: dict[str, dict[str, Any]],
     protected: ProtectedSourceSets,
     catalog: dict[str, Any],
 ) -> list[dict[str, Any]]:
     plans = []
     for row in manifest.rows:
         snapshot = snapshots.get(row["row_key"])
-        reasons = _row_reasons(row, snapshot, protected, catalog)
+        retirement_state = retirement_states.get(row["row_key"])
+        already_current = _expected_after_matches(row, snapshot, retirement_state)
+        if already_current:
+            reasons = _catalog_reasons(catalog)
+        elif snapshot is None:
+            reasons = _catalog_reasons(catalog) + [
+                "manifest prestate is missing and expected-after closure is not exact"
+            ]
+        else:
+            reasons = _row_reasons(row, snapshot, protected, catalog)
+        expected_event_ids = (
+            ["sn-change:protected-fold:" + _event_identity(row, "fold")]
+            if row["action"] == PROTECTED_IDENTITY_FOLD
+            else sorted(
+                [
+                    "source-authority-retirement:" + _event_identity(row, "source"),
+                    "sn-change:protected-retirement:" + _event_identity(row, "name"),
+                ]
+            )
+        )
         plan = {
             "row_key": row["row_key"],
-            "status": "refused" if reasons else "planned",
+            "status": (
+                "refused"
+                if reasons
+                else "already_current"
+                if already_current
+                else "planned"
+            ),
             "unresolved": reasons,
             "participant_ids": identity_fold._fold_participant_ids(snapshot)
             if snapshot
@@ -1211,14 +1680,17 @@ def _plan(
             if snapshot
             else None,
             "snapshot": snapshot,
-            "event_ids": [],
+            "event_ids": expected_event_ids,
+            "expected_after": row["expected_after"],
+            "expected_after_hash": row["expected_after_hash"],
+            "allowlisted_delta": row["allowlisted_delta"],
             "retirement_protected_hash": (
                 payload_hash(_retirement_protected_state(snapshot, protected))
                 if snapshot and row["action"] == RETIRE_STALE_SOURCE_BRANCH
                 else None
             ),
         }
-        if not reasons and snapshot is not None:
+        if not reasons and not already_current and snapshot is not None:
             if row["action"] == PROTECTED_IDENTITY_FOLD:
                 item = _fold_item(row, snapshot)
                 plan["mutation"] = item
@@ -1238,13 +1710,14 @@ def _read_preflight(
     transaction: Any, manifest: ProtectedStructuralManifest
 ) -> tuple[list[dict[str, Any]], ProtectedSourceSets, dict[str, Any]]:
     snapshots = _read_snapshots(transaction, manifest)
+    retirement_states = _read_retirement_states(transaction, manifest)
     catalog = _read_catalog_contract(transaction)
     protected = _read_protected_source_sets(transaction)
     if not hmac.compare_digest(
         protected.protected_set_hash, manifest.protected_set_hash
     ):
         raise ProtectedStructuralConflict("manifest protected_set_hash drifted")
-    plans = _plan(manifest, snapshots, protected, catalog)
+    plans = _plan(manifest, snapshots, retirement_states, protected, catalog)
     return plans, protected, catalog
 
 
@@ -1274,50 +1747,58 @@ def reconcile_protected_structure(
             transaction = session.begin_transaction()
             try:
                 plans, _, _ = _read_preflight(transaction, manifest)
-                query_count += 3
+                query_count += 3 + int(manifest.action == RETIRE_STALE_SOURCE_BRANCH)
                 if any(plan["status"] == "refused" for plan in plans) or not apply:
                     transaction.rollback()
                     return _receipt(
                         manifest, plans, applied=False, query_count=query_count
                     )
+                planned = [plan for plan in plans if plan["status"] == "planned"]
+                if not planned:
+                    transaction.rollback()
+                    return _receipt(
+                        manifest, plans, applied=True, query_count=query_count
+                    )
                 lock_participants(
                     transaction,
-                    {item for plan in plans for item in plan["participant_ids"]},
+                    {item for plan in planned for item in plan["participant_ids"]},
                     conflict_type=ProtectedStructuralConflict,
                     message="protected structural participant set changed",
                 )
                 _lock_relationships(
                     transaction,
-                    {item for plan in plans for item in plan["relationship_ids"]},
+                    {item for plan in planned for item in plan["relationship_ids"]},
                 )
                 query_count += 2
-                locked, locked_protected, _ = _read_preflight(transaction, manifest)
-                query_count += 3
-                if any(plan["status"] != "planned" for plan in locked) or [
-                    plan["before_hash"] for plan in locked
-                ] != [plan["before_hash"] for plan in plans]:
+                locked, _, _ = _read_preflight(transaction, manifest)
+                query_count += 3 + int(manifest.action == RETIRE_STALE_SOURCE_BRANCH)
+                if [plan["status"] for plan in locked] != [
+                    plan["status"] for plan in plans
+                ] or [plan["before_hash"] for plan in locked] != [
+                    plan["before_hash"] for plan in plans
+                ]:
                     raise ProtectedStructuralConflict(
                         "protected structural closure changed after locks"
                     )
-                fold_items = [
-                    plan["mutation"]
-                    for plan in locked
+                locked_planned = [
+                    plan for plan in locked if plan["status"] == "planned"
+                ]
+                mutation_query = (
+                    FOLD_APPLY_QUERY
                     if manifest.action == PROTECTED_IDENTITY_FOLD
-                ]
-                retire_items = [
-                    plan["mutation"]
-                    for plan in locked
-                    if manifest.action == RETIRE_STALE_SOURCE_BRANCH
-                ]
-                fold_result = list(transaction.run(FOLD_APPLY_QUERY, items=fold_items))
-                retire_result = list(
-                    transaction.run(RETIRE_APPLY_QUERY, items=retire_items)
+                    else RETIRE_APPLY_QUERY
                 )
-                query_count += 2
-                expected_rows = {plan["row_key"] for plan in locked}
+                mutation_result = list(
+                    transaction.run(
+                        mutation_query,
+                        items=[plan["mutation"] for plan in locked_planned],
+                    )
+                )
+                query_count += 1
+                expected_rows = {plan["row_key"] for plan in locked_planned}
                 actual_rows = {
                     str(item["row_key"])
-                    for result in (*fold_result, *retire_result)
+                    for result in mutation_result
                     for item in dict(result).get("results") or []
                 }
                 if actual_rows != expected_rows:
@@ -1327,57 +1808,19 @@ def reconcile_protected_structure(
                 if manifest.action == PROTECTED_IDENTITY_FOLD:
                     post_snapshots = _read_snapshots(transaction, manifest)
                     query_count += 1
-                    for plan in locked:
-                        post = post_snapshots.get(plan["row_key"])
-                        change_id = plan["mutation"]["event"]["id"]
-                        if (
-                            post is None
-                            or identity_fold._fold_verification_state(
-                                post, fold_change_id=change_id
-                            )
-                            != plan["mutation"]["expected_after"]
+                    for row, plan in zip(manifest.rows, locked, strict=True):
+                        if not _expected_after_matches(
+                            row, post_snapshots.get(plan["row_key"]), None
                         ):
                             raise ProtectedStructuralConflict(
                                 "protected fold exact postflight failed"
                             )
                 else:
-                    state_rows = list(
-                        transaction.run(
-                            RETIREMENT_STATE_QUERY,
-                            items=[
-                                {
-                                    "row_key": plan["row_key"],
-                                    "old_id": row["old_id"],
-                                    "target_id": row["target_id"],
-                                    "source_ids": plan["mutation"][
-                                        "postflight_source_ids"
-                                    ],
-                                    "backing_ids": plan["mutation"][
-                                        "postflight_backing_ids"
-                                    ],
-                                    "event_ids": plan["event_ids"],
-                                }
-                                for row, plan in zip(manifest.rows, locked, strict=True)
-                            ],
-                        )
-                    )
+                    post_states = _read_retirement_states(transaction, manifest)
                     query_count += 1
-                    by_key = {
-                        str(dict(item)["row_key"]): dict(item) for item in state_rows
-                    }
-                    for plan in locked:
-                        state = by_key.get(plan["row_key"])
-                        if (
-                            state is None
-                            or int(state.get("old_count") or 0) != 0
-                            or len([item for item in state.get("events") or [] if item])
-                            != 2
-                            or payload_hash(
-                                _retirement_post_protected_state(
-                                    state, locked_protected
-                                )
-                            )
-                            != plan["retirement_protected_hash"]
+                    for row, plan in zip(manifest.rows, locked, strict=True):
+                        if not _expected_after_matches(
+                            row, None, post_states.get(plan["row_key"])
                         ):
                             raise ProtectedStructuralConflict(
                                 "protected retirement exact postflight failed"
@@ -1397,3 +1840,93 @@ def reconcile_protected_structure(
     finally:
         if own:
             client.close()
+
+
+def census_protected_structural_release(
+    manifest_path: str | Path,
+    receipt: dict[str, Any],
+    *,
+    expected_receipt_hash: str,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Certify committed graph state against an exact apply receipt and manifest."""
+    manifest = load_protected_structural_manifest(manifest_path)
+    bound_hash = _require_sha(expected_receipt_hash, "expected_receipt_hash")
+    receipt_payload = copy.deepcopy(receipt)
+    claimed_hash = _require_sha(
+        receipt_payload.pop("receipt_hash", None), "receipt_hash"
+    )
+    actual_hash = payload_hash(receipt_payload)
+    if not (
+        hmac.compare_digest(bound_hash, claimed_hash)
+        and hmac.compare_digest(claimed_hash, actual_hash)
+    ):
+        raise ValueError("release census receipt hash does not bind exact receipt")
+    if (
+        receipt.get("manifest_hash") != manifest.manifest_hash
+        or receipt.get("mode") not in {"applied", "already_current"}
+        or (receipt.get("counts") or {}).get("refused") != 0
+    ):
+        raise ValueError("release census receipt is not an applicable manifest receipt")
+    receipt_rows = receipt.get("rows") or []
+    if len(receipt_rows) != len(manifest.rows):
+        raise ValueError("release census receipt row count differs from manifest")
+    for row, receipt_row in zip(manifest.rows, receipt_rows, strict=True):
+        if (
+            receipt_row.get("row_key") != row["row_key"]
+            or receipt_row.get("expected_after_hash") != row["expected_after_hash"]
+            or receipt_row.get("expected_after") != row["expected_after"]
+            or receipt_row.get("allowlisted_delta") != row["allowlisted_delta"]
+        ):
+            raise ValueError("release census receipt row does not bind manifest state")
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                snapshots = _read_snapshots(transaction, manifest)
+                retirement_states = _read_retirement_states(transaction, manifest)
+                catalog = _read_catalog_contract(transaction)
+                protected = _read_protected_source_sets(transaction)
+                query_count = 3 + int(manifest.action == RETIRE_STALE_SOURCE_BRANCH)
+                rows = []
+                for row in manifest.rows:
+                    exact = _expected_after_matches(
+                        row,
+                        snapshots.get(row["row_key"]),
+                        retirement_states.get(row["row_key"]),
+                    )
+                    rows.append(
+                        {
+                            "row_key": row["row_key"],
+                            "exact_expected_after": exact,
+                        }
+                    )
+                release_ready = (
+                    all(row["exact_expected_after"] for row in rows)
+                    and not _catalog_reasons(catalog)
+                    and protected.protected_set_hash == manifest.protected_set_hash
+                )
+                transaction.rollback()
+            except BaseException:
+                transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+    census = {
+        "schema": "imas-codex.protected-structural-release-census",
+        "schema_version": 1,
+        "manifest_hash": manifest.manifest_hash,
+        "receipt_hash": claimed_hash,
+        "release_ready": release_ready,
+        "rows": rows,
+        "query_audit": {
+            "query_count": query_count,
+            "cohort_size_independent": True,
+        },
+    }
+    census["census_hash"] = payload_hash(census)
+    return census
