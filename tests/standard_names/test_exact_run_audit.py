@@ -254,6 +254,20 @@ def test_unrelated_run_evidence_is_rejected_even_when_mock_returns_it() -> None:
     )
 
 
+@pytest.mark.parametrize("started_at", [None, "not-a-timestamp"])
+def test_invalid_or_missing_run_start_time_fails_closed(started_at: object) -> None:
+    run_row = _run_row()
+    run_row["run"]["started_at"] = started_at
+
+    receipt, client = _audit([[_target_row()], [_dd_row()], [run_row]])
+
+    assert receipt.passed is False
+    assert receipt.query_count == 3
+    assert client.query.call_count == 3
+    assert receipt.raw_rows["run"] == [run_row]
+    assert any("invalid start timestamp" in item for item in receipt.diagnostics)
+
+
 @pytest.mark.parametrize("evidence_kind", ["cost", "review"])
 def test_unrelated_child_evidence_is_rejected(evidence_kind: str) -> None:
     run_row = _run_row()
@@ -383,3 +397,12 @@ def test_queries_are_bounded_and_keep_aggregates_in_with_scope() -> None:
         "RETURN costs, ledger_cost, overspend_cost, cost_events" in _RUN_EVIDENCE_QUERY
     )
     assert "run.id STARTS WITH $run_id_prefix" in _RUN_EVIDENCE_QUERY
+    for temporal_property in (
+        "run.started_at",
+        "cost.llm_at",
+        "review.reviewed_at",
+        "review.llm_at",
+        "revision.created_at",
+        "change.changed_at",
+    ):
+        assert f"datetime(toString({temporal_property}))" in _RUN_EVIDENCE_QUERY

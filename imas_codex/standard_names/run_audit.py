@@ -96,15 +96,15 @@ _RUN_EVIDENCE_QUERY = """
 // EXACT_STANDARD_NAME_RUN_EVIDENCE
 MATCH (run:SNRun)
 WHERE run.id STARTS WITH $run_id_prefix
-  AND run.started_at >= datetime($launched_at)
-  AND run.started_at <= datetime($completed_at)
+  AND datetime(toString(run.started_at)) >= datetime($launched_at)
+  AND datetime(toString(run.started_at)) <= datetime($completed_at)
 CALL (run) {
   OPTIONAL MATCH (cost:LLMCost)-[:FOR_RUN]->(run)
   WITH run, cost
   WHERE cost IS NULL
      OR cost.llm_at IS NULL
-     OR (cost.llm_at >= datetime($launched_at)
-         AND cost.llm_at <= datetime($completed_at))
+     OR (datetime(toString(cost.llm_at)) >= datetime($launched_at)
+         AND datetime(toString(cost.llm_at)) <= datetime($completed_at))
   WITH run, collect(CASE WHEN cost IS NULL THEN null ELSE {
          id: cost.id,
          run_id: cost.run_id,
@@ -130,13 +130,14 @@ CALL (run, costs) {
   WITH run, costs, target, review
   WHERE review IS NULL
      OR review.reviewed_at IS NULL
-     OR (review.reviewed_at >= datetime($launched_at)
-         AND review.reviewed_at <= datetime($completed_at))
+     OR (datetime(toString(review.reviewed_at)) >= datetime($launched_at)
+         AND datetime(toString(review.reviewed_at)) <= datetime($completed_at))
   WITH review, run,
        [cost IN costs WHERE cost.run_id = run.id
           AND target.id IN coalesce(cost.sn_ids, [])
           AND cost.pool = 'review'
-          AND cost.llm_at = review.llm_at | cost.id] AS linked_cost_ids
+          AND datetime(toString(cost.llm_at)) =
+              datetime(toString(review.llm_at)) | cost.id] AS linked_cost_ids
   WITH collect(CASE WHEN review IS NULL THEN null ELSE {
          id: review.id,
          review_axis: review.review_axis,
@@ -165,14 +166,14 @@ CALL (run) {
        collect(DISTINCT successor.id) AS refined_successor_ids
   OPTIONAL MATCH (target)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
   WHERE revision.created_at IS NULL
-     OR (revision.created_at >= datetime($launched_at)
-         AND revision.created_at <= datetime($completed_at))
+     OR (datetime(toString(revision.created_at)) >= datetime($launched_at)
+         AND datetime(toString(revision.created_at)) <= datetime($completed_at))
   WITH run, target, predecessor_ids, refined_successor_ids,
        collect(DISTINCT revision.id) AS docs_revision_ids
   OPTIONAL MATCH (target)-[:HAS_INTERNAL_CHANGE]->(change:StandardNameChange)
   WHERE change.changed_at IS NULL
-     OR (change.changed_at >= datetime($launched_at)
-         AND change.changed_at <= datetime($completed_at))
+     OR (datetime(toString(change.changed_at)) >= datetime($launched_at)
+         AND datetime(toString(change.changed_at)) <= datetime($completed_at))
   RETURN predecessor_ids, refined_successor_ids, docs_revision_ids,
          collect(DISTINCT change.id) AS internal_change_ids
 }
