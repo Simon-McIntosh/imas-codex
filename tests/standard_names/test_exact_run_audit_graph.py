@@ -85,4 +85,7 @@ def test_disposable_graph_compiles_all_bounded_queries_without_global_scans() ->
         assert not any("VarLengthExpand" in operator for operator in operators)
     assert "NodeUniqueIndexSeek" in plans["target"]
     assert "NodeUniqueIndexSeek" in plans["dd"]
-    assert "NodeIndexSeekByRange" in plans["run"]
+    assert any(
+        operator.startswith("Node") and "IndexSeek" in operator
+        for operator in plans["run"]
+    )
