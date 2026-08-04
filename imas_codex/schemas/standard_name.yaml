@@ -772,9 +772,11 @@ classes:
         range: string
       source_paths:
         description: >-
-          All source entity IDs mapped to this standard name (union list).
-          DD paths are bare (no colon): "equilibrium/time_slice/profiles_1d/psi".
-          Signal IDs are facility-prefixed: "tcv:ip/measured".
+          Exact StandardNameSource entity IDs mapped to this standard name
+          (union list). DD entries use the canonical "dd:<bare DD path>" form,
+          for example "dd:equilibrium/time_slice/profiles_1d/psi". Signal and
+          derived entries retain their producing source IDs, including any
+          facility/source prefix or "derived:" prefix.
         multivalued: true
         range: string
       validity_domain:

@@ -65,6 +65,8 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
     ordinary_name = f"exact_preflight_ordinary_{suffix}"
     predecessor_name = f"exact_preflight_predecessor_{suffix}"
     fixture_source_id = f"dd:test_review_entry__{suffix}"
+    target_path = f"exact/preflight/{suffix}"
+    target_source_id = f"dd:{target_path}"
     dd_version = f"4.1.1-exact-preflight-{suffix}"
     password = os.environ.get(
         "IMAS_CODEX_TEST_NEO4J_PASSWORD", os.environ.get("NEO4J_PASSWORD", "")
@@ -99,6 +101,25 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
                 "  id: $name_id, name_stage: 'drafted', "
                 "  validation_status: 'valid', origin: 'pipeline', "
                 "  description: 'A reviewable exact target.'}) "
+                "SET target.source_paths = [$target_source_id], target.unit = 'm' "
+                "REMOVE target.dd_version "
+                "MERGE (target_source:StandardNameSource {id: $target_source_id}) "
+                "SET target_source.source_id = $target_path, "
+                "    target_source.source_type = 'dd', "
+                "    target_source.status = 'composed', "
+                "    target_source.produced_sn_id = $name_id, "
+                "    target_source.dd_version = $dd_version, "
+                "    target_source.dd_snapshot_pinned = true, "
+                "    target_source.dd_unit = 'm', "
+                "    target_source.dd_path = $target_path "
+                "MERGE (backing:IMASNode {id: $target_path}) "
+                "SET backing.unit = 'm' "
+                "MERGE (unit:Unit {id: 'm'}) "
+                "MERGE (target_source)-[:PRODUCED_NAME]->(target) "
+                "MERGE (target_source)-[:FROM_DD_PATH]->(backing) "
+                "MERGE (backing)-[:HAS_STANDARD_NAME]->(target) "
+                "MERGE (backing)-[:HAS_UNIT]->(unit) "
+                "MERGE (target)-[:HAS_UNIT]->(unit) "
                 "MERGE (predecessor:StandardName {"
                 "  id: $predecessor_name, name_stage: 'accepted'}) "
                 "MERGE (target)-[:REFINED_FROM]->(predecessor) "
@@ -107,6 +128,9 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
                 name_id=ordinary_name,
                 predecessor_name=predecessor_name,
                 fixture_source_id=fixture_source_id,
+                target_path=target_path,
+                target_source_id=target_source_id,
+                dd_version=dd_version,
             ).consume()
             ordinary_rows = list(
                 session.run(
@@ -127,6 +151,11 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
     assert len(ordinary_rows) == 1
     ordinary_receipt = dict(ordinary_rows[0])
     assert [target["id"] for target in ordinary_receipt["targets"]] == [ordinary_name]
+    assert ordinary_receipt["targets"][0]["source_paths"] == [target_source_id]
+    assert ordinary_receipt["targets"][0]["dd_version"] is None
+    assert [source["id"] for source in ordinary_receipt["sources"]] == [
+        target_source_id
+    ]
     assert ordinary_receipt["action_count"] == 1
     assert ordinary_receipt["review_action_count"] == 1
     assert ordinary_receipt["refine_action_count"] == 0

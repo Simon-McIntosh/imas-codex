@@ -54,10 +54,10 @@ def _row(label: str | None = None) -> dict[str, object]:
                 "edit_mode": None,
                 "edit_status": None,
                 "unit": "m",
-                "dd_version": "4.1.1",
+                "dd_version": None,
                 "cocos": 17 if label is not None else None,
                 "cocos_transformation_type": label,
-                "source_paths": [PATH],
+                "source_paths": [f"dd:{PATH}"],
                 # Durable history is evidence, never a live lease.
                 "run_id": "historical-run",
                 "last_run_id": "historical-worker-run",
@@ -240,6 +240,41 @@ def test_review_pass_retains_exact_cocos_label_and_accepted_predecessor(
     assert receipt.per_path_cocos_labels == {PATH: label}
 
 
+@pytest.mark.parametrize("target_dd_version", [None, "4.0.0", "4.1.1"])
+def test_target_dd_version_is_optional_historical_provenance(
+    target_dd_version: str | None,
+) -> None:
+    row = _review_row()
+    row["targets"][0]["dd_version"] = target_dd_version  # type: ignore[index]
+
+    receipt, _client = _audit(row, operation="review_name")
+
+    assert receipt.passed is True
+    assert receipt.raw_evidence["targets"][0]["dd_version"] == target_dd_version
+
+
+@pytest.mark.parametrize(
+    "cached_source_ids",
+    [
+        [PATH],
+        [],
+        [f"dd:{PATH}", "dd:unexplained/path"],
+    ],
+)
+def test_source_path_cache_refuses_noncanonical_missing_or_extra_ids(
+    cached_source_ids: list[str],
+) -> None:
+    row = _review_row()
+    row["targets"][0]["source_paths"] = cached_source_ids  # type: ignore[index]
+
+    receipt, _client = _audit(row, operation="review_name")
+
+    assert receipt.passed is False
+    assert (
+        "target source-ID mirror differs from producing sources" in receipt.diagnostics
+    )
+
+
 @pytest.mark.parametrize("operation", ["review_name", "refine_name"])
 @pytest.mark.parametrize("location", ["predecessor", "successor", "self"])
 def test_refinement_lineage_protected_source_refuses_both_operations(
@@ -322,7 +357,6 @@ def test_review_specific_ineligibility_refuses(mutation: str, diagnostic: str) -
     [
         ("claim", "target has an active worker or drain lease"),
         ("protection", "structural lineage intersects WEST or fixture sources"),
-        ("dd_version", "target DD version is not current"),
         ("unit", "target unit property and relationship differ"),
         ("cocos", "target did not preserve the per-path COCOS label"),
         ("successor", "target already has a refined successor"),
@@ -336,8 +370,6 @@ def test_review_shared_safety_evidence_refuses(mutation: str, diagnostic: str) -
         target["claim_token"] = "occupied"
     elif mutation == "protection":
         row["protected_source_ids"] = ["dd:west/protected"]
-    elif mutation == "dd_version":
-        target["dd_version"] = "4.0.0"
     elif mutation == "unit":
         target["unit"] = "s"
     elif mutation == "cocos":
@@ -487,7 +519,6 @@ def test_real_claim_or_drain_fields_block_but_run_history_does_not(
         ("dd_version", "source DD version is not current"),
         ("unit", "source/backing unit mismatch"),
         ("projection", "projection is not singular"),
-        ("target_source_paths", "target source-path mirror differs"),
     ],
 )
 def test_source_dd_unit_and_projection_mismatches_refuse(
@@ -503,8 +534,6 @@ def test_source_dd_unit_and_projection_mismatches_refuse(
         source["dd_unit"] = "s"
     elif mutation == "projection":
         source["projection_edge_ids"] = []
-    else:
-        row["targets"][0]["source_paths"] = ["wrong/path"]  # type: ignore[index]
 
     receipt, _client = _audit(row)
 
