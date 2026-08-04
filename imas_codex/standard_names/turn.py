@@ -7,7 +7,7 @@ Provides:
 
 from __future__ import annotations
 
-from imas_codex.standard_names.pools import POOL_NAMES
+from imas_codex.standard_names.pool_registry import POOL_NAMES
 
 # Maps an --only value to the set of turn-level phases to keep running.
 # Everything outside the set is skipped.
@@ -31,7 +31,7 @@ _ONLY_TO_ACTIVE: dict[str, set[str]] = {
 # A single-quorum action needs a pool boundary, not the broader name-review
 # axis. Derive the eligible pool identifiers from the canonical pool registry;
 # the action vocabulary is policy, while the pool-name universe remains owned
-# by ``pools.POOL_NAMES``.
+# by ``pool_registry.POOL_NAMES``.
 _NAME_REVIEW_ACTIONS = frozenset({"review", "refine"})
 _EXACT_POOL_SELECTORS: dict[str, str] = {
     pool_name: pool_name

@@ -50,49 +50,13 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
 
 from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+from imas_codex.standard_names.pool_registry import POOL_NAMES, POOL_WEIGHTS
 
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
 
 logger = logging.getLogger(__name__)
 
-
-# Default per-pool weights for soft-fairness admission control.
-# Sum to 1.0 across the seven pools of the refine pipeline.
-#
-# Rationale (2026-05-05): Review is the throughput bottleneck — each
-# review costs ~$0.09 (2× blind LLM calls + optional escalator) vs
-# ~$0.02 for generation.  Equal generate/review weights caused a >100-
-# name review backlog after $15 spend.  Weights now favour review pools
-# so names and docs flow through the pipeline at roughly equal rates.
-# Embedding is handled by the shared discovery embed_description_worker
-# (async background task, not a pool).
-#
-# These weights ration the *dollar* budget across the PAID (OpenRouter)
-# pools.  A pool whose model routes to a local / zero-cost endpoint (see
-# ``free_pools`` / ``_pool_is_free``) is FREE: it bypasses the spend-fairness
-# gate entirely (admitted whenever it has pending work, limited only by GPU
-# replica count) and is excluded from the fairness denominator so the paid
-# pools renormalise over only the paid set.  Its weight below is therefore
-# inert while it is free (e.g. ``generate_name``'s 0.15 has no effect when it
-# runs on a local vLLM GPU) — it matters only if that pool is reconfigured
-# to a paid model.
-# ``enrich_parents`` synthesises a real description for placeholder derived
-# parents (generalising over their accepted children) so they can leave the
-# coverage deadlock and flow review_name → accept → docs.  It feeds
-# review_name and is throttled against the same review_name backlog cap, so a
-# modest weight suffices; it runs on the cheap compose-tier model.
-POOL_WEIGHTS: dict[str, float] = {
-    "generate_name": 0.12,
-    "review_name": 0.24,
-    "refine_name": 0.10,
-    "generate_docs": 0.14,
-    "review_docs": 0.24,
-    "refine_docs": 0.08,
-    "enrich_parents": 0.08,
-}
-
-POOL_NAMES: tuple[str, ...] = tuple(POOL_WEIGHTS.keys())
 
 # Maps each pool to the ``pyproject.toml`` model section that determines
 # which LLM endpoint it calls.  Used by :func:`free_pools` to decide which
