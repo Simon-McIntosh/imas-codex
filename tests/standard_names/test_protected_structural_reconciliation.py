@@ -186,6 +186,42 @@ class _Transaction:
         self.mutation_queries = 0
 
     def run(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        if "PROTECTED_STRUCTURAL_RELEASE_CENSUS" in cypher:
+            return [
+                {
+                    "state_rows": [
+                        {
+                            "result_type": "retirement",
+                            "lookup_key": item["row_key"],
+                            "payload": {
+                                "row_key": item["row_key"],
+                                "old_count": 0,
+                                "targets": [],
+                                "sources": [],
+                                "backings": [],
+                                "events": [],
+                                "old_mirror_count": 0,
+                                "orphan_source_cache_count": 0,
+                                "orphan_backing_cache_count": 0,
+                            },
+                        }
+                        for item in params["items"]
+                    ],
+                    "versions": [{"properties": {"id": "4.1.1"}}],
+                    "cocos_nodes": [{"properties": {"id": 17}}],
+                    "downstream_label_entries": [],
+                    "negative_fixture_entries": [
+                        {"id": path, "element_id": f"node:{path}", "value": None}
+                        for path in sut._NEGATIVE_FIXTURE_PATHS
+                    ],
+                    "west_closure": [],
+                    "present_west_source_ids": [],
+                    "fixture_source_ids": [],
+                    "active_targeted_identity_count": 0,
+                    "outside_orphan_source_count": 0,
+                    "outside_orphan_projection_count": 0,
+                }
+            ]
         if "PROTECTED_STRUCTURAL_FOLD_APPLY" in cypher:
             self.mutation_queries += 1
             return [
@@ -291,8 +327,11 @@ def _patch_retirement_execution(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sut, "_read_preflight", read_preflight)
     monkeypatch.setattr(sut, "lock_participants", lambda *_args, **_kwargs: ())
     monkeypatch.setattr(sut, "_lock_relationships", lambda *_args, **_kwargs: None)
-    monkeypatch.setattr(sut, "_read_catalog_contract", lambda _tx: _catalog())
-    monkeypatch.setattr(sut, "_read_protected_source_sets", lambda _tx: _protected())
+    monkeypatch.setattr(
+        sut,
+        "_read_catalog_contract",
+        lambda _tx, _manifest: (_catalog(), _protected()),
+    )
     monkeypatch.setattr(
         sut,
         "_read_snapshots",
@@ -355,7 +394,7 @@ def test_apply_query_count_is_constant_in_cohort_size(
     assert receipt["mode"] == "applied"
     assert receipt["counts"]["applied"] == size
     assert receipt["query_audit"] == {
-        "query_count": 14,
+        "query_count": 9,
         "cohort_size_independent": True,
     }
     assert graph.transaction.mutation_queries == 1
@@ -382,7 +421,7 @@ def test_fold_apply_query_count_is_constant_in_cohort_size(
     )
 
     assert receipt["counts"]["applied"] == size
-    assert receipt["query_audit"]["query_count"] == 12
+    assert receipt["query_audit"]["query_count"] == 9
     assert graph.transaction.mutation_queries == 1
     assert graph.transaction.committed
 
@@ -625,16 +664,16 @@ def test_release_census_is_separate_and_receipt_bound(
         "expected_after_hash": row["expected_after_hash"],
         "allowlisted_delta": row["allowlisted_delta"],
     }
-    receipt = sut._receipt(manifest, [plan], applied=True, query_count=4)
-    assert receipt["release_postflight"] == {"required": True, "certified": False}
-    monkeypatch.setattr(sut, "_read_snapshots", lambda *_args: {})
-    monkeypatch.setattr(
-        sut,
-        "_read_retirement_states",
-        lambda *_args: {row["row_key"]: state},
+    receipt = sut._receipt(
+        manifest,
+        [plan],
+        applied=True,
+        query_count=2,
+        release_baseline=sut._release_baseline(_catalog()),
     )
-    monkeypatch.setattr(sut, "_read_catalog_contract", lambda _tx: _catalog())
-    monkeypatch.setattr(sut, "_read_protected_source_sets", lambda _tx: _protected())
+    assert receipt["release_postflight"] == {"required": True, "certified": False}
+    monkeypatch.setattr(sut, "_west_source_ids", lambda: frozenset())
+    monkeypatch.setattr(sut, "_protected_set_hash", lambda *_args: _HASH)
 
     census = sut.census_protected_structural_release(
         path,
@@ -645,7 +684,7 @@ def test_release_census_is_separate_and_receipt_bound(
 
     assert census["release_ready"] is True
     assert census["receipt_hash"] == receipt["receipt_hash"]
-    assert census["query_audit"]["query_count"] == 4
+    assert census["query_audit"]["query_count"] == 1
 
 
 def test_protected_subclosure_hash_detects_target_and_west_drift() -> None:

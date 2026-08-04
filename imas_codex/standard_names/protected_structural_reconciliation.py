@@ -22,8 +22,10 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names import edit as identity_fold
 from imas_codex.standard_names.grammar_segment_reconciliation import (
+    _FIXTURE_SOURCE_ID_PREFIX,
     ProtectedSourceSets,
-    _read_protected_source_sets,
+    _protected_set_hash,
+    _west_source_ids,
 )
 from imas_codex.standard_names.source_authority import (
     lock_participants,
@@ -42,6 +44,10 @@ _RECEIPT_SCHEMA = "imas-codex.protected-structural-reconciliation-receipt"
 _CURRENT_DD_VERSION = "4.1.1"
 _CATALOG_COCOS = 17
 _DOWNSTREAM_LABELS = ("ip_like", "psi_like")
+_NEGATIVE_FIXTURE_PATHS = (
+    "core_profiles/profiles_1d/electrons/temperature",
+    "equilibrium/time_slice/profiles_1d/b_average",
+)
 _MINIMUM_AUTHORITY_POLICY_CONFIDENCE = 0.95
 _SHA = re.compile(r"[0-9a-f]{64}")
 
@@ -73,12 +79,89 @@ CATALOG_CONTRACT_QUERY = """
 // PROTECTED_STRUCTURAL_CATALOG_CONTRACT
 MATCH (version:DDVersion {is_current: true})
 OPTIONAL MATCH (version)-[:HAS_COCOS|COCOS]->(cocos:COCOS)
-RETURN collect(DISTINCT {
+WITH collect(DISTINCT {
   element_id: elementId(version), properties: properties(version)
 }) AS versions,
 collect(DISTINCT CASE WHEN cocos IS NULL THEN null ELSE {
   element_id: elementId(cocos), properties: properties(cocos)
 } END) AS cocos_nodes
+CALL {
+  MATCH (node:IMASNode)
+  WHERE node.cocos_transformation_type IN $downstream_labels
+  RETURN collect({
+    element_id: elementId(node), id: node.id,
+    value: node.cocos_transformation_type
+  }) AS downstream_label_entries
+}
+CALL {
+  UNWIND $negative_fixture_paths AS fixture_path
+  OPTIONAL MATCH (fixture:IMASNode {id: fixture_path})
+  RETURN collect({
+    id: fixture_path,
+    element_id: CASE WHEN fixture IS NULL THEN null ELSE elementId(fixture) END,
+    value: fixture.cocos_transformation_type
+  }) AS negative_fixture_entries
+}
+CALL {
+  UNWIND $west_source_ids AS source_id
+  OPTIONAL MATCH (source:StandardNameSource {id: source_id})
+  WITH source WHERE source IS NOT NULL
+  RETURN collect({
+    element_id: elementId(source), labels: labels(source),
+    properties: properties(source),
+    relationships: [(source)-[relationship]-(other) | {
+      element_id: elementId(relationship), type: type(relationship),
+      properties: properties(relationship),
+      other_element_id: elementId(other), other_labels: labels(other),
+      other_id: other.id, other_properties: properties(other)
+    }],
+    backings: [(source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing) | {
+      element_id: elementId(backing), labels: labels(backing),
+      properties: properties(backing),
+      relationships: [(backing)-[relationship]-(other) | {
+        element_id: elementId(relationship), type: type(relationship),
+        properties: properties(relationship),
+        other_element_id: elementId(other), other_labels: labels(other),
+        other_id: other.id, other_properties: properties(other)
+      }]
+    }]
+  }) AS west_closure
+}
+CALL {
+  MATCH (source:StandardNameSource)
+  WHERE source.id STARTS WITH $fixture_source_id_prefix
+  RETURN collect(DISTINCT source.id) AS fixture_source_ids
+}
+CALL {
+  UNWIND $west_source_ids AS source_id
+  OPTIONAL MATCH (source:StandardNameSource {id: source_id})
+  RETURN collect(DISTINCT source.id) AS present_west_source_ids
+}
+CALL {
+  OPTIONAL MATCH (name:StandardName)
+  WHERE name.id IN $targeted_identity_ids
+    AND coalesce(name.name_stage, '') <> 'superseded'
+  RETURN count(name) AS active_targeted_identity_count
+}
+CALL {
+  OPTIONAL MATCH (source:StandardNameSource)
+  WHERE NOT (source.id IN $enumerated_source_ids)
+    AND source.produced_sn_id IS NOT NULL
+    AND NOT EXISTS { MATCH (:StandardName {id: source.produced_sn_id}) }
+  RETURN count(source) AS outside_orphan_source_count
+}
+CALL {
+  OPTIONAL MATCH (backing)
+  WHERE NOT (backing.id IN $enumerated_backing_ids)
+    AND backing.standard_name_id IS NOT NULL
+    AND NOT EXISTS { MATCH (:StandardName {id: backing.standard_name_id}) }
+  RETURN count(backing) AS outside_orphan_projection_count
+}
+RETURN versions, cocos_nodes, downstream_label_entries,
+       negative_fixture_entries, west_closure,
+       present_west_source_ids, fixture_source_ids,
+       active_targeted_identity_count,
+       outside_orphan_source_count, outside_orphan_projection_count
 """
 
 RELATIONSHIP_LOCK_QUERY = """
@@ -174,6 +257,42 @@ RETURN item.row_key AS row_key,
        orphan_backing_cache_count
 ORDER BY row_key
 """
+
+PREFLIGHT_STATE_QUERY = (
+    "// PROTECTED_STRUCTURAL_PREFLIGHT_STATE\n"
+    "CALL {\n" + PROTECTED_STRUCTURAL_SNAPSHOT_QUERY + "\n}\n"
+    "RETURN 'snapshot' AS result_type,\n"
+    "       old_properties.id AS lookup_key,\n"
+    "       {old_element_id: old_element_id,\n"
+    "        target_element_id: target_element_id,\n"
+    "        old_labels: old_labels, target_labels: target_labels,\n"
+    "        old_properties: old_properties, target_properties: target_properties,\n"
+    "        cycle: cycle, sources: sources, backings: backings,\n"
+    "        relationships: relationships, reviews: reviews,\n"
+    "        revisions: revisions, changes: changes,\n"
+    "        old_units: old_units, target_units: target_units} AS payload\n"
+    "UNION ALL\n"
+    "CALL {\n" + RETIREMENT_STATE_QUERY + "\n}\n"
+    "RETURN 'retirement' AS result_type, row_key AS lookup_key,\n"
+    "       {row_key: row_key, old_count: old_count, targets: targets,\n"
+    "        sources: sources, backings: backings, events: events,\n"
+    "        old_mirror_count: old_mirror_count,\n"
+    "        orphan_source_cache_count: orphan_source_cache_count,\n"
+    "        orphan_backing_cache_count: orphan_backing_cache_count} AS payload"
+)
+
+RELEASE_CENSUS_QUERY = (
+    "// PROTECTED_STRUCTURAL_RELEASE_CENSUS\n"
+    "CALL {\n" + PREFLIGHT_STATE_QUERY + "\n}\n"
+    "WITH collect({result_type: result_type, lookup_key: lookup_key,\n"
+    "              payload: payload}) AS state_rows\n"
+    "CALL {\n" + CATALOG_CONTRACT_QUERY + "\n}\n"
+    "RETURN state_rows, versions, cocos_nodes, downstream_label_entries,\n"
+    "       negative_fixture_entries, west_closure,\n"
+    "       present_west_source_ids, fixture_source_ids,\n"
+    "       active_targeted_identity_count,\n"
+    "       outside_orphan_source_count, outside_orphan_projection_count"
+)
 
 FOLD_APPLY_QUERY = """
 // PROTECTED_STRUCTURAL_FOLD_APPLY
@@ -561,22 +680,22 @@ def _retirement_post_protected_state(
     )
 
 
-def _state_without_element_identity(value: Any) -> Any:
-    """Project closure semantics without database-local element identifiers."""
-    if isinstance(value, dict):
-        return {
-            key: _state_without_element_identity(item)
-            for key, item in value.items()
-            if "element_id" not in key
-        }
-    if isinstance(value, list | tuple):
-        return [_state_without_element_identity(item) for item in value]
-    return value
+def _retirement_generated_identity_projection(state: dict[str, Any]) -> dict[str, Any]:
+    """Remove only identities allocated for the two new events and their edge."""
+    projected = copy.deepcopy(state)
+    for event in projected.get("events") or []:
+        event.pop("element_id", None)
+    for source in projected.get("sources") or []:
+        for relationship in source.get("relationships") or []:
+            if relationship.get("type") == "HAS_AUTHORITY_RETIREMENT":
+                relationship.pop("element_id", None)
+                relationship.pop("other_element_id", None)
+    return projected
 
 
 def _retirement_state_semantics(state: dict[str, Any]) -> dict[str, Any]:
     return _canonical(
-        _state_without_element_identity(
+        _retirement_generated_identity_projection(
             {
                 "old_count": int(state.get("old_count") or 0),
                 "targets": [item for item in state.get("targets") or [] if item],
@@ -1248,6 +1367,71 @@ def _read_retirement_states(
     }
 
 
+def _state_query_params(manifest: ProtectedStructuralManifest) -> dict[str, Any]:
+    return {
+        "pairs": [
+            {"old_id": row["old_id"], "target_id": row["target_id"]}
+            for row in manifest.rows
+        ],
+        "items": [
+            {
+                "row_key": row["row_key"],
+                "old_id": row["old_id"],
+                "target_id": row["target_id"],
+                "source_ids": sorted(
+                    item["properties"]["id"]
+                    for item in row["expected_after"].get("sources") or []
+                ),
+                "backing_ids": sorted(
+                    item["properties"]["id"]
+                    for item in row["expected_after"].get("backings") or []
+                ),
+                "event_ids": sorted(
+                    [
+                        "source-authority-retirement:" + _event_identity(row, "source"),
+                        "sn-change:protected-retirement:"
+                        + _event_identity(row, "name"),
+                    ]
+                ),
+            }
+            for row in manifest.rows
+            if manifest.action == RETIRE_STALE_SOURCE_BRANCH
+        ],
+        "live_stages": sorted(identity_fold._FOLD_LIVE_STAGES),
+    }
+
+
+def _read_preflight_states(
+    transaction: Any, manifest: ProtectedStructuralManifest
+) -> tuple[dict[str, dict[str, Any]], dict[str, dict[str, Any]]]:
+    snapshots: dict[str, dict[str, Any]] = {}
+    retirement_states: dict[str, dict[str, Any]] = {}
+    by_old_id = {row["old_id"]: row for row in manifest.rows}
+    for graph_row in transaction.run(
+        PREFLIGHT_STATE_QUERY, **_state_query_params(manifest)
+    ):
+        result = dict(graph_row)
+        payload = _canonical(dict(result.get("payload") or {}))
+        if result.get("result_type") == "snapshot":
+            manifest_row = by_old_id.get(str(result.get("lookup_key") or ""))
+            if manifest_row is None or manifest_row["row_key"] in snapshots:
+                raise ProtectedStructuralConflict(
+                    "snapshot returned an unexpected pair"
+                )
+            payload["_cas_signature"] = identity_fold._fold_cas_signature(payload)
+            snapshots[manifest_row["row_key"]] = payload
+        elif result.get("result_type") == "retirement":
+            row_key = str(result.get("lookup_key") or "")
+            if row_key not in manifest.row_keys or row_key in retirement_states:
+                raise ProtectedStructuralConflict(
+                    "retirement state returned an unexpected row"
+                )
+            retirement_states[row_key] = payload
+        else:
+            raise ProtectedStructuralConflict("preflight state returned unknown type")
+    return snapshots, retirement_states
+
+
 def _expected_after_matches(
     row: dict[str, Any],
     snapshot: dict[str, Any] | None,
@@ -1270,11 +1454,52 @@ def _expected_after_matches(
     )
 
 
-def _read_catalog_contract(transaction: Any) -> dict[str, Any]:
-    rows = [dict(row) for row in transaction.run(CATALOG_CONTRACT_QUERY)]
+def _contract_query_params(manifest: ProtectedStructuralManifest) -> dict[str, Any]:
+    return {
+        "downstream_labels": list(_DOWNSTREAM_LABELS),
+        "negative_fixture_paths": list(_NEGATIVE_FIXTURE_PATHS),
+        "west_source_ids": sorted(_west_source_ids()),
+        "fixture_source_id_prefix": _FIXTURE_SOURCE_ID_PREFIX,
+        "targeted_identity_ids": sorted(row["old_id"] for row in manifest.rows),
+        "enumerated_source_ids": sorted(
+            {source_id for row in manifest.rows for source_id in row["source_ids"]}
+        ),
+        "enumerated_backing_ids": sorted(
+            {backing_id for row in manifest.rows for backing_id in row["backing_ids"]}
+        ),
+    }
+
+
+def _read_catalog_contract(
+    transaction: Any, manifest: ProtectedStructuralManifest
+) -> tuple[dict[str, Any], ProtectedSourceSets]:
+    rows = [
+        dict(row)
+        for row in transaction.run(
+            CATALOG_CONTRACT_QUERY, **_contract_query_params(manifest)
+        )
+    ]
     if len(rows) != 1:
         raise ProtectedStructuralConflict("catalog query did not return one row")
-    return _canonical(rows[0])
+    catalog = _canonical(rows[0])
+    west_source_ids = _west_source_ids()
+    fixture_source_ids = frozenset(
+        str(item) for item in catalog.get("fixture_source_ids") or []
+    )
+    present_west_source_ids = frozenset(
+        str(item) for item in catalog.get("present_west_source_ids") or []
+    )
+    if not present_west_source_ids <= west_source_ids:
+        raise ProtectedStructuralConflict(
+            "protected WEST source query returned identities outside its manifest"
+        )
+    protected = ProtectedSourceSets(
+        west_source_ids=west_source_ids,
+        fixture_source_ids=fixture_source_ids,
+        present_source_ids=present_west_source_ids | fixture_source_ids,
+        protected_set_hash=_protected_set_hash(west_source_ids, fixture_source_ids),
+    )
+    return catalog, protected
 
 
 def _catalog_reasons(catalog: dict[str, Any]) -> list[str]:
@@ -1292,6 +1517,122 @@ def _catalog_reasons(catalog: dict[str, Any]) -> list[str]:
     ):
         reasons.append("global catalog COCOS is not exactly 17")
     return reasons
+
+
+def _release_baseline(catalog: dict[str, Any]) -> dict[str, Any]:
+    labels = [item for item in catalog.get("downstream_label_entries") or [] if item]
+    fixtures = [item for item in catalog.get("negative_fixture_entries") or [] if item]
+    west_closure = [item for item in catalog.get("west_closure") or [] if item]
+    west_identity = [
+        {
+            "element_id": source.get("element_id"),
+            "relationships": [
+                {
+                    "element_id": relationship.get("element_id"),
+                    "type": relationship.get("type"),
+                    "other_element_id": relationship.get("other_element_id"),
+                }
+                for relationship in source.get("relationships") or []
+            ],
+            "backings": [
+                {
+                    "element_id": backing.get("element_id"),
+                    "relationships": [
+                        {
+                            "element_id": relationship.get("element_id"),
+                            "type": relationship.get("type"),
+                            "other_element_id": relationship.get("other_element_id"),
+                        }
+                        for relationship in backing.get("relationships") or []
+                    ],
+                }
+                for backing in source.get("backings") or []
+            ],
+        }
+        for source in west_closure
+    ]
+    west_producers = [source.get("element_id") for source in west_identity]
+    west_nodes = [
+        element_id
+        for source in west_identity
+        for element_id in [
+            source.get("element_id"),
+            *(backing.get("element_id") for backing in source.get("backings") or []),
+            *(
+                relationship.get("other_element_id")
+                for relationship in source.get("relationships") or []
+            ),
+            *(
+                relationship.get("other_element_id")
+                for backing in source.get("backings") or []
+                for relationship in backing.get("relationships") or []
+            ),
+        ]
+        if element_id
+    ]
+    west_relationships = [
+        relationship
+        for source in west_identity
+        for relationship in [
+            *(source.get("relationships") or []),
+            *(
+                relationship
+                for backing in source.get("backings") or []
+                for relationship in backing.get("relationships") or []
+            ),
+        ]
+    ]
+    return _canonical(
+        {
+            "downstream_label_counts": {
+                label: sum(item.get("value") == label for item in labels)
+                for label in _DOWNSTREAM_LABELS
+            },
+            "downstream_label_entries_hash": payload_hash(_canonical(labels)),
+            "negative_fixture_entries": fixtures,
+            "negative_fixture_entries_hash": payload_hash(_canonical(fixtures)),
+            "west_producer_identity_hash": payload_hash(_canonical(west_producers)),
+            "west_node_identity_hash": payload_hash(_canonical(west_nodes)),
+            "west_relationship_identity_hash": payload_hash(
+                _canonical(west_relationships)
+            ),
+            "west_closure_hash": payload_hash(_canonical(west_identity)),
+        }
+    )
+
+
+def _release_catalog_reasons(
+    catalog: dict[str, Any], baseline: dict[str, Any]
+) -> list[str]:
+    reasons = _catalog_reasons(catalog)
+    current = _release_baseline(catalog)
+    if current["downstream_label_counts"] != baseline.get(
+        "downstream_label_counts"
+    ) or current["downstream_label_entries_hash"] != baseline.get(
+        "downstream_label_entries_hash"
+    ):
+        reasons.append("catalog-wide downstream labels changed")
+    west_hash_fields = (
+        "west_producer_identity_hash",
+        "west_node_identity_hash",
+        "west_relationship_identity_hash",
+        "west_closure_hash",
+    )
+    if any(current[field] != baseline.get(field) for field in west_hash_fields):
+        reasons.append("WEST producer closure changed")
+    fixtures = current["negative_fixture_entries"]
+    if {item.get("id") for item in fixtures} != set(_NEGATIVE_FIXTURE_PATHS) or any(
+        item.get("element_id") is None or item.get("value") is not None
+        for item in fixtures
+    ):
+        reasons.append("negative COCOS fixtures are missing or labeled")
+    if int(catalog.get("active_targeted_identity_count") or 0) != 0:
+        reasons.append("targeted strict-parser identities remain active")
+    if int(catalog.get("outside_orphan_source_count") or 0) != 0:
+        reasons.append("orphan source mirrors remain outside the row closure")
+    if int(catalog.get("outside_orphan_projection_count") or 0) != 0:
+        reasons.append("orphan projection mirrors remain outside the row closure")
+    return sorted(set(reasons))
 
 
 def _row_reasons(
@@ -1572,6 +1913,7 @@ def _receipt(
     *,
     applied: bool,
     query_count: int,
+    release_baseline: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     planned_count = sum(plan["status"] == "planned" for plan in plans)
     mode = (
@@ -1624,6 +1966,7 @@ def _receipt(
             "required": True,
             "certified": False,
         },
+        "release_baseline": _canonical(release_baseline or {}),
     }
     receipt["receipt_hash"] = payload_hash(receipt)
     return receipt
@@ -1709,10 +2052,8 @@ def _plan(
 def _read_preflight(
     transaction: Any, manifest: ProtectedStructuralManifest
 ) -> tuple[list[dict[str, Any]], ProtectedSourceSets, dict[str, Any]]:
-    snapshots = _read_snapshots(transaction, manifest)
-    retirement_states = _read_retirement_states(transaction, manifest)
-    catalog = _read_catalog_contract(transaction)
-    protected = _read_protected_source_sets(transaction)
+    snapshots, retirement_states = _read_preflight_states(transaction, manifest)
+    catalog, protected = _read_catalog_contract(transaction, manifest)
     if not hmac.compare_digest(
         protected.protected_set_hash, manifest.protected_set_hash
     ):
@@ -1746,18 +2087,27 @@ def reconcile_protected_structure(
         with client.session() as session:
             transaction = session.begin_transaction()
             try:
-                plans, _, _ = _read_preflight(transaction, manifest)
-                query_count += 3 + int(manifest.action == RETIRE_STALE_SOURCE_BRANCH)
+                plans, _, catalog = _read_preflight(transaction, manifest)
+                query_count += 2
+                baseline = _release_baseline(catalog)
                 if any(plan["status"] == "refused" for plan in plans) or not apply:
                     transaction.rollback()
                     return _receipt(
-                        manifest, plans, applied=False, query_count=query_count
+                        manifest,
+                        plans,
+                        applied=False,
+                        query_count=query_count,
+                        release_baseline=baseline,
                     )
                 planned = [plan for plan in plans if plan["status"] == "planned"]
                 if not planned:
                     transaction.rollback()
                     return _receipt(
-                        manifest, plans, applied=True, query_count=query_count
+                        manifest,
+                        plans,
+                        applied=True,
+                        query_count=query_count,
+                        release_baseline=baseline,
                     )
                 lock_participants(
                     transaction,
@@ -1771,7 +2121,7 @@ def reconcile_protected_structure(
                 )
                 query_count += 2
                 locked, _, _ = _read_preflight(transaction, manifest)
-                query_count += 3 + int(manifest.action == RETIRE_STALE_SOURCE_BRANCH)
+                query_count += 2
                 if [plan["status"] for plan in locked] != [
                     plan["status"] for plan in plans
                 ] or [plan["before_hash"] for plan in locked] != [
@@ -1825,15 +2175,22 @@ def reconcile_protected_structure(
                             raise ProtectedStructuralConflict(
                                 "protected retirement exact postflight failed"
                             )
-                post_catalog = _read_catalog_contract(transaction)
-                post_protected = _read_protected_source_sets(transaction)
-                query_count += 2
+                post_catalog, post_protected = _read_catalog_contract(
+                    transaction, manifest
+                )
+                query_count += 1
                 if _catalog_reasons(post_catalog):
                     raise ProtectedStructuralConflict("catalog contract changed")
                 if post_protected.protected_set_hash != manifest.protected_set_hash:
                     raise ProtectedStructuralConflict("protected source set changed")
                 transaction.commit()
-                return _receipt(manifest, locked, applied=True, query_count=query_count)
+                return _receipt(
+                    manifest,
+                    locked,
+                    applied=True,
+                    query_count=query_count,
+                    release_baseline=baseline,
+                )
             except BaseException:
                 transaction.rollback()
                 raise
@@ -1886,11 +2243,53 @@ def census_protected_structural_release(
         with client.session() as session:
             transaction = session.begin_transaction()
             try:
-                snapshots = _read_snapshots(transaction, manifest)
-                retirement_states = _read_retirement_states(transaction, manifest)
-                catalog = _read_catalog_contract(transaction)
-                protected = _read_protected_source_sets(transaction)
-                query_count = 3 + int(manifest.action == RETIRE_STALE_SOURCE_BRANCH)
+                result_rows = list(
+                    transaction.run(
+                        RELEASE_CENSUS_QUERY,
+                        **_state_query_params(manifest),
+                        **_contract_query_params(manifest),
+                    )
+                )
+                if len(result_rows) != 1:
+                    raise ProtectedStructuralConflict(
+                        "release census did not return one snapshot"
+                    )
+                result = dict(result_rows[0])
+                snapshots: dict[str, dict[str, Any]] = {}
+                retirement_states: dict[str, dict[str, Any]] = {}
+                by_old_id = {row["old_id"]: row for row in manifest.rows}
+                for raw_state in result.pop("state_rows", []) or []:
+                    state = dict(raw_state)
+                    payload = _canonical(dict(state.get("payload") or {}))
+                    if state.get("result_type") == "snapshot":
+                        manifest_row = by_old_id.get(str(state.get("lookup_key") or ""))
+                        if manifest_row is None:
+                            raise ProtectedStructuralConflict(
+                                "release census returned an unexpected snapshot"
+                            )
+                        payload["_cas_signature"] = identity_fold._fold_cas_signature(
+                            payload
+                        )
+                        snapshots[manifest_row["row_key"]] = payload
+                    elif state.get("result_type") == "retirement":
+                        retirement_states[str(state.get("lookup_key") or "")] = payload
+                catalog = _canonical(result)
+                west_source_ids = _west_source_ids()
+                fixture_source_ids = frozenset(
+                    str(item) for item in catalog.get("fixture_source_ids") or []
+                )
+                present_west_source_ids = frozenset(
+                    str(item) for item in catalog.get("present_west_source_ids") or []
+                )
+                protected = ProtectedSourceSets(
+                    west_source_ids=west_source_ids,
+                    fixture_source_ids=fixture_source_ids,
+                    present_source_ids=present_west_source_ids | fixture_source_ids,
+                    protected_set_hash=_protected_set_hash(
+                        west_source_ids, fixture_source_ids
+                    ),
+                )
+                query_count = 1
                 rows = []
                 for row in manifest.rows:
                     exact = _expected_after_matches(
@@ -1902,11 +2301,18 @@ def census_protected_structural_release(
                         {
                             "row_key": row["row_key"],
                             "exact_expected_after": exact,
+                            "expected_after_hash": row["expected_after_hash"],
+                            "protected_subclosure_hash": row[
+                                "expected_protected_subclosure_hash"
+                            ],
                         }
                     )
+                catalog_reasons = _release_catalog_reasons(
+                    catalog, receipt.get("release_baseline") or {}
+                )
                 release_ready = (
                     all(row["exact_expected_after"] for row in rows)
-                    and not _catalog_reasons(catalog)
+                    and not catalog_reasons
                     and protected.protected_set_hash == manifest.protected_set_hash
                 )
                 transaction.rollback()
@@ -1922,6 +2328,22 @@ def census_protected_structural_release(
         "manifest_hash": manifest.manifest_hash,
         "receipt_hash": claimed_hash,
         "release_ready": release_ready,
+        "catalog_reasons": catalog_reasons,
+        "catalog_evidence": {
+            **_release_baseline(catalog),
+            "active_targeted_identity_count": int(
+                catalog.get("active_targeted_identity_count") or 0
+            ),
+            "outside_orphan_source_count": int(
+                catalog.get("outside_orphan_source_count") or 0
+            ),
+            "outside_orphan_projection_count": int(
+                catalog.get("outside_orphan_projection_count") or 0
+            ),
+            "current_dd_version": _CURRENT_DD_VERSION,
+            "catalog_cocos": _CATALOG_COCOS,
+            "protected_set_hash": protected.protected_set_hash,
+        },
         "rows": rows,
         "query_audit": {
             "query_count": query_count,

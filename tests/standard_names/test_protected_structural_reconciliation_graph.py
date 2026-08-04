@@ -152,6 +152,12 @@ def _seed(client: GraphClient, action: str, *, count: int) -> list[dict[str, str
         CREATE (cocos:COCOS {id: 17})
         CREATE (version)-[:HAS_COCOS]->(cocos)
         CREATE (unit:Unit {id: 'm^2', symbol: 'm^2'})
+        CREATE (:IMASNode {
+          id: 'core_profiles/profiles_1d/electrons/temperature'
+        })
+        CREATE (:IMASNode {
+          id: 'equilibrium/time_slice/profiles_1d/b_average'
+        })
         WITH unit
         UNWIND $rows AS row
         CREATE (old:StandardName {
@@ -335,6 +341,33 @@ def _event_ids(row: dict[str, Any]) -> list[str]:
     ]
 
 
+def _protected_identity(client: GraphClient, target_id: str) -> dict[str, Any]:
+    rows = client.query(
+        """
+        MATCH (target:StandardName {id: $target_id})-[target_unit:HAS_UNIT]
+              ->(unit:Unit)
+        MATCH (west:StandardNameSource)-[binding:PRODUCED_NAME]->(target)
+        WHERE west.id STARTS WITH 'dd:'
+          AND NOT west.id STARTS WITH 'dd:test_review_entry__'
+        MATCH (west)-[ownership:FROM_DD_PATH]->(backing:IMASNode)
+        MATCH (backing)-[projection:HAS_STANDARD_NAME]->(target)
+        MATCH (backing)-[backing_unit:HAS_UNIT]->(unit)
+        RETURN elementId(target) AS target,
+               elementId(west) AS west_source,
+               elementId(backing) AS west_backing,
+               elementId(unit) AS unit,
+               elementId(binding) AS binding,
+               elementId(ownership) AS ownership,
+               elementId(projection) AS projection,
+               elementId(target_unit) AS target_unit,
+               elementId(backing_unit) AS backing_unit
+        """,
+        target_id=target_id,
+    )
+    assert len(rows) == 1
+    return rows[0]
+
+
 def _transactional_after_state(client: GraphClient, path: Path) -> dict[str, Any]:
     manifest = sut.load_protected_structural_manifest(path)
     with client.session() as session:
@@ -408,7 +441,7 @@ def test_fold_dry_apply_second_apply_and_event_drift(
     dry_counter = _CountingGraphClient(graph_client)
     dry = sut.reconcile_protected_structure(path, gc=dry_counter)
     assert dry["mode"] == "dry_run"
-    assert dry_counter.query_count == dry["query_audit"]["query_count"] == 3
+    assert dry_counter.query_count == dry["query_audit"]["query_count"] == 2
     assert graph_client.query(
         "MATCH (event:StandardNameChange) RETURN count(event) AS count"
     ) == [{"count": 0}]
@@ -422,7 +455,7 @@ def test_fold_dry_apply_second_apply_and_event_drift(
         path, apply=True, expected_manifest_hash=digest, gc=apply_counter
     )
     assert receipt["mode"] == "applied"
-    assert apply_counter.query_count == receipt["query_audit"]["query_count"] == 12
+    assert apply_counter.query_count == receipt["query_audit"]["query_count"] == 9
     census = sut.census_protected_structural_release(
         path,
         receipt,
@@ -476,6 +509,9 @@ def test_retirement_rollback_exact_postflight_and_second_apply(
     )
     dry = sut.reconcile_protected_structure(path, gc=graph_client)
     assert dry["counts"]["planned"] == 1, dry["rows"][0]["unresolved"]
+    protected_identity_before = _protected_identity(
+        graph_client, seeded[0]["target_id"]
+    )
     failing = _CountingGraphClient(graph_client, fail_mutation=True)
     with pytest.raises(RuntimeError, match="injected retirement failure"):
         sut.reconcile_protected_structure(
@@ -494,6 +530,10 @@ def test_retirement_rollback_exact_postflight_and_second_apply(
         path, apply=True, expected_manifest_hash=digest, gc=graph_client
     )
     assert receipt["mode"] == "applied"
+    assert (
+        _protected_identity(graph_client, seeded[0]["target_id"])
+        == protected_identity_before
+    )
     census = sut.census_protected_structural_release(
         path,
         receipt,
@@ -585,8 +625,8 @@ def test_graph_manifest_rejects_shared_target(
 @pytest.mark.parametrize(
     ("action", "expected_dry_queries", "expected_apply_queries"),
     [
-        (sut.PROTECTED_IDENTITY_FOLD, 3, 12),
-        (sut.RETIRE_STALE_SOURCE_BRANCH, 4, 14),
+        (sut.PROTECTED_IDENTITY_FOLD, 2, 9),
+        (sut.RETIRE_STALE_SOURCE_BRANCH, 2, 9),
     ],
 )
 @pytest.mark.parametrize("count", [1, 40])
