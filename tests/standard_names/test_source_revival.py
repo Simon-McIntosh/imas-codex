@@ -866,6 +866,7 @@ def _startup_patches(revive_mock: MagicMock, retry_mock: MagicMock) -> list:
         patch(f"{_GO}.seed_parent_sources", return_value=0),
         patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
         patch(f"{_GO}.structural_accept_derived_parents", return_value=0),
+        patch(f"{_GO}.reconcile_orphan_parent_sources", return_value=0),
         patch(f"{_GO}.resolve_doc_links", return_value={}),
         patch(f"{_GO}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
         patch(f"{_GO}.mark_orphaned_standard_name_runs_stale", return_value=0),
