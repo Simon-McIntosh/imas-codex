@@ -110,6 +110,11 @@ def _open_existing_receipt(
             raise ReceiptPersistenceError(
                 f"receipt destination contains different content: {path}"
             )
+        mode = stat.S_IMODE(path_stat.st_mode)
+        if mode != 0o600:
+            raise ReceiptPersistenceError(
+                f"receipt destination must have mode 0600: {path} (found {mode:04o})"
+            )
         return descriptor
     except BaseException:
         os.close(descriptor)

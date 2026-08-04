@@ -89,6 +89,53 @@ def test_identical_receipt_is_idempotent(
     assert first.path.read_bytes() == canonical_receipt_bytes(payload)
 
 
+def test_identical_default_receipt_with_public_mode_fails_closed(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path))
+    payload = {"mode": "dry_run"}
+    encoded = canonical_receipt_bytes(payload)
+    digest = hashlib.sha256(encoded).hexdigest()
+    output = (
+        tmp_path
+        / "imas-codex/receipts/standard-names/protected-structural-reconciliation"
+        / f"{digest}.json"
+    )
+    output.parent.mkdir(parents=True)
+    output.write_bytes(encoded)
+    output.chmod(0o644)
+
+    with pytest.raises(ReceiptPersistenceError, match="mode 0600"):
+        persist_receipt("protected-structural-reconciliation", payload)
+
+    assert output.read_bytes() == encoded
+    assert _mode(output) == 0o644
+
+
+def test_identical_explicit_receipt_with_public_mode_fails_closed(
+    tmp_path: Path,
+) -> None:
+    payload = {"mode": "dry_run"}
+    encoded = canonical_receipt_bytes(payload)
+    backing = tmp_path / "shared.json"
+    backing.write_bytes(encoded)
+    backing.chmod(0o644)
+    output = tmp_path / "receipt.json"
+    output.hardlink_to(backing)
+
+    with pytest.raises(ReceiptPersistenceError, match="mode 0600"):
+        persist_receipt(
+            "protected-structural-reconciliation",
+            payload,
+            output_path=output,
+        )
+
+    assert output.read_bytes() == encoded
+    assert _mode(backing) == 0o644
+    assert _mode(output) == 0o644
+
+
 def test_existing_mismatched_content_fails_closed(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -164,7 +211,9 @@ def test_identical_race_winner_is_idempotent_and_temp_is_removed(
         follow_symlinks: bool,
     ) -> None:
         assert follow_symlinks is False
-        Path(destination).write_bytes(expected)
+        destination_path = Path(destination)
+        destination_path.write_bytes(expected)
+        destination_path.chmod(0o600)
         raise FileExistsError(errno.EEXIST, "already installed", destination)
 
     with patch(
