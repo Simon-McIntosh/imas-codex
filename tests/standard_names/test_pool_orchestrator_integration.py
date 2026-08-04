@@ -196,6 +196,10 @@ class TestReconcileRunsBeforePools:
             patch(f"{_BM}.drain_pending", new_callable=AsyncMock, return_value=True),
             patch(f"{_BM}.get_total_spent", new_callable=AsyncMock, return_value=0.0),
             patch(
+                "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+                return_value={},
+            ),
+            patch(
                 "imas_codex.graph.client.GraphClient",
                 return_value=_mock_gc_ctx,
             ),
