@@ -399,11 +399,8 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
 
     target = targets[0] if len(targets) == 1 else {}
     target_source_paths = _sorted_strings(target.get("source_paths"))
-    source_backing_ids: list[str] = []
     for source in sources:
         backing_id = source.get("backing_id")
-        if backing_id is not None:
-            source_backing_ids.append(str(backing_id))
         if source.get("source_type") != "dd":
             receipt.diagnostics.append(f"{source.get('id')}: source is not DD-backed")
         if source.get("id") != f"dd:{backing_id}":
@@ -465,8 +462,10 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
                 f"{source.get('id')}: source/backing unit mismatch"
             )
 
-    if sorted(source_backing_ids) != target_source_paths:
-        receipt.diagnostics.append("target source-path mirror differs from DD closure")
+    if receipt.source_ids != target_source_paths:
+        receipt.diagnostics.append(
+            "target source-ID mirror differs from producing sources"
+        )
     target_unit_edges = evidence.get("target_unit_edge_ids") or []
     raw_target_unit_ids = evidence.get("target_unit_ids") or []
     target_unit = target.get("unit")
@@ -486,8 +485,6 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
     if receipt.target_units and receipt.backing_units != receipt.target_units:
         receipt.diagnostics.append("target and backing DD units differ")
 
-    if target.get("dd_version") != receipt.dd_version:
-        receipt.diagnostics.append("target DD version is not current")
     catalogs = evidence.get("catalogs") or []
     catalog_cocos_ids = evidence.get("catalog_cocos_ids") or []
     receipt.catalog_cocos = sorted(
