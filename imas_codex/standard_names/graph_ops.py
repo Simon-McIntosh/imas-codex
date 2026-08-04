@@ -14370,6 +14370,24 @@ def persist_reviewed_docs(
 # -- refine_name (StandardName, reviewed + low score + chain < cap) -----------
 
 
+REFINE_NAME_ELIGIBILITY_WHERE = (
+    "sn.name_stage = 'reviewed'"
+    " AND sn.reviewer_score_name IS NOT NULL"
+    " AND sn.reviewer_score_name < $min_score"
+    " AND coalesce(sn.chain_length, 0) < $rotation_cap"
+    " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
+    # A pinned rename that has already spent its re-review budget rests at
+    # 'reviewed' — refine must not re-claim it (it is never rewritten, only
+    # resubmitted; see resubmit_pinned_rename_for_review). Under the cap it
+    # is claimed so the resubmit-to-review can fire.
+    " AND NOT (coalesce(sn.edit_mode, '') = 'rename'"
+    "          AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)"
+    # Derived parents are structurally fixed and have no refinement target.
+    " AND coalesce(sn.origin, '') <> 'derived'"
+)
+"""Canonical graph predicate for name-refinement eligibility."""
+
+
 @retry_on_deadlock()
 def claim_refine_name_batch(
     min_score: float = DEFAULT_MIN_SCORE,
@@ -14396,28 +14414,8 @@ def claim_refine_name_batch(
     """
     from imas_codex.standard_names.chain_history import name_chain_history
 
-    where = (
-        "sn.name_stage = 'reviewed'"
-        " AND sn.reviewer_score_name IS NOT NULL"
-        " AND sn.reviewer_score_name < $min_score"
-        " AND coalesce(sn.chain_length, 0) < $rotation_cap"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        # A pinned rename that has already spent its re-review budget rests at
-        # 'reviewed' — refine must not re-claim it (it is never rewritten, only
-        # resubmitted; see resubmit_pinned_rename_for_review). Under the cap it
-        # IS claimed so the resubmit-to-review can fire.
-        " AND NOT (coalesce(sn.edit_mode, '') = 'rename'"
-        "          AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)"
-        # Derived parents (seeded by ``seed_parent_sources``) have no
-        # refinement target — the name is structurally fixed. Skip
-        # them so they don't enter the refine loop. The admission gate
-        # filters bad derived names at write time, and
-        # normalize_derived_parent_lifecycle deletes any inadmissible
-        # accepted derived parents at startup (the self-healing cascade).
-        " AND coalesce(sn.origin, '') <> 'derived'"
-    )
     items = _claim_sn_atomic(
-        eligibility_where=where,
+        eligibility_where=REFINE_NAME_ELIGIBILITY_WHERE,
         query_params={"min_score": min_score, "rotation_cap": rotation_cap},
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,
