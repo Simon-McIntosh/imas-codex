@@ -19,6 +19,7 @@ from imas_codex.standard_names.defaults import (
     REVIEW_DOCS_BACKLOG_CAP,
     REVIEW_NAME_BACKLOG_CAP,
 )
+from imas_codex.standard_names.turn import TURN_PHASES
 
 logger = logging.getLogger(__name__)
 console = Console()
@@ -725,6 +726,8 @@ def _run_sn_cmd(
     )
 
     async def async_main(stop_event, service_monitor):
+        from imas_codex.standard_names.turn import exact_pool_from_only
+
         summary = await run_sn_pools(
             cost_limit=cost_limit,
             time_limit_s=time_limit * 60 if time_limit else None,
@@ -751,6 +754,7 @@ def _run_sn_cmd(
             flush=flush,
             skip_review=skip_review,
             skip_generate=skip_generate,
+            only_pool=exact_pool_from_only(only),
             attach_only=(only == "attach"),
             reconcile_only=(only == "reconcile"),
             skip_global_maintenance=skip_global_maintenance,
@@ -1409,26 +1413,14 @@ def _reject_unscoped_accepted_reset(
 @click.option(
     "--only",
     "only_phase",
-    type=click.Choice(
-        [
-            "reconcile",
-            "attach",
-            "extract",
-            "compose",
-            "validate",
-            "consolidate",
-            "persist",
-            "enrich",
-            "review",
-            "link",
-        ],
-        case_sensitive=False,
-    ),
+    type=click.Choice(TURN_PHASES, case_sensitive=False),
     default=None,
     help=(
         "Run only this phase — all others are skipped. "
         "extract/compose/validate/consolidate/persist select generation plus "
         "parent enrichment; enrich selects only ENRICH_PARENTS. "
+        "review_name and refine_name select exactly one name-axis action; "
+        "review/review_names retain their broader multi-pool behavior. "
         "attach backfills the DD-side HAS_STANDARD_NAME edge from provenance "
         "(no LLM, no pools)."
     ),

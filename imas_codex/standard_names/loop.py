@@ -154,6 +154,7 @@ def _build_pool_specs(
     flush: bool = False,
     skip_review: bool = False,
     skip_generate: bool = False,
+    only_pool: str | None = None,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -205,7 +206,7 @@ def _build_pool_specs(
         release_review_docs_claims,
         release_review_names_claims,
     )
-    from imas_codex.standard_names.pools import PoolSpec
+    from imas_codex.standard_names.pools import POOL_NAMES, PoolSpec
     from imas_codex.standard_names.workers import (
         process_enrich_parents_batch,
         process_generate_docs_batch,
@@ -215,6 +216,9 @@ def _build_pool_specs(
         process_review_docs_batch,
         process_review_name_batch,
     )
+
+    if only_pool is not None and only_pool not in POOL_NAMES:
+        raise ValueError(f"unknown standard-name pool: {only_pool}")
 
     regen_score = min_score if min_score is not None else DEFAULT_MIN_SCORE
     _rotation_cap_kwargs: dict[str, Any] = {}
@@ -553,6 +557,17 @@ def _build_pool_specs(
         }
         specs = [s for s in specs if s.name not in _REVIEW_REFINE_POOLS]
 
+    # Exact action selectors are applied after the established coarse filters,
+    # so names-only/docs-only and review suppression retain their safety
+    # semantics. A contradictory combination fails instead of silently running
+    # zero pools or widening to an adjacent review/refine action.
+    if only_pool is not None:
+        specs = [spec for spec in specs if spec.name == only_pool]
+        if len(specs) != 1:
+            raise ValueError(
+                f"exact pool {only_pool!r} is excluded by another pool filter"
+            )
+
     # ── Backlog throttle wiring ───────────────────────────────────────
     # Upstream generators/refiners pause when their downstream review
     # queue exceeds the configured cap.  The throttle wraps the claim
@@ -794,6 +809,7 @@ async def run_sn_pools(
     flush: bool = False,
     skip_review: bool = False,
     skip_generate: bool = False,
+    only_pool: str | None = None,
     attach_only: bool = False,
     reconcile_only: bool = False,
     skip_global_maintenance: bool = False,
@@ -878,9 +894,14 @@ async def run_sn_pools(
             post-drain maintenance while retaining the ordinary scoped worker
             pools and run audit. Requires *scope_run_id* and is incompatible
             with maintenance-only modes.
+        only_pool: Restrict operational work to exactly one canonical worker
+            pool. Broad ``--only`` phases leave this unset.
     """
     from imas_codex.standard_names.budget import BudgetManager
-    from imas_codex.standard_names.pools import run_pools
+    from imas_codex.standard_names.pools import POOL_NAMES, run_pools
+
+    if only_pool is not None and only_pool not in POOL_NAMES:
+        raise ValueError(f"unknown standard-name pool: {only_pool}")
 
     started = datetime.now(UTC)
 
@@ -1620,6 +1641,7 @@ async def run_sn_pools(
             flush=flush,
             skip_review=skip_review,
             skip_generate=skip_generate,
+            only_pool=only_pool,
         )
 
         # ── Wire pool health into display state ───────────────────
