@@ -91,8 +91,12 @@ def _run_row() -> dict:
                 "id": "cost-1",
                 "run_id": _RUN_ID,
                 "linked_run_id": _RUN_ID,
-                "pool": "review",
-                "phase": "review_names",
+                "pool": "review_name",
+                "phase": "review_name",
+                "event_type": "review_name",
+                "cycle": "c0",
+                "sn_ids": [_NAME_ID],
+                "llm_at": "2026-08-04T00:01:00+00:00",
                 "llm_cost": 0.031,
                 "overspend": 0.0,
             },
@@ -100,8 +104,12 @@ def _run_row() -> dict:
                 "id": "cost-2",
                 "run_id": _RUN_ID,
                 "linked_run_id": _RUN_ID,
-                "pool": "review",
-                "phase": "review_names",
+                "pool": "review_name",
+                "phase": "review_name",
+                "event_type": "review_name",
+                "cycle": "c1",
+                "sn_ids": [_NAME_ID],
+                "llm_at": "2026-08-04T00:01:02+00:00",
                 "llm_cost": 0.033326,
                 "overspend": 0.0,
             },
@@ -118,6 +126,8 @@ def _run_row() -> dict:
                 "resolution_role": "primary",
                 "resolution_method": None,
                 "score": 0.91,
+                "reviewed_at": "2026-08-04T00:02:00+00:00",
+                "llm_at": "2026-08-04T00:02:00.988906+00:00",
                 "linked_run_id": _RUN_ID,
                 "linked_cost_ids": ["cost-1"],
             },
@@ -129,6 +139,8 @@ def _run_row() -> dict:
                 "resolution_role": "secondary",
                 "resolution_method": "consensus",
                 "score": 0.928,
+                "reviewed_at": "2026-08-04T00:02:00+00:00",
+                "llm_at": "2026-08-04T00:02:00.988906+00:00",
                 "linked_run_id": _RUN_ID,
                 "linked_cost_ids": ["cost-2"],
             },
@@ -173,7 +185,7 @@ def test_complete_receipt_preserves_evidence_and_exact_cost() -> None:
     assert receipt.events_total == receipt.cost_event_count == 2
     assert receipt.target_scope_run_id == _SCOPE
     assert receipt.run_id == _RUN_ID
-    assert receipt.pool_counts == {"review": 2}
+    assert receipt.pool_counts == {"review_name": 2}
     assert receipt.review_count == 2
     assert receipt.review_cycles == [0, 1]
     assert receipt.review_resolutions == ["consensus"]
@@ -297,7 +309,35 @@ def test_review_linkage_reuses_bounded_costs_and_keeps_query_count_constant() ->
     )
     assert _RUN_EVIDENCE_QUERY.count("[:FOR_RUN]->(run)") == 1
     assert "CALL (run, costs)" in _RUN_EVIDENCE_QUERY
-    assert "[cost IN costs WHERE cost.run_id = run.id" in _RUN_EVIDENCE_QUERY
+    assert "[cost IN costs WHERE review_pool IS NOT NULL" in _RUN_EVIDENCE_QUERY
+
+
+@pytest.mark.parametrize(
+    ("evidence", "field", "value"),
+    [
+        ("cost", "cycle", "c9"),
+        ("cost", "pool", "review_docs"),
+        ("cost", "sn_ids", ["unrelated_name"]),
+        ("review", "review_axis", "unknown"),
+        ("review", "cycle_index", None),
+    ],
+)
+def test_review_cost_semantic_mismatch_fails_closed(
+    evidence: str, field: str, value: object
+) -> None:
+    run_row = _run_row()
+    run_row[f"{evidence}s"][0][field] = value
+
+    receipt, client = _audit([[_target_row()], [_dd_row()], [run_row]])
+
+    assert receipt.passed is False
+    assert receipt.query_count == 3
+    assert client.query.call_count == 3
+    assert receipt.raw_rows["run"] == [run_row]
+    assert any(
+        "review evidence is not linked to the selected run" in item
+        for item in receipt.diagnostics
+    )
 
 
 @pytest.mark.parametrize(
@@ -401,8 +441,12 @@ def test_queries_are_bounded_and_keep_aggregates_in_with_scope() -> None:
         "run.started_at",
         "cost.llm_at",
         "review.reviewed_at",
-        "review.llm_at",
         "revision.created_at",
         "change.changed_at",
     ):
         assert f"datetime(toString({temporal_property}))" in _RUN_EVIDENCE_QUERY
+    assert "WHEN 'names' THEN 'review_name'" in _RUN_EVIDENCE_QUERY
+    assert "WHEN 'docs' THEN 'review_docs'" in _RUN_EVIDENCE_QUERY
+    assert "cost.pool = review_pool" in _RUN_EVIDENCE_QUERY
+    assert "cost.cycle = review_cycle" in _RUN_EVIDENCE_QUERY
+    assert "datetime(toString(review.llm_at))" not in _RUN_EVIDENCE_QUERY
