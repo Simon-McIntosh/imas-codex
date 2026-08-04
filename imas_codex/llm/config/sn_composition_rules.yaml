@@ -7,18 +7,34 @@ description: >-
 
 composition_rules:
   - id: "NC-1"
-    title: "No synonymous names"
+    title: "Synonym collapse requires complete semantic equivalence"
     category: "consistency"
-    severity: "soft"
+    severity: "hard"
     rule: |
-      When a controlled vocabulary term exists (e.g., `magnetic_flux`), always
-      use it. Never create alternative wordings for the same physical quantity.
+      HARD SOURCE-FIDELITY CONTRACT. Use one controlled-vocabulary spelling only
+      after proving that two candidates denote the same observable. Preserve
+      every authoritative source-stated semantic axis that distinguishes the
+      observable: subject/object, mechanism/cause, locus/carrier,
+      projection/axis, surface kind, geometry representation, coordinate kind,
+      aggregation, process, state, unit, and DD-authoritative transformation or
+      label semantics. Domain-implied boilerplate may be omitted, but an explicit
+      differentiator may not. If the public grammar cannot express a required
+      axis, emit a `vocab_gap`; never attach, merge, or generalize to a nearby
+      name that drops or changes it.
+
+      Flux-surface area has two distinct canonical quantities. DD `area` is the
+      poloidal cross-sectional area enclosed by the flux surface, named
+      `poloidal_cross_sectional_area_of_flux_surface`. DD `surface` is the swept
+      toroidal surface area, named `surface_area_of_flux_surface`. The bare
+      `area_of_flux_surface` is an ambiguous umbrella and must not represent
+      either source family.
     examples_good:
       - "poloidal_magnetic_flux"
-      - "area_of_flux_surface"
+      - "poloidal_cross_sectional_area_of_flux_surface"
+      - "surface_area_of_flux_surface"
     examples_bad:
       - "poloidal_flux"
-      - "cross_sectional_area_of_flux_surface"
+      - "area_of_flux_surface"
     affects:
       - "name"
 

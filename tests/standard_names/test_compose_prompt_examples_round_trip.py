@@ -156,6 +156,102 @@ def test_nc_rule_good_example_round_trips(rule_id: str, name: str) -> None:
     )
 
 
+def test_flux_surface_area_forms_round_trip_without_semantic_collapse() -> None:
+    """The public grammar preserves cross-sectional and swept-surface forms."""
+    cross_section = "poloidal_cross_sectional_area_of_flux_surface"
+    swept_surface = "surface_area_of_flux_surface"
+
+    cross_ir = parse(cross_section, strict=True).ir
+    surface_ir = parse(swept_surface, strict=True).ir
+
+    assert compose(cross_ir) == cross_section
+    assert compose(surface_ir) == swept_surface
+    assert cross_ir != surface_ir
+    assert cross_ir.projection is not None
+    assert cross_ir.projection.axis == "poloidal"
+    assert {qualifier.token for qualifier in cross_ir.qualifiers} == {"cross_sectional"}
+    assert surface_ir.projection is None
+    assert {qualifier.token for qualifier in surface_ir.qualifiers} == {"surface"}
+
+
+def test_consistency_rule_forbids_generic_flux_surface_area_umbrella() -> None:
+    """Consistency cannot erase the DD distinction between two surface kinds."""
+    from imas_codex.llm.prompt_loader import load_prompt_config
+
+    rules = load_prompt_config("sn_composition_rules")["composition_rules"]
+    synonym_rule = next(rule for rule in rules if rule["id"] == "NC-1")
+
+    assert synonym_rule["severity"] == "hard"
+    assert (
+        "poloidal_cross_sectional_area_of_flux_surface" in synonym_rule["examples_good"]
+    )
+    assert "surface_area_of_flux_surface" in synonym_rule["examples_good"]
+    assert "area_of_flux_surface" in synonym_rule["examples_bad"]
+    assert "area_of_flux_surface" not in synonym_rule["examples_good"]
+
+
+_SOURCE_AXIS_MARKERS = (
+    "subject/object",
+    "mechanism/cause",
+    "locus/carrier",
+    "projection/axis",
+    "surface kind",
+    "geometry representation",
+    "coordinate kind",
+    "aggregation",
+    "process",
+    "state",
+    "unit",
+    "dd-authoritative transformation/label semantics",
+)
+
+
+@pytest.mark.parametrize(
+    "relative_path",
+    ("sn/generate_name_system.md", "sn/generate_name_dd.md"),
+)
+def test_compose_prompts_carry_complete_source_axis_contract(
+    relative_path: str,
+) -> None:
+    """Both compose seats fail closed on every authoritative semantic axis."""
+    source = (PROMPTS_DIR / relative_path).read_text(encoding="utf-8")
+    text = " ".join(source.lower().split())
+
+    for marker in _SOURCE_AXIS_MARKERS:
+        assert marker in text
+    assert "vocab_gap" in text
+    assert "area_of_flux_surface" in text
+    assert "ambiguous umbrella" in text
+    assert "cocos is fixed ddv4 catalog metadata" in text
+    assert "psi_like" in text
+    assert "ip_like" in text
+
+
+@pytest.mark.parametrize(
+    "relative_path",
+    ("sn/generate_name_system.md", "sn/generate_name_dd.md"),
+)
+def test_ordinal_geometry_never_changes_the_physical_carrier(
+    relative_path: str,
+) -> None:
+    """Removing an array ordinal cannot recast non-LOS geometry as a sight-line."""
+    text = (PROMPTS_DIR / relative_path).read_text(encoding="utf-8").lower()
+
+    for counterexample in (
+        "thick_line",
+        "pellet",
+        "gas pipe",
+        "shunt",
+        "beam path",
+        "interpolation",
+        "other-object outline",
+    ):
+        assert counterexample in text
+    assert "only genuine" in text or "only paths genuinely" in text
+    assert "line_of_sight" in text
+    assert "vocab_gap" in text
+
+
 # A prefix transformation may coexist with a projection, and change_in is a
 # bare-prefix operator. These forms MUST round-trip permanently — that
 # co-existence is the grammar invariant this guard locks in.

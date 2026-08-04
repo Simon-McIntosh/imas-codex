@@ -10,8 +10,9 @@ schema_needs: []
 Name the **physical or geometric quantities** represented by the following
 IMAS Data Dictionary paths. Each standard name describes the underlying
 physics — NOT the DD path, IDS section, or measurement instrument.
-When multiple DD paths represent the same quantity (e.g. across IDSs), they
-share ONE standard name.
+Multiple DD paths share one standard name only after their complete semantic
+identities are proven equivalent. Similar units, leaves, or geometry shapes do
+not establish equivalence.
 
 **Subject–base separation rule:** Species and entity qualifiers (electron,
 ion, neutral, fast_ion) go in the `subject` segment, NOT fused into
@@ -57,6 +58,29 @@ The `unit` field for each path is pre-populated from the IMAS Data Dictionary
 - Use the provided unit to inform your naming (e.g., "eV" tells you this is an energy/temperature quantity)
 - "dimensionless" means the quantity is genuinely unitless (e.g., safety factor, elongation)
 
+## Authoritative source-axis fidelity — HARD
+
+For every candidate and attachment, compare the exact authoritative DD source
+binding with the complete name identity. Preserve every source-stated semantic
+axis that distinguishes the observable: **subject/object, mechanism/cause,
+locus/carrier, projection/axis, surface kind, geometry representation,
+coordinate kind, aggregation, process, state, unit, and DD-authoritative
+transformation/label semantics**. Domain-implied boilerplate may be omitted,
+but an explicit differentiator may not. A candidate or attachment that drops,
+changes, or invents any distinguishing axis is wrong even when it parses or
+resembles an existing name. If the public grammar cannot express the exact
+identity, emit a `vocab_gap`; never silently generalize, merge, or substitute a
+nearby registered concept.
+
+The supplied unit is authoritative, and COCOS is fixed DDv4 catalog metadata.
+Do not choose, infer, or change a COCOS transformation label. `psi_like` and
+`ip_like` remain downstream catalog labels, not composer output.
+
+Flux-surface area is not one generic family: DD `area` is
+`poloidal_cross_sectional_area_of_flux_surface`, while DD `surface` is
+`surface_area_of_flux_surface`. Never emit or attach either source family to
+the ambiguous umbrella `area_of_flux_surface`.
+
 ## Optional DD-gap evidence — flag only
 
 When the supplied DD metadata itself contains a concrete contradiction, you may
@@ -93,12 +117,13 @@ defect.**
 | `plasma_current_IP` | `plasma_current` | No symbol suffixes |
 | `current_from_passive_loop` | `passive_loop_current` | `_from_` implies causation — use device prefix for signals |
 | `poloidal_flux` | `poloidal_magnetic_flux` | Use controlled vocabulary term; no synonymous short forms |
+| `area_of_flux_surface` for DD `area` or DD `surface` | `poloidal_cross_sectional_area_of_flux_surface` for DD `area`; `surface_area_of_flux_surface` for DD `surface` | Surface kind is load-bearing: poloidal enclosed cross-section and swept toroidal surface are different observables |
 | `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Drop provenance; use the registered Faraday-polarization quantity |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking into standard name |
 | `flux_surface_averaged_elongation` | `elongation` | Elongation is a geometric property of a contour, not a flux-surface average |
 | `energy_due_to_recombination_at_ion_state` | `energy_due_to_recombination` | Process tokens are bare vocabulary entries — never append `_at_X` / `_in_X` / `_on_X` qualifiers |
 | `energy_due_to_impurity_radiation_in_halo_region` | `radiated_energy_over_halo_region_due_to_impurity_radiation` | A region is a postfix `_over_` locus before the process suffix |
-| `vertical_coordinate_of_outline_point` | `vertical_outline` | **Enumeration is a coordinate, not a name** — outline vertices are an ordinal array of ONE geometry; collapse to `radial_outline` / `vertical_outline` (`base_token=outline`, axis as `coordinate` projection). The vertex index lives in the DD path; emit every vertex path in `dd_paths`. Never encode `outline_point` |
+| `vertical_coordinate_of_outline_point` | owner-qualified vertical outline, or `vocab_gap` | Omit the ordinal vertex label, retain the owning object and axis, and never merge outlines belonging to different objects |
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
 | `x1_coordinate_of_neutron_detector_geometry_outline` | `first_local_tangential_coordinate_of_neutron_detector` | **Local tangent axes are DISTINCT semantic directions, not storage labels** — map source-local X1/X2 to the REGISTERED carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` (`base_kind=geometry`), retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` |
 | `vertical_front_surface_radius_of_optical_element` for reflector X2 curvature | `second_local_tangential_radius_of_reflector` | X2 is an object-local surface tangent, not machine vertical. Keep `reflector`, drop the redundant `front_surface` wording, omit diagnostic/channel provenance, and do not claim a principal-curvature direction without source evidence |
@@ -124,8 +149,9 @@ component is being described. Generic geometric primitives alone are useless.
 | `alpha_of_oblique` | `angle_of_poloidal_field_coil` | Names the engineering owner without inventing a primitive token |
 | `radius_of_circle` | SKIP — no tokamak-universal meaning | Pure geometric primitive |
 | `height_of_rectangle` | `height_of_poloidal_field_coil` | Rectangle alone is meaningless; the owning coil is registered |
-| `outline_r` | `radial_outline` | Outline vertices are an ordinal array of ONE geometry → collapse (`base_token=outline`, radial `coordinate` projection); the vertex index lives in the DD path |
-| `first_point_r` | `radial_coordinate_of_line_of_sight` | **Enumeration is a coordinate, not a name** — `first_point`/`second_point`/`third_point` are endpoints of ONE line-of-sight; collapse ALL to `radial_coordinate_of_line_of_sight` (`base_token=coordinate`, radial `coordinate` projection, `locus_token=line_of_sight`, `locus_relation=of`). `line_of_sight` is a LOCUS, never a base. List every endpoint path in `dd_paths`. NEVER encode the ordinal (`first_point`) in the name |
+| `<owner>/outline/r` | owner-qualified radial outline, or `vocab_gap` | Omit the vertex ordinal but retain the physical owner; never attach another object's outline to a generic or unrelated outline identity |
+| `line_of_sight/first_point/r` | `radial_coordinate_of_line_of_sight` | **Enumeration is a coordinate, not a name** only within the same carrier: omit the endpoint ordinal, retain the explicit `line_of_sight` representation, and list only genuine sight-line endpoints in `dd_paths` |
+| `coil/geometry/thick_line/first_point/r` | registered coil thick-line coordinate, or `vocab_gap` | A thick-line conductor is not a line of sight; retain carrier, representation, owner, and axis or fail closed |
 
 **When to SKIP geometry paths entirely:**
 
@@ -144,24 +170,30 @@ component is being described. Generic geometric primitives alone are useless.
 
 ### Enumerated geometry points collapse to ONE name
 
-**Enumeration is a coordinate, not a name.** When a DD leaf's **parent is an
-ordinal point** — `first_point` / `second_point` / `third_point` / `point` /
-`<entity>_point`, or an `outline` vertex array — the ordinal is an array index,
-NOT part of the quantity's identity. Name by the **grandparent geometry
-carrier** with the axis projection, and emit `dd_paths` covering **all** the
-ordinal siblings so the multiple DD paths attach to the ONE name:
+**Enumeration is a coordinate, not a name** only when the ordinal is array
+bookkeeping within the same physical geometry carrier and owner. Omit
+`first_point` / `second_point` / `third_point`, but preserve the grandparent
+carrier, its representation, its owner, and the axis projection. Emit
+`dd_paths` covering only semantically equivalent ordinal siblings:
 
 | DD leaves (ordinal siblings) | ✅ ONE name | Segments |
 |---|---|---|
 | `.../line_of_sight/first_point/r` + `.../second_point/r` + `.../third_point/r` | `radial_coordinate_of_line_of_sight` | `base_token=coordinate`, `base_kind=geometry`, `projection_axis=radial`, `locus_token=line_of_sight`, `locus_relation=of`, `locus_type=geometry` |
 | `.../line_of_sight/*_point/z` | `vertical_coordinate_of_line_of_sight` | …`projection_axis=vertical` |
 | `.../line_of_sight/*_point/phi` | `toroidal_coordinate_of_line_of_sight` | …`projection_axis=toroidal` |
-| `<entity>/outline/r` (vertex array) | `radial_outline` | `base_token=outline`, `base_kind=geometry`, `projection_axis=radial` |
-| `<entity>/outline/z` (vertex array) | `vertical_outline` | …`projection_axis=vertical` |
+| `<entity>/outline/r` (vertex array) | owner-qualified radial outline, or `vocab_gap` | retain `<entity>`; never use another object's outline identity |
+| `<entity>/outline/z` (vertex array) | owner-qualified vertical outline, or `vocab_gap` | retain `<entity>`; never use another object's outline identity |
 
 `dd_paths` for `radial_coordinate_of_line_of_sight` MUST list every
 `.../*_point/r` endpoint — the collapse is realised by attaching every endpoint
-path to the single name.
+path to the single name. Do not include endpoints belonging to any other
+geometry carrier.
+
+**Non-line-of-sight counterexamples are hard exclusions.** `thick_line`
+conductor geometry, pellet paths, gas pipes, shunt positions, beam paths,
+interpolation knots, and outlines of other objects must never be recast as
+`*_coordinate_of_line_of_sight` or as a generic unrelated outline. Preserve
+their supported carrier/owner or emit a `vocab_gap`.
 
 **Distinguish points only by physical ENTITY, never by ordinal.** A point earns
 a distinct name ONLY when it is a distinct physical entity (an aperture vs a
@@ -490,7 +522,7 @@ These names already exist in the catalog. Reuse them if they match your source, 
 {% if item.family_parent_name %}  - **Geometric base:** `{{ item.family_parent_name }}`{% endif %}
 
   - **ISN naming convention:** Geometric coordinates use `{axis}_{geometric_base}` form (e.g., `radial_position`, `vertical_position`, `toroidal_angle`). Do NOT use `component_of` or `coordinate_of` connectors for coordinates.
-  - **Enumeration is a coordinate, not a name.** If the geometric position is an **ordinal point** (`first_point`/`second_point`/`third_point`/`point`/`<entity>_point`) or an `outline` vertex, the ordinal is an array index — COLLAPSE to the grandparent geometry carrier + axis: line-of-sight endpoints → `radial_coordinate_of_line_of_sight` / `vertical_coordinate_of_line_of_sight` (`base_token=coordinate`, `locus_token=line_of_sight`, `locus_relation=of` — `line_of_sight` is a LOCUS, not a base); outline vertices → `radial_outline` / `vertical_outline` (`base_token=outline`). Emit `dd_paths` covering EVERY ordinal sibling so they share the ONE name. Never put `first_point`/`second_point`/`outline_point` in the name; distinguish a point only by physical entity (`radial_position_of_aperture`, `radial_position_of_first_wall`), never by ordinal.
+  - **Enumeration is a coordinate, not a name only within one carrier.** Omit an ordinal point index while preserving the exact grandparent geometry carrier, representation, owner, and axis. Only genuine `line_of_sight/*_point` paths may use `radial_coordinate_of_line_of_sight` / `vertical_coordinate_of_line_of_sight`; `thick_line`, pellet, pipe, shunt, beam-path, interpolation, and other-object outline paths retain their own identity or emit a `vocab_gap`. Never put `first_point`/`second_point`/`outline_point` in the name, and never replace that ordinal by an unrelated carrier.
   - **Object-local X1/X2 axes are DISTINCT tangent directions, not storage-shaped name tokens** — use `first_local_tangential_coordinate` / `second_local_tangential_coordinate`, retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` or reinterpret X2 as machine `vertical`.
   - Note: these siblings may have DIFFERENT units (e.g., metres vs radians) — this is expected for geometric coordinates.
 {% elif item.family_type == "derivative" %}  - This path is a **derivative** quantity.

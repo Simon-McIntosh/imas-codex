@@ -13,6 +13,36 @@ You are a quality reviewer for IMAS standard name entries in fusion plasma physi
 
 {% include "sn/_exemplars.md" %}
 
+## Authoritative source-axis fidelity — HARD
+
+Compare each candidate with its exact authoritative source binding. The name
+must preserve every source-stated semantic axis that distinguishes the
+observable: **subject/object, mechanism/cause, locus/carrier, projection/axis,
+surface kind, geometry representation, coordinate kind, aggregation, process,
+state, unit, and DD-authoritative transformation/label semantics**.
+Domain-implied boilerplate may be omitted, but an explicit differentiator may
+not. Dropping, changing, or inventing any distinguishing axis means the name
+denotes a different observable: cap Semantic Accuracy at **5/20**. If the
+public grammar cannot express the exact identity, require a `vocab_gap`; never
+reward a silent generalization, merge, or nearest-token substitution.
+
+The DD unit is authoritative, and COCOS is fixed DDv4 catalog metadata. Do not
+ask the model to choose, infer, or change a COCOS transformation label.
+`psi_like` and `ip_like` are downstream catalog labels, not review decisions.
+
+For flux-surface area, DD `area` requires
+`poloidal_cross_sectional_area_of_flux_surface`, while DD `surface` requires
+`surface_area_of_flux_surface`. These denote different observables. The bare
+`area_of_flux_surface` is an ambiguous umbrella and must receive Semantic
+Accuracy **≤ 5/20** for either source family.
+
+Ordinal geometry words may be omitted only as array bookkeeping. The physical
+carrier/representation and owner remain mandatory. Only genuine
+`line_of_sight/*_point` paths may map to `*_coordinate_of_line_of_sight`;
+`thick_line` conductors, pellet paths, gas pipes, shunts, beam paths,
+interpolation points, and other-object outlines must retain their own identity
+or fail closed with a vocabulary gap.
+
 ## Scoring Dimensions
 
 Rate each dimension from 0 to 20. The total score is the sum (0-120).
@@ -63,7 +93,11 @@ grammar and convention scores.
 - **[I2.8]** Flux-surface reduction of a flux function is a no-op — a base constant on a flux surface (safety factor, magnetic shear, flux labels psi/rho_tor, pressure) must NOT carry `flux_surface_averaged_`/`maximum_over_flux_surface_`/`minimum_over_flux_surface_` (an FSA of an FSA; the grammar gate rejects it). The unreduced name (e.g. `safety_factor_at_plasma_boundary`) serves both the local and averaged DD leaves → prefixed form **score 0**. Conversely, a surface-varying base on a `local/separatrix_average/...` leaf MUST keep the `flux_surface_averaged_` prefix — the bare `<q>_at_plasma_boundary` is the local-value leaf's name and would collide.
 - **[I2.3]** Are unit conversions dimensionally consistent? Check eV↔K ($1\;\text{eV} = 11605\;\text{K}$) and Pa↔eV/m³ ($1\;\text{Pa} = 6.242 \times 10^{18}\;\text{eV/m}^3$).
 - **[I1.9] Measurement principle (HARD)** — does the name describe the **physical observable**, not the diagnostic instrument's internal state? A Rogowski coil measures the current ENCLOSED by the loop via induced voltage, so the observable is the enclosed (plasma) current — `current_of_rogowski_coil` is **WRONG**. Same for interferometer (line-integrated density, not "phase of interferometer") and bolometer (radiated power, not "power of bolometer"). Name attributes the measurement to the device → **score ≤ 5**.
-- **[I1.10] Qualifier fidelity (HARD)** — does the name drop a source-stated load-bearing qualifier (**kind** `neutron` vs `heat`, **extremum** `maximum`/`minimum`, **species**, **locus**, **medium** `coolant`), OR add a redundant one (`toroidal_plasma_current` — plasma current is inherently toroidal)? Either changes what is measured → **score ≤ 5**. Do NOT penalise dropping domain-implied boilerplate (`equilibrium_`, `_of_plasma`) absent from the source.
+- **[I1.10] Qualifier fidelity (HARD)** — apply the complete authoritative
+  source-axis contract above. A dropped load-bearing axis or an invented axis
+  changes what is measured → **score ≤ 5**. Do NOT penalize dropping
+  domain-implied boilerplate (`equilibrium_`, `_of_plasma`) absent from the
+  source.
 
 **20**: Name unambiguously identifies the quantity; domain expert would agree.
 **10**: Name is defensible but there may be a more precise choice.

@@ -17,6 +17,21 @@ ISOTOPE_RATIO = (
 SOURCE_PATH = "core_profiles/profiles_1d/neutrals/isotope/density"
 SECOND_SOURCE_PATH = "edge_profiles/profiles_1d/neutrals/isotope/density"
 
+SOURCE_AXIS_MARKERS = (
+    "subject/object",
+    "mechanism/cause",
+    "locus/carrier",
+    "projection/axis",
+    "surface kind",
+    "geometry representation",
+    "coordinate kind",
+    "aggregation",
+    "process",
+    "state",
+    "unit",
+    "dd-authoritative transformation/label semantics",
+)
+
 
 def _source_binding() -> dict:
     return {
@@ -90,6 +105,64 @@ def _review_item() -> dict:
         "physics_domain": "core_plasma_physics",
         "source_bindings": [_source_binding()],
     }
+
+
+@pytest.mark.parametrize("prompt_name", ("sn/review", "sn/review_names"))
+def test_name_review_prompts_enforce_complete_source_axis_contract(
+    prompt_name: str,
+) -> None:
+    """Both name-review paths reject semantic loss instead of rewarding brevity."""
+    rendered = render_prompt(
+        prompt_name,
+        {
+            "items": [],
+            "nearby_existing_names": [],
+            "review_scored_examples": [],
+            "batch_context": "",
+        },
+    ).lower()
+
+    for marker in SOURCE_AXIS_MARKERS:
+        assert marker in rendered
+    assert "semantic accuracy" in rendered
+    assert "5/20" in rendered
+    assert "vocab_gap" in rendered
+    assert "poloidal_cross_sectional_area_of_flux_surface" in rendered
+    assert "surface_area_of_flux_surface" in rendered
+    assert "area_of_flux_surface" in rendered
+    assert "ambiguous umbrella" in rendered
+    assert "cocos is fixed ddv4 catalog metadata" in rendered
+    assert "psi_like" in rendered
+    assert "ip_like" in rendered
+
+
+@pytest.mark.parametrize("prompt_name", ("sn/review", "sn/review_names"))
+def test_name_review_prompts_reject_non_line_of_sight_geometry_collapse(
+    prompt_name: str,
+) -> None:
+    """Review catches ordinal removal that changes the geometry representation."""
+    rendered = render_prompt(
+        prompt_name,
+        {
+            "items": [],
+            "nearby_existing_names": [],
+            "review_scored_examples": [],
+            "batch_context": "",
+        },
+    ).lower()
+
+    for counterexample in (
+        "thick_line",
+        "pellet",
+        "gas pipe",
+        "shunt",
+        "beam path",
+        "interpolation",
+        "other-object outline",
+    ):
+        assert counterexample in rendered
+    assert "only genuine" in rendered
+    assert "line_of_sight" in rendered
 
 
 def test_review_claim_projects_exact_pinned_source_bindings() -> None:
