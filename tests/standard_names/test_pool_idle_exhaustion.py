@@ -65,7 +65,7 @@ def _make_idle_spec(name: str, *, pending: int = 0) -> PoolSpec:
 
 
 # ---------------------------------------------------------------------------
-# Idle-exhaustion watchdog (Fix 2)
+# Idle-exhaustion watchdog
 # ---------------------------------------------------------------------------
 
 
@@ -139,22 +139,18 @@ class TestIdleExhaustionWatchdog:
         assert idle_exhausted.is_set()
 
     @pytest.mark.asyncio
-    async def test_initial_pending_failure_requires_successful_refresh(self) -> None:
-        """A failed initial pending query cannot certify an empty run."""
+    async def test_pending_failure_stops_without_certifying_empty(self) -> None:
+        """A failed pending query is terminally unproven, never empty."""
         mgr = BudgetManager(total_budget=5.0)
         stop_event = asyncio.Event()
         idle_exhausted = asyncio.Event()
+        pending_failed = asyncio.Event()
         spec = _make_idle_spec("generate", pending=0)
-        calls = 0
 
         def pending_fn() -> dict[str, int]:
-            nonlocal calls
-            calls += 1
-            if calls == 1:
-                raise RuntimeError("pending query unavailable")
-            return {"generate": 0}
+            raise RuntimeError("pending query unavailable")
 
-        run_task = asyncio.create_task(
+        await asyncio.wait_for(
             run_pools(
                 [spec],
                 mgr,
@@ -164,25 +160,47 @@ class TestIdleExhaustionWatchdog:
                 grace_period=0.5,
                 weights={"generate": 1.0},
                 idle_exhausted_event=idle_exhausted,
+                pending_count_failed_event=pending_failed,
                 idle_exhaustion_poll=0.01,
                 idle_exhaustion_polls=3,
                 free_pool_set={"generate"},
-            )
+            ),
+            timeout=1.0,
         )
-        try:
-            await asyncio.sleep(0.1)
-            assert calls == 1
-            assert not stop_event.is_set(), (
-                "a failed pending query must leave quiescence unproven"
-            )
-            await asyncio.wait_for(run_task, timeout=1.0)
-        finally:
-            if not run_task.done():
-                stop_event.set()
-                await asyncio.gather(run_task, return_exceptions=True)
 
-        assert calls >= 2
-        assert idle_exhausted.is_set()
+        assert stop_event.is_set()
+        assert pending_failed.is_set()
+        assert not idle_exhausted.is_set()
+
+    @pytest.mark.asyncio
+    async def test_pending_positive_stall_has_distinct_signal(self) -> None:
+        """A wedged backlog must not be reported as a clean drain."""
+        mgr = BudgetManager(total_budget=5.0)
+        stop_event = asyncio.Event()
+        idle_exhausted = asyncio.Event()
+        stalled = asyncio.Event()
+        spec = _make_idle_spec("review_name", pending=4)
+
+        await asyncio.wait_for(
+            run_pools(
+                [spec],
+                mgr,
+                stop_event,
+                grace_period=0.5,
+                weights={"review_name": 1.0},
+                idle_exhausted_event=idle_exhausted,
+                stalled_event=stalled,
+                idle_exhaustion_poll=0.01,
+                idle_exhaustion_polls=3,
+                stall_seconds=0.05,
+                free_pool_set={"review_name"},
+            ),
+            timeout=1.0,
+        )
+
+        assert stop_event.is_set()
+        assert stalled.is_set()
+        assert not idle_exhausted.is_set()
 
     @pytest.mark.asyncio
     async def test_idle_watchdog_does_not_fire_with_pending_work(self) -> None:

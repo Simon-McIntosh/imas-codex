@@ -6,7 +6,7 @@ No live Neo4j required.
 Covers:
 - charge_event enqueues to async writer
 - Lease decision uses pending cache
-- charge_event soft semantics (never raises)
+- charge_event hard lease enforcement
 - drain_pending returns True on success
 - drain_pending returns False on writer failure
 - Writer retries on transient error
@@ -22,9 +22,12 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.budget import (
+    BudgetExceeded,
+    BudgetExposureUnknown,
     BudgetManager,
     ChargeResult,
     LLMCostEvent,
+    provider_exposure,
 )
 
 # ── Helpers ──────────────────────────────────────────────────────────────
@@ -152,24 +155,67 @@ class TestLeaseDecisionUsesPendingCache:
 
 
 # =====================================================================
-# charge_event soft semantics
+# charge_event hard lease enforcement
 # =====================================================================
 
 
-class TestChargeEventSoftSemantics:
-    """charge_event uses soft-charge semantics — overspend allowed."""
+class TestChargeEventHardLease:
+    """A charge cannot exceed the exposure reserved before launch."""
 
     @pytest.mark.asyncio
-    async def test_charge_event_soft_semantics(self):
-        """charge_event uses soft-charge semantics — never raises."""
+    async def test_over_lease_charge_is_rejected_without_accounting_drift(self):
         mgr = BudgetManager(total_budget=0.3)
         lease = mgr.reserve(0.3)
         assert lease is not None
 
         event = _make_event()
-        result = lease.charge_event(0.5, event)
-        assert abs(result.overspend - 0.2) < 1e-9
-        assert abs(mgr.spent - 0.5) < 1e-9
+        with pytest.raises(BudgetExceeded, match="reserved exposure"):
+            lease.charge_event(0.5, event)
+
+        assert mgr.spent == 0.0
+        assert lease.charged == 0.0
+        assert mgr.check_invariant()
+
+    @pytest.mark.parametrize("amount", [0.0, -0.1, float("nan"), float("inf")])
+    def test_unproven_exposure_is_rejected_before_reservation(self, amount: float):
+        mgr = BudgetManager(total_budget=1.0)
+
+        with pytest.raises(ValueError, match="finite and positive"):
+            mgr.reserve(amount)
+
+        assert mgr.spent == 0.0
+        assert mgr.remaining == 1.0
+
+    def test_concurrent_leases_cannot_expose_more_than_run_cap(self):
+        mgr = BudgetManager(total_budget=1.0)
+        first = mgr.reserve(0.7, phase="review_name")
+        second = mgr.reserve(0.4, phase="review_docs")
+
+        assert first is not None
+        assert second is None
+        first.charge_event(0.7, _make_event(phase="review_name"))
+        assert mgr.spent == pytest.approx(0.7)
+        assert mgr.check_invariant()
+
+    def test_provider_exposure_multiplies_retries_and_calls(self):
+        assert provider_exposure(
+            0.1,
+            provider_attempts=5,
+            calls=3,
+        ) == pytest.approx(1.5)
+
+    def test_unknown_provider_exposure_fails_closed(self):
+        with pytest.raises(BudgetExposureUnknown, match="no finite positive"):
+            provider_exposure(None, provider_attempts=5)
+
+    def test_lease_checks_subcall_exposure_before_launch(self):
+        mgr = BudgetManager(total_budget=1.0)
+        lease = mgr.reserve(0.4)
+        assert lease is not None
+
+        lease.require_exposure(0.4)
+        with pytest.raises(BudgetExceeded, match="exceeds lease remainder"):
+            lease.require_exposure(0.5)
 
 
 # =====================================================================

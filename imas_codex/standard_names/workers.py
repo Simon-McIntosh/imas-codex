@@ -26,6 +26,8 @@ from collections.abc import Callable, Sequence
 from functools import cache as _cache, lru_cache
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.discovery.base.llm import DEFAULT_MAX_RETRIES
+from imas_codex.standard_names.budget import model_provider_exposure
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -3653,9 +3655,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             _total_cache_read += getattr(llm_out, "cache_read_tokens", 0) or 0
             _total_cache_creation += getattr(llm_out, "cache_creation_tokens", 0) or 0
 
-            # Charge actual LLM cost to budget lease via typed event.
-            # charge_event uses soft-charge semantics: the LLM has
-            # already been paid for, so spend is always recorded.
+            # Charge the exact completed-call cost against the exposure that
+            # was reserved before the provider request started.
             if lease:
                 _event = LLMCostEvent(
                     model=model,
@@ -4247,16 +4248,19 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                 break
 
             # Budget gate — reserve before doing any LLM work.
-            # Per-item cost calibrated to measured compose spend: mean
-            # $0.13/item, p95 $0.47/item.  Reserve at $0.20/item (mean+50%
-            # headroom) to cover the typical extension and avoid draining
-            # the global pool via in-flight overshoot, which would starve
-            # downstream review phases.
+            # Reserve the maximum configured exposure for every wrapper-level
+            # attempt plus each possible outer and grammar retry.
             lease = None
             if state.budget_manager:
-                estimated = len(batch.items) * 0.20
+                call_bound = len(batch.items) * (_retry_attempts() + 2)
+                maximum_exposure = model_provider_exposure(
+                    model,
+                    0.20,
+                    provider_attempts=DEFAULT_MAX_RETRIES,
+                    calls=call_bound,
+                )
                 phase_tag = getattr(state, "budget_phase_tag", "") or "generate_name"
-                lease = state.budget_manager.reserve(estimated, phase=phase_tag)
+                lease = state.budget_manager.reserve(maximum_exposure, phase=phase_tag)
                 if lease is None:
                     budget_retries += 1
                     if (
@@ -5435,20 +5439,24 @@ async def compose_batch(
     ]
 
     # ── Budget reservation ─────────────────────────────────────────────
-    # Reserve for retry_attempts + 1 LLM calls (re-enrichment retry)
+    # Reserve every wrapper attempt for the bounded compose and per-candidate
+    # grammar retry calls before any provider request starts.
     _max_retries = _retry_attempts()
     # Token-reuse hits from the FINAL attempt (carried to the VocabGap stamp).
     _token_reuse_hits: dict[tuple[str, str], Any] = {}
     _editorial_guidance = ""
     _editorial_should_retry = False
-    estimated = len(batch) * 0.20 * (_max_retries + 1)
+    call_bound = len(batch) * (_max_retries + 2)
+    maximum_exposure = model_provider_exposure(
+        model,
+        0.20,
+        provider_attempts=DEFAULT_MAX_RETRIES,
+        calls=call_bound,
+    )
     phase_tag = "regen" if regen else "generate_name"
-    lease = mgr.reserve(estimated, phase=phase_tag)
+    lease = mgr.reserve(maximum_exposure, phase=phase_tag)
     if lease is None:
-        # Fallback: tracking-only lease so charge_event still records
-        # spend.  Without this, _spent stays at 0 and hard_exhausted()
-        # never fires — causing the pool to run indefinitely.
-        lease = mgr.reserve(0.0, phase=phase_tag)
+        return []
 
     try:
         # ── Bounded retry loop for failed compositions ─────────────────
@@ -6506,19 +6514,29 @@ async def process_refine_name_batch(
             # Snapshot ``original_reservation`` *before* any extension
             # so the cost-attribution invariant test can verify the
             # delta is fully accounted for via LLMCost batch_id rows.
-            base_estimate = 0.20  # single-item refine
+            base_maximum = 0.20
             fanout_pad = 0.0
             if (
                 fanout_eligible
                 and fanout_settings.enabled
                 and fanout_settings.sites.get("refine_name", False)
             ):
-                fanout_pad = fanout_settings.cost_estimate_for(escalate=escalate)
-            estimated = base_estimate + fanout_pad
-            lease = mgr.reserve(estimated, phase="refine_name")
+                fanout_pad = fanout_settings.cap_for_charge(escalate=escalate)
+            maximum_exposure = model_provider_exposure(
+                model,
+                base_maximum,
+                provider_attempts=DEFAULT_MAX_RETRIES,
+            )
+            if fanout_pad:
+                maximum_exposure += model_provider_exposure(
+                    fanout_settings.proposer_model,
+                    fanout_pad,
+                    provider_attempts=1,
+                )
+            lease = mgr.reserve(maximum_exposure, phase="refine_name")
             if lease is None:
-                lease = mgr.reserve(0.0, phase="refine_name")
-            original_reservation = lease.reserved if lease else 0.0
+                continue
+            original_reservation = lease.reserved
 
             # ── Optional fan-out ─────────────────────────────────────
             fanout_evidence = ""
@@ -7157,7 +7175,7 @@ async def _run_rd_quorum_cycles(
     import uuid as _uuid
     from datetime import datetime as _dt
 
-    from imas_codex.standard_names.budget import LLMCostEvent
+    from imas_codex.standard_names.budget import BudgetExceeded, LLMCostEvent
 
     review_group_id = str(_uuid.uuid4())
     cycles: list[dict[str, Any]] = []  # parsed cycle results (cycle_index 0..N)
@@ -7262,6 +7280,8 @@ async def _run_rd_quorum_cycles(
                         service="standard-names",
                     ),
                 )
+            except BudgetExceeded:
+                raise
             except Exception:
                 logger.debug(
                     "rd_quorum charge_event failed for %s c%d",
@@ -7917,13 +7937,19 @@ async def process_review_name_batch(
             )
 
         # ── Budget reservation (cover all cycles) ──────────────────────
-        # Per-item cost ~$0.05; reserve worst-case across the chain
-        # (every model called) with a 1.3× safety margin.
-        per_item_estimate = 0.05
-        worst_case = per_item_estimate * len(review_models) * 1.3
-        lease = mgr.reserve(worst_case, phase="review_name")
+        # Bound every reviewer model and every wrapper retry before cycle zero.
+        per_attempt_maximum = 0.05 * 1.3
+        maximum_exposure = sum(
+            model_provider_exposure(
+                review_model,
+                per_attempt_maximum,
+                provider_attempts=DEFAULT_MAX_RETRIES,
+            )
+            for review_model in review_models
+        )
+        lease = mgr.reserve(maximum_exposure, phase="review_name")
         if lease is None:
-            lease = mgr.reserve(0.0, phase="review_name")
+            continue
 
         # ── RD-quorum cycles ──────────────────────────────────────────
         try:
@@ -8698,9 +8724,8 @@ async def process_generate_docs_batch(
         sn_id = item["id"]
         claim_token = item.get("claim_token") or ""
         chain_history = item.get("chain_history") or []
-        # Fix D: the docs user template reads ``item.chain_history`` — ensure it
-        # is present on the item (it is fetched into the local var, but the item
-        # dict may not carry it), so refined-docs see predecessor history.
+        # The docs user template reads ``item.chain_history``. Keep it on the
+        # item so refined documentation sees predecessor history.
         item["chain_history"] = chain_history
 
         # ── Build prompt context ───────────────────────────────────────
@@ -8718,7 +8743,7 @@ async def process_generate_docs_batch(
             "chain_history": chain_history,
             "nearby_existing_names": nearby_existing_names,
             "compose_scored_examples": compose_scored_examples,
-            # Locus-defining cross-link context (PR-9): the ISN-registry gloss +
+            # Locus-defining cross-link context: the ISN-registry gloss and
             # position-defining standard quantity for this name's locus, so the
             # docs prompt can link e.g. *_at_pedestal_top ->
             # normalized_poloidal_flux_coordinate_of_pedestal. None when the name
@@ -8743,10 +8768,14 @@ async def process_generate_docs_batch(
             system_prompt = None
 
         # ── Budget reservation ─────────────────────────────────────────
-        estimated = 0.20
-        lease = mgr.reserve(estimated, phase="generate_docs")
+        maximum_exposure = model_provider_exposure(
+            model,
+            0.20,
+            provider_attempts=DEFAULT_MAX_RETRIES,
+        )
+        lease = mgr.reserve(maximum_exposure, phase="generate_docs")
         if lease is None:
-            lease = mgr.reserve(0.0, phase="generate_docs")
+            continue
 
         # ── LLM call ──────────────────────────────────────────────────
         try:
@@ -8965,10 +8994,14 @@ async def process_enrich_parents_batch(
             system_prompt = None
 
         # ── Budget reservation ─────────────────────────────────────────
-        estimated = 0.05
-        lease = mgr.reserve(estimated, phase="enrich_parents")
+        maximum_exposure = model_provider_exposure(
+            model,
+            0.05,
+            provider_attempts=DEFAULT_MAX_RETRIES,
+        )
+        lease = mgr.reserve(maximum_exposure, phase="enrich_parents")
         if lease is None:
-            lease = mgr.reserve(0.0, phase="enrich_parents")
+            continue
 
         try:
             _messages = (
@@ -9262,18 +9295,24 @@ async def process_review_docs_batch(
             )
 
         # ── Budget reservation (cover all cycles) ──────────────────────
-        per_item_estimate = 0.05
-        worst_case = per_item_estimate * len(review_models) * 1.3
-        lease = mgr.reserve(worst_case, phase="review_docs")
-        if lease is None:
-            lease = mgr.reserve(0.0, phase="review_docs")
-
         # Derived parents use a SINGLE-model review (the chain anchor), not the
         # full RD-quorum: a structural abstraction reviewed against the
         # parent-aware rubric does not need multi-model adjudication, and the
         # quorum is the cost-dominant phase. One call (resolution_method=
         # 'single_review') cuts parent docs-review cost ~2-3x.
         _item_review_models = review_models[:1] if _is_parent else review_models
+        per_attempt_maximum = 0.05 * 1.3
+        maximum_exposure = sum(
+            model_provider_exposure(
+                review_model,
+                per_attempt_maximum,
+                provider_attempts=DEFAULT_MAX_RETRIES,
+            )
+            for review_model in _item_review_models
+        )
+        lease = mgr.reserve(maximum_exposure, phase="review_docs")
+        if lease is None:
+            continue
         _response_model = (
             StandardNameQualityReviewDocsParentBatch
             if _is_parent
@@ -9575,7 +9614,7 @@ async def process_refine_docs_batch(
         except Exception:
             logger.debug("refine_docs: sibling family fetch failed for %s", sn_id)
 
-        # Locus-defining cross-link context (PR-9), same as generate_docs.
+        # Locus-defining cross-link context, matching generated documentation.
         try:
             from imas_codex.standard_names.context import locus_context_for
 
@@ -9601,10 +9640,14 @@ async def process_refine_docs_batch(
             system_prompt = None
 
         # ── Budget reservation ─────────────────────────────────────
-        estimated = 0.20
-        lease = mgr.reserve(estimated, phase="refine_docs")
+        maximum_exposure = model_provider_exposure(
+            model,
+            0.20,
+            provider_attempts=DEFAULT_MAX_RETRIES,
+        )
+        lease = mgr.reserve(maximum_exposure, phase="refine_docs")
         if lease is None:
-            lease = mgr.reserve(0.0, phase="refine_docs")
+            continue
 
         # ── LLM call ──────────────────────────────────────────────
         _messages = (

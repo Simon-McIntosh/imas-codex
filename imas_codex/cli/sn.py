@@ -471,12 +471,24 @@ def _compute_pool_progress(
     )
     rows = list(gc.query(query, **params))  # type: ignore[attr-defined]
     if not rows:
-        return {k: {"pending": 0, "done": 0} for k in pools}
+        raise RuntimeError("pending-count query returned no progress row")
     r = rows[0]
-    return {
-        k: {"pending": int(r.get(k, 0)), "done": int(r.get(f"{k}_done", 0) or 0)}
-        for k in pools
+    required = {field for pool in pools for field in (pool, f"{pool}_done")}
+    missing = required.difference(r)
+    if missing:
+        raise RuntimeError(
+            f"pending-count query omitted required fields: {sorted(missing)}"
+        )
+    progress = {
+        pool: {
+            "pending": int(r[pool]),
+            "done": int(r[f"{pool}_done"] or 0),
+        }
+        for pool in pools
     }
+    if any(value < 0 for counts in progress.values() for value in counts.values()):
+        raise RuntimeError("pending-count query returned a negative count")
+    return progress
 
 
 def _compute_pool_pending(
@@ -591,45 +603,38 @@ def _run_sn_cmd(
     _ms = min_score if min_score is not None else DEFAULT_MIN_SCORE
     _scope_run_id = scope_run_id
     _drain_scope_id = drain_scope_id
-    _POOLS = (
-        "generate_name",
-        "review_name",
-        "refine_name",
-        "generate_docs",
-        "review_docs",
-        "refine_docs",
-        "enrich_parents",
-    )
-
     _progress_cache: dict[str, tuple[float, dict[str, dict[str, int]]]] = {
         "v": (0.0, {})
     }
 
+    def _query_pool_progress() -> dict[str, dict[str, int]]:
+        """Read one uncached graph snapshot for terminality or display."""
+        with _GC() as gc:
+            return _compute_pool_progress(
+                gc,
+                domains=_domains_list,
+                rotation_cap=_rc,
+                min_score=_ms,
+                scope_run_id=_scope_run_id,
+                drain_scope_id=_drain_scope_id,
+                edits_only=edits_only,
+            )
+
     def _pool_progress_fn() -> dict[str, dict[str, int]]:
-        """Cached per-pool {pending, done} counts (1 s TTL)."""
+        """Cached per-pool counts for display refreshes."""
         import time as _t
 
         now = _t.monotonic()
         ts, val = _progress_cache["v"]
         if not val or (now - ts) > 1.0:
-            try:
-                with _GC() as gc:
-                    val = _compute_pool_progress(
-                        gc,
-                        domains=_domains_list,
-                        rotation_cap=_rc,
-                        min_score=_ms,
-                        scope_run_id=_scope_run_id,
-                        drain_scope_id=_drain_scope_id,
-                        edits_only=edits_only,
-                    )
-            except Exception:
-                val = {k: {"pending": 0, "done": 0} for k in _POOLS}
+            val = _query_pool_progress()
             _progress_cache["v"] = (now, val)
         return val
 
     def _pool_pending_fn() -> dict[str, int]:
-        return {k: v["pending"] for k, v in _pool_progress_fn().items()}
+        # Terminality must never inherit a display cache entry observed before
+        # the latest completion epoch.
+        return {k: v["pending"] for k, v in _query_pool_progress().items()}
 
     if use_rich:
         cli_console = Console()
@@ -772,8 +777,8 @@ def _run_sn_cmd(
     row = summary_table(summary)
 
     if quiet:
-        if row.get("stop_reason") == "provider_budget_exhausted":
-            raise SystemExit(4)
+        if not dry_run:
+            _require_terminal_drain(str(row.get("stop_reason") or ""))
         return row
 
     # Print summary table (in both rich and plain mode, after display exits)
@@ -808,9 +813,17 @@ def _run_sn_cmd(
             "  Existing partial progress is preserved in the graph; the "
             "next run picks up where this one stopped."
         )
-        raise SystemExit(4)
+    if not dry_run:
+        _require_terminal_drain(str(row.get("stop_reason") or ""))
 
     return row
+
+
+def _require_terminal_drain(stop_reason: str) -> None:
+    """Exit nonzero unless the run proved a fresh, terminally empty backlog."""
+    if stop_reason == "no_eligible_work":
+        return
+    raise SystemExit(4 if stop_reason == "provider_budget_exhausted" else 1)
 
 
 def _execute_rename_cascade(
@@ -1362,8 +1375,9 @@ def _reject_unscoped_accepted_reset(
     default=False,
     help=(
         "Drain existing work without composing new names. "
-        "Skips auto-seeding and the generate_name pool; only review, "
-        "refine, and docs pools run. Incompatible with --focus."
+        "Skips auto-seeding and only the generate_name pool; drains "
+        "review_name, refine_name, generate_docs, review_docs, refine_docs, "
+        "and enrich_parents. Incompatible with --focus."
     ),
 )
 @click.option(

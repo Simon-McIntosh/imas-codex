@@ -53,6 +53,10 @@ excluded under `--docs-only`, and shares the single `--cost-limit` budget pool.
 Its weight and replica count live alongside the other pools in `POOL_WEIGHTS`
 and `[tool.imas-codex.sn-pools].enrich-parents-replicas`.
 
+`--flush` has fixed membership: it excludes only `generate_name` and drains
+`review_name`, `refine_name`, `generate_docs`, `review_docs`, `refine_docs`,
+and `enrich_parents`. It does not auto-seed new source work.
+
 **Acceptance always overrides cap.** Even at `chain_length == cap − 1`, a
 passing score wins — there is no forced exhaustion on a good result.
 
@@ -68,11 +72,13 @@ effective weight by 0.5× so refinement can catch up.
 `DEFAULT_ORPHAN_SWEEP_TIMEOUT_S` (600 s). The periodic sweep lives in
 `orphan_sweep.py`.
 
-**Loop termination.** The loop stops on zero eligible work, an exhausted
-`--cost-limit` (a single shared budget pool across all seven pools), or a
-per-pool admission threshold. On `Ctrl-C` it writes an audit `SNRun` node
-(`cost`, pool counters, `min_score`, `rotation_cap`, `stop_reason`); `sn status`
-surfaces the most recent run.
+**Loop termination.** A live run succeeds only after the pending-count query
+has freshly observed zero eligible work after the latest batch completion.
+Pending-count read failures stop as `pending_count_failed`; a pending-positive
+no-progress window stops as `stalled`. Budget exhaustion or saturation, the
+wall-clock limit, provider exhaustion, degraded accounting, interruption, and
+every other unproven closure exit nonzero. Each outcome is written to the
+`SNRun.stop_reason`; `sn status` surfaces the most recent run.
 
 ### Scope routing
 
@@ -662,11 +668,15 @@ written. Unparseable names silently produce no derived edges.
 
 Cost is graph-backed via `LLMCost` nodes written async by `BudgetManager`.
 `SNRun.status`: `started → completed | interrupted | failed | degraded`. The
-only charge API is `lease.charge_event(cost, event)` (soft, never raises).
-Start the manager with `await shared_mgr.start()`; finalize each run with
-`drain_pending()` + `get_total_spent()` in a `finally` block. (LLMCost node
-properties and canonical cost queries are documented in `AGENTS.md` →
-Graph Operations.)
+only charge API is `lease.charge_event(cost, event)`. Before any paid provider
+request, its lease reserves the full declared maximum exposure across wrapper
+retries, outer retries, fan-out, and concurrent calls. A missing or non-finite
+bound fails before launch; a charge beyond the lease or run cap raises without
+changing the ledger. Unused headroom is released, while every completed call's
+actual cost remains exact. Start the manager with `await shared_mgr.start()`;
+finalize each run with `drain_pending()` + `get_total_spent()` in a `finally`
+block. (LLMCost node properties and canonical cost queries are documented in
+`AGENTS.md` → Graph Operations.)
 
 ## PR-Driven Round-Trip
 

@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import threading
 import time
 import uuid
@@ -131,6 +132,59 @@ class BudgetExceeded(RuntimeError):
     """Raised when a lease charge exceeds the reserved amount."""
 
 
+class BudgetExposureUnknown(RuntimeError):
+    """Raised when a paid call has no finite pre-launch exposure bound."""
+
+
+def provider_exposure(
+    max_cost_per_attempt: float | None,
+    *,
+    provider_attempts: int,
+    calls: int = 1,
+) -> float:
+    """Return the hard reservation needed for all possible paid attempts.
+
+    Callers supply a provider-price ceiling for one attempt plus the exact
+    number of wrapper attempts and calls that may execute under the lease.
+    Missing, non-finite, or non-positive inputs fail closed before launch.
+    """
+    if (
+        max_cost_per_attempt is None
+        or not math.isfinite(max_cost_per_attempt)
+        or max_cost_per_attempt <= 0
+    ):
+        raise BudgetExposureUnknown(
+            "paid provider call has no finite positive per-attempt cost ceiling"
+        )
+    if provider_attempts < 1 or calls < 1:
+        raise BudgetExposureUnknown(
+            "paid provider call has no positive attempt and call bound"
+        )
+    exposure = max_cost_per_attempt * provider_attempts * calls
+    if not math.isfinite(exposure) or exposure <= 0:
+        raise BudgetExposureUnknown("paid provider exposure is not finite")
+    return exposure
+
+
+def model_provider_exposure(
+    model: str,
+    max_cost_per_attempt: float | None,
+    *,
+    provider_attempts: int,
+    calls: int = 1,
+) -> float:
+    """Return a reservable exposure for a configured model route."""
+    from imas_codex.discovery.base.llm import _is_local_model
+
+    if _is_local_model(model):
+        return EPSILON
+    return provider_exposure(
+        max_cost_per_attempt,
+        provider_attempts=provider_attempts,
+        calls=calls,
+    )
+
+
 class BudgetLease:
     """A bounded spending grant from a :class:`BudgetManager`.
 
@@ -186,6 +240,18 @@ class BudgetLease:
         """Phase tag this lease is attributed to (empty string if untagged)."""
         return self._phase
 
+    def require_exposure(self, amount: float) -> None:
+        """Fail before launch unless *amount* remains reserved on this lease."""
+        if not math.isfinite(amount) or amount <= 0:
+            raise BudgetExposureUnknown(
+                "paid provider exposure must be finite and positive"
+            )
+        if self._released or self.remaining + EPSILON < amount:
+            raise BudgetExceeded(
+                f"provider exposure ${amount:.6f} exceeds lease remainder "
+                f"${max(self.remaining, 0.0):.6f}"
+            )
+
     # ------------------------------------------------------------------
     # Typed charge API
     # ------------------------------------------------------------------
@@ -193,27 +259,20 @@ class BudgetLease:
     def charge_event(self, cost: float, event: LLMCostEvent) -> ChargeResult:
         """Atomic charge: record spend + enqueue an ``LLMCost`` graph write.
 
-        Extends the reservation from the pool when needed (soft-charge
-        semantics — never raises ``BudgetExceeded``).  Returns a
-        :class:`ChargeResult` with overspend information.
-
-        This is the preferred entry point for instrumented call-sites.
-        Legacy ``charge_soft`` / ``charge_or_extend`` are thin wrappers
-        around this method without metadata.
+        The provider call must already be covered by this lease's declared
+        maximum exposure. A charge beyond the remaining reservation raises
+        :class:`BudgetExceeded` without mutating accounting; reservations are
+        never extended after a paid request has begun.
         """
         if cost < 0:
             raise ValueError("charge must be non-negative")
-        shortfall = (self._charged + cost) - self._reserved
-        if shortfall > EPSILON:
-            extended = self._mgr._extend_reservation(self._lease_id, shortfall)
-            self._reserved += extended
-        # Record spend unconditionally — the LLM has already been paid.
-        self._charged += cost
+        if not math.isfinite(cost):
+            raise ValueError("charge must be finite")
         self._mgr._record_spend(self._lease_id, cost)
-        overspend = max(self._charged - self._reserved, 0.0)
+        self._charged += cost
         # Enqueue async graph write
-        self._mgr._enqueue_write(cost, event, overspend)
-        return ChargeResult(overspend=overspend)
+        self._mgr._enqueue_write(cost, event, 0.0)
+        return ChargeResult()
 
     def release_unused(self) -> float:
         """Return unspent portion to manager pool.  Idempotent."""
@@ -543,6 +602,8 @@ class BudgetManager:
                 rejected if it would push the phase's cumulative committed
                 spend beyond ``cap × 1.5``.
         """
+        if not math.isfinite(amount) or amount <= 0:
+            raise ValueError("reserved provider exposure must be finite and positive")
         with self._lock:
             # ── Per-phase cap check ────────────────────────────────────────
             if phase and phase in self._phase_caps:
@@ -594,12 +655,23 @@ class BudgetManager:
         for diagnostic attribution.
         """
         with self._lock:
+            remaining = self._reserved.get(lease_id)
+            if remaining is None:
+                raise BudgetExceeded("cannot charge a released or unknown lease")
+            if amount > remaining + EPSILON:
+                raise BudgetExceeded(
+                    f"charge ${amount:.6f} exceeds reserved exposure "
+                    f"${remaining:.6f} for lease {lease_id}"
+                )
+            if self._spent + amount > self._total + EPSILON:
+                raise BudgetExceeded(
+                    f"charge ${amount:.6f} would exceed run cap ${self._total:.6f}"
+                )
             self._spent += amount
             phase = self._lease_phases.get(lease_id, "")
             if phase:
                 self._phase_spent[phase] = self._phase_spent.get(phase, 0.0) + amount
-            if lease_id in self._reserved:
-                self._reserved[lease_id] -= amount
+            self._reserved[lease_id] = max(remaining - amount, 0.0)
 
     def _extend_reservation(self, lease_id: str, amount: float) -> float:
         """Atomically extend an active reservation by drawing from the pool.

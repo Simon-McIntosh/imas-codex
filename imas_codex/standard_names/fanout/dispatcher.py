@@ -313,10 +313,9 @@ async def run_fanout(
 
     # ── Pre-flight budget check (no_budget outcome) ──────────────────
     cap = settings.cap_for_charge(escalate=escalate)
-    # Snapshot how much has already been charged to the parent lease
-    # before fan-out starts; subsequent fan-out charges are reflected
-    # in the lease's running ``charged`` figure.  This is a soft
-    # pre-flight gate, not a hard ceiling.
+    # Snapshot how much has already been charged to the parent lease and prove
+    # the configured cumulative fan-out ceiling is still reserved before the
+    # proposer can contact its provider.
     pre_charged = parent_lease.charged
     if cap <= 0:
         write_fanout_node(
@@ -332,6 +331,7 @@ async def run_fanout(
             escalate=escalate,
         )
         return ""
+    parent_lease.require_exposure(cap)
 
     # ── Stage A: proposer ────────────────────────────────────────────
     plan, planner_failure = await propose(

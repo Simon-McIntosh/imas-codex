@@ -19,7 +19,11 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Literal
 
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
-from imas_codex.standard_names.budget import LLMCostEvent
+from imas_codex.discovery.base.llm import DEFAULT_MAX_RETRIES
+from imas_codex.standard_names.budget import (
+    LLMCostEvent,
+    model_provider_exposure,
+)
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
 # revised_name values (e.g. multi-hundred-char stream-of-consciousness strings).
@@ -1006,24 +1010,23 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
             if not names:
                 return [], []
 
-            # --- Budget reservation (worst-case: all cycles) -----------------
-            # Per-name cost calibrated to observed Opus 4.6 + GPT-5.4 review
-            # spend.  Each review cycle does one LLM call plus an optional
-            # retry on unmatched items (~30% of batch).  For 3-model
-            # RD-quorum, the escalator (cycle 2) only processes the disputed
-            # subset, not the full batch.  A 1.5× per-model multiplier
-            # conservatively covers "full batch + partial retry".
-            #
-            # Previous value was 3.0× per model (9.0× for 3 models), which
-            # made the reservation ($6.75 for 15 names) exceed the entire
-            # review phase budget ($3.00), blocking all batches.
-            estimated_cost = len(names) * 0.05
-            worst_case = estimated_cost * len(models) * 1.5
+            # Reserve every model's primary and unmatched retry calls, including
+            # every retry the provider wrapper may issue for each call.
+            per_attempt_maximum = len(names) * 0.05 * 1.5
+            maximum_exposure = sum(
+                model_provider_exposure(
+                    review_model,
+                    per_attempt_maximum,
+                    provider_attempts=DEFAULT_MAX_RETRIES,
+                    calls=2,
+                )
+                for review_model in models
+            )
             lease = None
 
             if state.budget_manager:
                 phase_tag = getattr(state, "budget_phase_tag", "") or "review"
-                lease = state.budget_manager.reserve(worst_case, phase=phase_tag)
+                lease = state.budget_manager.reserve(maximum_exposure, phase=phase_tag)
                 if lease is None:
                     state.stats["budget_reservation_blocked"] = (
                         state.stats.get("budget_reservation_blocked", 0) + 1
@@ -2415,10 +2418,19 @@ async def _review_batch_core(
 
     # ── Budget reservation ─────────────────────────────────────────────
     review_phase = f"review_{target}"
-    estimated = len(batch) * 0.05
-    worst_case = estimated * len(models) * 1.5
-    lease = mgr.reserve(worst_case, phase=review_phase)
-    # Soft-stop: proceed even without lease
+    per_attempt_maximum = len(batch) * 0.05 * 1.5
+    maximum_exposure = sum(
+        model_provider_exposure(
+            review_model,
+            per_attempt_maximum,
+            provider_attempts=DEFAULT_MAX_RETRIES,
+            calls=2,
+        )
+        for review_model in models
+    )
+    lease = mgr.reserve(maximum_exposure, phase=review_phase)
+    if lease is None:
+        return 0
 
     review_group_id = str(_uuid.uuid4())
 
