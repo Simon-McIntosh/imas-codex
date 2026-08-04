@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from contextlib import ExitStack
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -29,15 +30,44 @@ _DGO = "imas_codex.graph.dd_graph_ops"
 
 @pytest.fixture(autouse=True)
 def _stub_parent_lifecycle_startup():
-    """Stub the graph-backed derived-parent startup sweeps of run_sn_pools."""
-    with (
+    """Keep graph-backed startup maintenance inside the test mock boundary."""
+    startup_patches = (
         patch(f"{_GO}.reconcile_vocab_gaps", return_value={}),
+        patch(
+            f"{_GO}.revive_unit_skipped_sources",
+            return_value={"checked": 0, "revived": 0},
+        ),
+        patch(
+            f"{_GO}.retry_vocab_gap_sources_on_grammar_change",
+            return_value={"checked": 0, "revived": 0},
+        ),
+        patch(f"{_GO}.reconcile_provenance", return_value={}),
         patch(f"{_GO}.reconcile_source_status_liveness", return_value={}),
         patch(f"{_GO}.retire_unreachable_hint_edits", return_value=0),
+        patch(f"{_GO}.reconcile_grammar_segments", return_value={}),
+        patch(f"{_GO}.reconcile_reviewable_name_stage", return_value={}),
+        patch(f"{_GO}.reconcile_standard_name_cocos_links", return_value={}),
+        patch(
+            f"{_GO}.reconcile_standard_name_unit_edges",
+            return_value={
+                "names_realigned": 0,
+                "edges_dropped": 0,
+                "edges_created": 0,
+            },
+        ),
+        patch(
+            f"{_GO}.reconcile_standard_name_dd_edges",
+            return_value={"edges_created": 0, "pairs_dropped": 0},
+        ),
+        patch(
+            f"{_GO}.reconcile_standard_name_source_paths",
+            return_value={"names_reconciled": 0},
+        ),
         patch(f"{_GO}.rederive_structural_edges", return_value={}),
         patch(f"{_GO}.seed_parent_sources", return_value=0),
         patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
         patch(f"{_GO}.structural_accept_derived_parents", return_value=0),
+        patch(f"{_GO}.reconcile_orphan_parent_sources", return_value=0),
         # Always-on stranded-reviewed promotion builds its own GraphClient;
         # stub it so the startup path stays graph-free.
         patch(f"{_GO}.promote_stranded_reviewed", return_value={"name": 0, "docs": 0}),
@@ -54,7 +84,10 @@ def _stub_parent_lifecycle_startup():
             f"{_DGO}.reconcile_dd_unit_corrections",
             return_value={"checked": 0, "corrected": 0},
         ),
-    ):
+    )
+    with ExitStack() as stack:
+        for startup_patch in startup_patches:
+            stack.enter_context(startup_patch)
         yield
 
 
