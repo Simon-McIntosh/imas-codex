@@ -6517,6 +6517,190 @@ def sn_recover_terminal_attachments(
     click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
 
 
+@sn.command("reconcile-protected-structure")
+@click.option(
+    "--manifest",
+    "manifest_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=str),
+    required=True,
+    help="Exact protected-structure reconciliation manifest.",
+)
+@click.option(
+    "--authority-artifact",
+    "authority_artifact_path",
+    type=click.Path(exists=True, dir_okay=False, path_type=str),
+    required=True,
+    help="Exact signed authority artifact bound by the manifest.",
+)
+@click.option(
+    "--apply",
+    is_flag=True,
+    help="Apply the atomic reconciliation; the default is a zero-write dry run.",
+)
+@click.option(
+    "--manifest-sha256",
+    "expected_manifest_hash",
+    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
+)
+@click.option(
+    "--receipt",
+    "receipt_path",
+    type=click.Path(dir_okay=False, path_type=str),
+    help="Explicit path for the complete receipt and release-census result.",
+)
+def sn_reconcile_protected_structure(
+    manifest_path: str,
+    authority_artifact_path: str,
+    apply: bool,
+    expected_manifest_hash: str | None,
+    receipt_path: str | None,
+) -> None:
+    """Dry-run or apply an exact authority-bound protected-structure change.
+
+    Dry-run is the default. Apply requires the digest of the exact manifest
+    bytes and runs the separate receipt-bound release census after commit.
+    """
+    import hashlib
+    import hmac
+    import json
+    import re
+    from pathlib import Path
+
+    if apply and not expected_manifest_hash:
+        raise click.UsageError("--apply requires --manifest-sha256")
+
+    manifest = Path(manifest_path).expanduser().resolve()
+    authority_artifact = Path(authority_artifact_path).expanduser().resolve()
+    output_path = (
+        Path(receipt_path).expanduser().resolve() if receipt_path is not None else None
+    )
+    if output_path in {manifest, authority_artifact}:
+        raise click.UsageError("--receipt must not overwrite an input artifact")
+    try:
+        manifest_bytes = manifest.read_bytes()
+    except OSError as exc:
+        raise click.ClickException(f"cannot read exact manifest bytes: {exc}") from exc
+    manifest_hash = hashlib.sha256(manifest_bytes).hexdigest()
+
+    normalized_expected_hash = (
+        expected_manifest_hash.strip().casefold()
+        if expected_manifest_hash is not None
+        else None
+    )
+    if (
+        normalized_expected_hash is not None
+        and re.fullmatch(r"[0-9a-f]{64}", normalized_expected_hash) is None
+    ):
+        raise click.UsageError(
+            "--manifest-sha256 must be exactly 64 hexadecimal characters"
+        )
+    if normalized_expected_hash is not None and not hmac.compare_digest(
+        normalized_expected_hash, manifest_hash
+    ):
+        raise click.UsageError(
+            "--manifest-sha256 does not match the exact manifest bytes"
+        )
+
+    try:
+        authority_bytes = authority_artifact.read_bytes()
+    except OSError as exc:
+        raise click.ClickException(
+            f"cannot read exact authority artifact bytes: {exc}"
+        ) from exc
+    authority_hash = hashlib.sha256(authority_bytes).hexdigest()
+    try:
+        manifest_payload = json.loads(manifest_bytes)
+        catalog_contract = manifest_payload["catalog_contract"]
+        bound_authority_hash = catalog_contract["authority_evidence_sha256"]
+        bound_authority_path = catalog_contract["authority_evidence_path"]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise click.ClickException(
+            "manifest does not expose an exact authority artifact contract"
+        ) from exc
+    if not isinstance(bound_authority_hash, str) or not hmac.compare_digest(
+        bound_authority_hash.casefold(), authority_hash
+    ):
+        raise click.ClickException(
+            "authority artifact SHA-256 does not match the manifest contract"
+        )
+    if bound_authority_path is not None and (
+        not isinstance(bound_authority_path, str)
+        or Path(bound_authority_path).expanduser().resolve() != authority_artifact
+    ):
+        raise click.ClickException(
+            "authority artifact path does not match the manifest contract"
+        )
+
+    from imas_codex.standard_names.protected_structural_reconciliation import (
+        ProtectedStructuralConflict,
+        census_protected_structural_release,
+        reconcile_protected_structure,
+    )
+
+    try:
+        operator_receipt = reconcile_protected_structure(
+            manifest,
+            apply=apply,
+            expected_manifest_hash=manifest_hash,
+        )
+        release_census = None
+        if apply and operator_receipt.get("mode") in {
+            "applied",
+            "already_current",
+        }:
+            release_census = census_protected_structural_release(
+                manifest,
+                operator_receipt,
+                expected_receipt_hash=operator_receipt.get("receipt_hash", ""),
+            )
+    except (OSError, ValueError, ProtectedStructuralConflict) as exc:
+        raise click.ClickException(str(exc)) from exc
+
+    if output_path is not None:
+        result_payload = {
+            "manifest_hash": manifest_hash,
+            "receipt": operator_receipt,
+            "release_census": release_census,
+        }
+        try:
+            output_path.write_bytes(
+                (
+                    json.dumps(
+                        result_payload,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    )
+                    + "\n"
+                ).encode()
+            )
+        except OSError as exc:
+            raise click.ClickException(f"cannot write receipt: {exc}") from exc
+
+    counts = operator_receipt.get("counts") or {}
+    count_summary = ",".join(f"{key}={counts[key]}" for key in sorted(counts)) or "none"
+    mode = str(operator_receipt.get("mode") or ("apply" if apply else "dry_run"))
+    receipt_hash = str(operator_receipt.get("receipt_hash") or "missing")
+    if release_census is None:
+        census_summary = "not_run"
+    else:
+        census_summary = (
+            f"release_ready={str(bool(release_census.get('release_ready'))).lower()}"
+            f",census_hash={release_census.get('census_hash', 'missing')}"
+        )
+    click.echo(
+        f"mode={mode} manifest_sha256={manifest_hash} counts={count_summary} "
+        f"receipt_hash={receipt_hash} release_census={census_summary}"
+    )
+    if output_path is not None:
+        click.echo(f"receipt={output_path}")
+    if apply and release_census is None:
+        raise click.ClickException(
+            "apply did not produce an applicable receipt for release census"
+        )
+    if release_census is not None and not release_census.get("release_ready"):
+        raise click.ClickException("release census did not certify the committed state")
+
+
 @sn.command("reconcile-structural-closure")
 @click.option(
     "--manifest",
