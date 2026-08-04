@@ -51,6 +51,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import math
 import os
 import re
 import time
@@ -194,6 +195,100 @@ class ProviderBudgetExhausted(Exception):
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
+
+
+class ProviderPricingUnbounded(RuntimeError):
+    """Raised before launch when a Standard Names route has no rate ceiling."""
+
+
+_STANDARD_NAMES_RATE_CEILING = {
+    "prompt": 20.0,
+    "completion": 100.0,
+    "request": 1.0,
+    "image": 10.0,
+}
+"""Immutable OpenRouter dollars-per-million/request/image policy ceiling.
+
+Future production seats can precede LiteLLM's bundled price catalog. OpenRouter
+enforces this model-independent ceiling during provider selection, so an
+unknown or newly repriced route cannot turn local catalog lag into overspend.
+"""
+
+
+def get_openrouter_max_price(model: str) -> dict[str, float]:
+    """Return an OpenRouter-enforced rate ceiling in dollars per million.
+
+    Cataloged routes use their tighter known text rates.  A route newer than
+    the bundled catalog uses the immutable Standard Names policy ceiling.
+    Request-based pricing is included when present.  Separately billed
+    dimensions that the Standard Names text-only request cannot cap are
+    rejected.
+    """
+    import litellm
+
+    pricing_model = ensure_model_prefix(model)
+    try:
+        info = litellm.get_model_info(pricing_model)
+    except Exception:
+        return dict(_STANDARD_NAMES_RATE_CEILING)
+
+    unsupported = (
+        "input_cost_per_second",
+        "input_cost_per_audio_token",
+        "input_cost_per_image_token",
+        "input_cost_per_audio_per_second",
+        "input_cost_per_video_per_second",
+        "output_cost_per_reasoning_token",
+        "output_cost_per_second",
+        "output_cost_per_video_per_second",
+        "output_cost_per_image_token",
+        "citation_cost_per_token",
+        "search_context_cost_per_query",
+        "tiered_pricing",
+        "input_cost_per_token_batches",
+        "output_cost_per_token_batches",
+    )
+    if any(info.get(field) is not None for field in unsupported):
+        raise ProviderPricingUnbounded(
+            f"OpenRouter route {model} has pricing outside the bounded text request"
+        )
+
+    def _maximum_rate(*prefixes: str) -> float:
+        rates = [
+            float(value)
+            for key, value in info.items()
+            if value is not None
+            and any(key.startswith(prefix) for prefix in prefixes)
+            and not key.endswith(("_flex", "_priority", "_batches"))
+        ]
+        if not rates or max(rates) <= 0:
+            raise ProviderPricingUnbounded(
+                f"OpenRouter token rate unavailable for {model}"
+            )
+        return max(rates)
+
+    prompt_rate = _maximum_rate(
+        "input_cost_per_token", "cache_creation_input_token_cost"
+    )
+    completion_rate = _maximum_rate("output_cost_per_token")
+    request_rate = float(info.get("input_cost_per_query") or 0.0)
+    image_rate = max(
+        float(info.get("input_cost_per_image") or 0.0),
+        float(info.get("output_cost_per_image") or 0.0),
+    )
+    ceiling = {
+        "prompt": prompt_rate * 1_000_000,
+        "completion": completion_rate * 1_000_000,
+        "request": request_rate,
+        "image": image_rate,
+    }
+    if any(not math.isfinite(value) or value < 0 for value in ceiling.values()):
+        raise ProviderPricingUnbounded(f"OpenRouter rate ceiling invalid for {model}")
+    if any(ceiling[field] > _STANDARD_NAMES_RATE_CEILING[field] for field in ceiling):
+        raise ProviderPricingUnbounded(
+            f"OpenRouter route {model} exceeds the Standard Names rate policy"
+        )
+    return ceiling
 
 
 class EmptyResponseError(ValueError):
@@ -1633,6 +1728,7 @@ def _build_kwargs(
     _warn_if_missing_openrouter_prefix(model)
 
     limits = get_model_limits(model)
+    bypass_proxy = False
 
     # Auto-resolve endpoint from the model registry if not explicitly passed
     if not api_base:
@@ -1721,6 +1817,15 @@ def _build_kwargs(
                 logger.debug(
                     "Bypassing proxy for %s (cache_control preserved)", model_id
                 )
+
+    if service == "standard-names" and not _is_local_model(model):
+        if api_base or not bypass_proxy:
+            raise ProviderPricingUnbounded(
+                "paid Standard Names calls require direct OpenRouter routing "
+                "with an enforceable max_price"
+            )
+        extra_body = kwargs.setdefault("extra_body", {})
+        extra_body["provider"] = {"max_price": get_openrouter_max_price(model)}
 
     if response_format is not None:
         # Always convert Pydantic models to explicit json_schema dicts.

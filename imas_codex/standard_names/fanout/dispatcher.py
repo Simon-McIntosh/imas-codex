@@ -4,17 +4,17 @@ Public entry point:
     :func:`run_fanout` — ``async`` orchestrator.  Returns the rendered
     markdown evidence block (or ``""`` for any true-no-op outcome).
 
-Three internal stages:
-    1. :func:`propose` — Stage A LLM call → :class:`FanoutPlan`.
-    2. :func:`execute` — pure-Python parallel runner over Stage A's
+Three internal operations:
+    1. :func:`propose` — proposer LLM call → :class:`FanoutPlan`.
+    2. :func:`execute` — pure-Python parallel runner over the proposer's
        calls.
     3. :func:`render.format_results` — markdown evidence block.
 
 Cost ownership:
-    The Stage A proposer call is charged to the **caller's**
+    The proposer call is charged to the **caller's**
     :class:`BudgetLease` via
     ``parent_lease.charge_event(cost, LLMCostEvent(batch_id=fanout_run_id, …))``.
-    The caller's existing Stage C (synthesizer) call charges as today;
+    The caller's existing synthesizer call charges as today;
     the caller is responsible for stamping ``batch_id=fanout_run_id``
     onto its synthesizer's :class:`LLMCostEvent` so the
     ``Fanout`` ↔ ``LLMCost`` join works.
@@ -32,7 +32,14 @@ import logging
 import uuid
 from typing import Any
 
-from imas_codex.standard_names.budget import BudgetLease, LLMCostEvent
+from imas_codex.discovery.base.llm import DEFAULT_MAX_RETRIES
+from imas_codex.standard_names.budget import (
+    BudgetExceeded,
+    BudgetLease,
+    LLMCostEvent,
+    charge_billable_exception,
+    model_provider_exposure,
+)
 
 from .catalog import get_runner, normalize_query_or_path
 from .config import (
@@ -53,7 +60,7 @@ logger = logging.getLogger(__name__)
 
 
 # =====================================================================
-# Stage A — propose
+# Proposer request
 # =====================================================================
 
 
@@ -62,7 +69,7 @@ def _build_proposer_user_prompt(
     reviewer_excerpt: str,
     scope: FanoutScope,
 ) -> str:
-    """Build the dynamic Stage A user prompt body.
+    """Build the dynamic proposer user prompt body.
 
     The system prompt (with the ``catalog_version`` line) is rendered
     by :func:`render_proposer_system_prompt`; everything else lives
@@ -86,6 +93,29 @@ def _build_proposer_user_prompt(
     return "\n".join(parts)
 
 
+def proposer_exposure(
+    *,
+    candidate: CandidateContext,
+    reviewer_excerpt: str,
+    scope: FanoutScope,
+    settings: FanoutSettings,
+) -> float:
+    """Return the priced maximum exposure of the rendered proposer request."""
+    messages = [
+        {"role": "system", "content": render_proposer_system_prompt()},
+        {
+            "role": "user",
+            "content": _build_proposer_user_prompt(candidate, reviewer_excerpt, scope),
+        },
+    ]
+    return model_provider_exposure(
+        settings.proposer_model,
+        messages,
+        response_model=FanoutPlan,
+        provider_attempts=DEFAULT_MAX_RETRIES,
+    )
+
+
 async def propose(
     *,
     candidate: CandidateContext,
@@ -95,7 +125,7 @@ async def propose(
     parent_lease: BudgetLease,
     fanout_run_id: str,
 ) -> tuple[FanoutPlan | None, FanoutOutcome | None]:
-    """Run Stage A.  Charges proposer cost to ``parent_lease``.
+    """Run the proposer and charge its cost to ``parent_lease``.
 
     Returns:
         ``(plan, None)`` on a successfully parsed plan that is
@@ -127,6 +157,14 @@ async def propose(
             reasoning_effort=get_reasoning_effort("sn-fanout"),
         )
     except Exception as e:
+        charge_billable_exception(
+            parent_lease,
+            e,
+            model=settings.proposer_model,
+            sn_ids=(candidate.sn_id,) if candidate.sn_id else (),
+            batch_id=fanout_run_id,
+            phase="sn_fanout_refine_proposer",
+        )
         logger.info(
             "fan-out planner_schema_fail (run_id=%s): %s",
             fanout_run_id,
@@ -181,7 +219,7 @@ async def propose(
 
 
 # =====================================================================
-# Stage B — execute
+# Parallel executor
 # =====================================================================
 
 
@@ -192,7 +230,7 @@ async def execute(
     scope: FanoutScope,
     settings: FanoutSettings,
 ) -> list[FanoutResult]:
-    """Run Stage B — parallel executor with per-call + total timeouts.
+    """Run the parallel executor with per-call and total timeouts.
 
     Wraps the gather in :func:`asyncio.wait_for(total_timeout_s)` so
     even sync helpers that ignore their per-call timeout are bounded
@@ -312,12 +350,18 @@ async def run_fanout(
         return ""
 
     # ── Pre-flight budget check (no_budget outcome) ──────────────────
-    cap = settings.cap_for_charge(escalate=escalate)
+    cap = proposer_exposure(
+        candidate=candidate,
+        reviewer_excerpt=reviewer_excerpt,
+        scope=scope,
+        settings=settings,
+    )
     # Snapshot how much has already been charged to the parent lease and prove
     # the configured cumulative fan-out ceiling is still reserved before the
     # proposer can contact its provider.
-    pre_charged = parent_lease.charged
-    if cap <= 0:
+    try:
+        parent_lease.require_exposure(cap)
+    except BudgetExceeded:
         write_fanout_node(
             gc,
             run_id=fanout_run_id,
@@ -331,9 +375,8 @@ async def run_fanout(
             escalate=escalate,
         )
         return ""
-    parent_lease.require_exposure(cap)
 
-    # ── Stage A: proposer ────────────────────────────────────────────
+    # ── Proposer request ─────────────────────────────────────────────
     plan, planner_failure = await propose(
         candidate=candidate,
         reviewer_excerpt=reviewer_excerpt,
@@ -359,24 +402,7 @@ async def run_fanout(
 
     assert plan is not None  # narrow for type-checkers
 
-    # ── Post-proposer budget check ──────────────────────────────────
-    fanout_charge = parent_lease.charged - pre_charged
-    if fanout_charge > cap:
-        write_fanout_node(
-            gc,
-            run_id=fanout_run_id,
-            sn_id=candidate.sn_id,
-            site=site,
-            outcome="no_budget",
-            plan_size=len(plan.queries),
-            hits_count=0,
-            evidence_tokens=0,
-            arm=arm,
-            escalate=escalate,
-        )
-        return ""
-
-    # ── Stage B: execute ────────────────────────────────────────────
+    # ── Parallel execution ───────────────────────────────────────────
     results = await execute(plan, gc=gc, scope=scope, settings=settings)
     outcome = _classify_outcome(results)
 

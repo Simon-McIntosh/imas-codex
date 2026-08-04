@@ -141,7 +141,7 @@ class TestClassifyOutcome:
 
 
 # ---------------------------------------------------------------------
-# propose() — Stage A
+# Proposer request
 # ---------------------------------------------------------------------
 
 
@@ -312,8 +312,7 @@ class TestRunFanout:
     async def test_no_budget_writes_node(self) -> None:
         gc = _MockGraphClient()
         s = _settings(
-            fanout_max_charge_per_cycle_baseline=0.0,
-            fanout_max_charge_per_cycle_escalation=0.0,
+            proposer_model="openrouter/anthropic/claude-sonnet-4.6",
         )
         evidence = await dispatcher.run_fanout(
             site="refine_name",
@@ -428,25 +427,33 @@ class TestExecutePartialFail:
             ]
         )
         _patch_llm(monkeypatch, _FakeLLMResult(plan))
-        # Healthy first runner
-        monkeypatch.setattr(
-            "imas_codex.standard_names.search.search_standard_names_vector",
-            lambda *a, **kw: [
-                {
-                    "id": "electron_temperature",
-                    "description": "T_e",
-                    "score": 0.9,
-                }
-            ],
-        )
 
-        # Failing cluster runner
-        def _boom(*a, **kw):
-            raise RuntimeError("graph unavailable")
+        async def _healthy(call, **_kwargs):
+            return FanoutResult(
+                fn_id=call.fn_id,
+                args=call.model_dump(),
+                ok=True,
+                hits=[
+                    FanoutHit(
+                        kind="standard_name",
+                        id="electron_temperature",
+                        label="electron_temperature",
+                    )
+                ],
+            )
+
+        async def _failed(call, **_kwargs):
+            return FanoutResult(
+                fn_id=call.fn_id,
+                args=call.model_dump(),
+                ok=False,
+                error="graph unavailable",
+            )
 
         monkeypatch.setattr(
-            "imas_codex.graph.dd_search.cluster_search",
-            _boom,
+            dispatcher,
+            "get_runner",
+            lambda call: _failed if call.fn_id == "search_dd_clusters" else _healthy,
         )
 
         evidence = await dispatcher.run_fanout(

@@ -115,13 +115,14 @@ def test_cli_forwards_explicit_maintenance_mode(
     """The selected maintenance command reaches the orchestrator unchanged."""
     from imas_codex.cli.sn import _run_sn_cmd
 
-    run_pools = AsyncMock(return_value=MagicMock())
+    run_pools = AsyncMock(return_value=MagicMock(stop_reason="completed"))
 
     def _run_discovery(_config, async_main):
         return asyncio.run(async_main(asyncio.Event(), MagicMock()))
 
     with (
         patch("imas_codex.cli.sn._require_embed_ready"),
+        patch("imas_codex.cli.sn._require_terminal_drain"),
         patch(
             "imas_codex.cli.discover.common.use_rich_output",
             return_value=False,
@@ -377,13 +378,14 @@ async def test_review_then_refine_requires_separate_pool_selection() -> None:
 def test_run_command_forwards_exact_pool_selector() -> None:
     from imas_codex.cli.sn import _run_sn_cmd
 
-    run_pools = AsyncMock(return_value=MagicMock())
+    run_pools = AsyncMock(return_value=MagicMock(stop_reason="completed"))
 
     def _run_discovery(_config, async_main):
         return asyncio.run(async_main(asyncio.Event(), MagicMock()))
 
     with (
         patch("imas_codex.cli.sn._require_embed_ready"),
+        patch("imas_codex.cli.sn._require_terminal_drain"),
         patch(
             "imas_codex.cli.discover.common.use_rich_output",
             return_value=False,

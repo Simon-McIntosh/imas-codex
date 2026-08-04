@@ -28,6 +28,7 @@ local cache.
 from __future__ import annotations
 
 import asyncio
+import json
 import logging
 import math
 import threading
@@ -54,6 +55,14 @@ _WRITER_CALL_TIMEOUT = 20.0
 # Heartbeat interval: how long the writer waits on an empty queue
 # before emitting a health log line.
 _WRITER_HEARTBEAT_SEC = 60.0
+
+# Conservative input-token ceiling used when a newly configured OpenRouter
+# model is not yet present in LiteLLM's bundled catalog.  Production prompts
+# are rejected if even their serialized UTF-8 byte length exceeds this value;
+# one token cannot encode less than one request byte.  Reserving the complete
+# ceiling also covers provider chat-template framing without trusting a local
+# tokenizer estimate.
+_UNCATALOGED_INPUT_TOKEN_CEILING = 2_000_000
 
 
 # =====================================================================
@@ -168,21 +177,141 @@ def provider_exposure(
 
 def model_provider_exposure(
     model: str,
-    max_cost_per_attempt: float | None,
+    messages: list[dict[str, Any]],
     *,
+    response_model: type[Any],
     provider_attempts: int,
     calls: int = 1,
+    max_tokens: int | None = None,
 ) -> float:
-    """Return a reservable exposure for a configured model route."""
-    from imas_codex.discovery.base.llm import _is_local_model
+    """Price the maximum billable exposure of a rendered structured request.
+
+    A cataloged model reserves its complete input context.  A model that is
+    newer than the bundled LiteLLM catalog reserves a conservative immutable
+    input ceiling after verifying that the rendered text request fits within
+    it.  This avoids tokenizer estimates, which can omit provider framing or
+    structured-output schema tokens.  Every wrapper retry is priced with the
+    largest output allowance it can reach after a length exhaustion.  Routes
+    with non-text inputs or unsupported billable dimensions fail closed.
+    """
+    import litellm
+
+    from imas_codex.discovery.base.llm import (
+        _LENGTH_RETRY_TOKEN_CAP,
+        _LENGTH_RETRY_TOKEN_MULTIPLIER,
+        _is_local_model,
+        get_model_limits,
+        get_openrouter_max_price,
+    )
 
     if _is_local_model(model):
         return EPSILON
-    return provider_exposure(
-        max_cost_per_attempt,
-        provider_attempts=provider_attempts,
-        calls=calls,
+    if provider_attempts < 1 or calls < 1:
+        raise BudgetExposureUnknown("paid provider call has no bounded call count")
+
+    for message in messages:
+        if not isinstance(message.get("content"), str):
+            raise BudgetExposureUnknown(
+                "non-text provider input has no token-only bound"
+            )
+
+    schema = response_model.model_json_schema()
+    serialized_request = json.dumps(
+        {"messages": messages, "response_schema": schema},
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
     )
+    request_byte_bound = len(serialized_request.encode("utf-8"))
+    if request_byte_bound <= 0:
+        raise BudgetExposureUnknown("rendered provider request is empty")
+
+    try:
+        model_info = litellm.get_model_info(model)
+    except Exception:
+        model_info = {}
+    catalog_input_limit = model_info.get("max_input_tokens")
+    input_limit = (
+        catalog_input_limit
+        if isinstance(catalog_input_limit, int) and catalog_input_limit > 0
+        else _UNCATALOGED_INPUT_TOKEN_CEILING
+    )
+    if request_byte_bound > input_limit:
+        raise BudgetExposureUnknown("rendered request exceeds the provider input bound")
+
+    try:
+        max_price = get_openrouter_max_price(model)
+    except Exception as exc:
+        raise BudgetExposureUnknown(
+            f"enforceable OpenRouter rate ceiling unavailable for {model}"
+        ) from exc
+
+    output_limit = max_tokens or get_model_limits(model)["max_tokens"]
+    if not isinstance(output_limit, int) or output_limit <= 0:
+        raise BudgetExposureUnknown(
+            "provider output allowance is not positively bounded"
+        )
+
+    total = 0.0
+    for _ in range(provider_attempts):
+        attempt_cost = (
+            input_limit * max_price["prompt"] / 1_000_000
+            + output_limit * max_price["completion"] / 1_000_000
+            + max_price["request"]
+        )
+        if not math.isfinite(attempt_cost) or attempt_cost <= 0:
+            raise BudgetExposureUnknown(
+                f"authoritative token prices are not finite and positive for {model}"
+            )
+        total += attempt_cost
+        output_limit = min(
+            output_limit * _LENGTH_RETRY_TOKEN_MULTIPLIER,
+            _LENGTH_RETRY_TOKEN_CAP,
+        )
+
+    exposure = total * calls
+    if not math.isfinite(exposure) or exposure <= 0:
+        raise BudgetExposureUnknown("paid provider exposure is not finite")
+    return exposure
+
+
+def charge_billable_exception(
+    lease: BudgetLease | None,
+    exc: BaseException,
+    *,
+    model: str,
+    sn_ids: tuple[str, ...] = (),
+    batch_id: str | None = None,
+    phase: str,
+    service: str = "standard-names",
+) -> bool:
+    """Charge aggregate retry telemetry carried by a terminal exception once."""
+    from imas_codex.discovery.base.llm import (
+        LLMStructuredCallError,
+        ProviderBudgetExhausted,
+    )
+
+    if lease is None or not isinstance(
+        exc, LLMStructuredCallError | ProviderBudgetExhausted
+    ):
+        return False
+    if exc.response_count <= 0:
+        return False
+    lease.charge_event(
+        float(exc.cost),
+        LLMCostEvent(
+            model=model,
+            tokens_in=int(exc.input_tokens),
+            tokens_out=int(exc.output_tokens),
+            tokens_cached_read=int(exc.cache_read_tokens),
+            tokens_cached_write=int(exc.cache_creation_tokens),
+            sn_ids=sn_ids,
+            batch_id=batch_id,
+            phase=phase,
+            service=service,
+        ),
+    )
+    return True
 
 
 class BudgetLease:

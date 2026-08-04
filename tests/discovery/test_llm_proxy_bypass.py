@@ -7,6 +7,9 @@ proxy to preserve prompt caching and actual cost reporting.
 
 from __future__ import annotations
 
+import tomllib
+from pathlib import Path
+
 import pytest
 
 from imas_codex.discovery.base import llm
@@ -102,6 +105,143 @@ class TestProxyBypass:
         )
         assert "api_base" not in kwargs
         assert kwargs["model"] == "openrouter/anthropic/claude-sonnet-4.6"
+
+    def test_standard_names_direct_request_carries_provider_rate_cap(self, monkeypatch):
+        """Paid SN requests bind OpenRouter routing to the catalog ceiling."""
+        _make_stub_settings(monkeypatch, location="iter")
+        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+
+        kwargs = llm._build_kwargs(
+            model="anthropic/claude-sonnet-4.6",
+            api_key="or-key",
+            messages=MESSAGES,
+            response_format=None,
+            max_tokens=None,
+            temperature=None,
+            timeout=None,
+            service="standard-names",
+        )
+
+        ceiling = kwargs["extra_body"]["provider"]["max_price"]
+        assert ceiling["prompt"] >= 3.0
+        assert ceiling["completion"] >= 15.0
+        assert ceiling["request"] == 0.0
+        assert ceiling["image"] == 0.0
+
+    def test_standard_names_proxy_route_rejects_before_provider(self, monkeypatch):
+        """A route that cannot carry max_price is rejected before dispatch."""
+        _make_stub_settings(monkeypatch, location="iter")
+        monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
+        monkeypatch.setenv("LITELLM_API_KEY", "proxy-key")
+
+        with pytest.raises(llm.ProviderPricingUnbounded):
+            llm._build_kwargs(
+                model="anthropic/claude-sonnet-4.6",
+                api_key="or-key",
+                messages=MESSAGES,
+                response_format=None,
+                max_tokens=None,
+                temperature=None,
+                timeout=None,
+                service="standard-names",
+            )
+
+    def test_separately_billed_reasoning_rejects_before_provider(self, monkeypatch):
+        """A cataloged rate outside the text ceiling cannot dispatch."""
+        import litellm
+
+        _make_stub_settings(monkeypatch, location="iter")
+        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+        monkeypatch.setattr(
+            litellm,
+            "get_model_info",
+            lambda _model: {
+                "input_cost_per_token": 1e-6,
+                "output_cost_per_token": 2e-6,
+                "output_cost_per_reasoning_token": 3e-6,
+            },
+        )
+
+        with pytest.raises(llm.ProviderPricingUnbounded):
+            llm._build_kwargs(
+                model="openrouter/future/reasoning-model",
+                api_key="or-key",
+                messages=MESSAGES,
+                response_format=None,
+                max_tokens=None,
+                temperature=None,
+                timeout=None,
+                service="standard-names",
+            )
+
+    def test_all_live_paid_standard_names_seats_have_direct_rate_caps(
+        self, monkeypatch
+    ):
+        """Every configured production seat dispatches directly under max_price."""
+        import litellm
+
+        config = tomllib.loads(Path("pyproject.toml").read_text())["tool"]["imas-codex"]
+        seats = {
+            name: section["model"]
+            for name, section in config.items()
+            if name.startswith("sn-")
+            and name != "sn-benchmark"
+            and isinstance(section, dict)
+            and isinstance(section.get("model"), str)
+        }
+        review = config["sn-review"]
+        active_profile = review.get("active-profile", "default")
+        seats.update(
+            {
+                f"sn-review.names.{active_profile}.{index}": model
+                for index, model in enumerate(
+                    review["names"]["profiles"][active_profile]["models"]
+                )
+            }
+        )
+        seats.update(
+            {
+                f"sn-review.docs.{index}": model
+                for index, model in enumerate(review["docs"]["models"])
+            }
+        )
+        seats["sn-fanout.proposer"] = config["sn-fanout"]["proposer-model"]
+        paid_seats = {
+            seat: model
+            for seat, model in seats.items()
+            if model.startswith("openrouter/")
+        }
+
+        assert paid_seats
+        assert any("openai/" in model for model in paid_seats.values())
+        assert any("x-ai/" in model for model in paid_seats.values())
+        _make_stub_settings(monkeypatch, location="iter")
+        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
+
+        def _catalog_lag(_model):
+            raise RuntimeError("model is newer than bundled catalog")
+
+        monkeypatch.setattr(litellm, "get_model_info", _catalog_lag)
+        for seat, model in paid_seats.items():
+            kwargs = llm._build_kwargs(
+                model=model,
+                api_key="or-key",
+                messages=MESSAGES,
+                response_format=None,
+                max_tokens=None,
+                temperature=None,
+                timeout=None,
+                service="standard-names",
+            )
+            assert "api_base" not in kwargs, seat
+            assert kwargs["model"] == model, seat
+            assert kwargs["api_key"] == "direct-or-key", seat
+            assert kwargs["extra_body"]["provider"]["max_price"] == {
+                "prompt": 20.0,
+                "completion": 100.0,
+                "request": 1.0,
+                "image": 10.0,
+            }, seat
 
 
 class TestCacheControlInjection:

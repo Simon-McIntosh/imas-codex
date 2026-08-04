@@ -18,6 +18,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.budget import (
+    BudgetExceeded,
     BudgetLease,
     BudgetManager,
     ChargeResult,
@@ -287,11 +288,7 @@ class TestEnrichChargeEvent:
 
     @pytest.mark.asyncio
     async def test_enrich_uses_soft_stop_never_drops_items(self):
-        """charge_event with soft-stop semantics never raises BudgetExceeded.
-
-        Even when overspend is reported, the enrich worker must continue
-        processing items (never check result.hard_stop).
-        """
+        """A provider charge can never extend its lease after launch."""
         mgr = _make_mgr(budget=0.01)  # Tiny budget
         lease = mgr.reserve(0.01, phase="enrich")
         assert lease is not None
@@ -306,17 +303,10 @@ class TestEnrichChargeEvent:
             service="standard-names",
         )
 
-        # Charge well over budget — should NOT raise
-        result = lease.charge_event(5.0, event)
-
-        # Overspend is reported but no exception
-        assert result.overspend > 0
-        assert not result.hard_stop  # soft-stop: never hard-stops
-
-        # Critical: workflow continues — lease is still usable
-        result2 = lease.charge_event(1.0, event)
-        assert result2.overspend > 0
-        # Total charged = 6.0, reserved = 0.01 → significant overspend
+        with pytest.raises(BudgetExceeded):
+            lease.charge_event(5.0, event)
+        assert lease.charged == 0.0
+        assert lease.remaining == pytest.approx(0.01)
 
 
 # =====================================================================

@@ -25,12 +25,12 @@ class TestBudgetReservationBlocked:
     """Verify pipeline tracks reservation failures and invariant checks them."""
 
     def test_pipeline_increments_budget_reservation_blocked(self) -> None:
-        """_process_batch must set stats['budget_reservation_blocked'] on None lease."""
+        """A review request with no lease must stop before provider launch."""
         from imas_codex.standard_names.review import pipeline
 
         src = inspect.getsource(pipeline)
-        assert "budget_reservation_blocked" in src, (
-            "_process_batch must track budget_reservation_blocked in state.stats"
+        assert "review request has no reservable provider exposure" in src, (
+            "review requests must fail closed when exact exposure cannot be reserved"
         )
 
 

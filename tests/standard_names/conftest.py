@@ -27,6 +27,43 @@ _LIVE_GRAPH_MARKERS = frozenset(
 
 
 @pytest.fixture(autouse=True)
+def _bound_synthetic_model_exposure(monkeypatch):
+    """Give mocked provider routes a finite lease in worker unit tests.
+
+    Production model identifiers are provider-qualified. Bare ids such as
+    ``reviewer`` and explicit ``openrouter/test/*`` routes are test doubles
+    whose provider calls are already mocked. Their synthetic responses can
+    carry nonzero cost, so use a one-dollar ceiling rather than pretending the
+    response was local or inventing token prices for a nonexistent model.
+    """
+    import litellm
+
+    from imas_codex.discovery.base.llm import _is_local_model
+    from imas_codex.standard_names import budget, workers
+    from imas_codex.standard_names.fanout import dispatcher
+    from imas_codex.standard_names.review import pipeline
+
+    original = budget.model_provider_exposure
+
+    def _bounded(model, *args, **kwargs):
+        if _is_local_model(model):
+            return original(model, *args, **kwargs)
+        if "/" not in model or model.startswith("openrouter/test/"):
+            return 1.0
+        try:
+            litellm.get_model_info(model)
+        except Exception:
+            # Several worker tests intentionally use future or invented
+            # provider-qualified model ids while mocking the call itself.
+            return 1.0
+        return original(model, *args, **kwargs)
+
+    monkeypatch.setattr(workers, "model_provider_exposure", _bounded)
+    monkeypatch.setattr(pipeline, "model_provider_exposure", _bounded)
+    monkeypatch.setattr(dispatcher, "model_provider_exposure", _bounded)
+
+
+@pytest.fixture(autouse=True)
 def _block_live_graph(request):
     """Raise RuntimeError if a default-tier test attempts to open a real
     Neo4j connection.

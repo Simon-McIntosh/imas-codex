@@ -668,12 +668,21 @@ written. Unparseable names silently produce no derived edges.
 
 Cost is graph-backed via `LLMCost` nodes written async by `BudgetManager`.
 `SNRun.status`: `started → completed | interrupted | failed | degraded`. The
-only charge API is `lease.charge_event(cost, event)`. Before any paid provider
-request, its lease reserves the full declared maximum exposure across wrapper
-retries, outer retries, fan-out, and concurrent calls. A missing or non-finite
-bound fails before launch; a charge beyond the lease or run cap raises without
-changing the ledger. Unused headroom is released, while every completed call's
-actual cost remains exact. Start the manager with `await shared_mgr.start()`;
+only charge API is `lease.charge_event(cost, event)`. Every paid request goes
+directly to OpenRouter with `provider.max_price` set to either the bundled
+catalog's tighter known rates or an immutable model-independent policy ceiling.
+This keeps newly configured production seats bounded when the local catalog
+lags. Proxy routes and cataloged prices with unbounded text, media, search,
+time, or reasoning dimensions fail before dispatch. The lease prices a known
+model's full input context; uncataloged models reserve a conservative immutable
+input ceiling and reject requests whose serialized text and response schema do
+not fit. It also covers the configured output allowance (including
+length-retry growth), request fee, every wrapper attempt, outer retry, fan-out
+request, and concurrent reservation. This makes a provider charge beyond the
+lease unreachable: a route whose advertised rate exceeds the request ceiling
+is not executed. Completed structured-call failures carry aggregate retry
+telemetry and are charged once before their handler releases unused headroom.
+Start the manager with `await shared_mgr.start()`;
 finalize each run with `drain_pending()` + `get_total_spent()` in a `finally`
 block. (LLMCost node properties and canonical cost queries are documented in
 `AGENTS.md` → Graph Operations.)

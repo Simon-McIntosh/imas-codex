@@ -10,11 +10,15 @@ import asyncio
 import threading
 
 import pytest
+from pydantic import BaseModel
 
 from imas_codex.standard_names.budget import (
+    BudgetExposureUnknown,
     BudgetLease,
     BudgetManager,
     LLMCostEvent,
+    charge_billable_exception,
+    model_provider_exposure,
 )
 
 # ── Test helper ───────────────────────────────────────────────────────
@@ -26,6 +30,89 @@ def _ce(lease: BudgetLease, amount: float, phase: str = "test") -> None:
         amount,
         LLMCostEvent(model="test-model", tokens_in=0, tokens_out=0, phase=phase),
     )
+
+
+class _BoundedResponse(BaseModel):
+    answer: str
+
+
+def test_paid_exposure_uses_context_and_all_wrapper_attempts():
+    """The lease covers the hard input bound and initial call plus retries."""
+    messages = [{"role": "user", "content": "short rendered prompt"}]
+    one_attempt = model_provider_exposure(
+        "openrouter/anthropic/claude-sonnet-4.6",
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+    )
+    all_attempts = model_provider_exposure(
+        "openrouter/anthropic/claude-sonnet-4.6",
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=5,
+    )
+    assert one_attempt > 7.0
+    assert all_attempts > one_attempt * 5
+
+
+def test_catalog_lag_uses_immutable_provider_and_input_ceilings():
+    """A newly configured route remains bounded before the catalog catches up."""
+    exposure = model_provider_exposure(
+        "openrouter/future/model",
+        [{"role": "user", "content": "prompt"}],
+        response_model=_BoundedResponse,
+        provider_attempts=5,
+    )
+    assert exposure > 40.0
+
+
+def test_non_text_input_rejects_before_reservation():
+    """An input with unpriced media cannot reach a provider through the gate."""
+    with pytest.raises(BudgetExposureUnknown):
+        model_provider_exposure(
+            "openrouter/anthropic/claude-sonnet-4.6",
+            [{"role": "user", "content": [{"type": "image_url"}]}],
+            response_model=_BoundedResponse,
+            provider_attempts=5,
+        )
+
+
+@pytest.mark.parametrize("error_type", ["structured", "provider_budget"])
+def test_billable_terminal_exception_is_charged_from_aggregate_telemetry(error_type):
+    """Both terminal exception types preserve all completed retry spend."""
+    from imas_codex.discovery.base.llm import (
+        LLMStructuredCallError,
+        ProviderBudgetExhausted,
+    )
+
+    error_class = (
+        LLMStructuredCallError
+        if error_type == "structured"
+        else ProviderBudgetExhausted
+    )
+    exc = error_class(
+        "terminal",
+        cost=0.2,
+        input_tokens=80,
+        output_tokens=20,
+        cache_read_tokens=10,
+        cache_creation_tokens=5,
+        response_count=3,
+    )
+    mgr = BudgetManager(total_budget=1.0)
+    lease = mgr.reserve(0.5)
+    assert lease is not None
+
+    charged = charge_billable_exception(
+        lease,
+        exc,
+        model="openrouter/anthropic/claude-sonnet-4.6",
+        phase="review_name",
+    )
+
+    assert charged
+    assert lease.charged == pytest.approx(0.2)
+    assert mgr.spent == pytest.approx(0.2)
 
 
 # =====================================================================
