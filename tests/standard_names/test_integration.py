@@ -22,7 +22,13 @@ imas_sn = pytest.importorskip("imas_standard_names")
 
 def _call_write(names: list[dict], mock_gc: MagicMock) -> int:
     """Call write_standard_names with a mocked GraphClient."""
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with (
+        patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
+        patch(
+            "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+            return_value=set(),
+        ),
+    ):
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
         from imas_codex.standard_names.graph_ops import write_standard_names
@@ -129,16 +135,14 @@ class TestEmbeddingCoverage:
 
 
 class TestCoalesceSafety:
-    """Verify that write_standard_names uses coalesce for all optional fields.
+    """Verify that write_standard_names uses coalesce for optional fields.
 
     When a field is None in the batch, coalesce(None, sn.field) = sn.field,
     so an sn-build re-run cannot accidentally erase data that was set by
-    an earlier catalog import.
+    an earlier catalog import. Strict-parser projections are intentionally
+    excluded because each parse is authoritative and must clear stale values.
     """
 
-    # The StandardName schema carries no individual grammar_* slots
-    # (grammar_physical_base, grammar_subject, grammar_component, …), so
-    # grammar_parse_version is the only grammar field written via coalesce.
     _COALESCE_FIELDS = [
         ("documentation", "b.documentation, sn.documentation"),
         ("kind", "b.kind, sn.kind"),
@@ -146,7 +150,6 @@ class TestCoalesceSafety:
         ("source_paths", "b.source_paths, sn.source_paths"),
         ("validity_domain", "b.validity_domain, sn.validity_domain"),
         ("constraints", "b.constraints, sn.constraints"),
-        ("grammar_parse_version", "b.grammar_parse_version, sn.grammar_parse_version"),
     ]
 
     def test_build_does_not_erase_imported_data(self) -> None:
@@ -179,6 +182,10 @@ class TestCoalesceSafety:
                 f"Field '{field_name}' must use coalesce({coalesce_args}) in "
                 "write_standard_names Cypher to preserve existing graph data"
             )
+        assert "sn.grammar_parse_version = b.grammar_parse_version" in cypher
+        assert (
+            "sn.validation_diagnostics_json = b.validation_diagnostics_json" in cypher
+        )
 
     def test_build_with_none_fields_preserves_graph(self) -> None:
         """Batch dicts must include None for absent optional fields (not omit them).
@@ -338,7 +345,17 @@ class TestWriteStandardNames:
         def capture_query(cypher, **kwargs):
             if "batch" in kwargs:
                 captured_calls.append({"cypher": cypher, "batch": kwargs["batch"]})
-            return None
+            if "existing_dd_paths" in cypher:
+                return [
+                    {
+                        "id": _RICH_SN_RECORD["id"],
+                        "source_id": _RICH_SN_RECORD["source_id"],
+                        "dd_unit": _RICH_SN_RECORD["unit"],
+                        "sn_unit": _RICH_SN_RECORD["unit"],
+                        "existing_dd_paths": [],
+                    }
+                ]
+            return []
 
         mock_gc = MagicMock()
         mock_gc.query = MagicMock(side_effect=capture_query)

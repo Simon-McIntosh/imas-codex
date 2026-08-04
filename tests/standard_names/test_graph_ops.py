@@ -69,10 +69,12 @@ class TestWriteStandardNames:
         assert "coalesce(b.validity_domain, sn.validity_domain)" in cypher
         assert "coalesce(b.constraints, sn.constraints)" in cypher
         assert "coalesce(b.confidence, sn.confidence)" not in cypher
-        assert "coalesce(b.grammar_parse_version, sn.grammar_parse_version)" in cypher
+        # Strict-parse output is authoritative. A reparse must also clear stale
+        # projections, so these fields are direct assignments rather than
+        # optional metadata protected by coalesce.
+        assert "sn.grammar_parse_version = b.grammar_parse_version" in cypher
         assert (
-            "coalesce(b.validation_diagnostics_json, sn.validation_diagnostics_json)"
-            in cypher
+            "sn.validation_diagnostics_json = b.validation_diagnostics_json" in cypher
         )
 
         # created_at should use coalesce(sn.created_at, datetime()) — preserve existing
@@ -138,14 +140,10 @@ class TestWriteStandardNames:
         unit_calls = [
             call
             for call in mock_gc.query.call_args_list
-            if "HAS_UNIT" in str(call) and "Unit" in str(call)
+            if "MERGE (u:Unit {id: b.unit})" in call[0][0]
+            and "MERGE (sn)-[:HAS_UNIT]->(u)" in call[0][0]
         ]
-        assert len(unit_calls) >= 1, "Should create HAS_UNIT relationship"
-
-        unit_cypher = unit_calls[0][0][0]
-        assert "Unit" in unit_cypher
-        assert "MERGE (u:Unit" in unit_cypher
-        assert "MERGE (sn)-[:HAS_UNIT]->(u)" in unit_cypher
+        assert len(unit_calls) == 1, "Should create one precise HAS_UNIT write"
 
     def test_no_unit_relationship_when_no_units(self) -> None:
         """Names without units should NOT create HAS_UNIT relationships."""
