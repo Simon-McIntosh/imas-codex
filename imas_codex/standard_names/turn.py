@@ -7,21 +7,7 @@ Provides:
 
 from __future__ import annotations
 
-# Valid --only phase choices (CLI enforces this set).
-TURN_PHASES: tuple[str, ...] = (
-    "reconcile",
-    "attach",
-    "extract",
-    "compose",
-    "validate",
-    "consolidate",
-    "persist",
-    "enrich",
-    "review",
-    "review_names",
-    "review_docs",
-    "link",
-)
+from imas_codex.standard_names.pool_registry import POOL_NAMES
 
 # Maps an --only value to the set of turn-level phases to keep running.
 # Everything outside the set is skipped.
@@ -42,6 +28,32 @@ _ONLY_TO_ACTIVE: dict[str, set[str]] = {
     "link": {"link"},
 }
 
+# A single-quorum action needs a pool boundary, not the broader name-review
+# axis. Derive the eligible pool identifiers from the canonical pool registry;
+# the action vocabulary is policy, while the pool-name universe remains owned
+# by ``pool_registry.POOL_NAMES``.
+_NAME_REVIEW_ACTIONS = frozenset({"review", "refine"})
+_EXACT_POOL_SELECTORS: dict[str, str] = {
+    pool_name: pool_name
+    for pool_name in POOL_NAMES
+    if pool_name.endswith("_name")
+    and pool_name.removesuffix("_name") in _NAME_REVIEW_ACTIONS
+}
+
+# Valid --only choices (CLI enforces this set). Broad phase selectors preserve
+# their historical multi-pool meaning; exact selectors name one worker pool.
+TURN_PHASES: tuple[str, ...] = (*_ONLY_TO_ACTIVE, *_EXACT_POOL_SELECTORS)
+
+
+def exact_pool_from_only(only_phase: str | None) -> str | None:
+    """Resolve an exact pool selector while preserving broad phase selectors."""
+    if only_phase is None or only_phase in _ONLY_TO_ACTIVE:
+        return None
+    try:
+        return _EXACT_POOL_SELECTORS[only_phase]
+    except KeyError as exc:
+        raise ValueError(f"unknown --only selector: {only_phase}") from exc
+
 
 def skip_flags_from_only(only_phase: str | None) -> dict[str, bool]:
     """Derive per-phase skip flags from an ``--only`` selection.
@@ -53,7 +65,10 @@ def skip_flags_from_only(only_phase: str | None) -> dict[str, bool]:
     if only_phase is None:
         return {}
 
-    active = _ONLY_TO_ACTIVE.get(only_phase, set())
+    if only_phase in _EXACT_POOL_SELECTORS:
+        active = {"review_names"}
+    else:
+        active = _ONLY_TO_ACTIVE.get(only_phase, set())
     return {
         "skip_generate": "generate" not in active,
         "skip_enrich": "enrich" not in active,

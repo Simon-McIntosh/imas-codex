@@ -371,6 +371,47 @@ def test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection(
     assert run.call_args.kwargs["skip_generate"] is True
 
 
+def test_exact_name_review_action_routes_to_one_pool() -> None:
+    helper_result = {
+        "name_ids": ["poloidal_flux"],
+        "run_id": "scope-run",
+        "dry_run": False,
+        "stamped": 1,
+    }
+    with (
+        patch("imas_codex.cli.sn._require_embed_ready"),
+        patch("imas_codex.cli.sn._auto_sync_grammar"),
+        patch("imas_codex.cli.sn._note_pipeline_version_drift"),
+        patch(
+            "imas_codex.standard_names.graph_ops.scope_exact_standard_names",
+            return_value=helper_result,
+        ),
+        patch("imas_codex.cli.sn._run_sn_cmd") as run,
+    ):
+        result = CliRunner().invoke(
+            sn,
+            [
+                "run",
+                "--name",
+                "poloidal_flux",
+                "--only",
+                "review_name",
+                "--names-only",
+                "--edits",
+                "--skip-global-maintenance",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    kwargs = run.call_args.kwargs
+    assert kwargs["only"] == "review_name"
+    assert kwargs["names_only"] is True
+    assert kwargs["edits_only"] is True
+    assert kwargs["skip_global_maintenance"] is True
+    assert kwargs["skip_generate"] is True
+    assert kwargs["scope_size_hint"] == 1
+
+
 def test_exact_parent_enrich_routes_only_enrichment_pool_flags() -> None:
     helper_result = {
         "name_ids": ["flux"],

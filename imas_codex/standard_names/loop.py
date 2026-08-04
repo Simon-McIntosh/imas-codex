@@ -105,9 +105,9 @@ def _count_scope_names(
     """Return the number of StandardName nodes bound to *scope_run_id*.
 
     This is the size of a ``--focus`` scoped drain — the natural ceiling on how
-    many nodes any pool can concurrently work. Used to cap docs-pool replicas so
-    concurrency never exceeds the available work. Returns 0 on any query error
-    (the caller then leaves configured replicas unchanged).
+    many nodes any pool can concurrently work. Exact-name scopes pass their
+    already-known cardinality instead, so this fallback query is issued only for
+    scope modes that do not know their size. Returns 0 on any query error.
     """
     from imas_codex.graph.client import GraphClient
 
@@ -147,6 +147,7 @@ def _build_pool_specs(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     only_domain: str | None = None,
     scope_run_id: str | None = None,
+    scope_size_hint: int | None = None,
     drain_scope_id: str | None = None,
     edits_only: bool = False,
     names_only: bool = False,
@@ -154,6 +155,7 @@ def _build_pool_specs(
     flush: bool = False,
     skip_review: bool = False,
     skip_generate: bool = False,
+    only_pool: str | None = None,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -205,7 +207,7 @@ def _build_pool_specs(
         release_review_docs_claims,
         release_review_names_claims,
     )
-    from imas_codex.standard_names.pools import PoolSpec
+    from imas_codex.standard_names.pools import POOL_NAMES, PoolSpec
     from imas_codex.standard_names.workers import (
         process_enrich_parents_batch,
         process_generate_docs_batch,
@@ -215,6 +217,9 @@ def _build_pool_specs(
         process_review_docs_batch,
         process_review_name_batch,
     )
+
+    if only_pool is not None and only_pool not in POOL_NAMES:
+        raise ValueError(f"unknown standard-name pool: {only_pool}")
 
     regen_score = min_score if min_score is not None else DEFAULT_MIN_SCORE
     _rotation_cap_kwargs: dict[str, Any] = {}
@@ -388,34 +393,43 @@ def _build_pool_specs(
     _refine_docs_replicas = get_pool_replicas("refine_docs")
     _enrich_parents_replicas = get_pool_replicas("enrich_parents")
 
-    # Scoped drains (``--focus``/``--edits``) target a small, bounded set of
-    # names. Running the configured replica count (tuned for an unbounded global
-    # run) against a 1–2-name eligible set is pure amplification: N replicas all
-    # bind the same node, all pass the paid LLM call, and only one persist lands
-    # — the claim-race waste the settle+seq verify only partially recovers. Cap
-    # each docs pool's replicas at ~half the scope size (min 1) so concurrency
-    # never exceeds the work available. The names pools are left alone: a scoped
-    # docs drain (``docs_only``) is where this pathology was measured, and the
-    # scope size is the natural ceiling for the docs axis.
-    if scope_run_id or drain_scope_id:
+    # A scoped run has a finite actionable set. Never launch more claim loops
+    # than names: excess replicas only amplify claim/readback traffic against
+    # the same nodes. Exact-name callers already know cardinality and provide a
+    # hint, avoiding a graph recount; other scoped modes retain one count query.
+    if scope_size_hint is not None:
+        if (
+            not isinstance(scope_size_hint, int)
+            or isinstance(scope_size_hint, bool)
+            or scope_size_hint <= 0
+        ):
+            raise ValueError("scope_size_hint must be a positive integer")
+        if not (scope_run_id or drain_scope_id):
+            raise ValueError("scope_size_hint requires a bounded graph scope")
+        _scope_size = scope_size_hint
+    elif scope_run_id or drain_scope_id:
+        _scope_size = _count_scope_names(scope_run_id, drain_scope_id)
+    else:
+        _scope_size = 0
+
+    if _scope_size > 0:
         import math
 
-        _scope_size = _count_scope_names(scope_run_id, drain_scope_id)
-        if _scope_size > 0:
-            _cap = max(1, math.ceil(_scope_size / 2))
-            _gen_docs_replicas = min(_gen_docs_replicas, _cap)
-            _review_docs_replicas = min(_review_docs_replicas, _cap)
-            _refine_docs_replicas = min(_refine_docs_replicas, _cap)
-            logger.info(
-                "scoped run (%s): %d names in scope — docs-pool replicas capped "
-                "at %d (generate=%d review=%d refine=%d)",
-                scope_run_id or drain_scope_id,
-                _scope_size,
-                _cap,
-                _gen_docs_replicas,
-                _review_docs_replicas,
-                _refine_docs_replicas,
-            )
+        _gen_name_replicas = min(_gen_name_replicas, _scope_size)
+        _review_name_replicas = min(_review_name_replicas, _scope_size)
+        _refine_name_replicas = min(_refine_name_replicas, _scope_size)
+        _enrich_parents_replicas = min(_enrich_parents_replicas, _scope_size)
+        _docs_cap = max(1, math.ceil(_scope_size / 2))
+        _gen_docs_replicas = min(_gen_docs_replicas, _docs_cap)
+        _review_docs_replicas = min(_review_docs_replicas, _docs_cap)
+        _refine_docs_replicas = min(_refine_docs_replicas, _docs_cap)
+        logger.info(
+            "scoped run (%s): %d names — every pool capped at cardinality; "
+            "docs capped at %d",
+            scope_run_id or drain_scope_id,
+            _scope_size,
+            _docs_cap,
+        )
 
     specs = [
         PoolSpec(
@@ -552,6 +566,17 @@ def _build_pool_specs(
             "refine_docs",
         }
         specs = [s for s in specs if s.name not in _REVIEW_REFINE_POOLS]
+
+    # Exact action selectors are applied after the established coarse filters,
+    # so names-only/docs-only and review suppression retain their safety
+    # semantics. A contradictory combination fails instead of silently running
+    # zero pools or widening to an adjacent review/refine action.
+    if only_pool is not None:
+        specs = [spec for spec in specs if spec.name == only_pool]
+        if len(specs) != 1:
+            raise ValueError(
+                f"exact pool {only_pool!r} is excluded by another pool filter"
+            )
 
     # ── Backlog throttle wiring ───────────────────────────────────────
     # Upstream generators/refiners pause when their downstream review
@@ -785,6 +810,7 @@ async def run_sn_pools(
     on_event: Callable[[dict[str, Any]], None] | None = None,
     display: Any | None = None,
     scope_run_id: str | None = None,
+    scope_size_hint: int | None = None,
     drain_scope_id: str | None = None,
     drain_paths: tuple[str, ...] = (),
     drain_dd_version: str | None = None,
@@ -794,6 +820,7 @@ async def run_sn_pools(
     flush: bool = False,
     skip_review: bool = False,
     skip_generate: bool = False,
+    only_pool: str | None = None,
     attach_only: bool = False,
     reconcile_only: bool = False,
     skip_global_maintenance: bool = False,
@@ -878,9 +905,25 @@ async def run_sn_pools(
             post-drain maintenance while retaining the ordinary scoped worker
             pools and run audit. Requires *scope_run_id* and is incompatible
             with maintenance-only modes.
+        only_pool: Restrict operational work to exactly one canonical worker
+            pool. Broad ``--only`` phases leave this unset.
+        scope_size_hint: Known positive cardinality for a bounded graph scope.
+            Exact-name callers provide it to avoid recounting the graph.
     """
     from imas_codex.standard_names.budget import BudgetManager
-    from imas_codex.standard_names.pools import run_pools
+    from imas_codex.standard_names.pools import POOL_NAMES, run_pools
+
+    if only_pool is not None and only_pool not in POOL_NAMES:
+        raise ValueError(f"unknown standard-name pool: {only_pool}")
+    if scope_size_hint is not None:
+        if (
+            not isinstance(scope_size_hint, int)
+            or isinstance(scope_size_hint, bool)
+            or scope_size_hint <= 0
+        ):
+            raise ValueError("scope_size_hint must be a positive integer")
+        if not (scope_run_id or drain_scope_id):
+            raise ValueError("scope_size_hint requires a bounded graph scope")
 
     started = datetime.now(UTC)
 
@@ -1613,6 +1656,7 @@ async def run_sn_pools(
             on_event=on_event,
             only_domain=_only_domain_for_pools,
             scope_run_id=scope_run_id,
+            scope_size_hint=scope_size_hint,
             drain_scope_id=drain_scope_id,
             edits_only=edits_only,
             names_only=names_only,
@@ -1620,6 +1664,7 @@ async def run_sn_pools(
             flush=flush,
             skip_review=skip_review,
             skip_generate=skip_generate,
+            only_pool=only_pool,
         )
 
         # ── Wire pool health into display state ───────────────────
