@@ -16,8 +16,8 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="94">
+<meta name="plan-modified" content="2026-08-05">
+<meta name="plan-version" content="95">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -982,6 +982,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="flush-safety-verification-hold-20260804" data-who="reckon-ship" data-when="2026-08-04T23:58:00+02:00" data-quote="Independent verification: HOLD">
     <div class="r-comment-body"><p>The first terminal-drain candidate <code>52467b9a</code> was not integrated. The terminal-count, stall, nonzero-exit, fresh-epoch and six-pool flush contracts passed, but two P1 budget defects remain: empirical per-call estimates do not prove a pre-provider maximum charge, and billable structured failures are not charged in every compose/review/docs/fanout catch path. The single full <code>sun_debug</code> run therefore remains red at 23 failed, 6268 passed, 10 skipped and 211 deselected; 22 failures are stale contract expectations and one is an archive-without-git staging artifact. Job 1240919 had no OOM; retained log <code>~/.cache/flush-safety-full-suite-52467b9a.log</code>, SHA-256 <code>432edfab442d6d9c073632ffe4d71e30dcc1474ca0dabe926d56d9a189ea9bc0</code>. Repair requires pricing/token-derived fail-closed reservations plus exact-once exception-cost accounting before any paid pipeline run. No graph write, provider call or pipeline action occurred.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="attachment-guard-bypass-audit-20260805" data-who="reckon-ship" data-when="2026-08-05T00:02:26+02:00" data-quote="Read-only attachment admission audit">
+    <div class="r-comment-body"><p><strong>The attachment defect is a shared admission-boundary failure, not just bad prompt prose.</strong> Current guard logic is embedded in <code>workers._is_attachment_consistent</code>; compose and stable attachment call it, while audit/retarget wrap the same narrow path/unit predicate. It does not compare parsed base, subject/object, mechanism/process, projection, transformation, aggregation, surface kind or complete representation evidence, so equal units mask the audited 94+ semantic losses.</p><p><strong>A concrete fail-open bypass is now proven.</strong> <code>tombstone_supersede_into</code> creates new target pairings before calling <code>retarget_standard_name_sources</code>; the guard then sees <code>already_bound</code> and admits them. Its later migrated-attachment check is non-transactional and catches exceptions. Manifest reconciliation and legacy semantic repair likewise select topology/scalar authority without proving semantic compatibility. The repair therefore requires one public-parser-backed compatibility engine called before every compose, attach, retarget, exclusive bind, edit cascade, fold, manifest reconcile and legacy repair write, repeated inside the source-CAS transaction, and reused by the retroactive audit. Unknown or contradictory material evidence refuses attachment. COCOS remains outside this engine: DDv4 catalog COCOS 17 and <code>psi_like</code>/<code>ip_like</code>/null labels stay unchanged. The audit was read-only with no graph, provider, pipeline or file mutation.</p></div>
 </div>
 </section>
 </main>
