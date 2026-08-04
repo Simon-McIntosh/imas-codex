@@ -1075,7 +1075,7 @@ class TestMixConfig:
         )
 
     def test_score_grid_batches_each_candidate_corpus(self):
-        """A 203-query evaluation uses at most one Bolt call per corpus."""
+        """Graph traffic stays constant as in-memory scoring work grows."""
 
         expected_by_query = {
             query.query_text: query.expected_paths[0] for query in ALL_QUERIES
@@ -1126,36 +1126,50 @@ class TestMixConfig:
                         )
                 return rows
 
-        graph = CountingGraph()
-        encoder = CountingEncoder()
-        cache = SearchEvaluationCache()
         queries = ALL_QUERIES
-        configs = generate_doe_grid()
+        exhaustive_configs = generate_doe_grid()
+        observed: list[tuple[int, int, int, int]] = []
 
-        channels = precompute_search_channels(
-            graph,
-            encoder,
-            configs,
-            queries,
-            max_results=50,
-            search_evaluation_cache=cache,
-        )
-        retrieval_counts = (graph.calls, encoder.calls)
-        for config in configs:
-            metrics = evaluate_config(
-                config,
+        for configs in (
+            exhaustive_configs[:1],
+            exhaustive_configs[:41],
+            exhaustive_configs,
+        ):
+            graph = CountingGraph()
+            encoder = CountingEncoder()
+            cache = SearchEvaluationCache()
+            channels = precompute_search_channels(
                 graph,
                 encoder,
+                configs,
                 queries,
-                precomputed_channels=channels,
+                max_results=50,
+                search_evaluation_cache=cache,
             )
-            assert metrics["mrr"] > 0.99
-            assert metrics["query_count"] == 203
+            retrieval_counts = (graph.calls, encoder.calls)
+            scored_queries = 0
+            for config in configs:
+                metrics = evaluate_config(
+                    config,
+                    graph,
+                    encoder,
+                    queries,
+                    precomputed_channels=channels,
+                )
+                assert metrics["mrr"] > 0.99
+                scored_queries += metrics["query_count"]
 
-        assert retrieval_counts == (3, 1)
-        assert (graph.calls, encoder.calls) == retrieval_counts
-        assert len(configs) == 269
-        assert len(channels) == len({query.query_text for query in ALL_QUERIES})
+            assert retrieval_counts == (3, 1)
+            assert (graph.calls, encoder.calls) == retrieval_counts
+            assert len(channels) == len({query.query_text for query in ALL_QUERIES})
+            observed.append((len(configs), graph.calls, encoder.calls, scored_queries))
+
+        assert len(exhaustive_configs) == 269
+        assert observed == [
+            (1, 3, 1, 203),
+            (41, 3, 1, 41 * 203),
+            (269, 3, 1, 269 * 203),
+        ]
 
 
 class TestDoEGrid:
