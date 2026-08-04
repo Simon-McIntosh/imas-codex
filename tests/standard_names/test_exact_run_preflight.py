@@ -1,4 +1,4 @@
-"""One-query authorization evidence for exact paid name refinement."""
+"""One-query authorization evidence for exact paid name operations."""
 
 from __future__ import annotations
 
@@ -9,6 +9,9 @@ from unittest.mock import patch
 import pytest
 
 from imas_codex.standard_names import graph_ops, run_preflight
+from imas_codex.standard_names.defaults import (
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+)
 from imas_codex.standard_names.run_preflight import (
     audit_exact_standard_name_preflight,
 )
@@ -42,10 +45,12 @@ def _row(label: str | None = None) -> dict[str, object]:
                 "docs_stage": "pending",
                 "status": "draft",
                 "validation_status": "valid",
+                "description": "A reviewable DD-grounded quantity.",
                 "reviewer_score_name": 0.5,
                 "chain_length": 1,
                 "review_resubmit_count": 0,
                 "origin": "pipeline",
+                "facility": None,
                 "edit_mode": None,
                 "edit_status": None,
                 "unit": "m",
@@ -63,8 +68,10 @@ def _row(label: str | None = None) -> dict[str, object]:
                 "drain_claim_scope_id": None,
             }
         ],
+        "action_count": 1,
+        "action_element_ids": ["target-1"],
         "refine_action_count": 1,
-        "refine_action_element_ids": ["target-1"],
+        "review_action_count": 0,
         "sources": [
             {
                 "element_id": "source-1",
@@ -130,6 +137,19 @@ def _audit(row: dict[str, object], **overrides: object):
     return receipt, client
 
 
+def _review_row(label: str | None = None) -> dict[str, object]:
+    row = _row(label)
+    target = row["targets"][0]  # type: ignore[index]
+    target["name_stage"] = "drafted"
+    target["reviewer_score_name"] = None
+    target["chain_length"] = 2
+    row["action_count"] = 1
+    row["refine_action_count"] = 0
+    row["review_action_count"] = 1
+    row["accepted_or_protected_lineage_ids"] = ["accepted_predecessor"]
+    return row
+
+
 @pytest.mark.parametrize("label", [None, "psi_like", "ip_like"])
 def test_pass_retains_exact_cocos_label_and_historical_run_id(
     label: str | None,
@@ -138,6 +158,9 @@ def test_pass_retains_exact_cocos_label_and_historical_run_id(
 
     assert receipt.passed is True
     assert receipt.query_count == len(client.calls) == 1
+    assert receipt.operation == "refine_name"
+    assert receipt.action_count == receipt.refine_action_count == 1
+    assert receipt.review_action_count == 0
     assert receipt.target_run_id == "historical-run"
     assert receipt.catalog_cocos == [17]
     assert receipt.per_path_cocos_labels == {PATH: label}
@@ -152,6 +175,14 @@ def test_claim_and_preflight_consume_the_same_eligibility_predicate() -> None:
     )
     assert (
         graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+        in run_preflight._EXACT_STANDARD_NAME_PREFLIGHT_QUERY
+    )
+    assert (
+        run_preflight.REVIEW_NAME_ELIGIBILITY_WHERE
+        is graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE
+    )
+    assert (
+        graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE
         in run_preflight._EXACT_STANDARD_NAME_PREFLIGHT_QUERY
     )
     assert (
@@ -175,6 +206,157 @@ def test_claim_and_preflight_consume_the_same_eligibility_predicate() -> None:
         claim.call_args.kwargs["eligibility_where"]
         is graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
     )
+    with (
+        patch.object(graph_ops, "_claim_sn_atomic", return_value=[]) as claim,
+        patch.object(graph_ops, "_verify_name_claim_winners", return_value=[]),
+    ):
+        graph_ops.claim_review_name_batch(facility="west", drain_scope_id="drain")
+    assert (
+        claim.call_args.kwargs["eligibility_where"]
+        is graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE
+    )
+    assert claim.call_args.kwargs["query_params"] == {
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        "drain_scope_id": "drain",
+        "min_score": graph_ops.DEFAULT_MIN_SCORE,
+        "facility": "west",
+    }
+
+
+@pytest.mark.parametrize("label", [None, "psi_like", "ip_like"])
+def test_review_pass_retains_exact_cocos_label_and_accepted_predecessor(
+    label: str | None,
+) -> None:
+    receipt, client = _audit(_review_row(label), operation="review_name")
+
+    assert receipt.passed is True
+    assert receipt.query_count == len(client.calls) == 1
+    assert receipt.operation == "review_name"
+    assert receipt.action_count == receipt.review_action_count == 1
+    assert receipt.refine_action_count == 0
+    assert receipt.accepted_or_protected_lineage_ids == ["accepted_predecessor"]
+    assert receipt.per_path_cocos_labels == {PATH: label}
+
+
+def test_review_explicit_drain_scope_accepts_already_passing_review() -> None:
+    row = _review_row()
+    target = row["targets"][0]  # type: ignore[index]
+    target["name_stage"] = "reviewed"
+    target["reviewer_score_name"] = 0.9
+
+    receipt, _client = _audit(
+        row,
+        operation="review_name",
+        drain_scope_id="exact-drain",
+    )
+
+    assert receipt.passed is True
+    assert receipt.drain_scope_id == "exact-drain"
+
+
+@pytest.mark.parametrize(
+    ("mutation", "diagnostic"),
+    [
+        ("stage", "target is not staged for name review"),
+        ("validation", "target validation status is not valid"),
+        ("description", "target has no reviewable description"),
+        (
+            "placeholder",
+            "target still carries the deterministic parent placeholder",
+        ),
+        ("derived", "derived names are structurally fixed"),
+        ("facility", "target facility does not match review scope"),
+        ("cardinality", "exact review_name action cardinality is 0"),
+    ],
+)
+def test_review_specific_ineligibility_refuses(mutation: str, diagnostic: str) -> None:
+    row = _review_row()
+    target = row["targets"][0]  # type: ignore[index]
+    kwargs: dict[str, object] = {"operation": "review_name"}
+    if mutation == "stage":
+        target["name_stage"] = "accepted"
+    elif mutation == "validation":
+        target["validation_status"] = "quarantined"
+    elif mutation == "description":
+        target["description"] = None
+    elif mutation == "placeholder":
+        target["description"] = DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER
+    elif mutation == "derived":
+        target["origin"] = "derived"
+    elif mutation == "facility":
+        target["facility"] = "iter"
+        kwargs["facility"] = "west"
+    row["review_action_count"] = 0
+
+    receipt, _client = _audit(row, **kwargs)
+
+    assert receipt.passed is False
+    assert diagnostic in receipt.diagnostics
+
+
+@pytest.mark.parametrize(
+    ("mutation", "diagnostic"),
+    [
+        ("claim", "target has an active worker or drain lease"),
+        ("protection", "structural lineage intersects WEST or fixture sources"),
+        ("dd_version", "target DD version is not current"),
+        ("unit", "target unit property and relationship differ"),
+        ("cocos", "target did not preserve the per-path COCOS label"),
+        ("successor", "target already has a refined successor"),
+        ("predecessors", "target has ambiguous refinement predecessors"),
+    ],
+)
+def test_review_shared_safety_evidence_refuses(mutation: str, diagnostic: str) -> None:
+    row = _review_row("psi_like")
+    target = row["targets"][0]  # type: ignore[index]
+    if mutation == "claim":
+        target["claim_token"] = "occupied"
+    elif mutation == "protection":
+        row["protected_source_ids"] = ["dd:west/protected"]
+    elif mutation == "dd_version":
+        target["dd_version"] = "4.0.0"
+    elif mutation == "unit":
+        target["unit"] = "s"
+    elif mutation == "cocos":
+        target["cocos_transformation_type"] = "ip_like"
+    elif mutation == "successor":
+        row["successor_ids"] = ["later_candidate"]
+    else:
+        row["predecessor_ids"] = ["earlier_a", "earlier_b"]
+
+    receipt, _client = _audit(row, operation="review_name")
+
+    assert receipt.passed is False
+    assert diagnostic in receipt.diagnostics
+
+
+def test_review_budget_overflow_refuses() -> None:
+    receipt, _client = _audit(
+        _review_row(),
+        operation="review_name",
+        requested_cost_ceiling="5.01",
+        cumulative_spend="195.00",
+    )
+
+    assert receipt.passed is False
+    assert "requested cost ceiling exceeds authorized budget" in receipt.diagnostics
+
+
+def test_invalid_operation_refuses_before_graph_access() -> None:
+    client = _Client([_review_row()])
+
+    with pytest.raises(ValueError, match="operation must be"):
+        audit_exact_standard_name_preflight(
+            NAME,
+            operation="generate_name",  # type: ignore[arg-type]
+            requested_cost_ceiling="0.5",
+            cumulative_spend="5",
+            authorized_budget="200",
+            dd_version="4.1.1",
+            gc=client,
+        )
+
+    assert client.calls == []
 
 
 @pytest.mark.parametrize(

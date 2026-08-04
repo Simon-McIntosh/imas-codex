@@ -1,10 +1,10 @@
-"""Fail-closed evidence for authorizing one exact paid name refinement."""
+"""Fail-closed evidence for authorizing one exact paid name operation."""
 
 from __future__ import annotations
 
 from contextlib import nullcontext
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -12,8 +12,12 @@ from imas_codex.settings import get_dd_version
 from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
-from imas_codex.standard_names.graph_ops import REFINE_NAME_ELIGIBILITY_WHERE
+from imas_codex.standard_names.graph_ops import (
+    REFINE_NAME_ELIGIBILITY_WHERE,
+    REVIEW_NAME_ELIGIBILITY_WHERE,
+)
 
 if TYPE_CHECKING:
     from imas_codex.graph.client import GraphClient
@@ -26,9 +30,15 @@ WITH collect(candidate) AS target_matches
 CALL (target_matches) {{
   UNWIND target_matches AS sn
   WITH sn
-  WHERE {REFINE_NAME_ELIGIBILITY_WHERE}
-  RETURN count(sn) AS refine_action_count,
-         collect(elementId(sn)) AS refine_action_element_ids
+  WHERE ($operation = 'refine_name' AND ({REFINE_NAME_ELIGIBILITY_WHERE}))
+     OR ($operation = 'review_name' AND ({REVIEW_NAME_ELIGIBILITY_WHERE}))
+  WITH count(sn) AS action_count,
+       collect(elementId(sn)) AS action_element_ids
+  RETURN action_count, action_element_ids,
+         CASE WHEN $operation = 'refine_name' THEN action_count ELSE 0 END
+           AS refine_action_count,
+         CASE WHEN $operation = 'review_name' THEN action_count ELSE 0 END
+           AS review_action_count
 }}
 CALL (target_matches) {{
   WITH head(target_matches) AS target
@@ -121,7 +131,8 @@ CALL (target_matches) {{
   RETURN collect(DISTINCT protected_source.id) AS protected_source_ids
 }}
 OPTIONAL MATCH (catalog:DDVersion {{id: $dd_version}})
-WITH target_matches, refine_action_count, refine_action_element_ids,
+WITH target_matches, action_count, action_element_ids,
+     refine_action_count, review_action_count,
      sources, target_unit_ids, target_unit_edge_ids,
      predecessor_ids, successor_ids, accepted_or_protected_lineage_ids,
      protected_source_ids, collect(catalog) AS catalog_matches
@@ -138,10 +149,12 @@ RETURN [target IN target_matches | {{
          docs_stage: target.docs_stage,
          status: target.status,
          validation_status: target.validation_status,
+         description: target.description,
          reviewer_score_name: target.reviewer_score_name,
          chain_length: target.chain_length,
          review_resubmit_count: target.review_resubmit_count,
          origin: target.origin,
+         facility: target.facility,
          edit_mode: target.edit_mode,
          edit_status: target.edit_status,
          unit: target.unit,
@@ -157,7 +170,8 @@ RETURN [target IN target_matches | {{
          drain_scope_claimed_at: target.drain_scope_claimed_at,
          drain_claim_scope_id: target.drain_claim_scope_id
        }}] AS targets,
-       refine_action_count, refine_action_element_ids,
+       action_count, action_element_ids,
+       refine_action_count, review_action_count,
        sources, target_unit_ids, target_unit_edge_ids,
        predecessor_ids, successor_ids, accepted_or_protected_lineage_ids,
        protected_source_ids,
@@ -173,7 +187,7 @@ RETURN [target IN target_matches | {{
 
 
 class ExactStandardNamePreflightReceipt(BaseModel):
-    """Machine-readable authorization evidence for one exact refinement."""
+    """Machine-readable authorization evidence for one exact paid operation."""
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -191,8 +205,13 @@ class ExactStandardNamePreflightReceipt(BaseModel):
     budget_remaining_after: Decimal
     raw_evidence: dict[str, Any] = Field(default_factory=dict)
 
+    operation: Literal["review_name", "refine_name"] = "refine_name"
+    action_count: int = 0
     identity_count: int = 0
     refine_action_count: int = 0
+    review_action_count: int = 0
+    facility: str | None = None
+    drain_scope_id: str | None = None
     target_name_stage: str | None = None
     target_status: str | None = None
     target_validation_status: str | None = None
@@ -254,6 +273,12 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
     targets = evidence.get("targets") or []
     receipt.identity_count = len(targets)
     receipt.refine_action_count = int(evidence.get("refine_action_count") or 0)
+    receipt.review_action_count = int(evidence.get("review_action_count") or 0)
+    receipt.action_count = (
+        receipt.refine_action_count
+        if receipt.operation == "refine_name"
+        else receipt.review_action_count
+    )
     if receipt.identity_count != 1:
         receipt.diagnostics.append(
             f"exact StandardName identity resolved to {receipt.identity_count} rows"
@@ -270,29 +295,61 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
         receipt.target_run_id = target.get("run_id")
         receipt.target_claim_fields = _claim_fields(target)
 
-        if receipt.target_name_stage != "reviewed":
-            receipt.diagnostics.append("target name stage is not reviewed")
-        if receipt.target_score is None:
-            receipt.diagnostics.append("target has no name-review score")
-        elif receipt.target_score >= receipt.min_score:
-            receipt.diagnostics.append("target name-review score is not below minimum")
-        if receipt.target_chain_length >= receipt.rotation_cap:
-            receipt.diagnostics.append(
-                "target refinement chain reached the rotation cap"
+        if receipt.operation == "refine_name":
+            if receipt.target_name_stage != "reviewed":
+                receipt.diagnostics.append("target name stage is not reviewed")
+            if receipt.target_score is None:
+                receipt.diagnostics.append("target has no name-review score")
+            elif receipt.target_score >= receipt.min_score:
+                receipt.diagnostics.append(
+                    "target name-review score is not below minimum"
+                )
+            if receipt.target_chain_length >= receipt.rotation_cap:
+                receipt.diagnostics.append(
+                    "target refinement chain reached the rotation cap"
+                )
+            if (
+                receipt.target_edit_mode == "rename"
+                and int(target.get("review_resubmit_count") or 0)
+                >= receipt.rotation_cap
+            ):
+                receipt.diagnostics.append(
+                    "pinned rename exhausted its re-review budget"
+                )
+        else:
+            drafted = receipt.target_name_stage == "drafted"
+            drain_restage = (
+                receipt.drain_scope_id is not None
+                and receipt.target_name_stage == "reviewed"
+                and receipt.target_score is not None
+                and receipt.target_score >= receipt.min_score
             )
-        if (
-            receipt.target_edit_mode == "rename"
-            and int(target.get("review_resubmit_count") or 0) >= receipt.rotation_cap
-        ):
-            receipt.diagnostics.append("pinned rename exhausted its re-review budget")
+            if not (drafted or drain_restage):
+                receipt.diagnostics.append("target is not staged for name review")
+            if receipt.target_validation_status != "valid":
+                receipt.diagnostics.append("target validation status is not valid")
+            description = target.get("description")
+            if description is None:
+                receipt.diagnostics.append("target has no reviewable description")
+            elif description == DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER:
+                receipt.diagnostics.append(
+                    "target still carries the deterministic parent placeholder"
+                )
+            if (
+                receipt.facility is not None
+                and target.get("facility") != receipt.facility
+            ):
+                receipt.diagnostics.append(
+                    "target facility does not match review scope"
+                )
         if receipt.target_origin == "derived":
             receipt.diagnostics.append("derived names are structurally fixed")
         if any(value is not None for value in receipt.target_claim_fields.values()):
             receipt.diagnostics.append("target has an active worker or drain lease")
 
-    if receipt.refine_action_count != 1:
+    if receipt.action_count != 1:
         receipt.diagnostics.append(
-            f"exact refine_name action cardinality is {receipt.refine_action_count}"
+            f"exact {receipt.operation} action cardinality is {receipt.action_count}"
         )
 
     sources = evidence.get("sources") or []
@@ -468,7 +525,7 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
         receipt.diagnostics.append("target has ambiguous refinement predecessors")
     if receipt.successor_ids:
         receipt.diagnostics.append("target already has a refined successor")
-    if receipt.accepted_or_protected_lineage_ids:
+    if receipt.operation == "refine_name" and receipt.accepted_or_protected_lineage_ids:
         receipt.diagnostics.append(
             "refinement lineage intersects accepted or protected state"
         )
@@ -496,9 +553,12 @@ def audit_exact_standard_name_preflight(
     min_score: Decimal | float | str = DEFAULT_MIN_SCORE,
     rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
     dd_version: str | None = None,
+    operation: Literal["review_name", "refine_name"] = "refine_name",
+    facility: str | None = None,
+    drain_scope_id: str | None = None,
     gc: GraphClient | None = None,
 ) -> ExactStandardNamePreflightReceipt:
-    """Return one-query evidence for a paid exact ``refine_name`` decision.
+    """Return one-query evidence for an exact paid name-pipeline decision.
 
     ``run_id`` and ``last_run_id`` are returned as durable provenance but never
     interpreted as leases. Only worker and bounded-drain claim fields can block.
@@ -513,6 +573,8 @@ def audit_exact_standard_name_preflight(
         raise ValueError("dd_version is required")
     if rotation_cap <= 0:
         raise ValueError("rotation_cap must be positive")
+    if operation not in {"review_name", "refine_name"}:
+        raise ValueError("operation must be 'review_name' or 'refine_name'")
 
     ceiling = Decimal(str(requested_cost_ceiling))
     spent = Decimal(str(cumulative_spend))
@@ -530,6 +592,9 @@ def audit_exact_standard_name_preflight(
         authorized_budget=budget,
         budget_remaining_before=budget - spent,
         budget_remaining_after=budget - spent - ceiling,
+        operation=operation,
+        facility=facility,
+        drain_scope_id=drain_scope_id,
     )
 
     from imas_codex.standard_names.grammar_segment_reconciliation import (
@@ -542,6 +607,10 @@ def audit_exact_standard_name_preflight(
         "dd_version": configured_dd,
         "min_score": float(threshold),
         "rotation_cap": rotation_cap,
+        "operation": operation,
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        "facility": facility,
+        "drain_scope_id": drain_scope_id,
         "west_source_ids": sorted(_west_source_ids()),
         "fixture_source_id_prefix": _FIXTURE_SOURCE_ID_PREFIX,
     }

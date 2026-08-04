@@ -13413,6 +13413,25 @@ def claim_review_names_seed_and_expand(
 # -- review_name (name_stage='drafted', claim only) ---------------------------
 
 
+REVIEW_NAME_ELIGIBILITY_WHERE = (
+    "(sn.name_stage = 'drafted' OR "
+    "($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed' "
+    "AND sn.reviewer_score_name >= $min_score))"
+    " AND sn.validation_status = 'valid'"
+    " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
+    " AND sn.description IS NOT NULL"
+    " AND sn.description <> $parent_desc_placeholder"
+    " AND coalesce(sn.origin, '') <> 'derived'"
+    " AND ($facility IS NULL OR sn.facility = $facility)"
+)
+"""Canonical graph predicate for name-review eligibility.
+
+The drain clause permits an explicitly scoped, already-passing review to be
+restaged. A real description is mandatory, while deterministic placeholder
+parents and all derived names remain outside the review pool.
+"""
+
+
 @retry_on_deadlock()
 def claim_review_name_batch(
     facility: str | None = None,
@@ -13445,38 +13464,14 @@ def claim_review_name_batch(
         DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
     )
 
-    where = (
-        "(sn.name_stage = 'drafted' OR "
-        "($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed' "
-        "AND sn.reviewer_score_name >= $min_score))"
-        " AND sn.validation_status = 'valid'"
-        " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        # Gate: require a real description before review so the
-        # semantic_similarity_check in the review worker can run. Exclude the
-        # deterministic-parent placeholder — a derived parent still carrying it
-        # has no real description to review and must wait for enrichment.
-        " AND sn.description IS NOT NULL"
-        " AND sn.description <> $parent_desc_placeholder"
-        # Derived parents are NEVER name-reviewed (mirrors claim_refine_name_batch,
-        # which already excludes origin='derived'). A derived parent's name is a
-        # deterministic grammar peel that already passed the admission gate and
-        # generalises its accepted children by construction — the name must NOT
-        # change, so reviewing it is both wasteful and a route to a stuck
-        # 'reviewed' state (review cannot rename, refine excludes them). They are
-        # accepted STRUCTURALLY (persist_enriched_parent / the structural-accept
-        # repair) with a child-inherited score; quality is gated on the docs axis.
-        " AND coalesce(sn.origin, '') <> 'derived'"
-    )
     query_params: dict[str, Any] = {
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         "drain_scope_id": drain_scope_id,
         "min_score": min_score,
+        "facility": facility,
     }
-    if facility is not None:
-        where += " AND sn.facility = $facility"
-        query_params["facility"] = facility
     items = _claim_sn_atomic(
-        eligibility_where=where,
+        eligibility_where=REVIEW_NAME_ELIGIBILITY_WHERE,
         query_params=query_params,
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,

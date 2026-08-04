@@ -8,6 +8,9 @@ from typing import Any
 
 import pytest
 
+from imas_codex.standard_names.defaults import (
+    DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+)
 from imas_codex.standard_names.run_preflight import (
     _EXACT_STANDARD_NAME_PREFLIGHT_QUERY,
 )
@@ -36,8 +39,12 @@ def _params(name_id: str, dd_version: str) -> dict[str, object]:
     return {
         "name_id": name_id,
         "dd_version": dd_version,
+        "operation": "review_name",
         "min_score": 0.85,
         "rotation_cap": 3,
+        "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        "facility": None,
+        "drain_scope_id": None,
         "west_source_ids": [],
         "fixture_source_id_prefix": "dd:test_review_entry__",
     }
@@ -86,7 +93,10 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
                 )
             )
             session.run(
-                "MERGE (:StandardName {id: $name_id})",
+                "MERGE (:StandardName {"
+                "id: $name_id, name_stage: 'drafted', "
+                "validation_status: 'valid', origin: 'pipeline', "
+                "description: 'A reviewable exact target.'})",
                 name_id=ordinary_name,
             ).consume()
             ordinary_rows = list(
@@ -101,11 +111,16 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
             ).consume()
 
     assert len(missing_rows) == 1
-    assert dict(missing_rows[0])["targets"] == []
+    missing_receipt = dict(missing_rows[0])
+    assert missing_receipt["targets"] == []
+    assert missing_receipt["action_count"] == 0
+    assert missing_receipt["review_action_count"] == 0
     assert len(ordinary_rows) == 1
-    assert [target["id"] for target in dict(ordinary_rows[0])["targets"]] == [
-        ordinary_name
-    ]
+    ordinary_receipt = dict(ordinary_rows[0])
+    assert [target["id"] for target in ordinary_receipt["targets"]] == [ordinary_name]
+    assert ordinary_receipt["action_count"] == 1
+    assert ordinary_receipt["review_action_count"] == 1
+    assert ordinary_receipt["refine_action_count"] == 0
 
     plan_nodes = _plan_nodes(explained.plan)
     operators = [operator for operator, _arguments in plan_nodes]
