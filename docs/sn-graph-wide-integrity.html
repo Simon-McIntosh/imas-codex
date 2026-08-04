@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="93">
+<meta name="plan-version" content="94">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -979,6 +979,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260804-semantic-collapse-audit" data-who="reckon-ship" data-when="2026-08-04T23:58:00+02:00">
     <div class="r-comment-body"><p><strong>Consistency-driven semantic collapse is now a hard S7 gate.</strong> One bounded read-only query audited 3,044 change rows, 185 lineage rows, 211 source-authority events and 761 names with zero truncation except one explicitly capped 80-source geometry cohort. Receipt <code>~/.local/share/imas-codex/receipts/standard-names/s7-semantic-collapse-audit/semantic-collapse-audit.json</code>, SHA-256 <code>f0b4ab8aa2e95b680b77c2232d806f6ae7a14985dcda44edf673bddca97fac59</code>, mode <code>0600</code>. The rejected flux-area fold never applied, but 25 live flux-area attachments already erase or misapply the poloidal/swept distinction. Across the bounded audit, 86 attachments across 10 accepted identities are proven wrong and eight across four more are high-confidence, for an actionable minimum of 94 across 14 identities.</p><p><strong>Applied folds are not uniformly bad.</strong> Of 17 applied fold events, 13 are preserving/corrective, three are lossy and one lacks sufficient evidence. Proven live cohorts include 23 generic flux-area attachments, 12 magnetic/vector-potential sources attached to E×B energy flux, 37 non-line-of-sight geometries attached to radial/vertical line-of-sight coordinates, and seven other-object outlines attached to an iron-core identity. The root cause is unproved equivalence: contradictory NC-1 guidance favors generic area, attachment repair does not gate heterogeneous source semantics, and docs can mask qualifiers omitted from names. Plan implementation is reset to 0.90; generation and automatic folding remain held until prevention, exact repair and independent verification land.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="flush-safety-verification-hold-20260804" data-who="reckon-ship" data-when="2026-08-04T23:58:00+02:00" data-quote="Independent verification: HOLD">
+    <div class="r-comment-body"><p>The first terminal-drain candidate <code>52467b9a</code> was not integrated. The terminal-count, stall, nonzero-exit, fresh-epoch and six-pool flush contracts passed, but two P1 budget defects remain: empirical per-call estimates do not prove a pre-provider maximum charge, and billable structured failures are not charged in every compose/review/docs/fanout catch path. The single full <code>sun_debug</code> run therefore remains red at 23 failed, 6268 passed, 10 skipped and 211 deselected; 22 failures are stale contract expectations and one is an archive-without-git staging artifact. Job 1240919 had no OOM; retained log <code>~/.cache/flush-safety-full-suite-52467b9a.log</code>, SHA-256 <code>432edfab442d6d9c073632ffe4d71e30dcc1474ca0dabe926d56d9a189ea9bc0</code>. Repair requires pricing/token-derived fail-closed reservations plus exact-once exception-cost accounting before any paid pipeline run. No graph write, provider call or pipeline action occurred.</p></div>
 </div>
 </section>
 </main>
