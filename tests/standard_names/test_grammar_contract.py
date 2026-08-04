@@ -285,13 +285,19 @@ def test_persist_and_decomposition_parity(name: str, expect_rejected: bool):
 
 
 def test_write_standard_names_persists_grammar_segments():
-    """write_standard_names MERGE Cypher must SET all grammar_* segment fields."""
+    """The strict parser projection must replace every stored grammar field."""
     from unittest.mock import MagicMock, patch
 
     mock_gc = MagicMock()
     mock_gc.query = MagicMock(return_value=[])
 
-    with patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC:
+    with (
+        patch("imas_codex.standard_names.graph_ops.GraphClient") as MockGC,
+        patch(
+            "imas_codex.standard_names.protection._fetch_catalog_edit_names",
+            return_value=set(),
+        ),
+    ):
         MockGC.return_value.__enter__ = MagicMock(return_value=mock_gc)
         MockGC.return_value.__exit__ = MagicMock(return_value=False)
         from imas_codex.standard_names.graph_ops import write_standard_names
@@ -330,11 +336,12 @@ def test_write_standard_names_persists_grammar_segments():
         "process",
         "device",
         "region",
+        "object",
+        "geometry",
     ]
     for field in grammar_fields:
-        assert f"sn.{field}" in merge_cypher, f"MERGE Cypher must SET sn.{field}"
-        assert f"coalesce(b.{field}" in merge_cypher, (
-            f"MERGE Cypher must use coalesce for {field}"
+        assert f"sn.{field} = b.{field}" in merge_cypher, (
+            f"MERGE Cypher must directly assign the authoritative {field} projection"
         )
 
 
