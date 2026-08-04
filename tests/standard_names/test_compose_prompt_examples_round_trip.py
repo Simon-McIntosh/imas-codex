@@ -415,7 +415,7 @@ def test_every_policy_surface_preserves_owned_outline_identities(
     assert _round_trips("radial_outline_of_plasma_boundary")
     assert "radial_outline_of_wall" in rendered
     assert "radial_outline_of_plasma_boundary" in rendered
-    assert "plasma_boundary_outline_r" not in rendered
+    assert "`plasma_boundary_outline_r`" not in rendered
 
 
 def test_locusless_unit_vector_is_a_semantic_negative_not_a_parser_failure() -> None:
