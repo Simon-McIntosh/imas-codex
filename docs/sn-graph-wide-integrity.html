@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="85">
-<meta name="plan-impl" content="0.98">
+<meta name="plan-version" content="86">
+<meta name="plan-impl" content="0.99">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -26,6 +26,26 @@
 </head>
 <body>
   <main class="plan-doc">
+
+    <section id="current-bounded-closure">
+      <h2>Current bounded closure</h2>
+      <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
+        <p><strong>The safety machinery is landed; live protected mutations are
+        still held.</strong> Exact authority, dry-run, transactional apply,
+        idempotent replay, and one-query release census are available through
+        <code>sn reconcile-protected-structure</code>. The latest aggregate graph
+        read classifies 491 semantic findings and 68 orphans but finds
+        <strong>zero signed mutation-ready actions</strong>. No protected fold or
+        retirement has been applied.</p>
+        <figure>
+          <img src="/imas-codex/figures/sn-graph-wide-integrity/bounded-reconciliation.svg"
+               alt="Bounded reconciliation flow from one aggregate graph read through signed authority, dry-run, explicit apply, and one-query release census">
+          <figcaption>Finding volume is partitioned offline. Only an exact signed
+          manifest can cross the write boundary; ambiguous, stale, protected, and
+          open-lifecycle rows remain visible non-actions.</figcaption>
+        </figure>
+      </div>
+    </section>
 
     <h2 id="s1">§1 — Why this plan exists</h2>
     <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
@@ -597,7 +617,7 @@ Do not execute a live drain until review approves the implementation. The global
     </article>
 <article class="r-fu" data-id="f-sgwi-005" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-ship" data-written-at="2026-08-04T12:05:00+02:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Close protected structural identities and partition residual provenance</h4>
-    <div class="r-fu-body"><p>The remaining work is no longer a broad repair pass: 498 semantic-source conflicts and 68 orphans have zero currently signed bulk actions, while two open structural identities need exact DD 4.1.1 and WEST-aware lifecycle authority. Build or reuse only hash-pinned exact operators, preserve ambiguity, and prove COCOS/label/protected closure after every action.</p></div>
+    <div class="r-fu-body"><p>The remaining work is no longer an operator-design or broad-repair pass. The protected structural operator and dry-run-first CLI are landed, while the latest one-query census finds 491 semantic-source conflicts and 68 orphans with zero signed actions. Two open structural identities still need explicit DD 4.1.1 and WEST-aware mutation authority. Preserve ambiguity and prove COCOS/label/protected closure after every authorized action.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
 Plan:    sn-graph-wide-integrity (http://localhost:8765/imas-codex/sn-graph-wide-integrity.html)
 Section: §3 / §4 / §7 — protected structural closure and residual provenance classification
@@ -605,7 +625,7 @@ Capability: orchestrator
 Requirements: deep reasoning, extended context, strict verification, elevated graph-mutation risk
 
 Context
-  Writer, bounded-scope, review, preflight, and postflight safeguards are landed and the full Standard Names suite is green. The fresh one-query census still exposes 498 semantic-source violations, 68 provenance orphans with zero mutation-ready actions, and four strict-parser residues. Finish only evidence-backed exact closure; ambiguity stays visible.
+  Writer, bounded-scope, review, preflight, postflight, protected structural reconciliation, and its guarded CLI are landed and the full Standard Names suite is green. The fresh one-query census still exposes 491 semantic-source violations, 68 provenance orphans with zero signed actions, and four strict-parser residues. Finish only explicitly authorized exact closure; ambiguity stays visible.
 
 State to read
   docs/sn-graph-wide-integrity.html, especially the latest three _top comments
@@ -627,6 +647,7 @@ Done-when
   2. the stale DD 4.1.0 flux_surface_average_magnetic_field_magnitude branch is retired only through a hash-pinned protected lifecycle operator that preserves the accepted WEST target and source edge.
   3. all 498 semantic-source rows are partitioned by explicit evidence into signed exact actions versus named non-actionable classes; no ambiguous bulk mutation occurs.
   4. fresh one-query census, protected hashes, COCOS/label invariants, and full Standard Names suite are green; outcomes are recorded and this followup is resolved.</pre>
+    <p class="r-fu-outcome">The exact operator and guarded CLI are independently approved and merged at <code>a42309df</code> and <code>1abddbe8</code>; temporary-Neo4j lifecycle hardening is merged at <code>954b9619</code>. Real disposable-Neo4j tests prove dry/apply/census query counts of 2/9/1 for both one- and forty-row fold/retirement cohorts, exact retained WEST/target/source/backing/unit/relationship identities, rollback, replay, tamper refusal, DD 4.1.1, COCOS 17, and downstream label preservation. The current cross-section authority artifact is explicitly read-only and intersects two WEST sources, so no live apply is authorized. Followup remains open only for new signed authority and the two exact production dispositions.</p>
     </article>
 </section>
 
@@ -891,6 +912,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="bounded-review-census-and-final-validation-20260804" data-who="reckon-ship" data-when="2026-08-04">
     <div class="r-comment-body"><p><strong>The bounded exact-review cohort is closed without scope leakage.</strong> <code>ratio_of_particle_count_to_particle_simulated_count</code> passed a one-query DD 4.1.1 preflight and earned ordinary quorum acceptance at <code>0.94375</code> after two linked reviews, costing <code>$0.067913</code>; its three-query canonical postflight found no successor, revision, internal-change, new-name, overspend, or out-of-pool collateral. Evidence: preflight SHA-256 <code>82fc8c2fd4e86208494e1a3e7797ddad75a9bd2717a13e2dc47d485d47385e00</code>, run SHA-256 <code>a1d52cae274a08b00d66e16cd9870c1d5e75ca42a68551e52f50a6cbddd61ee5</code>, postflight SHA-256 <code>b8ebda95433baee0371f6c94bd46b1c822a8d4b4b2ecc6c3ebf00a667fedb793</code>.</p><p><code>neutral_internal_state_atomic_power_density_due_to_collisions</code> failed closed at <code>name_stage=exhausted</code>, score <code>0.7875</code>, after two completed reviewers and one <code>claude-sonnet-5</code> grammar-compilation timeout. It was not retried or refined. Exact spend was <code>$0.080587</code>; the canonical three-read postflight passed with two linked reviews and costs, the failed provider attempt recorded, and zero collateral. Run evidence SHA-256 <code>5fad9db3aebcfec419c6435b801411228bcdc23e07d66ea65e4da778f3ab1eaf</code>; postflight SHA-256 <code>b0df76215ebb8342d1508e91650b6975ab78290f0fb3a26b51553db584aea73c</code>. The fourth candidate, <code>volume_averaged_time_derivative_of_electron_density</code>, stopped before spend because its sole producing source is pinned to stale DD 4.1.0 rather than current DD 4.1.1; evidence SHA-256 <code>27eaee76826c907a241c4f6ad31a9335d33a7808bfe6bad82422204d2d283912</code>. Cohort result: two accepted, one exhausted by ordinary review, one authority refusal; attributable spend <code>$5.310418</code> of <code>$200</code>.</p><p><strong>The fresh graph census is one-query bounded and leaves unresolved work visible.</strong> One static Cypher-5 read completed in <code>1.186133 s</code>: 498 semantic-source violations (12 missing-live, 335 multiple-live, 149 scalar, 2 projection), 68 provenance orphans with zero genuinely mutation-ready actions, four strict-parser residues (two open, two hidden), zero stale grammar/gas mirrors, and 35 DDGap observations with zero actionable. Source claims/tokens/drain scopes and duplicate live names are zero. DD 4.1.1 remains globally COCOS <code>17</code>; downstream labels remain 158 <code>psi_like</code>, 74 <code>ip_like</code>, and one intentionally null negative fixture. Evidence <code>/tmp/s7_final_completion_census_corrected.json</code>, SHA-256 <code>9a48d3e73f5d71fde22107967a655852a35fc827cf9f5666decffea00a10d2f1</code>. This plan remains active: the census has no safe deterministic bulk mutation, and the remaining parser rows require protected-aware DD authority rather than more grammar expansion.</p><p><strong>Final integrated validation is green and compute-isolated.</strong> The first full run exposed 21 stale test contracts across reviewer-profile isolation, guarded-writer mocks, startup-maintenance mocks, and brittle source/help assertions; no product regression or generated-model drift was found. Five test-only merge commits corrected those fixtures without changing production code. At pushed main <code>594f761d</code>, the final <code>tests/standard_names/</code> run passed <code>6247</code> tests with <code>10</code> skips and zero failures in 241 s on <code>sun_debug</code>; MaxRSS was 720240 KiB and task/user OOM counters stayed zero. Log SHA-256 <code>c410edd4a41c9a1ce6b31dfd8280360da5febd91563bed161db3cfa115856438</code>; manifest SHA-256 <code>e6b7118e563aaed0e84555cb3287d64e2594068348f1a5a52ff65fecbca408c3</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="protected-structural-operator-and-final-census-20260804" data-who="reckon-ship" data-when="2026-08-04">
+    <div class="r-comment-body"><p><strong>Protected structural reconciliation is landed but no live mutation is authorized.</strong> Merge <code>a42309df</code> adds exact manifest and authority binding, transactional fold/retirement, retained element-identity proofs, idempotent replay, tamper refusal, and a receipt-bound one-query catalog census. Merge <code>1abddbe8</code> exposes <code>sn reconcile-protected-structure</code> as zero-write dry-run by default; apply requires the exact manifest SHA, and receipt output refuses direct, symlink, or hardlink input collisions and uses fsynced atomic replacement. Disposable Neo4j proved constant dry/apply/census counts of 2/9/1 for one and forty rows. The read-only cross-section artifact is a negative authorization fixture, so the WEST-intersecting fold and stale-branch retirement remain held pending new explicit signed authority.</p><p><strong>The final merged validation and graph census are bounded and green.</strong> Exact main <code>1abddbe8</code> passed 6,279 tests with 10 skips and zero failures in 5m45s on <code>sun_debug</code>; MaxRSS was 748,684 KiB and every cgroup OOM counter remained zero. Log SHA-256 <code>1bf8decadd99566c1e0cf91cbc2b1fcb7cf70aa407e3475d473991df648c2a1a</code>. One aggregate read-only graph query then completed in 2.556 s with zero retries/writes/provider calls and zero OOM delta: 491 semantic findings (4 missing, 336 multiple, 148 scalar, 3 projection), 68 orphans, four strict-parser residues, 35 non-actionable DD gaps, and zero signed actions, claims, tokens, drains, or duplicate names. DD 4.1.1 remains globally COCOS 17; downstream labels remain <code>psi_like=158</code>, <code>ip_like=74</code>, and one intentional null negative fixture. Evidence <code>/tmp/s7_final_release_census_1abddbe8.json</code>, SHA-256 <code>3149b21a4f0136c28879c77ae6d83af2ac1ecee3e961d02c84dcb32f294b94af</code>. Receipt-authoritative S7 spend is <code>$5.310418</code> of the authorized <code>$200</code>.</p><p><strong>The temporary Neo4j <code>Killed</code>/hang path is corrected.</strong> The helper's 128 MiB JVM metaspace ceiling caused repeated <code>OutOfMemoryError: Metaspace</code>, defunct Bolt connections, and failed termination handling; it was not a Linux cgroup kill in that run. Merge <code>954b9619</code> uses a bounded 768 MiB default with validated overrides, real Bolt readiness, child-exit log context, and bounded TERM/KILL teardown. Twenty-five focused tests passed; final merged regression peaked below 1 GiB. Historical login-shell kills remain separately explained by the 64 GiB/no-swap user slice and accumulated stale processes/worktree environments.</p></div>
 </div>
 </section>
 </main>
