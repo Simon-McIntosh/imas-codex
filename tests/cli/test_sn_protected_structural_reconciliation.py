@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
@@ -86,7 +87,9 @@ def _assert_receipt_collision_refused(
 
 def test_protected_structure_is_zero_write_dry_run_by_default(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setenv("XDG_DATA_HOME", str(tmp_path / "data"))
     manifest, authority, manifest_hash = _write_inputs(tmp_path)
     operator_receipt = _receipt()
     with (
@@ -122,6 +125,16 @@ def test_protected_structure_is_zero_write_dry_run_by_default(
     assert f"manifest_sha256={manifest_hash}" in result.output
     assert "counts=allowlisted=2,applied=0,planned=2,refused=0" in result.output
     assert "release_census=not_run" in result.output
+    receipt_line = next(
+        line for line in result.output.splitlines() if line.startswith("receipt=")
+    )
+    output = Path(receipt_line.removeprefix("receipt="))
+    assert output.parent.name == "protected-structural-reconciliation"
+    assert json.loads(output.read_bytes()) == {
+        "manifest_hash": manifest_hash,
+        "receipt": operator_receipt,
+        "release_census": None,
+    }
 
 
 def test_protected_structure_apply_requires_manifest_hash_before_operator(
@@ -299,66 +312,7 @@ def test_protected_structure_authorized_apply_forwards_and_certifies(
     assert f"receipt={output.resolve()}" in result.output
 
 
-def test_protected_structure_receipt_atomically_replaces_raced_hardlink(
-    tmp_path: Path,
-) -> None:
-    manifest, authority, manifest_hash = _write_inputs(tmp_path)
-    manifest_bytes = manifest.read_bytes()
-    authority_bytes = authority.read_bytes()
-    output = tmp_path / "receipt.json"
-    prior_receipt = b"complete prior receipt\n"
-    output.write_bytes(prior_receipt)
-    operator_receipt = _receipt()
-    expected_payload = {
-        "manifest_hash": manifest_hash,
-        "receipt": operator_receipt,
-        "release_census": None,
-    }
-    expected_bytes = (
-        json.dumps(expected_payload, sort_keys=True, separators=(",", ":")) + "\n"
-    ).encode()
-    real_replace = os.replace
-
-    def race_then_replace(source: str | Path, destination: str | Path) -> None:
-        assert Path(destination) == output.resolve()
-        assert output.read_bytes() == prior_receipt
-        assert Path(source).read_bytes() == expected_bytes
-        output.unlink()
-        output.hardlink_to(manifest)
-        real_replace(source, destination)
-
-    with (
-        patch(
-            "imas_codex.standard_names.protected_structural_reconciliation."
-            "reconcile_protected_structure",
-            return_value=operator_receipt,
-        ),
-        patch("os.replace", side_effect=race_then_replace) as replace,
-        patch("os.fsync", wraps=os.fsync) as fsync,
-    ):
-        result = CliRunner().invoke(
-            sn,
-            [
-                "reconcile-protected-structure",
-                "--manifest",
-                str(manifest),
-                "--authority-artifact",
-                str(authority),
-                "--receipt",
-                str(output),
-            ],
-        )
-
-    assert result.exit_code == 0, result.output
-    replace.assert_called_once()
-    fsync.assert_called_once()
-    assert output.read_bytes() == expected_bytes
-    assert manifest.read_bytes() == manifest_bytes
-    assert authority.read_bytes() == authority_bytes
-    assert list(tmp_path.glob(f".{output.name}.*.tmp")) == []
-
-
-def test_protected_structure_receipt_write_failure_cleans_temporary_file(
+def test_protected_structure_receipt_refuses_mismatched_existing_file(
     tmp_path: Path,
 ) -> None:
     manifest, authority, _ = _write_inputs(tmp_path)
@@ -367,14 +321,14 @@ def test_protected_structure_receipt_write_failure_cleans_temporary_file(
     output = tmp_path / "receipt.json"
     prior_receipt = b"complete prior receipt\n"
     output.write_bytes(prior_receipt)
+    operator_receipt = _receipt()
 
     with (
         patch(
             "imas_codex.standard_names.protected_structural_reconciliation."
             "reconcile_protected_structure",
-            return_value=_receipt(),
+            return_value=operator_receipt,
         ),
-        patch("os.replace", side_effect=OSError("replacement refused")),
     ):
         result = CliRunner().invoke(
             sn,
@@ -390,11 +344,95 @@ def test_protected_structure_receipt_write_failure_cleans_temporary_file(
         )
 
     assert result.exit_code != 0
-    assert "cannot write receipt: replacement refused" in result.output
+    assert "different content" in result.output
     assert output.read_bytes() == prior_receipt
     assert manifest.read_bytes() == manifest_bytes
     assert authority.read_bytes() == authority_bytes
     assert list(tmp_path.glob(f".{output.name}.*.tmp")) == []
+
+
+def test_protected_structure_receipt_write_failure_cleans_temporary_file(
+    tmp_path: Path,
+) -> None:
+    manifest, authority, _ = _write_inputs(tmp_path)
+    manifest_bytes = manifest.read_bytes()
+    authority_bytes = authority.read_bytes()
+    output = tmp_path / "receipt.json"
+
+    with (
+        patch(
+            "imas_codex.standard_names.protected_structural_reconciliation."
+            "reconcile_protected_structure",
+            return_value=_receipt(),
+        ),
+        patch(
+            "imas_codex.standard_names.receipt_store.os.link",
+            side_effect=OSError("install refused"),
+        ),
+    ):
+        result = CliRunner().invoke(
+            sn,
+            [
+                "reconcile-protected-structure",
+                "--manifest",
+                str(manifest),
+                "--authority-artifact",
+                str(authority),
+                "--receipt",
+                str(output),
+            ],
+        )
+
+    assert result.exit_code != 0
+    assert "cannot write receipt: install refused" in result.output
+    assert not output.exists()
+    assert manifest.read_bytes() == manifest_bytes
+    assert authority.read_bytes() == authority_bytes
+    assert list(tmp_path.glob(f".{output.name}.*.tmp")) == []
+
+
+def test_protected_structure_apply_refuses_success_when_receipt_cannot_persist(
+    tmp_path: Path,
+) -> None:
+    manifest, authority, manifest_hash = _write_inputs(tmp_path)
+    operator_receipt = _receipt(mode="applied")
+    release_census = {"release_ready": True, "census_hash": "b" * 64}
+
+    with (
+        patch(
+            "imas_codex.standard_names.protected_structural_reconciliation."
+            "reconcile_protected_structure",
+            return_value=operator_receipt,
+        ) as reconcile,
+        patch(
+            "imas_codex.standard_names.protected_structural_reconciliation."
+            "census_protected_structural_release",
+            return_value=release_census,
+        ) as census,
+        patch(
+            "imas_codex.standard_names.receipt_store.persist_receipt",
+            side_effect=OSError("durable storage unavailable"),
+        ),
+    ):
+        result = CliRunner().invoke(
+            sn,
+            [
+                "reconcile-protected-structure",
+                "--manifest",
+                str(manifest),
+                "--authority-artifact",
+                str(authority),
+                "--apply",
+                "--manifest-sha256",
+                manifest_hash,
+            ],
+        )
+
+    assert result.exit_code != 0
+    assert "durable storage unavailable" in result.output
+    assert "mode=applied" not in result.output
+    reconcile.assert_called_once()
+    census.assert_called_once()
 
 
 def test_protected_structure_operator_failure_is_a_cli_error(tmp_path: Path) -> None:

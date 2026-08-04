@@ -6563,9 +6563,7 @@ def sn_reconcile_protected_structure(
     import hashlib
     import hmac
     import json
-    import os
     import re
-    import tempfile
     from pathlib import Path
 
     if apply and not expected_manifest_hash:
@@ -6651,6 +6649,10 @@ def sn_reconcile_protected_structure(
         census_protected_structural_release,
         reconcile_protected_structure,
     )
+    from imas_codex.standard_names.receipt_store import (
+        ReceiptPersistenceError,
+        persist_receipt,
+    )
 
     try:
         operator_receipt = reconcile_protected_structure(
@@ -6671,56 +6673,20 @@ def sn_reconcile_protected_structure(
     except (OSError, ValueError, ProtectedStructuralConflict) as exc:
         raise click.ClickException(str(exc)) from exc
 
-    if output_path is not None:
-        result_payload = {
-            "manifest_hash": manifest_hash,
-            "receipt": operator_receipt,
-            "release_census": release_census,
-        }
-        encoded_receipt = (
-            json.dumps(
-                result_payload,
-                sort_keys=True,
-                separators=(",", ":"),
-            )
-            + "\n"
-        ).encode()
-        temporary_path: Path | None = None
-        temporary_descriptor = -1
-        try:
-            temporary_descriptor, temporary_name = tempfile.mkstemp(
-                dir=output_path.parent,
-                prefix=f".{output_path.name}.",
-                suffix=".tmp",
-            )
-            temporary_path = Path(temporary_name)
-            with os.fdopen(temporary_descriptor, "wb") as stream:
-                temporary_descriptor = -1
-                stream.write(encoded_receipt)
-                stream.flush()
-                os.fsync(stream.fileno())
-            os.replace(temporary_path, output_path)
-            temporary_path = None
-        except OSError as exc:
-            cleanup_errors: list[str] = []
-            if temporary_descriptor >= 0:
-                try:
-                    os.close(temporary_descriptor)
-                except OSError as cleanup_exc:
-                    cleanup_errors.append(str(cleanup_exc))
-            if temporary_path is not None:
-                try:
-                    temporary_path.unlink(missing_ok=True)
-                except OSError as cleanup_exc:
-                    cleanup_errors.append(str(cleanup_exc))
-            cleanup_detail = (
-                f"; temporary cleanup failed: {', '.join(cleanup_errors)}"
-                if cleanup_errors
-                else ""
-            )
-            raise click.ClickException(
-                f"cannot write receipt: {exc}{cleanup_detail}"
-            ) from exc
+    result_payload = {
+        "manifest_hash": manifest_hash,
+        "receipt": operator_receipt,
+        "release_census": release_census,
+    }
+    try:
+        stored_receipt = persist_receipt(
+            "protected-structural-reconciliation",
+            result_payload,
+            output_path=output_path,
+            protected_inputs=(manifest, authority_artifact),
+        )
+    except (OSError, ReceiptPersistenceError) as exc:
+        raise click.ClickException(f"cannot write receipt: {exc}") from exc
 
     counts = operator_receipt.get("counts") or {}
     count_summary = ",".join(f"{key}={counts[key]}" for key in sorted(counts)) or "none"
@@ -6737,8 +6703,7 @@ def sn_reconcile_protected_structure(
         f"mode={mode} manifest_sha256={manifest_hash} counts={count_summary} "
         f"receipt_hash={receipt_hash} release_census={census_summary}"
     )
-    if output_path is not None:
-        click.echo(f"receipt={output_path}")
+    click.echo(f"receipt={stored_receipt.path}")
     if apply and release_census is None:
         raise click.ClickException(
             "apply did not produce an applicable receipt for release census"
