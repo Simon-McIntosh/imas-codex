@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-03T09:06:16",
+  "updated": "2026-08-04T17:54:18",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -200,7 +200,7 @@
           {
             "slug": "sn-graph-wide-integrity",
             "why_now": "After S6 closes, the remaining 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, global writer/fan-out/embedding debt, and the rejected bounded-manifest prototype are explicit graph-wide work. WEST is excluded and remains green.",
-            "done_when": "f-sgwi-001 and f-sgwi-004 close: graph-wide provenance/parser residue is reconciled without touching WEST; fan-out and embedding decisions are settled; writer gates and geometry rule are tested; bounded manifest draining preserves scope through refine/review/docs, uses ordinary acceptance hygiene, is fail-closed and transactionally fenced, clears scope on every exit, and passes independent review plus the full SN suite."
+            "done_when": "f-sgwi-001, f-sgwi-004, and f-sgwi-005 close: graph-wide provenance/parser residue is evidence-partitioned without touching WEST; fan-out, embedding, writer gates, geometry rules, and bounded-manifest execution are tested; the two protected structural identities receive exact explicit authority or remain visibly held as non-actionable; fresh one-query census, DD 4.1.1/global COCOS 17, psi_like/ip_like, null-fixture, transactional, scope-cleanup, independent-review, and full-suite gates pass."
           },
           {
             "slug": "sn-dd-gaps",
@@ -283,6 +283,6 @@
       }
     ],
     "blockers": [],
-    "_version": 20
+    "_version": 21
   }
 }
