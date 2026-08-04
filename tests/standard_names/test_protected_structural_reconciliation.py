@@ -16,6 +16,13 @@ from imas_codex.standard_names.grammar_segment_reconciliation import (
 )
 
 _HASH = "a" * 64
+_NEGATIVE_FIXTURE_LABELS = [
+    {"path": "fixture/dd/average_field", "label": None},
+    {"path": "fixture/dd/electron_temperature", "label": None},
+]
+_NEGATIVE_FIXTURE_LABELS_HASH = sut._negative_fixture_labels_hash(
+    _NEGATIVE_FIXTURE_LABELS
+)
 
 
 def _row(
@@ -23,7 +30,15 @@ def _row(
     *,
     index: int = 0,
 ) -> dict[str, Any]:
-    expected_after = {"cohort_index": index, "state": "expected"}
+    expected_after = {
+        "cohort_index": index,
+        "state": "expected",
+        "negative_fixture_label_contract": {
+            "dd_version": "4.1.1",
+            "fixture_labels": _NEGATIVE_FIXTURE_LABELS,
+            "fixture_labels_hash": _NEGATIVE_FIXTURE_LABELS_HASH,
+        },
+    }
     row = {
         "row_key": "",
         "action": action,
@@ -36,6 +51,8 @@ def _row(
         "expected_relationship_ids_hash": _HASH,
         "expected_protected_subclosure_hash": _HASH,
         "expected_mutation_hash": _HASH,
+        "negative_fixture_labels": _NEGATIVE_FIXTURE_LABELS,
+        "negative_fixture_labels_hash": _NEGATIVE_FIXTURE_LABELS_HASH,
         "expected_after": expected_after,
         "expected_after_hash": sut.payload_hash(expected_after),
         "allowlisted_delta": {"action": action},
@@ -65,6 +82,7 @@ def _payload(
         protected_set_hash=_HASH,
         authority_evidence_sha256=_HASH,
         authority_evidence_path=authority_evidence_path,
+        negative_fixture_labels=_NEGATIVE_FIXTURE_LABELS,
     )
 
 
@@ -92,6 +110,10 @@ def _catalog() -> dict[str, Any]:
     return {
         "versions": [{"properties": {"id": "4.1.1"}}],
         "cocos_nodes": [{"properties": {"id": 17}}],
+        "negative_fixture_entries": [
+            {"id": item["path"], "element_id": f"node:{index}", "value": None}
+            for index, item in enumerate(_NEGATIVE_FIXTURE_LABELS)
+        ],
     }
 
 
@@ -168,6 +190,21 @@ def test_manifest_refuses_cocos_dd_and_label_contract_drift(tmp_path: Path) -> N
             sut.load_protected_structural_manifest(path)
 
 
+def test_manifest_refuses_dynamic_or_labeled_negative_fixtures(tmp_path: Path) -> None:
+    path, _ = _write(tmp_path / "negative-fixtures.json", [_row()])
+    payload = _payload([_row()])
+    payload["catalog_contract"]["negative_fixture_labels"].reverse()
+    path.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="negative fixture label contract"):
+        sut.load_protected_structural_manifest(path)
+
+    payload = _payload([_row()])
+    payload["catalog_contract"]["negative_fixture_labels"][0]["label"] = "psi_like"
+    path.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="require a path and null label"):
+        sut.load_protected_structural_manifest(path)
+
+
 def test_manifest_refuses_authority_policy_below_floor(tmp_path: Path) -> None:
     payload = _payload([_row(sut.PROTECTED_IDENTITY_FOLD)])
     payload["catalog_contract"]["minimum_authority_confidence"] = 0.5
@@ -211,8 +248,8 @@ class _Transaction:
                     "cocos_nodes": [{"properties": {"id": 17}}],
                     "downstream_label_entries": [],
                     "negative_fixture_entries": [
-                        {"id": path, "element_id": f"node:{path}", "value": None}
-                        for path in sut._NEGATIVE_FIXTURE_PATHS
+                        {"id": path, "element_id": f"node:{index}", "value": None}
+                        for index, path in enumerate(params["negative_fixture_paths"])
                     ],
                     "west_closure": [],
                     "present_west_source_ids": [],
@@ -491,6 +528,11 @@ def test_fold_accepts_generic_current_catalog_authority_artifact(
             "catalog_constant": 17,
             "change_made": False,
         },
+        "negative_fixture_label_contract": {
+            "dd_version": "4.1.1",
+            "fixture_labels": _NEGATIVE_FIXTURE_LABELS,
+            "fixture_labels_hash": _NEGATIVE_FIXTURE_LABELS_HASH,
+        },
         "graph_evidence": {
             "raw_evidence": {
                 "catalogs": [{"id": "4.1.1", "is_current": True, "cocos": 17}]
@@ -511,6 +553,7 @@ def test_fold_accepts_generic_current_catalog_authority_artifact(
         authority_evidence_path=evidence_path,
         authority_verdict="equivalent",
         minimum_authority_confidence=0.95,
+        negative_fixture_labels=_NEGATIVE_FIXTURE_LABELS,
     )
     manifest_path = tmp_path / "manifest.json"
     manifest_path.write_text(json.dumps(payload, sort_keys=True))
@@ -537,6 +580,11 @@ def test_read_only_authority_artifact_is_a_negative_fixture(tmp_path: Path) -> N
             "catalog_constant": 17,
             "change_made": False,
         },
+        "negative_fixture_label_contract": {
+            "dd_version": "4.1.1",
+            "fixture_labels": _NEGATIVE_FIXTURE_LABELS,
+            "fixture_labels_hash": _NEGATIVE_FIXTURE_LABELS_HASH,
+        },
         "graph_evidence": {
             "raw_evidence": {
                 "catalogs": [{"id": "4.1.1", "is_current": True, "cocos": 17}]
@@ -555,6 +603,7 @@ def test_read_only_authority_artifact_is_a_negative_fixture(tmp_path: Path) -> N
         protected_set_hash=_HASH,
         authority_evidence_sha256=evidence_hash,
         authority_evidence_path=evidence_path,
+        negative_fixture_labels=_NEGATIVE_FIXTURE_LABELS,
     )
     manifest_path = tmp_path / "read-only-manifest.json"
     manifest_path.write_text(json.dumps(payload, sort_keys=True))
@@ -614,7 +663,9 @@ def test_retirement_second_apply_requires_exact_events_and_after_closure(
         "orphan_source_cache_count": 0,
         "orphan_backing_cache_count": 0,
     }
-    row["expected_after"] = sut._retirement_state_semantics(state)
+    row["expected_after"] = sut._bind_expected_after_contract(
+        sut._retirement_state_semantics(state), row
+    )
     row["expected_after_hash"] = sut.payload_hash(row["expected_after"])
     row["row_key"] = sut.payload_hash(
         {key: value for key, value in row.items() if key != "row_key"}
@@ -648,7 +699,9 @@ def test_release_census_is_separate_and_receipt_bound(
         "orphan_source_cache_count": 0,
         "orphan_backing_cache_count": 0,
     }
-    row["expected_after"] = sut._retirement_state_semantics(state)
+    row["expected_after"] = sut._bind_expected_after_contract(
+        sut._retirement_state_semantics(state), row
+    )
     row["expected_after_hash"] = sut.payload_hash(row["expected_after"])
     row["row_key"] = sut.payload_hash(
         {key: value for key, value in row.items() if key != "row_key"}
@@ -672,6 +725,10 @@ def test_release_census_is_separate_and_receipt_bound(
         release_baseline=sut._release_baseline(_catalog()),
     )
     assert receipt["release_postflight"] == {"required": True, "certified": False}
+    assert receipt["safety"]["negative_fixture_label_contract"] == {
+        "fixture_labels": _NEGATIVE_FIXTURE_LABELS,
+        "fixture_labels_hash": _NEGATIVE_FIXTURE_LABELS_HASH,
+    }
     monkeypatch.setattr(sut, "_west_source_ids", lambda: frozenset())
     monkeypatch.setattr(sut, "_protected_set_hash", lambda *_args: _HASH)
 
@@ -685,6 +742,10 @@ def test_release_census_is_separate_and_receipt_bound(
     assert census["release_ready"] is True
     assert census["receipt_hash"] == receipt["receipt_hash"]
     assert census["query_audit"]["query_count"] == 1
+    assert census["catalog_evidence"]["negative_fixture_label_contract"] == {
+        "fixture_labels": _NEGATIVE_FIXTURE_LABELS,
+        "fixture_labels_hash": _NEGATIVE_FIXTURE_LABELS_HASH,
+    }
 
 
 def test_protected_subclosure_hash_detects_target_and_west_drift() -> None:

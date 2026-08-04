@@ -44,10 +44,6 @@ _RECEIPT_SCHEMA = "imas-codex.protected-structural-reconciliation-receipt"
 _CURRENT_DD_VERSION = "4.1.1"
 _CATALOG_COCOS = 17
 _DOWNSTREAM_LABELS = ("ip_like", "psi_like")
-_NEGATIVE_FIXTURE_PATHS = (
-    "core_profiles/profiles_1d/electrons/temperature",
-    "equilibrium/time_slice/profiles_1d/b_average",
-)
 _MINIMUM_AUTHORITY_POLICY_CONFIDENCE = 0.95
 _SHA = re.compile(r"[0-9a-f]{64}")
 
@@ -405,6 +401,40 @@ def _require_sha(value: Any, field: str) -> str:
     if _SHA.fullmatch(normalized) is None:
         raise ValueError(f"{field} must be exactly one SHA-256 hex digest")
     return normalized
+
+
+def _normalize_negative_fixture_labels(value: Any, field: str) -> list[dict[str, Any]]:
+    """Validate an externally supplied exact set of DD paths with null labels."""
+    if not isinstance(value, list) or not value:
+        raise ValueError(f"{field} must be a non-empty list")
+    normalized: list[dict[str, Any]] = []
+    for item in value:
+        if not isinstance(item, dict) or set(item) != {"path", "label"}:
+            raise ValueError(f"{field} entries must contain exactly path and label")
+        path = str(item["path"] or "").strip()
+        if not path or item["label"] is not None:
+            raise ValueError(f"{field} entries require a path and null label")
+        normalized.append({"path": path, "label": None})
+    normalized.sort(key=lambda item: item["path"])
+    if len({item["path"] for item in normalized}) != len(normalized):
+        raise ValueError(f"{field} paths must be unique")
+    return normalized
+
+
+def _negative_fixture_labels_hash(labels: list[dict[str, Any]]) -> str:
+    return payload_hash({"dd_version": _CURRENT_DD_VERSION, "fixture_labels": labels})
+
+
+def _bind_expected_after_contract(
+    state: dict[str, Any], row: dict[str, Any]
+) -> dict[str, Any]:
+    bound = copy.deepcopy(state)
+    bound["negative_fixture_label_contract"] = {
+        "dd_version": _CURRENT_DD_VERSION,
+        "fixture_labels": copy.deepcopy(row["negative_fixture_labels"]),
+        "fixture_labels_hash": row["negative_fixture_labels_hash"],
+    }
+    return _canonical(bound)
 
 
 def _canonical(value: Any) -> Any:
@@ -950,6 +980,7 @@ def build_manifest_row(
     reason: str,
     authority_evidence_sha256: str | None,
     event_timestamp: str,
+    negative_fixture_labels: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Bind one audited fold-shaped closure to an exact manifest row."""
     if action not in PROTECTED_STRUCTURAL_ACTIONS:
@@ -963,6 +994,10 @@ def build_manifest_row(
         if action == PROTECTED_IDENTITY_FOLD
         else None
     )
+    fixture_labels = _normalize_negative_fixture_labels(
+        negative_fixture_labels, "negative_fixture_labels"
+    )
+    fixture_labels_hash = _negative_fixture_labels_hash(fixture_labels)
     mutation = _mutation_payload(snapshot, action, old_id)
     row = {
         "row_key": "",
@@ -980,6 +1015,8 @@ def build_manifest_row(
             _protected_subclosure(snapshot, protected)
         ),
         "expected_mutation_hash": payload_hash(mutation),
+        "negative_fixture_labels": fixture_labels,
+        "negative_fixture_labels_hash": fixture_labels_hash,
         "authority_evidence_sha256": evidence,
         "event_timestamp": event_timestamp,
         "reason": reason.strip(),
@@ -994,8 +1031,8 @@ def build_manifest_row(
         if action == PROTECTED_IDENTITY_FOLD
         else _retirement_expected_state(snapshot, item)
     )
-    row["expected_after"] = expected_after
-    row["expected_after_hash"] = payload_hash(expected_after)
+    row["expected_after"] = _bind_expected_after_contract(expected_after, row)
+    row["expected_after_hash"] = payload_hash(row["expected_after"])
     row["allowlisted_delta"] = _allowlisted_delta(row, item)
     row["row_key"] = payload_hash(
         {key: value for key, value in row.items() if key != "row_key"}
@@ -1011,10 +1048,21 @@ def build_manifest_payload(
     authority_evidence_path: str | Path | None = None,
     authority_verdict: str = "equivalent",
     minimum_authority_confidence: float = _MINIMUM_AUTHORITY_POLICY_CONFIDENCE,
+    negative_fixture_labels: list[dict[str, Any]],
 ) -> dict[str, Any]:
     """Build the exact JSON payload; callers serialize with sorted keys."""
     _require_sha(protected_set_hash, "protected_set_hash")
     evidence_hash = _require_sha(authority_evidence_sha256, "authority_evidence_sha256")
+    fixture_labels = _normalize_negative_fixture_labels(
+        negative_fixture_labels, "negative_fixture_labels"
+    )
+    fixture_labels_hash = _negative_fixture_labels_hash(fixture_labels)
+    if any(
+        row.get("negative_fixture_labels") != fixture_labels
+        or row.get("negative_fixture_labels_hash") != fixture_labels_hash
+        for row in rows
+    ):
+        raise ValueError("manifest rows differ from the negative fixture contract")
     return {
         "schema": _MANIFEST_SCHEMA,
         "schema_version": 1,
@@ -1022,6 +1070,8 @@ def build_manifest_payload(
             "dd_version": _CURRENT_DD_VERSION,
             "cocos": _CATALOG_COCOS,
             "downstream_labels": list(_DOWNSTREAM_LABELS),
+            "negative_fixture_labels": fixture_labels,
+            "negative_fixture_labels_hash": fixture_labels_hash,
             "authority_evidence_path": (
                 str(Path(authority_evidence_path).expanduser().resolve())
                 if authority_evidence_path is not None
@@ -1048,6 +1098,8 @@ _ROW_FIELDS = {
     "expected_relationship_ids_hash",
     "expected_protected_subclosure_hash",
     "expected_mutation_hash",
+    "negative_fixture_labels",
+    "negative_fixture_labels_hash",
     "expected_after",
     "expected_after_hash",
     "allowlisted_delta",
@@ -1082,6 +1134,8 @@ def load_protected_structural_manifest(
         "dd_version",
         "cocos",
         "downstream_labels",
+        "negative_fixture_labels",
+        "negative_fixture_labels_hash",
         "authority_evidence_path",
         "authority_evidence_sha256",
         "authority_verdict",
@@ -1094,6 +1148,17 @@ def load_protected_structural_manifest(
         or tuple(contract["downstream_labels"]) != _DOWNSTREAM_LABELS
     ):
         raise ValueError("manifest does not bind DD 4.1.1, COCOS 17, and labels")
+    fixture_labels = _normalize_negative_fixture_labels(
+        contract["negative_fixture_labels"], "negative_fixture_labels"
+    )
+    fixture_labels_hash = _require_sha(
+        contract["negative_fixture_labels_hash"], "negative_fixture_labels_hash"
+    )
+    if (
+        contract["negative_fixture_labels"] != fixture_labels
+        or _negative_fixture_labels_hash(fixture_labels) != fixture_labels_hash
+    ):
+        raise ValueError("manifest negative fixture label contract is not exact")
     authority_hash = _require_sha(
         contract["authority_evidence_sha256"], "authority_evidence_sha256"
     )
@@ -1156,6 +1221,7 @@ def load_protected_structural_manifest(
             "expected_protected_subclosure_hash",
             "expected_mutation_hash",
             "expected_after_hash",
+            "negative_fixture_labels_hash",
         ):
             row[field] = _require_sha(row[field], field)
         if not isinstance(row["expected_after"], dict) or not isinstance(
@@ -1164,6 +1230,21 @@ def load_protected_structural_manifest(
             raise ValueError("manifest expected-after and delta must be objects")
         if payload_hash(row["expected_after"]) != row["expected_after_hash"]:
             raise ValueError("manifest expected_after_hash does not match its state")
+        row_fixture_labels = _normalize_negative_fixture_labels(
+            row["negative_fixture_labels"], "negative_fixture_labels"
+        )
+        if (
+            row["negative_fixture_labels"] != row_fixture_labels
+            or row_fixture_labels != fixture_labels
+            or row["negative_fixture_labels_hash"] != fixture_labels_hash
+            or row["expected_after"].get("negative_fixture_label_contract")
+            != {
+                "dd_version": _CURRENT_DD_VERSION,
+                "fixture_labels": fixture_labels,
+                "fixture_labels_hash": fixture_labels_hash,
+            }
+        ):
+            raise ValueError("manifest row negative fixture contract differs")
         if row["allowlisted_delta"].get("action") != action:
             raise ValueError("manifest allowlisted delta action differs from row")
         if action == PROTECTED_IDENTITY_FOLD:
@@ -1241,6 +1322,28 @@ def _validate_authority_evidence(manifest: ProtectedStructuralManifest) -> None:
         for item in catalogs
         if isinstance(item, dict) and item.get("is_current") is True
     ]
+    fixture_contract = evidence.get("negative_fixture_label_contract") or {}
+    try:
+        artifact_fixture_labels = _normalize_negative_fixture_labels(
+            fixture_contract.get("fixture_labels"),
+            "authority negative_fixture_labels",
+        )
+        artifact_fixture_hash = _require_sha(
+            fixture_contract.get("fixture_labels_hash"),
+            "authority negative_fixture_labels_hash",
+        )
+    except ValueError as exc:
+        raise ValueError(
+            "authority evidence negative fixture contract is invalid"
+        ) from exc
+    fixture_contract_matches = (
+        set(fixture_contract) == {"dd_version", "fixture_labels", "fixture_labels_hash"}
+        and fixture_contract.get("dd_version") == contract["dd_version"]
+        and artifact_fixture_labels == contract["negative_fixture_labels"]
+        and artifact_fixture_hash == contract["negative_fixture_labels_hash"]
+        and artifact_fixture_hash
+        == _negative_fixture_labels_hash(artifact_fixture_labels)
+    )
     artifact_verdict = str(
         verdict.get("verdict") or evidence.get("final_disposition") or ""
     ).casefold()
@@ -1291,6 +1394,7 @@ def _validate_authority_evidence(manifest: ProtectedStructuralManifest) -> None:
         or confidence < contract["minimum_authority_confidence"]
         or not artifact_verdict.startswith(contract["authority_verdict"])
         or not catalog_matches
+        or not fixture_contract_matches
         or cocos.get("catalog_check_passed") is not True
         or cocos.get("catalog_constant") != contract["cocos"]
         or cocos.get("change_made") is not False
@@ -1448,6 +1552,7 @@ def _expected_after_matches(
         if retirement_state is None:
             return False
         state = _retirement_state_semantics(retirement_state)
+    state = _bind_expected_after_contract(state, row)
     return (
         state == row["expected_after"]
         and payload_hash(state) == row["expected_after_hash"]
@@ -1457,7 +1562,10 @@ def _expected_after_matches(
 def _contract_query_params(manifest: ProtectedStructuralManifest) -> dict[str, Any]:
     return {
         "downstream_labels": list(_DOWNSTREAM_LABELS),
-        "negative_fixture_paths": list(_NEGATIVE_FIXTURE_PATHS),
+        "negative_fixture_paths": [
+            item["path"]
+            for item in manifest.catalog_contract["negative_fixture_labels"]
+        ],
         "west_source_ids": sorted(_west_source_ids()),
         "fixture_source_id_prefix": _FIXTURE_SOURCE_ID_PREFIX,
         "targeted_identity_ids": sorted(row["old_id"] for row in manifest.rows),
@@ -1602,7 +1710,9 @@ def _release_baseline(catalog: dict[str, Any]) -> dict[str, Any]:
 
 
 def _release_catalog_reasons(
-    catalog: dict[str, Any], baseline: dict[str, Any]
+    catalog: dict[str, Any],
+    baseline: dict[str, Any],
+    negative_fixture_labels: list[dict[str, Any]],
 ) -> list[str]:
     reasons = _catalog_reasons(catalog)
     current = _release_baseline(catalog)
@@ -1612,6 +1722,10 @@ def _release_catalog_reasons(
         "downstream_label_entries_hash"
     ):
         reasons.append("catalog-wide downstream labels changed")
+    if current["negative_fixture_entries_hash"] != baseline.get(
+        "negative_fixture_entries_hash"
+    ):
+        reasons.append("negative COCOS fixture identities changed")
     west_hash_fields = (
         "west_producer_identity_hash",
         "west_node_identity_hash",
@@ -1621,9 +1735,12 @@ def _release_catalog_reasons(
     if any(current[field] != baseline.get(field) for field in west_hash_fields):
         reasons.append("WEST producer closure changed")
     fixtures = current["negative_fixture_entries"]
-    if {item.get("id") for item in fixtures} != set(_NEGATIVE_FIXTURE_PATHS) or any(
-        item.get("element_id") is None or item.get("value") is not None
-        for item in fixtures
+    actual_fixture_labels = sorted(
+        ({"path": item.get("id"), "label": item.get("value")} for item in fixtures),
+        key=lambda item: str(item["path"]),
+    )
+    if actual_fixture_labels != negative_fixture_labels or any(
+        item.get("element_id") is None for item in fixtures
     ):
         reasons.append("negative COCOS fixtures are missing or labeled")
     if int(catalog.get("active_targeted_identity_count") or 0) != 0:
@@ -1733,6 +1850,7 @@ def _row_reasons(
             if row["action"] == PROTECTED_IDENTITY_FOLD
             else _retirement_expected_state(snapshot, item)
         )
+        expected_after = _bind_expected_after_contract(expected_after, row)
         if (
             expected_after != row["expected_after"]
             or payload_hash(expected_after) != row["expected_after_hash"]
@@ -1948,6 +2066,12 @@ def _receipt(
                 "expected_event_ids": plan.get("event_ids", []),
                 "expected_after": plan["expected_after"],
                 "expected_after_hash": plan["expected_after_hash"],
+                "negative_fixture_labels": copy.deepcopy(
+                    manifest.catalog_contract["negative_fixture_labels"]
+                ),
+                "negative_fixture_labels_hash": manifest.catalog_contract[
+                    "negative_fixture_labels_hash"
+                ],
                 "allowlisted_delta": plan["allowlisted_delta"],
             }
             for plan in plans
@@ -1961,6 +2085,14 @@ def _receipt(
             "current_dd_version": _CURRENT_DD_VERSION,
             "downstream_labels": list(_DOWNSTREAM_LABELS),
             "llm_calls": 0,
+            "negative_fixture_label_contract": {
+                "fixture_labels": copy.deepcopy(
+                    manifest.catalog_contract["negative_fixture_labels"]
+                ),
+                "fixture_labels_hash": manifest.catalog_contract[
+                    "negative_fixture_labels_hash"
+                ],
+            },
         },
         "release_postflight": {
             "required": True,
@@ -2233,6 +2365,10 @@ def census_protected_structural_release(
             receipt_row.get("row_key") != row["row_key"]
             or receipt_row.get("expected_after_hash") != row["expected_after_hash"]
             or receipt_row.get("expected_after") != row["expected_after"]
+            or receipt_row.get("negative_fixture_labels")
+            != row["negative_fixture_labels"]
+            or receipt_row.get("negative_fixture_labels_hash")
+            != row["negative_fixture_labels_hash"]
             or receipt_row.get("allowlisted_delta") != row["allowlisted_delta"]
         ):
             raise ValueError("release census receipt row does not bind manifest state")
@@ -2308,7 +2444,9 @@ def census_protected_structural_release(
                         }
                     )
                 catalog_reasons = _release_catalog_reasons(
-                    catalog, receipt.get("release_baseline") or {}
+                    catalog,
+                    receipt.get("release_baseline") or {},
+                    manifest.catalog_contract["negative_fixture_labels"],
                 )
                 release_ready = (
                     all(row["exact_expected_after"] for row in rows)
@@ -2331,6 +2469,14 @@ def census_protected_structural_release(
         "catalog_reasons": catalog_reasons,
         "catalog_evidence": {
             **_release_baseline(catalog),
+            "negative_fixture_label_contract": {
+                "fixture_labels": copy.deepcopy(
+                    manifest.catalog_contract["negative_fixture_labels"]
+                ),
+                "fixture_labels_hash": manifest.catalog_contract[
+                    "negative_fixture_labels_hash"
+                ],
+            },
             "active_targeted_identity_count": int(
                 catalog.get("active_targeted_identity_count") or 0
             ),

@@ -27,6 +27,14 @@ from imas_codex.standard_names.grammar_segment_reconciliation import (
 
 pytestmark = pytest.mark.graph
 
+_NEGATIVE_FIXTURE_LABELS = [
+    {"path": "fixture/dd/average_field", "label": None},
+    {"path": "fixture/dd/electron_temperature", "label": None},
+]
+_NEGATIVE_FIXTURE_LABELS_HASH = sut._negative_fixture_labels_hash(
+    _NEGATIVE_FIXTURE_LABELS
+)
+
 
 @dataclass(frozen=True)
 class _EphemeralNeo4j:
@@ -152,13 +160,12 @@ def _seed(client: GraphClient, action: str, *, count: int) -> list[dict[str, str
         CREATE (cocos:COCOS {id: 17})
         CREATE (version)-[:HAS_COCOS]->(cocos)
         CREATE (unit:Unit {id: 'm^2', symbol: 'm^2'})
-        CREATE (:IMASNode {
-          id: 'core_profiles/profiles_1d/electrons/temperature'
-        })
-        CREATE (:IMASNode {
-          id: 'equilibrium/time_slice/profiles_1d/b_average'
-        })
         WITH unit
+        UNWIND $negative_fixture_labels AS fixture
+        CREATE (:IMASNode {
+          id: fixture.path, cocos_transformation_type: fixture.label
+        })
+        WITH DISTINCT unit
         UNWIND $rows AS row
         CREATE (old:StandardName {
           id: row.old_id, name_stage: $old_stage,
@@ -191,6 +198,7 @@ def _seed(client: GraphClient, action: str, *, count: int) -> list[dict[str, str
         source_status=(
             "composed" if action == sut.PROTECTED_IDENTITY_FOLD else "stale"
         ),
+        negative_fixture_labels=_NEGATIVE_FIXTURE_LABELS,
     )
     west_source_id = sorted(_west_source_ids())[0]
     client.query(
@@ -272,6 +280,11 @@ def _authority(path: Path, rows: list[dict[str, Any]], *, disposition: str) -> s
             "catalog_constant": 17,
             "change_made": False,
         },
+        "negative_fixture_label_contract": {
+            "dd_version": "4.1.1",
+            "fixture_labels": _NEGATIVE_FIXTURE_LABELS,
+            "fixture_labels_hash": _NEGATIVE_FIXTURE_LABELS_HASH,
+        },
         "graph_evidence": {
             "raw_evidence": {
                 "catalogs": [{"id": "4.1.1", "is_current": True, "cocos": 17}]
@@ -316,6 +329,7 @@ def _manifest(
                 evidence_hash if action == sut.PROTECTED_IDENTITY_FOLD else None
             ),
             event_timestamp="2026-08-04T12:00:00+02:00",
+            negative_fixture_labels=_NEGATIVE_FIXTURE_LABELS,
         )
         for item in seeded
     ]
@@ -326,6 +340,7 @@ def _manifest(
         authority_evidence_path=(
             evidence_path if action == sut.PROTECTED_IDENTITY_FOLD else None
         ),
+        negative_fixture_labels=_NEGATIVE_FIXTURE_LABELS,
     )
     path = tmp_path / f"{action}-manifest.json"
     path.write_text(json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n")
@@ -400,7 +415,7 @@ def _transactional_after_state(client: GraphClient, path: Path) -> dict[str, Any
                     ]
                 )
             transaction.rollback()
-            return state
+            return sut._bind_expected_after_contract(state, manifest.rows[0])
         except BaseException:
             transaction.rollback()
             raise
@@ -614,6 +629,7 @@ def test_graph_manifest_rejects_shared_target(
         rows,
         protected_set_hash=protected.protected_set_hash,
         authority_evidence_sha256="0" * 64,
+        negative_fixture_labels=_NEGATIVE_FIXTURE_LABELS,
     )
     path = tmp_path / "shared-target.json"
     path.write_text(json.dumps(payload, sort_keys=True))
@@ -652,3 +668,14 @@ def test_access_plan_is_constant_across_cohort_size(
     assert applied["counts"]["applied"] == count
     assert apply_counter.query_count == expected_apply_queries
     assert applied["query_audit"]["query_count"] == expected_apply_queries
+
+    census_counter = _CountingGraphClient(graph_client)
+    census = sut.census_protected_structural_release(
+        path,
+        applied,
+        expected_receipt_hash=applied["receipt_hash"],
+        gc=census_counter,
+    )
+    assert census["release_ready"] is True, census["catalog_reasons"]
+    assert census_counter.query_count == 1
+    assert census["query_audit"]["query_count"] == 1
