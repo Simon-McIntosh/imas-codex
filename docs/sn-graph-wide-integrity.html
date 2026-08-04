@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="91">
+<meta name="plan-version" content="92">
 <meta name="plan-impl" content="0.99">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -940,6 +940,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260804-flux-area-correction" data-who="Simon McIntosh" data-when="2026-08-04T23:35:00+02:00">
     <div class="r-comment-body"><p><strong>The proposed <code>cross_section_of_flux_surface → area_of_flux_surface</code> fold is rejected before mutation.</strong> Protecting WEST is a collateral-damage boundary, not permission to preserve an incorrect identity. A generic flux-surface area cannot distinguish the DD poloidal cross-sectional area from the swept toroidal surface area. This distinction was already documented by the edit-side-car work: DD <code>area</code> is poloidal cross-sectional area, whereas <code>surface</code> is the swept toroidal surface. No fold has been applied. The row is now held for strict grammar validation and sanctioned staging/review of an explicitly poloidal cross-sectional-area identity; the generic accepted WEST target must remain untouched unless separately adjudicated.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260804-corrected-completion-census" data-who="reckon-ship" data-when="2026-08-04T23:50:00+02:00">
+    <div class="r-comment-body"><p><strong>The corrected completion census succeeded as exactly one bounded read.</strong> One Cypher-5 statement returned one compact row in 17.52 s with zero retries, writes, provider calls, pipeline actions, or OOM-kill delta. Private receipt <code>~/.local/share/imas-codex/receipts/standard-names/s7-completion-census-result/completion-census-result.json</code>, SHA-256 <code>562211fa1a8d3314cc706e2f589d78a91ea023c4c2797721a4180a87c626ccda</code>, mode <code>0600</code>. Current blockers are 491 semantic-source findings, 68 provenance orphans, four strict-parser residues, and 1,585 pipeline candidates. Backlogs are generate 836, name review 311, name refine 36, docs generate 324, docs review 71, docs refine 7; every claimed count is zero.</p><p><strong>The candidate partition is fail-closed.</strong> Only 235 rows are preliminarily safe; 1,192 carry stale DD authority, 96 touch protected sources, 50 have incomplete DD authority, and 12 lack provenance. WEST is 355/355 at the retained hash, fixtures are 61 at the retained hash, duplicate names/sources and open runs are zero, DDGap remains 35 facts/451 observations/zero actionable, DD 4.1.1/global COCOS 17 pass, and downstream <code>psi_like=158</code>, <code>ip_like=74</code>, and the null negative fixture remain unchanged. The cross-section fold is explicitly inadmissible under the locked poloidal-versus-swept decision. No paid pipeline work may begin until the semantic-collapse audit classifies the 235 and the hard-budget/terminality repair is independently green.</p></div>
 </div>
 </section>
 </main>
