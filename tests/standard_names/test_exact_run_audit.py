@@ -268,6 +268,24 @@ def test_unrelated_child_evidence_is_rejected(evidence_kind: str) -> None:
     assert any(evidence_kind in item for item in receipt.diagnostics)
 
 
+def test_review_linkage_reuses_bounded_costs_and_keeps_query_count_constant() -> None:
+    run_row = _run_row()
+    run_row["reviews"][0]["linked_cost_ids"] = []
+
+    receipt, client = _audit([[_target_row()], [_dd_row()], [run_row]])
+
+    assert receipt.passed is False
+    assert receipt.query_count == 3
+    assert client.query.call_count == 3
+    assert any(
+        "review evidence is not linked to the selected run" in item
+        for item in receipt.diagnostics
+    )
+    assert _RUN_EVIDENCE_QUERY.count("[:FOR_RUN]->(run)") == 1
+    assert "CALL (run, costs)" in _RUN_EVIDENCE_QUERY
+    assert "[cost IN costs WHERE cost.run_id = run.id" in _RUN_EVIDENCE_QUERY
+
+
 @pytest.mark.parametrize(
     ("field", "value", "diagnostic"),
     [
@@ -358,6 +376,8 @@ def test_queries_are_bounded_and_keep_aggregates_in_with_scope() -> None:
     assert "DDVersion {is_current: true}" not in _TARGET_EVIDENCE_QUERY
     assert "MATCH (version:DDVersion {id: $dd_version})" in _DD_EVIDENCE_QUERY
     assert "WITH run, cost" in _RUN_EVIDENCE_QUERY
+    assert _RUN_EVIDENCE_QUERY.count("[:FOR_RUN]->(run)") == 1
+    assert "CALL (run, costs)" in _RUN_EVIDENCE_QUERY
     assert "AS ledger_cost" in _RUN_EVIDENCE_QUERY
     assert (
         "RETURN costs, ledger_cost, overspend_cost, cost_events" in _RUN_EVIDENCE_QUERY

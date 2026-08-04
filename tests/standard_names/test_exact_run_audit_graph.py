@@ -62,6 +62,15 @@ def test_disposable_graph_compiles_all_bounded_queries_without_global_scans() ->
         graph_name="ephemeral-exact-run-audit",
     ) as gc:
         with gc.session() as session:
+            for statement in (
+                "CREATE CONSTRAINT exact_run_audit_standard_name_id IF NOT EXISTS "
+                "FOR (node:StandardName) REQUIRE node.id IS UNIQUE",
+                "CREATE CONSTRAINT exact_run_audit_dd_version_id IF NOT EXISTS "
+                "FOR (node:DDVersion) REQUIRE node.id IS UNIQUE",
+                "CREATE CONSTRAINT exact_run_audit_sn_run_id IF NOT EXISTS "
+                "FOR (node:SNRun) REQUIRE node.id IS UNIQUE",
+            ):
+                session.run(statement).consume()
             for label, query in (
                 ("target", _TARGET_EVIDENCE_QUERY),
                 ("dd", _DD_EVIDENCE_QUERY),
@@ -72,6 +81,8 @@ def test_disposable_graph_compiles_all_bounded_queries_without_global_scans() ->
 
     assert set(plans) == {"target", "dd", "run"}
     for operators in plans.values():
-        assert "AllNodesScan" not in operators
-        assert not any("AllRelationshipsScan" in operator for operator in operators)
+        assert not any("Scan" in operator for operator in operators)
         assert not any("VarLengthExpand" in operator for operator in operators)
+    assert "NodeUniqueIndexSeek" in plans["target"]
+    assert "NodeUniqueIndexSeek" in plans["dd"]
+    assert "NodeIndexSeekByRange" in plans["run"]

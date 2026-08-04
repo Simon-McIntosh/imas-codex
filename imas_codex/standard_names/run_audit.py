@@ -124,20 +124,19 @@ CALL (run) {
        count(cost) AS cost_events
   RETURN costs, ledger_cost, overspend_cost, cost_events
 }
-CALL (run) {
+CALL (run, costs) {
   OPTIONAL MATCH (target:StandardName {id: $name_id})
                  -[:HAS_REVIEW]->(review:StandardNameReview)
-  WITH run, target, review
+  WITH run, costs, target, review
   WHERE review IS NULL
      OR review.reviewed_at IS NULL
      OR (review.reviewed_at >= datetime($launched_at)
          AND review.reviewed_at <= datetime($completed_at))
-  OPTIONAL MATCH (review_cost:LLMCost)-[:FOR_RUN]->(run)
-  WHERE review_cost.run_id = run.id
-    AND target.id IN coalesce(review_cost.sn_ids, [])
-    AND review_cost.pool = 'review'
-    AND review_cost.llm_at = review.llm_at
-  WITH review, run, collect(DISTINCT review_cost.id) AS linked_cost_ids
+  WITH review, run,
+       [cost IN costs WHERE cost.run_id = run.id
+          AND target.id IN coalesce(cost.sn_ids, [])
+          AND cost.pool = 'review'
+          AND cost.llm_at = review.llm_at | cost.id] AS linked_cost_ids
   WITH collect(CASE WHEN review IS NULL THEN null ELSE {
          id: review.id,
          review_axis: review.review_axis,
