@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="96">
+<meta name="plan-version" content="97">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -988,6 +988,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="semantic-repair-evidence-inventory-20260805" data-who="reckon-ship" data-when="2026-08-05T00:05:00+02:00" data-quote="Exhaustive one-query evidence inventory">
     <div class="r-comment-body"><p><strong>The earlier 94-row minimum is now an exhaustive evidence partition.</strong> One bounded read-only production query took 9.091638 s and returned 376 unique live attachment rows across 348 sources and 26 current targets, with zero retries, writes, provider calls, pipeline actions or new OOM kills. The exclusive classification is 137 proven wrong, eight high-confidence suspect, 173 supported/correct and 58 ambiguous; the sum is exactly 376. All prior 86 proven and eight high-confidence pairs are recovered. The previously capped <code>toroidal_angle_of_measurement_position</code> cohort is fully exhausted at 113 sources and 124 attachment rows, exposing 33 sources beyond the old cap plus 11 current target identities absent from the prior audit.</p><p>The private receipt is <code>~/.local/share/imas-codex/receipts/standard-names/s7-semantic-repair-manifest/semantic-repair-evidence.json</code>, mode <code>0600</code>, SHA-256 <code>86fbe56ef617364f5cf44aaf33f2f8c3e77bad0b29ccee996cdaf81b85fe735e</code>; classification digest <code>68dd0d3f2cee555788e26584752587232f7a406f9771c127a4c0eee373545266</code>. Offline recomputation also matches the embedded canonical payload digest. Authority is the unique current DD 4.1.1 catalog at COCOS 17; <code>psi_like</code>/<code>ip_like</code> and the intentional null fixture are preserved. This is observational evidence only: 58 WEST-protected and 145 catalog-protected attachment rows are inventoried, but no detach, attach, rename, accept, generation or review action is signed or authorized.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="semantic-policy-verification-hold-20260805" data-who="reckon-ship" data-when="2026-08-05T00:08:00+02:00" data-quote="Independent semantic-policy verification: HOLD">
+    <div class="r-comment-body"><p>Candidate <code>1e29f49e</code> remains unmerged. Independent review confirms the hard NC-1 contract and both distinct flux-area forms strictly round-trip through public ISN, but the one focused adjacent run was red at one failed, 276 passed and one skipped. Backticked DD/prose tokens in an endorsed-name table were parsed as names; reviewer prompts still described invalid <code>poloidal_flux</code> and decomposable <code>cross_sectional_area</code> as atomic bases; the live name-only compose prompt lacked the new contract and carried an owner-dropping unit-vector example; and outline guidance simultaneously forbade all outlines, allowed owner-qualified outlines, and retained tests endorsing generic cross-object outlines. Repair must cover every actual compose mode, remove all contradictory decomposition guidance, retain outline owner/axis/representation, and replace prose-marker tests with public-parser and rendered-mode behavior. Verification log <code>~/.cache/semantic-policy-focused-1e29f49e.log</code>, SHA-256 <code>6f798c60b362361f2d5c62e326421f5efdea15b3f5a3d4379ffc3b752a195ecc</code>. No graph, provider, generation or pipeline action occurred.</p></div>
 </div>
 </section>
 </main>
