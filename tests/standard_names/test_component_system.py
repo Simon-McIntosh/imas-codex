@@ -332,7 +332,7 @@ def test_seed_parent_sources_keeps_seedable_operator_gate() -> None:
     )
 
 
-def test_refine_name_claim_skips_derived_origin():
+def test_refine_name_claim_skips_derived_origin(monkeypatch: pytest.MonkeyPatch):
     """The REFINE_NAME claim must exclude derived/deterministic origins.
 
     Refining a structurally-derived parent is meaningless — the name
@@ -340,20 +340,27 @@ def test_refine_name_claim_skips_derived_origin():
     below-min review should leave the parent at ``reviewed`` so it
     visibly fails the export quality gate, prompting manual review.
     """
-    import inspect
-
     from imas_codex.standard_names import graph_ops
 
-    src = inspect.getsource(graph_ops.claim_refine_name_batch)
-    assert "origin" in src and "derived" in src, (
-        "claim_refine_name_batch must filter out origin='derived'."
-    )
-    assert "coalesce(sn.origin, '') <> 'derived'" in src, (
+    predicate = graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+    assert "coalesce(sn.origin, '') <> 'derived'" in predicate, (
         "Use scalar compare to exclude origin='derived'."
     )
 
+    captured: dict = {}
 
-def test_review_name_claim_excludes_derived_parents():
+    def _capture_claim(**kwargs):
+        captured.update(kwargs)
+        return []
+
+    monkeypatch.setattr(graph_ops, "_claim_sn_atomic", _capture_claim)
+    assert graph_ops.claim_refine_name_batch() == []
+    assert captured["eligibility_where"] == predicate
+
+
+def test_review_name_claim_excludes_derived_parents(
+    monkeypatch: pytest.MonkeyPatch,
+):
     """Derived parents SKIP REVIEW_NAME and are accepted structurally (the name
     score is inherited from their accepted children, with
     ``reviewer_model_name='structural-inheritance'``). A structural abstraction
@@ -362,19 +369,27 @@ def test_review_name_claim_excludes_derived_parents():
     and additionally gates on a real (non-placeholder) description so only
     review-ready pipeline names are scored.
     """
-    import inspect
-
     from imas_codex.standard_names import graph_ops
 
-    src = inspect.getsource(graph_ops.claim_review_name_batch)
-    assert "coalesce(sn.origin, '') <> 'derived'" in src, (
+    predicate = graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE
+    assert "coalesce(sn.origin, '') <> 'derived'" in predicate, (
         "claim_review_name_batch must exclude origin='derived' — derived parents "
         "skip REVIEW_NAME and are accepted structurally from their children."
     )
-    assert "sn.description <> $parent_desc_placeholder" in src, (
+    assert "sn.description <> $parent_desc_placeholder" in predicate, (
         "claim_review_name_batch must exclude the deterministic-parent "
         "placeholder description so only review-ready names are scored."
     )
+
+    captured: dict = {}
+
+    def _capture_claim(**kwargs):
+        captured.update(kwargs)
+        return []
+
+    monkeypatch.setattr(graph_ops, "_claim_sn_atomic", _capture_claim)
+    assert graph_ops.claim_review_name_batch() == []
+    assert captured["eligibility_where"] == predicate
 
 
 def test_review_name_worker_skips_semantic_sim_for_derived():

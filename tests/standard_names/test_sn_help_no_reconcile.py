@@ -1,10 +1,12 @@
-"""Test ``sn --help`` output contains no reconcile, link, seed tokens.
+"""Test ``sn --help`` omits removed bare reconcile, link, and seed verbs.
 
-The standalone CLI verbs are removed; their functionality is reachable only
-via ``sn run``.
+The legacy standalone verbs are removed. Governed maintenance commands may use
+more specific names with mandatory manifest and audit inputs.
 """
 
 from __future__ import annotations
+
+import re
 
 from click.testing import CliRunner
 
@@ -18,18 +20,14 @@ class TestSnHelpNoLegacyVerbs:
         runner = CliRunner()
         result = runner.invoke(sn, ["--help"])
         assert result.exit_code == 0
-        # The word "reconcile" should not appear as a listed command
-        for line in result.output.splitlines():
-            # Skip docstring lines that mention the concept
-            stripped = line.strip()
-            if stripped.startswith("sn "):
-                # Example usage lines in the group docstring
-                continue
-            if stripped.startswith("reconcile") and not stripped.startswith(
-                "reconcile →"
-            ):
-                # This would be a subcommand listing
-                assert False, f"Found 'reconcile' as a subcommand: {line}"
+        command_lines = result.output.partition("Commands:")[2].splitlines()
+        listed_commands = {
+            match.group(1)
+            for line in command_lines
+            if (match := re.match(r"^  ([a-z0-9][a-z0-9-]*)\s{2,}", line))
+        }
+        assert "reconcile" not in listed_commands
+        assert "reconcile-grammar-segments" in listed_commands
 
     def test_no_resolve_links_as_command(self):
         runner = CliRunner()
