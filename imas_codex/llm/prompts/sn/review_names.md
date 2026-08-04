@@ -58,9 +58,9 @@ into `physical_base`** rather than placing them in their correct segment
 `physical_base=torque`). Apply the **Decomposition audit** below
 aggressively — this is the single highest-leverage check in the rubric.
 
-Compound `physical_base` tokens like `poloidal_flux`, `minor_radius`,
-`cross_sectional_area`, `safety_factor`, `polarization_angle`,
-`internal_inductance` are valid lexicalised atomic physics terms; treat them
+Compound `physical_base` tokens like `minor_radius`, `safety_factor`,
+`polarization_angle`, and `internal_inductance` are valid lexicalised atomic
+physics terms; treat them
 as single entries even if a substring resembles a registered token.
 
 Flag `vocab_gap` and dock points whenever any segment would require an
@@ -105,8 +105,8 @@ grammar and convention scores.
     - `toroidal_torque` → projection=`toroidal` + base=`torque`
     - `volume_averaged_electron_temperature` → operator=`volume_averaged` + qualifier=`electron` + base=`temperature`
     - `poloidal_cross_sectional_area_of_flux_surface` → projection=`poloidal` + qualifier=`cross_sectional` + base=`area` + locus=`flux_surface`
-  Allow genuine lexicalised atomic terms (`poloidal_flux`, `minor_radius`,
-  `cross_sectional_area`, `safety_factor`). For real defects, dock
+  Allow genuine lexicalised atomic terms (`minor_radius`, `safety_factor`).
+  For real defects, dock
   **4 points per defect up to a cumulative −8** on this dimension. Record
   each absorbed token in the `issues` field as
   `decomposition: <token>(<group>) absorbed into physical_base`.

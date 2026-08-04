@@ -165,6 +165,28 @@ def test_name_review_prompts_reject_non_line_of_sight_geometry_collapse(
     assert "line_of_sight" in rendered
 
 
+@pytest.mark.parametrize("prompt_name", ("sn/review", "sn/review_names"))
+def test_name_review_prompts_use_public_flux_area_decomposition(
+    prompt_name: str,
+) -> None:
+    """Reviewers do not treat projection and qualifier tokens as atomic bases."""
+    source = render_prompt(
+        prompt_name,
+        {
+            "items": [],
+            "nearby_existing_names": [],
+            "review_scored_examples": [],
+            "batch_context": "",
+        },
+    )
+
+    assert "projection=`poloidal` + qualifier=`cross_sectional` + base=`area`" in source
+    assert "`poloidal_flux` is a lexicalised atomic term" not in source
+    assert "Allow lexicalised atomic compounds (`poloidal_flux`" not in source
+    assert "Compound `physical_base` tokens like `poloidal_flux`" not in source
+    assert "`cross_sectional_area`, `safety_factor`" not in source
+
+
 def test_review_claim_projects_exact_pinned_source_bindings() -> None:
     """The claim carries enough exact-source state for immutable DD grounding."""
     from imas_codex.standard_names import graph_ops

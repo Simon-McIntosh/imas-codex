@@ -33,7 +33,7 @@ pytest.importorskip("imas_standard_names")
 
 from imas_standard_names import compose, parse  # noqa: E402
 
-from imas_codex.llm.prompt_loader import PROMPTS_DIR  # noqa: E402
+from imas_codex.llm.prompt_loader import PROMPTS_DIR, render_prompt  # noqa: E402
 
 # Compose system prompt + the shared includes it renders (see the
 # ``{% include %}`` directives in generate_name_system.md).
@@ -174,6 +174,34 @@ def test_flux_surface_area_forms_round_trip_without_semantic_collapse() -> None:
     assert {qualifier.token for qualifier in surface_ir.qualifiers} == {"surface"}
 
 
+@pytest.mark.parametrize(
+    "name",
+    (
+        "radial_outline_of_wall",
+        "vertical_outline_of_wall",
+        "radial_outline_of_plasma_boundary",
+        "vertical_outline_of_plasma_boundary",
+    ),
+)
+def test_owner_qualified_outline_forms_round_trip(name: str) -> None:
+    """The public grammar preserves the owner on each outline projection."""
+    assert _round_trips(name)
+
+
+def test_outline_owners_are_distinct_public_ir_identities() -> None:
+    """Parsing cannot fold wall and plasma-boundary outlines together."""
+    wall = parse("radial_outline_of_wall", strict=True).ir
+    boundary = parse("radial_outline_of_plasma_boundary", strict=True).ir
+
+    assert compose(wall) == "radial_outline_of_wall"
+    assert compose(boundary) == "radial_outline_of_plasma_boundary"
+    assert wall != boundary
+    assert wall.locus is not None
+    assert boundary.locus is not None
+    assert wall.locus.token == "wall"
+    assert boundary.locus.token == "plasma_boundary"
+
+
 def test_consistency_rule_forbids_generic_flux_surface_area_umbrella() -> None:
     """Consistency cannot erase the DD distinction between two surface kinds."""
     from imas_codex.llm.prompt_loader import load_prompt_config
@@ -207,15 +235,26 @@ _SOURCE_AXIS_MARKERS = (
 
 
 @pytest.mark.parametrize(
-    "relative_path",
-    ("sn/generate_name_system.md", "sn/generate_name_dd.md"),
+    "relative_path,prompt_name",
+    (
+        ("sn/generate_name_system.md", None),
+        ("sn/generate_name_dd.md", "sn/generate_name_dd"),
+        ("sn/generate_name_dd_names.md", "sn/generate_name_dd_names"),
+    ),
 )
 def test_compose_prompts_carry_complete_source_axis_contract(
     relative_path: str,
+    prompt_name: str | None,
 ) -> None:
-    """Both compose seats fail closed on every authoritative semantic axis."""
-    source = (PROMPTS_DIR / relative_path).read_text(encoding="utf-8")
-    text = " ".join(source.lower().split())
+    """Every compose path fails closed on every authoritative semantic axis."""
+    if prompt_name is None:
+        prompt = (PROMPTS_DIR / relative_path).read_text(encoding="utf-8")
+    else:
+        prompt = render_prompt(
+            prompt_name,
+            {"items": [], "nearby_existing_names": [], "reference_exemplars": []},
+        )
+    text = " ".join(prompt.lower().split())
 
     for marker in _SOURCE_AXIS_MARKERS:
         assert marker in text
@@ -228,14 +267,26 @@ def test_compose_prompts_carry_complete_source_axis_contract(
 
 
 @pytest.mark.parametrize(
-    "relative_path",
-    ("sn/generate_name_system.md", "sn/generate_name_dd.md"),
+    "relative_path,prompt_name",
+    (
+        ("sn/generate_name_system.md", None),
+        ("sn/generate_name_dd.md", "sn/generate_name_dd"),
+        ("sn/generate_name_dd_names.md", "sn/generate_name_dd_names"),
+    ),
 )
 def test_ordinal_geometry_never_changes_the_physical_carrier(
     relative_path: str,
+    prompt_name: str | None,
 ) -> None:
     """Removing an array ordinal cannot recast non-LOS geometry as a sight-line."""
-    text = (PROMPTS_DIR / relative_path).read_text(encoding="utf-8").lower()
+    if prompt_name is None:
+        prompt = (PROMPTS_DIR / relative_path).read_text(encoding="utf-8")
+    else:
+        prompt = render_prompt(
+            prompt_name,
+            {"items": [], "nearby_existing_names": [], "reference_exemplars": []},
+        )
+    text = prompt.lower()
 
     for counterexample in (
         "thick_line",
@@ -250,6 +301,25 @@ def test_ordinal_geometry_never_changes_the_physical_carrier(
     assert "only genuine" in text or "only paths genuinely" in text
     assert "line_of_sight" in text
     assert "vocab_gap" in text
+
+
+@pytest.mark.parametrize(
+    "prompt_name",
+    ("sn/generate_name_dd", "sn/generate_name_dd_names"),
+)
+def test_compose_modes_preserve_outline_and_unit_vector_owners(
+    prompt_name: str,
+) -> None:
+    """Both user modes reject owner-erasing geometry consolidation."""
+    text = render_prompt(
+        prompt_name,
+        {"items": [], "nearby_existing_names": [], "reference_exemplars": []},
+    ).lower()
+
+    assert "radial_outline_of_wall" in text
+    assert "radial_outline_of_plasma_boundary" in text
+    assert "z_direction_unit_vector_of_camera" in text
+    assert "bare `radial_outline` / `vertical_outline`" in text
 
 
 # A prefix transformation may coexist with a projection, and change_in is a

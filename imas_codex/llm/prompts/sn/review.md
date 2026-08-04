@@ -70,9 +70,9 @@ grammar and convention scores.
   Examples of defects and corrections:
     - `toroidal_torque` → projection=`toroidal` + base=`torque`
     - `volume_averaged_electron_temperature` → operator=`volume_averaged` + qualifier=`electron` + base=`temperature`
-    - `normalized_poloidal_flux` → operator=`normalized` + base=`poloidal_flux` (`poloidal_flux` is a lexicalised atomic term)
-  Allow lexicalised atomic compounds (`poloidal_flux`, `minor_radius`,
-  `cross_sectional_area`, `safety_factor`) — these are named quantities
+    - `poloidal_cross_sectional_area_of_flux_surface` → projection=`poloidal` + qualifier=`cross_sectional` + base=`area` + locus=`flux_surface`
+  Allow genuine lexicalised atomic compounds such as `minor_radius` and
+  `safety_factor` — these are named quantities
   even though they contain closed-vocab words. For genuine defects,
   dock grammar by **4 points per defect up to a cumulative −8**. List
   the absorbed tokens in the `issues` field as

@@ -117,13 +117,13 @@ defect.**
 | `plasma_current_IP` | `plasma_current` | No symbol suffixes |
 | `current_from_passive_loop` | `passive_loop_current` | `_from_` implies causation — use device prefix for signals |
 | `poloidal_flux` | `poloidal_magnetic_flux` | Use controlled vocabulary term; no synonymous short forms |
-| `area_of_flux_surface` for DD `area` or DD `surface` | `poloidal_cross_sectional_area_of_flux_surface` for DD `area`; `surface_area_of_flux_surface` for DD `surface` | Surface kind is load-bearing: poloidal enclosed cross-section and swept toroidal surface are different observables |
+| `area_of_flux_surface` for DD area or DD surface | `poloidal_cross_sectional_area_of_flux_surface` for DD area; `surface_area_of_flux_surface` for DD surface | Surface kind is load-bearing: poloidal enclosed cross-section and swept toroidal surface are different observables |
 | `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Drop provenance; use the registered Faraday-polarization quantity |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking into standard name |
 | `flux_surface_averaged_elongation` | `elongation` | Elongation is a geometric property of a contour, not a flux-surface average |
 | `energy_due_to_recombination_at_ion_state` | `energy_due_to_recombination` | Process tokens are bare vocabulary entries — never append `_at_X` / `_in_X` / `_on_X` qualifiers |
 | `energy_due_to_impurity_radiation_in_halo_region` | `radiated_energy_over_halo_region_due_to_impurity_radiation` | A region is a postfix `_over_` locus before the process suffix |
-| `vertical_coordinate_of_outline_point` | owner-qualified vertical outline, or `vocab_gap` | Omit the ordinal vertex label, retain the owning object and axis, and never merge outlines belonging to different objects |
+| `vertical_coordinate_of_outline_point` | owner-qualified vertical outline, or vocab gap | Omit the ordinal vertex label, retain the owning object and axis, and never merge outlines belonging to different objects |
 | `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
 | `x1_coordinate_of_neutron_detector_geometry_outline` | `first_local_tangential_coordinate_of_neutron_detector` | **Local tangent axes are DISTINCT semantic directions, not storage labels** — map source-local X1/X2 to the REGISTERED carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` (`base_kind=geometry`), retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` |
 | `vertical_front_surface_radius_of_optical_element` for reflector X2 curvature | `second_local_tangential_radius_of_reflector` | X2 is an object-local surface tangent, not machine vertical. Keep `reflector`, drop the redundant `front_surface` wording, omit diagnostic/channel provenance, and do not claim a principal-curvature direction without source evidence |
@@ -149,9 +149,9 @@ component is being described. Generic geometric primitives alone are useless.
 | `alpha_of_oblique` | `angle_of_poloidal_field_coil` | Names the engineering owner without inventing a primitive token |
 | `radius_of_circle` | SKIP — no tokamak-universal meaning | Pure geometric primitive |
 | `height_of_rectangle` | `height_of_poloidal_field_coil` | Rectangle alone is meaningless; the owning coil is registered |
-| `<owner>/outline/r` | owner-qualified radial outline, or `vocab_gap` | Omit the vertex ordinal but retain the physical owner; never attach another object's outline to a generic or unrelated outline identity |
+| `<owner>/outline/r` | owner-qualified radial outline, or vocab gap | Omit the vertex ordinal but retain the physical owner; never attach another object's outline to a generic or unrelated outline identity |
 | `line_of_sight/first_point/r` | `radial_coordinate_of_line_of_sight` | **Enumeration is a coordinate, not a name** only within the same carrier: omit the endpoint ordinal, retain the explicit `line_of_sight` representation, and list only genuine sight-line endpoints in `dd_paths` |
-| `coil/geometry/thick_line/first_point/r` | registered coil thick-line coordinate, or `vocab_gap` | A thick-line conductor is not a line of sight; retain carrier, representation, owner, and axis or fail closed |
+| `coil/geometry/thick_line/first_point/r` | registered coil thick-line coordinate, or vocab gap | A thick-line conductor is not a line of sight; retain carrier, representation, owner, and axis or fail closed |
 
 **When to SKIP geometry paths entirely:**
 
@@ -184,6 +184,12 @@ carrier, its representation, its owner, and the axis projection. Emit
 | `<entity>/outline/r` (vertex array) | owner-qualified radial outline, or `vocab_gap` | retain `<entity>`; never use another object's outline identity |
 | `<entity>/outline/z` (vertex array) | owner-qualified vertical outline, or `vocab_gap` | retain `<entity>`; never use another object's outline identity |
 
+Use a registered owner-qualified form such as `radial_outline_of_wall` or
+`radial_outline_of_plasma_boundary` when it matches the exact source owner.
+Never teach bare `radial_outline` / `vertical_outline` as identities shared by
+different objects. Ordinal siblings of one wall outline may consolidate, but a
+wall outline and a plasma-boundary outline may not.
+
 `dd_paths` for `radial_coordinate_of_line_of_sight` MUST list every
 `.../*_point/r` endpoint — the collapse is realised by attaching every endpoint
 path to the single name. Do not include endpoints belonging to any other
@@ -193,7 +199,8 @@ geometry carrier.
 conductor geometry, pellet paths, gas pipes, shunt positions, beam paths,
 interpolation knots, and outlines of other objects must never be recast as
 `*_coordinate_of_line_of_sight` or as a generic unrelated outline. Preserve
-their supported carrier/owner or emit a `vocab_gap`.
+their supported carrier/owner or emit a `vocab_gap`; an other-object outline
+is never a consistency match.
 
 **Distinguish points only by physical ENTITY, never by ordinal.** A point earns
 a distinct name ONLY when it is a distinct physical entity (an aperture vs a
