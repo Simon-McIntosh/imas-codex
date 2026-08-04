@@ -409,6 +409,7 @@ def test_exact_name_review_action_routes_to_one_pool() -> None:
     assert kwargs["edits_only"] is True
     assert kwargs["skip_global_maintenance"] is True
     assert kwargs["skip_generate"] is True
+    assert kwargs["scope_size_hint"] == 1
 
 
 def test_exact_parent_enrich_routes_only_enrichment_pool_flags() -> None:

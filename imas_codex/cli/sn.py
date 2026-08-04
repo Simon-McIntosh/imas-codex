@@ -531,6 +531,7 @@ def _run_sn_cmd(
     only: str | None = None,
     max_sources: int | None = None,
     scope_run_id: str | None = None,
+    scope_size_hint: int | None = None,
     drain_scope_id: str | None = None,
     drain_paths: tuple[str, ...] = (),
     drain_dd_version: str | None = None,
@@ -745,6 +746,7 @@ def _run_sn_cmd(
             on_event=_on_event,
             display=display,
             scope_run_id=scope_run_id,
+            scope_size_hint=scope_size_hint,
             drain_scope_id=drain_scope_id,
             drain_paths=drain_paths,
             drain_dd_version=drain_dd_version,
@@ -2129,6 +2131,7 @@ def sn_run(
             only=only_phase,
             max_sources=max_sources,
             scope_run_id=exact_scope_run_id,
+            scope_size_hint=len(scoped["name_ids"]),
             edits_only=edits_only,
             skip_global_maintenance=skip_global_maintenance,
         )

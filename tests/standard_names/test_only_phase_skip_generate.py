@@ -189,6 +189,106 @@ def test_build_pool_specs_rejects_unknown_pool() -> None:
         _build_specs(only_pool="review")
 
 
+@pytest.mark.parametrize(
+    ("pool_name", "filters"),
+    [
+        (
+            "review_name",
+            {"only_pool": "review_name", "names_only": True, "skip_generate": True},
+        ),
+        (
+            "refine_name",
+            {"only_pool": "refine_name", "names_only": True, "skip_generate": True},
+        ),
+        (
+            "enrich_parents",
+            {"names_only": True, "skip_generate": True, "skip_review": True},
+        ),
+    ],
+)
+def test_single_name_scope_keeps_one_replica(
+    pool_name: str, filters: dict[str, object]
+) -> None:
+    recount = MagicMock(side_effect=AssertionError("exact scope recounted"))
+    with (
+        patch(f"{_LOOP}._count_scope_names", new=recount),
+        patch("imas_codex.settings.get_pool_replicas", return_value=128),
+    ):
+        specs = _build_specs(
+            scope_run_id="exact-scope",
+            scope_size_hint=1,
+            **filters,
+        )
+
+    assert [(spec.name, spec.replicas) for spec in specs] == [(pool_name, 1)]
+    recount.assert_not_called()
+
+
+def test_forty_name_scope_caps_every_pool_and_keeps_docs_stricter() -> None:
+    recount = MagicMock(side_effect=AssertionError("exact scope recounted"))
+    with (
+        patch(f"{_LOOP}._count_scope_names", new=recount),
+        patch("imas_codex.settings.get_pool_replicas", return_value=128),
+    ):
+        specs = _build_specs(
+            scope_run_id="exact-scope",
+            scope_size_hint=40,
+        )
+
+    replicas = {spec.name: spec.replicas for spec in specs}
+    assert max(replicas.values()) <= 40
+    assert replicas["generate_name"] == 40
+    assert replicas["review_name"] == 40
+    assert replicas["refine_name"] == 40
+    assert replicas["enrich_parents"] == 40
+    assert replicas["generate_docs"] == 20
+    assert replicas["review_docs"] == 20
+    assert replicas["refine_docs"] == 20
+    recount.assert_not_called()
+
+
+def test_scoped_fallback_counts_once_and_caps_safely() -> None:
+    recount = MagicMock(return_value=3)
+    with (
+        patch(f"{_LOOP}._count_scope_names", new=recount),
+        patch("imas_codex.settings.get_pool_replicas", return_value=128),
+    ):
+        specs = _build_specs(scope_run_id="focus-scope")
+
+    replicas = {spec.name: spec.replicas for spec in specs}
+    recount.assert_called_once_with("focus-scope", None)
+    assert max(replicas.values()) <= 3
+    assert replicas["review_name"] == 3
+    assert replicas["enrich_parents"] == 3
+    assert replicas["generate_docs"] == 2
+    assert replicas["review_docs"] == 2
+    assert replicas["refine_docs"] == 2
+
+
+@pytest.mark.parametrize("invalid_hint", [0, -1, True, 1.5])
+def test_invalid_scope_size_hint_fails_closed(invalid_hint: object) -> None:
+    recount = MagicMock(side_effect=AssertionError("invalid scope recounted"))
+    with (
+        patch(f"{_LOOP}._count_scope_names", new=recount),
+        pytest.raises(ValueError, match="positive integer"),
+    ):
+        _build_specs(
+            scope_run_id="exact-scope",
+            scope_size_hint=invalid_hint,
+        )
+    recount.assert_not_called()
+
+
+def test_unscoped_scope_size_hint_fails_closed() -> None:
+    recount = MagicMock(side_effect=AssertionError("unscoped hint recounted"))
+    with (
+        patch(f"{_LOOP}._count_scope_names", new=recount),
+        pytest.raises(ValueError, match="requires a bounded graph scope"),
+    ):
+        _build_specs(scope_size_hint=1)
+    recount.assert_not_called()
+
+
 @pytest.mark.asyncio
 async def test_review_then_refine_requires_separate_pool_selection() -> None:
     """One review quorum cannot cascade into refinement in the same action."""
@@ -217,7 +317,10 @@ async def test_review_then_refine_requires_separate_pool_selection() -> None:
     review_process = AsyncMock(side_effect=_review)
     refine_process = AsyncMock(side_effect=_refine)
     with (
-        patch(f"{_LOOP}._count_scope_names", return_value=1),
+        patch(
+            f"{_LOOP}._count_scope_names",
+            side_effect=AssertionError("exact scope recounted"),
+        ),
         patch(f"{_GO}.claim_review_name_batch", new=review_claim),
         patch(f"{_GO}.claim_refine_name_batch", new=refine_claim),
         patch(
@@ -232,6 +335,7 @@ async def test_review_then_refine_requires_separate_pool_selection() -> None:
         review_specs = _build_specs(
             only_pool="review_name",
             scope_run_id="exact-scope",
+            scope_size_hint=1,
             edits_only=True,
             names_only=True,
             skip_generate=True,
@@ -253,6 +357,7 @@ async def test_review_then_refine_requires_separate_pool_selection() -> None:
         refine_specs = _build_specs(
             only_pool="refine_name",
             scope_run_id="exact-scope",
+            scope_size_hint=1,
             edits_only=True,
             names_only=True,
             skip_generate=True,
@@ -300,9 +405,12 @@ def test_run_command_forwards_exact_pool_selector() -> None:
             dry_run=False,
             quiet=True,
             only="review_name",
+            scope_run_id="exact-scope",
+            scope_size_hint=1,
         )
 
     assert run_pools.await_args.kwargs["only_pool"] == "review_name"
+    assert run_pools.await_args.kwargs["scope_size_hint"] == 1
 
 
 # ---------------------------------------------------------------------------
