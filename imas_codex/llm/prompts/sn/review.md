@@ -42,6 +42,10 @@ carrier/representation and owner remain mandatory. Only genuine
 `thick_line` conductors, pellet paths, gas pipes, shunts, beam paths,
 interpolation points, and other-object outlines must retain their own identity
 or fail closed with a vocabulary gap.
+Owner-qualified outline forms such as `radial_outline_of_wall` and
+`radial_outline_of_plasma_boundary` are public-grammar-valid and remain
+distinct. Bare `radial_outline` / `vertical_outline` parse, but are semantically
+owner-erasing when the source identifies the outlined object.
 
 ## Scoring Dimensions
 
@@ -173,7 +177,7 @@ scope/exclusions, essential cross-references, and sign convention where needed.
   names (e.g. `electron_temperature_and_density_profile`) → reject.
   Examples:
     - ❌ `equilibrium_plasma_boundary_outline_radial_coordinate` → prefer
-      `plasma_boundary_outline_r`
+      `radial_outline_of_plasma_boundary`
     - ❌ `reconstructed_electron_temperature_profile_versus_normalized_psi`
       → prefer `electron_temperature` (with coordinate context elsewhere)
 - **[I4.1]** For machine geometry, does the batch create an explosion of per-component position names when a generic parameterized name would suffice?

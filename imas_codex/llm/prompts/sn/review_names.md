@@ -44,6 +44,10 @@ carrier/representation and owner remain mandatory. Only genuine
 `thick_line` conductors, pellet paths, gas pipes, shunts, beam paths,
 interpolation points, and other-object outlines must retain their own identity
 or fail closed with a vocabulary gap.
+Owner-qualified outline forms such as `radial_outline_of_wall` and
+`radial_outline_of_plasma_boundary` are public-grammar-valid and remain
+distinct. Bare `radial_outline` / `vertical_outline` parse, but are semantically
+owner-erasing when the source identifies the outlined object.
 
 ## Token vocabulary
 

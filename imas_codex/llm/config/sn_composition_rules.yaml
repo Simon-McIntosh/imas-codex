@@ -230,21 +230,27 @@ composition_rules:
       - "name"
 
   - id: "NC-13"
-    title: "Never use `outline` as a physical quantity"
+    title: "Outline coordinates retain their axis and owning object"
     category: "naming"
-    severity: "soft"
+    severity: "hard"
     rule: |
-      An outline is a set of 2D points (a contour), not a scalar or vector
-      field. For the Z-coordinate along the boundary contour use
-      `vertical_coordinate_of_plasma_boundary`; the 2D contour itself is
-      expressed as the pair of (radial_coordinate, vertical_coordinate) standard
-      names, not a single `outline` name.
+      `outline` is a registered geometry carrier for the coordinate arrays that
+      describe a contour. Omit only an ordinal vertex index; retain the source
+      axis and owning object. Compose owner-qualified identities such as
+      `radial_outline_of_wall` and `vertical_outline_of_plasma_boundary`.
+      Bare `radial_outline` and `vertical_outline` are public-grammar-valid but
+      semantically owner-erasing when the source states an owner, so they must
+      never consolidate outlines from different objects. A coordinate of the
+      plasma boundary is also not interchangeable with its outline
+      representation.
     examples_good:
-      - "vertical_coordinate_of_plasma_boundary"
-      - "radial_coordinate_of_plasma_boundary"
-    examples_bad:
+      - "radial_outline_of_wall"
+      - "vertical_outline_of_wall"
+      - "radial_outline_of_plasma_boundary"
       - "vertical_outline_of_plasma_boundary"
-      - "horizontal_outline_of_plasma_boundary"
+    examples_bad:
+      - "radial_outline"
+      - "vertical_outline"
     affects:
       - "name"
 

@@ -138,6 +138,33 @@ def _nc_good_examples() -> list[tuple[str, str]]:
 _NC_GOOD_EXAMPLES = _nc_good_examples()
 
 
+def _nc_bad_examples() -> list[tuple[str, str]]:
+    """Return every rejected teaching example with its owning rule ID."""
+    from imas_codex.llm.prompt_loader import load_prompt_config
+
+    cfg = load_prompt_config("sn_composition_rules")
+    out: list[tuple[str, str]] = []
+    for rule in cfg.get("composition_rules", []) or []:
+        rule_id = rule.get("id", "?")
+        for example in rule.get("examples_bad", []) or []:
+            out.append((rule_id, example))
+    return out
+
+
+_NC_BAD_EXAMPLES = _nc_bad_examples()
+
+# These negative examples are valid public-grammar names whose rejection is
+# semantic. Every other negative is expected to fail strict public parsing.
+_SEMANTIC_NEGATIVE_EXAMPLES = {
+    ("NC-1", "area_of_flux_surface"),
+    ("NC-13", "radial_outline"),
+    ("NC-13", "vertical_outline"),
+    ("NC-28", "plasma_current_reference_waveform"),
+    ("NC-30", "emissivity_of_infrared_camera"),
+    ("NC-30", "radiance_of_visible_camera"),
+}
+
+
 def test_nc_good_examples_were_extracted() -> None:
     """Guard the guard: a loader/YAML change must not silently empty the corpus."""
     assert len(_NC_GOOD_EXAMPLES) >= 30, (
@@ -153,6 +180,19 @@ def test_nc_rule_good_example_round_trips(rule_id: str, name: str) -> None:
         f"NC rule {rule_id} examples_good entry {name!r} does not round-trip "
         f"through the public ISN parser. Rewrite it to a canonical form (the "
         f"rule prose carries any teaching gloss)."
+    )
+
+
+@pytest.mark.parametrize("rule_id,name", _NC_BAD_EXAMPLES)
+def test_nc_rule_bad_example_has_declared_public_oracle_disposition(
+    rule_id: str,
+    name: str,
+) -> None:
+    """Every negative is explicitly semantic or rejected by strict parsing."""
+    is_semantic_negative = (rule_id, name) in _SEMANTIC_NEGATIVE_EXAMPLES
+    assert _round_trips(name) is is_semantic_negative, (
+        f"negative example {(rule_id, name)!r} changed public-grammar disposition; "
+        "classify it explicitly as a semantic negative or a parser rejection"
     )
 
 
@@ -200,6 +240,21 @@ def test_outline_owners_are_distinct_public_ir_identities() -> None:
     assert boundary.locus is not None
     assert wall.locus.token == "wall"
     assert boundary.locus.token == "plasma_boundary"
+
+
+def test_outline_rule_matches_public_grammar_and_owner_semantics() -> None:
+    """The registry endorses owned outlines and rejects only owner erasure."""
+    from imas_codex.llm.prompt_loader import load_prompt_config
+
+    rules = load_prompt_config("sn_composition_rules")["composition_rules"]
+    outline_rule = next(rule for rule in rules if rule["id"] == "NC-13")
+
+    assert outline_rule["severity"] == "hard"
+    assert all(_round_trips(name) for name in outline_rule["examples_good"])
+    assert set(outline_rule["examples_bad"]) == {"radial_outline", "vertical_outline"}
+    assert all(_round_trips(name) for name in outline_rule["examples_bad"])
+    assert "vertical_outline_of_plasma_boundary" in outline_rule["examples_good"]
+    assert "vertical_outline_of_plasma_boundary" not in outline_rule["examples_bad"]
 
 
 def test_consistency_rule_forbids_generic_flux_surface_area_umbrella() -> None:
@@ -320,6 +375,57 @@ def test_compose_modes_preserve_outline_and_unit_vector_owners(
     assert "radial_outline_of_plasma_boundary" in text
     assert "z_direction_unit_vector_of_camera" in text
     assert "bare `radial_outline` / `vertical_outline`" in text
+
+
+def _render_policy_surface(prompt_name: str) -> str:
+    """Render one production prompt surface without calling external services."""
+    if prompt_name == "sn/generate_name_system":
+        from imas_codex.standard_names.context import build_compose_context
+
+        return render_prompt(prompt_name, context=build_compose_context())
+    return render_prompt(
+        prompt_name,
+        {
+            "items": [],
+            "nearby_existing_names": [],
+            "reference_exemplars": [],
+            "review_scored_examples": [],
+            "batch_context": "",
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    "prompt_name",
+    (
+        "sn/generate_name_system",
+        "sn/generate_name_dd",
+        "sn/generate_name_dd_names",
+        "sn/review",
+        "sn/review_names",
+    ),
+)
+def test_every_policy_surface_preserves_owned_outline_identities(
+    prompt_name: str,
+) -> None:
+    """Rendered compose and review prompts agree with the public outline IR."""
+    rendered = _render_policy_surface(prompt_name)
+
+    assert _round_trips("radial_outline_of_wall")
+    assert _round_trips("radial_outline_of_plasma_boundary")
+    assert "radial_outline_of_wall" in rendered
+    assert "radial_outline_of_plasma_boundary" in rendered
+    assert "plasma_boundary_outline_r" not in rendered
+
+
+def test_locusless_unit_vector_is_a_semantic_negative_not_a_parser_failure() -> None:
+    """The rich compose prompt states the public parser's actual disposition."""
+    assert _round_trips("z_direction_unit_vector")
+    rendered = _render_policy_surface("sn/generate_name_dd")
+
+    assert "public parser accepts a locus-less unit-vector name" in rendered
+    assert "semantically rejected for an owned device vector" in rendered
+    assert "rejected by the grammar at error severity" not in rendered
 
 
 # A prefix transformation may coexist with a projection, and change_in is a
