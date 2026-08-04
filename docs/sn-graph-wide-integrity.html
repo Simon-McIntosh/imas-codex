@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-04">
-<meta name="plan-version" content="90">
+<meta name="plan-version" content="91">
 <meta name="plan-impl" content="0.99">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -383,6 +383,15 @@
       <button class="r-opt" data-value="per-name">Adjudicate the eight individually</button>
       </p>
     <p class="r-dec-rat">Locked by the lead 2026-07-29: parent units are REQUIRED, and the unit must match the PARENT&#x27;S OWN quantity — not blind child inheritance. A parent can have a normalized_* child, so parent and child units will not always match: the unit is derived from what the parent&#x27;s name asserts (its base semantics), with child-sourcing valid only when the child is not a dimension-transforming variant (exempt the dimensionless / dimension-transforming operator sets, e.g. normalized, perturbed). Consequences: the derived-parent mint runs the validity oracle and this unit rule (a dimensional base with no derivable unit is un-mintable, not silently null); the ISN canonicalizer gains the None guard so a missing unit raises the promised validation error; the eight null-unit parents are repaired to their own dimensional units (energy J or eV per catalog convention, density m^-3, current A, the operator-transformed and binary cases per their own semantics).</p>
+    </div>
+<div class="r-dec" data-key="flux-surface-area-semantics" data-choice="distinguish-poloidal-and-swept" data-by="Simon McIntosh" data-when="2026-08-04T21:09:34+00:00">
+    <p class="r-dec-q">Must flux-surface area distinguish poloidal cross-sectional area from swept surface area?</p>
+    <p class="r-dec-ctx">The proposed protected fold mapped cross_section_of_flux_surface to area_of_flux_surface because five DD sources already used the generic target. The lead identified that this loses a physical distinction already documented in the repository: DD area is the poloidal cross-sectional area, while the swept toroidal surface is a different quantity.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="distinguish-poloidal-and-swept">Use an explicitly poloidal cross-sectional-area identity and keep swept surface area distinct</button>
+      <button class="r-opt" data-value="generic-area">Fold into generic area_of_flux_surface</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead on 2026-08-04: a plain flux-surface area name is physically ambiguous because it cannot distinguish poloidal cross-sectional area from swept surface area. The previously proposed fold is rejected. No fold was applied. Re-adjudicate the source through an explicit poloidal cross-sectional-area name using the sanctioned edit/review pipeline.</p>
     </div>
 </section>
 
@@ -928,6 +937,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260804-restart-handoff" data-who="reckon-ship" data-when="2026-08-04T23:05:00+02:00">
     <div class="r-comment-body"><p><strong>Restart checkpoint — work paused to preserve a durable handoff.</strong> S7 is 1/3 plans lifecycle-complete and 66.3% implemented; this plan remains active at 0.99. The landed safety surface includes writer and geometry guards, exact bounded drains, protected structural dry-run/apply machinery, durable private receipts, DDGap policy, gas-unit repair, COCOS authority correction, and a full Standard Names suite at 6,279 passed with 10 skipped. Receipt-authoritative S7 spend remains <code>$5.310418</code> of the authorized <code>$200</code>; no paid generation was started in this restart pass.</p><p><strong>New blocking evidence.</strong> An offline audit at <code>cb6ca67f</code> found that global <code>sn run --flush</code> is not yet a trustworthy closure gate: pending-count exceptions can appear as zero, a pending-positive stall can be mislabeled <code>no_eligible_work</code>, several nonterminal outcomes return success, and concurrent post-call charging has no proven hard overspend bound. Audit receipt <code>~/.local/share/imas-codex/receipts/standard-names/s7-completion-audit/audit-cb6ca67f.json</code>, SHA-256 <code>d344917c3f820e5bda70fa427fb24cdfa38b13d20a81d1249a2884b5077e2f89</code>, mode <code>0600</code>. The attempted fresh one-query census stopped on a Cypher compile error, issued no retry, and made zero writes; failure receipt <code>~/.local/share/imas-codex/receipts/standard-names/s7-completion-census/dedd53b365afd1d481ec04c0a7ba751a6635cf821f33a12b78b59c4ddcdd6929.json</code>, SHA-256 <code>dedd53b365afd1d481ec04c0a7ba751a6635cf821f33a12b78b59c4ddcdd6929</code>, mode <code>0600</code>.</p><p><strong>Five remaining restart tasks, in order.</strong></p><ol><li>Land and independently verify honest flush terminality, nonzero failure exits, hard concurrent budget reservation, and exact six-pool membership documentation.</li><li>Offline-review the failed aggregate Cypher, then run exactly one corrected read-only completion census and verify its compact private receipt.</li><li>Reconcile the literal protected-closure followup with the S7 contract, keep the two rows visibly non-actionable unless exact mutation authority is supplied, rerun the full suite, and close this plan.</li><li>Execute the MAST plan-and-validate work: exact manifest, six-name ISN adjudication, typed facility discovery/source support, and bounded dry-runs. Graph apply and catalog/ISNC publication remain separately authority-gated.</li><li>After all authorized MAST work completes, run its bounded generation cohort, then run the global <code>sn run --flush</code> as the final operational gate under the shared <code>$200</code> ceiling; follow only with one fresh census, the full suite, plan closure, and S7 index closure.</li></ol></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260804-flux-area-correction" data-who="Simon McIntosh" data-when="2026-08-04T23:35:00+02:00">
+    <div class="r-comment-body"><p><strong>The proposed <code>cross_section_of_flux_surface → area_of_flux_surface</code> fold is rejected before mutation.</strong> Protecting WEST is a collateral-damage boundary, not permission to preserve an incorrect identity. A generic flux-surface area cannot distinguish the DD poloidal cross-sectional area from the swept toroidal surface area. This distinction was already documented by the edit-side-car work: DD <code>area</code> is poloidal cross-sectional area, whereas <code>surface</code> is the swept toroidal surface. No fold has been applied. The row is now held for strict grammar validation and sanctioned staging/review of an explicitly poloidal cross-sectional-area identity; the generic accepted WEST target must remain untouched unless separately adjudicated.</p></div>
 </div>
 </section>
 </main>
