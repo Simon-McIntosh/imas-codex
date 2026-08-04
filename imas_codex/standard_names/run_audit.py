@@ -132,12 +132,21 @@ CALL (run, costs) {
      OR review.reviewed_at IS NULL
      OR (datetime(toString(review.reviewed_at)) >= datetime($launched_at)
          AND datetime(toString(review.reviewed_at)) <= datetime($completed_at))
+  WITH review, run, costs, target,
+       CASE review.review_axis
+         WHEN 'names' THEN 'review_name'
+         WHEN 'docs' THEN 'review_docs'
+       END AS review_pool,
+       CASE WHEN review.cycle_index IS NULL THEN null
+            ELSE 'c' + toString(review.cycle_index)
+       END AS review_cycle
   WITH review, run,
-       [cost IN costs WHERE cost.run_id = run.id
+       [cost IN costs WHERE review_pool IS NOT NULL
+          AND review_cycle IS NOT NULL
+          AND cost.run_id = run.id
           AND target.id IN coalesce(cost.sn_ids, [])
-          AND cost.pool = 'review'
-          AND datetime(toString(cost.llm_at)) =
-              datetime(toString(review.llm_at)) | cost.id] AS linked_cost_ids
+          AND cost.pool = review_pool
+          AND cost.cycle = review_cycle | cost.id] AS linked_cost_ids
   WITH collect(CASE WHEN review IS NULL THEN null ELSE {
          id: review.id,
          review_axis: review.review_axis,
@@ -456,12 +465,39 @@ def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
         receipt.review_resolutions = _sorted_strings(
             review.get("resolution_method") for review in reviews
         )
+        costs_by_id = {
+            str(cost["id"]): cost for cost in costs if cost.get("id") is not None
+        }
+        review_pools = {"names": "review_name", "docs": "review_docs"}
+
+        def review_costs_match(review: dict[str, Any]) -> bool:
+            linked_cost_ids = [
+                str(cost_id) for cost_id in review.get("linked_cost_ids") or []
+            ]
+            review_pool = review_pools.get(str(review.get("review_axis")))
+            cycle_index = review.get("cycle_index")
+            if not linked_cost_ids or review_pool is None or cycle_index is None:
+                return False
+            review_cycle = f"c{cycle_index}"
+            for cost_id in linked_cost_ids:
+                cost = costs_by_id.get(cost_id)
+                if (
+                    cost is None
+                    or cost.get("run_id") != receipt.run_id
+                    or cost.get("linked_run_id") != receipt.run_id
+                    or cost.get("pool") != review_pool
+                    or cost.get("cycle") != review_cycle
+                    or receipt.name_id
+                    not in {str(name_id) for name_id in cost.get("sn_ids") or []}
+                ):
+                    return False
+            return True
+
         unrelated_reviews = [
             review
             for review in reviews
             if review.get("linked_run_id") != receipt.run_id
-            or not review.get("linked_cost_ids")
-            or not set(map(str, review.get("linked_cost_ids") or [])).issubset(cost_ids)
+            or not review_costs_match(review)
         ]
         if unrelated_reviews:
             receipt.diagnostics.append(
