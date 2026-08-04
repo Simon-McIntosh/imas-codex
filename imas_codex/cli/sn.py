@@ -6563,7 +6563,9 @@ def sn_reconcile_protected_structure(
     import hashlib
     import hmac
     import json
+    import os
     import re
+    import tempfile
     from pathlib import Path
 
     if apply and not expected_manifest_hash:
@@ -6574,8 +6576,21 @@ def sn_reconcile_protected_structure(
     output_path = (
         Path(receipt_path).expanduser().resolve() if receipt_path is not None else None
     )
-    if output_path in {manifest, authority_artifact}:
-        raise click.UsageError("--receipt must not overwrite an input artifact")
+    if output_path is not None:
+        receipt_collides = output_path in {manifest, authority_artifact}
+        if not receipt_collides:
+            try:
+                receipt_collides = output_path.samefile(
+                    manifest
+                ) or output_path.samefile(authority_artifact)
+            except FileNotFoundError:
+                receipt_collides = False
+            except OSError as exc:
+                raise click.ClickException(
+                    f"cannot verify receipt filesystem identity: {exc}"
+                ) from exc
+        if receipt_collides:
+            raise click.UsageError("--receipt must not overwrite an input artifact")
     try:
         manifest_bytes = manifest.read_bytes()
     except OSError as exc:
@@ -6662,19 +6677,50 @@ def sn_reconcile_protected_structure(
             "receipt": operator_receipt,
             "release_census": release_census,
         }
-        try:
-            output_path.write_bytes(
-                (
-                    json.dumps(
-                        result_payload,
-                        sort_keys=True,
-                        separators=(",", ":"),
-                    )
-                    + "\n"
-                ).encode()
+        encoded_receipt = (
+            json.dumps(
+                result_payload,
+                sort_keys=True,
+                separators=(",", ":"),
             )
+            + "\n"
+        ).encode()
+        temporary_path: Path | None = None
+        temporary_descriptor = -1
+        try:
+            temporary_descriptor, temporary_name = tempfile.mkstemp(
+                dir=output_path.parent,
+                prefix=f".{output_path.name}.",
+                suffix=".tmp",
+            )
+            temporary_path = Path(temporary_name)
+            with os.fdopen(temporary_descriptor, "wb") as stream:
+                temporary_descriptor = -1
+                stream.write(encoded_receipt)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary_path, output_path)
+            temporary_path = None
         except OSError as exc:
-            raise click.ClickException(f"cannot write receipt: {exc}") from exc
+            cleanup_errors: list[str] = []
+            if temporary_descriptor >= 0:
+                try:
+                    os.close(temporary_descriptor)
+                except OSError as cleanup_exc:
+                    cleanup_errors.append(str(cleanup_exc))
+            if temporary_path is not None:
+                try:
+                    temporary_path.unlink(missing_ok=True)
+                except OSError as cleanup_exc:
+                    cleanup_errors.append(str(cleanup_exc))
+            cleanup_detail = (
+                f"; temporary cleanup failed: {', '.join(cleanup_errors)}"
+                if cleanup_errors
+                else ""
+            )
+            raise click.ClickException(
+                f"cannot write receipt: {exc}{cleanup_detail}"
+            ) from exc
 
     counts = operator_receipt.get("counts") or {}
     count_summary = ",".join(f"{key}={counts[key]}" for key in sorted(counts)) or "none"
