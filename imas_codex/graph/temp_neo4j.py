@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import shutil
 import signal
 import subprocess
@@ -48,6 +49,15 @@ IMAS_DD_LABELS = [
     "SignConvention",
 ]
 
+_TEMP_NEO4J_METASPACE_ENV = "IMAS_CODEX_TEMP_NEO4J_MAX_METASPACE"
+_TEMP_NEO4J_DEFAULT_METASPACE = "768m"
+_TEMP_NEO4J_MIN_METASPACE_BYTES = 256 * 1024**2
+_TEMP_NEO4J_MAX_METASPACE_BYTES = 2 * 1024**3
+_TEMP_NEO4J_READY_TIMEOUT_SECONDS = 180.0
+_TEMP_NEO4J_READY_POLL_SECONDS = 1.0
+_TEMP_NEO4J_LOG_TAIL_LINES = 40
+_MEMORY_SIZE = re.compile(r"^(?P<amount>[1-9][0-9]*)(?P<unit>[kmg])$", re.IGNORECASE)
+
 
 # ============================================================================
 # Temp Neo4j helpers
@@ -61,15 +71,58 @@ def _neo4j_image() -> Path:
     return get_neo4j_image_path()
 
 
-def write_temp_neo4j_conf(conf_dir: Path, bolt_port: int, http_port: int) -> Path:
+def _temp_neo4j_metaspace_limit(value: str | None = None) -> str:
+    """Resolve a bounded JVM metaspace ceiling for the temporary instance."""
+    configured = (
+        value
+        if value is not None
+        else os.environ.get(_TEMP_NEO4J_METASPACE_ENV, _TEMP_NEO4J_DEFAULT_METASPACE)
+    )
+    normalized = configured.strip().lower()
+    match = _MEMORY_SIZE.fullmatch(normalized)
+    if match is None:
+        raise click.ClickException(
+            f"{_TEMP_NEO4J_METASPACE_ENV} must be an integer followed by k, m, or g"
+        )
+    factors = {"k": 1024, "m": 1024**2, "g": 1024**3}
+    size_bytes = int(match.group("amount")) * factors[match.group("unit").lower()]
+    if (
+        not _TEMP_NEO4J_MIN_METASPACE_BYTES
+        <= size_bytes
+        <= (_TEMP_NEO4J_MAX_METASPACE_BYTES)
+    ):
+        raise click.ClickException(
+            f"{_TEMP_NEO4J_METASPACE_ENV} must be between 256m and 2g"
+        )
+    return normalized
+
+
+def _temp_neo4j_jvm_options(metaspace_limit: str | None = None) -> tuple[str, ...]:
+    """Build the bounded JVM options written to the temporary configuration."""
+    return (
+        "-XX:MaxDirectMemorySize=256m",
+        f"-XX:MaxMetaspaceSize={_temp_neo4j_metaspace_limit(metaspace_limit)}",
+    )
+
+
+def write_temp_neo4j_conf(
+    conf_dir: Path,
+    bolt_port: int,
+    http_port: int,
+    *,
+    metaspace_limit: str | None = None,
+) -> Path:
     """Write a neo4j.conf for a temporary filtering instance.
 
     Disables authentication and binds to non-standard ports to avoid
-    conflicts with the production instance.  Memory is kept very low
-    because the temp instance runs inside a per-user cgroup with
-    limited headroom.  Filtering uses ``CALL {} IN TRANSACTIONS``
-    which commits in server-side batches and needs minimal heap.
+    conflicts with the production instance. Memory remains bounded for
+    compute allocations while leaving enough class metadata headroom for
+    Neo4j startup and graph test plugins.
     """
+    jvm_options = "\n".join(
+        f"server.jvm.additional={option}"
+        for option in _temp_neo4j_jvm_options(metaspace_limit)
+    )
     conf_file = conf_dir / "neo4j.conf"
     conf_file.write_text(
         f"""\
@@ -80,11 +133,75 @@ server.memory.heap.initial_size=128m
 server.memory.heap.max_size=512m
 server.memory.pagecache.size=128m
 dbms.memory.transaction.total.max=512m
-server.jvm.additional=-XX:MaxDirectMemorySize=256m
-server.jvm.additional=-XX:MaxMetaspaceSize=128m
+{jvm_options}
 """
     )
     return conf_file
+
+
+def _recent_neo4j_log(log_path: Path) -> str:
+    """Return bounded recent log context without masking read failures."""
+    try:
+        lines = log_path.read_text(errors="replace").splitlines()
+    except OSError as exc:
+        return f"<unable to read {log_path}: {exc}>"
+    if not lines:
+        return "<no log output>"
+    return "\n".join(lines[-_TEMP_NEO4J_LOG_TAIL_LINES:])
+
+
+def _bolt_port_ready(bolt_port: int) -> bool:
+    """Return whether the temporary instance completes a Bolt exchange."""
+    from neo4j import GraphDatabase
+
+    driver = GraphDatabase.driver(
+        f"bolt://127.0.0.1:{bolt_port}",
+        auth=None,
+        connection_timeout=2,
+    )
+    try:
+        driver.verify_connectivity()
+    except Exception:
+        return False
+    finally:
+        driver.close()
+    return True
+
+
+def _raise_if_temp_neo4j_exited(proc: subprocess.Popen, neo4j_log: Path) -> None:
+    """Raise immediately with child status and recent output after early exit."""
+    return_code = proc.poll()
+    if return_code is None:
+        return
+    raise click.ClickException(
+        f"Temp Neo4j exited before Bolt readiness (exit code {return_code})\n"
+        f"Recent Neo4j log output:\n{_recent_neo4j_log(neo4j_log)}"
+    )
+
+
+def _wait_for_bolt_ready(
+    proc: subprocess.Popen,
+    bolt_port: int,
+    neo4j_log: Path,
+    *,
+    timeout_seconds: float = _TEMP_NEO4J_READY_TIMEOUT_SECONDS,
+    poll_seconds: float = _TEMP_NEO4J_READY_POLL_SECONDS,
+) -> None:
+    """Wait for Bolt readiness while treating child death as terminal."""
+    deadline = time.monotonic() + timeout_seconds
+    while True:
+        _raise_if_temp_neo4j_exited(proc, neo4j_log)
+        if _bolt_port_ready(bolt_port):
+            return
+        _raise_if_temp_neo4j_exited(proc, neo4j_log)
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise click.ClickException(
+                f"Temp Neo4j did not reach Bolt readiness within "
+                f"{timeout_seconds:g} seconds\n"
+                f"Recent Neo4j log output:\n{_recent_neo4j_log(neo4j_log)}"
+            )
+        time.sleep(min(poll_seconds, remaining))
 
 
 def start_temp_neo4j(
@@ -101,8 +218,6 @@ def start_temp_neo4j(
     the Apptainer ``--writable-tmpfs`` overlay (often capped at 64 MB
     by ``sessiondir max size``) is only used for trivial metadata.
     """
-    import urllib.request
-
     neo4j_image = _neo4j_image()
 
     # Ensure all Neo4j write-target directories exist on host
@@ -166,31 +281,14 @@ def start_temp_neo4j(
         start_new_session=True,
     )
 
-    ready = False
-    for _ in range(180):
-        if proc.poll() is not None:
-            log_fh.flush()
-            tail = neo4j_log.read_text()[-500:] if neo4j_log.exists() else ""
-            raise click.ClickException(
-                f"Temp Neo4j exited prematurely (rc={proc.returncode})\n"
-                f"Last log output:\n{tail}"
-            )
-        try:
-            urllib.request.urlopen(f"http://localhost:{http_port}/", timeout=2)
-            ready = True
-            break
-        except Exception:
-            time.sleep(1)
-
-    if not ready:
-        log_fh.flush()
-        stop_temp_neo4j(proc)
+    try:
+        _wait_for_bolt_ready(proc, bolt_port, neo4j_log)
+    except BaseException:
+        if proc.poll() is None:
+            stop_temp_neo4j(proc)
+        raise
+    finally:
         log_fh.close()
-        tail = neo4j_log.read_text()[-500:] if neo4j_log.exists() else ""
-        raise click.ClickException(
-            f"Temp Neo4j instance did not start within 180 seconds\n"
-            f"Last log output:\n{tail}"
-        )
 
     return proc, neo4j_log
 
@@ -224,18 +322,28 @@ def _cleanup_stale_temp_neo4j(bolt_port: int, http_port: int) -> None:
 
 def stop_temp_neo4j(proc: subprocess.Popen) -> None:
     """Terminate a temporary Neo4j process and its entire process group."""
+    if proc.poll() is not None:
+        return
     try:
         os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
     except (ProcessLookupError, PermissionError):
-        pass
+        if proc.poll() is not None:
+            return
+        proc.terminate()
     try:
         proc.wait(timeout=15)
+        return
     except subprocess.TimeoutExpired:
         try:
             os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
         except (ProcessLookupError, PermissionError):
             proc.kill()
+    try:
         proc.wait(timeout=10)
+    except subprocess.TimeoutExpired as exc:
+        raise click.ClickException(
+            f"Temp Neo4j process {proc.pid} did not exit after SIGKILL"
+        ) from exc
 
 
 def dump_temp_neo4j(temp_dir: Path, output_path: Path) -> None:
