@@ -1,10 +1,10 @@
 """Tests for the N-reviewer SN review pipeline.
 
-Covers:
-- Settings accessor get_sn_review_names_models() / get_sn_review_docs_models()
+Coverage:
+- Settings accessors get_sn_review_names_models() / get_sn_review_docs_models()
   read [sn-review.names/docs].models correctly
-- StandardNameReviewState has new fields (review_models, review_records,
-  canonical_review_model) and backward-compat secondary_models alias
+- StandardNameReviewState exposes review_models, review_records,
+  canonical_review_model, and the secondary_models compatibility alias
 - Pipeline helpers (_model_slug, _derive_model_family, _build_review_record)
   produce correct output without requiring a live Neo4j connection
 """
@@ -45,6 +45,7 @@ def test_get_sn_review_names_models_override(monkeypatch):
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
     settings_mod._load_pyproject_settings.cache_clear()
+    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
     models = settings_mod.get_sn_review_names_models()
     assert models == ["a", "b", "c"]
 
@@ -60,6 +61,7 @@ def test_get_sn_review_docs_models_override(monkeypatch):
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
     settings_mod._load_pyproject_settings.cache_clear()
+    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
     models = settings_mod.get_sn_review_docs_models()
     assert models == ["x", "y"]
 
@@ -77,7 +79,7 @@ def test_state_has_review_models_default():
     assert state.review_models == []
     assert state.canonical_review_model is None
     assert state.review_records == []
-    # Backward-compat alias still present
+    # Compatibility alias mirrors the canonical empty model list.
     assert state.secondary_models == []
 
 

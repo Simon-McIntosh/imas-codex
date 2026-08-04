@@ -1,4 +1,4 @@
-"""Tests for per-axis review model chain config (p39-3).
+"""Tests for per-axis review model chain configuration.
 
 Covers:
 - get_sn_review_names_models() / get_sn_review_docs_models() length validation
@@ -18,7 +18,7 @@ import pytest
 
 
 def _patch_sn_review(monkeypatch, review_dict: dict):
-    """Monkeypatch _get_section so sn-review returns *review_dict*."""
+    """Install an isolated default-profile sn-review configuration."""
     from imas_codex import settings as settings_mod
 
     def fake_get_section(name: str) -> dict:
@@ -28,6 +28,7 @@ def _patch_sn_review(monkeypatch, review_dict: dict):
 
     monkeypatch.setattr(settings_mod, "_get_section", fake_get_section)
     settings_mod._load_pyproject_settings.cache_clear()
+    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
 
 
 # ---------------------------------------------------------------------------
