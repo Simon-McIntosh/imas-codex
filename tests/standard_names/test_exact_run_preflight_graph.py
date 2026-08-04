@@ -63,6 +63,8 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
     suffix = uuid.uuid4().hex
     missing_name = f"exact_preflight_missing_{suffix}"
     ordinary_name = f"exact_preflight_ordinary_{suffix}"
+    predecessor_name = f"exact_preflight_predecessor_{suffix}"
+    fixture_source_id = f"dd:test_review_entry__{suffix}"
     dd_version = f"4.1.1-exact-preflight-{suffix}"
     password = os.environ.get(
         "IMAS_CODEX_TEST_NEO4J_PASSWORD", os.environ.get("NEO4J_PASSWORD", "")
@@ -93,11 +95,18 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
                 )
             )
             session.run(
-                "MERGE (:StandardName {"
-                "id: $name_id, name_stage: 'drafted', "
-                "validation_status: 'valid', origin: 'pipeline', "
-                "description: 'A reviewable exact target.'})",
+                "MERGE (target:StandardName {"
+                "  id: $name_id, name_stage: 'drafted', "
+                "  validation_status: 'valid', origin: 'pipeline', "
+                "  description: 'A reviewable exact target.'}) "
+                "MERGE (predecessor:StandardName {"
+                "  id: $predecessor_name, name_stage: 'accepted'}) "
+                "MERGE (target)-[:REFINED_FROM]->(predecessor) "
+                "MERGE (source:StandardNameSource {id: $fixture_source_id}) "
+                "MERGE (source)-[:PRODUCED_NAME]->(predecessor)",
                 name_id=ordinary_name,
+                predecessor_name=predecessor_name,
+                fixture_source_id=fixture_source_id,
             ).consume()
             ordinary_rows = list(
                 session.run(
@@ -121,6 +130,9 @@ def test_disposable_graph_preserves_missing_receipt_and_uses_exact_seeks() -> No
     assert ordinary_receipt["action_count"] == 1
     assert ordinary_receipt["review_action_count"] == 1
     assert ordinary_receipt["refine_action_count"] == 0
+    assert ordinary_receipt["accepted_or_protected_lineage_ids"] == [predecessor_name]
+    assert ordinary_receipt["refinement_protected_source_ids"] == [fixture_source_id]
+    assert ordinary_receipt["protected_source_ids"] == []
 
     plan_nodes = _plan_nodes(explained.plan)
     operators = [operator for operator, _arguments in plan_nodes]

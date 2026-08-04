@@ -104,13 +104,22 @@ CALL (target_matches) {{
        prior_lineage + later_lineage AS refinement_lineage
   UNWIND CASE WHEN refinement_lineage = [] THEN [null]
               ELSE refinement_lineage END AS member
+  OPTIONAL MATCH (refinement_source:StandardNameSource)-[:PRODUCED_NAME]->(member)
   RETURN predecessor_ids, successor_ids,
          collect(DISTINCT CASE
            WHEN member.name_stage IN ['accepted', 'approved']
              OR member.status = 'active'
              OR member.origin = 'catalog_edit'
            THEN member.id
-         END) AS accepted_or_protected_lineage_ids
+         END) AS accepted_or_protected_lineage_ids,
+         collect(DISTINCT CASE
+           WHEN refinement_source.id IN $west_source_ids
+             OR refinement_source.id STARTS WITH $fixture_source_id_prefix
+             OR refinement_source.id STARTS WITH 'fixture:'
+             OR refinement_source.id STARTS WITH 'test:'
+             OR refinement_source.id STARTS WITH 'signals:test:'
+           THEN refinement_source.id
+         END) AS refinement_protected_source_ids
 }}
 CALL (target_matches) {{
   WITH head(target_matches) AS target
@@ -135,7 +144,8 @@ WITH target_matches, action_count, action_element_ids,
      refine_action_count, review_action_count,
      sources, target_unit_ids, target_unit_edge_ids,
      predecessor_ids, successor_ids, accepted_or_protected_lineage_ids,
-     protected_source_ids, collect(catalog) AS catalog_matches
+     refinement_protected_source_ids, protected_source_ids,
+     collect(catalog) AS catalog_matches
 CALL (catalog_matches) {{
   UNWIND catalog_matches AS catalog
   OPTIONAL MATCH (catalog)-[catalog_cocos_edge:HAS_COCOS]->(catalog_cocos:COCOS)
@@ -174,7 +184,7 @@ RETURN [target IN target_matches | {{
        refine_action_count, review_action_count,
        sources, target_unit_ids, target_unit_edge_ids,
        predecessor_ids, successor_ids, accepted_or_protected_lineage_ids,
-       protected_source_ids,
+       refinement_protected_source_ids, protected_source_ids,
        [catalog IN catalog_matches | {{
          element_id: elementId(catalog),
          id: catalog.id,
@@ -234,6 +244,7 @@ class ExactStandardNamePreflightReceipt(BaseModel):
     predecessor_ids: list[str] = Field(default_factory=list)
     successor_ids: list[str] = Field(default_factory=list)
     accepted_or_protected_lineage_ids: list[str] = Field(default_factory=list)
+    refinement_protected_source_ids: list[str] = Field(default_factory=list)
     protected_source_ids: list[str] = Field(default_factory=list)
 
 
@@ -520,6 +531,9 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
     receipt.accepted_or_protected_lineage_ids = _sorted_strings(
         evidence.get("accepted_or_protected_lineage_ids")
     )
+    receipt.refinement_protected_source_ids = _sorted_strings(
+        evidence.get("refinement_protected_source_ids")
+    )
     receipt.protected_source_ids = _sorted_strings(evidence.get("protected_source_ids"))
     if len(receipt.predecessor_ids) > 1:
         receipt.diagnostics.append("target has ambiguous refinement predecessors")
@@ -528,6 +542,10 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
     if receipt.operation == "refine_name" and receipt.accepted_or_protected_lineage_ids:
         receipt.diagnostics.append(
             "refinement lineage intersects accepted or protected state"
+        )
+    if receipt.refinement_protected_source_ids:
+        receipt.diagnostics.append(
+            "refinement lineage intersects WEST or fixture sources"
         )
     if receipt.protected_source_ids:
         receipt.diagnostics.append(

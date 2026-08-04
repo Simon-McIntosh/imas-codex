@@ -104,6 +104,7 @@ def _row(label: str | None = None) -> dict[str, object]:
         "predecessor_ids": ["earlier_candidate"],
         "successor_ids": [],
         "accepted_or_protected_lineage_ids": [],
+        "refinement_protected_source_ids": [],
         "protected_source_ids": [],
         "catalogs": [
             {
@@ -235,7 +236,29 @@ def test_review_pass_retains_exact_cocos_label_and_accepted_predecessor(
     assert receipt.action_count == receipt.review_action_count == 1
     assert receipt.refine_action_count == 0
     assert receipt.accepted_or_protected_lineage_ids == ["accepted_predecessor"]
+    assert receipt.refinement_protected_source_ids == []
     assert receipt.per_path_cocos_labels == {PATH: label}
+
+
+@pytest.mark.parametrize("operation", ["review_name", "refine_name"])
+@pytest.mark.parametrize("location", ["predecessor", "successor", "self"])
+def test_refinement_lineage_protected_source_refuses_both_operations(
+    location: str,
+    operation: str,
+) -> None:
+    row = _review_row() if operation == "review_name" else _row()
+    protected_source = f"fixture:{location}"
+    row["refinement_protected_source_ids"] = [protected_source]
+    if location == "successor":
+        row["successor_ids"] = ["later_candidate"]
+
+    receipt, _client = _audit(row, operation=operation)
+
+    assert receipt.passed is False
+    assert receipt.refinement_protected_source_ids == [protected_source]
+    assert (
+        "refinement lineage intersects WEST or fixture sources" in receipt.diagnostics
+    )
 
 
 def test_review_explicit_drain_scope_accepts_already_passing_review() -> None:
