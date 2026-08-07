@@ -43,9 +43,11 @@ def _emitted_cypher() -> list[str]:
                         "new_name": "new_name",
                         "requested_source_exists": True,
                         "successor_exists": True,
+                        "trigger_source_id": "dd:some/dd/path",
                         "old_name": "old_name",
                         "old_stage": "accepted",
-                        "source_ids": ["dd:some/dd/path"],
+                        "judged_source_ids": ["dd:some/dd/path"],
+                        "retained_source_ids": [],
                     }
                 ]
             plan = kwargs["plans"][0]

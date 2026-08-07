@@ -37,9 +37,11 @@ def _mock_gc_tx():
                     "new_name": pair["new_name"],
                     "requested_source_exists": True,
                     "successor_exists": True,
+                    "trigger_source_id": f"dd:{pair['source_id']}",
                     "old_name": None,
                     "old_stage": None,
-                    "source_ids": [],
+                    "judged_source_ids": [],
+                    "retained_source_ids": [],
                 }
                 for pair in params["pairs"]
             ]
@@ -1640,16 +1642,27 @@ def _supersession_preflight(
     old_name: str | None = "old_pipeline_name",
     new_name: str = "new_pipeline_name",
     requested_source_id: str = "eq/q_95",
+    trigger_source_id: str | None = "dd:eq/q_95",
     source_ids: list[str] | None = None,
+    retained_source_ids: list[str] | None = None,
 ) -> dict[str, object]:
+    """One preflight row.
+
+    ``source_ids`` are the sources a composer already bound to the successor —
+    the only ones eligible to carry their provenance across. ``retained_source_ids``
+    are the sources that reach the predecessor and nothing else; they hold it
+    live.
+    """
     return {
         "requested_source_id": requested_source_id,
         "new_name": new_name,
         "requested_source_exists": True,
         "successor_exists": True,
+        "trigger_source_id": trigger_source_id,
         "old_name": old_name,
         "old_stage": "accepted" if old_name else None,
-        "source_ids": source_ids if source_ids is not None else ["dd:eq/q_95"],
+        "judged_source_ids": (source_ids if source_ids is not None else ["dd:eq/q_95"]),
+        "retained_source_ids": retained_source_ids or [],
     }
 
 
