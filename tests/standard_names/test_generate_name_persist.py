@@ -1744,14 +1744,16 @@ class TestSupersedePriorSourceNames:
         # The predecessor is marked superseded and linked via REFINED_FROM.
         assert "old.name_stage = 'superseded'" in cypher
         assert "MERGE (new)-[:REFINED_FROM]->(old)" in cypher
-        # Only a structural parent is exempt: it belongs to the admission gate,
-        # not to any one source. An imported name IS eligible — the graph plus
-        # the review pipeline is the source of truth, so an unreviewed import
-        # must not keep competing for a source that has already recomposed.
+        # A structural parent is exempt by origin: it belongs to the admission
+        # gate, not to any one source. An imported name is NOT exempt by origin
+        # alone — the graph plus the review pipeline is the source of truth, so
+        # an unreviewed import must not keep competing for a source that has
+        # already recomposed. Publication through a merged catalog PR is what
+        # exempts it, pinned in test_supersession_catalog_guard.
         assert "coalesce(old.origin, 'pipeline') <> 'derived'" in cypher
         assert "catalog_edit" not in cypher
-        # Already-retired / frozen names are never re-superseded.
-        assert "['superseded', 'exhausted', 'contested']" in cypher
+        # Already-retired / frozen / published names are never re-superseded.
+        assert "['superseded', 'exhausted', 'contested', 'approved']" in cypher
         # The new name itself is never superseded (byte-identical regen no-op).
         preflight_cypher = _transaction_call(
             tx, "GENERATED_SUPERSESSION_PREFLIGHT"
