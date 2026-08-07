@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="98">
+<meta name="plan-version" content="99">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -994,6 +994,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260807-semantic-policy-integrated" data-who="reckon-ship" data-when="2026-08-07T20:55:00+02:00">
     <div class="r-comment-body"><p><strong>Semantic-policy HOLD closed and integrated.</strong> The four-commit repair chain (1e29f49e..ef903f61) plus three verification-worker commits (634b3623, 7f287c4a, 0562e698) merged to main as <code>c43e77e7</code>. Every HOLD finding closed with public-ISN-oracle evidence: NC example round-trips enforced; the shared grammar-reference include (rendered into seven live system prompts) no longer teaches <code>poloidal_flux</code>/<code>ellipticity_angle</code> as valid or <code>minor_radius</code>/<code>cross_sectional_area</code>/<code>polarization_angle</code> as atomic — the atomic-base exemption is now decided mechanically by the registry; invalid exemplar fix-targets corrected (<code>normalized_poloidal_magnetic_flux</code>, <code>normal_magnetic_field_fourier_coefficient</code>); outline policy is owner/axis-qualified with parser-verified negatives; tests are rendered-mode + public-parser based. Suite: 6389 passed, 0 failed. Operational carry-forward: 5 of 6 PIPELINE_PROMPTS clear-gate inputs changed — the first <code>sn run</code> after this merge trips the pipeline-hash gate and needs a deliberate <code>--skip-clear-gate</code>. The graph-side repair of wrong source attachments (f-sgwi-006) remains open and now has its policy/guard precondition satisfied.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260807-flush-safety-integrated" data-who="reckon-ship" data-when="2026-08-07T21:30:00+02:00">
+    <div class="r-comment-body"><p><strong>Flush-safety HOLD closed and integrated.</strong> The two-commit chain (52467b9a, c2b27e5e) plus four verification-worker commits merged to main as <code>112a18b9</code>. Both P1 defects closed: reservations are pricing/token-derived, fail-closed, and enforced provider-side (the same price dict is stamped as <code>provider.max_price</code>); all nine pooled dispatch sites charge exactly once, the convergence-gate adjudicator is now metered against the campaign budget, and self-refine refuses metered routes. Calibration repaired: per-call reservation fell from $279.21 (2M-token uncataloged ceiling) to $0.96–$4.85 via request-byte-bounded input, bare-vendor catalog fallback, and per-attempt reservation — the policy rate ceiling was NOT lowered. The masking conftest stub is replaced by a per-seat calibration gate (every configured sn-* seat must price finite and ≤ $10). Suite 6311 passed / 0 failed. Unverified residuals recorded honestly: the live <code>max_price</code> round-trip is unexercised until the first paid call; the archive-without-git test artifact is not yet reproduced on a compute node; <code>phase_caps</code> remains deliberately unwired and its cumulative-commit trap is sharper under per-attempt reservations.</p></div>
 </div>
 </section>
 </main>
