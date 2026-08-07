@@ -15,6 +15,31 @@ Standard Names are standalone, self-describing metadata labels for fusion plasma
 
 **You do NOT compose a name string.** You fill individual IR (Intermediate Representation) segment fields — `base_token`, `base_kind`, `projection_axis`, `qualifiers`, `locus_token`, `locus_relation`, `locus_type`, `locus_value`, `operators`, `process_token` — plus a description. (The projection *shape* is derived automatically from `base_kind`.) `operators` is an ordered outer-to-inner list of structured applications. Code assembles the canonical name from your segments via ISN's `compose()` function. **The composer and parser are authoritative**: surface spelling, joining-word order, preposition rendering, and adjacent-token collapsing are all handled by `compose()` — your job is to choose the **right field values**, not to spell the final string. Each segment has a closed vocabulary — use only registered tokens; if none fits, emit a `vocab_gap`.
 
+### Authoritative source-axis fidelity — HARD
+
+Before proposing a candidate or attaching a source to an existing name, compare
+the exact authoritative source binding with the complete name identity. Preserve
+every source-stated semantic axis that distinguishes the observable:
+**subject/object, mechanism/cause, locus/carrier, projection/axis, surface kind,
+geometry representation, coordinate kind, aggregation, process, state, unit,
+and DD-authoritative transformation/label semantics**. Domain-implied
+boilerplate may be omitted, but an explicit differentiator may not. A candidate
+or attachment that drops, changes, or invents any distinguishing axis is wrong,
+even when it parses or resembles an established name. If the public grammar
+cannot express the exact identity, emit a `vocab_gap`; never silently
+generalize, merge, or substitute the nearest registered concept.
+
+DD unit is authoritative, and COCOS is fixed DDv4 catalog metadata. Do not
+choose, infer, or change a COCOS transformation label. `psi_like` and `ip_like`
+are downstream catalog labels, not decisions made by the composer.
+
+**Flux-surface area is the canonical test.** DD `area` means the poloidal
+cross-sectional area enclosed by the surface: ✓
+`poloidal_cross_sectional_area_of_flux_surface`. DD `surface` means the swept
+toroidal surface: ✓ `surface_area_of_flux_surface`. They are different
+observables. The bare `area_of_flux_surface` is an ambiguous umbrella and must
+not be emitted or used as an attachment target for either family.
+
 ### Three gold exemplars — the field-choice you make
 
 1. **`electron_temperature`** — `base_token=temperature`, `qualifiers=["electron"]`. The simplest valid form: a generic base made specific by a species qualifier.
@@ -76,7 +101,7 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
   - **Value locus vs gradient/position locus.** When the registry offers more than one locus for the same feature (a locus for the *value* of a profile there, versus a locus for the steepest-gradient point or for the coordinate/flux that *locates* the feature), pick the variant matching what THIS quantity measures. Do not collapse the distinct variants onto one bare feature token.
   - **Point vs surface-distribution vs contact locus.** When a feature can be a sampled point, a distribution/peak over its surface, or a distinct contact/tangency point, pick the registered locus (and its allowed relation) whose description matches the source — never force the bare feature token where the registry defines a more specific locus.
 - **Fidelity over expressibility — a different registered feature is NOT a "fit" (HARD RULE).** "Use registered tokens; if none fits, emit a `vocab_gap`" means the token for the **exact feature named in the DD path** — never the nearest lexical neighbour. If the exact feature has no registered `locus_token`, emit a `vocab_gap` for the literal feature; do NOT substitute a *related-but-different* registered feature just because it parses. A divertor **target** (a surface) is not a strike **point** (a point on the separatrix): a source path `.../strike_point_inner_r` whose "inner strike point" has no registered token must surface as a gap (`inner_strike_point`), and must NEVER be renamed to the registered `inner_divertor_target`. Grammatical acceptance never licenses naming a different physical object than the source. This is the **#1 silent semantic error** — a plausible, well-formed name that quietly denotes the wrong feature.
-- **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `radial_coordinate_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`. (For a generic hardware outline whose vertices are an ordinal array, collapse to `radial_outline` / `vertical_outline` — see "Enumeration is a coordinate, not a name" below.)
+- **Name a boundary-contour coordinate against the registered boundary token, not an `outline_point`.** The boundary outline IS the `plasma_boundary` contour (and `wall` the wall contour); `outline_point` is not a registered position token. ✓ `vertical_coordinate_of_plasma_boundary`, `radial_coordinate_of_plasma_boundary`; ✗ `vertical_coordinate_of_plasma_boundary_outline_point`. A hardware outline omits its vertex ordinal but retains its owning object; never collapse outlines of different objects to a generic outline.
 - **Place names with quantity-words are single location tokens, not quantities.** `center_of_mass` is a reference point (barycentre), not a mass quantity — treat it as a location qualifier. ✓ `center_of_mass_velocity`, `radial_center_of_mass_velocity`, `center_of_mass_position`; ✗ `mass_velocity`. Apply the same to `line_of_sight`, `field_of_view`, `point_of_closest_approach`.
 
 ### Coordinates — canonical coordinate base, never `_position_of_X`
@@ -94,13 +119,14 @@ This rule is unconditional and overrides any apparent symmetry with sibling name
 
 ### Enumeration is a coordinate, not a name (geometry-point collapse)
 
-Geometry defined by **multiple ordinal points / vertices / waypoints**
-(line-of-sight endpoints, polygon outline vertices, beam-path waypoints,
-conductor-element samples) **collapses to ONE geometric-quantity name** — the
-ordinal index is a coordinate carried by the DD path, NOT a name component. A
-standard name identifies a quantity-KIND by intrinsic physical identity; the
-"first" vs "second" point is the same kind of thing sampled at different array
-indices.
+Geometry defined by multiple ordinal points omits the ordinal only when it is
+array bookkeeping **within the same physical geometry carrier and owner**. The
+ordinal index is carried by the DD path, but the carrier/representation is a
+load-bearing semantic axis. Endpoints of a line of sight may share one
+line-of-sight coordinate name; endpoints of a conductor thick line, pellet
+path, gas pipe, shunt, beam path, or another geometry remain attached to that
+own carrier and owner. Never turn "first point" removal into a change of
+geometry representation.
 
 - **Line-of-sight endpoints** (`.../line_of_sight/first_point/r`,
   `.../second_point/r`, `.../third_point/r`) → all collapse to ONE name per
@@ -113,11 +139,17 @@ indices.
   LOCUS, never a `base_token`** — a bare `base_token="line_of_sight"` is not a
   registered base and emits a false `vocab_gap` (it is a coordinate *of* the
   sight-line, exactly like `radial_coordinate_of_<point>`). One name covers
-  every endpoint of every diagnostic's sight-line; list all the endpoint paths
-  in `dd_paths`.
-- **Outline vertices** (`<entity>/outline/r`, `/z`) → `radial_outline`,
-  `vertical_outline` (`base_token="outline"`, `base_kind="geometry"`, axis as
-  the `coordinate` projection). One name covers every vertex.
+  every endpoint of a genuinely identified sight-line; list only those
+  line-of-sight endpoint paths in `dd_paths`.
+- **Other carriers are not lines of sight.** Paths under `thick_line`,
+  `pellet/path_geometry`, `gas_injection/pipe`, `magnetics/shunt`, beam paths,
+  or interpolation knots must retain their source-supported carrier and owner.
+  If the public grammar cannot express that identity, emit a `vocab_gap`.
+- **Outline vertices** (`<entity>/outline/r`, `/z`) omit the vertex ordinal but
+  retain the owning entity. Never attach an outline of a wall, control surface,
+  conductor element, ferritic object, or plasma boundary to an unrelated
+  object's outline name. Use an owner-qualified registered form when supported;
+  otherwise emit a `vocab_gap` rather than a generic or unrelated outline.
 - **Distinguish points only by physical ENTITY, never by ordinal.** A point
   earns its own name ONLY when it is a distinct physical entity (an aperture vs
   a wall), named by that entity: `radial_position_of_aperture`
@@ -297,7 +329,7 @@ Skip and record as `vocab_gap`/`skipped` rather than composing when a DD path wo
 - `turn_count` (hardware winding property, not a physics observable)
 - bare contentless descriptors as a whole base — `level`, `ratio`, `multiplier`, `sign`, `gain`, `noise`, bare `factor`. These carry no physics on their own: either qualify with the specific quantity they modify (e.g. `density_peaking_factor`, not bare `factor`) or `skip`. `gain`/`noise` on a signal-chain path are diagnostic-hardware infrastructure → `skipped`.
 - bare `vertical_coordinate` / bare `outline_point` (always need `_of_<entity>`)
-- bare ordinal-point name components — `first_point`, `second_point`, `third_point`, `outline_point`, `first_coordinate`, `second_coordinate` — are forbidden in any name. Ordinal/enumerated geometry points collapse to ONE geometric-quantity name (`radial_coordinate_of_line_of_sight`, `radial_outline`); the ordinal index lives in the DD path. Distinguish points only by physical entity (`aperture`, `wall`), never by ordinal. The separate semantic carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` are reserved for genuine ordered directions in an object-local tangent frame.
+- bare ordinal-point name components — `first_point`, `second_point`, `third_point`, `outline_point`, `first_coordinate`, `second_coordinate` — are forbidden in any name. Omit the ordinal index while preserving the exact geometry carrier, representation, owner, and axis. Only paths genuinely under `line_of_sight` may use `radial_coordinate_of_line_of_sight` or its axis siblings; thick-line conductors, pellets, pipes, shunts, beam paths, interpolation points, and other-object outlines must retain their own identity or fail closed with `vocab_gap`. The separate semantic carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` are reserved for genuine ordered directions in an object-local tangent frame.
 - `nuclear_charge_number` (→ `atomic_number`)
 - `azimuth_angle` (→ `toroidal_angle`)
 - `distance_between_A_and_B` / `distance_from_A_to_B_along_C` — a span between two distinct named features is NOT representable in the single locus slot, and the DD has no such arbitrary spans. Name real distance/clearance quantities as a `distance`/`gap` base at a single reference surface or plane (✓ `radial_distance_at_outboard_midplane`, ✓ `gap_at_plasma_boundary`); emit `vocab_gap` if no single-locus form is faithful. Never fabricate a multi-locus span that silently drops an endpoint.
@@ -447,7 +479,11 @@ The following rules encode concrete issues found during expert peer review of LL
 
 ### Structural Scope
 
-**SS-1 Prefer generic over explosive.** For machine geometry (positions, cross-sections, areas of device components), prefer generic names parameterized by component metadata over per-component R/Z entries. E.g. one `position_of_flux_loop` rather than dozens of per-loop entries.
+**SS-1 Reuse only within one physical identity.** For repeated samples of the
+same machine-geometry carrier and owner, reuse one standard name rather than
+creating per-index entries. Never gain compactness by dropping the carrier,
+representation, surface kind, or owning object; use a vocabulary gap when the
+public grammar cannot represent the required distinction.
 
 **SS-2 Standalone fitting quantities.** Generic fitting/uncertainty quantities (`chi_squared`, `fitting_weight`, `residual`) are standalone standard names, not repeated per measured quantity.
 

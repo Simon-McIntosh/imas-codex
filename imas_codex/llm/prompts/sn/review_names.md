@@ -15,6 +15,40 @@ Do **not** penalise entries for missing or terse `description`/`documentation`. 
 
 {% include "sn/_exemplars.md" %}
 
+## Authoritative source-axis fidelity — HARD
+
+Compare each candidate with its exact authoritative source binding. The name
+must preserve every source-stated semantic axis that distinguishes the
+observable: **subject/object, mechanism/cause, locus/carrier, projection/axis,
+surface kind, geometry representation, coordinate kind, aggregation, process,
+state, unit, and DD-authoritative transformation/label semantics**.
+Domain-implied boilerplate may be omitted, but an explicit differentiator may
+not. Dropping, changing, or inventing any distinguishing axis means the name
+denotes a different observable: cap Semantic Accuracy at **5/20**. If the
+public grammar cannot express the exact identity, require a `vocab_gap`; never
+reward a silent generalization, merge, or nearest-token substitution.
+
+The DD unit is authoritative, and COCOS is fixed DDv4 catalog metadata. Do not
+ask the model to choose, infer, or change a COCOS transformation label.
+`psi_like` and `ip_like` are downstream catalog labels, not review decisions.
+
+For flux-surface area, DD `area` requires
+`poloidal_cross_sectional_area_of_flux_surface`, while DD `surface` requires
+`surface_area_of_flux_surface`. These denote different observables. The bare
+`area_of_flux_surface` is an ambiguous umbrella and must receive Semantic
+Accuracy **≤ 5/20** for either source family.
+
+Ordinal geometry words may be omitted only as array bookkeeping. The physical
+carrier/representation and owner remain mandatory. Only genuine
+`line_of_sight/*_point` paths may map to `*_coordinate_of_line_of_sight`;
+`thick_line` conductors, pellet paths, gas pipes, shunts, beam paths,
+interpolation points, and other-object outlines must retain their own identity
+or fail closed with a vocabulary gap.
+Owner-qualified outline forms such as `radial_outline_of_wall` and
+`radial_outline_of_plasma_boundary` are public-grammar-valid and remain
+distinct. Bare `radial_outline` / `vertical_outline` parse, but are semantically
+owner-erasing when the source identifies the outlined object.
+
 ## Token vocabulary
 
 Every segment has a defined token list. A name that uses an unregistered
@@ -28,9 +62,9 @@ into `physical_base`** rather than placing them in their correct segment
 `physical_base=torque`). Apply the **Decomposition audit** below
 aggressively — this is the single highest-leverage check in the rubric.
 
-Compound `physical_base` tokens like `poloidal_flux`, `minor_radius`,
-`cross_sectional_area`, `safety_factor`, `polarization_angle`,
-`internal_inductance` are valid lexicalised atomic physics terms; treat them
+Compound `physical_base` tokens like `minor_radius`, `safety_factor`,
+`polarization_angle`, and `internal_inductance` are valid lexicalised atomic
+physics terms; treat them
 as single entries even if a substring resembles a registered token.
 
 Flag `vocab_gap` and dock points whenever any segment would require an
@@ -74,9 +108,9 @@ grammar and convention scores.
   decomposition error**:
     - `toroidal_torque` → projection=`toroidal` + base=`torque`
     - `volume_averaged_electron_temperature` → operator=`volume_averaged` + qualifier=`electron` + base=`temperature`
-    - `flux_surface_cross_sectional_area` → locus=`flux_surface` + base=`cross_sectional_area`
-  Allow genuine lexicalised atomic terms (`poloidal_flux`, `minor_radius`,
-  `cross_sectional_area`, `safety_factor`). For real defects, dock
+    - `poloidal_cross_sectional_area_of_flux_surface` → projection=`poloidal` + qualifier=`cross_sectional` + base=`area` + locus=`flux_surface`
+  Allow genuine lexicalised atomic terms (`minor_radius`, `safety_factor`).
+  For real defects, dock
   **4 points per defect up to a cumulative −8** on this dimension. Record
   each absorbed token in the `issues` field as
   `decomposition: <token>(<group>) absorbed into physical_base`.
@@ -102,18 +136,11 @@ grammar and convention scores.
   reaching the detector (not "power of the bolometer"). **Score ≤ 5** when the
   name attributes the measured quantity to the device rather than to the physical
   system being probed.
-- **Qualifier fidelity — dropped (HARD)**: does the name drop a
-  physically-essential qualifier that the source description states? Compare the
-  name against the provided source description and flag a dropped **kind**
-  (`neutron` vs `heat` flux), **extremum** (`maximum`, `peak`, `minimum`),
-  **species**, **locus** (`at_poloidal_field_coil`), or **medium** (`coolant`)
-  qualifier — these change *what is measured* and must appear in the name.
-  **Score ≤ 5** when such a qualifier is present in the source description but
-  absent from the name (e.g. source "Maximum neutron flux at the first wall" →
-  name `heat_flux_at_wall` loses `maximum` and `neutron` and mistypes the flux
-  kind). Do NOT penalise the inverse — qualifiers absent from the source that are
-  merely domain-implied boilerplate (`equilibrium_`, `_of_plasma`) should still
-  be dropped.
+- **Qualifier fidelity — dropped (HARD)**: apply the complete authoritative
+  source-axis contract above, not a short qualifier checklist. Any absent
+  distinguishing axis changes *what is measured* and requires **Semantic
+  Accuracy ≤ 5**. Do NOT penalize dropping domain-implied boilerplate
+  (`equilibrium_`, `_of_plasma`) absent from the source.
 - **Qualifier fidelity — over-qualified (HARD)**: does the name add a
   qualifier that is neither stated by the source nor physically necessary? A
   modifier that restates something already inherent in the base

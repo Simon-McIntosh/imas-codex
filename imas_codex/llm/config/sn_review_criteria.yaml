@@ -354,9 +354,10 @@ common_issues:
         For each candidate, inspect the ``physical_base`` token and list
         any closed-vocab tokens present as whole underscore-separated
         substrings. Treat each hit as a candidate decomposition defect
-        unless the compound is a well-known lexicalised atomic quantity
-        (e.g. ``poloidal_flux``, ``minor_radius``,
-        ``cross_sectional_area``).
+        unless the closed ``physical_base`` registry holds the whole
+        spelling as one token AND parsing it leaves the qualifier set
+        empty (e.g. ``safety_factor``, ``loop_voltage``,
+        ``internal_inductance``).
       examples_bad:
         - name: "toroidal_torque"
           hit: "toroidal (projection axis)"
@@ -364,13 +365,16 @@ common_issues:
         - name: "volume_averaged_electron_temperature"
           hit: "volume_averaged (operator), electron (qualifier)"
           correction: "operator=volume_averaged + qualifier=electron + base=temperature"
-        - name: "normalized_poloidal_flux"
-          hit: "normalized (operator), poloidal (projection)"
-          correction: "operator=normalized + base=poloidal_flux (poloidal_flux is an accepted atomic term)"
+        - name: "normalized_poloidal_magnetic_flux"
+          hit: "normalized_poloidal (projection axis)"
+          correction: "projection=normalized_poloidal + base=magnetic_flux"
+        - name: "cross_sectional_area"
+          hit: "cross_sectional (qualifier)"
+          correction: "qualifier=cross_sectional + base=area"
       examples_allowed:
-        - "poloidal_flux (atomic — widely lexicalised as a named quantity)"
-        - "cross_sectional_area (atomic geometric property)"
-        - "minor_radius (atomic geometric property)"
+        - "safety_factor (one registered physical_base, no qualifier)"
+        - "loop_voltage (one registered physical_base, no qualifier)"
+        - "internal_inductance (one registered physical_base, no qualifier)"
       affects: [grammar, semantic]
       score_override: >-
         grammar -= 4 per genuine decomposition defect (capped at -8 on

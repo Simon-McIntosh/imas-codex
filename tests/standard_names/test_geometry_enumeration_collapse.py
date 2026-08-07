@@ -1,15 +1,17 @@
 """Enumerated geometry points collapse to one geometric-quantity name.
 
 A standard name identifies a quantity-KIND by intrinsic physical identity.
-Ordinal/enumerated geometry points (line-of-sight endpoints, polygon outline
-vertices, beam-path waypoints) are NOT separately named — they COLLAPSE to ONE
-geometric-quantity standard name; the ordinal index lives in the DD path/mapping
-(``dd_paths``), never in the name. A point earns a distinct name only when it is
-a distinct physical ENTITY (aperture vs wall), named by that entity.
+Ordinal/enumerated geometry points are NOT separately named when the ordinal is
+only array bookkeeping within one carrier and owner. The ordinal index lives in
+the DD path/mapping (``dd_paths``), never in the name. Carrier, owner, axis, and
+representation remain part of the physical identity: wall and plasma-boundary
+outlines therefore remain distinct. A point earns a distinct name when it is a
+distinct physical ENTITY (aperture vs wall), named by that entity.
 
-A separate, orthogonal rule: DD local-coordinate axes ``x1``/``x2``/``x3`` are
-ORTHOGONAL directions of a local sensor frame (NOT ordinal samples). They use the
-registered carriers ``x1_coordinate`` / ``x2_coordinate`` and stay DISTINCT names.
+A separate, orthogonal rule: DD local-coordinate axes ``x1``/``x2`` are
+orthogonal directions of a local sensor frame, not ordinal samples. They map to
+the registered semantic carriers ``first_local_tangential_coordinate`` and
+``second_local_tangential_coordinate`` and stay distinct names.
 
 These tests exercise the ISN composer directly via :class:`GrammarSegments` — no
 LLM call. They pin the verified target forms and guard that ordinal-bearing base
@@ -30,26 +32,65 @@ def _name(seg: GrammarSegments) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Collapsed geometry carriers — line-of-sight endpoints + outline vertices
+# Collapsed geometry carriers — ordinal vertices within one owner
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.parametrize(
-    "base_token,axis,expected",
+    "owner,axis,expected",
     [
-        # outline vertex array -> ONE name per axis
-        ("outline", "radial", "radial_outline"),
-        ("outline", "vertical", "vertical_outline"),
+        ("wall", "radial", "radial_outline_of_wall"),
+        ("wall", "vertical", "vertical_outline_of_wall"),
+        (
+            "plasma_boundary",
+            "radial",
+            "radial_outline_of_plasma_boundary",
+        ),
+        (
+            "plasma_boundary",
+            "vertical",
+            "vertical_outline_of_plasma_boundary",
+        ),
     ],
 )
-def test_enumerated_geometry_collapses_to_one_carrier(base_token, axis, expected):
+def test_outline_ordinals_collapse_only_within_owner(owner, axis, expected):
+    """An outline's vertex index is omitted while its owner remains."""
     seg = GrammarSegments(
-        base_token=base_token,
+        base_token="outline",
         base_kind="geometry",
         projection_axis=axis,
         projection_shape="coordinate",
+        locus_token=owner,
+        locus_relation="of",
+        locus_type="position",
     )
     assert _name(seg) == expected
+
+
+def test_outline_owners_stay_distinct():
+    """Consistency within one vertex array cannot merge different objects."""
+    wall = GrammarSegments(
+        base_token="outline",
+        base_kind="geometry",
+        projection_axis="radial",
+        projection_shape="coordinate",
+        locus_token="wall",
+        locus_relation="of",
+        locus_type="position",
+    )
+    boundary = GrammarSegments(
+        base_token="outline",
+        base_kind="geometry",
+        projection_axis="radial",
+        projection_shape="coordinate",
+        locus_token="plasma_boundary",
+        locus_relation="of",
+        locus_type="position",
+    )
+
+    assert _name(wall) == "radial_outline_of_wall"
+    assert _name(boundary) == "radial_outline_of_plasma_boundary"
+    assert _name(wall) != _name(boundary)
 
 
 @pytest.mark.parametrize("axis", ["radial", "vertical", "toroidal"])
@@ -137,8 +178,8 @@ def test_first_wall_point_named_by_entity():
 
 
 # ---------------------------------------------------------------------------
-# Negative guard — ordinal-bearing base tokens must NOT be registered carriers
-# (these are exactly the names the old prompt taught and that generated gaps).
+# Negative guard — ordinal-bearing base tokens must NOT be registered carriers;
+# they erase the source carrier and owner instead of representing the quantity.
 # ---------------------------------------------------------------------------
 
 

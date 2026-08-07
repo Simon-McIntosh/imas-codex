@@ -110,10 +110,12 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
 
 #### Abbreviations
 
-- ❌ `norm_poloidal_flux`, `perp_velocity`, `temp_pedestal`, `sep_distance`
+- ❌ `norm_poloidal_magnetic_flux`, `perp_velocity`, `temp_pedestal`,
+  `sep_distance`
   - *Why bad:* every abbreviation has a canonical long form. Long forms
     dedupe across a domain; abbreviations proliferate.
-  - *Fix:* `normalized_poloidal_flux`, `perpendicular_velocity_component`,
+  - *Fix:* `normalized_poloidal_magnetic_flux`,
+    `perpendicular_velocity_component`,
     `pedestal_electron_temperature`, `separatrix_distance`.
 
 #### Provenance verbs in the name
@@ -175,7 +177,7 @@ DEPRECATED: `vertical_position_of_<position>` (old form;
   "Fourier coefficients of the normal component..."
   - *Why bad:* the name promises a scalar field; the description
     describes a spectral coefficient. They disagree.
-  - *Fix:* either rename to `fourier_coefficient_of_normal_magnetic_field`
+  - *Fix:* either rename to `normal_magnetic_field_fourier_coefficient`
     or rewrite the description to describe the underlying field.
 
 #### Trivial surface-of-definition names
