@@ -2451,6 +2451,9 @@ def sn_run(
             ),
         )
         thresholds = ConvergenceThresholds(min_docs_accept_rate=campaign_accept_rate)
+        # Gate adjudication spend is billed under its own scope id so it is
+        # attributable without being mistaken for a drain's measured cost.
+        campaign_gate_run_id = str(_uuid.uuid4())
 
         def _campaign_drain(run_id: str, batch_cost_cap: float) -> float | None:
             row = _run_sn_cmd(
@@ -2500,7 +2503,13 @@ def sn_run(
         )
 
         # Model + effort come from [tool.imas-codex.sn-prose-adjudicator].
-        adjudicate_prose_fn = make_prose_adjudicator()
+        # The gate contacts a provider, so it draws on the same per-batch cost
+        # cap as the drain it adjudicates and records its spend under the
+        # campaign scope rather than beside the budget.
+        adjudicate_prose_fn = make_prose_adjudicator(
+            cost_ceiling=budget.per_batch_cost_cap,
+            run_id=campaign_gate_run_id,
+        )
         with GraphClient() as gc:
             result = runner.run(
                 gc=gc,
