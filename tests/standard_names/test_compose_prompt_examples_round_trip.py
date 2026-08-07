@@ -273,6 +273,80 @@ def test_consistency_rule_forbids_generic_flux_surface_area_umbrella() -> None:
     assert "area_of_flux_surface" not in synonym_rule["examples_good"]
 
 
+# ---------------------------------------------------------------------------
+# Compound-base atomicity — the oracle behind the decomposition audit
+# ---------------------------------------------------------------------------
+# The review rubrics tell the reviewer to decompose any registered token that a
+# candidate absorbed into ``physical_base``, then exempt a short list of
+# "lexicalised atomic" compounds from that audit. Which spellings qualify is
+# decidable rather than editorial: a compound is atomic iff the closed
+# ``physical_bases`` registry holds it as ONE token AND the public IR leaves its
+# qualifier set empty. A spelling the IR splits into base + qualifier is
+# decomposable however lexicalised it reads, and exempting it teaches the
+# composer that absorbing a registered qualifier is acceptable — the same
+# absorption the audit exists to catch. These tests pin the public oracle so a
+# rubric may only exempt a compound the grammar actually treats as one token.
+
+
+def _registered_bases() -> frozenset[str]:
+    from imas_standard_names.grammar import get_grammar_context
+
+    bases = get_grammar_context()["grammar"]["vocabularies"]["physical_bases"]
+    return frozenset(str(token) for token in bases)
+
+
+def _is_lexicalised_atomic(name: str) -> bool:
+    """True iff ISN holds ``name`` as one registered base carrying no qualifier."""
+    try:
+        ir = parse(name, strict=True).ir
+    except Exception:
+        return False
+    return name in _registered_bases() and not ir.qualifiers
+
+
+@pytest.mark.parametrize(
+    "name", ("safety_factor", "loop_voltage", "internal_inductance")
+)
+def test_atomic_compound_is_one_registered_base_without_qualifiers(name: str) -> None:
+    """Only these may be exempted from the decomposition audit."""
+    assert _is_lexicalised_atomic(name)
+    assert _round_trips(name)
+
+
+@pytest.mark.parametrize(
+    "name,base,qualifier",
+    (
+        ("minor_radius", "radius", "minor"),
+        ("major_radius", "radius", "major"),
+        ("cross_sectional_area", "area", "cross_sectional"),
+        ("surface_area", "area", "surface"),
+        ("polarization_angle", "angle", "polarization"),
+    ),
+)
+def test_qualifier_bearing_compound_is_not_atomic(
+    name: str,
+    base: str,
+    qualifier: str,
+) -> None:
+    """The IR splits these, so no rubric may exempt them from the audit."""
+    ir = parse(name, strict=True).ir
+
+    assert ir.base.token == base
+    assert {token.token for token in ir.qualifiers} == {qualifier}
+    assert not _is_lexicalised_atomic(name)
+
+
+@pytest.mark.parametrize("name", ("poloidal_flux", "ellipticity_angle"))
+def test_unparseable_spelling_is_never_teachable_as_a_name(name: str) -> None:
+    """A spelling the public parser rejects cannot be endorsed as valid."""
+    from imas_standard_names.grammar import ParseError
+
+    with pytest.raises(ParseError):
+        parse(name, strict=True)
+    assert not _round_trips(name)
+    assert not _is_lexicalised_atomic(name)
+
+
 _SOURCE_AXIS_MARKERS = (
     "subject/object",
     "mechanism/cause",
