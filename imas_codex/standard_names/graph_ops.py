@@ -15252,14 +15252,23 @@ def supersede_prior_source_names(
     - its id differs from ``new_name`` (byte-identical regen is a no-op MERGE —
       the same node is reused, so nothing is superseded);
     - it is not already ``superseded``/``exhausted``;
+    - it is not published catalog content: neither ``name_stage='approved'``
+      nor carrying a ``catalog_pr_number``. Both conditions are required
+      because they are set by the same merge write, so either one alone would
+      let a half-written or hand-repaired row through. A name that reached
+      ``approved`` was published by a merged catalog pull request; retiring it
+      from an automatic compose pass would revoke governed content with no
+      human in the loop. Withdrawing published content is a governance act and
+      goes through the catalog, never through this dedup;
     - its ``origin`` is not ``derived`` — a structural parent is owned by the
       admission gate, not by any one source, so a source-keyed dedup must not
-      retire it. ``catalog_edit`` is NOT exempt: those names are one bulk import
-      of this pipeline's own earlier output, sitting unreviewed, and the graph
-      plus the review pipeline is the source of truth. Exempting them let an
-      imported name keep competing for a source that had already recomposed,
-      which is how one coordinate axis resolved to a single name while another
-      stayed split across two.
+      retire it. ``catalog_edit`` alone is NOT exempt: unpublished names
+      carrying that origin are one bulk import of this pipeline's own earlier
+      output, sitting unreviewed, and the graph plus the review pipeline is
+      the source of truth. Exempting them let an imported name keep competing
+      for a source that had already recomposed, which is how one coordinate
+      axis resolved to a single name while another stayed split across two.
+      Publication, not origin, is what makes catalog content untouchable.
 
     Before changing lifecycle, lineage, or provenance, the helper discovers
     the complete semantic-source set for every predecessor-to-successor pair
@@ -15302,7 +15311,9 @@ def supersede_prior_source_names(
                 OPTIONAL MATCH (new:StandardName {id: pr.new_name})
                 OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(old:StandardName)
                 WHERE old.id <> pr.new_name
-                  AND NOT coalesce(old.name_stage, '') IN ['superseded', 'exhausted', 'contested']
+                  AND NOT coalesce(old.name_stage, '') IN
+                      ['superseded', 'exhausted', 'contested', 'approved']
+                  AND old.catalog_pr_number IS NULL
                   AND coalesce(old.origin, 'pipeline') <> 'derived'
                 // Skip self and any case where old already descends from new
                 // along the REFINED_FROM chain (would form a cycle).
@@ -15460,7 +15471,8 @@ def supersede_prior_source_names(
                 WHERE coalesce(old.name_stage, '') =
                       coalesce(plan.old_stage, '')
                   AND NOT coalesce(old.name_stage, '') IN
-                      ['superseded', 'exhausted', 'contested']
+                      ['superseded', 'exhausted', 'contested', 'approved']
+                  AND old.catalog_pr_number IS NULL
                   AND coalesce(old.origin, 'pipeline') <> 'derived'
                   AND new.id <> old.id
                   AND NOT (old)-[:REFINED_FROM*1..]->(new)
