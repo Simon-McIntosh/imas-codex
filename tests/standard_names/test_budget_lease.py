@@ -36,8 +36,8 @@ class _BoundedResponse(BaseModel):
     answer: str
 
 
-def test_paid_exposure_uses_context_and_all_wrapper_attempts():
-    """The lease covers the hard input bound and initial call plus retries."""
+def test_paid_exposure_covers_every_wrapper_attempt():
+    """Pricing N attempts exceeds N times the first, as allowances escalate."""
     messages = [{"role": "user", "content": "short rendered prompt"}]
     one_attempt = model_provider_exposure(
         "openrouter/anthropic/claude-sonnet-4.6",
@@ -51,8 +51,30 @@ def test_paid_exposure_uses_context_and_all_wrapper_attempts():
         response_model=_BoundedResponse,
         provider_attempts=5,
     )
-    assert one_attempt > 7.0
+    assert one_attempt > 0
     assert all_attempts > one_attempt * 5
+
+
+def test_paid_exposure_tracks_the_prompt_not_the_context_window():
+    """A short request must not reserve what a context-window-sized one would.
+
+    Pricing the route's whole input context would make every request cost the
+    same regardless of size, over-reserving small ones by orders of magnitude.
+    """
+    route = "openrouter/anthropic/claude-sonnet-4.6"
+    short = model_provider_exposure(
+        route,
+        [{"role": "user", "content": "short rendered prompt"}],
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+    )
+    long = model_provider_exposure(
+        route,
+        [{"role": "user", "content": "y" * 500_000}],
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+    )
+    assert short < long, "a smaller request must reserve less"
 
 
 def test_catalog_lag_uses_immutable_provider_and_input_ceilings():

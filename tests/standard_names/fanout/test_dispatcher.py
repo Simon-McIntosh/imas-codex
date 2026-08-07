@@ -66,6 +66,19 @@ def _new_lease():
     return lease
 
 
+def _starved_lease():
+    """A lease and pool too small to fund the proposer's priced attempt.
+
+    Stated as an explicit fraction of a cent rather than inferred from what a
+    given route happens to cost, so the no-budget path stays exercised when
+    pricing changes.
+    """
+    mgr = BudgetManager(total_budget=0.001)
+    lease = mgr.reserve(0.001)
+    assert lease is not None
+    return lease
+
+
 class _FakeLLMResult:
     def __init__(self, parsed: FanoutPlan, cost: float = 0.0) -> None:
         self.parsed = parsed
@@ -320,7 +333,7 @@ class TestRunFanout:
             reviewer_excerpt="unclear",
             scope=_scope(),
             gc=gc,
-            parent_lease=_new_lease(),
+            parent_lease=_starved_lease(),
             settings=s,
             fanout_run_id="run-nb",
         )
