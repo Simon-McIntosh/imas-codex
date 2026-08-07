@@ -66,6 +66,19 @@ def _new_lease():
     return lease
 
 
+def _starved_lease():
+    """A lease and pool too small to fund the proposer's priced attempt.
+
+    Stated as an explicit fraction of a cent rather than inferred from what a
+    given route happens to cost, so the no-budget path stays exercised when
+    pricing changes.
+    """
+    mgr = BudgetManager(total_budget=0.001)
+    lease = mgr.reserve(0.001)
+    assert lease is not None
+    return lease
+
+
 class _FakeLLMResult:
     def __init__(self, parsed: FanoutPlan, cost: float = 0.0) -> None:
         self.parsed = parsed
@@ -141,7 +154,7 @@ class TestClassifyOutcome:
 
 
 # ---------------------------------------------------------------------
-# propose() — Stage A
+# Proposer request
 # ---------------------------------------------------------------------
 
 
@@ -312,8 +325,7 @@ class TestRunFanout:
     async def test_no_budget_writes_node(self) -> None:
         gc = _MockGraphClient()
         s = _settings(
-            fanout_max_charge_per_cycle_baseline=0.0,
-            fanout_max_charge_per_cycle_escalation=0.0,
+            proposer_model="openrouter/anthropic/claude-sonnet-4.6",
         )
         evidence = await dispatcher.run_fanout(
             site="refine_name",
@@ -321,7 +333,7 @@ class TestRunFanout:
             reviewer_excerpt="unclear",
             scope=_scope(),
             gc=gc,
-            parent_lease=_new_lease(),
+            parent_lease=_starved_lease(),
             settings=s,
             fanout_run_id="run-nb",
         )
@@ -428,25 +440,33 @@ class TestExecutePartialFail:
             ]
         )
         _patch_llm(monkeypatch, _FakeLLMResult(plan))
-        # Healthy first runner
-        monkeypatch.setattr(
-            "imas_codex.standard_names.search.search_standard_names_vector",
-            lambda *a, **kw: [
-                {
-                    "id": "electron_temperature",
-                    "description": "T_e",
-                    "score": 0.9,
-                }
-            ],
-        )
 
-        # Failing cluster runner
-        def _boom(*a, **kw):
-            raise RuntimeError("graph unavailable")
+        async def _healthy(call, **_kwargs):
+            return FanoutResult(
+                fn_id=call.fn_id,
+                args=call.model_dump(),
+                ok=True,
+                hits=[
+                    FanoutHit(
+                        kind="standard_name",
+                        id="electron_temperature",
+                        label="electron_temperature",
+                    )
+                ],
+            )
+
+        async def _failed(call, **_kwargs):
+            return FanoutResult(
+                fn_id=call.fn_id,
+                args=call.model_dump(),
+                ok=False,
+                error="graph unavailable",
+            )
 
         monkeypatch.setattr(
-            "imas_codex.graph.dd_search.cluster_search",
-            _boom,
+            dispatcher,
+            "get_runner",
+            lambda call: _failed if call.fn_id == "search_dd_clusters" else _healthy,
         )
 
         evidence = await dispatcher.run_fanout(

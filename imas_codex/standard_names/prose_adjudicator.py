@@ -25,10 +25,14 @@ from __future__ import annotations
 import asyncio
 import logging
 from collections.abc import Callable, Sequence
+from typing import Any
 
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
+
+#: Budget phase tag for gate adjudication spend.
+_BUDGET_PHASE = "prose_adjudication"
 
 # The adjudicator seat is configured in ``[tool.imas-codex.sn-prose-adjudicator]``
 # (read via ``settings.get_model``).  It wants a light, well-calibrated
@@ -115,28 +119,99 @@ async def _adjudicate_one(
     *,
     reasoning_effort: str | None,
     service: str,
+    budget_manager: Any | None = None,
 ) -> bool:
     """Return True if the doc genuinely reintroduced banned prose.
 
-    Fails safe: any error keeps the grep verdict (genuine).
+    Fails safe: any error keeps the grep verdict (genuine).  This gate runs
+    inside a paid run, so when a budget is supplied each call reserves its
+    priced exposure before dispatch and charges what it actually spent, making
+    gate spend bounded and visible alongside the pipeline's own.
     """
     from imas_codex.discovery.base.llm import (
         acall_llm_structured,
         ensure_model_prefix,
     )
+    from imas_codex.standard_names.budget import (
+        LLMCostEvent,
+        bind_attempt_exposure,
+        charge_billable_exception,
+        model_provider_exposure,
+    )
 
+    route = ensure_model_prefix(model)
+    messages = [
+        {"role": "system", "content": _SYSTEM},
+        {"role": "user", "content": _user_prompt(name, findings, text)},
+    ]
+    lease = None
+    if budget_manager is not None:
+        try:
+            lease = budget_manager.reserve(
+                model_provider_exposure(
+                    route,
+                    messages,
+                    response_model=ProseVerdict,
+                    provider_attempts=1,
+                ),
+                phase=_BUDGET_PHASE,
+            )
+        except Exception as exc:  # noqa: BLE001 — fail safe to a visible halt
+            logger.warning(
+                "prose adjudicator could not price %s (%s); keeping grep verdict",
+                name,
+                exc,
+            )
+            return True
+        if lease is None:
+            logger.warning(
+                "prose adjudicator has no fundable budget for %s; "
+                "keeping grep verdict (genuine)",
+                name,
+            )
+            return True
     try:
-        verdict, _cost, _ = await acall_llm_structured(
-            model=ensure_model_prefix(model),
-            messages=[
-                {"role": "system", "content": _SYSTEM},
-                {"role": "user", "content": _user_prompt(name, findings, text)},
-            ],
-            response_model=ProseVerdict,
-            service=service,
-            reasoning_effort=reasoning_effort,
-            max_retries=2,
-        )
+        try:
+            llm_out = await acall_llm_structured(
+                model=route,
+                messages=messages,
+                response_model=ProseVerdict,
+                service=service,
+                reasoning_effort=reasoning_effort,
+                max_retries=2,
+                before_attempt=bind_attempt_exposure(
+                    lease, route, messages, response_model=ProseVerdict
+                ),
+            )
+        except Exception as exc:
+            charge_billable_exception(
+                lease,
+                exc,
+                model=route,
+                sn_ids=(name,),
+                phase=_BUDGET_PHASE,
+                service=service,
+            )
+            raise
+        verdict, _cost, _ = llm_out
+        if lease is not None:
+            lease.charge_event(
+                float(_cost),
+                LLMCostEvent(
+                    model=route,
+                    tokens_in=int(getattr(llm_out, "input_tokens", 0) or 0),
+                    tokens_out=int(getattr(llm_out, "output_tokens", 0) or 0),
+                    tokens_cached_read=int(
+                        getattr(llm_out, "cache_read_tokens", 0) or 0
+                    ),
+                    tokens_cached_write=int(
+                        getattr(llm_out, "cache_creation_tokens", 0) or 0
+                    ),
+                    sn_ids=(name,),
+                    phase=_BUDGET_PHASE,
+                    service=service,
+                ),
+            )
     except Exception as exc:  # noqa: BLE001 — fail safe to a visible halt
         logger.warning(
             "prose adjudicator failed on %s (%s); keeping grep verdict (genuine)",
@@ -144,6 +219,9 @@ async def _adjudicate_one(
             exc,
         )
         return True
+    finally:
+        if lease is not None:
+            lease.release_unused()
     if not verdict.genuine_banned:
         logger.info(
             "prose adjudicator cleared %s as legitimate: %s", name, verdict.reason
@@ -156,6 +234,8 @@ def make_prose_adjudicator(
     *,
     reasoning_effort: str | None = None,
     service: str = "standard-names",
+    cost_ceiling: float | None = None,
+    run_id: str | None = None,
 ) -> Callable[[Sequence[tuple[str, str, dict[str, int]]]], list[bool]]:
     """Build a sync gate-adjudicator callable.
 
@@ -166,6 +246,12 @@ def make_prose_adjudicator(
 
     ``model``/``reasoning_effort`` default to the ``sn-prose-adjudicator``
     pyproject seat when not supplied.
+
+    ``cost_ceiling`` bounds what this gate may spend across one batch; each
+    adjudication reserves before dispatch and charges what it spent, and with
+    ``run_id`` the charges persist as ``LLMCost`` rows so gate spend is
+    auditable rather than invisible.  Without a ceiling the gate runs
+    unmetered, which is only appropriate outside a paid run.
     """
     from imas_codex.settings import get_model, get_reasoning_effort
 
@@ -181,19 +267,30 @@ def make_prose_adjudicator(
             return []
 
         async def _run() -> list[bool]:
-            return await asyncio.gather(
-                *(
-                    _adjudicate_one(
-                        model,
-                        sid,
-                        text,
-                        findings,
-                        reasoning_effort=reasoning_effort,
-                        service=service,
+            from imas_codex.standard_names.budget import BudgetManager
+
+            manager = None
+            if cost_ceiling is not None and cost_ceiling > 0:
+                manager = BudgetManager(cost_ceiling, run_id=run_id)
+                await manager.start()
+            try:
+                return await asyncio.gather(
+                    *(
+                        _adjudicate_one(
+                            model,
+                            sid,
+                            text,
+                            findings,
+                            reasoning_effort=reasoning_effort,
+                            service=service,
+                            budget_manager=manager,
+                        )
+                        for sid, text, findings in flagged
                     )
-                    for sid, text, findings in flagged
                 )
-            )
+            finally:
+                if manager is not None:
+                    await manager.drain_pending()
 
         return asyncio.run(_run())
 

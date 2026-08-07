@@ -132,7 +132,10 @@ def _patch_compose_deps():
             "imas_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
-        patch("imas_codex.settings.get_model", return_value="test-model"),
+        patch(
+            "imas_codex.settings.get_model",
+            return_value="hosted_vllm/test-model",
+        ),
         # Prompt rendering
         patch(
             "imas_codex.llm.prompt_loader.render_prompt",
@@ -470,8 +473,11 @@ class TestPoolComposeRetry:
             mgr = _FakeBudgetManager()
             await compose_batch(batch, mgr, stop)
 
-        # 1 item × $0.20 × (2 retries + 1) = $0.60
-        assert mgr.reserved == pytest.approx(0.60, abs=0.01)
+        # Local routes are zero-cost but retain an epsilon lease so every call
+        # still passes through the same pre-launch accounting path.
+        from imas_codex.standard_names.budget import EPSILON
+
+        assert mgr.reserved == pytest.approx(EPSILON)
 
 
 if __name__ == "__main__":  # pragma: no cover

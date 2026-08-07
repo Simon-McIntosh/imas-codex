@@ -319,7 +319,13 @@ def _patch_compose_deps():
             "imas_codex.standard_names.context.build_compose_context",
             return_value={},
         ),
-        patch("imas_codex.settings.get_model", return_value="local-model"),
+        # Self-refine discards its cost, so it may only run on a locally
+        # served route; the compose seat has to name one for the pass to be
+        # reachable at all.
+        patch(
+            "imas_codex.settings.get_model",
+            return_value="hosted_vllm/local-model",
+        ),
         patch(
             "imas_codex.llm.prompt_loader.render_prompt",
             side_effect=lambda name, *a, **k: "system" if "system" in name else "user",

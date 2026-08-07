@@ -1370,8 +1370,8 @@ class TestPendingCountWatchdog:
         assert spec.health.pending_count == 9
 
     @pytest.mark.asyncio
-    async def test_watchdog_survives_pending_fn_exception(self) -> None:
-        """Exceptions from pending_fn are logged and swallowed; watchdog continues."""
+    async def test_watchdog_fails_closed_on_pending_fn_exception(self) -> None:
+        """A pending read failure stops immediately with no stale update."""
         from imas_codex.standard_names.pools import PoolSpec, _pending_count_watchdog
 
         spec = PoolSpec(
@@ -1381,29 +1381,22 @@ class TestPendingCountWatchdog:
         )
 
         stop = asyncio.Event()
-        call_count = 0
+        pending_failed = asyncio.Event()
 
         def pending_fn() -> dict[str, int]:
-            nonlocal call_count
-            call_count += 1
-            if call_count == 1:
-                raise RuntimeError("graph connection refused")
-            return {"generate_docs": 5}
+            raise RuntimeError("graph connection refused")
 
-        async def _stopper():
-            await asyncio.sleep(0.12)
-            stop.set()
-
-        # Should not propagate the exception.
-        await asyncio.gather(
-            _pending_count_watchdog([spec], stop, pending_fn, poll=0.02),
-            _stopper(),
+        await _pending_count_watchdog(
+            [spec],
+            stop,
+            pending_fn,
+            pending_count_failed_event=pending_failed,
+            poll=0.02,
         )
 
-        # After the exception on call 1, subsequent calls succeed.
-        assert call_count >= 2
-        # Final pending_count updated from successful calls.
-        assert spec.health.pending_count == 5
+        assert stop.is_set()
+        assert pending_failed.is_set()
+        assert spec.health.pending_count == 0
 
     @pytest.mark.asyncio
     async def test_run_pools_wires_pending_fn(self) -> None:

@@ -26,6 +26,48 @@ _LIVE_GRAPH_MARKERS = frozenset(
 )
 
 
+#: Route prefixes that only ever name a test double.  A real OpenRouter route
+#: is provider-qualified (``openrouter/<vendor>/<model>``), so a bare id or a
+#: ``test``/``some`` vendor segment cannot collide with a production seat.
+_SYNTHETIC_ROUTE_PREFIXES = ("test/", "openrouter/test/", "some/")
+
+
+def _is_synthetic_route(model: str) -> bool:
+    """True when *model* names a test double rather than a real route."""
+    return "/" not in model or model.startswith(_SYNTHETIC_ROUTE_PREFIXES)
+
+
+@pytest.fixture(autouse=True)
+def _bound_synthetic_model_exposure(monkeypatch):
+    """Give mocked provider routes a finite lease in worker unit tests.
+
+    Only ids that cannot name a real route are stubbed, and the membership
+    test is structural rather than a catalog lookup.  Keying this off "the
+    catalog does not know it" would silently capture every production seat
+    newer than the bundled catalog — which is all of them — and no test would
+    then exercise the pricing that bounds real spend.
+
+    A stubbed double still gets a one-dollar ceiling rather than zero, because
+    scripted responses carry nonzero synthetic cost and must charge against
+    something.
+    """
+    from imas_codex.discovery.base.llm import _is_local_model
+    from imas_codex.standard_names import budget, workers
+    from imas_codex.standard_names.fanout import dispatcher
+    from imas_codex.standard_names.review import pipeline
+
+    original = budget.model_provider_exposure
+
+    def _bounded(model, *args, **kwargs):
+        if not _is_local_model(model) and _is_synthetic_route(model):
+            return 1.0
+        return original(model, *args, **kwargs)
+
+    monkeypatch.setattr(workers, "model_provider_exposure", _bounded)
+    monkeypatch.setattr(pipeline, "model_provider_exposure", _bounded)
+    monkeypatch.setattr(dispatcher, "model_provider_exposure", _bounded)
+
+
 @pytest.fixture(autouse=True)
 def _block_live_graph(request):
     """Raise RuntimeError if a default-tier test attempts to open a real

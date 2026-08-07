@@ -19,7 +19,12 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Literal
 
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
-from imas_codex.standard_names.budget import LLMCostEvent
+from imas_codex.standard_names.budget import (
+    LLMCostEvent,
+    bind_attempt_exposure,
+    charge_billable_exception,
+    model_provider_exposure,
+)
 
 # Defense-in-depth: strict SN id pattern used to reject reviewer-hallucinated
 # revised_name values (e.g. multi-hundred-char stream-of-consciousness strings).
@@ -259,7 +264,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
     wlog.info("Starting review extraction")
     state.extract_stats.status_text = "loading catalog…"
 
-    # --- Step 1: Load full catalog -------------------------------------------
+    # --- Load full catalog ---------------------------------------------------
 
     def _load_all_names() -> list[dict]:
         with GraphClient() as gc:
@@ -304,14 +309,14 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
     state.all_names = all_names
     wlog.info("Loaded %d StandardNames from graph", len(all_names))
 
-    # --- Step 2: Compute review_input_hash for staleness detection ----------
+    # --- Compute review_input_hash for staleness detection ------------------
 
     _compute_hash = _get_hash_fn()
     if _compute_hash is not None:
         for name in all_names:
             name["_computed_hash"] = _compute_hash(name)
 
-    # --- Step 3: Apply filters -----------------------------------------------
+    # --- Apply filters -------------------------------------------------------
 
     state.extract_stats.status_text = "filtering targets…"
 
@@ -436,7 +441,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
         state.extract_phase.mark_done()
         return
 
-    # --- Step 4: Reconstruct clusters ----------------------------------------
+    # --- Reconstruct clusters ------------------------------------------------
 
     state.extract_stats.status_text = "reconstructing clusters…"
 
@@ -451,7 +456,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
         len(targets),
     )
 
-    # --- Step 5: Group into batches ------------------------------------------
+    # --- Group into batches --------------------------------------------------
 
     state.extract_stats.status_text = "forming batches…"
     batches = group_into_review_batches(
@@ -1006,33 +1011,8 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
             if not names:
                 return [], []
 
-            # --- Budget reservation (worst-case: all cycles) -----------------
-            # Per-name cost calibrated to observed Opus 4.6 + GPT-5.4 review
-            # spend.  Each review cycle does one LLM call plus an optional
-            # retry on unmatched items (~30% of batch).  For 3-model
-            # RD-quorum, the escalator (cycle 2) only processes the disputed
-            # subset, not the full batch.  A 1.5× per-model multiplier
-            # conservatively covers "full batch + partial retry".
-            #
-            # Previous value was 3.0× per model (9.0× for 3 models), which
-            # made the reservation ($6.75 for 15 names) exceed the entire
-            # review phase budget ($3.00), blocking all batches.
-            estimated_cost = len(names) * 0.05
-            worst_case = estimated_cost * len(models) * 1.5
             lease = None
-
-            if state.budget_manager:
-                phase_tag = getattr(state, "budget_phase_tag", "") or "review"
-                lease = state.budget_manager.reserve(worst_case, phase=phase_tag)
-                if lease is None:
-                    state.stats["budget_reservation_blocked"] = (
-                        state.stats.get("budget_reservation_blocked", 0) + 1
-                    )
-                    wlog.info(
-                        "Budget exhausted at batch %d — stopping review",
-                        batch_idx,
-                    )
-                    return [], []
+            phase_tag = getattr(state, "budget_phase_tag", "") or "review"
 
             review_group_id = str(_uuid.uuid4())
             batch_review_records: list[dict] = []
@@ -1056,6 +1036,9 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     target=review_target,
                     review_scored_examples=review_scored,
                     prior_reviews=None,  # blind — no prior context
+                    budget_manager=state.budget_manager,
+                    budget_phase=phase_tag,
+                    budget_batch_id=f"{_group_key}-c0",
                 )
                 c0_cost = result_0.get("_cost", 0.0)
                 c0_items = result_0.get("_items", [])
@@ -1138,6 +1121,9 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     target=review_target,
                     review_scored_examples=review_scored,
                     prior_reviews=None,  # blind — no primary context
+                    budget_manager=state.budget_manager,
+                    budget_phase=phase_tag,
+                    budget_batch_id=f"{_group_key}-c1",
                 )
                 c1_cost = result_1.get("_cost", 0.0)
                 c1_items = result_1.get("_items", [])
@@ -1310,6 +1296,9 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
                     target=review_target,
                     review_scored_examples=review_scored,
                     prior_reviews=prior_reviews_ctx,
+                    budget_manager=state.budget_manager,
+                    budget_phase=phase_tag,
+                    budget_batch_id=f"{_group_key}-c2",
                 )
                 c2_cost = result_2.get("_cost", 0.0)
                 c2_items = result_2.get("_items", [])
@@ -1847,6 +1836,9 @@ async def _review_single_batch(
     _is_retry: bool = False,
     review_scored_examples: list[dict] | None = None,
     prior_reviews: list[dict] | None = None,
+    budget_manager: Any | None = None,
+    budget_phase: str = "review",
+    budget_batch_id: str | None = None,
 ) -> dict[str, Any]:
     """Review a single batch via LLM — mirrors ``_review_batch()`` from workers.py.
 
@@ -1939,14 +1931,63 @@ async def _review_single_batch(
 
     from imas_codex.settings import get_sn_review_reasoning_effort
 
-    llm_out = await acall_llm_structured(
-        model=model,
-        messages=messages,
-        response_model=response_model,
-        service="standard-names",
-        reasoning_effort=get_sn_review_reasoning_effort(),
-    )
-    result, cost, tokens = llm_out
+    request_lease = None
+    if budget_manager is not None:
+        maximum_exposure = model_provider_exposure(
+            model,
+            messages,
+            response_model=response_model,
+            provider_attempts=1,
+        )
+        request_lease = budget_manager.reserve(maximum_exposure, phase=budget_phase)
+        if request_lease is None:
+            from imas_codex.standard_names.budget import BudgetExceeded
+
+            raise BudgetExceeded("review request has no reservable provider exposure")
+    try:
+        try:
+            llm_out = await acall_llm_structured(
+                model=model,
+                messages=messages,
+                response_model=response_model,
+                service="standard-names",
+                reasoning_effort=get_sn_review_reasoning_effort(),
+                before_attempt=bind_attempt_exposure(
+                    request_lease, model, messages, response_model=response_model
+                ),
+            )
+        except Exception as exc:
+            charge_billable_exception(
+                request_lease,
+                exc,
+                model=model,
+                sn_ids=tuple(str(item.get("id") or "") for item in names),
+                batch_id=budget_batch_id,
+                phase=budget_phase,
+            )
+            raise
+        result, cost, tokens = llm_out
+        if request_lease is not None:
+            request_lease.charge_event(
+                float(cost),
+                LLMCostEvent(
+                    model=model,
+                    tokens_in=int(getattr(llm_out, "input_tokens", 0) or 0),
+                    tokens_out=int(getattr(llm_out, "output_tokens", 0) or 0),
+                    tokens_cached_read=int(
+                        getattr(llm_out, "cache_read_tokens", 0) or 0
+                    ),
+                    tokens_cached_write=int(
+                        getattr(llm_out, "cache_creation_tokens", 0) or 0
+                    ),
+                    sn_ids=tuple(str(item.get("id") or "") for item in names),
+                    batch_id=budget_batch_id,
+                    phase=budget_phase,
+                ),
+            )
+    finally:
+        if request_lease is not None:
+            request_lease.release_unused()
 
     # --- Match reviews to original entries -----------------------------------
     scored, unmatched, revised_count = _match_reviews_to_entries(
@@ -1986,6 +2027,11 @@ async def _review_single_batch(
             target=target,
             _is_retry=True,
             review_scored_examples=review_scored_examples,
+            budget_manager=budget_manager,
+            budget_phase=budget_phase,
+            budget_batch_id=(
+                f"{budget_batch_id}-retry" if budget_batch_id else "review-retry"
+            ),
         )
 
         scored.extend(retry_result.get("_items", []))
@@ -2413,12 +2459,8 @@ async def _review_batch_core(
     if stop_event.is_set():
         return 0
 
-    # ── Budget reservation ─────────────────────────────────────────────
     review_phase = f"review_{target}"
-    estimated = len(batch) * 0.05
-    worst_case = estimated * len(models) * 1.5
-    lease = mgr.reserve(worst_case, phase=review_phase)
-    # Soft-stop: proceed even without lease
+    lease = None
 
     review_group_id = str(_uuid.uuid4())
 
@@ -2437,6 +2479,9 @@ async def _review_batch_core(
             target=target,
             review_scored_examples=review_scored,
             prior_reviews=None,
+            budget_manager=mgr,
+            budget_phase=review_phase,
+            budget_batch_id=f"{review_group_id}-c0",
         )
         c0_cost = result_0.get("_cost", 0.0)
         c0_items = result_0.get("_items", [])

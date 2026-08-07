@@ -14,11 +14,51 @@ import time
 
 import pytest
 
+from imas_codex.cli.sn import _compute_pool_progress, _require_terminal_drain
 from imas_codex.standard_names.display import (
     POOL_ORDER,
     PoolDisplayState,
     SN6PoolDisplay,
 )
+from imas_codex.standard_names.pools import FLUSH_POOL_NAMES
+
+
+class TestTerminalDrainContract:
+    """The command succeeds only after a fresh, proven empty observation."""
+
+    def test_empty_graph_response_is_not_zero_progress(self) -> None:
+        class EmptyGraph:
+            def query(self, *args, **kwargs):
+                return []
+
+        with pytest.raises(RuntimeError, match="no progress row"):
+            _compute_pool_progress(EmptyGraph(), None, 3, 0.8)
+
+    def test_only_proven_empty_stop_reason_succeeds(self) -> None:
+        _require_terminal_drain("no_eligible_work")
+
+        for reason in (
+            "stalled",
+            "pending_count_failed",
+            "time_limit_reached",
+            "budget_saturated",
+            "budget_exhausted",
+            "degraded",
+            "completed",
+        ):
+            with pytest.raises(SystemExit) as exc:
+                _require_terminal_drain(reason)
+            assert exc.value.code != 0
+
+    def test_flush_membership_is_explicit(self) -> None:
+        assert FLUSH_POOL_NAMES == (
+            "review_name",
+            "refine_name",
+            "generate_docs",
+            "review_docs",
+            "refine_docs",
+            "enrich_parents",
+        )
 
 
 class TestOnEventPopulatesPoolState:

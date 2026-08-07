@@ -244,6 +244,7 @@ class TestCLIRouting:
         _run_sn_cmd, so patch at their source modules.
         """
         with (
+            patch("imas_codex.cli.sn._require_terminal_drain"),
             patch(
                 "imas_codex.cli.discover.common.run_discovery",
                 return_value={"summary": MagicMock()},

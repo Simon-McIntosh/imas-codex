@@ -57,6 +57,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# Flush drains every downstream pool and excludes only the source composer.
+# Keep this tuple explicit so CLI help, orchestration, and tests share one
+# auditable contract.
+FLUSH_POOL_NAMES = (
+    "review_name",
+    "refine_name",
+    "generate_docs",
+    "review_docs",
+    "refine_docs",
+    "enrich_parents",
+)
+
 
 # Maps each pool to the ``pyproject.toml`` model section that determines
 # which LLM endpoint it calls.  Used by :func:`free_pools` to decide which
@@ -519,6 +531,7 @@ async def _idle_exhaustion_watchdog(
     pools: list[PoolSpec],
     stop_event: asyncio.Event,
     idle_exhausted_event: asyncio.Event,
+    stalled_event: asyncio.Event,
     *,
     poll: float = 1.0,
     idle_polls: int = 30,
@@ -608,14 +621,17 @@ async def _idle_exhaustion_watchdog(
         if current_total > last_total:
             last_total = current_total
             last_progress_ts = time.time()
-        elif (time.time() - last_progress_ts) >= stall_seconds:
+        elif (
+            any(p.health.pending_count > 0 for p in pools)
+            and (time.time() - last_progress_ts) >= stall_seconds
+        ):
             logger.warning(
                 "run_pools: no forward progress for ~%.0fs despite pending work "
                 "(pending=%s) — wedged residue; signalling graceful shutdown",
                 stall_seconds,
                 {p.name: p.health.pending_count for p in pools},
             )
-            idle_exhausted_event.set()
+            stalled_event.set()
             stop_event.set()
             return
 
@@ -624,6 +640,7 @@ async def _pending_count_watchdog(
     pools: list[PoolSpec],
     stop_event: asyncio.Event,
     pending_fn: Callable[[], dict[str, int]],
+    pending_count_failed_event: asyncio.Event | None = None,
     poll: float = 5.0,
 ) -> None:
     """Poll ``pending_fn`` and push per-pool pending counts to ``PoolHealth``.
@@ -640,11 +657,13 @@ async def _pending_count_watchdog(
     seconds between subsequent refreshes.
 
     Pool names in the ``pending_fn`` result that do not match a live pool are
-    silently ignored.  Pools absent from the result default to 0.
+    ignored. Missing live pools, invalid counts, and callback failures stop the
+    run because they leave terminal emptiness unproven.
     """
     pool_by_name = {p.name: p for p in pools}
+    failure_event = pending_count_failed_event or asyncio.Event()
 
-    def _refresh() -> None:
+    def _refresh() -> bool:
         # Capture the completion frontier before querying.  If a claimed batch
         # completes or releases while the query runs, its epoch advances and
         # this observation remains deliberately stale until the next refresh.
@@ -652,25 +671,46 @@ async def _pending_count_watchdog(
         try:
             counts = pending_fn()
         except Exception as exc:  # noqa: BLE001
-            logger.warning("pending_count_watchdog: pending_fn raised: %s", exc)
-            return
+            logger.error("pending_count_watchdog: pending_fn raised: %s", exc)
+            failure_event.set()
+            stop_event.set()
+            return False
+        missing = set(pool_by_name).difference(counts)
+        invalid = {
+            name: counts.get(name)
+            for name in pool_by_name
+            if not isinstance(counts.get(name), int) or counts.get(name, -1) < 0
+        }
+        if missing or invalid:
+            logger.error(
+                "pending_count_watchdog: incomplete or invalid counts "
+                "(missing=%s invalid=%s)",
+                sorted(missing),
+                invalid,
+            )
+            failure_event.set()
+            stop_event.set()
+            return False
         for name, pool in pool_by_name.items():
-            pool.health.pending_count = counts.get(name, 0)
+            pool.health.pending_count = counts[name]
             pool.health._pending_observation_epoch = observed_epoch
         logger.debug(
             "pending_count_watchdog: updated pending counts — %s",
             {n: pool_by_name[n].health.pending_count for n in pool_by_name},
         )
+        return True
 
     # First poll before any admission decisions.
-    _refresh()
+    if not _refresh():
+        return
 
     while not stop_event.is_set():
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=poll)
             break  # stop_event triggered
         except TimeoutError:
-            _refresh()
+            if not _refresh():
+                return
 
 
 async def run_pools(
@@ -685,8 +725,11 @@ async def run_pools(
     idle_exhausted_event: asyncio.Event | None = None,
     budget_saturated_event: asyncio.Event | None = None,
     provider_exhausted_event: asyncio.Event | None = None,
+    stalled_event: asyncio.Event | None = None,
+    pending_count_failed_event: asyncio.Event | None = None,
     idle_exhaustion_poll: float = 1.0,
     idle_exhaustion_polls: int = 30,
+    stall_seconds: float = 600.0,
     free_pool_set: set[str] | None = None,
 ) -> dict[str, PoolHealth]:
     """Run all pool loops concurrently and orchestrate cooperative shutdown.
@@ -770,6 +813,24 @@ async def run_pools(
             sorted(free_pool_set),
         )
 
+    # Complete the initial graph-backed observation before creating any pool
+    # task, so a failed or incomplete count stops admission before a claim can
+    # launch.
+    pending_watchdog_task: asyncio.Task[None] | None = None
+    if pending_fn is not None:
+        count_failure_event = pending_count_failed_event or asyncio.Event()
+        pending_watchdog_task = asyncio.create_task(
+            _pending_count_watchdog(
+                pools,
+                stop_event,
+                pending_fn,
+                count_failure_event,
+                pending_poll_interval,
+            ),
+            name="pending_count_watchdog",
+        )
+        await asyncio.sleep(0)
+
     tasks = []
     for p in pools:
         for replica_idx in range(p.replicas):
@@ -811,27 +872,20 @@ async def run_pools(
     # run that exhausts its scope (e.g. ``--physics-domain X`` with no
     # remaining sources) spins forever until SIGINT.
     idle_event = idle_exhausted_event or asyncio.Event()
+    stall_event = stalled_event or asyncio.Event()
     idle_watchdog_task = asyncio.create_task(
         _idle_exhaustion_watchdog(
             pools,
             stop_event,
             idle_event,
+            stall_event,
             poll=idle_exhaustion_poll,
             idle_polls=idle_exhaustion_polls,
             require_pending_observation=pending_fn is not None,
+            stall_seconds=stall_seconds,
         ),
         name="idle_exhaustion_watchdog",
     )
-
-    # Optional: pending-count watchdog for headless / --quiet mode.
-    pending_watchdog_task: asyncio.Task[None] | None = None
-    if pending_fn is not None:
-        pending_watchdog_task = asyncio.create_task(
-            _pending_count_watchdog(
-                pools, stop_event, pending_fn, pending_poll_interval
-            ),
-            name="pending_count_watchdog",
-        )
 
     # Wait until stop_event is set OR all pools complete naturally.
     stop_waiter = asyncio.create_task(stop_event.wait(), name="stop_waiter")
@@ -937,6 +991,7 @@ async def run_pools(
 __all__ = [
     "POOL_NAMES",
     "POOL_WEIGHTS",
+    "FLUSH_POOL_NAMES",
     "PoolHealth",
     "PoolSpec",
     "_pending_count_watchdog",

@@ -49,11 +49,12 @@ class RunSummary:
 # Map RunSummary.stop_reason to SNRun.status lifecycle values.
 _STOP_TO_STATUS: dict[str, str] = {
     "completed": "completed",
-    "budget_exhausted": "completed",
-    "budget_saturated": "completed",
+    "budget_exhausted": "degraded",
+    "budget_saturated": "degraded",
     "provider_budget_exhausted": "degraded",
-    "time_limit_reached": "completed",
-    "stalled": "completed",
+    "time_limit_reached": "degraded",
+    "stalled": "degraded",
+    "pending_count_failed": "degraded",
     "no_work": "completed",
     "no_eligible_work": "completed",
     "dry_run": "completed",
@@ -546,11 +547,16 @@ def _build_pool_specs(
         specs = [s for s in specs if s.name in _DOCS_POOLS]
 
     # ── Flush / skip-generate filtering ──────────────────────────────
-    # Flush mode drains existing work without generating new names.
+    # Flush mode drains exactly the pinned downstream set without generating
+    # new names.
     # ``--only`` phases that exclude the generate phase (skip_generate, e.g.
     # ``--only link`` / ``--only review``) drop the same pool. Both exclude
     # generate_name so only review/refine/docs pools run — no new composition.
-    if flush or skip_generate:
+    if flush:
+        from imas_codex.standard_names.pools import FLUSH_POOL_NAMES
+
+        specs = [s for s in specs if s.name in FLUSH_POOL_NAMES]
+    elif skip_generate:
         specs = [s for s in specs if s.name != "generate_name"]
 
     # ── Skip-review filtering ────────────────────────────────────────
@@ -984,6 +990,11 @@ async def run_sn_pools(
     # zero-pending across all pools.  Lets the stop-reason logic
     # distinguish "out of eligible work" from "interrupted by user".
     idle_exhausted_event = asyncio.Event()
+    # Set when pending work remains but no pool advances for the liveness
+    # window. This is incomplete work, not a clean empty drain.
+    stalled_event = asyncio.Event()
+    # Set when the graph-backed pending observation cannot prove the backlog.
+    pending_count_failed_event = asyncio.Event()
     # Set when the budget-saturation watchdog detects all pools have
     # consecutively failed to reserve budget SATURATION_THRESHOLD times.
     budget_saturated_event = asyncio.Event()
@@ -1790,6 +1801,8 @@ async def run_sn_pools(
                 idle_exhausted_event=idle_exhausted_event,
                 budget_saturated_event=budget_saturated_event,
                 provider_exhausted_event=provider_exhausted_event,
+                stalled_event=stalled_event,
+                pending_count_failed_event=pending_count_failed_event,
             )
         finally:
             if sweep_task is not None and not sweep_task.done():
@@ -1949,7 +1962,11 @@ async def run_sn_pools(
         # Likewise for the idle-exhaustion watchdog — when it fires, the
         # run finished its scope and must be classified as completed via
         # ``no_eligible_work`` rather than mistaken for a user interrupt.
-        if shared_mgr.hard_exhausted():
+        if pending_count_failed_event.is_set():
+            summary.stop_reason = "pending_count_failed"
+        elif stalled_event.is_set():
+            summary.stop_reason = "stalled"
+        elif shared_mgr.hard_exhausted():
             summary.stop_reason = "budget_exhausted"
         elif provider_exhausted_event.is_set():
             # Upstream LLM provider credits / billing limit hit — peer
@@ -2154,6 +2171,8 @@ async def run_sn_pools(
         if not cost_is_exact and summary.stop_reason not in (
             "interrupted",
             "failed",
+            "pending_count_failed",
+            "stalled",
         ):
             summary.stop_reason = "degraded"
 

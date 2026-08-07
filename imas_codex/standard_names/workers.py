@@ -26,6 +26,11 @@ from collections.abc import Callable, Sequence
 from functools import cache as _cache, lru_cache
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.standard_names.budget import (
+    bind_attempt_exposure,
+    charge_billable_exception,
+    model_provider_exposure,
+)
 from imas_codex.standard_names.defaults import (
     DEFAULT_ESCALATION_MODEL,
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
@@ -3478,8 +3483,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
     from imas_codex.settings import get_compose_concurrency
 
     async def _compose_batch_body(
-        batch: ExtractionBatch, lease: BudgetLease | None
-    ) -> list[dict]:
+        batch: ExtractionBatch, lease_box: list[BudgetLease]
+    ) -> list[dict] | None:
         # Search for nearby existing names (per-item for better relevance)
         _nearby_seen: set[str] = set()
         nearby: list[dict] = []
@@ -3600,6 +3605,20 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             {"role": "user", "content": user_prompt},
         ]
 
+        lease = None
+        if state.budget_manager:
+            maximum_exposure = model_provider_exposure(
+                model,
+                messages,
+                response_model=StandardNameComposeBatch,
+                provider_attempts=1,
+            )
+            phase_tag = getattr(state, "budget_phase_tag", "") or "generate_name"
+            lease = state.budget_manager.reserve(maximum_exposure, phase=phase_tag)
+            if lease is None:
+                return None
+            lease_box.append(lease)
+
         # --- Bounded retry loop for failed compositions ---
         # Accumulate full LLMResult fields across retries so the batch's
         # per-candidate cost/token attribution is accurate.  Compose is
@@ -3627,8 +3646,21 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     response_model=StandardNameComposeBatch,
                     service="standard-names",
                     reasoning_effort=get_reasoning_effort("sn-compose"),
+                    before_attempt=bind_attempt_exposure(
+                        lease,
+                        model,
+                        messages,
+                        response_model=StandardNameComposeBatch,
+                    ),
                 )
             except (ValueError, Exception) as compose_exc:
+                charge_billable_exception(
+                    lease,
+                    compose_exc,
+                    model=model,
+                    batch_id=batch.group_key,
+                    phase=getattr(state, "budget_phase_tag", "") or "generate_name",
+                )
                 _exc_str = str(compose_exc)
                 if "not a registered" in _exc_str:
                     logger.warning(
@@ -3653,9 +3685,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             _total_cache_read += getattr(llm_out, "cache_read_tokens", 0) or 0
             _total_cache_creation += getattr(llm_out, "cache_creation_tokens", 0) or 0
 
-            # Charge actual LLM cost to budget lease via typed event.
-            # charge_event uses soft-charge semantics: the LLM has
-            # already been paid for, so spend is always recorded.
+            # Charge the exact completed-call cost against the exposure that
+            # was reserved before the provider request started.
             if lease:
                 _event = LLMCostEvent(
                     model=model,
@@ -4010,7 +4041,15 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                             c.compose_name(),
                             name_id,
                         )
-                except Exception:
+                except Exception as retry_exc:
+                    charge_billable_exception(
+                        lease,
+                        retry_exc,
+                        model=model,
+                        sn_ids=(name_id,),
+                        batch_id=f"{batch.group_key}-grammar-retry",
+                        phase=getattr(state, "budget_phase_tag", "") or "generate_name",
+                    )
                     wlog.debug("Grammar retry also failed for %r", name_id)
 
             candidates.append(
@@ -4246,18 +4285,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
             except asyncio.QueueEmpty:
                 break
 
-            # Budget gate — reserve before doing any LLM work.
-            # Per-item cost calibrated to measured compose spend: mean
-            # $0.13/item, p95 $0.47/item.  Reserve at $0.20/item (mean+50%
-            # headroom) to cover the typical extension and avoid draining
-            # the global pool via in-flight overshoot, which would starve
-            # downstream review phases.
-            lease = None
-            if state.budget_manager:
-                estimated = len(batch.items) * 0.20
-                phase_tag = getattr(state, "budget_phase_tag", "") or "generate_name"
-                lease = state.budget_manager.reserve(estimated, phase=phase_tag)
-                if lease is None:
+            lease_box: list[BudgetLease] = []
+
+            try:
+                candidates = await _compose_batch_body(batch, lease_box)
+                if candidates is None:
                     budget_retries += 1
                     if (
                         budget_retries > _MAX_BUDGET_RETRIES
@@ -4280,9 +4312,6 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     )
                     await asyncio.sleep(random.uniform(1.0, 3.0))
                     continue
-
-            try:
-                candidates = await _compose_batch_body(batch, lease)
                 if candidates:
                     composed.extend(candidates)
                 budget_retries = 0  # Reset on success
@@ -4295,8 +4324,8 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     exc,
                 )
             finally:
-                if lease:
-                    lease.release_unused()
+                if lease_box:
+                    lease_box[0].release_unused()
 
     n_compose_workers = get_compose_concurrency()
     await asyncio.gather(
@@ -5435,20 +5464,23 @@ async def compose_batch(
     ]
 
     # ── Budget reservation ─────────────────────────────────────────────
-    # Reserve for retry_attempts + 1 LLM calls (re-enrichment retry)
+    # Seed the lease with the first compose attempt; each further attempt and
+    # each per-candidate grammar retry binds its own exposure before it runs.
     _max_retries = _retry_attempts()
     # Token-reuse hits from the FINAL attempt (carried to the VocabGap stamp).
     _token_reuse_hits: dict[tuple[str, str], Any] = {}
     _editorial_guidance = ""
     _editorial_should_retry = False
-    estimated = len(batch) * 0.20 * (_max_retries + 1)
+    maximum_exposure = model_provider_exposure(
+        model,
+        messages,
+        response_model=StandardNameComposeBatch,
+        provider_attempts=1,
+    )
     phase_tag = "regen" if regen else "generate_name"
-    lease = mgr.reserve(estimated, phase=phase_tag)
+    lease = mgr.reserve(maximum_exposure, phase=phase_tag)
     if lease is None:
-        # Fallback: tracking-only lease so charge_event still records
-        # spend.  Without this, _spent stays at 0 and hard_exhausted()
-        # never fires — causing the pool to run indefinitely.
-        lease = mgr.reserve(0.0, phase=phase_tag)
+        return []
 
     try:
         # ── Bounded retry loop for failed compositions ─────────────────
@@ -5470,8 +5502,21 @@ async def compose_batch(
                     response_model=StandardNameComposeBatch,
                     service="standard-names",
                     reasoning_effort=get_reasoning_effort("sn-compose"),
+                    before_attempt=bind_attempt_exposure(
+                        lease,
+                        model,
+                        messages,
+                        response_model=StandardNameComposeBatch,
+                    ),
                 )
             except (ValueError, Exception) as compose_exc:
+                charge_billable_exception(
+                    lease,
+                    compose_exc,
+                    model=model,
+                    batch_id=group_key,
+                    phase=phase_tag,
+                )
                 _exc_str = str(compose_exc)
                 if "not a registered" in _exc_str:
                     logger.warning(
@@ -5841,7 +5886,15 @@ async def compose_batch(
                                 "Pool %s: retry result still un-parseable",
                                 phase_tag,
                             )
-                except Exception:
+                except Exception as retry_exc:
+                    charge_billable_exception(
+                        lease,
+                        retry_exc,
+                        model=model,
+                        sn_ids=(name_id,),
+                        batch_id=f"{group_key}-grammar-retry",
+                        phase=phase_tag,
+                    )
                     wlog.debug(
                         "Pool %s: grammar retry failed for %r",
                         phase_tag,
@@ -5855,9 +5908,20 @@ async def compose_batch(
             # before the paid review quorum), let the LOCAL compose model
             # critique its own name + description and emit an improved
             # candidate. Improve-or-no-op; the rewrite is re-validated and
-            # discarded if it fails grammar. Local model → $0, so no budget
-            # charge. OFF = byte-identical to the path without this block.
+            # discarded if it fails grammar. OFF = byte-identical to the path
+            # without this block.
+            #
+            # The pass discards its LLMResult, so it can only run where the
+            # call is free: on a paid route its spend would leave no cost
+            # record and no reservation. Refuse rather than spend silently.
             if not grammar_failed and get_compose_self_refine():
+                from imas_codex.discovery.base.llm import _is_local_model
+
+                if not _is_local_model(model):
+                    raise RuntimeError(
+                        "compose self-refine records no cost and reserves no "
+                        f"budget, so it cannot run on the metered route {model}"
+                    )
                 try:
                     _ref_name, _ref_desc = await _self_refine_candidate(
                         name_id,
@@ -6324,6 +6388,7 @@ async def process_refine_name_batch(
         run_fanout,
         should_trigger_fanout,
     )
+    from imas_codex.standard_names.fanout.dispatcher import proposer_exposure
     from imas_codex.standard_names.graph_ops import (
         _mark_refine_vocab_gap_exhausted,
         persist_refined_name,
@@ -6502,29 +6567,16 @@ async def process_refine_name_batch(
                 char_cap=fanout_settings.refine_trigger_comment_chars,
             )
 
-            # ── Budget reservation (tiered) ───────────────────────────
-            # Snapshot ``original_reservation`` *before* any extension
-            # so the cost-attribution invariant test can verify the
-            # delta is fully accounted for via LLMCost batch_id rows.
-            base_estimate = 0.20  # single-item refine
-            fanout_pad = 0.0
+            # ── Optional fan-out ─────────────────────────────────────
+            lease = None
+            fanout_evidence = ""
+            fanout_run_id: str | None = None
+            fanout_arm: str | None = None
             if (
                 fanout_eligible
                 and fanout_settings.enabled
                 and fanout_settings.sites.get("refine_name", False)
             ):
-                fanout_pad = fanout_settings.cost_estimate_for(escalate=escalate)
-            estimated = base_estimate + fanout_pad
-            lease = mgr.reserve(estimated, phase="refine_name")
-            if lease is None:
-                lease = mgr.reserve(0.0, phase="refine_name")
-            original_reservation = lease.reserved if lease else 0.0
-
-            # ── Optional fan-out ─────────────────────────────────────
-            fanout_evidence = ""
-            fanout_run_id: str | None = None
-            fanout_arm: str | None = None
-            if fanout_eligible and lease is not None:
                 fanout_arm = assign_arm(
                     sn_id,
                     chain_length,
@@ -6550,6 +6602,15 @@ async def process_refine_name_batch(
                     ids_filter=ids_filter,
                 )
                 try:
+                    fanout_maximum = proposer_exposure(
+                        candidate=candidate_ctx,
+                        reviewer_excerpt=reviewer_excerpt,
+                        scope=scope,
+                        settings=fanout_settings,
+                    )
+                    lease = mgr.reserve(fanout_maximum, phase="refine_name")
+                    if lease is None:
+                        continue
                     fanout_evidence = await run_fanout(
                         site="refine_name",
                         candidate=candidate_ctx,
@@ -6568,6 +6629,10 @@ async def process_refine_name_batch(
                         sn_id,
                     )
                     fanout_evidence = ""
+                finally:
+                    if lease is not None:
+                        lease.release_unused()
+                        lease = None
             prompt_context["fanout_evidence"] = fanout_evidence
 
             # Load composition rules for system prompt
@@ -6597,6 +6662,16 @@ async def process_refine_name_batch(
                 if system_prompt
                 else [{"role": "user", "content": user_prompt}]
             )
+            maximum_exposure = model_provider_exposure(
+                model,
+                _messages,
+                response_model=RefinedName,
+                provider_attempts=1,
+            )
+            lease = mgr.reserve(maximum_exposure, phase="refine_name")
+            if lease is None:
+                continue
+            original_reservation = lease.reserved
             cost = 0.0
             llm_tokens_in = 0
             llm_tokens_out = 0
@@ -6610,6 +6685,9 @@ async def process_refine_name_batch(
                     response_model=RefinedName,
                     service="standard-names",
                     reasoning_effort=get_reasoning_effort("sn-refine"),
+                    before_attempt=bind_attempt_exposure(
+                        lease, model, _messages, response_model=RefinedName
+                    ),
                 )
 
                 # acall_llm_structured returns an LLMResult that still supports
@@ -6771,22 +6849,17 @@ async def process_refine_name_batch(
                     llm_tokens_out = exc.output_tokens
                     llm_tokens_cached_read = exc.cache_read_tokens
                     llm_tokens_cached_write = exc.cache_creation_tokens
-                    if lease and exc.response_count > 0 and not llm_charge_recorded:
-                        _event = LLMCostEvent(
+                    if not llm_charge_recorded:
+                        llm_charge_recorded = charge_billable_exception(
+                            lease,
+                            exc,
                             model=model,
-                            tokens_in=llm_tokens_in,
-                            tokens_out=llm_tokens_out,
-                            tokens_cached_read=llm_tokens_cached_read,
-                            tokens_cached_write=llm_tokens_cached_write,
                             sn_ids=(sn_id,),
                             phase=(
                                 "refine_name+fanout" if fanout_run_id else "refine_name"
                             ),
-                            service="standard-names",
                             batch_id=fanout_run_id,
                         )
-                        lease.charge_event(cost, _event)
-                        llm_charge_recorded = True
                 if isinstance(exc, ProviderBudgetExhausted):
                     raise
                 _exc_str = str(exc)
@@ -7108,9 +7181,10 @@ async def _run_rd_quorum_cycles(
     models: list[str],
     disagreement_threshold: float,
     rubric_dims: tuple[str, ...],
-    lease: Any,
     phase: str,
     acall_llm_structured: Callable[..., Any],
+    lease: Any = None,
+    budget_manager: Any = None,
     reasoning_effort: str | None = None,
     escalation_reasoning_effort: str | None = None,
     run_id: str | None = None,
@@ -7157,7 +7231,7 @@ async def _run_rd_quorum_cycles(
     import uuid as _uuid
     from datetime import datetime as _dt
 
-    from imas_codex.standard_names.budget import LLMCostEvent
+    from imas_codex.standard_names.budget import BudgetExceeded, LLMCostEvent
 
     review_group_id = str(_uuid.uuid4())
     cycles: list[dict[str, Any]] = []  # parsed cycle results (cycle_index 0..N)
@@ -7182,19 +7256,43 @@ async def _run_rd_quorum_cycles(
             if (cycle_idx >= 2 and escalation_reasoning_effort is not None)
             else reasoning_effort
         )
+        cycle_messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": cycle_user_prompt or user_prompt},
+        ]
+        cycle_lease = lease
+        owns_lease = False
+        if budget_manager is not None:
+            maximum_exposure = model_provider_exposure(
+                model,
+                cycle_messages,
+                response_model=response_model,
+                provider_attempts=1,
+            )
+            cycle_lease = budget_manager.reserve(maximum_exposure, phase=phase)
+            if cycle_lease is None:
+                return None
+            owns_lease = True
         try:
             llm_out = await acall_llm_structured(
                 model=model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": cycle_user_prompt or user_prompt},
-                ],
+                messages=cycle_messages,
                 response_model=response_model,
                 service="standard-names",
                 reasoning_effort=cycle_effort,
+                before_attempt=bind_attempt_exposure(
+                    cycle_lease, model, cycle_messages, response_model=response_model
+                ),
             )
             result_obj, cost, _tokens = llm_out
-        except Exception:
+        except Exception as exc:
+            charge_billable_exception(
+                cycle_lease,
+                exc,
+                model=model,
+                sn_ids=(sn_id,),
+                phase=phase,
+            )
             logger.exception(
                 "rd_quorum %s cycle %d failed for %s (model=%s)",
                 review_axis,
@@ -7202,6 +7300,8 @@ async def _run_rd_quorum_cycles(
                 sn_id,
                 model,
             )
+            if owns_lease:
+                cycle_lease.release_unused()
             return None
 
         # Unwrap batch response: prompts ask for {"reviews": [...]}; we pass
@@ -7223,6 +7323,8 @@ async def _run_rd_quorum_cycles(
                     sn_id,
                     model,
                 )
+                if owns_lease:
+                    cycle_lease.release_unused()
                 return None
             try:
                 result_obj = reviews_list[0]
@@ -7235,6 +7337,8 @@ async def _run_rd_quorum_cycles(
                     sn_id,
                     model,
                 )
+                if owns_lease:
+                    cycle_lease.release_unused()
                 return None
 
         tokens_in = int(getattr(llm_out, "input_tokens", 0) or 0)
@@ -7246,9 +7350,9 @@ async def _run_rd_quorum_cycles(
         total_tokens_in += tokens_in
         total_tokens_out += tokens_out
 
-        if lease is not None:
+        if cycle_lease is not None:
             try:
-                lease.charge_event(
+                cycle_lease.charge_event(
                     cost,
                     LLMCostEvent(
                         model=model,
@@ -7262,6 +7366,8 @@ async def _run_rd_quorum_cycles(
                         service="standard-names",
                     ),
                 )
+            except BudgetExceeded:
+                raise
             except Exception:
                 logger.debug(
                     "rd_quorum charge_event failed for %s c%d",
@@ -7269,6 +7375,8 @@ async def _run_rd_quorum_cycles(
                     cycle_idx,
                     exc_info=True,
                 )
+        if owns_lease:
+            cycle_lease.release_unused()
 
         # Extract score and per-dim scores.
         try:
@@ -7916,16 +8024,8 @@ async def process_review_name_batch(
                 {**base_context, "prior_reviews": prior_reviews},
             )
 
-        # ── Budget reservation (cover all cycles) ──────────────────────
-        # Per-item cost ~$0.05; reserve worst-case across the chain
-        # (every model called) with a 1.3× safety margin.
-        per_item_estimate = 0.05
-        worst_case = per_item_estimate * len(review_models) * 1.3
-        lease = mgr.reserve(worst_case, phase="review_name")
-        if lease is None:
-            lease = mgr.reserve(0.0, phase="review_name")
-
         # ── RD-quorum cycles ──────────────────────────────────────────
+        lease = None
         try:
             quorum = await _run_rd_quorum_cycles(
                 sn_id=sn_id,
@@ -7937,6 +8037,7 @@ async def process_review_name_batch(
                 disagreement_threshold=disagreement_threshold,
                 rubric_dims=("grammar", "semantic", "convention", "completeness"),
                 lease=lease,
+                budget_manager=mgr,
                 phase="review_name",
                 acall_llm_structured=acall_llm_structured,
                 reasoning_effort=get_sn_review_reasoning_effort(),
@@ -8698,9 +8799,8 @@ async def process_generate_docs_batch(
         sn_id = item["id"]
         claim_token = item.get("claim_token") or ""
         chain_history = item.get("chain_history") or []
-        # Fix D: the docs user template reads ``item.chain_history`` — ensure it
-        # is present on the item (it is fetched into the local var, but the item
-        # dict may not carry it), so refined-docs see predecessor history.
+        # The docs user template reads ``item.chain_history``. Keep it on the
+        # item so refined documentation sees predecessor history.
         item["chain_history"] = chain_history
 
         # ── Build prompt context ───────────────────────────────────────
@@ -8718,7 +8818,7 @@ async def process_generate_docs_batch(
             "chain_history": chain_history,
             "nearby_existing_names": nearby_existing_names,
             "compose_scored_examples": compose_scored_examples,
-            # Locus-defining cross-link context (PR-9): the ISN-registry gloss +
+            # Locus-defining cross-link context: the ISN-registry gloss and
             # position-defining standard quantity for this name's locus, so the
             # docs prompt can link e.g. *_at_pedestal_top ->
             # normalized_poloidal_flux_coordinate_of_pedestal. None when the name
@@ -8742,28 +8842,35 @@ async def process_generate_docs_batch(
             logger.debug("generate_docs: system prompt render failed for %s", sn_id)
             system_prompt = None
 
-        # ── Budget reservation ─────────────────────────────────────────
-        estimated = 0.20
-        lease = mgr.reserve(estimated, phase="generate_docs")
+        _messages = (
+            [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+            if system_prompt
+            else [{"role": "user", "content": user_prompt}]
+        )
+        maximum_exposure = model_provider_exposure(
+            model,
+            _messages,
+            response_model=GeneratedDocs,
+            provider_attempts=1,
+        )
+        lease = mgr.reserve(maximum_exposure, phase="generate_docs")
         if lease is None:
-            lease = mgr.reserve(0.0, phase="generate_docs")
+            continue
 
         # ── LLM call ──────────────────────────────────────────────────
         try:
-            _messages = (
-                [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ]
-                if system_prompt
-                else [{"role": "user", "content": user_prompt}]
-            )
             llm_out = await acall_llm_structured(
                 model=model,
                 messages=_messages,
                 response_model=GeneratedDocs,
                 service="standard-names",
                 reasoning_effort=get_reasoning_effort("sn-docs"),
+                before_attempt=bind_attempt_exposure(
+                    lease, model, _messages, response_model=GeneratedDocs
+                ),
             )
 
             result_obj, cost, _tokens = llm_out
@@ -8818,6 +8925,13 @@ async def process_generate_docs_batch(
                 )
 
         except Exception as _doc_exc:
+            charge_billable_exception(
+                lease,
+                _doc_exc,
+                model=model,
+                sn_ids=(sn_id,),
+                phase="generate_docs",
+            )
             # A "token mismatch or node not found" persist error is an EXPECTED
             # race, not a failure: the orphan sweep reclaimed the item (docs
             # generation can outrun the claim TTL) or another worker took it.
@@ -8964,27 +9078,37 @@ async def process_enrich_parents_batch(
             logger.debug("enrich_parents: system prompt render failed for %s", sn_id)
             system_prompt = None
 
-        # ── Budget reservation ─────────────────────────────────────────
-        estimated = 0.05
-        lease = mgr.reserve(estimated, phase="enrich_parents")
+        _messages = (
+            [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ]
+            if system_prompt
+            else [{"role": "user", "content": user_prompt}]
+        )
+        maximum_exposure = model_provider_exposure(
+            model,
+            _messages,
+            response_model=EnrichedParentDescription,
+            provider_attempts=1,
+        )
+        lease = mgr.reserve(maximum_exposure, phase="enrich_parents")
         if lease is None:
-            lease = mgr.reserve(0.0, phase="enrich_parents")
+            continue
 
         try:
-            _messages = (
-                [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ]
-                if system_prompt
-                else [{"role": "user", "content": user_prompt}]
-            )
             llm_out = await acall_llm_structured(
                 model=model,
                 messages=_messages,
                 response_model=EnrichedParentDescription,
                 service="standard-names",
                 reasoning_effort=get_reasoning_effort("sn-parent-enrich"),
+                before_attempt=bind_attempt_exposure(
+                    lease,
+                    model,
+                    _messages,
+                    response_model=EnrichedParentDescription,
+                ),
             )
             result_obj, cost, _tokens = llm_out
 
@@ -9033,6 +9157,13 @@ async def process_enrich_parents_batch(
                 )
 
         except Exception as _enrich_exc:
+            charge_billable_exception(
+                lease,
+                _enrich_exc,
+                model=model,
+                sn_ids=(sn_id,),
+                phase="enrich_parents",
+            )
             if "token mismatch or node not found" in str(_enrich_exc):
                 logger.warning(
                     "enrich_parents claim lost for %s (reclaimed mid-enrich) "
@@ -9261,19 +9392,13 @@ async def process_review_docs_batch(
                 "documentation in fusion plasma physics."
             )
 
-        # ── Budget reservation (cover all cycles) ──────────────────────
-        per_item_estimate = 0.05
-        worst_case = per_item_estimate * len(review_models) * 1.3
-        lease = mgr.reserve(worst_case, phase="review_docs")
-        if lease is None:
-            lease = mgr.reserve(0.0, phase="review_docs")
-
         # Derived parents use a SINGLE-model review (the chain anchor), not the
         # full RD-quorum: a structural abstraction reviewed against the
         # parent-aware rubric does not need multi-model adjudication, and the
         # quorum is the cost-dominant phase. One call (resolution_method=
         # 'single_review') cuts parent docs-review cost ~2-3x.
         _item_review_models = review_models[:1] if _is_parent else review_models
+        lease = None
         _response_model = (
             StandardNameQualityReviewDocsParentBatch
             if _is_parent
@@ -9301,6 +9426,7 @@ async def process_review_docs_batch(
                 disagreement_threshold=disagreement_threshold,
                 rubric_dims=_rubric_dims,
                 lease=lease,
+                budget_manager=mgr,
                 phase="review_docs",
                 acall_llm_structured=acall_llm_structured,
                 reasoning_effort=get_sn_review_reasoning_effort(),
@@ -9575,7 +9701,7 @@ async def process_refine_docs_batch(
         except Exception:
             logger.debug("refine_docs: sibling family fetch failed for %s", sn_id)
 
-        # Locus-defining cross-link context (PR-9), same as generate_docs.
+        # Locus-defining cross-link context, matching generated documentation.
         try:
             from imas_codex.standard_names.context import locus_context_for
 
@@ -9600,13 +9726,6 @@ async def process_refine_docs_batch(
             logger.debug("refine_docs: system prompt render failed for %s", sn_id)
             system_prompt = None
 
-        # ── Budget reservation ─────────────────────────────────────
-        estimated = 0.20
-        lease = mgr.reserve(estimated, phase="refine_docs")
-        if lease is None:
-            lease = mgr.reserve(0.0, phase="refine_docs")
-
-        # ── LLM call ──────────────────────────────────────────────
         _messages = (
             [
                 {"role": "system", "content": system_prompt},
@@ -9615,6 +9734,17 @@ async def process_refine_docs_batch(
             if system_prompt
             else [{"role": "user", "content": user_prompt}]
         )
+        maximum_exposure = model_provider_exposure(
+            model,
+            _messages,
+            response_model=RefinedDocs,
+            provider_attempts=1,
+        )
+        lease = mgr.reserve(maximum_exposure, phase="refine_docs")
+        if lease is None:
+            continue
+
+        # ── LLM call ──────────────────────────────────────────────
         try:
             llm_out = await acall_llm_structured(
                 model=model,
@@ -9622,6 +9752,9 @@ async def process_refine_docs_batch(
                 response_model=RefinedDocs,
                 service="standard-names",
                 reasoning_effort=get_reasoning_effort("sn-refine"),
+                before_attempt=bind_attempt_exposure(
+                    lease, model, _messages, response_model=RefinedDocs
+                ),
             )
 
             result_obj, cost, _tokens = llm_out
@@ -9689,6 +9822,13 @@ async def process_refine_docs_batch(
                 )
 
         except Exception as exc:
+            charge_billable_exception(
+                lease,
+                exc,
+                model=model,
+                sn_ids=(sn_id,),
+                phase="refine_docs",
+            )
             # A deterministic ``RefinedDocs`` validation failure (docs that
             # consistently violate the schema length bounds) is a NORMAL
             # failed-refine outcome, not a crash — the model keeps producing

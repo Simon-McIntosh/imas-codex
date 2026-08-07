@@ -35,12 +35,17 @@ _ALL_POOL_KEYS = frozenset(
         "enrich_parents",
     }
 )
+_ALL_PROGRESS_KEYS = _ALL_POOL_KEYS | {f"{key}_done" for key in _ALL_POOL_KEYS}
 
 
 def _make_gc(row: dict | None) -> MagicMock:
     """Return a mock gc whose ``query`` returns *row* (or empty list)."""
     gc = MagicMock()
-    gc.query.return_value = [row] if row is not None else []
+    complete_row = None
+    if row is not None:
+        complete_row = dict.fromkeys(_ALL_PROGRESS_KEYS, 0)
+        complete_row.update(row)
+    gc.query.return_value = [complete_row] if complete_row is not None else []
     return gc
 
 
@@ -60,10 +65,10 @@ class TestReturnShape:
         assert set(result.keys()) == _ALL_POOL_KEYS
 
     def test_empty_query_returns_zeros(self) -> None:
-        """When the DB returns no rows, every count must be 0."""
+        """A missing progress row fails closed instead of claiming a drain."""
         gc = _make_gc(None)  # empty list
-        result = _compute_pool_pending(gc, domains=None, rotation_cap=3, min_score=0.75)
-        assert result == dict.fromkeys(_ALL_POOL_KEYS, 0)
+        with pytest.raises(RuntimeError, match="returned no progress row"):
+            _compute_pool_pending(gc, domains=None, rotation_cap=3, min_score=0.75)
 
     def test_values_are_ints(self) -> None:
         """Values must be plain Python ints (not neo4j Integer wrappers)."""

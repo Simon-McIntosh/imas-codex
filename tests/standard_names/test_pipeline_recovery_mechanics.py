@@ -554,7 +554,18 @@ def test_cli_pending_progress_uses_the_same_edit_scope() -> None:
     from imas_codex.cli.sn import _compute_pool_progress
 
     gc = MagicMock()
-    gc.query.return_value = [{}]
+    pools = (
+        "generate_name",
+        "enrich_parents",
+        "review_name",
+        "refine_name",
+        "generate_docs",
+        "review_docs",
+        "refine_docs",
+    )
+    gc.query.return_value = [
+        {key: 0 for pool in pools for key in (pool, f"{pool}_done")}
+    ]
 
     _compute_pool_progress(
         gc,

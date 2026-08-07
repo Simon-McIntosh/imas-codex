@@ -1,108 +1,123 @@
-"""Regression tests: budget reservation failure must not trigger invariant error.
+"""A paid review request must hold a reservation before it reaches a provider.
 
-When ``BudgetManager.reserve(worst_case)`` returns ``None`` for every batch
-(worst_case > remaining pool), total_cost stays at $0.00 and persist_count
-stays at 0, so the under-spend invariant ``total_cost < budget * 0.5`` is
-trivially true — an exhausted budget would otherwise be reported as an
-invariant violation.
+The review path prices the rendered request, reserves that maximum exposure,
+and only then contacts the provider.  When the remaining pool cannot cover the
+priced exposure the request raises ``BudgetExceeded`` instead of launching, so
+spend can never precede the reservation that bounds it.
 
-The invariant is therefore conditioned on reservations having succeeded:
-1. ``_process_batch`` in ``review/pipeline.py`` increments
-   ``state.stats["budget_reservation_blocked"]`` when ``reserve()`` returns
-   ``None``.
-2. Both ``_run_review_names_phase`` and ``_run_review_docs_phase`` in
-   ``turn.py`` add ``and not budget_blocked`` to the invariant condition.
+These tests drive ``_review_single_batch`` with a mocked provider and assert on
+the dispatch itself: an unfundable request must leave the provider untouched,
+and a fundable one must both launch and charge its completed cost.
 """
 
 from __future__ import annotations
 
-import inspect
+import asyncio
+import logging
+from unittest.mock import patch
 
 import pytest
 
+from imas_codex.standard_names.budget import BudgetExceeded, BudgetManager
+from imas_codex.standard_names.models import (
+    StandardNameQualityReview,
+    StandardNameQualityReviewBatch,
+    StandardNameQualityScore,
+)
 
-class TestBudgetReservationBlocked:
-    """Verify pipeline tracks reservation failures and invariant checks them."""
+_NAMES = [{"id": "electron_temperature", "source_id": "core/te"}]
 
-    def test_pipeline_increments_budget_reservation_blocked(self) -> None:
-        """_process_batch must set stats['budget_reservation_blocked'] on None lease."""
-        from imas_codex.standard_names.review import pipeline
 
-        src = inspect.getsource(pipeline)
-        assert "budget_reservation_blocked" in src, (
-            "_process_batch must track budget_reservation_blocked in state.stats"
+def _review_response() -> StandardNameQualityReviewBatch:
+    return StandardNameQualityReviewBatch(
+        reviews=[
+            StandardNameQualityReview(
+                source_id="core/te",
+                standard_name="electron_temperature",
+                scores=StandardNameQualityScore(
+                    grammar=18,
+                    semantic=18,
+                    documentation=18,
+                    convention=18,
+                    completeness=18,
+                    compliance=18,
+                ),
+                reasoning="Good.",
+            )
+        ]
+    )
+
+
+def _run_review(budget_manager, provider):
+    from imas_codex.standard_names.review.pipeline import _review_single_batch
+
+    with (
+        patch(
+            "imas_codex.llm.prompt_loader.render_prompt",
+            return_value="mocked prompt",
+        ),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=provider,
+        ),
+    ):
+        return asyncio.run(
+            _review_single_batch(
+                names=_NAMES,
+                model="test-model",
+                grammar_enums={},
+                compose_ctx={},
+                batch_context="test",
+                neighborhood=[],
+                audit_findings=[],
+                wlog=logging.getLogger("test"),
+                budget_manager=budget_manager,
+                budget_phase="review_names",
+                budget_batch_id="equilibrium",
+            )
         )
 
 
-class TestBudgetReservationBlockedUnit:
-    """Unit-level tests that the invariant logic is correct."""
+class TestReviewReservationGate:
+    """The reservation is a precondition of dispatch, not a running total."""
 
-    def test_invariant_not_triggered_when_budget_blocked(self) -> None:
-        """A fully budget-blocked phase must not read as an invariant breach.
+    def test_unfundable_request_never_reaches_the_provider(self) -> None:
+        """A pool too small for the priced exposure must stop before launch."""
+        dispatches: list[dict] = []
 
-        Conditions: target_names > 0, persist_count == 0,
-        total_cost < budget * 0.5, but budget_reservation_blocked > 0.
-        Invariant must NOT fire.
-        """
-        # Simulate state
-        target_names = ["name_a", "name_b", "name_c"]
-        persist_count = 0
-        total_cost = 0.0
-        budget = 3.0
-        stats = {"budget_reservation_blocked": 3}
+        async def _provider(**kwargs):
+            dispatches.append(kwargs)
+            raise AssertionError("provider was contacted without a reservation")
 
-        budget_blocked = stats.get("budget_reservation_blocked", 0) > 0
+        # The priced exposure for a mocked route is $1.00; this pool cannot
+        # cover it, so reserve() returns None and the request must fail closed.
+        mgr = BudgetManager(total_budget=0.001)
 
-        # This is the patched invariant condition
-        should_fire = (
-            len(target_names) > 0
-            and persist_count == 0
-            and total_cost < budget * 0.5
-            and not budget_blocked
-        )
-        assert not should_fire, (
-            "Invariant must NOT fire when budget_reservation_blocked > 0"
-        )
+        with pytest.raises(BudgetExceeded):
+            _run_review(mgr, _provider)
 
-    def test_invariant_fires_without_budget_block(self) -> None:
-        """Without budget blocking, the invariant should still catch silent failures."""
-        target_names = ["name_a", "name_b", "name_c"]
-        persist_count = 0
-        total_cost = 0.0
-        budget = 3.0
-        stats = {}  # No budget_reservation_blocked
+        assert dispatches == []
+        assert mgr.spent == 0.0
+        assert mgr.remaining == pytest.approx(0.001)
 
-        budget_blocked = stats.get("budget_reservation_blocked", 0) > 0
+    def test_fundable_request_launches_and_charges_its_cost(self) -> None:
+        """A covered request dispatches once and settles its completed spend."""
+        dispatches: list[dict] = []
 
-        should_fire = (
-            len(target_names) > 0
-            and persist_count == 0
-            and total_cost < budget * 0.5
-            and not budget_blocked
-        )
-        assert should_fire, (
-            "Invariant MUST fire when nothing was persisted and budget wasn't the cause"
-        )
+        async def _provider(**kwargs):
+            dispatches.append(kwargs)
+            return _review_response(), 0.01, 100
 
-    def test_invariant_respects_high_cost(self) -> None:
-        """When total_cost >= budget * 0.5, invariant should not fire regardless."""
-        target_names = ["name_a"]
-        persist_count = 0
-        total_cost = 2.0
-        budget = 3.0
-        stats = {}
+        mgr = BudgetManager(total_budget=5.0)
+        result = _run_review(mgr, _provider)
 
-        budget_blocked = stats.get("budget_reservation_blocked", 0) > 0
-
-        should_fire = (
-            len(target_names) > 0
-            and persist_count == 0
-            and total_cost < budget * 0.5
-            and not budget_blocked
-        )
-        assert not should_fire, (
-            "Invariant must not fire when total_cost >= budget * 0.5"
-        )
+        assert len(dispatches) == 1
+        assert len(result["_items"]) == 1
+        assert mgr.spent == pytest.approx(0.01)
+        # The unused remainder of the reservation returns to the pool, so the
+        # pool is short only by what was actually charged.
+        assert mgr.remaining == pytest.approx(5.0 - 0.01)
+        assert mgr.check_invariant()
 
 
 class TestBudgetManagerReserve:
@@ -110,17 +125,14 @@ class TestBudgetManagerReserve:
 
     def test_reserve_returns_none_when_insufficient(self) -> None:
         """reserve() must return None when amount > remaining pool."""
-        from imas_codex.standard_names.budget import BudgetManager
-
         bm = BudgetManager(total_budget=3.0)
-        # worst_case of $3.375 exceeds the $3.00 pool
-        lease = bm.reserve(3.375)
-        assert lease is None, "reserve() must return None when amount > pool"
+        assert bm.reserve(3.375) is None, (
+            "reserve() must return None when amount > pool"
+        )
 
     def test_reserve_succeeds_when_sufficient(self) -> None:
         """reserve() must return a BudgetLease when amount <= pool."""
-        from imas_codex.standard_names.budget import BudgetManager
-
         bm = BudgetManager(total_budget=3.0)
-        lease = bm.reserve(1.0)
-        assert lease is not None, "reserve() must succeed when pool is sufficient"
+        assert bm.reserve(1.0) is not None, (
+            "reserve() must succeed when pool is sufficient"
+        )
