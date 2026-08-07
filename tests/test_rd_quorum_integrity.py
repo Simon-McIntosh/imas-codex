@@ -8,6 +8,9 @@ a throttled run is visible in the run summary rather than silently degrading
 name acceptance to single-model.
 
 Covers:
+- The structured-call double answers the production call surface and honours
+  the per-attempt budget hook (a double that drifts from that surface turns
+  every guard below green-by-accident or red-by-accident).
 - 2-model profile, secondary fails → deferred (None), warned, counted.
 - 1-model profile, primary succeeds → single_review, VALID (unchanged).
 - 3-model profile, both base cycles succeed, no disagreement → quorum_consensus
@@ -21,15 +24,24 @@ Covers:
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
+
+from imas_codex.discovery.base.llm import acall_llm_structured, get_model_limits
 from imas_codex.standard_names.workers import (
     _run_rd_quorum_cycles,
     quorum_incomplete_snapshot,
     reset_quorum_incomplete,
 )
+
+# The double binds every call against the real structured-LLM signature, so a
+# parameter added to the production function needs no edit here while a caller
+# keyword that production would reject still raises.
+_PRODUCTION_CALL_SIGNATURE = inspect.signature(acall_llm_structured)
 
 _NAMES_DIMS = {"grammar": 16, "semantic": 16, "convention": 16, "completeness": 16}
 _DOCS_PARENT_DIMS = {
@@ -76,11 +88,23 @@ def _make_acall(responses: list[dict | None]):
     """
     calls = {"n": 0}
 
-    async def _acall(
-        *, model, messages, response_model, service, reasoning_effort=None
-    ):
+    async def _acall(**kwargs):
+        bound = _PRODUCTION_CALL_SIGNATURE.bind(**kwargs)
+        bound.apply_defaults()
         idx = calls["n"]
         calls["n"] += 1
+        # One simulated provider request per call, so the attempt hook fires
+        # once with (attempt_index, resolved output allowance) exactly as the
+        # production request loop fires it — a hook that raises aborts the
+        # cycle before any response is billed, which is what a budget denial
+        # on the first attempt does for real.
+        before_attempt = bound.arguments.get("before_attempt")
+        if before_attempt is not None:
+            model = bound.arguments["model"]
+            max_tokens = bound.arguments.get("max_tokens") or get_model_limits(
+                model
+            ).get("max_tokens", 0)
+            before_attempt(0, int(max_tokens))
         spec = responses[idx] if idx < len(responses) else None
         if spec is None:
             batch = _FakeBatch([])  # empty → failed cycle
@@ -117,6 +141,63 @@ def _run(
         )
     )
     return result, calls
+
+
+# ---------------------------------------------------------------------------
+# Double fidelity: the stand-in must answer the real call surface
+# ---------------------------------------------------------------------------
+
+
+class TestStructuredCallDouble:
+    def test_accepts_the_production_keyword_surface(self):
+        """Every keyword the chain passes is one the real function takes."""
+        acall, _calls = _make_acall([{"score": 0.8, "dims": _NAMES_DIMS}])
+        chain_kwargs = {
+            "model": "m0",
+            "messages": [{"role": "user", "content": "u"}],
+            "response_model": None,
+            "service": "standard-names",
+            "reasoning_effort": None,
+            "before_attempt": None,
+        }
+        _PRODUCTION_CALL_SIGNATURE.bind(**chain_kwargs)
+        batch, _cost, _tokens = asyncio.run(acall(**chain_kwargs))
+        assert len(batch.reviews) == 1
+
+    def test_attempt_hook_runs_and_its_denial_aborts_the_call(self):
+        """The hook fires per request; raising stops the call, as in production."""
+        seen: list[tuple[int, int]] = []
+
+        def _hook(attempt: int, max_output_tokens: int) -> None:
+            seen.append((attempt, max_output_tokens))
+
+        acall, _calls = _make_acall([{"score": 0.8, "dims": _NAMES_DIMS}] * 2)
+        asyncio.run(
+            acall(
+                model="m0",
+                messages=[{"role": "user", "content": "u"}],
+                response_model=None,
+                service="standard-names",
+                before_attempt=_hook,
+            )
+        )
+        assert len(seen) == 1
+        assert seen[0][0] == 0
+        assert seen[0][1] > 0  # priced at the allowance the request carries
+
+        def _deny(attempt: int, max_output_tokens: int) -> None:
+            raise RuntimeError("budget denial")
+
+        with pytest.raises(RuntimeError, match="budget denial"):
+            asyncio.run(
+                acall(
+                    model="m0",
+                    messages=[{"role": "user", "content": "u"}],
+                    response_model=None,
+                    service="standard-names",
+                    before_attempt=_deny,
+                )
+            )
 
 
 # ---------------------------------------------------------------------------
