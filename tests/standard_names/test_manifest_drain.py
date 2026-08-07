@@ -20,6 +20,25 @@ from imas_codex.standard_names.graph_ops import (
 )
 
 
+@pytest.fixture(autouse=True)
+def _pristine_reviewer_profile(monkeypatch) -> None:
+    """Start each test with no reviewer profile in the process environment.
+
+    ``sn run`` writes the profile it resolved into
+    ``IMAS_CODEX_SN_REVIEW_PROFILE`` so that deeper settings lookups in the
+    same call see the same value. A real invocation exits and the write dies
+    with the process; under ``CliRunner`` it outlives the test, and every
+    later in-process invocation inherits it. A single-model profile left
+    behind that way makes the bounded drain refuse on its two-reviewer
+    precondition before it ever reaches the code under test.
+
+    Clearing the variable per test makes this module independent of whatever
+    ran before it, and monkeypatch's undo stops these invocations leaking a
+    profile onward.
+    """
+    monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
+
+
 def _plan_item(**updates) -> dict:
     item = {
         "path": "equilibrium/time_slice/global_quantities/ip",
