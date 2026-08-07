@@ -225,11 +225,19 @@ IR segment fields before emitting:
 2. **For each token (and 2-token / 3-token compound), look it up in the
    registry above.**  If the token appears in any segment, it MUST occupy
    that segment's IR field, not be absorbed into `base_token`.
-3. **Whitelist genuine atomic compounds** that share a prefix with a
-   registered token but are NOT decomposable: `poloidal_flux`, `minor_radius`,
-   `cross_sectional_area`, `safety_factor`, `polarization_angle`,
-   `ellipticity_angle`, `loop_voltage`, `internal_inductance`. These are
-   single, lexicalised physics terms.
+3. **Exempt a compound only when the grammar holds it as ONE base.** The
+   exemption applies exactly when the closed `physical_base` registry holds the
+   whole spelling as a single token AND parsing it leaves the qualifier set
+   empty: `safety_factor`, `loop_voltage`, `internal_inductance`. A spelling
+   the parser splits into a qualifier plus a base stays decomposable however
+   lexicalised it reads — `minor_radius` is `minor` + `radius`,
+   `cross_sectional_area` is `cross_sectional` + `area`, `polarization_angle`
+   is `polarization` + `angle` — so put the qualifier in its own IR field.
+   `poloidal_flux` and `ellipticity_angle` are not names at all and must never
+   be emitted or endorsed: a generic base (`flux`) needs a qualifying segment
+   and a component like `poloidal` does not supply one (use
+   `poloidal_magnetic_flux`), while `ellipticity_angle` matches no registered
+   base (use `ellipticity`).
 4. **If a registered token is present but no atomic compound rule exempts
    it**, place it in the correct IR segment field:
    - `<component>_<base>` → set `projection_axis` to the component token;

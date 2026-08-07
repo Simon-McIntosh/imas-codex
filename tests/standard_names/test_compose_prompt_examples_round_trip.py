@@ -347,6 +347,107 @@ def test_unparseable_spelling_is_never_teachable_as_a_name(name: str) -> None:
     assert not _is_lexicalised_atomic(name)
 
 
+# The three surfaces above state the exemption in prose or structured YAML;
+# these tests hold each stated claim to the same oracle so the guidance cannot
+# drift back to exempting a decomposable spelling or endorsing one the parser
+# rejects. ``_grammar_reference.md`` renders into every compose, review, refine,
+# enrich and docs system prompt, so a wrong claim there reaches every seat.
+
+
+def _grammar_reference_exempt_tokens() -> list[str]:
+    """Tokens the decomposition checklist exempts from the audit."""
+    text = " ".join(
+        (PROMPTS_DIR / "shared/sn/_grammar_reference.md")
+        .read_text(encoding="utf-8")
+        .split()
+    )
+    match = re.search(r"qualifier set empty:\s*((?:`[a-z_]+`(?:,\s*)?)+)", text)
+    assert match, "exemption list not found — did the checklist wording change?"
+    return re.findall(r"`([a-z_]+)`", match.group(1))
+
+
+def test_grammar_reference_exempts_only_atomic_compounds() -> None:
+    """Every compound the shared checklist exempts is one unqualified base."""
+    exempt = _grammar_reference_exempt_tokens()
+
+    assert exempt, "checklist exempts nothing — extractor broke?"
+    for token in exempt:
+        assert _is_lexicalised_atomic(token), (
+            f"{token!r} is exempted from the decomposition audit but the public "
+            f"grammar does not hold it as one unqualified base"
+        )
+
+
+def _decomposition_criterion() -> dict:
+    from imas_codex.llm.prompt_loader import load_prompt_config
+
+    criteria = load_prompt_config("sn_review_criteria")
+    for value in _walk_mappings(criteria):
+        if "I4.6_physical_base_decomposition" in value:
+            return value["I4.6_physical_base_decomposition"]
+    raise AssertionError("decomposition criterion not found in sn_review_criteria")
+
+
+def _walk_mappings(node: object) -> list[dict]:
+    """Every mapping reachable in a nested YAML structure."""
+    found: list[dict] = []
+    if isinstance(node, dict):
+        found.append(node)
+        for child in node.values():
+            found.extend(_walk_mappings(child))
+    elif isinstance(node, list):
+        for child in node:
+            found.extend(_walk_mappings(child))
+    return found
+
+
+def test_review_criterion_allows_only_atomic_compounds() -> None:
+    """Each allowed compound in the rubric config is one unqualified base."""
+    allowed = _decomposition_criterion()["examples_allowed"]
+
+    assert allowed, "criterion allows nothing — loader or YAML broke?"
+    for entry in allowed:
+        name = entry.split()[0]
+        assert _is_lexicalised_atomic(name), (
+            f"{name!r} is listed as an allowed atomic compound but the public "
+            f"grammar splits it or rejects it"
+        )
+
+
+def test_review_criterion_defect_examples_are_genuine_defects() -> None:
+    """Each rubric defect example really is decomposable or unparseable."""
+    defects = _decomposition_criterion()["examples_bad"]
+
+    assert defects, "criterion lists no defects — loader or YAML broke?"
+    for entry in defects:
+        name = entry["name"]
+        assert not _is_lexicalised_atomic(name), (
+            f"{name!r} is taught as a decomposition defect but the public "
+            f"grammar holds it as one unqualified base"
+        )
+
+
+def test_abbreviation_fix_targets_round_trip() -> None:
+    """Every canonical spelling the exemplars prescribe is a real name."""
+    text = (PROMPTS_DIR / "shared/sn/_exemplars_name_only.md").read_text(
+        encoding="utf-8"
+    )
+    targets = {
+        token
+        for line in text.splitlines()
+        if "*Fix:*" in line
+        for token in re.findall(r"`([^`]+)`", line)
+        if _NAME.match(token)
+    }
+
+    assert targets, "no fix targets extracted — markup changed?"
+    for name in sorted(targets):
+        assert _round_trips(name), (
+            f"prescribed fix target {name!r} does not round-trip through the "
+            f"public ISN parser"
+        )
+
+
 _SOURCE_AXIS_MARKERS = (
     "subject/object",
     "mechanism/cause",
