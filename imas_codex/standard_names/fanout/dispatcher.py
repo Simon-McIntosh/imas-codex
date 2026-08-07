@@ -32,11 +32,11 @@ import logging
 import uuid
 from typing import Any
 
-from imas_codex.discovery.base.llm import DEFAULT_MAX_RETRIES
 from imas_codex.standard_names.budget import (
     BudgetExceeded,
     BudgetLease,
     LLMCostEvent,
+    bind_attempt_exposure,
     charge_billable_exception,
     model_provider_exposure,
 )
@@ -100,7 +100,7 @@ def proposer_exposure(
     scope: FanoutScope,
     settings: FanoutSettings,
 ) -> float:
-    """Return the priced maximum exposure of the rendered proposer request."""
+    """Return the priced exposure of one rendered proposer attempt."""
     messages = [
         {"role": "system", "content": render_proposer_system_prompt()},
         {
@@ -112,7 +112,7 @@ def proposer_exposure(
         settings.proposer_model,
         messages,
         response_model=FanoutPlan,
-        provider_attempts=DEFAULT_MAX_RETRIES,
+        provider_attempts=1,
     )
 
 
@@ -155,6 +155,12 @@ async def propose(
             temperature=settings.proposer_temperature,
             service="standard-names",
             reasoning_effort=get_reasoning_effort("sn-fanout"),
+            before_attempt=bind_attempt_exposure(
+                parent_lease,
+                settings.proposer_model,
+                messages,
+                response_model=FanoutPlan,
+            ),
         )
     except Exception as e:
         charge_billable_exception(

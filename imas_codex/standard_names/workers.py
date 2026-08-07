@@ -26,8 +26,8 @@ from collections.abc import Callable, Sequence
 from functools import cache as _cache, lru_cache
 from typing import TYPE_CHECKING, Any
 
-from imas_codex.discovery.base.llm import DEFAULT_MAX_RETRIES
 from imas_codex.standard_names.budget import (
+    bind_attempt_exposure,
     charge_billable_exception,
     model_provider_exposure,
 )
@@ -3607,13 +3607,11 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
 
         lease = None
         if state.budget_manager:
-            call_bound = len(batch.items) * (_retry_attempts() + 2)
             maximum_exposure = model_provider_exposure(
                 model,
                 messages,
                 response_model=StandardNameComposeBatch,
-                provider_attempts=DEFAULT_MAX_RETRIES,
-                calls=call_bound,
+                provider_attempts=1,
             )
             phase_tag = getattr(state, "budget_phase_tag", "") or "generate_name"
             lease = state.budget_manager.reserve(maximum_exposure, phase=phase_tag)
@@ -3648,6 +3646,12 @@ async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
                     response_model=StandardNameComposeBatch,
                     service="standard-names",
                     reasoning_effort=get_reasoning_effort("sn-compose"),
+                    before_attempt=bind_attempt_exposure(
+                        lease,
+                        model,
+                        messages,
+                        response_model=StandardNameComposeBatch,
+                    ),
                 )
             except (ValueError, Exception) as compose_exc:
                 charge_billable_exception(
@@ -5460,20 +5464,18 @@ async def compose_batch(
     ]
 
     # ── Budget reservation ─────────────────────────────────────────────
-    # Reserve every wrapper attempt for the bounded compose and per-candidate
-    # grammar retry calls before any provider request starts.
+    # Seed the lease with the first compose attempt; each further attempt and
+    # each per-candidate grammar retry binds its own exposure before it runs.
     _max_retries = _retry_attempts()
     # Token-reuse hits from the FINAL attempt (carried to the VocabGap stamp).
     _token_reuse_hits: dict[tuple[str, str], Any] = {}
     _editorial_guidance = ""
     _editorial_should_retry = False
-    call_bound = len(batch) * (_max_retries + 2)
     maximum_exposure = model_provider_exposure(
         model,
         messages,
         response_model=StandardNameComposeBatch,
-        provider_attempts=DEFAULT_MAX_RETRIES,
-        calls=call_bound,
+        provider_attempts=1,
     )
     phase_tag = "regen" if regen else "generate_name"
     lease = mgr.reserve(maximum_exposure, phase=phase_tag)
@@ -5500,6 +5502,12 @@ async def compose_batch(
                     response_model=StandardNameComposeBatch,
                     service="standard-names",
                     reasoning_effort=get_reasoning_effort("sn-compose"),
+                    before_attempt=bind_attempt_exposure(
+                        lease,
+                        model,
+                        messages,
+                        response_model=StandardNameComposeBatch,
+                    ),
                 )
             except (ValueError, Exception) as compose_exc:
                 charge_billable_exception(
@@ -5900,9 +5908,20 @@ async def compose_batch(
             # before the paid review quorum), let the LOCAL compose model
             # critique its own name + description and emit an improved
             # candidate. Improve-or-no-op; the rewrite is re-validated and
-            # discarded if it fails grammar. Local model → $0, so no budget
-            # charge. OFF = byte-identical to the path without this block.
+            # discarded if it fails grammar. OFF = byte-identical to the path
+            # without this block.
+            #
+            # The pass discards its LLMResult, so it can only run where the
+            # call is free: on a paid route its spend would leave no cost
+            # record and no reservation. Refuse rather than spend silently.
             if not grammar_failed and get_compose_self_refine():
+                from imas_codex.discovery.base.llm import _is_local_model
+
+                if not _is_local_model(model):
+                    raise RuntimeError(
+                        "compose self-refine records no cost and reserves no "
+                        f"budget, so it cannot run on the metered route {model}"
+                    )
                 try:
                     _ref_name, _ref_desc = await _self_refine_candidate(
                         name_id,
@@ -6647,7 +6666,7 @@ async def process_refine_name_batch(
                 model,
                 _messages,
                 response_model=RefinedName,
-                provider_attempts=DEFAULT_MAX_RETRIES,
+                provider_attempts=1,
             )
             lease = mgr.reserve(maximum_exposure, phase="refine_name")
             if lease is None:
@@ -6666,6 +6685,9 @@ async def process_refine_name_batch(
                     response_model=RefinedName,
                     service="standard-names",
                     reasoning_effort=get_reasoning_effort("sn-refine"),
+                    before_attempt=bind_attempt_exposure(
+                        lease, model, _messages, response_model=RefinedName
+                    ),
                 )
 
                 # acall_llm_structured returns an LLMResult that still supports
@@ -7245,7 +7267,7 @@ async def _run_rd_quorum_cycles(
                 model,
                 cycle_messages,
                 response_model=response_model,
-                provider_attempts=DEFAULT_MAX_RETRIES,
+                provider_attempts=1,
             )
             cycle_lease = budget_manager.reserve(maximum_exposure, phase=phase)
             if cycle_lease is None:
@@ -7258,6 +7280,9 @@ async def _run_rd_quorum_cycles(
                 response_model=response_model,
                 service="standard-names",
                 reasoning_effort=cycle_effort,
+                before_attempt=bind_attempt_exposure(
+                    cycle_lease, model, cycle_messages, response_model=response_model
+                ),
             )
             result_obj, cost, _tokens = llm_out
         except Exception as exc:
@@ -8829,7 +8854,7 @@ async def process_generate_docs_batch(
             model,
             _messages,
             response_model=GeneratedDocs,
-            provider_attempts=DEFAULT_MAX_RETRIES,
+            provider_attempts=1,
         )
         lease = mgr.reserve(maximum_exposure, phase="generate_docs")
         if lease is None:
@@ -8843,6 +8868,9 @@ async def process_generate_docs_batch(
                 response_model=GeneratedDocs,
                 service="standard-names",
                 reasoning_effort=get_reasoning_effort("sn-docs"),
+                before_attempt=bind_attempt_exposure(
+                    lease, model, _messages, response_model=GeneratedDocs
+                ),
             )
 
             result_obj, cost, _tokens = llm_out
@@ -9062,7 +9090,7 @@ async def process_enrich_parents_batch(
             model,
             _messages,
             response_model=EnrichedParentDescription,
-            provider_attempts=DEFAULT_MAX_RETRIES,
+            provider_attempts=1,
         )
         lease = mgr.reserve(maximum_exposure, phase="enrich_parents")
         if lease is None:
@@ -9075,6 +9103,12 @@ async def process_enrich_parents_batch(
                 response_model=EnrichedParentDescription,
                 service="standard-names",
                 reasoning_effort=get_reasoning_effort("sn-parent-enrich"),
+                before_attempt=bind_attempt_exposure(
+                    lease,
+                    model,
+                    _messages,
+                    response_model=EnrichedParentDescription,
+                ),
             )
             result_obj, cost, _tokens = llm_out
 
@@ -9704,7 +9738,7 @@ async def process_refine_docs_batch(
             model,
             _messages,
             response_model=RefinedDocs,
-            provider_attempts=DEFAULT_MAX_RETRIES,
+            provider_attempts=1,
         )
         lease = mgr.reserve(maximum_exposure, phase="refine_docs")
         if lease is None:
@@ -9718,6 +9752,9 @@ async def process_refine_docs_batch(
                 response_model=RefinedDocs,
                 service="standard-names",
                 reasoning_effort=get_reasoning_effort("sn-refine"),
+                before_attempt=bind_attempt_exposure(
+                    lease, model, _messages, response_model=RefinedDocs
+                ),
             )
 
             result_obj, cost, _tokens = llm_out

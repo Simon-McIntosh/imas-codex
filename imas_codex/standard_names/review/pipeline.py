@@ -19,9 +19,9 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any, Literal
 
 from imas_codex.discovery.base.engine import WorkerSpec, run_discovery_engine
-from imas_codex.discovery.base.llm import DEFAULT_MAX_RETRIES
 from imas_codex.standard_names.budget import (
     LLMCostEvent,
+    bind_attempt_exposure,
     charge_billable_exception,
     model_provider_exposure,
 )
@@ -1937,7 +1937,7 @@ async def _review_single_batch(
             model,
             messages,
             response_model=response_model,
-            provider_attempts=DEFAULT_MAX_RETRIES,
+            provider_attempts=1,
         )
         request_lease = budget_manager.reserve(maximum_exposure, phase=budget_phase)
         if request_lease is None:
@@ -1945,43 +1945,49 @@ async def _review_single_batch(
 
             raise BudgetExceeded("review request has no reservable provider exposure")
     try:
-        llm_out = await acall_llm_structured(
-            model=model,
-            messages=messages,
-            response_model=response_model,
-            service="standard-names",
-            reasoning_effort=get_sn_review_reasoning_effort(),
-        )
-    except Exception as exc:
-        charge_billable_exception(
-            request_lease,
-            exc,
-            model=model,
-            sn_ids=tuple(str(item.get("id") or "") for item in names),
-            batch_id=budget_batch_id,
-            phase=budget_phase,
-        )
-        if request_lease is not None:
-            request_lease.release_unused()
-        raise
-    result, cost, tokens = llm_out
-    if request_lease is not None:
-        request_lease.charge_event(
-            float(cost),
-            LLMCostEvent(
+        try:
+            llm_out = await acall_llm_structured(
                 model=model,
-                tokens_in=int(getattr(llm_out, "input_tokens", 0) or 0),
-                tokens_out=int(getattr(llm_out, "output_tokens", 0) or 0),
-                tokens_cached_read=int(getattr(llm_out, "cache_read_tokens", 0) or 0),
-                tokens_cached_write=int(
-                    getattr(llm_out, "cache_creation_tokens", 0) or 0
+                messages=messages,
+                response_model=response_model,
+                service="standard-names",
+                reasoning_effort=get_sn_review_reasoning_effort(),
+                before_attempt=bind_attempt_exposure(
+                    request_lease, model, messages, response_model=response_model
                 ),
+            )
+        except Exception as exc:
+            charge_billable_exception(
+                request_lease,
+                exc,
+                model=model,
                 sn_ids=tuple(str(item.get("id") or "") for item in names),
                 batch_id=budget_batch_id,
                 phase=budget_phase,
-            ),
-        )
-        request_lease.release_unused()
+            )
+            raise
+        result, cost, tokens = llm_out
+        if request_lease is not None:
+            request_lease.charge_event(
+                float(cost),
+                LLMCostEvent(
+                    model=model,
+                    tokens_in=int(getattr(llm_out, "input_tokens", 0) or 0),
+                    tokens_out=int(getattr(llm_out, "output_tokens", 0) or 0),
+                    tokens_cached_read=int(
+                        getattr(llm_out, "cache_read_tokens", 0) or 0
+                    ),
+                    tokens_cached_write=int(
+                        getattr(llm_out, "cache_creation_tokens", 0) or 0
+                    ),
+                    sn_ids=tuple(str(item.get("id") or "") for item in names),
+                    batch_id=budget_batch_id,
+                    phase=budget_phase,
+                ),
+            )
+    finally:
+        if request_lease is not None:
+            request_lease.release_unused()
 
     # --- Match reviews to original entries -----------------------------------
     scored, unmatched, revised_count = _match_reviews_to_entries(

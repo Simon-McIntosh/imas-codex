@@ -34,6 +34,7 @@ import math
 import threading
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -56,13 +57,18 @@ _WRITER_CALL_TIMEOUT = 20.0
 # before emitting a health log line.
 _WRITER_HEARTBEAT_SEC = 60.0
 
-# Conservative input-token ceiling used when a newly configured OpenRouter
-# model is not yet present in LiteLLM's bundled catalog.  Production prompts
-# are rejected if even their serialized UTF-8 byte length exceeds this value;
-# one token cannot encode less than one request byte.  Reserving the complete
-# ceiling also covers provider chat-template framing without trusting a local
-# tokenizer estimate.
+# Hard input-token ceiling used when a newly configured OpenRouter model is not
+# yet present in LiteLLM's bundled catalog, so no published context limit is
+# available to bound the request against.
 _UNCATALOGED_INPUT_TOKEN_CEILING = 2_000_000
+
+# Token allowance added to the serialized request's UTF-8 byte length to cover
+# provider chat-template framing (role markers, turn delimiters, control
+# tokens), which the serialized bytes do not contain.  The byte length itself
+# is already a strict over-count of the request's own tokens — a BPE token
+# consumes at least one byte of what it encodes — so the sum bounds the billed
+# input without trusting a local tokenizer.
+_CHAT_FRAMING_TOKEN_ALLOWANCE = 4_096
 
 
 # =====================================================================
@@ -186,20 +192,20 @@ def model_provider_exposure(
 ) -> float:
     """Price the maximum billable exposure of a rendered structured request.
 
-    A cataloged model reserves its complete input context.  A model that is
-    newer than the bundled LiteLLM catalog reserves a conservative immutable
-    input ceiling after verifying that the rendered text request fits within
-    it.  This avoids tokenizer estimates, which can omit provider framing or
-    structured-output schema tokens.  Every wrapper retry is priced with the
-    largest output allowance it can reach after a length exhaustion.  Routes
-    with non-text inputs or unsupported billable dimensions fail closed.
+    The input term is bounded by the rendered request itself — its serialized
+    UTF-8 byte length plus a framing allowance — capped by the route's
+    published context limit.  Pricing the whole context window instead would
+    over-reserve by the ratio of the window to the prompt, which for a
+    million-token route is three orders of magnitude and starves every other
+    concurrent request.  Every wrapper retry is priced with the largest output
+    allowance it can reach after a length exhaustion.  Routes with non-text
+    inputs or unsupported billable dimensions fail closed.
     """
-    import litellm
-
     from imas_codex.discovery.base.llm import (
         _LENGTH_RETRY_TOKEN_CAP,
         _LENGTH_RETRY_TOKEN_MULTIPLIER,
         _is_local_model,
+        get_catalog_model_info,
         get_model_limits,
         get_openrouter_max_price,
     )
@@ -226,11 +232,7 @@ def model_provider_exposure(
     if request_byte_bound <= 0:
         raise BudgetExposureUnknown("rendered provider request is empty")
 
-    try:
-        model_info = litellm.get_model_info(model)
-    except Exception:
-        model_info = {}
-    catalog_input_limit = model_info.get("max_input_tokens")
+    catalog_input_limit = get_catalog_model_info(model).get("max_input_tokens")
     input_limit = (
         catalog_input_limit
         if isinstance(catalog_input_limit, int) and catalog_input_limit > 0
@@ -238,6 +240,7 @@ def model_provider_exposure(
     )
     if request_byte_bound > input_limit:
         raise BudgetExposureUnknown("rendered request exceeds the provider input bound")
+    input_bound = min(input_limit, request_byte_bound + _CHAT_FRAMING_TOKEN_ALLOWANCE)
 
     try:
         max_price = get_openrouter_max_price(model)
@@ -255,7 +258,7 @@ def model_provider_exposure(
     total = 0.0
     for _ in range(provider_attempts):
         attempt_cost = (
-            input_limit * max_price["prompt"] / 1_000_000
+            input_bound * max_price["prompt"] / 1_000_000
             + output_limit * max_price["completion"] / 1_000_000
             + max_price["request"]
         )
@@ -273,6 +276,38 @@ def model_provider_exposure(
     if not math.isfinite(exposure) or exposure <= 0:
         raise BudgetExposureUnknown("paid provider exposure is not finite")
     return exposure
+
+
+def bind_attempt_exposure(
+    lease: BudgetLease | None,
+    model: str,
+    messages: list[dict[str, Any]],
+    *,
+    response_model: type[Any],
+) -> Callable[[int, int], None] | None:
+    """Return a per-attempt hook binding each provider request to *lease*.
+
+    Passed to ``acall_llm_structured(before_attempt=...)``.  Each attempt is
+    priced at the output allowance that attempt will actually carry, so a
+    retry that escalated its allowance after a length exhaustion is funded at
+    its real size instead of every call pre-reserving the worst case it might
+    never reach.  Returns ``None`` when there is no lease to bind.
+    """
+    if lease is None:
+        return None
+
+    def _bind(attempt: int, max_output_tokens: int) -> None:
+        lease.require_attempt(
+            model_provider_exposure(
+                model,
+                messages,
+                response_model=response_model,
+                provider_attempts=1,
+                max_tokens=max_output_tokens or None,
+            )
+        )
+
+    return _bind
 
 
 def charge_billable_exception(
@@ -368,6 +403,30 @@ class BudgetLease:
     def phase(self) -> str:
         """Phase tag this lease is attributed to (empty string if untagged)."""
         return self._phase
+
+    def require_attempt(self, amount: float) -> None:
+        """Hold *amount* of unspent reservation before one provider attempt.
+
+        Draws the shortfall from the manager pool so a lease seeded for the
+        first attempt can cover a retry whose output allowance has escalated,
+        and raises when the pool cannot fund it — denying the attempt before
+        it reaches the provider rather than after.
+        """
+        if not math.isfinite(amount) or amount <= 0:
+            raise BudgetExposureUnknown(
+                "provider attempt exposure must be finite and positive"
+            )
+        if self._released:
+            raise BudgetExceeded("cannot bind an attempt to a released lease")
+        shortfall = amount - self.remaining
+        if shortfall <= EPSILON:
+            return
+        self._reserved += self._mgr._extend_reservation(self._lease_id, shortfall)
+        if self.remaining + EPSILON < amount:
+            raise BudgetExceeded(
+                f"provider attempt exposure ${amount:.6f} exceeds the fundable "
+                f"remainder ${max(self.remaining, 0.0):.6f}"
+            )
 
     def require_exposure(self, amount: float) -> None:
         """Fail before launch unless *amount* remains reserved on this lease."""

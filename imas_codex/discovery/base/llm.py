@@ -215,6 +215,42 @@ unknown or newly repriced route cannot turn local catalog lag into overspend.
 """
 
 
+def _lookup_catalog(model: str, *, route_only: bool) -> tuple[dict[str, Any], bool]:
+    """Return catalog metadata for *model* and whether it is the route's own.
+
+    An OpenRouter route is catalogued under either the provider-qualified id
+    (``openrouter/anthropic/claude-sonnet-4.6``) or only under the bare vendor
+    id (``openai/gpt-5.5``), and which one carries the entry differs per
+    vendor.  The bare entry describes the vendor's *direct* API rather than
+    the OpenRouter route, so callers that care about the difference get it
+    reported instead of inferred.
+    """
+    import litellm
+
+    prefixed = ensure_model_prefix(model)
+    candidates = [(prefixed, True)]
+    if not route_only and prefixed.startswith("openrouter/"):
+        candidates.append((prefixed.removeprefix("openrouter/"), False))
+    for candidate, is_route in candidates:
+        try:
+            info = litellm.get_model_info(candidate)
+        except Exception:
+            continue
+        if info:
+            return dict(info), is_route
+    return {}, False
+
+
+def get_catalog_model_info(model: str) -> dict[str, Any]:
+    """Return LiteLLM catalog metadata for *model*, empty when it is unknown.
+
+    Both the provider-qualified and bare vendor spellings are tried, because
+    trying only one silently discards the published context limit for half the
+    fleet and falls back to the far looser policy ceiling.
+    """
+    return _lookup_catalog(model, route_only=False)[0]
+
+
 def get_openrouter_max_price(model: str) -> dict[str, float]:
     """Return an OpenRouter-enforced rate ceiling in dollars per million.
 
@@ -223,13 +259,16 @@ def get_openrouter_max_price(model: str) -> dict[str, float]:
     Request-based pricing is included when present.  Separately billed
     dimensions that the Standard Names text-only request cannot cap are
     rejected.
-    """
-    import litellm
 
-    pricing_model = ensure_model_prefix(model)
-    try:
-        info = litellm.get_model_info(pricing_model)
-    except Exception:
+    Every resolved rate is additionally clamped to the policy ceiling, so a
+    catalog entry can only ever tighten the bound, never raise it.
+
+    The returned mapping is the same object stamped onto the request as
+    ``extra_body.provider.max_price``, so the reservation priced from it can
+    never be smaller than what the provider is permitted to charge.
+    """
+    info, is_route_entry = _lookup_catalog(model, route_only=False)
+    if not info:
         return dict(_STANDARD_NAMES_RATE_CEILING)
 
     unsupported = (
@@ -248,7 +287,7 @@ def get_openrouter_max_price(model: str) -> dict[str, float]:
         "input_cost_per_token_batches",
         "output_cost_per_token_batches",
     )
-    if any(info.get(field) is not None for field in unsupported):
+    if is_route_entry and any(info.get(field) is not None for field in unsupported):
         raise ProviderPricingUnbounded(
             f"OpenRouter route {model} has pricing outside the bounded text request"
         )
@@ -267,28 +306,36 @@ def get_openrouter_max_price(model: str) -> dict[str, float]:
             )
         return max(rates)
 
-    prompt_rate = _maximum_rate(
-        "input_cost_per_token", "cache_creation_input_token_cost"
-    )
-    completion_rate = _maximum_rate("output_cost_per_token")
-    request_rate = float(info.get("input_cost_per_query") or 0.0)
-    image_rate = max(
-        float(info.get("input_cost_per_image") or 0.0),
-        float(info.get("output_cost_per_image") or 0.0),
-    )
-    ceiling = {
-        "prompt": prompt_rate * 1_000_000,
-        "completion": completion_rate * 1_000_000,
-        "request": request_rate,
-        "image": image_rate,
-    }
+    try:
+        ceiling = {
+            "prompt": _maximum_rate(
+                "input_cost_per_token", "cache_creation_input_token_cost"
+            )
+            * 1_000_000,
+            "completion": _maximum_rate("output_cost_per_token") * 1_000_000,
+            "request": float(info.get("input_cost_per_query") or 0.0),
+            "image": max(
+                float(info.get("input_cost_per_image") or 0.0),
+                float(info.get("output_cost_per_image") or 0.0),
+            ),
+        }
+    except ProviderPricingUnbounded:
+        if is_route_entry:
+            raise
+        # A bare vendor entry without usable token rates says nothing about
+        # the route; the policy ceiling still bounds it.
+        return dict(_STANDARD_NAMES_RATE_CEILING)
+
     if any(not math.isfinite(value) or value < 0 for value in ceiling.values()):
         raise ProviderPricingUnbounded(f"OpenRouter rate ceiling invalid for {model}")
-    if any(ceiling[field] > _STANDARD_NAMES_RATE_CEILING[field] for field in ceiling):
-        raise ProviderPricingUnbounded(
-            f"OpenRouter route {model} exceeds the Standard Names rate policy"
-        )
-    return ceiling
+    # Clamp rather than reject: a catalog rate above policy would be stamped as
+    # a max_price the route cannot satisfy, which OpenRouter refuses at
+    # selection time — a visible, unbilled failure.  Clamping keeps the
+    # reservation and the provider cap the same number in every case.
+    return {
+        field: min(value, _STANDARD_NAMES_RATE_CEILING[field])
+        for field, value in ceiling.items()
+    }
 
 
 class EmptyResponseError(ValueError):
@@ -2079,6 +2126,7 @@ async def acall_llm_structured(
     retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
     service: str = "untagged",
     reasoning_effort: str | None = None,
+    before_attempt: Callable[[int, int], None] | None = None,
 ) -> LLMResult:
     """Async version of call_llm_structured.
 
@@ -2094,6 +2142,11 @@ async def acall_llm_structured(
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
         retry_base_delay: Base delay for exponential backoff (seconds).
+        before_attempt: Called as ``(attempt_index, max_output_tokens)``
+            immediately before each provider request, with the output
+            allowance that request will carry.  Raising aborts the call
+            before it reaches the provider, which lets a caller bind each
+            attempt's spend to a budget as the allowance escalates.
 
     Returns:
         :class:`LLMResult` — backward-compatible with 3-tuple unpacking
@@ -2151,6 +2204,25 @@ async def acall_llm_structured(
     succeeded = False
     try:
         for attempt in range(max_retries):
+            if before_attempt is not None:
+                try:
+                    before_attempt(attempt, int(kwargs.get("max_tokens") or 0))
+                except Exception as denial:
+                    # Attempts already billed must still reach the caller's
+                    # charge site, so a denial after a paid response is
+                    # reported as a terminal structured failure carrying the
+                    # accumulated telemetry rather than a bare refusal.
+                    if response_count:
+                        raise _structured_call_error(
+                            str(denial),
+                            cost=total_cost,
+                            input_tokens=total_input_tokens,
+                            output_tokens=total_output_tokens,
+                            cache_read_tokens=total_cache_read,
+                            cache_creation_tokens=total_cache_creation,
+                            response_count=response_count,
+                        ) from denial
+                    raise
             try:
                 if _use_local:
                     response = await _acompletion_local(kwargs)
