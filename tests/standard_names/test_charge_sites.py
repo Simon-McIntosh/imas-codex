@@ -287,7 +287,7 @@ class TestEnrichChargeEvent:
         assert event.cycle is None  # enrich has no cycles
 
     @pytest.mark.asyncio
-    async def test_enrich_uses_soft_stop_never_drops_items(self):
+    async def test_charge_beyond_reservation_is_refused_without_mutation(self):
         """A provider charge can never extend its lease after launch."""
         mgr = _make_mgr(budget=0.01)  # Tiny budget
         lease = mgr.reserve(0.01, phase="enrich")
