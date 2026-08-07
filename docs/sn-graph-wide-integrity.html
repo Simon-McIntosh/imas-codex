@@ -16,8 +16,8 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-07">
-<meta name="plan-version" content="99">
+<meta name="plan-modified" content="2026-08-08">
+<meta name="plan-version" content="100">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -997,6 +997,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260807-flush-safety-integrated" data-who="reckon-ship" data-when="2026-08-07T21:30:00+02:00">
     <div class="r-comment-body"><p><strong>Flush-safety HOLD closed and integrated.</strong> The two-commit chain (52467b9a, c2b27e5e) plus four verification-worker commits merged to main as <code>112a18b9</code>. Both P1 defects closed: reservations are pricing/token-derived, fail-closed, and enforced provider-side (the same price dict is stamped as <code>provider.max_price</code>); all nine pooled dispatch sites charge exactly once, the convergence-gate adjudicator is now metered against the campaign budget, and self-refine refuses metered routes. Calibration repaired: per-call reservation fell from $279.21 (2M-token uncataloged ceiling) to $0.96–$4.85 via request-byte-bounded input, bare-vendor catalog fallback, and per-attempt reservation — the policy rate ceiling was NOT lowered. The masking conftest stub is replaced by a per-seat calibration gate (every configured sn-* seat must price finite and ≤ $10). Suite 6311 passed / 0 failed. Unverified residuals recorded honestly: the live <code>max_price</code> round-trip is unexercised until the first paid call; the archive-without-git test artifact is not yet reproduced on a compute node; <code>phase_caps</code> remains deliberately unwired and its cumulative-commit trap is sharper under per-attempt reservations.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260808-corpus-census-review" data-who="reckon-ship" data-when="2026-08-08T00:15:00+02:00">
+    <div class="r-comment-body"><p><strong>Independent corpus review + census corroboration complete (read-only).</strong> The 12-day corpus is broadly sound and anti-fold in intent; acceptance discipline held; zero graph mutations since 2026-08-04T08:35:49Z, verified to PRODUCED_NAME elementId-hash level. All receipt-backed docs claims verified byte-for-byte; two claims were scope-inflated (suite-green figures were tests/standard_names only — the full repo run at ac98f94d is 11584 passed / 9 failed; and the “zero provenance-orphan” lock is contradicted by 68 live orphans).</p><p><strong>Census supersedes f-sgwi-006’s stale figures:</strong> 376 rows total; <strong>145 actionable</strong> (137 proven-wrong + 8 high-confidence) across <strong>16 accepted identities</strong> (+1 quarantined); the capped 80-source cohort is now exactly enumerated (113 sources / 124 bindings, fully_exhausted). Sample verification confirms the classification is trustworthy. Action split: 107 detach+retarget, 25 identity-collapse rows requiring <code>sn edit</code>+quorum (never detach), 5 needing a valid name minted first; 8 WEST-protected sources and 46 catalog-protected targets in the overlay.</p><p><strong>Root cause found:</strong> the supersession preflight retargets every predecessor source wholesale (fold), which generated 137/145 of the worklist — the fold guard lands before any attachment repair. Corrective wave also covers: stale quorum test double (3 regressions from the budget merge, positive-path guard coverage restored + test relocated back into tests/standard_names), a latent catalog-supersession hole (origin&lt;&gt;'derived' predicate + missing 'approved' stage exclusion; zero live exposure), and a manifest-drain test isolation defect.</p></div>
 </div>
 </section>
 </main>
