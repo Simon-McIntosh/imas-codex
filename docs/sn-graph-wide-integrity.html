@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="104">
+<meta name="plan-version" content="105">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -727,6 +727,34 @@ Done-when
   1. WEST intersection is no longer a refusal reason: gate + overlay + migration protection updated, tests updated to pin the new policy (catalog + fixture protection still enforced)
   2. Census re-run shows the previously WEST-protected rows as actionable (or repaired) with signed receipts
   3. tests still green (full suite)
+  4. followup written + this followup marked resolved</pre>
+    </article>
+<article class="r-fu" data-id="f-sgwi-008" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="smc" data-written-at="2026-08-08 12:20" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Demonstrate a funded clean drain and persist run invocation metadata</h4>
+    <div class="r-fu-body"><p>Eligibility is verified healthy: 300 drafted names satisfy the exact <code>REVIEW_NAME_ELIGIBILITY_WHERE</code> predicate against the live graph. But no clean post-fix drain has run: the 08:57Z probe reported <code>no_eligible_work</code> (scoped run — nothing in its scope) and the 09:02Z probe went <code>budget_saturated</code> at $0.00 spent with status <code>degraded</code> — the fail-closed reservation gate could not fund a single review batch from a $10 budget. Two gaps: (a) the minimum viable budget for a review batch is undocumented and evidently &gt;$10; (b) <code>SNRun</code> does not persist the invocation (flags/scope/argv), so post-hoc diagnosis of a run's emptiness is guesswork.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-graph-wide-integrity (http://localhost:8765/imas-codex/sn-graph-wide-integrity.html)
+Section: flush-safety verification
+Capability: general
+Requirements: strict verification
+
+Context
+  The fail-closed reservation gate landed but its live max_price round-trip is unexercised and the 09:02Z run saturated a $10 budget at $0 spent while 300 drafted names sat review-eligible. A funded drain has never been demonstrated post-fix. (Honour the Locked / surface the Open decisions shown live above - do not re-list.)
+
+State to read  (CODE / FILES / DATA - the builder injects the plan URL)
+  imas_codex/standard_names/pools.py (_budget_saturation_watchdog, reserve-failure threshold)
+  imas_codex/standard_names/graph_ops.py REVIEW_NAME_ELIGIBILITY_WHERE
+  SNRun nodes f08b3b16 (degraded) and 848f5e6a in the graph
+  imas_codex/schemas/standard_name.yaml SNRun class
+
+Scope locks / constraints  (non-decision)
+  Do not weaken the fail-closed reservation gate; document/verify, never bypass.
+  The funded drain probe must use a budget comfortably above one review-batch reservation (compute it from the seat pricing first) and stay within the shared USD 200 S7 ceiling.
+
+Done-when
+  1. One review-batch reservation cost is computed and documented; a funded probe run drains a nonzero review batch cleanly (names_reviewed &gt; 0, stop_reason honest)
+  2. SNRun persists its invocation (argv/flags/scope) via a schema addition + build-models, so no_eligible_work is auditable post-hoc
+  3. The 09:02Z degraded-status path is explained in the plan (reservation math), tests still green
   4. followup written + this followup marked resolved</pre>
     </article>
 </section>
