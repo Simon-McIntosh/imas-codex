@@ -110,15 +110,53 @@ def _isn_locus_relations() -> frozenset[str]:
     return frozenset()
 
 
+#: Parse fields that prove field-evaluation structure on their own: a species,
+#: population or orbit class only qualifies a quantity that is evaluated
+#: somewhere.
+_EVALUATED_QUANTITY_FIELDS = ("subject", "population", "orbit")
+
+#: Parse fields carrying an axis token.  An axis proves field-evaluation
+#: structure only when it projects the quantity itself.
+_AXIS_FIELDS = ("component", "coordinate")
+
+#: Qualifier tokens under which an axis token names the plane a geometric
+#: extent is sectioned in rather than a vector component of the quantity.  A
+#: poloidal cross-sectional area is a scalar extent of the surface bounding it,
+#: so it keeps the intrinsic-geometry relation ``_of_`` exactly as the swept
+#: ``surface_area_of_flux_surface`` does.
+_SECTIONING_QUALIFIER_TOKENS = frozenset({"cross_sectional"})
+
+
+def _sections_a_geometric_extent(name: str) -> bool:
+    """Return whether an axis token names a sectioning plane, not a projection."""
+    try:
+        from imas_standard_names import parse
+
+        qualifiers = parse(name, strict=True).ir.qualifiers
+    except Exception:
+        return False
+    return any(
+        getattr(qualifier, "token", None) in _SECTIONING_QUALIFIER_TOKENS
+        for qualifier in qualifiers
+    )
+
+
 def _has_field_evaluation_structure(name: str) -> bool:
     """Return whether public parse fields prove a quantity is field-like.
 
     ISN currently publishes the geometry-vs-position distinction but does not
     classify every physical base as an evaluated field or an intrinsic
-    property.  Subject and population qualifiers and vector projections are
-    nevertheless unambiguous field-evaluation structure.  Reading those
-    public parse fields preserves a conservative deterministic gate without
-    copying either the physical-base or qualifier vocabularies into codex.
+    property.  Subject and population qualifiers are nevertheless unambiguous
+    field-evaluation structure, and so is an axis token that projects the
+    quantity.  Reading those public parse fields preserves a conservative
+    deterministic gate without copying either the physical-base or qualifier
+    vocabularies into codex.
+
+    An axis token does not always project the quantity.  Under a sectioning
+    qualifier it names the plane a scalar geometric extent is taken in, which
+    is an intrinsic property of the object that bounds it — the same reading
+    already applied to an entity locus, where
+    ``poloidal_cross_sectional_area_of_rogowski_coil`` passes unflagged.
     """
     try:
         from imas_standard_names.grammar import parse_standard_name
@@ -126,10 +164,13 @@ def _has_field_evaluation_structure(name: str) -> bool:
         parsed = parse_standard_name(name)
     except Exception:
         return False
-    return any(
-        getattr(parsed, field, None) is not None
-        for field in ("subject", "population", "orbit", "component", "coordinate")
-    )
+    if any(
+        getattr(parsed, field, None) is not None for field in _EVALUATED_QUANTITY_FIELDS
+    ):
+        return True
+    if _sections_a_geometric_extent(name):
+        return False
+    return any(getattr(parsed, field, None) is not None for field in _AXIS_FIELDS)
 
 
 # Checks whose failure demotes to quarantined
