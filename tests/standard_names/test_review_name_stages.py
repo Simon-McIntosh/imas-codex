@@ -1390,8 +1390,13 @@ class TestQuorumGatedAcceptance:
 
         assert result == "accepted"
 
-    def test_a_low_score_is_unaffected_by_the_gate(self):
-        """The gate only withholds acceptance; it never changes a refine verdict."""
+    def test_a_low_score_is_marked_too(self):
+        """A below-threshold score is no more trustworthy for being low.
+
+        It decides the opposite thing — that the name needs rewriting — and
+        acting on it spends a paid refine rotation, so the marker is recorded
+        for every non-quorate review, not only for a would-be acceptance.
+        """
         gc = self._accepting_gc()
 
         with _patch_gc(gc):
@@ -1409,4 +1414,110 @@ class TestQuorumGatedAcceptance:
             )
 
         assert result == "reviewed"
+        assert gc.query.call_args_list[1].kwargs["quorum_shortfall"]
+
+    def test_a_quorate_low_score_still_routes_to_refine(self):
+        """A chain that agreed the name is weak leaves refine free to act."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.5,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "reviewed"
+        assert gc.query.call_args_list[1].kwargs["quorum_shortfall"] is None
+
+
+class TestQuorumGatedRefineRouting:
+    """A score its seats never agreed on must not buy a paid refine rotation.
+
+    A refine rotation rewrites the name.  When the rewrite fails deterministic
+    grammar the pipeline terminates the identity by design, rather than
+    re-charging a paid model forever — so a rotation spent on an untrustworthy
+    score can cost a sound name outright.  Refine therefore acts only on a
+    verdict the chain actually reached.
+    """
+
+    def test_disagreeing_seats_below_threshold_do_not_reach_refine(self):
+        """The observed shape: two blind seats far apart, no escalator verdict.
+
+        Cycle 0 scored 0.6375 and cycle 1 scored 0.9875 — a 0.35 spread against
+        a 0.20 disagreement threshold — the escalator never answered, and the
+        stored score is their 0.8125 mean, which falls under the 0.85
+        threshold and would ordinarily route to refine.
+        """
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=(0.6375 + 0.9875) / 2,
+                model="openrouter/x-ai/grok-4.5",
+                min_score=0.85,
+                rotation_cap=3,
+                resolution_method="max_cycles_reached",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "reviewed"
+        write_kwargs = gc.query.call_args_list[1].kwargs
+        # The marker is what keeps refine off it — see the eligibility test below.
+        assert write_kwargs["quorum_shortfall"]
+        assert "escalator" in write_kwargs["quorum_shortfall"]
+        assert write_kwargs["resolution_method"] == "max_cycles_reached"
+
+    def test_refine_claim_skips_a_recorded_quorum_shortfall(self, monkeypatch):
+        """The canonical eligibility predicate excludes a marked name."""
+        from imas_codex.standard_names import graph_ops
+
+        predicate = graph_ops.REFINE_NAME_ELIGIBILITY_WHERE
+        assert "sn.review_quorum_shortfall IS NULL" in predicate
+
+        captured: dict = {}
+
+        def _capture_claim(**kwargs):
+            captured.update(kwargs)
+            return []
+
+        monkeypatch.setattr(graph_ops, "_claim_sn_atomic", _capture_claim)
+
+        assert graph_ops.claim_refine_name_batch() == []
+        assert captured["eligibility_where"] == predicate
+
+    def test_rescore_is_the_recovery_path(self):
+        """A re-review that reaches a verdict clears the marker by writing null.
+
+        ``sn rescore`` returns the name to 'drafted' and reviews it again; a
+        quorate result writes a null shortfall here, which restores refine
+        eligibility without any separate repair step.
+        """
+        gc = _mock_gc_query(return_values=[[{"chain_length": 0}], [{"id": "x"}]])
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.5,
+                model="m",
+                min_score=0.85,
+                rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
+            )
+
         assert gc.query.call_args_list[1].kwargs["quorum_shortfall"] is None

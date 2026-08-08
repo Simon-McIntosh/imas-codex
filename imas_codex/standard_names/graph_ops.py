@@ -13626,9 +13626,11 @@ def persist_reviewed_name(
        - ``'reviewed'`` otherwise (eligible for refine_name pickup;
          at chain_length == rotation_cap-1 this routes through the
          Opus escalator in process_refine_name_batch)
-    3. Withhold ``'accepted'`` when the reviewer chain did not reach a
-       verdict — see ``resolution_method`` below.  The name holds at
-       ``'reviewed'`` with the shortfall recorded on the node.
+    3. Record a quorum shortfall whenever the reviewer chain did not reach a
+       verdict — see ``resolution_method`` below.  A would-be acceptance is
+       withheld and holds at ``'reviewed'``; a below-threshold score keeps its
+       stage but is skipped by ``REFINE_NAME_ELIGIBILITY_WHERE``, so neither
+       decision is acted on until ``sn rescore`` re-reviews the name.
     4. SET reviewer fields, ``name_stage``, clear claim state.
 
     Parameters
@@ -13656,9 +13658,10 @@ def persist_reviewed_name(
         :func:`claim_refine_name_batch`).
     resolution_method:
         How the reviewer chain reached this score, as recorded by the
-        RD-quorum loop.  Acceptance requires a quorate method; omitting it
-        holds the name at ``'reviewed'``, so a caller that publishes names
-        must state how the score was reached.
+        RD-quorum loop.  A quorate method is required before the score is
+        acted on in either direction — accepting the name or spending a
+        refine rotation to rewrite it.  Omitting it withholds both, so a
+        caller that publishes names must state how the score was reached.
     reviewer_chain_size:
         Number of seats the configured chain defines.  Distinguishes a
         two-seat chain's terminal disagreement, which is its designed
@@ -13742,19 +13745,38 @@ def persist_reviewed_name(
     # survive, and `sn rescore` re-reviews it once the seats are healthy.
     # `quorum_exempt` is for accepts that carry a different authority than
     # the reviewer chain (a merged catalog PR), never for pipeline reviews.
+    # The marker is recorded for every non-quorate review, not only for one
+    # that would have accepted.  A score below the threshold decides the
+    # opposite thing — that the NAME needs rewriting — and it is no more
+    # trustworthy for having come from seats that never agreed.  Acting on it
+    # spends a paid refine rotation, and a rotation can rewrite a sound name
+    # into a candidate that terminates it.  ``REFINE_NAME_ELIGIBILITY_WHERE``
+    # therefore skips any name carrying this marker; ``sn rescore`` is the
+    # recovery, and the next quorate review clears it by writing null here.
     quorum_shortfall: str | None = None
-    if target_stage == "accepted" and not quorum_exempt:
+    if not quorum_exempt:
         quorum_shortfall = _quorum_admits_acceptance(
             resolution_method, reviewer_chain_size
         )
         if quorum_shortfall is not None:
-            target_stage = "reviewed"
-            logger.warning(
-                "persist_reviewed_name: refusing acceptance of %s at score %.3f — %s",
-                sn_id,
-                score,
-                quorum_shortfall,
-            )
+            if target_stage == "accepted":
+                target_stage = "reviewed"
+                logger.warning(
+                    "persist_reviewed_name: refusing acceptance of %s at "
+                    "score %.3f — %s",
+                    sn_id,
+                    score,
+                    quorum_shortfall,
+                )
+            else:
+                logger.warning(
+                    "persist_reviewed_name: parking %s at %s without a refine "
+                    "rotation (score %.3f) — %s",
+                    sn_id,
+                    target_stage,
+                    score,
+                    quorum_shortfall,
+                )
 
     grammar_valid = True
     grammar_issue: str | None = None
@@ -14490,6 +14512,12 @@ REFINE_NAME_ELIGIBILITY_WHERE = (
     "          AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)"
     # Derived parents are structurally fixed and have no refinement target.
     " AND coalesce(sn.origin, '') <> 'derived'"
+    # A score the reviewer seats never agreed on is not evidence that the NAME
+    # needs rewriting, so it must not buy a paid refine rotation — a rotation
+    # spent on it can drive a sound name into a rewrite and terminate it.
+    # The name rests here until `sn rescore` re-reviews it against a healthy
+    # chain, which clears the marker.
+    " AND sn.review_quorum_shortfall IS NULL"
 )
 """Canonical graph predicate for name-refinement eligibility."""
 
