@@ -64,15 +64,52 @@ def _neo4j_probe_client():
     return GraphClient()
 
 
+def _graph_credential_is_configured() -> bool:
+    """Whether a real credential exists for the endpoint the probe would use.
+
+    An explicit test endpoint is a deliberate opt-in and cannot reach the
+    project graph, so it always qualifies — including an auth-disabled local
+    server that legitimately has no password.
+
+    Otherwise the probe would resolve the active profile, which for a remote
+    location is the shared project graph.  A checkout that supplies no
+    credential resolves to the packaged development placeholder, and
+    authenticating against a shared server with a placeholder is a failed
+    login: repeat it once per pytest session across a few sessions and the
+    server's failed-attempt limiter locks the account out from under whoever
+    is using it for real.  Resolution here is metadata-only —
+    ``auto_tunnel=False`` is the documented side-effect-free path — so asking
+    this question never opens a connection.
+    """
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_URI"):
+        return True
+    try:
+        from imas_codex.graph.profiles import DEFAULT_PASSWORD, resolve_neo4j
+
+        credential = resolve_neo4j(auto_tunnel=False).password or ""
+    except Exception:
+        return False
+    return bool(credential) and credential != DEFAULT_PASSWORD
+
+
 def _neo4j_unavailable_reason() -> str:
     """Describe the selected graph endpoint without triggering resolution."""
     if test_uri := os.environ.get("IMAS_CODEX_TEST_NEO4J_URI"):
         return f"Explicit Neo4j test endpoint is not available: {test_uri}"
+    if not _graph_credential_is_configured():
+        return (
+            "No Neo4j credential is configured for this checkout, so the "
+            "reachability probe was skipped rather than authenticating with "
+            "the packaged placeholder against the project graph"
+        )
     return "Configured project Neo4j graph is not available"
 
 
 def _check_neo4j() -> bool:
     """Probe whether Neo4j is reachable (cached per session).
+
+    A checkout with no configured credential reports unreachable without
+    connecting at all — see :func:`_graph_credential_is_configured`.
 
     Without an explicit test URI, constructing a ``GraphClient`` resolves the
     active graph profile, which for a remote location establishes an SSH
@@ -89,6 +126,12 @@ def _check_neo4j() -> bool:
     """
     global _neo4j_available
     if _neo4j_available is not None:
+        return _neo4j_available
+
+    # Short-circuit BEFORE any client is built: with no credential the only
+    # thing a probe can do is fail authentication against the project graph.
+    if not _graph_credential_is_configured():
+        _neo4j_available = False
         return _neo4j_available
 
     import threading
