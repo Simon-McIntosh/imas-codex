@@ -11555,11 +11555,20 @@ def reconcile_reviewable_name_stage(gc: Any | None = None) -> dict[str, int]:
     this reconcile heals any name already stranded by the earlier behaviour and
     is an idempotent safety net for any other path that could leave a produced
     name below 'drafted'. A name qualifies when it is at ``name_stage`` null or
-    ``'pending'``, is ``validation_status='valid'`` (quarantined names are
-    regenerated, not reviewed), is not a structural ``derived`` parent (those
-    are reviewed structurally, not by the name quorum), and carries at least one
-    non-``derived`` produced source (a real DD/signal origin). Once advanced the
-    name is ``'drafted'`` and no longer matches — the pass is a no-op thereafter.
+    ``'pending'``, is ``validation_status='valid'``, is not a structural
+    ``derived`` parent (those are reviewed structurally, not by the name
+    quorum), and carries at least one non-``derived`` produced source (a real
+    DD/signal origin). Once advanced the name is ``'drafted'`` and no longer
+    matches — the pass is a no-op thereafter.
+
+    The ``'valid'`` requirement is narrow but load-bearing:
+    :data:`REVIEW_NAME_ELIGIBILITY_WHERE` demands ``'valid'`` too, so advancing
+    a quarantined name here would move it from stranded-at-``'pending'`` to
+    stranded-at-``'drafted'`` without making it claimable by anything. A
+    quarantined name cannot re-enter the pool loop at any stage — review never
+    claims it, so it never reaches ``'reviewed'`` and refine never claims it
+    either. Its repair vehicle is ``sn edit --rename``, which mints a fresh,
+    separately validated successor rather than advancing a stage.
 
     Returns dict: {names_advanced}.
     """
