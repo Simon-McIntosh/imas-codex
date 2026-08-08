@@ -106,8 +106,18 @@ from imas_codex.standard_names.graph_ops import (
 )
 
 #: name_stage values eligible for a direct rename (superseded is handled
-#: separately: eligible only when it has no successor).
+#: separately: eligible only when it has no successor; the stages below the
+#: review entry point are handled by :func:`_stranded_rename_refusal`).
 _RENAME_ELIGIBLE_STAGES = frozenset({"accepted", "reviewed", "exhausted", "drafted"})
+
+#: name_stage values that sit below the review entry stage. A name resting
+#: here has either not been minted yet or has been re-staged by a reseed.
+_UNMINTED_NAME_STAGES = frozenset({"", "pending"})
+
+#: StandardNameSource statuses whose composition has already been consumed —
+#: the generate pool claims 'extracted' sources only, so a name produced
+#: exclusively by sources in this set is never re-minted.
+_LIVE_SOURCE_STATUSES = frozenset({"composed", "attached"})
 
 _ENTRY_BY_MODE = {"rename": "review_name", "docs": "review_docs", "hint": "generate"}
 
@@ -292,8 +302,9 @@ def _stamp_successor_validation(
     pipeline-generated candidate passes (grammar round-trip, ISN Pydantic /
     semantic / structural / canonical / description layers, post-generation
     audits).  A
-    quarantined result cannot reach ``accepted`` — the review worker skips
-    quarantined names with a 0.0 score.
+    quarantined result cannot reach ``accepted`` — the name-review claim
+    predicate requires ``validation_status='valid'``, so a quarantined name is
+    never claimed for review and never scored.
     """
     from imas_codex.standard_names.workers import validate_name_candidate
 
@@ -319,6 +330,81 @@ def _stamp_successor_validation(
         status=status,
         issues=issues,
     )
+
+
+def _stranded_rename_refusal(
+    sn_id: str, stage: str | None, row: dict[str, Any]
+) -> str | None:
+    """Refusal text for a rename whose root sits outside the eligible stages.
+
+    Returns ``None`` when the rename is admitted. Exactly one class of
+    ineligible stage is admitted: a *stranded* name — one resting below the
+    review entry stage that no pool can ever move, and whose identity is
+    nonetheless real. Such a name has no other repair vehicle:
+
+    * the generate pool claims ``StandardNameSource`` at ``status='extracted'``,
+      so a name whose sources are all composed/attached is never re-minted;
+    * the review pool claims ``name_stage='drafted'``, so nothing lifts it;
+    * ``reconcile_reviewable_name_stage`` lifts only ``validation_status='valid'``
+      names, and a quarantined name is excluded from the review claim anyway,
+      so advancing one to 'drafted' would simply re-strand it there.
+
+    The conditions below each hold back a name whose repair is something other
+    than a rename:
+
+    no ``name_stage`` at all
+        The refine hand-off compare-and-sets the predecessor on its concrete
+        stage, so a bare node cannot be handed off; it has to be minted first.
+    ``has_successor``
+        A refine already converged this name onto a successor; the successor
+        carries the concept forward and is the node to edit. This generalises
+        the superseded-with-successor guard to a name whose stage label was
+        reset out from under it by a reseed.
+    ``origin='derived'``
+        A structural parent is named by the grammar peel, and the enrich-parents
+        pool lifts it out of 'pending'; it is not renamed by hand.
+    no live source
+        Nothing produced this name, so there is no identity to rename.
+    no description
+        The name was never composed. Steering generation with a hint is the
+        repair; renaming an empty placeholder only mints a second empty one.
+    """
+    if (stage or "") not in _UNMINTED_NAME_STAGES:
+        return (
+            f"{sn_id!r} has name_stage={stage!r} — not eligible for rename "
+            "(must be accepted/reviewed/exhausted/drafted, or superseded with "
+            "no successor)"
+        )
+    if not stage:
+        return (
+            f"{sn_id!r} carries no name_stage — not eligible for rename (the "
+            "refine hand-off compares against a concrete predecessor stage, so "
+            "a bare node has to be minted before it can be renamed)"
+        )
+    if row.get("has_successor"):
+        return (
+            f"{sn_id!r} rests at name_stage={stage!r} but a successor was "
+            "already refined from it — edit the successor instead"
+        )
+    if (row.get("origin") or "") == "derived":
+        return (
+            f"{sn_id!r} is a derived structural parent at name_stage={stage!r} "
+            "— not eligible for rename (its name follows from the grammar peel "
+            "over its children)"
+        )
+    if not row.get("has_live_source"):
+        return (
+            f"{sn_id!r} has name_stage={stage!r} and no live source — not "
+            "eligible for rename (nothing produced this name, so there is no "
+            "identity to rename)"
+        )
+    if not (row.get("description") or "").strip():
+        return (
+            f"{sn_id!r} has name_stage={stage!r} and no description — not "
+            "eligible for rename (it was never composed; steer generation with "
+            "a hint instead)"
+        )
+    return None
 
 
 def _blocked(
@@ -366,8 +452,14 @@ def _fetch_target(gc: GraphClient, sn_id: str) -> dict[str, Any] | None:
                sn.tags AS tags,
                coalesce(sn.chain_length, 0) AS chain_length,
                has_successor,
-               EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(sn) } AS has_children
+               EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(sn) } AS has_children,
+               EXISTS {
+                 MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+                 WHERE coalesce(src.source_type, '') <> 'derived'
+                   AND coalesce(src.status, '') IN $live_source_statuses
+               } AS has_live_source
         """,
+        live_source_statuses=sorted(_LIVE_SOURCE_STATUSES),
         id=sn_id,
     )
     if not rows:
@@ -2158,15 +2250,19 @@ def _apply_rename(
                 extra_actions=actions,
             )
     elif root_stage not in _RENAME_ELIGIBLE_STAGES:
-        return _blocked(
-            target,
-            "rename",
-            "name",
-            scope,
-            f"{refine_root_old!r} has name_stage={root_stage!r} — not eligible "
-            "for rename (must be accepted/reviewed/exhausted/drafted, or "
-            "superseded with no successor)",
-            extra_actions=actions,
+        refusal = _stranded_rename_refusal(refine_root_old, root_stage, root_row)
+        if refusal is not None:
+            return _blocked(
+                target,
+                "rename",
+                "name",
+                scope,
+                refusal,
+                extra_actions=actions,
+            )
+        actions.append(
+            f"{refine_root_old!r} is stranded at name_stage={root_stage!r} with "
+            "live sources — admitting the rename as its only repair vehicle"
         )
 
     # 5. Plan the descendant cascade now (dry-run) — conflicts refuse the

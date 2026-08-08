@@ -114,15 +114,29 @@ class FakeGraph:
         )
 
     def add_source(
-        self, source_id: str, *, sn_id: str, status: str = "extracted"
+        self,
+        source_id: str,
+        *,
+        sn_id: str,
+        status: str = "extracted",
+        source_type: str = "dd",
     ) -> None:
         self.sources[source_id] = {
             "status": status,
+            "source_type": source_type,
             "claimed_at": None,
             "claim_token": None,
             "attempt_count": 0,
         }
         self.produced_name[source_id] = sn_id
+
+    def has_live_source(self, sn_id: str) -> bool:
+        return any(
+            target == sn_id
+            and self.sources[sid].get("source_type") != "derived"
+            and self.sources[sid].get("status") in ("composed", "attached")
+            for sid, target in self.produced_name.items()
+        )
 
     def refined_from_id(self, successor: str) -> str | None:
         return self.refined_from.get(successor)
@@ -210,6 +224,7 @@ class FakeGraph:
                     "chain_length": node.get("chain_length", 0) or 0,
                     "has_successor": self.has_successor(sn_id),
                     "has_children": has_children,
+                    "has_live_source": self.has_live_source(sn_id),
                 }
             ]
 
@@ -905,7 +920,7 @@ class TestRenameEligibility:
         assert "successor" in plan.blocked
         assert plan.applied is False
 
-    def test_pending_stage_refused(self) -> None:
+    def test_pending_stage_without_live_source_refused(self) -> None:
         fake = FakeGraph()
         fake.add_node("plasma_current", name_stage="pending")
         with _patched_graph(fake):
@@ -917,6 +932,9 @@ class TestRenameEligibility:
             )
         assert plan.blocked is not None
         assert "not eligible" in plan.blocked
+        assert "no live source" in plan.blocked
+        assert plan.applied is False
+        assert "toroidal_plasma_current" not in fake.nodes
 
     def test_isn_invalid_rename_refused(self) -> None:
         fake = FakeGraph()
@@ -1021,6 +1039,219 @@ class TestRenameEligibility:
                 gc=fake,
             )
         assert plan.run_id is None
+
+
+# =============================================================================
+# Rename of a name stranded below the review entry stage
+# =============================================================================
+
+
+def _stranded(
+    *,
+    name_stage: str | None = "pending",
+    source_status: str = "composed",
+    source_type: str = "dd",
+    **node_fields: Any,
+) -> FakeGraph:
+    """A name resting below review entry that still holds a produced source."""
+    fake = FakeGraph()
+    fake.add_node("plasma_current", name_stage=name_stage, **node_fields)
+    fake.add_source(
+        "dd:magnetics/ip",
+        sn_id="plasma_current",
+        status=source_status,
+        source_type=source_type,
+    )
+    return fake
+
+
+@contextmanager
+def _admitting_pairing_guard():
+    """Admit every source pairing the rename hands to the write-time guard.
+
+    That guard resolves DD paths, units and existing bindings against the real
+    graph, which the FakeGraph does not model; its own behaviour is covered by
+    the attachment-audit tests. Stubbing it keeps these tests on the one thing
+    they pin — which names the rename admits.
+    """
+    from imas_codex.standard_names.attachment_audit import (
+        AttachmentPairingGuardResult,
+    )
+
+    def _admit(gc: Any, sn_id: str, source_ids: list[str]):
+        return AttachmentPairingGuardResult(tuple(sorted(set(source_ids))), ())
+
+    with patch(
+        "imas_codex.standard_names.attachment_audit.guard_source_pairings", _admit
+    ):
+        yield
+
+
+class TestStrandedRename:
+    """A quarantined, source-backed name below review entry can be renamed.
+
+    Nothing in the pool loop can move such a name: the generate pool claims
+    sources at ``status='extracted'`` (these are already composed/attached),
+    the review pool claims ``name_stage='drafted'``, and a quarantined name is
+    excluded from the review claim regardless of stage — so no stage advance
+    would make it claimable. The rename edit is its only repair vehicle, and
+    the replacement it mints is reviewed like any other candidate.
+    """
+
+    def test_quarantined_pending_with_live_source_is_renameable(self) -> None:
+        fake = _stranded(validation_status="quarantined")
+        with _patched_graph(fake), _admitting_pairing_guard():
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="parser-invalid spelling",
+                gc=fake,
+            )
+        assert plan.blocked is None
+        assert plan.applied is True
+        assert plan.successor == "toroidal_plasma_current"
+        assert fake.nodes["plasma_current"]["name_stage"] == "superseded"
+        assert fake.nodes["plasma_current"]["superseded_from_stage"] == "pending"
+
+    def test_renamed_product_enters_review_not_acceptance(self) -> None:
+        fake = _stranded(validation_status="quarantined")
+        with _patched_graph(fake), _admitting_pairing_guard():
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="parser-invalid spelling",
+                gc=fake,
+            )
+        assert plan.entry == "review_name"
+        successor = fake.nodes["toroidal_plasma_current"]
+        assert successor["name_stage"] == "drafted"
+        assert successor["reviewer_score_name"] is None
+
+    def test_rename_leaves_predecessor_quarantine_intact(self) -> None:
+        fake = _stranded(validation_status="quarantined")
+        with _patched_graph(fake), _admitting_pairing_guard():
+            apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="parser-invalid spelling",
+                gc=fake,
+            )
+        assert fake.nodes["plasma_current"]["validation_status"] == "quarantined"
+        # The replacement is judged on its own merits by the same admission
+        # gate a generated candidate passes, not by inheriting 'quarantined'.
+        successor = fake.nodes["toroidal_plasma_current"]
+        assert successor["validated_at"] == "now"
+        assert successor["validation_status"] in ("valid", "quarantined")
+
+    def test_dry_run_admits_without_writing(self) -> None:
+        fake = _stranded(validation_status="quarantined")
+        before = deepcopy(fake.nodes)
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="parser-invalid spelling",
+                dry_run=True,
+                gc=fake,
+            )
+        assert plan.blocked is None
+        assert plan.applied is False
+        assert fake.nodes == before
+
+    def test_successor_refuses_and_names_the_node_to_edit(self) -> None:
+        fake = _stranded(validation_status="quarantined")
+        fake.add_node("area_of_flux_surface", name_stage="accepted")
+        fake.refined_from["area_of_flux_surface"] = "plasma_current"
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="parser-invalid spelling",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "edit the successor instead" in plan.blocked
+        assert plan.applied is False
+        assert "toroidal_plasma_current" not in fake.nodes
+
+    @pytest.mark.parametrize("source_status", ["stale", "extracted", "failed"])
+    def test_no_live_source_refused(self, source_status: str) -> None:
+        fake = _stranded(source_status=source_status)
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "no live source" in plan.blocked
+        assert plan.applied is False
+
+    def test_derived_structural_source_is_not_a_live_source(self) -> None:
+        fake = _stranded(source_type="derived")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "no live source" in plan.blocked
+
+    def test_empty_description_refused(self) -> None:
+        fake = _stranded(description="   ")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "no description" in plan.blocked
+        assert plan.applied is False
+
+    def test_derived_parent_refused(self) -> None:
+        fake = _stranded(origin="derived")
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "derived structural parent" in plan.blocked
+        assert plan.applied is False
+
+    def test_bare_node_without_stage_refused(self) -> None:
+        fake = _stranded(name_stage=None)
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "carries no name_stage" in plan.blocked
+        assert plan.applied is False
+
+    @pytest.mark.parametrize("stage", ["refining", "contested"])
+    def test_other_ineligible_stages_unchanged(self, stage: str) -> None:
+        fake = _stranded(name_stage=stage)
+        with _patched_graph(fake):
+            plan = apply_edit(
+                target="plasma_current",
+                rename="toroidal_plasma_current",
+                reason="why",
+                gc=fake,
+            )
+        assert plan.blocked is not None
+        assert "not eligible for rename" in plan.blocked
+        assert plan.applied is False
 
 
 # =============================================================================
