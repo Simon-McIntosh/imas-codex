@@ -223,6 +223,8 @@ class TestPersistToAccepted:
                 model="test/model",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "accepted"
@@ -246,6 +248,8 @@ class TestPersistToAccepted:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         # Second call is the SET query
@@ -378,6 +382,8 @@ class TestPersistToExhausted:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "accepted"
@@ -405,6 +411,8 @@ class TestScoreCanonicalPolicy:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert result == "accepted"
 
@@ -421,6 +429,8 @@ class TestScoreCanonicalPolicy:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert result == "accepted"
 
@@ -437,6 +447,8 @@ class TestScoreCanonicalPolicy:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert result == "accepted"
 
@@ -773,6 +785,8 @@ class TestMinScoreThreshold:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert result == "accepted"
 
@@ -1166,7 +1180,233 @@ class TestPersistWritesReviewNode:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         # Stage transition must still succeed even if review-node write fails
         assert new_stage == "accepted"
+
+
+class TestQuorumGatedAcceptance:
+    """A score is only as authoritative as the seats that produced it.
+
+    When a reviewer chain loses seats mid-run the surviving seat still returns
+    a score, and it reaches the stage decision looking exactly like a quorate
+    one.  A provider outage would otherwise publish names on a single opinion.
+    """
+
+    @staticmethod
+    def _accepting_gc():
+        return _mock_gc_query(
+            return_values=[[{"chain_length": 0}], [{"id": "x"}]],
+        )
+
+    def test_outage_shape_at_the_threshold_does_not_accept(self):
+        """One seat scores exactly at threshold on a chain that lost its others.
+
+        This is the shape a reviewer outage leaves behind on the names axis: a
+        three-seat chain whose blind pair never reconciled and whose escalator
+        never answered, resolving to ``max_cycles_reached`` while the surviving
+        seat's score lands precisely on the acceptance threshold.
+        """
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.85,
+                model="openrouter/x-ai/grok-4.5",
+                min_score=0.85,
+                rotation_cap=3,
+                resolution_method="max_cycles_reached",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "reviewed"
+
+    def test_sub_quorum_seat_count_does_not_accept(self):
+        """A score from fewer seats than the chain defines cannot publish a name."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.95,
+                model="m",
+                min_score=0.85,
+                rotation_cap=3,
+                resolution_method="single_review",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "reviewed"
+
+    def test_shortfall_reason_is_recorded_on_the_node(self):
+        """The refusal must be visible, not merely a stage that looks ordinary."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.9,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="single_review",
+                reviewer_chain_size=3,
+            )
+
+        write_kwargs = gc.query.call_args_list[1].kwargs
+        assert write_kwargs["quorum_shortfall"]
+        assert "fewer reviewer seats" in write_kwargs["quorum_shortfall"]
+        assert write_kwargs["resolution_method"] == "single_review"
+        assert write_kwargs["target_stage"] == "reviewed"
+
+    def test_quorate_review_records_no_shortfall(self):
+        """A healthy chain accepts and leaves the marker clear."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.9,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "accepted"
+        assert gc.query.call_args_list[1].kwargs["quorum_shortfall"] is None
+
+    def test_escalated_dispute_accepts(self):
+        """The escalator resolving a dispute is the designed three-seat verdict."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.9,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="authoritative_escalation",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "accepted"
+
+    def test_unresolved_dispute_on_an_escalator_chain_does_not_accept(self):
+        """A chain that defines an escalator must hear from it."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.9,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="max_cycles_reached",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "reviewed"
+
+    def test_unresolved_dispute_on_a_two_seat_chain_accepts(self):
+        """Without an escalator seat, a merged disagreement is the terminal verdict."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.9,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="max_cycles_reached",
+                reviewer_chain_size=2,
+            )
+
+        assert result == "accepted"
+
+    def test_missing_resolution_method_does_not_accept(self):
+        """Fail closed: a caller that never states how the score was reached."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.9,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+            )
+
+        assert result == "reviewed"
+
+    def test_exempt_accept_bypasses_the_gate(self):
+        """A merged catalog PR carries a human verdict, not a chain score."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.9,
+                model="sn-merge",
+                min_score=0.75,
+                rotation_cap=3,
+                quorum_exempt=True,
+            )
+
+        assert result == "accepted"
+
+    def test_a_low_score_is_unaffected_by_the_gate(self):
+        """The gate only withholds acceptance; it never changes a refine verdict."""
+        gc = self._accepting_gc()
+
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+            result = persist_reviewed_name(
+                sn_id="x",
+                claim_token="tok",
+                score=0.5,
+                model="m",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="single_review",
+                reviewer_chain_size=3,
+            )
+
+        assert result == "reviewed"
+        assert gc.query.call_args_list[1].kwargs["quorum_shortfall"] is None

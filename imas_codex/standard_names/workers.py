@@ -8103,6 +8103,8 @@ async def process_review_name_batch(
                 llm_service="standard-names",
                 run_id=mgr.run_id,
                 skip_review_node=True,
+                resolution_method=quorum["resolution_method"],
+                reviewer_chain_size=len(review_models),
             )
             if new_stage:
                 source_versions = _review_dd_source_bindings(item)

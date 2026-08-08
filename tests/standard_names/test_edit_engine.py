@@ -1279,6 +1279,8 @@ class TestEditLifecycle:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert stage == "accepted"
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] == "applied"
@@ -1303,6 +1305,8 @@ class TestEditLifecycle:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert stage == "exhausted"
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] == "exhausted"
@@ -1327,6 +1331,8 @@ class TestEditLifecycle:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert stage == "reviewed"
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] == "open"
@@ -1349,6 +1355,8 @@ class TestEditLifecycle:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert fake.nodes["toroidal_plasma_current"]["edit_status"] is None
 
@@ -1794,6 +1802,8 @@ class TestRenameCascadeProtections:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert stage == "accepted"
         assert "ion_temperature_of_plasma_boundary" in fake.nodes
@@ -1828,6 +1838,8 @@ class TestRenameCascadeProtections:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         # Acceptance refused — the protected (accepted, non-opted-in)
         # descendant cannot ride the cascade.
@@ -1857,6 +1869,8 @@ class TestRenameCascadeProtections:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert stage == "reviewed"
@@ -1880,6 +1894,8 @@ class TestRenameCascadeProtections:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert stage == "reviewed"

@@ -94,9 +94,7 @@ class TestFamilyMapping:
         # The reviewed decision is the PARENT's rename, not the leaf's.
         assert plan.successor == "density"
         assert plan.entry == "review_name"
-        assert any(
-            "maps to parent" in a and "'temperature'" in a for a in plan.actions
-        )
+        assert any("maps to parent" in a and "'temperature'" in a for a in plan.actions)
         # Descendant cascade was PLANNED but not yet applied — the leaves
         # keep their old ids until the root rename is accepted.
         planned_pairs = {(r["from"], r["to"]) for r in plan.cascade_planned}
@@ -141,7 +139,9 @@ class TestFamilyMapping:
         # No graph mutation at all.
         assert "density" not in fake.nodes
         assert fake.nodes["temperature"]["name_stage"] == "accepted"
-        assert fake.edges_by_child["electron_temperature"][0]["parent_id"] == "temperature"
+        assert (
+            fake.edges_by_child["electron_temperature"][0]["parent_id"] == "temperature"
+        )
 
 
 class TestSubtreeCascadePlanning:
@@ -224,6 +224,8 @@ class TestAcceptanceCascadeApplication:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         assert stage == "accepted"
         assert fake.nodes["density"]["edit_status"] == "applied"
@@ -254,6 +256,8 @@ class TestAcceptanceCascadeApplication:
                 model="reviewer/x",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
         # The acceptance is refused — the reviewed decision cannot land while
         # its atomic cascade is invalid.

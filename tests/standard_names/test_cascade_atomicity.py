@@ -21,9 +21,7 @@ from imas_codex.standard_names.graph_ops import persist_reviewed_name
 from tests.standard_names.test_edit_engine import FakeGraph, _patched_graph
 
 
-def _drafted_subtree_root(
-    fake: FakeGraph, *, include_accepted: bool = True
-) -> None:
+def _drafted_subtree_root(fake: FakeGraph, *, include_accepted: bool = True) -> None:
     """Graph state right after a subtree rename's successor was created:
     ``temperature`` superseded, ``density`` drafted+open, two accepted
     children pointing at the new (drafted) root.
@@ -54,6 +52,8 @@ def _accept(fake: FakeGraph) -> str:
             model="reviewer/x",
             min_score=0.75,
             rotation_cap=3,
+            resolution_method="quorum_consensus",
+            reviewer_chain_size=3,
         )
 
 

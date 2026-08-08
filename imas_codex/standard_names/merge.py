@@ -398,6 +398,9 @@ def _accept(
             min_score=threshold,
             run_id=run_id,
             skip_review_node=True,
+            # A merged catalog PR is a human verdict, not a reviewer-chain
+            # score, so the quorum gate does not apply to it.
+            quorum_exempt=True,
         )
 
 
