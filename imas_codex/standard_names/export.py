@@ -187,6 +187,11 @@ def _fetch_candidates(
     - ``docs_stage = 'accepted'`` — excludes nodes whose documentation has
       not yet passed the docs review loop (skipped when *names_only*).
     - ``validation_status = 'valid'`` — excludes quarantined nodes.
+    - ``review_quorum_shortfall IS NULL`` — excludes a name accepted while its
+      reviewer chain had not reached a verdict. A quorate review clears the
+      marker, so an accepted node still carrying one arrived by a path that
+      did not consult it, and publishing it would ship exactly what the
+      quorum gate withheld.
 
     When *names_only* is True, the ``docs_stage`` gate is dropped so
     names can be exported before documentation is generated.
@@ -205,6 +210,7 @@ def _fetch_candidates(
     MATCH (sn:StandardName)
     WHERE (sn.name_stage = 'approved' OR sn.id IN $batch)
       AND sn.validation_status = 'valid'
+      AND sn.review_quorum_shortfall IS NULL
     """
         params["batch"] = batch
     else:
@@ -212,6 +218,7 @@ def _fetch_candidates(
     MATCH (sn:StandardName)
     WHERE sn.name_stage IN ['accepted', 'approved']
       AND sn.validation_status = 'valid'
+      AND sn.review_quorum_shortfall IS NULL
     """
     if not names_only:
         cypher += "  AND sn.docs_stage = 'accepted'\n"

@@ -10244,6 +10244,24 @@ def refresh_name_claims(sn_ids: list[str], claim_token: str) -> int:
         return result[0]["refreshed"] if result else 0
 
 
+PROMOTE_STRANDED_NAME_WHERE = (
+    "sn.name_stage = 'reviewed' "
+    "AND sn.reviewer_score_name >= $min_score "
+    "AND coalesce(sn.edit_status, '') <> 'open' "
+    "AND coalesce(sn.validation_status, '') <> 'quarantined' "
+    "AND sn.review_quorum_shortfall IS NULL"
+)
+"""Canonical graph predicate for name-axis stranded promotion."""
+
+PROMOTE_STRANDED_DOCS_WHERE = (
+    "sn.docs_stage = 'reviewed' "
+    "AND sn.reviewer_score_docs >= $min_score "
+    "AND sn.name_stage = 'accepted' "
+    "AND coalesce(sn.validation_status, '') <> 'quarantined'"
+)
+"""Canonical graph predicate for docs-axis stranded promotion."""
+
+
 def promote_stranded_reviewed(
     min_score: float = DEFAULT_MIN_SCORE,
     *,
@@ -10270,24 +10288,21 @@ def promote_stranded_reviewed(
       descendants atomically; a bare stage flip here would strand that cascade.
     * both axes exclude ``validation_status='quarantined'``.
     * docs axis requires ``name_stage='accepted'`` (docs is a post-name axis).
+    * name axis excludes a recorded ``review_quorum_shortfall`` — a name held
+      at ``'reviewed'`` because its reviewer chain never reached a verdict
+      looks identical to one stranded by a lowered threshold, and its stored
+      score can clear the bar while the seats behind it disagreed. Promoting
+      on that score publishes exactly what the quorum gate withheld, so the
+      marker must be honoured here as well as in
+      :func:`persist_reviewed_name`.
 
     Idempotent: a second run matches nothing (the names are already accepted).
 
     Returns ``{"name": n_name, "docs": n_docs}`` — the number promoted on each
     axis (or that would be promoted in ``dry_run``).
     """
-    name_where = (
-        "sn.name_stage = 'reviewed' "
-        "AND sn.reviewer_score_name >= $min_score "
-        "AND coalesce(sn.edit_status, '') <> 'open' "
-        "AND coalesce(sn.validation_status, '') <> 'quarantined'"
-    )
-    docs_where = (
-        "sn.docs_stage = 'reviewed' "
-        "AND sn.reviewer_score_docs >= $min_score "
-        "AND sn.name_stage = 'accepted' "
-        "AND coalesce(sn.validation_status, '') <> 'quarantined'"
-    )
+    name_where = PROMOTE_STRANDED_NAME_WHERE
+    docs_where = PROMOTE_STRANDED_DOCS_WHERE
     with GraphClient() as gc:
         if dry_run:
             n_name = gc.query(

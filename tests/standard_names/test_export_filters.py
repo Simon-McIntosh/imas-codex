@@ -288,3 +288,41 @@ class TestFetchCandidatesDomainFilter:
             result = _fetch_candidates(domain="test")
         ids = {r["id"] for r in result}
         assert "sn_b" in ids, f"Expected sn_b for domain='test', got: {ids}"
+
+
+class TestQuorumShortfallIsNotExportable:
+    """A name accepted without a reviewer verdict must not reach the catalog.
+
+    A quorate review writes a null shortfall, so an accepted node still
+    carrying one reached that stage by a path that never consulted the marker.
+    Publishing it would ship exactly what the acceptance gate withheld, and
+    the export gate is the last place to catch it.
+    """
+
+    def _capture_cypher(self, **kwargs) -> str:
+        captured: list[str] = []
+
+        def mock_query(cypher: str, **_kw) -> list:
+            captured.append(cypher)
+            return []
+
+        mock_gc = MagicMock()
+        mock_gc.query = mock_query
+        mock_gc.__enter__ = MagicMock(return_value=mock_gc)
+        mock_gc.__exit__ = MagicMock(return_value=False)
+        with patch(_GC_PATH, return_value=mock_gc):
+            _fetch_candidates(**kwargs)
+        return captured[0]
+
+    def test_rc_export_excludes_a_recorded_shortfall(self) -> None:
+        assert "sn.review_quorum_shortfall IS NULL" in self._capture_cypher()
+
+    def test_batch_export_excludes_a_recorded_shortfall(self) -> None:
+        """The batch path is a separate WHERE clause and needs its own guard."""
+        cypher = self._capture_cypher(batch=["sn_a", "sn_b"])
+        assert "sn.review_quorum_shortfall IS NULL" in cypher
+
+    def test_names_only_export_excludes_a_recorded_shortfall(self) -> None:
+        """Dropping the docs gate must not drop the quorum gate with it."""
+        cypher = self._capture_cypher(names_only=True)
+        assert "sn.review_quorum_shortfall IS NULL" in cypher
