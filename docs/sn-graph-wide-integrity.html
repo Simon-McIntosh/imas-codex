@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="103">
+<meta name="plan-version" content="104">
 <meta name="plan-impl" content="0.9">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -393,6 +393,10 @@
       </p>
     <p class="r-dec-rat">Locked by the lead on 2026-08-04: a plain flux-surface area name is physically ambiguous because it cannot distinguish poloidal cross-sectional area from swept surface area. The previously proposed fold is rejected. No fold was applied. Re-adjudicate the source through an explicit poloidal cross-sectional-area name using the sanctioned edit/review pipeline.</p>
     </div>
+<div class="r-dec" data-key="west-batch-repair-scope" data-choice="fold into repair scope" data-by="smc" data-when="2026-08-08T15:02:20+00:00">
+    <p class="r-dec-q">west-batch-repair-scope</p>
+    <p class="r-dec-rat">The WEST batch has not been released; it must represent current best effort, not a historic snapshot. The frozen-baseline policy retires: the zero-WEST-intersection gate and the WEST-protected overlay rows lose protected status for repair actions. Protection remains only for the published ISN catalog (released names).</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -694,6 +698,36 @@ Done-when
   3. the 94-row minimum and capped 80-source cohort are converted into an exhaustive exclusive manifest with zero unexplained rows;
   4. exact source detach/attach/retirement operations dry-run with zero collateral and, only with explicit graph-mutation authority, apply and replay idempotently;
   5. affected identities are repaired through sn edit/quorum where required; fresh one-query census, semantic-collapse audit, protected hashes and full suite are green; followup resolved.</pre>
+    </article>
+<article class="r-fu" data-id="f-sgwi-007" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="smc" data-written-at="2026-08-08 12:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Lift the WEST-batch protection and fold the release cohort into repair scope</h4>
+    <div class="r-fu-body"><p>Decision <code>west-batch-repair-scope</code> is locked: the unreleased WEST batch folds into best-effort repair scope. The zero-WEST-intersection invariant in <code>structural_closure.py</code> (raise at west_intersection != 0), the WEST reasons in <code>_protected_reasons</code>, the WEST participant protection in <code>source_snapshot_migration.py</code>, and the 8 WEST-protected sources in the census overlay all encode the retired frozen-baseline policy. Published-catalog protection (46 catalog-protected targets, the supersession guard for released names) is unchanged. Quorum acceptance discipline is unchanged — WEST names re-entering repair go through the same review pipeline, never a hand-accept.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan:    sn-graph-wide-integrity (http://localhost:8765/imas-codex/sn-graph-wide-integrity.html)
+Section: protected-closure / census overlay
+Capability: orchestrator
+Requirements: strict verification, elevated risk
+
+Context
+  The west-batch-repair-scope decision is locked: the unreleased WEST review batch is no longer a frozen baseline and folds into best-effort graph-wide repair scope. Only the published ISN catalog keeps protected status. (Honour the Locked / surface the Open decisions shown live above - do not re-list them.)
+
+State to read  (CODE / FILES / DATA - the builder injects the plan URL)
+  imas_codex/standard_names/structural_closure.py (zero-WEST-intersection raise, _protected_reasons)
+  imas_codex/standard_names/source_snapshot_migration.py (WEST participant protection)
+  the latest census artifact + the c-20260808-corpus-census-review comment (8 WEST-protected sources, 46 catalog-protected targets)
+  tests pinning the WEST/test zero-intersection invariant
+
+Scope locks / constraints  (non-decision)
+  Published-catalog (released) name protection stays intact - only WEST-batch protection lifts.
+  Test-fixture protection stays intact.
+  No blind accepts: WEST rows re-entering repair route through compose/review/refine as usual.
+  Coordinate with sn-west-review-rehearsal f-swrr-020 - the 14-source residual and the RC cut run against the repaired, de-protected corpus.
+
+Done-when
+  1. WEST intersection is no longer a refusal reason: gate + overlay + migration protection updated, tests updated to pin the new policy (catalog + fixture protection still enforced)
+  2. Census re-run shows the previously WEST-protected rows as actionable (or repaired) with signed receipts
+  3. tests still green (full suite)
+  4. followup written + this followup marked resolved</pre>
     </article>
 </section>
 
