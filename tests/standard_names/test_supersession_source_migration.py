@@ -341,6 +341,19 @@ class TestPreflightContract:
             in cypher
         )
 
+    def test_the_dd_edge_alone_does_not_single_out_the_recomposed_source(
+        self,
+    ) -> None:
+        """A renamed DD path keeps a source under its superseded spelling beside
+        the current one, so both anchor the same node. The successor binding is
+        what tells them apart; without it every alias is offered as the
+        recomposed source and the pass aborts a batch it should have run."""
+        cypher = self._preflight_cypher()
+        assert (
+            "OPTIONAL MATCH (trigger:StandardNameSource)-[:FROM_DD_PATH]->(src) "
+            "WHERE EXISTS { (trigger)-[:PRODUCED_NAME]->(new) }" in cypher
+        )
+
     def test_protected_predecessors_stay_excluded(self) -> None:
         """Published catalog content, terminal stages and structural parents are
         filtered before any source is classified."""

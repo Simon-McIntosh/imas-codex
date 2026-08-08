@@ -15228,6 +15228,56 @@ def persist_refined_name(
     )
 
 
+_GENERATED_SUPERSESSION_PREFLIGHT_QUERY = """
+// GENERATED_SUPERSESSION_PREFLIGHT
+UNWIND $pairs AS pr
+OPTIONAL MATCH (src:IMASNode {id: pr.source_id})
+OPTIONAL MATCH (new:StandardName {id: pr.new_name})
+// The recomposed source itself, resolved through its DD edge rather than by
+// rebuilding the composite id. One DD path can anchor several sources — a
+// renamed path keeps a source under its superseded spelling alongside the
+// current one — so the successor binding this pass just wrote is what singles
+// the recomposed source out of them. Without it every alias reaches the
+// predecessor, none of them can be told apart, and the batch aborts.
+OPTIONAL MATCH (trigger:StandardNameSource)-[:FROM_DD_PATH]->(src)
+WHERE EXISTS { (trigger)-[:PRODUCED_NAME]->(new) }
+OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(old:StandardName)
+WHERE old.id <> pr.new_name
+  AND NOT coalesce(old.name_stage, '') IN
+      ['superseded', 'exhausted', 'contested', 'approved']
+  AND old.catalog_pr_number IS NULL
+  AND coalesce(old.origin, 'pipeline') <> 'derived'
+// Skip self and any case where old already descends from new
+// along the REFINED_FROM chain (would form a cycle).
+  AND new.id <> old.id
+  AND NOT (old)-[:REFINED_FROM*1..]->(new)
+WITH pr, src, new, trigger, old
+OPTIONAL MATCH (source:StandardNameSource)
+WHERE old IS NOT NULL
+  AND ((source)-[:PRODUCED_NAME]->(old)
+       OR source.produced_sn_id = old.id
+       OR (source)-[:PRODUCED_NAME]->(new))
+// A live successor edge is what a composer emits, so it is the one fact that
+// says this pairing was judged. Everything else reaches the predecessor only
+// through the predecessor.
+WITH pr, src, new, trigger, old, source,
+     EXISTS { (source)-[:PRODUCED_NAME]->(new) } AS judged
+RETURN pr.source_id AS requested_source_id,
+       pr.new_name AS new_name,
+       src IS NOT NULL AS requested_source_exists,
+       new IS NOT NULL AS successor_exists,
+       trigger.id AS trigger_source_id,
+       old.id AS old_name,
+       old.name_stage AS old_stage,
+       [source_id IN collect(DISTINCT
+          CASE WHEN judged THEN source.id END)
+        WHERE source_id IS NOT NULL] AS judged_source_ids,
+       [source_id IN collect(DISTINCT
+          CASE WHEN judged THEN null ELSE source.id END)
+        WHERE source_id IS NOT NULL] AS retained_source_ids
+"""
+
+
 @retry_on_deadlock()
 def supersede_prior_source_names(
     pairs: list[dict[str, str]],
@@ -15327,49 +15377,7 @@ def supersede_prior_source_names(
     def _apply(query_handle: Any) -> int:
         preflight_rows = list(
             query_handle.query(
-                """
-                // GENERATED_SUPERSESSION_PREFLIGHT
-                UNWIND $pairs AS pr
-                OPTIONAL MATCH (src:IMASNode {id: pr.source_id})
-                OPTIONAL MATCH (new:StandardName {id: pr.new_name})
-                // The recomposed source itself, resolved through its DD edge
-                // rather than by rebuilding the composite id.
-                OPTIONAL MATCH (trigger:StandardNameSource)-[:FROM_DD_PATH]->(src)
-                OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(old:StandardName)
-                WHERE old.id <> pr.new_name
-                  AND NOT coalesce(old.name_stage, '') IN
-                      ['superseded', 'exhausted', 'contested', 'approved']
-                  AND old.catalog_pr_number IS NULL
-                  AND coalesce(old.origin, 'pipeline') <> 'derived'
-                // Skip self and any case where old already descends from new
-                // along the REFINED_FROM chain (would form a cycle).
-                  AND new.id <> old.id
-                  AND NOT (old)-[:REFINED_FROM*1..]->(new)
-                WITH pr, src, new, trigger, old
-                OPTIONAL MATCH (source:StandardNameSource)
-                WHERE old IS NOT NULL
-                  AND ((source)-[:PRODUCED_NAME]->(old)
-                       OR source.produced_sn_id = old.id
-                       OR (source)-[:PRODUCED_NAME]->(new))
-                // A live successor edge is what a composer emits, so it is the
-                // one fact that says this pairing was judged. Everything else
-                // reaches the predecessor only through the predecessor.
-                WITH pr, src, new, trigger, old, source,
-                     EXISTS { (source)-[:PRODUCED_NAME]->(new) } AS judged
-                RETURN pr.source_id AS requested_source_id,
-                       pr.new_name AS new_name,
-                       src IS NOT NULL AS requested_source_exists,
-                       new IS NOT NULL AS successor_exists,
-                       trigger.id AS trigger_source_id,
-                       old.id AS old_name,
-                       old.name_stage AS old_stage,
-                       [source_id IN collect(DISTINCT
-                          CASE WHEN judged THEN source.id END)
-                        WHERE source_id IS NOT NULL] AS judged_source_ids,
-                       [source_id IN collect(DISTINCT
-                          CASE WHEN judged THEN null ELSE source.id END)
-                        WHERE source_id IS NOT NULL] AS retained_source_ids
-                """,
+                _GENERATED_SUPERSESSION_PREFLIGHT_QUERY,
                 pairs=normalized_pairs,
             )
             or []
