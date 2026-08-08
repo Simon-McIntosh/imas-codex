@@ -2742,6 +2742,48 @@ class TestCanonicalLocusCheck:
         assert canonical_locus_check({"id": name}) == []
 
     @pytest.mark.parametrize(
+        "name",
+        [
+            "poloidal_cross_sectional_area_of_flux_surface",
+            "poloidal_cross_sectional_area_of_plasma_boundary",
+        ],
+    )
+    def test_sectioned_geometric_extent_keeps_the_intrinsic_relation(self, name):
+        """An axis under a sectioning qualifier names a plane, not a projection.
+
+        A poloidal cross-sectional area is a scalar extent of the surface that
+        bounds it, so it takes ``_of_`` exactly as the swept
+        ``surface_area_of_flux_surface`` does.  Reading the axis as a vector
+        projection demands ``_at_`` and quarantines the canonical spelling the
+        composition rules publish for the DD ``area`` family.
+        """
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        assert canonical_locus_check({"id": name}) == []
+
+    def test_sectioning_exception_is_scoped_to_the_axis_proof(self):
+        """A species subject still proves field evaluation under the same relation."""
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        issues = canonical_locus_check({"id": "electron_temperature_of_flux_surface"})
+
+        assert len(issues) == 1
+        assert "field-evaluation structure" in issues[0]
+
+    def test_entity_and_position_loci_agree_on_the_sectioned_extent(self):
+        """One construction cannot be clean on an entity locus and flagged on a position."""
+        from imas_codex.standard_names.audits import canonical_locus_check
+
+        entity = canonical_locus_check(
+            {"id": "poloidal_cross_sectional_area_of_rogowski_coil"}
+        )
+        position = canonical_locus_check(
+            {"id": "poloidal_cross_sectional_area_of_flux_surface"}
+        )
+
+        assert entity == position == []
+
+    @pytest.mark.parametrize(
         "locus,relation",
         _registered_locus_cases(),
     )
