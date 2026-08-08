@@ -37,6 +37,7 @@ class _FakeGraph:
             and n.get("reviewer_score_name", 0.0) >= min_score
             and (n.get("edit_status") or "") != "open"
             and (n.get("validation_status") or "") != "quarantined"
+            and n.get("review_quorum_shortfall") is None
         )
 
     def _docs_eligible(self, n: dict, min_score: float) -> bool:
@@ -160,3 +161,150 @@ class TestIdempotency:
         out = _run(nodes, min_score=0.7, dry_run=True)
         assert out["name"] == 1
         assert nodes[0]["name_stage"] == "reviewed"  # unchanged
+
+
+class TestQuorumShortfallIsHonoured:
+    """A name the quorum gate parked must not be promoted by this pass.
+
+    The two states are indistinguishable by score alone. A name stranded by a
+    lowered threshold and a name held because its reviewer seats never reached
+    a verdict both sit at 'reviewed' carrying a score above the bar — and a
+    non-quorate mean can clear the bar while the seats behind it disagreed
+    sharply per dimension. Promoting on the score alone publishes exactly what
+    the gate withheld, so the marker decides.
+    """
+
+    def test_quorum_shortfall_blocks_promotion(self) -> None:
+        nodes = [
+            {
+                "id": "shortfall",
+                "name_stage": "reviewed",
+                "reviewer_score_name": 0.925,
+                "review_quorum_shortfall": (
+                    "blind seats disagreed and the escalator seat did not "
+                    "resolve them (method=max_cycles_reached)"
+                ),
+            }
+        ]
+        out = _run(nodes, min_score=0.85)
+        assert out["name"] == 0
+        assert nodes[0]["name_stage"] == "reviewed"
+
+    def test_cleared_shortfall_promotes_again(self) -> None:
+        """A quorate re-review nulls the marker, restoring ordinary eligibility."""
+        nodes = [
+            {
+                "id": "cleared",
+                "name_stage": "reviewed",
+                "reviewer_score_name": 0.925,
+                "review_quorum_shortfall": None,
+            }
+        ]
+        out = _run(nodes, min_score=0.85)
+        assert out["name"] == 1
+        assert nodes[0]["name_stage"] == "accepted"
+
+    def test_parked_name_survives_a_later_maintenance_pass(self) -> None:
+        """The observed two-run sequence, end to end.
+
+        Run one reviews the name: the blind seats split (0.85 and 1.0 overall,
+        but 0.70 against 1.0 on one dimension), no escalator answers, and the
+        gate parks it at 'reviewed' with the marker and a 0.925 mean. Run two
+        starts and its maintenance pass sees a 'reviewed' name whose score
+        clears the bar. It must leave it alone.
+        """
+        from imas_codex.standard_names.graph_ops import persist_reviewed_name
+
+        gc_calls: list[dict] = []
+
+        class _Recorder:
+            def __enter__(self_inner):
+                return self_inner
+
+            def __exit__(self_inner, *_a):
+                return None
+
+            def query(self_inner, _cypher, **params):
+                gc_calls.append(params)
+                if "target_stage" in params:
+                    return [{"id": params["id"]}]
+                return [{"chain_length": 0}]
+
+        with patch.object(graph_ops, "GraphClient", return_value=_Recorder()):
+            stage = persist_reviewed_name(
+                sn_id="radial_coordinate_of_shunt",
+                claim_token="tok",
+                score=0.925,
+                model="openrouter/x-ai/grok-4.5",
+                min_score=0.85,
+                rotation_cap=3,
+                resolution_method="max_cycles_reached",
+                reviewer_chain_size=3,
+            )
+
+        assert stage == "reviewed"
+        write = next(p for p in gc_calls if "target_stage" in p)
+        assert write["quorum_shortfall"]
+
+        # Run two: the node as the gate left it, through the maintenance pass.
+        nodes = [
+            {
+                "id": "radial_coordinate_of_shunt",
+                "name_stage": write["target_stage"],
+                "reviewer_score_name": 0.925,
+                "review_quorum_shortfall": write["quorum_shortfall"],
+            }
+        ]
+        out = _run(nodes, min_score=0.85)
+        assert out["name"] == 0
+        assert nodes[0]["name_stage"] == "reviewed"
+
+
+class TestFakeMirrorsProduction:
+    """The fake reimplements the production WHERE clause, so it can drift.
+
+    That drift is how a promotion path kept accepting names after the quorum
+    gate landed: the gate was tested, the pass was tested, and neither test
+    knew the other clause existed. Pin the mirror to the real predicate so a
+    future clause cannot be invisible here.
+    """
+
+    def test_every_production_name_clause_is_consulted_by_the_fake(self) -> None:
+        import re
+
+        from imas_codex.standard_names.graph_ops import PROMOTE_STRANDED_NAME_WHERE
+
+        referenced = set(re.findall(r"sn\.(\w+)", PROMOTE_STRANDED_NAME_WHERE))
+
+        class _RecordingNode(dict):
+            """Records reads. Pre-populated so no clause short-circuits.
+
+            The predicate is a chain of ``and``s, so probing with an empty node
+            stops at the first clause and every later field looks unread.
+            """
+
+            def __init__(self) -> None:
+                super().__init__(
+                    name_stage="reviewed",
+                    reviewer_score_name=1.0,
+                    edit_status=None,
+                    validation_status=None,
+                    review_quorum_shortfall=None,
+                )
+                self.read: set[str] = set()
+
+            def get(self, key, default=None):
+                self.read.add(key)
+                return super().get(key, default)
+
+        node = _RecordingNode()
+        assert _FakeGraph([])._name_eligible(node, 0.85), (
+            "the probe node must satisfy every clause, or short-circuiting "
+            "hides the fields this test is meant to observe"
+        )
+
+        missing = referenced - node.read
+        assert not missing, (
+            f"the fake ignores production predicate field(s) {sorted(missing)} — "
+            "update _name_eligible so this harness still mirrors the real clause"
+        )
