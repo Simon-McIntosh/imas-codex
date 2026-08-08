@@ -2932,6 +2932,33 @@ classes:
           Most recent heartbeat from a live run; orphan sweep uses
           this to detect dead processes.
         range: datetime
+      invocation:
+        description: >-
+          Shell-equivalent command line the run was launched with, as a
+          single shlex-quoted string. Any argument that carries a
+          credential (an option whose name mentions key, token, secret,
+          or password, and bare values shaped like an API key) is
+          replaced by a redaction marker before the string is stored.
+          Without this a run that exited on 'no_eligible_work' or
+          'budget_saturated' cannot be told apart from one whose scope
+          flags excluded the work it was meant to do.
+        range: string
+      invocation_flags:
+        description: >-
+          JSON object of the resolved run knobs the orchestrator received
+          — cost limit, time limit, min score, model overrides, backlog
+          caps, and the phase skip flags. Resolved values, not raw
+          argv, so a default that changed between releases is still
+          recoverable from the run row.
+        range: string
+      invocation_scope:
+        description: >-
+          JSON object of the work-scope restriction — physics domains,
+          scope run id, drain scope id and DD version, exact-path count,
+          single-pool selector, and the edits-only / skip-maintenance
+          switches. Answers whether an empty run had no work or was
+          pointed away from it.
+        range: string
 
   LLMCost:
     description: >-

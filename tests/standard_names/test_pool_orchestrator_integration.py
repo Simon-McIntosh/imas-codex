@@ -7,11 +7,13 @@ Covers:
 * Physics-domain passthrough to extract_phase only.
 * Stale claim clearing on restart (via reconcile).
 * SNRun finalization with correct stop-reason.
+* SNRun records the invocation that produced it.
 """
 
 from __future__ import annotations
 
 import asyncio
+import json
 import time
 from contextlib import ExitStack
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -602,3 +604,91 @@ class TestFinalizeWithCorrectStatus:
         assert len(finalize_calls) == 1
         # With stop_event set, this is "interrupted".
         assert finalize_calls[0]["status"] in ("completed", "interrupted")
+
+
+# =====================================================================
+# 7. SNRun records how the run was invoked
+# =====================================================================
+
+
+class TestRunInvocationPersisted:
+    @pytest.mark.asyncio
+    async def test_create_sn_run_open_receives_invocation(self) -> None:
+        """The run row must carry argv, resolved knobs, and resolved scope.
+
+        Without them a run that stops on ``no_eligible_work`` cannot be
+        distinguished from one whose scope flags excluded the work.
+        """
+        open_calls: list[dict] = []
+
+        def _create_open(run_id, **kwargs):
+            open_calls.append({"run_id": run_id, **kwargs})
+
+        _mock_gc_ctx = MagicMock()
+        _mock_gc_inst = MagicMock()
+        _mock_gc_inst.query.return_value = [{"cnt": 1}]
+        _mock_gc_ctx.__enter__ = MagicMock(return_value=_mock_gc_inst)
+        _mock_gc_ctx.__exit__ = MagicMock(return_value=False)
+
+        with (
+            patch(
+                f"{_GO}.reconcile_standard_name_sources",
+                return_value={"relinked": 0, "stale_marked": 0, "revived": 0},
+            ),
+            patch(f"{_GO}.create_sn_run_open", side_effect=_create_open),
+            patch(f"{_GO}.finalize_sn_run"),
+            patch(f"{_GO}.release_all_orphan_claims", return_value={"sn": 0, "sns": 0}),
+            patch(f"{_GO}.rederive_structural_edges", return_value={}),
+            patch(f"{_GO}.seed_parent_sources", return_value=0),
+            patch(f"{_GO}.normalize_derived_parent_lifecycle", return_value=0),
+            patch(f"{_GO}.resolve_doc_links", return_value={}),
+            patch(f"{_BM}.start", new_callable=AsyncMock),
+            patch(f"{_BM}.drain_pending", new_callable=AsyncMock, return_value=True),
+            patch(f"{_BM}.get_total_spent", new_callable=AsyncMock, return_value=0.0),
+            patch(_CLAIM_PATCHES["generate_name"], return_value=[]),
+            patch(_CLAIM_PATCHES["generate_docs"], return_value=[]),
+            patch(_CLAIM_PATCHES["review_name"], return_value=[]),
+            patch(_CLAIM_PATCHES["review_docs"], return_value=[]),
+            patch(_CLAIM_PATCHES["refine_name"], return_value=[]),
+            patch(_CLAIM_PATCHES["refine_docs"], return_value=[]),
+            patch(
+                "imas_codex.standard_names.source_refresh.refresh_drifted_sources",
+                return_value={},
+            ),
+            patch(
+                "imas_codex.graph.client.GraphClient",
+                return_value=_mock_gc_ctx,
+            ),
+            patch(
+                "sys.argv",
+                ["imas-codex", "sn", "run", "--only", "review_name", "-c", "80"],
+            ),
+        ):
+            from imas_codex.standard_names.loop import run_sn_pools
+
+            stop = asyncio.Event()
+
+            async def _stop_soon():
+                await asyncio.sleep(0.2)
+                stop.set()
+
+            await asyncio.gather(
+                run_sn_pools(
+                    cost_limit=80.0,
+                    only_pool="review_name",
+                    flush=True,
+                    stop_event=stop,
+                ),
+                _stop_soon(),
+            )
+
+        assert len(open_calls) == 1
+        call = open_calls[0]
+        assert "--only review_name" in call["invocation"]
+
+        flags = json.loads(call["invocation_flags"])
+        assert flags["cost_limit"] == 80.0
+        assert flags["flush"] is True
+
+        scope = json.loads(call["invocation_scope"])
+        assert scope["only_pool"] == "review_name"

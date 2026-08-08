@@ -433,6 +433,39 @@ async def pool_loop(
 # budget saturation.  When every pool has failed to reserve budget this many
 # times in a row, the remaining budget is too small to fund any batch —
 # equivalent to "remaining < smallest batch" but signal-driven.
+#
+# Sizing a budget against this gate
+# ---------------------------------
+# Reservations are worst-case provider exposure, not expected spend, so the
+# budget a run needs is set by what it must *hold*, not by what it will bill.
+# ``model_provider_exposure`` prices one request as
+#
+#     (request_bytes + chat-framing allowance) x prompt_rate / 1e6
+#   + max_output_tokens x completion_rate / 1e6
+#   + per_request_rate
+#
+# and a route absent from the bundled price catalog is priced at the immutable
+# policy ceiling ($20/M prompt, $100/M completion, $1 per request).  Every seat
+# in the current reviewer quorum is such a route, so each review request
+# reserves roughly $6.75 for a 25-name batch: $3.20 of it is the 32k output
+# allowance and $1.00 the per-request charge, neither of which shrinks with a
+# smaller batch.  A name-review batch spends two of those sequentially (the two
+# blind cycles) and a third when the reviewers disagree, so ONE batch needs
+# ~$13.50 to start and ~$20.25 to finish through the escalator.
+#
+# Two consequences that a nominal-looking budget hides:
+#
+# * A budget below one full chain cannot complete a single batch.  The first
+#   cycle reserves, the second cannot, and the batch aborts having billed
+#   nothing — so the run reports zero spend while its work sits eligible.
+# * The failure counter this threshold reads is keyed by PHASE, shared by every
+#   replica of that pool.  A pool running N replicas issues N reservations
+#   against one pot, so a budget funding fewer than N concurrent requests leaves
+#   the surplus replicas failing in a tight claim loop; ten such failures land
+#   within milliseconds, long before an in-flight request can return and reset
+#   the counter.  Keeping the gate honest therefore requires
+#   ``budget >= replicas x per-request exposure``, or a replica count lowered
+#   to match the budget (``IMAS_CODEX_SN_POOLS_<POOL>_REPLICAS``).
 SATURATION_THRESHOLD: int = 10
 
 

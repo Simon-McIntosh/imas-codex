@@ -12031,6 +12031,9 @@ def create_sn_run_open(
     started_at: Any,
     cost_limit: float,
     min_score: float | None = None,
+    invocation: str | None = None,
+    invocation_flags: str | None = None,
+    invocation_scope: str | None = None,
 ) -> None:
     """Pre-create an ``SNRun`` node with ``status='started'``.
 
@@ -12039,6 +12042,12 @@ def create_sn_run_open(
 
     Uses MERGE so repeated calls (e.g. after a retry) are safe.
     Sets ``created_at`` explicitly so the timestamp is never NULL.
+
+    The invocation triple (command line, resolved knobs, resolved scope) is
+    written at creation rather than at finalization so it survives a run that
+    is killed before it can close itself — which is exactly the run whose
+    scope a reader most needs to reconstruct.  See
+    :mod:`imas_codex.standard_names.run_invocation`.
     """
     from imas_codex.graph.models import SNRun
 
@@ -12052,6 +12061,9 @@ def create_sn_run_open(
         min_score=min_score,
         status="started",
         cost_is_exact=True,
+        invocation=invocation,
+        invocation_flags=invocation_flags,
+        invocation_scope=invocation_scope,
     )
     props = run.model_dump(mode="json")
     try:

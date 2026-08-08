@@ -1016,12 +1016,53 @@ async def run_sn_pools(
 
     # Pre-create the SNRun node so LLMCost → FOR_RUN edges have a target.
     from imas_codex.standard_names.graph_ops import create_sn_run_open
+    from imas_codex.standard_names.run_invocation import capture_run_invocation
+
+    # Record how the run was asked to work alongside what it does, so an empty
+    # or budget-starved run can be told apart from one whose scope excluded the
+    # work. Captured from the caller's resolved arguments rather than re-parsed
+    # from the command line, so non-CLI entry points are recorded identically.
+    invocation = capture_run_invocation(
+        flags={
+            "cost_limit": cost_limit,
+            "time_limit_s": time_limit_s,
+            "turn_number": turn_number,
+            "min_score": min_score,
+            "compose_model": compose_model,
+            "escalation_model": escalation_model,
+            "rotation_cap": rotation_cap,
+            "review_name_backlog_cap": review_name_backlog_cap,
+            "review_docs_backlog_cap": review_docs_backlog_cap,
+            "max_sources": max_sources,
+            "source": source,
+            "flush": flush,
+            "names_only": names_only,
+            "docs_only": docs_only,
+            "skip_review": skip_review,
+            "skip_generate": skip_generate,
+        },
+        scope={
+            "domains": list(domains),
+            "only_domain": only_domain,
+            "only_pool": only_pool,
+            "scope_run_id": scope_run_id,
+            "scope_size_hint": scope_size_hint,
+            "drain_scope_id": drain_scope_id,
+            "drain_dd_version": drain_dd_version,
+            "drain_path_count": len(drain_paths) or None,
+            "edits_only": edits_only,
+            "attach_only": attach_only,
+            "reconcile_only": reconcile_only,
+            "skip_global_maintenance": skip_global_maintenance,
+        },
+    )
 
     create_sn_run_open(
         run_id,
         started_at=started,
         cost_limit=cost_limit,
         min_score=min_score,
+        **invocation,
     )
 
     # Post-create assertion: verify the SNRun node exists in the graph.
