@@ -689,6 +689,9 @@ class TestRunInvocationPersisted:
         flags = json.loads(call["invocation_flags"])
         assert flags["cost_limit"] == 80.0
         assert flags["flush"] is True
+        # The budget a pool must hold at once is replicas x per-request
+        # reservation, so the counts belong beside the limit.
+        assert flags["pool_replicas"]["review_name"] > 0
 
         scope = json.loads(call["invocation_scope"])
         assert scope["only_pool"] == "review_name"

@@ -1015,6 +1015,7 @@ async def run_sn_pools(
     await shared_mgr.start()
 
     # Pre-create the SNRun node so LLMCost → FOR_RUN edges have a target.
+    from imas_codex.settings import get_pool_replicas
     from imas_codex.standard_names.graph_ops import create_sn_run_open
     from imas_codex.standard_names.run_invocation import capture_run_invocation
 
@@ -1022,8 +1023,14 @@ async def run_sn_pools(
     # or budget-starved run can be told apart from one whose scope excluded the
     # work. Captured from the caller's resolved arguments rather than re-parsed
     # from the command line, so non-CLI entry points are recorded identically.
+    # Replica counts come from environment overrides as often as from config,
+    # so the command line alone cannot explain a run that starved on budget:
+    # the money a pool must hold at once is its replica count times its
+    # per-request reservation. Record the resolved counts alongside the limit
+    # they are spent against.
     invocation = capture_run_invocation(
         flags={
+            "pool_replicas": {pool: get_pool_replicas(pool) for pool in POOL_NAMES},
             "cost_limit": cost_limit,
             "time_limit_s": time_limit_s,
             "turn_number": turn_number,
