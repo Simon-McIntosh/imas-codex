@@ -8,6 +8,38 @@ import click
 
 logger = logging.getLogger(__name__)
 
+# The proxy runs from an ephemeral `uv tool run` environment, so its
+# dependencies are resolved fresh rather than from a lockfile. Every launch
+# path must request the same set, or they drift apart and only some of them
+# break.
+#
+# fastapi is capped because litellm imports
+# `fastapi.dependencies.utils.get_flat_dependant`, which fastapi removed in
+# 0.140.7 (0.140.6 is the last release that exports it) while litellm's own
+# metadata still accepts any `fastapi>=0.136.3,<1.0`. Without the ceiling a
+# fresh resolve installs a fastapi the proxy cannot import, and the service
+# crash-loops on ImportError at startup. Drop the cap once litellm stops
+# importing the removed symbol.
+_PROXY_REQUIREMENTS = (
+    "litellm[proxy]>=1.81.0",
+    "langfuse>=2.0.0",
+    "prisma>=0.15.0",
+    "fastapi<0.140.7",
+)
+
+
+def _proxy_run_args() -> list[str]:
+    """Return the `--with` arguments for a `uv tool run` argument vector."""
+    args: list[str] = []
+    for requirement in _PROXY_REQUIREMENTS:
+        args += ["--with", requirement]
+    return args
+
+
+def _proxy_run_flags() -> str:
+    """Return the `--with` flags as a shell/unit command-line fragment."""
+    return " ".join(f"--with '{item}'" for item in _PROXY_REQUIREMENTS)
+
 
 def _check_file_permissions() -> None:
     """Warn about insecure file permissions on sensitive files."""
@@ -208,12 +240,7 @@ def _start_llm_foreground(
         uv_path,
         "tool",
         "run",
-        "--with",
-        "litellm[proxy]>=1.81.0",
-        "--with",
-        "langfuse>=2.0.0",
-        "--with",
-        "prisma>=0.15.0",
+        *_proxy_run_args(),
         "--",
         "litellm",
         "--config",
@@ -682,7 +709,7 @@ EnvironmentFile=-{env_file}
 Environment="PATH={Path.home()}/.local/bin:/usr/local/bin:/usr/bin"
 Environment="LITELLM_CALLBACKS=langfuse"
 ExecStartPre=/bin/mkdir -p {log_dir}
-ExecStart={uv_path} tool run --with 'litellm[proxy]>=1.81.0' --with 'langfuse>=2.0.0' -- litellm --config {config_path} --host 0.0.0.0 --port {port}
+ExecStart={uv_path} tool run {_proxy_run_flags()} -- litellm --config {config_path} --host 0.0.0.0 --port {port}
 ExecStop=/bin/kill -15 $MAINPID
 StandardOutput=append:{log_file}
 StandardError=append:{log_file}
@@ -835,8 +862,7 @@ def _deploy_login_llm_direct() -> None:
         f"fi\n"
         f"\n"
         f"exec $HOME/.local/bin/uv tool run "
-        f"  --with 'litellm[proxy]>=1.81.0' --with 'langfuse>=2.0.0' "
-        f"  --with 'prisma>=0.15.0' "
+        f"  {_proxy_run_flags()} "
         f"  -- litellm "
         f"  --config {_PROJECT}/imas_codex/config/litellm_config.yaml "
         f"  --host 0.0.0.0 --port {port} "
@@ -986,7 +1012,7 @@ Environment="PATH=%h/.local/bin:/usr/local/bin:/usr/bin"
 Environment="LITELLM_CALLBACKS=langfuse"
 ExecStartPre=/bin/mkdir -p {_services_h}
 ExecStartPre=-/bin/bash -c 'PG_BIN=$(cat {_services_h}/.pg_bin 2>/dev/null); [ -n "$PG_BIN" ] && [ -x "$PG_BIN/pg_ctl" ] && [ -f {_services_h}/pgdata/PG_VERSION ] && ($PG_BIN/pg_ctl status -D {_services_h}/pgdata >/dev/null 2>&1 || $PG_BIN/pg_ctl start -D {_services_h}/pgdata -w -l {_services_h}/pgdata/log/postgresql.log)'
-ExecStart=%h/.local/bin/uv tool run --with 'litellm[proxy]>=1.81.0' --with 'langfuse>=2.0.0' --with 'prisma>=0.15.0' -- litellm --config {_project_h}/imas_codex/config/litellm_config.yaml --host 0.0.0.0 --port {port}
+ExecStart=%h/.local/bin/uv tool run {_proxy_run_flags()} -- litellm --config {_project_h}/imas_codex/config/litellm_config.yaml --host 0.0.0.0 --port {port}
 ExecStop=/bin/kill -15 $MAINPID
 StandardOutput=append:{_services_h}/llm.log
 StandardError=append:{_services_h}/llm.log

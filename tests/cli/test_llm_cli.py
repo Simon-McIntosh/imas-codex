@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import click
@@ -9,6 +10,7 @@ import httpx
 import pytest
 from click.testing import CliRunner
 
+from imas_codex.cli import llm_cli
 from imas_codex.cli.llm_cli import (
     _check_file_permissions,
     _llm_headers,
@@ -524,3 +526,44 @@ class TestLlmStatusDeep:
 
         result = runner.invoke(llm, ["status", "--deep"])
         assert "billable" in result.output.lower() or "LLM API calls" in result.output
+
+
+class TestProxyRequirements:
+    """Every launch path must request one identical dependency set.
+
+    The proxy resolves its dependencies fresh on each start rather than from a
+    lockfile, so an unconstrained requirement silently picks up a release that
+    breaks the import — and a spec duplicated per launch path means only some
+    of them get fixed.
+    """
+
+    def test_the_requirement_set_is_declared_once(self):
+        source = Path(llm_cli.__file__).read_text()
+        assert source.count("litellm[proxy]") == 1, (
+            "the litellm requirement is spelled out more than once; launch "
+            "paths must share _PROXY_REQUIREMENTS or they will drift"
+        )
+
+    def test_fastapi_is_capped_below_the_release_that_dropped_the_import(self):
+        # litellm imports fastapi.dependencies.utils.get_flat_dependant, which
+        # fastapi removed in 0.140.7.
+        capped = [
+            item for item in llm_cli._PROXY_REQUIREMENTS if item.startswith("fastapi")
+        ]
+        assert capped == ["fastapi<0.140.7"]
+
+    def test_both_renderings_carry_every_requirement(self):
+        flags = llm_cli._proxy_run_flags()
+        args = llm_cli._proxy_run_args()
+        for requirement in llm_cli._PROXY_REQUIREMENTS:
+            assert f"'{requirement}'" in flags
+            assert requirement in args
+        assert args.count("--with") == len(llm_cli._PROXY_REQUIREMENTS)
+
+    def test_requirements_are_quoted_so_specifiers_survive_a_shell(self):
+        # The launcher script is executed by bash, where an unquoted '<' would
+        # redirect input instead of bounding the version.
+        for fragment in llm_cli._proxy_run_flags().split("--with "):
+            if fragment.strip():
+                assert fragment.strip().startswith("'")
+                assert fragment.strip().endswith("'")
