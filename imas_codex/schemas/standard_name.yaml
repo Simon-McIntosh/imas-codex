@@ -935,11 +935,12 @@ classes:
         range: string
       review_quorum_shortfall:
         description: >-
-          Why a score at or above the acceptance threshold did not accept
-          the name. Null on every quorate review. A non-null value means
-          the reviewer chain lost seats, so the name holds at
-          ``name_stage='reviewed'`` until ``sn rescore`` re-reviews it
-          against a healthy chain.
+          Why the most recent name-axis score was not acted on. Null on
+          every quorate review. A non-null value means the reviewer chain
+          did not reach a verdict, so the score neither accepts the name
+          nor buys a refine rotation to rewrite it — refine eligibility
+          skips any name carrying it. Cleared by the next quorate review;
+          ``sn rescore`` is the recovery.
         range: string
       review_quorum_shortfall_at:
         description: >-
