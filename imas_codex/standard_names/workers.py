@@ -5480,7 +5480,20 @@ async def compose_batch(
     phase_tag = "regen" if regen else "generate_name"
     lease = mgr.reserve(maximum_exposure, phase=phase_tag)
     if lease is None:
-        return []
+        # Signal the refusal rather than returning a count, matching the
+        # review path. Returning would leave the batch's sources claimed with
+        # nothing to release them until the claim ages out, so every replica
+        # would spin on empty claims while the pool showed pending work — a
+        # stall, not a budget verdict. Raising routes through the pool's
+        # release hook, which frees the sources for the next attempt, and each
+        # refused reservation advances the saturation counter so the run exits
+        # promptly on the reason that actually stopped it.
+        from imas_codex.standard_names.budget import BudgetExceeded
+
+        raise BudgetExceeded(
+            f"{phase_tag} batch of {len(batch)} has no reservable provider "
+            f"exposure (${maximum_exposure:.4f} required)"
+        )
 
     try:
         # ── Bounded retry loop for failed compositions ─────────────────

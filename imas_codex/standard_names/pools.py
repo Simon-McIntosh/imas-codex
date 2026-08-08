@@ -378,6 +378,17 @@ async def pool_loop(
         # ── Process ───────────────────────────────────────────────
         try:
             count = await spec.process(batch)
+            # A processor returning anything but a count violates ProcessFn,
+            # and adding it straight into the counter surfaces that violation
+            # as an arithmetic error several frames from its cause. Name the
+            # pool and the offending type instead; the handler below then
+            # releases the claim on the ordinary error path.
+            if isinstance(count, bool) or not isinstance(count, int):
+                raise TypeError(
+                    f"{spec.name} batch processor returned "
+                    f"{type(count).__name__}, expected an int count of "
+                    "processed items"
+                )
             spec.health.total_processed += count
             spec.health.mark_progress()
             logger.debug("%s processed %d items", tag, count)

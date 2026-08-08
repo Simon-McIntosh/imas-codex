@@ -479,6 +479,45 @@ class TestPoolComposeRetry:
 
         assert mgr.reserved == pytest.approx(EPSILON)
 
+    @pytest.mark.asyncio
+    async def test_unfundable_batch_signals_the_refusal(
+        self, _patch_compose_deps
+    ) -> None:
+        """A refused reservation raises rather than returning.
+
+        Returning would leave the batch's sources claimed with nothing to
+        release them until the claim ages out, so the pool would spin on empty
+        claims while still showing pending work. Raising routes through the
+        pool's release hook and lets the saturation counter advance, so the run
+        exits on the reason that actually stopped it.
+        """
+        from imas_codex.standard_names.budget import BudgetExceeded
+        from imas_codex.standard_names.workers import compose_batch
+
+        class _UnfundableBudgetManager(_FakeBudgetManager):
+            def reserve(self, amount, phase=""):
+                return None
+
+        llm_calls = 0
+
+        async def mock_llm(*_args, **_kwargs):
+            nonlocal llm_calls
+            llm_calls += 1
+            return _FakeLLMOut(_FakeBatchResult([]))
+
+        with (
+            patch("imas_codex.discovery.base.llm.acall_llm_structured", mock_llm),
+            patch("imas_codex.standard_names.workers._retry_attempts", return_value=1),
+            pytest.raises(BudgetExceeded, match="no reservable provider exposure"),
+        ):
+            await compose_batch(
+                [_make_batch_item()],
+                _UnfundableBudgetManager(),
+                asyncio.Event(),
+            )
+
+        assert llm_calls == 0, "an unfunded batch must not reach the provider"
+
 
 if __name__ == "__main__":  # pragma: no cover
     pytest.main([__file__, "-v"])

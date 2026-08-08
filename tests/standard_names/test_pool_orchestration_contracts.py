@@ -633,6 +633,63 @@ class TestPoolLoopReleaseOnFailure:
         stop.set()
         await asyncio.wait_for(task, timeout=2.0)  # must not raise
 
+    @pytest.mark.asyncio
+    async def test_pool_loop_names_a_non_count_process_return(self) -> None:
+        """A processor returning a collection is reported as a contract fault.
+
+        Adding the return value straight into the progress counter reports the
+        fault as an arithmetic error several frames from its cause, which is
+        how a budget refusal that returned an empty list read as a crash.
+        """
+        mgr = _mock_mgr()
+        stop = asyncio.Event()
+
+        batch_payload = {"items": [{"id": "sn-bad-return"}]}
+        claims_iter = [batch_payload, None]
+        released = {"n": 0}
+
+        async def claim() -> dict | None:
+            return claims_iter.pop(0) if claims_iter else None
+
+        async def process(batch: dict):
+            return []  # violates the int contract
+
+        async def release(batch: dict) -> None:
+            released["n"] += 1
+
+        spec = PoolSpec(
+            name="generate_name",
+            claim=claim,
+            process=process,
+            release=release,
+        )
+        spec.health.pending_count = 1
+        spec._replica_backoffs[0].base = 0.05
+        spec._replica_backoffs[0].cap = 0.1
+        spec._replica_backoffs[0].reset()
+
+        task = asyncio.create_task(
+            pool_loop(
+                spec,
+                mgr,
+                stop,
+                active_pools_fn=lambda: {"generate_name"},
+                admission_poll=0.05,
+            )
+        )
+        await asyncio.sleep(0.3)
+        stop.set()
+        await asyncio.wait_for(task, timeout=2.0)
+
+        assert spec.health.error_count >= 1
+        assert spec.health.total_processed == 0
+        assert released["n"] >= 1, "the claim must still be released"
+        # The recorded error must name the pool and the offending type rather
+        # than the arithmetic that happened to expose them.
+        assert "generate_name batch processor returned list" in (
+            spec.health.last_error or ""
+        )
+
 
 # ---------------------------------------------------------------------------
 # Skeleton sweep runs on an open GraphClient
