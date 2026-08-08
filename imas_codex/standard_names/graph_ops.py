@@ -15228,6 +15228,56 @@ def persist_refined_name(
     )
 
 
+_GENERATED_SUPERSESSION_PREFLIGHT_QUERY = """
+// GENERATED_SUPERSESSION_PREFLIGHT
+UNWIND $pairs AS pr
+OPTIONAL MATCH (src:IMASNode {id: pr.source_id})
+OPTIONAL MATCH (new:StandardName {id: pr.new_name})
+// The recomposed source itself, resolved through its DD edge rather than by
+// rebuilding the composite id. One DD path can anchor several sources — a
+// renamed path keeps a source under its superseded spelling alongside the
+// current one — so the successor binding this pass just wrote is what singles
+// the recomposed source out of them. Without it every alias reaches the
+// predecessor, none of them can be told apart, and the batch aborts.
+OPTIONAL MATCH (trigger:StandardNameSource)-[:FROM_DD_PATH]->(src)
+WHERE EXISTS { (trigger)-[:PRODUCED_NAME]->(new) }
+OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(old:StandardName)
+WHERE old.id <> pr.new_name
+  AND NOT coalesce(old.name_stage, '') IN
+      ['superseded', 'exhausted', 'contested', 'approved']
+  AND old.catalog_pr_number IS NULL
+  AND coalesce(old.origin, 'pipeline') <> 'derived'
+// Skip self and any case where old already descends from new
+// along the REFINED_FROM chain (would form a cycle).
+  AND new.id <> old.id
+  AND NOT (old)-[:REFINED_FROM*1..]->(new)
+WITH pr, src, new, trigger, old
+OPTIONAL MATCH (source:StandardNameSource)
+WHERE old IS NOT NULL
+  AND ((source)-[:PRODUCED_NAME]->(old)
+       OR source.produced_sn_id = old.id
+       OR (source)-[:PRODUCED_NAME]->(new))
+// A live successor edge is what a composer emits, so it is the one fact that
+// says this pairing was judged. Everything else reaches the predecessor only
+// through the predecessor.
+WITH pr, src, new, trigger, old, source,
+     EXISTS { (source)-[:PRODUCED_NAME]->(new) } AS judged
+RETURN pr.source_id AS requested_source_id,
+       pr.new_name AS new_name,
+       src IS NOT NULL AS requested_source_exists,
+       new IS NOT NULL AS successor_exists,
+       trigger.id AS trigger_source_id,
+       old.id AS old_name,
+       old.name_stage AS old_stage,
+       [source_id IN collect(DISTINCT
+          CASE WHEN judged THEN source.id END)
+        WHERE source_id IS NOT NULL] AS judged_source_ids,
+       [source_id IN collect(DISTINCT
+          CASE WHEN judged THEN null ELSE source.id END)
+        WHERE source_id IS NOT NULL] AS retained_source_ids
+"""
+
+
 @retry_on_deadlock()
 def supersede_prior_source_names(
     pairs: list[dict[str, str]],
@@ -15270,13 +15320,36 @@ def supersede_prior_source_names(
       axis resolved to a single name while another stayed split across two.
       Publication, not origin, is what makes catalog content untouchable.
 
-    Before changing lifecycle, lineage, or provenance, the helper discovers
-    the complete semantic-source set for every predecessor-to-successor pair
-    and requires the canonical attachment guard to admit every pairing.  It
-    then retargets exactly that set and compare-and-sets the predecessor state
-    before marking it superseded.  A missing source, guard rejection, partial
-    move, or concurrent drift raises so the caller-owned transaction rolls the
-    generated successor and every associated mutation back together.
+    **Only a source a composer already bound to the successor carries its
+    provenance across.** A standard name is a stable semantic identity and a
+    source is provenance for it, so the only evidence that a source realizes
+    the successor is that something judged the pairing: the recomposed source
+    itself, and any source already producing the successor. Every other source
+    still realizing the predecessor is enumerated and left exactly where it is.
+    Migrating them wholesale — retargeting a predecessor's entire population
+    because one of its sources recomposed — stamps one source's new identity
+    onto sources no composer and no reviewer ever judged against it, and is how
+    a diagnostic line-of-sight name came to carry a conductor cross-section and
+    a field-map grid axis. Unit and dimension agreement cannot catch it: both
+    sides are metres.
+
+    Before changing lifecycle, lineage, or provenance, the helper discovers the
+    judged source set for every predecessor-to-successor pair and requires the
+    canonical attachment guard to admit every pairing.  It then retargets
+    exactly that set and compare-and-sets the predecessor state before marking
+    it superseded.  A missing source, guard rejection, partial move, or
+    concurrent drift raises so the caller-owned transaction rolls the generated
+    successor and every associated mutation back together.
+
+    A predecessor the judged set does not drain is **not** superseded. It stays
+    live, carrying exactly the sources that still realize it, each of which
+    still holds one live name — so the ``one source → at most one
+    non-superseded pipeline name`` invariant holds for every source including
+    the recomposed one, and no row is stranded. The refusal is recorded as a
+    ``supersession_deferred`` entry in the change ledger naming both names and
+    the retained count, so a split awaiting convergence is enumerable rather
+    than silent. Convergence is then an explicit act: recompose the retained
+    sources, or fold the names with :func:`tombstone_supersede_into`.
 
     For each superseded predecessor the helper marks it
     ``name_stage='superseded'``, clears its claim, and creates a
@@ -15304,36 +15377,7 @@ def supersede_prior_source_names(
     def _apply(query_handle: Any) -> int:
         preflight_rows = list(
             query_handle.query(
-                """
-                // GENERATED_SUPERSESSION_PREFLIGHT
-                UNWIND $pairs AS pr
-                OPTIONAL MATCH (src:IMASNode {id: pr.source_id})
-                OPTIONAL MATCH (new:StandardName {id: pr.new_name})
-                OPTIONAL MATCH (src)-[:HAS_STANDARD_NAME]->(old:StandardName)
-                WHERE old.id <> pr.new_name
-                  AND NOT coalesce(old.name_stage, '') IN
-                      ['superseded', 'exhausted', 'contested', 'approved']
-                  AND old.catalog_pr_number IS NULL
-                  AND coalesce(old.origin, 'pipeline') <> 'derived'
-                // Skip self and any case where old already descends from new
-                // along the REFINED_FROM chain (would form a cycle).
-                  AND new.id <> old.id
-                  AND NOT (old)-[:REFINED_FROM*1..]->(new)
-                WITH pr, src, new, old
-                OPTIONAL MATCH (source:StandardNameSource)
-                WHERE old IS NOT NULL
-                  AND ((source)-[:PRODUCED_NAME]->(old)
-                       OR source.produced_sn_id = old.id
-                       OR (source)-[:PRODUCED_NAME]->(new))
-                RETURN pr.source_id AS requested_source_id,
-                       pr.new_name AS new_name,
-                       src IS NOT NULL AS requested_source_exists,
-                       new IS NOT NULL AS successor_exists,
-                       old.id AS old_name,
-                       old.name_stage AS old_stage,
-                       [source_id IN collect(DISTINCT source.id)
-                        WHERE source_id IS NOT NULL] AS source_ids
-                """,
+                _GENERATED_SUPERSESSION_PREFLIGHT_QUERY,
                 pairs=normalized_pairs,
             )
             or []
@@ -15380,11 +15424,16 @@ def supersede_prior_source_names(
             if not old_name:
                 continue
             new_name = row["new_name"]
-            source_ids = sorted(set(row.get("source_ids") or []))
-            if not source_ids:
+            source_ids = sorted(set(row.get("judged_source_ids") or []))
+            trigger_source_id = row.get("trigger_source_id")
+            if not trigger_source_id or trigger_source_id not in source_ids:
+                # The recomposed source is the one pairing this pass produced
+                # evidence for. Without it there is nothing to carry across and
+                # the predecessor binding it still holds would go unresolved.
                 raise RuntimeError(
-                    "generated-name supersession preflight found predecessor "
-                    f"{old_name!r} without a semantic source"
+                    "generated-name supersession preflight found no successor "
+                    f"binding for the recomposed source of {old_name!r} -> "
+                    f"{new_name!r}"
                 )
             key = (old_name, new_name)
             plan = plans_by_pair.setdefault(
@@ -15394,6 +15443,7 @@ def supersede_prior_source_names(
                     "new_name": new_name,
                     "old_stage": row.get("old_stage"),
                     "source_ids": [],
+                    "retained_source_ids": [],
                 },
             )
             if plan["old_stage"] != row.get("old_stage"):
@@ -15402,6 +15452,10 @@ def supersede_prior_source_names(
                     f"during preflight for {old_name!r}"
                 )
             plan["source_ids"] = sorted(set(plan["source_ids"]) | set(source_ids))
+            plan["retained_source_ids"] = sorted(
+                set(plan["retained_source_ids"])
+                | set(row.get("retained_source_ids") or [])
+            )
             winners_by_old.setdefault(old_name, set()).add(new_name)
 
         conflicting = {
@@ -15441,6 +15495,7 @@ def supersede_prior_source_names(
                 )
 
         from imas_codex.standard_names.provenance_lifecycle import (
+            record_standard_name_change,
             retarget_standard_name_sources,
         )
 
@@ -15460,6 +15515,58 @@ def supersede_prior_source_names(
                     f"supersession: expected {expected}, moved {moved} for "
                     f"{plan['old_name']} -> {plan['new_name']}"
                 )
+
+        deferred = [plan for plan in plans if plan["retained_source_ids"]]
+        drained = [plan for plan in plans if not plan["retained_source_ids"]]
+        if deferred:
+            # The retarget rebuilds the successor's path projection from the
+            # set it moved and empties the predecessor's. A predecessor that
+            # stays live must get its own projection back, rebuilt from the
+            # bindings it still holds.
+            query_handle.query(
+                """
+                UNWIND $names AS old_name
+                MATCH (old:StandardName {id: old_name})
+                OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(old)
+                OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+                OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+                WITH old, collect(DISTINCT CASE
+                       WHEN source IS NULL THEN null
+                       WHEN dd IS NOT NULL THEN 'dd:' + dd.id
+                       WHEN signal IS NOT NULL THEN signal.id
+                       WHEN source.source_type = 'derived'
+                        AND source.source_id STARTS WITH 'derived:'
+                       THEN source.source_id
+                       ELSE source.id END) AS paths
+                SET old.source_paths = [p IN paths WHERE p IS NOT NULL]
+                """,
+                names=sorted({plan["old_name"] for plan in deferred}),
+            )
+            for plan in deferred:
+                retained = plan["retained_source_ids"]
+                record_standard_name_change(
+                    query_handle,
+                    plan["old_name"],
+                    plan["new_name"],
+                    operation="supersession_deferred",
+                    reason=(
+                        f"{len(retained)} source(s) still realize "
+                        f"{plan['old_name']} and were never judged against "
+                        f"{plan['new_name']}; the predecessor stays live rather "
+                        "than carrying them across"
+                    ),
+                    origin="generated_name_supersession",
+                )
+                logger.warning(
+                    "supersede_prior_source_names: %s kept live — %d source(s) "
+                    "not judged against %s (%s)",
+                    plan["old_name"],
+                    len(retained),
+                    plan["new_name"],
+                    ", ".join(retained[:5]),
+                )
+        if not drained:
+            return 0
 
         rows = list(
             query_handle.query(
@@ -15553,16 +15660,24 @@ def supersede_prior_source_names(
                 MERGE (new)-[:REFINED_FROM]->(old)
                 RETURN old.id AS old_name, new.id AS new_name
                 """,
-                plans=plans,
+                plans=[
+                    {
+                        "old_name": plan["old_name"],
+                        "new_name": plan["new_name"],
+                        "old_stage": plan["old_stage"],
+                        "source_ids": plan["source_ids"],
+                    }
+                    for plan in drained
+                ],
             )
             or []
         )
-        expected_results = {(plan["old_name"], plan["new_name"]) for plan in plans}
+        expected_results = {(plan["old_name"], plan["new_name"]) for plan in drained}
         actual_results = {(row.get("old_name"), row.get("new_name")) for row in rows}
-        if actual_results != expected_results or len(rows) != len(plans):
+        if actual_results != expected_results or len(rows) != len(drained):
             raise RuntimeError(
                 "generated-name supersession state changed before lifecycle "
-                f"finalization: expected {len(plans)}, finalized {len(rows)}"
+                f"finalization: expected {len(drained)}, finalized {len(rows)}"
             )
         for row in rows:
             logger.info(
