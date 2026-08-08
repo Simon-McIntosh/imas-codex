@@ -45,7 +45,6 @@ def _params(name_id: str, dd_version: str) -> dict[str, object]:
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         "facility": None,
         "drain_scope_id": None,
-        "west_source_ids": [],
         "fixture_source_id_prefix": "dd:test_review_entry__",
     }
 

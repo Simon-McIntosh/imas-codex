@@ -1122,8 +1122,8 @@ def load_terminal_attachment_recovery_manifest(
             "expected_relationship_ids_hash",
         ):
             _require_terminal_recovery_sha(row[field_name], field_name)
-        if row["west_intersection"] != 0 or row["test_intersection"] != 0:
-            raise ValueError("WEST and test intersections must both be exactly zero")
+        if row["test_intersection"] != 0:
+            raise ValueError("test intersection must be exactly zero")
         normalized_rows.append(copy.deepcopy(row))
     normalized_rows.sort(key=lambda item: item["source_id"])
     source_ids = tuple(str(row["source_id"]) for row in normalized_rows)
@@ -1208,11 +1208,15 @@ def _terminal_recovery_relationship_descriptors(
 
 
 def _terminal_recovery_protected_reasons(row: dict[str, Any]) -> list[str]:
-    west = False
+    """Refuse recovery into immutable closures.
+
+    Persistent test fixtures are immutable.  Facility batch membership is
+    ordinary repairable state and yields no reason.
+    """
     fixture = False
 
     def visit(value: Any, key: str = "") -> None:
-        nonlocal west, fixture
+        nonlocal fixture
         if isinstance(value, dict):
             for child_key, child in value.items():
                 visit(child, str(child_key))
@@ -1225,10 +1229,7 @@ def _terminal_recovery_protected_reasons(row: dict[str, Any]) -> list[str]:
             return
         normalized = value.casefold()
         normalized_key = key.casefold()
-        if normalized_key in {"facility", "facility_id"} and normalized == "west":
-            west = True
         if normalized_key in {"id", "other_id", "source_id"}:
-            west = west or normalized.startswith(("west:", "signals:west:"))
             fixture = fixture or normalized.startswith(
                 ("fixture:", "test:", "signals:test:")
             )
@@ -1239,12 +1240,7 @@ def _terminal_recovery_protected_reasons(row: dict[str, Any]) -> list[str]:
             fixture = True
 
     visit(row)
-    reasons: list[str] = []
-    if west:
-        reasons.append("current graph closure intersects WEST")
-    if fixture:
-        reasons.append("current graph closure intersects test fixtures")
-    return reasons
+    return ["current graph closure intersects test fixtures"] if fixture else []
 
 
 def _terminal_recovery_preserved_payload(

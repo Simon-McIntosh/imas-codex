@@ -131,10 +131,22 @@ def test_manifest_refuses_duplicates_unknown_actions_and_protected_rows(
         load_structural_closure_manifest(unknown)
 
     protected_row = _row()
-    protected_row["west_intersection"] = 1
+    protected_row["test_intersection"] = 1
     protected = _write(tmp_path / "protected.json", [protected_row])
-    with pytest.raises(ValueError, match="intersections"):
+    with pytest.raises(ValueError, match="test intersection"):
         load_structural_closure_manifest(protected)
+
+
+def test_manifest_admits_a_facility_batch_intersection(tmp_path: Path) -> None:
+    """Facility batch membership is recorded evidence, never a refusal."""
+    facility_row = _row()
+    facility_row["west_intersection"] = 1
+
+    manifest = load_structural_closure_manifest(
+        _write(tmp_path / "facility.json", [facility_row])
+    )
+
+    assert manifest.rows[0]["west_intersection"] == 1
 
 
 def test_manifest_refuses_overlapping_destructive_targets(tmp_path: Path) -> None:
@@ -1308,7 +1320,7 @@ def test_claimed_unit_and_dd_participants_refuse_without_mutation(
 
 
 @pytest.mark.graph
-def test_generic_protected_participant_property_refuses_without_mutation(
+def test_facility_batch_participant_is_recorded_and_still_actionable(
     tmp_path: Path, structural_graph: GraphClient
 ) -> None:
     _seed_vector_parent(structural_graph)
@@ -1318,10 +1330,48 @@ def test_generic_protected_participant_property_refuses_without_mutation(
         rows[0],
         root_id="magnetic_field",
         expected_actions=[MATERIALIZE_ADMISSIBLE_PARENT],
-        reason="refuse protected structural participants",
+        reason="record the facility batch intersection",
+    )
+    assert manifest_row["west_intersection"] == 1
+
+    manifest, _ = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {"magnetic_field": {"expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT]}},
+    )
+    receipt = closure.reconcile_structural_closure(manifest, gc=structural_graph)
+
+    assert receipt["rows"][0]["status"] == "planned"
+    assert receipt["rows"][0]["unresolved"] == []
+
+
+@pytest.mark.graph
+def test_test_fixture_participant_refuses_without_mutation(
+    tmp_path: Path, structural_graph: GraphClient
+) -> None:
+    _seed_vector_parent(structural_graph)
+    manifest, _ = _bound_manifest(
+        tmp_path,
+        structural_graph,
+        {"magnetic_field": {"expected_actions": [MATERIALIZE_ADMISSIBLE_PARENT]}},
+    )
+    structural_graph.query(
+        "MATCH (source:StandardNameSource {id: 'derived:radial_magnetic_field'}) "
+        "SET source.origin = 'fixture'"
     )
 
-    assert manifest_row["west_intersection"] == 1
+    receipt = closure.reconcile_structural_closure(manifest, gc=structural_graph)
+
+    assert receipt["rows"][0]["status"] == "refused"
+    assert (
+        "structural closure intersects test fixtures"
+        in (receipt["rows"][0]["unresolved"])
+    )
+    assert receipt["events"] == []
+    assert structural_graph.query(
+        "MATCH (:StandardNameSource {id: 'derived:magnetic_field'}) "
+        "RETURN count(*) AS sources"
+    ) == [{"sources": 0}]
 
 
 @pytest.mark.graph

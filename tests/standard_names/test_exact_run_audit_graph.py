@@ -51,7 +51,6 @@ def test_disposable_graph_compiles_all_bounded_queries_without_global_scans() ->
         "dd_version": "4.1.1",
         "launched_at": "2026-08-04T00:00:00+00:00",
         "completed_at": "2026-08-04T00:05:00+00:00",
-        "west_source_ids": [],
         "fixture_source_id_prefix": "dd:test_review_entry__",
     }
     plans: dict[str, list[str]] = {}

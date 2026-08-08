@@ -70,11 +70,10 @@ def test_allowlist_is_exact_and_excludes_deferred_or_defect_sources(
         tmp_path / "bounded.json",
         [
             _record("dd:kept/path"),
-            _record("dd:west/path", west=True),
             _record("dd:test/path", test=True),
             _record("dd:record/defect", next_operator="DDGap_flag"),
             _record("dd:declared/defect"),
-            _record("dd:deferred/path", scope_status="deferred_west_closure"),
+            _record("dd:deferred/path", scope_status="deferred_review"),
             _record("signals:facility:not-dd"),
         ],
     )
@@ -89,22 +88,31 @@ def test_allowlist_is_exact_and_excludes_deferred_or_defect_sources(
         "non_dd": 1,
         "non_executable": 1,
         "test": 1,
-        "west": 2,
     }
-    assert allowlist.excluded_source_ids["west"] == (
-        "dd:deferred/path",
-        "dd:west/path",
+    assert allowlist.excluded_source_ids["test"] == ("dd:test/path",)
+
+
+def test_allowlist_admits_facility_batch_sources(tmp_path: Path) -> None:
+    """Facility batch membership is repairable, so it never subtracts a source."""
+    manifest = _write_manifest(
+        tmp_path / "bounded.json",
+        [_record("dd:kept/path"), _record("dd:facility/path", west=True)],
     )
 
+    allowlist = load_source_snapshot_allowlist(manifest)
 
-@pytest.mark.parametrize("protected_kind", ["west", "test"])
+    assert allowlist.source_ids == ("dd:facility/path", "dd:kept/path")
+    assert "west" not in allowlist.excluded_counts
+    assert "west" not in allowlist.excluded_source_ids
+
+
 @pytest.mark.parametrize("protected_first", [False, True])
 def test_allowlist_globally_subtracts_protected_source_regardless_of_order(
-    tmp_path: Path, protected_kind: str, protected_first: bool
+    tmp_path: Path, protected_first: bool
 ) -> None:
     duplicate = "dd:duplicated/protected"
     clean = _record(duplicate)
-    protected = _record(duplicate, **{protected_kind: True})
+    protected = _record(duplicate, test=True)
     duplicate_records = [protected, clean] if protected_first else [clean, protected]
     manifest = _write_manifest(
         tmp_path / "bounded.json",
@@ -114,8 +122,8 @@ def test_allowlist_globally_subtracts_protected_source_regardless_of_order(
     allowlist = load_source_snapshot_allowlist(manifest)
 
     assert allowlist.source_ids == ("dd:kept/path",)
-    assert allowlist.excluded_counts[protected_kind] == 1
-    assert allowlist.excluded_source_ids[protected_kind] == (duplicate,)
+    assert allowlist.excluded_counts["test"] == 1
+    assert allowlist.excluded_source_ids["test"] == (duplicate,)
 
 
 def test_allowlist_subtracts_sources_protected_by_special_check(tmp_path: Path) -> None:
@@ -125,16 +133,16 @@ def test_allowlist_subtracts_sources_protected_by_special_check(tmp_path: Path) 
     )
     payload = json.loads(manifest.read_text())
     payload["special_checks"]["protected_source"] = {
-        "classification": "deferred_west_closure",
+        "classification": "deferred_test_closure",
         "source_id": "dd:special/protected",
-        "target_identity_west_closure": True,
+        "target_identity_test_closure": True,
     }
     manifest.write_text(json.dumps(payload))
 
     allowlist = load_source_snapshot_allowlist(manifest)
 
     assert allowlist.source_ids == ("dd:kept/path",)
-    assert allowlist.excluded_source_ids["west"] == ("dd:special/protected",)
+    assert allowlist.excluded_source_ids["test"] == ("dd:special/protected",)
 
 
 @pytest.mark.parametrize(
@@ -432,8 +440,8 @@ def test_receipt_bytes_remain_stable_for_one_exact_row() -> None:
         source_ids=("dd:diagnostic/path",),
         paths=("diagnostic/path",),
         allowlist_hash="b" * 64,
-        excluded_counts={"west": 1},
-        excluded_source_ids={"west": ("dd:west/path",)},
+        excluded_counts={"test": 1},
+        excluded_source_ids={"test": ("dd:test/path",)},
     )
     planned = [
         {
@@ -461,11 +469,11 @@ def test_receipt_bytes_remain_stable_for_one_exact_row() -> None:
 
     assert (
         sha256(receipt_bytes).hexdigest()
-        == "89c8fd1b70312d9c1e8e2a88094b912f34366dd2c641e05e3edc750aaced5e87"
+        == "cddeae3708bbf075e0d5d899a24cf85cd431b90ebcd2e96bf58b73189c4c50a4"
     )
     assert (
         receipt["receipt_hash"]
-        == "2ac66ca5db4f4b004a5074bcce530b21beee34a5bb5196c32c0a30ae625ae8ac"
+        == "11e802cf7f4b7684a5fdd1123fcbfa9d4e4bcea2fe4f0cf546e278dcff916739"
     )
 
 

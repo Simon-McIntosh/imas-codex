@@ -441,10 +441,16 @@ def test_manifest_rejects_protected_and_nonexact_rows(tmp_path: Path) -> None:
     row = _minimal_manifest_row(
         reconciliation.REPAIR_IDENTITY_SCALAR, "dd:diagnostic/path"
     )
-    row["west_intersection"] = 1
+    row["test_intersection"] = 1
     manifest = _write_manifest(tmp_path / "protected.json", [row])
-    with pytest.raises(ValueError, match="intersections"):
+    with pytest.raises(ValueError, match="test intersection"):
         reconciliation.load_source_authority_manifest(manifest)
+
+    row["test_intersection"] = 0
+    row["west_intersection"] = 1
+    manifest = _write_manifest(tmp_path / "facility.json", [row])
+    loaded = reconciliation.load_source_authority_manifest(manifest)
+    assert loaded.rows[0]["west_intersection"] == 1
 
     row["west_intersection"] = 0
     row["unexpected"] = True
@@ -991,13 +997,13 @@ def test_unit_cache_refuses_protected_direct_source_but_not_target_producer() ->
     protection = row["target_protection"]
     protection["targets"][0]["matches"][0]["producers"].append(
         {
-            "source_element_id": "west-source-element",
+            "source_element_id": "fixture-source-element",
             "source_labels": ["StandardNameSource"],
             "source_properties": {
-                "id": "signals:west:diagnostic/value",
+                "id": "fixture:diagnostic/value",
                 "source_type": "signal",
             },
-            "binding_element_id": "west-binding",
+            "binding_element_id": "fixture-binding",
             "binding_properties": {},
         }
     )
@@ -1017,7 +1023,7 @@ def test_unit_cache_refuses_protected_direct_source_but_not_target_producer() ->
     assert plans[0]["status"] == "planned"
 
     protection["direct_sources"][0]["matches"][0]["properties"]["id"] = (
-        "signals:west:diagnostic/value"
+        "fixture:diagnostic/value"
     )
     _, protected_refusals = reconciliation._plan_rows(
         [row],
@@ -1028,7 +1034,10 @@ def test_unit_cache_refuses_protected_direct_source_but_not_target_producer() ->
         run_id="run",
         changed_at="2026-08-03T00:00:00+00:00",
     )
-    assert "direct source identity intersects WEST" in protected_refusals[0]["reasons"]
+    assert (
+        "direct source identity intersects test fixtures"
+        in protected_refusals[0]["reasons"]
+    )
 
 
 def test_unit_cache_idempotence_requires_exact_immutable_event() -> None:

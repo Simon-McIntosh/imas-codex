@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from decimal import Decimal
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -52,7 +52,6 @@ def _target_row(*, element_id: str = "target-1") -> dict:
                 "backing_unit_ids": ["rad"],
                 "projection_ids": ["projection-1"],
                 "per_path_cocos_label": None,
-                "west": False,
                 "fixture": False,
             }
         ],
@@ -156,18 +155,14 @@ def _run_row() -> dict:
 def _audit(query_results: list[object]):
     client = MagicMock()
     client.query.side_effect = query_results
-    with patch(
-        "imas_codex.standard_names.grammar_segment_reconciliation._west_source_ids",
-        return_value=frozenset(),
-    ):
-        receipt = audit_exact_standard_name_run(
-            _NAME_ID,
-            _SCOPE,
-            _RUN_ID[:12],
-            _LAUNCH,
-            _COMPLETE,
-            gc=client,
-        )
+    receipt = audit_exact_standard_name_run(
+        _NAME_ID,
+        _SCOPE,
+        _RUN_ID[:12],
+        _LAUNCH,
+        _COMPLETE,
+        gc=client,
+    )
     return receipt, client
 
 

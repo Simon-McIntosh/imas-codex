@@ -247,10 +247,10 @@ def test_mixed_current_and_pending_cohort_is_not_an_atomic_apply_candidate() -> 
     transaction.rollback.assert_called_once()
 
 
-def test_refuses_unparseable_nonlive_west_and_fixture_rows() -> None:
+def test_refuses_unparseable_nonlive_and_fixture_rows() -> None:
     candidate = _candidate(_NAMES[0])
     candidate["properties"]["name_stage"] = "superseded"
-    candidate["relationships"][0]["other_id"] = "signals:west:fixture:one"
+    candidate["relationships"][0]["other_id"] = "signals:west:one"
     manifest = _manifest([candidate])
     with patch.object(
         reconciliation,
@@ -268,7 +268,7 @@ def test_refuses_unparseable_nonlive_west_and_fixture_rows() -> None:
     reasons = refusals[0]["reasons"]
     assert "standard name is not live" in reasons
     assert "strict public ISN parser rejected the canonical name" in reasons
-    assert "current graph closure intersects WEST" in reasons
+    assert not any("intersects" in reason for reason in reasons)
 
     fixture = copy.deepcopy(candidate)
     fixture["properties"]["name_stage"] = "drafted"
@@ -287,15 +287,35 @@ def test_refuses_unparseable_nonlive_west_and_fixture_rows() -> None:
     )
 
 
+def test_facility_batch_source_shape_stays_plannable() -> None:
+    """A source owned by the facility batch manifest is repairable, not refused."""
+    source_id = "dd:hard_x_rays/emissivity_profile_1d/half_width_internal"
+    candidate = _candidate(_NAMES[0])
+    source = candidate["relationships"][0]
+    source["other_id"] = source_id
+    source["other_properties"] = {
+        "id": source_id,
+        "source_id": "hard_x_rays/emissivity_profile_1d/half_width_internal",
+        "source_type": "dd",
+    }
+    protected = _protected(west=(source_id,))
+    manifest = _manifest([candidate], protected=protected)
+
+    plans, refusals = reconciliation._plan_rows(
+        _closure_rows([candidate]),
+        manifest,
+        protected,
+        reason="audit exact protected ownership",
+        changed_at=None,
+    )
+
+    assert not refusals
+    assert [plan["status"] for plan in plans] == ["planned"]
+
+
 @pytest.mark.parametrize(
     ("source_id", "source_path", "kind", "expected_reason"),
     [
-        (
-            "dd:hard_x_rays/emissivity_profile_1d/half_width_internal",
-            "hard_x_rays/emissivity_profile_1d/half_width_internal",
-            "west",
-            "current graph closure intersects WEST",
-        ),
         (
             "dd:test_review_entry__src_01035615",
             "test/path",

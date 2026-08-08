@@ -291,9 +291,7 @@ def test_refinement_lineage_protected_source_refuses_both_operations(
 
     assert receipt.passed is False
     assert receipt.refinement_protected_source_ids == [protected_source]
-    assert (
-        "refinement lineage intersects WEST or fixture sources" in receipt.diagnostics
-    )
+    assert "refinement lineage intersects fixture sources" in receipt.diagnostics
 
 
 def test_review_explicit_drain_scope_accepts_already_passing_review() -> None:
@@ -356,7 +354,7 @@ def test_review_specific_ineligibility_refuses(mutation: str, diagnostic: str) -
     ("mutation", "diagnostic"),
     [
         ("claim", "target has an active worker or drain lease"),
-        ("protection", "structural lineage intersects WEST or fixture sources"),
+        ("protection", "structural lineage intersects fixture sources"),
         ("unit", "target unit property and relationship differ"),
         ("cocos", "target did not preserve the per-path COCOS label"),
         ("successor", "target already has a refined successor"),
@@ -369,7 +367,7 @@ def test_review_shared_safety_evidence_refuses(mutation: str, diagnostic: str) -
     if mutation == "claim":
         target["claim_token"] = "occupied"
     elif mutation == "protection":
-        row["protected_source_ids"] = ["dd:west/protected"]
+        row["protected_source_ids"] = ["fixture:protected"]
     elif mutation == "unit":
         target["unit"] = "s"
     elif mutation == "cocos":
@@ -473,8 +471,8 @@ def test_missing_or_ambiguous_identity_still_uses_one_query(target_count: int) -
     [
         (
             "protected_source_ids",
-            ["dd:west/protected"],
-            "structural lineage intersects WEST or fixture sources",
+            ["fixture:protected"],
+            "structural lineage intersects fixture sources",
         ),
         (
             "accepted_or_protected_lineage_ids",

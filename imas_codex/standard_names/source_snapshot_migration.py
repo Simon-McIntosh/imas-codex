@@ -149,9 +149,9 @@ def load_source_snapshot_allowlist(
 ) -> SourceSnapshotAllowlist:
     """Derive a sorted exact DD allowlist from a bounded integrity manifest.
 
-    Executable records are eligible only when their closure evidence is free
-    of WEST and test participants.  Any source selected for DD-gap handling is
-    removed independently, even if another executable record mentions it.
+    Executable records are eligible only when their closure evidence is free of
+    test participants.  Any source selected for DD-gap handling is removed
+    independently, even if another executable record mentions it.
     """
     path = Path(manifest_path).expanduser().resolve()
     raw = path.read_bytes()
@@ -170,7 +170,6 @@ def load_source_snapshot_allowlist(
 
     records = _manifest_records(manifest)
     dd_gap_ids = _dd_gap_source_ids(manifest)
-    west_ids = _protected_source_ids(records, "west")
     test_ids = _protected_source_ids(records, "test")
     selected: set[str] = set()
     excluded: dict[str, set[str]] = {}
@@ -186,11 +185,6 @@ def load_source_snapshot_allowlist(
                     exclude("non_executable", source_id)
                 continue
             evidence = record.get("scope_evidence") or {}
-            west = bool(
-                evidence.get("direct_west_source_hits")
-                or evidence.get("direct_west_name_hits")
-                or evidence.get("west_component_hits")
-            )
             test = bool(
                 evidence.get("direct_test_source_hits")
                 or evidence.get("direct_test_name_hits")
@@ -199,8 +193,6 @@ def load_source_snapshot_allowlist(
             for source_id in source_ids:
                 if not source_id.startswith("dd:"):
                     exclude("non_dd", source_id)
-                elif west:
-                    exclude("west", source_id)
                 elif test:
                     exclude("test", source_id)
                 elif source_id in dd_gap_ids:
@@ -211,7 +203,6 @@ def load_source_snapshot_allowlist(
 
     for reason, protected_ids in (
         ("dd_gap", dd_gap_ids),
-        ("west", west_ids),
         ("test", test_ids),
     ):
         for source_id in protected_ids:

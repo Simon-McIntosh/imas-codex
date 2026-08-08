@@ -39,7 +39,6 @@ CALL (target) {
     backing_unit_ids: backing_unit_ids,
     projection_ids: projection_ids,
     per_path_cocos_label: backing.cocos_transformation_type,
-    west: source.id IN $west_source_ids,
     fixture: source.id STARTS WITH $fixture_source_id_prefix
              OR source.id STARTS WITH 'fixture:'
              OR source.id STARTS WITH 'test:'
@@ -258,7 +257,6 @@ class ExactStandardNameRunAuditReceipt(BaseModel):
     current_dd_versions: list[str] = Field(default_factory=list)
     global_cocos: list[int] = Field(default_factory=list)
     per_path_cocos_labels: dict[str, str | None] = Field(default_factory=dict)
-    west: bool = False
     fixture: bool = False
 
     predecessor_ids: list[str] = Field(default_factory=list)
@@ -361,13 +359,12 @@ def _populate_receipt(receipt: ExactStandardNameRunAuditReceipt) -> None:
             for source in sources
             if source.get("backing_id") is not None
         }
-        receipt.west = any(bool(source.get("west")) for source in sources)
         receipt.fixture = any(bool(source.get("fixture")) for source in sources)
         if receipt.target_scope_run_id != receipt.scope_run_id:
             receipt.diagnostics.append(
                 "target run provenance does not match exact scope"
             )
-        if receipt.target_protected or receipt.west or receipt.fixture:
+        if receipt.target_protected or receipt.fixture:
             receipt.diagnostics.append("target closure intersects protected state")
 
     if len(receipt.dd_snapshot_versions) != 1:
@@ -582,7 +579,6 @@ def audit_exact_standard_name_run(
     )
     from imas_codex.standard_names.grammar_segment_reconciliation import (
         _FIXTURE_SOURCE_ID_PREFIX,
-        _west_source_ids,
     )
 
     params = {
@@ -591,7 +587,6 @@ def audit_exact_standard_name_run(
         "run_id_prefix": normalized_run,
         "launched_at": launch.isoformat(),
         "completed_at": completion.isoformat(),
-        "west_source_ids": sorted(_west_source_ids()),
         "fixture_source_id_prefix": _FIXTURE_SOURCE_ID_PREFIX,
     }
     if gc is None:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import pathlib
 from dataclasses import dataclass, field
 from typing import Any
 from unittest.mock import patch
@@ -734,13 +735,10 @@ def _run(
     target: str = "electron_density",
     dry_run: bool = False,
     parseable: bool = True,
-    use_west_manifest: bool = False,
 ) -> dict[str, Any]:
     graph.target = target
-    west_paths = edit._fold_west_dd_paths() if use_west_manifest else frozenset()
     with (
         patch.object(edit, "GraphClient", return_value=graph),
-        patch.object(edit, "_fold_west_dd_paths", return_value=west_paths),
         patch.object(
             edit,
             "_isn_round_trip_ok",
@@ -941,21 +939,14 @@ def test_attachment_mismatch_is_a_write_free_refusal() -> None:
     assert graph.state == before
 
 
-def test_exact_west_manifest_membership_fails_closed() -> None:
-    west_path = sorted(edit._fold_west_dd_paths())[0]
-    graph = _Graph(_state(backing_id=west_path))
-    result = _run(graph, use_west_manifest=True)
-    assert result["ok"] is False
-    assert "WEST task manifest" in result["reason"]
+def test_facility_batch_backing_folds_like_any_other_path() -> None:
+    """Facility batch ownership of a DD path does not withhold the fold."""
+    from imas_codex.standard_names.sources_manifest import load_sources_file
 
-    same_prefix_not_member = west_path.rsplit("/", 1)[0] + "/not_in_manifest"
-    assert same_prefix_not_member not in edit._fold_west_dd_paths()
-    assert (
-        _run(_Graph(_state(backing_id=same_prefix_not_member)), use_west_manifest=True)[
-            "ok"
-        ]
-        is True
-    )
+    manifest = pathlib.Path(edit.__file__).parent / "manifests" / "west_task_2e.yaml"
+    facility_path = sorted(load_sources_file(manifest))[0]
+
+    assert _run(_Graph(_state(backing_id=facility_path)))["ok"] is True
 
 
 def test_receipt_is_full_typed_and_preserves_audit_subgraphs() -> None:

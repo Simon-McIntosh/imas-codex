@@ -143,15 +143,6 @@ def _manifest(
                     "scope_status": "executable",
                     "next_operator": "bounded_review",
                     "participants": {
-                        "source_ids": ["dd:west/excluded"],
-                        "name_ids": [],
-                    },
-                    "scope_evidence": {"west_component_hits": ["component:west"]},
-                },
-                {
-                    "scope_status": "executable",
-                    "next_operator": "bounded_review",
-                    "participants": {
                         "source_ids": ["dd:test/excluded"],
                         "name_ids": [],
                     },
@@ -250,7 +241,7 @@ def _seed(driver) -> None:
         ).consume()
         session.run(
             """
-            UNWIND ['west/excluded', 'test/excluded', 'defect/excluded'] AS path
+            UNWIND ['test/excluded', 'defect/excluded'] AS path
             CREATE (node:IMASNode {id: path, documentation: 'excluded'})
             CREATE (source:StandardNameSource {
               id: 'dd:' + path, source_type: 'dd', source_id: path,

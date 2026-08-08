@@ -367,13 +367,14 @@ def test_planner_excludes_derived_source():
     assert reconciliation.plan_semantic_source_rows([row]) == []
 
 
-@pytest.mark.parametrize("protected", ["west", "WEST"])
-def test_transitive_west_protection_refuses(protected):
-    row = _row(protected=protected)
+@pytest.mark.parametrize("facility", ["west", "WEST"])
+def test_facility_batch_membership_stays_actionable(facility):
+    """Facility batch membership is repairable, so it refuses no binding."""
+    row = _row(protected=facility)
     manifest_row = _manifest_row(row)
     plan = reconciliation._plan_row(row, manifest_row)
-    assert plan["status"] == "refused"
-    assert any("WEST" in reason for reason in plan["unresolved"])
+    assert plan["status"] == "planned"
+    assert plan["unresolved"] == []
 
 
 @pytest.mark.parametrize(
@@ -393,12 +394,12 @@ def test_prospective_target_produced_by_protected_source_refuses():
     row = _row()
     row["prospective_producers"] = [
         {
-            "source_element_id": "west-source",
+            "source_element_id": "fixture-source",
             "source_properties": {
-                "id": "signals:west:diagnostic:value",
-                "facility_id": "west",
+                "id": "fixture:diagnostic:value",
+                "origin": "fixture",
             },
-            "relationship_element_id": "west-binding",
+            "relationship_element_id": "fixture-binding",
             "target_element_id": "target-element",
             "target_properties": row["prospective_targets"][0]["properties"],
         }
@@ -406,6 +407,7 @@ def test_prospective_target_produced_by_protected_source_refuses():
     manifest_row = _manifest_row(row)
     plan = reconciliation._plan_row(row, manifest_row)
     assert plan["status"] == "refused"
+    assert any("fixtures" in reason for reason in plan["unresolved"])
 
 
 def test_transitive_parent_producer_protection_refuses():

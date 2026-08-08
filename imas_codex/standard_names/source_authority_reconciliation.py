@@ -409,8 +409,8 @@ def load_source_authority_manifest(path: str | Path) -> SourceAuthorityManifest:
             "expected_participant_ids_hash",
         ):
             _require_sha(row[field], field)
-        if row["west_intersection"] != 0 or row["test_intersection"] != 0:
-            raise ValueError("WEST and test intersections must both be exactly zero")
+        if row["test_intersection"] != 0:
+            raise ValueError("test intersection must be exactly zero")
         if operation == FOLD_DUPLICATE_SOURCE_IDENTITY:
             duplicate_id = str(row["duplicate_source_id"])
             if duplicate_id == source_id:
@@ -525,12 +525,15 @@ def _claim_reasons(source: dict[str, Any], *, prefix: str = "source") -> list[st
 
 
 def _protected_reasons(value: Any) -> list[str]:
-    """Detect protected graph participants from identity-bearing fields only."""
-    west = False
+    """Detect protected graph participants from identity-bearing fields only.
+
+    Persistent test fixtures are immutable.  Facility batch membership is
+    ordinary repairable state and yields no reason.
+    """
     test = False
 
     def visit(item: Any, key: str = "") -> None:
-        nonlocal west, test
+        nonlocal test
         if isinstance(item, dict):
             for child_key, child in item.items():
                 visit(child, str(child_key))
@@ -543,13 +546,13 @@ def _protected_reasons(value: Any) -> list[str]:
             return
         normalized = item.casefold()
         normalized_key = key.casefold()
-        if normalized_key in {"facility_id", "facility"} and normalized == "west":
-            west = True
-        if normalized_key in {"id", "other_id", "source_id", "stable_id"}:
-            if normalized.startswith("signals:west:") or normalized.startswith("west:"):
-                west = True
-            if normalized.startswith(("test:", "fixture:", "signals:test:")):
-                test = True
+        if normalized_key in {
+            "id",
+            "other_id",
+            "source_id",
+            "stable_id",
+        } and normalized.startswith(("test:", "fixture:", "signals:test:")):
+            test = True
         if normalized_key in {"source_type", "origin"} and normalized in {
             "test",
             "fixture",
@@ -557,12 +560,7 @@ def _protected_reasons(value: Any) -> list[str]:
             test = True
 
     visit(value)
-    reasons = []
-    if west:
-        reasons.append("current graph closure intersects WEST")
-    if test:
-        reasons.append("current graph closure intersects test fixtures")
-    return reasons
+    return ["current graph closure intersects test fixtures"] if test else []
 
 
 def _target_protection_reasons(protection: dict[str, Any]) -> list[str]:

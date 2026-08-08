@@ -317,7 +317,6 @@ def _invoke(
     with (
         patch.object(edit, "GraphClient", side_effect=lambda: instance.client(failure)),
         patch.object(edit, "_isn_round_trip_ok", return_value=(True, None)),
-        patch.object(edit, "_fold_west_dd_paths", return_value=frozenset()),
     ):
         return edit.supersede_into(old, into)
 

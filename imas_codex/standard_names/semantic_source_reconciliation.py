@@ -639,6 +639,11 @@ def build_semantic_source_manifest_row(
 
 
 def _walk_protection(value: Any, reasons: set[str], key: str = "") -> None:
+    """Collect the refusal reasons carried by one binding-authority closure.
+
+    Persistent test fixtures and live claims are immutable here.  Facility
+    batch membership is ordinary repairable state and contributes no reason.
+    """
     if isinstance(value, dict):
         for child_key, child in value.items():
             _walk_protection(child, reasons, str(child_key))
@@ -660,13 +665,10 @@ def _walk_protection(value: Any, reasons: set[str], key: str = "") -> None:
     if not isinstance(value, str):
         return
     normalized = value.casefold()
-    if normalized_key in {"facility", "facility_id"} and normalized == "west":
-        reasons.add("protected closure intersects WEST")
-    if normalized_key in {"id", "source_id", "target_id"}:
-        if normalized.startswith(("west:", "signals:west:")):
-            reasons.add("protected closure intersects WEST")
-        if normalized.startswith(("test:", "fixture:", "signals:test:")):
-            reasons.add("protected closure intersects test fixtures")
+    if normalized_key in {"id", "source_id", "target_id"} and normalized.startswith(
+        ("test:", "fixture:", "signals:test:")
+    ):
+        reasons.add("protected closure intersects test fixtures")
     if normalized_key in {"origin", "source_type"} and normalized in {
         "test",
         "fixture",

@@ -325,8 +325,8 @@ def load_structural_closure_manifest(
             "expected_admission_hash",
         ):
             _require_sha(row[field], field)
-        if row["west_intersection"] != 0 or row["test_intersection"] != 0:
-            raise ValueError("WEST and test intersections must both be exactly zero")
+        if row["test_intersection"] != 0:
+            raise ValueError("test intersection must be exactly zero")
         if not str(row["reason"]).strip():
             raise ValueError("every structural closure row requires a reason")
         normalized_rows.append(copy.deepcopy(row))
@@ -407,7 +407,8 @@ def _relationship_ids(row: dict[str, Any]) -> tuple[str, ...]:
     return tuple(sorted(ids))
 
 
-def _protected_reasons(row: dict[str, Any]) -> list[str]:
+def _protection_intersections(row: dict[str, Any]) -> dict[str, bool]:
+    """Detect protected-corpus membership inside one closure snapshot."""
     west = False
     fixture = False
 
@@ -436,12 +437,22 @@ def _protected_reasons(row: dict[str, Any]) -> list[str]:
                 fixture = True
 
     visit(row)
-    reasons = []
-    if west:
-        reasons.append("structural closure intersects WEST")
-    if fixture:
-        reasons.append("structural closure intersects test fixtures")
-    return reasons
+    return {"west": west, "fixture": fixture}
+
+
+def _protected_reasons(row: dict[str, Any]) -> list[str]:
+    """Refuse only the closures whose membership is immutable.
+
+    Persistent test fixtures are immutable.  Facility batch membership is
+    recorded as manifest evidence, but the batch is ordinary repairable state
+    and never refuses a row.
+    """
+    intersections = _protection_intersections(row)
+    return (
+        ["structural closure intersects test fixtures"]
+        if intersections["fixture"]
+        else []
+    )
 
 
 def _claim_reasons(row: dict[str, Any]) -> list[str]:
@@ -584,7 +595,7 @@ def build_structural_closure_manifest_row(
     """Bind an audited closure snapshot to one exact manifest row."""
     if str(row.get("root_id")) != root_id:
         raise ValueError("closure snapshot root does not match the manifest root")
-    protected = _protected_reasons(row)
+    intersections = _protection_intersections(row)
     target_ids = {
         root_id,
         *(str(item) for item in retire_ids or []),
@@ -612,10 +623,8 @@ def build_structural_closure_manifest_row(
         "expected_participant_ids_hash": payload_hash(_participant_ids(row)),
         "expected_relationship_ids_hash": payload_hash(_relationship_ids(row)),
         "expected_admission_hash": payload_hash(admission),
-        "west_intersection": int("structural closure intersects WEST" in protected),
-        "test_intersection": int(
-            "structural closure intersects test fixtures" in protected
-        ),
+        "west_intersection": int(intersections["west"]),
+        "test_intersection": int(intersections["fixture"]),
         "reason": reason,
     }
 

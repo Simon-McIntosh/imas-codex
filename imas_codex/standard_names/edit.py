@@ -84,8 +84,6 @@ from contextlib import suppress
 from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from functools import lru_cache
-from pathlib import Path
 from typing import Any
 
 from imas_standard_names.grammar import parser as _isn_parser
@@ -1231,14 +1229,6 @@ def _fold_refusal(reason: str) -> dict[str, Any]:
     return {"ok": False, "reason": reason}
 
 
-@lru_cache(maxsize=1)
-def _fold_west_dd_paths() -> frozenset[str]:
-    from imas_codex.standard_names.sources_manifest import load_sources_file
-
-    manifest = Path(__file__).parent / "manifests" / "west_task_2e.yaml"
-    return frozenset(load_sources_file(manifest))
-
-
 def _fold_unit_authority(
     properties: dict[str, Any], unit_edges: list[dict[str, Any]], label: str
 ) -> tuple[str | None, str | None]:
@@ -1409,14 +1399,6 @@ def _fold_guard_reason(snapshot: dict[str, Any], old: str, into: str) -> str | N
         )
         if backing_unit_reason:
             return backing_unit_reason
-        if (
-            "IMASNode" in set(backing.get("labels") or [])
-            and backing.get("id") in _fold_west_dd_paths()
-        ):
-            return (
-                f"DD path {backing['id']!r} is in the WEST task manifest; "
-                "identity fold is not authorized"
-            )
 
     existing_paths = sorted(
         backing["id"]

@@ -1,10 +1,14 @@
 """Exact manifest reconciliation for structural changes near protected sources.
 
-The ordinary identity and source-authority operators intentionally refuse WEST
-and persistent fixture closures.  This module does not weaken those guards.  It
+The ordinary identity and source-authority operators intentionally refuse
+persistent fixture closures.  This module does not weaken those guards.  It
 admits a protected closure only as an immutable, hash-bound participant of one
 exact transaction.  The only writable graph elements are listed in a manifest
 row's mutation payload; every other participant is compared before and after.
+
+The facility batch closure this module hashes is bystander state: the operator
+proves it did not disturb that closure inside its own transaction.  Membership
+of that batch is not a protected status and never refuses repair elsewhere.
 """
 
 from __future__ import annotations

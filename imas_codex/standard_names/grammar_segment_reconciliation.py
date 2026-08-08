@@ -161,7 +161,12 @@ class GrammarSegmentManifest:
 
 @dataclass(frozen=True)
 class ProtectedSourceSets:
-    """Canonical WEST ownership plus the current persistent fixture identities."""
+    """The identity sets one reconciliation transaction pins before it writes.
+
+    Persistent fixture identities are immutable and refuse a row outright.
+    The facility batch identities are locked bystanders: a transaction proves
+    it left them as it found them, but membership alone refuses nothing.
+    """
 
     west_source_ids: frozenset[str]
     fixture_source_ids: frozenset[str]
@@ -221,7 +226,7 @@ def _is_own_event_relationship(relationship: dict[str, Any]) -> bool:
 
 
 def _west_source_ids() -> frozenset[str]:
-    """Load canonical WEST ownership from the shipped source manifest."""
+    """Load the facility batch source identities from the shipped manifest."""
     return frozenset(f"dd:{path}" for path in load_sources_file(_WEST_MANIFEST))
 
 
@@ -274,11 +279,15 @@ def _read_protected_source_sets(transaction: Any) -> ProtectedSourceSets:
 
 
 def _protected_reasons(value: Any, protected: ProtectedSourceSets) -> list[str]:
-    west = False
+    """Refuse closures whose identities are immutable.
+
+    Persistent test fixtures are immutable.  Facility batch membership is
+    ordinary repairable state and yields no reason.
+    """
     test = False
 
     def visit(item: Any, key: str = "") -> None:
-        nonlocal west, test
+        nonlocal test
         if isinstance(item, dict):
             for child_key, child in item.items():
                 visit(child, str(child_key))
@@ -288,15 +297,10 @@ def _protected_reasons(value: Any, protected: ProtectedSourceSets) -> list[str]:
         elif isinstance(item, str):
             normalized = item.casefold()
             normalized_key = key.casefold()
-            if normalized_key in {"facility", "facility_id"} and normalized == "west":
-                west = True
             if normalized_key in {"id", "other_id", "source_id"}:
-                west = west or normalized.startswith(("west:", "signals:west:"))
                 test = test or normalized.startswith(
                     ("test:", "fixture:", "signals:test:")
                 )
-                west = west or normalized in protected.west_source_ids
-                west = west or f"dd:{normalized}" in protected.west_source_ids
                 test = test or normalized in protected.fixture_source_ids
                 test = test or normalized.startswith(_FIXTURE_SOURCE_ID_PREFIX)
                 if normalized_key == "source_id":
@@ -305,12 +309,7 @@ def _protected_reasons(value: Any, protected: ProtectedSourceSets) -> list[str]:
                 test = test or normalized in {"test", "fixture"}
 
     visit(value)
-    reasons: list[str] = []
-    if west:
-        reasons.append("current graph closure intersects WEST")
-    if test:
-        reasons.append("current graph closure intersects test fixtures")
-    return reasons
+    return ["current graph closure intersects test fixtures"] if test else []
 
 
 def _snapshots(candidate: dict[str, Any], parsed: dict[str, Any]) -> dict[str, Any]:
@@ -482,8 +481,8 @@ def load_grammar_segment_manifest(path: str | Path) -> GrammarSegmentManifest:
             _ROW_FIELDS - {"name", "west_intersection", "test_intersection"}
         ):
             _require_sha(row.get(field), field)
-        if row["west_intersection"] != 0 or row["test_intersection"] != 0:
-            raise ValueError("WEST and test intersections must both be exactly zero")
+        if row["test_intersection"] != 0:
+            raise ValueError("test intersection must be exactly zero")
         names.append(name)
         normalized.append(dict(row))
     if names != sorted(names):

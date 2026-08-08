@@ -403,8 +403,8 @@ def _seed_shared_target(
     protected: bool,
     target_id: str = "shared_target",
 ) -> None:
-    source_id = "signals:west:protected" if protected else "signals:iter:disjoint"
-    facility_id = "west" if protected else "iter"
+    source_id = "fixture:protected" if protected else "signals:iter:disjoint"
+    facility_id = "iter"
     with graph.driver() as driver, driver.session() as session:
         session.run(
             """
@@ -433,8 +433,8 @@ def _seed_protected_target_only(
             """
             CREATE (target:StandardName {id: $target_id})
             CREATE (producer:StandardNameSource {
-              id: 'signals:west:prospective', source_type: 'signal',
-              facility_id: 'west', status: 'attached'
+              id: 'fixture:prospective', source_type: 'signal',
+              facility_id: 'iter', status: 'attached'
             })
             CREATE (producer)-[:PRODUCED_NAME {authority: 'prospective'}]->(target)
             """,
@@ -1031,8 +1031,8 @@ def test_snapshot_admission_can_precede_nonparticipating_retirement(
 @pytest.mark.parametrize(
     ("property_name", "property_value", "expected_reason"),
     [
-        ("facility_id", "west", "direct source identity intersects WEST"),
         ("origin", "fixture", "direct source identity intersects test fixtures"),
+        ("origin", "test", "direct source identity intersects test fixtures"),
     ],
 )
 def test_direct_protected_source_identity_is_refused(
@@ -1069,6 +1069,39 @@ def test_direct_protected_source_identity_is_refused(
 
     assert receipt["mode"] == "refused", receipt
     assert expected_reason in receipt["refusals"][0]["reasons"]
+
+
+def test_direct_facility_batch_source_identity_is_actionable(
+    ephemeral_neo4j: _EphemeralNeo4j,
+    tmp_path: Path,
+) -> None:
+    """Facility batch membership of the direct source refuses nothing."""
+    _clear(ephemeral_neo4j)
+    _seed(ephemeral_neo4j, reconciliation.REPAIR_IDENTITY_SCALAR)
+    with ephemeral_neo4j.driver() as driver, driver.session() as session:
+        session.run(
+            """
+            MATCH (source:StandardNameSource {id: 'dd:diagnostic/channel/value'})
+            SET source.facility_id = 'west'
+            """
+        ).consume()
+    manifest = _write_live_manifest(
+        ephemeral_neo4j,
+        tmp_path / "direct-facility.json",
+        reconciliation.REPAIR_IDENTITY_SCALAR,
+    )
+    client = ephemeral_neo4j.client()
+    try:
+        receipt = reconciliation.reconcile_source_authority(
+            manifest,
+            reason="repair a facility batch direct source",
+            gc=client,
+        )
+    finally:
+        client.close()
+
+    assert receipt["mode"] != "refused", receipt
+    assert not receipt["refusals"]
 
 
 @pytest.mark.parametrize(

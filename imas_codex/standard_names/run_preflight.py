@@ -113,8 +113,7 @@ CALL (target_matches) {{
            THEN member.id
          END) AS accepted_or_protected_lineage_ids,
          collect(DISTINCT CASE
-           WHEN refinement_source.id IN $west_source_ids
-             OR refinement_source.id STARTS WITH $fixture_source_id_prefix
+           WHEN refinement_source.id STARTS WITH $fixture_source_id_prefix
              OR refinement_source.id STARTS WITH 'fixture:'
              OR refinement_source.id STARTS WITH 'test:'
              OR refinement_source.id STARTS WITH 'signals:test:'
@@ -132,8 +131,7 @@ CALL (target_matches) {{
               ELSE structural_lineage END AS member
   OPTIONAL MATCH (protected_source:StandardNameSource)-[:PRODUCED_NAME]->(member)
   WITH protected_source
-  WHERE protected_source.id IN $west_source_ids
-     OR protected_source.id STARTS WITH $fixture_source_id_prefix
+  WHERE protected_source.id STARTS WITH $fixture_source_id_prefix
      OR protected_source.id STARTS WITH 'fixture:'
      OR protected_source.id STARTS WITH 'test:'
      OR protected_source.id STARTS WITH 'signals:test:'
@@ -541,13 +539,9 @@ def _populate_receipt(receipt: ExactStandardNamePreflightReceipt) -> None:
             "refinement lineage intersects accepted or protected state"
         )
     if receipt.refinement_protected_source_ids:
-        receipt.diagnostics.append(
-            "refinement lineage intersects WEST or fixture sources"
-        )
+        receipt.diagnostics.append("refinement lineage intersects fixture sources")
     if receipt.protected_source_ids:
-        receipt.diagnostics.append(
-            "structural lineage intersects WEST or fixture sources"
-        )
+        receipt.diagnostics.append("structural lineage intersects fixture sources")
 
     if receipt.requested_cost_ceiling <= 0:
         receipt.diagnostics.append("requested cost ceiling must be positive")
@@ -614,7 +608,6 @@ def audit_exact_standard_name_preflight(
 
     from imas_codex.standard_names.grammar_segment_reconciliation import (
         _FIXTURE_SOURCE_ID_PREFIX,
-        _west_source_ids,
     )
 
     params = {
@@ -626,7 +619,6 @@ def audit_exact_standard_name_preflight(
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         "facility": facility,
         "drain_scope_id": drain_scope_id,
-        "west_source_ids": sorted(_west_source_ids()),
         "fixture_source_id_prefix": _FIXTURE_SOURCE_ID_PREFIX,
     }
     manager = nullcontext(gc) if gc is not None else _graph_client()

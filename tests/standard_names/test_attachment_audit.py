@@ -2416,7 +2416,7 @@ def test_terminal_recovery_manifest_rejects_duplicate_and_mixed_rows(
         load_terminal_attachment_recovery_manifest(manifest)
 
 
-@pytest.mark.parametrize("defect", ["competing", "west", "fixture"])
+@pytest.mark.parametrize("defect", ["competing", "fixture"])
 def test_terminal_recovery_refuses_unsafe_current_scope(
     tmp_path: Path, defect: str
 ) -> None:
@@ -2436,8 +2436,6 @@ def test_terminal_recovery_refuses_unsafe_current_scope(
                 {"id": "competing_live_name", "name_stage": "accepted"},
             )
         )
-    elif defect == "west":
-        source["properties"]["facility_id"] = "west"
     else:
         source["properties"]["origin"] = "fixture"
     manifest = tmp_path / "terminal-recovery.json"
@@ -2453,6 +2451,26 @@ def test_terminal_recovery_refuses_unsafe_current_scope(
     assert receipt["mode"] == "refused"
     assert client.last_transaction is not None
     assert client.last_transaction.committed is False
+
+
+def test_terminal_recovery_admits_a_facility_batch_scope(tmp_path: Path) -> None:
+    """Facility batch membership is repairable, so recovery stays in scope."""
+    from imas_codex.standard_names.attachment_audit import recover_terminal_attachments
+
+    rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
+    rows[0]["sources"][0]["properties"]["facility_id"] = "west"
+    manifest = tmp_path / "terminal-recovery.json"
+    _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(rows)
+
+    receipt = recover_terminal_attachments(
+        manifest,
+        reason="recover exact terminal source binding",
+        gc=client,
+    )
+
+    assert receipt["mode"] != "refused"
+    assert not receipt["refusals"]
 
 
 @pytest.mark.parametrize("failure", ["relationship_race", "partial_cardinality"])
