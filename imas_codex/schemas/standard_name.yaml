@@ -925,6 +925,27 @@ classes:
         range: string
       reviewer_model_name:
         description: LLM model that produced the most recent name-axis review.
+      review_resolution_method:
+        description: >-
+          How the reviewer chain reached the most recent name-axis score:
+          ``quorum_consensus`` (both blind seats agreed),
+          ``authoritative_escalation`` (the escalator seat resolved their
+          dispute), ``max_cycles_reached`` (no seat resolved it), or
+          ``single_review`` (fewer seats scored than the chain defines).
+        range: string
+      review_quorum_shortfall:
+        description: >-
+          Why a score at or above the acceptance threshold did not accept
+          the name. Null on every quorate review. A non-null value means
+          the reviewer chain lost seats, so the name holds at
+          ``name_stage='reviewed'`` until ``sn rescore`` re-reviews it
+          against a healthy chain.
+        range: string
+      review_quorum_shortfall_at:
+        description: >-
+          ISO 8601 timestamp of the most recent withheld acceptance. Null
+          whenever ``review_quorum_shortfall`` is null.
+        range: datetime
       reviewed_name_at:
         description: >-
           ISO 8601 timestamp of the most recent name-review pass.

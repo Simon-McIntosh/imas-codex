@@ -13535,6 +13535,46 @@ def claim_review_name_batch(
 # -- persist_reviewed_name (write the review + the stage transition) ----------
 
 
+#: Resolution methods under which the blind seats actually reached a verdict.
+#: ``quorum_consensus`` means both blind cycles scored and agreed;
+#: ``authoritative_escalation`` means the context-aware seat resolved their
+#: dispute.  Anything else scored the name with fewer seats than the chain
+#: defines, so the score carries less authority than the profile promises.
+QUORATE_RESOLUTION_METHODS: frozenset[str] = frozenset(
+    {"quorum_consensus", "authoritative_escalation"}
+)
+
+#: ``max_cycles_reached`` merges two blind seats that never agreed.  On a
+#: two-seat chain that is the designed terminal outcome; on a chain that
+#: defines an escalator it means the escalator itself did not answer.
+_ESCALATOR_CHAIN_SIZE = 3
+
+
+def _quorum_admits_acceptance(
+    resolution_method: str | None,
+    reviewer_chain_size: int | None,
+) -> str | None:
+    """Return why a review cannot carry an acceptance, or ``None`` when it can.
+
+    A reviewer chain that loses seats mid-run still produces a score — the
+    surviving seat's — and that score is indistinguishable from a quorate one
+    once it reaches the stage decision.  Acceptance therefore has to ask how
+    the score was reached, not just how high it is.
+    """
+    if resolution_method in QUORATE_RESOLUTION_METHODS:
+        return None
+    if resolution_method is None:
+        return "review carried no resolution method"
+    if resolution_method == "max_cycles_reached":
+        if (reviewer_chain_size or 0) < _ESCALATOR_CHAIN_SIZE:
+            return None
+        return (
+            "blind seats disagreed and the escalator seat did not resolve them "
+            f"(method={resolution_method})"
+        )
+    return f"fewer reviewer seats scored than the chain defines (method={resolution_method})"
+
+
 @retry_on_deadlock()
 def persist_reviewed_name(
     *,
@@ -13557,6 +13597,9 @@ def persist_reviewed_name(
     llm_service: str | None = None,
     run_id: str | None = None,
     skip_review_node: bool = False,
+    resolution_method: str | None = None,
+    reviewer_chain_size: int | None = None,
+    quorum_exempt: bool = False,
 ) -> str:
     """Persist name-review results and transition ``name_stage``.
 
@@ -13571,7 +13614,10 @@ def persist_reviewed_name(
        - ``'reviewed'`` otherwise (eligible for refine_name pickup;
          at chain_length == rotation_cap-1 this routes through the
          Opus escalator in process_refine_name_batch)
-    3. SET reviewer fields, ``name_stage``, clear claim state.
+    3. Withhold ``'accepted'`` when the reviewer chain did not reach a
+       verdict — see ``resolution_method`` below.  The name holds at
+       ``'reviewed'`` with the shortfall recorded on the node.
+    4. SET reviewer fields, ``name_stage``, clear claim state.
 
     Parameters
     ----------
@@ -13596,6 +13642,19 @@ def persist_reviewed_name(
     rotation_cap:
         Maximum chain depth before exhaustion (same value used by
         :func:`claim_refine_name_batch`).
+    resolution_method:
+        How the reviewer chain reached this score, as recorded by the
+        RD-quorum loop.  Acceptance requires a quorate method; omitting it
+        holds the name at ``'reviewed'``, so a caller that publishes names
+        must state how the score was reached.
+    reviewer_chain_size:
+        Number of seats the configured chain defines.  Distinguishes a
+        two-seat chain's terminal disagreement, which is its designed
+        outcome, from an escalator chain whose escalator never answered.
+    quorum_exempt:
+        Skip the quorum gate for an acceptance carrying a different
+        authority than the reviewer chain — a merged catalog PR.  Never set
+        it on a pipeline review.
 
     Returns
     -------
@@ -13661,6 +13720,29 @@ def persist_reviewed_name(
         target_stage = "exhausted"
     else:
         target_stage = "reviewed"
+
+    # ── Quorum gate ───────────────────────────────────────────────────
+    # A score high enough to accept is only as good as the seats that
+    # produced it.  When seats drop out mid-run the surviving seat's score
+    # arrives here looking exactly like a quorate one, so a provider outage
+    # would otherwise publish names on a single opinion.  Hold the name at
+    # 'reviewed' with the shortfall recorded: the score and its comments
+    # survive, and `sn rescore` re-reviews it once the seats are healthy.
+    # `quorum_exempt` is for accepts that carry a different authority than
+    # the reviewer chain (a merged catalog PR), never for pipeline reviews.
+    quorum_shortfall: str | None = None
+    if target_stage == "accepted" and not quorum_exempt:
+        quorum_shortfall = _quorum_admits_acceptance(
+            resolution_method, reviewer_chain_size
+        )
+        if quorum_shortfall is not None:
+            target_stage = "reviewed"
+            logger.warning(
+                "persist_reviewed_name: refusing acceptance of %s at score %.3f — %s",
+                sn_id,
+                score,
+                quorum_shortfall,
+            )
 
     grammar_valid = True
     grammar_issue: str | None = None
@@ -13777,7 +13859,13 @@ def persist_reviewed_name(
                 sn.validation_issues = CASE
                   WHEN $grammar_issue IS NULL THEN sn.validation_issues
                   ELSE coalesce(sn.validation_issues, []) + [$grammar_issue]
-                END
+                END,
+                sn.review_quorum_shortfall    = $quorum_shortfall,
+                sn.review_quorum_shortfall_at = CASE
+                  WHEN $quorum_shortfall IS NULL THEN null
+                  ELSE datetime()
+                END,
+                sn.review_resolution_method   = $resolution_method
             SET sn += $grammar_identity
             RETURN sn.id AS id
             """,
@@ -13794,6 +13882,8 @@ def persist_reviewed_name(
             grammar_valid=grammar_valid,
             grammar_issue=grammar_issue,
             grammar_identity=grammar_identity,
+            quorum_shortfall=quorum_shortfall,
+            resolution_method=resolution_method,
         )
 
     # A concurrent reviewer already transitioned this node out of 'drafted'
