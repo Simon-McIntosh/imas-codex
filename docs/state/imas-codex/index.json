@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-04T22:49:58",
+  "updated": "2026-08-08T17:36:40",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -199,8 +199,8 @@
         "items": [
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "After S6 closes, the remaining 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, global writer/fan-out/embedding debt, and the rejected bounded-manifest prototype are explicit graph-wide work. WEST is excluded and remains green.",
-            "done_when": "f-sgwi-001, f-sgwi-004, and f-sgwi-005 close: graph-wide provenance/parser residue is evidence-partitioned without touching WEST; fan-out, embedding, writer gates, geometry rules, and bounded-manifest execution are tested; the two protected structural identities receive exact explicit authority or remain visibly held as non-actionable; fresh one-query census, DD 4.1.1/global COCOS 17, psi_like/ip_like, null-fixture, transactional, scope-cleanup, independent-review, and full-suite gates pass."
+            "why_now": "After S6 closes, the remaining 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, global writer/fan-out/embedding debt, and the rejected bounded-manifest prototype are explicit graph-wide work. Per the west-batch-repair-scope decision the unreleased WEST batch now folds into repair scope rather than being held frozen.",
+            "done_when": "f-sgwi-001, f-sgwi-004, f-sgwi-005, and f-sgwi-007 close: graph-wide provenance/parser residue is evidence-partitioned; the WEST-batch protection is lifted per the locked decision (published-catalog and test-fixture protection retained); fan-out, embedding, writer gates, geometry rules, and bounded-manifest execution are tested; the two protected structural identities receive exact explicit authority or remain visibly held as non-actionable; fresh one-query census, DD 4.1.1/global COCOS 17, psi_like/ip_like, null-fixture, transactional, scope-cleanup, independent-review, and full-suite gates pass."
           },
           {
             "slug": "sn-dd-gaps",
@@ -226,7 +226,7 @@
         ],
         "starts": "2026-08-14",
         "ends": "2026-08-28",
-        "description": "Graph-wide integrity and evidence-policy follow-on after S6: 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, writer/fan-out/embedding debt, a safe bounded-manifest operator, and DDGap storage/writer/triage policy. WEST remains excluded and must retain its zero-invariant baseline.",
+        "description": "Graph-wide integrity and evidence-policy follow-on after S6: 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, writer/fan-out/embedding debt, a safe bounded-manifest operator, and DDGap storage/writer/triage policy. Per the west-batch-repair-scope decision (2026-08-08) the unreleased WEST batch is no longer a frozen baseline: it folds into best-effort repair scope through the normal quorum pipeline; only the published ISN catalog and test fixtures retain protected status.",
         "summary": "Restart checkpoint 2026-08-04: 1/3 plans are lifecycle-complete and S7 is 66.3% implemented. sn-dd-gaps is done; sn-graph-wide-integrity is 0.99 with one protected-closure followup open; mast-semantic-source-repair is correctly 0/5 and dependency-blocked. Remaining order: repair and verify honest flush terminality plus hard budget reservations; complete one corrected aggregate census; close graph integrity with protected rows held unless separately authorized; execute MAST manifest/adjudication/discovery/dry-run work and separately authorized apply/publication; then run the bounded MAST cohort and the final global sn run --flush under the shared USD 200 ceiling, followed only by a fresh census, full suite, and closure."
       }
     ],
@@ -286,9 +286,14 @@
         "when": "2026-08-04",
         "who": "reckon-ship",
         "what": "S7 handoff recorded at main cb6ca67f. Landed graph-integrity machinery and validation remain green; exact attributable spend is $5.310418/$200. A fresh completion audit found global flush terminality and hard-budget proof gaps, and the single attempted aggregate census stopped safely on a compile error with zero writes and no retry. Five ordered restart tasks are now recorded in the graph and MAST plans; no paid generation or MAST mutation/publication occurred."
+      },
+      {
+        "when": "2026-08-08",
+        "who": "Simon McIntosh",
+        "what": "WEST batch de-protection locked (west-batch-repair-scope): the unreleased WEST review batch folds into best-effort graph-wide repair scope through the normal quorum pipeline; only the published ISN catalog and test fixtures retain protected status. S7 scope text updated; f-sgwi-007 queued to lift the structural_closure zero-intersection gate and census-overlay protection."
       }
     ],
     "blockers": [],
-    "_version": 22
+    "_version": 24
   }
 }

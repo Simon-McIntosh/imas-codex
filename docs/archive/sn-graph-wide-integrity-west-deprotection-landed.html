@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="research">
+  <meta name="plan-slug" content="sn-graph-wide-integrity-west-deprotection-landed">
+  <meta name="plan-title" content="Facility-batch protection lift — landed record">
+  <meta name="plan-summary" content="Membership of the unreleased WEST review batch no longer withholds a row from any reconciliation, migration, preflight, audit, or fold; protection now covers exactly the published catalog and the persistent test fixtures.">
+  <meta name="plan-status" content="reference">
+  <meta name="plan-evidence-for" content="sn-graph-wide-integrity">
+  <meta name="plan-commits" content="7653ba5e">
+  <title>Facility-batch protection lift — landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body><main class="plan-doc">
+  <h2>Outcome</h2>
+  <p>The locked <code>west-batch-repair-scope</code> decision is now code. A survey found the retired frozen-baseline policy encoded at ten sites, not the three named in the dispatch; lifting only three would have left the facility batch refusing at five live gates, so the refusal was removed everywhere: the structural-closure protected reason and its manifest zero-intersection raise, the same invariant in the source-authority, grammar-segment, and terminal-recovery manifests, the semantic-source binding overlay reason, the snapshot-migration allowlist exclusion, the preflight lineage predicates and diagnostics, the run-audit protected flag, and the identity-fold membership refusal (<code>_fold_west_dd_paths</code> deleted). Fixture refusals are retained and now carried by standalone tests; the manifest intersection field survives as recorded evidence — a new test asserts a manifest carrying <code>west_intersection: 1</code> loads instead of raising.</p>
+  <svg viewBox="0 0 820 170" role="img" aria-label="The protection boundary contracts from catalog plus fixtures plus facility batch to catalog plus fixtures only, releasing five worklist rows into repair scope." style="max-width:100%;height:auto">
+    <g font-family="system-ui" font-size="14" text-anchor="middle">
+      <rect x="20" y="30" width="300" height="110" rx="8" fill="#f3f5f7" stroke="#59636e"/>
+      <text x="170" y="54">before: protected closure</text>
+      <text x="170" y="80">catalog 43 · fixtures</text>
+      <text x="170" y="102">facility batch 5 · dual 3</text>
+      <text x="170" y="126" font-size="12">held 51 / 145</text>
+      <path d="M330 85H460" stroke="#087f5b" stroke-width="2"/>
+      <text x="395" y="72" font-size="12" fill="#087f5b">scope lift</text>
+      <rect x="470" y="30" width="300" height="110" rx="8" fill="#e8f4ef" stroke="#087f5b"/>
+      <text x="620" y="54">now: protected closure</text>
+      <text x="620" y="80">catalog 43 · fixtures · dual 3</text>
+      <text x="620" y="102">facility rows released: 5</text>
+      <text x="620" y="126" font-size="12">held 46 / 145 · actionable 99</text>
+    </g>
+  </svg>
+  <h2>Measured evidence</h2>
+  <table><thead><tr><th>Measure</th><th>Result</th></tr></thead><tbody>
+    <tr><td>Sites encoding the retired policy</td><td>10 found by survey (dispatch named 3); refusal removed at all</td></tr>
+    <tr><td>Default suite (worker worktree)</td><td>11587 passed / 1 failed — the failure is environment-only (needs a provider key absent from the isolated worktree; passes in the main checkout with credentials, exit 0)</td></tr>
+    <tr><td>Changed graph-marked files</td><td>95 passed / 0 failed against a disposable Neo4j; three new policy tests confirmed executing by name</td></tr>
+    <tr><td>Live graph tier, merged vs base</td><td>61 failures on merged main; identical 61 at base 7ea2dcf6 (set difference empty both directions) — all pre-existing live-corpus state, none introduced</td></tr>
+    <tr><td>Worklist recount under new scope</td><td>145 rows: held 51 → 46, actionable 94 → 99; 5 facility-only rows released; all 3 dual-protected rows stay held on catalog protection; <code>catalog_guard_intact: true</code>, <code>baseline_reproduced: true</code></td></tr>
+    <tr><td>Protection-scope drift observed live</td><td>the retarget gate probe now refuses on <code>expected_protection_hash drifted</code> — the closure hash change is visible to the gate</td></tr>
+  </tbody></table>
+  <p>The recount receipt is at <code>~/.local/share/imas-codex/receipts/standard-names/s7-attachment-repair/worklist-recount.json</code> (worklist key hash <code>b883d6ec…</code>, byte-identical to the frozen census previously verified against the live graph). The recount re-partitions the frozen census under the new scope; the first fresh live census through the rewritten overlay lands with the repair wave's closure census. Quorum acceptance discipline is unchanged: released rows route through compose/review/refine, never a hand-accept.</p>
+  <h2>Carried forward</h2>
+  <p>The 61 pre-existing live graph-tier failures (semantic-source mirror disagreements, provenance-ledger orphans, schema compliance, search-ranking regressions, and lifecycle e2e state) are live-corpus defects in the repair backlog, not code regressions; several are exactly the rows the repair wave addresses. A repo-wide <code>ruff format</code> drift on six untouched files was observed and left for a separate cleanup.</p>
+</main></body></html>

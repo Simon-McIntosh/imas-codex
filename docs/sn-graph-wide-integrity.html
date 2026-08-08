@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-08">
-<meta name="plan-version" content="105">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="106">
+<meta name="plan-impl" content="0.925">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -699,7 +699,7 @@ Done-when
   4. exact source detach/attach/retirement operations dry-run with zero collateral and, only with explicit graph-mutation authority, apply and replay idempotently;
   5. affected identities are repaired through sn edit/quorum where required; fresh one-query census, semantic-collapse audit, protected hashes and full suite are green; followup resolved.</pre>
     </article>
-<article class="r-fu" data-id="f-sgwi-007" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="smc" data-written-at="2026-08-08 12:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-007" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="smc" data-written-at="2026-08-08 12:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-08T17:38:33+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Lift the WEST-batch protection and fold the release cohort into repair scope</h4>
     <div class="r-fu-body"><p>Decision <code>west-batch-repair-scope</code> is locked: the unreleased WEST batch folds into best-effort repair scope. The zero-WEST-intersection invariant in <code>structural_closure.py</code> (raise at west_intersection != 0), the WEST reasons in <code>_protected_reasons</code>, the WEST participant protection in <code>source_snapshot_migration.py</code>, and the 8 WEST-protected sources in the census overlay all encode the retired frozen-baseline policy. Published-catalog protection (46 catalog-protected targets, the supersession guard for released names) is unchanged. Quorum acceptance discipline is unchanged — WEST names re-entering repair go through the same review pipeline, never a hand-accept.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -728,6 +728,7 @@ Done-when
   2. Census re-run shows the previously WEST-protected rows as actionable (or repaired) with signed receipts
   3. tests still green (full suite)
   4. followup written + this followup marked resolved</pre>
+    <p class="r-fu-outcome">landed — commit 7653ba5e; protection is now catalog+fixtures only at all 10 encoding sites (not the 3 named); recount: held 51→46, actionable 94→99, 3 dual-protected rows survive on catalog protection, catalog_guard_intact true; 61 live graph-tier failures proven pre-existing at base 7ea2dcf6 (identical set); archive/sn-graph-wide-integrity-west-deprotection-landed.html</p>
     </article>
 <article class="r-fu" data-id="f-sgwi-008" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="smc" data-written-at="2026-08-08 12:20" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Demonstrate a funded clean drain and persist run invocation metadata</h4>
@@ -1071,6 +1072,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260808-stage-heal" data-who="reckon-ship" data-when="2026-08-08T10:40:00+02:00">
     <div class="r-comment-body"><p><strong>Stranded-rename repair landed</strong> (merge <code>344c0268</code>). Root cause of the pending-stage stranding class: <code>--focus --reseed</code> re-stages reviewed names backward to pending while a separate revalidation pass quarantines parser-invalid spellings, and both the review claim and the <code>reconcile_reviewable_name_stage</code> self-heal require <code>validation_status='valid'</code> — so the self-heal currently lifts zero of the five stranded names. Fix: <code>sn edit</code> rename now admits a name stranded at pending only when it has no live successor, is not derived, holds ≥1 live produced source, and carries a real description — rename→review preserved, quarantine semantics intact, dead placeholders still refused (14 new tests; suite 6459/0F). Decisive discovery: <code>cross_section_of_flux_surface</code> is a DEAD PREDECESSOR — <code>area_of_flux_surface</code> was refined from it and already carries 5 of its 6 sources — so the rename vehicle is correctly refused and the 23-source cross-sectional cohort resolves through generation of <code>poloidal_cross_sectional_area_of_flux_surface</code> (already the largest item on the mint focus list) followed by gated retarget. Remaining stranded names route to minting (3, description-less) or are genuinely dead (1, sole source stale).</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260808-west-deprotection" data-who="reckon-ship" data-when="2026-08-08">
+    <div class="r-comment-body"><p><strong>Facility-batch protection lift landed</strong> (commit <code>7653ba5e</code>). The dispatch named 3 encoding sites; a survey found the retired frozen-baseline policy at 10, and lifting only 3 would have left WEST refusing at 5 live gates — so the refusal was removed at all of them (structural-closure protected reason + manifest zero-intersection raise; the same invariant in source-authority, grammar-segment, and terminal-recovery manifests; semantic-source binding overlay; snapshot-migration allowlist exclusion; preflight lineage predicates; run-audit protected flag; identity-fold membership refusal). Fixture refusals retained under standalone tests; the manifest intersection field survives as recorded evidence. Verification: default suite 11587/1F (the 1F is environment-only, passes with credentials), 95/0F across the changed graph-marked files, and the live graph tier shows an identical 61-failure set at base 7ea2dcf6 and merged main — all pre-existing corpus state. Worklist recount under the new scope: 145 rows, held 51 → 46, actionable 94 → 99, the 5 facility-only rows released, all 3 dual-protected rows still held on catalog protection (<code>catalog_guard_intact: true</code>; receipt <code>s7-attachment-repair/worklist-recount.json</code>). The retarget gate probe now refuses on <code>expected_protection_hash drifted</code> — the closure change is visible live. Landed record: <a href="/imas-codex/archive/sn-graph-wide-integrity-west-deprotection-landed.html">facility-batch protection lift</a>.</p></div>
 </div>
 </section>
 </main>
