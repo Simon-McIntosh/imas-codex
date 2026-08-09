@@ -13,8 +13,11 @@ The staging directory produced here is consumed by ``publish.py``
 from __future__ import annotations
 
 import hashlib
+import importlib.metadata
 import json
 import logging
+import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -38,6 +41,12 @@ logger = logging.getLogger(__name__)
 
 # Default COCOS convention for the catalog manifest
 _DEFAULT_COCOS_CONVENTION = 17
+
+# ``generated_at`` is required by the ISN manifest model. Low-level callers
+# that intentionally provide no provenance receive this conspicuous, stable
+# value; the public export path sets ``require_provenance=True`` and refuses to
+# emit it.
+_UNVERSIONED_TIMESTAMP = "1970-01-01T00:00:00+00:00"
 
 # Gate names
 GATE_A = "graph_tests"
@@ -1099,6 +1108,7 @@ def _write_manifest(
     export_scope: str = "full",
     domains_included: list[str] | None = None,
     review_batch: list[str] | None = None,
+    require_provenance: bool = False,
 ) -> Path:
     """Write the catalog.yml manifest to the staging directory root.
 
@@ -1111,11 +1121,10 @@ def _write_manifest(
     """
     import imas_standard_names
 
-    # Deterministic timestamps: derive from the source commit so identical
-    # content yields identical bytes (see _commit_iso_timestamp). Fall back to
-    # wall-clock only when there is no commit to key off (e.g. a non-git
-    # staging run in tests), which is the only remaining non-deterministic path.
-    stamp = _commit_iso_timestamp(source_commit_sha) or datetime.now(UTC).isoformat()
+    stamp = _manifest_iso_timestamp(
+        source_commit_sha,
+        require_provenance=require_provenance,
+    )
 
     manifest_data = {
         "catalog_name": "imas-standard-names-catalog",
@@ -1181,7 +1190,7 @@ def _write_export_report(staging_dir: Path, report: ExportReport) -> Path:
 
 
 def _get_codex_commit_sha() -> str | None:
-    """Get the current imas-codex git commit SHA, or None."""
+    """Get the imas-codex source commit from Git or installed metadata."""
     try:
         result = subprocess.run(
             ["git", "rev-parse", "HEAD"],
@@ -1192,7 +1201,23 @@ def _get_codex_commit_sha() -> str | None:
         )
         return result.stdout.strip()
     except Exception:
+        pass
+
+    # hatch-vcs records source revisions in PEP 440 local versions such as
+    # ``0.13.dev42+gabc123def``. This remains available in an installed wheel
+    # or source archive where the repository itself is absent.
+    try:
+        distribution = importlib.metadata.distribution("imas-codex")
+    except importlib.metadata.PackageNotFoundError:
         return None
+    packaged_module = Path(
+        distribution.locate_file("imas_codex/standard_names/export.py")
+    ).resolve()
+    if packaged_module != Path(__file__).resolve():
+        return None
+    version = distribution.version
+    match = re.search(r"(?:^|[+.])g([0-9a-f]{7,40})(?:[.]|$)", version)
+    return match.group(1) if match else None
 
 
 def _commit_iso_timestamp(sha: str | None) -> str | None:
@@ -1216,6 +1241,53 @@ def _commit_iso_timestamp(sha: str | None) -> str | None:
         return result.stdout.strip() or None
     except Exception:
         return None
+
+
+def _source_date_epoch_iso_timestamp() -> str | None:
+    """Return ``SOURCE_DATE_EPOCH`` as UTC ISO-8601, if configured.
+
+    Reproducible source and wheel builds conventionally carry their build
+    provenance through this environment variable. An invalid configured value
+    is an error rather than a reason to silently emit unrelated metadata.
+    """
+    raw = os.environ.get("SOURCE_DATE_EPOCH")
+    if raw is None:
+        return None
+    try:
+        epoch = int(raw)
+        if epoch < 0:
+            raise ValueError("must be non-negative")
+        return datetime.fromtimestamp(epoch, tz=UTC).isoformat()
+    except (OverflowError, OSError, ValueError) as exc:
+        raise RuntimeError(
+            "SOURCE_DATE_EPOCH must be a non-negative Unix timestamp"
+        ) from exc
+
+
+def _manifest_iso_timestamp(
+    source_commit_sha: str | None,
+    *,
+    require_provenance: bool,
+) -> str:
+    """Resolve a deterministic manifest timestamp.
+
+    A repository commit date is authoritative when available. Archives and
+    installed packages can instead supply the reproducible-build timestamp.
+    The public export path refuses missing provenance; the stable epoch is
+    reserved for direct low-level callers that explicitly do not require it.
+    """
+    stamp = _commit_iso_timestamp(source_commit_sha)
+    if stamp is not None:
+        return stamp
+    stamp = _source_date_epoch_iso_timestamp()
+    if stamp is not None:
+        return stamp
+    if require_provenance:
+        raise RuntimeError(
+            "export provenance timestamp unavailable: run from an imas-codex "
+            "Git checkout or set SOURCE_DATE_EPOCH for an archive/install export"
+        )
+    return _UNVERSIONED_TIMESTAMP
 
 
 # =============================================================================
@@ -1645,6 +1717,7 @@ def run_export(
         export_scope=export_scope,
         domains_included=all_domains,
         review_batch=sorted(review_batch) if review_batch is not None else None,
+        require_provenance=True,
     )
 
     # ── 7. Write export report ──────────────────────────────────

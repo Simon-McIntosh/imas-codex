@@ -19,6 +19,9 @@ pytest.importorskip("imas_standard_names")
 
 from imas_codex.standard_names.export import (  # noqa: E402
     _commit_iso_timestamp,
+    _get_codex_commit_sha,
+    _manifest_iso_timestamp,
+    _source_date_epoch_iso_timestamp,
     _write_domain_yaml,
     _write_manifest,
 )
@@ -69,9 +72,7 @@ class TestManifestDeterminism:
         # normalised by the ISN model, but identically for both fields).
         assert manifest["generated_at"] == manifest["exported_at"]
 
-    def test_no_commit_falls_back_without_crashing(self, tmp_path: Path) -> None:
-        # source_commit_sha=None -> _commit_iso_timestamp returns None ->
-        # wall-clock fallback; the manifest must still be written.
+    def test_no_commit_uses_stable_unversioned_timestamp(self, tmp_path: Path) -> None:
         _write_manifest(
             tmp_path,
             cocos_convention=17,
@@ -85,7 +86,18 @@ class TestManifestDeterminism:
             source_commit_sha=None,
         )
         manifest = yaml.safe_load((tmp_path / "catalog.yml").read_text())
-        assert manifest["generated_at"]
+        assert manifest["generated_at"] == "1970-01-01T00:00:00Z"
+
+    def test_required_provenance_fails_clearly_when_unavailable(self) -> None:
+        with (
+            patch(
+                "imas_codex.standard_names.export._commit_iso_timestamp",
+                return_value=None,
+            ),
+            patch.dict("os.environ", {}, clear=True),
+            pytest.raises(RuntimeError, match="SOURCE_DATE_EPOCH"),
+        ):
+            _manifest_iso_timestamp(None, require_provenance=True)
 
 
 class TestCommitTimestamp:
@@ -93,16 +105,59 @@ class TestCommitTimestamp:
         assert _commit_iso_timestamp(None) is None
 
     def test_real_sha_returns_iso(self) -> None:
-        import subprocess
-
-        head = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout.strip()
+        head = _get_codex_commit_sha()
+        if head is None:
+            pytest.skip("source commit unavailable outside a VCS/package build")
         ts = _commit_iso_timestamp(head)
+        if ts is None:
+            pytest.skip("commit object unavailable outside a VCS checkout")
         assert ts is not None and "T" in ts
+
+    def test_archive_uses_packaged_sha_and_source_date_epoch(self) -> None:
+        with (
+            patch(
+                "imas_codex.standard_names.export.subprocess.run",
+                side_effect=FileNotFoundError,
+            ),
+            patch(
+                "imas_codex.standard_names.export.importlib.metadata.distribution"
+            ) as distribution,
+            patch.dict("os.environ", {"SOURCE_DATE_EPOCH": "1783591200"}),
+        ):
+            distribution.return_value.version = "0.13.dev42+gabc123def"
+            distribution.return_value.locate_file.return_value = (
+                Path(__file__).parents[2] / "imas_codex/standard_names/export.py"
+            )
+            sha = _get_codex_commit_sha()
+            assert sha == "abc123def"
+            assert _manifest_iso_timestamp(sha, require_provenance=True) == (
+                "2026-07-09T10:00:00+00:00"
+            )
+
+    def test_invalid_source_date_epoch_fails_clearly(self) -> None:
+        with (
+            patch.dict("os.environ", {"SOURCE_DATE_EPOCH": "not-a-timestamp"}),
+            pytest.raises(RuntimeError, match="non-negative Unix timestamp"),
+        ):
+            _source_date_epoch_iso_timestamp()
+
+    def test_source_archive_rejects_unrelated_installed_metadata(
+        self, tmp_path: Path
+    ) -> None:
+        with (
+            patch(
+                "imas_codex.standard_names.export.subprocess.run",
+                side_effect=FileNotFoundError,
+            ),
+            patch(
+                "imas_codex.standard_names.export.importlib.metadata.distribution"
+            ) as distribution,
+        ):
+            distribution.return_value.version = "0.13.dev42+gabc123def"
+            distribution.return_value.locate_file.return_value = (
+                tmp_path / "other-install/imas_codex/standard_names/export.py"
+            )
+            assert _get_codex_commit_sha() is None
 
 
 class TestDomainHeaderHasNoSha:
