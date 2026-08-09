@@ -930,8 +930,9 @@ classes:
           How the reviewer chain reached the most recent name-axis score:
           ``quorum_consensus`` (both blind seats agreed),
           ``authoritative_escalation`` (the escalator seat resolved their
-          dispute), ``max_cycles_reached`` (no seat resolved it), or
-          ``single_review`` (fewer seats scored than the chain defines).
+          dispute), ``max_cycles_reached`` (the blind-seat cycles ended
+          without agreement), or ``single_review`` (fewer seats scored than
+          the chain defines).
         range: string
       review_quorum_shortfall:
         description: >-
@@ -976,6 +977,27 @@ classes:
           review only.
       reviewer_model_docs:
         description: LLM model that produced the most recent docs-axis review.
+      docs_review_resolution_method:
+        description: >-
+          How the reviewer chain reached the most recent docs-axis score:
+          ``quorum_consensus`` (both blind seats agreed),
+          ``authoritative_escalation`` (the escalator seat resolved their
+          dispute), ``max_cycles_reached`` (no seat resolved it), or
+          ``single_review`` (fewer seats scored than the chain defines).
+        range: string
+      docs_review_quorum_shortfall:
+        description: >-
+          Why the most recent docs-axis score was not acted on. Null on every
+          quorate review. A non-null value means the reviewer chain did not
+          reach a verdict, so the score neither accepts the documentation nor
+          buys a refinement rotation. Cleared when documentation is staged for
+          an exact rescore or by the next quorate review.
+        range: string
+      docs_review_quorum_shortfall_at:
+        description: >-
+          ISO 8601 timestamp of the most recent withheld docs decision. Null
+          whenever ``docs_review_quorum_shortfall`` is null.
+        range: datetime
       reviewed_docs_at:
         description: >-
           ISO 8601 timestamp of the most recent docs-review pass.

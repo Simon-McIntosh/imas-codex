@@ -260,8 +260,8 @@ class TestQuorumCompletenessGuard:
         assert quorum_incomplete_snapshot("run-x") == {"names": 1}
         reset_quorum_incomplete("run-x")
 
-    def test_derived_parent_single_model_list_is_valid(self):
-        """Derived-parent path passes a 1-model list → single_review, VALID."""
+    def test_explicit_single_model_profile_returns_single_review(self):
+        """The quorum primitive still describes an explicit one-seat profile."""
         reset_quorum_incomplete("run-x")
         result, calls = _run(
             models=["m0"],

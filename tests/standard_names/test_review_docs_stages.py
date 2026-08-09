@@ -175,6 +175,27 @@ class TestClaimSkipsPendingDocs:
         assert "'drafted'" in where
 
 
+def test_docs_shortfall_blocks_refine_claim() -> None:
+    """An unresolved aggregate score cannot spend a docs refinement rotation."""
+    captured: list[str] = []
+
+    def _fake_claim_sn_atomic(*, eligibility_where: str, **_kwargs: Any) -> list:
+        captured.append(eligibility_where)
+        return []
+
+    with patch(
+        "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+        side_effect=_fake_claim_sn_atomic,
+    ):
+        from imas_codex.standard_names.graph_ops import claim_refine_docs_batch
+
+        claim_refine_docs_batch()
+
+    assert captured
+    assert "sn.docs_review_resolution_method IS NOT NULL" in captured[0]
+    assert "sn.docs_review_quorum_shortfall IS NULL" in captured[0]
+
+
 # =============================================================================
 # 1b. Claim-race resolution (the docs-cost root cause)
 # =============================================================================
@@ -261,6 +282,8 @@ class TestPersistReviewedDocsConcurrentWinNoOp:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == ""
@@ -297,6 +320,8 @@ class TestPersistToAccepted:
                 model="test/model",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "accepted"
@@ -322,6 +347,8 @@ class TestPersistToReviewedLowScore:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "reviewed"
@@ -353,6 +380,8 @@ class TestPersistToExhaustedAtCap:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "reviewed"
@@ -380,6 +409,8 @@ class TestPersistToExhaustedAtCap:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "exhausted"
@@ -405,6 +436,8 @@ class TestPersistToReviewedBelowCap:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "reviewed"
@@ -430,9 +463,110 @@ class TestAcceptOverridesChainLengthAtCap:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == "accepted"
+
+
+@pytest.mark.parametrize(
+    "resolution_method,reviewer_chain_size,expected_stage,has_shortfall",
+    [
+        ("quorum_consensus", 3, "accepted", False),
+        ("authoritative_escalation", 3, "accepted", False),
+        ("max_cycles_reached", 3, "reviewed", True),
+        ("single_review", 3, "reviewed", True),
+        (None, None, "reviewed", True),
+        ("max_cycles_reached", 2, "accepted", False),
+    ],
+)
+def test_docs_acceptance_requires_canonical_quorum_authority(
+    resolution_method: str | None,
+    reviewer_chain_size: int | None,
+    expected_stage: str,
+    has_shortfall: bool,
+) -> None:
+    """Docs acceptance follows the shared name-axis quorum policy exactly."""
+    gc = _mock_gc_query(
+        return_values=[
+            [{"docs_chain_length": 0}],
+            [{"id": "test_name"}],
+        ]
+    )
+
+    with _patch_gc(gc):
+        from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+
+        result = persist_reviewed_docs(
+            sn_id="test_name",
+            claim_token="tok",
+            score=0.95,
+            model="m",
+            min_score=0.85,
+            resolution_method=resolution_method,
+            reviewer_chain_size=reviewer_chain_size,
+            skip_review_node=True,
+        )
+
+    assert result == expected_stage
+    write_kwargs = gc.query.call_args_list[1].kwargs
+    assert bool(write_kwargs["quorum_shortfall"]) is has_shortfall
+    assert write_kwargs["resolution_method"] == resolution_method
+    cypher = gc.query.call_args_list[1].args[0]
+    assert "docs_review_resolution_method" in cypher
+    assert "docs_review_quorum_shortfall_at" in cypher
+
+
+def test_fresh_docs_quorum_clears_a_prior_shortfall() -> None:
+    """A quorate result writes null marker fields instead of retaining residue."""
+    gc = _mock_gc_query(
+        return_values=[
+            [{"docs_chain_length": 0}],
+            [{"id": "test_name"}],
+        ]
+    )
+    with _patch_gc(gc):
+        from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+
+        result = persist_reviewed_docs(
+            sn_id="test_name",
+            claim_token="tok",
+            score=0.95,
+            model="m",
+            resolution_method="authoritative_escalation",
+            reviewer_chain_size=3,
+            skip_review_node=True,
+        )
+
+    assert result == "accepted"
+    write_kwargs = gc.query.call_args_list[1].kwargs
+    assert write_kwargs["quorum_shortfall"] is None
+
+
+def test_missing_authority_preserves_exhaustion_but_blocks_refinement() -> None:
+    """A low score keeps its lifecycle decision while recording the shortfall."""
+    gc = _mock_gc_query(
+        return_values=[
+            [{"docs_chain_length": 3}],
+            [{"id": "test_name"}],
+        ]
+    )
+    with _patch_gc(gc):
+        from imas_codex.standard_names.graph_ops import persist_reviewed_docs
+
+        result = persist_reviewed_docs(
+            sn_id="test_name",
+            claim_token="tok",
+            score=0.5,
+            model="m",
+            rotation_cap=3,
+            skip_review_node=True,
+        )
+
+    assert result == "exhausted"
+    write_kwargs = gc.query.call_args_list[1].kwargs
+    assert write_kwargs["quorum_shortfall"] == "review carried no resolution method"
 
 
 class TestPersistTokenMismatchNoOp:
@@ -451,6 +585,8 @@ class TestPersistTokenMismatchNoOp:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert result == ""
@@ -484,6 +620,8 @@ class TestPersistWritesReviewerDocsFields:
                 model="openrouter/test/model",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         # Check the SET query kwargs
@@ -533,6 +671,8 @@ class TestPersistDoesNotChangeNameFields:
                 model="m",
                 min_score=0.75,
                 rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         set_call = gc.query.call_args_list[1]
@@ -545,6 +685,79 @@ class TestPersistDoesNotChangeNameFields:
         assert "reviewer_score_name" not in cypher
         assert "reviewer_comments_name" not in cypher
         assert "reviewed_name_at" not in cypher
+
+
+class TestExactDocsRescoreStaging:
+    def test_stages_only_aggregate_docs_decision_fields(self) -> None:
+        """CAS staging preserves content, depth, and review-node history."""
+        gc = _mock_gc_query(
+            return_values=[
+                [
+                    {
+                        "prior_stage": "accepted",
+                        "description": "Preserved description",
+                        "documentation": "Preserved documentation",
+                    }
+                ]
+            ]
+        )
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
+
+            result = stage_docs_for_rescore("test_name", run_id="exact-docs-run")
+
+        assert result == {
+            "ok": True,
+            "sn_id": "test_name",
+            "prior_stage": "accepted",
+            "run_id": "exact-docs-run",
+            "dry_run": False,
+        }
+        cypher = gc.query.call_args.args[0]
+        assert "sn.docs_stage IN ['accepted', 'reviewed', 'exhausted']" in cypher
+        assert "sn.claim_token IS NULL" in cypher
+        assert "sn.drain_scope_id IS NULL" in cypher
+        assert "sn.drain_scope_claimed_at IS NULL" in cypher
+        assert "sn.drain_claim_scope_id IS NULL" in cypher
+        assert "sn.run_id = $run_id" in cypher
+        set_clause = cypher.split("SET", 1)[1].split("RETURN", 1)[0]
+        assert "sn.description" not in set_clause
+        assert "sn.documentation" not in set_clause
+        assert "sn.docs_chain_length" not in set_clause
+        assert "StandardNameReview" not in cypher
+
+    def test_claimed_record_fails_closed_without_second_write(self) -> None:
+        gc = _mock_gc_query(
+            return_values=[
+                [],
+                [
+                    {
+                        "name_stage": "accepted",
+                        "docs_stage": "reviewed",
+                        "claim_token": "owned",
+                        "claimed_at": "now",
+                    }
+                ],
+            ]
+        )
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
+
+            result = stage_docs_for_rescore("test_name", run_id="exact-docs-run")
+
+        assert result["ok"] is False
+        assert "claimed=True" in result["reason"]
+        assert gc.query.call_count == 2
+
+    def test_empty_scope_is_refused_without_graph_access(self) -> None:
+        gc = _mock_gc_query()
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
+
+            result = stage_docs_for_rescore("test_name", run_id="  ")
+
+        assert result["ok"] is False
+        gc.query.assert_not_called()
 
 
 # =============================================================================

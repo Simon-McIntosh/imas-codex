@@ -5101,12 +5101,20 @@ def sn_merge(
     table.add_column("value", style="white")
     table.add_row("changes seen", str(report.changes_seen))
     table.add_row("accepted", str(len(report.accepted)))
+    table.add_row("staged for review", str(len(report.staged_for_review)))
     table.add_row("auto-approved", str(len(report.auto_approved)))
     table.add_row("contested", str(len(report.contested)))
     table.add_row("quarantined", str(len(report.quarantined)))
     table.add_row("blocked", str(len(report.blocked)))
     table.add_row("unmatched", str(len(report.unmatched)))
     console.print(table)
+
+    if report.staged_for_review:
+        console.print(
+            f"\n[yellow]⏳ {len(report.staged_for_review)} docs edit(s) staged "
+            "for complete quorum review; they remain excluded from full export "
+            "until accepted.[/yellow]"
+        )
 
     if report.contested:
         console.print(

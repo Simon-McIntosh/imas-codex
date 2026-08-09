@@ -249,6 +249,8 @@ def _reject_name(gc, sn_id: str, *, rotation_cap: int = _CAP) -> str:
         model="test/model",
         min_score=0.75,
         rotation_cap=rotation_cap,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=3,
     )
 
 
@@ -262,6 +264,8 @@ def _accept_name(gc, sn_id: str, *, rotation_cap: int = _CAP) -> str:
         model="test/model",
         min_score=0.75,
         rotation_cap=rotation_cap,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=3,
     )
 
 
@@ -311,6 +315,8 @@ def _reject_docs(gc, sn_id: str, *, rotation_cap: int = _CAP) -> str:
         model="test/model",
         min_score=0.75,
         rotation_cap=rotation_cap,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=3,
     )
 
 

@@ -246,6 +246,8 @@ class TestReviewDocsBumpsReviewed:
                     score=0.90,
                     model="test-model",
                     run_id=_RUN_ID,
+                    resolution_method="quorum_consensus",
+                    reviewer_chain_size=3,
                 )
 
             bumps = _extract_bump_calls(mock_gc)

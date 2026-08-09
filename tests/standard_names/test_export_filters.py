@@ -45,6 +45,7 @@ def _make_node(
         "kind": "scalar",
         "unit": "eV",
         "physics_domain": "test",
+        "docs_review_resolution_method": "quorum_consensus",
         **kwargs,
     }
 
@@ -80,13 +81,21 @@ def _make_gc_filtering(all_nodes: list[dict]) -> MagicMock:
 
     def _query(cypher: str, **kwargs) -> list[dict]:
         domain = kwargs.get("domain")
+        requires_docs = "sn.docs_stage = 'accepted'" in cypher
         return [
             {"record": n}
             for n in all_nodes
             if (
                 n.get("name_stage") == "accepted"
-                and n.get("docs_stage") == "accepted"
                 and n.get("validation_status") == "valid"
+                and (
+                    not requires_docs
+                    or (
+                        n.get("docs_stage") == "accepted"
+                        and n.get("docs_review_resolution_method") is not None
+                        and n.get("docs_review_quorum_shortfall") is None
+                    )
+                )
                 and (domain is None or n.get("physics_domain") == domain)
             )
         ]
@@ -326,3 +335,54 @@ class TestQuorumShortfallIsNotExportable:
         """Dropping the docs gate must not drop the quorum gate with it."""
         cypher = self._capture_cypher(names_only=True)
         assert "sn.review_quorum_shortfall IS NULL" in cypher
+
+    def test_full_export_requires_docs_quorum_authority(self) -> None:
+        cypher = self._capture_cypher()
+        assert "sn.docs_review_resolution_method IS NOT NULL" in cypher
+        assert "sn.docs_review_quorum_shortfall IS NULL" in cypher
+
+    def test_batch_export_requires_docs_quorum_authority(self) -> None:
+        cypher = self._capture_cypher(batch=["sn_a"])
+        assert "sn.docs_review_resolution_method IS NOT NULL" in cypher
+        assert "sn.docs_review_quorum_shortfall IS NULL" in cypher
+
+    def test_names_only_export_is_independent_of_docs_authority(self) -> None:
+        cypher = self._capture_cypher(names_only=True)
+        assert "docs_review_resolution_method" not in cypher
+        assert "docs_review_quorum_shortfall" not in cypher
+
+    def test_missing_docs_resolution_is_excluded_from_full_export(self) -> None:
+        nodes = [_make_node("legacy_docs", docs_review_resolution_method=None)]
+        mock_gc = _make_gc_filtering(nodes)
+        with patch(_GC_PATH) as mock_graph:
+            mock_graph.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_graph.return_value.__exit__ = MagicMock(return_value=False)
+            assert _fetch_candidates() == []
+
+    def test_recorded_docs_shortfall_is_excluded_from_full_export(self) -> None:
+        nodes = [
+            _make_node(
+                "held_docs",
+                docs_review_quorum_shortfall="review carried no resolution method",
+            )
+        ]
+        mock_gc = _make_gc_filtering(nodes)
+        with patch(_GC_PATH) as mock_graph:
+            mock_graph.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_graph.return_value.__exit__ = MagicMock(return_value=False)
+            assert _fetch_candidates() == []
+
+    def test_recorded_docs_shortfall_does_not_hide_name_only_export(self) -> None:
+        nodes = [
+            _make_node(
+                "held_docs",
+                docs_review_quorum_shortfall="review carried no resolution method",
+            )
+        ]
+        mock_gc = _make_gc_filtering(nodes)
+        with patch(_GC_PATH) as mock_graph:
+            mock_graph.return_value.__enter__ = MagicMock(return_value=mock_gc)
+            mock_graph.return_value.__exit__ = MagicMock(return_value=False)
+            assert [row["id"] for row in _fetch_candidates(names_only=True)] == [
+                "held_docs"
+            ]

@@ -46,6 +46,8 @@ class _FakeGraph:
             and n.get("reviewer_score_docs", 0.0) >= min_score
             and n.get("name_stage") == "accepted"
             and (n.get("validation_status") or "") != "quarantined"
+            and n.get("docs_review_resolution_method") is not None
+            and n.get("docs_review_quorum_shortfall") is None
         )
 
     def query(self, cypher: str, **params):
@@ -121,6 +123,7 @@ class TestDocsAxis:
                 "name_stage": "accepted",
                 "docs_stage": "reviewed",
                 "reviewer_score_docs": 0.8,
+                "docs_review_resolution_method": "quorum_consensus",
             }
         ]
         out = _run(nodes, min_score=0.7)
@@ -134,10 +137,26 @@ class TestDocsAxis:
                 "name_stage": "accepted",
                 "docs_stage": "reviewed",
                 "reviewer_score_docs": 0.5,
+                "docs_review_resolution_method": "quorum_consensus",
             }
         ]
         out = _run(nodes, min_score=0.7)
         assert out["docs"] == 0
+
+    def test_docs_quorum_shortfall_blocks_promotion(self) -> None:
+        nodes = [
+            {
+                "id": "held_docs",
+                "name_stage": "accepted",
+                "docs_stage": "reviewed",
+                "reviewer_score_docs": 0.9,
+                "docs_review_resolution_method": "single_review",
+                "docs_review_quorum_shortfall": "review carried no resolution method",
+            }
+        ]
+        out = _run(nodes, min_score=0.7)
+        assert out["docs"] == 0
+        assert nodes[0]["docs_stage"] == "reviewed"
 
 
 class TestIdempotency:
@@ -149,6 +168,7 @@ class TestIdempotency:
                 "name_stage": "accepted",
                 "docs_stage": "reviewed",
                 "reviewer_score_docs": 0.9,
+                "docs_review_resolution_method": "quorum_consensus",
             },
         ]
         first = _run(nodes, min_score=0.7)
@@ -308,3 +328,30 @@ class TestFakeMirrorsProduction:
             f"the fake ignores production predicate field(s) {sorted(missing)} — "
             "update _name_eligible so this harness still mirrors the real clause"
         )
+
+    def test_every_production_docs_clause_is_consulted_by_the_fake(self) -> None:
+        import re
+
+        from imas_codex.standard_names.graph_ops import PROMOTE_STRANDED_DOCS_WHERE
+
+        referenced = set(re.findall(r"sn\.(\w+)", PROMOTE_STRANDED_DOCS_WHERE))
+
+        class _RecordingNode(dict):
+            def __init__(self) -> None:
+                super().__init__(
+                    docs_stage="reviewed",
+                    reviewer_score_docs=1.0,
+                    name_stage="accepted",
+                    validation_status=None,
+                    docs_review_resolution_method="quorum_consensus",
+                    docs_review_quorum_shortfall=None,
+                )
+                self.read: set[str] = set()
+
+            def get(self, key, default=None):
+                self.read.add(key)
+                return super().get(key, default)
+
+        node = _RecordingNode()
+        assert _FakeGraph([])._docs_eligible(node, 0.85)
+        assert not referenced - node.read

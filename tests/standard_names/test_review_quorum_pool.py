@@ -510,6 +510,8 @@ async def test_docs_two_models_agreement_writes_two_cycles() -> None:
     assert {r["review_axis"] for r in records} == {"docs"}
     assert records[1]["resolution_method"] == "quorum_consensus"
     assert lease.charge_event.call_count == 2
+    assert captured["persist"]["resolution_method"] == "quorum_consensus"
+    assert captured["persist"]["reviewer_chain_size"] == 2
 
 
 @pytest.mark.asyncio
@@ -562,3 +564,58 @@ async def test_docs_three_models_disagreement_runs_escalator() -> None:
     expected = sum(s_c.values()) / (20.0 * len(s_c))
     assert captured["persist"]["score"] == pytest.approx(expected)
     assert captured["persist"]["skip_review_node"] is True
+    assert captured["persist"]["resolution_method"] == "authoritative_escalation"
+    assert captured["persist"]["reviewer_chain_size"] == 3
+
+
+@pytest.mark.asyncio
+async def test_derived_parent_docs_use_the_complete_reviewer_chain() -> None:
+    """Parent-specific prose keeps its rubric but not a reduced authority."""
+    from imas_codex.standard_names.workers import process_review_docs_batch
+
+    captured: dict[str, Any] = {}
+    mgr, _ = _mock_budget_manager()
+    scores = {
+        "generalization": 17,
+        "positioning": 17,
+        "physics_accuracy": 17,
+        "clarity": 17,
+    }
+    llm = _llm_returns([_docs_result(scores), _docs_result(scores)])
+    item = _docs_item()
+    item.update(
+        {
+            "origin": "derived",
+            "derived_children": [
+                {
+                    "name": "child_field",
+                    "description": "Concrete child",
+                    "unit": "eV",
+                    "physics_domain": ["test"],
+                }
+            ],
+        }
+    )
+
+    graph = MagicMock()
+    graph.__enter__ = MagicMock(return_value=graph)
+    graph.__exit__ = MagicMock(return_value=False)
+    graph.query = MagicMock(return_value=[])
+    patches = _patch_common(
+        captured=captured,
+        llm_mock=llm,
+        models=["model-a", "model-b", "model-c"],
+        review_axis="docs",
+    )
+    patches.append(patch("imas_codex.graph.client.GraphClient", return_value=graph))
+    for p in patches:
+        p.start()
+    try:
+        await process_review_docs_batch([item], mgr, asyncio.Event(), on_event=None)
+    finally:
+        for p in patches:
+            p.stop()
+
+    assert llm.await_count == 2
+    assert captured["persist"]["resolution_method"] == "quorum_consensus"
+    assert captured["persist"]["reviewer_chain_size"] == 3

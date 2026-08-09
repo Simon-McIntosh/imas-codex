@@ -6,13 +6,15 @@ and re-plays the human edit through the SAME steered-proposal path as
 ``sn edit`` (:func:`~imas_codex.standard_names.edit.apply_edit`): the changed
 field becomes the candidate and the human intent becomes the ``reason``.
 
-The re-attached proposal is then scored by the FULL review pipeline with
-**no refine step** — a human-reviewed wording must never be silently
-rewritten afterwards.  The score decides the outcome:
+The re-attached proposal is then scored by the review pipeline with no inline
+refine step. The score decides the immediate outcome:
 
-* ``score >= threshold`` → **ACCEPT**: the edit lands and the name reaches
-  the accepted state via ``persist_reviewed_name`` / ``persist_reviewed_docs``
-  (a NAME edit's accept also fires the descendant rename cascade).
+* ``score >= threshold`` on the name axis → **ACCEPT**: the edit lands via
+  ``persist_reviewed_name`` and fires the descendant rename cascade.
+* ``score >= threshold`` on the docs axis → **STAGE FOR REVIEW**: the aggregate
+  merge score is not quorum authority, so the unchanged text is fenced to one
+  exact ordinary docs-review scope. It remains unpublished until that full
+  configured chain reaches a valid resolution.
 * ``score <  threshold`` → **QUARANTINE + FLAG**: the existing quarantine
   signal (``validation_status='quarantined'``) is set and the proposal is
   surfaced for human attention.  It is never accepted, never refined, never
@@ -22,10 +24,7 @@ A NAME change rides ``apply_edit``'s **rename mode**, which carries the
 producing-source (``PRODUCED_NAME``) provenance through the rename cascade —
 never delete-and-recreate.
 
-The "no refine" guarantee is structural: :func:`run_merge` runs only the
-review scorer and immediately transitions each proposal to *accepted* or
-*quarantined*.  It never leaves a proposal in the refine-eligible
-``'reviewed'`` state and never invokes any refine pool.  Attaching with
+The merge operation itself never invokes a refine pool. Attaching with
 ``refine=False`` additionally stamps the durable review-only marker on the
 node (see :func:`~imas_codex.standard_names.edit.apply_edit`).
 """
@@ -48,6 +47,7 @@ from imas_codex.standard_names.edit import apply_edit
 from imas_codex.standard_names.graph_ops import (
     persist_reviewed_docs,
     persist_reviewed_name,
+    stage_docs_for_rescore,
 )
 
 logger = logging.getLogger(__name__)
@@ -92,7 +92,7 @@ class MergeOutcome:
 
     sn_id: str
     axis: str
-    decision: str  # accepted | quarantined | blocked | unmatched | planned
+    decision: str  # accepted | staged_for_review | quarantined | blocked | unmatched | planned
     target_id: str | None = None  # the reviewed node (rename successor / target)
     score: float | None = None
     reason: str = ""
@@ -106,6 +106,7 @@ class MergeReport:
     dry_run: bool = False
     changes_seen: int = 0
     accepted: list[str] = field(default_factory=list)
+    staged_for_review: list[str] = field(default_factory=list)
     quarantined: list[dict[str, Any]] = field(default_factory=list)
     contested: list[dict[str, Any]] = field(default_factory=list)
     auto_approved: list[str] = field(default_factory=list)
@@ -363,7 +364,7 @@ def _clear_claim(sn_id: str, gc: GraphClient) -> None:
     )
 
 
-def _accept(
+def _apply_passing_review(
     review_target: str,
     *,
     axis: str,
@@ -371,16 +372,18 @@ def _accept(
     threshold: float,
     run_id: str | None,
     gc: GraphClient,
-) -> None:
-    """Promote a scored proposal to the accepted state.
+) -> str:
+    """Accept a quorate name result or stage docs for complete review.
 
-    Reuses the pipeline's own accept path (``persist_reviewed_name`` /
-    ``persist_reviewed_docs``) so a NAME accept also fires the descendant
-    rename cascade exactly as a normal reviewed rename would.
+    A name proposal carries explicit human authority and reuses the normal name
+    accept path so descendant rename cascades run. The docs scorer exposes only
+    an aggregate mean, so it cannot establish reviewer-chain resolution. Docs
+    are first failed closed, then staged unchanged for an exact ordinary
+    ``review_docs`` claim.
     """
     _clear_claim(review_target, gc)
     if axis == "docs":
-        persist_reviewed_docs(
+        stage = persist_reviewed_docs(
             sn_id=review_target,
             claim_token="",
             score=score,
@@ -389,8 +392,31 @@ def _accept(
             run_id=run_id,
             skip_review_node=True,
         )
+        # The merge scorer returns an aggregate score, not the canonical
+        # RD-quorum resolution metadata. It therefore cannot grant docs
+        # acceptance. The fail-closed persist records that shortfall, then this
+        # exact-scope transition parks the unchanged proposal for ordinary
+        # review_docs with the configured chain.
+        if stage != "reviewed":
+            raise RuntimeError(
+                f"docs merge for {review_target!r} bypassed quorum staging "
+                f"(unexpected stage {stage!r})"
+            )
+        review_run_id = run_id or (
+            "sn-merge-docs-review-" + datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
+        )
+        staged = stage_docs_for_rescore(
+            review_target,
+            run_id=review_run_id,
+        )
+        if not staged.get("ok"):
+            raise RuntimeError(
+                f"could not stage docs review for {review_target!r}: "
+                f"{staged.get('reason', 'unknown refusal')}"
+            )
+        return "staged_for_review"
     else:
-        persist_reviewed_name(
+        stage = persist_reviewed_name(
             sn_id=review_target,
             claim_token="",
             score=score,
@@ -402,6 +428,12 @@ def _accept(
             # score, so the quorum gate does not apply to it.
             quorum_exempt=True,
         )
+        if stage != "accepted":
+            raise RuntimeError(
+                f"name merge for {review_target!r} did not accept "
+                f"(unexpected stage {stage!r})"
+            )
+        return "accepted"
 
 
 def _quarantine(
@@ -721,7 +753,7 @@ def run_merge(
 
             # ── Accept ≥ threshold else quarantine + flag ────────────────
             if score >= thr:
-                _accept(
+                disposition = _apply_passing_review(
                     review_target,
                     axis=change.axis,
                     score=score,
@@ -729,7 +761,9 @@ def run_merge(
                     run_id=plan.run_id,
                     gc=gc,
                 )
-                if all(value is not None for value in approval_values):
+                if disposition == "accepted" and all(
+                    value is not None for value in approval_values
+                ):
                     mark_catalog_name_approved(
                         review_target,
                         catalog_pr_number=int(catalog_pr_number),
@@ -737,12 +771,15 @@ def run_merge(
                         catalog_merge_commit_sha=str(catalog_merge_commit_sha),
                         gc=gc,
                     )
-                report.accepted.append(review_target)
+                if disposition == "accepted":
+                    report.accepted.append(review_target)
+                else:
+                    report.staged_for_review.append(review_target)
                 report.outcomes.append(
                     MergeOutcome(
                         sn_id=change.sn_id,
                         axis=change.axis,
-                        decision="accepted",
+                        decision=disposition,
                         target_id=review_target,
                         score=score,
                     )
@@ -1042,6 +1079,7 @@ def build_contract_block(
             f"batch: {batch_artifact or '(none)'}",
             (
                 f"outcomes: approved={len(report.accepted)} "
+                f"staged_for_review={len(report.staged_for_review)} "
                 f"auto_approved={len(report.auto_approved)} "
                 f"contested={len(report.contested)}"
             ),
