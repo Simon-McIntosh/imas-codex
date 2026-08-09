@@ -81,6 +81,7 @@ class FakeGraph:
     produced_name: dict[str, str] = field(default_factory=dict)
     sources: dict[str, dict[str, Any]] = field(default_factory=dict)
     docs_revisions: list[str] = field(default_factory=list)
+    source_migration_events: set[str] = field(default_factory=set)
 
     # -- construction helpers ------------------------------------------------
 
@@ -124,6 +125,7 @@ class FakeGraph:
         self.sources[source_id] = {
             "status": status,
             "source_type": source_type,
+            "produced_sn_id": sn_id,
             "claimed_at": None,
             "claim_token": None,
             "attempt_count": 0,
@@ -545,6 +547,34 @@ class FakeGraph:
                 n += 1
             return [{"reset": n}]
 
+        if "AS current_bindings" in cypher and "manifest_recorded" in cypher:
+            rows = []
+            for source_id in params.get("source_ids") or []:
+                source = self.sources.get(source_id)
+                target = self.produced_name.get(source_id)
+                rows.append(
+                    {
+                        "source_id": source_id,
+                        "source_exists": source is not None,
+                        "source_status": source.get("status") if source else None,
+                        "scalar_binding": (
+                            source.get("produced_sn_id") if source else None
+                        ),
+                        "actively_claimed": bool(
+                            source
+                            and (
+                                source.get("claimed_at") is not None
+                                or source.get("claim_token") is not None
+                            )
+                        ),
+                        "current_bindings": [target] if target else [],
+                        "manifest_recorded": (
+                            params["manifest_event_id"] in self.source_migration_events
+                        ),
+                    }
+                )
+            return rows
+
         # Default: best-effort helpers (_doc_link_mismatches etc.) — safe no-op.
         return []
 
@@ -667,14 +697,45 @@ class FakeGraph:
         if "RETURN size(moved) AS moved" in cypher:
             old_name = params["old_name"]
             new_name = params["new_name"]
-            selected = set(params.get("source_ids") or [])
-            moved = 0
-            for sid, target in list(self.produced_name.items()):
-                if target == old_name and sid in selected:
-                    self.produced_name[sid] = new_name
-                    moved += 1
-            self.nodes[new_name]["source_paths"] = sorted(selected)
-            return [{"moved": moved}]
+            selected = list(params.get("source_ids") or [])
+            if not selected:
+                return []
+            if old_name not in self.nodes or new_name not in self.nodes:
+                return []
+            if any(
+                source_id not in self.sources
+                or self.sources[source_id].get("status") == "stale"
+                or self.sources[source_id].get("claimed_at") is not None
+                or self.sources[source_id].get("claim_token") is not None
+                or self.sources[source_id].get("produced_sn_id") != old_name
+                or self.produced_name.get(source_id) != old_name
+                for source_id in selected
+            ):
+                return []
+
+            for source_id in selected:
+                self.produced_name[source_id] = new_name
+                self.sources[source_id]["produced_sn_id"] = new_name
+
+            if any(
+                self.produced_name.get(source_id) != new_name
+                or self.sources[source_id].get("produced_sn_id") != new_name
+                for source_id in selected
+            ):
+                return []
+
+            self.source_migration_events.add(params["manifest_event_id"])
+            self.nodes[old_name]["source_paths"] = sorted(
+                source_id
+                for source_id, target in self.produced_name.items()
+                if target == old_name
+            )
+            self.nodes[new_name]["source_paths"] = sorted(
+                source_id
+                for source_id, target in self.produced_name.items()
+                if target == new_name
+            )
+            return [{"moved": len(selected)}]
 
         if "CREATE (change:StandardNameChange" in cypher:
             return []
@@ -728,6 +789,7 @@ class _FakeTx:
         self.owner.produced_name = self.graph.produced_name
         self.owner.sources = self.graph.sources
         self.owner.docs_revisions = self.graph.docs_revisions
+        self.owner.source_migration_events = self.graph.source_migration_events
         self._closed = True
 
     def closed(self) -> bool:
@@ -1099,14 +1161,31 @@ class TestStrandedRename:
     """
 
     def test_quarantined_pending_with_live_source_is_renameable(self) -> None:
+        from imas_codex.standard_names.provenance_lifecycle import (
+            retarget_standard_name_sources,
+        )
+
         fake = _stranded(validation_status="quarantined")
-        with _patched_graph(fake), _admitting_pairing_guard():
+        with (
+            _patched_graph(fake),
+            _admitting_pairing_guard(),
+            patch(
+                "imas_codex.standard_names.provenance_lifecycle."
+                "retarget_standard_name_sources",
+                wraps=retarget_standard_name_sources,
+            ) as migrate_sources,
+        ):
             plan = apply_edit(
                 target="plasma_current",
                 rename="toroidal_plasma_current",
                 reason="parser-invalid spelling",
                 gc=fake,
             )
+        migrate_sources.assert_called_once()
+        assert migrate_sources.call_args.kwargs["source_ids"] == ["dd:magnetics/ip"]
+        assert migrate_sources.call_args.kwargs["expected_current_bindings"] == {
+            "dd:magnetics/ip": "plasma_current"
+        }
         assert plan.blocked is None
         assert plan.applied is True
         assert plan.successor == "toroidal_plasma_current"
