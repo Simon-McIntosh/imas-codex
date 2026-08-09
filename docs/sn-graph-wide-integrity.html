@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="119">
+<meta name="plan-version" content="120">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -1186,6 +1186,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260809-docs-authority-backfill-applied" data-who="reckon-ship" data-when="2026-08-09T17:14:00+00:00">
     <div class="r-comment-body"><p><strong>The exact documentation-authority backfill applied successfully at zero cost.</strong> Fresh quiet/CAS preflight rebuilt the canonical 22-row manifest byte-identically (SHA-256 <code>8f5c726b…</code>), with all 22 resolution methods null. The single public apply call returned matched 22, changed 22, already-applied 0, postflight true; all 22 now carry <code>quorum_consensus</code>. Documentation text, scores, 164 Reviews, 13 sources, 25 parent/child links, all relationship structure, and the normalized one-hop snapshot remained unchanged. No provider call or LLMCost delta occurred. Receipt <code>/tmp/sgwi_docs_authority_backfill_apply.json</code>, SHA-256 <code>7d7d91625b7b7975692012a4db7b4bb98399b95b32577285dbb55f261342429c</code>. A repeat is an idempotent changed-0/already-22 outcome.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260809-docs-recovery-builder-hold" data-who="reckon-ship" data-when="2026-08-09T17:25:00+00:00">
+    <div class="r-comment-body"><p><strong>The first full documentation-recovery builder candidate is held by independent review.</strong> Fresh quiet census is 2,238 docs-accepted rows and the candidate partitions 14 metadata-backfill, 32 exact current rescore, 270 historical hold, and 1,922 ambiguous hold. Three fail-closed defects prevent integration: all 14 reported backfills already carry authority and need an explicit <code>already_authoritative</code> outcome; its eight-name paid batches are arbitrary because expected admission exposure is only known after rendering each request; and emitted content hashes are not accepted or enforced by <code>stage_docs_for_rescore</code>, so they are decorative rather than transactional CAS. No paid rescore has started.</p><p><strong>Correction contract:</strong> distinguish already-authoritative from missing metadata; emit a prioritized exact queue with zero pre-render reservation and fill each hard-capped tranche only after canonical request rendering; extend staging to recompute and enforce documentation and review-input hashes inside the write transaction. Overall remaining ceiling is USD 189.356037.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
