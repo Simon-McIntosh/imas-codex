@@ -190,16 +190,15 @@ def model_provider_exposure(
     calls: int = 1,
     max_tokens: int | None = None,
 ) -> float:
-    """Price the maximum billable exposure of a rendered structured request.
+    """Estimate the expected bill for a rendered structured request.
 
     The input term is bounded by the rendered request itself — its serialized
     UTF-8 byte length plus a framing allowance — capped by the route's
-    published context limit.  Pricing the whole context window instead would
-    over-reserve by the ratio of the window to the prompt, which for a
-    million-token route is three orders of magnitude and starves every other
-    concurrent request.  Every wrapper retry is priced with the largest output
-    allowance it can reach after a length exhaustion.  Routes with non-text
-    inputs or unsupported billable dimensions fail closed.
+    published context limit.  Cataloged route rates estimate admission cost;
+    the separate provider ``max_price`` policy remains enforced at dispatch.
+    Every wrapper retry is represented and priced with the output allowance it
+    can reach after a length exhaustion.  Routes without proven expected rates,
+    and requests with unpriced non-text dimensions, fail closed.
     """
     from imas_codex.discovery.base.llm import (
         _LENGTH_RETRY_TOKEN_CAP,
@@ -207,7 +206,7 @@ def model_provider_exposure(
         _is_local_model,
         get_catalog_model_info,
         get_model_limits,
-        get_openrouter_max_price,
+        get_openrouter_expected_price,
     )
 
     if _is_local_model(model):
@@ -243,10 +242,13 @@ def model_provider_exposure(
     input_bound = min(input_limit, request_byte_bound + _CHAT_FRAMING_TOKEN_ALLOWANCE)
 
     try:
-        max_price = get_openrouter_max_price(model)
+        expected_price = get_openrouter_expected_price(
+            model,
+            input_tokens=input_bound,
+        )
     except Exception as exc:
         raise BudgetExposureUnknown(
-            f"enforceable OpenRouter rate ceiling unavailable for {model}"
+            f"proven OpenRouter expected price unavailable for {model}"
         ) from exc
 
     output_limit = max_tokens or get_model_limits(model)["max_tokens"]
@@ -258,9 +260,9 @@ def model_provider_exposure(
     total = 0.0
     for _ in range(provider_attempts):
         attempt_cost = (
-            input_bound * max_price["prompt"] / 1_000_000
-            + output_limit * max_price["completion"] / 1_000_000
-            + max_price["request"]
+            input_bound * expected_price["prompt"] / 1_000_000
+            + output_limit * expected_price["completion"] / 1_000_000
+            + expected_price["request"]
         )
         if not math.isfinite(attempt_cost) or attempt_cost <= 0:
             raise BudgetExposureUnknown(

@@ -76,6 +76,39 @@ def _get_section(section: str) -> dict:
     return _load_pyproject_settings().get(section, {})
 
 
+def get_openrouter_pricing(model: str) -> dict[str, Any]:
+    """Return the centrally cataloged OpenRouter pricing for *model*.
+
+    Token rates are normalized to USD per million tokens.  ``request`` is a
+    fixed per-request USD charge, and optional overrides apply at or above
+    their ``min_input_tokens`` threshold.  An empty mapping means the project
+    has no explicit catalog entry and lets the LLM layer consult LiteLLM's
+    bundled catalog before failing closed.
+    """
+    catalog = _get_section("llm").get("openrouter-pricing", {})
+    raw = catalog.get(model)
+    if not isinstance(raw, dict):
+        return {}
+    overrides = [
+        {
+            "min_input_tokens": item.get("min-input-tokens"),
+            "prompt": item.get("prompt"),
+            "completion": item.get("completion"),
+            "request": item.get("request", raw.get("request", 0.0)),
+        }
+        for item in raw.get("overrides", [])
+        if isinstance(item, dict)
+    ]
+    return {
+        "prompt": raw.get("prompt"),
+        "completion": raw.get("completion"),
+        "request": raw.get("request", 0.0),
+        "source": raw.get("source"),
+        "verified_at": raw.get("verified-at"),
+        "overrides": overrides,
+    }
+
+
 # ─── Valid model sections ───────────────────────────────────────────────────
 
 MODEL_SECTIONS = frozenset(

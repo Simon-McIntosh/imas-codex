@@ -447,28 +447,23 @@ async def pool_loop(
 #
 # Sizing a budget against this gate
 # ---------------------------------
-# Reservations are worst-case provider exposure, not expected spend, so the
-# budget a run needs is set by what it must *hold*, not by what it will bill.
-# ``model_provider_exposure`` prices one request as
+# Reservations estimate expected provider cost, so the budget a run needs is
+# set by the requests it may hold concurrently as well as the spend it expects
+# to bill. ``model_provider_exposure`` prices one request as
 #
 #     (request_bytes + chat-framing allowance) x prompt_rate / 1e6
 #   + max_output_tokens x completion_rate / 1e6
 #   + per_request_rate
 #
-# and a route absent from the bundled price catalog is priced at the immutable
-# policy ceiling ($20/M prompt, $100/M completion, $1 per request).  Every seat
-# in the current reviewer quorum is such a route, so each review request
-# reserves roughly $6.75 for a 25-name batch: $3.20 of it is the 32k output
-# allowance and $1.00 the per-request charge, neither of which shrinks with a
-# smaller batch.  A name-review batch spends two of those sequentially (the two
-# blind cycles) and a third when the reviewers disagree, so ONE batch needs
-# ~$13.50 to start and ~$20.25 to finish through the escalator.
+# using the route's centrally cataloged expected rates. Missing price authority
+# refuses admission instead of substituting the policy ceiling. The immutable
+# provider ``max_price`` cap remains a separate dispatch boundary, and actual
+# charges still count against the campaign hard stop.
 #
 # Two consequences that a nominal-looking budget hides:
 #
-# * A budget below one full chain cannot complete a single batch.  The first
-#   cycle reserves, the second cannot, and the batch aborts having billed
-#   nothing — so the run reports zero spend while its work sits eligible.
+# * A budget below the concurrent request set cannot start all eligible work.
+#   Size the run from rendered-request estimates and leave room for retries.
 # * The failure counter this threshold reads is keyed by PHASE, shared by every
 #   replica of that pool.  A pool running N replicas issues N reservations
 #   against one pot, so a budget funding fewer than N concurrent requests leaves
