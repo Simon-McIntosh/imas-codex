@@ -150,6 +150,56 @@ def test_cli_forwards_explicit_maintenance_mode(
     assert run_pools.await_args.kwargs["reconcile_only"] is reconcile_only
 
 
+def test_completed_maintenance_commands_return_success() -> None:
+    """Maintenance-only completion does not require a pool backlog proof."""
+    from imas_codex.cli.sn import _run_sn_cmd
+
+    def _run_discovery(_config, async_main):
+        return asyncio.run(async_main(asyncio.Event(), MagicMock()))
+
+    for selector in ("attach", "reconcile"):
+        run_pools = AsyncMock(return_value=MagicMock(stop_reason="completed"))
+        with (
+            patch("imas_codex.cli.sn._require_embed_ready"),
+            patch(
+                "imas_codex.cli.discover.common.use_rich_output",
+                return_value=False,
+            ),
+            patch("imas_codex.cli.discover.common.setup_logging"),
+            patch(
+                "imas_codex.cli.discover.common.run_discovery",
+                side_effect=_run_discovery,
+            ),
+            patch("imas_codex.standard_names.loop.run_sn_pools", new=run_pools),
+            patch(
+                "imas_codex.standard_names.loop.summary_table",
+                return_value={"stop_reason": "completed"},
+            ),
+        ):
+            row = _run_sn_cmd(
+                cost_limit=0.0,
+                per_domain_limit=None,
+                dry_run=False,
+                quiet=True,
+                only=selector,
+            )
+
+        assert row == {"stop_reason": "completed"}
+
+
+def test_maintenance_commands_preserve_incomplete_exit_statuses() -> None:
+    from imas_codex.cli.sn import _require_terminal_drain
+
+    for reason, exit_code in (
+        ("degraded", 1),
+        ("failed", 1),
+        ("provider_budget_exhausted", 4),
+    ):
+        with pytest.raises(SystemExit) as exc:
+            _require_terminal_drain(reason, maintenance_only=True)
+        assert exc.value.code == exit_code
+
+
 # ---------------------------------------------------------------------------
 # pool specs
 # ---------------------------------------------------------------------------
