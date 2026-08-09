@@ -751,12 +751,18 @@ def fetch_review_neighbours(
 # Sibling-family (parallel-structure) context
 # ---------------------------------------------------------------------------
 
+DOCUMENTATION_FAMILY_OPERATOR_KINDS: tuple[str, ...] = (
+    "projection",
+    "qualifier",
+    "coordinate",
+)
+
 _SIBLING_FAMILY_QUERY = """
 MATCH (sn:StandardName {id: $sn_id})-[r:HAS_PARENT]->(p:StandardName)
-WHERE r.operator_kind IN ['projection', 'qualifier', 'coordinate', 'locus']
+WHERE r.operator_kind IN $family_kinds
 OPTIONAL MATCH (sib:StandardName)-[rs:HAS_PARENT]->(p)
 WHERE sib.id <> $sn_id
-  AND rs.operator_kind IN ['projection', 'qualifier', 'coordinate', 'locus']
+  AND rs.operator_kind IN $family_kinds
   AND coalesce(sib.name_stage, '') <> 'superseded'
 WITH p, r,
      [s IN collect({
@@ -830,7 +836,14 @@ def fetch_sibling_family(
             return None
 
     try:
-        rows = list(gc.query(_SIBLING_FAMILY_QUERY, sn_id=sn_id) or [])
+        rows = list(
+            gc.query(
+                _SIBLING_FAMILY_QUERY,
+                sn_id=sn_id,
+                family_kinds=list(DOCUMENTATION_FAMILY_OPERATOR_KINDS),
+            )
+            or []
+        )
     except Exception:
         logger.debug("fetch_sibling_family: query failed for %s", sn_id)
         rows = []
@@ -844,7 +857,13 @@ def fetch_sibling_family(
     if not rows:
         return None
     row = rows[0]
-    raw_sibs = [s for s in (row.get("sibs") or []) if s.get("id")]
+    if row.get("member_operator_kind") not in DOCUMENTATION_FAMILY_OPERATOR_KINDS:
+        return None
+    raw_sibs = [
+        s
+        for s in (row.get("sibs") or [])
+        if s.get("id") and s.get("operator_kind") in DOCUMENTATION_FAMILY_OPERATOR_KINDS
+    ]
     if not raw_sibs:
         return None
 

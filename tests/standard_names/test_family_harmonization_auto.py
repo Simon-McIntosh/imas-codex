@@ -16,6 +16,7 @@ from unittest.mock import patch
 
 from imas_codex.standard_names.graph_ops import _doc_link_mismatches
 from imas_codex.standard_names.harmonize import (
+    assemble_family,
     group_signature,
     mark_families_for_regen,
     restamp_harmonized_families,
@@ -69,6 +70,7 @@ def _member(mid, desc="d", doc="x", stage="accepted"):
         "description": desc,
         "documentation": doc,
         "docs_stage": stage,
+        "operator_kind": "projection",
     }
 
 
@@ -117,6 +119,100 @@ def test_restamp_noop_on_empty_graph():
     ):
         out = restamp_harmonized_families(gc=_FamiliesGC([]))
     assert out == {"restamped": 0, "unchanged": 0, "not_ready": 0}
+
+
+def test_restamp_omits_locus_ancestry_without_documentation_write():
+    members = [
+        {
+            **_member(f"radial_coordinate_of_distinct_owner_{index}"),
+            "operator_kind": "locus",
+        }
+        for index in range(35)
+    ]
+    rows = [
+        {
+            "parent_id": "radial_coordinate",
+            "stored_signature": None,
+            "members": members,
+        }
+    ]
+
+    with patch(
+        "imas_codex.standard_names.graph_ops.stamp_harmonized_families",
+        side_effect=AssertionError("locus ancestry must not be restamped"),
+    ):
+        out = restamp_harmonized_families(gc=_FamiliesGC(rows))
+
+    assert out == {"restamped": 0, "unchanged": 0, "not_ready": 0}
+
+
+def test_restamp_keeps_safe_family_and_carries_no_source_migration_manifest():
+    members = [
+        {**_member("poloidal_mode_number"), "operator_kind": "projection"},
+        {**_member("toroidal_mode_number"), "operator_kind": "projection"},
+    ]
+    rows = [
+        {
+            "parent_id": "mode_number",
+            "stored_signature": None,
+            "members": members,
+        }
+    ]
+    stamped_calls = []
+
+    def _fake_stamp(families):
+        stamped_calls.extend(families)
+        return len(families)
+
+    with patch(
+        "imas_codex.standard_names.graph_ops.stamp_harmonized_families",
+        side_effect=_fake_stamp,
+    ):
+        out = restamp_harmonized_families(gc=_FamiliesGC(rows))
+
+    assert out == {"restamped": 1, "unchanged": 0, "not_ready": 0}
+    assert stamped_calls == [
+        {
+            "parent": "mode_number",
+            "members": ["poloidal_mode_number", "toroidal_mode_number"],
+            "signature": group_signature(members),
+        }
+    ]
+    assert "source_ids" not in stamped_calls[0]
+    assert "successor" not in stamped_calls[0]
+
+
+class _LocusSeedGC:
+    """Expose a locus parent and reject any physical-base fallback query."""
+
+    def __init__(self):
+        self.calls = []
+
+    def query(self, cypher, **params):
+        self.calls.append(cypher)
+        if "RETURN c.id AS id, c.physical_base AS physical_base" in cypher:
+            return [
+                {
+                    "id": "radial_coordinate_of_control_surface",
+                    "physical_base": "coordinate",
+                }
+            ]
+        if "RETURN p.id AS parent_id" in cypher:
+            return [
+                {
+                    "parent_id": "radial_coordinate",
+                    "operator_kind": "locus",
+                    "operator": "control_surface",
+                }
+            ]
+        raise AssertionError("locus seed must not fall back to a base-wide cohort")
+
+
+def test_locus_seed_is_not_regrouped_by_physical_base():
+    gc = _LocusSeedGC()
+
+    assert assemble_family("radial_coordinate_of_control_surface", gc=gc) is None
+    assert len(gc.calls) == 2
 
 
 # ---------------------------------------------------------------------------
