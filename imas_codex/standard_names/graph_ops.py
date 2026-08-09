@@ -20,6 +20,7 @@ import time
 import uuid
 from contextlib import nullcontext, suppress
 from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
@@ -16606,6 +16607,113 @@ def persist_embed_batch(items: list[dict[str, Any]]) -> int:
 # =============================================================================
 
 
+class RefinedNamePersistenceRefusalReason(StrEnum):
+    """Exact mechanism that prevented a refined successor write."""
+
+    PREDECESSOR_MISSING = "predecessor_missing"
+    PREDECESSOR_STAGE = "predecessor_stage_changed"
+    CLAIM_LOST = "claim_lost"
+    SUCCESSOR_LIFECYCLE = "successor_lifecycle_collision"
+    SUCCESSOR_SCOPE = "successor_scope_collision"
+    SUCCESSOR_NOT_PERSISTED = "successor_not_persisted"
+
+
+class RefinedNamePersistenceRefusal(RuntimeError):
+    """Typed refusal carrying both the proposed and existing identities."""
+
+    def __init__(
+        self,
+        *,
+        old_name: str,
+        proposed_name: str,
+        reason: RefinedNamePersistenceRefusalReason,
+        existing_name: str | None = None,
+    ) -> None:
+        self.old_name = old_name
+        self.proposed_name = proposed_name
+        self.reason = reason
+        self.existing_name = existing_name
+        detail = f" existing={existing_name!r}" if existing_name else ""
+        super().__init__(
+            f"refined successor refused: predecessor={old_name!r} "
+            f"proposed={proposed_name!r} reason={reason.value}{detail}"
+        )
+
+
+def _classify_refined_name_persistence_refusal(
+    tx: Any,
+    *,
+    old_name: str,
+    new_name: str,
+    expected_old_stage: str | None,
+    expected_claim_token: str | None,
+    edit_mode: str | None,
+) -> RefinedNamePersistenceRefusal:
+    """Read the failed transaction predicate and return its exact refusal."""
+    rows = list(
+        tx.run(
+            """
+            OPTIONAL MATCH (old:StandardName {id: $old_name})
+            OPTIONAL MATCH (existing:StandardName {id: $new_name})
+            RETURN old IS NOT NULL AS old_exists,
+                   old.name_stage AS old_stage,
+                   old.claim_token AS old_claim_token,
+                   old.drain_scope_id AS old_drain_scope_id,
+                   existing.id AS existing_id,
+                   existing.name_stage AS existing_stage,
+                   existing.origin AS existing_origin,
+                   existing.drain_scope_id AS existing_drain_scope_id,
+                   existing.drain_scope_claimed_at
+                       AS existing_drain_scope_claimed_at,
+                   (old.drain_scope_id IS NULL
+                    OR existing.drain_scope_id IS NULL
+                    OR existing.drain_scope_id = old.drain_scope_id
+                    OR existing.drain_scope_claimed_at IS NULL
+                    OR existing.drain_scope_claimed_at < datetime()
+                         - duration('PT600S')) AS successor_scope_compatible
+            """,
+            old_name=old_name,
+            new_name=new_name,
+        )
+    )
+    state = dict(rows[0]) if rows else {}
+    existing_name = state.get("existing_id")
+    if not state.get("old_exists"):
+        reason = RefinedNamePersistenceRefusalReason.PREDECESSOR_MISSING
+    else:
+        required_stage = expected_old_stage or "refining"
+        if state.get("old_stage") != required_stage:
+            reason = RefinedNamePersistenceRefusalReason.PREDECESSOR_STAGE
+        elif (
+            expected_old_stage is None
+            and expected_claim_token is not None
+            and state.get("old_claim_token") != expected_claim_token
+        ):
+            reason = RefinedNamePersistenceRefusalReason.CLAIM_LOST
+        elif existing_name:
+            reusable = (
+                edit_mode is None
+                and (state.get("existing_stage") or "") in {"", "pending"}
+                and (state.get("existing_origin") or "") != "derived"
+            )
+            if not reusable:
+                reason = RefinedNamePersistenceRefusalReason.SUCCESSOR_LIFECYCLE
+            else:
+                reason = (
+                    RefinedNamePersistenceRefusalReason.SUCCESSOR_NOT_PERSISTED
+                    if state.get("successor_scope_compatible")
+                    else RefinedNamePersistenceRefusalReason.SUCCESSOR_SCOPE
+                )
+        else:
+            reason = RefinedNamePersistenceRefusalReason.SUCCESSOR_NOT_PERSISTED
+    return RefinedNamePersistenceRefusal(
+        old_name=old_name,
+        proposed_name=new_name,
+        reason=reason,
+        existing_name=existing_name,
+    )
+
+
 @retry_on_deadlock()
 def persist_refined_name(
     *,
@@ -16893,10 +17001,13 @@ def persist_refined_name(
                     )
                 )
                 if not preflight:
-                    raise RuntimeError(
-                        f"persist_refined_name no-op: {old_name} → {new_name} — "
-                        "the predecessor stage or successor collision changed "
-                        "before the atomic rename began"
+                    raise _classify_refined_name_persistence_refusal(
+                        tx,
+                        old_name=old_name,
+                        new_name=new_name,
+                        expected_old_stage=expected_old_stage,
+                        expected_claim_token=expected_claim_token,
+                        edit_mode=edit_mode,
                     )
 
                 preflight_row = dict(preflight[0])
@@ -17126,10 +17237,13 @@ def persist_refined_name(
                     )
                 )
                 if not result:
-                    raise RuntimeError(
-                        f"persist_refined_name no-op: {old_name} → {new_name} — "
-                        "the predecessor left name_stage='refining' during "
-                        "the atomic rename"
+                    raise RefinedNamePersistenceRefusal(
+                        old_name=old_name,
+                        proposed_name=new_name,
+                        reason=(
+                            RefinedNamePersistenceRefusalReason.SUCCESSOR_NOT_PERSISTED
+                        ),
+                        existing_name=new_name,
                     )
 
                 from imas_codex.standard_names.provenance_lifecycle import (
@@ -17186,17 +17300,11 @@ def persist_refined_name(
         bump_sn_run_counter(run_id, "names_regenerated")
         return row
 
-    # Empty result means the ``MATCH (old) WHERE name_stage='refining'`` gate
-    # did not bind — typically because orphan_sweep reverted the claim back
-    # to 'reviewed' while the LLM call was in flight. Silently returning a
-    # bare row dict here was the root cause of the refine_name silent-bug
-    # (5 REFINED_FROM edges from 500+ claims observed 2026-05-18). Raise
-    # explicitly so the worker's exception handler either releases the
-    # claim cleanly or marks the SN exhausted.
-    raise RuntimeError(
-        f"persist_refined_name no-op: {old_name} → {new_name} — the old SN "
-        f"was not in name_stage='refining' at persist time (likely reverted "
-        f"by orphan_sweep). LLM call complete but no graph mutation occurred."
+    raise RefinedNamePersistenceRefusal(
+        old_name=old_name,
+        proposed_name=new_name,
+        reason=RefinedNamePersistenceRefusalReason.SUCCESSOR_NOT_PERSISTED,
+        existing_name=new_name,
     )
 
 
@@ -19907,6 +20015,63 @@ def pool_pending_counts(
         "generate_docs": int(r.get("generate_docs", 0)),
         "review_docs": int(r.get("review_docs", 0)),
         "refine_docs": int(r.get("refine_docs", 0)),
+    }
+
+
+def scoped_terminal_residue(
+    *,
+    scope_run_id: str | None = None,
+    drain_scope_id: str | None = None,
+) -> dict[str, Any]:
+    """Return claim and transient-stage residue inside one exact run scope."""
+    if bool(scope_run_id) == bool(drain_scope_id):
+        raise ValueError("exactly one scoped terminal selector is required")
+    scope_id = scope_run_id or drain_scope_id
+    scope_property = "run_id" if scope_run_id else "drain_scope_id"
+    cypher = f"""
+    CALL {{
+      MATCH (sn:StandardName)
+      WHERE sn.{scope_property} = $scope_id
+        AND (sn.claim_token IS NOT NULL
+             OR sn.claimed_at IS NOT NULL
+             OR sn.name_stage = 'refining'
+             OR sn.docs_stage = 'refining')
+      WITH sn ORDER BY sn.id
+      RETURN count(sn) AS name_count,
+             collect({{
+               id: sn.id,
+               name_stage: sn.name_stage,
+               docs_stage: sn.docs_stage,
+               claim_token: sn.claim_token,
+               claimed_at: toString(sn.claimed_at)
+             }})[0..50] AS names
+    }}
+    CALL {{
+      MATCH (sns:StandardNameSource)
+      WHERE sns.{scope_property} = $scope_id
+        AND (sns.claim_token IS NOT NULL OR sns.claimed_at IS NOT NULL)
+      WITH sns ORDER BY sns.id
+      RETURN count(sns) AS source_count,
+             collect({{
+               id: sns.id,
+               status: sns.status,
+               claim_token: sns.claim_token,
+               claimed_at: toString(sns.claimed_at)
+             }})[0..50] AS sources
+    }}
+    RETURN name_count, source_count, names, sources
+    """
+    with GraphClient() as gc:
+        rows = list(gc.query(cypher, scope_id=scope_id))
+    row = dict(rows[0]) if rows else {}
+    name_count = int(row.get("name_count") or 0)
+    source_count = int(row.get("source_count") or 0)
+    return {
+        "total": name_count + source_count,
+        "name_count": name_count,
+        "source_count": source_count,
+        "names": list(row.get("names") or []),
+        "sources": list(row.get("sources") or []),
     }
 
 

@@ -274,6 +274,9 @@ def find_name_key_duplicate(
     is designed for cases where the LLM has emitted a candidate whose
     canonical form already exists in the graph (e.g.
     ``Electron_Temperature`` vs ``electron_temperature``).
+    Only *exclude* is omitted. An exact pre-existing candidate id remains
+    visible because successor admissibility must be decided explicitly; it
+    cannot be mistaken for a fresh identity.
     """
     if not isinstance(candidate_name, str) or not candidate_name.strip():
         return None
@@ -287,7 +290,6 @@ def find_name_key_duplicate(
             MATCH (sn:StandardName)
             WHERE sn.id IS NOT NULL
               AND ($exclude IS NULL OR sn.id <> $exclude)
-              AND sn.id <> $candidate_name
             WITH sn,
                  toLower(replace(replace(replace(replace(replace(
                      sn.id,
@@ -310,7 +312,6 @@ def find_name_key_duplicate(
             RETURN sn.id AS id
             LIMIT 1
             """,
-            candidate_name=candidate_name,
             candidate_key=candidate_key,
             exclude=exclude,
         )
@@ -334,12 +335,10 @@ def find_name_key_duplicate(
             MATCH (sn:StandardName)
             WHERE sn.id IS NOT NULL
               AND ($exclude IS NULL OR sn.id <> $exclude)
-              AND sn.id <> $candidate_name
               AND toLower(sn.id) CONTAINS $rough
             RETURN sn.id AS id
             LIMIT 50
             """,
-            candidate_name=candidate_name,
             exclude=exclude,
             rough=candidate_key.replace("_", ""),
         )

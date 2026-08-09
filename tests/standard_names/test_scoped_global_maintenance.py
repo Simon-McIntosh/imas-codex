@@ -95,13 +95,22 @@ def _maintenance_mocks(stack: ExitStack) -> dict[str, MagicMock]:
     return mocks
 
 
-async def _run_loop(*, skip_global_maintenance: bool):
+async def _run_loop(
+    *, skip_global_maintenance: bool, terminal_residue: dict | None = None
+):
     """Run the orchestrator with graph and worker boundaries mocked."""
     graph_context, _ = _graph_context()
     with ExitStack() as stack:
         maintenance = _maintenance_mocks(stack)
         create_run = stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
         finalize_run = stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
+        terminal_probe = stack.enter_context(
+            patch(
+                f"{_GO}.scoped_terminal_residue",
+                return_value=terminal_residue
+                or {"total": 0, "names": [], "sources": []},
+            )
+        )
         stack.enter_context(
             patch(
                 "imas_codex.standard_names.ledger.find_provenance_orphans",
@@ -167,13 +176,21 @@ async def _run_loop(*, skip_global_maintenance: bool):
             skip_global_maintenance=skip_global_maintenance,
         )
 
-    return summary, maintenance, create_run, finalize_run, build_specs, run_pools
+    return (
+        summary,
+        maintenance,
+        create_run,
+        finalize_run,
+        build_specs,
+        run_pools,
+        terminal_probe,
+    )
 
 
 @pytest.mark.asyncio
 async def test_scoped_run_bypasses_complete_global_maintenance_set() -> None:
     result = await _run_loop(skip_global_maintenance=True)
-    summary, maintenance, create_run, finalize_run, build_specs, run_pools = result
+    summary, maintenance, create_run, finalize_run, build_specs, run_pools, _ = result
 
     for writer in maintenance.values():
         writer.assert_not_called()
@@ -188,7 +205,7 @@ async def test_scoped_run_bypasses_complete_global_maintenance_set() -> None:
 @pytest.mark.asyncio
 async def test_ordinary_scoped_run_keeps_global_maintenance() -> None:
     result = await _run_loop(skip_global_maintenance=False)
-    _, maintenance, create_run, finalize_run, build_specs, run_pools = result
+    _, maintenance, create_run, finalize_run, build_specs, run_pools, _ = result
 
     for writer in maintenance.values():
         writer.assert_called()
@@ -196,6 +213,96 @@ async def test_ordinary_scoped_run_keeps_global_maintenance() -> None:
     finalize_run.assert_called_once()
     build_specs.assert_called_once()
     run_pools.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_scoped_idle_completion_refuses_transient_claim_residue() -> None:
+    residue = {
+        "total": 1,
+        "names": [
+            {
+                "id": "radial_outline_of_conductor_cross_section",
+                "name_stage": "refining",
+                "docs_stage": "pending",
+                "claim_token": "token",
+            }
+        ],
+        "sources": [],
+    }
+    graph_context, _ = _graph_context()
+    with ExitStack() as stack:
+        maintenance = _maintenance_mocks(stack)
+        stack.enter_context(patch(f"{_GO}.create_sn_run_open"))
+        finalize_run = stack.enter_context(patch(f"{_GO}.finalize_sn_run"))
+        stack.enter_context(
+            patch(f"{_GO}.scoped_terminal_residue", return_value=residue)
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.ledger.find_provenance_orphans",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.audits.find_flux_surface_reduction_violations",
+                return_value=[],
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.audits.find_removed_dd_sources",
+                return_value=[],
+            )
+        )
+        stack.enter_context(patch(f"{_GO}.persist_outcome_snapshot", return_value={}))
+        stack.enter_context(patch(f"{_GO}.reset_persist_outcomes"))
+        stack.enter_context(patch(f"{_LOOP}._build_pool_specs", return_value=[]))
+
+        async def idle_run(*args, **kwargs):
+            kwargs["idle_exhausted_event"].set()
+            return {}
+
+        stack.enter_context(
+            patch("imas_codex.standard_names.pools.run_pools", side_effect=idle_run)
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.budget.BudgetManager.start",
+                new_callable=AsyncMock,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.budget.BudgetManager.drain_pending",
+                new_callable=AsyncMock,
+                return_value=True,
+            )
+        )
+        stack.enter_context(
+            patch(
+                "imas_codex.standard_names.budget.BudgetManager._get_total_spent_sync",
+                return_value=0.0,
+            )
+        )
+        stack.enter_context(
+            patch("imas_codex.graph.client.GraphClient", return_value=graph_context)
+        )
+
+        from imas_codex.standard_names.loop import run_sn_pools
+
+        summary = await run_sn_pools(
+            cost_limit=5.0,
+            scope_run_id="bounded-run",
+            skip_global_maintenance=True,
+        )
+
+    for writer in maintenance.values():
+        writer.assert_not_called()
+    assert summary.stop_reason == "transient_scope_residue"
+    finalize_kwargs = finalize_run.call_args.kwargs
+    assert finalize_kwargs["status"] == "degraded"
+    assert finalize_kwargs["stop_reason"] == "transient_scope_residue"
 
 
 @pytest.mark.asyncio

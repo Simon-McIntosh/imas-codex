@@ -286,6 +286,81 @@ def test_review_enrichment_keeps_pins_and_reuses_compose_context() -> None:
     )
 
 
+def test_semantic_cluster_neighbors_never_expand_source_authority() -> None:
+    """Global vector clusters are useful comparators, never must-cover sources."""
+    from imas_codex.standard_names import workers
+
+    outline_path = "pf_passive/loop/element/geometry/outline/r"
+    conductor_comparator = "pf_active/coil/geometry/outline/r"
+    unrelated_paths = (
+        "equilibrium/time_slice/boundary_secondary_separatrix/outline/r",
+        "equilibrium/time_slice/boundary_secondary_separatrix/strike_point/r",
+        "equilibrium/time_slice/boundary_separatrix/x_point/r",
+        "wall/description_2d/limiter/unit/outline/r",
+    )
+    item = {
+        "id": "radial_outline_of_conductor_cross_section",
+        "description": "Radial coordinates tracing a conductor cross-section.",
+        "kind": "scalar",
+        "unit": "m",
+        "physics_domain": "magnetics",
+        "source_bindings": [
+            {
+                "id": f"dd:{outline_path}",
+                "source_type": "dd",
+                "source_id": outline_path,
+                "dd_path": outline_path,
+                "dd_version": "4.1.0",
+                "dd_documentation": "Major radius",
+                "dd_snapshot_pinned": True,
+                "dd_parent_path": "pf_passive/loop/element/geometry/outline",
+                "dd_parent_documentation": "Irregular outline of the element",
+                "dd_data_type": "FLT_1D",
+                "dd_unit": "m",
+                "enhanced_description": "Major radius coordinate of outline.",
+            }
+        ],
+    }
+
+    def enrich(stubs: list[dict]) -> None:
+        stubs[0]["cross_ids_paths"] = [conductor_comparator, *unrelated_paths]
+        stubs[0]["clusters"] = [
+            {
+                "label": "boundary shape r",
+                "scope": "global",
+                "description": "Plasma boundary R coordinates",
+            }
+        ]
+
+    with patch.object(workers, "_enrich_batch_items", side_effect=enrich):
+        workers._enrich_name_review_items([item])
+
+    assert item["source_paths"] == [outline_path]
+    assert "cross_ids_paths" not in item
+    comparator_paths = [entry["path"] for entry in item["semantic_comparators"]]
+    assert conductor_comparator in comparator_paths
+
+    rendered = render_prompt(
+        "sn/review_names_user",
+        {
+            "items": [item],
+            "batch_context": "",
+            "vector_neighbours": [],
+            "same_base_neighbours": [],
+            "same_path_neighbours": [],
+            "nearby_existing_names": [],
+            "review_scored_examples": [],
+            "prior_reviews": [],
+        },
+    )
+    assert "Authoritative source and structural-family obligations" in rendered
+    assert "Non-binding semantic comparators" in rendered
+    assert "must cover every listed instance" not in rendered
+    assert "never expand the candidate's identity obligation" in rendered
+    for path in unrelated_paths:
+        assert path in rendered
+
+
 def test_multi_source_review_prompt_renders_complete_context_deterministically() -> (
     None
 ):
@@ -323,7 +398,9 @@ def test_multi_source_review_prompt_renders_complete_context_deterministically()
                         "members": [SECOND_SOURCE_PATH],
                     }
                 ],
-                "cross_ids_paths": [SECOND_SOURCE_PATH],
+                "semantic_comparators": [
+                    {"path": SECOND_SOURCE_PATH, "basis": "semantic_cluster"}
+                ],
                 "dd_paths_docs": {
                     "z_profiles/member/density": (
                         "Supplementary zeta member definition."

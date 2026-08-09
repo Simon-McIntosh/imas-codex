@@ -110,6 +110,11 @@ class TestFindNameKeyDuplicate:
         result = find_name_key_duplicate(gc, "Electron_Temperature")
         assert result == "electron_temperature"
 
+    def test_exact_candidate_id_is_a_successor_collision(self) -> None:
+        gc = _gc_returning([[{"id": "electron_temperature"}]])
+        result = find_name_key_duplicate(gc, "electron_temperature", exclude="old")
+        assert result == "electron_temperature"
+
     def test_case_only_collision(self) -> None:
         gc = _gc_returning([[{"id": "electron_temperature"}]])
         result = find_name_key_duplicate(gc, "ELECTRON_TEMPERATURE")
@@ -176,14 +181,13 @@ class TestFindNameKeyDuplicate:
 # ---------------------------------------------------------------------------
 
 
-def test_first_cypher_filters_exclude_and_self() -> None:
-    """The primary Cypher pass must exclude ``$exclude`` and the
-    candidate id itself (so a freshly-MERGEd row can't shadow itself)."""
+def test_first_cypher_excludes_only_predecessor() -> None:
+    """The candidate id remains visible while the predecessor is excluded."""
     gc = _gc_returning([[]])
     find_name_key_duplicate(gc, "electron_temperature", exclude="legacy")
     cypher = gc.query.call_args_list[0][0][0]
     assert "$exclude IS NULL OR sn.id <> $exclude" in cypher
-    assert "sn.id <> $candidate_name" in cypher
+    assert "sn.id <> $candidate_name" not in cypher
 
 
 def test_first_cypher_uses_candidate_key_param() -> None:

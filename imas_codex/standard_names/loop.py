@@ -55,6 +55,8 @@ _STOP_TO_STATUS: dict[str, str] = {
     "time_limit_reached": "degraded",
     "stalled": "degraded",
     "pending_count_failed": "degraded",
+    "terminal_scope_unproven": "degraded",
+    "transient_scope_residue": "degraded",
     "no_work": "completed",
     "no_eligible_work": "completed",
     "dry_run": "completed",
@@ -2035,6 +2037,32 @@ async def run_sn_pools(
             summary.stop_reason = "interrupted"
         else:
             summary.stop_reason = "completed"
+
+        if summary.stop_reason in {"completed", "no_eligible_work"} and (
+            scope_run_id or drain_scope_id
+        ):
+            from imas_codex.standard_names.graph_ops import scoped_terminal_residue
+
+            try:
+                terminal_residue = await asyncio.to_thread(
+                    scoped_terminal_residue,
+                    scope_run_id=scope_run_id,
+                    drain_scope_id=drain_scope_id,
+                )
+            except Exception as terminal_exc:  # noqa: BLE001
+                summary.stop_reason = "terminal_scope_unproven"
+                logger.error(
+                    "run_sn_pools: scoped terminal consistency query failed: %s",
+                    terminal_exc,
+                )
+            else:
+                if terminal_residue["total"]:
+                    summary.stop_reason = "transient_scope_residue"
+                    logger.error(
+                        "run_sn_pools: scoped terminal residue refuses successful "
+                        "completion: %s",
+                        _json.dumps(terminal_residue, sort_keys=True, default=str),
+                    )
 
     except KeyboardInterrupt:
         summary.stop_reason = "interrupted"

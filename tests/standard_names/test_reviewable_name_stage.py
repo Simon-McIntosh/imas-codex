@@ -243,19 +243,28 @@ def test_refine_into_new_name_is_drafted(_gc, _clean):
 
 @pytest.mark.graph
 def test_refine_into_accepted_name_is_not_demoted(_gc, _clean):
-    """Converging onto a live accepted name must not reset its stage."""
-    from imas_codex.standard_names.graph_ops import persist_refined_name
+    """Converging onto a live accepted identity is a typed refusal."""
+    from imas_codex.standard_names.graph_ops import (
+        RefinedNamePersistenceRefusal,
+        RefinedNamePersistenceRefusalReason,
+        persist_refined_name,
+    )
 
     old = _uid("old")
     new = _uid("accepted")
     _create_sn(_gc, new, name_stage="accepted", origin="pipeline")
     _create_sn(_gc, old, name_stage="refining", origin="pipeline")
 
-    persist_refined_name(
-        old_name=old, new_name=new, description="refined", old_chain_length=0
-    )
+    with pytest.raises(RefinedNamePersistenceRefusal) as caught:
+        persist_refined_name(
+            old_name=old, new_name=new, description="refined", old_chain_length=0
+        )
 
+    assert (
+        caught.value.reason is RefinedNamePersistenceRefusalReason.SUCCESSOR_LIFECYCLE
+    )
     assert _stage(_gc, new) == "accepted"
+    assert _stage(_gc, old) == "refining"
 
 
 @pytest.mark.graph
