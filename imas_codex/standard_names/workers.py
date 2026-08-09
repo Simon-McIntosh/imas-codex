@@ -9519,12 +9519,11 @@ async def process_review_docs_batch(
                 "documentation in fusion plasma physics."
             )
 
-        # Derived parents use a SINGLE-model review (the chain anchor), not the
-        # full RD-quorum: a structural abstraction reviewed against the
-        # parent-aware rubric does not need multi-model adjudication, and the
-        # quorum is the cost-dominant phase. One call (resolution_method=
-        # 'single_review') cuts parent docs-review cost ~2-3x.
-        _item_review_models = review_models[:1] if _is_parent else review_models
+        # Structural authority fixes a derived parent's name, not the quality
+        # of its prose. Parent-aware docs therefore use the complete configured
+        # reviewer chain, with their distinct rubric supplying the abstraction
+        # context instead of reducing the review authority.
+        _item_review_models = review_models
         lease = None
         _response_model = (
             StandardNameQualityReviewDocsParentBatch
@@ -9602,6 +9601,8 @@ async def process_review_docs_batch(
                 llm_service="standard-names",
                 run_id=mgr.run_id,
                 skip_review_node=True,
+                resolution_method=quorum["resolution_method"],
+                reviewer_chain_size=len(_item_review_models),
             )
             if new_stage:
                 source_versions = _review_dd_source_bindings(item)

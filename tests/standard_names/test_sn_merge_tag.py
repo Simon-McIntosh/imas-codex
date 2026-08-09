@@ -1,11 +1,11 @@
 """Tests for the fold-back receipt — the version tag ``sn merge`` writes.
 
-Two events complete a release: the human merges the catalog PR (durably
-recorded by GitHub) and the maintainer folds it back into the graph
-(``sn merge``). The second was recorded nowhere durable, so a merged PR with a
-forgotten fold-back was silently inconsistent. The fix: ``sn merge`` tags the
-merge commit after a successful fold-back with a machine-readable contract
-block (``graph-merged: …``) plus a grounded human summary appended below it.
+A fold-back requires a durable receipt linking the merged catalog PR to its
+graph actions. ``sn merge`` tags the merge commit with a machine-readable
+contract block (``graph-merged: …``) plus a grounded human summary. The
+contract counts docs staged for ordinary quorum review separately from
+accepted names, so a successful fold-back never implies those docs are ready
+for full export.
 
 These tests pin that contract against a LOCAL bare repo — a real merge commit,
 ``gh`` and the notes model mocked, no live GitHub and no live LLM:
@@ -97,9 +97,10 @@ def merged_repo(tmp_path: Path) -> dict:
     }
 
 
-def _report(accepted=1, auto=3, contested=0) -> MergeReport:
+def _report(accepted=1, staged=0, auto=3, contested=0) -> MergeReport:
     r = MergeReport()
     r.accepted = [f"n{i}" for i in range(accepted)]
+    r.staged_for_review = [f"s{i}" for i in range(staged)]
     r.auto_approved = [f"a{i}" for i in range(auto)]
     r.contested = [{"sn_id": f"c{i}"} for i in range(contested)]
     return r
@@ -116,7 +117,7 @@ class TestContractMessage:
             pr_number=7,
             pr_url="https://github.com/o/r/pull/7",
             batch_artifact="v0.1.0rc1.sn_names.yaml",
-            report=_report(accepted=1, auto=3, contested=1),
+            report=_report(accepted=1, staged=2, auto=3, contested=1),
             timestamp="2026-07-22T00:00:00+00:00",
         )
         lines = block.splitlines()
@@ -124,6 +125,7 @@ class TestContractMessage:
         assert "#7" in block and "pull/7" in block
         assert "v0.1.0rc1.sn_names.yaml" in block
         assert "approved=1" in block
+        assert "staged_for_review=2" in block
         assert "auto_approved=3" in block
         assert "contested=1" in block
 

@@ -5,11 +5,12 @@ the orchestration contract of :func:`run_merge`:
 
 * a human catalog edit is re-attached like ``sn edit`` (candidate + reason,
   ``origin='human'``, ``refine=False``) via :func:`apply_edit`;
-* the attached proposal is scored by the FULL review pipeline, but the
-  refine pools are NEVER invoked (a human-reviewed wording must not be
-  silently rewritten);
-* a review score at or above threshold ACCEPTS (the name reaches the
-  accepted state via ``persist_reviewed_*``);
+* the attached proposal is scored without invoking refine pools;
+* a name review score at or above threshold accepts through
+  ``persist_reviewed_name``;
+* a docs score at or above threshold is not treated as quorum authority: the
+  unchanged text is staged for an exact ordinary docs review and remains out
+  of full export;
 * a score below threshold QUARANTINES + FLAGS (``validation_status`` set to
   ``'quarantined'``) — never accepted, never refined, never mutated;
 * a NAME change routes through ``apply_edit``'s rename mode (which carries
@@ -80,7 +81,7 @@ def _gc_exists(exists: bool = True) -> MagicMock:
 # ---------------------------------------------------------------------------
 
 
-class TestRunMergeAcceptPath:
+class TestRunMergePassingReviewPath:
     def test_docs_edit_attached_like_sn_edit_with_reason(self):
         change = MergeChange(
             sn_id="electron_temperature",
@@ -93,12 +94,23 @@ class TestRunMergeAcceptPath:
             patch(f"{MERGE}.read_pr_changes", return_value=[change]),
             patch(f"{MERGE}.apply_edit") as m_apply,
             patch(f"{MERGE}._score_proposal", return_value=0.93) as m_score,
-            patch(f"{MERGE}.persist_reviewed_docs", return_value="accepted") as m_docs,
+            patch(f"{MERGE}.persist_reviewed_docs", return_value="reviewed") as m_docs,
+            patch(
+                f"{MERGE}.stage_docs_for_rescore",
+                return_value={"ok": True},
+            ) as m_stage,
+            patch(f"{MERGE}.mark_catalog_name_approved") as m_approve,
             patch(f"{MERGE}.persist_reviewed_name") as m_name,
         ):
             m_apply.return_value = _edit_plan(target="electron_temperature")
             report = run_merge(
-                isnc_dir="/tmp/isnc", base_ref="origin/main", threshold=0.85, gc=gc
+                isnc_dir="/tmp/isnc",
+                base_ref="origin/main",
+                threshold=0.85,
+                catalog_pr_number=12,
+                catalog_pr_url="https://example.test/pull/12",
+                catalog_merge_commit_sha="abc123",
+                gc=gc,
             )
 
         # Attached exactly like sn edit: the changed field is the candidate +
@@ -112,25 +124,37 @@ class TestRunMergeAcceptPath:
         assert kwargs["reason"] and "PR" in kwargs["reason"]
         assert "rename" not in kwargs or kwargs.get("rename") is None
 
-        # Review ran, then accept via the docs persist path.
+        # The aggregate score is recorded fail-closed, then the same text is
+        # staged for the complete configured docs quorum.
         m_score.assert_called_once()
         m_docs.assert_called_once()
+        m_stage.assert_called_once_with(
+            "electron_temperature", run_id="sn-edit-20260709T000000Z"
+        )
+        m_approve.assert_not_called()
         m_name.assert_not_called()
-        assert "electron_temperature" in report.accepted
+        assert report.accepted == []
+        assert report.staged_for_review == ["electron_temperature"]
+        assert report.outcomes[0].decision == "staged_for_review"
         assert report.threshold == 0.85
 
-    def test_score_at_threshold_accepts(self):
+    def test_docs_score_at_threshold_stages_for_quorum(self):
         change = MergeChange(sn_id="ion_density", axis="docs", new_value="Ion density.")
         gc = _gc_exists(True)
         with (
             patch(f"{MERGE}.read_pr_changes", return_value=[change]),
             patch(f"{MERGE}.apply_edit", return_value=_edit_plan(target="ion_density")),
             patch(f"{MERGE}._score_proposal", return_value=0.85),
-            patch(f"{MERGE}.persist_reviewed_docs", return_value="accepted") as m_docs,
+            patch(f"{MERGE}.persist_reviewed_docs", return_value="reviewed") as m_docs,
+            patch(
+                f"{MERGE}.stage_docs_for_rescore",
+                return_value={"ok": True},
+            ),
         ):
             report = run_merge(isnc_dir="/x", base_ref="b", threshold=0.85, gc=gc)
         m_docs.assert_called_once()
-        assert "ion_density" in report.accepted
+        assert report.accepted == []
+        assert report.staged_for_review == ["ion_density"]
         assert not report.quarantined
 
 
@@ -183,7 +207,8 @@ class TestRunMergeContestPath:
                 side_effect=lambda **k: _edit_plan(target=k["target"]),
             ),
             patch(f"{MERGE}._score_proposal", side_effect=[0.9, 0.4]) as m_score,
-            patch(f"{MERGE}.persist_reviewed_docs", return_value="accepted"),
+            patch(f"{MERGE}.persist_reviewed_docs", return_value="reviewed"),
+            patch(f"{MERGE}.stage_docs_for_rescore", return_value={"ok": True}),
             patch(
                 "imas_codex.standard_names.graph_ops.claim_refine_name_batch"
             ) as m_rn,
@@ -206,7 +231,8 @@ class TestRunMergeContestPath:
         m_rd.assert_not_called()
         m_prn.assert_not_called()
         m_prd.assert_not_called()
-        assert "a_name" in report.accepted
+        assert report.accepted == []
+        assert report.staged_for_review == ["a_name"]
         assert any(c["sn_id"] == "b_name" for c in report.contested)
 
 

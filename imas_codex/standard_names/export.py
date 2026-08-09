@@ -192,6 +192,10 @@ def _fetch_candidates(
       marker, so an accepted node still carrying one arrived by a path that
       did not consult it, and publishing it would ship exactly what the
       quorum gate withheld.
+    - explicit docs resolution metadata with no docs quorum shortfall —
+      excludes unresolved and historical score-only decisions from full
+      exports. Names-only export remains independent of docs state and docs
+      review authority.
 
     When *names_only* is True, the ``docs_stage`` gate is dropped so
     names can be exported before documentation is generated.
@@ -221,7 +225,11 @@ def _fetch_candidates(
       AND sn.review_quorum_shortfall IS NULL
     """
     if not names_only:
-        cypher += "  AND sn.docs_stage = 'accepted'\n"
+        cypher += (
+            "  AND sn.docs_stage = 'accepted'\n"
+            "  AND sn.docs_review_resolution_method IS NOT NULL\n"
+            "  AND sn.docs_review_quorum_shortfall IS NULL\n"
+        )
 
     if domain:
         cypher += " AND sn.physics_domain = $domain"

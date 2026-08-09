@@ -10257,7 +10257,9 @@ PROMOTE_STRANDED_DOCS_WHERE = (
     "sn.docs_stage = 'reviewed' "
     "AND sn.reviewer_score_docs >= $min_score "
     "AND sn.name_stage = 'accepted' "
-    "AND coalesce(sn.validation_status, '') <> 'quarantined'"
+    "AND coalesce(sn.validation_status, '') <> 'quarantined' "
+    "AND sn.docs_review_resolution_method IS NOT NULL "
+    "AND sn.docs_review_quorum_shortfall IS NULL"
 )
 """Canonical graph predicate for docs-axis stranded promotion."""
 
@@ -14031,7 +14033,7 @@ def persist_reviewed_name(
                     len(cascade_result.renamed),
                 )
 
-    # ── Write StandardNameReview node + HAS_REVIEW edge (Finding 1 fix) ──
+    # ── Write StandardNameReview node + HAS_REVIEW edge ─────────────────
     # The single-reviewer worker path was previously SETting reviewer_*
     # fields on the SN node only — no Review node was ever created.
     # Mirror the RD-quorum schema: cycle_index=0, role='primary',
@@ -14078,7 +14080,7 @@ def persist_reviewed_name(
                         "cycle_index": 0,
                         "review_group_id": _group_id,
                         "resolution_role": "primary",
-                        "resolution_method": None,
+                        "resolution_method": resolution_method,
                         "llm_model": model,
                         "llm_cost": llm_cost,
                         "llm_tokens_in": llm_tokens_in,
@@ -14224,6 +14226,8 @@ def persist_reviewed_docs(
     llm_service: str | None = None,
     run_id: str | None = None,
     skip_review_node: bool = False,
+    resolution_method: str | None = None,
+    reviewer_chain_size: int | None = None,
 ) -> str:
     """Persist docs-review results and transition ``docs_stage``.
 
@@ -14238,7 +14242,11 @@ def persist_reviewed_docs(
        - ``'reviewed'`` otherwise (eligible for refine_docs pickup;
          at docs_chain_length == rotation_cap-1 this routes through
          the Opus escalator in process_refine_docs_batch)
-    3. SET reviewer_docs fields, ``docs_stage``, clear claim state.
+    3. Record a quorum shortfall whenever the configured reviewer chain did
+       not reach a verdict. A would-be acceptance is withheld at
+       ``'reviewed'``; a below-threshold stage decision is retained, but the
+       marker prevents refinement from spending another rotation.
+    4. SET reviewer_docs fields, ``docs_stage``, clear claim state.
 
     Parameters
     ----------
@@ -14263,6 +14271,13 @@ def persist_reviewed_docs(
     rotation_cap:
         Maximum chain depth before exhaustion (same value used by
         :func:`claim_refine_docs_batch`).
+    resolution_method:
+        How the RD-quorum loop reached this score. Missing metadata is treated
+        as a shortfall, so historical score-only calls fail closed.
+    reviewer_chain_size:
+        Number of seats the configured docs reviewer chain defines. This
+        preserves the canonical two-seat terminal policy while distinguishing
+        a three-seat chain whose escalator did not answer.
 
     Returns
     -------
@@ -14312,6 +14327,10 @@ def persist_reviewed_docs(
     elif docs_chain_length >= rotation_cap:
         target_stage = "exhausted"
     else:
+        target_stage = "reviewed"
+
+    quorum_shortfall = _quorum_admits_acceptance(resolution_method, reviewer_chain_size)
+    if quorum_shortfall is not None and target_stage == "accepted":
         target_stage = "reviewed"
 
     # ── Link label/target gate (accept path only) ─────────────────────
@@ -14387,6 +14406,10 @@ def persist_reviewed_docs(
                 sn.reviewer_comments_docs     = $comments,
                 sn.reviewer_comments_per_dim_docs = $comments_per_dim_json,
                 sn.reviewer_model_docs        = $model,
+                sn.docs_review_resolution_method = $resolution_method,
+                sn.docs_review_quorum_shortfall = $quorum_shortfall,
+                sn.docs_review_quorum_shortfall_at =
+                    CASE WHEN $quorum_shortfall IS NULL THEN null ELSE datetime() END,
                 sn.reviewed_docs_at           = datetime(),
                 sn.docs_stage                 = $target_stage,
                 sn.edit_status                = $new_edit_status,
@@ -14402,6 +14425,8 @@ def persist_reviewed_docs(
             comments=comments,
             comments_per_dim_json=comments_per_dim_json,
             model=model,
+            resolution_method=resolution_method,
+            quorum_shortfall=quorum_shortfall,
             target_stage=target_stage,
             new_edit_status=new_edit_status,
         )
@@ -14417,12 +14442,15 @@ def persist_reviewed_docs(
         return ""
 
     logger.info(
-        "persist_reviewed_docs: %s → docs_stage=%s (score=%.3f, chain=%d/%d)",
+        "persist_reviewed_docs: %s → docs_stage=%s "
+        "(score=%.3f, chain=%d/%d, resolution=%s, shortfall=%s)",
         sn_id,
         target_stage,
         score,
         docs_chain_length,
         rotation_cap,
+        resolution_method,
+        quorum_shortfall,
     )
 
     # ── Normalize bare [name] brackets AT acceptance (source-of-truth fix) ──
@@ -14486,7 +14514,7 @@ def persist_reviewed_docs(
                         "cycle_index": 0,
                         "review_group_id": _group_id,
                         "resolution_role": "primary",
-                        "resolution_method": None,
+                        "resolution_method": resolution_method,
                         "llm_model": model,
                         "llm_cost": llm_cost,
                         "llm_tokens_in": llm_tokens_in,
@@ -14508,6 +14536,105 @@ def persist_reviewed_docs(
     bump_sn_run_counter(run_id, "names_reviewed")
 
     return target_stage
+
+
+STAGE_DOCS_FOR_RESCORE_QUERY = """
+MATCH (sn:StandardName {id: $id})
+WHERE sn.name_stage = 'accepted'
+  AND sn.docs_stage IN ['accepted', 'reviewed', 'exhausted']
+  AND sn.claim_token IS NULL
+  AND sn.claimed_at IS NULL
+  AND sn.drain_scope_id IS NULL
+  AND sn.drain_scope_claimed_at IS NULL
+  AND sn.drain_claim_scope_id IS NULL
+WITH sn, sn.docs_stage AS prior_stage
+FOREACH (_ IN CASE WHEN $dry_run THEN [] ELSE [1] END |
+    SET sn.docs_stage = 'drafted',
+        sn.reviewer_score_docs = null,
+        sn.reviewer_scores_docs = null,
+        sn.reviewer_comments_docs = null,
+        sn.reviewer_comments_per_dim_docs = null,
+        sn.reviewer_model_docs = null,
+        sn.docs_review_resolution_method = null,
+        sn.docs_review_quorum_shortfall = null,
+        sn.docs_review_quorum_shortfall_at = null,
+        sn.reviewed_docs_at = null,
+        sn.run_id = $run_id
+)
+RETURN prior_stage AS prior_stage,
+       sn.description AS description,
+       sn.documentation AS documentation
+"""
+"""Compare-and-set query for one exact docs-only quorum rescore."""
+
+
+def stage_docs_for_rescore(
+    sn_id: str,
+    *,
+    run_id: str,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Stage one exact documentation record for a fresh quorum review.
+
+    This is the compare-and-set recovery primitive for docs whose stored
+    aggregate decision lacks sufficient reviewer authority. It accepts only a
+    name whose name axis is accepted, whose docs are in an operator-recoverable
+    terminal stage, and which has no active claim. The documentation text,
+    description, refinement depth, and ``StandardNameReview`` history are
+    preserved. Only the docs stage and aggregate docs-review decision fields
+    are reset, and ``run_id`` fences the next ``review_docs`` claim to this
+    exact record.
+
+    Returns ``{"ok": True, ...}`` on an eligible transition, or a fail-closed
+    diagnostic when the record is absent, live, claimed, or not name-accepted.
+    A dry run executes the same eligibility predicate without mutation.
+    """
+    if not run_id.strip():
+        return {"ok": False, "reason": "run_id must be non-empty"}
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            STAGE_DOCS_FOR_RESCORE_QUERY,
+            id=sn_id,
+            run_id=run_id,
+            dry_run=dry_run,
+        )
+        if not rows:
+            current = gc.query(
+                """
+                MATCH (sn:StandardName {id: $id})
+                RETURN sn.name_stage AS name_stage,
+                       sn.docs_stage AS docs_stage,
+                       sn.claim_token AS claim_token,
+                       sn.claimed_at AS claimed_at,
+                       sn.drain_scope_id AS drain_scope_id,
+                       sn.drain_scope_claimed_at AS drain_scope_claimed_at,
+                       sn.drain_claim_scope_id AS drain_claim_scope_id
+                """,
+                id=sn_id,
+            )
+            if not current:
+                return {"ok": False, "reason": f"name {sn_id!r} not found"}
+            state = current[0]
+            return {
+                "ok": False,
+                "reason": (
+                    f"{sn_id!r} is not docs-rescore eligible "
+                    f"(name_stage={state.get('name_stage')!r}, "
+                    f"docs_stage={state.get('docs_stage')!r}, "
+                    f"claimed={bool(state.get('claim_token') or state.get('claimed_at'))}, "
+                    "drain_scoped="
+                    f"{any(state.get(field) is not None for field in ('drain_scope_id', 'drain_scope_claimed_at', 'drain_claim_scope_id'))})"
+                ),
+            }
+
+    return {
+        "ok": True,
+        "sn_id": sn_id,
+        "prior_stage": rows[0]["prior_stage"],
+        "run_id": run_id,
+        "dry_run": dry_run,
+    }
 
 
 # -- refine_name (StandardName, reviewed + low score + chain < cap) -----------
@@ -17355,7 +17482,8 @@ def claim_refine_docs_batch(
         " AND sn.reviewer_score_docs < $min_score"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        + score_gate
+        " AND sn.docs_review_resolution_method IS NOT NULL"
+        " AND sn.docs_review_quorum_shortfall IS NULL" + score_gate
     )
     items = _claim_sn_atomic(
         eligibility_where=where,

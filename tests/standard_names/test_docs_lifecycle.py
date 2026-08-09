@@ -233,6 +233,8 @@ def _review_docs(
         model="test/model",
         min_score=0.75,
         rotation_cap=rotation_cap,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=3,
     )
     return new_stage
 
@@ -692,6 +694,8 @@ def test_docs_acceptance_overrides_chain_length_at_cap(_gc, _clean):
         model="test/model",
         min_score=0.75,
         rotation_cap=3,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=3,
     )
 
     assert result == "accepted", (
@@ -748,9 +752,9 @@ def test_concurrent_review_docs_does_not_double_advance(_gc, _clean):
     """Second persist_reviewed_docs with stale token is a no-op.
 
     Sequence:
-      1. SN drafted, claimed by Worker A with token T1.
+      1. SN drafted and claimed with the first token.
       2. Worker A persists → docs_stage='accepted', score=0.85.
-      3. Worker B tries to persist with stale token T2 → no-op.
+      3. A concurrent worker tries to persist with a stale second token → no-op.
       4. Reviewer score reflects only Worker A's review.
     """
     sn_id = _uid("concurrent_docs")
@@ -779,6 +783,8 @@ def test_concurrent_review_docs_does_not_double_advance(_gc, _clean):
         model="test/model",
         min_score=0.75,
         rotation_cap=3,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=3,
     )
     assert r1 == "accepted"
 
@@ -790,6 +796,8 @@ def test_concurrent_review_docs_does_not_double_advance(_gc, _clean):
         model="test/model",
         min_score=0.75,
         rotation_cap=3,
+        resolution_method="quorum_consensus",
+        reviewer_chain_size=3,
     )
     assert r2 == "", f"Stale-token persist must be a no-op; got {r2!r}"
 

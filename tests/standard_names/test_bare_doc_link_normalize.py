@@ -118,6 +118,8 @@ def test_persist_reviewed_docs_normalizes_on_accept():
             min_score=0.85,
             rotation_cap=3,
             skip_review_node=True,
+            resolution_method="quorum_consensus",
+            reviewer_chain_size=3,
         )
 
     assert result == "accepted"
@@ -155,6 +157,8 @@ def test_persist_reviewed_docs_skips_normalize_when_not_accepted():
             min_score=0.85,
             rotation_cap=3,
             skip_review_node=True,
+            resolution_method="quorum_consensus",
+            reviewer_chain_size=3,
         )
 
     assert result == "reviewed"

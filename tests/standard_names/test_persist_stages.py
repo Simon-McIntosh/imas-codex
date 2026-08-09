@@ -210,11 +210,10 @@ def test_review_stage_decision(
     # Name acceptance is quorum-gated, so a case exercising the score × chain
     # decision must declare that the reviewer chain actually reached a verdict;
     # otherwise it measures the quorum gate instead of the stage table.
-    quorum_kwargs: dict[str, Any] = (
-        {"resolution_method": "quorum_consensus", "reviewer_chain_size": 3}
-        if fn_name == "persist_reviewed_name"
-        else {}
-    )
+    quorum_kwargs: dict[str, Any] = {
+        "resolution_method": "quorum_consensus",
+        "reviewer_chain_size": 3,
+    }
 
     with _patch_gc(gc), _no_write_reviews():
         result = fn(

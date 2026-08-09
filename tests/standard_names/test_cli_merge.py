@@ -18,6 +18,7 @@ def test_sn_merge_forwards_flags_and_reports():
         dry_run=True,
         changes_seen=5,
         accepted=["a", "b"],
+        staged_for_review=["docs_pending"],
         quarantined=[{"sn_id": "c", "target_id": "c", "score": 0.4}],
         blocked=[],
         unmatched=["d"],
@@ -33,6 +34,8 @@ def test_sn_merge_forwards_flags_and_reports():
     assert kw["base_ref"] == "main"
     assert kw["dry_run"] is True
     assert "2" in result.output  # accepted count surfaced
+    assert "staged for review" in result.output.lower()
+    assert "complete quorum review" in result.output.lower()
 
 
 def test_sn_merge_nonzero_exit_on_blocked():
@@ -43,7 +46,9 @@ def test_sn_merge_nonzero_exit_on_blocked():
         blocked=[{"sn_id": "b", "reason": "collision"}],
     )
     with patch(MOCK_TARGET, return_value=report):
-        result = CliRunner().invoke(sn, ["merge", "--isnc", "/tmp/isnc", "--base", "main"])
+        result = CliRunner().invoke(
+            sn, ["merge", "--isnc", "/tmp/isnc", "--base", "main"]
+        )
 
     assert result.exit_code != 0, result.output
     assert "blocked" in result.output.lower()

@@ -1151,6 +1151,8 @@ class TestPersistWritesReviewNode:
                 llm_cost=0.04,
                 llm_tokens_in=2000,
                 llm_tokens_out=300,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
             )
 
         assert mock_write_reviews.called
