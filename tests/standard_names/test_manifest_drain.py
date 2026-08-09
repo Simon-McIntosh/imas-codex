@@ -39,6 +39,14 @@ def _pristine_reviewer_profile(monkeypatch) -> None:
     monkeypatch.delenv("IMAS_CODEX_SN_REVIEW_PROFILE", raising=False)
 
 
+@pytest.fixture
+def ready_local_compose(monkeypatch) -> MagicMock:
+    """Expose a healthy configured compose endpoint to live drain tests."""
+    readiness_probe = MagicMock(return_value=(True, "test-compose"))
+    monkeypatch.setattr("imas_codex.cli.sn._check_local_llm", readiness_probe)
+    return readiness_probe
+
+
 def _plan_item(**updates) -> dict:
     item = {
         "path": "equilibrium/time_slice/global_quantities/ip",
@@ -322,7 +330,7 @@ def test_dry_run_propagates_selected_reviewer_profile(
 
 
 def test_live_drain_explicit_default_replaces_stale_profile(
-    monkeypatch, tmp_path: Path
+    monkeypatch, tmp_path: Path, ready_local_compose: MagicMock
 ) -> None:
     from imas_codex import settings as settings_mod
 
@@ -373,10 +381,11 @@ def test_live_drain_explicit_default_replaces_stale_profile(
         "models": expected_models,
         "threshold": expected_threshold,
     }
+    ready_local_compose.assert_called_once_with()
 
 
 def test_live_operator_reports_owned_scope_and_cleans_it(
-    monkeypatch, tmp_path: Path
+    monkeypatch, tmp_path: Path, ready_local_compose: MagicMock
 ) -> None:
     manifest = tmp_path / "batch.yaml"
     _write_manifest(manifest)
@@ -389,9 +398,14 @@ def test_live_operator_reports_owned_scope_and_cleans_it(
     monkeypatch.setattr("imas_codex.settings.get_dd_version", lambda: "4.1.0")
     embed = MagicMock(side_effect=AssertionError("bounded drain probed embedding"))
     monkeypatch.setattr("imas_codex.cli.sn._require_embed_ready", embed)
+
+    def prepare_scope(paths, **kwargs):
+        ready_local_compose.assert_called_once_with()
+        return "owned-scope", [item]
+
     monkeypatch.setattr(
         "imas_codex.standard_names.graph_ops.prepare_manifest_drain_scope",
-        lambda paths, **kwargs: ("owned-scope", [item]),
+        prepare_scope,
     )
     run = MagicMock(return_value={"drain_report": [item]})
     clear = MagicMock(return_value={"sources": 1, "names": 0})
@@ -407,6 +421,7 @@ def test_live_operator_reports_owned_scope_and_cleans_it(
     assert run.call_args.kwargs["drain_scope_id"] == "owned-scope"
     assert run.call_args.kwargs["skip_global_maintenance"] is True
     embed.assert_not_called()
+    ready_local_compose.assert_called_once_with()
     clear.assert_called_once_with("owned-scope")
 
 
@@ -445,7 +460,7 @@ def test_inner_bounded_run_disables_embedding_preflight_and_monitor(
 
 
 def test_pre_loop_cleanup_does_not_mask_the_primary_failure(
-    monkeypatch, tmp_path: Path
+    monkeypatch, tmp_path: Path, ready_local_compose: MagicMock
 ) -> None:
     manifest = tmp_path / "batch.yaml"
     _write_manifest(manifest)
@@ -474,6 +489,7 @@ def test_pre_loop_cleanup_does_not_mask_the_primary_failure(
     assert result.exit_code == 1
     assert isinstance(result.exception, RuntimeError)
     assert str(result.exception) == "primary failure"
+    ready_local_compose.assert_called_once_with()
 
 
 @pytest.mark.asyncio
