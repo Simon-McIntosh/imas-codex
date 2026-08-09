@@ -10,11 +10,23 @@ HTTPError means the server is up), never as "unreachable".
 
 from __future__ import annotations
 
+import asyncio
 import urllib.error
 from io import BytesIO
-from unittest.mock import MagicMock, patch
+from typing import Any
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from imas_codex.cli.sn import _check_local_llm, _check_openrouter
+import click
+import pytest
+
+from imas_codex.cli.sn import (
+    _check_local_llm,
+    _check_openrouter,
+    _require_local_compose_ready,
+    _run_can_generate_names,
+    _run_sn_cmd,
+    _sn_llm_service_checks,
+)
 
 _COMPOSE_CFG = {
     "model": "hosted_vllm/deepseek-v4-flash",
@@ -165,3 +177,134 @@ class TestCheckOpenRouter:
         healthy, detail = self._run(err)
         assert healthy is False
         assert detail == "unreachable"
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "expected"),
+    [
+        ({}, True),
+        ({"only": "compose"}, True),
+        ({"skip_generate": True}, False),
+        ({"docs_only": True}, False),
+        ({"flush": True}, False),
+        ({"only": "review"}, False),
+        ({"only": "review_name"}, False),
+        ({"only": "reconcile"}, False),
+        ({"only": "attach"}, False),
+    ],
+)
+def test_run_capability_identifies_local_compose_dependency(
+    kwargs: dict[str, Any], expected: bool
+) -> None:
+    """Only runs able to dispatch generation depend on local compose."""
+    assert _run_can_generate_names(**kwargs) is expected
+
+
+def test_generation_registers_local_compose_as_critical() -> None:
+    """The Rich monitor gates generation on the configured local endpoint."""
+    with patch(
+        "imas_codex.cli.sn._configured_local_compose_required", return_value=True
+    ):
+        checks = _sn_llm_service_checks(
+            use_rich=True,
+            dry_run=False,
+            can_generate_names=True,
+        )
+
+    gpu = next(item for item in checks if item[0] == "gpu")
+    assert gpu[1] is _check_local_llm
+    assert gpu[2]["critical"] is True
+
+
+@pytest.mark.parametrize(
+    "run_kwargs",
+    [
+        {"can_generate_names": False},
+        {"can_generate_names": True, "dry_run": True},
+    ],
+)
+def test_non_generation_routes_do_not_probe_local_compose(
+    run_kwargs: dict[str, bool],
+) -> None:
+    """Review, docs, maintenance, and previews stay independent of Ambix."""
+    with patch(
+        "imas_codex.cli.sn._configured_local_compose_required",
+        side_effect=AssertionError("local compose route inspected"),
+    ):
+        checks = _sn_llm_service_checks(
+            use_rich=True,
+            dry_run=run_kwargs.get("dry_run", False),
+            can_generate_names=run_kwargs["can_generate_names"],
+        )
+
+    assert all(name != "gpu" for name, _, _ in checks)
+
+
+def test_failed_local_readiness_blocks_without_paid_fallback() -> None:
+    """A local outage fails closed before any OpenRouter route is considered."""
+    with (
+        patch(
+            "imas_codex.cli.sn._configured_local_compose_required",
+            return_value=True,
+        ),
+        patch(
+            "imas_codex.cli.sn._check_local_llm",
+            return_value=(False, "down"),
+        ),
+        patch(
+            "imas_codex.cli.sn._check_openrouter",
+            side_effect=AssertionError("paid fallback attempted"),
+        ) as paid_fallback,
+        pytest.raises(click.ClickException, match="no paid provider fallback"),
+    ):
+        _require_local_compose_ready()
+
+    paid_fallback.assert_not_called()
+
+
+def test_initial_local_readiness_blocks_generation_until_stopped() -> None:
+    """An unhealthy critical probe cannot race a generation worker launch."""
+    run_pools = AsyncMock()
+    paid_fallback = MagicMock(side_effect=AssertionError("paid fallback attempted"))
+
+    async def wait_forever() -> bool:
+        await asyncio.Event().wait()
+        return True
+
+    monitor = MagicMock()
+    monitor.await_services_ready = AsyncMock(side_effect=wait_forever)
+
+    def run_discovery(config, async_main):
+        gpu = next(item for item in config.extra_service_checks if item[0] == "gpu")
+        assert gpu[2]["critical"] is True
+        stop_event = asyncio.Event()
+        stop_event.set()
+        return asyncio.run(async_main(stop_event, monitor))
+
+    with (
+        patch("imas_codex.cli.sn._require_embed_ready"),
+        patch(
+            "imas_codex.cli.sn._configured_local_compose_required",
+            return_value=True,
+        ),
+        patch("imas_codex.cli.sn._check_openrouter", new=paid_fallback),
+        patch("imas_codex.cli.discover.common.use_rich_output", return_value=True),
+        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch(
+            "imas_codex.cli.discover.common.run_discovery", side_effect=run_discovery
+        ),
+        patch(
+            "imas_codex.standard_names.display.SN6PoolDisplay", return_value=MagicMock()
+        ),
+        patch("imas_codex.standard_names.loop.run_sn_pools", new=run_pools),
+    ):
+        result = _run_sn_cmd(
+            cost_limit=1.0,
+            per_domain_limit=None,
+            dry_run=False,
+            quiet=False,
+        )
+
+    assert result is None
+    run_pools.assert_not_awaited()
+    paid_fallback.assert_not_called()

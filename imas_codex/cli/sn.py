@@ -123,6 +123,95 @@ def _check_local_llm() -> tuple[bool, str]:
         return False, "unreachable"
 
 
+def _run_can_generate_names(
+    *,
+    skip_generate: bool = False,
+    docs_only: bool = False,
+    flush: bool = False,
+    only: str | None = None,
+) -> bool:
+    """Return whether an SN run can dispatch the configured compose seat."""
+    if skip_generate or docs_only or flush:
+        return False
+    if only is None:
+        return True
+
+    from imas_codex.standard_names.turn import skip_flags_from_only
+
+    return not skip_flags_from_only(only).get("skip_generate", False)
+
+
+def _configured_local_compose_required(compose_model: str | None = None) -> bool:
+    """Return whether the effective compose model uses its configured endpoint."""
+    from imas_codex.settings import get_model_config, get_model_endpoint
+
+    config = get_model_config("sn-compose")
+    model = compose_model or config["model"]
+    if model == config["model"] and config.get("api_base"):
+        return True
+    endpoint = get_model_endpoint(model or "")
+    return bool(endpoint and endpoint.get("api_base"))
+
+
+def _require_local_compose_ready(compose_model: str | None = None) -> None:
+    """Fail before generation when the effective local compose route is down."""
+    if not _configured_local_compose_required(compose_model):
+        return
+    healthy, detail = _check_local_llm()
+    if healthy:
+        return
+    raise click.ClickException(
+        "The configured local Standard Names compose endpoint is required for "
+        f"generation but is unavailable ({detail or 'unknown error'}). "
+        "Restore the Ambix vLLM service and retry; no paid provider fallback "
+        "will be used."
+    )
+
+
+def _sn_llm_service_checks(
+    *,
+    use_rich: bool,
+    dry_run: bool,
+    can_generate_names: bool,
+    compose_model: str | None = None,
+) -> list[tuple[str, Any, dict[str, Any]]]:
+    """Build health checks for only the LLM endpoints this run can invoke."""
+    if not use_rich or dry_run:
+        return []
+
+    checks: list[tuple[str, Any, dict[str, Any]]] = []
+    if can_generate_names and _configured_local_compose_required(compose_model):
+        checks.append(
+            ("gpu", _check_local_llm, {"poll_interval": 30.0, "critical": True})
+        )
+    checks.append(
+        (
+            "openrouter",
+            _check_openrouter,
+            {"poll_interval": 60.0, "critical": False},
+        )
+    )
+    return checks
+
+
+async def _await_services_or_stop(service_monitor: Any, stop_event: Any) -> bool:
+    """Wait for critical readiness while still honoring the run stop signal."""
+    import asyncio
+
+    ready_task = asyncio.create_task(service_monitor.await_services_ready())
+    stop_task = asyncio.create_task(stop_event.wait())
+    done, _ = await asyncio.wait(
+        {ready_task, stop_task}, return_when=asyncio.FIRST_COMPLETED
+    )
+    if stop_task in done:
+        ready_task.cancel()
+        await asyncio.gather(ready_task, return_exceptions=True)
+        return False
+    stop_task.cancel()
+    await asyncio.gather(stop_task, return_exceptions=True)
+    return bool(ready_task.result())
+
+
 def _check_openrouter() -> tuple[bool, str]:
     """Probe OpenRouter key validity and remaining credit.
 
@@ -580,6 +669,15 @@ def _run_sn_cmd(
 
     run_id = str(_uuid.uuid4())
     use_rich = not quiet and not dry_run and use_rich_output()
+    can_generate_names = _run_can_generate_names(
+        skip_generate=skip_generate,
+        docs_only=docs_only,
+        flush=flush,
+        only=only,
+    )
+    local_compose_required = can_generate_names and _configured_local_compose_required(
+        compose_model
+    )
 
     # Pre-suppress console output BEFORE any heavy imports/inits so
     # rich-mode startup is silent.  Sweeps ALL registered loggers to
@@ -684,21 +782,12 @@ def _run_sn_cmd(
     # compose endpoint (when [sn-compose].api-base is set), and OpenRouter
     # (docs / refine / review quorum).  The LiteLLM proxy check is skipped —
     # SN routes around the proxy.
-    _llm_checks: list[tuple[str, Any, dict[str, Any]]] = []
-    if use_rich and not dry_run:
-        from imas_codex.settings import get_model_config as _gmc
-
-        if _gmc("sn-compose").get("api_base"):
-            _llm_checks.append(
-                ("gpu", _check_local_llm, {"poll_interval": 30.0, "critical": False})
-            )
-        _llm_checks.append(
-            (
-                "openrouter",
-                _check_openrouter,
-                {"poll_interval": 60.0, "critical": False},
-            )
-        )
+    _llm_checks = _sn_llm_service_checks(
+        use_rich=use_rich,
+        dry_run=dry_run,
+        can_generate_names=can_generate_names,
+        compose_model=compose_model,
+    )
 
     disc_config = DiscoveryConfig(
         domain="standard-names",
@@ -733,6 +822,14 @@ def _run_sn_cmd(
 
     async def async_main(stop_event, service_monitor):
         from imas_codex.standard_names.turn import exact_pool_from_only
+
+        if local_compose_required:
+            if service_monitor is None and not drain_scope_id:
+                _require_local_compose_ready(compose_model)
+            elif service_monitor is not None and not await _await_services_or_stop(
+                service_monitor, stop_event
+            ):
+                return {"summary": None}
 
         summary = await run_sn_pools(
             cost_limit=cost_limit,
@@ -1802,6 +1899,7 @@ def sn_run(
             )
             return
 
+        _require_local_compose_ready(compose_model)
         scope_id: str | None = None
         scope_owned_by_loop = False
 
