@@ -543,13 +543,9 @@ class TestRenameCascadeBasic:
 # ---------------------------------------------------------------------------
 
 
-class TestProjectionNonCascade:
-    def test_projection_children_do_not_rename(self) -> None:
-        """Renaming ``magnetic_field`` does NOT rename ``radial_magnetic_field``.
-
-        Projection children carry independent identity — their axis
-        prefix is the catalog entry, not the parent's name.
-        """
+class TestSemanticCohortProof:
+    def test_exact_projection_transform_cascades(self) -> None:
+        """A grammar-proven projection keeps its axis while its base follows."""
         gc = _MockGraph()
         gc.add_node("magnetic_field")
         gc.add_node("radial_magnetic_field")
@@ -562,20 +558,107 @@ class TestProjectionNonCascade:
             shape="component",
         )
 
-        # Use a valid ISN target name.  ``magnetic_field`` itself is
-        # already grammatical; any locus-suffixed form keeps it valid.
+        result = rename_cascade(gc, "magnetic_field", "electric_field")
+
+        assert result.conflicts == []
+        assert {row["from"]: row["to"] for row in result.renamed} == {
+            "magnetic_field": "electric_field",
+            "radial_magnetic_field": "radial_electric_field",
+        }
+
+    def test_locus_edge_is_a_hard_boundary(self) -> None:
+        gc = _MockGraph()
+        gc.add_node("radial_coordinate")
+        gc.add_node("radial_coordinate_of_control_surface")
+        gc.add_edge(
+            "radial_coordinate_of_control_surface",
+            "radial_coordinate",
+            operator="control_surface",
+            operator_kind="locus",
+        )
+
+        result = rename_cascade(gc, "radial_coordinate", "radial_outline")
+
+        assert result.conflicts == []
+        assert result.renamed == [{"from": "radial_coordinate", "to": "radial_outline"}]
+        assert result.skipped == [
+            {
+                "name": "radial_coordinate_of_control_surface",
+                "reason": "operator_kind=locus is a semantic boundary",
+            }
+        ]
+
+    def test_edge_metadata_must_match_grammar_structure(self) -> None:
+        gc = _MockGraph()
+        gc.add_node("temperature")
+        gc.add_node("ion_temperature")
+        gc.add_edge(
+            "ion_temperature",
+            "temperature",
+            operator="electron",
+            operator_kind="qualifier",
+        )
+
+        result = rename_cascade(gc, "temperature", "density", dry_run=False)
+
+        assert result.conflicts
+        assert any("semantic proof" in conflict for conflict in result.conflicts)
+        assert gc.write_calls == []
+        assert set(gc.nodes) == {"temperature", "ion_temperature"}
+
+    def test_projection_representation_mismatch_fails_closed(self) -> None:
+        gc = _MockGraph()
+        gc.add_node("magnetic_field")
+        gc.add_node("radial_magnetic_field")
+        gc.add_edge(
+            "radial_magnetic_field",
+            "magnetic_field",
+            operator="component",
+            operator_kind="projection",
+            axis="vertical",
+            shape="component",
+        )
+
         result = rename_cascade(
             gc,
             "magnetic_field",
-            "magnetic_field_of_plasma_boundary",
+            "electric_field",
+            dry_run=False,
         )
 
-        # Only the root is renamed; the projection child is skipped.
-        assert result.conflicts == []
-        renamed_from = [r["from"] for r in result.renamed]
-        assert renamed_from == ["magnetic_field"]
-        skipped_names = [s["name"] for s in result.skipped]
-        assert "radial_magnetic_field" in skipped_names
+        assert result.conflicts
+        assert any("semantic proof" in conflict for conflict in result.conflicts)
+        assert gc.write_calls == []
+        assert set(gc.nodes) == {"magnetic_field", "radial_magnetic_field"}
+
+    def test_heterogeneous_operator_cohort_fails_before_write(self) -> None:
+        gc = _MockGraph()
+        gc.add_node("temperature")
+        gc.add_node("ion_temperature")
+        gc.add_node("maximum_of_temperature")
+        gc.add_edge(
+            "ion_temperature",
+            "temperature",
+            operator="ion",
+            operator_kind="qualifier",
+        )
+        gc.add_edge(
+            "maximum_of_temperature",
+            "temperature",
+            operator="maximum",
+            operator_kind="unary_prefix",
+        )
+
+        result = rename_cascade(gc, "temperature", "density", dry_run=False)
+
+        assert result.conflicts
+        assert any("heterogeneous" in conflict for conflict in result.conflicts)
+        assert gc.write_calls == []
+        assert set(gc.nodes) == {
+            "temperature",
+            "ion_temperature",
+            "maximum_of_temperature",
+        }
 
 
 # ---------------------------------------------------------------------------
@@ -1135,7 +1218,7 @@ class TestOldRootCascadeRecovery:
             include_accepted=True,
         )
 
-        assert any("ISN round-trip failed" in conflict for conflict in result.conflicts)
+        assert any("semantic proof" in conflict for conflict in result.conflicts)
         assert gc.write_calls == []
 
 

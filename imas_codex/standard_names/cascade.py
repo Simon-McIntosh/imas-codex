@@ -4,10 +4,11 @@ When a parent StandardName is renamed (e.g. ``elongation`` →
 ``elongation_of_closed_flux_surface``), descendants that derive their
 identity from the parent name through grammar structure must follow
 (``upper_elongation`` → ``upper_elongation_of_closed_flux_surface``).
-The information needed for this cascade is **already encoded** on
-``HAS_PARENT`` edges — the ``operator``, ``operator_kind``, ``role``,
-``separator``, ``axis`` and ``shape`` properties record exactly how the
-child name relates to the parent.  This module provides the operation.
+``HAS_PARENT`` is topology, not rename authority.  A descendant may follow
+only when ISN independently re-derives the exact stored operator edge from the
+child name and can re-derive the same operator edge after substitution.  Locus
+and coordinate edges are semantic boundaries, and mixed operator cohorts under
+one parent are refused before review or mutation.
 
 Cascade rules by ``operator_kind``:
 
@@ -15,13 +16,13 @@ Cascade rules by ``operator_kind``:
 ``operator_kind``   Cascades?   Renaming rule
 ==================  =========== ============================================
 ``qualifier``        Yes         ``{operator}_{new_parent_name}``
-``locus``            Yes         ``{new_parent_name}_{relation}_{locus}``
+``locus``            **No**      Physical-owner boundary
 ``unary_prefix``     Yes         ``{operator}_{new_parent_name}``
 ``unary_postfix``    Yes         ``{new_parent_name}_{operator}``
 ``binary`` (role a)  Yes         ``{op}_of_{new_parent_name}_{sep}_{other}``
 ``binary`` (role b)  Yes         ``{op}_of_{other}_{sep}_{new_parent_name}``
-``projection``       **No**      Component children have independent identity
-``coordinate``       **No**      Same as projection — axis renders independently
+``projection``       Yes         Preserve the proven projection IR exactly
+``coordinate``       **No**      Representation boundary
 ==================  =========== ============================================
 
 The operation is all-or-nothing: every candidate is parsed and composed
@@ -52,6 +53,8 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from imas_standard_names.grammar import parser as _isn_parser
+
+from imas_codex.standard_names.derivation import derive_edges
 
 logger = logging.getLogger(__name__)
 
@@ -109,11 +112,13 @@ def _cascade_target_name(
     other_arg_name: str | None = None,
     locus_relation: str | None = None,
     locus_token: str | None = None,
+    child_name: str | None = None,
 ) -> str | None:
     """Compute the new child id given the edge properties and renamed parent.
 
-    Returns ``None`` for edges that do **not** cascade (projection,
-    coordinate).  Returns a string for every operator_kind that does.
+    Returns ``None`` for semantic boundaries and for transforms without enough
+    proof material.  Returns a string for every operator kind that can preserve
+    its parsed structure around the new parent.
 
     Parameters
     ----------
@@ -131,14 +136,33 @@ def _cascade_target_name(
         the original child name's parse — the edge schema stores only
         the locus token under ``operator``; the relation is rebuilt at
         cascade-time from the child's IR.
+    child_name:
+        Required for projection transforms so the exact parsed projection can
+        be retained without reconstructing grammar vocabulary in this module.
     """
     op_kind = edge_props.get("operator_kind")
     operator = edge_props.get("operator")
 
-    if op_kind in ("projection", "coordinate"):
-        # Projections render axis_inner — the child is independent of
-        # the parent's exact name string.  Do not cascade.
+    if op_kind == "coordinate":
         return None
+
+    if op_kind == "projection":
+        if not child_name:
+            return None
+        try:
+            child_ir = _isn_parser.parse(child_name).ir
+            parent_ir = _isn_parser.parse(new_parent_name).ir
+            if child_ir.projection is None:
+                return None
+            # Applying a projection to an already projected or owner-qualified
+            # parent would cross a representation or locus boundary.
+            if parent_ir.projection is not None or parent_ir.locus is not None:
+                return None
+            return _isn_parser.compose(
+                parent_ir.model_copy(update={"projection": child_ir.projection})
+            )
+        except Exception:
+            return None
 
     if op_kind == "qualifier":
         if not operator:
@@ -181,6 +205,47 @@ def _cascade_target_name(
 
     # Unknown kind — leave alone.
     return None
+
+
+def _edge_proves_semantic_transform(
+    edge_props: dict[str, Any],
+    child_name: str,
+    parent_name: str,
+) -> tuple[bool, str]:
+    """Require the stored edge to equal ISN's derivation from the child.
+
+    This makes the grammar parse, rather than graph ancestry, the authority for
+    propagation.  Only the properties that define each operator are compared;
+    descriptive or legacy relationship fields cannot widen the cohort.
+    """
+    kind = edge_props.get("operator_kind")
+    required_by_kind = {
+        "qualifier": ("operator", "operator_kind"),
+        "unary_prefix": ("operator", "operator_kind"),
+        "unary_postfix": ("operator", "operator_kind"),
+        "binary": ("operator", "operator_kind", "role", "separator"),
+        "projection": ("operator", "operator_kind", "axis", "shape"),
+    }
+    required = required_by_kind.get(kind)
+    if required is None:
+        return False, f"operator_kind={kind!r} has no semantics-preserving proof"
+    if any(edge_props.get(field) in (None, "") for field in required):
+        return False, f"operator_kind={kind!r} edge metadata is incomplete"
+
+    candidates = [
+        edge
+        for edge in derive_edges(child_name)
+        if edge.edge_type == "HAS_PARENT" and edge.to_name == parent_name
+    ]
+    if not candidates:
+        return False, "ISN does not derive this child-to-parent edge"
+    expected = {field: edge_props.get(field) for field in required}
+    if not any(
+        {field: candidate.props.get(field) for field in required} == expected
+        for candidate in candidates
+    ):
+        return False, "stored operator metadata differs from ISN derivation"
+    return True, "ok"
 
 
 # ---------------------------------------------------------------------------
@@ -450,6 +515,7 @@ def _walk_and_resolve_cascade(
     *,
     override_edits: bool,
     include_accepted: bool,
+    semantic_root_id: str | None = None,
 ) -> tuple[dict[str, str], list[dict[str, str]], list[str], int]:
     """Walk the ``HAS_PARENT*`` subtree rooted at *root_id* and resolve
     the cascade rename for every descendant.
@@ -461,6 +527,10 @@ def _walk_and_resolve_cascade(
 
     Returns ``(rename_plan, skipped, conflicts, total_descendants)`` where
     ``rename_plan`` is seeded with ``{root_id: root_new_name}``.
+
+    ``semantic_root_id`` is the predecessor identity used only to prove direct
+    child transforms after a reviewed successor has already inherited the old
+    root's edges.  It never changes graph traversal or the rename target.
     """
     # Walk descendants depth-first via HAS_PARENT*.  We need the per-edge
     # properties for each direct child of every node in the subtree.  The
@@ -524,10 +594,30 @@ def _walk_and_resolve_cascade(
             continue
         edges_by_child.setdefault(cid, []).append(er)
 
+    # Every propagation layer is one operator cohort. Boundary edges do not
+    # participate, but two different propagating operator kinds below the same
+    # parent are heterogeneous and require separate reviewed edits.
+    kinds_by_parent: dict[str, set[str]] = {}
+    for er in edge_rows:
+        kind = er.get("operator_kind")
+        target_id = er.get("target_id")
+        if not target_id or kind in ("locus", "coordinate"):
+            continue
+        kinds_by_parent.setdefault(target_id, set()).add(str(kind))
+    heterogeneous_parents = {
+        parent_id: kinds
+        for parent_id, kinds in kinds_by_parent.items()
+        if len(kinds) > 1
+    }
+
     # Plan per-descendant renames.
     rename_plan: dict[str, str] = {root_id: root_new_name}
     skipped: list[dict[str, str]] = []
-    conflicts: list[str] = []
+    conflicts: list[str] = [
+        f"heterogeneous semantic cohort below {parent_id!r}: "
+        f"operator_kinds={sorted(kinds)!r}"
+        for parent_id, kinds in sorted(heterogeneous_parents.items())
+    ]
 
     # Iterate descendants in topological-ish order (depth-first via the
     # graph walk's row order is sufficient — every child references its
@@ -565,13 +655,30 @@ def _walk_and_resolve_cascade(
             new_parent_name = rename_plan[target_id]
             op_kind = anchor.get("operator_kind")
 
-            # Projections don't cascade.
-            if op_kind in ("projection", "coordinate"):
+            if op_kind in ("locus", "coordinate"):
                 skipped.append(
                     {
                         "name": child_id,
-                        "reason": f"operator_kind={op_kind} has independent identity",
+                        "reason": f"operator_kind={op_kind} is a semantic boundary",
                     }
+                )
+                pending.discard(child_id)
+                progress = True
+                continue
+
+            proof_ok, proof_reason = _edge_proves_semantic_transform(
+                anchor,
+                child_id,
+                (
+                    semantic_root_id
+                    if target_id == root_id and semantic_root_id is not None
+                    else str(target_id)
+                ),
+            )
+            if not proof_ok:
+                conflicts.append(
+                    f"semantic proof absent for {child_id!r} -> {target_id!r}: "
+                    f"{proof_reason}"
                 )
                 pending.discard(child_id)
                 progress = True
@@ -627,6 +734,7 @@ def _walk_and_resolve_cascade(
                 other_arg_name=other_arg_name,
                 locus_relation=locus_relation,
                 locus_token=locus_token,
+                child_name=child_id,
             )
             if new_child is None:
                 # The dispatcher returned None for a kind we expected to
@@ -634,6 +742,18 @@ def _walk_and_resolve_cascade(
                 conflicts.append(
                     f"cannot compute cascade for {child_id!r} "
                     f"(operator_kind={op_kind!r}; edge props insufficient)"
+                )
+                pending.discard(child_id)
+                progress = True
+                continue
+
+            successor_proof_ok, successor_proof_reason = (
+                _edge_proves_semantic_transform(anchor, new_child, new_parent_name)
+            )
+            if not successor_proof_ok:
+                conflicts.append(
+                    f"semantic proof does not survive {child_id!r} -> "
+                    f"{new_child!r}: {successor_proof_reason}"
                 )
                 pending.discard(child_id)
                 progress = True
@@ -977,6 +1097,7 @@ def cascade_descendants_of(
         new_root,
         override_edits=override_edits,
         include_accepted=include_accepted,
+        semantic_root_id=old_root,
     )
 
     used_old_root_fallback = False
