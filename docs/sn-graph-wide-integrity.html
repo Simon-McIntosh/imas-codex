@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="118">
+<meta name="plan-version" content="119">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -1183,6 +1183,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260809-iron-core-radial-partial-drain" data-who="reckon-ship" data-when="2026-08-09T17:02:00+00:00">
     <div class="r-comment-body"><p><strong>The four-source radial-hardware run used its authorized budget and exposed a focused-scope drain bug.</strong> Exact source scope <code>f93b7ffa-33ac-4fa4-beee-2e51688e9013</code> and SNRun <code>5d256340-4fd0-4923-9b12-d9934c0a4b04</code> ended <code>completed/no_eligible_work</code> at USD 0.736383: local DSv4 compose cost USD 0; paid review/refine cost USD 0.736383. Plasma converged to accepted <code>radial_outline_of_plasma_filament</code> (name 1.000, docs 0.925); active-coil attached accepted <code>radial_outline_of_coil_conductor_element</code>; iron-core attached pre-existing reviewed <code>radial_coordinate_of_iron_core_segment</code> (name 0.65, docs pending). Passive-loop refined from rejected <code>radial_outline_of_passive_loop</code> (0.70625) to <code>radial_outline_of_conductor_cross_section</code>, but the successor remains drafted.</p><p><strong>This is unfinished workflow, not a budget hold.</strong> The refine worker passed the audit SNRun ID into the successor's focus-scope field instead of inheriting the predecessor's source scope. The same focused invocation therefore could not claim the drafted successor and falsely drained. A focused scope-continuity repair is active; no reset, unscoped rerun, or direct acceptance is authorized. Overall remaining ceiling is USD 189.356037.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260809-docs-authority-backfill-applied" data-who="reckon-ship" data-when="2026-08-09T17:14:00+00:00">
+    <div class="r-comment-body"><p><strong>The exact documentation-authority backfill applied successfully at zero cost.</strong> Fresh quiet/CAS preflight rebuilt the canonical 22-row manifest byte-identically (SHA-256 <code>8f5c726b…</code>), with all 22 resolution methods null. The single public apply call returned matched 22, changed 22, already-applied 0, postflight true; all 22 now carry <code>quorum_consensus</code>. Documentation text, scores, 164 Reviews, 13 sources, 25 parent/child links, all relationship structure, and the normalized one-hop snapshot remained unchanged. No provider call or LLMCost delta occurred. Receipt <code>/tmp/sgwi_docs_authority_backfill_apply.json</code>, SHA-256 <code>7d7d91625b7b7975692012a4db7b4bb98399b95b32577285dbb55f261342429c</code>. A repeat is an idempotent changed-0/already-22 outcome.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
