@@ -6556,6 +6556,8 @@ async def process_refine_name_batch(
     )
     from imas_codex.standard_names.fanout.dispatcher import proposer_exposure
     from imas_codex.standard_names.graph_ops import (
+        RefinedNamePersistenceRefusal,
+        RefinedNamePersistenceRefusalReason,
         _mark_refine_vocab_gap_exhausted,
         bump_sn_run_counter,
         persist_refined_name,
@@ -6917,18 +6919,13 @@ async def process_refine_name_batch(
                         sn_id,
                     )
                 if dup_id:
-                    logger.info(
-                        "refine_name dup_prevented: %s → %s collides with %s",
-                        sn_id,
-                        candidate_name,
-                        dup_id,
-                    )
                     # Release claim back to 'reviewed' so the cycle
                     # can pick it up again (with fresh feedback) or
                     # be marked superseded by manual review.
                     token = item.get("claim_token") or ""
+                    released = 0
                     try:
-                        await _asyncio.to_thread(
+                        released = await _asyncio.to_thread(
                             release_refine_name_failed_claims,
                             sn_ids=[sn_id],
                             token=token,
@@ -6938,18 +6935,25 @@ async def process_refine_name_batch(
                             "release after dup_prevented failed for %s",
                             sn_id,
                         )
+                    collision_event = {
+                        "pool": "refine_name",
+                        "name": sn_id,
+                        "old_name": sn_id,
+                        "proposed_name": candidate_name,
+                        "existing_name": dup_id,
+                        "duplicate_of": dup_id,
+                        "refusal_reason": "successor_collision",
+                        "claim_release_count": released,
+                        "outcome": "dup_prevented",
+                        "model": model,
+                        "cost": cost,
+                    }
+                    logger.warning(
+                        "refine_name_persistence_refused %s",
+                        json.dumps(collision_event, sort_keys=True),
+                    )
                     if on_event is not None:
-                        on_event(
-                            {
-                                "pool": "refine_name",
-                                "name": sn_id,
-                                "old_name": sn_id,
-                                "duplicate_of": dup_id,
-                                "outcome": "dup_prevented",
-                                "model": model,
-                                "cost": cost,
-                            }
-                        )
+                        on_event(collision_event)
                     continue
 
                 # ── Persist ───────────────────────────────────────────
@@ -7038,15 +7042,45 @@ async def process_refine_name_batch(
                 if isinstance(exc, ProviderBudgetExhausted):
                     raise
                 _exc_str = str(exc)
-                # "no-op" means orphan_sweep already reverted this claim
-                # while the LLM call was in flight — the graph is already
-                # consistent; just warn and move on (no release needed).
-                if "no-op" in _exc_str:
-                    logger.warning(
-                        "refine_name skipped (orphan_sweep beat us): %s", sn_id
-                    )
-                    continue
                 token = item.get("claim_token") or ""
+                if isinstance(exc, RefinedNamePersistenceRefusal):
+                    released = 0
+                    try:
+                        released = await _asyncio.to_thread(
+                            release_refine_name_failed_claims,
+                            sn_ids=[sn_id],
+                            token=token,
+                        )
+                    except Exception:
+                        logger.debug(
+                            "release after typed persist refusal failed for %s",
+                            sn_id,
+                            exc_info=True,
+                        )
+                    claim_lost = exc.reason in {
+                        RefinedNamePersistenceRefusalReason.CLAIM_LOST,
+                        RefinedNamePersistenceRefusalReason.PREDECESSOR_STAGE,
+                        RefinedNamePersistenceRefusalReason.PREDECESSOR_MISSING,
+                    }
+                    refusal_event = {
+                        "pool": "refine_name",
+                        "name": sn_id,
+                        "old_name": sn_id,
+                        "proposed_name": exc.proposed_name,
+                        "existing_name": exc.existing_name,
+                        "refusal_reason": exc.reason.value,
+                        "claim_release_count": released,
+                        "outcome": "claim_lost" if claim_lost else "persist_refused",
+                        "model": model,
+                        "cost": cost,
+                    }
+                    logger.warning(
+                        "refine_name_persistence_refused %s",
+                        json.dumps(refusal_event, sort_keys=True),
+                    )
+                    if on_event is not None:
+                        on_event(refusal_event)
+                    continue
                 # A grammar/validation failure (the LLM proposed an
                 # ungrammatical name — e.g. an unregistered qualifier token) or
                 # a self-referential refine is a NORMAL failed-refine outcome,
@@ -7308,6 +7342,11 @@ def _enrich_name_review_items(items: list[dict[str, Any]]) -> None:
     protected = {"path", "description", "documentation", "unit", "physics_domain"}
     for item, stub in zip(owners, stubs, strict=True):
         for key, value in stub.items():
+            if key == "cross_ids_paths":
+                item["semantic_comparators"] = [
+                    {"path": path, "basis": "semantic_cluster"} for path in value
+                ]
+                continue
             if key not in protected and key not in item:
                 item[key] = value
 

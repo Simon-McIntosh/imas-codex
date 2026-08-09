@@ -389,6 +389,44 @@ class TestIdleExhaustionWatchdog:
         assert consumer.health.total_processed == 1
 
 
+def test_scoped_terminal_residue_reports_transient_claims() -> None:
+    """A refining claim remains terminally visible despite zero pending work."""
+    from unittest.mock import MagicMock, patch
+
+    from imas_codex.standard_names.graph_ops import scoped_terminal_residue
+
+    gc = MagicMock()
+    gc.__enter__.return_value = gc
+    gc.__exit__.return_value = False
+    gc.query.return_value = [
+        {
+            "name_count": 1,
+            "source_count": 0,
+            "names": [
+                {
+                    "id": "radial_outline_of_conductor_cross_section",
+                    "name_stage": "refining",
+                    "docs_stage": "pending",
+                    "claim_token": "token",
+                    "claimed_at": "2026-08-09T17:52:52Z",
+                }
+            ],
+            "sources": [],
+        }
+    ]
+
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=gc):
+        residue = scoped_terminal_residue(scope_run_id="bounded-run")
+
+    assert residue["total"] == 1
+    assert residue["names"][0]["name_stage"] == "refining"
+    cypher = gc.query.call_args.args[0]
+    assert "sn.run_id = $scope_id" in cypher
+    assert "sns.run_id = $scope_id" in cypher
+    assert "claim_token IS NOT NULL" in cypher
+    assert "name_stage = 'refining'" in cypher
+
+
 # ---------------------------------------------------------------------------
 # Budget saturation watchdog (replaces the near-exhausted gate)
 # ---------------------------------------------------------------------------

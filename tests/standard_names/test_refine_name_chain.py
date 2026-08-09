@@ -450,19 +450,46 @@ class TestPersistCypherContent:
         """
         import pytest
 
-        from imas_codex.standard_names.graph_ops import persist_refined_name
+        from imas_codex.standard_names.graph_ops import (
+            RefinedNamePersistenceRefusal,
+            RefinedNamePersistenceRefusalReason,
+            persist_refined_name,
+        )
 
         gc, tx = _mock_gc_tx()
-        tx.run.return_value = []
+        tx.run.side_effect = [
+            [],
+            [
+                {
+                    "old_exists": True,
+                    "old_stage": "refining",
+                    "old_claim_token": "tok",
+                    "existing_id": "new",
+                    "existing_stage": "accepted",
+                    "existing_origin": "pipeline",
+                    "old_drain_scope_id": None,
+                    "existing_drain_scope_id": None,
+                    "existing_drain_scope_claimed_at": None,
+                }
+            ],
+        ]
 
         with patch(_GC_PATH, return_value=gc):
-            with pytest.raises(RuntimeError, match="persist_refined_name no-op"):
+            with pytest.raises(RefinedNamePersistenceRefusal) as caught:
                 persist_refined_name(
                     old_name="old",
                     new_name="new",
                     description="d",
                     old_chain_length=0,
+                    expected_claim_token="tok",
                 )
+
+        assert (
+            caught.value.reason
+            is RefinedNamePersistenceRefusalReason.SUCCESSOR_LIFECYCLE
+        )
+        assert caught.value.proposed_name == "new"
+        assert caught.value.existing_name == "new"
 
 
 # =============================================================================
@@ -849,6 +876,144 @@ class TestProcessReleasesOnFailure:
         call_kwargs = mock_release.call_args.kwargs
         assert call_kwargs["sn_ids"] == ["test_name"]
         assert call_kwargs["token"] == "tok-abc-123"
+
+    @pytest.mark.asyncio
+    async def test_exact_id_collision_emits_both_ids_and_releases_claim(self, caplog):
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        item = _make_refine_item(sn_id="radial_outline_of_passive_loop")
+        refined = MagicMock()
+        refined.description = "Radial coordinates tracing a conductor cross-section."
+        refined.kind = "scalar"
+        refined.reason = "Correct the DD-proven owner."
+        events: list[dict[str, Any]] = []
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                return_value=(
+                    refined,
+                    0.19,
+                    {"input_tokens": 100, "output_tokens": 50},
+                ),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt text",
+            ),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch("imas_codex.settings.get_model", return_value="default-model"),
+            patch(
+                "imas_codex.standard_names.workers._compose_refined_candidate_name",
+                return_value="radial_outline_of_conductor_cross_section",
+            ),
+            patch(
+                "imas_codex.standard_names.canonical.find_name_key_duplicate",
+                return_value="radial_outline_of_conductor_cross_section",
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_refined_name"
+            ) as mock_persist,
+            patch(
+                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
+                return_value=1,
+            ) as mock_release,
+            patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
+            caplog.at_level("WARNING"),
+        ):
+            count = await process_refine_name_batch(
+                [item], _mock_budget_manager(), asyncio.Event(), on_event=events.append
+            )
+
+        assert count == 0
+        mock_persist.assert_not_called()
+        mock_release.assert_called_once_with(
+            sn_ids=["radial_outline_of_passive_loop"], token="tok-abc-123"
+        )
+        collision = events[-1]
+        assert collision["outcome"] == "dup_prevented"
+        assert collision["proposed_name"] == (
+            "radial_outline_of_conductor_cross_section"
+        )
+        assert collision["existing_name"] == (
+            "radial_outline_of_conductor_cross_section"
+        )
+        assert collision["claim_release_count"] == 1
+        assert "refine_name_persistence_refused" in caplog.text
+        assert "radial_outline_of_passive_loop" in caplog.text
+        assert "radial_outline_of_conductor_cross_section" in caplog.text
+
+    @pytest.mark.asyncio
+    async def test_proven_claim_loss_is_distinct_from_successor_refusal(self, caplog):
+        from imas_codex.standard_names.graph_ops import (
+            RefinedNamePersistenceRefusal,
+            RefinedNamePersistenceRefusalReason,
+        )
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        item = _make_refine_item()
+        refined = MagicMock()
+        refined.description = "Electron temperature."
+        refined.kind = "scalar"
+        refined.reason = "Retain exact source semantics."
+        refusal = RefinedNamePersistenceRefusal(
+            old_name=item["id"],
+            proposed_name="electron_temperature",
+            reason=RefinedNamePersistenceRefusalReason.CLAIM_LOST,
+        )
+        events: list[dict[str, Any]] = []
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                return_value=(
+                    refined,
+                    0.05,
+                    {"input_tokens": 100, "output_tokens": 50},
+                ),
+            ),
+            patch(
+                "imas_codex.llm.prompt_loader.render_prompt",
+                return_value="prompt text",
+            ),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch("imas_codex.settings.get_model", return_value="default-model"),
+            patch(
+                "imas_codex.standard_names.workers._compose_refined_candidate_name",
+                return_value="electron_temperature",
+            ),
+            patch(
+                "imas_codex.standard_names.canonical.find_name_key_duplicate",
+                return_value=None,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                side_effect=refusal,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
+                return_value=0,
+            ) as mock_release,
+            patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
+            caplog.at_level("WARNING"),
+        ):
+            count = await process_refine_name_batch(
+                [item], _mock_budget_manager(), asyncio.Event(), on_event=events.append
+            )
+
+        assert count == 0
+        mock_release.assert_called_once_with(
+            sn_ids=[item["id"]], token=item["claim_token"]
+        )
+        assert events[-1]["outcome"] == "claim_lost"
+        assert events[-1]["refusal_reason"] == "claim_lost"
+        assert "orphan_sweep beat us" not in caplog.text
 
     @pytest.mark.asyncio
     async def test_parse_failure_charges_once_then_terminates(self):

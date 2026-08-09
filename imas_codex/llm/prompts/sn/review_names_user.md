@@ -70,6 +70,11 @@ evidence in each candidate. Do not merely average their scores.
 
 ## Candidates to Review
 
+Score each exact candidate against its authoritative bound sources and any
+structurally proven representation/owner family shown below. Semantic-cluster,
+vector, and graph-neighbor context is comparison-only: it can reveal a naming
+pattern or collision, but it never expands the candidate's identity obligation.
+
 {% for item in items %}
 ### Candidate {{ loop.index }}
 - **Standard name**: {{ item.standard_name or item.id }}
@@ -81,6 +86,8 @@ evidence in each candidate. Do not merely average their scores.
 - **Recursive semantic IR**: `{{ item.semantic_ir }}`
 {% else %}- **Grammar Fields**: {% if item.physical_base %}physical_base={{ item.physical_base }}{% endif %}{% if item.subject %}, subject={{ item.subject }}{% endif %}{% if item.component %}, component={{ item.component }}{% endif %}{% if item.coordinate %}, coordinate={{ item.coordinate }}{% endif %}{% if item.position %}, position={{ item.position }}{% endif %}{% if item.process %}, process={{ item.process }}{% endif %}
 {% endif %}{% if item.dd_source_docs %}
+**Authoritative source and structural-family obligations**:
+
 **Exact DD source definitions**:
 {% if item.unpinned_source_count %}
 ⚠️ **Provenance incomplete:** {{ item.unpinned_source_count }} exact DD source binding(s) lack a pinned extraction snapshot. Unpinned text below is mutable context, not authoritative evidence; flag the grounding deficiency in the review.
@@ -111,7 +118,7 @@ member only when the DD leaf itself fixes one.
 {% endif %}{% if item.dd_description %}- **DD enriched description**: {{ item.dd_description }}
 {% endif %}{% if item.physics_domain %}- **Physics domain**: {{ item.physics_domain }}
 {% endif %}{% if item.dd_keywords %}- **DD keywords**: {{ item.dd_keywords | join(', ') if item.dd_keywords is iterable and item.dd_keywords is not string else item.dd_keywords }}
-{% endif %}{% if item.source_paths %}- **Source paths** (provenance context): {{ item.source_paths | join(', ') }}
+{% endif %}{% if item.source_paths %}- **Source paths** (authoritative bound-source cohort): {{ item.source_paths | join(', ') }}
 {% endif %}{% if item.source_context_omitted %}- **Bounded source context**: {{ item.source_context_omitted }} additional exact source binding(s) omitted after deterministic ordering.
 {% endif %}
 {% if item.validation_issues %}
@@ -123,7 +130,7 @@ member only when the DD leaf itself fixes one.
 {% if item.semantic_warning %}
 
 {{ item.semantic_warning }}
-{% endif %}{% if item.value_provenance or item.data_type or item.node_type or item.coordinate_paths or item.timebase or item.cocos_label or item.lifecycle_status or item.parent_path or item.parent_description or item.ancestor_context or item.identifier_schema or item.identifier_values or item.cross_ids_paths or item.dd_paths_docs or item.hybrid_neighbours or item.related_neighbours or item.error_fields or item.sibling_fields %}
+{% endif %}{% if item.value_provenance or item.data_type or item.node_type or item.coordinate_paths or item.timebase or item.cocos_label or item.lifecycle_status or item.parent_path or item.parent_description or item.ancestor_context or item.identifier_schema or item.identifier_values or item.semantic_comparators or item.dd_paths_docs or item.hybrid_neighbours or item.related_neighbours or item.error_fields or item.sibling_fields %}
 {% if item.value_provenance %}- **Value provenance**: {{ item.value_provenance }}; review the underlying quantity at `{{ item.provenance_base_path }}` rather than encoding the estimator in the name.
 {% endif %}{% if item.data_type %}- **Data type**: {{ item.data_type }}
 {% endif %}{% if item.node_type %}- **Node type**: {{ item.node_type }}
@@ -145,9 +152,9 @@ member only when the DD leaf itself fixes one.
 - **Identifier enum values**:
 {% for value in item.identifier_values %}  - `{{ value.name }}` ({{ value.index }}): {{ value.description | default('', true) }}
 {% endfor %}{% endif %}
-{% if item.cross_ids_paths %}
-- **Cross-IDS equivalents** (the candidate must cover every listed instance):
-{% for path in item.cross_ids_paths %}  - `{{ path }}`
+{% if item.semantic_comparators %}
+- **Non-binding semantic comparators** (optional comparison context; these never expand the candidate's identity obligation):
+{% for comparator in item.semantic_comparators %}  - `{{ comparator.path }}`{% if comparator.basis %} — {{ comparator.basis | replace('_', ' ') }}{% endif %}
 {% endfor %}{% endif %}
 {% if item.dd_paths_docs %}
 - **Current-graph member DD context** (supplementary and non-authoritative; pinned source snapshots above are the sole definition authority):
@@ -170,7 +177,7 @@ member only when the DD leaf itself fixes one.
 {% for sibling in item.sibling_fields %}  - `{{ sibling.path }}`: {{ sibling.description or 'no description' }} ({{ sibling.data_type or '?' }})
 {% endfor %}{% endif %}
 {% endif %}{% if item.clusters or item.dd_clusters %}
-- **Semantic clusters:**
+- **Semantic clusters** (comparison-only; membership is not identity authority):
 {% for cluster in item.clusters or item.dd_clusters %}  - **{{ cluster.label }}** ({{ cluster.scope }}): {{ cluster.description }}{% if cluster.members %}
     Members: {{ cluster.members | join(', ') }}{% endif %}
 {% endfor %}{% endif %}
