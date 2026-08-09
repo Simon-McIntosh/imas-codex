@@ -778,7 +778,10 @@ def _run_sn_cmd(
 
     if quiet:
         if not dry_run:
-            _require_terminal_drain(str(row.get("stop_reason") or ""))
+            _require_terminal_drain(
+                str(row.get("stop_reason") or ""),
+                maintenance_only=only in {"attach", "reconcile"},
+            )
         return row
 
     # Print summary table (in both rich and plain mode, after display exits)
@@ -814,14 +817,21 @@ def _run_sn_cmd(
             "next run picks up where this one stopped."
         )
     if not dry_run:
-        _require_terminal_drain(str(row.get("stop_reason") or ""))
+        _require_terminal_drain(
+            str(row.get("stop_reason") or ""),
+            maintenance_only=only in {"attach", "reconcile"},
+        )
 
     return row
 
 
-def _require_terminal_drain(stop_reason: str) -> None:
-    """Exit nonzero unless the run proved a fresh, terminally empty backlog."""
-    if stop_reason == "no_eligible_work":
+def _require_terminal_drain(
+    stop_reason: str, *, maintenance_only: bool = False
+) -> None:
+    """Require a proven empty pool drain or completed maintenance-only run."""
+    if stop_reason == "no_eligible_work" or (
+        maintenance_only and stop_reason == "completed"
+    ):
         return
     raise SystemExit(4 if stop_reason == "provider_budget_exhausted" else 1)
 
