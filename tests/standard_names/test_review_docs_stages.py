@@ -766,6 +766,28 @@ class TestExactDocsRescoreStaging:
 
 
 class TestFailedReleaseKeepsDrafted:
+    def test_failed_release_compares_and_updates_docs_axis(self) -> None:
+        """A docs failure must never predicate or mutate the name lifecycle."""
+        gc = _mock_gc_query(return_values=[[{"released": 1}]])
+        with _patch_gc(gc):
+            from imas_codex.standard_names.graph_ops import (
+                release_review_docs_failed_claims,
+            )
+
+            released = release_review_docs_failed_claims(
+                sn_ids=["test_name"],
+                claim_token="docs-token",
+                from_stage="drafted",
+                to_stage="drafted",
+            )
+
+        assert released == 1
+        cypher = gc.query.call_args.args[0]
+        assert "n.docs_stage = $from_stage" in cypher
+        assert "n.docs_stage = $to_stage" in cypher
+        set_clause = cypher.split("SET", 1)[1]
+        assert "name_stage" not in set_clause
+
     def test_failed_release_keeps_drafted(self, mock_llm):
         """LLM error path calls release_review_docs_failed_claims with from/to_stage='drafted'."""
         _ = mock_llm  # consume fixture — will raise RuntimeError for missing response

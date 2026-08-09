@@ -9367,6 +9367,440 @@ async def process_enrich_parents_batch(
     return processed
 
 
+_DOCS_REVIEW_VOLATILE_ITEM_FIELDS = frozenset(
+    {
+        "claim_token",
+        "claim_seq",
+        "claimed_at",
+        "docs_stage",
+        "run_id",
+        "reviewer_score_docs",
+        "reviewer_scores_docs",
+        "reviewer_comments_docs",
+        "reviewer_comments_per_dim_docs",
+        "reviewer_model_docs",
+        "docs_review_resolution_method",
+        "docs_review_quorum_shortfall",
+        "docs_review_quorum_shortfall_at",
+        "reviewed_docs_at",
+    }
+)
+_docs_review_admissions: dict[str, dict[str, Any]] = {}
+
+
+def _canonical_docs_review_item(item: dict[str, Any]) -> dict[str, Any]:
+    """Copy the prompt-bearing fields while excluding claim/lifecycle state."""
+    import copy
+
+    return {
+        key: copy.deepcopy(value)
+        for key, value in item.items()
+        if key not in _DOCS_REVIEW_VOLATILE_ITEM_FIELDS
+    }
+
+
+def _load_docs_review_admission_item(sn_id: str) -> dict[str, Any]:
+    """Read the same prompt-bearing projection returned by a docs claim."""
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName {id: $id})
+            OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
+            OPTIONAL MATCH (sn)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
+            RETURN sn.id AS id,
+                   sn.name AS name,
+                   sn.description AS description,
+                   sn.documentation AS documentation,
+                   sn.kind AS kind,
+                   coalesce(u.id, sn.unit) AS unit,
+                   c.id AS cluster_id,
+                   sn.physics_domain AS physics_domain,
+                   sn.validation_status AS validation_status,
+                   sn.tags AS tags,
+                   coalesce(sn.docs_chain_length, 0) AS docs_chain_length,
+                   sn.docs_stage AS docs_stage,
+                   sn.edit_mode AS edit_mode,
+                   sn.name_hint AS name_hint,
+                   sn.docs_hint AS docs_hint,
+                   sn.edit_reason AS edit_reason,
+                   sn.edit_origin AS edit_origin,
+                   sn.origin AS origin,
+                   sn.run_id AS run_id,
+                   sn.source_paths AS source_paths,
+                   [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {
+                       id: source.id,
+                       source_type: source.source_type,
+                       source_id: source.source_id,
+                       dd_path: source.dd_path,
+                       dd_version: source.dd_version
+                   }] AS source_bindings
+            """,
+            id=sn_id,
+        )
+    if len(rows) != 1:
+        raise ValueError(f"documentation review target {sn_id!r} is not unique")
+    return dict(rows[0])
+
+
+def _load_docs_review_parent_children(item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Read the canonical live children for one derived parent candidate."""
+    if item.get("origin") != "derived":
+        return []
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (p:StandardName {id: $id, origin: 'derived'})
+            MATCH (c:StandardName)-[:HAS_PARENT]->(p)
+            WHERE NOT (coalesce(c.name_stage, '') IN
+                       ['superseded', 'exhausted', 'contested'])
+            WITH c ORDER BY c.id
+            RETURN collect({
+                name: c.id,
+                description: CASE WHEN c.description = $placeholder
+                    THEN null ELSE c.description END,
+                unit: c.unit,
+                physics_domain: c.physics_domain
+            })[..12] AS children
+            """,
+            id=item["id"],
+            placeholder=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
+        )
+    return list(rows[0].get("children") or []) if rows else []
+
+
+def _load_docs_review_examples(item: dict[str, Any]) -> list[dict[str, Any]]:
+    """Read the scored documentation examples used by the reviewer prompt."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.example_loader import load_review_examples
+
+    domain = item.get("physics_domain") or ""
+    with GraphClient() as gc:
+        return list(load_review_examples(gc, physics_domains=[domain], axis="docs"))
+
+
+def _enrich_docs_review_dd_context(item: dict[str, Any]) -> None:
+    """Attach the same first-source DD context used at worker dispatch."""
+    source_paths = item.get("source_paths") or []
+    first_source = source_paths[0] if isinstance(source_paths, list) else source_paths
+    if isinstance(first_source, str):
+        first_source = strip_dd_prefix(first_source)
+    if not first_source:
+        return
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        _enrich_dd_path_context(gc, item, first_source)
+
+
+def _docs_review_request_identity(payload: dict[str, Any]) -> str:
+    """Hash a canonical rendered request and its priced reviewer sequence."""
+    import hashlib
+
+    serialized = json.dumps(
+        payload,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+    return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
+
+
+async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
+    """Render and price one canonical docs-review request without mutation.
+
+    This is the sole docs-review prompt construction path. Admission and the
+    claimed worker both call it, so context, templates, reviewer models,
+    response schema, effort settings, possible escalator exposure, and request
+    identity cannot drift through duplicated preparation code.
+    """
+    import asyncio as _asyncio
+
+    from imas_codex.llm.prompt_loader import render_prompt
+    from imas_codex.settings import (
+        get_model,
+        get_sn_review_disagreement_threshold,
+        get_sn_review_docs_models,
+        get_sn_review_escalation_reasoning_effort,
+        get_sn_review_names_models,
+        get_sn_review_reasoning_effort,
+    )
+    from imas_codex.standard_names.context import fetch_review_neighbours
+    from imas_codex.standard_names.models import (
+        StandardNameQualityReviewDocsBatch,
+        StandardNameQualityReviewDocsParentBatch,
+    )
+
+    source_item = item
+    if item.get("docs_stage") in {"accepted", "reviewed", "exhausted"}:
+        source_item = await _asyncio.to_thread(
+            _load_docs_review_admission_item, str(item.get("id") or "")
+        )
+    prepared_item = _canonical_docs_review_item(source_item)
+    try:
+        review_models = list(get_sn_review_docs_models())
+    except (ValueError, IndexError):
+        review_models = []
+    if not review_models:
+        try:
+            review_models = list(get_sn_review_names_models())
+        except (ValueError, IndexError):
+            review_models = []
+    if not review_models:
+        review_models = [get_model("sn-refine")]
+
+    try:
+        disagreement_threshold = get_sn_review_disagreement_threshold()
+    except Exception:
+        disagreement_threshold = 0.20
+
+    try:
+        children = await _asyncio.to_thread(
+            _load_docs_review_parent_children, prepared_item
+        )
+    except Exception:
+        logger.debug("review_docs: parent children fetch failed", exc_info=True)
+        children = []
+    if children:
+        prepared_item["derived_children"] = children
+
+    try:
+        neighbours = await _asyncio.to_thread(fetch_review_neighbours, prepared_item)
+    except Exception:
+        logger.debug(
+            "review_docs: neighbour fetch failed for %s",
+            prepared_item.get("id"),
+            exc_info=True,
+        )
+        neighbours = {
+            "vector_neighbours": [],
+            "same_base_neighbours": [],
+            "same_path_neighbours": [],
+        }
+    try:
+        review_examples = await _asyncio.to_thread(
+            _load_docs_review_examples, prepared_item
+        )
+    except Exception:
+        logger.debug(
+            "review_docs: scored-example load failed for %s",
+            prepared_item.get("id"),
+            exc_info=True,
+        )
+        review_examples = []
+    try:
+        await _asyncio.to_thread(_enrich_docs_review_dd_context, prepared_item)
+    except Exception:
+        logger.debug(
+            "review_docs: dd_path_context failed for %s",
+            prepared_item.get("id"),
+            exc_info=True,
+        )
+
+    prompt_context: dict[str, Any] = {
+        "item": prepared_item,
+        **neighbours,
+        "review_scored_examples": review_examples,
+    }
+    is_parent = bool(prepared_item.get("derived_children"))
+    user_template = "sn/review_docs_parent_user" if is_parent else "sn/review_docs_user"
+    system_template = (
+        "sn/review_docs_parent_system" if is_parent else "sn/review_docs_system"
+    )
+    user_prompt = render_prompt(user_template, prompt_context)
+    system_prompt = render_prompt(system_template, prompt_context)
+    response_model = (
+        StandardNameQualityReviewDocsParentBatch
+        if is_parent
+        else StandardNameQualityReviewDocsBatch
+    )
+    rubric_dims = (
+        ("generalization", "positioning", "physics_accuracy", "clarity")
+        if is_parent
+        else (
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        )
+    )
+    base_messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+    exposures = [
+        model_provider_exposure(
+            model,
+            base_messages,
+            response_model=response_model,
+            provider_attempts=1,
+        )
+        for model in review_models[:2]
+    ]
+    if len(review_models) >= 3:
+        # The escalation request additionally carries two bounded structured
+        # critiques. Bound their rendered UTF-8 payload by the two reviewers'
+        # complete output allowances; four bytes per token covers a full-width
+        # Unicode code point. This synthetic envelope is priced but is never
+        # sent to a provider.
+        from imas_codex.discovery.base.llm import get_model_limits
+
+        critique_byte_bound = sum(
+            int(get_model_limits(model).get("max_tokens") or 0) * 4
+            for model in review_models[:2]
+        )
+        if critique_byte_bound <= 0:
+            raise ValueError("reviewer output allowance is not bounded")
+        escalation_messages = [
+            {"role": "system", "content": system_prompt},
+            {
+                "role": "user",
+                "content": (
+                    user_prompt
+                    + "\n\n## Prior reviewer critiques for authoritative escalation\n"
+                    + ("x" * critique_byte_bound)
+                ),
+            },
+        ]
+        exposures.append(
+            model_provider_exposure(
+                review_models[2],
+                escalation_messages,
+                response_model=response_model,
+                provider_attempts=1,
+            )
+        )
+
+    reasoning_effort = get_sn_review_reasoning_effort()
+    escalation_reasoning_effort = get_sn_review_escalation_reasoning_effort()
+    identity_payload = {
+        "id": prepared_item["id"],
+        "models": review_models,
+        "messages": base_messages,
+        "response_schema": response_model.model_json_schema(),
+        "rubric_dims": list(rubric_dims),
+        "disagreement_threshold": disagreement_threshold,
+        "reasoning_effort": reasoning_effort,
+        "escalation_reasoning_effort": escalation_reasoning_effort,
+        "expected_exposures": exposures,
+    }
+    return {
+        **identity_payload,
+        "request_identity": _docs_review_request_identity(identity_payload),
+        "expected_exposure": sum(exposures),
+        "provider_policy_ceiling_is_separate": True,
+        "response_model": response_model,
+        "user_prompt": user_prompt,
+        "system_prompt": system_prompt,
+    }
+
+
+async def admit_docs_review_request(
+    item: dict[str, Any],
+    *,
+    scope_run_id: str,
+    expected_docs_hash: str,
+    expected_review_input_hash: str,
+    tranche_remaining: float,
+    campaign_remaining: float,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Price, admit, and stage one exact docs-review request fail closed."""
+    import asyncio as _asyncio
+    import math
+
+    from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
+
+    request = await prepare_docs_review_request(item)
+    expected_exposure = float(request["expected_exposure"])
+    remainders = (float(tranche_remaining), float(campaign_remaining))
+    if any(not math.isfinite(value) or value < 0 for value in remainders):
+        raise ValueError(
+            "documentation review remainders must be finite and nonnegative"
+        )
+    if expected_exposure > min(remainders):
+        return {
+            "ok": False,
+            "outcome": "insufficient_exposure",
+            "request_identity": request["request_identity"],
+            "expected_exposure": expected_exposure,
+            "tranche_remaining": remainders[0],
+            "campaign_remaining": remainders[1],
+            "provider_policy_ceiling_is_separate": True,
+        }
+    if scope_run_id in _docs_review_admissions:
+        return {
+            "ok": False,
+            "outcome": "scope_already_admitted",
+            "reason": f"scope {scope_run_id!r} already has a priced request",
+        }
+    staged = await _asyncio.to_thread(
+        stage_docs_for_rescore,
+        item["id"],
+        run_id=scope_run_id,
+        dry_run=dry_run,
+        expected_docs_hash=expected_docs_hash,
+        expected_review_input_hash=expected_review_input_hash,
+        request_identity=request["request_identity"],
+    )
+    result = {
+        **staged,
+        "request_identity": request["request_identity"],
+        "expected_exposures": request["expected_exposures"],
+        "expected_exposure": expected_exposure,
+        "provider_policy_ceiling_is_separate": True,
+    }
+    if staged.get("ok") and not dry_run:
+        _docs_review_admissions[scope_run_id] = {
+            "id": item["id"],
+            "request_identity": request["request_identity"],
+            "rollback_receipt": staged["rollback_receipt"],
+        }
+    return result
+
+
+async def _release_or_rollback_docs_review(item: dict[str, Any]) -> None:
+    """Use the exact priced rollback when present, else ordinary claim release."""
+    import asyncio as _asyncio
+
+    from imas_codex.standard_names.graph_ops import (
+        release_review_docs_failed_claims,
+        rollback_docs_rescore_admission,
+    )
+
+    claim_token = item.get("claim_token") or ""
+    if not claim_token:
+        return
+    scope_run_id = item.get("run_id") or ""
+    admission = _docs_review_admissions.get(scope_run_id)
+    if admission is not None and admission.get("id") == item.get("id"):
+        outcome = await _asyncio.to_thread(
+            rollback_docs_rescore_admission,
+            admission["rollback_receipt"],
+            claim_token=claim_token,
+        )
+        if outcome.get("ok"):
+            _docs_review_admissions.pop(scope_run_id, None)
+        else:
+            logger.error(
+                "exact documentation rollback refused for %s: %s",
+                item.get("id"),
+                outcome.get("reason"),
+            )
+        return
+    await _asyncio.to_thread(
+        release_review_docs_failed_claims,
+        sn_ids=[item["id"]],
+        claim_token=claim_token,
+        from_stage="drafted",
+        to_stage="drafted",
+    )
+
+
 async def process_review_docs_batch(
     batch: list[dict[str, Any]],
     mgr: BudgetManager,
@@ -9387,89 +9821,16 @@ async def process_review_docs_batch(
     import asyncio as _asyncio
 
     from imas_codex.discovery.base.llm import acall_llm_structured
-    from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import (
-        get_model,
-        get_sn_review_disagreement_threshold,
-        get_sn_review_docs_models,
-        get_sn_review_escalation_reasoning_effort,
-        get_sn_review_names_models,
-        get_sn_review_reasoning_effort,
-    )
     from imas_codex.standard_names.defaults import (
         DEFAULT_MIN_SCORE,
         DEFAULT_REFINE_ROTATIONS,
     )
     from imas_codex.standard_names.graph_ops import (
         persist_reviewed_docs,
-        release_review_docs_failed_claims,
         update_review_aggregates,
     )
-    from imas_codex.standard_names.models import (
-        StandardNameQualityReviewDocsBatch,
-        StandardNameQualityReviewDocsParentBatch,
-    )
-
-    # ── Resolve docs review chain ──────────────────────────────────────
-    try:
-        review_models = get_sn_review_docs_models()
-    except (ValueError, IndexError):
-        review_models = []
-    if not review_models:
-        try:
-            review_models = get_sn_review_names_models()
-        except (ValueError, IndexError):
-            review_models = []
-    if not review_models:
-        # Refine tier (Sonnet 4.6) — defensive fallback only.
-        review_models = [get_model("sn-refine")]
-
-    try:
-        disagreement_threshold = get_sn_review_disagreement_threshold()
-    except Exception:
-        disagreement_threshold = 0.20
 
     processed = 0
-
-    # ── Derived-parent children for parent-aware docs review ───────────
-    # A derived parent is an abstraction over its children; the docs reviewer
-    # must judge it on positioning + generalisation (does it correctly capture
-    # the common quantity?), NOT as a standalone specific name. Inject the
-    # children (origin='derived' only) so the review_docs_user parent block can
-    # reframe the rubric — otherwise the quorum penalises abstractions for
-    # lacking child-level specifics (observed: parent docs systematically <0.85).
-    parent_children: dict[str, list] = {}
-    try:
-        from imas_codex.graph.client import GraphClient as _GCKids
-        from imas_codex.standard_names.defaults import (
-            DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER as _PH_DESC,
-        )
-
-        def _fetch_parent_children() -> dict[str, list]:
-            with _GCKids() as _gc:
-                rows = _gc.query(
-                    """
-                    MATCH (p:StandardName)
-                    WHERE p.id IN $ids AND p.origin = 'derived'
-                    MATCH (c:StandardName)-[:HAS_PARENT]->(p)
-                    WHERE NOT coalesce(c.name_stage, '') IN ['superseded', 'exhausted', 'contested']
-                    WITH p, c ORDER BY c.id
-                    RETURN p.id AS pid, collect({
-                        name: c.id,
-                        description: CASE WHEN c.description = $ph
-                            THEN null ELSE c.description END,
-                        unit: c.unit,
-                        physics_domain: c.physics_domain
-                    })[..12] AS children
-                    """,
-                    ids=[it["id"] for it in batch],
-                    ph=_PH_DESC,
-                )
-                return {r["pid"]: list(r["children"]) for r in rows}
-
-        parent_children = await _asyncio.to_thread(_fetch_parent_children)
-    except Exception:
-        logger.debug("review_docs: parent children fetch failed", exc_info=True)
 
     for item in batch:
         if stop_event.is_set():
@@ -9477,154 +9838,43 @@ async def process_review_docs_batch(
 
         sn_id = item["id"]
         claim_token = item.get("claim_token") or ""
-        if parent_children.get(sn_id):
-            item["derived_children"] = parent_children[sn_id]
-
-        # ── Build prompt context ───────────────────────────────────────
-        from imas_codex.standard_names.context import fetch_review_neighbours
-
-        try:
-            neighbours = fetch_review_neighbours(item)
-        except Exception:
-            logger.debug(
-                "review_docs: neighbour fetch failed for %s", sn_id, exc_info=True
-            )
-            neighbours = {
-                "vector_neighbours": [],
-                "same_base_neighbours": [],
-                "same_path_neighbours": [],
-            }
-
-        # ── Load scored examples for reviewer calibration ──────────────
-        from imas_codex.graph.client import GraphClient
-        from imas_codex.standard_names.example_loader import load_review_examples
-
-        try:
-            _item_domain = item.get("physics_domain") or ""
-
-            def _load_review_examples(domain: str = _item_domain) -> list:
-                with GraphClient() as _gc:
-                    return load_review_examples(
-                        _gc, physics_domains=[domain], axis="docs"
-                    )
-
-            review_scored_examples = await _asyncio.to_thread(_load_review_examples)
-        except Exception:
-            logger.debug(
-                "review_docs: scored-example load failed for %s", sn_id, exc_info=True
-            )
-            review_scored_examples = []
-
-        # ── DD path context for docs reviewer ──────────────────────────
-        _source_paths = item.get("source_paths") or []
-        if _source_paths:
-            _first_src = (
-                _source_paths[0] if isinstance(_source_paths, list) else _source_paths
-            )
-            if isinstance(_first_src, str):
-                _first_src = strip_dd_prefix(_first_src)
-            if _first_src:
-                try:
-                    from imas_codex.graph.client import GraphClient as _GCDD
-
-                    def _do_dd_ctx(_p=_first_src, _it=item) -> None:
-                        with _GCDD() as _gc:
-                            _enrich_dd_path_context(_gc, _it, _p)
-
-                    await _asyncio.to_thread(_do_dd_ctx)
-                except Exception:
-                    logger.debug(
-                        "review_docs: dd_path_context failed for %s",
-                        sn_id,
-                        exc_info=True,
-                    )
-
-        prompt_context: dict[str, Any] = {
-            "item": item,
-            **neighbours,
-            "review_scored_examples": review_scored_examples,
-        }
-        # Derived parents are reviewed against the PARENT rubric (distinct
-        # dimension set: generalization / positioning / physics_accuracy /
-        # clarity), not the standalone-name docs rubric.
-        _is_parent = bool(item.get("derived_children"))
-        _user_tmpl = (
-            "sn/review_docs_parent_user" if _is_parent else "sn/review_docs_user"
-        )
-        _system_tmpl = (
-            "sn/review_docs_parent_system" if _is_parent else "sn/review_docs_system"
-        )
-        try:
-            user_prompt = render_prompt(_user_tmpl, prompt_context)
-            system_prompt = render_prompt(_system_tmpl, prompt_context)
-        except Exception:
-            logger.debug("review_docs: prompt render failed for %s", sn_id)
-            user_prompt = (
-                f"Review the documentation for standard name: {item.get('id', sn_id)}\n"
-                f"Description: {item.get('description', '')}\n"
-                f"Documentation: {item.get('documentation', '')}"
-            )
-            system_prompt = (
-                "You are a quality reviewer for IMAS standard name "
-                "documentation in fusion plasma physics."
-            )
-
-        # Structural authority fixes a derived parent's name, not the quality
-        # of its prose. Parent-aware docs therefore use the complete configured
-        # reviewer chain, with their distinct rubric supplying the abstraction
-        # context instead of reducing the review authority.
-        _item_review_models = review_models
         lease = None
-        _response_model = (
-            StandardNameQualityReviewDocsParentBatch
-            if _is_parent
-            else StandardNameQualityReviewDocsBatch
-        )
-        _rubric_dims = (
-            ("generalization", "positioning", "physics_accuracy", "clarity")
-            if _is_parent
-            else (
-                "description_quality",
-                "documentation_quality",
-                "completeness",
-                "physics_accuracy",
-            )
-        )
 
         try:
+            request = await prepare_docs_review_request(item)
+            scope_run_id = item.get("run_id") or ""
+            admission = _docs_review_admissions.get(scope_run_id)
+            if admission is not None and (
+                admission.get("id") != sn_id
+                or admission.get("request_identity") != request["request_identity"]
+            ):
+                logger.error(
+                    "review_docs request identity drifted for %s before dispatch",
+                    sn_id,
+                )
+                await _release_or_rollback_docs_review(item)
+                continue
+
             quorum = await _run_rd_quorum_cycles(
                 sn_id=sn_id,
                 review_axis="docs",
-                response_model=_response_model,
-                user_prompt=user_prompt,
-                system_prompt=system_prompt,
-                models=_item_review_models,
-                disagreement_threshold=disagreement_threshold,
-                rubric_dims=_rubric_dims,
+                response_model=request["response_model"],
+                user_prompt=request["user_prompt"],
+                system_prompt=request["system_prompt"],
+                models=request["models"],
+                disagreement_threshold=request["disagreement_threshold"],
+                rubric_dims=tuple(request["rubric_dims"]),
                 lease=lease,
                 budget_manager=mgr,
                 phase="review_docs",
                 acall_llm_structured=acall_llm_structured,
-                reasoning_effort=get_sn_review_reasoning_effort(),
-                escalation_reasoning_effort=get_sn_review_escalation_reasoning_effort(),
+                reasoning_effort=request["reasoning_effort"],
+                escalation_reasoning_effort=request["escalation_reasoning_effort"],
                 run_id=mgr.run_id,
             )
 
             if quorum is None:
-                if claim_token:
-                    try:
-                        await _asyncio.to_thread(
-                            release_review_docs_failed_claims,
-                            sn_ids=[sn_id],
-                            claim_token=claim_token,
-                            from_stage="drafted",
-                            to_stage="drafted",
-                        )
-                    except Exception:
-                        logger.debug(
-                            "release_review_docs_failed_claims also failed for %s",
-                            sn_id,
-                        )
+                await _release_or_rollback_docs_review(item)
                 continue
 
             from imas_codex.standard_names.graph_ops import write_reviews
@@ -9652,7 +9902,7 @@ async def process_review_docs_batch(
                 run_id=mgr.run_id,
                 skip_review_node=True,
                 resolution_method=quorum["resolution_method"],
-                reviewer_chain_size=len(_item_review_models),
+                reviewer_chain_size=len(request["models"]),
             )
             if new_stage:
                 source_versions = _review_dd_source_bindings(item)
@@ -9674,6 +9924,8 @@ async def process_review_docs_batch(
 
             if new_stage:
                 processed += 1
+                if admission is not None:
+                    _docs_review_admissions.pop(scope_run_id, None)
                 _comment_log = (quorum["winning_comments"] or "")[:80]
                 logger.info(
                     "review_docs: %s → %s (score=%.3f, cycles=%d, method=%s) %s",
@@ -9703,21 +9955,10 @@ async def process_review_docs_batch(
 
         except Exception:
             logger.exception("review_docs failed for %s", sn_id)
-            token = item.get("claim_token") or ""
-            if token:
-                try:
-                    await _asyncio.to_thread(
-                        release_review_docs_failed_claims,
-                        sn_ids=[sn_id],
-                        claim_token=token,
-                        from_stage="drafted",
-                        to_stage="drafted",
-                    )
-                except Exception:
-                    logger.debug(
-                        "release_review_docs_failed_claims also failed for %s",
-                        sn_id,
-                    )
+            try:
+                await _release_or_rollback_docs_review(item)
+            except Exception:
+                logger.debug("documentation claim cleanup also failed for %s", sn_id)
         finally:
             if lease is not None:
                 try:

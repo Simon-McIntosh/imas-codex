@@ -315,6 +315,42 @@ class TestScopeRunIdFiltersClaims:
         assert "sn.run_id = $scope_run_id" in seed_cypher
         assert "sn.run_id = $scope_run_id" in expand_cypher
 
+    def test_exact_docs_review_claim_forwards_scope_to_seed_and_expansion(self):
+        """An admitted docs row cannot expand into an unrelated drafted row."""
+        from imas_codex.standard_names.graph_ops import claim_review_docs_batch
+
+        captured: dict = {}
+
+        def _claim(**kwargs):
+            captured.update(kwargs)
+            return [
+                {
+                    "id": "admitted_name",
+                    "docs_stage": "drafted",
+                    "run_id": "exact-docs-scope",
+                    "claim_token": "claim-token",
+                }
+            ]
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops._claim_sn_atomic",
+                side_effect=_claim,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._verify_docs_claim_winners",
+                side_effect=lambda items, **_kwargs: items,
+            ),
+        ):
+            items = claim_review_docs_batch(
+                batch_size=50,
+                scope_run_id="exact-docs-scope",
+            )
+
+        assert [item["id"] for item in items] == ["admitted_name"]
+        assert captured["scope_run_id"] == "exact-docs-scope"
+        assert "sn.run_id AS run_id" in captured["extra_return_fields"]
+
 
 # ---------------------------------------------------------------------------
 # 3. test_scope_run_id_filters_generate_name_claims

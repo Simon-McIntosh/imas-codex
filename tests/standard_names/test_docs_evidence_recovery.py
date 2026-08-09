@@ -12,6 +12,7 @@ from imas_codex.standard_names.graph_ops import (
     DocsEvidenceRecoveryConflict,
     build_docs_evidence_recovery_budget,
     build_docs_evidence_recovery_manifest,
+    rollback_docs_rescore_admission,
     stage_docs_for_rescore,
 )
 from imas_codex.standard_names.review.audits import compute_review_input_hash
@@ -193,6 +194,21 @@ class _RescoreTransaction:
                     "documentation": properties["documentation"],
                 }
             ]
+        if "sn.run_id = $scope_run_id" in cypher and "$rollback_receipt_id" in cypher:
+            eligible = (
+                properties["id"] == params["id"]
+                and properties["run_id"] == params["scope_run_id"]
+                and properties["docs_stage"] == "drafted"
+                and properties.get("claim_token") == params["claim_token"]
+            )
+            if not eligible:
+                return []
+            for field, value in params["prior_authority"].items():
+                properties[field] = copy.deepcopy(value)
+            properties["claimed_at"] = None
+            properties["claim_token"] = None
+            self.write_count += 1
+            return [{"id": properties["id"]}]
         raise AssertionError("unexpected exact rescore query")
 
     def commit(self) -> None:
@@ -354,6 +370,49 @@ def test_manifest_rescore_input_executes_content_bound_staging() -> None:
         graph.transaction.state["standard_name"]["documentation"]
         == (state["standard_name"]["documentation"])
     )
+
+
+def test_priced_staging_receipt_drives_exact_docs_axis_rollback() -> None:
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    graph = _RescoreGraph(state)
+
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        staged = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"],
+            run_id="exact-docs-run",
+            request_identity="a" * 64,
+        )
+        graph.transaction.state["standard_name"]["claim_token"] = "claim-token"
+        graph.transaction.state["standard_name"]["claimed_at"] = "now"
+        graph.transaction.closed = False
+        rolled_back = rollback_docs_rescore_admission(
+            staged["rollback_receipt"], claim_token="claim-token"
+        )
+
+    assert rolled_back["ok"] is True
+    after = graph.transaction.state["standard_name"]
+    before = state["standard_name"]
+    for field in (
+        "docs_stage",
+        "reviewer_score_docs",
+        "reviewer_scores_docs",
+        "reviewer_comments_docs",
+        "reviewer_comments_per_dim_docs",
+        "reviewer_model_docs",
+        "docs_review_resolution_method",
+        "docs_review_quorum_shortfall",
+        "docs_review_quorum_shortfall_at",
+        "reviewed_docs_at",
+        "run_id",
+    ):
+        assert after.get(field) == before.get(field)
+    assert after["description"] == before["description"]
+    assert after["documentation"] == before["documentation"]
+    assert after["docs_chain_length"] == before["docs_chain_length"]
+    assert graph.transaction.state["reviews"] == state["reviews"]
+    assert after["claim_token"] is None
+    assert after["claimed_at"] is None
 
 
 @pytest.mark.parametrize("drift_field", ["description", "documentation", "kind"])
