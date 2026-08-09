@@ -630,6 +630,7 @@ class TestBenchmarkRunner:
                     source_id="equilibrium/time_slice/profiles_1d/q",
                     base_token="safety_factor",
                     base_kind="quantity",
+                    description="Safety factor on a magnetic flux surface",
                     reason="Safety factor profile",
                 ),
                 StandardNameCandidate(
@@ -637,6 +638,7 @@ class TestBenchmarkRunner:
                     base_token="temperature",
                     base_kind="quantity",
                     qualifiers=["electron"],
+                    description="Electron temperature in the plasma core",
                     reason="Electron temperature",
                 ),
             ],
@@ -713,6 +715,7 @@ class TestBenchmarkRunner:
                     source_id="equilibrium/time_slice/profiles_1d/elongation",
                     base_token="elongation",
                     base_kind="quantity",
+                    description="Elongation of a magnetic flux surface",
                     reason="Plasma elongation",
                 ),
             ],

@@ -2,21 +2,36 @@
 
 from __future__ import annotations
 
+import pytest
+from pydantic import ValidationError
+
 from imas_codex.standard_names.models import StandardNameCandidate
 
 
 class TestStandardNameCandidateDescription:
     """Verify the description field on StandardNameCandidate."""
 
-    def test_description_default_empty(self) -> None:
-        """Description defaults to empty string when not provided."""
-        c = StandardNameCandidate(
-            source_id="eq/time_slice/profiles_1d/psi",
-            base_token="magnetic_flux",
-            base_kind="quantity",
-            reason="test",
-        )
-        assert c.description == ""
+    def test_description_is_required(self) -> None:
+        """A candidate without physical meaning prose is invalid."""
+        with pytest.raises(ValidationError, match="description"):
+            StandardNameCandidate(
+                source_id="eq/time_slice/profiles_1d/psi",
+                base_token="magnetic_flux",
+                base_kind="quantity",
+                reason="test",
+            )
+
+    @pytest.mark.parametrize("description", ["", "  \t\n"])
+    def test_description_rejects_blank_text(self, description: str) -> None:
+        """Empty and whitespace-only descriptions fail the model contract."""
+        with pytest.raises(ValidationError, match="description"):
+            StandardNameCandidate(
+                source_id="eq/time_slice/profiles_1d/psi",
+                base_token="magnetic_flux",
+                base_kind="quantity",
+                description=description,
+                reason="test",
+            )
 
     def test_description_persists(self) -> None:
         """Description is stored when provided."""

@@ -510,6 +510,11 @@ def _claimed_source_ids(batch: list[dict[str, Any]]) -> set[str]:
     }
 
 
+def _strip_response_source_id(source_id: Any) -> Any:
+    """Remove only surrounding whitespace from a model-proposed source id."""
+    return source_id.strip() if isinstance(source_id, str) else source_id
+
+
 def _review_dd_source_bindings(item: dict[str, Any]) -> dict[str, str | None]:
     """Return exact DD paths and versions from authoritative source edges."""
     bindings: dict[str, str | None] = {}
@@ -538,11 +543,19 @@ def _sanitize_dd_gap_evidence(
     rejected: set[str] = set()
     for report in evidence:
         if isinstance(report, dict):
-            path = report.get("path")
-            reference_path = report.get("reference_path")
+            path = _strip_response_source_id(report.get("path"))
+            reference_path = _strip_response_source_id(report.get("reference_path"))
+            report["path"] = path
+            if "reference_path" in report:
+                report["reference_path"] = reference_path
         else:
-            path = getattr(report, "path", None)
-            reference_path = getattr(report, "reference_path", None)
+            path = _strip_response_source_id(getattr(report, "path", None))
+            reference_path = _strip_response_source_id(
+                getattr(report, "reference_path", None)
+            )
+            report.path = path
+            if hasattr(report, "reference_path"):
+                report.reference_path = reference_path
         report_paths = {value for value in (path, reference_path) if value}
         if path not in allowed_source_ids or not report_paths.issubset(
             allowed_source_ids
@@ -661,6 +674,10 @@ def _sanitize_compose_result_sources(
 
     kept_candidates = []
     for candidate in result.candidates:
+        candidate.source_id = _strip_response_source_id(candidate.source_id)
+        candidate.dd_paths = [
+            _strip_response_source_id(path) for path in candidate.dd_paths
+        ]
         if candidate.source_id not in allowed_source_ids:
             rejected.add(candidate.source_id)
             continue
@@ -674,17 +691,22 @@ def _sanitize_compose_result_sources(
 
     kept_attachments = []
     for attachment in result.attachments:
+        attachment.source_id = _strip_response_source_id(attachment.source_id)
         if attachment.source_id in allowed_source_ids:
             kept_attachments.append(attachment)
         else:
             rejected.add(attachment.source_id)
     result.attachments = kept_attachments
 
+    result.skipped = [
+        _strip_response_source_id(source_id) for source_id in result.skipped
+    ]
     rejected.update(set(result.skipped) - allowed_source_ids)
     result.skipped = [sid for sid in result.skipped if sid in allowed_source_ids]
 
     kept_gaps = []
     for gap in result.vocab_gaps:
+        gap.source_id = _strip_response_source_id(gap.source_id)
         if gap.source_id in allowed_source_ids:
             kept_gaps.append(gap)
         else:
@@ -764,6 +786,97 @@ def _filter_persist_candidates_to_claimed_sources(
             rejected,
         )
     return kept
+
+
+def _persist_description_checked_candidates(
+    candidates: list[dict[str, Any]],
+    *,
+    source_type: str,
+    phase: str,
+    compose_model: str,
+    dd_version: str | None,
+    cocos_version: int | None,
+    run_id: str | None,
+) -> int | list[str]:
+    """Persist only candidates with prose, releasing rejected claims to retry.
+
+    The structured response contract requires a non-empty description, but
+    callers and test doubles can still supply unvalidated candidate-shaped
+    objects. This final boundary prevents those objects from creating a drafted name
+    before releasing each exact source claim through the canonical failure
+    path. A source with any descriptionless proposal is entirely deferred so
+    duplicate proposals cannot race the release with a richer sibling.
+    """
+    from imas_codex.standard_names.graph_ops import (
+        persist_generated_name_batch,
+        release_generate_name_failed_claims,
+    )
+
+    rejected_source_ids = {
+        candidate.get("source_id")
+        for candidate in candidates
+        if not isinstance(candidate.get("description"), str)
+        or not candidate["description"].strip()
+    }
+    rejected_source_ids.discard(None)
+    rejected_count = sum(
+        1
+        for candidate in candidates
+        if not isinstance(candidate.get("description"), str)
+        or not candidate["description"].strip()
+    )
+
+    releases_by_token: dict[str, set[str]] = {}
+    for candidate in candidates:
+        source_id = candidate.get("source_id")
+        if source_id not in rejected_source_ids:
+            continue
+        claim_token = candidate.get("source_claim_token")
+        if not isinstance(source_id, str) or not source_id or not claim_token:
+            continue
+        source_node_id = (
+            source_id
+            if source_type == "dd" and source_id.startswith("dd:")
+            else encode_source_path(source_type, source_id)
+        )
+        releases_by_token.setdefault(str(claim_token), set()).add(source_node_id)
+
+    released = 0
+    release_expected = sum(len(ids) for ids in releases_by_token.values())
+    for claim_token, source_ids in sorted(releases_by_token.items()):
+        released += release_generate_name_failed_claims(
+            source_ids=sorted(source_ids),
+            claim_token=claim_token,
+        )
+
+    if rejected_count:
+        logger.warning(
+            "Pool %s: rejected %d candidate(s) with empty descriptions; "
+            "released %d/%d exact source claim(s) for retry",
+            phase,
+            rejected_count,
+            released,
+            release_expected,
+        )
+
+    eligible = [
+        candidate
+        for candidate in candidates
+        if candidate.get("source_id") not in rejected_source_ids
+        and isinstance(candidate.get("description"), str)
+        and candidate["description"].strip()
+    ]
+    if not eligible:
+        return []
+
+    return persist_generated_name_batch(
+        eligible,
+        compose_model=compose_model,
+        dd_version=dd_version,
+        cocos_version=cocos_version,
+        run_id=run_id,
+        return_winner_ids=True,
+    )
 
 
 def _mark_source_prevalidation_failed(
@@ -6176,16 +6289,15 @@ async def compose_batch(
 
         # ── Persist ────────────────────────────────────────────────────
         if candidates:
-            from imas_codex.standard_names.graph_ops import persist_generated_name_batch
-
             persisted = await asyncio.to_thread(
-                persist_generated_name_batch,
+                _persist_description_checked_candidates,
                 candidates,
+                source_type=source_kind,
+                phase=phase_tag,
                 compose_model=model,
                 dd_version=batch[0].get("dd_version"),
                 cocos_version=batch[0].get("cocos_version"),
                 run_id=mgr.run_id,
-                return_winner_ids=True,
             )
             # Only the exact ID-returning persistence contract proves which
             # source claims won the CAS. A legacy count cannot authorize a
