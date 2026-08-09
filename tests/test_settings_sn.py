@@ -56,6 +56,17 @@ def test_retry_k_expansion_default():
     assert get_sn_retry_k_expansion() == 12
 
 
+def test_compose_seat_uses_ambix_local_route():
+    """Production composition resolves only to the authenticated Ambix route."""
+    from imas_codex.settings import get_model_config
+
+    assert get_model_config("sn-compose") == {
+        "model": "hosted_vllm/deepseek-v4-flash",
+        "api_base": "http://98dci4-gpu-0003:18800/v1",
+        "api_key_env": "AMBIX_API_KEY",
+    }
+
+
 # ── Environment variable overrides ──────────────────────────────────────────
 
 

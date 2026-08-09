@@ -1,10 +1,11 @@
-"""Every paid Standard Names launch seat must be affordable to reserve.
+"""Every Standard Names launch seat must reserve its actual route exposure.
 
 The pipeline reserves a request's expected billable cost before it reaches a
 provider.  That estimate must use a proven route price rather than the separate
 provider policy ceiling, or a run can fail to fund a single batch despite
 having ample budget for its actual cost.  These tests price the configured
-compose seat and three default name-review seats through the real formula.
+local compose seat and three default paid name-review seats through the real
+formula.
 
 The ceiling below is a calibration gate, not a physical bound: it is set well
 under a realistic per-run cost limit so a pricing change that inflates
@@ -21,7 +22,7 @@ from imas_codex.settings import (
     get_openrouter_pricing,
     get_sn_review_names_models,
 )
-from imas_codex.standard_names.budget import model_provider_exposure
+from imas_codex.standard_names.budget import EPSILON, model_provider_exposure
 
 #: Upper bound for one representative attempt on every launch seat.
 MAX_ATTEMPT_EXPOSURE_USD = 0.50
@@ -41,9 +42,9 @@ class _SeatResponse(BaseModel):
     answer: str
 
 
-def _configured_seats() -> list[tuple[str, str]]:
-    """Return the paid seats used to compose and review a name batch."""
-    return [("sn-compose", get_model("sn-compose"))] + [
+def _configured_paid_seats() -> list[tuple[str, str]]:
+    """Return the paid reviewer seats used after local composition."""
+    return [
         (f"sn-review.names[{index}]", model)
         for index, model in enumerate(get_sn_review_names_models())
     ]
@@ -61,7 +62,7 @@ def _assert_proven_pricing(seat: str, model: str) -> dict[str, object]:
     return pricing
 
 
-@pytest.mark.parametrize("seat,model", _configured_seats(), ids=lambda v: str(v))
+@pytest.mark.parametrize("seat,model", _configured_paid_seats(), ids=lambda v: str(v))
 def test_launch_seat_has_proven_catalog_pricing(seat: str, model: str) -> None:
     """Every paid launch route has finite rates and official provenance."""
     _assert_proven_pricing(seat, model)
@@ -75,7 +76,7 @@ def test_escalation_seat_has_proven_catalog_pricing() -> None:
     assert pricing["request"] == 0.0
 
 
-@pytest.mark.parametrize("seat,model", _configured_seats(), ids=lambda v: str(v))
+@pytest.mark.parametrize("seat,model", _configured_paid_seats(), ids=lambda v: str(v))
 def test_launch_seat_reserves_an_affordable_attempt(seat: str, model: str) -> None:
     """One attempt on a configured seat must price finite and affordable."""
     exposure = model_provider_exposure(
@@ -105,11 +106,22 @@ def test_escalation_seat_reserves_an_affordable_attempt() -> None:
     assert 0 < exposure <= ESCALATION_MAX_ATTEMPT_EXPOSURE_USD
 
 
+def test_local_compose_reserves_no_provider_exposure() -> None:
+    """The configured local route must not reserve an OpenRouter attempt."""
+    exposure = model_provider_exposure(
+        get_model("sn-compose"),
+        _RENDERED_REQUEST,
+        response_model=_SeatResponse,
+        provider_attempts=1,
+    )
+    assert exposure == EPSILON
+
+
 def test_seat_enumeration_is_not_silently_empty() -> None:
-    """The gate covers one compose route and the complete three-seat quorum."""
-    seats = _configured_seats()
-    assert len(seats) == 4, f"expected compose plus three reviewers, got {seats}"
-    assert len({model for _, model in seats}) == 4
+    """The paid gate covers the complete three-seat reviewer quorum."""
+    seats = _configured_paid_seats()
+    assert len(seats) == 3, f"expected three paid reviewers, got {seats}"
+    assert len({model for _, model in seats}) == 3
 
 
 def test_exposure_scales_with_the_rendered_request_not_the_context_window() -> None:
