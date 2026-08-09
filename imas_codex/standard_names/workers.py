@@ -510,6 +510,11 @@ def _claimed_source_ids(batch: list[dict[str, Any]]) -> set[str]:
     }
 
 
+def _strip_response_source_id(source_id: Any) -> Any:
+    """Remove only surrounding whitespace from a model-proposed source id."""
+    return source_id.strip() if isinstance(source_id, str) else source_id
+
+
 def _review_dd_source_bindings(item: dict[str, Any]) -> dict[str, str | None]:
     """Return exact DD paths and versions from authoritative source edges."""
     bindings: dict[str, str | None] = {}
@@ -538,11 +543,19 @@ def _sanitize_dd_gap_evidence(
     rejected: set[str] = set()
     for report in evidence:
         if isinstance(report, dict):
-            path = report.get("path")
-            reference_path = report.get("reference_path")
+            path = _strip_response_source_id(report.get("path"))
+            reference_path = _strip_response_source_id(report.get("reference_path"))
+            report["path"] = path
+            if "reference_path" in report:
+                report["reference_path"] = reference_path
         else:
-            path = getattr(report, "path", None)
-            reference_path = getattr(report, "reference_path", None)
+            path = _strip_response_source_id(getattr(report, "path", None))
+            reference_path = _strip_response_source_id(
+                getattr(report, "reference_path", None)
+            )
+            report.path = path
+            if hasattr(report, "reference_path"):
+                report.reference_path = reference_path
         report_paths = {value for value in (path, reference_path) if value}
         if path not in allowed_source_ids or not report_paths.issubset(
             allowed_source_ids
@@ -661,6 +674,10 @@ def _sanitize_compose_result_sources(
 
     kept_candidates = []
     for candidate in result.candidates:
+        candidate.source_id = _strip_response_source_id(candidate.source_id)
+        candidate.dd_paths = [
+            _strip_response_source_id(path) for path in candidate.dd_paths
+        ]
         if candidate.source_id not in allowed_source_ids:
             rejected.add(candidate.source_id)
             continue
@@ -674,17 +691,22 @@ def _sanitize_compose_result_sources(
 
     kept_attachments = []
     for attachment in result.attachments:
+        attachment.source_id = _strip_response_source_id(attachment.source_id)
         if attachment.source_id in allowed_source_ids:
             kept_attachments.append(attachment)
         else:
             rejected.add(attachment.source_id)
     result.attachments = kept_attachments
 
+    result.skipped = [
+        _strip_response_source_id(source_id) for source_id in result.skipped
+    ]
     rejected.update(set(result.skipped) - allowed_source_ids)
     result.skipped = [sid for sid in result.skipped if sid in allowed_source_ids]
 
     kept_gaps = []
     for gap in result.vocab_gaps:
+        gap.source_id = _strip_response_source_id(gap.source_id)
         if gap.source_id in allowed_source_ids:
             kept_gaps.append(gap)
         else:
