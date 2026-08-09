@@ -774,6 +774,13 @@ request = 0.0
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5"
 verified-at = "2026-08-09"
 
+[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-fable-5"]
+prompt = 10.0
+completion = 50.0
+request = 0.0
+source = "https://openrouter.ai/api/v1/model/anthropic/claude-fable-5"
+verified-at = "2026-08-09"
+
 [tool.imas-codex.docs-server]
 # Host-wide HTML docs server (~/docs-server/serve.py): fronts every
 # project's docs/plans-html/ under a single URL prefix and exposes a

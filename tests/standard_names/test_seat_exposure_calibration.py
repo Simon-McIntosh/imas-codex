@@ -26,6 +26,9 @@ from imas_codex.standard_names.budget import model_provider_exposure
 #: Upper bound for one representative attempt on every launch seat.
 MAX_ATTEMPT_EXPOSURE_USD = 0.50
 
+#: Upper bound for the stronger model used only after the refine chain is spent.
+ESCALATION_MAX_ATTEMPT_EXPOSURE_USD = 2.00
+
 #: A rendered Standard Names request is a few tens of kilobytes of prompt.
 #: Oversized on purpose so the gate measures a realistic worst case.
 _RENDERED_REQUEST = [
@@ -46,9 +49,8 @@ def _configured_seats() -> list[tuple[str, str]]:
     ]
 
 
-@pytest.mark.parametrize("seat,model", _configured_seats(), ids=lambda v: str(v))
-def test_launch_seat_has_proven_catalog_pricing(seat: str, model: str) -> None:
-    """Every paid launch route has finite rates and official provenance."""
+def _assert_proven_pricing(seat: str, model: str) -> dict[str, object]:
+    """Require finite text rates with official per-route provenance."""
     pricing = get_openrouter_pricing(model)
     assert pricing, f"{seat} ({model}) has no catalog entry"
     assert pricing["prompt"] > 0
@@ -56,6 +58,21 @@ def test_launch_seat_has_proven_catalog_pricing(seat: str, model: str) -> None:
     assert pricing["request"] >= 0
     assert pricing["source"].startswith("https://openrouter.ai/api/v1/model/")
     assert pricing["verified_at"]
+    return pricing
+
+
+@pytest.mark.parametrize("seat,model", _configured_seats(), ids=lambda v: str(v))
+def test_launch_seat_has_proven_catalog_pricing(seat: str, model: str) -> None:
+    """Every paid launch route has finite rates and official provenance."""
+    _assert_proven_pricing(seat, model)
+
+
+def test_escalation_seat_has_proven_catalog_pricing() -> None:
+    """The paid final refinement route has its published text rates."""
+    pricing = _assert_proven_pricing("sn-escalation", get_model("sn-escalation"))
+    assert pricing["prompt"] == 10.0
+    assert pricing["completion"] == 50.0
+    assert pricing["request"] == 0.0
 
 
 @pytest.mark.parametrize("seat,model", _configured_seats(), ids=lambda v: str(v))
@@ -74,6 +91,18 @@ def test_launch_seat_reserves_an_affordable_attempt(seat: str, model: str) -> No
         "ceiling — a run would exhaust its cost limit on a handful of "
         "concurrent requests and stall without spending it"
     )
+
+
+def test_escalation_seat_reserves_an_affordable_attempt() -> None:
+    """The stronger final refinement route still admits one expected attempt."""
+    model = get_model("sn-escalation")
+    exposure = model_provider_exposure(
+        model,
+        _RENDERED_REQUEST,
+        response_model=_SeatResponse,
+        provider_attempts=1,
+    )
+    assert 0 < exposure <= ESCALATION_MAX_ATTEMPT_EXPOSURE_USD
 
 
 def test_seat_enumeration_is_not_silently_empty() -> None:
