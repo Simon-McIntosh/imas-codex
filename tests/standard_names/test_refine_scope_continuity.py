@@ -137,7 +137,10 @@ async def test_focused_scope_survives_multiple_refine_rotations() -> None:
         manager = _manager(audit)
         assert (
             await process_refine_name_batch(
-                [_item("radial_coordinate", scope)], manager, asyncio.Event()
+                [_item("radial_coordinate", scope)],
+                manager,
+                asyncio.Event(),
+                scope_run_id=scope,
             )
             == 1
         )
@@ -147,6 +150,7 @@ async def test_focused_scope_survives_multiple_refine_rotations() -> None:
                 [_item("radial_outline", successor_scope, chain_length=1)],
                 manager,
                 asyncio.Event(),
+                scope_run_id=scope,
             )
             == 1
         )
@@ -165,6 +169,7 @@ async def test_focused_refine_keeps_audit_counter_separate() -> None:
             [_item("radial_coordinate", "source-focus-scope")],
             manager,
             asyncio.Event(),
+            scope_run_id="source-focus-scope",
         )
 
     assert calls[0]["run_id"] is None
@@ -189,6 +194,48 @@ async def test_unscoped_refine_retains_audit_run_behavior() -> None:
 
 
 @pytest.mark.asyncio
+async def test_unscoped_refine_ignores_one_historical_scope() -> None:
+    from imas_codex.standard_names.workers import process_refine_name_batch
+
+    calls: list[dict] = []
+    manager = _manager("audit-run")
+    with _worker_dependencies(["radial_outline"], calls) as bump:
+        await process_refine_name_batch(
+            [_item("radial_coordinate", "historical-run")],
+            manager,
+            asyncio.Event(),
+        )
+
+    assert calls[0]["run_id"] == "audit-run"
+    bump.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_unscoped_refine_ignores_mixed_historical_scopes() -> None:
+    from imas_codex.standard_names.workers import process_refine_name_batch
+
+    calls: list[dict] = []
+    manager = _manager("audit-run")
+    items = [
+        _item("radial_coordinate", "historical-a"),
+        _item("vertical_coordinate", "historical-b"),
+        _item("toroidal_coordinate", None),
+    ]
+    with _worker_dependencies(
+        ["radial_outline", "vertical_outline", "toroidal_outline"], calls
+    ) as bump:
+        processed = await process_refine_name_batch(
+            items,
+            manager,
+            asyncio.Event(),
+        )
+
+    assert processed == 3
+    assert [call["run_id"] for call in calls] == ["audit-run"] * 3
+    bump.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
     from imas_codex.standard_names.workers import process_refine_name_batch
 
@@ -204,7 +251,10 @@ async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
         ) as resubmit,
     ):
         processed = await process_refine_name_batch(
-            [item], _manager("audit-run"), asyncio.Event()
+            [item],
+            _manager("audit-run"),
+            asyncio.Event(),
+            scope_run_id=scope,
         )
 
     assert processed == 0
@@ -214,16 +264,17 @@ async def test_pinned_rename_restage_keeps_existing_focused_scope() -> None:
 
 
 @pytest.mark.parametrize(
-    "items",
+    "scope_metadata",
     [
-        [_item("a", "source-focus-scope"), _item("b", "other-scope")],
-        [_item("a", "source-focus-scope"), _item("b", None)],
-        [_item("a", "   ")],
+        "other-scope",
+        None,
+        "   ",
+        pytest.param("missing", id="missing"),
     ],
 )
 @pytest.mark.asyncio
 async def test_inconsistent_focused_metadata_refuses_before_persistence(
-    items: list[dict],
+    scope_metadata: str | None,
 ) -> None:
     from imas_codex.standard_names.workers import (
         RefineScopeContinuityError,
@@ -231,12 +282,50 @@ async def test_inconsistent_focused_metadata_refuses_before_persistence(
     )
 
     calls: list[dict] = []
+    item = _item("radial_coordinate", scope_metadata)
+    if scope_metadata == "missing":
+        item.pop("scope_run_id")
     with _worker_dependencies(["unused"], calls):
         with pytest.raises(RefineScopeContinuityError):
             await process_refine_name_batch(
-                items, _manager("audit-run"), asyncio.Event()
+                [item],
+                _manager("audit-run"),
+                asyncio.Event(),
+                scope_run_id="source-focus-scope",
             )
     assert calls == []
+
+
+@pytest.mark.asyncio
+async def test_pool_adapter_passes_explicit_refine_scope() -> None:
+    from imas_codex.standard_names import loop
+
+    captured: dict = {}
+
+    async def _process(_items, _manager, _stop_event, **kwargs):
+        captured.update(kwargs)
+        return 1
+
+    with (
+        patch(
+            "imas_codex.standard_names.workers.process_refine_name_batch",
+            side_effect=_process,
+        ),
+        patch("imas_codex.settings.get_pool_replicas", return_value=1),
+    ):
+        specs = loop._build_pool_specs(
+            _manager("audit-run"),
+            asyncio.Event(),
+            scope_run_id="source-focus-scope",
+            scope_size_hint=1,
+            only_pool="refine_name",
+        )
+        processed = await specs[0].process(
+            {"items": [_item("radial_coordinate", "source-focus-scope")]}
+        )
+
+    assert processed == 1
+    assert captured["scope_run_id"] == "source-focus-scope"
 
 
 def test_atomic_claim_returns_canonical_scope_identity() -> None:
@@ -296,6 +385,7 @@ async def test_focused_successor_remains_claimable_by_same_scope() -> None:
             [_item("radial_coordinate", scope)],
             _manager("audit-run"),
             asyncio.Event(),
+            scope_run_id=scope,
         )
 
     successor_scope = calls[0]["run_id"] or scope

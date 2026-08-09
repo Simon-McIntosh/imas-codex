@@ -6436,48 +6436,40 @@ class RefineScopeContinuityError(RuntimeError):
     """A refine batch cannot prove one coherent successor scope."""
 
 
-def _refine_batch_scope_id(batch: list[dict[str, Any]]) -> str | None:
-    """Return the one focused scope carried by the atomic claim, if any.
+def _refine_batch_scope_id(
+    batch: list[dict[str, Any]], scope_run_id: str | None
+) -> str | None:
+    """Validate and return the invocation's explicit focused scope, if any.
 
     ``BudgetManager.run_id`` identifies the audit run that pays for and counts
-    the work.  It is not the graph scope selected by ``--focus``.  The claim
-    read-back carries the predecessor's durable ``StandardName.run_id`` under
-    ``scope_run_id`` so a successor can remain visible to the same focused
-    invocation across every refine rotation.
+    the work. It is not the graph scope selected by ``--focus``. Only an
+    explicit invocation scope activates focused continuity; durable run IDs on
+    rows in an ordinary unscoped backlog are historical provenance and do not
+    classify the invocation.
 
-    An ordinary unscoped batch carries only null values.  A mixture of scoped
-    and unscoped rows, distinct scopes, or a blank scope cannot have arisen
-    from one coherent atomic focused claim, so refinement refuses before any
-    model call or persistence.
+    In focused mode, the atomic claim read-back must prove that every
+    predecessor carries the exact requested scope. Missing, blank, or
+    mismatched claim metadata refuses before any model call or persistence.
     """
-    scope_ids: set[str] = set()
-    unscoped_count = 0
-    for item in batch:
-        raw_scope = item.get("scope_run_id")
-        if raw_scope is None:
-            unscoped_count += 1
-            continue
-        if not isinstance(raw_scope, str) or not raw_scope.strip():
-            raise RefineScopeContinuityError(
-                f"refine claim for {item.get('id')!r} carries a blank scope identity"
-            )
-        if raw_scope != raw_scope.strip():
-            raise RefineScopeContinuityError(
-                f"refine claim for {item.get('id')!r} carries a non-canonical "
-                "scope identity"
-            )
-        scope_ids.add(raw_scope)
+    if scope_run_id is None:
+        return None
+    if (
+        not isinstance(scope_run_id, str)
+        or not scope_run_id.strip()
+        or scope_run_id != scope_run_id.strip()
+    ):
+        raise RefineScopeContinuityError(
+            "refine invocation carries a blank or non-canonical scope identity"
+        )
 
-    if len(scope_ids) > 1:
-        raise RefineScopeContinuityError(
-            "refine batch carries multiple focused scope identities: "
-            + ", ".join(sorted(scope_ids))
-        )
-    if scope_ids and unscoped_count:
-        raise RefineScopeContinuityError(
-            "refine batch mixes focused and unscoped claim metadata"
-        )
-    return next(iter(scope_ids), None)
+    for item in batch:
+        claimed_scope = item.get("scope_run_id")
+        if claimed_scope != scope_run_id:
+            raise RefineScopeContinuityError(
+                f"refine claim for {item.get('id')!r} carries scope "
+                f"{claimed_scope!r}, expected {scope_run_id!r}"
+            )
+    return scope_run_id
 
 
 def _compose_refined_candidate_name(result_obj: Any) -> str:
@@ -6523,6 +6515,7 @@ async def process_refine_name_batch(
     stop_event: asyncio.Event,
     *,
     on_event: Callable[[dict[str, Any]], None] | None = None,
+    scope_run_id: str | None = None,
 ) -> int:
     """Process a batch of StandardNames through successor-chain refinement.
 
@@ -6572,7 +6565,7 @@ async def process_refine_name_batch(
     from imas_codex.standard_names.models import RefinedName
 
     rotation_cap = DEFAULT_REFINE_ROTATIONS
-    focus_scope_id = _refine_batch_scope_id(batch)
+    focus_scope_id = _refine_batch_scope_id(batch, scope_run_id)
     processed = 0
 
     # ── GraphClient lifecycle ────────────────────────────────────────
