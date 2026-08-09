@@ -447,6 +447,19 @@ enums:
           Only one review cycle produced a valid score (either len(models)==1,
           or one cycle failed while the other succeeded).
 
+  DocsReviewAdmissionStatus:
+    description: >-
+      Durable lifecycle of one priced documentation-review admission. Active
+      records authorize exactly one fenced provider sequence; consumed and
+      rolled_back records are immutable terminal receipts.
+    permissible_values:
+      active:
+        description: Staged and eligible for one exact claimed review sequence.
+      consumed:
+        description: Terminal documentation authority and owned Reviews persisted atomically.
+      rolled_back:
+        description: Prior documentation authority restored and owned partial Reviews removed.
+
   SNRunStatus:
     description: SNRun lifecycle. `started` is in-progress; others are terminal.
     permissible_values:
@@ -1690,6 +1703,15 @@ classes:
         inlined: false
         annotations:
           relationship_type: DOCS_REVISION_OF
+      docs_review_admission:
+        description: >-
+          Active priced documentation-review authority. The scalar id and
+          HAS_DOCS_REVIEW_ADMISSION edge are created atomically with staging
+          and cleared only by terminal consumption or exact rollback.
+        range: DocsReviewAdmission
+        inlined: false
+        annotations:
+          relationship_type: HAS_DOCS_REVIEW_ADMISSION
       refined_from:
         description: >-
           The predecessor StandardName node this entry was refined from.
@@ -1811,6 +1833,91 @@ classes:
         required: true
       description:
         description: Human-readable description of this locus.
+
+  DocsReviewAdmission:
+    description: >-
+      Durable fail-closed authority for one priced documentation review. Its
+      identifier is derived from scope_id, so one scope cannot authorize two
+      targets. The record binds rendered request identity, content evidence,
+      provider exposure, worker claim, prior aggregate authority, and the
+      exact Review group created by the authorized sequence.
+    class_uri: sn:DocsReviewAdmission
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: SHA-256 identity derived from the exact scope id.
+      target_id:
+        required: true
+        description: Exact StandardName id authorized by this admission.
+      scope_id:
+        required: true
+        description: Exact run scope; globally unique across admission targets.
+      request_identity:
+        required: true
+        description: SHA-256 identity of the canonical rendered request and pricing inputs.
+      docs_hash:
+        required: true
+        description: SHA-256 digest of description and documentation content at staging.
+      review_input_hash:
+        required: true
+        description: SHA-256 digest of the complete review input at staging.
+      mandatory_exposures_json:
+        required: true
+        description: JSON array of priced mandatory reviewer exposures in dispatch order.
+      conditional_exposure:
+        required: true
+        range: float
+        description: Conservatively bounded exposure for the possible escalator call.
+      expected_exposure:
+        required: true
+        range: float
+        description: Total mandatory plus conditional exposure reserved at admission.
+      claim_token:
+        description: Exact worker claim token bound before provider dispatch.
+      claim_seq:
+        range: integer
+        description: Exact worker claim sequence bound before provider dispatch.
+      claimed_at:
+        range: datetime
+        description: Timestamp when the exact worker claim was bound.
+      prior_docs_stage:
+        required: true
+        description: Terminal documentation stage present before recovery staging.
+      prior_authority_json:
+        required: true
+        description: JSON snapshot of every docs-axis aggregate authority field.
+      review_group_id:
+        required: true
+        description: Deterministic owner id for Reviews created by this admission.
+      created_review_ids:
+        multivalued: true
+        range: string
+        description: Exact Review ids atomically created or matched by terminal persistence.
+      status:
+        required: true
+        range: DocsReviewAdmissionStatus
+      receipt_identity:
+        required: true
+        description: SHA-256 identity of the immutable admission receipt payload.
+      created_at:
+        required: true
+        range: datetime
+      expires_at:
+        required: true
+        range: datetime
+        description: Latest instant at which provider dispatch may begin.
+      dispatch_verified_at:
+        range: datetime
+        description: Timestamp of the transactional pre-provider identity verification.
+      completed_at:
+        range: datetime
+        description: Timestamp when terminal authority was atomically consumed.
+      rolled_back_at:
+        range: datetime
+        description: Timestamp when exact prior authority was restored.
+      final_authority_json:
+        description: JSON snapshot of terminal docs authority written on consumption.
 
   DocsRevision:
     description: >-
@@ -3093,6 +3200,10 @@ classes:
           UUID identifying the quorum group this Review belongs to.
           All cycles within one batch review share the same group id.
         required: true
+      docs_review_admission_id:
+        description: >-
+          Durable admission that exclusively owns this Review. Null for
+          ordinary pipeline reviews and immutable once set.
       resolution_role:
         description: >-
           Role of this Review within the quorum group: primary, secondary,
