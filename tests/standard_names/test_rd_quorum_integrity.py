@@ -42,6 +42,8 @@ from imas_codex.standard_names.graph_ops import (
 )
 from imas_codex.standard_names.workers import (
     _run_rd_quorum_cycles,
+    admit_docs_review_request,
+    prepare_docs_review_request,
     quorum_incomplete_snapshot,
     reset_quorum_incomplete,
 )
@@ -58,6 +60,229 @@ _DOCS_PARENT_DIMS = {
     "physics_accuracy": 16,
     "clarity": 16,
 }
+
+
+def _docs_request_item() -> dict:
+    return {
+        "id": "electron_temperature",
+        "name": "electron_temperature",
+        "description": "Electron temperature profile",
+        "documentation": "The electron temperature $T_e$.",
+        "kind": "scalar",
+        "unit": "eV",
+        "physics_domain": "core_profiles",
+        "source_paths": [],
+        "docs_stage": "accepted",
+        "run_id": None,
+    }
+
+
+def _request_preparation_patches(*, exposure: float = 1.0):
+    return (
+        patch(
+            "imas_codex.settings.get_sn_review_docs_models",
+            return_value=["m0", "m1", "m2"],
+        ),
+        patch(
+            "imas_codex.standard_names.workers._load_docs_review_admission_item",
+            side_effect=lambda _sn_id: _docs_request_item(),
+        ),
+        patch(
+            "imas_codex.standard_names.workers._load_docs_review_parent_children",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.workers._load_docs_review_examples",
+            return_value=[],
+        ),
+        patch(
+            "imas_codex.standard_names.context.fetch_review_neighbours",
+            return_value={
+                "vector_neighbours": [],
+                "same_base_neighbours": [],
+                "same_path_neighbours": [],
+            },
+        ),
+        patch(
+            "imas_codex.llm.prompt_loader.render_prompt",
+            side_effect=lambda template, context: (
+                f"{template}:{context['item']['id']}:{context['item']['description']}"
+            ),
+        ),
+        patch(
+            "imas_codex.standard_names.workers.model_provider_exposure",
+            return_value=exposure,
+        ),
+    )
+
+
+def test_docs_request_identity_is_deterministic_and_prices_possible_escalator() -> None:
+    item = _docs_request_item()
+    patches = _request_preparation_patches(exposure=1.25)
+    with (
+        patches[0],
+        patches[1],
+        patches[2],
+        patches[3],
+        patches[4],
+        patches[5],
+        patches[6],
+    ):
+        first = asyncio.run(prepare_docs_review_request(item))
+        second = asyncio.run(prepare_docs_review_request(copy.deepcopy(item)))
+
+    assert first["request_identity"] == second["request_identity"]
+    assert first["models"] == ["m0", "m1", "m2"]
+    assert first["expected_exposures"] == [1.25, 1.25, 1.25]
+    assert first["expected_exposure"] == pytest.approx(3.75)
+    assert first["provider_policy_ceiling_is_separate"] is True
+
+
+def test_insufficient_docs_exposure_refuses_before_graph_or_provider() -> None:
+    item = _docs_request_item()
+    stage = MagicMock(side_effect=AssertionError("graph mutation attempted"))
+    provider = AsyncMock(side_effect=AssertionError("provider call attempted"))
+    patches = _request_preparation_patches(exposure=2.0)
+    with (
+        patches[0],
+        patches[1],
+        patches[2],
+        patches[3],
+        patches[4],
+        patches[5],
+        patches[6],
+        patch(
+            "imas_codex.standard_names.graph_ops.stage_docs_for_rescore",
+            new=stage,
+        ),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            new=provider,
+        ),
+    ):
+        result = asyncio.run(
+            admit_docs_review_request(
+                item,
+                scope_run_id="exact-scope",
+                expected_docs_hash="a" * 64,
+                expected_review_input_hash="b" * 64,
+                tranche_remaining=5.99,
+                campaign_remaining=20.0,
+            )
+        )
+
+    assert result["ok"] is False
+    assert result["outcome"] == "insufficient_exposure"
+    assert result["expected_exposure"] == pytest.approx(6.0)
+    stage.assert_not_called()
+    provider.assert_not_awaited()
+
+
+def test_docs_request_price_drift_changes_identity() -> None:
+    item = _docs_request_item()
+    stable = _request_preparation_patches(exposure=1.0)
+    with (
+        stable[0],
+        stable[1],
+        stable[2],
+        stable[3],
+        stable[4],
+        stable[5],
+        stable[6],
+    ):
+        before = asyncio.run(prepare_docs_review_request(item))
+    drifted = _request_preparation_patches(exposure=1.01)
+    with (
+        drifted[0],
+        drifted[1],
+        drifted[2],
+        drifted[3],
+        drifted[4],
+        drifted[5],
+        drifted[6],
+    ):
+        after = asyncio.run(prepare_docs_review_request(item))
+
+    assert before["request_identity"] != after["request_identity"]
+
+
+def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> None:
+    item = _docs_request_item()
+    scope_run_id = "priced-docs-scope"
+    stage = MagicMock(
+        return_value={
+            "ok": True,
+            "sn_id": item["id"],
+            "rollback_receipt": {"receipt": "exact-prior-authority"},
+        }
+    )
+    stable = _request_preparation_patches(exposure=1.0)
+    with (
+        stable[0],
+        stable[1],
+        stable[2],
+        stable[3],
+        stable[4],
+        stable[5],
+        stable[6],
+        patch(
+            "imas_codex.standard_names.graph_ops.stage_docs_for_rescore",
+            new=stage,
+        ),
+    ):
+        admitted = asyncio.run(
+            admit_docs_review_request(
+                item,
+                scope_run_id=scope_run_id,
+                expected_docs_hash="a" * 64,
+                expected_review_input_hash="b" * 64,
+                tranche_remaining=10.0,
+                campaign_remaining=10.0,
+            )
+        )
+    assert admitted["ok"] is True
+
+    claimed = {
+        **item,
+        "docs_stage": "drafted",
+        "run_id": scope_run_id,
+        "claim_token": "claim-token",
+    }
+    rollback = MagicMock(return_value={"ok": True})
+    provider_chain = AsyncMock(
+        side_effect=AssertionError("provider chain reached after request drift")
+    )
+    drifted = _request_preparation_patches(exposure=1.01)
+    with (
+        drifted[0],
+        drifted[1],
+        drifted[2],
+        drifted[3],
+        drifted[4],
+        drifted[5],
+        drifted[6],
+        patch(
+            "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+            new=rollback,
+        ),
+        patch(
+            "imas_codex.standard_names.workers._run_rd_quorum_cycles",
+            new=provider_chain,
+        ),
+    ):
+        from imas_codex.standard_names.workers import process_review_docs_batch
+
+        processed = asyncio.run(
+            process_review_docs_batch(
+                [claimed], _mock_budget_manager(), asyncio.Event()
+            )
+        )
+
+    assert processed == 0
+    rollback.assert_called_once_with(
+        {"receipt": "exact-prior-authority"}, claim_token="claim-token"
+    )
+    provider_chain.assert_not_awaited()
 
 
 # ---------------------------------------------------------------------------

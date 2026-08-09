@@ -15560,6 +15560,9 @@ def claim_review_docs_batch(
             ", sn.docs_hint AS docs_hint"
             ", sn.edit_reason AS edit_reason"
             ", sn.edit_origin AS edit_origin"
+            ", sn.origin AS origin"
+            ", sn.run_id AS run_id"
+            ", sn.source_paths AS source_paths"
             ", [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {"
             "     id: source.id,"
             "     source_type: source.source_type,"
@@ -15922,6 +15925,7 @@ WHERE sn.name_stage = 'accepted'
   AND sn.docs_stage IN ['accepted', 'reviewed', 'exhausted']
   AND sn.claim_token IS NULL
   AND sn.claimed_at IS NULL
+  AND (NOT $require_unscoped OR sn.run_id IS NULL)
   AND sn.drain_scope_id IS NULL
   AND sn.drain_scope_claimed_at IS NULL
   AND sn.drain_claim_scope_id IS NULL
@@ -15944,6 +15948,33 @@ RETURN prior_stage AS prior_stage,
        sn.documentation AS documentation
 """
 """Compare-and-set query for one exact docs-only quorum rescore."""
+
+_DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS = (
+    "docs_stage",
+    "reviewer_score_docs",
+    "reviewer_scores_docs",
+    "reviewer_comments_docs",
+    "reviewer_comments_per_dim_docs",
+    "reviewer_model_docs",
+    "docs_review_resolution_method",
+    "docs_review_quorum_shortfall",
+    "docs_review_quorum_shortfall_at",
+    "reviewed_docs_at",
+    "run_id",
+)
+_DOCS_RESCORE_RECEIPT_SCHEMA = "imas-codex.docs-rescore-admission-receipt"
+_DOCS_RESCORE_RECEIPT_FIELDS = frozenset(
+    {
+        "schema",
+        "id",
+        "scope_run_id",
+        "request_identity",
+        "docs_hash",
+        "review_input_hash",
+        "prior_authority",
+        "rollback_receipt_id",
+    }
+)
 
 _LOCK_READ_DOCS_FOR_RESCORE_QUERY = """
 MATCH (sn:StandardName {id: $id})
@@ -15974,6 +16005,7 @@ def stage_docs_for_rescore(
     dry_run: bool = False,
     expected_docs_hash: str | None = None,
     expected_review_input_hash: str | None = None,
+    request_identity: str | None = None,
 ) -> dict[str, Any]:
     """Stage one exact documentation record for a fresh quorum review.
 
@@ -15995,6 +16027,15 @@ def stage_docs_for_rescore(
     """
     if not run_id.strip():
         return {"ok": False, "reason": "run_id must be non-empty"}
+    if request_identity is not None and not _SHA256_RE.fullmatch(request_identity):
+        return {"ok": False, "reason": "request_identity must be a SHA-256 digest"}
+    if request_identity is not None and (
+        expected_docs_hash is None or expected_review_input_hash is None
+    ):
+        return {
+            "ok": False,
+            "reason": "priced admission requires both documentation hashes",
+        }
 
     hashes_supplied = (
         expected_docs_hash is not None or expected_review_input_hash is not None
@@ -16052,6 +16093,7 @@ def stage_docs_for_rescore(
                             id=sn_id,
                             run_id=run_id,
                             dry_run=dry_run,
+                            require_unscoped=request_identity is not None,
                         )
                     ]
                     if not rows:
@@ -16061,7 +16103,7 @@ def stage_docs_for_rescore(
                         transaction.rollback()
                     else:
                         transaction.commit()
-                    return {
+                    result = {
                         "ok": True,
                         "sn_id": sn_id,
                         "prior_stage": rows[0]["prior_stage"],
@@ -16069,6 +16111,25 @@ def stage_docs_for_rescore(
                         "dry_run": dry_run,
                         "content_cas_verified": True,
                     }
+                    if request_identity is not None:
+                        prior_authority = {
+                            field: _authority_json_value(properties.get(field))
+                            for field in _DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS
+                        }
+                        receipt = {
+                            "schema": _DOCS_RESCORE_RECEIPT_SCHEMA,
+                            "id": sn_id,
+                            "scope_run_id": run_id,
+                            "request_identity": request_identity,
+                            "docs_hash": current_docs_hash,
+                            "review_input_hash": current_review_input_hash,
+                            "prior_authority": prior_authority,
+                        }
+                        receipt["rollback_receipt_id"] = _authority_payload_hash(
+                            receipt
+                        )
+                        result["rollback_receipt"] = receipt
+                    return result
                 except BaseException:
                     if not transaction.closed:
                         transaction.rollback()
@@ -16082,6 +16143,7 @@ def stage_docs_for_rescore(
             id=sn_id,
             run_id=run_id,
             dry_run=dry_run,
+            require_unscoped=False,
         )
         if not rows:
             current = gc.query(
@@ -16109,6 +16171,156 @@ def stage_docs_for_rescore(
         "run_id": run_id,
         "dry_run": dry_run,
     }
+
+
+def _normalize_docs_rescore_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
+    """Validate and normalize one self-authenticating rollback receipt."""
+    if not isinstance(receipt, dict) or set(receipt) != set(
+        _DOCS_RESCORE_RECEIPT_FIELDS
+    ):
+        raise ValueError(
+            "documentation rescore receipt fields must be exactly "
+            f"{sorted(_DOCS_RESCORE_RECEIPT_FIELDS)}"
+        )
+    normalized = dict(receipt)
+    if normalized["schema"] != _DOCS_RESCORE_RECEIPT_SCHEMA:
+        raise ValueError("documentation rescore receipt schema is unsupported")
+    for field in (
+        "request_identity",
+        "docs_hash",
+        "review_input_hash",
+        "rollback_receipt_id",
+    ):
+        if not _SHA256_RE.fullmatch(str(normalized[field])):
+            raise ValueError(f"{field} must be a SHA-256 digest")
+    if not str(normalized["id"]).strip() or not str(normalized["scope_run_id"]).strip():
+        raise ValueError("documentation rescore receipt ids must be non-empty")
+    prior_authority = normalized.get("prior_authority")
+    if not isinstance(prior_authority, dict) or set(prior_authority) != set(
+        _DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS
+    ):
+        raise ValueError(
+            "documentation rescore prior authority fields must be exactly "
+            f"{list(_DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS)}"
+        )
+    identity_payload = {
+        key: normalized[key] for key in normalized if key != "rollback_receipt_id"
+    }
+    if _authority_payload_hash(identity_payload) != normalized["rollback_receipt_id"]:
+        raise ValueError("documentation rescore rollback receipt identity is invalid")
+    return normalized
+
+
+@retry_on_deadlock()
+def rollback_docs_rescore_admission(
+    receipt: dict[str, Any],
+    *,
+    claim_token: str,
+) -> dict[str, Any]:
+    """Restore one priced docs admission iff every exact CAS fence still matches.
+
+    The receipt is returned by :func:`stage_docs_for_rescore` and carries the
+    complete prior docs-axis aggregate authority. The rollback keeps prose,
+    refinement depth, and Review nodes untouched. Any lifecycle, content,
+    review-input, scope, or claim-token drift is a refusal.
+    """
+    normalized = _normalize_docs_rescore_receipt(receipt)
+    if not claim_token.strip():
+        return {"ok": False, "reason": "claim_token must be non-empty"}
+
+    from imas_codex.standard_names.review.audits import compute_review_input_hash
+
+    client = GraphClient()
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                locked = [
+                    dict(record)
+                    for record in transaction.run(
+                        _LOCK_READ_DOCS_FOR_RESCORE_QUERY, id=normalized["id"]
+                    )
+                ]
+                if len(locked) != 1:
+                    transaction.rollback()
+                    return {
+                        "ok": False,
+                        "outcome": "rollback_drift",
+                        "reason": f"name {normalized['id']!r} not found",
+                    }
+                properties = dict(locked[0].get("standard_name") or {})
+                current_docs_hash = compute_docs_authority_content_hash(properties)
+                current_review_input_hash = compute_review_input_hash(properties)
+                eligible = (
+                    properties.get("id") == normalized["id"]
+                    and properties.get("name_stage") == "accepted"
+                    and properties.get("docs_stage") == "drafted"
+                    and properties.get("run_id") == normalized["scope_run_id"]
+                    and properties.get("claim_token") == claim_token
+                    and current_docs_hash == normalized["docs_hash"]
+                    and current_review_input_hash == normalized["review_input_hash"]
+                    and properties.get("review_input_hash")
+                    == normalized["review_input_hash"]
+                    and all(
+                        properties.get(field) is None
+                        for field in (
+                            "drain_scope_id",
+                            "drain_scope_claimed_at",
+                            "drain_claim_scope_id",
+                        )
+                    )
+                )
+                if not eligible:
+                    transaction.rollback()
+                    return {
+                        "ok": False,
+                        "outcome": "rollback_drift",
+                        "reason": (
+                            f"{normalized['id']!r} changed after priced admission"
+                        ),
+                    }
+                rows = [
+                    dict(record)
+                    for record in transaction.run(
+                        """
+                        MATCH (sn:StandardName {id: $id})
+                        WHERE sn.run_id = $scope_run_id
+                          AND sn.docs_stage = 'drafted'
+                          AND sn.claim_token = $claim_token
+                        WITH sn, $rollback_receipt_id AS rollback_receipt_id
+                        SET sn += $prior_authority,
+                            sn.claimed_at = null,
+                            sn.claim_token = null
+                        RETURN sn.id AS id, rollback_receipt_id
+                        """,
+                        id=normalized["id"],
+                        scope_run_id=normalized["scope_run_id"],
+                        claim_token=claim_token,
+                        rollback_receipt_id=normalized["rollback_receipt_id"],
+                        prior_authority=normalized["prior_authority"],
+                    )
+                ]
+                if len(rows) != 1:
+                    transaction.rollback()
+                    return {
+                        "ok": False,
+                        "outcome": "rollback_drift",
+                        "reason": "documentation rescore rollback CAS matched no row",
+                    }
+                transaction.commit()
+                return {
+                    "ok": True,
+                    "id": normalized["id"],
+                    "scope_run_id": normalized["scope_run_id"],
+                    "request_identity": normalized["request_identity"],
+                    "rollback_receipt_id": normalized["rollback_receipt_id"],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        client.close()
 
 
 # -- refine_name (StandardName, reviewed + low score + chain < cap) -----------
@@ -17947,7 +18159,7 @@ def release_review_docs_claims(
     if not sn_ids:
         return 0
     stage_clause = (
-        "AND n.name_stage = $expected_stage" if expected_stage is not None else ""
+        "AND n.docs_stage = $expected_stage" if expected_stage is not None else ""
     )
     extra: dict[str, Any] = (
         {"expected_stage": expected_stage} if expected_stage is not None else {}
@@ -17959,6 +18171,7 @@ def release_review_docs_claims(
             MATCH (n:StandardName {{id: sid}})
             WHERE n.claim_token = $token
               {stage_clause}
+            WITH n  // Preserve name_stage; this release owns the docs axis.
             SET n.claimed_at = null, n.claim_token = null
             RETURN count(n) AS released
             """,
@@ -17988,14 +18201,14 @@ def release_review_docs_failed_claims(
 ) -> int:
     """Release StandardName review-docs claims on worker failure.
 
-    Clears claim state and optionally reverts ``name_stage``.
+    Clears claim state and optionally reverts ``docs_stage``.
 
     Returns the count of SNs actually released.
     """
     if not sn_ids:
         return 0
-    stage_where = "AND n.name_stage = $from_stage" if from_stage is not None else ""
-    stage_set = "n.name_stage = $to_stage," if to_stage is not None else ""
+    stage_where = "AND n.docs_stage = $from_stage" if from_stage is not None else ""
+    stage_set = "n.docs_stage = $to_stage," if to_stage is not None else ""
     params: dict[str, Any] = {"ids": sn_ids, "token": claim_token}
     if from_stage is not None:
         params["from_stage"] = from_stage
@@ -18008,6 +18221,7 @@ def release_review_docs_failed_claims(
             MATCH (n:StandardName {{id: sid}})
             WHERE n.claim_token = $token
               {stage_where}
+            WITH n  // Preserve name_stage; this release owns the docs axis.
             SET {stage_set}
                 n.claimed_at = null,
                 n.claim_token = null

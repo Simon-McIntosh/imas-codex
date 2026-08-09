@@ -48,8 +48,8 @@ def test_only_review_maps_to_skip_generate() -> None:
     assert flags["skip_review"] is False
 
 
-@pytest.mark.parametrize("selector", ["review_name", "refine_name"])
-def test_exact_name_action_is_a_canonical_pool_selector(selector: str) -> None:
+@pytest.mark.parametrize("selector", ["review_name", "refine_name", "review_docs"])
+def test_exact_action_is_a_canonical_pool_selector(selector: str) -> None:
     from imas_codex.standard_names.turn import (
         TURN_PHASES,
         exact_pool_from_only,
@@ -228,11 +228,52 @@ def test_build_pool_specs_default_keeps_generate_name() -> None:
     assert "generate_name" in names
 
 
-@pytest.mark.parametrize("pool_name", ["review_name", "refine_name"])
-def test_build_pool_specs_selects_exact_name_action(pool_name: str) -> None:
+@pytest.mark.parametrize("pool_name", ["review_name", "refine_name", "review_docs"])
+def test_build_pool_specs_selects_exact_action(pool_name: str) -> None:
     names = {spec.name for spec in _build_specs(only_pool=pool_name)}
 
     assert names == {pool_name}
+
+
+def test_cli_review_docs_selects_only_the_docs_review_pool() -> None:
+    """The docs-review selector cannot also expose generation or refinement."""
+    from imas_codex.cli.sn import _run_sn_cmd
+
+    def _run_discovery(_config, async_main):
+        return asyncio.run(async_main(asyncio.Event(), MagicMock()))
+
+    run_pools = AsyncMock(return_value=MagicMock(stop_reason="completed"))
+    with (
+        patch("imas_codex.cli.sn._require_embed_ready"),
+        patch("imas_codex.cli.sn._require_terminal_drain"),
+        patch(
+            "imas_codex.cli.discover.common.use_rich_output",
+            return_value=False,
+        ),
+        patch("imas_codex.cli.discover.common.setup_logging"),
+        patch(
+            "imas_codex.cli.discover.common.run_discovery",
+            side_effect=_run_discovery,
+        ),
+        patch("imas_codex.standard_names.loop.run_sn_pools", new=run_pools),
+        patch(
+            "imas_codex.standard_names.loop.summary_table",
+            return_value={"stop_reason": "completed"},
+        ),
+    ):
+        _run_sn_cmd(
+            cost_limit=5.0,
+            per_domain_limit=None,
+            dry_run=False,
+            quiet=True,
+            only="review_docs",
+        )
+
+    kwargs = run_pools.await_args.kwargs
+    assert kwargs["only_pool"] == "review_docs"
+    assert {spec.name for spec in _build_specs(only_pool=kwargs["only_pool"])} == {
+        "review_docs"
+    }
 
 
 def test_build_pool_specs_rejects_unknown_pool() -> None:

@@ -24,7 +24,6 @@ _ONLY_TO_ACTIVE: dict[str, set[str]] = {
     "enrich": {"enrich"},
     "review": {"review_names", "review_docs"},
     "review_names": {"review_names"},
-    "review_docs": {"review_docs"},
     "link": {"link"},
 }
 
@@ -32,12 +31,9 @@ _ONLY_TO_ACTIVE: dict[str, set[str]] = {
 # axis. Derive the eligible pool identifiers from the canonical pool registry;
 # the action vocabulary is policy, while the pool-name universe remains owned
 # by ``pool_registry.POOL_NAMES``.
-_NAME_REVIEW_ACTIONS = frozenset({"review", "refine"})
+_EXACT_ACTIONS = frozenset({"review_name", "refine_name", "review_docs"})
 _EXACT_POOL_SELECTORS: dict[str, str] = {
-    pool_name: pool_name
-    for pool_name in POOL_NAMES
-    if pool_name.endswith("_name")
-    and pool_name.removesuffix("_name") in _NAME_REVIEW_ACTIONS
+    pool_name: pool_name for pool_name in POOL_NAMES if pool_name in _EXACT_ACTIONS
 }
 
 # Valid --only choices (CLI enforces this set). Broad phase selectors preserve
@@ -66,7 +62,11 @@ def skip_flags_from_only(only_phase: str | None) -> dict[str, bool]:
         return {}
 
     if only_phase in _EXACT_POOL_SELECTORS:
-        active = {"review_names"}
+        active = (
+            {"review_docs"}
+            if _EXACT_POOL_SELECTORS[only_phase] == "review_docs"
+            else {"review_names"}
+        )
     else:
         active = _ONLY_TO_ACTIVE.get(only_phase, set())
     return {
