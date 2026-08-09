@@ -1,11 +1,10 @@
-"""Every configured Standard Names seat must be affordable to reserve.
+"""Every paid Standard Names launch seat must be affordable to reserve.
 
-The pipeline reserves a request's maximum billable exposure before it reaches
-a provider, so a seat whose priced exposure approaches the run's whole cost
-limit cannot fund a single batch — ``reserve()`` returns ``None`` for every
-pool and the paid stages stop without spending anything.  That failure is
-invisible in a unit test that stubs the pricing, so these tests price the real
-seats from ``pyproject.toml`` through the real formula.
+The pipeline reserves a request's expected billable cost before it reaches a
+provider.  That estimate must use a proven route price rather than the separate
+provider policy ceiling, or a run can fail to fund a single batch despite
+having ample budget for its actual cost.  These tests price the configured
+compose seat and three default name-review seats through the real formula.
 
 The ceiling below is a calibration gate, not a physical bound: it is set well
 under a realistic per-run cost limit so a pricing change that inflates
@@ -18,15 +17,17 @@ import pytest
 from pydantic import BaseModel
 
 from imas_codex.settings import (
-    MODEL_SECTIONS,
     get_model,
-    get_sn_review_docs_models,
+    get_openrouter_pricing,
     get_sn_review_names_models,
 )
 from imas_codex.standard_names.budget import model_provider_exposure
 
-#: Upper bound for one priced provider attempt on any configured seat.
-MAX_ATTEMPT_EXPOSURE_USD = 10.0
+#: Upper bound for one representative attempt on every launch seat.
+MAX_ATTEMPT_EXPOSURE_USD = 0.50
+
+#: Upper bound for the stronger model used only after the refine chain is spent.
+ESCALATION_MAX_ATTEMPT_EXPOSURE_USD = 2.00
 
 #: A rendered Standard Names request is a few tens of kilobytes of prompt.
 #: Oversized on purpose so the gate measures a realistic worst case.
@@ -41,19 +42,41 @@ class _SeatResponse(BaseModel):
 
 
 def _configured_seats() -> list[tuple[str, str]]:
-    """Return ``(seat, model)`` for every Standard Names seat in config."""
-    seats = [
-        (section, get_model(section))
-        for section in sorted(MODEL_SECTIONS)
-        if section.startswith("sn-")
+    """Return the paid seats used to compose and review a name batch."""
+    return [("sn-compose", get_model("sn-compose"))] + [
+        (f"sn-review.names[{index}]", model)
+        for index, model in enumerate(get_sn_review_names_models())
     ]
-    seats += [("sn-review.names", m) for m in get_sn_review_names_models()]
-    seats += [("sn-review.docs", m) for m in get_sn_review_docs_models()]
-    return seats
+
+
+def _assert_proven_pricing(seat: str, model: str) -> dict[str, object]:
+    """Require finite text rates with official per-route provenance."""
+    pricing = get_openrouter_pricing(model)
+    assert pricing, f"{seat} ({model}) has no catalog entry"
+    assert pricing["prompt"] > 0
+    assert pricing["completion"] > 0
+    assert pricing["request"] >= 0
+    assert pricing["source"].startswith("https://openrouter.ai/api/v1/model/")
+    assert pricing["verified_at"]
+    return pricing
 
 
 @pytest.mark.parametrize("seat,model", _configured_seats(), ids=lambda v: str(v))
-def test_configured_seat_reserves_an_affordable_attempt(seat: str, model: str) -> None:
+def test_launch_seat_has_proven_catalog_pricing(seat: str, model: str) -> None:
+    """Every paid launch route has finite rates and official provenance."""
+    _assert_proven_pricing(seat, model)
+
+
+def test_escalation_seat_has_proven_catalog_pricing() -> None:
+    """The paid final refinement route has its published text rates."""
+    pricing = _assert_proven_pricing("sn-escalation", get_model("sn-escalation"))
+    assert pricing["prompt"] == 10.0
+    assert pricing["completion"] == 50.0
+    assert pricing["request"] == 0.0
+
+
+@pytest.mark.parametrize("seat,model", _configured_seats(), ids=lambda v: str(v))
+def test_launch_seat_reserves_an_affordable_attempt(seat: str, model: str) -> None:
     """One attempt on a configured seat must price finite and affordable."""
     exposure = model_provider_exposure(
         model,
@@ -70,10 +93,23 @@ def test_configured_seat_reserves_an_affordable_attempt(seat: str, model: str) -
     )
 
 
+def test_escalation_seat_reserves_an_affordable_attempt() -> None:
+    """The stronger final refinement route still admits one expected attempt."""
+    model = get_model("sn-escalation")
+    exposure = model_provider_exposure(
+        model,
+        _RENDERED_REQUEST,
+        response_model=_SeatResponse,
+        provider_attempts=1,
+    )
+    assert 0 < exposure <= ESCALATION_MAX_ATTEMPT_EXPOSURE_USD
+
+
 def test_seat_enumeration_is_not_silently_empty() -> None:
-    """The gate is worthless if it parametrizes over nothing."""
+    """The gate covers one compose route and the complete three-seat quorum."""
     seats = _configured_seats()
-    assert len(seats) >= 5, f"expected the configured seat set, got {seats}"
+    assert len(seats) == 4, f"expected compose plus three reviewers, got {seats}"
+    assert len({model for _, model in seats}) == 4
 
 
 def test_exposure_scales_with_the_rendered_request_not_the_context_window() -> None:

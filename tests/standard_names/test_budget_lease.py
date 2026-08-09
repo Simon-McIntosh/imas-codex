@@ -55,6 +55,25 @@ def test_paid_exposure_covers_every_wrapper_attempt():
     assert all_attempts > one_attempt * 5
 
 
+def test_paid_exposure_multiplies_the_complete_retry_budget_per_call():
+    """The calls multiplier preserves the whole wrapper-attempt estimate."""
+    messages = [{"role": "user", "content": "short rendered prompt"}]
+    one_call = model_provider_exposure(
+        "openrouter/anthropic/claude-sonnet-4.6",
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=3,
+    )
+    four_calls = model_provider_exposure(
+        "openrouter/anthropic/claude-sonnet-4.6",
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=3,
+        calls=4,
+    )
+    assert four_calls == pytest.approx(one_call * 4)
+
+
 def test_paid_exposure_tracks_the_prompt_not_the_context_window():
     """A short request must not reserve what a context-window-sized one would.
 
@@ -77,15 +96,61 @@ def test_paid_exposure_tracks_the_prompt_not_the_context_window():
     assert short < long, "a smaller request must reserve less"
 
 
-def test_catalog_lag_uses_immutable_provider_and_input_ceilings():
-    """A newly configured route remains bounded before the catalog catches up."""
-    exposure = model_provider_exposure(
-        "openrouter/future/model",
-        [{"role": "user", "content": "prompt"}],
-        response_model=_BoundedResponse,
-        provider_attempts=5,
+def test_catalog_lag_fails_closed_without_proven_expected_price():
+    """An unpriced paid route cannot reach a provider through admission."""
+    with pytest.raises(BudgetExposureUnknown):
+        model_provider_exposure(
+            "openrouter/future/model",
+            [{"role": "user", "content": "prompt"}],
+            response_model=_BoundedResponse,
+            provider_attempts=5,
+        )
+
+
+def test_catalog_entry_without_official_provenance_fails_closed(monkeypatch):
+    """Numeric rates alone are not price authority for paid admission."""
+    from imas_codex import settings
+
+    monkeypatch.setattr(
+        settings,
+        "get_openrouter_pricing",
+        lambda model: {
+            "prompt": 1.0,
+            "completion": 1.0,
+            "request": 0.0,
+            "source": "",
+            "verified_at": "",
+            "overrides": [],
+        },
     )
-    assert exposure > 40.0
+    with pytest.raises(BudgetExposureUnknown):
+        model_provider_exposure(
+            "openrouter/future/model",
+            [{"role": "user", "content": "prompt"}],
+            response_model=_BoundedResponse,
+            provider_attempts=1,
+        )
+
+
+def test_expected_reservation_does_not_use_the_provider_policy_ceiling(monkeypatch):
+    """Admission prices the catalog mean while the provider cap stays separate."""
+    from imas_codex.discovery.base import llm
+
+    def _policy_ceiling_must_not_price_admission(model: str) -> dict[str, float]:
+        raise AssertionError(f"provider policy ceiling priced admission for {model}")
+
+    monkeypatch.setattr(
+        llm, "get_openrouter_max_price", _policy_ceiling_must_not_price_admission
+    )
+
+    exposure = model_provider_exposure(
+        "openrouter/x-ai/grok-4.5",
+        [{"role": "user", "content": "short rendered prompt"}],
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+    )
+
+    assert 0 < exposure < 0.25
 
 
 def test_non_text_input_rejects_before_reservation():

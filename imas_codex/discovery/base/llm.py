@@ -338,6 +338,88 @@ def get_openrouter_max_price(model: str) -> dict[str, float]:
     }
 
 
+def get_openrouter_expected_price(
+    model: str,
+    *,
+    input_tokens: int,
+) -> dict[str, float]:
+    """Return the expected text price for reservation admission.
+
+    The project catalog takes precedence because newly configured routes can
+    predate LiteLLM's bundled data.  Optional long-input overrides are selected
+    from the rendered request size.  Routes absent from both catalogs fail
+    closed; the provider policy ceiling is intentionally not a substitute for
+    a mean price because it describes the maximum route OpenRouter may select,
+    not the expected bill for one request.
+
+    Returned token rates are USD per million tokens and ``request`` is USD per
+    request.  Provider selection remains independently constrained by
+    :func:`get_openrouter_max_price` at dispatch.
+    """
+    from imas_codex.settings import get_openrouter_pricing
+
+    if not isinstance(input_tokens, int) or input_tokens <= 0:
+        raise ProviderPricingUnbounded(
+            f"OpenRouter expected-price input bound invalid for {model}"
+        )
+
+    entry = get_openrouter_pricing(model)
+    if entry:
+        source = entry.get("source")
+        verified_at = entry.get("verified_at")
+        if not (
+            isinstance(source, str)
+            and source.startswith("https://openrouter.ai/api/v1/model/")
+            and isinstance(verified_at, str)
+            and verified_at
+        ):
+            raise ProviderPricingUnbounded(
+                f"OpenRouter expected-price provenance unavailable for {model}"
+            )
+        selected = entry
+        thresholds: set[int] = set()
+        for override in entry.get("overrides", []):
+            threshold = override.get("min_input_tokens")
+            if not isinstance(threshold, int) or threshold <= 0:
+                raise ProviderPricingUnbounded(
+                    f"OpenRouter expected-price threshold invalid for {model}"
+                )
+            if threshold in thresholds:
+                raise ProviderPricingUnbounded(
+                    f"OpenRouter expected-price threshold duplicated for {model}"
+                )
+            thresholds.add(threshold)
+            if input_tokens >= threshold:
+                selected = override
+        price = {
+            "prompt": selected.get("prompt"),
+            "completion": selected.get("completion"),
+            "request": selected.get("request", entry.get("request", 0.0)),
+        }
+    else:
+        info, _ = _lookup_catalog(model, route_only=False)
+        if not info:
+            raise ProviderPricingUnbounded(
+                f"OpenRouter expected price unavailable for {model}"
+            )
+        price = {
+            "prompt": float(info.get("input_cost_per_token") or 0.0) * 1_000_000,
+            "completion": float(info.get("output_cost_per_token") or 0.0) * 1_000_000,
+            "request": float(info.get("input_cost_per_query") or 0.0),
+        }
+
+    if (
+        not math.isfinite(float(price["prompt"]))
+        or float(price["prompt"]) <= 0
+        or not math.isfinite(float(price["completion"]))
+        or float(price["completion"]) <= 0
+        or not math.isfinite(float(price["request"]))
+        or float(price["request"]) < 0
+    ):
+        raise ProviderPricingUnbounded(f"OpenRouter expected price invalid for {model}")
+    return {field: float(value) for field, value in price.items()}
+
+
 class EmptyResponseError(ValueError):
     """The LLM returned a response with no usable content.
 
