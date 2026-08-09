@@ -34,9 +34,10 @@ import pytest
 
 from imas_codex.discovery.base.llm import acall_llm_structured, get_model_limits
 from imas_codex.standard_names.graph_ops import (
+    DOCS_AUTHORITY_PROJECTION_VERSION,
     DocsAuthorityBackfillConflict,
     backfill_docs_review_authority,
-    compute_docs_authority_content_hash,
+    build_docs_review_authority_manifest,
     compute_docs_review_evidence_hash,
 )
 from imas_codex.standard_names.workers import (
@@ -458,36 +459,10 @@ def _authority_state(
     return {"id": name_id, "standard_name": properties, "reviews": reviews}
 
 
-def _authority_manifest(state: dict) -> list[dict]:
-    properties = state["standard_name"]
-    reviews = state["reviews"]
-    return [
-        {
-            "id": state["id"],
-            "expected_docs_hash": compute_docs_authority_content_hash(properties),
-            "expected_review_input_hash": properties["review_input_hash"],
-            "expected_review_evidence_hash": compute_docs_review_evidence_hash(reviews),
-            "expected_review_group_id": reviews[-1]["review_group_id"],
-            "expected_resolution_method": "quorum_consensus",
-            "expected_reviewer_score_docs": properties["reviewer_score_docs"],
-            "expected_reviewed_docs_at": properties["reviewed_docs_at"],
-            "expected_lifecycle": {
-                "claim_token": properties["claim_token"],
-                "claimed_at": properties["claimed_at"],
-                "docs_chain_depth": properties["docs_chain_length"],
-                "docs_stage": properties["docs_stage"],
-                "drain_claim_scope_id": properties["drain_claim_scope_id"],
-                "drain_scope_claimed_at": properties["drain_scope_claimed_at"],
-                "drain_scope_id": properties["drain_scope_id"],
-                "edit_status": properties["edit_status"],
-                "name_chain_depth": properties["chain_length"],
-                "name_stage": properties["name_stage"],
-                "run_id": properties["run_id"],
-                "status": properties["status"],
-                "validation_status": properties["validation_status"],
-            },
-        }
-    ]
+def _authority_manifest(state: dict) -> dict:
+    return build_docs_review_authority_manifest(
+        [state["id"]], gc=_AuthorityGraph(_AuthorityTransaction([state]))
+    )
 
 
 class _AuthorityTransaction:
@@ -569,6 +544,62 @@ class _AuthorityGraph:
 
 
 class TestDocsAuthorityBackfill:
+    def test_builder_emits_deterministic_production_shaped_cohort(self):
+        names = [
+            "efficiency_of_plant_system",
+            "flux_surface_averaged_argon_density_at_plasma_boundary",
+            "flux_surface_averaged_carbon_density_at_plasma_boundary",
+            "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+            "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+            "flux_surface_averaged_lithium_density_at_plasma_boundary",
+            "flux_surface_averaged_xenon_density_at_plasma_boundary",
+            "helium_4_density",
+            "ion_state_velocity",
+            "ion_state_velocity_due_to_e_cross_b_drift",
+            "neutral_state_momentum",
+            "oxygen_density",
+            "perturbed_plasma_velocity",
+            "radial_effective_electron_energy_convection_velocity",
+            "radial_minimum_force_of_poloidal_field_coil",
+            "ratio_of_hydrogen_density_to_total_hydrogenic_density",
+            "toroidal_flux_surface_averaged_helium_3_velocity_at_plasma_boundary",
+            "toroidal_plasma_current",
+            "total_electron_deposited_power",
+            "total_fast_ion_pressure",
+            "vertical_coordinate_of_ferritic_element_centroid",
+            "xenon_density",
+        ]
+        states = [_authority_state(name) for name in reversed(names)]
+        first_transaction = _AuthorityTransaction(states)
+        second_transaction = _AuthorityTransaction(states)
+
+        first = build_docs_review_authority_manifest(
+            list(reversed(names)), gc=_AuthorityGraph(first_transaction)
+        )
+        second = build_docs_review_authority_manifest(
+            names, gc=_AuthorityGraph(second_transaction)
+        )
+
+        assert first == second
+        assert set(first) == {
+            "schema",
+            "projection_version",
+            "manifest_id",
+            "rows",
+        }
+        assert first["projection_version"] == DOCS_AUTHORITY_PROJECTION_VERSION
+        assert len(first["manifest_id"]) == 64
+        assert [row["id"] for row in first["rows"]] == sorted(names)
+        assert len(first["rows"]) == 22
+        assert first_transaction.rolled_back is True
+        assert second_transaction.rolled_back is True
+        for state, row in zip(
+            sorted(states, key=lambda item: item["id"]), first["rows"], strict=True
+        ):
+            assert row["expected_review_evidence_hash"] == (
+                compute_docs_review_evidence_hash(state["reviews"])
+            )
+
     def test_exact_quorum_evidence_sets_only_authority_method(self):
         state = _authority_state()
         before = copy.deepcopy(state)
@@ -607,14 +638,37 @@ class TestDocsAuthorityBackfill:
             is None
         )
 
-    @pytest.mark.parametrize(
-        "manifest", [[], [_authority_manifest(_authority_state())[0]] * 2]
-    )
-    def test_empty_or_duplicate_manifest_is_rejected(self, manifest):
+    @pytest.mark.parametrize("ids", [[], ["electron_temperature"] * 2])
+    def test_empty_or_duplicate_manifest_is_rejected(self, ids):
         transaction = _AuthorityTransaction([_authority_state()])
         with pytest.raises(ValueError):
-            backfill_docs_review_authority(manifest, gc=_AuthorityGraph(transaction))
+            build_docs_review_authority_manifest(ids, gc=_AuthorityGraph(transaction))
         assert transaction.committed is False
+
+    def test_projection_version_mismatch_is_rejected_before_transaction(self):
+        state = _authority_state()
+        manifest = _authority_manifest(state)
+        manifest["projection_version"] = DOCS_AUTHORITY_PROJECTION_VERSION + 1
+        transaction = _AuthorityTransaction([state])
+
+        with pytest.raises(ValueError, match="projection version"):
+            backfill_docs_review_authority(manifest, gc=_AuthorityGraph(transaction))
+
+        assert transaction.committed is False
+        assert transaction.rolled_back is False
+
+    @pytest.mark.parametrize("row_fault", ["empty", "duplicate"])
+    def test_apply_rejects_empty_or_duplicate_rows_before_transaction(self, row_fault):
+        state = _authority_state()
+        manifest = _authority_manifest(state)
+        manifest["rows"] = [] if row_fault == "empty" else [manifest["rows"][0]] * 2
+        transaction = _AuthorityTransaction([state])
+
+        with pytest.raises(ValueError):
+            backfill_docs_review_authority(manifest, gc=_AuthorityGraph(transaction))
+
+        assert transaction.committed is False
+        assert transaction.rolled_back is False
 
     @pytest.mark.parametrize("cohort_fault", ["partial", "extra"])
     def test_partial_or_extra_transaction_cohort_is_rejected(self, cohort_fault):
@@ -662,11 +716,11 @@ class TestDocsAuthorityBackfill:
         self, method, cycles
     ):
         state = _authority_state()
+        manifest = _authority_manifest(state)
         state["reviews"] = [
             review for review in state["reviews"] if review["cycle_index"] in cycles
         ]
         state["reviews"][-1]["resolution_method"] = method
-        manifest = _authority_manifest(state)
         transaction = _AuthorityTransaction([state])
         with pytest.raises(DocsAuthorityBackfillConflict):
             backfill_docs_review_authority(manifest, gc=_AuthorityGraph(transaction))
@@ -684,7 +738,7 @@ class TestDocsAuthorityBackfill:
         manifest = _authority_manifest(state)
         state["standard_name"]["reviewed_docs_at"] = "2026-08-09T12:00:07+00:00"
         transaction = _AuthorityTransaction([state])
-        with pytest.raises(DocsAuthorityBackfillConflict, match="timestamp drifted"):
+        with pytest.raises(DocsAuthorityBackfillConflict, match="timestamp"):
             backfill_docs_review_authority(manifest, gc=_AuthorityGraph(transaction))
 
     def test_lifecycle_drift_is_rejected(self):
@@ -722,9 +776,9 @@ class TestDocsAuthorityBackfill:
             }
         )
         state["standard_name"]["reviewer_score_docs"] = 0.92
-        manifest = _authority_manifest(state)
-        manifest[0]["expected_resolution_method"] = "authoritative_escalation"
-        manifest[0]["expected_reviewer_score_docs"] = 0.92
+        manifest = build_docs_review_authority_manifest(
+            [state["id"]], gc=_AuthorityGraph(_AuthorityTransaction([state]))
+        )
         transaction = _AuthorityTransaction([state])
 
         result = backfill_docs_review_authority(

@@ -13608,6 +13608,11 @@ class DocsAuthorityBackfillConflict(RuntimeError):
     """Raised when exact documentation-review authority cannot be proven."""
 
 
+DOCS_AUTHORITY_MANIFEST_SCHEMA = "imas-codex.docs-review-authority-manifest"
+DOCS_AUTHORITY_PROJECTION_VERSION = 1
+_DOCS_AUTHORITY_MANIFEST_ENVELOPE_FIELDS = frozenset(
+    {"schema", "projection_version", "manifest_id", "rows"}
+)
 _DOCS_AUTHORITY_MANIFEST_FIELDS = frozenset(
     {
         "id",
@@ -13768,13 +13773,13 @@ def _authority_timestamp_seconds(value: Any) -> float:
     return parsed.timestamp()
 
 
-def _normalize_docs_authority_manifest(
-    manifest: list[dict[str, Any]],
-) -> tuple[list[dict[str, Any]], str]:
-    if not manifest:
+def _normalize_docs_authority_rows(
+    supplied_rows: Any,
+) -> list[dict[str, Any]]:
+    if not isinstance(supplied_rows, list) or not supplied_rows:
         raise ValueError("documentation authority manifest must be non-empty")
     normalized: list[dict[str, Any]] = []
-    for index, supplied in enumerate(manifest):
+    for index, supplied in enumerate(supplied_rows):
         if not isinstance(supplied, dict) or set(supplied) != set(
             _DOCS_AUTHORITY_MANIFEST_FIELDS
         ):
@@ -13830,7 +13835,54 @@ def _normalize_docs_authority_manifest(
     if duplicates:
         raise ValueError("duplicate manifest ids: " + ", ".join(duplicates))
     normalized.sort(key=lambda row: row["id"])
-    return normalized, _authority_payload_hash(normalized)
+    return normalized
+
+
+def _docs_authority_manifest_id(rows: list[dict[str, Any]]) -> str:
+    return _authority_payload_hash(
+        {
+            "schema": DOCS_AUTHORITY_MANIFEST_SCHEMA,
+            "projection_version": DOCS_AUTHORITY_PROJECTION_VERSION,
+            "rows": rows,
+        }
+    )
+
+
+def _docs_authority_manifest_payload(
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    normalized = _normalize_docs_authority_rows(rows)
+    return {
+        "schema": DOCS_AUTHORITY_MANIFEST_SCHEMA,
+        "projection_version": DOCS_AUTHORITY_PROJECTION_VERSION,
+        "manifest_id": _docs_authority_manifest_id(normalized),
+        "rows": normalized,
+    }
+
+
+def _normalize_docs_authority_manifest(
+    manifest: dict[str, Any],
+) -> tuple[list[dict[str, Any]], str]:
+    if not isinstance(manifest, dict) or set(manifest) != set(
+        _DOCS_AUTHORITY_MANIFEST_ENVELOPE_FIELDS
+    ):
+        raise ValueError(
+            "documentation authority manifest fields must be exactly "
+            f"{sorted(_DOCS_AUTHORITY_MANIFEST_ENVELOPE_FIELDS)}"
+        )
+    if manifest["schema"] != DOCS_AUTHORITY_MANIFEST_SCHEMA:
+        raise ValueError("documentation authority manifest schema is unsupported")
+    if manifest["projection_version"] != DOCS_AUTHORITY_PROJECTION_VERSION:
+        raise ValueError(
+            "documentation authority projection version is unsupported: "
+            f"expected {DOCS_AUTHORITY_PROJECTION_VERSION}, "
+            f"got {manifest['projection_version']!r}"
+        )
+    rows = _normalize_docs_authority_rows(manifest["rows"])
+    manifest_id = _docs_authority_manifest_id(rows)
+    if manifest["manifest_id"] != manifest_id:
+        raise ValueError("documentation authority manifest identity is invalid")
+    return rows, manifest_id
 
 
 _LOCK_DOCS_AUTHORITY_QUERY = """
@@ -13944,28 +13996,20 @@ def _latest_docs_review_group(
     )
 
 
-def _verify_docs_review_group(
-    row: dict[str, Any],
+def _project_docs_review_authority_row(
+    name_id: str,
     properties: dict[str, Any],
     reviews: list[dict[str, Any]],
-) -> None:
+) -> dict[str, Any]:
     from math import isclose
 
     from imas_codex.standard_names.review.audits import compute_review_input_hash
 
-    name_id = row["id"]
-    if compute_docs_authority_content_hash(properties) != row["expected_docs_hash"]:
-        raise DocsAuthorityBackfillConflict(f"{name_id}: documentation content drifted")
     current_input_hash = compute_review_input_hash(properties)
-    if (
-        current_input_hash != row["expected_review_input_hash"]
-        or properties.get("review_input_hash") != row["expected_review_input_hash"]
-    ):
+    if current_input_hash != properties.get("review_input_hash"):
         raise DocsAuthorityBackfillConflict(f"{name_id}: review input hash drifted")
 
     lifecycle = _docs_authority_lifecycle(properties)
-    if lifecycle != row["expected_lifecycle"]:
-        raise DocsAuthorityBackfillConflict(f"{name_id}: lifecycle state drifted")
     if lifecycle["docs_stage"] != "accepted":
         raise DocsAuthorityBackfillConflict(
             f"{name_id}: documentation lifecycle is not accepted"
@@ -13984,23 +14028,25 @@ def _verify_docs_review_group(
         or properties.get("docs_review_quorum_shortfall_at") is not None
     ):
         raise DocsAuthorityBackfillConflict(f"{name_id}: quorum shortfall is recorded")
-    current_method = properties.get("docs_review_resolution_method")
-    if current_method not in (None, row["expected_resolution_method"]):
-        raise DocsAuthorityBackfillConflict(
-            f"{name_id}: existing documentation authority method drifted"
-        )
 
     group = _latest_docs_review_group(name_id, reviews)
     group_ids = {str(review.get("review_group_id") or "") for review in group}
-    if group_ids != {row["expected_review_group_id"]}:
-        raise DocsAuthorityBackfillConflict(f"{name_id}: latest Review group drifted")
+    if len(group_ids) != 1:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: latest Review group is internally inconsistent"
+        )
+    group_id = next(iter(group_ids))
     review_ids = [str(review.get("id") or "") for review in group]
     if not all(review_ids) or len(set(review_ids)) != len(review_ids):
         raise DocsAuthorityBackfillConflict(
             f"{name_id}: Review ids are missing or repeated"
         )
 
-    method = row["expected_resolution_method"]
+    method = group[-1].get("resolution_method")
+    if method not in QUORATE_RESOLUTION_METHODS:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review group is not acceptance-authoritative"
+        )
     expected_cycles = [0, 1] if method == "quorum_consensus" else [0, 1, 2]
     expected_roles = (
         ["primary", "secondary"]
@@ -14029,7 +14075,7 @@ def _verify_docs_review_group(
             f"{name_id}: Review models are missing or not independent"
         )
     for cycle, review_id in zip(expected_cycles, review_ids, strict=True):
-        expected_id = f"{name_id}:docs:{row['expected_review_group_id']}:{cycle}"
+        expected_id = f"{name_id}:docs:{group_id}:{cycle}"
         if review_id != expected_id:
             raise DocsAuthorityBackfillConflict(
                 f"{name_id}: Review identity does not bind its cycle"
@@ -14039,10 +14085,12 @@ def _verify_docs_review_group(
         raise DocsAuthorityBackfillConflict(
             f"{name_id}: Review group is not acceptance-authoritative"
         )
-    if compute_docs_review_evidence_hash(group) != row["expected_review_evidence_hash"]:
-        raise DocsAuthorityBackfillConflict(f"{name_id}: Review evidence drifted")
-
-    scores = [float(review.get("score")) for review in group]
+    try:
+        scores = [float(review.get("score")) for review in group]
+    except (TypeError, ValueError) as exc:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review score is missing or invalid"
+        ) from exc
     expected_score = (
         scores[2] if method == "authoritative_escalation" else sum(scores) / 2
     )
@@ -14052,15 +14100,6 @@ def _verify_docs_review_group(
     ):
         raise DocsAuthorityBackfillConflict(
             f"{name_id}: aggregate score does not match Review evidence"
-        )
-    if not isclose(
-        float(row["expected_reviewer_score_docs"]),
-        expected_score,
-        rel_tol=0.0,
-        abs_tol=1e-12,
-    ):
-        raise DocsAuthorityBackfillConflict(
-            f"{name_id}: manifest aggregate score does not match Review evidence"
         )
 
     reviewed_at_values = {
@@ -14074,9 +14113,9 @@ def _verify_docs_review_group(
     aggregate_reviewed_at = _canonical_authority_timestamp(
         properties.get("reviewed_docs_at")
     )
-    if aggregate_reviewed_at != row["expected_reviewed_docs_at"]:
+    if aggregate_reviewed_at is None:
         raise DocsAuthorityBackfillConflict(
-            f"{name_id}: aggregate review timestamp drifted"
+            f"{name_id}: aggregate review timestamp is missing"
         )
     if (
         abs(
@@ -14089,6 +14128,42 @@ def _verify_docs_review_group(
             f"{name_id}: aggregate timestamp is not bound to Review evidence"
         )
 
+    current_method = properties.get("docs_review_resolution_method")
+    if current_method not in (None, method):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: existing documentation authority method drifted"
+        )
+    return {
+        "id": name_id,
+        "expected_docs_hash": compute_docs_authority_content_hash(properties),
+        "expected_review_input_hash": current_input_hash,
+        "expected_review_evidence_hash": compute_docs_review_evidence_hash(group),
+        "expected_review_group_id": group_id,
+        "expected_resolution_method": method,
+        "expected_reviewer_score_docs": expected_score,
+        "expected_reviewed_docs_at": aggregate_reviewed_at,
+        "expected_lifecycle": lifecycle,
+    }
+
+
+def _assert_docs_authority_projection_matches(
+    expected: dict[str, Any], current: dict[str, Any]
+) -> None:
+    name_id = expected["id"]
+    mismatches = (
+        ("expected_docs_hash", "documentation content drifted"),
+        ("expected_review_input_hash", "review input hash drifted"),
+        ("expected_review_evidence_hash", "Review evidence drifted"),
+        ("expected_review_group_id", "latest Review group drifted"),
+        ("expected_resolution_method", "terminal Review resolution drifted"),
+        ("expected_reviewer_score_docs", "manifest aggregate score drifted"),
+        ("expected_reviewed_docs_at", "aggregate review timestamp drifted"),
+        ("expected_lifecycle", "lifecycle state drifted"),
+    )
+    for field, message in mismatches:
+        if expected[field] != current[field]:
+            raise DocsAuthorityBackfillConflict(f"{name_id}: {message}")
+
 
 def _read_docs_authority_states(
     transaction: Any, ids: list[str]
@@ -14096,6 +14171,63 @@ def _read_docs_authority_states(
     return [
         dict(record) for record in transaction.run(_READ_DOCS_AUTHORITY_QUERY, ids=ids)
     ]
+
+
+def _normalize_docs_authority_ids(name_ids: Any) -> list[str]:
+    if not isinstance(name_ids, list) or not name_ids:
+        raise ValueError("documentation authority ids must be a non-empty list")
+    ids = [str(name_id).strip() for name_id in name_ids]
+    if any(not name_id for name_id in ids):
+        raise ValueError("documentation authority ids must be non-empty strings")
+    duplicates = sorted(name_id for name_id in set(ids) if ids.count(name_id) > 1)
+    if duplicates:
+        raise ValueError(
+            "duplicate documentation authority ids: " + ", ".join(duplicates)
+        )
+    return sorted(ids)
+
+
+def build_docs_review_authority_manifest(
+    name_ids: list[str],
+    *,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Project exact current docs-review authority into a versioned manifest.
+
+    This read-only builder accepts an explicit cohort and derives every field
+    from the current StandardName plus its latest complete canonical Review
+    group. The apply API validates the same projection before writing.
+    """
+    ids = _normalize_docs_authority_ids(name_ids)
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                states = _read_docs_authority_states(transaction, ids)
+                returned_ids = [str(state.get("id") or "") for state in states]
+                if returned_ids != ids:
+                    raise DocsAuthorityBackfillConflict(
+                        "documentation cohort is missing or contains extra rows"
+                    )
+                rows = [
+                    _project_docs_review_authority_row(
+                        state["id"],
+                        dict(state.get("standard_name") or {}),
+                        [dict(review) for review in state.get("reviews") or []],
+                    )
+                    for state in states
+                ]
+                transaction.rollback()
+                return _docs_authority_manifest_payload(rows)
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
 
 
 def _without_docs_authority_method(properties: dict[str, Any]) -> dict[str, Any]:
@@ -14114,12 +14246,12 @@ def _authority_unordered_collection(values: list[Any]) -> list[Any]:
 
 @retry_on_deadlock()
 def backfill_docs_review_authority(
-    manifest: list[dict[str, Any]],
+    manifest: dict[str, Any],
     *,
     dry_run: bool = False,
     gc: Any | None = None,
 ) -> dict[str, Any]:
-    """Backfill docs authority from one exact, content-bound Review manifest.
+    """Backfill docs authority from one exact, versioned Review manifest.
 
     The whole cohort is locked, verified, written, and postflighted in one
     transaction. Dry-run executes the same write and postflight, then rolls
@@ -14151,11 +14283,21 @@ def backfill_docs_review_authority(
                     )
                 manifest_by_id = {row["id"]: row for row in rows}
                 for state in before:
-                    _verify_docs_review_group(
-                        manifest_by_id[state["id"]],
-                        dict(state.get("standard_name") or {}),
+                    expected = manifest_by_id[state["id"]]
+                    properties = dict(state.get("standard_name") or {})
+                    if (
+                        compute_docs_authority_content_hash(properties)
+                        != expected["expected_docs_hash"]
+                    ):
+                        raise DocsAuthorityBackfillConflict(
+                            f"{state['id']}: documentation content drifted"
+                        )
+                    current = _project_docs_review_authority_row(
+                        state["id"],
+                        properties,
                         [dict(review) for review in state.get("reviews") or []],
                     )
+                    _assert_docs_authority_projection_matches(expected, current)
 
                 write_rows = [
                     dict(record)
