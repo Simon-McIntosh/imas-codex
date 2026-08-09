@@ -109,10 +109,8 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "dd-enrichment": "openrouter/anthropic/claude-sonnet-4.6",
     "sn-compose": "openrouter/anthropic/claude-sonnet-4.6",
     "sn-docs": "openrouter/openai/gpt-5.5",
-    # Refine pass for SN names + docs.  E3 telemetry showed flash-lite
-    # could not lift critiqued names (cl=0 accepted at ~42%, cl=1+ at
-    # ~5%).  Sonnet 4.6 matches compose tier so the refine pass is
-    # capable enough to recover from reviewer feedback.
+    # Refinement must synthesize a corrected candidate from reviewer feedback,
+    # so it uses compose-tier capability rather than a lightweight classifier.
     "sn-refine": "openrouter/anthropic/claude-sonnet-4.6",
     # Final refine attempt at chain cap (name + docs). Vendor-diverse from
     # compose and refine so escalation breaks a failure loop with an
