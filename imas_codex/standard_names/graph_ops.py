@@ -13604,6 +13604,786 @@ def _quorum_admits_acceptance(
     return f"fewer reviewer seats scored than the chain defines (method={resolution_method})"
 
 
+class DocsAuthorityBackfillConflict(RuntimeError):
+    """Raised when exact documentation-review authority cannot be proven."""
+
+
+DOCS_AUTHORITY_MANIFEST_SCHEMA = "imas-codex.docs-review-authority-manifest"
+DOCS_AUTHORITY_PROJECTION_VERSION = 1
+_DOCS_AUTHORITY_MANIFEST_ENVELOPE_FIELDS = frozenset(
+    {"schema", "projection_version", "manifest_id", "rows"}
+)
+_DOCS_AUTHORITY_MANIFEST_FIELDS = frozenset(
+    {
+        "id",
+        "expected_docs_hash",
+        "expected_review_input_hash",
+        "expected_review_evidence_hash",
+        "expected_review_group_id",
+        "expected_resolution_method",
+        "expected_reviewer_score_docs",
+        "expected_reviewed_docs_at",
+        "expected_lifecycle",
+    }
+)
+_DOCS_AUTHORITY_LIFECYCLE_FIELDS = frozenset(
+    {
+        "claim_token",
+        "claimed_at",
+        "docs_chain_depth",
+        "docs_stage",
+        "drain_claim_scope_id",
+        "drain_scope_claimed_at",
+        "drain_scope_id",
+        "edit_status",
+        "name_chain_depth",
+        "name_stage",
+        "run_id",
+        "status",
+        "validation_status",
+    }
+)
+_DOCS_REVIEW_EVIDENCE_FIELDS = (
+    "review_id",
+    "standard_name_id",
+    "review_axis",
+    "review_group_id",
+    "cycle_index",
+    "resolution_role",
+    "resolution_method",
+    "model",
+    "model_family",
+    "is_canonical",
+    "score",
+    "scores_json",
+    "reviewed_at",
+    "codex_version",
+    "isn_version",
+)
+_SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+
+
+def _authority_json_value(value: Any) -> Any:
+    """Convert driver values to deterministic JSON-compatible values."""
+    if isinstance(value, dict):
+        return {
+            str(key): _authority_json_value(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, list | tuple):
+        return [_authority_json_value(item) for item in value]
+    if hasattr(value, "iso_format"):
+        return value.iso_format()
+    if hasattr(value, "isoformat") and not isinstance(value, str):
+        return value.isoformat()
+    if value is None or isinstance(value, str | int | float | bool):
+        return value
+    return str(value)
+
+
+def _authority_payload_hash(value: Any) -> str:
+    payload = json.dumps(
+        _authority_json_value(value),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def compute_docs_authority_content_hash(name: dict[str, Any]) -> str:
+    """Hash the exact description and documentation governed by docs review."""
+    return _authority_payload_hash(
+        {
+            "description": str(name.get("description") or ""),
+            "documentation": str(name.get("documentation") or ""),
+        }
+    )
+
+
+def _review_evidence_record(record: dict[str, Any]) -> dict[str, Any]:
+    normalized = {
+        "review_id": record.get("review_id") or record.get("id"),
+        "standard_name_id": record.get("standard_name_id"),
+        "review_axis": record.get("review_axis"),
+        "review_group_id": record.get("review_group_id"),
+        "cycle_index": record.get("cycle_index"),
+        "resolution_role": record.get("resolution_role"),
+        "resolution_method": record.get("resolution_method"),
+        "model": record.get("model") or record.get("reviewer_model"),
+        "model_family": record.get("model_family"),
+        "is_canonical": record.get("is_canonical"),
+        "score": record.get("score"),
+        "scores_json": record.get("scores_json"),
+        "reviewed_at": _authority_json_value(record.get("reviewed_at")),
+        "codex_version": record.get("codex_version"),
+        "isn_version": record.get("isn_version"),
+    }
+    return {field: normalized[field] for field in _DOCS_REVIEW_EVIDENCE_FIELDS}
+
+
+def compute_docs_review_evidence_hash(records: list[dict[str, Any]]) -> str:
+    """Fingerprint one exact ordered documentation Review group."""
+    evidence = [_review_evidence_record(record) for record in records]
+    evidence.sort(
+        key=lambda record: (
+            int(record.get("cycle_index") or 0),
+            str(record.get("review_id") or ""),
+        )
+    )
+    return _authority_payload_hash(evidence)
+
+
+def _canonical_authority_timestamp(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(_authority_json_value(value)).strip().replace("Z", "+00:00")
+    match = re.fullmatch(
+        r"(?P<head>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})"
+        r"(?:\.(?P<fraction>\d+))?(?P<offset>[+-]\d{2}:\d{2})?",
+        text,
+    )
+    if not match:
+        raise DocsAuthorityBackfillConflict(f"invalid review timestamp {text!r}")
+    fraction = (match.group("fraction") or "").rstrip("0")
+    suffix = f".{fraction}" if fraction else ""
+    return f"{match.group('head')}{suffix}{match.group('offset') or ''}"
+
+
+def _authority_timestamp_seconds(value: Any) -> float:
+    from datetime import datetime as _datetime
+
+    if hasattr(value, "to_native"):
+        native = value.to_native()
+        return native.timestamp()
+    text = str(_authority_json_value(value)).strip().replace("Z", "+00:00")
+    match = re.fullmatch(
+        r"(?P<head>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})"
+        r"(?:\.(?P<fraction>\d+))?(?P<offset>[+-]\d{2}:\d{2})?",
+        text,
+    )
+    if not match:
+        raise DocsAuthorityBackfillConflict(f"invalid review timestamp {text!r}")
+    fraction = (match.group("fraction") or "")[:6].ljust(6, "0")
+    suffix = f".{fraction}" if fraction else ""
+    parsed = _datetime.fromisoformat(
+        f"{match.group('head')}{suffix}{match.group('offset') or ''}"
+    )
+    return parsed.timestamp()
+
+
+def _normalize_docs_authority_rows(
+    supplied_rows: Any,
+) -> list[dict[str, Any]]:
+    if not isinstance(supplied_rows, list) or not supplied_rows:
+        raise ValueError("documentation authority manifest must be non-empty")
+    normalized: list[dict[str, Any]] = []
+    for index, supplied in enumerate(supplied_rows):
+        if not isinstance(supplied, dict) or set(supplied) != set(
+            _DOCS_AUTHORITY_MANIFEST_FIELDS
+        ):
+            raise ValueError(
+                "documentation authority manifest row "
+                f"{index} fields must be exactly "
+                f"{sorted(_DOCS_AUTHORITY_MANIFEST_FIELDS)}"
+            )
+        row = dict(supplied)
+        row["id"] = str(row["id"]).strip()
+        row["expected_review_group_id"] = str(row["expected_review_group_id"]).strip()
+        if not row["id"] or not row["expected_review_group_id"]:
+            raise ValueError("manifest ids and review-group ids must be non-empty")
+        for field in (
+            "expected_docs_hash",
+            "expected_review_input_hash",
+            "expected_review_evidence_hash",
+        ):
+            row[field] = str(row[field]).lower()
+            if not _SHA256_RE.fullmatch(row[field]):
+                raise ValueError(f"{field} must be a lowercase SHA-256 digest")
+        method = row["expected_resolution_method"]
+        if method not in QUORATE_RESOLUTION_METHODS:
+            raise ValueError(
+                "expected_resolution_method must be quorum_consensus or "
+                "authoritative_escalation"
+            )
+        try:
+            score = float(row["expected_reviewer_score_docs"])
+        except (TypeError, ValueError) as exc:
+            raise ValueError("expected_reviewer_score_docs must be numeric") from exc
+        if not 0.0 <= score <= 1.0:
+            raise ValueError("expected_reviewer_score_docs must be within [0, 1]")
+        row["expected_reviewer_score_docs"] = score
+        row["expected_reviewed_docs_at"] = _canonical_authority_timestamp(
+            row["expected_reviewed_docs_at"]
+        )
+        if row["expected_reviewed_docs_at"] is None:
+            raise ValueError("expected_reviewed_docs_at must be non-empty")
+        lifecycle = row["expected_lifecycle"]
+        if not isinstance(lifecycle, dict) or set(lifecycle) != set(
+            _DOCS_AUTHORITY_LIFECYCLE_FIELDS
+        ):
+            raise ValueError(
+                "expected_lifecycle fields must be exactly "
+                f"{sorted(_DOCS_AUTHORITY_LIFECYCLE_FIELDS)}"
+            )
+        row["expected_lifecycle"] = _authority_json_value(lifecycle)
+        normalized.append(row)
+
+    ids = [row["id"] for row in normalized]
+    duplicates = sorted(name_id for name_id in set(ids) if ids.count(name_id) > 1)
+    if duplicates:
+        raise ValueError("duplicate manifest ids: " + ", ".join(duplicates))
+    normalized.sort(key=lambda row: row["id"])
+    return normalized
+
+
+def _docs_authority_manifest_id(rows: list[dict[str, Any]]) -> str:
+    return _authority_payload_hash(
+        {
+            "schema": DOCS_AUTHORITY_MANIFEST_SCHEMA,
+            "projection_version": DOCS_AUTHORITY_PROJECTION_VERSION,
+            "rows": rows,
+        }
+    )
+
+
+def _docs_authority_manifest_payload(
+    rows: list[dict[str, Any]],
+) -> dict[str, Any]:
+    normalized = _normalize_docs_authority_rows(rows)
+    return {
+        "schema": DOCS_AUTHORITY_MANIFEST_SCHEMA,
+        "projection_version": DOCS_AUTHORITY_PROJECTION_VERSION,
+        "manifest_id": _docs_authority_manifest_id(normalized),
+        "rows": normalized,
+    }
+
+
+def _normalize_docs_authority_manifest(
+    manifest: dict[str, Any],
+) -> tuple[list[dict[str, Any]], str]:
+    if not isinstance(manifest, dict) or set(manifest) != set(
+        _DOCS_AUTHORITY_MANIFEST_ENVELOPE_FIELDS
+    ):
+        raise ValueError(
+            "documentation authority manifest fields must be exactly "
+            f"{sorted(_DOCS_AUTHORITY_MANIFEST_ENVELOPE_FIELDS)}"
+        )
+    if manifest["schema"] != DOCS_AUTHORITY_MANIFEST_SCHEMA:
+        raise ValueError("documentation authority manifest schema is unsupported")
+    if manifest["projection_version"] != DOCS_AUTHORITY_PROJECTION_VERSION:
+        raise ValueError(
+            "documentation authority projection version is unsupported: "
+            f"expected {DOCS_AUTHORITY_PROJECTION_VERSION}, "
+            f"got {manifest['projection_version']!r}"
+        )
+    rows = _normalize_docs_authority_rows(manifest["rows"])
+    manifest_id = _docs_authority_manifest_id(rows)
+    if manifest["manifest_id"] != manifest_id:
+        raise ValueError("documentation authority manifest identity is invalid")
+    return rows, manifest_id
+
+
+_LOCK_DOCS_AUTHORITY_QUERY = """
+UNWIND $ids AS requested_id
+MATCH (sn:StandardName {id: requested_id})
+OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+WITH requested_id, sn, collect(review) AS reviews
+SET sn._docs_authority_lock = true
+REMOVE sn._docs_authority_lock
+FOREACH (review IN reviews | SET review._docs_authority_lock = true)
+FOREACH (review IN reviews | REMOVE review._docs_authority_lock)
+RETURN requested_id AS id
+ORDER BY id
+"""
+
+_READ_DOCS_AUTHORITY_QUERY = """
+UNWIND $ids AS requested_id
+MATCH (sn:StandardName {id: requested_id})
+OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+WITH sn, collect(properties(review)) AS reviews
+OPTIONAL MATCH (source:StandardNameSource)-[binding:PRODUCED_NAME]->(sn)
+WITH sn, reviews,
+     collect(DISTINCT CASE WHEN source IS NULL THEN null ELSE {
+         source_id: source.id,
+         relationship_id: elementId(binding)
+     } END) AS source_bindings
+OPTIONAL MATCH (sn)-[parent_edge:HAS_PARENT]->(parent:StandardName)
+WITH sn, reviews, source_bindings,
+     collect(DISTINCT CASE WHEN parent IS NULL THEN null ELSE {
+         parent_id: parent.id,
+         relationship_id: elementId(parent_edge)
+     } END) AS parents
+OPTIONAL MATCH (child:StandardName)-[child_edge:HAS_PARENT]->(sn)
+RETURN sn.id AS id,
+       properties(sn) AS standard_name,
+       reviews,
+       source_bindings,
+       parents,
+       collect(DISTINCT CASE WHEN child IS NULL THEN null ELSE {
+           child_id: child.id,
+           relationship_id: elementId(child_edge)
+       } END) AS children
+ORDER BY id
+"""
+
+_WRITE_DOCS_AUTHORITY_QUERY = """
+UNWIND $rows AS expected
+MATCH (sn:StandardName {id: expected.id})
+WHERE sn.docs_review_resolution_method IS NULL
+   OR sn.docs_review_resolution_method = expected.resolution_method
+WITH sn, expected, sn.docs_review_resolution_method AS prior_method
+SET sn.docs_review_resolution_method = expected.resolution_method
+RETURN sn.id AS id, prior_method
+ORDER BY id
+"""
+
+
+def _docs_authority_lifecycle(properties: dict[str, Any]) -> dict[str, Any]:
+    return _authority_json_value(
+        {
+            "claim_token": properties.get("claim_token"),
+            "claimed_at": properties.get("claimed_at"),
+            "docs_chain_depth": int(properties.get("docs_chain_length") or 0),
+            "docs_stage": properties.get("docs_stage"),
+            "drain_claim_scope_id": properties.get("drain_claim_scope_id"),
+            "drain_scope_claimed_at": properties.get("drain_scope_claimed_at"),
+            "drain_scope_id": properties.get("drain_scope_id"),
+            "edit_status": properties.get("edit_status"),
+            "name_chain_depth": int(properties.get("chain_length") or 0),
+            "name_stage": properties.get("name_stage"),
+            "run_id": properties.get("run_id"),
+            "status": properties.get("status"),
+            "validation_status": properties.get("validation_status"),
+        }
+    )
+
+
+def _latest_docs_review_group(
+    name_id: str, reviews: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for review in reviews:
+        if review.get("review_axis") != "docs":
+            continue
+        group_id = str(review.get("review_group_id") or "")
+        if not group_id:
+            raise DocsAuthorityBackfillConflict(
+                f"{name_id}: documentation Review lacks review_group_id"
+            )
+        groups.setdefault(group_id, []).append(review)
+    if not groups:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: no documentation Review group exists"
+        )
+
+    def group_order(item: tuple[str, list[dict[str, Any]]]) -> tuple[float, str]:
+        group_id, records = item
+        reviewed_at = [
+            _authority_timestamp_seconds(record.get("reviewed_at"))
+            for record in records
+        ]
+        return max(reviewed_at), group_id
+
+    _, latest = max(groups.items(), key=group_order)
+    return sorted(
+        latest,
+        key=lambda review: (
+            int(review.get("cycle_index") or 0),
+            str(review.get("id") or ""),
+        ),
+    )
+
+
+def _project_docs_review_authority_row(
+    name_id: str,
+    properties: dict[str, Any],
+    reviews: list[dict[str, Any]],
+) -> dict[str, Any]:
+    from math import isclose
+
+    from imas_codex.standard_names.review.audits import compute_review_input_hash
+
+    current_input_hash = compute_review_input_hash(properties)
+    if current_input_hash != properties.get("review_input_hash"):
+        raise DocsAuthorityBackfillConflict(f"{name_id}: review input hash drifted")
+
+    lifecycle = _docs_authority_lifecycle(properties)
+    if lifecycle["docs_stage"] != "accepted":
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: documentation lifecycle is not accepted"
+        )
+    live_claim_fields = (
+        "claim_token",
+        "claimed_at",
+        "drain_claim_scope_id",
+        "drain_scope_claimed_at",
+        "drain_scope_id",
+    )
+    if any(lifecycle[field] is not None for field in live_claim_fields):
+        raise DocsAuthorityBackfillConflict(f"{name_id}: active claim or drain scope")
+    if (
+        properties.get("docs_review_quorum_shortfall") is not None
+        or properties.get("docs_review_quorum_shortfall_at") is not None
+    ):
+        raise DocsAuthorityBackfillConflict(f"{name_id}: quorum shortfall is recorded")
+
+    group = _latest_docs_review_group(name_id, reviews)
+    group_ids = {str(review.get("review_group_id") or "") for review in group}
+    if len(group_ids) != 1:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: latest Review group is internally inconsistent"
+        )
+    group_id = next(iter(group_ids))
+    review_ids = [str(review.get("id") or "") for review in group]
+    if not all(review_ids) or len(set(review_ids)) != len(review_ids):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review ids are missing or repeated"
+        )
+
+    method = group[-1].get("resolution_method")
+    if method not in QUORATE_RESOLUTION_METHODS:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review group is not acceptance-authoritative"
+        )
+    expected_cycles = [0, 1] if method == "quorum_consensus" else [0, 1, 2]
+    expected_roles = (
+        ["primary", "secondary"]
+        if method == "quorum_consensus"
+        else ["primary", "secondary", "escalator"]
+    )
+    cycles = [review.get("cycle_index") for review in group]
+    roles = [review.get("resolution_role") for review in group]
+    methods = [review.get("resolution_method") for review in group]
+    canonical = [review.get("is_canonical") for review in group]
+    if cycles != expected_cycles or roles != expected_roles:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review cycles or roles are not canonical"
+        )
+    if methods != ([None] * (len(group) - 1) + [method]):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: terminal Review resolution is not canonical"
+        )
+    if canonical != ([True] + [False] * (len(group) - 1)):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: canonical Review marker is inconsistent"
+        )
+    models = [review.get("model") or review.get("reviewer_model") for review in group]
+    if any(not model for model in models) or len(set(models)) != len(models):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review models are missing or not independent"
+        )
+    for cycle, review_id in zip(expected_cycles, review_ids, strict=True):
+        expected_id = f"{name_id}:docs:{group_id}:{cycle}"
+        if review_id != expected_id:
+            raise DocsAuthorityBackfillConflict(
+                f"{name_id}: Review identity does not bind its cycle"
+            )
+    shortfall = _quorum_admits_acceptance(method, len(group))
+    if shortfall is not None or method not in QUORATE_RESOLUTION_METHODS:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review group is not acceptance-authoritative"
+        )
+    try:
+        scores = [float(review.get("score")) for review in group]
+    except (TypeError, ValueError) as exc:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review score is missing or invalid"
+        ) from exc
+    expected_score = (
+        scores[2] if method == "authoritative_escalation" else sum(scores) / 2
+    )
+    aggregate_score = properties.get("reviewer_score_docs")
+    if aggregate_score is None or not isclose(
+        float(aggregate_score), expected_score, rel_tol=0.0, abs_tol=1e-12
+    ):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: aggregate score does not match Review evidence"
+        )
+
+    reviewed_at_values = {
+        _canonical_authority_timestamp(review.get("reviewed_at")) for review in group
+    }
+    if len(reviewed_at_values) != 1:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: Review group timestamps are inconsistent"
+        )
+    group_reviewed_at = next(iter(reviewed_at_values))
+    aggregate_reviewed_at = _canonical_authority_timestamp(
+        properties.get("reviewed_docs_at")
+    )
+    if aggregate_reviewed_at is None:
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: aggregate review timestamp is missing"
+        )
+    if (
+        abs(
+            _authority_timestamp_seconds(aggregate_reviewed_at)
+            - _authority_timestamp_seconds(group_reviewed_at)
+        )
+        > 5.0
+    ):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: aggregate timestamp is not bound to Review evidence"
+        )
+
+    current_method = properties.get("docs_review_resolution_method")
+    if current_method not in (None, method):
+        raise DocsAuthorityBackfillConflict(
+            f"{name_id}: existing documentation authority method drifted"
+        )
+    return {
+        "id": name_id,
+        "expected_docs_hash": compute_docs_authority_content_hash(properties),
+        "expected_review_input_hash": current_input_hash,
+        "expected_review_evidence_hash": compute_docs_review_evidence_hash(group),
+        "expected_review_group_id": group_id,
+        "expected_resolution_method": method,
+        "expected_reviewer_score_docs": expected_score,
+        "expected_reviewed_docs_at": aggregate_reviewed_at,
+        "expected_lifecycle": lifecycle,
+    }
+
+
+def _assert_docs_authority_projection_matches(
+    expected: dict[str, Any], current: dict[str, Any]
+) -> None:
+    name_id = expected["id"]
+    mismatches = (
+        ("expected_docs_hash", "documentation content drifted"),
+        ("expected_review_input_hash", "review input hash drifted"),
+        ("expected_review_evidence_hash", "Review evidence drifted"),
+        ("expected_review_group_id", "latest Review group drifted"),
+        ("expected_resolution_method", "terminal Review resolution drifted"),
+        ("expected_reviewer_score_docs", "manifest aggregate score drifted"),
+        ("expected_reviewed_docs_at", "aggregate review timestamp drifted"),
+        ("expected_lifecycle", "lifecycle state drifted"),
+    )
+    for field, message in mismatches:
+        if expected[field] != current[field]:
+            raise DocsAuthorityBackfillConflict(f"{name_id}: {message}")
+
+
+def _read_docs_authority_states(
+    transaction: Any, ids: list[str]
+) -> list[dict[str, Any]]:
+    return [
+        dict(record) for record in transaction.run(_READ_DOCS_AUTHORITY_QUERY, ids=ids)
+    ]
+
+
+def _normalize_docs_authority_ids(name_ids: Any) -> list[str]:
+    if not isinstance(name_ids, list) or not name_ids:
+        raise ValueError("documentation authority ids must be a non-empty list")
+    ids = [str(name_id).strip() for name_id in name_ids]
+    if any(not name_id for name_id in ids):
+        raise ValueError("documentation authority ids must be non-empty strings")
+    duplicates = sorted(name_id for name_id in set(ids) if ids.count(name_id) > 1)
+    if duplicates:
+        raise ValueError(
+            "duplicate documentation authority ids: " + ", ".join(duplicates)
+        )
+    return sorted(ids)
+
+
+def build_docs_review_authority_manifest(
+    name_ids: list[str],
+    *,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Project exact current docs-review authority into a versioned manifest.
+
+    This read-only builder accepts an explicit cohort and derives every field
+    from the current StandardName plus its latest complete canonical Review
+    group. The apply API validates the same projection before writing.
+    """
+    ids = _normalize_docs_authority_ids(name_ids)
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                states = _read_docs_authority_states(transaction, ids)
+                returned_ids = [str(state.get("id") or "") for state in states]
+                if returned_ids != ids:
+                    raise DocsAuthorityBackfillConflict(
+                        "documentation cohort is missing or contains extra rows"
+                    )
+                rows = [
+                    _project_docs_review_authority_row(
+                        state["id"],
+                        dict(state.get("standard_name") or {}),
+                        [dict(review) for review in state.get("reviews") or []],
+                    )
+                    for state in states
+                ]
+                transaction.rollback()
+                return _docs_authority_manifest_payload(rows)
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
+def _without_docs_authority_method(properties: dict[str, Any]) -> dict[str, Any]:
+    comparable = dict(properties)
+    comparable.pop("docs_review_resolution_method", None)
+    return _authority_json_value(comparable)
+
+
+def _authority_unordered_collection(values: list[Any]) -> list[Any]:
+    normalized = [_authority_json_value(value) for value in values]
+    return sorted(
+        normalized,
+        key=lambda value: json.dumps(value, sort_keys=True, separators=(",", ":")),
+    )
+
+
+@retry_on_deadlock()
+def backfill_docs_review_authority(
+    manifest: dict[str, Any],
+    *,
+    dry_run: bool = False,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Backfill docs authority from one exact, versioned Review manifest.
+
+    The whole cohort is locked, verified, written, and postflighted in one
+    transaction. Dry-run executes the same write and postflight, then rolls
+    back. The only durable property this API can change is
+    ``docs_review_resolution_method``; it never changes prose, lifecycle,
+    scores, Review nodes, timestamps, publication state, or relationships.
+    """
+    rows, manifest_id = _normalize_docs_authority_manifest(manifest)
+    ids = [row["id"] for row in rows]
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                locked_ids = sorted(
+                    str(dict(record).get("id") or "")
+                    for record in transaction.run(_LOCK_DOCS_AUTHORITY_QUERY, ids=ids)
+                )
+                if locked_ids != ids:
+                    raise DocsAuthorityBackfillConflict(
+                        "locked documentation cohort differs from manifest"
+                    )
+                before = _read_docs_authority_states(transaction, ids)
+                before_ids = [str(state.get("id") or "") for state in before]
+                if before_ids != ids:
+                    raise DocsAuthorityBackfillConflict(
+                        "documentation cohort is missing or contains extra rows"
+                    )
+                manifest_by_id = {row["id"]: row for row in rows}
+                for state in before:
+                    expected = manifest_by_id[state["id"]]
+                    properties = dict(state.get("standard_name") or {})
+                    if (
+                        compute_docs_authority_content_hash(properties)
+                        != expected["expected_docs_hash"]
+                    ):
+                        raise DocsAuthorityBackfillConflict(
+                            f"{state['id']}: documentation content drifted"
+                        )
+                    current = _project_docs_review_authority_row(
+                        state["id"],
+                        properties,
+                        [dict(review) for review in state.get("reviews") or []],
+                    )
+                    _assert_docs_authority_projection_matches(expected, current)
+
+                write_rows = [
+                    dict(record)
+                    for record in transaction.run(
+                        _WRITE_DOCS_AUTHORITY_QUERY,
+                        rows=[
+                            {
+                                "id": row["id"],
+                                "resolution_method": row["expected_resolution_method"],
+                            }
+                            for row in rows
+                        ],
+                    )
+                ]
+                written_ids = [str(record.get("id") or "") for record in write_rows]
+                if written_ids != ids:
+                    raise DocsAuthorityBackfillConflict(
+                        "documentation authority write lost cohort cardinality"
+                    )
+                changed = sum(
+                    record.get("prior_method") is None for record in write_rows
+                )
+
+                after = _read_docs_authority_states(transaction, ids)
+                after_ids = [str(state.get("id") or "") for state in after]
+                if after_ids != ids:
+                    raise DocsAuthorityBackfillConflict(
+                        "documentation authority postflight cohort drifted"
+                    )
+                before_by_id = {state["id"]: state for state in before}
+                for state in after:
+                    name_id = state["id"]
+                    prior = before_by_id[name_id]
+                    expected_method = manifest_by_id[name_id][
+                        "expected_resolution_method"
+                    ]
+                    properties = dict(state.get("standard_name") or {})
+                    if (
+                        properties.get("docs_review_resolution_method")
+                        != expected_method
+                    ):
+                        raise DocsAuthorityBackfillConflict(
+                            f"{name_id}: authority method missing after write"
+                        )
+                    if _without_docs_authority_method(properties) != (
+                        _without_docs_authority_method(
+                            dict(prior.get("standard_name") or {})
+                        )
+                    ):
+                        raise DocsAuthorityBackfillConflict(
+                            f"{name_id}: collateral StandardName mutation detected"
+                        )
+                    for field in (
+                        "reviews",
+                        "source_bindings",
+                        "parents",
+                        "children",
+                    ):
+                        if _authority_unordered_collection(
+                            state.get(field) or []
+                        ) != _authority_unordered_collection(prior.get(field) or []):
+                            raise DocsAuthorityBackfillConflict(
+                                f"{name_id}: {field} mutated during backfill"
+                            )
+
+                if dry_run:
+                    transaction.rollback()
+                else:
+                    transaction.commit()
+                return {
+                    "manifest_id": manifest_id,
+                    "dry_run": dry_run,
+                    "matched": len(rows),
+                    "changed": changed,
+                    "already_applied": len(rows) - changed,
+                    "postflight_verified": True,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 @retry_on_deadlock()
 def persist_reviewed_name(
     *,
