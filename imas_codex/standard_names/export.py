@@ -1207,9 +1207,15 @@ def _get_codex_commit_sha() -> str | None:
     # ``0.13.dev42+gabc123def``. This remains available in an installed wheel
     # or source archive where the repository itself is absent.
     try:
-        version = importlib.metadata.version("imas-codex")
+        distribution = importlib.metadata.distribution("imas-codex")
     except importlib.metadata.PackageNotFoundError:
         return None
+    packaged_module = Path(
+        distribution.locate_file("imas_codex/standard_names/export.py")
+    ).resolve()
+    if packaged_module != Path(__file__).resolve():
+        return None
+    version = distribution.version
     match = re.search(r"(?:^|[+.])g([0-9a-f]{7,40})(?:[.]|$)", version)
     return match.group(1) if match else None
 

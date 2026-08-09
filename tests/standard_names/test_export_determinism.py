@@ -120,11 +120,14 @@ class TestCommitTimestamp:
                 side_effect=FileNotFoundError,
             ),
             patch(
-                "imas_codex.standard_names.export.importlib.metadata.version",
-                return_value="0.13.dev42+gabc123def",
-            ),
+                "imas_codex.standard_names.export.importlib.metadata.distribution"
+            ) as distribution,
             patch.dict("os.environ", {"SOURCE_DATE_EPOCH": "1783591200"}),
         ):
+            distribution.return_value.version = "0.13.dev42+gabc123def"
+            distribution.return_value.locate_file.return_value = (
+                Path(__file__).parents[2] / "imas_codex/standard_names/export.py"
+            )
             sha = _get_codex_commit_sha()
             assert sha == "abc123def"
             assert _manifest_iso_timestamp(sha, require_provenance=True) == (
@@ -137,6 +140,24 @@ class TestCommitTimestamp:
             pytest.raises(RuntimeError, match="non-negative Unix timestamp"),
         ):
             _source_date_epoch_iso_timestamp()
+
+    def test_source_archive_rejects_unrelated_installed_metadata(
+        self, tmp_path: Path
+    ) -> None:
+        with (
+            patch(
+                "imas_codex.standard_names.export.subprocess.run",
+                side_effect=FileNotFoundError,
+            ),
+            patch(
+                "imas_codex.standard_names.export.importlib.metadata.distribution"
+            ) as distribution,
+        ):
+            distribution.return_value.version = "0.13.dev42+gabc123def"
+            distribution.return_value.locate_file.return_value = (
+                tmp_path / "other-install/imas_codex/standard_names/export.py"
+            )
+            assert _get_codex_commit_sha() is None
 
 
 class TestDomainHeaderHasNoSha:
