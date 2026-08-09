@@ -13907,6 +13907,10 @@ OPTIONAL MATCH (source:StandardNameSource)-[binding:PRODUCED_NAME]->(sn)
 WITH sn, reviews,
      collect(DISTINCT CASE WHEN source IS NULL THEN null ELSE {
          source_id: source.id,
+         source_type: source.source_type,
+         path: coalesce(source.dd_path, source.source_id),
+         dd_path: source.dd_path,
+         status: source.status,
          relationship_id: elementId(binding)
      } END) AS source_bindings
 OPTIONAL MATCH (sn)-[parent_edge:HAS_PARENT]->(parent:StandardName)
@@ -14382,6 +14386,565 @@ def backfill_docs_review_authority(
     finally:
         if own:
             client.close()
+
+
+class DocsEvidenceRecoveryConflict(RuntimeError):
+    """Raised when a read-only documentation census cannot be proven exact."""
+
+
+DOCS_EVIDENCE_RECOVERY_MANIFEST_SCHEMA = (
+    "imas-codex.docs-review-evidence-recovery-manifest"
+)
+DOCS_EVIDENCE_RECOVERY_PROJECTION_VERSION = 1
+_DOCS_EVIDENCE_LIFECYCLE_SELECTION_FIELDS = frozenset({"docs_stage", "name_stages"})
+_DOCS_EVIDENCE_LIFECYCLE_STAGES = frozenset({"accepted", "exhausted", "superseded"})
+_DOCS_EVIDENCE_OUTCOMES = (
+    "metadata_backfill_proven",
+    "rescore_required_current",
+    "historical_hold",
+    "evidence_ambiguous_hold",
+)
+
+_SELECT_DOCS_EVIDENCE_IDS_QUERY = """
+MATCH (sn:StandardName)
+WHERE sn.docs_stage = $docs_stage
+  AND sn.name_stage IN $name_stages
+RETURN sn.id AS id
+ORDER BY id
+"""
+
+
+def _normalize_docs_evidence_selection(
+    name_ids: list[str] | None,
+    lifecycle_selection: dict[str, Any] | None,
+    expected_count: int | None,
+) -> tuple[dict[str, Any], list[str] | None]:
+    if (name_ids is None) == (lifecycle_selection is None):
+        raise ValueError(
+            "provide either exact documentation ids or one lifecycle selection"
+        )
+    if name_ids is not None:
+        if expected_count is not None:
+            raise ValueError("expected_count belongs only to lifecycle selection")
+        ids = _normalize_docs_authority_ids(name_ids)
+        return {"kind": "exact_ids", "ids": ids}, ids
+
+    if not isinstance(lifecycle_selection, dict) or set(lifecycle_selection) != set(
+        _DOCS_EVIDENCE_LIFECYCLE_SELECTION_FIELDS
+    ):
+        raise ValueError(
+            "lifecycle selection fields must be exactly docs_stage and name_stages"
+        )
+    if lifecycle_selection["docs_stage"] != "accepted":
+        raise ValueError("evidence recovery only selects docs_stage='accepted'")
+    supplied_stages = lifecycle_selection["name_stages"]
+    if not isinstance(supplied_stages, list) or not supplied_stages:
+        raise ValueError("lifecycle name_stages must be a non-empty list")
+    stages = sorted(str(stage).strip() for stage in supplied_stages)
+    if any(not stage for stage in stages) or len(set(stages)) != len(stages):
+        raise ValueError("lifecycle name_stages must be unique non-empty strings")
+    unsupported = sorted(set(stages) - _DOCS_EVIDENCE_LIFECYCLE_STAGES)
+    if unsupported:
+        raise ValueError("unsupported evidence lifecycle: " + ", ".join(unsupported))
+    if not isinstance(expected_count, int) or expected_count < 1:
+        raise ValueError("lifecycle selection requires a positive expected_count")
+    return (
+        {
+            "kind": "lifecycle",
+            "docs_stage": "accepted",
+            "name_stages": stages,
+            "expected_count": expected_count,
+        },
+        None,
+    )
+
+
+def _docs_evidence_source_bindings(state: dict[str, Any]) -> list[dict[str, Any]]:
+    bindings = []
+    for raw in state.get("source_bindings") or []:
+        binding = dict(raw)
+        source_id = str(binding.get("source_id") or "").strip()
+        if not source_id:
+            continue
+        bindings.append(
+            {
+                "source_id": source_id,
+                "source_type": binding.get("source_type"),
+                "path": binding.get("path")
+                or binding.get("dd_path")
+                or binding.get("source_id"),
+                "dd_path": binding.get("dd_path"),
+                "status": binding.get("status"),
+                "relationship_id": binding.get("relationship_id"),
+            }
+        )
+    return sorted(bindings, key=lambda item: item["source_id"])
+
+
+def _safe_latest_docs_review_group(
+    name_id: str, reviews: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], list[str]]:
+    docs_reviews = [
+        dict(review) for review in reviews if review.get("review_axis") == "docs"
+    ]
+    if not docs_reviews:
+        return [], ["missing_review_group"]
+    if any(
+        not str(review.get("review_group_id") or "").strip() for review in docs_reviews
+    ):
+        return [], ["missing_review_group"]
+    try:
+        return _latest_docs_review_group(name_id, docs_reviews), []
+    except (DocsAuthorityBackfillConflict, TypeError, ValueError):
+        return [], ["incomplete_review_group"]
+
+
+def _docs_group_shape(
+    name_id: str, group: list[dict[str, Any]]
+) -> tuple[str | None, list[str], bool]:
+    """Return terminal method, evidence reasons, and explicit-rescore status."""
+    if not group:
+        return None, [], False
+    reasons: list[str] = []
+    ids = [str(review.get("id") or "") for review in group]
+    if not all(ids) or len(set(ids)) != len(ids):
+        reasons.append("incomplete_review_group")
+    method = group[-1].get("resolution_method")
+    if method == "quorum_consensus":
+        cycles = [0, 1]
+        roles = ["primary", "secondary"]
+        methods = [None, method]
+        canonical = [True, False]
+        explicit_rescore = False
+    elif method == "authoritative_escalation":
+        cycles = [0, 1, 2]
+        roles = ["primary", "secondary", "escalator"]
+        methods = [None, None, method]
+        canonical = [True, False, False]
+        explicit_rescore = False
+    elif method == "single_review":
+        cycles = [0]
+        roles = ["primary"]
+        methods = [method]
+        canonical = [True]
+        explicit_rescore = True
+        reasons.append("incomplete_review_group")
+    elif method == "max_cycles_reached":
+        cycles = [0, 1]
+        roles = ["primary", "secondary"]
+        methods = [None, method]
+        canonical = [True, False]
+        explicit_rescore = True
+        reasons.append("terminal_method_mismatch")
+    else:
+        cycles = []
+        roles = []
+        methods = []
+        canonical = []
+        explicit_rescore = False
+        reasons.append("terminal_method_mismatch")
+
+    observed_cycles = [review.get("cycle_index") for review in group]
+    observed_roles = [review.get("resolution_role") for review in group]
+    observed_methods = [review.get("resolution_method") for review in group]
+    observed_canonical = [review.get("is_canonical") for review in group]
+    if (
+        observed_cycles != cycles
+        or observed_roles != roles
+        or observed_methods != methods
+        or observed_canonical != canonical
+    ):
+        if "incomplete_review_group" not in reasons:
+            reasons.append("incomplete_review_group")
+        explicit_rescore = False
+    for cycle, review_id in zip(cycles, ids, strict=False):
+        group_id = str(group[0].get("review_group_id") or "")
+        if review_id != f"{name_id}:docs:{group_id}:{cycle}":
+            if "incomplete_review_group" not in reasons:
+                reasons.append("incomplete_review_group")
+            explicit_rescore = False
+    models = [review.get("model") or review.get("reviewer_model") for review in group]
+    if any(not model for model in models) or len(set(models)) != len(models):
+        if "incomplete_review_group" not in reasons:
+            reasons.append("incomplete_review_group")
+        explicit_rescore = False
+    return str(method) if method is not None else None, reasons, explicit_rescore
+
+
+def _docs_evidence_aggregate_reasons(
+    properties: dict[str, Any], group: list[dict[str, Any]], method: str | None
+) -> list[str]:
+    from math import isclose
+
+    if not group or method not in QUORATE_RESOLUTION_METHODS:
+        return []
+    try:
+        scores = [float(review.get("score")) for review in group]
+        expected_score = (
+            scores[2] if method == "authoritative_escalation" else sum(scores) / 2
+        )
+        aggregate_score = float(properties.get("reviewer_score_docs"))
+    except (TypeError, ValueError, IndexError):
+        return ["aggregate_mismatch"]
+    if not isclose(aggregate_score, expected_score, rel_tol=0.0, abs_tol=1e-12):
+        return ["aggregate_mismatch"]
+    try:
+        review_times = {
+            _canonical_authority_timestamp(review.get("reviewed_at"))
+            for review in group
+        }
+        aggregate_time = _canonical_authority_timestamp(
+            properties.get("reviewed_docs_at")
+        )
+        if len(review_times) != 1 or aggregate_time is None:
+            return ["aggregate_mismatch"]
+        if (
+            abs(
+                _authority_timestamp_seconds(aggregate_time)
+                - _authority_timestamp_seconds(next(iter(review_times)))
+            )
+            > 5.0
+        ):
+            return ["aggregate_mismatch"]
+    except (DocsAuthorityBackfillConflict, TypeError, ValueError):
+        return ["aggregate_mismatch"]
+    return []
+
+
+def _docs_recovery_priority(
+    lifecycle: dict[str, Any], *, source_bound: bool, publication_relevant: bool
+) -> int:
+    if lifecycle["name_stage"] == "accepted":
+        return 0 if source_bound and publication_relevant else 1
+    if lifecycle["name_stage"] == "exhausted":
+        return 2
+    return 3
+
+
+def _project_docs_evidence_recovery_row(state: dict[str, Any]) -> dict[str, Any]:
+    from imas_codex.standard_names.review.audits import compute_review_input_hash
+
+    name_id = str(state.get("id") or "").strip()
+    properties = dict(state.get("standard_name") or {})
+    reviews = [dict(review) for review in state.get("reviews") or []]
+    lifecycle = _docs_authority_lifecycle(properties)
+    bindings = _docs_evidence_source_bindings(state)
+    source_bound = bool(bindings)
+    publication_relevant = (
+        lifecycle["name_stage"] == "accepted"
+        and lifecycle["docs_stage"] == "accepted"
+        and lifecycle["validation_status"] == "valid"
+    )
+    current_input_hash = compute_review_input_hash(properties)
+    stored_input_hash = properties.get("review_input_hash")
+    group, reasons = _safe_latest_docs_review_group(name_id, reviews)
+    method, shape_reasons, explicit_rescore = _docs_group_shape(name_id, group)
+    reasons.extend(shape_reasons)
+    if stored_input_hash != current_input_hash:
+        reasons.append("stale_review_input")
+    reasons.extend(_docs_evidence_aggregate_reasons(properties, group, method))
+    stored_method = properties.get("docs_review_resolution_method")
+    if stored_method not in (None, method):
+        reasons.append("terminal_method_mismatch")
+
+    live_fields = (
+        "claim_token",
+        "claimed_at",
+        "drain_claim_scope_id",
+        "drain_scope_claimed_at",
+        "drain_scope_id",
+    )
+    lifecycle_conflict = lifecycle["docs_stage"] != "accepted" or any(
+        lifecycle[field] is not None for field in live_fields
+    )
+    if lifecycle["name_stage"] not in _DOCS_EVIDENCE_LIFECYCLE_STAGES:
+        lifecycle_conflict = True
+    if lifecycle_conflict:
+        reasons.append("claim_scope_lifecycle_conflict")
+
+    authority_projection = None
+    if lifecycle["name_stage"] != "superseded" and not lifecycle_conflict:
+        try:
+            authority_projection = _project_docs_review_authority_row(
+                name_id, properties, reviews
+            )
+            _docs_authority_manifest_payload([authority_projection])
+        except (DocsAuthorityBackfillConflict, TypeError, ValueError):
+            authority_projection = None
+
+    if lifecycle["name_stage"] == "superseded":
+        outcome = "historical_hold"
+        reasons = ["superseded_history"]
+    elif authority_projection is not None:
+        outcome = "metadata_backfill_proven"
+        reasons = []
+    else:
+        ambiguous = set(reasons) - {
+            "incomplete_review_group",
+            "terminal_method_mismatch",
+        }
+        if lifecycle["name_stage"] == "accepted" and explicit_rescore and not ambiguous:
+            outcome = "rescore_required_current"
+        else:
+            outcome = "evidence_ambiguous_hold"
+
+    reason_order = (
+        "missing_review_group",
+        "incomplete_review_group",
+        "stale_review_input",
+        "aggregate_mismatch",
+        "terminal_method_mismatch",
+        "claim_scope_lifecycle_conflict",
+        "superseded_history",
+    )
+    unique_reasons = [reason for reason in reason_order if reason in set(reasons)]
+    normalized_group = [_review_evidence_record(review) for review in group]
+    docs_hash = compute_docs_authority_content_hash(properties)
+    rescore_input = None
+    if outcome == "rescore_required_current":
+        rescore_input = {
+            "api": "stage_docs_for_rescore",
+            "sn_id": name_id,
+            "expected_docs_hash": docs_hash,
+            "expected_review_input_hash": current_input_hash,
+            "preserve_description": str(properties.get("description") or ""),
+            "preserve_documentation": str(properties.get("documentation") or ""),
+        }
+    return {
+        "id": name_id,
+        "outcome": outcome,
+        "reason_codes": unique_reasons,
+        "priority": _docs_recovery_priority(
+            lifecycle,
+            source_bound=source_bound,
+            publication_relevant=publication_relevant,
+        ),
+        "description": str(properties.get("description") or ""),
+        "documentation": str(properties.get("documentation") or ""),
+        "docs_hash": docs_hash,
+        "lifecycle": lifecycle,
+        "source_bound": source_bound,
+        "publication_relevant": publication_relevant,
+        "source_bindings": bindings,
+        "reviewer_score_docs": properties.get("reviewer_score_docs"),
+        "reviewed_docs_at": _authority_json_value(properties.get("reviewed_docs_at")),
+        "stored_review_input_hash": stored_input_hash,
+        "current_review_input_hash": current_input_hash,
+        "latest_review_group_id": (
+            str(group[0].get("review_group_id")) if group else None
+        ),
+        "latest_resolution_method": method,
+        "latest_review_evidence_hash": (
+            compute_docs_review_evidence_hash(group) if group else None
+        ),
+        "latest_review_group": normalized_group,
+        "authority_projection": authority_projection,
+        "rescore_input": rescore_input,
+    }
+
+
+def _docs_evidence_manifest_payload(
+    selection: dict[str, Any], rows: list[dict[str, Any]]
+) -> dict[str, Any]:
+    normalized_rows = _authority_json_value(sorted(rows, key=lambda row: row["id"]))
+    ids = [row["id"] for row in normalized_rows]
+    if len(ids) != len(set(ids)):
+        raise DocsEvidenceRecoveryConflict("duplicate ids in evidence projection")
+    counts = {
+        outcome: sum(row["outcome"] == outcome for row in normalized_rows)
+        for outcome in _DOCS_EVIDENCE_OUTCOMES
+        if any(row["outcome"] == outcome for row in normalized_rows)
+    }
+    reasons = sorted(
+        {reason for row in normalized_rows for reason in row["reason_codes"]}
+    )
+    reason_counts = {
+        reason: sum(reason in row["reason_codes"] for row in normalized_rows)
+        for reason in reasons
+    }
+    body = {
+        "schema": DOCS_EVIDENCE_RECOVERY_MANIFEST_SCHEMA,
+        "projection_version": DOCS_EVIDENCE_RECOVERY_PROJECTION_VERSION,
+        "selection": _authority_json_value(selection),
+        "counts": counts,
+        "reason_counts": reason_counts,
+        "rows": normalized_rows,
+    }
+    return {**body, "manifest_id": _authority_payload_hash(body)}
+
+
+def build_docs_evidence_recovery_manifest(
+    name_ids: list[str] | None = None,
+    *,
+    lifecycle_selection: dict[str, Any] | None = None,
+    expected_count: int | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Build an exact, versioned census without graph writes or inference.
+
+    An operator must supply either explicit ids or a documented accepted-docs
+    lifecycle selection plus its expected cardinality. Every row is reconciled
+    against current content, the complete latest Review group, and the strict
+    authority-backfill projection. Ambiguous evidence remains a hold.
+    """
+    selection, ids = _normalize_docs_evidence_selection(
+        name_ids, lifecycle_selection, expected_count
+    )
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                if ids is None:
+                    ids = [
+                        str(dict(record).get("id") or "")
+                        for record in transaction.run(
+                            _SELECT_DOCS_EVIDENCE_IDS_QUERY,
+                            docs_stage=selection["docs_stage"],
+                            name_stages=selection["name_stages"],
+                        )
+                    ]
+                    if ids != sorted(ids) or len(ids) != len(set(ids)):
+                        raise DocsEvidenceRecoveryConflict(
+                            "lifecycle selection returned unordered or duplicate ids"
+                        )
+                    if len(ids) != selection["expected_count"]:
+                        raise DocsEvidenceRecoveryConflict(
+                            "lifecycle selection cardinality drifted: "
+                            f"expected {selection['expected_count']}, got {len(ids)}"
+                        )
+                states = _read_docs_authority_states(transaction, ids)
+                returned_ids = [str(state.get("id") or "") for state in states]
+                if returned_ids != ids:
+                    raise DocsEvidenceRecoveryConflict(
+                        "documentation evidence cohort cardinality drifted"
+                    )
+                rows = [_project_docs_evidence_recovery_row(state) for state in states]
+                transaction.rollback()
+                return _docs_evidence_manifest_payload(selection, rows)
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
+def _validate_docs_evidence_manifest(manifest: dict[str, Any]) -> list[dict[str, Any]]:
+    required = {
+        "schema",
+        "projection_version",
+        "selection",
+        "counts",
+        "reason_counts",
+        "rows",
+        "manifest_id",
+    }
+    if not isinstance(manifest, dict) or set(manifest) != required:
+        raise ValueError("documentation evidence manifest envelope is invalid")
+    if manifest["schema"] != DOCS_EVIDENCE_RECOVERY_MANIFEST_SCHEMA:
+        raise ValueError("documentation evidence manifest schema is unsupported")
+    if manifest["projection_version"] != DOCS_EVIDENCE_RECOVERY_PROJECTION_VERSION:
+        raise ValueError("documentation evidence projection version is unsupported")
+    body = {key: value for key, value in manifest.items() if key != "manifest_id"}
+    if manifest["manifest_id"] != _authority_payload_hash(body):
+        raise ValueError("documentation evidence manifest identity is invalid")
+    rows = manifest["rows"]
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("documentation evidence manifest rows must be non-empty")
+    ids = [str(row.get("id") or "") for row in rows]
+    if ids != sorted(ids) or not all(ids) or len(ids) != len(set(ids)):
+        raise ValueError("documentation evidence manifest ids are invalid")
+    return rows
+
+
+def build_docs_evidence_recovery_budget(
+    manifest: dict[str, Any],
+    *,
+    authorized_remaining_ceiling: float,
+    per_batch_hard_cap: float,
+) -> dict[str, Any]:
+    """Allocate deterministic paid tranches under two hard dollar ceilings.
+
+    The exact request exposure is unknown until the review prompt is rendered.
+    Each tranche therefore remains subject to ``model_provider_exposure`` at
+    launch, stops at its hard cap, and requires a spend/census refresh before
+    the next tranche. Target membership is never a promise that every target
+    can execute within that tranche.
+    """
+    from decimal import ROUND_DOWN, Decimal, InvalidOperation
+
+    rows = _validate_docs_evidence_manifest(manifest)
+    try:
+        ceiling = Decimal(str(authorized_remaining_ceiling))
+        batch_cap = Decimal(str(per_batch_hard_cap))
+    except InvalidOperation as exc:
+        raise ValueError("budget ceilings must be finite positive numbers") from exc
+    if not ceiling.is_finite() or ceiling <= 0:
+        raise ValueError("authorized_remaining_ceiling must be finite and positive")
+    if not batch_cap.is_finite() or batch_cap <= 0:
+        raise ValueError("per_batch_hard_cap must be finite and positive")
+
+    candidates = sorted(
+        (row for row in rows if row["outcome"] == "rescore_required_current"),
+        key=lambda row: (int(row["priority"]), row["id"]),
+    )
+    paid_batches: list[dict[str, Any]] = []
+    if candidates:
+        possible_batches = int(
+            (ceiling / batch_cap).to_integral_value(rounding=ROUND_DOWN)
+        )
+        if ceiling % batch_cap:
+            possible_batches += 1
+        batch_count = min(len(candidates), possible_batches)
+        remaining = ceiling
+        for index in range(batch_count):
+            start = index * len(candidates) // batch_count
+            stop = (index + 1) * len(candidates) // batch_count
+            target_ids = [row["id"] for row in candidates[start:stop]]
+            hard_cap = min(batch_cap, remaining)
+            batch_body = {
+                "ordinal": index + 1,
+                "target_ids": target_ids,
+                "hard_cost_cap": float(hard_cap),
+                "reservation_required_before_each_call": True,
+                "stop_and_remeasure": True,
+            }
+            paid_batches.append(
+                {
+                    **batch_body,
+                    "batch_id": _authority_payload_hash(batch_body),
+                }
+            )
+            remaining -= hard_cap
+
+    total_hard_cap = sum(
+        (Decimal(str(batch["hard_cost_cap"])) for batch in paid_batches),
+        Decimal("0"),
+    )
+    return {
+        "manifest_id": manifest["manifest_id"],
+        "authorized_remaining_ceiling": float(ceiling),
+        "per_batch_hard_cap": float(batch_cap),
+        "total_hard_cap": float(total_hard_cap),
+        "unallocated_ceiling": float(ceiling - total_hard_cap),
+        "reservation_mechanism": "model_provider_exposure",
+        "cost_is_known_before_rendering": False,
+        "stop_boundary": "stop and remeasure graph census and actual spend after every batch",
+        "zero_cost_recoverable_count": sum(
+            row["outcome"] == "metadata_backfill_proven" for row in rows
+        ),
+        "paid_candidate_count": len(candidates),
+        "historical_hold_count": sum(
+            row["outcome"] == "historical_hold" for row in rows
+        ),
+        "ambiguous_hold_count": sum(
+            row["outcome"] == "evidence_ambiguous_hold" for row in rows
+        ),
+        "paid_batches": paid_batches,
+    }
 
 
 @retry_on_deadlock()
