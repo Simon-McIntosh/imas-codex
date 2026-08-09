@@ -1894,6 +1894,13 @@ classes:
         multivalued: true
         range: string
         description: Exact Review ids atomically created or matched by terminal persistence.
+      created_reviews:
+        description: StandardNameReview records owned exclusively by this admission.
+        multivalued: true
+        range: StandardNameReview
+        inlined: false
+        annotations:
+          relationship_type: CREATED_REVIEW
       status:
         required: true
         range: DocsReviewAdmissionStatus

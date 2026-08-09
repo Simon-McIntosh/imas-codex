@@ -175,6 +175,52 @@ def _invoke(*extra_args: str) -> tuple[object, dict | None]:
     return result, captured if captured else None
 
 
+def test_required_docs_admission_flag_is_forwarded_for_exact_recovery_pool() -> None:
+    result, captured = _invoke(
+        "--only",
+        "review_docs",
+        "--scope-run-id",
+        "priced-scope",
+        "--require-docs-admission",
+    )
+
+    assert result.exit_code == 0
+    assert captured is not None
+    assert captured["require_docs_admission"] is True
+    assert captured["scope_run_id"] == "priced-scope"
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        ("--require-docs-admission",),
+        (
+            "--require-docs-admission",
+            "--scope-run-id",
+            "priced-scope",
+            "--only",
+            "review_name",
+        ),
+        (
+            "--require-docs-admission",
+            "--scope-run-id",
+            "priced-scope",
+            "--only",
+            "review_docs",
+            "--focus",
+            "path/to/name",
+        ),
+    ],
+)
+def test_required_docs_admission_rejects_ambiguous_invocation(
+    args: tuple[str, ...],
+) -> None:
+    result, _captured = _invoke(*args)
+
+    assert result.exit_code == 2
+    assert "--require-docs-admission" in result.output
+
+
 # ---------------------------------------------------------------------------
 # 1. test_default_min_score
 # ---------------------------------------------------------------------------

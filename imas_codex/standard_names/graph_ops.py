@@ -15498,6 +15498,7 @@ def claim_review_docs_batch(
     drain_scope_id: str | None = None,
     edits_only: bool = False,
     min_score: float = DEFAULT_MIN_SCORE,
+    require_docs_admission: bool = False,
 ) -> list[dict[str, Any]]:
     """Claim StandardName nodes for docs review.
 
@@ -15513,6 +15514,9 @@ def claim_review_docs_batch(
     ``unit``, ``tags``, ``physics_domain``, ``docs_chain_length``,
     ``claim_token``.
     """
+    if require_docs_admission and not scope_run_id:
+        raise ValueError("required docs admission needs an exact scope_run_id")
+
     # Name-form-vetted gate (same invariant as generate_docs): a real
     # name-review score OR a structurally-accepted derived parent. CURATIVE-SCOPE
     # EXCEPTION: under a scope_run_id (curative family-docs wave) the names are
@@ -16410,6 +16414,13 @@ def bind_docs_review_admission_claim(
                           AND (a.claim_token IS NULL OR a.claim_token = $claim_token)
                           AND (a.claim_seq IS NULL OR a.claim_seq = $claim_seq)
                           AND NOT EXISTS {
+                              MATCH (duplicate:DocsReviewAdmission)
+                              WHERE duplicate.status = 'active'
+                                AND duplicate.target_id = $target_id
+                                AND duplicate.scope_id = $scope_id
+                                AND duplicate.id <> a.id
+                          }
+                          AND NOT EXISTS {
                               MATCH (other:StandardName)
                               WHERE other.run_id = $scope_id
                                 AND other.id <> $target_id
@@ -16934,6 +16945,228 @@ def rollback_docs_rescore_admission(
                     "scope_id": admission["scope_id"],
                     "admission_id": admission_id,
                     "receipt_identity": admission.get("receipt_identity"),
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        client.close()
+
+
+@retry_on_deadlock()
+def force_rollback_docs_review_admission(
+    *,
+    target_id: str,
+    scope_id: str,
+    intended_admission_id: str | None,
+    current_claim_token: str | None,
+    current_claim_seq: int | None,
+) -> dict[str, Any]:
+    """Force exact durable rollback without rebinding a stale paid sequence.
+
+    This recovery primitive deliberately ignores the admission's stored worker
+    token because that token may belong to a dead process that already made a
+    billable call. The current StandardName claim remains an exact CAS fence:
+    it must match the caller's replacement token and sequence. Exactly one
+    active admission must bind the target and scope, and either its scalar or
+    schema-declared edge must still prove intent. Content, receipt, lifecycle,
+    and scope drift refuse without mutation.
+    """
+    if not target_id or not scope_id:
+        raise ValueError("forced docs rollback requires target_id and scope_id")
+    if intended_admission_id is not None:
+        _validate_docs_admission_id(intended_admission_id)
+
+    from imas_codex.standard_names.review.audits import compute_review_input_hash
+
+    client = GraphClient()
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                locked = [
+                    dict(record)
+                    for record in transaction.run(
+                        """
+                        MATCH (sn:StandardName {id: $target_id})
+                        SET sn._docs_admission_recovery_lock = true
+                        REMOVE sn._docs_admission_recovery_lock
+                        OPTIONAL MATCH (a:DocsReviewAdmission {
+                            target_id: $target_id, scope_id: $scope_id
+                        })
+                        WITH sn, collect(a) AS admissions
+                        FOREACH (candidate IN admissions |
+                            SET candidate._docs_admission_recovery_lock = true)
+                        FOREACH (candidate IN admissions |
+                            REMOVE candidate._docs_admission_recovery_lock)
+                        RETURN properties(sn) AS standard_name,
+                               [candidate IN admissions |
+                                   properties(candidate)] AS admissions,
+                               [(sn)-[:HAS_DOCS_REVIEW_ADMISSION]->(linked)
+                                   WHERE linked:DocsReviewAdmission |
+                                   linked.id] AS linked_admission_ids
+                        """,
+                        target_id=target_id,
+                        scope_id=scope_id,
+                    )
+                ]
+                if len(locked) != 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "missing_target"}
+                properties = dict(locked[0].get("standard_name") or {})
+                admissions = [
+                    dict(value) for value in locked[0].get("admissions") or []
+                ]
+                active = [
+                    admission
+                    for admission in admissions
+                    if admission.get("status") == "active"
+                ]
+                if len(active) > 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "duplicate_active_admission"}
+                if not active:
+                    terminal = [
+                        admission
+                        for admission in admissions
+                        if admission.get("status") == "rolled_back"
+                        and (
+                            intended_admission_id is None
+                            or admission.get("id") == intended_admission_id
+                        )
+                    ]
+                    transaction.rollback()
+                    if len(terminal) == 1:
+                        return {
+                            "ok": True,
+                            "outcome": "already_rolled_back",
+                            "admission_id": terminal[0].get("id"),
+                        }
+                    return {"ok": False, "outcome": "missing_active_admission"}
+
+                admission = active[0]
+                admission_id = str(admission.get("id") or "")
+                if (
+                    intended_admission_id is not None
+                    and admission_id != intended_admission_id
+                ):
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "admission_intent_drift"}
+                linked_ids = set(locked[0].get("linked_admission_ids") or [])
+                intent_attached = (
+                    properties.get("docs_review_admission") == admission_id
+                    or admission_id in linked_ids
+                )
+                claim_matches = properties.get(
+                    "claim_token"
+                ) == current_claim_token and (
+                    current_claim_seq is None
+                    or properties.get("claim_seq") == current_claim_seq
+                )
+                docs_hash = compute_docs_authority_content_hash(properties)
+                review_input_hash = compute_review_input_hash(properties)
+                exact = (
+                    _docs_admission_receipt_is_valid(admission)
+                    and intent_attached
+                    and claim_matches
+                    and properties.get("id") == target_id
+                    and properties.get("name_stage") == "accepted"
+                    and properties.get("docs_stage") == "drafted"
+                    and properties.get("run_id") == scope_id
+                    and admission.get("target_id") == target_id
+                    and admission.get("scope_id") == scope_id
+                    and docs_hash == admission.get("docs_hash")
+                    and review_input_hash == admission.get("review_input_hash")
+                    and properties.get("review_input_hash") == review_input_hash
+                    and all(
+                        properties.get(field) is None
+                        for field in (
+                            "drain_scope_id",
+                            "drain_scope_claimed_at",
+                            "drain_claim_scope_id",
+                        )
+                    )
+                )
+                if not exact:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "forced_rollback_drift"}
+
+                prior_authority = json.loads(admission["prior_authority_json"])
+                if set(prior_authority) != set(_DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS):
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "invalid_prior_authority"}
+                prior_scalar = {
+                    key: value
+                    for key, value in prior_authority.items()
+                    if key
+                    not in {"docs_review_quorum_shortfall_at", "reviewed_docs_at"}
+                }
+                restored = [
+                    dict(record)
+                    for record in transaction.run(
+                        """
+                        MATCH (sn:StandardName {id: $target_id})
+                        MATCH (a:DocsReviewAdmission {id: $admission_id})
+                        WHERE a.status = 'active'
+                          AND a.target_id = $target_id
+                          AND a.scope_id = $scope_id
+                          AND sn.run_id = $scope_id
+                          AND sn.docs_stage = 'drafted'
+                          AND sn.claim_token = $current_claim_token
+                          AND ($current_claim_seq IS NULL
+                               OR sn.claim_seq = $current_claim_seq)
+                        OPTIONAL MATCH (sn)-[edge:HAS_DOCS_REVIEW_ADMISSION]->(a)
+                        CALL (a) {
+                            OPTIONAL MATCH (a)-[:CREATED_REVIEW]->
+                                           (owned:StandardNameReview)
+                            WITH a, owned WHERE owned IS NOT NULL
+                              AND owned.docs_review_admission_id = a.id
+                            DETACH DELETE owned
+                            RETURN count(*) AS deleted_reviews
+                        }
+                        WITH sn, a, edge, deleted_reviews
+                        SET sn += $prior_scalar,
+                            sn.docs_review_quorum_shortfall_at = CASE
+                                WHEN $prior_shortfall_at IS NULL THEN null
+                                ELSE datetime($prior_shortfall_at) END,
+                            sn.reviewed_docs_at = CASE
+                                WHEN $prior_reviewed_at IS NULL THEN null
+                                ELSE datetime($prior_reviewed_at) END,
+                            sn.claim_token = null,
+                            sn.claimed_at = null,
+                            sn.docs_review_admission = null,
+                            a.status = 'rolled_back',
+                            a.rolled_back_at = datetime(),
+                            a.created_review_ids = []
+                        FOREACH (_ IN CASE WHEN edge IS NULL THEN [] ELSE [1] END |
+                            DELETE edge)
+                        RETURN sn.id AS id, deleted_reviews
+                        """,
+                        target_id=target_id,
+                        scope_id=scope_id,
+                        admission_id=admission_id,
+                        current_claim_token=current_claim_token,
+                        current_claim_seq=current_claim_seq,
+                        prior_scalar=prior_scalar,
+                        prior_shortfall_at=prior_authority.get(
+                            "docs_review_quorum_shortfall_at"
+                        ),
+                        prior_reviewed_at=prior_authority.get("reviewed_docs_at"),
+                    )
+                ]
+                if len(restored) != 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "forced_rollback_drift"}
+                transaction.commit()
+                return {
+                    "ok": True,
+                    "outcome": "rolled_back",
+                    "id": target_id,
+                    "scope_id": scope_id,
+                    "admission_id": admission_id,
+                    "receipt_identity": admission.get("receipt_identity"),
+                    "deleted_reviews": int(restored[0].get("deleted_reviews") or 0),
                 }
             except BaseException:
                 if not transaction.closed:

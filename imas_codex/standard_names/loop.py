@@ -159,6 +159,7 @@ def _build_pool_specs(
     skip_review: bool = False,
     skip_generate: bool = False,
     only_pool: str | None = None,
+    require_docs_admission: bool = False,
 ) -> list[Any]:
     """Construct 7 :class:`PoolSpec` objects wiring claims → batch processors.
 
@@ -223,6 +224,10 @@ def _build_pool_specs(
 
     if only_pool is not None and only_pool not in POOL_NAMES:
         raise ValueError(f"unknown standard-name pool: {only_pool}")
+    if require_docs_admission and (only_pool != "review_docs" or not scope_run_id):
+        raise ValueError(
+            "required docs admission needs review_docs and an exact scope_run_id"
+        )
 
     regen_score = min_score if min_score is not None else DEFAULT_MIN_SCORE
     _rotation_cap_kwargs: dict[str, Any] = {}
@@ -501,10 +506,18 @@ def _build_pool_specs(
             claim=_make_claim_adapter(
                 claim_review_docs_batch,
                 min_score=regen_score,
+                require_docs_admission=require_docs_admission,
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_review_docs_batch, heartbeat=True),
+            process=_make_process_adapter(
+                process_review_docs_batch,
+                heartbeat=True,
+                process_kwargs={
+                    "require_docs_admission": require_docs_admission,
+                    "scope_run_id": scope_run_id,
+                },
+            ),
             release=_make_release_adapter(
                 release_review_docs_claims, ids_kwarg="sn_ids"
             ),
@@ -835,6 +848,7 @@ async def run_sn_pools(
     attach_only: bool = False,
     reconcile_only: bool = False,
     skip_global_maintenance: bool = False,
+    require_docs_admission: bool = False,
     scope_started_callback: Callable[[], None] | None = None,
 ) -> RunSummary:
     """Run the pool-based ``sn run`` orchestrator.
@@ -926,6 +940,10 @@ async def run_sn_pools(
 
     if only_pool is not None and only_pool not in POOL_NAMES:
         raise ValueError(f"unknown standard-name pool: {only_pool}")
+    if require_docs_admission and (only_pool != "review_docs" or not scope_run_id):
+        raise ValueError(
+            "required docs admission needs review_docs and an exact scope_run_id"
+        )
     if scope_size_hint is not None:
         if (
             not isinstance(scope_size_hint, int)
@@ -1052,6 +1070,7 @@ async def run_sn_pools(
             "docs_only": docs_only,
             "skip_review": skip_review,
             "skip_generate": skip_generate,
+            "require_docs_admission": require_docs_admission,
         },
         scope={
             "domains": list(domains),
@@ -1729,6 +1748,7 @@ async def run_sn_pools(
             skip_review=skip_review,
             skip_generate=skip_generate,
             only_pool=only_pool,
+            require_docs_admission=require_docs_admission,
         )
 
         # ── Wire pool health into display state ───────────────────
