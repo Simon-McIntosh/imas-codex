@@ -15490,6 +15490,7 @@ def claim_refine_name_batch(
             ", sn.docs_hint AS docs_hint"
             ", sn.edit_reason AS edit_reason"
             ", sn.edit_origin AS edit_origin"
+            ", sn.run_id AS scope_run_id"
         ),
         stage_field="name_stage",
         to_stage="refining",

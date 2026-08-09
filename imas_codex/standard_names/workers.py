@@ -6432,6 +6432,54 @@ class RefineCandidateValidationError(ValueError):
     """A refined candidate failed deterministic strict grammar validation."""
 
 
+class RefineScopeContinuityError(RuntimeError):
+    """A refine batch cannot prove one coherent successor scope."""
+
+
+def _refine_batch_scope_id(batch: list[dict[str, Any]]) -> str | None:
+    """Return the one focused scope carried by the atomic claim, if any.
+
+    ``BudgetManager.run_id`` identifies the audit run that pays for and counts
+    the work.  It is not the graph scope selected by ``--focus``.  The claim
+    read-back carries the predecessor's durable ``StandardName.run_id`` under
+    ``scope_run_id`` so a successor can remain visible to the same focused
+    invocation across every refine rotation.
+
+    An ordinary unscoped batch carries only null values.  A mixture of scoped
+    and unscoped rows, distinct scopes, or a blank scope cannot have arisen
+    from one coherent atomic focused claim, so refinement refuses before any
+    model call or persistence.
+    """
+    scope_ids: set[str] = set()
+    unscoped_count = 0
+    for item in batch:
+        raw_scope = item.get("scope_run_id")
+        if raw_scope is None:
+            unscoped_count += 1
+            continue
+        if not isinstance(raw_scope, str) or not raw_scope.strip():
+            raise RefineScopeContinuityError(
+                f"refine claim for {item.get('id')!r} carries a blank scope identity"
+            )
+        if raw_scope != raw_scope.strip():
+            raise RefineScopeContinuityError(
+                f"refine claim for {item.get('id')!r} carries a non-canonical "
+                "scope identity"
+            )
+        scope_ids.add(raw_scope)
+
+    if len(scope_ids) > 1:
+        raise RefineScopeContinuityError(
+            "refine batch carries multiple focused scope identities: "
+            + ", ".join(sorted(scope_ids))
+        )
+    if scope_ids and unscoped_count:
+        raise RefineScopeContinuityError(
+            "refine batch mixes focused and unscoped claim metadata"
+        )
+    return next(iter(scope_ids), None)
+
+
 def _compose_refined_candidate_name(result_obj: Any) -> str:
     """Compose one refined candidate name and type deterministic failures."""
     from imas_standard_names import ParseError
@@ -6516,6 +6564,7 @@ async def process_refine_name_batch(
     from imas_codex.standard_names.fanout.dispatcher import proposer_exposure
     from imas_codex.standard_names.graph_ops import (
         _mark_refine_vocab_gap_exhausted,
+        bump_sn_run_counter,
         persist_refined_name,
         release_refine_name_failed_claims,
         resubmit_pinned_rename_for_review,
@@ -6523,6 +6572,7 @@ async def process_refine_name_batch(
     from imas_codex.standard_names.models import RefinedName
 
     rotation_cap = DEFAULT_REFINE_ROTATIONS
+    focus_scope_id = _refine_batch_scope_id(batch)
     processed = 0
 
     # ── GraphClient lifecycle ────────────────────────────────────────
@@ -6934,9 +6984,16 @@ async def process_refine_name_batch(
                     model=model,
                     reason=result_obj.reason,
                     escalated=escalate,
-                    run_id=mgr.run_id,
+                    # A focused successor inherits the predecessor's durable
+                    # scope inside persist_refined_name's transaction when
+                    # run_id is null. The manager id remains reserved for the
+                    # SNRun that paid for this invocation. Unscoped runs keep
+                    # their established audit-id stamping behavior.
+                    run_id=mgr.run_id if focus_scope_id is None else None,
                     expected_claim_token=item.get("claim_token"),
                 )
+                if focus_scope_id is not None:
+                    bump_sn_run_counter(mgr.run_id, "names_regenerated")
                 processed += 1
                 logger.info(
                     "refine_name: %s → %s (chain_length=%d, model=%s)",
