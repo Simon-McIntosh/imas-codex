@@ -117,6 +117,25 @@ The single most-repeated field choice: which `locus_relation` to pair with a `lo
 
 This rule is unconditional and overrides any apparent symmetry with sibling names.
 
+### Positional samples never enter Standard Name identity — HARD
+
+Never emit, propose, approve, or refine a Standard Name that encodes an ordered
+sample or endpoint. Positional words such as **first, second, third, start, end**
+and equivalent sample-position labels remain in the DD path and source
+description as provenance, never in the identity. Apply this rule only when the
+source structure proves that the word indexes a point or sample; do not strip a
+registered semantic token such as `first_wall`, or `start`/`end` when it names a
+state or process rather than sample position.
+
+Dropping the positional label must preserve the exact quantity, owner, carrier,
+geometry representation, axis, mechanism, and locus. If the same non-ordinal
+identity needs an unavailable carrier or locus token, emit a `vocab_gap` for
+that exact token. Never borrow `line_of_sight` or another object's identity.
+Thus `radial_coordinate_of_arc_of_circle_start_point` is forbidden; the
+intended semantic class is the radial coordinate of the same arc-of-circle
+carrier without its endpoint index. If that carrier has no registered token,
+emit the `vocab_gap` rather than inventing a Standard Name.
+
 ### Enumeration is a coordinate, not a name (geometry-point collapse)
 
 Geometry defined by multiple ordinal points omits the ordinal only when it is

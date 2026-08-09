@@ -349,6 +349,8 @@ _SAMPLE_FEATURE_NOUNS: frozenset[str] = frozenset(
     {
         "point",
         "points",
+        "sample",
+        "samples",
         "node",
         "nodes",
         "centre",

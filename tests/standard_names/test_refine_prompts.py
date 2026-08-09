@@ -12,6 +12,7 @@ from __future__ import annotations
 import pytest
 
 from imas_codex.llm.prompt_loader import render_prompt
+from imas_codex.standard_names.context import build_compose_context
 
 # ---------------------------------------------------------------------------
 # Context builders
@@ -196,6 +197,20 @@ class TestRefineNamePrompt:
         )
         rendered = render_prompt("sn/refine_name_user", ctx)
         assert "no per-dimension comments recorded" in rendered
+
+    def test_system_forbids_endpoint_position_identity(self):
+        """Refinement cannot reintroduce ordering removed by composition."""
+        rendered = " ".join(
+            render_prompt("sn/refine_name_system", build_compose_context())
+            .lower()
+            .split()
+        )
+
+        assert "never emit, propose, approve, or refine" in rendered
+        assert "first, second, third, start, end" in rendered
+        assert "radial_coordinate_of_arc_of_circle_start_point" in rendered
+        assert "same arc-of-circle carrier" in rendered
+        assert "vocab_gap" in rendered
 
 
 # ---------------------------------------------------------------------------
