@@ -382,3 +382,104 @@ def test_generate_docs_user_template_renders_without_dd_context():
     # DD sections should be absent (not even their headers)
     assert "IMAS DD Paths" not in rendered
     assert "DD Source Documentation" not in rendered
+
+
+# =============================================================================
+# Documentation-family safety
+# =============================================================================
+
+
+class _SiblingFamilyGC:
+    """Return a canned family row while recording the read query."""
+
+    def __init__(self, row: dict[str, Any] | None):
+        self.row = row
+        self.calls: list[tuple[str, dict[str, Any]]] = []
+
+    def query(self, cypher: str, **params: Any):
+        self.calls.append((cypher, params))
+        return [self.row] if self.row is not None else []
+
+
+def _sibling(name: str, operator_kind: str) -> dict[str, Any]:
+    return {
+        "id": name,
+        "description": f"Description for {name}",
+        "documentation": f"Documentation for {name}",
+        "docs_stage": "accepted",
+        "reviewer_score_docs": 0.9,
+        "operator_kind": operator_kind,
+        "axis": None,
+    }
+
+
+def test_locus_ancestry_does_not_create_automatic_docs_cohort():
+    """A large locus peel is grammar ancestry, not prose parallelism."""
+    from imas_codex.standard_names.context import fetch_sibling_family
+
+    siblings = [
+        _sibling(f"radial_coordinate_of_distinct_owner_{index}", "locus")
+        for index in range(34)
+    ]
+    gc = _SiblingFamilyGC(
+        {
+            "parent_id": "radial_coordinate",
+            "parent_description": "Radial coordinate.",
+            "parent_documentation": "The radial coordinate locates a point.",
+            "parent_docs_stage": "accepted",
+            "member_operator_kind": "locus",
+            "sibs": siblings,
+        }
+    )
+
+    family = fetch_sibling_family("radial_coordinate_of_control_surface", gc=gc)
+
+    assert family is None
+    assert len(siblings) + 1 == 35
+    assert "locus" not in gc.calls[0][1]["family_kinds"]
+
+
+def test_safe_projection_family_remains_available_to_docs():
+    """Axis projections remain useful parallel-structure comparators."""
+    from imas_codex.standard_names.context import fetch_sibling_family
+
+    gc = _SiblingFamilyGC(
+        {
+            "parent_id": "mode_number",
+            "parent_description": "Mode number components.",
+            "parent_documentation": "Mode numbers label periodic structure.",
+            "parent_docs_stage": "accepted",
+            "member_operator_kind": "projection",
+            "sibs": [
+                _sibling("poloidal_mode_number", "projection"),
+                _sibling("toroidal_mode_number", "projection"),
+            ],
+        }
+    )
+
+    family = fetch_sibling_family("radial_mode_number", gc=gc)
+
+    assert family is not None
+    assert [member["name"] for member in family["siblings"]] == [
+        "poloidal_mode_number",
+        "toroidal_mode_number",
+    ]
+    assert set(gc.calls[0][1]["family_kinds"]) == {
+        "coordinate",
+        "projection",
+        "qualifier",
+    }
+
+
+def test_source_owners_are_not_automatic_prose_family_members():
+    """Attached owners never become sibling members or identity evidence."""
+    from imas_codex.standard_names.context import fetch_sibling_family
+
+    gc = _SiblingFamilyGC(None)
+    source_owners = [f"outline_owner_{index}" for index in range(10)]
+
+    assert fetch_sibling_family("vertical_outline", gc=gc) is None
+    assert len(source_owners) == 10
+    cypher = gc.calls[0][0]
+    assert "StandardNameSource" not in cypher
+    assert "PRODUCED_NAME" not in cypher

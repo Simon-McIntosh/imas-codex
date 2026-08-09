@@ -20,17 +20,13 @@ import re
 from typing import Any
 
 from imas_codex.graph.models import NameStage
+from imas_codex.standard_names.context import DOCUMENTATION_FAMILY_OPERATOR_KINDS
 from imas_codex.standard_names.defaults import (
     DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
 )
 
 #: Operator kinds eligible for parent-based family grouping.
-_FAMILY_OPERATOR_KINDS: tuple[str, ...] = (
-    "projection",
-    "qualifier",
-    "coordinate",
-    "locus",
-)
+_FAMILY_OPERATOR_KINDS = DOCUMENTATION_FAMILY_OPERATOR_KINDS
 
 #: Averaging-reduction operator tokens whose HAS_PARENT edges also join a
 #: family even though their kind is unary_prefix (excluded above so the
@@ -197,7 +193,22 @@ def _row_to_member(row: dict[str, Any]) -> dict[str, Any]:
         "docs_stage": row.get("docs_stage"),
         "reviewer_score_docs": row.get("reviewer_score_docs"),
         "operator_kind": row.get("operator_kind"),
+        "operator": row.get("operator"),
     }
+
+
+def _is_documentation_family_member(member: dict[str, Any]) -> bool:
+    """Return whether structural edge metadata proves a safe docs cohort."""
+    kind = member.get("operator_kind")
+    operator = member.get("operator")
+    return kind in _FAMILY_OPERATOR_KINDS or operator in _FAMILY_REDUCTION_OPERATORS
+
+
+def _documentation_family_members(
+    members: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Drop explicitly ineligible structural edges from a query result."""
+    return [member for member in members if _is_documentation_family_member(member)]
 
 
 def _resolve_gc(gc: Any | None) -> tuple[Any, bool]:
@@ -256,19 +267,19 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
             resolved_gc.query(
                 """
                 MATCH (c:StandardName {id: $seed})-[r:HAS_PARENT]->(p:StandardName)
-                WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
-                RETURN p.id AS parent_id
-                LIMIT 1
+                RETURN p.id AS parent_id,
+                       r.operator_kind AS operator_kind,
+                       r.operator AS operator
+                ORDER BY p.id
                 """,
                 seed=seed_name,
-                kinds=list(_FAMILY_OPERATOR_KINDS),
-                reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
             )
             or []
         )
+        eligible_parent_rows = _documentation_family_members(list(parent_rows))
 
-        if parent_rows and parent_rows[0].get("parent_id"):
-            parent_id = parent_rows[0]["parent_id"]
+        if eligible_parent_rows and eligible_parent_rows[0].get("parent_id"):
+            parent_id = eligible_parent_rows[0]["parent_id"]
             member_rows = (
                 resolved_gc.query(
                     """
@@ -280,7 +291,8 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                            c.documentation AS documentation,
                            c.docs_stage AS docs_stage,
                            c.reviewer_score_docs AS reviewer_score_docs,
-                           r.operator_kind AS operator_kind
+                           r.operator_kind AS operator_kind,
+                           r.operator AS operator
                     """,
                     parent_id=parent_id,
                     kinds=list(_FAMILY_OPERATOR_KINDS),
@@ -300,7 +312,9 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                 or []
             )
             parent_info = parent_info_rows[0] if parent_info_rows else {}
-            members = [_row_to_member(r) for r in member_rows]
+            members = _documentation_family_members(
+                [_row_to_member(r) for r in member_rows]
+            )
             kinds_seen = sorted(
                 {m["operator_kind"] for m in members if m["operator_kind"]}
             )
@@ -317,6 +331,9 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                 "members": members,
                 "anchor": anchor,
             }
+
+        if parent_rows:
+            return None
 
         physical_base = seed_rows[0].get("physical_base")
         if not physical_base:
@@ -336,8 +353,7 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                   AND coalesce(c.name_stage, '') <> $superseded
                   AND c.description IS NOT NULL
                   AND NOT EXISTS {
-                    MATCH (c)-[r:HAS_PARENT]->(:StandardName)
-                    WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
+                    MATCH (c)-[:HAS_PARENT]->(:StandardName)
                   }
                 RETURN c.id AS id, c.description AS description,
                        c.documentation AS documentation,
@@ -345,8 +361,6 @@ def assemble_family(seed_name: str, gc: Any | None = None) -> dict[str, Any] | N
                        c.reviewer_score_docs AS reviewer_score_docs
                 """,
                 pb=physical_base,
-                kinds=list(_FAMILY_OPERATOR_KINDS),
-                reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                 superseded=NameStage.superseded.value,
             )
             or []
@@ -415,7 +429,8 @@ def build_worklist(
                            documentation: c.documentation,
                            docs_stage: c.docs_stage,
                            reviewer_score_docs: c.reviewer_score_docs,
-                           operator_kind: r.operator_kind
+                           operator_kind: r.operator_kind,
+                           operator: r.operator
                        }) AS members
                 """,
                 kinds=list(_FAMILY_OPERATOR_KINDS),
@@ -427,7 +442,7 @@ def build_worklist(
 
         worklist: list[dict[str, Any]] = []
         for row in family_rows:
-            members = list(row.get("members") or [])
+            members = _documentation_family_members(list(row.get("members") or []))
             n = len(members)
             if n < min_size:
                 continue
@@ -481,8 +496,7 @@ def build_worklist(
                       AND coalesce(c.name_stage, '') <> $superseded
                       AND c.description IS NOT NULL
                       AND NOT EXISTS {
-                        MATCH (c)-[r:HAS_PARENT]->(:StandardName)
-                        WHERE (r.operator_kind IN $kinds OR r.operator IN $reduction_ops)
+                        MATCH (c)-[:HAS_PARENT]->(:StandardName)
                       }
                     RETURN c.physical_base AS physical_base,
                            collect({
@@ -494,8 +508,6 @@ def build_worklist(
                                harmonized_group_signature: c.harmonized_group_signature
                            }) AS members
                     """,
-                    kinds=list(_FAMILY_OPERATOR_KINDS),
-                    reduction_ops=list(_FAMILY_REDUCTION_OPERATORS),
                     superseded=NameStage.superseded.value,
                 )
                 or []
@@ -668,7 +680,9 @@ def stamp_harmonized(
                       AND c.description IS NOT NULL
                     RETURN c.id AS id, c.description AS description,
                            c.documentation AS documentation,
-                           c.docs_stage AS docs_stage
+                           c.docs_stage AS docs_stage,
+                           r.operator_kind AS operator_kind,
+                           r.operator AS operator
                     """,
                     pid=parent_id,
                     kinds=list(_FAMILY_OPERATOR_KINDS),
@@ -676,7 +690,7 @@ def stamp_harmonized(
                 )
                 or []
             )
-            members = [dict(r) for r in rows]
+            members = _documentation_family_members([dict(r) for r in rows])
             if not members or any(
                 m.get("docs_stage") != _DOCS_STAGE_ACCEPTED for m in members
             ):
@@ -788,7 +802,9 @@ def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:
                     id: c.id,
                     description: c.description,
                     documentation: c.documentation,
-                    docs_stage: c.docs_stage
+                    docs_stage: c.docs_stage,
+                    operator_kind: r.operator_kind,
+                    operator: r.operator
                 }) AS members
                 WHERE size(members) >= 2
                 RETURN p.id AS parent_id,
@@ -808,7 +824,9 @@ def restamp_harmonized_families(gc: Any | None = None) -> dict[str, int]:
     unchanged = 0
     not_ready = 0
     for row in rows:
-        members = list(row.get("members") or [])
+        members = _documentation_family_members(list(row.get("members") or []))
+        if len(members) < 2:
+            continue
         if any(m.get("docs_stage") != _DOCS_STAGE_ACCEPTED for m in members):
             not_ready += 1
             continue
