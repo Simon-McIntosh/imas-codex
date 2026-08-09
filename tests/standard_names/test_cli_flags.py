@@ -29,6 +29,121 @@ from imas_codex.standard_names.defaults import (
     REVIEW_NAME_BACKLOG_CAP,
 )
 
+
+def test_release_refine_claim_help_describes_fenced_dry_run() -> None:
+    result = CliRunner().invoke(
+        sn, ["release-refine-claim", "--help"], terminal_width=200
+    )
+
+    assert result.exit_code == 0
+    assert "zero-write" in result.output
+    assert "dry run" in result.output
+    assert "exact claim token" in result.output
+    assert "--manifest-sha256" in result.output
+    assert "refining" in result.output
+
+
+def test_release_refine_claim_default_emits_json_dry_run() -> None:
+    receipt = {
+        "outcome": "would_release",
+        "dry_run": True,
+        "eligible": True,
+        "would_release": 1,
+        "changed": 0,
+        "manifest_sha256": "a" * 64,
+    }
+    with patch(
+        "imas_codex.standard_names.graph_ops.release_stranded_refine_claim",
+        return_value=receipt,
+    ) as release:
+        result = CliRunner().invoke(
+            sn,
+            [
+                "release-refine-claim",
+                "electron_temperature",
+                "--claim-token",
+                "exact-token",
+                "--expected-stage",
+                "refining",
+                "--scope-run-id",
+                "exact-scope",
+            ],
+        )
+
+    assert result.exit_code == 0
+    assert result.output.strip() == (
+        '{"changed":0,"dry_run":true,"eligible":true,'
+        '"manifest_sha256":"' + "a" * 64 + '","outcome":"would_release",'
+        '"would_release":1}'
+    )
+    release.assert_called_once_with(
+        "electron_temperature",
+        claim_token="exact-token",
+        expected_stage="refining",
+        scope_run_id="exact-scope",
+        apply=False,
+        manifest_sha256=None,
+    )
+
+
+@pytest.mark.parametrize(
+    ("extra", "message"),
+    [
+        (["--apply"], "--apply requires --scope-run-id"),
+        (
+            ["--apply", "--scope-run-id", "exact-scope"],
+            "--apply requires --manifest-sha256",
+        ),
+    ],
+)
+def test_release_refine_claim_apply_requires_scope_and_manifest(
+    extra: list[str], message: str
+) -> None:
+    result = CliRunner().invoke(
+        sn,
+        [
+            "release-refine-claim",
+            "electron_temperature",
+            "--claim-token",
+            "exact-token",
+            "--expected-stage",
+            "refining",
+            *extra,
+        ],
+    )
+
+    assert result.exit_code == 2
+    assert message in result.output
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        [
+            "release-refine-claim",
+            "electron_temperature",
+            "--expected-stage",
+            "refining",
+            "--apply",
+        ],
+        [
+            "release-refine-claim",
+            "electron_temperature",
+            "--claim-token",
+            "exact-token",
+            "--expected-stage",
+            "reviewed",
+        ],
+    ],
+)
+def test_release_refine_claim_rejects_missing_token_or_wrong_stage(
+    args: list[str],
+) -> None:
+    result = CliRunner().invoke(sn, args)
+
+    assert result.exit_code == 2
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
