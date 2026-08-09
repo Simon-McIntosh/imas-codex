@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-graph-wide-integrity">
   <meta name="plan-title" content="Graph-wide name integrity (everything outside the release batch)">
   <meta name="plan-summary" content="Close the provenance and attachment defects in the exploratory half of the corpus — the deliberately-broad generation across ~half the DD catalog — plus the write-path gaps and carried findings that the WEST release does not depend on.">
-  <meta name="plan-status" content="blocked">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="109">
+<meta name="plan-version" content="110">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -404,6 +404,42 @@
 <div class="r-dec" data-key="budget-reservation-policy" data-choice="mean-based-estimation" data-by="lead" data-when="2026-08-09T05:53:19+00:00">
     <p class="r-dec-q">budget-reservation-policy</p>
     <p class="r-dec-rat">Lead directive 2026-08-09: per-request budget reservations must estimate the MEAN cost, not the worst case. The current policy-ceiling pricing for uncatalogued models produces $6.75/review-request and $8.51/compose-batch reservations against actual costs of cents, forcing replica throttling and $100 gate headroom for $1 of real spend. The hard budget stop already owns the ceiling: the pipeline stops when spend reaches the limit; it does not flush and break the ceiling. Fix = catalog the three reviewer-seat and compose-seat prices AND switch the exposure estimate in budget.py::model_provider_exposure to expected cost.</p>
+    </div>
+<div class="r-dec" data-key="family-topology-repair" data-choice="repair-topology-then-recompose" data-by="Simon McIntosh" data-when="2026-08-09T13:08:11+00:00">
+    <p class="r-dec-q">How should over-fanned and prematurely folded Standard Name families be repaired?</p>
+    <p class="r-dec-ctx">The live graph shows that initial family fanning and later broad folding can both erase source meaning. The repair may require selective lifecycle rewind rather than another family-wide rename.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="repair-topology-then-recompose">Repair fan/fold mechanics, selectively reset affected sources to extracted, then rerun the ordinary pipeline.</button>
+      <button class="r-opt" data-value="source-scoped-successor-only">Add only an exact-source successor split while leaving family mechanics unchanged.</button>
+      <button class="r-opt" data-value="preserve-current-families">Avoid resets and preserve the current family topology.</button>
+      </p>
+    <p class="r-dec-rat">Lead decision 2026-08-09: over-fanning and later folding are both suspected causes of semantic loss. Repair the topology and its prevention rules first; use exact, reviewed selective reset-to-extracted for affected sources and rerun the ordinary pipeline rather than forcing another broad rename or retaining damaged families.</p>
+    </div>
+<div class="r-dec" data-key="standard-name-ordinality" data-choice="never-encode-position" data-by="Simon McIntosh" data-when="2026-08-09T13:08:11+00:00">
+    <p class="r-dec-q">May a Standard Name encode an ordinal or endpoint position?</p>
+    <p class="r-dec-ctx">DD paths and descriptions may contain first_point, second_point, start_point, end_point, or equivalent ordering metadata.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="never-encode-position">Never encode start/end/first/second/third or equivalent position ordering in a Standard Name.</button>
+      <button class="r-opt" data-value="encode-distinct-positions">Allow ordered point positions to create distinct Standard Names.</button>
+      </p>
+    <p class="r-dec-rat">Strict lead rule 2026-08-09: ordinality and endpoint position are DD representation details, not Standard Name semantics. All ordered samples of the same physical object share the non-ordinal identity. This forbids proposed identities such as arc_of_circle_start_point; source order may remain in the DD path and description only.</p>
+    </div>
+<div class="r-dec" data-key="funded-drain-cadence" data-choice="guarded-50-dollar-cohorts" data-by="Simon McIntosh" data-when="2026-08-09T13:08:11+00:00">
+    <p class="r-dec-q">How should the authorized USD 200 pipeline budget be used?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="guarded-50-dollar-cohorts">Run sequential cohorts capped at USD 50, starting with backlog flush and remeasuring after each.</button>
+      <button class="r-opt" data-value="single-200-dollar-run">Run one pipeline invocation with a USD 200 cap.</button>
+      <button class="r-opt" data-value="hold-spend">Do not run paid cohorts.</button>
+      </p>
+    <p class="r-dec-rat">Lead choice 1A: the USD 200 ceiling is cumulative execution authority, not a reason to stop over fractional reservations. Use up to four independently guarded USD 50 cohorts, beginning with backlog drain, and stop earlier only for a real safety, quality, provider, or no-eligible-work condition.</p>
+    </div>
+<div class="r-dec" data-key="local-compose-readiness" data-choice="verify-local-dsv4" data-by="Simon McIntosh" data-when="2026-08-09T13:08:11+00:00">
+    <p class="r-dec-q">What must be true before generating new Standard Names?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="verify-local-dsv4">Verify the imas-ambix local DSv4 service and configured compose route are healthy before generation.</button>
+      <button class="r-opt" data-value="allow-paid-compose-without-local-check">Allow generation without checking the local compose service.</button>
+      </p>
+    <p class="r-dec-rat">Lead decision 2026-08-09: check that the local DSv4 model managed by imas-ambix is running and that imas-codex is routed to the intended local compose endpoint before any new-name generation.</p>
     </div>
 </section>
 
@@ -1127,14 +1163,17 @@ Done-when (ordered)
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
 <h2><span class="sec">§</span> Open questions</h2>
-<div class="r-q" data-id="q-sgwi-r1-source-scoped-repair" data-section="§7" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="q-sgwi-r1-source-scoped-repair" data-section="§7" data-status="resolved" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="2026-08-09T13:08:11+00:00" data-resolved-by="Simon McIntosh">
     <p class="r-q-body"><p>R1's exact source still binds <code>radial_coordinate_of_control_surface</code>, but the sanctioned rename dry-run expands to 34 siblings and requires broad family scope. Should we authorize and build an exact source-scoped successor/split instrument instead of cascading a family rename?</p></p>
+    <p class="r-q-resolution">Choice 2B: repair the underlying family fan/fold mechanics instead of adding only a narrow successor workaround. Selective reset-to-extracted and ordinary pipeline reruns are authorized for exact reviewed sources after topology prevention is green.</p>
     </div>
-<div class="r-q" data-id="q-sgwi-r4-array-locus-authority" data-section="§7" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="q-sgwi-r4-array-locus-authority" data-section="§7" data-status="resolved" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="2026-08-09T13:08:11+00:00" data-resolved-by="Simon McIntosh">
     <p class="r-q-body"><p>R4 is a sole-attachment FLT_1D array whose ordinary detach correctly orphan-refuses; no execution row, reason, manifest, or recovery vehicle exists, and the evidence conflicts between an invalid start-point locus and the broader arc-of-circle locus. Which exact target/locus and sanctioned recovery vehicle should be locked before L/M proceed?</p></p>
+    <p class="r-q-resolution">Do not preselect or invent an ordinal locus. Start/end/first/second positions are forbidden in Standard Names. After the policy and family repairs, reset the exact R4 source to extracted through a sanctioned scoped instrument and let the ordinary pipeline derive a non-ordinal owner/quantity identity; preserve the DD ordering detail only in source metadata and description.</p>
     </div>
-<div class="r-q" data-id="q-sgwi-closure-instruments" data-section="§7" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="" data-resolved-by="">
+<div class="r-q" data-id="q-sgwi-closure-instruments" data-section="§7" data-status="resolved" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="2026-08-09T13:08:11+00:00" data-resolved-by="Simon McIntosh">
     <p class="r-q-body"><p>The promised verbatim radius-locus refine rule is absent from all asserted authorities, and the runbook §5b query currently returns 87 rows rather than zero. Please authorize the reviewed verbatim rule and a scope/cardinality-aware replacement census before this follow-up is declared complete.</p></p>
+    <p class="r-q-resolution">Replace the absent radius-locus wording with the strict no-ordinal-position rule and implement a source-scope/cardinality-aware census. The census must evaluate the intended cohort rather than demand zero across unrelated valid rows.</p>
     </div>
 </section>
 </main>
