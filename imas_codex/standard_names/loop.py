@@ -472,7 +472,10 @@ def _build_pool_specs(
                 **({"domain": only_domain} if only_domain else {}),
                 **_scope_kwargs,
             ),
-            process=_make_process_adapter(process_refine_name_batch),
+            process=_make_process_adapter(
+                process_refine_name_batch,
+                process_kwargs={"scope_run_id": scope_run_id},
+            ),
             release=_make_release_adapter(
                 release_refine_name_claims, ids_kwarg="sn_ids"
             ),
