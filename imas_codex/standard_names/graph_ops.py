@@ -14,6 +14,7 @@ import functools
 import hashlib
 import json
 import logging
+import math
 import os
 import re
 import time
@@ -15563,6 +15564,7 @@ def claim_review_docs_batch(
             ", sn.edit_origin AS edit_origin"
             ", sn.origin AS origin"
             ", sn.run_id AS run_id"
+            ", sn.docs_review_admission AS docs_review_admission"
             ", sn.source_paths AS source_paths"
             ", [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {"
             "     id: source.id,"
@@ -15963,19 +15965,7 @@ _DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS = (
     "reviewed_docs_at",
     "run_id",
 )
-_DOCS_RESCORE_RECEIPT_SCHEMA = "imas-codex.docs-rescore-admission-receipt"
-_DOCS_RESCORE_RECEIPT_FIELDS = frozenset(
-    {
-        "schema",
-        "id",
-        "scope_run_id",
-        "request_identity",
-        "docs_hash",
-        "review_input_hash",
-        "prior_authority",
-        "rollback_receipt_id",
-    }
-)
+_DOCS_REVIEW_ADMISSION_TTL_SECONDS = 3600
 
 _LOCK_READ_DOCS_FOR_RESCORE_QUERY = """
 MATCH (sn:StandardName {id: $id})
@@ -15983,6 +15973,47 @@ SET sn._docs_rescore_lock = true
 REMOVE sn._docs_rescore_lock
 RETURN properties(sn) AS standard_name
 """
+
+
+def docs_review_admission_id(scope_id: str) -> str:
+    """Return the deterministic identity that makes one scope single-target."""
+    if not isinstance(scope_id, str) or not scope_id.strip():
+        raise ValueError("documentation review scope id must be non-empty")
+    return hashlib.sha256(f"docs-review-admission\0{scope_id}".encode()).hexdigest()
+
+
+def _docs_review_group_id(admission_id: str) -> str:
+    """Return the deterministic Review group owned by one admission."""
+    return hashlib.sha256(f"docs-review-group\0{admission_id}".encode()).hexdigest()
+
+
+def _docs_admission_receipt_identity(payload: dict[str, Any]) -> str:
+    """Hash immutable admission authority independently of wall-clock fields."""
+    return _authority_payload_hash(payload)
+
+
+def _docs_admission_receipt_is_valid(admission: dict[str, Any]) -> bool:
+    """Verify the self-authenticating immutable fields of a durable admission."""
+    try:
+        payload = {
+            "admission_id": admission["id"],
+            "target_id": admission["target_id"],
+            "scope_id": admission["scope_id"],
+            "request_identity": admission["request_identity"],
+            "docs_hash": admission["docs_hash"],
+            "review_input_hash": admission["review_input_hash"],
+            "mandatory_exposures": json.loads(admission["mandatory_exposures_json"]),
+            "conditional_exposure": float(admission["conditional_exposure"]),
+            "expected_exposure": float(admission["expected_exposure"]),
+            "prior_docs_stage": admission["prior_docs_stage"],
+            "prior_authority": json.loads(admission["prior_authority_json"]),
+            "review_group_id": admission["review_group_id"],
+        }
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return False
+    return _docs_admission_receipt_identity(payload) == admission.get(
+        "receipt_identity"
+    )
 
 
 def _docs_rescore_ineligible(sn_id: str, state: dict[str, Any]) -> dict[str, Any]:
@@ -16007,6 +16038,10 @@ def stage_docs_for_rescore(
     expected_docs_hash: str | None = None,
     expected_review_input_hash: str | None = None,
     request_identity: str | None = None,
+    mandatory_exposures: list[float] | None = None,
+    conditional_exposure: float | None = None,
+    expected_exposure: float | None = None,
+    admission_ttl_seconds: int = _DOCS_REVIEW_ADMISSION_TTL_SECONDS,
 ) -> dict[str, Any]:
     """Stage one exact documentation record for a fresh quorum review.
 
@@ -16037,6 +16072,32 @@ def stage_docs_for_rescore(
             "ok": False,
             "reason": "priced admission requires both documentation hashes",
         }
+    if request_identity is not None:
+        exposures = list(mandatory_exposures or [])
+        if (
+            not exposures
+            or conditional_exposure is None
+            or expected_exposure is None
+            or admission_ttl_seconds < 1
+            or any(
+                not math.isfinite(float(value)) or float(value) <= 0
+                for value in exposures
+            )
+            or not math.isfinite(float(conditional_exposure))
+            or float(conditional_exposure) < 0
+            or not math.isfinite(float(expected_exposure))
+            or float(expected_exposure) <= 0
+            or not math.isclose(
+                sum(float(value) for value in exposures) + float(conditional_exposure),
+                float(expected_exposure),
+                rel_tol=1e-12,
+                abs_tol=1e-12,
+            )
+        ):
+            return {
+                "ok": False,
+                "reason": "priced admission exposure breakdown is invalid",
+            }
 
     hashes_supplied = (
         expected_docs_hash is not None or expected_review_input_hash is not None
@@ -16087,6 +16148,64 @@ def stage_docs_for_rescore(
                                 f"{sn_id!r} documentation or review input drifted"
                             ),
                         }
+                    admission_id = None
+                    receipt_identity = None
+                    review_group_id = None
+                    prior_authority = None
+                    if request_identity is not None:
+                        admission_id = docs_review_admission_id(run_id)
+                        review_group_id = _docs_review_group_id(admission_id)
+                        conflicts = [
+                            dict(record)
+                            for record in transaction.run(
+                                """
+                                OPTIONAL MATCH (a:DocsReviewAdmission {id: $admission_id})
+                                OPTIONAL MATCH (other:StandardName)
+                                WHERE other.run_id = $scope_id AND other.id <> $target_id
+                                RETURN count(DISTINCT a) AS admissions,
+                                       count(DISTINCT other) AS other_targets
+                                """,
+                                admission_id=admission_id,
+                                scope_id=run_id,
+                                target_id=sn_id,
+                            )
+                        ]
+                        if (
+                            len(conflicts) != 1
+                            or int(conflicts[0].get("admissions") or 0) != 0
+                            or int(conflicts[0].get("other_targets") or 0) != 0
+                        ):
+                            transaction.rollback()
+                            return {
+                                "ok": False,
+                                "outcome": "scope_already_admitted",
+                                "reason": (
+                                    f"scope {run_id!r} already binds durable authority"
+                                ),
+                            }
+                        prior_authority = {
+                            field: _authority_json_value(properties.get(field))
+                            for field in _DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS
+                        }
+                        immutable_receipt = {
+                            "admission_id": admission_id,
+                            "target_id": sn_id,
+                            "scope_id": run_id,
+                            "request_identity": request_identity,
+                            "docs_hash": current_docs_hash,
+                            "review_input_hash": current_review_input_hash,
+                            "mandatory_exposures": [
+                                float(value) for value in mandatory_exposures or []
+                            ],
+                            "conditional_exposure": float(conditional_exposure or 0),
+                            "expected_exposure": float(expected_exposure or 0),
+                            "prior_docs_stage": properties.get("docs_stage"),
+                            "prior_authority": prior_authority,
+                            "review_group_id": review_group_id,
+                        }
+                        receipt_identity = _docs_admission_receipt_identity(
+                            immutable_receipt
+                        )
                     rows = [
                         dict(record)
                         for record in transaction.run(
@@ -16103,6 +16222,71 @@ def stage_docs_for_rescore(
                     if dry_run:
                         transaction.rollback()
                     else:
+                        if request_identity is not None:
+                            admission_rows = [
+                                dict(record)
+                                for record in transaction.run(
+                                    """
+                                    MATCH (sn:StandardName {id: $target_id})
+                                    WHERE sn.run_id = $scope_id
+                                      AND sn.docs_stage = 'drafted'
+                                      AND sn.docs_review_admission IS NULL
+                                    CREATE (a:DocsReviewAdmission {
+                                        id: $admission_id,
+                                        target_id: $target_id,
+                                        scope_id: $scope_id,
+                                        request_identity: $request_identity,
+                                        docs_hash: $docs_hash,
+                                        review_input_hash: $review_input_hash,
+                                        mandatory_exposures_json: $mandatory_exposures_json,
+                                        conditional_exposure: $conditional_exposure,
+                                        expected_exposure: $expected_exposure,
+                                        prior_docs_stage: $prior_docs_stage,
+                                        prior_authority_json: $prior_authority_json,
+                                        review_group_id: $review_group_id,
+                                        created_review_ids: [],
+                                        status: 'active',
+                                        receipt_identity: $receipt_identity,
+                                        created_at: datetime(),
+                                        expires_at: datetime() + duration({seconds: $ttl_seconds})
+                                    })
+                                    SET sn.docs_review_admission = a.id
+                                    MERGE (sn)-[:HAS_DOCS_REVIEW_ADMISSION]->(a)
+                                    RETURN a.id AS admission_id
+                                    """,
+                                    admission_id=admission_id,
+                                    target_id=sn_id,
+                                    scope_id=run_id,
+                                    request_identity=request_identity,
+                                    docs_hash=current_docs_hash,
+                                    review_input_hash=current_review_input_hash,
+                                    mandatory_exposures_json=json.dumps(
+                                        mandatory_exposures,
+                                        sort_keys=True,
+                                        separators=(",", ":"),
+                                    ),
+                                    conditional_exposure=float(
+                                        conditional_exposure or 0
+                                    ),
+                                    expected_exposure=float(expected_exposure or 0),
+                                    prior_docs_stage=properties.get("docs_stage"),
+                                    prior_authority_json=json.dumps(
+                                        prior_authority,
+                                        sort_keys=True,
+                                        separators=(",", ":"),
+                                    ),
+                                    review_group_id=review_group_id,
+                                    receipt_identity=receipt_identity,
+                                    ttl_seconds=admission_ttl_seconds,
+                                )
+                            ]
+                            if len(admission_rows) != 1:
+                                transaction.rollback()
+                                return {
+                                    "ok": False,
+                                    "outcome": "admission_persistence_noop",
+                                    "reason": "durable admission CAS matched no row",
+                                }
                         transaction.commit()
                     result = {
                         "ok": True,
@@ -16113,23 +16297,11 @@ def stage_docs_for_rescore(
                         "content_cas_verified": True,
                     }
                     if request_identity is not None:
-                        prior_authority = {
-                            field: _authority_json_value(properties.get(field))
-                            for field in _DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS
-                        }
-                        receipt = {
-                            "schema": _DOCS_RESCORE_RECEIPT_SCHEMA,
-                            "id": sn_id,
-                            "scope_run_id": run_id,
-                            "request_identity": request_identity,
-                            "docs_hash": current_docs_hash,
-                            "review_input_hash": current_review_input_hash,
-                            "prior_authority": prior_authority,
-                        }
-                        receipt["rollback_receipt_id"] = _authority_payload_hash(
-                            receipt
+                        result.update(
+                            admission_id=admission_id,
+                            receipt_identity=receipt_identity,
+                            review_group_id=review_group_id,
                         )
-                        result["rollback_receipt"] = receipt
                     return result
                 except BaseException:
                     if not transaction.closed:
@@ -16174,61 +16346,129 @@ def stage_docs_for_rescore(
     }
 
 
-def _normalize_docs_rescore_receipt(receipt: dict[str, Any]) -> dict[str, Any]:
-    """Validate and normalize one self-authenticating rollback receipt."""
-    if not isinstance(receipt, dict) or set(receipt) != set(
-        _DOCS_RESCORE_RECEIPT_FIELDS
-    ):
-        raise ValueError(
-            "documentation rescore receipt fields must be exactly "
-            f"{sorted(_DOCS_RESCORE_RECEIPT_FIELDS)}"
+def _lock_docs_review_admission(
+    transaction: Any, admission_id: str
+) -> list[dict[str, Any]]:
+    """Lock and return one durable admission together with its target state."""
+    return [
+        dict(record)
+        for record in transaction.run(
+            """
+            MATCH (a:DocsReviewAdmission {id: $admission_id})
+            SET a._docs_review_admission_lock = true
+            REMOVE a._docs_review_admission_lock
+            OPTIONAL MATCH (sn:StandardName {id: a.target_id})
+            OPTIONAL MATCH (a)-[:CREATED_REVIEW]->(owned:StandardNameReview)
+            RETURN properties(a) AS admission,
+                   properties(sn) AS standard_name,
+                   collect(properties(owned)) AS owned_reviews
+            """,
+            admission_id=admission_id,
         )
-    normalized = dict(receipt)
-    if normalized["schema"] != _DOCS_RESCORE_RECEIPT_SCHEMA:
-        raise ValueError("documentation rescore receipt schema is unsupported")
-    for field in (
-        "request_identity",
-        "docs_hash",
-        "review_input_hash",
-        "rollback_receipt_id",
-    ):
-        if not _SHA256_RE.fullmatch(str(normalized[field])):
-            raise ValueError(f"{field} must be a SHA-256 digest")
-    if not str(normalized["id"]).strip() or not str(normalized["scope_run_id"]).strip():
-        raise ValueError("documentation rescore receipt ids must be non-empty")
-    prior_authority = normalized.get("prior_authority")
-    if not isinstance(prior_authority, dict) or set(prior_authority) != set(
-        _DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS
-    ):
-        raise ValueError(
-            "documentation rescore prior authority fields must be exactly "
-            f"{list(_DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS)}"
-        )
-    identity_payload = {
-        key: normalized[key] for key in normalized if key != "rollback_receipt_id"
-    }
-    if _authority_payload_hash(identity_payload) != normalized["rollback_receipt_id"]:
-        raise ValueError("documentation rescore rollback receipt identity is invalid")
-    return normalized
+    ]
+
+
+def _validate_docs_admission_id(admission_id: str) -> None:
+    if not _SHA256_RE.fullmatch(str(admission_id)):
+        raise ValueError("admission_id must be a SHA-256 digest")
 
 
 @retry_on_deadlock()
-def rollback_docs_rescore_admission(
-    receipt: dict[str, Any],
+def bind_docs_review_admission_claim(
     *,
+    admission_id: str,
+    target_id: str,
+    scope_id: str,
     claim_token: str,
+    claim_seq: int | None,
 ) -> dict[str, Any]:
-    """Restore one priced docs admission iff every exact CAS fence still matches.
+    """Bind one worker claim to exactly one active durable admission."""
+    _validate_docs_admission_id(admission_id)
+    if not claim_token:
+        return {"ok": False, "outcome": "missing_claim"}
+    client = GraphClient()
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                rows = [
+                    dict(record)
+                    for record in transaction.run(
+                        """
+                        MATCH (a:DocsReviewAdmission {id: $admission_id})
+                        MATCH (sn:StandardName {id: $target_id})
+                              -[:HAS_DOCS_REVIEW_ADMISSION]->(a)
+                        WHERE a.status = 'active'
+                          AND a.target_id = $target_id
+                          AND a.scope_id = $scope_id
+                          AND a.expires_at >= datetime()
+                          AND sn.docs_review_admission = a.id
+                          AND sn.run_id = $scope_id
+                          AND sn.docs_stage = 'drafted'
+                          AND sn.claim_token = $claim_token
+                          AND ($claim_seq IS NULL OR sn.claim_seq = $claim_seq)
+                          AND (a.claim_token IS NULL OR a.claim_token = $claim_token)
+                          AND (a.claim_seq IS NULL OR a.claim_seq = $claim_seq)
+                          AND NOT EXISTS {
+                              MATCH (other:StandardName)
+                              WHERE other.run_id = $scope_id
+                                AND other.id <> $target_id
+                          }
+                        SET a.claim_token = $claim_token,
+                            a.claim_seq = $claim_seq,
+                            a.claimed_at = datetime()
+                        RETURN properties(a) AS admission
+                        """,
+                        admission_id=admission_id,
+                        target_id=target_id,
+                        scope_id=scope_id,
+                        claim_token=claim_token,
+                        claim_seq=claim_seq,
+                    )
+                ]
+                if len(rows) != 1:
+                    transaction.rollback()
+                    return {
+                        "ok": False,
+                        "outcome": "admission_claim_refused",
+                        "reason": "active durable admission did not match exact claim",
+                    }
+                admission = dict(rows[0].get("admission") or {})
+                if not _docs_admission_receipt_is_valid(admission):
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "invalid_admission_receipt"}
+                transaction.commit()
+                return {
+                    "ok": True,
+                    "admission_id": admission_id,
+                    "review_group_id": admission.get("review_group_id"),
+                    "request_identity": admission.get("request_identity"),
+                    "docs_hash": admission.get("docs_hash"),
+                    "review_input_hash": admission.get("review_input_hash"),
+                    "receipt_identity": admission.get("receipt_identity"),
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        client.close()
 
-    The receipt is returned by :func:`stage_docs_for_rescore` and carries the
-    complete prior docs-axis aggregate authority. The rollback keeps prose,
-    refinement depth, and Review nodes untouched. Any lifecycle, content,
-    review-input, scope, or claim-token drift is a refusal.
-    """
-    normalized = _normalize_docs_rescore_receipt(receipt)
-    if not claim_token.strip():
-        return {"ok": False, "reason": "claim_token must be non-empty"}
 
+@retry_on_deadlock()
+def verify_docs_review_admission_request(
+    *,
+    admission_id: str,
+    target_id: str,
+    scope_id: str,
+    claim_token: str,
+    claim_seq: int | None,
+    request_identity: str,
+) -> dict[str, Any]:
+    """Transactionally verify live content and rendered identity before dispatch."""
+    _validate_docs_admission_id(admission_id)
+    if not _SHA256_RE.fullmatch(request_identity):
+        raise ValueError("request_identity must be a SHA-256 digest")
     from imas_codex.standard_names.review.audits import compute_review_input_hash
 
     client = GraphClient()
@@ -16236,32 +16476,384 @@ def rollback_docs_rescore_admission(
         with client.session() as session:
             transaction = session.begin_transaction()
             try:
-                locked = [
-                    dict(record)
-                    for record in transaction.run(
-                        _LOCK_READ_DOCS_FOR_RESCORE_QUERY, id=normalized["id"]
-                    )
-                ]
+                locked = _lock_docs_review_admission(transaction, admission_id)
                 if len(locked) != 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "missing_admission"}
+                admission = dict(locked[0].get("admission") or {})
+                properties = dict(locked[0].get("standard_name") or {})
+                docs_hash = compute_docs_authority_content_hash(properties)
+                review_input_hash = compute_review_input_hash(properties)
+                matches = (
+                    _docs_admission_receipt_is_valid(admission)
+                    and admission.get("status") == "active"
+                    and admission.get("target_id") == target_id
+                    and admission.get("scope_id") == scope_id
+                    and admission.get("claim_token") == claim_token
+                    and admission.get("claim_seq") == claim_seq
+                    and admission.get("request_identity") == request_identity
+                    and admission.get("docs_hash") == docs_hash
+                    and admission.get("review_input_hash") == review_input_hash
+                    and properties.get("review_input_hash") == review_input_hash
+                    and properties.get("docs_review_admission") == admission_id
+                    and properties.get("run_id") == scope_id
+                    and properties.get("claim_token") == claim_token
+                    and properties.get("claim_seq") == claim_seq
+                    and properties.get("docs_stage") == "drafted"
+                )
+                if not matches:
                     transaction.rollback()
                     return {
                         "ok": False,
-                        "outcome": "rollback_drift",
-                        "reason": f"name {normalized['id']!r} not found",
+                        "outcome": "admission_drift",
+                        "reason": "durable request, content, scope, or claim drifted",
                     }
+                verified = [
+                    dict(record)
+                    for record in transaction.run(
+                        """
+                        MATCH (a:DocsReviewAdmission {id: $admission_id})
+                        WHERE a.status = 'active'
+                          AND a.claim_token = $claim_token
+                          AND ($claim_seq IS NULL OR a.claim_seq = $claim_seq)
+                          AND a.expires_at >= datetime()
+                        SET a.dispatch_verified_at = datetime()
+                        RETURN a.id AS admission_id
+                        """,
+                        admission_id=admission_id,
+                        claim_token=claim_token,
+                        claim_seq=claim_seq,
+                    )
+                ]
+                if len(verified) != 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "admission_expired"}
+                transaction.commit()
+                return {"ok": True, "admission_id": admission_id}
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        client.close()
+
+
+def _normalize_admitted_reviews(
+    records: list[dict[str, Any]], admission_id: str, review_group_id: str
+) -> list[dict[str, Any]]:
+    """Normalize records for atomic terminal persistence."""
+    try:
+        import imas_standard_names
+
+        isn_version = imas_standard_names.__version__
+    except (ImportError, AttributeError):
+        isn_version = None
+    try:
+        import importlib.metadata
+
+        codex_version = importlib.metadata.version("imas-codex")
+    except Exception:
+        codex_version = None
+    normalized = []
+    for record in records:
+        if (
+            record.get("review_axis") != "docs"
+            or record.get("review_group_id") != review_group_id
+        ):
+            raise ValueError("admitted Review does not belong to the durable group")
+        row = dict(record)
+        row["docs_review_admission_id"] = admission_id
+        row.setdefault("codex_version", codex_version)
+        row.setdefault("isn_version", isn_version)
+        for field in ("scores_json", "comments_per_dim_json"):
+            row[field] = _ensure_json(row.get(field))
+        normalized.append(row)
+    if not normalized or len({row.get("id") for row in normalized}) != len(normalized):
+        raise ValueError("admitted Review ids must be non-empty and unique")
+    return normalized
+
+
+@retry_on_deadlock()
+def persist_admitted_docs_review(
+    *,
+    admission_id: str,
+    target_id: str,
+    scope_id: str,
+    claim_token: str,
+    claim_seq: int | None,
+    request_identity: str,
+    records: list[dict[str, Any]],
+    score: float,
+    scores: dict[str, Any] | None,
+    comments: str | None,
+    comments_per_dim: dict[str, Any] | None,
+    model: str,
+    min_score: float,
+    rotation_cap: int,
+    resolution_method: str | None,
+    reviewer_chain_size: int,
+    total_cost: float,
+) -> dict[str, Any]:
+    """Atomically create owned Reviews, persist authority, and consume admission."""
+    _validate_docs_admission_id(admission_id)
+    from imas_codex.standard_names.review.audits import compute_review_input_hash
+
+    client = GraphClient()
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                locked = _lock_docs_review_admission(transaction, admission_id)
+                if len(locked) != 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "missing_admission"}
+                admission = dict(locked[0].get("admission") or {})
+                if not _docs_admission_receipt_is_valid(admission):
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "invalid_admission_receipt"}
+                if admission.get("status") == "consumed":
+                    transaction.rollback()
+                    return {
+                        "ok": True,
+                        "outcome": "already_terminal",
+                        "stage": json.loads(
+                            admission.get("final_authority_json") or "{}"
+                        ).get("docs_stage"),
+                    }
+                if admission.get("status") == "rolled_back":
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "already_rolled_back"}
                 properties = dict(locked[0].get("standard_name") or {})
-                current_docs_hash = compute_docs_authority_content_hash(properties)
-                current_review_input_hash = compute_review_input_hash(properties)
-                eligible = (
-                    properties.get("id") == normalized["id"]
+                docs_hash = compute_docs_authority_content_hash(properties)
+                review_input_hash = compute_review_input_hash(properties)
+                matches = (
+                    _docs_admission_receipt_is_valid(admission)
+                    and admission.get("target_id") == target_id
+                    and admission.get("scope_id") == scope_id
+                    and admission.get("request_identity") == request_identity
+                    and admission.get("claim_token") == claim_token
+                    and admission.get("claim_seq") == claim_seq
+                    and admission.get("docs_hash") == docs_hash
+                    and admission.get("review_input_hash") == review_input_hash
+                    and properties.get("review_input_hash") == review_input_hash
+                    and properties.get("docs_review_admission") == admission_id
+                    and properties.get("run_id") == scope_id
+                    and properties.get("claim_token") == claim_token
+                    and properties.get("claim_seq") == claim_seq
+                    and properties.get("docs_stage") == "drafted"
+                )
+                if not matches:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "terminal_persistence_noop"}
+                review_group_id = str(admission.get("review_group_id") or "")
+                normalized = _normalize_admitted_reviews(
+                    records, admission_id, review_group_id
+                )
+                docs_chain_length = int(properties.get("docs_chain_length") or 0)
+                if score >= min_score:
+                    target_stage = "accepted"
+                elif docs_chain_length >= rotation_cap:
+                    target_stage = "exhausted"
+                else:
+                    target_stage = "reviewed"
+                quorum_shortfall = _quorum_admits_acceptance(
+                    resolution_method, reviewer_chain_size
+                )
+                if quorum_shortfall is not None and target_stage == "accepted":
+                    target_stage = "reviewed"
+                edit_status = properties.get("edit_status")
+                if edit_status == "open":
+                    edit_status = (
+                        "applied"
+                        if target_stage == "accepted"
+                        else "exhausted"
+                        if target_stage == "exhausted"
+                        else "open"
+                    )
+                conflicts = [
+                    dict(record)
+                    for record in transaction.run(
+                        """
+                        UNWIND $review_ids AS review_id
+                        OPTIONAL MATCH (r:StandardNameReview {id: review_id})
+                        WITH r WHERE r IS NOT NULL
+                        RETURN count(r) AS count,
+                               count(CASE WHEN r.docs_review_admission_id = $admission_id
+                                          THEN 1 END) AS owned
+                        """,
+                        review_ids=[row["id"] for row in normalized],
+                        admission_id=admission_id,
+                    )
+                ]
+                if conflicts and conflicts[0].get("count") != conflicts[0].get("owned"):
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "review_identity_conflict"}
+                transaction.run(
+                    """
+                    MATCH (a:DocsReviewAdmission {id: $admission_id})
+                    MATCH (sn:StandardName {id: $target_id})
+                    UNWIND $batch AS b
+                    MERGE (r:StandardNameReview {id: b.id})
+                    SET r += b,
+                        r.reviewed_at = CASE WHEN b.reviewed_at IS NULL
+                            THEN null ELSE datetime(b.reviewed_at) END,
+                        r.llm_at = CASE WHEN b.llm_at IS NULL
+                            THEN null ELSE datetime(b.llm_at) END
+                    MERGE (sn)-[:HAS_REVIEW]->(r)
+                    MERGE (a)-[:CREATED_REVIEW]->(r)
+                    """,
+                    admission_id=admission_id,
+                    target_id=target_id,
+                    batch=normalized,
+                )
+                final_authority = {
+                    "docs_stage": target_stage,
+                    "reviewer_score_docs": float(score),
+                    "reviewer_scores_docs": scores,
+                    "reviewer_comments_docs": comments,
+                    "reviewer_comments_per_dim_docs": comments_per_dim,
+                    "reviewer_model_docs": model,
+                    "docs_review_resolution_method": resolution_method,
+                    "docs_review_quorum_shortfall": quorum_shortfall,
+                }
+                terminal = [
+                    dict(record)
+                    for record in transaction.run(
+                        """
+                        MATCH (sn:StandardName {id: $target_id})
+                              -[edge:HAS_DOCS_REVIEW_ADMISSION]->
+                              (a:DocsReviewAdmission {id: $admission_id})
+                        WHERE a.status = 'active'
+                          AND a.scope_id = $scope_id
+                          AND a.request_identity = $request_identity
+                          AND a.claim_token = $claim_token
+                          AND ($claim_seq IS NULL OR a.claim_seq = $claim_seq)
+                          AND sn.docs_stage = 'drafted'
+                          AND sn.claim_token = $claim_token
+                          AND ($claim_seq IS NULL OR sn.claim_seq = $claim_seq)
+                        SET sn.reviewer_score_docs = $score,
+                            sn.reviewer_scores_docs = $scores_json,
+                            sn.reviewer_comments_docs = $comments,
+                            sn.reviewer_comments_per_dim_docs = $comments_per_dim_json,
+                            sn.reviewer_model_docs = $model,
+                            sn.docs_review_resolution_method = $resolution_method,
+                            sn.docs_review_quorum_shortfall = $quorum_shortfall,
+                            sn.docs_review_quorum_shortfall_at = CASE
+                                WHEN $quorum_shortfall IS NULL THEN null ELSE datetime() END,
+                            sn.reviewed_docs_at = datetime(),
+                            sn.docs_stage = $target_stage,
+                            sn.edit_status = $edit_status,
+                            sn.claim_token = null,
+                            sn.claimed_at = null,
+                            sn.docs_review_admission = null,
+                            sn.llm_cost_review_docs = coalesce(sn.llm_cost_review_docs, 0.0) + $total_cost,
+                            sn.review_docs_count = coalesce(sn.review_docs_count, 0) + 1,
+                            sn.llm_cost = coalesce(sn.llm_cost, 0.0) + $total_cost,
+                            a.status = 'consumed',
+                            a.created_review_ids = $review_ids,
+                            a.final_authority_json = $final_authority_json,
+                            a.completed_at = datetime()
+                        DELETE edge
+                        RETURN sn.docs_stage AS stage
+                        """,
+                        target_id=target_id,
+                        admission_id=admission_id,
+                        scope_id=scope_id,
+                        request_identity=request_identity,
+                        claim_token=claim_token,
+                        claim_seq=claim_seq,
+                        score=float(score),
+                        scores_json=_ensure_json(scores),
+                        comments=comments,
+                        comments_per_dim_json=_ensure_json(comments_per_dim),
+                        model=model,
+                        resolution_method=resolution_method,
+                        quorum_shortfall=quorum_shortfall,
+                        target_stage=target_stage,
+                        edit_status=edit_status,
+                        total_cost=float(total_cost),
+                        review_ids=[row["id"] for row in normalized],
+                        final_authority_json=json.dumps(
+                            final_authority, sort_keys=True, separators=(",", ":")
+                        ),
+                    )
+                ]
+                if len(terminal) != 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "terminal_persistence_noop"}
+                transaction.commit()
+                if target_stage == "accepted":
+                    try:
+                        with GraphClient() as gc:
+                            _normalize_bare_doc_links(gc, sn_id=target_id)
+                    except Exception:
+                        logger.debug(
+                            "admitted docs bare-link normalization failed for %s",
+                            target_id,
+                            exc_info=True,
+                        )
+                return {"ok": True, "outcome": "consumed", "stage": target_stage}
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        client.close()
+
+
+@retry_on_deadlock()
+def rollback_docs_rescore_admission(
+    admission_id: str,
+    *,
+    claim_token: str | None = None,
+    claim_seq: int | None = None,
+) -> dict[str, Any]:
+    """Restore durable prior authority and delete only admission-owned Reviews."""
+    _validate_docs_admission_id(admission_id)
+    from imas_codex.standard_names.review.audits import compute_review_input_hash
+
+    client = GraphClient()
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                locked = _lock_docs_review_admission(transaction, admission_id)
+                if len(locked) != 1:
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "missing_admission"}
+                admission = dict(locked[0].get("admission") or {})
+                if not _docs_admission_receipt_is_valid(admission):
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "invalid_admission_receipt"}
+                if admission.get("status") == "rolled_back":
+                    transaction.rollback()
+                    return {"ok": True, "outcome": "already_rolled_back"}
+                if admission.get("status") == "consumed":
+                    transaction.rollback()
+                    return {"ok": True, "outcome": "already_terminal"}
+                properties = dict(locked[0].get("standard_name") or {})
+                stored_claim = admission.get("claim_token")
+                live_claim = properties.get("claim_token")
+                claim_matches = (
+                    (stored_claim is None and not claim_token)
+                    or (
+                        stored_claim == claim_token
+                        and live_claim in {None, claim_token}
+                    )
+                ) and (claim_seq is None or admission.get("claim_seq") == claim_seq)
+                docs_hash = compute_docs_authority_content_hash(properties)
+                review_input_hash = compute_review_input_hash(properties)
+                matches = (
+                    _docs_admission_receipt_is_valid(admission)
+                    and claim_matches
+                    and properties.get("id") == admission.get("target_id")
                     and properties.get("name_stage") == "accepted"
                     and properties.get("docs_stage") == "drafted"
-                    and properties.get("run_id") == normalized["scope_run_id"]
-                    and properties.get("claim_token") == claim_token
-                    and current_docs_hash == normalized["docs_hash"]
-                    and current_review_input_hash == normalized["review_input_hash"]
-                    and properties.get("review_input_hash")
-                    == normalized["review_input_hash"]
+                    and properties.get("run_id") == admission.get("scope_id")
+                    and properties.get("docs_review_admission") == admission_id
+                    and docs_hash == admission.get("docs_hash")
+                    and review_input_hash == admission.get("review_input_hash")
+                    and properties.get("review_input_hash") == review_input_hash
                     and all(
                         properties.get(field) is None
                         for field in (
@@ -16271,50 +16863,77 @@ def rollback_docs_rescore_admission(
                         )
                     )
                 )
-                if not eligible:
+                if not matches:
                     transaction.rollback()
                     return {
                         "ok": False,
                         "outcome": "rollback_drift",
-                        "reason": (
-                            f"{normalized['id']!r} changed after priced admission"
-                        ),
+                        "reason": "documentation admission changed after staging",
                     }
+                prior_authority = json.loads(admission["prior_authority_json"])
+                if set(prior_authority) != set(_DOCS_RESCORE_PRIOR_AUTHORITY_FIELDS):
+                    transaction.rollback()
+                    return {"ok": False, "outcome": "invalid_prior_authority"}
+                prior_scalar = {
+                    key: value
+                    for key, value in prior_authority.items()
+                    if key
+                    not in {"docs_review_quorum_shortfall_at", "reviewed_docs_at"}
+                }
                 rows = [
                     dict(record)
                     for record in transaction.run(
                         """
-                        MATCH (sn:StandardName {id: $id})
-                        WHERE sn.run_id = $scope_run_id
+                        MATCH (sn:StandardName {id: $target_id})
+                              -[edge:HAS_DOCS_REVIEW_ADMISSION]->
+                              (a:DocsReviewAdmission {id: $admission_id})
+                        WHERE a.status = 'active'
+                          AND sn.run_id = a.scope_id
                           AND sn.docs_stage = 'drafted'
-                          AND sn.claim_token = $claim_token
-                        WITH sn, $rollback_receipt_id AS rollback_receipt_id
-                        SET sn += $prior_authority,
+                        CALL (a) {
+                            OPTIONAL MATCH (a)-[:CREATED_REVIEW]->(owned:StandardNameReview)
+                            WITH a, owned WHERE owned IS NOT NULL
+                              AND owned.docs_review_admission_id = a.id
+                            DETACH DELETE owned
+                            RETURN count(*) AS deleted_reviews
+                        }
+                        WITH sn, a, edge, deleted_reviews
+                        SET sn += $prior_scalar,
+                            sn.docs_review_quorum_shortfall_at = CASE
+                                WHEN $prior_shortfall_at IS NULL THEN null
+                                ELSE datetime($prior_shortfall_at) END,
+                            sn.reviewed_docs_at = CASE
+                                WHEN $prior_reviewed_at IS NULL THEN null
+                                ELSE datetime($prior_reviewed_at) END,
+                            sn.claim_token = null,
                             sn.claimed_at = null,
-                            sn.claim_token = null
-                        RETURN sn.id AS id, rollback_receipt_id
+                            sn.docs_review_admission = null,
+                            a.status = 'rolled_back',
+                            a.rolled_back_at = datetime(),
+                            a.created_review_ids = []
+                        DELETE edge
+                        RETURN sn.id AS id
                         """,
-                        id=normalized["id"],
-                        scope_run_id=normalized["scope_run_id"],
-                        claim_token=claim_token,
-                        rollback_receipt_id=normalized["rollback_receipt_id"],
-                        prior_authority=normalized["prior_authority"],
+                        target_id=admission["target_id"],
+                        admission_id=admission_id,
+                        prior_scalar=prior_scalar,
+                        prior_shortfall_at=prior_authority.get(
+                            "docs_review_quorum_shortfall_at"
+                        ),
+                        prior_reviewed_at=prior_authority.get("reviewed_docs_at"),
                     )
                 ]
                 if len(rows) != 1:
                     transaction.rollback()
-                    return {
-                        "ok": False,
-                        "outcome": "rollback_drift",
-                        "reason": "documentation rescore rollback CAS matched no row",
-                    }
+                    return {"ok": False, "outcome": "rollback_drift"}
                 transaction.commit()
                 return {
                     "ok": True,
-                    "id": normalized["id"],
-                    "scope_run_id": normalized["scope_run_id"],
-                    "request_identity": normalized["request_identity"],
-                    "rollback_receipt_id": normalized["rollback_receipt_id"],
+                    "outcome": "rolled_back",
+                    "id": admission["target_id"],
+                    "scope_id": admission["scope_id"],
+                    "admission_id": admission_id,
+                    "receipt_identity": admission.get("receipt_identity"),
                 }
             except BaseException:
                 if not transaction.closed:

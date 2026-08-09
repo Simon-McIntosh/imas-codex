@@ -3,15 +3,19 @@
 from __future__ import annotations
 
 import copy
+import json
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+import yaml
 
 from imas_codex.standard_names.graph_ops import (
     DOCS_EVIDENCE_RECOVERY_PROJECTION_VERSION,
     DocsEvidenceRecoveryConflict,
     build_docs_evidence_recovery_budget,
     build_docs_evidence_recovery_manifest,
+    docs_review_admission_id,
     rollback_docs_rescore_admission,
     stage_docs_for_rescore,
 )
@@ -164,11 +168,19 @@ class _RescoreTransaction:
         self.committed = False
         self.rolled_back = False
         self.write_count = 0
+        self.admissions: dict[str, dict] = {}
 
     def run(self, cypher: str, **params):
         properties = self.state["standard_name"]
         if "_docs_rescore_lock" in cypher:
             return [{"standard_name": copy.deepcopy(properties)}]
+        if "OPTIONAL MATCH (a:DocsReviewAdmission" in cypher:
+            return [
+                {
+                    "admissions": int(params["admission_id"] in self.admissions),
+                    "other_targets": 0,
+                }
+            ]
         if "sn.docs_stage IN ['accepted', 'reviewed', 'exhausted']" in cypher:
             eligible = (
                 properties["name_stage"] == "accepted"
@@ -194,19 +206,63 @@ class _RescoreTransaction:
                     "documentation": properties["documentation"],
                 }
             ]
-        if "sn.run_id = $scope_run_id" in cypher and "$rollback_receipt_id" in cypher:
-            eligible = (
-                properties["id"] == params["id"]
-                and properties["run_id"] == params["scope_run_id"]
-                and properties["docs_stage"] == "drafted"
-                and properties.get("claim_token") == params["claim_token"]
-            )
-            if not eligible:
+        if "CREATE (a:DocsReviewAdmission" in cypher:
+            if properties.get("docs_review_admission") is not None:
                 return []
-            for field, value in params["prior_authority"].items():
+            admission = {
+                "id": params["admission_id"],
+                "target_id": params["target_id"],
+                "scope_id": params["scope_id"],
+                "request_identity": params["request_identity"],
+                "docs_hash": params["docs_hash"],
+                "review_input_hash": params["review_input_hash"],
+                "mandatory_exposures_json": params["mandatory_exposures_json"],
+                "conditional_exposure": params["conditional_exposure"],
+                "expected_exposure": params["expected_exposure"],
+                "prior_docs_stage": params["prior_docs_stage"],
+                "prior_authority_json": params["prior_authority_json"],
+                "review_group_id": params["review_group_id"],
+                "created_review_ids": [],
+                "status": "active",
+                "receipt_identity": params["receipt_identity"],
+                "claim_token": None,
+                "claim_seq": None,
+            }
+            self.admissions[admission["id"]] = admission
+            properties["docs_review_admission"] = admission["id"]
+            self.write_count += 1
+            return [{"admission_id": admission["id"]}]
+        if "_docs_review_admission_lock" in cypher:
+            admission = self.admissions.get(params["admission_id"])
+            if admission is None:
+                return []
+            owned = [
+                review
+                for review in self.state["reviews"]
+                if review.get("docs_review_admission_id") == admission["id"]
+            ]
+            return [
+                {
+                    "admission": copy.deepcopy(admission),
+                    "standard_name": copy.deepcopy(properties),
+                    "owned_reviews": copy.deepcopy(owned),
+                }
+            ]
+        if "deleted_reviews" in cypher:
+            admission = self.admissions[params["admission_id"]]
+            prior = json.loads(admission["prior_authority_json"])
+            for field, value in prior.items():
                 properties[field] = copy.deepcopy(value)
             properties["claimed_at"] = None
             properties["claim_token"] = None
+            properties["docs_review_admission"] = None
+            self.state["reviews"] = [
+                review
+                for review in self.state["reviews"]
+                if review.get("docs_review_admission_id") != admission["id"]
+            ]
+            admission["status"] = "rolled_back"
+            admission["created_review_ids"] = []
             self.write_count += 1
             return [{"id": properties["id"]}]
         raise AssertionError("unexpected exact rescore query")
@@ -382,13 +438,12 @@ def test_priced_staging_receipt_drives_exact_docs_axis_rollback() -> None:
             **manifest["rows"][0]["rescore_input"],
             run_id="exact-docs-run",
             request_identity="a" * 64,
+            mandatory_exposures=[1.0, 1.0],
+            conditional_exposure=1.0,
+            expected_exposure=3.0,
         )
-        graph.transaction.state["standard_name"]["claim_token"] = "claim-token"
-        graph.transaction.state["standard_name"]["claimed_at"] = "now"
         graph.transaction.closed = False
-        rolled_back = rollback_docs_rescore_admission(
-            staged["rollback_receipt"], claim_token="claim-token"
-        )
+        rolled_back = rollback_docs_rescore_admission(staged["admission_id"])
 
     assert rolled_back["ok"] is True
     after = graph.transaction.state["standard_name"]
@@ -413,6 +468,80 @@ def test_priced_staging_receipt_drives_exact_docs_axis_rollback() -> None:
     assert graph.transaction.state["reviews"] == state["reviews"]
     assert after["claim_token"] is None
     assert after["claimed_at"] is None
+    assert after["docs_review_admission"] is None
+
+    graph.transaction.closed = False
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        repeated = rollback_docs_rescore_admission(staged["admission_id"])
+    assert repeated == {"ok": True, "outcome": "already_rolled_back"}
+
+
+def test_docs_review_admission_schema_declares_durable_authority() -> None:
+    schema_path = (
+        Path(__file__).parents[2] / "imas_codex" / "schemas" / "standard_name.yaml"
+    )
+    schema = yaml.safe_load(schema_path.read_text())
+    admission = schema["classes"]["DocsReviewAdmission"]
+
+    assert admission["attributes"]["id"]["identifier"] is True
+    assert admission["attributes"]["status"]["range"] == ("DocsReviewAdmissionStatus")
+    assert {
+        "target_id",
+        "scope_id",
+        "request_identity",
+        "docs_hash",
+        "review_input_hash",
+        "mandatory_exposures_json",
+        "conditional_exposure",
+        "expected_exposure",
+        "claim_token",
+        "claim_seq",
+        "prior_docs_stage",
+        "prior_authority_json",
+        "review_group_id",
+        "created_review_ids",
+        "receipt_identity",
+        "created_at",
+        "expires_at",
+    } <= set(admission["attributes"])
+
+
+def test_admission_identity_is_deterministic_and_scope_unique() -> None:
+    assert docs_review_admission_id("scope-a") == docs_review_admission_id("scope-a")
+    assert docs_review_admission_id("scope-a") != docs_review_admission_id("scope-b")
+    assert len(docs_review_admission_id("scope-a")) == 64
+
+
+def test_restart_rollback_deletes_only_admission_owned_partial_reviews() -> None:
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    graph = _RescoreGraph(state)
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        staged = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"],
+            run_id="restart-scope",
+            request_identity="a" * 64,
+            mandatory_exposures=[1.0, 1.0],
+            conditional_exposure=1.0,
+            expected_exposure=3.0,
+        )
+        admission_id = staged["admission_id"]
+        graph.transaction.state["reviews"].append(
+            {
+                "id": "partial-review",
+                "standard_name_id": state["id"],
+                "review_axis": "docs",
+                "review_group_id": staged["review_group_id"],
+                "docs_review_admission_id": admission_id,
+            }
+        )
+        graph.transaction.closed = False
+        result = rollback_docs_rescore_admission(admission_id)
+
+    assert result["ok"] is True
+    assert [review["id"] for review in graph.transaction.state["reviews"]] == [
+        state["reviews"][0]["id"]
+    ]
 
 
 @pytest.mark.parametrize("drift_field", ["description", "documentation", "kind"])

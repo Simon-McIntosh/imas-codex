@@ -26,6 +26,7 @@ from __future__ import annotations
 import asyncio
 import copy
 import inspect
+import json
 import logging
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -44,6 +45,7 @@ from imas_codex.standard_names.workers import (
     _run_rd_quorum_cycles,
     admit_docs_review_request,
     prepare_docs_review_request,
+    process_review_docs_batch,
     quorum_incomplete_snapshot,
     reset_quorum_incomplete,
 )
@@ -113,6 +115,10 @@ def _request_preparation_patches(*, exposure: float = 1.0):
             "imas_codex.standard_names.workers.model_provider_exposure",
             return_value=exposure,
         ),
+        patch(
+            "imas_codex.discovery.base.llm.get_catalog_model_info",
+            return_value={"max_input_tokens": 32_000},
+        ),
     )
 
 
@@ -127,6 +133,7 @@ def test_docs_request_identity_is_deterministic_and_prices_possible_escalator() 
         patches[4],
         patches[5],
         patches[6],
+        patches[7],
     ):
         first = asyncio.run(prepare_docs_review_request(item))
         second = asyncio.run(prepare_docs_review_request(copy.deepcopy(item)))
@@ -136,6 +143,23 @@ def test_docs_request_identity_is_deterministic_and_prices_possible_escalator() 
     assert first["expected_exposures"] == [1.25, 1.25, 1.25]
     assert first["expected_exposure"] == pytest.approx(3.75)
     assert first["provider_policy_ceiling_is_separate"] is True
+    assert first["escalation_input_token_bound"] == 32_000
+    actual_prompt = first["escalation_prompt_factory"](
+        [{"reasoning": "z" * 100_000, "scores_json": "{}"}]
+    )
+    serialized_request = json.dumps(
+        {
+            "messages": [
+                {"role": "system", "content": first["system_prompt"]},
+                {"role": "user", "content": actual_prompt},
+            ],
+            "response_schema": first["response_model"].model_json_schema(),
+        },
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    assert len(serialized_request.encode()) + 4_096 <= 32_000
 
 
 def test_insufficient_docs_exposure_refuses_before_graph_or_provider() -> None:
@@ -151,6 +175,7 @@ def test_insufficient_docs_exposure_refuses_before_graph_or_provider() -> None:
         patches[4],
         patches[5],
         patches[6],
+        patches[7],
         patch(
             "imas_codex.standard_names.graph_ops.stage_docs_for_rescore",
             new=stage,
@@ -189,6 +214,7 @@ def test_docs_request_price_drift_changes_identity() -> None:
         stable[4],
         stable[5],
         stable[6],
+        stable[7],
     ):
         before = asyncio.run(prepare_docs_review_request(item))
     drifted = _request_preparation_patches(exposure=1.01)
@@ -200,6 +226,7 @@ def test_docs_request_price_drift_changes_identity() -> None:
         drifted[4],
         drifted[5],
         drifted[6],
+        drifted[7],
     ):
         after = asyncio.run(prepare_docs_review_request(item))
 
@@ -213,7 +240,9 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
         return_value={
             "ok": True,
             "sn_id": item["id"],
-            "rollback_receipt": {"receipt": "exact-prior-authority"},
+            "admission_id": "d" * 64,
+            "receipt_identity": "e" * 64,
+            "review_group_id": "review-group",
         }
     )
     stable = _request_preparation_patches(exposure=1.0)
@@ -225,6 +254,7 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
         stable[4],
         stable[5],
         stable[6],
+        stable[7],
         patch(
             "imas_codex.standard_names.graph_ops.stage_docs_for_rescore",
             new=stage,
@@ -247,6 +277,8 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
         "docs_stage": "drafted",
         "run_id": scope_run_id,
         "claim_token": "claim-token",
+        "claim_seq": 3,
+        "docs_review_admission": "d" * 64,
     }
     rollback = MagicMock(return_value={"ok": True})
     provider_chain = AsyncMock(
@@ -261,6 +293,19 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
         drifted[4],
         drifted[5],
         drifted[6],
+        drifted[7],
+        patch(
+            "imas_codex.standard_names.graph_ops.bind_docs_review_admission_claim",
+            return_value={
+                "ok": True,
+                "admission_id": "d" * 64,
+                "review_group_id": "review-group",
+            },
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.verify_docs_review_admission_request",
+            return_value={"ok": False, "outcome": "admission_drift"},
+        ),
         patch(
             "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
             new=rollback,
@@ -279,10 +324,238 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
         )
 
     assert processed == 0
-    rollback.assert_called_once_with(
-        {"receipt": "exact-prior-authority"}, claim_token="claim-token"
-    )
+    rollback.assert_called_once_with("d" * 64, claim_token="claim-token", claim_seq=3)
     provider_chain.assert_not_awaited()
+
+
+def _prepared_docs_request(*, identity: str = "c" * 64) -> dict:
+    return {
+        "id": "electron_temperature",
+        "models": ["m0", "m1", "m2"],
+        "messages": [],
+        "response_schema": {},
+        "rubric_dims": [
+            "description_quality",
+            "documentation_quality",
+            "completeness",
+            "physics_accuracy",
+        ],
+        "disagreement_threshold": 0.2,
+        "reasoning_effort": "low",
+        "escalation_reasoning_effort": "medium",
+        "expected_exposures": [1.0, 1.0, 2.0],
+        "expected_exposure": 4.0,
+        "provider_policy_ceiling_is_separate": True,
+        "request_identity": identity,
+        "response_model": MagicMock(),
+        "user_prompt": "review docs",
+        "system_prompt": "review system",
+        "escalation_prompt_factory": MagicMock(),
+    }
+
+
+def _successful_docs_quorum() -> dict:
+    return {
+        "records": [
+            {
+                "id": "electron_temperature:docs:review-group:0",
+                "standard_name_id": "electron_temperature",
+                "review_group_id": "review-group",
+                "review_axis": "docs",
+            }
+        ],
+        "winning_score": 0.95,
+        "winning_scores": {"physics_accuracy": 0.95},
+        "winning_comments": "sound",
+        "winning_comments_per_dim": None,
+        "canonical_model": "m0",
+        "resolution_method": "quorum_consensus",
+        "total_cost": 1.0,
+        "total_tokens_in": 10,
+        "total_tokens_out": 5,
+        "review_group_id": "review-group",
+        "dd_gaps": [],
+    }
+
+
+def test_fresh_process_handoff_dispatches_only_after_durable_verification() -> None:
+    item = {
+        **_docs_request_item(),
+        "docs_stage": "drafted",
+        "run_id": "priced-docs-scope",
+        "claim_token": "claim-token",
+        "claim_seq": 7,
+        "docs_review_admission": "admission-id",
+    }
+    prepared = _prepared_docs_request()
+    bind = MagicMock(
+        return_value={
+            "ok": True,
+            "admission_id": "admission-id",
+            "review_group_id": "review-group",
+        }
+    )
+    verify = MagicMock(return_value={"ok": True, "admission_id": "admission-id"})
+    provider_chain = AsyncMock(return_value=_successful_docs_quorum())
+    persist = MagicMock(return_value={"ok": True, "stage": "accepted"})
+
+    with (
+        patch(
+            "imas_codex.standard_names.workers.prepare_docs_review_request",
+            new=AsyncMock(return_value=prepared),
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.bind_docs_review_admission_claim",
+            new=bind,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.verify_docs_review_admission_request",
+            new=verify,
+        ),
+        patch(
+            "imas_codex.standard_names.workers._run_rd_quorum_cycles",
+            new=provider_chain,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.persist_admitted_docs_review",
+            new=persist,
+        ),
+        patch(
+            "imas_codex.standard_names.workers._persist_dd_gap_evidence",
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.update_review_aggregates",
+        ),
+    ):
+        processed = asyncio.run(
+            process_review_docs_batch([item], _mock_budget_manager(), asyncio.Event())
+        )
+
+    assert processed == 1
+    bind.assert_called_once()
+    verify.assert_called_once()
+    provider_chain.assert_awaited_once()
+    assert provider_chain.await_args.kwargs["review_group_id"] == "review-group"
+    persist.assert_called_once()
+
+
+def test_missing_durable_admission_refuses_before_provider_dispatch() -> None:
+    item = {
+        **_docs_request_item(),
+        "docs_stage": "drafted",
+        "run_id": "priced-docs-scope",
+        "claim_token": "claim-token",
+        "claim_seq": 1,
+        "docs_review_admission": "admission-id",
+    }
+    provider_chain = AsyncMock(
+        side_effect=AssertionError("provider called without durable admission")
+    )
+    rollback = MagicMock(return_value={"ok": False, "outcome": "missing_admission"})
+    release = MagicMock(return_value=1)
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.bind_docs_review_admission_claim",
+            return_value={"ok": False, "outcome": "missing_admission"},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+            new=rollback,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.release_review_docs_failed_claims",
+            new=release,
+        ),
+        patch(
+            "imas_codex.standard_names.workers._run_rd_quorum_cycles",
+            new=provider_chain,
+        ),
+    ):
+        processed = asyncio.run(
+            process_review_docs_batch([item], _mock_budget_manager(), asyncio.Event())
+        )
+
+    assert processed == 0
+    provider_chain.assert_not_awaited()
+    rollback.assert_called_once()
+    release.assert_called_once_with(
+        sn_ids=[item["id"]],
+        claim_token="claim-token",
+        from_stage="drafted",
+        to_stage="drafted",
+    )
+
+
+def test_docs_review_cancellation_rolls_back_durable_admission() -> None:
+    item = {
+        **_docs_request_item(),
+        "docs_stage": "drafted",
+        "run_id": "priced-docs-scope",
+        "claim_token": "claim-token",
+        "claim_seq": 1,
+        "docs_review_admission": "admission-id",
+    }
+    stop_event = asyncio.Event()
+    stop_event.set()
+    rollback = MagicMock(return_value={"ok": True, "outcome": "rolled_back"})
+    with patch(
+        "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+        new=rollback,
+    ):
+        processed = asyncio.run(
+            process_review_docs_batch([item], _mock_budget_manager(), stop_event)
+        )
+
+    assert processed == 0
+    rollback.assert_called_once()
+
+
+def test_admitted_terminal_persistence_noop_rolls_back_partial_reviews() -> None:
+    item = {
+        **_docs_request_item(),
+        "docs_stage": "drafted",
+        "run_id": "priced-docs-scope",
+        "claim_token": "claim-token",
+        "claim_seq": 2,
+        "docs_review_admission": "admission-id",
+    }
+    rollback = MagicMock(return_value={"ok": True, "outcome": "rolled_back"})
+    with (
+        patch(
+            "imas_codex.standard_names.workers.prepare_docs_review_request",
+            new=AsyncMock(return_value=_prepared_docs_request()),
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.bind_docs_review_admission_claim",
+            return_value={
+                "ok": True,
+                "admission_id": "admission-id",
+                "review_group_id": "review-group",
+            },
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.verify_docs_review_admission_request",
+            return_value={"ok": True, "admission_id": "admission-id"},
+        ),
+        patch(
+            "imas_codex.standard_names.workers._run_rd_quorum_cycles",
+            new=AsyncMock(return_value=_successful_docs_quorum()),
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.persist_admitted_docs_review",
+            return_value={"ok": False, "outcome": "terminal_persistence_noop"},
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+            new=rollback,
+        ),
+    ):
+        processed = asyncio.run(
+            process_review_docs_batch([item], _mock_budget_manager(), asyncio.Event())
+        )
+
+    assert processed == 0
+    rollback.assert_called_once()
 
 
 # ---------------------------------------------------------------------------

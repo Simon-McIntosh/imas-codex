@@ -7403,6 +7403,7 @@ async def _run_rd_quorum_cycles(
     escalation_reasoning_effort: str | None = None,
     run_id: str | None = None,
     escalation_prompt_factory: Callable[[list[dict[str, Any]]], str] | None = None,
+    review_group_id: str | None = None,
 ) -> dict[str, Any] | None:
     """Run the configured RD-quorum reviewer chain for a single StandardName.
 
@@ -7447,7 +7448,7 @@ async def _run_rd_quorum_cycles(
 
     from imas_codex.standard_names.budget import BudgetExceeded, LLMCostEvent
 
-    review_group_id = str(_uuid.uuid4())
+    review_group_id = review_group_id or str(_uuid.uuid4())
     cycles: list[dict[str, Any]] = []  # parsed cycle results (cycle_index 0..N)
     total_cost = 0.0
     total_tokens_in = 0
@@ -9424,7 +9425,6 @@ _DOCS_REVIEW_VOLATILE_ITEM_FIELDS = frozenset(
         "reviewed_docs_at",
     }
 )
-_docs_review_admissions: dict[str, dict[str, Any]] = {}
 
 
 def _canonical_docs_review_item(item: dict[str, Any]) -> dict[str, Any]:
@@ -9549,6 +9549,69 @@ def _docs_review_request_identity(payload: dict[str, Any]) -> str:
     return hashlib.sha256(serialized.encode("utf-8")).hexdigest()
 
 
+def _bounded_docs_escalation_factory(
+    *,
+    base_user_prompt: str,
+    system_prompt: str,
+    response_model: type[Any],
+    input_token_bound: int,
+) -> Callable[[list[dict[str, Any]]], str]:
+    """Render the canonical critique request within a proven input bound.
+
+    The canonical budget infrastructure proves input tokens are no greater
+    than the complete serialized UTF-8 byte length plus chat framing. This
+    factory binary-searches the critique prefix against that same complete
+    request serialization, so the actual escalator request can never exceed
+    the cataloged model input limit used for admission pricing.
+    """
+    if input_token_bound <= 0:
+        raise ValueError("escalator input token bound must be positive")
+    from imas_codex.standard_names.budget import _CHAT_FRAMING_TOKEN_ALLOWANCE
+
+    serialized_byte_bound = input_token_bound - _CHAT_FRAMING_TOKEN_ALLOWANCE
+    if serialized_byte_bound <= 0:
+        raise ValueError("escalator input allowance cannot cover chat framing")
+    marker = "\n\n## Prior reviewer critiques for authoritative escalation\n"
+    schema = response_model.model_json_schema()
+
+    def _serialized_size(user_prompt: str) -> int:
+        return len(
+            json.dumps(
+                {
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    "response_schema": schema,
+                },
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            ).encode("utf-8")
+        )
+
+    def _render(prior_reviews: list[dict[str, Any]]) -> str:
+        critique = json.dumps(
+            prior_reviews,
+            ensure_ascii=True,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        prefix = base_user_prompt + marker
+        if _serialized_size(prefix) > serialized_byte_bound:
+            raise ValueError("base escalation request exceeds catalog input bound")
+        low, high = 0, len(critique)
+        while low < high:
+            midpoint = (low + high + 1) // 2
+            if _serialized_size(prefix + critique[:midpoint]) <= serialized_byte_bound:
+                low = midpoint
+            else:
+                high = midpoint - 1
+        return prefix + critique[:low]
+
+    return _render
+
+
 async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
     """Render and price one canonical docs-review request without mutation.
 
@@ -9575,7 +9638,11 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
     )
 
     source_item = item
-    if item.get("docs_stage") in {"accepted", "reviewed", "exhausted"}:
+    if item.get("docs_review_admission") or item.get("docs_stage") in {
+        "accepted",
+        "reviewed",
+        "exhausted",
+    }:
         source_item = await _asyncio.to_thread(
             _load_docs_review_admission_item, str(item.get("id") or "")
         )
@@ -9671,7 +9738,7 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         {"role": "system", "content": system_prompt},
         {"role": "user", "content": user_prompt},
     ]
-    exposures = [
+    mandatory_exposures = [
         model_provider_exposure(
             model,
             base_messages,
@@ -9680,39 +9747,38 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         )
         for model in review_models[:2]
     ]
+    conditional_exposure = 0.0
+    escalation_input_token_bound = None
+    escalation_prompt_factory = None
     if len(review_models) >= 3:
-        # The escalation request additionally carries two bounded structured
-        # critiques. Bound their rendered UTF-8 payload by the two reviewers'
-        # complete output allowances; four bytes per token covers a full-width
-        # Unicode code point. This synthetic envelope is priced but is never
-        # sent to a provider.
-        from imas_codex.discovery.base.llm import get_model_limits
+        from imas_codex.discovery.base.llm import get_catalog_model_info
 
-        critique_byte_bound = sum(
-            int(get_model_limits(model).get("max_tokens") or 0) * 4
-            for model in review_models[:2]
+        catalog_bound = get_catalog_model_info(review_models[2]).get("max_input_tokens")
+        if not isinstance(catalog_bound, int) or catalog_bound <= 0:
+            raise ValueError("escalator catalog input allowance is not bounded")
+        escalation_input_token_bound = catalog_bound
+        escalation_prompt_factory = _bounded_docs_escalation_factory(
+            base_user_prompt=user_prompt,
+            system_prompt=system_prompt,
+            response_model=response_model,
+            input_token_bound=catalog_bound,
         )
-        if critique_byte_bound <= 0:
-            raise ValueError("reviewer output allowance is not bounded")
+        worst_case_prompt = escalation_prompt_factory(
+            [{"critique": "x" * catalog_bound}]
+        )
         escalation_messages = [
             {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": (
-                    user_prompt
-                    + "\n\n## Prior reviewer critiques for authoritative escalation\n"
-                    + ("x" * critique_byte_bound)
-                ),
-            },
+            {"role": "user", "content": worst_case_prompt},
         ]
-        exposures.append(
-            model_provider_exposure(
-                review_models[2],
-                escalation_messages,
-                response_model=response_model,
-                provider_attempts=1,
-            )
+        conditional_exposure = model_provider_exposure(
+            review_models[2],
+            escalation_messages,
+            response_model=response_model,
+            provider_attempts=1,
         )
+    exposures = [*mandatory_exposures]
+    if conditional_exposure > 0:
+        exposures.append(conditional_exposure)
 
     reasoning_effort = get_sn_review_reasoning_effort()
     escalation_reasoning_effort = get_sn_review_escalation_reasoning_effort()
@@ -9726,6 +9792,9 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         "reasoning_effort": reasoning_effort,
         "escalation_reasoning_effort": escalation_reasoning_effort,
         "expected_exposures": exposures,
+        "mandatory_exposures": mandatory_exposures,
+        "conditional_exposure": conditional_exposure,
+        "escalation_input_token_bound": escalation_input_token_bound,
     }
     return {
         **identity_payload,
@@ -9735,6 +9804,7 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
         "response_model": response_model,
         "user_prompt": user_prompt,
         "system_prompt": system_prompt,
+        "escalation_prompt_factory": escalation_prompt_factory,
     }
 
 
@@ -9771,12 +9841,6 @@ async def admit_docs_review_request(
             "campaign_remaining": remainders[1],
             "provider_policy_ceiling_is_separate": True,
         }
-    if scope_run_id in _docs_review_admissions:
-        return {
-            "ok": False,
-            "outcome": "scope_already_admitted",
-            "reason": f"scope {scope_run_id!r} already has a priced request",
-        }
     staged = await _asyncio.to_thread(
         stage_docs_for_rescore,
         item["id"],
@@ -9785,6 +9849,9 @@ async def admit_docs_review_request(
         expected_docs_hash=expected_docs_hash,
         expected_review_input_hash=expected_review_input_hash,
         request_identity=request["request_identity"],
+        mandatory_exposures=request["mandatory_exposures"],
+        conditional_exposure=request["conditional_exposure"],
+        expected_exposure=expected_exposure,
     )
     result = {
         **staged,
@@ -9793,12 +9860,6 @@ async def admit_docs_review_request(
         "expected_exposure": expected_exposure,
         "provider_policy_ceiling_is_separate": True,
     }
-    if staged.get("ok") and not dry_run:
-        _docs_review_admissions[scope_run_id] = {
-            "id": item["id"],
-            "request_identity": request["request_identity"],
-            "rollback_receipt": staged["rollback_receipt"],
-        }
     return result
 
 
@@ -9812,24 +9873,30 @@ async def _release_or_rollback_docs_review(item: dict[str, Any]) -> None:
     )
 
     claim_token = item.get("claim_token") or ""
-    if not claim_token:
-        return
-    scope_run_id = item.get("run_id") or ""
-    admission = _docs_review_admissions.get(scope_run_id)
-    if admission is not None and admission.get("id") == item.get("id"):
+    admission_id = item.get("docs_review_admission")
+    if admission_id:
         outcome = await _asyncio.to_thread(
             rollback_docs_rescore_admission,
-            admission["rollback_receipt"],
-            claim_token=claim_token,
+            admission_id,
+            claim_token=claim_token or None,
+            claim_seq=item.get("claim_seq"),
         )
-        if outcome.get("ok"):
-            _docs_review_admissions.pop(scope_run_id, None)
-        else:
+        if not outcome.get("ok"):
             logger.error(
                 "exact documentation rollback refused for %s: %s",
                 item.get("id"),
                 outcome.get("reason"),
             )
+            if outcome.get("outcome") == "missing_admission" and claim_token:
+                await _asyncio.to_thread(
+                    release_review_docs_failed_claims,
+                    sn_ids=[item["id"]],
+                    claim_token=claim_token,
+                    from_stage="drafted",
+                    to_stage="drafted",
+                )
+        return
+    if not claim_token:
         return
     await _asyncio.to_thread(
         release_review_docs_failed_claims,
@@ -9865,34 +9932,62 @@ async def process_review_docs_batch(
         DEFAULT_REFINE_ROTATIONS,
     )
     from imas_codex.standard_names.graph_ops import (
+        bind_docs_review_admission_claim,
+        persist_admitted_docs_review,
         persist_reviewed_docs,
         update_review_aggregates,
+        verify_docs_review_admission_request,
     )
 
     processed = 0
 
     for item in batch:
         if stop_event.is_set():
-            break
+            await _release_or_rollback_docs_review(item)
+            continue
 
         sn_id = item["id"]
         claim_token = item.get("claim_token") or ""
         lease = None
 
         try:
-            request = await prepare_docs_review_request(item)
-            scope_run_id = item.get("run_id") or ""
-            admission = _docs_review_admissions.get(scope_run_id)
-            if admission is not None and (
-                admission.get("id") != sn_id
-                or admission.get("request_identity") != request["request_identity"]
-            ):
-                logger.error(
-                    "review_docs request identity drifted for %s before dispatch",
-                    sn_id,
+            admission_id = item.get("docs_review_admission")
+            durable_admission = None
+            if admission_id:
+                durable_admission = await _asyncio.to_thread(
+                    bind_docs_review_admission_claim,
+                    admission_id=admission_id,
+                    target_id=sn_id,
+                    scope_id=item.get("run_id") or "",
+                    claim_token=claim_token,
+                    claim_seq=item.get("claim_seq"),
                 )
-                await _release_or_rollback_docs_review(item)
-                continue
+                if not durable_admission.get("ok"):
+                    logger.error(
+                        "durable documentation admission refused for %s: %s",
+                        sn_id,
+                        durable_admission.get("outcome"),
+                    )
+                    await _release_or_rollback_docs_review(item)
+                    continue
+            request = await prepare_docs_review_request(item)
+            if durable_admission is not None:
+                verified = await _asyncio.to_thread(
+                    verify_docs_review_admission_request,
+                    admission_id=admission_id,
+                    target_id=sn_id,
+                    scope_id=item.get("run_id") or "",
+                    claim_token=claim_token,
+                    claim_seq=item.get("claim_seq"),
+                    request_identity=request["request_identity"],
+                )
+                if not verified.get("ok"):
+                    logger.error(
+                        "review_docs durable request drifted for %s before dispatch",
+                        sn_id,
+                    )
+                    await _release_or_rollback_docs_review(item)
+                    continue
 
             quorum = await _run_rd_quorum_cycles(
                 sn_id=sn_id,
@@ -9910,39 +10005,70 @@ async def process_review_docs_batch(
                 reasoning_effort=request["reasoning_effort"],
                 escalation_reasoning_effort=request["escalation_reasoning_effort"],
                 run_id=mgr.run_id,
+                escalation_prompt_factory=request.get("escalation_prompt_factory"),
+                review_group_id=(
+                    durable_admission.get("review_group_id")
+                    if durable_admission is not None
+                    else None
+                ),
             )
 
             if quorum is None:
                 await _release_or_rollback_docs_review(item)
                 continue
 
-            from imas_codex.standard_names.graph_ops import write_reviews
+            if durable_admission is not None:
+                terminal = await _asyncio.to_thread(
+                    persist_admitted_docs_review,
+                    admission_id=admission_id,
+                    target_id=sn_id,
+                    scope_id=item.get("run_id") or "",
+                    claim_token=claim_token,
+                    claim_seq=item.get("claim_seq"),
+                    request_identity=request["request_identity"],
+                    records=quorum["records"],
+                    score=quorum["winning_score"],
+                    scores=quorum["winning_scores"],
+                    comments=quorum["winning_comments"],
+                    comments_per_dim=quorum["winning_comments_per_dim"],
+                    model=quorum["canonical_model"],
+                    min_score=DEFAULT_MIN_SCORE,
+                    rotation_cap=DEFAULT_REFINE_ROTATIONS,
+                    resolution_method=quorum["resolution_method"],
+                    reviewer_chain_size=len(request["models"]),
+                    total_cost=quorum["total_cost"],
+                )
+                new_stage = terminal.get("stage") if terminal.get("ok") else ""
+                if not new_stage:
+                    await _release_or_rollback_docs_review(item)
+                    continue
+            else:
+                from imas_codex.standard_names.graph_ops import write_reviews
 
-            await _asyncio.to_thread(write_reviews, quorum["records"])
-
-            new_stage = await _asyncio.to_thread(
-                persist_reviewed_docs,
-                sn_id=sn_id,
-                claim_token=claim_token,
-                claim_seq=item.get("claim_seq"),
-                score=quorum["winning_score"],
-                scores=quorum["winning_scores"],
-                comments=quorum["winning_comments"],
-                comments_per_dim=quorum["winning_comments_per_dim"],
-                model=quorum["canonical_model"],
-                min_score=DEFAULT_MIN_SCORE,
-                rotation_cap=DEFAULT_REFINE_ROTATIONS,
-                llm_cost=quorum["total_cost"],
-                llm_tokens_in=quorum["total_tokens_in"],
-                llm_tokens_out=quorum["total_tokens_out"],
-                llm_tokens_cached_read=0,
-                llm_tokens_cached_write=0,
-                llm_service="standard-names",
-                run_id=mgr.run_id,
-                skip_review_node=True,
-                resolution_method=quorum["resolution_method"],
-                reviewer_chain_size=len(request["models"]),
-            )
+                await _asyncio.to_thread(write_reviews, quorum["records"])
+                new_stage = await _asyncio.to_thread(
+                    persist_reviewed_docs,
+                    sn_id=sn_id,
+                    claim_token=claim_token,
+                    claim_seq=item.get("claim_seq"),
+                    score=quorum["winning_score"],
+                    scores=quorum["winning_scores"],
+                    comments=quorum["winning_comments"],
+                    comments_per_dim=quorum["winning_comments_per_dim"],
+                    model=quorum["canonical_model"],
+                    min_score=DEFAULT_MIN_SCORE,
+                    rotation_cap=DEFAULT_REFINE_ROTATIONS,
+                    llm_cost=quorum["total_cost"],
+                    llm_tokens_in=quorum["total_tokens_in"],
+                    llm_tokens_out=quorum["total_tokens_out"],
+                    llm_tokens_cached_read=0,
+                    llm_tokens_cached_write=0,
+                    llm_service="standard-names",
+                    run_id=mgr.run_id,
+                    skip_review_node=True,
+                    resolution_method=quorum["resolution_method"],
+                    reviewer_chain_size=len(request["models"]),
+                )
             if new_stage:
                 source_versions = _review_dd_source_bindings(item)
                 await _asyncio.to_thread(
@@ -9963,8 +10089,6 @@ async def process_review_docs_batch(
 
             if new_stage:
                 processed += 1
-                if admission is not None:
-                    _docs_review_admissions.pop(scope_run_id, None)
                 _comment_log = (quorum["winning_comments"] or "")[:80]
                 logger.info(
                     "review_docs: %s → %s (score=%.3f, cycles=%d, method=%s) %s",
@@ -9992,6 +10116,9 @@ async def process_review_docs_batch(
             else:
                 logger.debug("review_docs: %s persist no-op (token mismatch?)", sn_id)
 
+        except asyncio.CancelledError:
+            await _release_or_rollback_docs_review(item)
+            raise
         except Exception:
             logger.exception("review_docs failed for %s", sn_id)
             try:
