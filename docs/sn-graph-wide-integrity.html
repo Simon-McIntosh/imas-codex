@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="120">
+<meta name="plan-version" content="121">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -1189,6 +1189,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260809-docs-recovery-builder-hold" data-who="reckon-ship" data-when="2026-08-09T17:25:00+00:00">
     <div class="r-comment-body"><p><strong>The first full documentation-recovery builder candidate is held by independent review.</strong> Fresh quiet census is 2,238 docs-accepted rows and the candidate partitions 14 metadata-backfill, 32 exact current rescore, 270 historical hold, and 1,922 ambiguous hold. Three fail-closed defects prevent integration: all 14 reported backfills already carry authority and need an explicit <code>already_authoritative</code> outcome; its eight-name paid batches are arbitrary because expected admission exposure is only known after rendering each request; and emitted content hashes are not accepted or enforced by <code>stage_docs_for_rescore</code>, so they are decorative rather than transactional CAS. No paid rescore has started.</p><p><strong>Correction contract:</strong> distinguish already-authoritative from missing metadata; emit a prioritized exact queue with zero pre-render reservation and fill each hard-capped tranche only after canonical request rendering; extend staging to recompute and enforce documentation and review-input hashes inside the write transaction. Overall remaining ceiling is USD 189.356037.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260809-focused-refine-scope-repair" data-who="reckon-ship" data-when="2026-08-09T17:38:00+00:00">
+    <div class="r-comment-body"><p><strong>Focused refine-scope continuity is repaired on main.</strong> Merge <code>fcb7e992</code> returns the predecessor's durable source scope in atomic claim data and validates one coherent scope before any model call. Focused successors inherit that scope transactionally, while LLMCost and SNRun accounting remain attributed to the executing audit run; ordinary unscoped and pinned-rename behavior remains unchanged. Blank, mixed, or conflicting scope metadata fails before spend/persistence. TDD captured six failures; final focused and related sets passed 9 and 87 tests. Artifact <code>/tmp/sgwi_refine_scope_continuity.json</code>, SHA-256 <code>e5490494488df308c71815568cbab93c378af46c346378586879b0a01a5bdfd7</code>. The drafted passive-loop successor may continue without reset only after independent integrated validation.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
