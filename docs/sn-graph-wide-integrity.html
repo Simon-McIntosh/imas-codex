@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-graph-wide-integrity">
   <meta name="plan-title" content="Graph-wide name integrity (everything outside the release batch)">
   <meta name="plan-summary" content="Close the provenance and attachment defects in the exploratory half of the corpus — the deliberately-broad generation across ~half the DD catalog — plus the write-path gaps and carried findings that the WEST release does not depend on.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="blocked">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="108">
-<meta name="plan-impl" content="0.95">
+<meta name="plan-version" content="109">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1121,6 +1121,21 @@ Done-when (ordered)
 <div class="r-comment" data-section="_top" data-id="c-20260809-expected-price-reservation" data-who="reckon-ship" data-when="2026-08-09T09:20:00+02:00">
     <div class="r-comment-body"><p><strong>Expected-price reservation is landed and independently green.</strong> Merge <code>4a716868</code> catalogs official route pricing for the compose seat, all three name-review seats, and the final escalation seat; admission now reserves expected route cost while the independent provider <code>max_price</code> ceiling remains unchanged and unpriced routes still fail closed. The first full-suite audit correctly exposed the missing live escalation route and failed 1 of 6,498 executed cases; after adding its official price and dedicated calibration, the previously failing chain-cap test passed and a fresh <code>sun_debug</code> run passed <strong>6,500</strong> tests with 10 skips and zero failures in 255 s. Log <code>~/.cache/sgwi009_reservation_reverification_standard_names.log</code>, SHA-256 <code>67752ff98d8513de95b7ed18b19778c2c41fba3140b401c15773a11683d24909</code>.</p></div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-20260809-exact-tail-authority-boundary" data-who="reckon-ship" data-when="2026-08-09T11:09:46+02:00">
+    <div class="r-comment-body"><p><strong>Exact authorized tail delivered; closure is blocked at the authority boundary.</strong> Expected-price reservation landed in merge <code>4a716868</code>, with the live Fable escalation route calibrated; candidate-description and exact-source fencing landed in merge <code>9e9f590c</code>; successful maintenance-only exit semantics landed in merge <code>d8d26fa9</code>. Fresh, serial manifest → dry-run → apply transactions completed rows B, D, E, F, G, H, I, J, K and N; C was already current. L/M were deliberately withheld because their R4 prerequisite is not executable. R2 completed as <code>radial_outline_of_ferritic_element</code> (name quorum 0.9875, docs quorum 0.90625; $0.648212). R3 completed as <code>radial_outline_of_antenna_strap</code> (name quorum 0.99375; refined docs accepted at 0.89375; successful retry $0.353947). Both poloidal-field-coil endpoint sources now bind and project exactly to accepted <code>radial_coordinate_of_poloidal_field_coil</code>; the source-fence fix trims surrounding response whitespace only and continues to reject distinct siblings. A funded review probe, run <code>8657b93d-63e4-4b6e-8ceb-0a6a8d23bbe5</code>, persisted its invocation/scope, spent an exact $0.048884, reviewed one name with two provider events, and stopped <code>no_eligible_work</code>.</p><p><strong>Closure census:</strong> accepted names moved from 2,358 (baseline hash <code>d5cf96a1…</code>) to 2,363, with exactly five additions and zero loss: <code>radial_coordinate_of_closest_wall_point</code>, <code>radial_coordinate_of_ferritic_element</code>, <code>radial_coordinate_of_poloidal_field_coil</code>, <code>radial_outline_of_antenna_strap</code>, and <code>radial_outline_of_ferritic_element</code>. Claims, open runs, and scopes are all zero; cross-sectional residuals are zero. The durable census is <code>~/.local/share/imas-codex/receipts/standard-names/s7-attachment-repair/orchestration/closure-census-20260809T084843Z.json</code>, SHA-256 <code>378eba6f5cd0daebae03c2b94df539e49a08ea85006535478f6ab55bc7b2b2df</code>. Independent final validation at exact clean <code>d8d26fa970e0915ad217c0dcd8b29e8e4b0ac983</code> passed 6,506 Standard Names tests with 10 skips and zero failures/errors in 241 s on <code>sun_debug</code>; log <code>~/.cache/sgwi009_final_standard_names.log</code>, SHA-256 <code>19ed8ee5ef9d38ef4817675917ce8280b312f5fccb8b00f5f8a8712eb31e8f5d</code>.</p><p><strong>Why this follow-up remains open:</strong> R1 cannot be applied safely because the sanctioned rename preflight expands to a 34-sibling family and no source-scoped successor/split instrument is authorized. R4 is a sole-attachment FLT_1D array; ordinary detach correctly orphan-refuses, while the execution row, reason, manifest, recovery vehicle, and exact locus decision are absent or conflicting. Therefore L/M and the iron-core rereview remain blocked. The promised verbatim radius-locus refine rule is absent from the runbook, receipts, live prompt, and tests, so it cannot be invented during execution. The runbook §5b query returns 87 rows rather than the promised zero, so it is not a valid closure instrument. Pellet r/phi and the escaped-acceptance disposition also remain lead decisions. No direct acceptance, broad family cascade, or unauthorised graph mutation was performed.</p></div>
+</div>
+</section>
+<section data-reckon="questions" id="questions" class="r-questions">
+<h2><span class="sec">§</span> Open questions</h2>
+<div class="r-q" data-id="q-sgwi-r1-source-scoped-repair" data-section="§7" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>R1's exact source still binds <code>radial_coordinate_of_control_surface</code>, but the sanctioned rename dry-run expands to 34 siblings and requires broad family scope. Should we authorize and build an exact source-scoped successor/split instrument instead of cascading a family rename?</p></p>
+    </div>
+<div class="r-q" data-id="q-sgwi-r4-array-locus-authority" data-section="§7" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>R4 is a sole-attachment FLT_1D array whose ordinary detach correctly orphan-refuses; no execution row, reason, manifest, or recovery vehicle exists, and the evidence conflicts between an invalid start-point locus and the broader arc-of-circle locus. Which exact target/locus and sanctioned recovery vehicle should be locked before L/M proceed?</p></p>
+    </div>
+<div class="r-q" data-id="q-sgwi-closure-instruments" data-section="§7" data-status="open" data-opened-by="reckon-ship" data-opened-at="2026-08-09T11:09:46+02:00" data-resolved-at="" data-resolved-by="">
+    <p class="r-q-body"><p>The promised verbatim radius-locus refine rule is absent from all asserted authorities, and the runbook §5b query currently returns 87 rows rather than zero. Please authorize the reviewed verbatim rule and a scope/cardinality-aware replacement census before this follow-up is declared complete.</p></p>
+    </div>
 </section>
 </main>
 </body>
