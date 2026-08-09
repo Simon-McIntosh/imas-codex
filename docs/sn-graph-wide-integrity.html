@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="116">
+<meta name="plan-version" content="117">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -1177,6 +1177,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260809-docs-authority-backfill" data-who="reckon-ship" data-when="2026-08-09T16:35:00+00:00">
     <div class="r-comment-body"><p><strong>The exact zero-cost documentation-authority backfill is integrated and independently apply-safe.</strong> Merge <code>ee38cd52</code> adds a public, versioned manifest builder and fail-closed <code>backfill_docs_review_authority</code> transaction. The canonical 22-row manifest at <code>/tmp/sgwi_docs_backfill_manifest_v2.json</code> has SHA-256 <code>8f5c726bbca9b7474c8366c84275e3b61e5e1c86d8beea7cb7e77d0c86e63e93</code>; live reconstruction was byte-identical, all 22 Review fingerprints matched, and a rollback dry-run matched and changed 22 rows in-transaction with no persistent graph delta. The independent one-hop snapshot covered 373 incident relationships and remained byte-identical at SHA-256 <code>531449fb2792a963aecea8a09eb32f5aa8f157f126f91a8821662fe868329b24</code>. Focused and related verification passed 21 and 74 tests. This backfill sets only the missing documentation resolution method; it does not regenerate prose, rescore, or direct-accept a name.</p><p><strong>The remaining 2,215 rows stay partitioned rather than blindly resubmitted.</strong> The next zero-cost mechanism must reconcile the 2,050 ambiguous rows against canonical current content and Review evidence, then exact-stage only demonstrated shortfalls. The 165 explicit nonquorate rows remain the first paid cohort, with 143 current accepted rows immediately stageable under a USD 50 cap; 22 superseded rows stay historical unless the lead explicitly requests historical repair.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260809-docs-authority-integrated-validation" data-who="reckon-ship" data-when="2026-08-09T16:47:00+00:00">
+    <div class="r-comment-body"><p><strong>The integrated documentation-authority gate is green.</strong> At exact merged main <code>1a56b767</code>, dependency sync passed and the full Standard Names suite executed once on <code>sun_debug</code>: <strong>6,608 passed</strong>, 10 skipped, zero failures/errors in 310 s. Durable log <code>~/.local/share/imas-codex/test-logs/sgwi_docs_authority_integrated_full.log</code>, SHA-256 <code>3d33befa96c28c5c2fb0d332a604b2d16349cee1f32168b057a5979c521cc626</code>. The exact 22-row metadata-only apply is now code-, independent-review-, and full-suite-ready; live mutation remains sequenced behind terminal graph quiet and fresh CAS.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
