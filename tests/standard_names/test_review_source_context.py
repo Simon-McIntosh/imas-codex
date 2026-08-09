@@ -166,6 +166,32 @@ def test_name_review_prompts_reject_non_line_of_sight_geometry_collapse(
 
 
 @pytest.mark.parametrize("prompt_name", ("sn/review", "sn/review_names"))
+def test_name_review_prompts_reject_endpoint_position_identity(
+    prompt_name: str,
+) -> None:
+    """Review never approves a name carrying endpoint ordering."""
+    rendered = " ".join(
+        render_prompt(
+            prompt_name,
+            {
+                "items": [],
+                "nearby_existing_names": [],
+                "review_scored_examples": [],
+                "batch_context": "",
+            },
+        )
+        .lower()
+        .split()
+    )
+
+    assert "never emit, propose, approve, or refine" in rendered
+    assert "first, second, third, start, end" in rendered
+    assert "radial_coordinate_of_arc_of_circle_start_point" in rendered
+    assert "same arc-of-circle carrier" in rendered
+    assert "vocab_gap" in rendered
+
+
+@pytest.mark.parametrize("prompt_name", ("sn/review", "sn/review_names"))
 def test_name_review_prompts_use_public_flux_area_decomposition(
     prompt_name: str,
 ) -> None:

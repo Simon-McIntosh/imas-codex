@@ -534,6 +534,36 @@ def test_ordinal_geometry_never_changes_the_physical_carrier(
 
 
 @pytest.mark.parametrize(
+    "relative_path,prompt_name",
+    (
+        ("sn/generate_name_system.md", None),
+        ("sn/generate_name_dd.md", "sn/generate_name_dd"),
+        ("sn/generate_name_dd_names.md", "sn/generate_name_dd_names"),
+    ),
+)
+def test_compose_prompts_forbid_endpoint_position_identity(
+    relative_path: str,
+    prompt_name: str | None,
+) -> None:
+    """Every compose mode retains endpoint ordering only in source provenance."""
+    if prompt_name is None:
+        prompt = (PROMPTS_DIR / relative_path).read_text(encoding="utf-8")
+    else:
+        prompt = render_prompt(
+            prompt_name,
+            {"items": [], "nearby_existing_names": [], "reference_exemplars": []},
+        )
+    text = " ".join(prompt.lower().split())
+
+    assert "first, second, third, start, end" in text
+    assert "dd path and source description" in text
+    assert "radial_coordinate_of_arc_of_circle_start_point" in text
+    assert "same arc-of-circle carrier" in text
+    assert "vocab_gap" in text
+    assert "line_of_sight" in text
+
+
+@pytest.mark.parametrize(
     "prompt_name",
     ("sn/generate_name_dd", "sn/generate_name_dd_names"),
 )

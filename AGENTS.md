@@ -709,6 +709,11 @@ from the `parents.py` admission gate). `StandardNameSource`:
   shorter.** There is no arbitrary character cap — a name is exactly as long
   as its physics requires. (The former 70-char `length_soft_cap` audit was an
   anti-pattern and has been removed.)
+- **Ordered sample positions never enter identity.** First/second/third and
+  start/end endpoint labels remain in DD provenance, while the Standard Name
+  retains the quantity, carrier, representation, owner, axis, mechanism, and
+  locus. An unavailable non-ordinal identity is a vocabulary gap, never a
+  nearest-object substitution.
 - **US spelling throughout.** Names and prose use American spelling
   (`normalized`, `gage`); `american_spelling_check` enforces this from the
   breame UK→US map and quarantines British forms for regeneration.

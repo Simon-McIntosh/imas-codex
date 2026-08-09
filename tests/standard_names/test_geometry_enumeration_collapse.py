@@ -24,6 +24,7 @@ import pytest
 from pydantic import ValidationError
 
 from imas_codex.standard_names.models import GrammarSegments
+from imas_codex.standard_names.segments import classify_gap, describe_gap, ordinal_form
 from imas_codex.standard_names.workers import normalize_spelling
 
 
@@ -199,3 +200,41 @@ def test_ordinal_base_tokens_do_not_compose(bad_base):
     so no ordinal-bearing name can be composed."""
     with pytest.raises(ValidationError):
         GrammarSegments(base_token=bad_base, base_kind="geometry")
+
+
+@pytest.mark.parametrize(
+    "token",
+    [
+        "start_point",
+        "end_point",
+        "start_points",
+        "end_points",
+        "start_sample",
+        "end_samples",
+        "arcs_of_circle_start_point",
+        "arcs_of_circle_end_points",
+    ],
+)
+def test_endpoint_samples_are_positional_rule_violations(token):
+    """Endpoint labels remain source ordering, never Standard Name identity."""
+    assert ordinal_form(token) is not None
+    assert classify_gap("position", token)[0] == "rule_violation"
+
+
+def test_unregistered_arc_endpoint_rejects_the_ordinal_compound():
+    """An unavailable non-ordinal carrier is a narrow gap, not a borrowed locus."""
+    forbidden = "arc_of_circle_start_point"
+    verdict = describe_gap("position", forbidden)
+
+    assert verdict.category == "rule_violation"
+    assert verdict.reuse_target is None
+    assert "'arc_of_circle'" in verdict.guidance
+    assert "itself unregistered" in verdict.guidance
+    assert "not the ordinal compound" in verdict.guidance
+
+
+@pytest.mark.parametrize("token", ["start_state", "end_state"])
+def test_state_words_are_not_mistaken_for_positional_samples(token):
+    """Start/end remain semantic when no point or sample structure indexes them."""
+    assert ordinal_form(token) is None
+    assert classify_gap("state", token)[0] != "rule_violation"

@@ -56,11 +56,21 @@ in the relevant segment is covered:
 - state resolution is ISN's `state` segment (`charge_state`, `internal_state`)
   plus the `_state`-suffixed subjects — not a fixed tuple.
 
-**Ordinality never enters a name.** `…/line_of_sight/{first,second,third}_point/r`
-must share ONE name, so `_vector_fields_conflict` must not treat ordinal samples
-of one object as distinct vector fields. Genuinely distinct fields (a camera's
-`direction` vs `up`) and distinct geometry primitives (`rectangle` centre vs
-`oblique` reference corner) still conflict.
+**Ordered sample positions never enter a name.** This includes
+`first`/`second`/`third` and `start`/`end` endpoint labels whenever the DD
+structure proves they index a point or sample. The ordering may remain in the DD
+path and source description as provenance, but generation, review, and refine
+must all exclude it from identity. Dropping it must preserve the quantity,
+carrier, geometry representation, owner, axis, mechanism, and locus. If that
+non-ordinal carrier or locus is unavailable in the public grammar, emit the
+exact vocabulary gap; never borrow `line_of_sight` or another object's token.
+Registered semantic tokens such as `first_wall`, and state/process uses of
+`start` or `end`, are not positional and must remain. Consequently
+`…/line_of_sight/{first,second,third,start,end}_point/r` shares one name, so
+`_vector_fields_conflict` must not treat ordered samples of one object as
+distinct vector fields. Genuinely distinct fields (a camera's `direction` vs
+`up`) and distinct geometry primitives (`rectangle` center vs `oblique`
+reference corner) still conflict.
 
 **A pairwise rule must be applied with compose semantics.** Compose accumulates
 only ACCEPTED siblings, so one representative of a conflicting group survives;

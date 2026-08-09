@@ -192,6 +192,31 @@ class TestStaleGuidanceStripped:
         )
 
 
+def test_name_pipeline_seats_share_one_endpoint_identity_rule():
+    """Generate, review, and refine receive the same non-ordinal contract."""
+    paths = [
+        "generate_name_system.md",
+        "generate_name_dd.md",
+        "generate_name_dd_names.md",
+        "review.md",
+        "review_names.md",
+        "review_names_system.md",
+        "refine_name_system.md",
+    ]
+    start = "Never emit, propose, approve, or refine"
+    end = "rather than inventing a Standard Name."
+    blocks: dict[str, str] = {}
+
+    for filename in paths:
+        text = (PROMPTS_DIR / "sn" / filename).read_text(encoding="utf-8")
+        block_start = text.index(start)
+        block_end = text.index(end, block_start) + len(end)
+        blocks[filename] = text[block_start:block_end]
+
+    expected = blocks[paths[0]]
+    assert all(block == expected for block in blocks.values())
+
+
 class TestDDGapEvidencePromptContract:
     """Every production response seat keeps DD-defect evidence flag-only."""
 
