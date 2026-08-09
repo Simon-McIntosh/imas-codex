@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="123">
+<meta name="plan-version" content="124">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -1198,6 +1198,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260809-bounded-docs-evidence-recovery" data-who="reckon-ship" data-when="2026-08-09T18:17:00+00:00">
     <div class="r-comment-body"><p><strong>Bounded documentation-evidence recovery is integrated after independent correction.</strong> Merge <code>dc052c7d</code> adds a deterministic read-only census/queue and real content-bound staging CAS. Fresh exact census: 2,238 docs-accepted rows = 14 already authoritative, 0 remaining metadata-only backfills, 32 exact current rescores, 270 superseded historical holds, and 1,922 ambiguous holds. The prior 22-row apply is honestly idempotent: 14 current already-authoritative plus eight superseded historical, all with authority evidence and zero work. Independent verification passed 97 focused/related tests; artifact <code>/tmp/sgwi_docs_recovery_corrected_independent.json</code>, SHA-256 <code>2848649d0c28aa73671f306933c197d08b57299cd38f750a1ea1e621ee7a11fe</code>.</p><p><strong>Budget contract:</strong> exact prioritized queue 32; no target is assigned before its actual review request is rendered. Reserved exposure and expected exposure are USD 0/null before rendering. Hard tranches are USD 50 + 50 + 50 + 39.356037 = USD 189.356037. Each request computes canonical expected admission exposure after rendering and refuses before a provider call if it does not fit; every tranche ends with actual-spend and graph-census rebuild. Superseded and ambiguous rows cost zero unless separately authorized.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260809-focused-scope-correction-green" data-who="reckon-ship" data-when="2026-08-09T18:23:00+00:00">
+    <div class="r-comment-body"><p><strong>The corrected focus/provenance split is independently green.</strong> Merge <code>b23a7de3</code> threads explicit invocation scope from the pool loop; focused rows must match it before graph/provider/persistence, while unscoped work ignores historical row IDs and attributes successors to the current audit run. Independent exact six-family verification passed 104 tests with zero failures/skips. Receipt <code>/tmp/sgwi_refine_scope_corrected_independent.json</code>, SHA-256 <code>c23cac686166e627d9875cb176d0021388170a72248e146e12f2343213962381</code>. The exact no-reset passive-loop continuation is cleared under the remaining USD 49.263617 cohort cap.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
