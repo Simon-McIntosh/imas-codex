@@ -766,6 +766,97 @@ def _filter_persist_candidates_to_claimed_sources(
     return kept
 
 
+def _persist_description_checked_candidates(
+    candidates: list[dict[str, Any]],
+    *,
+    source_type: str,
+    phase: str,
+    compose_model: str,
+    dd_version: str | None,
+    cocos_version: int | None,
+    run_id: str | None,
+) -> int | list[str]:
+    """Persist only candidates with prose, releasing rejected claims to retry.
+
+    The structured response contract requires a non-empty description, but
+    callers and test doubles can still supply unvalidated candidate-shaped
+    objects. This final boundary prevents those objects from creating a drafted name
+    before releasing each exact source claim through the canonical failure
+    path. A source with any descriptionless proposal is entirely deferred so
+    duplicate proposals cannot race the release with a richer sibling.
+    """
+    from imas_codex.standard_names.graph_ops import (
+        persist_generated_name_batch,
+        release_generate_name_failed_claims,
+    )
+
+    rejected_source_ids = {
+        candidate.get("source_id")
+        for candidate in candidates
+        if not isinstance(candidate.get("description"), str)
+        or not candidate["description"].strip()
+    }
+    rejected_source_ids.discard(None)
+    rejected_count = sum(
+        1
+        for candidate in candidates
+        if not isinstance(candidate.get("description"), str)
+        or not candidate["description"].strip()
+    )
+
+    releases_by_token: dict[str, set[str]] = {}
+    for candidate in candidates:
+        source_id = candidate.get("source_id")
+        if source_id not in rejected_source_ids:
+            continue
+        claim_token = candidate.get("source_claim_token")
+        if not isinstance(source_id, str) or not source_id or not claim_token:
+            continue
+        source_node_id = (
+            source_id
+            if source_type == "dd" and source_id.startswith("dd:")
+            else encode_source_path(source_type, source_id)
+        )
+        releases_by_token.setdefault(str(claim_token), set()).add(source_node_id)
+
+    released = 0
+    release_expected = sum(len(ids) for ids in releases_by_token.values())
+    for claim_token, source_ids in sorted(releases_by_token.items()):
+        released += release_generate_name_failed_claims(
+            source_ids=sorted(source_ids),
+            claim_token=claim_token,
+        )
+
+    if rejected_count:
+        logger.warning(
+            "Pool %s: rejected %d candidate(s) with empty descriptions; "
+            "released %d/%d exact source claim(s) for retry",
+            phase,
+            rejected_count,
+            released,
+            release_expected,
+        )
+
+    eligible = [
+        candidate
+        for candidate in candidates
+        if candidate.get("source_id") not in rejected_source_ids
+        and isinstance(candidate.get("description"), str)
+        and candidate["description"].strip()
+    ]
+    if not eligible:
+        return []
+
+    return persist_generated_name_batch(
+        eligible,
+        compose_model=compose_model,
+        dd_version=dd_version,
+        cocos_version=cocos_version,
+        run_id=run_id,
+        return_winner_ids=True,
+    )
+
+
 def _mark_source_prevalidation_failed(
     source_id: str,
     *,
@@ -6176,16 +6267,15 @@ async def compose_batch(
 
         # ── Persist ────────────────────────────────────────────────────
         if candidates:
-            from imas_codex.standard_names.graph_ops import persist_generated_name_batch
-
             persisted = await asyncio.to_thread(
-                persist_generated_name_batch,
+                _persist_description_checked_candidates,
                 candidates,
+                source_type=source_kind,
+                phase=phase_tag,
                 compose_model=model,
                 dd_version=batch[0].get("dd_version"),
                 cocos_version=batch[0].get("cocos_version"),
                 run_id=mgr.run_id,
-                return_winner_ids=True,
             )
             # Only the exact ID-returning persistence contract proves which
             # source claims won the CAS. A legacy count cannot authorize a

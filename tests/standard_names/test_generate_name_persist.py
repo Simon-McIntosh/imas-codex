@@ -105,6 +105,7 @@ def _make_candidate(
         "source_id": source_id,
         "source_types": ["dd"],
         "kind": "scalar",
+        "description": "Electron temperature in the plasma core",
         "unit": "eV",
         "physics_domain": ["core_profiles"],
         "model": model,
@@ -113,6 +114,49 @@ def _make_candidate(
         "source_claim_token": "winner",
         "source_claim_seq": 7,
     }
+
+
+def test_descriptionless_candidate_releases_source_without_persistence(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """A legacy candidate without prose is released for a clean retry."""
+    from imas_codex.standard_names.workers import (
+        _persist_description_checked_candidates,
+    )
+
+    candidate = _make_candidate()
+    candidate["description"] = " \t"
+
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.release_generate_name_failed_claims",
+            return_value=1,
+        ) as release,
+        patch(
+            "imas_codex.standard_names.graph_ops.persist_generated_name_batch",
+        ) as persist,
+        caplog.at_level("WARNING"),
+    ):
+        result = _persist_description_checked_candidates(
+            [candidate],
+            source_type="dd",
+            phase="generate_name",
+            compose_model="test/model",
+            dd_version="4.1.0",
+            cocos_version=None,
+            run_id="run-1",
+        )
+
+    assert result == []
+    release.assert_called_once_with(
+        source_ids=[
+            "dd:core_profiles/profiles_1d/electrons/temperature",
+        ],
+        claim_token="winner",
+    )
+    persist.assert_not_called()
+    assert "rejected 1 candidate(s) with empty descriptions" in caplog.text
+    assert "released 1/1 exact source claim(s) for retry" in caplog.text
 
 
 # ---------------------------------------------------------------------------

@@ -585,7 +585,7 @@ class StandardNameCandidate(BaseModel):
 
     # --- Non-IR fields ---
     description: str = Field(
-        default="",
+        min_length=1,
         description="1-line ≤120 char summary of the physical quantity",
     )
     kind: EntryKind = Field(
@@ -599,6 +599,14 @@ class StandardNameCandidate(BaseModel):
         default_factory=list, description="Mapped IMAS DD paths"
     )
     reason: str = Field(description="Brief justification (≤25 words)")
+
+    @field_validator("description")
+    @classmethod
+    def _description_has_meaningful_text(cls, value: str) -> str:
+        """Reject prose that cannot ground persistence or review."""
+        if not value.strip():
+            raise ValueError("description must contain non-whitespace text")
+        return value
 
     @model_validator(mode="before")
     @classmethod

@@ -31,7 +31,12 @@ def _candidate(
     base: str, *, kind: str = "quantity", qualifiers: list[str] | None = None
 ) -> StandardNameCandidate:
     seg = GrammarSegments(base_token=base, base_kind=kind, qualifiers=qualifiers or [])
-    return StandardNameCandidate(source_id="x", segments=seg, reason="t")
+    return StandardNameCandidate(
+        source_id="x",
+        segments=seg,
+        description="Shape parameter of a plasma surface",
+        reason="Surface shape",
+    )
 
 
 # ---------------------------------------------------------------------------
