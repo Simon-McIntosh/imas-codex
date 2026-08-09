@@ -19,7 +19,8 @@ Locked decisions (see the SN edit-engine plan):
 - Review receives ONLY the edit reason (intent) — never the proposal
   pre-approved. The reviewer still independently scores the candidate.
 - A shared-base leaf edit (renaming a segment a leaf's siblings also carry)
-  BLOCKS without explicit ``scope=family``.
+  blocks.  It is never promoted automatically to a structural parent; a
+  parent-scoped edit must be requested and reviewed explicitly.
 - Cascade descendants never individually re-enter LLM review — the ROOT
   rename is the reviewed decision; descendants follow atomically once it is
   accepted (see :func:`imas_codex.standard_names.graph_ops
@@ -36,7 +37,7 @@ name clears — there is no privileged accept path:
      (``cascade._isn_round_trip_ok``) — same round-trip the validate gate
      and the cascade apply run; a grammar-invalid name is refused up front.
   2. id-collision check against the live graph.
-  3. shared-base / sibling desync guard (``--scope family`` mapping).
+  3. shared-base / sibling desync guard (no leaf-to-parent promotion).
   4. ``persist_refined_name`` mints the ``drafted`` successor, then
      ``_stamp_successor_validation`` runs the FULL name-admission gate
      (:func:`imas_codex.standard_names.workers.validate_name_candidate`:
@@ -63,16 +64,10 @@ name clears — there is no privileged accept path:
   ``generate_docs`` pools; it therefore rides the pipeline's own gates by
   construction (nothing edit-specific to validate).
 
-``--scope family`` semantics: a shared-segment leaf edit is PROMOTED to its
-parent and the parent's rename cascades through the **full** ``HAS_PARENT``
-subtree (every descendant that embeds the segment), not just the leaf's
-direct siblings.  Full-subtree breadth is grammar-required: a grandchild
-such as ``time_derivative_of_upper_elongation`` embeds the same base as
-``elongation`` and would desync into invalid grammar if only direct
-siblings were renamed.  (The ``EditScope.family`` enum docstring in
-``imas_codex.graph.models`` still reads "sibling StandardNames" — that text
-is stale; the behaviour is full-subtree and the enum doc should be
-corrected to match.)
+``--scope family`` never widens a leaf edit through ``HAS_PARENT``.  Grammar
+ancestry groups structural forms but does not prove that their sources share
+an owner, representation, or repair intent.  Cascade-bearing parent edits are
+reviewed only when the parent itself is the explicit target.
 """
 
 from __future__ import annotations
@@ -2101,7 +2096,7 @@ def _apply_rename(
             f"a StandardName {new_name!r} already exists",
         )
 
-    # 3. Shared-base guard + family→parent mapping (leaf targets only — a
+    # 3. Shared-base guard (leaf targets only — a
     #    parent target's own siblings are unaffected by renaming it, since
     #    the subtree cascade only touches ITS descendants).
     #
@@ -2112,7 +2107,6 @@ def _apply_rename(
     #    siblings present — the base is what siblings actually share.
     refine_root_old = target
     refine_root_new = new_name
-    mapped_from_leaf = False
     actions: list[str] = []
 
     base_changed = _base_token(target) != _base_token(new_name)
@@ -2165,58 +2159,25 @@ def _apply_rename(
             if not sib_count:
                 continue  # no siblings to desync — safe to rename this leaf in place
 
-            if scope != EditScope.family.value:
+            if scope == EditScope.family.value:
                 return _blocked(
                     target,
                     "rename",
                     "name",
                     scope,
-                    f"renaming the shared segment {old_part!r} would desync "
-                    f"{sib_count} sibling(s) under parent {parent_id!r} — "
-                    "use --scope family",
+                    f"renaming the shared segment {old_part!r} reaches "
+                    f"{sib_count} sibling(s) under parent {parent_id!r}; a leaf "
+                    "edit cannot be promoted to its parent automatically — target "
+                    "the parent explicitly with a semantics-preserving cohort",
                 )
-            if old_part != parent_id:
-                return _blocked(
-                    target,
-                    "rename",
-                    "name",
-                    scope,
-                    f"cannot map family-scope rename onto parent {parent_id!r} — "
-                    f"the edited segment {old_part!r} does not match the parent's "
-                    "id (topology inconsistency)",
-                )
-            if new_part is None:
-                return _blocked(
-                    target,
-                    "rename",
-                    "name",
-                    scope,
-                    f"cannot map family-scope rename onto parent {parent_id!r} — "
-                    "the requested new name does not follow the same cascade "
-                    "template as the current name",
-                )
-            refine_root_old, refine_root_new = parent_id, new_part
-            mapped_from_leaf = True
             actions.append(
-                f"family scope maps to parent {parent_id!r} — mapped rename: "
-                f"{parent_id!r} → {new_part!r} (subtree)"
+                f"keeping the base change local to leaf {target!r}; "
+                f"{sib_count} sibling(s) under {parent_id!r} remain untouched"
             )
-            break
 
     # 4. Eligible-stage check — applies to whichever node is actually being
     #    refined (the mapped parent, or the target itself).
     root_row = target_row
-    if mapped_from_leaf:
-        root_row = _fetch_target(gc, refine_root_old)
-        if root_row is None:
-            return _blocked(
-                target,
-                "rename",
-                "name",
-                scope,
-                f"mapped parent {refine_root_old!r} not found",
-                extra_actions=actions,
-            )
 
     root_stage = root_row.get("name_stage")
     root_has_successor = bool(root_row.get("has_successor"))

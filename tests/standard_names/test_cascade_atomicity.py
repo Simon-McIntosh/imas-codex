@@ -58,6 +58,39 @@ def _accept(fake: FakeGraph) -> str:
 
 
 class TestCascadeAtomicity:
+    def test_locus_children_remain_untouched_when_root_accepts(self) -> None:
+        fake = FakeGraph()
+        fake.add_node("radial_coordinate", name_stage="superseded")
+        fake.add_node(
+            "radial_outline",
+            name_stage="drafted",
+            edit_status="open",
+            edit_scope="subtree",
+            edit_mode="rename",
+            edit_include_accepted=True,
+            claim_token="tok",
+        )
+        fake.refined_from["radial_outline"] = "radial_coordinate"
+        child = "radial_coordinate_of_control_surface"
+        fake.add_node(child, name_stage="accepted")
+        fake.add_edge(child, "radial_outline", "control_surface", "locus")
+
+        with _patched_graph(fake):
+            stage = persist_reviewed_name(
+                sn_id="radial_outline",
+                claim_token="tok",
+                score=0.95,
+                model="reviewer/x",
+                min_score=0.75,
+                rotation_cap=3,
+                resolution_method="quorum_consensus",
+                reviewer_chain_size=3,
+            )
+
+        assert stage == "accepted"
+        assert child in fake.nodes
+        assert "radial_outline_of_control_surface" not in fake.nodes
+
     def test_clean_cascade_applies_on_acceptance(self) -> None:
         """Baseline: a conflict-free cascade accepts the root and renames
         every descendant atomically."""
