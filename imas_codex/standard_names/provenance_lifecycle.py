@@ -13,6 +13,7 @@ import json
 from collections.abc import Mapping, Sequence
 from contextlib import suppress
 from datetime import UTC, datetime
+from hashlib import sha256
 from typing import Any
 from urllib.parse import quote
 from uuid import uuid4
@@ -312,19 +313,57 @@ def retarget_standard_name_sources(
     record_change: bool = True,
     enforce_consistency: bool = True,
     source_ids: Sequence[str] | None = None,
+    expected_current_bindings: Mapping[str, str] | None = None,
     _transactional: bool = False,
+    _allow_empty_noop: bool = False,
 ) -> int:
-    """Move every semantic source from ``old_name`` to ``new_name``.
+    """Move one explicit, compare-and-set source cohort to ``new_name``.
 
     ``FROM_DD_PATH`` / ``FROM_SIGNAL`` are never changed.  The operation makes
     ``PRODUCED_NAME``, its scalar mirror, upstream ``HAS_STANDARD_NAME`` and the
-    successor's ``source_paths`` projection agree.  Competing historical source
-    edges are removed; history belongs in ``StandardNameChange`` instead.
+    two affected names' ``source_paths`` projections agree. Every source id and
+    its expected current target are mandatory; implicit predecessor-wide
+    migration is forbidden. The same completed manifest is idempotent, while a
+    different manifest encountering its postcondition fails compare-and-set.
     """
     if not old_name or not new_name or old_name == new_name:
-        return 0
+        raise ValueError("source migration requires two distinct name ids")
 
-    if enforce_consistency and not _transactional:
+    admitted_source_ids = sorted(set(source_ids or ()))
+    empty_noop = not admitted_source_ids and _allow_empty_noop
+    if not admitted_source_ids and not empty_noop:
+        raise ValueError("source migration requires non-empty explicit source_ids")
+    expected = dict(expected_current_bindings or {})
+    if set(expected) != set(admitted_source_ids):
+        raise ValueError(
+            "expected_current_bindings keys must exactly match explicit source_ids"
+        )
+    unexpected_predecessors = {
+        source_id: target
+        for source_id, target in expected.items()
+        if target != old_name
+    }
+    if unexpected_predecessors:
+        raise ValueError(
+            "source migration manifest is heterogeneous for predecessor "
+            f"{old_name!r}: {unexpected_predecessors}"
+        )
+
+    manifest_payload = {
+        "expected_current_bindings": {
+            source_id: expected[source_id] for source_id in admitted_source_ids
+        },
+        "new_name": new_name,
+        "old_name": old_name,
+        "operation": operation,
+        "source_ids": admitted_source_ids,
+    }
+    manifest_hash = sha256(
+        json.dumps(manifest_payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    manifest_event_id = f"sn-change:source-migration:{manifest_hash}"
+
+    if not _transactional:
         from imas_codex.graph.client import GraphClient
 
         if isinstance(gc, GraphClient):
@@ -342,9 +381,11 @@ def retarget_standard_name_sources(
                         origin=origin,
                         run_id=run_id,
                         record_change=record_change,
-                        enforce_consistency=True,
+                        enforce_consistency=enforce_consistency,
                         source_ids=source_ids,
+                        expected_current_bindings=expected_current_bindings,
                         _transactional=True,
+                        _allow_empty_noop=_allow_empty_noop,
                     )
                     tx.commit()
                     return moved
@@ -352,52 +393,104 @@ def retarget_standard_name_sources(
                     tx.rollback()
                     raise
 
-    admitted_source_ids = sorted(set(source_ids)) if source_ids is not None else None
-    if enforce_consistency:
-        candidate_rows = gc.query(
-            """
-            MATCH (new:StandardName {id: $new_name})
-            OPTIONAL MATCH (old:StandardName {id: $old_name})
-            OPTIONAL MATCH (sns:StandardNameSource)
-            WHERE (sns)-[:PRODUCED_NAME]->(old)
-               OR sns.produced_sn_id = $old_name
-               OR (sns)-[:PRODUCED_NAME]->(new)
-            RETURN DISTINCT sns.id AS source_id
+    preflight_rows = (
+        []
+        if empty_noop
+        else [
+            dict(row)
+            for row in gc.query(
+                """
+            UNWIND $source_ids AS source_id
+            OPTIONAL MATCH (source:StandardNameSource {id: source_id})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+            WITH source_id, source,
+                 [id IN collect(DISTINCT target.id) WHERE id IS NOT NULL]
+                   AS current_bindings
+            OPTIONAL MATCH (event:StandardNameChange {id: $manifest_event_id})
+            RETURN source_id,
+                   source.id IS NOT NULL AS source_exists,
+                   source.status AS source_status,
+                   source.produced_sn_id AS scalar_binding,
+                   source.claimed_at IS NOT NULL OR source.claim_token IS NOT NULL
+                     AS actively_claimed,
+                   current_bindings,
+                   event.id IS NOT NULL AS manifest_recorded
+            ORDER BY source_id
             """,
-            old_name=old_name,
-            new_name=new_name,
-        )
-        candidate_ids = [r["source_id"] for r in candidate_rows if r.get("source_id")]
-        if admitted_source_ids is not None:
-            candidate_ids = [
-                source_id
-                for source_id in candidate_ids
-                if source_id in admitted_source_ids
-            ]
+                source_ids=admitted_source_ids,
+                manifest_event_id=manifest_event_id,
+            )
+        ]
+    )
+    if not empty_noop and (
+        len(preflight_rows) != len(admitted_source_ids)
+        or {row.get("source_id") for row in preflight_rows} != set(admitted_source_ids)
+    ):
+        raise RuntimeError("source migration preflight did not return the exact cohort")
+
+    pending: list[str] = []
+    completed: list[str] = []
+    conflicts: list[str] = []
+    for row in preflight_rows:
+        source_id = row["source_id"]
+        bindings = sorted(set(row.get("current_bindings") or []))
+        scalar = row.get("scalar_binding")
+        if (
+            row.get("source_exists")
+            and row.get("source_status") != "stale"
+            and not row.get("actively_claimed")
+            and bindings == [old_name]
+            and scalar == old_name
+        ):
+            pending.append(source_id)
+        elif (
+            row.get("source_exists")
+            and bindings == [new_name]
+            and scalar == new_name
+            and row.get("manifest_recorded")
+        ):
+            completed.append(source_id)
+        else:
+            conflicts.append(
+                f"{source_id}(exists={bool(row.get('source_exists'))}, "
+                f"status={row.get('source_status')!r}, claimed="
+                f"{bool(row.get('actively_claimed'))}, bindings={bindings!r}, "
+                f"scalar={scalar!r})"
+            )
+    if conflicts or (pending and completed):
+        details = ", ".join(conflicts) or "manifest is only partially applied"
+        raise RuntimeError(f"source migration compare-and-set failed: {details}")
+    if completed:
+        return 0
+
+    if enforce_consistency and not empty_noop:
         from imas_codex.standard_names.attachment_audit import guard_source_pairings
 
-        guarded = guard_source_pairings(gc, new_name, candidate_ids)
-        admitted_source_ids = list(guarded.accepted_source_ids)
-        if not admitted_source_ids:
-            return 0
+        guarded = guard_source_pairings(gc, new_name, admitted_source_ids)
+        if guarded.rejected or set(guarded.accepted_source_ids) != set(
+            admitted_source_ids
+        ):
+            rejected = (
+                ", ".join(
+                    f"{item.source_node_id}: {item.reason}" for item in guarded.rejected
+                )
+                or "pairing guard did not admit the exact source cohort"
+            )
+            raise ValueError(f"source migration attachment rejected: {rejected}")
     rows = gc.query(
         """
-        MATCH (new:StandardName {id: $new_name})
-        OPTIONAL MATCH (old:StandardName {id: $old_name})
-        OPTIONAL MATCH (sns:StandardNameSource)
-        // A successor edge is authoritative. Its scalar alone can outlive an
-        // attachment-gate rejection and must not recreate the detached edge.
-        WHERE (sns)-[:PRODUCED_NAME]->(old)
-           OR sns.produced_sn_id = $old_name
-           OR (sns)-[:PRODUCED_NAME]->(new)
-        WITH new, old, sns
-        WHERE $source_ids IS NULL OR sns.id IN $source_ids
-        WITH new, old, collect(DISTINCT sns) AS sources
-        SET old.source_paths = [], new.source_paths = []
-        WITH new, old, sources
-        UNWIND sources AS source
-        WITH new, old, source WHERE source IS NOT NULL
-        OPTIONAL MATCH (source)-[prior:PRODUCED_NAME]->(:StandardName)
+        // EXPLICIT_SOURCE_MIGRATION_APPLY
+        MATCH (old:StandardName {id: $old_name}),
+              (new:StandardName {id: $new_name})
+        UNWIND $source_ids AS source_id
+        MATCH (source:StandardNameSource {id: source_id})
+        WHERE source.status <> 'stale'
+          AND source.claimed_at IS NULL
+          AND source.claim_token IS NULL
+          AND source.produced_sn_id = $old_name
+          AND COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } = 1
+          AND EXISTS { (source)-[:PRODUCED_NAME]->(old) }
+        MATCH (source)-[prior:PRODUCED_NAME]->(old)
         DELETE prior
         MERGE (source)-[:PRODUCED_NAME]->(new)
         SET source.produced_sn_id = new.id
@@ -413,31 +506,67 @@ def retarget_standard_name_sources(
           MERGE (dd)-[:HAS_STANDARD_NAME]->(new))
         FOREACH (_ IN CASE WHEN signal IS NULL THEN [] ELSE [1] END |
           MERGE (signal)-[:HAS_STANDARD_NAME]->(new))
-        WITH new, collect(DISTINCT source) AS moved,
-             collect(DISTINCT CASE WHEN dd IS NULL THEN null ELSE 'dd:' + dd.id END) +
-             collect(DISTINCT CASE WHEN signal IS NULL THEN null ELSE signal.id END) +
+        WITH old, new, collect(DISTINCT source.id) AS moved_source_ids
+        WHERE size(moved_source_ids) = size($source_ids)
+        UNWIND $source_ids AS expected_source_id
+        MATCH (moved:StandardNameSource {id: expected_source_id})
+              -[:PRODUCED_NAME]->(new)
+        WHERE moved.produced_sn_id = new.id
+          AND COUNT { (moved)-[:PRODUCED_NAME]->(:StandardName) } = 1
+        WITH old, new, moved_source_ids,
+             count(DISTINCT moved) AS postflight_count
+        WHERE postflight_count = size($source_ids)
+        MERGE (event:StandardNameChange {id: $manifest_event_id})
+        ON CREATE SET event.from_name = old.id,
+                      event.to_name = new.id,
+                      event.operation = 'source_migration_manifest',
+                      event.reason = $manifest_hash,
+                      event.origin = $operation,
+                      event.run_id = $run_id,
+                      event.changed_at = datetime(),
+                      event.internal = true
+        MERGE (new)-[:HAS_INTERNAL_CHANGE]->(event)
+        WITH old, new, moved_source_ids AS moved
+        OPTIONAL MATCH (remaining:StandardNameSource)-[:PRODUCED_NAME]->(old)
+        OPTIONAL MATCH (remaining)-[:FROM_DD_PATH]->(remaining_dd:IMASNode)
+        OPTIONAL MATCH (remaining)-[:FROM_SIGNAL]->(remaining_signal:FacilitySignal)
+        WITH old, new, moved,
              collect(DISTINCT CASE
-               WHEN dd IS NULL AND signal IS NULL
-               THEN CASE
-                 WHEN source.source_type = 'derived'
-                  AND source.source_id STARTS WITH 'derived:'
-                 THEN source.source_id
-                 ELSE source.id
-               END
-               ELSE null
-             END) AS authoritative_paths
-        // Rebuild the cache from edge-bound sources. Existing caches can retain
-        // paths rejected by the attachment gate and are not authoritative.
-        WITH new, moved, [p IN authoritative_paths WHERE p IS NOT NULL] AS paths
-        SET new.source_paths = reduce(acc = [], p IN paths |
-          CASE WHEN p IN acc THEN acc ELSE acc + p END)
+               WHEN remaining IS NULL THEN null
+               WHEN remaining_dd IS NOT NULL THEN 'dd:' + remaining_dd.id
+               WHEN remaining_signal IS NOT NULL THEN remaining_signal.id
+               WHEN remaining.source_type = 'derived'
+                AND remaining.source_id STARTS WITH 'derived:'
+               THEN remaining.source_id ELSE remaining.id END) AS old_paths
+        OPTIONAL MATCH (current:StandardNameSource)-[:PRODUCED_NAME]->(new)
+        OPTIONAL MATCH (current)-[:FROM_DD_PATH]->(current_dd:IMASNode)
+        OPTIONAL MATCH (current)-[:FROM_SIGNAL]->(current_signal:FacilitySignal)
+        WITH old, new, moved, old_paths,
+             collect(DISTINCT CASE
+               WHEN current IS NULL THEN null
+               WHEN current_dd IS NOT NULL THEN 'dd:' + current_dd.id
+               WHEN current_signal IS NOT NULL THEN current_signal.id
+               WHEN current.source_type = 'derived'
+                AND current.source_id STARTS WITH 'derived:'
+               THEN current.source_id ELSE current.id END) AS new_paths
+        SET old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
+            new.source_paths = [path IN new_paths WHERE path IS NOT NULL]
         RETURN size(moved) AS moved
         """,
         old_name=old_name,
         new_name=new_name,
         source_ids=admitted_source_ids,
+        manifest_event_id=manifest_event_id,
+        manifest_hash=manifest_hash,
+        operation=operation,
+        run_id=run_id,
     )
     moved = int(rows[0].get("moved", 0)) if rows else 0
+    if moved != len(admitted_source_ids):
+        raise RuntimeError(
+            "source migration compare-and-set changed before mutation: "
+            f"expected {len(admitted_source_ids)}, moved {moved}"
+        )
     if record_change:
         record_standard_name_change(
             gc,
@@ -449,6 +578,291 @@ def retarget_standard_name_sources(
             run_id=run_id,
         )
     return moved
+
+
+def reset_standard_name_sources(
+    gc: Any,
+    manifest_rows: Sequence[Mapping[str, Any]],
+    *,
+    manifest_id: str,
+    reason: str,
+    include_accepted: bool = False,
+    publication_authority: str | None = None,
+    dry_run: bool = False,
+    _transactional: bool = False,
+) -> dict[str, Any]:
+    """Reset only an exact source cohort without changing name lifecycle.
+
+    Each row must provide ``source_id``, ``expected_status``,
+    ``expected_scalar``, and the complete non-empty ``expected_bindings`` list.
+    The transaction detaches exactly those bindings and their backing
+    projections, clears mutable composition/claim state, returns the source to
+    ``extracted``, and writes a deterministic ``StandardNameSourceRetry`` event.
+    Immutable DD/signal provenance edges and every StandardName lifecycle field
+    remain untouched. Potential name orphans are reported for a separate
+    lifecycle manifest.
+    """
+    if not manifest_id.strip():
+        raise ValueError("source reset requires a non-empty manifest_id")
+    if not reason.strip():
+        raise ValueError("source reset requires a non-empty reason")
+    normalized: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for raw in manifest_rows:
+        source_id = str(raw.get("source_id") or "").strip()
+        expected_status = str(raw.get("expected_status") or "").strip()
+        expected_scalar = raw.get("expected_scalar")
+        bindings = sorted(set(raw.get("expected_bindings") or ()))
+        if not source_id or source_id in seen:
+            raise ValueError("source reset rows require unique non-empty source_id")
+        if not expected_status or expected_scalar is None or not bindings:
+            raise ValueError(
+                "source reset rows require expected_status, expected_scalar, "
+                "and non-empty expected_bindings"
+            )
+        if expected_scalar not in bindings:
+            raise ValueError("expected_scalar must name one expected binding")
+        seen.add(source_id)
+        normalized.append(
+            {
+                "source_id": source_id,
+                "expected_status": expected_status,
+                "expected_scalar": expected_scalar,
+                "expected_bindings": bindings,
+            }
+        )
+    if not normalized:
+        raise ValueError("source reset requires a non-empty exact manifest")
+    normalized.sort(key=lambda item: item["source_id"])
+
+    manifest_payload = {
+        "include_accepted": include_accepted,
+        "manifest_id": manifest_id,
+        "publication_authority": publication_authority,
+        "reason": reason,
+        "rows": normalized,
+    }
+    manifest_hash = sha256(
+        json.dumps(manifest_payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    for item in normalized:
+        event_key = sha256(f"{manifest_id}\0{item['source_id']}".encode()).hexdigest()
+        item["event_id"] = f"source-retry:source-reset:{event_key}"
+        authority_note = (
+            f" [publication-authority {publication_authority}]"
+            if publication_authority
+            else ""
+        )
+        item["event_reason"] = (
+            f"{reason} [source-reset-manifest {manifest_hash}]{authority_note}"
+        )
+
+    if not _transactional:
+        from imas_codex.graph.client import GraphClient
+
+        if isinstance(gc, GraphClient):
+            from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+
+            with gc.session() as session:
+                tx = session.begin_transaction()
+                try:
+                    result = reset_standard_name_sources(
+                        _TransactionQueryAdapter(tx),
+                        normalized,
+                        manifest_id=manifest_id,
+                        reason=reason,
+                        include_accepted=include_accepted,
+                        publication_authority=publication_authority,
+                        dry_run=dry_run,
+                        _transactional=True,
+                    )
+                    if dry_run:
+                        tx.rollback()
+                    else:
+                        tx.commit()
+                    return result
+                except Exception:
+                    tx.rollback()
+                    raise
+
+    preflight = [
+        dict(row)
+        for row in gc.query(
+            """
+            // EXACT_SOURCE_RESET_PREFLIGHT
+            UNWIND $items AS item
+            OPTIONAL MATCH (source:StandardNameSource {id: item.source_id})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+            WITH item, source,
+                 [entry IN collect(DISTINCT {
+                    id: target.id,
+                    name_stage: target.name_stage,
+                    catalog_pr_number: target.catalog_pr_number,
+                    origin: target.origin,
+                    other_sources: COUNT {
+                      (:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                    } - 1
+                  }) WHERE entry.id IS NOT NULL] AS binding_state
+            OPTIONAL MATCH (event:StandardNameSourceRetry {id: item.event_id})
+            RETURN item.source_id AS source_id,
+                   source.id IS NOT NULL AS source_exists,
+                   source.status AS status,
+                   source.produced_sn_id AS scalar,
+                   source.claimed_at IS NOT NULL OR source.claim_token IS NOT NULL
+                     AS actively_claimed,
+                   binding_state,
+                   event.id IS NOT NULL AS event_exists,
+                   event.reason AS event_reason
+            ORDER BY source_id
+            """,
+            items=normalized,
+        )
+    ]
+    if len(preflight) != len(normalized) or {
+        row.get("source_id") for row in preflight
+    } != {item["source_id"] for item in normalized}:
+        raise RuntimeError("source reset preflight did not return the exact cohort")
+
+    expected_by_source = {item["source_id"]: item for item in normalized}
+    pending: list[str] = []
+    completed: list[str] = []
+    conflicts: list[str] = []
+    potential_orphans: set[str] = set()
+    for row in preflight:
+        expected_row = expected_by_source[row["source_id"]]
+        binding_state = list(row.get("binding_state") or [])
+        bindings = sorted(entry["id"] for entry in binding_state)
+        if (
+            row.get("source_exists")
+            and row.get("status") == "extracted"
+            and row.get("scalar") is None
+            and not bindings
+            and row.get("event_exists")
+            and row.get("event_reason") == expected_row["event_reason"]
+        ):
+            completed.append(row["source_id"])
+            continue
+        if (
+            not row.get("source_exists")
+            or row.get("status") != expected_row["expected_status"]
+            or row.get("status") == "stale"
+            or row.get("scalar") != expected_row["expected_scalar"]
+            or bindings != expected_row["expected_bindings"]
+            or row.get("actively_claimed")
+            or row.get("event_exists")
+        ):
+            conflicts.append(
+                f"{row['source_id']}(status={row.get('status')!r}, "
+                f"scalar={row.get('scalar')!r}, bindings={bindings!r}, "
+                f"claimed={bool(row.get('actively_claimed'))})"
+            )
+            continue
+        for target in binding_state:
+            if target.get("name_stage") == "accepted" and not include_accepted:
+                conflicts.append(
+                    f"{row['source_id']} binds accepted name {target['id']!r}; "
+                    "include_accepted is required"
+                )
+            if (
+                target.get("name_stage") == "approved"
+                or target.get("catalog_pr_number") is not None
+            ) and not publication_authority:
+                conflicts.append(
+                    f"{row['source_id']} binds published name {target['id']!r}; "
+                    "separate publication authority is required"
+                )
+            if int(target.get("other_sources") or 0) == 0:
+                potential_orphans.add(target["id"])
+        pending.append(row["source_id"])
+
+    if conflicts or (pending and completed):
+        details = "; ".join(conflicts) or "manifest is only partially applied"
+        raise RuntimeError(f"source reset compare-and-set failed: {details}")
+    result = {
+        "manifest_id": manifest_id,
+        "manifest_hash": manifest_hash,
+        "source_ids": [item["source_id"] for item in normalized],
+        "potential_name_orphans": sorted(potential_orphans),
+        "already_applied": bool(completed),
+        "dry_run": dry_run,
+        "applied": 0,
+    }
+    if completed or dry_run:
+        return result
+
+    rows = list(
+        gc.query(
+            """
+            // EXACT_SOURCE_RESET_APPLY
+            UNWIND $items AS item
+            MATCH (source:StandardNameSource {id: item.source_id})
+            WHERE source.status = item.expected_status
+              AND source.status <> 'stale'
+              AND source.produced_sn_id = item.expected_scalar
+              AND source.claimed_at IS NULL
+              AND source.claim_token IS NULL
+            OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(target:StandardName)
+            WITH item, source,
+                 collect(DISTINCT target.id) AS current_bindings,
+                 collect(DISTINCT binding) AS bindings,
+                 collect(DISTINCT target) AS targets,
+                 source.status AS previous_status,
+                 coalesce(source.attempt_count, 0) AS previous_attempt_count,
+                 source.last_error AS previous_error
+            WHERE size(current_bindings) = size(item.expected_bindings)
+              AND all(id IN current_bindings WHERE id IN item.expected_bindings)
+            OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+            OPTIONAL MATCH (backing)-[projection:HAS_STANDARD_NAME]->(projected)
+            WHERE projected.id IN item.expected_bindings
+            WITH item, source, bindings, targets, previous_status,
+                 previous_attempt_count, previous_error,
+                 collect(DISTINCT projection) AS projections
+            FOREACH (edge IN bindings | DELETE edge)
+            FOREACH (edge IN projections | DELETE edge)
+            FOREACH (name IN targets |
+              SET name.source_paths = [path IN coalesce(name.source_paths, [])
+                WHERE NOT (path = source.id OR path = source.source_id
+                           OR path = 'dd:' + source.source_id)])
+            CREATE (event:StandardNameSourceRetry {id: item.event_id})
+            SET event.source_id = source.id,
+                event.previous_status = previous_status,
+                event.previous_attempt_count = previous_attempt_count,
+                event.previous_error = previous_error,
+                event.reason = item.event_reason,
+                event.retried_at = datetime()
+            MERGE (source)-[:HAS_RETRY_EVENT]->(event)
+            SET source.retry_events = coalesce(source.retry_events, []) + event.id,
+                source.status = 'extracted',
+                source.produced_sn_id = null,
+                source.claimed_at = null,
+                source.claim_token = null,
+                source.attempt_count = 0,
+                source.composed_at = null,
+                source.failed_at = null,
+                source.last_error = null
+            WITH item, source, event
+            WHERE source.status = 'extracted'
+              AND source.produced_sn_id IS NULL
+              AND source.claimed_at IS NULL
+              AND source.claim_token IS NULL
+              AND COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } = 0
+            RETURN count(DISTINCT source) AS applied,
+                   collect(DISTINCT source.id) AS source_ids
+            """,
+            items=normalized,
+        )
+        or []
+    )
+    applied = int(rows[0].get("applied") or 0) if rows else 0
+    applied_ids = set(rows[0].get("source_ids") or []) if rows else set()
+    expected_ids = {item["source_id"] for item in normalized}
+    if applied != len(normalized) or applied_ids != expected_ids:
+        raise RuntimeError(
+            "source reset compare-and-set changed before mutation: "
+            f"expected {len(normalized)}, applied {applied}"
+        )
+    result["applied"] = applied
+    return result
 
 
 def bind_sources_exclusively(
@@ -1337,7 +1751,8 @@ def compact_unapproved_superseded(
         WITH old, collect(DISTINCT tip.id) AS tips
         OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(old)
         RETURN old.id AS name, old.superseded_from_stage AS prior_stage,
-               tips, count(DISTINCT source) AS source_count,
+               tips, collect(DISTINCT source.id) AS source_ids,
+               count(DISTINCT source) AS source_count,
                size(tips) = 1 AS safe_to_compact
         ORDER BY old.id
         """,
@@ -1352,13 +1767,22 @@ def compact_unapproved_superseded(
             continue
         old_name = item["name"]
         target = tips[0]
-        retarget_standard_name_sources(
-            gc,
-            old_name,
-            target,
-            operation="retarget_compacted_name",
-            record_change=False,
-        )
+        source_ids = sorted(set(item.get("source_ids") or []))
+        if "source_ids" in item:
+            if int(item.get("source_count") or 0) != len(source_ids):
+                raise RuntimeError(
+                    "compaction manifest source cardinality changed before apply"
+                )
+            if source_ids:
+                retarget_standard_name_sources(
+                    gc,
+                    old_name,
+                    target,
+                    operation="retarget_compacted_name",
+                    record_change=False,
+                    source_ids=source_ids,
+                    expected_current_bindings=dict.fromkeys(source_ids, old_name),
+                )
         deletion_clause = deletion_change_cypher("old")
         deleted = gc.query(
             f"""MATCH (old:StandardName {{id: $old_name}})

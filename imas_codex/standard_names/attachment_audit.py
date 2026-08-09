@@ -2,11 +2,11 @@
 
 ``workers._is_attachment_consistent`` decides whether a DD source path may
 realize a standard name. It is evaluated at COMPOSE time only, so an attachment
-written before a rule existed — or written by one of the many paths that never
-consult it (``persist_refined_name`` migrates a predecessor's whole source set
-onto the successor, ``rebind_sources`` and ``bind_sources_exclusively`` move
-sources on an edit cascade, the derived-parent seeders and the provenance
-rebuilders MERGE edges directly) — is never revisited. A decision cached
+written before a rule existed — or written by one of the paths that never
+consulted it (legacy source migration, derived-parent seeders, and provenance
+rebuilders that MERGE edges directly) — is never revisited. Current migration
+paths guard a nonempty explicit cohort before their compare-and-set write, but
+historical pairings still need this retroactive pass. A decision cached
 durably and never re-evaluated when the deciding logic improves is permanently
 wrong: a strike-point source stayed attached to a camera-orientation name on an
 ACCEPTED standard name even though the guard rejects that pair today.
