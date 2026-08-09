@@ -15334,6 +15334,10 @@ def persist_refined_name(
                     record_change=False,
                     enforce_consistency=False,
                     source_ids=candidate_source_ids,
+                    expected_current_bindings=dict.fromkeys(
+                        candidate_source_ids, old_name
+                    ),
+                    _allow_empty_noop=True,
                 )
                 if moved != len(candidate_source_ids):
                     raise RuntimeError(
@@ -15661,6 +15665,9 @@ def supersede_prior_source_names(
                 operation="regenerate",
                 enforce_consistency=False,
                 source_ids=plan["source_ids"],
+                expected_current_bindings=dict.fromkeys(
+                    plan["source_ids"], plan["old_name"]
+                ),
             )
             expected = len(plan["source_ids"])
             if moved != expected:
@@ -15879,17 +15886,16 @@ def tombstone_supersede_into(
     ``old.superseded_from_stage = coalesce(old.superseded_from_stage,
     'accepted')`` (so catalog export emits a ``status: deprecated`` stub for it),
     clears its claim, and MERGEs ``(into)-[:REFINED_FROM]->(old)`` so the stub
-    resolves to the live successor. Historical ``HAS_STANDARD_NAME`` /
-    ``PRODUCED_NAME`` edges on ``old`` are left intact as the provenance record.
+    resolves to the live successor. Immutable source provenance remains on the
+    source node; its live produced identity moves exclusively to ``into``.
 
     **The fold also carries ``old``'s sources onto ``into``.** A fold asserts
     that the two names denote one quantity, so every source realizing ``old``
-    realizes ``into``; without the carry-over a source whose only name was
+    realizes ``into``; without the migration a source whose only name was
     ``old`` is left with no live name at all — silently un-named, and rewound to
-    paid re-composition by the next drain. The carry-over is purely additive
-    (the historical edges stay), and the new pairings are put through the
-    attachment-consistency gate, scoped to ``into``, exactly as a compose-time
-    attachment would be.
+    paid re-composition by the next drain. The explicit source cohort and its
+    expected predecessor binding are guarded and migrated in the same
+    transaction as the lifecycle write.
 
     Refuses (returns ``{"ok": False, "reason": ...}`` without writing) when:
 
@@ -15910,8 +15916,12 @@ def tombstone_supersede_into(
         return {"ok": False, "reason": "old and target are the same name"}
 
     with GraphClient() as gc:
-        rows = gc.query(
-            """
+        with gc.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                rows = query_handle.query(
+                    """
             OPTIONAL MATCH (old:StandardName {id: $old_id})
             OPTIONAL MATCH (into:StandardName {id: $into_id})
             RETURN old.id AS old_id,
@@ -15921,66 +15931,80 @@ def tombstone_supersede_into(
                    into.name_stage AS into_stage,
                    EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(into) } AS cycle
             """,
-            old_id=old_id,
-            into_id=into_id,
-        )
-        row = rows[0] if rows else {}
-        if not row.get("old_id"):
-            return {"ok": False, "reason": f"name {old_id!r} not found"}
-        if not row.get("into_id"):
-            return {"ok": False, "reason": f"target {into_id!r} not found"}
-        if row.get("into_stage") not in ("accepted", "approved"):
-            return {
-                "ok": False,
-                "reason": (
-                    f"target {into_id!r} is name_stage={row.get('into_stage')!r}, "
-                    "not 'accepted' or 'approved' — supersede target must be the live "
-                    "canonical name"
-                ),
-            }
-        if row.get("cycle"):
-            return {
-                "ok": False,
-                "reason": (
-                    f"{old_id!r} already descends from {into_id!r} "
-                    "(REFINED_FROM cycle) — cannot fold"
-                ),
-            }
+                    old_id=old_id,
+                    into_id=into_id,
+                )
+                row = rows[0] if rows else {}
+                refusal: str | None = None
+                if not row.get("old_id"):
+                    refusal = f"name {old_id!r} not found"
+                elif not row.get("into_id"):
+                    refusal = f"target {into_id!r} not found"
+                elif row.get("into_stage") not in ("accepted", "approved"):
+                    refusal = (
+                        f"target {into_id!r} is name_stage="
+                        f"{row.get('into_stage')!r}, not 'accepted' or 'approved' — "
+                        "supersede target must be the live canonical name"
+                    )
+                elif row.get("cycle"):
+                    refusal = (
+                        f"{old_id!r} already descends from {into_id!r} "
+                        "(REFINED_FROM cycle) — cannot fold"
+                    )
+                if refusal:
+                    transaction.rollback()
+                    return {"ok": False, "reason": refusal}
 
-        already = row.get("old_stage") == "superseded"
-        # How many of old's sources would be left with no live name if the fold
-        # did not carry them over. Reported on a dry run so the operator sees
-        # the blast radius before writing.
-        carry_rows = gc.query(
-            """
+                already = row.get("old_stage") == "superseded"
+                carry_rows = query_handle.query(
+                    """
             MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(old:StandardName {id: $old_id})
             OPTIONAL MATCH (src)-[:PRODUCED_NAME]->(other:StandardName)
             WHERE other.id <> $old_id
               AND NOT coalesce(other.name_stage, '') IN ['superseded', 'exhausted']
             WITH src, count(other) AS live_elsewhere
-            RETURN count(src) AS sources,
+            RETURN collect(src.id) AS source_ids,
+                   count(src) AS sources,
                    sum(CASE WHEN live_elsewhere = 0 THEN 1 ELSE 0 END) AS would_strand
             """,
-            old_id=old_id,
-        )
-        carry = carry_rows[0] if carry_rows else {}
-        result = {
-            "ok": True,
-            "old_id": old_id,
-            "into_id": into_id,
-            "old_prior_stage": row.get("old_stage"),
-            "already_superseded": already,
-            "sources_carried": int(carry.get("sources") or 0),
-            "sources_would_strand": int(carry.get("would_strand") or 0),
-            "dry_run": dry_run,
-        }
-        if dry_run:
-            return result
+                    old_id=old_id,
+                )
+                carry = carry_rows[0] if carry_rows else {}
+                source_ids = sorted(set(carry.get("source_ids") or []))
+                result = {
+                    "ok": True,
+                    "old_id": old_id,
+                    "into_id": into_id,
+                    "old_prior_stage": row.get("old_stage"),
+                    "already_superseded": already,
+                    "sources_carried": len(source_ids),
+                    "sources_would_strand": int(carry.get("would_strand") or 0),
+                    "dry_run": dry_run,
+                }
+                if dry_run:
+                    transaction.rollback()
+                    return result
 
-        gc.query(
-            """
+                if source_ids:
+                    from imas_codex.standard_names.provenance_lifecycle import (
+                        retarget_standard_name_sources,
+                    )
+
+                    retarget_standard_name_sources(
+                        query_handle,
+                        old_id,
+                        into_id,
+                        operation="fold",
+                        source_ids=source_ids,
+                        expected_current_bindings=dict.fromkeys(source_ids, old_id),
+                    )
+
+                finalized = query_handle.query(
+                    """
             MATCH (old:StandardName {id: $old_id}),
                   (into:StandardName {id: $into_id})
+            WHERE into.name_stage IN ['accepted', 'approved']
+              AND NOT EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(into) }
             SET old.name_stage = 'superseded',
                 old.superseded_from_stage =
                     coalesce(old.superseded_from_stage, 'accepted'),
@@ -15993,54 +16017,21 @@ def tombstone_supersede_into(
                     WHEN coalesce(old.edit_status, '') = 'open'
                     THEN 'applied' ELSE old.edit_status END
             MERGE (into)-[:REFINED_FROM]->(old)
+            RETURN old.id AS old_id, into.id AS into_id
             """,
-            old_id=old_id,
-            into_id=into_id,
-        )
+                    old_id=old_id,
+                    into_id=into_id,
+                )
+                if len(finalized) != 1:
+                    raise RuntimeError("fold lifecycle compare-and-set changed")
+                transaction.commit()
+            except BaseException:
+                with suppress(Exception):
+                    transaction.rollback()
+                raise
 
-        # Carry old's sources onto the target. Additive: the predecessor keeps
-        # its edges as the provenance record, and each source now also resolves
-        # to the live name the fold declared canonical. The DD-side projection
-        # and the name's source_paths list are extended in step so the export
-        # and the SPA read the same set.
-        gc.query(
-            """
-            MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(old:StandardName {id: $old_id})
-            MATCH (into:StandardName {id: $into_id})
-            MERGE (src)-[:PRODUCED_NAME]->(into)
-            SET src.produced_sn_id = $into_id
-            WITH DISTINCT old, into
-            OPTIONAL MATCH (dd:IMASNode)-[:HAS_STANDARD_NAME]->(old)
-            FOREACH (n IN CASE WHEN dd IS NULL THEN [] ELSE [dd] END |
-                MERGE (n)-[:HAS_STANDARD_NAME]->(into))
-            WITH DISTINCT old, into
-            SET into.source_paths = coalesce(into.source_paths, []) +
-                [p IN coalesce(old.source_paths, [])
-                 WHERE NOT p IN coalesce(into.source_paths, [])]
-            """,
-            old_id=old_id,
-            into_id=into_id,
-        )
-
-        from imas_codex.standard_names.provenance_lifecycle import (
-            retarget_standard_name_sources,
-        )
-
-        retarget_standard_name_sources(
-            gc,
-            old_id,
-            into_id,
-            operation="fold",
-        )
-
-    # Judge the new pairings the carry-over created, scoped to the target — the
-    # source set is historical but every pairing with `into` is new, which is
-    # what the consistency guard exists to decide.
-    from imas_codex.standard_names.attachment_audit import gate_migrated_attachments
-
-    gate = gate_migrated_attachments(sn_id=into_id)
-    result["attachments_rejected"] = len(gate.rejected)
-    result["attachments_detached"] = gate.detached
+    result["attachments_rejected"] = 0
+    result["attachments_detached"] = 0
     logger.info(
         "tombstone_supersede_into: %s superseded into %s (sfs=accepted, "
         "REFINED_FROM lineage merged)",

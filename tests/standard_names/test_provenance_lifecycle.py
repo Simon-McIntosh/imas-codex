@@ -14,12 +14,33 @@ from imas_codex.standard_names.provenance_lifecycle import (
     find_semantic_source_invariant_violations,
     official_dd_documentation_url,
     refresh_renamed_source_mirrors,
+    reset_standard_name_sources,
     retarget_standard_name_sources,
     trace_standard_name_provenance,
 )
 
 
-def test_retarget_mutates_only_sources_admitted_by_pairing_guard() -> None:
+def _migration_row(
+    source_id: str,
+    *,
+    binding: str = "old",
+    scalar: str | None = "old",
+    status: str = "composed",
+    claimed: bool = False,
+    recorded: bool = False,
+) -> dict[str, object]:
+    return {
+        "source_id": source_id,
+        "source_exists": True,
+        "source_status": status,
+        "scalar_binding": scalar,
+        "actively_claimed": claimed,
+        "current_bindings": [binding] if binding else [],
+        "manifest_recorded": recorded,
+    }
+
+
+def test_retarget_rejects_a_partially_admitted_explicit_cohort() -> None:
     from imas_codex.standard_names.attachment_audit import (
         AttachmentPairingGuardResult,
         AttachmentVerdict,
@@ -27,8 +48,7 @@ def test_retarget_mutates_only_sources_admitted_by_pairing_guard() -> None:
 
     gc = MagicMock()
     gc.query.side_effect = [
-        [{"source_id": "dd:valid"}, {"source_id": "dd:invalid"}],
-        [{"moved": 1}],
+        [_migration_row("dd:valid"), _migration_row("dd:invalid")],
     ]
     verdict = AttachmentVerdict(
         "dd:invalid", "bad/path", "new", "drafted", "geometry mismatch"
@@ -37,11 +57,42 @@ def test_retarget_mutates_only_sources_admitted_by_pairing_guard() -> None:
         "imas_codex.standard_names.attachment_audit.guard_source_pairings",
         return_value=AttachmentPairingGuardResult(("dd:valid",), (verdict,)),
     ) as guard:
-        moved = retarget_standard_name_sources(gc, "old", "new", record_change=False)
+        with pytest.raises(ValueError, match="attachment rejected"):
+            retarget_standard_name_sources(
+                gc,
+                "old",
+                "new",
+                source_ids=["dd:valid", "dd:invalid"],
+                expected_current_bindings={"dd:valid": "old", "dd:invalid": "old"},
+                record_change=False,
+            )
 
-    assert moved == 1
-    guard.assert_called_once_with(gc, "new", ["dd:valid", "dd:invalid"])
-    assert gc.query.call_args_list[1].kwargs["source_ids"] == ["dd:valid"]
+    guard.assert_called_once_with(gc, "new", ["dd:invalid", "dd:valid"])
+    assert gc.query.call_count == 1
+
+
+def test_retarget_requires_an_explicit_nonempty_manifest() -> None:
+    gc = MagicMock()
+
+    with pytest.raises(ValueError, match="non-empty explicit source_ids"):
+        retarget_standard_name_sources(gc, "old", "new")
+
+    gc.query.assert_not_called()
+
+
+def test_retarget_rejects_heterogeneous_expected_predecessors() -> None:
+    gc = MagicMock()
+
+    with pytest.raises(ValueError, match="heterogeneous"):
+        retarget_standard_name_sources(
+            gc,
+            "old",
+            "new",
+            source_ids=["dd:a", "dd:b"],
+            expected_current_bindings={"dd:a": "old", "dd:b": "other"},
+        )
+
+    gc.query.assert_not_called()
 
 
 def test_exclusive_bind_can_bypass_guard_only_for_recovery_replay() -> None:
@@ -74,98 +125,23 @@ def test_exclusive_bind_mutates_only_sources_admitted_by_guard() -> None:
     assert gc.query.call_args.kwargs["source_ids"] == ["dd:valid"]
 
 
-def test_retarget_selector_includes_edge_migrated_sources_only() -> None:
+def test_retarget_query_repairs_exact_source_mirrors_and_both_caches() -> None:
     gc = MagicMock()
-    gc.query.side_effect = [[{"moved": 2}], []]
+    gc.query.side_effect = [[_migration_row("dd:one")], [{"moved": 1}]]
 
     moved = retarget_standard_name_sources(
-        gc, "old", "new", record_change=False, enforce_consistency=False
-    )
-
-    assert moved == 2
-    cypher = gc.query.call_args_list[0].args[0]
-    selector = cypher.split("WHERE", 1)[1].split("WITH new, old", 1)[0]
-    assert "(sns)-[:PRODUCED_NAME]->(old)" in selector
-    assert "sns.produced_sn_id = $old_name" in selector
-    assert "(sns)-[:PRODUCED_NAME]->(new)" in selector
-    assert "sns.produced_sn_id = $new_name" not in selector
-
-
-def test_retarget_cache_uses_surviving_edge_bound_sources() -> None:
-    gc = MagicMock()
-    gc.query.return_value = [{"moved": 1}]
-
-    retarget_standard_name_sources(
-        gc, "old", "new", record_change=False, enforce_consistency=False
-    )
-
-    cypher = gc.query.call_args.args[0]
-    selector = cypher.split("WHERE", 1)[1].split("WITH new, old", 1)[0]
-    cache_projection = cypher.split("AS authoritative_paths", 1)[1].split(
-        "RETURN size(moved)", 1
-    )[0]
-
-    sources = [
-        {
-            "id": "dd:accepted/path",
-            "source_type": "dd",
-            "source_id": "accepted/path",
-            "edge_target": "new",
-            "scalar_target": "new",
-            "path": "dd:accepted/path",
-        },
-        {
-            "id": "dd:rejected/path",
-            "source_type": "dd",
-            "source_id": "rejected/path",
-            "edge_target": None,
-            "scalar_target": "new",
-            "path": "dd:rejected/path",
-        },
-        {
-            "id": "derived:structural_parent",
-            "source_type": "derived",
-            "source_id": "derived:structural_parent",
-            "edge_target": "new",
-            "scalar_target": "new",
-            "path": "derived:structural_parent",
-        },
-    ]
-    selected = [
-        source
-        for source in sources
-        if source["edge_target"] in {"old", "new"} or source["scalar_target"] == "old"
-    ]
-
-    assert [source["id"] for source in selected] == [
-        "dd:accepted/path",
-        "derived:structural_parent",
-    ]
-    assert [source["path"] for source in selected] == [
-        "dd:accepted/path",
-        "derived:structural_parent",
-    ]
-    assert "(sns)-[:PRODUCED_NAME]->(new)" in selector
-    assert "sns.produced_sn_id = $new_name" not in selector
-    assert "SET old.source_paths = [], new.source_paths = []" in cypher
-    assert "coalesce(old.source_paths" not in cache_projection
-    assert "coalesce(new.source_paths" not in cache_projection
-    assert "source.source_id STARTS WITH 'derived:'" in cypher
-    assert "THEN source.source_id" in cypher
-    assert "ELSE source.id" in cypher
-    assert "[p IN authoritative_paths WHERE p IS NOT NULL] AS paths" in cache_projection
-
-
-def test_retarget_query_repairs_all_source_mirrors() -> None:
-    gc = MagicMock()
-    gc.query.return_value = [{"moved": 1}]
-
-    moved = retarget_standard_name_sources(
-        gc, "old", "new", record_change=False, enforce_consistency=False
+        gc,
+        "old",
+        "new",
+        source_ids=["dd:one"],
+        expected_current_bindings={"dd:one": "old"},
+        record_change=False,
+        enforce_consistency=False,
     )
 
     assert moved == 1
-    cypher = gc.query.call_args.args[0]
+    cypher = gc.query.call_args_list[1].args[0]
+    assert "COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } = 1" in cypher
     assert "DELETE prior" in cypher
     assert "MERGE (source)-[:PRODUCED_NAME]->(new)" in cypher
     assert "source.produced_sn_id = new.id" in cypher
@@ -174,28 +150,84 @@ def test_retarget_query_repairs_all_source_mirrors() -> None:
     assert "DELETE dd_old" in cypher
     assert "MERGE (dd)-[:HAS_STANDARD_NAME]->(new)" in cypher
     assert "MERGE (signal)-[:HAS_STANDARD_NAME]->(new)" in cypher
-    assert "'dd:' + dd.id" in cypher
-    assert "SET old.source_paths = [], new.source_paths = []" in cypher
+    assert "SET old.source_paths =" in cypher
+    assert "new.source_paths =" in cypher
+    assert "source_migration_manifest" in cypher
     assert (
         "FROM_DD_PATH" in cypher
         and "DELETE" not in cypher.split("FROM_DD_PATH")[1].split("FROM_SIGNAL")[0]
     )
 
 
-def test_retarget_query_separates_cache_reset_from_source_unwind() -> None:
+@pytest.mark.parametrize(
+    ("row", "detail"),
+    [
+        (
+            _migration_row("dd:fanout") | {"current_bindings": ["old", "other"]},
+            "bindings",
+        ),
+        (_migration_row("dd:scalar", scalar="other"), "scalar"),
+        (_migration_row("dd:claimed", claimed=True), "claimed"),
+        (_migration_row("dd:stale", status="stale"), "status"),
+    ],
+)
+def test_retarget_rejects_precondition_drift_before_mutation(row, detail) -> None:
     gc = MagicMock()
-    gc.query.return_value = [{"moved": 0}]
+    gc.query.return_value = [row]
 
-    retarget_standard_name_sources(
-        gc, "old", "new", record_change=False, enforce_consistency=False
+    with pytest.raises(RuntimeError, match="compare-and-set") as exc:
+        retarget_standard_name_sources(
+            gc,
+            "old",
+            "new",
+            source_ids=[row["source_id"]],
+            expected_current_bindings={row["source_id"]: "old"},
+            record_change=False,
+            enforce_consistency=False,
+        )
+
+    assert detail in str(exc.value)
+    assert gc.query.call_count == 1
+
+
+def test_retarget_same_completed_manifest_is_idempotent() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [
+        _migration_row("dd:one", binding="new", scalar="new", recorded=True)
+    ]
+
+    moved = retarget_standard_name_sources(
+        gc,
+        "old",
+        "new",
+        source_ids=["dd:one"],
+        expected_current_bindings={"dd:one": "old"},
+        record_change=False,
+        enforce_consistency=False,
     )
 
-    cypher = gc.query.call_args.args[0]
-    cache_reset = cypher.index("SET old.source_paths = [], new.source_paths = []")
-    source_unwind = cypher.index("UNWIND sources AS source")
-    boundary = cypher[cache_reset:source_unwind]
+    assert moved == 0
+    assert gc.query.call_count == 1
 
-    assert "WITH new, old, sources" in boundary
+
+def test_retarget_conflicting_manifest_cannot_claim_an_unrecorded_postcondition() -> (
+    None
+):
+    gc = MagicMock()
+    gc.query.return_value = [
+        _migration_row("dd:one", binding="new", scalar="new", recorded=False)
+    ]
+
+    with pytest.raises(RuntimeError, match="compare-and-set"):
+        retarget_standard_name_sources(
+            gc,
+            "old",
+            "new",
+            source_ids=["dd:one"],
+            expected_current_bindings={"dd:one": "old"},
+            record_change=False,
+            enforce_consistency=False,
+        )
 
 
 @pytest.mark.graph
@@ -206,16 +238,216 @@ def test_retarget_query_compiles_in_transaction(graph_client) -> None:
         transaction = session.begin_transaction()
         try:
             adapter = _TransactionQueryAdapter(transaction)
-            moved = retarget_standard_name_sources(
-                adapter,
-                "missing_predecessor_for_query_compilation",
-                "missing_successor_for_query_compilation",
-                record_change=False,
-                enforce_consistency=False,
-            )
-            assert moved == 0
+            with pytest.raises(RuntimeError, match="compare-and-set"):
+                retarget_standard_name_sources(
+                    adapter,
+                    "missing_predecessor_for_query_compilation",
+                    "missing_successor_for_query_compilation",
+                    source_ids=["dd:missing_source_for_query_compilation"],
+                    expected_current_bindings={
+                        "dd:missing_source_for_query_compilation": "missing_predecessor_for_query_compilation"
+                    },
+                    record_change=False,
+                    enforce_consistency=False,
+                )
         finally:
             transaction.rollback()
+
+
+def _reset_preflight(
+    *,
+    status: str = "composed",
+    stage: str = "reviewed",
+    origin: str = "pipeline",
+    catalog_pr_number: int | None = None,
+    bindings: list[str] | None = None,
+    scalar: str | None = "wrong_name",
+    claimed: bool = False,
+    event_exists: bool = False,
+    event_reason: str | None = None,
+) -> dict[str, object]:
+    targets = bindings if bindings is not None else ["wrong_name"]
+    return {
+        "source_id": "dd:example/path",
+        "source_exists": True,
+        "status": status,
+        "scalar": scalar,
+        "actively_claimed": claimed,
+        "binding_state": [
+            {
+                "id": target,
+                "name_stage": stage,
+                "catalog_pr_number": catalog_pr_number,
+                "origin": origin,
+                "other_sources": 0,
+            }
+            for target in targets
+        ],
+        "event_exists": event_exists,
+        "event_reason": event_reason,
+    }
+
+
+def _reset_manifest() -> list[dict[str, object]]:
+    return [
+        {
+            "source_id": "dd:example/path",
+            "expected_status": "composed",
+            "expected_scalar": "wrong_name",
+            "expected_bindings": ["wrong_name"],
+        }
+    ]
+
+
+def test_source_reset_accepted_binding_requires_explicit_acknowledgement() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [_reset_preflight(stage="accepted")]
+
+    with pytest.raises(RuntimeError, match="include_accepted"):
+        reset_standard_name_sources(
+            gc,
+            _reset_manifest(),
+            manifest_id="repair-one",
+            reason="wrong physical owner",
+        )
+
+    assert gc.query.call_count == 1
+
+
+def test_source_reset_publication_requires_separate_authority() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [_reset_preflight(stage="approved", catalog_pr_number=42)]
+
+    with pytest.raises(RuntimeError, match="publication authority"):
+        reset_standard_name_sources(
+            gc,
+            _reset_manifest(),
+            manifest_id="repair-one",
+            reason="wrong physical owner",
+            include_accepted=True,
+        )
+
+
+def test_source_reset_catalog_origin_alone_is_not_publication_authority() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [_reset_preflight(origin="catalog_edit")]
+
+    result = reset_standard_name_sources(
+        gc,
+        _reset_manifest(),
+        manifest_id="repair-one",
+        reason="wrong physical owner",
+        dry_run=True,
+    )
+
+    assert result["dry_run"] is True
+    assert result["potential_name_orphans"] == ["wrong_name"]
+    assert gc.query.call_count == 1
+
+
+def test_source_reset_holds_stale_source() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [_reset_preflight(status="stale")]
+
+    with pytest.raises(RuntimeError, match="status='stale'"):
+        reset_standard_name_sources(
+            gc,
+            _reset_manifest(),
+            manifest_id="repair-one",
+            reason="wrong physical owner",
+        )
+
+
+def test_source_reset_writes_only_source_state_and_non_lifecycle_name_cache() -> None:
+    gc = MagicMock()
+    gc.query.side_effect = [
+        [_reset_preflight()],
+        [{"applied": 1, "source_ids": ["dd:example/path"]}],
+    ]
+
+    result = reset_standard_name_sources(
+        gc,
+        _reset_manifest(),
+        manifest_id="repair-one",
+        reason="wrong physical owner",
+    )
+
+    assert result["applied"] == 1
+    assert result["potential_name_orphans"] == ["wrong_name"]
+    cypher = gc.query.call_args_list[1].args[0]
+    assert "DELETE edge" in cypher
+    assert "source.status = 'extracted'" in cypher
+    assert "source.produced_sn_id = null" in cypher
+    assert "source.attempt_count = 0" in cypher
+    assert "source.composed_at = null" in cypher
+    assert "StandardNameSourceRetry" in cypher
+    assert "FROM_DD_PATH|FROM_SIGNAL" in cypher
+    assert "DELETE backing" not in cypher
+    for lifecycle_field in (
+        "name.name_stage",
+        "name.status",
+        "name.origin",
+        "name.docs_stage",
+        "name.reviewer_score_name",
+    ):
+        assert lifecycle_field not in cypher
+
+
+def test_source_reset_same_completed_manifest_is_idempotent() -> None:
+    preview_gc = MagicMock()
+    preview_gc.query.return_value = [_reset_preflight()]
+    preview = reset_standard_name_sources(
+        preview_gc,
+        _reset_manifest(),
+        manifest_id="repair-one",
+        reason="wrong physical owner",
+        dry_run=True,
+    )
+    event_reason = (
+        f"wrong physical owner [source-reset-manifest {preview['manifest_hash']}]"
+    )
+    gc = MagicMock()
+    gc.query.return_value = [
+        _reset_preflight(
+            status="extracted",
+            bindings=[],
+            scalar=None,
+            event_exists=True,
+            event_reason=event_reason,
+        )
+    ]
+
+    result = reset_standard_name_sources(
+        gc,
+        _reset_manifest(),
+        manifest_id="repair-one",
+        reason="wrong physical owner",
+    )
+
+    assert result["already_applied"] is True
+    assert result["applied"] == 0
+    assert gc.query.call_count == 1
+
+
+def test_source_reset_conflicting_manifest_fails_after_completion() -> None:
+    gc = MagicMock()
+    gc.query.return_value = [
+        _reset_preflight(
+            status="extracted",
+            bindings=[],
+            scalar=None,
+            event_exists=True,
+            event_reason="different manifest content",
+        )
+    ]
+
+    with pytest.raises(RuntimeError, match="compare-and-set"):
+        reset_standard_name_sources(
+            gc,
+            _reset_manifest(),
+            manifest_id="repair-one",
+            reason="wrong physical owner",
+        )
 
 
 def test_rename_mirror_refresh_separates_updates_from_matches() -> None:

@@ -153,6 +153,9 @@ class TestUnjudgedSourcesStayBehind:
         )
 
         assert retarget.call_args.kwargs["source_ids"] == [_TRIGGER]
+        assert retarget.call_args.kwargs["expected_current_bindings"] == {
+            _TRIGGER: "radial_coordinate"
+        }
         # The attachment guard sees the same set, so no unjudged pairing is
         # even offered to it.
         assert guard.call_args.args[2] == [_TRIGGER]
@@ -239,6 +242,10 @@ class TestJudgedSourcesMigrate:
 
         assert superseded == 1
         assert retarget.call_args.kwargs["source_ids"] == sorted([_TRIGGER, sibling])
+        assert retarget.call_args.kwargs["expected_current_bindings"] == {
+            _TRIGGER: "radial_coordinate",
+            sibling: "radial_coordinate",
+        }
         assert recorder.statements("SET old.source_paths =") == []
 
 
