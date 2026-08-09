@@ -18968,6 +18968,420 @@ def release_review_docs_failed_claims(
     return released
 
 
+REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA = "imas-codex.refine-claim-release-manifest"
+REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA = "imas-codex.refine-claim-release-receipt"
+REFINE_CLAIM_RELEASE_PROJECTION_VERSION = 1
+
+
+class RefineClaimReleaseConflict(RuntimeError):
+    """An exact stranded-refinement claim could not be safely released."""
+
+
+_LOCK_REFINE_CLAIM_RELEASE_QUERY = """
+// REFINE_CLAIM_RELEASE_LOCK
+MATCH (sn:StandardName {id: $target_id})
+WHERE sn.name_stage = $expected_stage
+  AND sn.claim_token = $claim_token
+  AND sn.claimed_at IS NOT NULL
+  AND ($scope_run_id IS NULL OR sn.run_id = $scope_run_id)
+SET sn._refine_claim_release_lock = true
+REMOVE sn._refine_claim_release_lock
+RETURN sn.id AS id
+"""
+
+
+_READ_REFINE_CLAIM_RELEASE_QUERY = """
+// REFINE_CLAIM_RELEASE_READ
+MATCH (sn:StandardName {id: $target_id})
+CALL (sn) {
+  OPTIONAL MATCH (source:StandardNameSource)-[binding:PRODUCED_NAME]->(sn)
+  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+  WHERE NOT (bound.name_stage IN ['superseded', 'exhausted', 'contested'])
+  WITH source, binding,
+       collect(DISTINCT CASE WHEN bound IS NULL THEN null ELSE {
+         id: bound.id
+       } END) AS bound_names
+  RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
+    source: properties(source),
+    relationship: properties(binding),
+    bound_names: bound_names
+  } END) AS source_bindings
+}
+CALL (sn) {
+  OPTIONAL MATCH (projection)-[edge:HAS_STANDARD_NAME]->(sn)
+  WHERE projection:IMASNode OR projection:FacilitySignal
+  RETURN collect(CASE WHEN projection IS NULL THEN null ELSE {
+    labels: labels(projection),
+    node: properties(projection),
+    relationship: properties(edge)
+  } END) AS source_projections
+}
+CALL (sn) {
+  OPTIONAL MATCH (sn)-[:REFINED_FROM]->(predecessor:StandardName)
+  RETURN collect(DISTINCT predecessor.id) AS predecessor_ids
+}
+CALL (sn) {
+  OPTIONAL MATCH (successor:StandardName)-[:REFINED_FROM]->(sn)
+  RETURN collect(DISTINCT successor.id) AS successor_ids
+}
+CALL (sn) {
+  OPTIONAL MATCH (sn)-[edge]->(related)
+  RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
+    type: type(edge),
+    relationship: properties(edge),
+    node_labels: labels(related),
+    node: properties(related)
+  } END) AS outgoing_relationships
+}
+CALL (sn) {
+  OPTIONAL MATCH (related)-[edge]->(sn)
+  RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
+    type: type(edge),
+    relationship: properties(edge),
+    node_labels: labels(related),
+    node: properties(related)
+  } END) AS incoming_relationships
+}
+RETURN properties(sn) AS standard_name,
+       toString(sn.claimed_at) AS claimed_at_text,
+       source_bindings,
+       source_projections,
+       predecessor_ids,
+       successor_ids,
+       outgoing_relationships,
+       incoming_relationships
+"""
+
+
+_WRITE_REFINE_CLAIM_RELEASE_QUERY = """
+// REFINE_CLAIM_RELEASE_WRITE
+MATCH (sn:StandardName {id: $target_id})
+WHERE sn.name_stage = $expected_stage
+  AND sn.claim_token = $claim_token
+  AND toString(sn.claimed_at) = $expected_claimed_at
+  AND ($scope_run_id IS NULL OR sn.run_id = $scope_run_id)
+SET sn.name_stage = 'reviewed',
+    sn.claim_token = null,
+    sn.claimed_at = null
+RETURN sn.id AS id
+"""
+
+
+def _sorted_refine_claim_projection(values: Any) -> list[Any]:
+    normalized = [_authority_json_value(value) for value in values or []]
+    return sorted(
+        normalized,
+        key=lambda value: json.dumps(
+            value, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+        ),
+    )
+
+
+def _project_refine_claim_release_state(row: dict[str, Any]) -> dict[str, Any]:
+    properties = _authority_json_value(dict(row.get("standard_name") or {}))
+    description = str(properties.get("description") or "")
+    documentation = str(properties.get("documentation") or "")
+    return {
+        "target_id": properties.get("id"),
+        "name_stage": properties.get("name_stage"),
+        "claim": {
+            "token": properties.get("claim_token"),
+            "claimed_at": row.get("claimed_at_text") or properties.get("claimed_at"),
+        },
+        "scope": {
+            "run_id": properties.get("run_id"),
+            "drain_scope_id": properties.get("drain_scope_id"),
+            "drain_scope_claimed_at": properties.get("drain_scope_claimed_at"),
+            "drain_scope_paths": properties.get("drain_scope_paths"),
+            "drain_claim_scope_id": properties.get("drain_claim_scope_id"),
+        },
+        "content_hashes": {
+            "description_sha256": hashlib.sha256(description.encode()).hexdigest(),
+            "documentation_sha256": hashlib.sha256(documentation.encode()).hexdigest(),
+            "combined_sha256": _authority_payload_hash(
+                {
+                    "description": description,
+                    "documentation": documentation,
+                }
+            ),
+        },
+        "authority": {
+            "validation_status": properties.get("validation_status"),
+            "unit": properties.get("unit"),
+            "kind": properties.get("kind"),
+        },
+        "node_properties": properties,
+        "source_bindings": _sorted_refine_claim_projection(row.get("source_bindings")),
+        "source_projections": _sorted_refine_claim_projection(
+            row.get("source_projections")
+        ),
+        "predecessor_ids": sorted(
+            str(value) for value in row.get("predecessor_ids") or []
+        ),
+        "successor_ids": sorted(str(value) for value in row.get("successor_ids") or []),
+        "outgoing_relationships": _sorted_refine_claim_projection(
+            row.get("outgoing_relationships")
+        ),
+        "incoming_relationships": _sorted_refine_claim_projection(
+            row.get("incoming_relationships")
+        ),
+    }
+
+
+def _predicted_refine_claim_release_state(
+    before: dict[str, Any],
+) -> dict[str, Any]:
+    predicted = json.loads(
+        json.dumps(before, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    )
+    predicted["name_stage"] = "reviewed"
+    predicted["claim"] = {"token": None, "claimed_at": None}
+    predicted["node_properties"]["name_stage"] = "reviewed"
+    predicted["node_properties"].pop("claim_token", None)
+    predicted["node_properties"].pop("claimed_at", None)
+    return predicted
+
+
+def _refine_claim_release_manifest(
+    *,
+    target_id: str,
+    claim_token: str,
+    expected_stage: str,
+    scope_run_id: str | None,
+    before: dict[str, Any],
+    predicted_after: dict[str, Any],
+) -> dict[str, Any]:
+    return {
+        "schema": REFINE_CLAIM_RELEASE_MANIFEST_SCHEMA,
+        "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
+        "operation": "release_stranded_refine_claim",
+        "target_id": target_id,
+        "expected_stage": expected_stage,
+        "claim_token": claim_token,
+        "expected_scope_run_id": scope_run_id,
+        "before": before,
+        "predicted_after": predicted_after,
+    }
+
+
+def _refine_claim_no_change_receipt(
+    *,
+    target_id: str,
+    claim_token: str,
+    expected_stage: str,
+    scope_run_id: str | None,
+) -> dict[str, Any]:
+    return {
+        "schema": REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
+        "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
+        "outcome": "no_exact_eligible_claim",
+        "dry_run": True,
+        "eligible": False,
+        "would_release": 0,
+        "changed": 0,
+        "target_id": target_id,
+        "expected_stage": expected_stage,
+        "claim_token": claim_token,
+        "expected_scope_run_id": scope_run_id,
+        "manifest": None,
+        "manifest_sha256": None,
+    }
+
+
+def release_stranded_refine_claim(
+    standard_name: str,
+    *,
+    claim_token: str,
+    expected_stage: str,
+    scope_run_id: str | None = None,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Release one exact stranded name-refinement claim with full CAS fencing.
+
+    The default performs the same lock, compare-and-set write, and postflight
+    as apply, then rolls the transaction back. Apply additionally requires the
+    SHA-256 emitted by that dry run and an exact ``run_id`` scope. The only
+    durable changes are ``name_stage: refining -> reviewed`` and removal of the
+    matching main ``claim_token``/``claimed_at`` pair.
+    """
+    target_id = str(standard_name).strip()
+    token = str(claim_token).strip()
+    scope = str(scope_run_id).strip() if scope_run_id is not None else None
+    if not target_id:
+        raise ValueError("standard_name must be non-empty")
+    if not token:
+        raise ValueError("claim_token must be non-empty")
+    if expected_stage != "refining":
+        raise ValueError("expected_stage must be 'refining'")
+    if scope_run_id is not None and not scope:
+        raise ValueError("scope_run_id must be non-empty when supplied")
+    if apply and scope is None:
+        raise ValueError("apply requires an exact scope_run_id")
+    if apply and not manifest_sha256:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                params = {
+                    "target_id": target_id,
+                    "claim_token": token,
+                    "expected_stage": expected_stage,
+                    "scope_run_id": scope,
+                }
+                locked = [
+                    dict(record)
+                    for record in transaction.run(
+                        _LOCK_REFINE_CLAIM_RELEASE_QUERY, **params
+                    )
+                ]
+                if not locked:
+                    transaction.rollback()
+                    if apply:
+                        raise RefineClaimReleaseConflict(
+                            "no exact eligible refine claim matched the target, "
+                            "stage, token, claimed_at, and scope fences"
+                        )
+                    return _refine_claim_no_change_receipt(**params)
+                if len(locked) != 1 or locked[0].get("id") != target_id:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim lock did not resolve exactly one target"
+                    )
+
+                before_rows = [
+                    dict(record)
+                    for record in transaction.run(
+                        _READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
+                    )
+                ]
+                if len(before_rows) != 1:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim projection did not resolve exactly one target"
+                    )
+                before = _project_refine_claim_release_state(before_rows[0])
+                if before["target_id"] != target_id:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim target identity drifted"
+                    )
+                if before["name_stage"] != expected_stage:
+                    raise RefineClaimReleaseConflict("refine claim stage drifted")
+                if before["claim"]["token"] != token:
+                    raise RefineClaimReleaseConflict("refine claim token drifted")
+                if before["claim"]["claimed_at"] is None:
+                    raise RefineClaimReleaseConflict("refine claim timestamp is absent")
+                if scope is not None and before["scope"]["run_id"] != scope:
+                    raise RefineClaimReleaseConflict("refine claim scope drifted")
+                source_bindings = before["source_bindings"]
+                if not source_bindings:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim has no current source binding"
+                    )
+                for binding in source_bindings:
+                    if binding.get("bound_names") != [{"id": target_id}]:
+                        raise RefineClaimReleaseConflict(
+                            "refine claim source does not have exactly one current "
+                            "binding to the target"
+                        )
+                binding_ids = sorted(
+                    str(binding.get("source", {}).get("id") or "")
+                    for binding in source_bindings
+                )
+                projected_source_ids = sorted(
+                    str(source_id)
+                    for source_id in before["node_properties"].get("source_paths", [])
+                )
+                if binding_ids != projected_source_ids:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim source binding and scalar projection drifted"
+                    )
+
+                predicted_after = _predicted_refine_claim_release_state(before)
+                manifest = _refine_claim_release_manifest(
+                    target_id=target_id,
+                    claim_token=token,
+                    expected_stage=expected_stage,
+                    scope_run_id=scope,
+                    before=before,
+                    predicted_after=predicted_after,
+                )
+                computed_manifest_sha256 = _authority_payload_hash(manifest)
+                if apply and manifest_sha256 != computed_manifest_sha256:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim manifest SHA-256 does not match current authority"
+                    )
+
+                write_rows = [
+                    dict(record)
+                    for record in transaction.run(
+                        _WRITE_REFINE_CLAIM_RELEASE_QUERY,
+                        **params,
+                        expected_claimed_at=str(before["claim"]["claimed_at"]),
+                    )
+                ]
+                if len(write_rows) != 1 or write_rows[0].get("id") != target_id:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim compare-and-set did not change exactly one target"
+                    )
+
+                after_rows = [
+                    dict(record)
+                    for record in transaction.run(
+                        _READ_REFINE_CLAIM_RELEASE_QUERY, target_id=target_id
+                    )
+                ]
+                if len(after_rows) != 1:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim postflight did not resolve exactly one target"
+                    )
+                after = _project_refine_claim_release_state(after_rows[0])
+                if after != predicted_after:
+                    raise RefineClaimReleaseConflict(
+                        "refine claim postflight detected collateral projection drift"
+                    )
+
+                if apply:
+                    transaction.commit()
+                else:
+                    transaction.rollback()
+                return {
+                    "schema": REFINE_CLAIM_RELEASE_RECEIPT_SCHEMA,
+                    "projection_version": REFINE_CLAIM_RELEASE_PROJECTION_VERSION,
+                    "outcome": "released" if apply else "would_release",
+                    "dry_run": not apply,
+                    "eligible": True,
+                    "would_release": 0 if apply else 1,
+                    "changed": 1 if apply else 0,
+                    "target_id": target_id,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_manifest_sha256,
+                    "before": before,
+                    "predicted_after": predicted_after,
+                    "after": after if apply else predicted_after,
+                    "postflight_verified": True,
+                    "collateral_proof": {
+                        "node_properties_except_release_fields_unchanged": True,
+                        "relationships_unchanged": True,
+                        "source_bindings_unchanged": True,
+                        "source_projections_unchanged": True,
+                        "lineage_unchanged": True,
+                    },
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 @retry_on_deadlock()
 def release_refine_name_claims(
     *,

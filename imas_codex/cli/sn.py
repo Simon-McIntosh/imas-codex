@@ -7654,6 +7654,96 @@ def sn_ddgap(
     click.echo(f"{verb} {result['reported']} DD-gap fact: {result['ids'][0]}")
 
 
+@sn.command("release-refine-claim")
+@click.argument("standard_name")
+@click.option(
+    "--claim-token",
+    required=True,
+    help="Exact claim token currently held by this one StandardName.",
+)
+@click.option(
+    "--expected-stage",
+    type=click.Choice(["refining"]),
+    required=True,
+    help="Required current name stage; only 'refining' is releasable.",
+)
+@click.option(
+    "--scope-run-id",
+    help=(
+        "Expected durable run_id. Optional for discovery dry runs and required "
+        "with --apply."
+    ),
+)
+@click.option(
+    "--apply",
+    is_flag=True,
+    help=(
+        "Persist the exact release. The default is a zero-write dry run that "
+        "executes and rolls back the same compare-and-set operation."
+    ),
+)
+@click.option(
+    "--manifest-sha256",
+    help=(
+        "SHA-256 emitted by the matching dry run; required with --apply and "
+        "refused if any projected authority drifted."
+    ),
+)
+def sn_release_refine_claim(
+    standard_name: str,
+    claim_token: str,
+    expected_stage: str,
+    scope_run_id: str | None,
+    apply: bool,
+    manifest_sha256: str | None,
+) -> None:
+    """Release one stranded refine claim without changing lifecycle authority.
+
+    The exact target, refining stage, exact claim token and timestamp, run
+    scope, content, sources, projections, lineage, Reviews, and all unrelated
+    claims are manifest-bound. The only applied change is ``refining`` to
+    ``reviewed`` plus clearing that matching name claim. Any missing row,
+    duplicate, token/stage/scope mismatch, manifest drift, or collateral change
+    is refused; this command never accepts, resets, or creates a successor.
+    """
+    import json
+
+    from imas_codex.standard_names.graph_ops import (
+        RefineClaimReleaseConflict,
+        release_stranded_refine_claim,
+    )
+
+    if apply and not scope_run_id:
+        raise click.UsageError("--apply requires --scope-run-id")
+    if apply and not manifest_sha256:
+        raise click.UsageError("--apply requires --manifest-sha256")
+    try:
+        receipt = release_stranded_refine_claim(
+            standard_name,
+            claim_token=claim_token,
+            expected_stage=expected_stage,
+            scope_run_id=scope_run_id,
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+        )
+    except (RefineClaimReleaseConflict, ValueError) as exc:
+        refusal = {
+            "schema": "imas-codex.refine-claim-release-receipt",
+            "outcome": "refused",
+            "dry_run": not apply,
+            "eligible": False,
+            "would_release": 0,
+            "changed": 0,
+            "target_id": standard_name,
+            "reason": str(exc),
+        }
+        click.echo(json.dumps(refusal, sort_keys=True, separators=(",", ":")))
+        raise SystemExit(3) from exc
+    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
+    if not receipt.get("eligible"):
+        raise SystemExit(3)
+
+
 @sn.command("rescore")
 @click.argument("standard_name")
 @click.option(
