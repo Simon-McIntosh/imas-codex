@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import copy
+from unittest.mock import patch
 
 import pytest
 
@@ -11,6 +12,7 @@ from imas_codex.standard_names.graph_ops import (
     DocsEvidenceRecoveryConflict,
     build_docs_evidence_recovery_budget,
     build_docs_evidence_recovery_manifest,
+    stage_docs_for_rescore,
 )
 from imas_codex.standard_names.review.audits import compute_review_input_hash
 
@@ -21,6 +23,7 @@ def _state(
     method: str | None = "quorum_consensus",
     cycles: int = 2,
     name_stage: str = "accepted",
+    stored_method: str | None = None,
 ) -> dict:
     group_id = f"group-{name_id}"
     properties = {
@@ -53,7 +56,7 @@ def _state(
         "drain_claim_scope_id": None,
         "reviewer_score_docs": 0.9,
         "reviewed_docs_at": "2026-08-09T12:00:00+00:00",
-        "docs_review_resolution_method": None,
+        "docs_review_resolution_method": stored_method,
         "docs_review_quorum_shortfall": None,
         "docs_review_quorum_shortfall_at": None,
     }
@@ -152,6 +155,67 @@ class _Graph:
         return _Session(self.transaction)
 
 
+class _RescoreTransaction:
+    def __init__(self, state: dict) -> None:
+        self.state = copy.deepcopy(state)
+        self.original = copy.deepcopy(state)
+        self.closed = False
+        self.committed = False
+        self.rolled_back = False
+        self.write_count = 0
+
+    def run(self, cypher: str, **params):
+        properties = self.state["standard_name"]
+        if "_docs_rescore_lock" in cypher:
+            return [{"standard_name": copy.deepcopy(properties)}]
+        if "sn.docs_stage IN ['accepted', 'reviewed', 'exhausted']" in cypher:
+            eligible = (
+                properties["name_stage"] == "accepted"
+                and properties["docs_stage"] in {"accepted", "reviewed", "exhausted"}
+                and not properties.get("claim_token")
+                and not properties.get("claimed_at")
+                and not properties.get("drain_scope_id")
+                and not properties.get("drain_scope_claimed_at")
+                and not properties.get("drain_claim_scope_id")
+            )
+            if not eligible:
+                return []
+            prior_stage = properties["docs_stage"]
+            if not params["dry_run"]:
+                properties["docs_stage"] = "drafted"
+                properties["reviewer_score_docs"] = None
+                properties["run_id"] = params["run_id"]
+                self.write_count += 1
+            return [
+                {
+                    "prior_stage": prior_stage,
+                    "description": properties["description"],
+                    "documentation": properties["documentation"],
+                }
+            ]
+        raise AssertionError("unexpected exact rescore query")
+
+    def commit(self) -> None:
+        self.committed = True
+        self.closed = True
+
+    def rollback(self) -> None:
+        self.state = copy.deepcopy(self.original)
+        self.rolled_back = True
+        self.closed = True
+
+
+class _RescoreGraph:
+    def __init__(self, state: dict) -> None:
+        self.transaction = _RescoreTransaction(state)
+
+    def session(self):
+        return _Session(self.transaction)
+
+    def close(self) -> None:
+        pass
+
+
 def _row(manifest: dict, name_id: str) -> dict:
     return next(row for row in manifest["rows"] if row["id"] == name_id)
 
@@ -170,13 +234,39 @@ def test_exact_builder_is_deterministic_and_proves_strict_backfill() -> None:
     assert first["projection_version"] == DOCS_EVIDENCE_RECOVERY_PROJECTION_VERSION
     assert len(first["manifest_id"]) == 64
     assert [row["id"] for row in first["rows"]] == ["alpha_name", "zeta_name"]
-    assert first["counts"] == {"metadata_backfill_proven": 2}
+    assert first["counts"] == {
+        "already_authoritative": 0,
+        "metadata_backfill_proven": 2,
+        "rescore_required_current": 0,
+        "historical_hold": 0,
+        "evidence_ambiguous_hold": 0,
+    }
     row = first["rows"][0]
     assert row["outcome"] == "metadata_backfill_proven"
     assert row["authority_projection"]["id"] == "alpha_name"
     assert row["description"] == "Description for alpha_name."
     assert row["source_bindings"][0]["path"] == "path/alpha_name"
     assert row["latest_review_group"][1]["score"] == 0.85
+
+
+def test_canonical_stored_method_is_already_authoritative_not_backfill() -> None:
+    state = _state("settled_name", stored_method="quorum_consensus")
+
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    row = manifest["rows"][0]
+
+    assert manifest["counts"] == {
+        "already_authoritative": 1,
+        "metadata_backfill_proven": 0,
+        "rescore_required_current": 0,
+        "historical_hold": 0,
+        "evidence_ambiguous_hold": 0,
+    }
+    assert row["outcome"] == "already_authoritative"
+    assert row["authority_status"] == "already_authoritative"
+    assert row["authority_projection"]["expected_resolution_method"] == (
+        "quorum_consensus"
+    )
 
 
 def test_lifecycle_selection_is_explicit_and_cardinality_fenced() -> None:
@@ -235,13 +325,58 @@ def test_current_single_review_is_exact_rescore_without_prose_change() -> None:
     assert row["outcome"] == "rescore_required_current"
     assert row["reason_codes"] == ["incomplete_review_group"]
     assert row["rescore_input"] == {
-        "api": "stage_docs_for_rescore",
         "sn_id": "absorbed_wave_power",
         "expected_docs_hash": row["docs_hash"],
         "expected_review_input_hash": row["current_review_input_hash"],
-        "preserve_description": state["standard_name"]["description"],
-        "preserve_documentation": state["standard_name"]["documentation"],
     }
+
+
+def test_manifest_rescore_input_executes_content_bound_staging() -> None:
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    graph = _RescoreGraph(state)
+
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        result = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"], run_id="exact-docs-run"
+        )
+
+    assert result["ok"] is True
+    assert result["content_cas_verified"] is True
+    assert graph.transaction.committed is True
+    assert graph.transaction.write_count == 1
+    assert graph.transaction.state["standard_name"]["docs_stage"] == "drafted"
+    assert (
+        graph.transaction.state["standard_name"]["description"]
+        == (state["standard_name"]["description"])
+    )
+    assert (
+        graph.transaction.state["standard_name"]["documentation"]
+        == (state["standard_name"]["documentation"])
+    )
+
+
+@pytest.mark.parametrize("drift_field", ["description", "documentation", "kind"])
+def test_manifest_rescore_input_refuses_content_or_review_input_drift(
+    drift_field: str,
+) -> None:
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    changed = copy.deepcopy(state)
+    changed["standard_name"][drift_field] += " changed"
+    graph = _RescoreGraph(changed)
+
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        result = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"], run_id="exact-docs-run"
+        )
+
+    assert result["ok"] is False
+    assert result["outcome"] == "content_drift"
+    assert graph.transaction.write_count == 0
+    assert graph.transaction.committed is False
+    assert graph.transaction.rolled_back is True
+    assert graph.transaction.state == graph.transaction.original
 
 
 @pytest.mark.parametrize(
@@ -277,7 +412,11 @@ def test_ambiguous_evidence_never_becomes_recovered_or_rescore(fault, reason) ->
 
 
 def test_superseded_history_is_zero_cost_hold_even_with_quorate_evidence() -> None:
-    state = _state("historical_name", name_stage="superseded")
+    state = _state(
+        "historical_name",
+        name_stage="superseded",
+        stored_method="quorum_consensus",
+    )
     manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
     row = manifest["rows"][0]
 
@@ -285,6 +424,7 @@ def test_superseded_history_is_zero_cost_hold_even_with_quorate_evidence() -> No
     assert row["reason_codes"] == ["superseded_history"]
     assert row["priority"] == 3
     assert row["rescore_input"] is None
+    assert row["authority_status"] == "already_authoritative"
 
 
 def test_budget_envelope_never_promises_unknown_cost_or_exceeds_caps() -> None:
@@ -303,20 +443,25 @@ def test_budget_envelope_never_promises_unknown_cost_or_exceeds_caps() -> None:
         per_batch_hard_cap=50,
     )
 
-    assert budget["authorized_remaining_ceiling"] == 190.09242
-    assert budget["total_hard_cap"] <= 190.09242
-    assert all(batch["hard_cost_cap"] <= 50 for batch in budget["paid_batches"])
+    assert budget["authorized_remaining_ceiling_usd"] == 190.09242
+    assert budget["total_hard_cap_usd"] <= 190.09242
+    assert all(
+        tranche["hard_cost_cap_usd"] <= 50 for tranche in budget["hard_cap_tranches"]
+    )
     assert sum(
-        batch["hard_cost_cap"] for batch in budget["paid_batches"]
+        tranche["hard_cost_cap_usd"] for tranche in budget["hard_cap_tranches"]
     ) == pytest.approx(190.09242)
-    assert all(batch["stop_and_remeasure"] for batch in budget["paid_batches"])
-    assert budget["reservation_mechanism"] == "model_provider_exposure"
-    assert budget["cost_is_known_before_rendering"] is False
-    targeted = [
-        name_id for batch in budget["paid_batches"] for name_id in batch["target_ids"]
-    ]
-    assert targeted == sorted(state["id"] for state in states[:-1])
-    assert "historical" not in targeted
+    assert all(tranche["stop_and_remeasure"] for tranche in budget["hard_cap_tranches"])
+    assert all(tranche["target_ids"] == [] for tranche in budget["hard_cap_tranches"])
+    assert budget["reserved_exposure_usd"] == 0.0
+    assert budget["expected_exposure_usd"] is None
+    assert budget["expected_admission_mechanism"] == (
+        "model_provider_exposure_after_request_render"
+    )
+    assert budget["provider_policy_ceiling_is_separate"] is True
+    queued = [item["id"] for item in budget["prioritized_queue"]]
+    assert queued == sorted(state["id"] for state in states[:-1])
+    assert "historical" not in queued
     assert budget["historical_hold_count"] == 1
 
 

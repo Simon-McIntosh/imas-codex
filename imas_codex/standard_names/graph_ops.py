@@ -14395,10 +14395,11 @@ class DocsEvidenceRecoveryConflict(RuntimeError):
 DOCS_EVIDENCE_RECOVERY_MANIFEST_SCHEMA = (
     "imas-codex.docs-review-evidence-recovery-manifest"
 )
-DOCS_EVIDENCE_RECOVERY_PROJECTION_VERSION = 1
+DOCS_EVIDENCE_RECOVERY_PROJECTION_VERSION = 2
 _DOCS_EVIDENCE_LIFECYCLE_SELECTION_FIELDS = frozenset({"docs_stage", "name_stages"})
 _DOCS_EVIDENCE_LIFECYCLE_STAGES = frozenset({"accepted", "exhausted", "superseded"})
 _DOCS_EVIDENCE_OUTCOMES = (
+    "already_authoritative",
     "metadata_backfill_proven",
     "rescore_required_current",
     "historical_hold",
@@ -14663,7 +14664,7 @@ def _project_docs_evidence_recovery_row(state: dict[str, Any]) -> dict[str, Any]
         reasons.append("claim_scope_lifecycle_conflict")
 
     authority_projection = None
-    if lifecycle["name_stage"] != "superseded" and not lifecycle_conflict:
+    if not lifecycle_conflict:
         try:
             authority_projection = _project_docs_review_authority_row(
                 name_id, properties, reviews
@@ -14672,11 +14673,18 @@ def _project_docs_evidence_recovery_row(state: dict[str, Any]) -> dict[str, Any]
         except (DocsAuthorityBackfillConflict, TypeError, ValueError):
             authority_projection = None
 
+    authority_status = "unproven"
+    if authority_projection is not None:
+        if stored_method is None:
+            authority_status = "metadata_backfill_proven"
+        elif stored_method == authority_projection["expected_resolution_method"]:
+            authority_status = "already_authoritative"
+
     if lifecycle["name_stage"] == "superseded":
         outcome = "historical_hold"
         reasons = ["superseded_history"]
     elif authority_projection is not None:
-        outcome = "metadata_backfill_proven"
+        outcome = authority_status
         reasons = []
     else:
         ambiguous = set(reasons) - {
@@ -14703,16 +14711,14 @@ def _project_docs_evidence_recovery_row(state: dict[str, Any]) -> dict[str, Any]
     rescore_input = None
     if outcome == "rescore_required_current":
         rescore_input = {
-            "api": "stage_docs_for_rescore",
             "sn_id": name_id,
             "expected_docs_hash": docs_hash,
             "expected_review_input_hash": current_input_hash,
-            "preserve_description": str(properties.get("description") or ""),
-            "preserve_documentation": str(properties.get("documentation") or ""),
         }
     return {
         "id": name_id,
         "outcome": outcome,
+        "authority_status": authority_status,
         "reason_codes": unique_reasons,
         "priority": _docs_recovery_priority(
             lifecycle,
@@ -14753,7 +14759,6 @@ def _docs_evidence_manifest_payload(
     counts = {
         outcome: sum(row["outcome"] == outcome for row in normalized_rows)
         for outcome in _DOCS_EVIDENCE_OUTCOMES
-        if any(row["outcome"] == outcome for row in normalized_rows)
     }
     reasons = sorted(
         {reason for row in normalized_rows for reason in row["reason_codes"]}
@@ -14866,13 +14871,15 @@ def build_docs_evidence_recovery_budget(
     authorized_remaining_ceiling: float,
     per_batch_hard_cap: float,
 ) -> dict[str, Any]:
-    """Allocate deterministic paid tranches under two hard dollar ceilings.
+    """Emit an unpriced priority queue and bounded sequential spend tranches.
 
-    The exact request exposure is unknown until the review prompt is rendered.
-    Each tranche therefore remains subject to ``model_provider_exposure`` at
-    launch, stops at its hard cap, and requires a spend/census refresh before
-    the next tranche. Target membership is never a promise that every target
-    can execute within that tranche.
+    No request is assigned to a tranche here: expected admission exposure is
+    unknowable until the exact review request has been rendered. The launcher
+    must render the next queued request, calculate ``model_provider_exposure``,
+    and admit it only while that expected exposure fits both remaining caps.
+    Provider ``max_price`` is a separate route-policy ceiling, not this expected
+    admission price. Actual spend is persisted and the census is rebuilt after
+    each tranche.
     """
     from decimal import ROUND_DOWN, Decimal, InvalidOperation
 
@@ -14891,48 +14898,75 @@ def build_docs_evidence_recovery_budget(
         (row for row in rows if row["outcome"] == "rescore_required_current"),
         key=lambda row: (int(row["priority"]), row["id"]),
     )
-    paid_batches: list[dict[str, Any]] = []
+    queue = [
+        {
+            "queue_position": index + 1,
+            "id": row["id"],
+            "priority": row["priority"],
+            "description": row["description"],
+            "source_bindings": row["source_bindings"],
+            "reviewer_score_docs": row["reviewer_score_docs"],
+            "rescore_input": row["rescore_input"],
+        }
+        for index, row in enumerate(candidates)
+    ]
+    hard_cap_tranches: list[dict[str, Any]] = []
     if candidates:
-        possible_batches = int(
+        possible_tranches = int(
             (ceiling / batch_cap).to_integral_value(rounding=ROUND_DOWN)
         )
         if ceiling % batch_cap:
-            possible_batches += 1
-        batch_count = min(len(candidates), possible_batches)
+            possible_tranches += 1
+        tranche_count = min(len(candidates), possible_tranches)
         remaining = ceiling
-        for index in range(batch_count):
-            start = index * len(candidates) // batch_count
-            stop = (index + 1) * len(candidates) // batch_count
-            target_ids = [row["id"] for row in candidates[start:stop]]
+        for index in range(tranche_count):
             hard_cap = min(batch_cap, remaining)
-            batch_body = {
+            tranche_body = {
                 "ordinal": index + 1,
-                "target_ids": target_ids,
-                "hard_cost_cap": float(hard_cap),
-                "reservation_required_before_each_call": True,
+                "target_ids": [],
+                "hard_cost_cap_usd": float(hard_cap),
+                "reserved_exposure_usd": 0.0,
+                "expected_exposure_usd": None,
+                "render_before_admission": True,
                 "stop_and_remeasure": True,
             }
-            paid_batches.append(
+            hard_cap_tranches.append(
                 {
-                    **batch_body,
-                    "batch_id": _authority_payload_hash(batch_body),
+                    **tranche_body,
+                    "tranche_id": _authority_payload_hash(tranche_body),
                 }
             )
             remaining -= hard_cap
 
     total_hard_cap = sum(
-        (Decimal(str(batch["hard_cost_cap"])) for batch in paid_batches),
+        (Decimal(str(tranche["hard_cost_cap_usd"])) for tranche in hard_cap_tranches),
         Decimal("0"),
     )
     return {
         "manifest_id": manifest["manifest_id"],
-        "authorized_remaining_ceiling": float(ceiling),
-        "per_batch_hard_cap": float(batch_cap),
-        "total_hard_cap": float(total_hard_cap),
-        "unallocated_ceiling": float(ceiling - total_hard_cap),
-        "reservation_mechanism": "model_provider_exposure",
-        "cost_is_known_before_rendering": False,
-        "stop_boundary": "stop and remeasure graph census and actual spend after every batch",
+        "authorized_remaining_ceiling_usd": float(ceiling),
+        "per_tranche_hard_cap_usd": float(batch_cap),
+        "total_hard_cap_usd": float(total_hard_cap),
+        "unallocated_ceiling_usd": float(ceiling - total_hard_cap),
+        "reserved_exposure_usd": 0.0,
+        "expected_exposure_usd": None,
+        "expected_admission_mechanism": (
+            "model_provider_exposure_after_request_render"
+        ),
+        "provider_policy_ceiling_is_separate": True,
+        "launch_algorithm": [
+            "render the next exact queued review request",
+            "calculate canonical expected admission exposure",
+            "admit only if exposure fits the current tranche and overall remainder",
+            "otherwise stop the tranche before the provider call",
+            "persist actual spend and rebuild the census and queue after the tranche",
+        ],
+        "stop_boundary": (
+            "stop and remeasure graph census and actual spend after every tranche"
+        ),
+        "already_authoritative_count": sum(
+            row["outcome"] == "already_authoritative" for row in rows
+        ),
         "zero_cost_recoverable_count": sum(
             row["outcome"] == "metadata_backfill_proven" for row in rows
         ),
@@ -14943,7 +14977,8 @@ def build_docs_evidence_recovery_budget(
         "ambiguous_hold_count": sum(
             row["outcome"] == "evidence_ambiguous_hold" for row in rows
         ),
-        "paid_batches": paid_batches,
+        "prioritized_queue": queue,
+        "hard_cap_tranches": hard_cap_tranches,
     }
 
 
@@ -15910,12 +15945,35 @@ RETURN prior_stage AS prior_stage,
 """
 """Compare-and-set query for one exact docs-only quorum rescore."""
 
+_LOCK_READ_DOCS_FOR_RESCORE_QUERY = """
+MATCH (sn:StandardName {id: $id})
+SET sn._docs_rescore_lock = true
+REMOVE sn._docs_rescore_lock
+RETURN properties(sn) AS standard_name
+"""
+
+
+def _docs_rescore_ineligible(sn_id: str, state: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "ok": False,
+        "reason": (
+            f"{sn_id!r} is not docs-rescore eligible "
+            f"(name_stage={state.get('name_stage')!r}, "
+            f"docs_stage={state.get('docs_stage')!r}, "
+            f"claimed={bool(state.get('claim_token') or state.get('claimed_at'))}, "
+            "drain_scoped="
+            f"{any(state.get(field) is not None for field in ('drain_scope_id', 'drain_scope_claimed_at', 'drain_claim_scope_id'))})"
+        ),
+    }
+
 
 def stage_docs_for_rescore(
     sn_id: str,
     *,
     run_id: str,
     dry_run: bool = False,
+    expected_docs_hash: str | None = None,
+    expected_review_input_hash: str | None = None,
 ) -> dict[str, Any]:
     """Stage one exact documentation record for a fresh quorum review.
 
@@ -15926,7 +15984,10 @@ def stage_docs_for_rescore(
     description, refinement depth, and ``StandardNameReview`` history are
     preserved. Only the docs stage and aggregate docs-review decision fields
     are reset, and ``run_id`` fences the next ``review_docs`` claim to this
-    exact record.
+    exact record. Evidence-recovery callers supply both expected hashes. They
+    are recomputed and compared while the node is locked in the same
+    transaction as the lifecycle transition. Existing callers may omit both
+    hashes and retain the lifecycle-only behavior.
 
     Returns ``{"ok": True, ...}`` on an eligible transition, or a fail-closed
     diagnostic when the record is absent, live, claimed, or not name-accepted.
@@ -15934,6 +15995,86 @@ def stage_docs_for_rescore(
     """
     if not run_id.strip():
         return {"ok": False, "reason": "run_id must be non-empty"}
+
+    hashes_supplied = (
+        expected_docs_hash is not None or expected_review_input_hash is not None
+    )
+    if hashes_supplied:
+        if expected_docs_hash is None or expected_review_input_hash is None:
+            return {
+                "ok": False,
+                "reason": "both expected documentation hashes are required",
+            }
+        for field, value in (
+            ("expected_docs_hash", expected_docs_hash),
+            ("expected_review_input_hash", expected_review_input_hash),
+        ):
+            if not _SHA256_RE.fullmatch(str(value)):
+                return {"ok": False, "reason": f"{field} must be a SHA-256 digest"}
+
+        from imas_codex.standard_names.review.audits import compute_review_input_hash
+
+        client = GraphClient()
+        try:
+            with client.session() as session:
+                transaction = session.begin_transaction()
+                try:
+                    locked = [
+                        dict(record)
+                        for record in transaction.run(
+                            _LOCK_READ_DOCS_FOR_RESCORE_QUERY, id=sn_id
+                        )
+                    ]
+                    if len(locked) != 1:
+                        transaction.rollback()
+                        return {"ok": False, "reason": f"name {sn_id!r} not found"}
+                    properties = dict(locked[0].get("standard_name") or {})
+                    current_docs_hash = compute_docs_authority_content_hash(properties)
+                    current_review_input_hash = compute_review_input_hash(properties)
+                    if (
+                        current_docs_hash != expected_docs_hash
+                        or current_review_input_hash != expected_review_input_hash
+                        or properties.get("review_input_hash")
+                        != expected_review_input_hash
+                    ):
+                        transaction.rollback()
+                        return {
+                            "ok": False,
+                            "outcome": "content_drift",
+                            "reason": (
+                                f"{sn_id!r} documentation or review input drifted"
+                            ),
+                        }
+                    rows = [
+                        dict(record)
+                        for record in transaction.run(
+                            STAGE_DOCS_FOR_RESCORE_QUERY,
+                            id=sn_id,
+                            run_id=run_id,
+                            dry_run=dry_run,
+                        )
+                    ]
+                    if not rows:
+                        transaction.rollback()
+                        return _docs_rescore_ineligible(sn_id, properties)
+                    if dry_run:
+                        transaction.rollback()
+                    else:
+                        transaction.commit()
+                    return {
+                        "ok": True,
+                        "sn_id": sn_id,
+                        "prior_stage": rows[0]["prior_stage"],
+                        "run_id": run_id,
+                        "dry_run": dry_run,
+                        "content_cas_verified": True,
+                    }
+                except BaseException:
+                    if not transaction.closed:
+                        transaction.rollback()
+                    raise
+        finally:
+            client.close()
 
     with GraphClient() as gc:
         rows = gc.query(
@@ -15959,17 +16100,7 @@ def stage_docs_for_rescore(
             if not current:
                 return {"ok": False, "reason": f"name {sn_id!r} not found"}
             state = current[0]
-            return {
-                "ok": False,
-                "reason": (
-                    f"{sn_id!r} is not docs-rescore eligible "
-                    f"(name_stage={state.get('name_stage')!r}, "
-                    f"docs_stage={state.get('docs_stage')!r}, "
-                    f"claimed={bool(state.get('claim_token') or state.get('claimed_at'))}, "
-                    "drain_scoped="
-                    f"{any(state.get(field) is not None for field in ('drain_scope_id', 'drain_scope_claimed_at', 'drain_claim_scope_id'))})"
-                ),
-            }
+            return _docs_rescore_ineligible(sn_id, state)
 
     return {
         "ok": True,
