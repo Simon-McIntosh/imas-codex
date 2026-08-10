@@ -1423,7 +1423,9 @@ _LENGTH_RETRY_TOKEN_MULTIPLIER = 2
 _LENGTH_RETRY_TOKEN_CAP = 262144
 
 
-def _bump_max_tokens_for_length(kwargs: dict[str, Any]) -> int | None:
+def _bump_max_tokens_for_length(
+    kwargs: dict[str, Any], *, output_token_ceiling: int | None = None
+) -> int | None:
     """Grow ``kwargs['max_tokens']`` after a length-exhaustion empty response.
 
     Mutates *kwargs* in place and returns the new budget (or ``None`` when no
@@ -1434,11 +1436,35 @@ def _bump_max_tokens_for_length(kwargs: dict[str, Any]) -> int | None:
     current = kwargs.get("max_tokens")
     if not isinstance(current, int) or current <= 0:
         return None
-    if current >= _LENGTH_RETRY_TOKEN_CAP:
+    ceiling = (
+        min(output_token_ceiling, _LENGTH_RETRY_TOKEN_CAP)
+        if output_token_ceiling is not None
+        else _LENGTH_RETRY_TOKEN_CAP
+    )
+    if current >= ceiling:
         return None
-    bumped = min(current * _LENGTH_RETRY_TOKEN_MULTIPLIER, _LENGTH_RETRY_TOKEN_CAP)
+    bumped = min(current * _LENGTH_RETRY_TOKEN_MULTIPLIER, ceiling)
     kwargs["max_tokens"] = bumped
     return bumped
+
+
+def _validate_output_token_bound(
+    max_tokens: int | None, output_token_ceiling: int | None
+) -> None:
+    """Require a pre-priced ceiling to bound the initial request as well as retries."""
+    if output_token_ceiling is None:
+        return
+    if (
+        not isinstance(output_token_ceiling, int)
+        or output_token_ceiling <= 0
+        or max_tokens is None
+        or max_tokens <= 0
+        or max_tokens > output_token_ceiling
+    ):
+        raise ValueError(
+            "output_token_ceiling requires a positive max_tokens value at or "
+            "below the ceiling"
+        )
 
 
 def _is_local_model(model_id: str) -> bool:
@@ -2035,6 +2061,7 @@ def call_llm_structured(
     response_model: type[BaseModel],
     *,
     max_tokens: int | None = None,
+    output_token_ceiling: int | None = None,
     temperature: float | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
@@ -2056,6 +2083,8 @@ def call_llm_structured(
         messages: Chat messages [{"role": ..., "content": ...}].
         response_model: Pydantic model for structured output parsing.
         max_tokens: Max output tokens (None = model-family default).
+        output_token_ceiling: Immutable retry ceiling for a pre-priced request.
+            Legacy callers leave this unset and retain adaptive length retries.
         temperature: Sampling temperature (None = model default).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
@@ -2073,6 +2102,7 @@ def call_llm_structured(
     import litellm
 
     suppress_litellm_noise()
+    _validate_output_token_bound(max_tokens, output_token_ceiling)
 
     api_key = get_api_key()
     kwargs = _build_kwargs(
@@ -2145,7 +2175,9 @@ def call_llm_structured(
                 # completion budget on thinking): grow the token budget so the
                 # retry can finish reasoning AND emit the answer.
                 if isinstance(e, EmptyResponseError) and e.finish_reason == "length":
-                    bumped = _bump_max_tokens_for_length(kwargs)
+                    bumped = _bump_max_tokens_for_length(
+                        kwargs, output_token_ceiling=output_token_ceiling
+                    )
                     if bumped is not None:
                         logger.debug(
                             "Empty response (finish_reason=length): raised "
@@ -2202,6 +2234,7 @@ async def acall_llm_structured(
     response_model: type[BaseModel],
     *,
     max_tokens: int | None = None,
+    output_token_ceiling: int | None = None,
     temperature: float | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
@@ -2220,6 +2253,8 @@ async def acall_llm_structured(
         messages: Chat messages [{"role": ..., "content": ...}].
         response_model: Pydantic model for structured output parsing.
         max_tokens: Max output tokens (None = model-family default).
+        output_token_ceiling: Immutable retry ceiling for a pre-priced request.
+            Legacy callers leave this unset and retain adaptive length retries.
         temperature: Sampling temperature (None = model default).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
@@ -2242,6 +2277,7 @@ async def acall_llm_structured(
     import litellm
 
     suppress_litellm_noise()
+    _validate_output_token_bound(max_tokens, output_token_ceiling)
 
     api_key = get_api_key()
     kwargs = _build_kwargs(
@@ -2371,7 +2407,9 @@ async def acall_llm_structured(
                         isinstance(e, EmptyResponseError)
                         and e.finish_reason == "length"
                     ):
-                        bumped = _bump_max_tokens_for_length(kwargs)
+                        bumped = _bump_max_tokens_for_length(
+                            kwargs, output_token_ceiling=output_token_ceiling
+                        )
                         if bumped is not None:
                             logger.debug(
                                 "Empty response (finish_reason=length): raised "
@@ -2423,6 +2461,12 @@ async def acall_llm_structured(
     finally:
         if not succeeded:
             _ACTIVITY.record_failed()
+
+
+# Typed context dispatch imports only these private transport handles. The
+# public names remain available temporarily for unmigrated legacy callers.
+_call_structured_transport = call_llm_structured
+_acall_structured_transport = acall_llm_structured
 
 
 # ---------------------------------------------------------------------------

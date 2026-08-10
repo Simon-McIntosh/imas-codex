@@ -82,6 +82,10 @@ class CallsiteInventoryError(AssertionError):
     """Raised when source expressions drift from the executable registry."""
 
 
+class CallsitePolicyError(ValueError):
+    """A context-dispatch policy does not match an executable registry route."""
+
+
 def _route(service: str, seat: str, *templates: str) -> RouteBinding:
     return RouteBinding(service=service, seat=seat, templates=templates)
 
@@ -888,6 +892,43 @@ CALLSITE_REGISTRY: tuple[CallsiteRegistration, ...] = (
         ),
     ),
 )
+
+
+def get_callsite_registration(callsite_id: str) -> CallsiteRegistration:
+    """Return one exact callsite registration or fail closed."""
+    matches = [entry for entry in CALLSITE_REGISTRY if entry.callsite_id == callsite_id]
+    if len(matches) != 1:
+        raise CallsitePolicyError(
+            f"Expected one registered callsite {callsite_id!r}; found {len(matches)}"
+        )
+    return matches[0]
+
+
+def get_route_binding(
+    callsite_id: str,
+    *,
+    service: str,
+    seat: str,
+    templates: tuple[str, ...],
+) -> RouteBinding:
+    """Resolve an exact registered route for a future typed dispatch policy."""
+    registration = get_callsite_registration(callsite_id)
+    selected = set(templates)
+    matches = [
+        route
+        for route in registration.routes
+        if route.service == service
+        and route.seat == seat
+        and selected
+        and selected.issubset(route.templates)
+    ]
+    if len(matches) != 1:
+        raise CallsitePolicyError(
+            "Context policy does not identify one registered route: "
+            f"callsite={callsite_id!r}, service={service!r}, seat={seat!r}, "
+            f"templates={templates!r}, matches={len(matches)}"
+        )
+    return matches[0]
 
 
 def _call_symbol(node: ast.expr) -> str | None:

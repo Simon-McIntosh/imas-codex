@@ -8,7 +8,7 @@ must succeed without consuming a retry.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from pydantic import BaseModel, Field
@@ -642,6 +642,32 @@ def test_bump_max_tokens_grows_then_caps():
     # A value just below the cap doubles but clamps to the cap, never overshoots.
     kwargs2 = {"max_tokens": _LENGTH_RETRY_TOKEN_CAP - 1}
     assert _bump_max_tokens_for_length(kwargs2) == _LENGTH_RETRY_TOKEN_CAP
+
+
+def test_bump_max_tokens_honors_prepriced_ceiling():
+    """A typed dispatch retry cannot exceed its receipt's output allowance."""
+    from imas_codex.discovery.base.llm import _bump_max_tokens_for_length
+
+    kwargs = {"max_tokens": 64}
+    assert _bump_max_tokens_for_length(kwargs, output_token_ceiling=64) is None
+    assert kwargs["max_tokens"] == 64
+
+
+def test_structured_transport_rejects_unbounded_initial_allowance(monkeypatch):
+    """An invalid pre-priced ceiling refuses before the provider is invoked."""
+    fake = Mock()
+    monkeypatch.setattr("litellm.completion", fake)
+
+    with pytest.raises(ValueError, match="output_token_ceiling"):
+        call_llm_structured(
+            model="configured-test-model",
+            messages=[{"role": "user", "content": "content"}],
+            response_model=SingleObject,
+            max_tokens=65,
+            output_token_ceiling=64,
+        )
+
+    fake.assert_not_called()
 
 
 async def test_empty_length_response_retries_and_bumps_budget(monkeypatch):

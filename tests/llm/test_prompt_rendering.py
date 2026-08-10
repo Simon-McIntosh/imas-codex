@@ -4,6 +4,50 @@ from __future__ import annotations
 
 import pytest
 
+from imas_codex.llm.prompt_loader import (
+    PromptContextError,
+    StrictPromptError,
+    load_strict_prompt,
+    render_prompt_strict,
+)
+
+
+def _write_prompt(root, relative: str, content: str) -> None:
+    path = root / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content)
+
+
+def test_strict_render_rejects_missing_and_unknown_context(tmp_path) -> None:
+    _write_prompt(tmp_path, "demo/system.md", "Pinned: {{ pinned }}")
+
+    with pytest.raises(PromptContextError, match="missing context keys"):
+        render_prompt_strict("demo/system", prompts_dir=tmp_path)
+    with pytest.raises(PromptContextError, match="unknown context keys"):
+        render_prompt_strict(
+            "demo/system",
+            {"pinned": "value", "neighbor": "not declared"},
+            prompts_dir=tmp_path,
+        )
+
+
+def test_strict_render_rejects_missing_include(tmp_path) -> None:
+    _write_prompt(tmp_path, "demo/system.md", '{% include "absent.md" %}')
+
+    with pytest.raises(StrictPromptError, match="Missing registered include"):
+        load_strict_prompt("demo/system", prompts_dir=tmp_path)
+
+
+def test_strict_prompt_digest_covers_resolved_includes(tmp_path) -> None:
+    _write_prompt(tmp_path, "demo/system.md", '{% include "rules.md" %}')
+    _write_prompt(tmp_path, "shared/rules.md", "Rule A")
+    before = load_strict_prompt("demo/system", prompts_dir=tmp_path)
+
+    _write_prompt(tmp_path, "shared/rules.md", "Rule B")
+    after = load_strict_prompt("demo/system", prompts_dir=tmp_path)
+
+    assert before.source_digest != after.source_digest
+
 
 @pytest.fixture()
 def rendered_compose_system() -> str:

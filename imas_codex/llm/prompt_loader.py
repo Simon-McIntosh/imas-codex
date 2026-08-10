@@ -1139,6 +1139,252 @@ def _get_jinja_env(prompts_dir: Path) -> Environment:
     return env
 
 
+class StrictPromptError(ValueError):
+    """Base error for a registered prompt that cannot render exactly."""
+
+
+class UnregisteredPromptError(StrictPromptError):
+    """A prompt name does not resolve to one canonical template file."""
+
+
+class PromptContextError(StrictPromptError):
+    """A strict render has missing or caller-supplied unknown context keys."""
+
+
+@dataclass(frozen=True, slots=True)
+class StrictPromptSource:
+    """Resolved source identity for one strict prompt and all of its includes."""
+
+    name: str
+    content: str
+    metadata: dict[str, Any]
+    source_digest: str
+    required_context: frozenset[str]
+    source_files: tuple[str, ...]
+
+
+def _safe_template_name(name: str) -> str:
+    candidate = name.strip()
+    path = Path(candidate)
+    if (
+        not candidate
+        or candidate.startswith("inline:")
+        or path.is_absolute()
+        or ".." in path.parts
+        or path.suffix
+    ):
+        raise UnregisteredPromptError(f"Invalid registered prompt name {name!r}")
+    return candidate
+
+
+def _prompt_file_index(prompts_dir: Path) -> dict[str, Path]:
+    """Return an exact prompt-name index without swallowing parse failures."""
+    index: dict[str, Path] = {}
+    for path in sorted(prompts_dir.rglob("*.md")):
+        if "shared" in path.relative_to(prompts_dir).parts:
+            continue
+        relative_name = path.relative_to(prompts_dir).with_suffix("").as_posix()
+        text = path.read_text()
+        match = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
+        if match:
+            frontmatter = yaml.safe_load(match.group(1)) or {}
+            if not isinstance(frontmatter, dict):
+                raise StrictPromptError(f"Prompt frontmatter must be a mapping: {path}")
+            declared_name = str(frontmatter.get("name") or relative_name)
+            name = (
+                declared_name
+                if "/" in declared_name
+                else f"{Path(relative_name).parent.as_posix()}/{declared_name}"
+                if Path(relative_name).parent.as_posix() != "."
+                else declared_name
+            )
+        else:
+            name = relative_name
+        if name in index:
+            raise UnregisteredPromptError(
+                f"Duplicate registered prompt name {name!r}: {index[name]} and {path}"
+            )
+        index[name] = path
+    return index
+
+
+def _prompt_body(path: Path) -> tuple[dict[str, Any], str]:
+    text = path.read_text()
+    match = re.match(r"^---\n(.*?)\n---\n(.*)$", text, re.DOTALL)
+    if not match:
+        return {}, text.strip()
+    frontmatter = yaml.safe_load(match.group(1)) or {}
+    if not isinstance(frontmatter, dict):
+        raise StrictPromptError(f"Prompt frontmatter must be a mapping: {path}")
+    return frontmatter, match.group(2).strip()
+
+
+def _strict_jinja_env(prompts_dir: Path) -> Environment:
+    """Create a fail-closed environment rooted only in registered prompt assets."""
+    from jinja2 import ChoiceLoader, Environment, FileSystemLoader, StrictUndefined
+
+    env = Environment(
+        loader=ChoiceLoader(
+            [
+                FileSystemLoader(prompts_dir / "shared"),
+                FileSystemLoader(prompts_dir),
+            ]
+        ),
+        undefined=StrictUndefined,
+        autoescape=False,
+    )
+    env.filters["fromjson"] = __import__("json").loads
+    return env
+
+
+def _referenced_sources(
+    *,
+    env: Environment,
+    content: str,
+    prompts_dir: Path,
+) -> tuple[dict[str, str], frozenset[str]]:
+    """Resolve every static include and collect its undeclared variables."""
+    from jinja2 import TemplateNotFound, meta
+
+    sources: dict[str, str] = {"<root>": content}
+    required: set[str] = set()
+    pending: list[tuple[str, str]] = [("<root>", content)]
+    while pending:
+        source_name, source = pending.pop()
+        parsed = env.parse(source)
+        required.update(meta.find_undeclared_variables(parsed))
+        referenced = meta.find_referenced_templates(parsed)
+        if referenced is None:
+            raise StrictPromptError(
+                f"Dynamic include is forbidden in registered prompt {source_name!r}"
+            )
+        for include_name in referenced:
+            if include_name is None:
+                raise StrictPromptError(
+                    f"Dynamic include is forbidden in registered prompt {source_name!r}"
+                )
+            include_path = Path(include_name)
+            if include_path.is_absolute() or ".." in include_path.parts:
+                raise StrictPromptError(
+                    f"Include escapes the registered prompt roots: {include_name!r}"
+                )
+            if include_name in sources:
+                continue
+            try:
+                include_source, include_filename, _ = env.loader.get_source(
+                    env, include_name
+                )
+            except TemplateNotFound as exc:
+                raise StrictPromptError(
+                    f"Missing registered include {include_name!r}"
+                ) from exc
+            resolved = Path(include_filename).resolve()
+            allowed_roots = (
+                (prompts_dir / "shared").resolve(),
+                prompts_dir.resolve(),
+            )
+            if not any(resolved.is_relative_to(root) for root in allowed_roots):
+                raise StrictPromptError(
+                    f"Include escapes the registered prompt roots: {include_name!r}"
+                )
+            sources[include_name] = include_source
+            pending.append((include_name, include_source))
+    return sources, frozenset(required)
+
+
+def load_strict_prompt(
+    name: str,
+    prompts_dir: Path | None = None,
+) -> StrictPromptSource:
+    """Load one registered template with a digest over every static include."""
+    import json
+
+    root = prompts_dir or PROMPTS_DIR
+    registered_name = _safe_template_name(name)
+    index = _prompt_file_index(root)
+    path = index.get(registered_name)
+    if path is None:
+        raise UnregisteredPromptError(
+            f"Prompt {registered_name!r} is not registered under {root}"
+        )
+    if not path.resolve().is_relative_to(root.resolve()):
+        raise UnregisteredPromptError(
+            f"Prompt {registered_name!r} escapes the registered prompt root"
+        )
+    metadata, content = _prompt_body(path)
+    env = _strict_jinja_env(root)
+    sources, required_context = _referenced_sources(
+        env=env,
+        content=content,
+        prompts_dir=root,
+    )
+    digest_payload = json.dumps(
+        {"metadata": metadata, "sources": sources},
+        ensure_ascii=False,
+        separators=(",", ":"),
+        sort_keys=True,
+    )
+    source_digest = hashlib.sha256(digest_payload.encode("utf-8")).hexdigest()
+    source_files = tuple(
+        str(path) if key == "<root>" else key for key in sorted(sources)
+    )
+    return StrictPromptSource(
+        name=registered_name,
+        content=content,
+        metadata=metadata,
+        source_digest=source_digest,
+        required_context=required_context,
+        source_files=source_files,
+    )
+
+
+def render_prompt_strict(
+    name: str,
+    context: dict[str, Any] | None = None,
+    prompts_dir: Path | None = None,
+) -> str:
+    """Render one registered prompt with exact keys and ``StrictUndefined``.
+
+    Schema-provider values declared by prompt frontmatter remain static inputs.
+    Caller values may satisfy declared variables but cannot add an unused key.
+    Missing values and missing includes are fatal.
+    """
+    root = prompts_dir or PROMPTS_DIR
+    prompt = load_strict_prompt(name, root)
+    supplied = dict(context or {})
+    unknown = set(supplied) - prompt.required_context
+    if unknown:
+        raise PromptContextError(
+            f"Prompt {name!r} received unknown context keys: {sorted(unknown)}"
+        )
+    schema_needs = prompt.metadata.get("schema_needs")
+    if schema_needs is not None and (
+        not isinstance(schema_needs, list)
+        or any(not isinstance(need, str) for need in schema_needs)
+    ):
+        raise StrictPromptError(f"Prompt {name!r} has invalid schema_needs")
+    unknown_needs = set(schema_needs or ()) - set(_SCHEMA_PROVIDERS)
+    if unknown_needs:
+        raise StrictPromptError(
+            f"Prompt {name!r} names unknown schema providers: {sorted(unknown_needs)}"
+        )
+    full_context = get_schema_for_prompt(name, schema_needs)
+    collisions = set(supplied) & set(full_context)
+    if collisions:
+        raise PromptContextError(
+            f"Prompt {name!r} caller context overrides static schema keys: "
+            f"{sorted(collisions)}"
+        )
+    full_context.update(supplied)
+    missing = prompt.required_context - set(full_context)
+    if missing:
+        raise PromptContextError(
+            f"Prompt {name!r} is missing context keys: {sorted(missing)}"
+        )
+    env = _strict_jinja_env(root)
+    return env.from_string(prompt.content).render(full_context)
+
+
 def render_prompt(
     name: str,
     context: dict[str, Any] | None = None,
