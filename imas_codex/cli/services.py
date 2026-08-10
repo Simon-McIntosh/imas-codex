@@ -60,9 +60,9 @@ def _partition_limits() -> dict:
     try:
         partition = _gpu_partition()
         return {
-            "cpus": partition.get("cpus_per_node", 20),
+            "cpus": partition.get("cpus_per_node", partition.get("cores_per_node", 20)),
             "gpus": partition.get("gpus_per_node", 8),
-            "mem_gb": partition.get("mem_per_node_gb", 250),
+            "mem_gb": partition.get("mem_per_node_gb", partition.get("memory_gb", 250)),
         }
     except click.ClickException:
         return {"cpus": 20, "gpus": 8, "mem_gb": 250}
@@ -247,24 +247,96 @@ def _compute_config() -> dict:
     return compute
 
 
-def _gpu_entry() -> dict:
-    """Get the GPU resource entry marked for embed_server."""
+def _embedding_target() -> tuple[dict, dict]:
+    """Resolve the configured embedding partition and its GPU node.
+
+    The embedding location is authoritative.  ``current_use`` annotations and
+    scheduler ordering describe operational state, so neither may redirect a
+    service launch away from the configured location.
+    """
+    from imas_codex.remote.locations import resolve_location
+    from imas_codex.settings import get_embedding_location
+
+    location = get_embedding_location()
+    if location == "local":
+        raise click.ClickException(
+            "Embedding location is 'local' — no GPU target available."
+        )
+
+    info = resolve_location(location)
+    if not info.is_compute or info.scheduler != "slurm" or not info.partition:
+        raise click.ClickException(
+            f"Embedding location {location!r} does not resolve to one SLURM "
+            "compute partition."
+        )
+
     compute = _compute_config()
-    for gpu in compute.get("gpus", []):
-        if gpu.get("current_use") == "embed_server":
-            return gpu
-    raise click.ClickException(
-        "No GPU with current_use=embed_server in facility compute config."
-    )
+    partitions = [
+        partition
+        for partition in compute.get("scheduler", {}).get("partitions", [])
+        if partition.get("name") == info.partition
+    ]
+    if len(partitions) != 1:
+        raise click.ClickException(
+            f"Embedding location {location!r} maps to partition "
+            f"{info.partition!r}, but the private compute config contains "
+            f"{len(partitions)} matching partitions."
+        )
+
+    partition = partitions[0]
+    try:
+        gpu_count = int(partition.get("gpus_per_node", 0))
+    except (TypeError, ValueError):
+        gpu_count = 0
+    gpu_type = str(partition.get("gpu_type") or "").strip()
+    if gpu_count <= 0 or not gpu_type:
+        raise click.ClickException(
+            f"Configured embedding partition {info.partition!r} is not a "
+            "declared GPU partition."
+        )
+
+    gpu_entries = compute.get("gpus", [])
+    explicitly_mapped = [
+        gpu for gpu in gpu_entries if gpu.get("partition") == info.partition
+    ]
+    if explicitly_mapped:
+        candidates = explicitly_mapped
+    else:
+        candidates = [
+            gpu
+            for gpu in gpu_entries
+            if not gpu.get("partition") and gpu.get("model") == gpu_type
+        ]
+
+    if len(candidates) != 1:
+        raise click.ClickException(
+            f"Embedding partition {info.partition!r} must resolve to exactly "
+            f"one GPU node in private compute config; found {len(candidates)}."
+        )
+
+    gpu = candidates[0]
+    if gpu.get("model") and gpu.get("model") != gpu_type:
+        raise click.ClickException(
+            f"GPU node {gpu.get('location')!r} declares model "
+            f"{gpu.get('model')!r}, which does not match partition GPU type "
+            f"{gpu_type!r}."
+        )
+    node = str(gpu.get("location") or "").strip()
+    if not node or node == "login_node":
+        raise click.ClickException(
+            f"Embedding partition {info.partition!r} has no valid compute node."
+        )
+    return partition, gpu
+
+
+def _gpu_entry() -> dict:
+    """Get the GPU node for the configured embedding location."""
+    return _embedding_target()[1]
 
 
 def _gpu_partition() -> dict:
-    """Get the first scheduler partition with GPUs."""
-    compute = _compute_config()
-    for p in compute.get("scheduler", {}).get("partitions", []):
-        if p.get("gpus_per_node") or p.get("gpu_type"):
-            return p
-    raise click.ClickException("No GPU partition found in facility compute config.")
+    """Get the scheduler partition for the configured embedding location."""
+    return _embedding_target()[0]
 
 
 def _general_partition_name() -> str:
@@ -434,8 +506,8 @@ def _submit_service_job(
     import shlex
 
     if gpus > 0:
-        partition = _gpu_partition()
-        host = _gpu_entry()["location"]
+        partition, gpu = _embedding_target()
+        host = gpu["location"]
         partition_name = partition["name"]
         # Some GPU nodes are only reachable through a standing group
         # reservation (OVERLAP flag) — plain submissions see the node as
@@ -463,9 +535,7 @@ def _submit_service_job(
 
     gres_line = f"#SBATCH --gres=gpu:{gpus}\n" if gpus > 0 else ""
     nodelist_line = f"#SBATCH --nodelist={host}\n" if host else ""
-    reservation_line = (
-        f"#SBATCH --reservation={reservation}\n" if reservation else ""
-    )
+    reservation_line = f"#SBATCH --reservation={reservation}\n" if reservation else ""
 
     script = (
         "#!/bin/bash\n"
@@ -962,7 +1032,7 @@ def _embed_service_command(gpus: int, workers: int) -> str:
     """
     port = _embed_port()
     gpu_ids = ",".join(str(i) for i in range(gpus))
-    partition = _gpu_partition()
+    partition, _gpu = _embedding_target()
     partition_name = partition["name"]
 
     return (
@@ -990,7 +1060,8 @@ def deploy_neo4j() -> dict:
         return job
 
     # Kill orphaned Neo4j processes on the target node
-    host = _gpu_entry()["location"]
+    _partition, gpu = _embedding_target()
+    host = gpu["location"]
     _kill_neo4j_on_node(host)
     _clean_neo4j_locks(host)
 
@@ -1027,7 +1098,8 @@ def deploy_embed(gpus: int = _DEFAULT_GPUS, workers: int | None = None) -> dict:
 
     # Kill any orphaned embed processes before deploying a new job.
     # These survive scancel when SLURM doesn't fully clean cgroups.
-    host = _gpu_entry()["location"]
+    _partition, gpu = _embedding_target()
+    host = gpu["location"]
     _kill_embed_orphans(host)
 
     port = _embed_port()
@@ -1064,14 +1136,14 @@ def deploy_embed_noslurm(gpus: int = _DEFAULT_GPUS, workers: int | None = None) 
     if workers is None:
         workers = gpus
 
-    host = _gpu_entry()["location"]
+    partition, gpu = _embedding_target()
+    host = gpu["location"]
     port = _embed_port()
 
     # Kill any existing embed processes on the node
     _kill_embed_orphans(host)
 
     gpu_ids = ",".join(str(i) for i in range(gpus))
-    partition = _gpu_partition()
     partition_name = partition["name"]
     services_dir = "$HOME/.local/share/imas-codex/services"
     log_file = f"{services_dir}/codex-embed.log"
@@ -1304,7 +1376,7 @@ def _wait_plain(
     deadline = time.time() + timeout_s
     click.echo(f"  Waiting for {job_name}...")
 
-    # Phase 1: wait for RUNNING
+    # Wait for the scheduler to report the job as running.
     while time.time() < deadline:
         time.sleep(3)
         job = _get_service_job(job_name)
@@ -1314,7 +1386,7 @@ def _wait_plain(
     else:
         return None
 
-    # Phase 2: health check
+    # Verify the service endpoint after the allocation starts.
     if health_cmd and job:
         click.echo(f"  Checking {job_name} health...")
         while time.time() < deadline:

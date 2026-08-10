@@ -482,7 +482,7 @@ def _embed_host_from_facility() -> str | None:
         if info.facility == "local":
             return None
         return discover_compute_node_local(
-            service_job_name=info.service_job_name,
+            service_job_name="codex-embed",
         )
     except Exception:
         pass
