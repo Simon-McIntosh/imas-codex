@@ -271,6 +271,11 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
             )
         )
     assert admitted["ok"] is True
+    assert admitted["required_run_kwargs"] == {
+        "scope_run_id": scope_run_id,
+        "only_pool": "review_docs",
+        "require_docs_admission": True,
+    }
 
     claimed = {
         **item,
@@ -307,7 +312,7 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
             return_value={"ok": False, "outcome": "admission_drift"},
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+            "imas_codex.standard_names.graph_ops.force_rollback_docs_review_admission",
             new=rollback,
         ),
         patch(
@@ -324,7 +329,13 @@ def test_claimed_docs_request_drift_rolls_back_before_provider_dispatch() -> Non
         )
 
     assert processed == 0
-    rollback.assert_called_once_with("d" * 64, claim_token="claim-token", claim_seq=3)
+    rollback.assert_called_once_with(
+        target_id=item["id"],
+        scope_id=scope_run_id,
+        intended_admission_id="d" * 64,
+        current_claim_token="claim-token",
+        current_claim_seq=3,
+    )
     provider_chain.assert_not_awaited()
 
 
@@ -385,7 +396,7 @@ def test_fresh_process_handoff_dispatches_only_after_durable_verification() -> N
         "run_id": "priced-docs-scope",
         "claim_token": "claim-token",
         "claim_seq": 7,
-        "docs_review_admission": "admission-id",
+        "docs_review_admission": "a" * 64,
     }
     prepared = _prepared_docs_request()
     bind = MagicMock(
@@ -451,7 +462,9 @@ def test_missing_durable_admission_refuses_before_provider_dispatch() -> None:
     provider_chain = AsyncMock(
         side_effect=AssertionError("provider called without durable admission")
     )
-    rollback = MagicMock(return_value={"ok": False, "outcome": "missing_admission"})
+    rollback = MagicMock(
+        return_value={"ok": False, "outcome": "missing_active_admission"}
+    )
     release = MagicMock(return_value=1)
     with (
         patch(
@@ -459,7 +472,7 @@ def test_missing_durable_admission_refuses_before_provider_dispatch() -> None:
             return_value={"ok": False, "outcome": "missing_admission"},
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+            "imas_codex.standard_names.graph_ops.force_rollback_docs_review_admission",
             new=rollback,
         ),
         patch(
@@ -486,6 +499,100 @@ def test_missing_durable_admission_refuses_before_provider_dispatch() -> None:
     )
 
 
+def test_required_admission_missing_scalar_forces_recovery_before_provider() -> None:
+    item = {
+        **_docs_request_item(),
+        "docs_stage": "drafted",
+        "run_id": "priced-docs-scope",
+        "claim_token": "claim-token",
+        "claim_seq": 8,
+        "docs_review_admission": None,
+    }
+    provider_chain = AsyncMock(
+        side_effect=AssertionError("provider called without required admission")
+    )
+    force_rollback = MagicMock(return_value={"ok": True, "outcome": "rolled_back"})
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.force_rollback_docs_review_admission",
+            new=force_rollback,
+        ),
+        patch(
+            "imas_codex.standard_names.workers._run_rd_quorum_cycles",
+            new=provider_chain,
+        ),
+    ):
+        processed = asyncio.run(
+            process_review_docs_batch(
+                [item],
+                _mock_budget_manager(),
+                asyncio.Event(),
+                require_docs_admission=True,
+                scope_run_id="priced-docs-scope",
+            )
+        )
+
+    assert processed == 0
+    provider_chain.assert_not_awaited()
+    force_rollback.assert_called_once_with(
+        target_id=item["id"],
+        scope_id="priced-docs-scope",
+        intended_admission_id=None,
+        current_claim_token="claim-token",
+        current_claim_seq=8,
+    )
+
+
+def test_stale_bound_claim_refusal_forces_rollback_without_rebind() -> None:
+    item = {
+        **_docs_request_item(),
+        "docs_stage": "drafted",
+        "run_id": "priced-docs-scope",
+        "claim_token": "replacement-token",
+        "claim_seq": 9,
+        "docs_review_admission": "d" * 64,
+    }
+    bind = MagicMock(return_value={"ok": False, "outcome": "admission_claim_refused"})
+    force_rollback = MagicMock(return_value={"ok": True, "outcome": "rolled_back"})
+    provider_chain = AsyncMock(
+        side_effect=AssertionError("stale admission claim was rebound")
+    )
+    with (
+        patch(
+            "imas_codex.standard_names.graph_ops.bind_docs_review_admission_claim",
+            new=bind,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_ops.force_rollback_docs_review_admission",
+            new=force_rollback,
+        ),
+        patch(
+            "imas_codex.standard_names.workers._run_rd_quorum_cycles",
+            new=provider_chain,
+        ),
+    ):
+        processed = asyncio.run(
+            process_review_docs_batch(
+                [item],
+                _mock_budget_manager(),
+                asyncio.Event(),
+                require_docs_admission=True,
+                scope_run_id="priced-docs-scope",
+            )
+        )
+
+    assert processed == 0
+    bind.assert_called_once()
+    provider_chain.assert_not_awaited()
+    force_rollback.assert_called_once_with(
+        target_id=item["id"],
+        scope_id="priced-docs-scope",
+        intended_admission_id="d" * 64,
+        current_claim_token="replacement-token",
+        current_claim_seq=9,
+    )
+
+
 def test_docs_review_cancellation_rolls_back_durable_admission() -> None:
     item = {
         **_docs_request_item(),
@@ -493,13 +600,13 @@ def test_docs_review_cancellation_rolls_back_durable_admission() -> None:
         "run_id": "priced-docs-scope",
         "claim_token": "claim-token",
         "claim_seq": 1,
-        "docs_review_admission": "admission-id",
+        "docs_review_admission": "a" * 64,
     }
     stop_event = asyncio.Event()
     stop_event.set()
     rollback = MagicMock(return_value={"ok": True, "outcome": "rolled_back"})
     with patch(
-        "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+        "imas_codex.standard_names.graph_ops.force_rollback_docs_review_admission",
         new=rollback,
     ):
         processed = asyncio.run(
@@ -517,7 +624,7 @@ def test_admitted_terminal_persistence_noop_rolls_back_partial_reviews() -> None
         "run_id": "priced-docs-scope",
         "claim_token": "claim-token",
         "claim_seq": 2,
-        "docs_review_admission": "admission-id",
+        "docs_review_admission": "a" * 64,
     }
     rollback = MagicMock(return_value={"ok": True, "outcome": "rolled_back"})
     with (
@@ -529,13 +636,13 @@ def test_admitted_terminal_persistence_noop_rolls_back_partial_reviews() -> None
             "imas_codex.standard_names.graph_ops.bind_docs_review_admission_claim",
             return_value={
                 "ok": True,
-                "admission_id": "admission-id",
+                "admission_id": "a" * 64,
                 "review_group_id": "review-group",
             },
         ),
         patch(
             "imas_codex.standard_names.graph_ops.verify_docs_review_admission_request",
-            return_value={"ok": True, "admission_id": "admission-id"},
+            return_value={"ok": True, "admission_id": "a" * 64},
         ),
         patch(
             "imas_codex.standard_names.workers._run_rd_quorum_cycles",
@@ -546,7 +653,7 @@ def test_admitted_terminal_persistence_noop_rolls_back_partial_reviews() -> None
             return_value={"ok": False, "outcome": "terminal_persistence_noop"},
         ),
         patch(
-            "imas_codex.standard_names.graph_ops.rollback_docs_rescore_admission",
+            "imas_codex.standard_names.graph_ops.force_rollback_docs_review_admission",
             new=rollback,
         ),
     ):

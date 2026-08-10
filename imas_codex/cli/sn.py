@@ -638,6 +638,7 @@ def _run_sn_cmd(
     drain_dd_version: str | None = None,
     edits_only: bool = False,
     skip_global_maintenance: bool = False,
+    require_docs_admission: bool = False,
     scope_started_callback: Callable[[], None] | None = None,
 ) -> dict[str, Any] | None:
     """Execute the pool-based SN orchestrator with Rich progress display.
@@ -859,6 +860,7 @@ def _run_sn_cmd(
             skip_review=skip_review,
             skip_generate=skip_generate,
             only_pool=exact_pool_from_only(only),
+            require_docs_admission=require_docs_admission,
             attach_only=(only == "attach"),
             reconcile_only=(only == "reconcile"),
             skip_global_maintenance=skip_global_maintenance,
@@ -1509,6 +1511,15 @@ def _reject_unscoped_accepted_reset(
     ),
 )
 @click.option(
+    "--require-docs-admission",
+    is_flag=True,
+    default=False,
+    help=(
+        "Require one active priced documentation admission for every claimed "
+        "row. Requires --scope-run-id and --only review_docs."
+    ),
+)
+@click.option(
     "--skip-global-maintenance",
     is_flag=True,
     default=False,
@@ -1732,6 +1743,7 @@ def sn_run(
     flush: bool,
     edits_only: bool,
     scope_run_id: str | None,
+    require_docs_admission: bool,
     skip_global_maintenance: bool,
     families: str | None,
     only_phase: str | None,
@@ -1785,6 +1797,26 @@ def sn_run(
     # any profile left in the process environment by an earlier invocation.
     reviewer_profile = reviewer_profile.lower()
     _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
+
+    if require_docs_admission and (scope_run_id is None or only_phase != "review_docs"):
+        raise click.UsageError(
+            "--require-docs-admission requires --scope-run-id and --only review_docs"
+        )
+    if require_docs_admission and any(
+        (
+            exact_names,
+            focus_paths,
+            paths,
+            batch_name,
+            drain_batch,
+            families,
+            campaign,
+            campaign_manifest,
+        )
+    ):
+        raise click.UsageError(
+            "--require-docs-admission accepts only a pre-staged --scope-run-id"
+        )
 
     if exact_names:
         scope_conflicts = {
@@ -2389,6 +2421,7 @@ def sn_run(
             scope_run_id=scope_run_id,
             edits_only=edits_only,
             skip_global_maintenance=skip_global_maintenance,
+            require_docs_admission=require_docs_admission,
         )
         return
 
@@ -2745,6 +2778,7 @@ def sn_run(
             scope_run_id=scope_run_id,
             edits_only=edits_only,
             skip_global_maintenance=skip_global_maintenance,
+            require_docs_admission=require_docs_admission,
         )
         return
 

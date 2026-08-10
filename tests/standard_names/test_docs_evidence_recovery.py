@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import json
+import multiprocessing
 from pathlib import Path
 from unittest.mock import patch
 
@@ -16,6 +17,7 @@ from imas_codex.standard_names.graph_ops import (
     build_docs_evidence_recovery_budget,
     build_docs_evidence_recovery_manifest,
     docs_review_admission_id,
+    force_rollback_docs_review_admission,
     rollback_docs_rescore_admission,
     stage_docs_for_rescore,
 )
@@ -169,11 +171,28 @@ class _RescoreTransaction:
         self.rolled_back = False
         self.write_count = 0
         self.admissions: dict[str, dict] = {}
+        self.original_admissions: dict[str, dict] = {}
+        self.admission_links: set[str] = set()
+        self.original_admission_links: set[str] = set()
 
     def run(self, cypher: str, **params):
         properties = self.state["standard_name"]
         if "_docs_rescore_lock" in cypher:
             return [{"standard_name": copy.deepcopy(properties)}]
+        if "_docs_admission_recovery_lock" in cypher:
+            admissions = [
+                copy.deepcopy(admission)
+                for admission in self.admissions.values()
+                if admission.get("target_id") == params["target_id"]
+                and admission.get("scope_id") == params["scope_id"]
+            ]
+            return [
+                {
+                    "standard_name": copy.deepcopy(properties),
+                    "admissions": admissions,
+                    "linked_admission_ids": sorted(self.admission_links),
+                }
+            ]
         if "OPTIONAL MATCH (a:DocsReviewAdmission" in cypher:
             return [
                 {
@@ -229,6 +248,7 @@ class _RescoreTransaction:
                 "claim_seq": None,
             }
             self.admissions[admission["id"]] = admission
+            self.admission_links.add(admission["id"])
             properties["docs_review_admission"] = admission["id"]
             self.write_count += 1
             return [{"admission_id": admission["id"]}]
@@ -263,16 +283,22 @@ class _RescoreTransaction:
             ]
             admission["status"] = "rolled_back"
             admission["created_review_ids"] = []
+            self.admission_links.discard(admission["id"])
             self.write_count += 1
-            return [{"id": properties["id"]}]
+            return [{"id": properties["id"], "deleted_reviews": 1}]
         raise AssertionError("unexpected exact rescore query")
 
     def commit(self) -> None:
         self.committed = True
         self.closed = True
+        self.original = copy.deepcopy(self.state)
+        self.original_admissions = copy.deepcopy(self.admissions)
+        self.original_admission_links = set(self.admission_links)
 
     def rollback(self) -> None:
         self.state = copy.deepcopy(self.original)
+        self.admissions = copy.deepcopy(self.original_admissions)
+        self.admission_links = set(self.original_admission_links)
         self.rolled_back = True
         self.closed = True
 
@@ -286,6 +312,29 @@ class _RescoreGraph:
 
     def close(self) -> None:
         pass
+
+
+def _run_serialized_forced_rollback(input_path: str, output_path: str) -> None:
+    """Reload staged graph state in a fresh interpreter and reconcile it."""
+    payload = json.loads(Path(input_path).read_text())
+    graph = _RescoreGraph(payload["state"])
+    transaction = graph.transaction
+    transaction.admissions = payload["admissions"]
+    transaction.admission_links = set(payload["admission_links"])
+    transaction.original_admissions = copy.deepcopy(transaction.admissions)
+    transaction.original_admission_links = set(transaction.admission_links)
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        result = force_rollback_docs_review_admission(**payload["rollback"])
+    Path(output_path).write_text(
+        json.dumps(
+            {
+                "result": result,
+                "state": transaction.state,
+                "admissions": transaction.admissions,
+            },
+            sort_keys=True,
+        )
+    )
 
 
 def _row(manifest: dict, name_id: str) -> dict:
@@ -503,7 +552,15 @@ def test_docs_review_admission_schema_declares_durable_authority() -> None:
         "receipt_identity",
         "created_at",
         "expires_at",
+        "created_reviews",
     } <= set(admission["attributes"])
+    assert admission["attributes"]["created_reviews"] == {
+        "description": "StandardNameReview records owned exclusively by this admission.",
+        "multivalued": True,
+        "range": "StandardNameReview",
+        "inlined": False,
+        "annotations": {"relationship_type": "CREATED_REVIEW"},
+    }
 
 
 def test_admission_identity_is_deterministic_and_scope_unique() -> None:
@@ -542,6 +599,175 @@ def test_restart_rollback_deletes_only_admission_owned_partial_reviews() -> None
     assert [review["id"] for review in graph.transaction.state["reviews"]] == [
         state["reviews"][0]["id"]
     ]
+
+
+def test_force_rollback_accepts_reclaimed_target_claim_without_rebinding() -> None:
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    graph = _RescoreGraph(state)
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        staged = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"],
+            run_id="crash-recovery-scope",
+            request_identity="a" * 64,
+            mandatory_exposures=[1.0, 1.0],
+            conditional_exposure=1.0,
+            expected_exposure=3.0,
+        )
+        admission = graph.transaction.admissions[staged["admission_id"]]
+        admission["claim_token"] = "dead-worker-token"
+        admission["claim_seq"] = 4
+        target = graph.transaction.state["standard_name"]
+        target["claim_token"] = "reclaimed-token"
+        target["claim_seq"] = 5
+        target["claimed_at"] = "now"
+        graph.transaction.closed = False
+        result = force_rollback_docs_review_admission(
+            target_id=state["id"],
+            scope_id="crash-recovery-scope",
+            intended_admission_id=staged["admission_id"],
+            current_claim_token="reclaimed-token",
+            current_claim_seq=5,
+        )
+
+    assert result["ok"] is True
+    assert result["outcome"] == "rolled_back"
+    assert target["docs_stage"] == "accepted"
+    assert target["claim_token"] is None
+    assert admission["status"] == "rolled_back"
+
+
+def test_staged_admission_survives_serialization_and_fresh_interpreter(
+    tmp_path: Path,
+) -> None:
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    graph = _RescoreGraph(state)
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        staged = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"],
+            run_id="serialized-scope",
+            request_identity="a" * 64,
+            mandatory_exposures=[1.0, 1.0],
+            conditional_exposure=1.0,
+            expected_exposure=3.0,
+        )
+
+    target = graph.transaction.state["standard_name"]
+    target["claim_token"] = "replacement-token"
+    target["claim_seq"] = 8
+    target["claimed_at"] = "now"
+    admission_id = staged["admission_id"]
+    graph.transaction.admissions[admission_id]["claim_token"] = "crashed-token"
+    graph.transaction.admissions[admission_id]["claim_seq"] = 7
+    graph.transaction.state["reviews"].append(
+        {
+            "id": "serialized-partial-review",
+            "docs_review_admission_id": admission_id,
+        }
+    )
+    input_path = tmp_path / "durable-input.json"
+    output_path = tmp_path / "durable-output.json"
+    input_path.write_text(
+        json.dumps(
+            {
+                "state": graph.transaction.state,
+                "admissions": graph.transaction.admissions,
+                "admission_links": sorted(graph.transaction.admission_links),
+                "rollback": {
+                    "target_id": state["id"],
+                    "scope_id": "serialized-scope",
+                    "intended_admission_id": admission_id,
+                    "current_claim_token": "replacement-token",
+                    "current_claim_seq": 8,
+                },
+            },
+            sort_keys=True,
+        )
+    )
+
+    process = multiprocessing.get_context("spawn").Process(
+        target=_run_serialized_forced_rollback,
+        args=(str(input_path), str(output_path)),
+    )
+    process.start()
+    process.join(timeout=20)
+
+    assert process.exitcode == 0
+    recovered = json.loads(output_path.read_text())
+    assert recovered["result"]["outcome"] == "rolled_back"
+    assert recovered["state"]["standard_name"]["docs_stage"] == "accepted"
+    assert recovered["state"]["standard_name"]["claim_token"] is None
+    assert [review["id"] for review in recovered["state"]["reviews"]] == [
+        state["reviews"][0]["id"]
+    ]
+    assert recovered["admissions"][admission_id]["status"] == "rolled_back"
+
+
+def test_force_rollback_recovers_expired_unbound_admission_with_missing_scalar() -> (
+    None
+):
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    graph = _RescoreGraph(state)
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        staged = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"],
+            run_id="expired-scope",
+            request_identity="a" * 64,
+            mandatory_exposures=[1.0, 1.0],
+            conditional_exposure=1.0,
+            expected_exposure=3.0,
+        )
+        admission = graph.transaction.admissions[staged["admission_id"]]
+        admission["expired"] = True
+        target = graph.transaction.state["standard_name"]
+        target["docs_review_admission"] = None
+        target["claim_token"] = "current-token"
+        target["claim_seq"] = 1
+        graph.transaction.closed = False
+        result = force_rollback_docs_review_admission(
+            target_id=state["id"],
+            scope_id="expired-scope",
+            intended_admission_id=None,
+            current_claim_token="current-token",
+            current_claim_seq=1,
+        )
+
+    assert result["ok"] is True
+    assert target["docs_stage"] == "accepted"
+    assert target["claim_token"] is None
+
+
+def test_force_rollback_refuses_duplicate_active_target_scope_authority() -> None:
+    state = _state("absorbed_wave_power", method="single_review", cycles=1)
+    manifest = build_docs_evidence_recovery_manifest([state["id"]], gc=_Graph([state]))
+    graph = _RescoreGraph(state)
+    with patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph):
+        staged = stage_docs_for_rescore(
+            **manifest["rows"][0]["rescore_input"],
+            run_id="duplicate-scope",
+            request_identity="a" * 64,
+            mandatory_exposures=[1.0, 1.0],
+            conditional_exposure=1.0,
+            expected_exposure=3.0,
+        )
+        duplicate = copy.deepcopy(graph.transaction.admissions[staged["admission_id"]])
+        duplicate["id"] = "f" * 64
+        graph.transaction.admissions[duplicate["id"]] = duplicate
+        target_before = copy.deepcopy(graph.transaction.state["standard_name"])
+        graph.transaction.closed = False
+        result = force_rollback_docs_review_admission(
+            target_id=state["id"],
+            scope_id="duplicate-scope",
+            intended_admission_id=staged["admission_id"],
+            current_claim_token=None,
+            current_claim_seq=None,
+        )
+
+    assert result["ok"] is False
+    assert result["outcome"] == "duplicate_active_admission"
+    assert graph.transaction.state["standard_name"] == target_before
 
 
 @pytest.mark.parametrize("drift_field", ["description", "documentation", "kind"])
