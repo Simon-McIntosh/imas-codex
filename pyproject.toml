@@ -748,14 +748,12 @@ location = "iter"       # facility hosting LLM proxy (or "local" for in-process)
 [tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4-flash"]
 prompt = 0.14
 completion = 0.28
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash"
 verified-at = "2026-08-09"
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.5"]
 prompt = 2.0
 completion = 6.0
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/x-ai/grok-4.5"
 verified-at = "2026-08-09"
 overrides = [
@@ -765,7 +763,6 @@ overrides = [
 [tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.6-luna"]
 prompt = 0.10
 completion = 0.60
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/openai/gpt-5.6-luna"
 verified-at = "2026-08-09"
 overrides = [
@@ -775,14 +772,12 @@ overrides = [
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-5"]
 prompt = 2.0
 completion = 10.0
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5"
 verified-at = "2026-08-09"
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-fable-5"]
 prompt = 10.0
 completion = 50.0
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-fable-5"
 verified-at = "2026-08-09"
 

@@ -18,6 +18,10 @@ def test_context_schema_is_dedicated_and_not_imported_by_graph_schemas() -> None
     assert "BatchComparatorReceipt:" in schema_path.read_text()
     assert "TelemetryState:" in schema_path.read_text()
     assert "credential_source_identity:" in schema_path.read_text()
+    assert "route_id:" in schema_path.read_text()
+    assert "pricing_contract_digest:" in schema_path.read_text()
+    assert "pricing_provider_identity:" in schema_path.read_text()
+    assert "attempt_count_state:" in schema_path.read_text()
 
     for name in ("facility.yaml", "imas_dd.yaml", "standard_name.yaml"):
         assert (

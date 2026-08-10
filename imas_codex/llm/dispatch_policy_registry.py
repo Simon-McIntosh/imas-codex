@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import ast
 import importlib
 import json
+import math
 import re
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -13,7 +15,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
-from imas_codex.llm.callsite_registry import get_callsite_registration
+from imas_codex.llm.callsite_registry import (
+    get_callsite_registration,
+    get_route_binding,
+)
 
 DISPATCH_POLICY_DIR = Path(__file__).parent / "config" / "dispatch_policies"
 _CHANNEL_NAMES = frozenset(
@@ -24,6 +29,24 @@ _CHANNEL_NAMES = frozenset(
         "comparators",
         "provenance",
         "batch_comparators",
+    }
+)
+_OBLIGATION_NAMES = frozenset(
+    {
+        "quantity",
+        "carrier",
+        "representation",
+        "coordinate_frame",
+        "owner",
+        "locus",
+        "axis",
+        "section_plane",
+        "unit",
+        "dd_version",
+        "kind",
+        "physics_domain",
+        "cocos",
+        "family",
     }
 )
 
@@ -78,12 +101,13 @@ class DispatchPolicySpec:
     policy_id: str
     source_version: str
     callsite_id: str
+    route_id: str
     service: str
     seat: str
     task_kind: str
     templates: tuple[TemplateRoleSpec, ...]
     response_model_path: str
-    model_section: str
+    model_source: str
     tokenizer_path: str
     tokenizer_key: str
     identifier_pattern: str
@@ -96,14 +120,9 @@ class DispatchPolicySpec:
     max_context_bytes: int
     maximum_cost_exposure: float
     attachment_policy: AttachmentPolicySpec = AttachmentPolicySpec()
-    candidate_source_path: str | None = None
     temperature: float | None = None
     timeout: int | None = None
     reasoning_effort: str | None = None
-    zero_cost_local: bool = False
-    require_usage: bool = True
-    supported: bool = True
-    closure_blocker: str | None = None
 
     def channel(self, name: str) -> ClaimChannelSpec:
         """Return one exact channel policy or fail closed."""
@@ -122,6 +141,9 @@ class ResolvedDispatchPolicy:
 
     spec: DispatchPolicySpec
     model: str
+    api_base: str | None
+    api_key_env: str | None
+    endpoint_class: str | None
     response_model: type[BaseModel]
     token_counter: Callable[[Any], int]
 
@@ -130,7 +152,7 @@ class ResolvedDispatchPolicy:
 class DispatchRegistrySnapshot:
     """Policies and blockers validated together before either is published."""
 
-    policies: Mapping[str, DispatchPolicySpec]
+    policies: Mapping[tuple[str, str], DispatchPolicySpec]
     blockers: Mapping[str, str]
 
 
@@ -168,12 +190,13 @@ class _PolicyResource(_StrictResource):
     policy_id: str
     source_version: str
     callsite_id: str
+    route_id: str
     service: str
     seat: str
     task_kind: str
     templates: list[_TemplateResource]
     response_model: str
-    model_section: str
+    model_source: str
     tokenizer: str
     tokenizer_key: str
     identifier_pattern: str
@@ -186,16 +209,11 @@ class _PolicyResource(_StrictResource):
     max_context_bytes: int = Field(gt=0)
     maximum_cost_exposure: float = Field(ge=0)
     attachments: _AttachmentResource = Field(default_factory=_AttachmentResource)
-    candidate_source: str | None = None
     temperature: float | None = Field(default=None, ge=0, le=2)
     timeout: int | None = Field(default=None, gt=0)
     reasoning_effort: (
         Literal["minimal", "low", "medium", "high", "xhigh", "max"] | None
     ) = None
-    zero_cost_local: bool = False
-    require_usage: bool = True
-    supported: bool = True
-    closure_blocker: str | None = None
 
 
 class _PolicyFile(_StrictResource):
@@ -257,29 +275,6 @@ def _import_object(path: str) -> Any:
     return value
 
 
-def _candidate_models(path: str) -> tuple[str, ...]:
-    source = _import_object(path)
-    if not callable(source):
-        raise DispatchPolicyRegistryError(f"Candidate source {path!r} is not callable")
-    values = source()
-    if isinstance(values, str | bytes) or not isinstance(values, Sequence):
-        raise DispatchPolicyRegistryError(
-            f"Candidate source {path!r} must return a finite sequence"
-        )
-    candidates = tuple(values)
-    if not candidates or any(
-        not isinstance(item, str) or not item.strip() for item in candidates
-    ):
-        raise DispatchPolicyRegistryError(
-            f"Candidate source {path!r} must return non-blank model strings"
-        )
-    if len(candidates) != len(set(candidates)):
-        raise DispatchPolicyRegistryError(
-            f"Candidate source {path!r} returned duplicate models"
-        )
-    return candidates
-
-
 def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
     if not data.templates:
         raise DispatchPolicyRegistryError(f"{location}.templates must not be empty")
@@ -295,18 +290,18 @@ def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
         raise DispatchPolicyRegistryError(
             f"{location}.templates cannot place system roles after user roles"
         )
-    template_ids = [
-        (item.role, item.name, item.source_version) for item in data.templates
-    ]
+    template_ids = [(item.role, item.name) for item in data.templates]
     if len(template_ids) != len(set(template_ids)):
         raise DispatchPolicyRegistryError(f"{location}.templates contains duplicates")
+    if any(item.name.startswith("inline:") for item in data.templates):
+        raise DispatchPolicyRegistryError(
+            f"{location}.templates cannot activate legacy inline assets"
+        )
     if set(data.channels) != _CHANNEL_NAMES:
         raise DispatchPolicyRegistryError(
             f"{location}.channels must be exactly {sorted(_CHANNEL_NAMES)}"
         )
-    provider_ids = [
-        (item.name, item.kind, item.source_version) for item in data.static_providers
-    ]
+    provider_ids = [item.name for item in data.static_providers]
     if len(provider_ids) != len(set(provider_ids)):
         raise DispatchPolicyRegistryError(
             f"{location}.static_providers contains duplicates"
@@ -341,16 +336,13 @@ def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
         raise DispatchPolicyRegistryError(
             f"{location}.identifier_pattern is invalid"
         ) from exc
-    if data.model_section != data.seat:
-        raise DispatchPolicyRegistryError(
-            f"{location}.model_section must exactly match seat"
-        )
     spec = DispatchPolicySpec(
         policy_id=_require_string(data.policy_id, f"{location}.policy_id"),
         source_version=_require_string(
             data.source_version, f"{location}.source_version"
         ),
         callsite_id=_require_string(data.callsite_id, f"{location}.callsite_id"),
+        route_id=_require_string(data.route_id, f"{location}.route_id"),
         service=_require_string(data.service, f"{location}.service"),
         seat=_require_string(data.seat, f"{location}.seat"),
         task_kind=_require_string(data.task_kind, f"{location}.task_kind"),
@@ -367,7 +359,7 @@ def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
         response_model_path=_require_string(
             data.response_model, f"{location}.response_model"
         ),
-        model_section=data.model_section,
+        model_source=_require_string(data.model_source, f"{location}.model_source"),
         tokenizer_path=_require_string(data.tokenizer, f"{location}.tokenizer"),
         tokenizer_key=_require_string(data.tokenizer_key, f"{location}.tokenizer_key"),
         identifier_pattern=data.identifier_pattern,
@@ -383,7 +375,14 @@ def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
             data.required_obligations, f"{location}.required_obligations"
         ),
         static_providers=tuple(
-            StaticProviderSpec(item.name, item.kind, item.source_version)
+            StaticProviderSpec(
+                _require_string(item.name, f"{location}.static_providers.name"),
+                _require_string(item.kind, f"{location}.static_providers.kind"),
+                _require_string(
+                    item.source_version,
+                    f"{location}.static_providers.source_version",
+                ),
+            )
             for item in data.static_providers
         ),
         max_input_tokens=data.max_input_tokens,
@@ -402,16 +401,20 @@ def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
             max_width=attachment.max_width,
             max_height=attachment.max_height,
         ),
-        candidate_source_path=data.candidate_source,
         temperature=data.temperature,
         timeout=data.timeout,
         reasoning_effort=data.reasoning_effort,
-        zero_cost_local=data.zero_cost_local,
-        require_usage=data.require_usage,
-        supported=data.supported,
-        closure_blocker=data.closure_blocker,
     )
-    registration = get_callsite_registration(spec.callsite_id)
+    route = get_route_binding(spec.callsite_id, route_id=spec.route_id)
+    if (
+        route.service != spec.service
+        or route.seat != spec.seat
+        or route.templates != tuple(template.name for template in spec.templates)
+        or route.model_source != spec.model_source
+    ):
+        raise DispatchPolicyRegistryError(
+            f"{location} differs from the registered route authority"
+        )
     response_model = _import_object(spec.response_model_path)
     if not isinstance(response_model, type) or not issubclass(
         response_model, BaseModel
@@ -419,7 +422,11 @@ def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
         raise DispatchPolicyRegistryError(
             f"Response model {spec.response_model_path!r} is not a Pydantic model"
         )
-    if registration.response_model_identity != spec.response_model_path:
+    if route.response_model_identity is None:
+        raise DispatchPolicyRegistryError(
+            f"{location} route lacks a fully-qualified response contract identity"
+        )
+    if route.response_model_identity != spec.response_model_path:
         raise DispatchPolicyRegistryError(
             f"{location}.response_model differs from the registered response identity"
         )
@@ -428,8 +435,28 @@ def _load_spec(data: _PolicyResource, location: str) -> DispatchPolicySpec:
         raise DispatchPolicyRegistryError(
             f"Tokenizer {spec.tokenizer_path!r} is not callable"
         )
-    if spec.candidate_source_path is not None:
-        _candidate_models(spec.candidate_source_path)
+    from imas_codex.llm.prompt_loader import _SCHEMA_PROVIDERS
+
+    for provider in spec.static_providers:
+        source = _SCHEMA_PROVIDERS.get(provider.name)
+        if provider.kind not in {"schema", "grammar"} or not callable(source):
+            raise DispatchPolicyRegistryError(
+                f"{location}.static_providers contains an unknown source contract"
+            )
+    unknown_obligations = spec.required_obligations - _OBLIGATION_NAMES
+    if unknown_obligations:
+        raise DispatchPolicyRegistryError(
+            f"{location}.required_obligations contains unknown fields: "
+            f"{sorted(unknown_obligations)}"
+        )
+    from imas_codex.settings import get_model_source_models
+
+    try:
+        get_model_source_models(spec.model_source)
+    except ValueError as exc:
+        raise DispatchPolicyRegistryError(
+            f"{location}.model_source is invalid: {exc}"
+        ) from exc
     return spec
 
 
@@ -437,7 +464,7 @@ def load_dispatch_registry(
     directory: Path = DISPATCH_POLICY_DIR,
 ) -> DispatchRegistrySnapshot:
     """Load strict policies and blockers atomically into one snapshot."""
-    policies: dict[str, DispatchPolicySpec] = {}
+    policies: dict[tuple[str, str], DispatchPolicySpec] = {}
     blockers: dict[str, str] = {}
     policy_ids: set[str] = set()
     if not directory.exists():
@@ -467,21 +494,22 @@ def load_dispatch_registry(
                 payload = _PolicyFile.model_validate(payload_data)
                 for index, entry in enumerate(payload.policies):
                     spec = _load_spec(entry, f"{path}:policies[{index}]")
-                    if spec.callsite_id in policies:
+                    lookup_identity = (spec.callsite_id, spec.route_id)
+                    if lookup_identity in policies:
                         raise DispatchPolicyRegistryError(
-                            f"Duplicate typed dispatch policy for {spec.callsite_id!r}"
+                            f"Duplicate typed dispatch policy for {lookup_identity!r}"
                         )
                     if spec.policy_id in policy_ids:
                         raise DispatchPolicyRegistryError(
                             f"Duplicate typed policy id {spec.policy_id!r}"
                         )
                     policy_ids.add(spec.policy_id)
-                    policies[spec.callsite_id] = spec
+                    policies[lookup_identity] = spec
         except (OSError, json.JSONDecodeError, ValidationError) as exc:
             raise DispatchPolicyRegistryError(
                 f"Cannot load strict dispatch resource {path}: {exc}"
             ) from exc
-    collisions = set(policies) & set(blockers)
+    collisions = {callsite_id for callsite_id, _ in policies} & set(blockers)
     if collisions:
         raise DispatchPolicyRegistryError(
             f"Typed callsites cannot be both active and blocked: {sorted(collisions)}"
@@ -493,7 +521,7 @@ def load_dispatch_registry(
 
 def load_dispatch_policy_registry(
     directory: Path = DISPATCH_POLICY_DIR,
-) -> Mapping[str, DispatchPolicySpec]:
+) -> Mapping[tuple[str, str], DispatchPolicySpec]:
     """Return policies from one atomically validated registry snapshot."""
     return load_dispatch_registry(directory).policies
 
@@ -509,40 +537,121 @@ def _resolve_spec(
     spec: DispatchPolicySpec,
     candidate_model: str | None,
 ) -> ResolvedDispatchPolicy:
-    from imas_codex.settings import get_model
+    from imas_codex.settings import resolve_model_source
 
-    if not spec.supported:
-        reason = spec.closure_blocker or "route is explicitly unsupported"
-        raise DispatchPolicyRegistryError(f"Callsite {spec.callsite_id!r}: {reason}")
-    if spec.model_section != spec.seat:
+    route = get_route_binding(spec.callsite_id, route_id=spec.route_id)
+    if (
+        route.service != spec.service
+        or route.seat != spec.seat
+        or route.model_source != spec.model_source
+        or route.templates != tuple(template.name for template in spec.templates)
+        or route.response_model_identity != spec.response_model_path
+    ):
         raise DispatchPolicyRegistryError(
-            f"Policy {spec.policy_id!r} model section differs from its seat"
+            f"Policy {spec.policy_id!r} differs from its registered route"
         )
-    model = get_model(spec.model_section)
-    if candidate_model is not None:
-        if spec.candidate_source_path is None:
-            raise DispatchPolicyRegistryError(
-                f"Policy {spec.policy_id!r} does not permit a candidate model"
-            )
-        if candidate_model not in _candidate_models(spec.candidate_source_path):
-            raise DispatchPolicyRegistryError(
-                f"Candidate model is outside {spec.candidate_source_path!r}"
-            )
-        model = candidate_model
+    if route.response_model_identity is None:
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} route lacks a response contract identity"
+        )
+    template_ids = [(template.role, template.name) for template in spec.templates]
+    roles = [template.role for template in spec.templates]
+    if (
+        not roles
+        or roles[0] != "system"
+        or len(template_ids) != len(set(template_ids))
+        or any(name.startswith("inline:") for _, name in template_ids)
+        or any(role not in {"system", "user"} for role in roles)
+    ):
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} has invalid ordered template authority"
+        )
+    first_user = next(
+        (index for index, role in enumerate(roles) if role == "user"), None
+    )
+    if first_user is not None and "system" in roles[first_user:]:
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} places system templates after user templates"
+        )
+    channel_names = [channel.channel for channel in spec.channels]
+    if (
+        len(channel_names) != len(set(channel_names))
+        or set(channel_names) != _CHANNEL_NAMES
+    ):
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} does not own every exact context channel"
+        )
+    if spec.required_obligations - _OBLIGATION_NAMES:
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} names unknown semantic obligations"
+        )
+    provider_names = [provider.name for provider in spec.static_providers]
+    if len(provider_names) != len(set(provider_names)):
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} has duplicate provider lookup identities"
+        )
+    bounds = (
+        spec.max_input_tokens,
+        spec.max_output_tokens,
+        spec.max_attempts,
+        spec.max_context_bytes,
+    )
+    if (
+        any(
+            isinstance(value, bool) or not isinstance(value, int) or value <= 0
+            for value in bounds
+        )
+        or not math.isfinite(spec.maximum_cost_exposure)
+        or spec.maximum_cost_exposure < 0
+    ):
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} has invalid dispatch bounds"
+        )
+    try:
+        re.compile(spec.identifier_pattern)
+    except re.error as exc:
+        raise DispatchPolicyRegistryError(
+            f"Policy {spec.policy_id!r} has an invalid identifier pattern"
+        ) from exc
+    try:
+        resolved_source = resolve_model_source(
+            spec.model_source, candidate_model=candidate_model
+        )
+    except ValueError as exc:
+        raise DispatchPolicyRegistryError(str(exc)) from exc
     response_model = _import_object(spec.response_model_path)
     token_counter = _import_object(spec.tokenizer_path)
-    return ResolvedDispatchPolicy(spec, model, response_model, token_counter)
+    if not isinstance(response_model, type) or not issubclass(
+        response_model, BaseModel
+    ):
+        raise DispatchPolicyRegistryError(
+            f"Response model {spec.response_model_path!r} is not a Pydantic model"
+        )
+    if not callable(token_counter):
+        raise DispatchPolicyRegistryError(
+            f"Tokenizer {spec.tokenizer_path!r} is not callable"
+        )
+    return ResolvedDispatchPolicy(
+        spec,
+        resolved_source.model,
+        resolved_source.api_base,
+        resolved_source.api_key_env,
+        resolved_source.endpoint_class,
+        response_model,
+        token_counter,
+    )
 
 
 def resolve_dispatch_policy(
     callsite_id: str,
     *,
+    route_id: str,
     candidate_model: str | None = None,
-    registry: Mapping[str, DispatchPolicySpec] | None = None,
+    registry: Mapping[tuple[str, str], DispatchPolicySpec] | None = None,
 ) -> ResolvedDispatchPolicy:
     """Resolve one trusted policy and only its explicitly permitted model axis."""
     active = DISPATCH_POLICY_REGISTRY if registry is None else registry
-    spec = active.get(callsite_id)
+    spec = active.get((callsite_id, route_id))
     if spec is None:
         blocker = DISPATCH_CLOSURE_BLOCKERS.get(callsite_id)
         if blocker:
@@ -550,7 +659,7 @@ def resolve_dispatch_policy(
                 f"Callsite {callsite_id!r} is typed-unsupported: {blocker}"
             )
         raise DispatchPolicyRegistryError(
-            f"Callsite {callsite_id!r} has no typed-ready dispatch policy"
+            f"Route {(callsite_id, route_id)!r} has no typed-ready dispatch policy"
         )
     return _resolve_spec(spec, candidate_model)
 
@@ -558,7 +667,7 @@ def resolve_dispatch_policy(
 def policy_registry_closure(
     observed_calls: Iterable[Any],
     *,
-    registry: Mapping[str, DispatchPolicySpec] | None = None,
+    registry: Mapping[tuple[str, str], DispatchPolicySpec] | None = None,
 ) -> tuple[int, int]:
     """Return legacy/typed counts and require every typed policy to resolve."""
     active = DISPATCH_POLICY_REGISTRY if registry is None else registry
@@ -568,12 +677,27 @@ def policy_registry_closure(
         if getattr(call, "transition_kind", "legacy") == "typed":
             typed += 1
             callsite_id = getattr(call, "callsite_id", None)
-            spec = active.get(callsite_id)
+            route_id = getattr(call, "route_id", None)
+            spec = active.get((callsite_id, route_id))
             if spec is None:
                 raise DispatchPolicyRegistryError(
-                    f"Typed expression has no policy: {callsite_id!r}"
+                    f"Typed expression has no policy: {(callsite_id, route_id)!r}"
                 )
-            _resolve_spec(spec, None)
+            candidate_expression = getattr(call, "model_argument", None)
+            candidate_model: str | None = None
+            if candidate_expression is not None:
+                try:
+                    candidate_value = ast.literal_eval(candidate_expression)
+                except (ValueError, SyntaxError) as exc:
+                    raise DispatchPolicyRegistryError(
+                        "Typed candidate selection must be a literal model identity"
+                    ) from exc
+                if not isinstance(candidate_value, str):
+                    raise DispatchPolicyRegistryError(
+                        "Typed candidate selection must be a literal model identity"
+                    )
+                candidate_model = candidate_value
+            _resolve_spec(spec, candidate_model)
         else:
             legacy += 1
     return legacy, typed

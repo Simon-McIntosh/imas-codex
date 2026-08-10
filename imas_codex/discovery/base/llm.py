@@ -1892,6 +1892,7 @@ def _build_kwargs(
     api_key_override: str | None = None,
     reasoning_effort: str | None = None,
     typed_max_price: dict[str, float] | None = None,
+    typed_provider_name: str | None = None,
     typed_endpoint_contract: str | None = None,
     typed_resolved_api_key: str | None = None,
 ) -> dict[str, Any]:
@@ -1916,7 +1917,7 @@ def _build_kwargs(
     bypass_proxy = False
 
     # Auto-resolve endpoint from the model registry if not explicitly passed
-    if not api_base:
+    if not api_base and typed_endpoint_contract is None:
         endpoint = get_model_endpoint(model)
         if endpoint:
             api_base = endpoint["api_base"]
@@ -2025,8 +2026,16 @@ def _build_kwargs(
                 "paid typed calls require direct OpenRouter routing with a resolved "
                 "service credential"
             )
+        if not typed_provider_name:
+            raise ProviderPricingUnbounded(
+                "paid typed calls require an exact provider identity"
+            )
         extra_body = kwargs.setdefault("extra_body", {})
-        extra_body["provider"] = {"max_price": dict(typed_max_price)}
+        extra_body["provider"] = {
+            "max_price": dict(typed_max_price),
+            "only": [typed_provider_name],
+            "allow_fallbacks": False,
+        }
     elif typed_endpoint_contract == "direct-openrouter":
         raise ProviderPricingUnbounded(
             "the direct OpenRouter endpoint contract requires an enforceable max_price"

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -108,8 +109,10 @@ def response_schema_digest(response_model: type[BaseModel]) -> str:
     return canonical_fingerprint(response_model.model_json_schema())
 
 
-def _credential_identity(source_name: str, api_key: str) -> str:
-    key_id = hashlib.sha256(api_key.encode("utf-8")).hexdigest()
+def _credential_identity(source_name: str, endpoint: str, api_key: str) -> str:
+    key_id = hashlib.sha256(
+        f"{source_name}\0{endpoint}\0{api_key}".encode()
+    ).hexdigest()
     return f"{source_name}:sha256:{key_id}"
 
 
@@ -124,7 +127,11 @@ def _build_frozen_wire_request(
     service: str,
     reasoning_effort: str | None,
     provider_max_price: Mapping[str, float] | None,
+    provider_name: str | None,
     zero_cost_local: bool,
+    api_base: str | None,
+    api_key_env: str | None,
+    endpoint_class: str | None,
     attachment_redactions: Mapping[str, str],
 ) -> tuple[FrozenWireRequest, _FrozenTransportHandle]:
     """Apply transport transformations once and return public/private halves."""
@@ -133,8 +140,22 @@ def _build_frozen_wire_request(
         get_api_key_for_service_with_source,
     )
 
-    api_key, credential_source = get_api_key_for_service_with_source(service)
     endpoint_contract = "local-free" if zero_cost_local else "direct-openrouter"
+    if zero_cost_local:
+        if endpoint_class != "local-free" or not api_base or not api_key_env:
+            raise ValueError("Local typed route lacks its exact endpoint contract")
+        api_key = os.getenv(api_key_env, "")
+        if not api_key:
+            raise ValueError(
+                f"Local typed route credential source {api_key_env!r} is unavailable"
+            )
+        credential_source = api_key_env
+        endpoint_identity = api_base
+    else:
+        if any((api_base, api_key_env, endpoint_class)):
+            raise ValueError("Paid typed route cannot use a custom endpoint")
+        api_key, credential_source = get_api_key_for_service_with_source(service)
+        endpoint_identity = "https://openrouter.ai/api/v1"
     kwargs = _build_kwargs(
         model,
         api_key,
@@ -144,14 +165,19 @@ def _build_frozen_wire_request(
         temperature,
         timeout,
         service=service,
+        api_base=api_base,
+        api_key_override=api_key if zero_cost_local else None,
         reasoning_effort=reasoning_effort,
         typed_max_price=dict(provider_max_price) if provider_max_price else None,
+        typed_provider_name=provider_name,
         typed_endpoint_contract=endpoint_contract,
         typed_resolved_api_key=api_key,
     )
     identity = response_model_identity(response_model)
     schema_digest = response_schema_digest(response_model)
-    credential_identity = _credential_identity(credential_source, api_key)
+    credential_identity = _credential_identity(
+        credential_source, endpoint_identity, api_key
+    )
     frozen = _freeze(kwargs)
     tokenization_payload = _freeze(_without_secrets(frozen))
     redacted = _freeze(_redact(frozen, attachment_redactions))

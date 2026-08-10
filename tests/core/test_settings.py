@@ -226,6 +226,44 @@ def test_free_local_endpoint_requires_explicit_trusted_classification():
     )
 
 
+def test_checked_in_pricing_preserves_missing_dimensions_and_stays_inactive():
+    model = "openrouter/openai/gpt-5.6-luna"
+
+    pricing = settings.get_openrouter_pricing(model)
+
+    assert pricing["request"] is None
+    assert pricing["image"] is None
+    with pytest.raises(settings.PricingAuthorityError):
+        settings.get_typed_openrouter_pricing(model)
+
+
+def test_model_sources_separate_route_seats_from_candidate_selection():
+    fixed = settings.resolve_model_source("section:sn-compose")
+    assert fixed.source_id == "section:sn-compose"
+    assert fixed.model == settings.get_model("sn-compose")
+    assert fixed.endpoint_class == "local-free"
+
+    review_models = settings.get_model_source_models("sn-review:names")
+    assert "hosted_vllm/deepseek-v4-flash" in review_models
+    assert any(model.startswith("openrouter/") for model in review_models)
+    with pytest.raises(ValueError, match="requires an explicit"):
+        settings.resolve_model_source("sn-review:names")
+    with pytest.raises(ValueError, match="outside source"):
+        settings.resolve_model_source(
+            "sn-review:names", candidate_model="openrouter/unregistered/model"
+        )
+
+
+def test_local_reviewer_source_binds_its_own_endpoint_contract():
+    resolved = settings.resolve_model_source(
+        "sn-review:names", candidate_model="hosted_vllm/deepseek-v4-flash"
+    )
+
+    assert resolved.api_key_env == "AMBIX_API_KEY"
+    assert resolved.api_base
+    assert resolved.endpoint_class == "local-free"
+
+
 class TestGraphSettings:
     """Tests for graph (Neo4j) settings accessors."""
 

@@ -300,6 +300,8 @@ classes:
         required: true
       callsite_id:
         required: true
+      route_id:
+        required: true
       service:
         required: true
       seat:
@@ -351,7 +353,8 @@ classes:
       cached_write_tokens_state: {range: TelemetryState, required: true}
       actual_cost: {range: double}
       actual_cost_state: {range: TelemetryState, required: true}
-      attempt_count: {range: integer, required: true}
+      attempt_count: {range: integer}
+      attempt_count_state: {range: TelemetryState, required: true}
 
   PromptItemReceipt:
     description: Redacted request receipt for one item without raw values.
@@ -405,6 +408,12 @@ classes:
       endpoint_contract:
         required: true
         description: Enforceable route contract used for the frozen request.
+      pricing_contract_digest:
+        required: true
+        description: Exact checked-in pricing authority bound during preflight.
+      pricing_provider_identity: {required: true}
+      pricing_provider_tier: {required: true}
+      pricing_canonical_model: {required: true}
       prompt_bundle_digest: {required: true}
       response_model_identity: {required: true}
       response_schema_digest: {required: true}
@@ -421,4 +430,4 @@ classes:
       maximum_cost_exposure: {range: double, required: true}
       provider_usage: {range: ProviderUsage}
       failure_type:
-        description: Typed transport failure class populated after billable failure.
+        description: Typed transport failure class populated after any failed request.

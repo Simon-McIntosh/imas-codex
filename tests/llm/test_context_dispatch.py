@@ -72,12 +72,13 @@ def _policy(*, response_path: str | None = None) -> DispatchPolicySpec:
         policy_id="cluster-label-authority",
         source_version="policy-release",
         callsite_id="dd.cluster-labeling",
+        route_id="dd-enrichment",
         service="data-dictionary",
         seat="dd-enrichment",
         task_kind="cluster_labeling",
         templates=(TemplateRoleSpec("system", "clusters/labeler", "template-release"),),
         response_model_path=response_path or f"{module}:ClusterLabelBatch",
-        model_section="dd-enrichment",
+        model_source="section:dd-enrichment",
         tokenizer_path=f"{module}:_count_exact_request",
         tokenizer_key="test-exact-wire-tokenizer",
         identifier_pattern=_IDENTIFIER_PATTERN,
@@ -160,13 +161,16 @@ def _envelope(callsite_id: str, prompts_dir) -> dict[str, object]:
     return {
         "schema_version": "prompt-context",
         "callsite_id": callsite_id,
+        "route_id": "dd-enrichment",
         "service": "data-dictionary",
         "seat": "dd-enrichment",
         "task_kind": "cluster_labeling",
         "policy_id": "cluster-label-authority",
         "static_context": [
             ref.model_dump(mode="json")
-            for ref in static_context_refs(callsite_id, prompts_dir=prompts_dir)
+            for ref in static_context_refs(
+                callsite_id, route_id="dd-enrichment", prompts_dir=prompts_dir
+            )
         ],
         "batch_items": [
             {
@@ -213,21 +217,51 @@ def dispatch_case(tmp_path, monkeypatch):
     monkeypatch.setattr(
         policy_registry,
         "DISPATCH_POLICY_REGISTRY",
-        MappingProxyType({spec.callsite_id: spec}),
+        MappingProxyType({(spec.callsite_id, spec.route_id): spec}),
     )
-    registration = context_dispatch.get_callsite_registration(spec.callsite_id)
     monkeypatch.setattr(
-        context_dispatch,
-        "get_callsite_registration",
-        lambda callsite_id: replace(
-            registration,
-            response_model_identity=f"{__name__}:ClusterLabelBatch",
+        policy_registry,
+        "get_route_binding",
+        lambda callsite_id, route_id: SimpleNamespace(
+            service=spec.service,
+            seat=spec.seat,
+            model_source=spec.model_source,
+            templates=tuple(template.name for template in spec.templates),
+            response_model_identity=spec.response_model_path,
         ),
     )
     monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
     monkeypatch.setattr(
-        "imas_codex.settings.get_model",
-        lambda section: "openrouter/openai/gpt-5.6-luna",
+        "imas_codex.settings.resolve_model_source",
+        lambda source_id, candidate_model=None: SimpleNamespace(
+            model=candidate_model or "openrouter/openai/gpt-5.6-luna",
+            api_base=None,
+            api_key_env=None,
+            endpoint_class=None,
+        ),
+    )
+    monkeypatch.setattr(
+        "imas_codex.settings.get_typed_openrouter_pricing",
+        lambda model: {
+            "configured_alias": model,
+            "canonical_slug": "openai/gpt-5.6-luna-canonical",
+            "provider": "OpenAI",
+            "provider_tier": "default",
+            "source": "https://openrouter.ai/api/v1/models",
+            "endpoints_source": "https://openrouter.ai/api/v1/models/x/endpoints",
+            "retrieved_at": "2026-08-10T00:00:00+00:00",
+            "model_payload_sha256": "a" * 64,
+            "endpoints_payload_sha256": "b" * 64,
+            "canonical_projection_sha256": "c" * 64,
+            "prompt": 0.1,
+            "completion": 0.6,
+            "request": 0.01,
+            "image": 0.02,
+            "image_unit": "per-image",
+            "cache_control": "disabled",
+            "other_charged_dimensions": [],
+            "overrides": [],
+        },
     )
     return spec, _envelope(spec.callsite_id, tmp_path), tmp_path
 
@@ -261,7 +295,12 @@ def test_preflight_binds_final_wire_and_separates_dynamic_context(
     assert prepared.receipt.max_attempts == 2
     provider = prepared.wire_request.redacted_payload["extra_body"]["provider"]
     assert provider["max_price"]
+    assert provider["only"] == ["OpenAI"]
+    assert provider["allow_fallbacks"] is False
     assert prepared.receipt.endpoint_contract == "direct-openrouter"
+    assert prepared.receipt.pricing_provider_identity == "OpenAI"
+    assert prepared.receipt.pricing_provider_tier == "default"
+    assert prepared.receipt.pricing_contract_digest
     assert "OPENROUTER_API_KEY_IMAS_CODEX:sha256:" in (
         prepared.receipt.credential_source_identity
     )
@@ -293,13 +332,26 @@ def test_paid_typed_route_rejects_custom_and_never_uses_configured_proxy(
 ) -> None:
     spec, envelope, prompts_dir = dispatch_case
     monkeypatch.setattr(
-        "imas_codex.settings.get_model_endpoint",
-        lambda model: {"api_base": "https://custom.invalid/v1"},
+        "imas_codex.settings.resolve_model_source",
+        lambda source_id, candidate_model=None: SimpleNamespace(
+            model="openrouter/openai/gpt-5.6-luna",
+            api_base="https://custom.invalid/v1",
+            api_key_env="CUSTOM_KEY",
+            endpoint_class="custom",
+        ),
     )
-    with pytest.raises(PricingUnavailable, match="direct OpenRouter"):
+    with pytest.raises(PricingUnavailable, match="custom endpoint"):
         prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
 
-    monkeypatch.setattr("imas_codex.settings.get_model_endpoint", lambda model: None)
+    monkeypatch.setattr(
+        "imas_codex.settings.resolve_model_source",
+        lambda source_id, candidate_model=None: SimpleNamespace(
+            model="openrouter/openai/gpt-5.6-luna",
+            api_base=None,
+            api_key_env=None,
+            endpoint_class=None,
+        ),
+    )
     monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX")
     monkeypatch.setenv("OPENROUTER_API_KEY_DATA_DICTIONARY", "service-key")
     monkeypatch.setenv("LITELLM_PROXY_URL", "https://proxy.invalid/v1")
@@ -317,6 +369,42 @@ def test_typed_route_disables_unpriced_cache_control(dispatch_case) -> None:
     )
 
     assert "cache_control" not in repr(prepared.messages)
+
+
+def test_local_wire_receipt_binds_the_actual_endpoint_credential(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    monkeypatch.setattr(
+        policy_registry,
+        "DISPATCH_POLICY_REGISTRY",
+        MappingProxyType({(spec.callsite_id, spec.route_id): spec}),
+    )
+    monkeypatch.setattr(
+        "imas_codex.settings.resolve_model_source",
+        lambda source_id, candidate_model=None: SimpleNamespace(
+            model="hosted_vllm/deepseek-v4-flash",
+            api_base="http://local.invalid/v1",
+            api_key_env="AMBIX_API_KEY",
+            endpoint_class="local-free",
+        ),
+    )
+    monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX")
+    monkeypatch.setenv("AMBIX_API_KEY", "first-local-key")
+    first = prepare_context_dispatch(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+    monkeypatch.setenv("AMBIX_API_KEY", "second-local-key")
+    second = prepare_context_dispatch(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+
+    assert first.receipt.endpoint_contract == "local-free"
+    assert first.receipt.credential_source_identity.startswith("AMBIX_API_KEY:sha256:")
+    assert first.receipt.credential_source_identity != (
+        second.receipt.credential_source_identity
+    )
+    assert "first-local-key" not in repr(first)
 
 
 def test_registry_and_bundle_drift_refuse_before_tokenization(dispatch_case) -> None:
@@ -339,25 +427,25 @@ def test_same_named_different_schema_refuses_stale_static_refs(
     monkeypatch.setattr(
         policy_registry,
         "DISPATCH_POLICY_REGISTRY",
-        MappingProxyType({spec.callsite_id: changed}),
+        MappingProxyType({(spec.callsite_id, spec.route_id): changed}),
     )
 
     with pytest.raises(ContextPolicyError, match="response identity"):
         prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
 
 
-def test_cross_seat_model_section_refuses_before_render(
+def test_cross_seat_model_source_refuses_before_render(
     dispatch_case, monkeypatch
 ) -> None:
     spec, envelope, prompts_dir = dispatch_case
-    changed = replace(spec, model_section="sn-docs")
+    changed = replace(spec, model_source="section:sn-docs")
     monkeypatch.setattr(
         policy_registry,
         "DISPATCH_POLICY_REGISTRY",
-        MappingProxyType({spec.callsite_id: changed}),
+        MappingProxyType({(spec.callsite_id, spec.route_id): changed}),
     )
 
-    with pytest.raises(ContextPolicyError, match="model section differs"):
+    with pytest.raises(ContextPolicyError, match="registered route"):
         prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
 
 
@@ -451,18 +539,9 @@ def test_receipt_preserves_item_and_batch_comparator_sources(dispatch_case) -> N
     assert batch.fingerprint != after.receipt.batch_comparator_receipt.fingerprint
 
 
-def test_multimodal_attachment_is_bounded_encoded_and_redacted(
-    dispatch_case, monkeypatch
-) -> None:
+def test_multimodal_attachment_is_bounded_encoded_and_redacted(dispatch_case) -> None:
     spec, envelope, prompts_dir = dispatch_case
-    from imas_codex import settings
 
-    configured = settings.get_openrouter_pricing("openrouter/openai/gpt-5.6-luna")
-    monkeypatch.setattr(
-        settings,
-        "get_openrouter_pricing",
-        lambda model: {**configured, "image": 0.01},
-    )
     content = _png_bytes()
     envelope["batch_items"][0]["attachments"] = [
         {
@@ -520,24 +599,20 @@ def test_operation_budget_and_registered_exposure_refuse(dispatch_case) -> None:
         )
 
 
-def test_pricing_requires_openrouter_source_and_valid_verification_date(
+def test_pricing_requires_complete_authoritative_provenance(
     dispatch_case, monkeypatch
 ) -> None:
     spec, envelope, prompts_dir = dispatch_case
-    invalid = {
-        "prompt": 0.1,
-        "completion": 0.6,
-        "request": 0.0,
-        "image": 0.0,
-        "source": "https://example.invalid/model",
-        "verified_at": "not-a-date",
-        "overrides": [],
-    }
+    from imas_codex.settings import PricingAuthorityError
+
+    def invalid_authority(model):
+        raise PricingAuthorityError(f"Missing provider identity for {model}")
+
     monkeypatch.setattr(
-        "imas_codex.settings.get_openrouter_pricing", lambda model: invalid
+        "imas_codex.settings.get_typed_openrouter_pricing", invalid_authority
     )
 
-    with pytest.raises(PricingUnavailable, match="verification date"):
+    with pytest.raises(PricingUnavailable, match="Incomplete project pricing"):
         prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
 
 
@@ -599,9 +674,7 @@ def test_post_receipt_rejects_cost_above_preflight(dispatch_case) -> None:
     )
 
     with pytest.raises(UsageReconciliationError, match="exceeds") as caught:
-        reconcile_context_receipt(
-            prepared.receipt, result, paid=True, require_usage=True
-        )
+        reconcile_context_receipt(prepared.receipt, result, paid=True)
     assert caught.value.receipt is not None
 
 
@@ -620,9 +693,7 @@ def test_missing_boolean_and_fractional_usage_refuse(dispatch_case) -> None:
             cost=0.001,
         )
         with pytest.raises(UsageReconciliationError) as caught:
-            reconcile_context_receipt(
-                prepared.receipt, result, paid=True, require_usage=True
-            )
+            reconcile_context_receipt(prepared.receipt, result, paid=True)
         assert caught.value.receipt is not None
         assert caught.value.receipt.provider_usage.input_tokens_state.value != "valid"
 
@@ -670,6 +741,36 @@ def test_malformed_billable_telemetry_carries_explicit_failure_receipt(
     assert usage.attempt_count == 1
 
 
+def test_missing_provider_telemetry_carries_unavailable_failure_receipt(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    internal = context_dispatch._prepare_context_transport(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+
+    def transport(*args, **kwargs):
+        raise ValueError("provider returned no telemetry")
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.llm._call_frozen_structured_transport",
+        transport,
+    )
+    monkeypatch.setattr(
+        context_dispatch,
+        "_prepare_context_transport",
+        lambda *args, **kwargs: internal,
+    )
+    with pytest.raises(ContextTransportError) as caught:
+        dispatch_context(envelope, spec.callsite_id)
+
+    usage = caught.value.receipt.provider_usage
+    assert usage.input_tokens_state.value == "unavailable"
+    assert usage.actual_cost_state.value == "unavailable"
+    assert usage.attempt_count is None
+    assert usage.attempt_count_state.value == "unavailable"
+
+
 def test_cache_write_telemetry_refuses_against_disabled_cache(dispatch_case) -> None:
     spec, envelope, prompts_dir = dispatch_case
     prepared = prepare_context_dispatch(
@@ -685,9 +786,7 @@ def test_cache_write_telemetry_refuses_against_disabled_cache(dispatch_case) -> 
     )
 
     with pytest.raises(UsageReconciliationError, match="disable cache creation"):
-        reconcile_context_receipt(
-            prepared.receipt, result, paid=True, require_usage=True
-        )
+        reconcile_context_receipt(prepared.receipt, result, paid=True)
 
 
 def test_billable_failure_carries_reconciled_post_receipt(

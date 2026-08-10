@@ -26,10 +26,13 @@ Reachability = Literal["active", "active-public"]
 class RouteBinding:
     """A service/seat/template route reachable through one source expression."""
 
+    route_id: str
     service: str
     seat: str
+    model_source: str
     templates: tuple[str, ...]
     asset_mode: Literal["legacy-template", "legacy-inline"]
+    response_model_identity: str | None = None
 
 
 @dataclass(frozen=True, slots=True, order=True)
@@ -53,7 +56,6 @@ class CallsiteRegistration:
     response_model_symbol: str
     reachability: Reachability
     routes: tuple[RouteBinding, ...]
-    response_model_identity: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -67,6 +69,7 @@ class StructuredCall:
     response_model_argument: str | None
     transition_kind: TransitionKind
     callsite_id: str | None
+    route_id: str | None
     line: int
 
 
@@ -92,13 +95,28 @@ class CallsitePolicyError(ValueError):
     """A context-dispatch policy does not match an executable registry route."""
 
 
+_MODEL_SOURCES = {
+    "sn-benchmark.candidate": "sn-benchmark:candidates",
+    "sn-benchmark.docs-candidate": "sn-benchmark:candidates",
+    "sn-benchmark.compose-candidate": "sn-benchmark:compose",
+    "sn-benchmark.reviewer-candidate": "sn-benchmark:reviewers",
+    "sn-benchmark.refine-candidate": "sn-benchmark:refine",
+    "sn-benchmark.judge-candidate": "sn-benchmark:judges",
+    "sn-benchmark.reviewer": "sn-benchmark:judges",
+    "sn-fanout.proposer": "sn-fanout:proposer",
+    "sn-review.names": "sn-review:names",
+    "sn-review.docs": "sn-review:docs",
+}
+
+
 def _route(service: str, seat: str, *templates: str) -> RouteBinding:
     asset_mode = (
         "legacy-inline"
         if any(template.startswith("inline:") for template in templates)
         else "legacy-template"
     )
-    return RouteBinding(service, seat, templates, asset_mode)
+    model_source = _MODEL_SOURCES.get(seat, f"section:{seat}")
+    return RouteBinding(seat, service, seat, model_source, templates, asset_mode)
 
 
 def _source(
@@ -918,29 +936,22 @@ def get_callsite_registration(callsite_id: str) -> CallsiteRegistration:
 def get_route_binding(
     callsite_id: str,
     *,
-    service: str,
-    seat: str,
-    templates: tuple[str, ...],
+    route_id: str,
 ) -> RouteBinding:
     """Resolve an exact registered route for a future typed dispatch policy."""
     registration = get_callsite_registration(callsite_id)
-    matches = [
-        route
-        for route in registration.routes
-        if route.service == service
-        and route.seat == seat
-        and templates == route.templates
-    ]
+    matches = [route for route in registration.routes if route.route_id == route_id]
     if len(matches) != 1:
         raise CallsitePolicyError(
             "Context policy does not identify one registered route: "
-            f"callsite={callsite_id!r}, service={service!r}, seat={seat!r}, "
-            f"templates={templates!r}, matches={len(matches)}"
+            f"callsite={callsite_id!r}, route={route_id!r}, matches={len(matches)}"
         )
     return matches[0]
 
 
-_LEGACY_DISPATCH_SYMBOLS = frozenset({"call_llm_structured", "acall_llm_structured"})
+_LEGACY_DISPATCH_SYMBOLS = frozenset(
+    {"call_llm", "acall_llm", "call_llm_structured", "acall_llm_structured"}
+)
 _TYPED_DISPATCH_SYMBOLS = frozenset({"dispatch_context", "adispatch_context"})
 _DISPATCH_MODULES = frozenset(
     {
@@ -1006,6 +1017,8 @@ class _StructuredCallVisitor(ast.NodeVisitor):
         if isinstance(node, ast.Attribute):
             owner = self._resolve(node.value)
             dotted = f"{owner}.{node.attr}" if owner else node.attr
+            if dotted in self._bindings:
+                return self._bindings[dotted]
             if node.attr in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS:
                 return node.attr
             return dotted
@@ -1034,18 +1047,26 @@ class _StructuredCallVisitor(ast.NodeVisitor):
         resolved = self._resolve(node.value)
         if resolved in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS:
             for target in node.targets:
-                if isinstance(target, ast.Name):
-                    self._bindings[target.id] = resolved
+                target_name = self._target_name(target)
+                if target_name is not None:
+                    self._bindings[target_name] = resolved
         self.generic_visit(node)
 
     def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
         resolved = self._resolve(node.value) if node.value is not None else None
-        if (
-            isinstance(node.target, ast.Name)
-            and resolved in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS
-        ):
-            self._bindings[node.target.id] = resolved
+        if resolved in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS:
+            target_name = self._target_name(node.target)
+            if target_name is not None:
+                self._bindings[target_name] = resolved
         self.generic_visit(node)
+
+    def _target_name(self, node: ast.expr) -> str | None:
+        if isinstance(node, ast.Name):
+            return node.id
+        if isinstance(node, ast.Attribute):
+            owner = self._resolve(node.value)
+            return f"{owner}.{node.attr}" if owner else None
+        return None
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._visit_scope(node)
@@ -1077,13 +1098,20 @@ class _StructuredCallVisitor(ast.NodeVisitor):
                 self._bindings[injected] = injected
         self.generic_visit(node)
         self.scopes.pop()
+        assigned_attributes = {
+            name: value
+            for name, value in self._bindings.items()
+            if "." in name and previous_bindings.get(name) != value
+        }
         self._bindings = previous_bindings
+        self._bindings.update(assigned_attributes)
 
     def visit_Call(self, node: ast.Call) -> None:
         dispatch_symbol: str | None = None
         dispatch_style: DispatchStyle | None = None
         transition_kind: TransitionKind = "legacy"
         callsite_id: str | None = None
+        route_id: str | None = None
         symbol = self._resolve(node.func)
 
         if symbol in _LEGACY_DISPATCH_SYMBOLS:
@@ -1091,21 +1119,30 @@ class _StructuredCallVisitor(ast.NodeVisitor):
             dispatch_style = "direct"
         elif symbol == "asyncio.to_thread" and node.args:
             injected_symbol = self._resolve(node.args[0])
-            if injected_symbol in _LEGACY_DISPATCH_SYMBOLS:
+            if injected_symbol in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS:
                 dispatch_symbol = injected_symbol
                 dispatch_style = "to-thread"
+                if injected_symbol in _TYPED_DISPATCH_SYMBOLS:
+                    transition_kind = "typed"
         elif symbol in set(self._injected_by_scope.values()):
             dispatch_symbol = symbol
             dispatch_style = "injected"
+            if (
+                _keyword_expression(node, "callsite_id") is not None
+                or _keyword_expression(node, "route_id") is not None
+            ):
+                transition_kind = "typed"
         elif symbol in _TYPED_DISPATCH_SYMBOLS:
             dispatch_symbol = symbol
             dispatch_style = (
                 "typed-async" if symbol == "adispatch_context" else "typed-sync"
             )
             transition_kind = "typed"
+        if transition_kind == "typed":
+            argument_offset = 1 if symbol == "asyncio.to_thread" else 0
             expression = _keyword_expression(node, "callsite_id")
-            if expression is None and len(node.args) >= 2:
-                expression = ast.unparse(node.args[1])
+            if expression is None and len(node.args) >= argument_offset + 2:
+                expression = ast.unparse(node.args[argument_offset + 1])
             if expression is not None:
                 try:
                     parsed = ast.literal_eval(expression)
@@ -1113,6 +1150,14 @@ class _StructuredCallVisitor(ast.NodeVisitor):
                     parsed = None
                 if isinstance(parsed, str):
                     callsite_id = parsed
+            route_expression = _keyword_expression(node, "route_id")
+            if route_expression is not None:
+                try:
+                    parsed_route = ast.literal_eval(route_expression)
+                except (ValueError, SyntaxError):
+                    parsed_route = None
+                if isinstance(parsed_route, str):
+                    route_id = parsed_route
 
         if dispatch_symbol is not None and dispatch_style is not None:
             scope = ".".join(self.scopes) or "<module>"
@@ -1129,10 +1174,14 @@ class _StructuredCallVisitor(ast.NodeVisitor):
                     ),
                     dispatch_style=dispatch_style,
                     service_argument=_keyword_expression(node, "service"),
-                    model_argument=_keyword_expression(node, "model"),
+                    model_argument=_keyword_expression(
+                        node,
+                        "candidate_model" if transition_kind == "typed" else "model",
+                    ),
                     response_model_argument=_keyword_expression(node, "response_model"),
                     transition_kind=transition_kind,
                     callsite_id=callsite_id,
+                    route_id=route_id,
                     line=node.lineno,
                 )
             )
@@ -1186,8 +1235,10 @@ def assert_registry_current(
     legacy_calls = [call for call in observed if call.transition_kind == "legacy"]
     typed_calls = [call for call in observed if call.transition_kind == "typed"]
     observed_by_source = {call.source: call for call in legacy_calls}
-    typed_by_callsite = {
-        call.callsite_id: call for call in typed_calls if call.callsite_id is not None
+    typed_by_route = {
+        (call.callsite_id, call.route_id): call
+        for call in typed_calls
+        if call.callsite_id is not None and call.route_id is not None
     }
     problems: list[str] = []
 
@@ -1198,8 +1249,10 @@ def assert_registry_current(
         problems.append("registry contains duplicate callsite ids")
     if len(observed_by_source) != len(legacy_calls):
         problems.append("scanner produced duplicate legacy source identities")
-    if len(typed_by_callsite) != len(typed_calls):
-        problems.append("typed dispatches require unique literal callsite identities")
+    if len(typed_by_route) != len(typed_calls):
+        problems.append(
+            "typed dispatches require unique literal callsite and route identities"
+        )
 
     for source in sorted(observed_by_source.keys() - registered_by_source.keys()):
         call = observed_by_source[source]
@@ -1208,28 +1261,45 @@ def assert_registry_current(
             f"{source.scope} {source.dispatch_symbol} occurrence {source.occurrence}"
         )
     registered_ids = {entry.callsite_id for entry in registry}
-    for callsite_id in sorted(set(typed_by_callsite) - registered_ids):
-        call = typed_by_callsite[callsite_id]
+    for callsite_id, route_id in sorted(
+        identity for identity in typed_by_route if identity[0] not in registered_ids
+    ):
+        call = typed_by_route[(callsite_id, route_id)]
         problems.append(
             f"unregistered typed dispatch {call.source.source_path}:{call.line} "
             f"{callsite_id!r}"
         )
+    registered_routes = {
+        (entry.callsite_id, route.route_id)
+        for entry in registry
+        for route in entry.routes
+    }
+    for identity in sorted(set(typed_by_route) - registered_routes):
+        call = typed_by_route[identity]
+        problems.append(
+            f"unregistered typed route {call.source.source_path}:{call.line} "
+            f"{identity!r}"
+        )
     for entry in registry:
         legacy = observed_by_source.get(entry.source)
-        typed = typed_by_callsite.get(entry.callsite_id)
-        if (legacy is None) == (typed is None):
+        typed = [
+            call
+            for (callsite_id, _), call in typed_by_route.items()
+            if callsite_id == entry.callsite_id
+        ]
+        if (legacy is None) == (not typed):
             problems.append(
                 f"{entry.callsite_id} must have exactly one legacy or typed expression"
             )
             continue
-        if typed is not None and (
-            typed.source.source_path != entry.source.source_path
-            or typed.source.scope != entry.source.scope
+        if typed and (
+            typed[0].source.source_path != entry.source.source_path
+            or typed[0].source.scope != entry.source.scope
         ):
             problems.append(
                 f"{entry.callsite_id} typed carrier changed: "
                 f"{entry.source.source_path}:{entry.source.scope} -> "
-                f"{typed.source.source_path}:{typed.source.scope}"
+                f"{typed[0].source.source_path}:{typed[0].source.scope}"
             )
 
     for source in sorted(registered_by_source.keys() & observed_by_source.keys()):
@@ -1250,10 +1320,17 @@ def assert_registry_current(
         if not entry.routes:
             problems.append(f"{entry.callsite_id} has no registered route")
         for route in entry.routes:
-            if not route.service or not route.seat or not route.templates:
-                problems.append(
-                    f"{entry.callsite_id} has incomplete service/seat/template metadata"
-                )
+            if (
+                not route.route_id
+                or not route.service
+                or not route.seat
+                or not route.model_source
+                or not route.templates
+            ):
+                problems.append(f"{entry.callsite_id} has incomplete route metadata")
+        route_ids = [route.route_id for route in entry.routes]
+        if len(route_ids) != len(set(route_ids)):
+            problems.append(f"{entry.callsite_id} has duplicate route identities")
 
     if problems:
         raise CallsiteInventoryError(
@@ -1318,6 +1395,17 @@ _RAW_PROVIDER_HEALTH_PROBE = (
     "imas_codex/discovery/base/services.py",
     "_probe_litellm_local",
 )
+_RAW_PROVIDER_TRANSPORT_SCOPES = frozenset(
+    {
+        "_acompletion_local",
+        "call_llm_structured",
+        "acall_llm_structured",
+        "_call_frozen_structured_transport",
+        "_acall_frozen_structured_transport",
+        "call_llm",
+        "acall_llm",
+    }
+)
 
 
 def _dotted_symbol(node: ast.expr) -> str | None:
@@ -1339,6 +1427,19 @@ class _ProviderCallVisitor(ast.NodeVisitor):
         self.scopes: list[str] = []
         self.calls: list[ProviderCall] = []
 
+    def visit_Import(self, node: ast.Import) -> None:
+        for imported in node.names:
+            if imported.name == "litellm":
+                self.aliases[imported.asname or imported.name] = "litellm"
+
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if node.module == "litellm":
+            for imported in node.names:
+                if imported.name in {"completion", "acompletion"}:
+                    self.aliases[imported.asname or imported.name] = (
+                        f"litellm.{imported.name}"
+                    )
+
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._visit_scope(node)
 
@@ -1352,18 +1453,47 @@ class _ProviderCallVisitor(ast.NodeVisitor):
         self,
         node: ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> None:
+        previous_aliases = self.aliases.copy()
         self.scopes.append(node.name)
         self.generic_visit(node)
         self.scopes.pop()
+        assigned_attributes = {
+            name: value
+            for name, value in self.aliases.items()
+            if "." in name and previous_aliases.get(name) != value
+        }
+        self.aliases = previous_aliases
+        self.aliases.update(assigned_attributes)
+
+    def _resolve_symbol(self, node: ast.expr) -> str | None:
+        symbol = _dotted_symbol(node)
+        if symbol is None:
+            return None
+        first, separator, remainder = symbol.partition(".")
+        if first in self.aliases:
+            return self.aliases[first] + (separator + remainder if separator else "")
+        return self.aliases.get(symbol, symbol)
+
+    def _bind_target(self, target: ast.expr, symbol: str | None) -> None:
+        if symbol is None:
+            return
+        target_name = _dotted_symbol(target)
+        if target_name is not None:
+            self.aliases[target_name] = symbol
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        symbol = self._resolve_symbol(node.value)
+        for target in node.targets:
+            self._bind_target(target, symbol)
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        symbol = self._resolve_symbol(node.value) if node.value is not None else None
+        self._bind_target(node.target, symbol)
+        self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
-        symbol = _dotted_symbol(node.func)
-        if symbol is not None:
-            first, separator, remainder = symbol.partition(".")
-            if first in self.aliases:
-                symbol = self.aliases[first] + (
-                    separator + remainder if separator else ""
-                )
+        symbol = self._resolve_symbol(node.func)
 
         if symbol in {"litellm.completion", "litellm.acompletion"} or (
             symbol is not None
@@ -1413,7 +1543,10 @@ def scan_provider_bypasses(
         visitor = _ProviderCallVisitor(relative_path, _provider_import_aliases(tree))
         visitor.visit(tree)
         for call in visitor.calls:
-            is_transport = call.source_path == _RAW_PROVIDER_TRANSPORT
+            is_transport = (
+                call.source_path == _RAW_PROVIDER_TRANSPORT
+                and call.scope in _RAW_PROVIDER_TRANSPORT_SCOPES
+            )
             is_health_probe = (
                 call.source_path,
                 call.scope,

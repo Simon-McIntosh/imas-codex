@@ -113,6 +113,7 @@ def envelope_data() -> dict[str, object]:
     return {
         "schema_version": "prompt-context",
         "callsite_id": "compose_name",
+        "route_id": "sn-compose",
         "service": "standard-names",
         "seat": "sn-compose",
         "task_kind": "name_composition",
