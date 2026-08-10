@@ -7,8 +7,13 @@ import pytest
 from imas_codex.llm.callsite_registry import (
     CALLSITE_REGISTRY,
     CallsiteInventoryError,
+    CallsiteRegistration,
     CallsiteSourceSyntaxError,
+    RouteBinding,
+    SourceCallIdentity,
     assert_registry_current,
+    assert_zero_legacy_dispatches,
+    get_route_binding,
     scan_provider_bypasses,
     scan_structured_calls,
 )
@@ -93,6 +98,26 @@ def dispatch():
     assert first.line != second.line
 
 
+def test_scanner_recognizes_typed_sync_and_async_dispatches(tmp_path):
+    _write_source(
+        tmp_path,
+        "imas_codex/carrier.py",
+        """
+def sync_call(envelope):
+    return dispatch_context(envelope, "example.sync")
+
+async def async_call(envelope):
+    return await adispatch_context(envelope, callsite_id="example.async")
+""",
+    )
+
+    calls = scan_structured_calls(tmp_path)
+
+    assert [call.dispatch_style for call in calls] == ["typed-sync", "typed-async"]
+    assert [call.transition_kind for call in calls] == ["typed", "typed"]
+    assert [call.callsite_id for call in calls] == ["example.sync", "example.async"]
+
+
 def test_unregistered_dispatch_fails_loudly(tmp_path):
     _write_source(
         tmp_path,
@@ -151,3 +176,70 @@ def test_registry_binds_response_models_and_complete_routes():
             assert route.service
             assert route.seat
             assert all(template for template in route.templates)
+            assert route.asset_mode in {"legacy-template", "legacy-inline"}
+
+
+def test_legacy_route_matching_is_exact_and_inline_assets_are_explicit() -> None:
+    route = get_route_binding(
+        "dd.cluster-labeling",
+        service="data-dictionary",
+        seat="dd-enrichment",
+        templates=("clusters/labeler",),
+    )
+    assert route.asset_mode == "legacy-template"
+
+    with pytest.raises(ValueError, match="does not identify one"):
+        get_route_binding(
+            "dd.cluster-labeling",
+            service="data-dictionary",
+            seat="dd-enrichment",
+            templates=(),
+        )
+    assert any(
+        route.asset_mode == "legacy-inline"
+        for entry in CALLSITE_REGISTRY
+        for route in entry.routes
+    )
+
+
+def test_registry_accepts_exact_legacy_to_typed_expression_transition(tmp_path) -> None:
+    _write_source(
+        tmp_path,
+        "imas_codex/carrier.py",
+        """
+def dispatch(envelope):
+    return dispatch_context(envelope, "example.typed")
+""",
+    )
+    registry = (
+        CallsiteRegistration(
+            callsite_id="example.typed",
+            source=SourceCallIdentity(
+                "imas_codex/carrier.py", "dispatch", "call_llm_structured"
+            ),
+            dispatch_style="direct",
+            service_argument="'data-dictionary'",
+            response_model_symbol="Response",
+            reachability="active",
+            routes=(
+                RouteBinding(
+                    "data-dictionary",
+                    "language",
+                    ("example/system",),
+                    "legacy-template",
+                ),
+            ),
+        ),
+    )
+
+    observed = assert_registry_current(
+        tmp_path, registry, typed_policy_registry={"example.typed": object()}
+    )
+
+    assert len(observed) == 1
+    assert observed[0].transition_kind == "typed"
+
+
+def test_final_closure_rejects_current_legacy_expressions() -> None:
+    with pytest.raises(CallsiteInventoryError, match="zero legacy expressions"):
+        assert_zero_legacy_dispatches()

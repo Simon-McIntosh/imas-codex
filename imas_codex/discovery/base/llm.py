@@ -472,6 +472,7 @@ class LLMResult:
         "output_tokens",
         "cache_read_tokens",
         "cache_creation_tokens",
+        "response_count",
     )
 
     def __init__(
@@ -483,6 +484,7 @@ class LLMResult:
         cache_creation_tokens: int = 0,
         input_tokens: int = 0,
         output_tokens: int = 0,
+        response_count: int = 1,
     ) -> None:
         self.parsed = parsed
         self.cost = cost
@@ -494,6 +496,7 @@ class LLMResult:
         self.output_tokens = output_tokens
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
+        self.response_count = response_count
 
     # Allow ``result, cost, tokens = call_llm_structured(...)``
     def __iter__(self):
@@ -1864,6 +1867,7 @@ def _build_kwargs(
     api_base: str | None = None,
     api_key_override: str | None = None,
     reasoning_effort: str | None = None,
+    typed_max_price: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Build litellm completion kwargs with model-aware defaults.
 
@@ -1973,7 +1977,14 @@ def _build_kwargs(
                     "Bypassing proxy for %s (cache_control preserved)", model_id
                 )
 
-    if service == "standard-names" and not _is_local_model(model):
+    if typed_max_price is not None:
+        if _is_local_model(model):
+            raise ProviderPricingUnbounded(
+                "a local typed route cannot carry paid provider pricing"
+            )
+        extra_body = kwargs.setdefault("extra_body", {})
+        extra_body["provider"] = {"max_price": dict(typed_max_price)}
+    elif service == "standard-names" and not _is_local_model(model):
         if api_base or not bypass_proxy:
             raise ProviderPricingUnbounded(
                 "paid Standard Names calls require direct OpenRouter routing "
@@ -2155,6 +2166,7 @@ def call_llm_structured(
                 total_cache_creation,
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
+                response_count=response_count,
             )
 
         except Exception as e:
@@ -2380,6 +2392,7 @@ async def acall_llm_structured(
                     total_cache_creation,
                     input_tokens=total_input_tokens,
                     output_tokens=total_output_tokens,
+                    response_count=response_count,
                 )
 
             except Exception as e:
@@ -2463,8 +2476,196 @@ async def acall_llm_structured(
             _ACTIVITY.record_failed()
 
 
-# Typed context dispatch imports only these private transport handles. The
-# public names remain available temporarily for unmigrated legacy callers.
+def _call_frozen_structured_transport(
+    request: Any,
+    *,
+    response_model: type[BaseModel],
+    model: str,
+    max_attempts: int,
+    retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+) -> LLMResult:
+    """Send one already-built typed request without rebuilding or mutating it."""
+    import litellm
+
+    suppress_litellm_noise()
+    total_cost = 0.0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_cache_read = 0
+    total_cache_creation = 0
+    response_count = 0
+    last_error: Exception | None = None
+    for attempt in range(max_attempts):
+        try:
+            response = litellm.completion(**request.transport_copy())
+            total_cost += extract_cost(response, model=model)
+            input_tokens = response.usage.prompt_tokens
+            output_tokens = response.usage.completion_tokens
+            if isinstance(input_tokens, bool) or not isinstance(input_tokens, int):
+                raise ValueError("provider prompt usage is not an integer")
+            if isinstance(output_tokens, bool) or not isinstance(output_tokens, int):
+                raise ValueError("provider completion usage is not an integer")
+            cache_read, cache_creation = extract_cache_tokens(response)
+            total_input_tokens += input_tokens
+            total_output_tokens += output_tokens
+            total_cache_read += cache_read
+            total_cache_creation += cache_creation
+            response_count += 1
+            content = response.choices[0].message.content
+            if not content:
+                raise EmptyResponseError(_finish_reason(response))
+            parsed = _parse_structured_content(
+                _sanitize_content(content), response_model, model
+            )
+            return LLMResult(
+                parsed,
+                total_cost,
+                total_input_tokens + total_output_tokens,
+                total_cache_read,
+                total_cache_creation,
+                input_tokens=total_input_tokens,
+                output_tokens=total_output_tokens,
+                response_count=response_count,
+            )
+        except Exception as exc:
+            last_error = exc
+            message = str(exc)
+            if _is_budget_exhausted(message):
+                raise ProviderBudgetExhausted(
+                    f"LLM provider budget exhausted: {message[:200]}",
+                    cost=total_cost,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
+                    cache_read_tokens=total_cache_read,
+                    cache_creation_tokens=total_cache_creation,
+                    response_count=response_count,
+                ) from exc
+            if _is_retryable(message) and attempt < max_attempts - 1:
+                time.sleep(retry_base_delay * (2**attempt))
+                continue
+            if response_count:
+                raise _structured_call_error(
+                    message,
+                    cost=total_cost,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
+                    cache_read_tokens=total_cache_read,
+                    cache_creation_tokens=total_cache_creation,
+                    response_count=response_count,
+                ) from exc
+            raise
+    raise last_error  # type: ignore[misc]
+
+
+async def _acall_frozen_structured_transport(
+    request: Any,
+    *,
+    response_model: type[BaseModel],
+    model: str,
+    max_attempts: int,
+    retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+) -> LLMResult:
+    """Async exact-wire counterpart of :func:`_call_frozen_structured_transport`."""
+    import litellm
+
+    suppress_litellm_noise()
+    routing_kwargs = request.transport_copy()
+    total_cost = 0.0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_cache_read = 0
+    total_cache_creation = 0
+    response_count = 0
+    last_error: Exception | None = None
+    use_local = model.startswith("hosted_vllm/") and _is_local_api_base(
+        routing_kwargs.get("api_base")
+    )
+    governor = None if use_local else get_rate_governor()
+    _heartbeat_ensure_started()
+    _ACTIVITY.record_started()
+    succeeded = False
+    try:
+        for attempt in range(max_attempts):
+            try:
+                if use_local:
+                    response = await _acompletion_local(request.transport_copy())
+                else:
+                    async with governor.slot():
+                        response = await litellm.acompletion(**request.transport_copy())
+                    governor.record_success()
+                cost_delta = extract_cost(response, model=model)
+                total_cost += cost_delta
+                _ACTIVITY.add_spend(cost_delta)
+                input_tokens = response.usage.prompt_tokens
+                output_tokens = response.usage.completion_tokens
+                if isinstance(input_tokens, bool) or not isinstance(input_tokens, int):
+                    raise ValueError("provider prompt usage is not an integer")
+                if isinstance(output_tokens, bool) or not isinstance(
+                    output_tokens, int
+                ):
+                    raise ValueError("provider completion usage is not an integer")
+                cache_read, cache_creation = extract_cache_tokens(response)
+                total_input_tokens += input_tokens
+                total_output_tokens += output_tokens
+                total_cache_read += cache_read
+                total_cache_creation += cache_creation
+                response_count += 1
+                content = response.choices[0].message.content
+                if not content:
+                    raise EmptyResponseError(_finish_reason(response))
+                parsed = _parse_structured_content(
+                    _sanitize_content(content), response_model, model
+                )
+                _ACTIVITY.record_completed()
+                succeeded = True
+                return LLMResult(
+                    parsed,
+                    total_cost,
+                    total_input_tokens + total_output_tokens,
+                    total_cache_read,
+                    total_cache_creation,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
+                    response_count=response_count,
+                )
+            except Exception as exc:
+                last_error = exc
+                message = str(exc)
+                if _is_budget_exhausted(message):
+                    raise ProviderBudgetExhausted(
+                        f"LLM provider budget exhausted: {message[:200]}",
+                        cost=total_cost,
+                        input_tokens=total_input_tokens,
+                        output_tokens=total_output_tokens,
+                        cache_read_tokens=total_cache_read,
+                        cache_creation_tokens=total_cache_creation,
+                        response_count=response_count,
+                    ) from exc
+                if governor is not None and _is_rate_limited(message):
+                    governor.record_rate_limited()
+                if _is_retryable(message) and attempt < max_attempts - 1:
+                    await asyncio.sleep(retry_base_delay * (2**attempt))
+                    continue
+                if response_count:
+                    raise _structured_call_error(
+                        message,
+                        cost=total_cost,
+                        input_tokens=total_input_tokens,
+                        output_tokens=total_output_tokens,
+                        cache_read_tokens=total_cache_read,
+                        cache_creation_tokens=total_cache_creation,
+                        response_count=response_count,
+                    ) from exc
+                raise
+        raise last_error  # type: ignore[misc]
+    finally:
+        if not succeeded:
+            _ACTIVITY.record_failed()
+
+
+# Public legacy wrappers remain unchanged until the executable inventory has
+# reached zero legacy expressions. Typed business calls use only the frozen
+# private transport functions above.
 _call_structured_transport = call_llm_structured
 _acall_structured_transport = acall_llm_structured
 

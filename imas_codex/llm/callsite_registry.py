@@ -12,11 +12,13 @@ from __future__ import annotations
 
 import ast
 import warnings
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
-DispatchStyle = Literal["direct", "to-thread", "injected"]
+DispatchStyle = Literal["direct", "to-thread", "injected", "typed-sync", "typed-async"]
+TransitionKind = Literal["legacy", "typed"]
 Reachability = Literal["active", "active-public"]
 
 
@@ -27,6 +29,7 @@ class RouteBinding:
     service: str
     seat: str
     templates: tuple[str, ...]
+    asset_mode: Literal["legacy-template", "legacy-inline"]
 
 
 @dataclass(frozen=True, slots=True, order=True)
@@ -61,6 +64,8 @@ class StructuredCall:
     service_argument: str | None
     model_argument: str | None
     response_model_argument: str | None
+    transition_kind: TransitionKind
+    callsite_id: str | None
     line: int
 
 
@@ -87,7 +92,12 @@ class CallsitePolicyError(ValueError):
 
 
 def _route(service: str, seat: str, *templates: str) -> RouteBinding:
-    return RouteBinding(service=service, seat=seat, templates=templates)
+    asset_mode = (
+        "legacy-inline"
+        if any(template.startswith("inline:") for template in templates)
+        else "legacy-template"
+    )
+    return RouteBinding(service, seat, templates, asset_mode)
 
 
 def _source(
@@ -913,14 +923,12 @@ def get_route_binding(
 ) -> RouteBinding:
     """Resolve an exact registered route for a future typed dispatch policy."""
     registration = get_callsite_registration(callsite_id)
-    selected = set(templates)
     matches = [
         route
         for route in registration.routes
         if route.service == service
         and route.seat == seat
-        and selected
-        and selected.issubset(route.templates)
+        and templates == route.templates
     ]
     if len(matches) != 1:
         raise CallsitePolicyError(
@@ -973,6 +981,8 @@ class _StructuredCallVisitor(ast.NodeVisitor):
     def visit_Call(self, node: ast.Call) -> None:
         dispatch_symbol: str | None = None
         dispatch_style: DispatchStyle | None = None
+        transition_kind: TransitionKind = "legacy"
+        callsite_id: str | None = None
         symbol = _call_symbol(node.func)
 
         if symbol in {"call_llm_structured", "acall_llm_structured"}:
@@ -990,6 +1000,22 @@ class _StructuredCallVisitor(ast.NodeVisitor):
         elif symbol == "acall_fn":
             dispatch_symbol = symbol
             dispatch_style = "injected"
+        elif symbol in {"dispatch_context", "adispatch_context"}:
+            dispatch_symbol = symbol
+            dispatch_style = (
+                "typed-async" if symbol == "adispatch_context" else "typed-sync"
+            )
+            transition_kind = "typed"
+            expression = _keyword_expression(node, "callsite_id")
+            if expression is None and len(node.args) >= 2:
+                expression = ast.unparse(node.args[1])
+            if expression is not None:
+                try:
+                    parsed = ast.literal_eval(expression)
+                except (ValueError, SyntaxError):
+                    parsed = None
+                if isinstance(parsed, str):
+                    callsite_id = parsed
 
         if dispatch_symbol is not None and dispatch_style is not None:
             scope = ".".join(self.scopes) or "<module>"
@@ -1008,6 +1034,8 @@ class _StructuredCallVisitor(ast.NodeVisitor):
                     service_argument=_keyword_expression(node, "service"),
                     model_argument=_keyword_expression(node, "model"),
                     response_model_argument=_keyword_expression(node, "response_model"),
+                    transition_kind=transition_kind,
+                    callsite_id=callsite_id,
                     line=node.lineno,
                 )
             )
@@ -1048,12 +1076,19 @@ def scan_structured_calls(
 def assert_registry_current(
     project_root: Path | str = Path("."),
     registry: tuple[CallsiteRegistration, ...] = CALLSITE_REGISTRY,
+    *,
+    typed_policy_registry: Mapping[str, object] | None = None,
 ) -> tuple[StructuredCall, ...]:
     """Return observed calls or raise with a complete registry drift report."""
 
     observed = scan_structured_calls(project_root)
     registered_by_source = {entry.source: entry for entry in registry}
-    observed_by_source = {call.source: call for call in observed}
+    legacy_calls = [call for call in observed if call.transition_kind == "legacy"]
+    typed_calls = [call for call in observed if call.transition_kind == "typed"]
+    observed_by_source = {call.source: call for call in legacy_calls}
+    typed_by_callsite = {
+        call.callsite_id: call for call in typed_calls if call.callsite_id is not None
+    }
     problems: list[str] = []
 
     if len(registered_by_source) != len(registry):
@@ -1061,8 +1096,10 @@ def assert_registry_current(
     callsite_ids = [entry.callsite_id for entry in registry]
     if len(set(callsite_ids)) != len(callsite_ids):
         problems.append("registry contains duplicate callsite ids")
-    if len(observed_by_source) != len(observed):
-        problems.append("scanner produced duplicate source identities")
+    if len(observed_by_source) != len(legacy_calls):
+        problems.append("scanner produced duplicate legacy source identities")
+    if len(typed_by_callsite) != len(typed_calls):
+        problems.append("typed dispatches require unique literal callsite identities")
 
     for source in sorted(observed_by_source.keys() - registered_by_source.keys()):
         call = observed_by_source[source]
@@ -1070,9 +1107,30 @@ def assert_registry_current(
             f"unregistered dispatch {source.source_path}:{call.line} "
             f"{source.scope} {source.dispatch_symbol} occurrence {source.occurrence}"
         )
-    for source in sorted(registered_by_source.keys() - observed_by_source.keys()):
-        entry = registered_by_source[source]
-        problems.append(f"missing registered dispatch {entry.callsite_id}: {source!r}")
+    registered_ids = {entry.callsite_id for entry in registry}
+    for callsite_id in sorted(set(typed_by_callsite) - registered_ids):
+        call = typed_by_callsite[callsite_id]
+        problems.append(
+            f"unregistered typed dispatch {call.source.source_path}:{call.line} "
+            f"{callsite_id!r}"
+        )
+    for entry in registry:
+        legacy = observed_by_source.get(entry.source)
+        typed = typed_by_callsite.get(entry.callsite_id)
+        if (legacy is None) == (typed is None):
+            problems.append(
+                f"{entry.callsite_id} must have exactly one legacy or typed expression"
+            )
+            continue
+        if typed is not None and (
+            typed.source.source_path != entry.source.source_path
+            or typed.source.scope != entry.source.scope
+        ):
+            problems.append(
+                f"{entry.callsite_id} typed carrier changed: "
+                f"{entry.source.source_path}:{entry.source.scope} -> "
+                f"{typed.source.source_path}:{typed.source.scope}"
+            )
 
     for source in sorted(registered_by_source.keys() & observed_by_source.keys()):
         entry = registered_by_source[source]
@@ -1100,6 +1158,40 @@ def assert_registry_current(
     if problems:
         raise CallsiteInventoryError(
             "Structured LLM callsite inventory drift:\n- " + "\n- ".join(problems)
+        )
+    if typed_calls:
+        from imas_codex.llm.dispatch_policy_registry import policy_registry_closure
+
+        policy_registry_closure(observed, registry=typed_policy_registry)
+    return observed
+
+
+def assert_zero_legacy_dispatches(
+    project_root: Path | str = Path("."),
+    registry: tuple[CallsiteRegistration, ...] = CALLSITE_REGISTRY,
+    *,
+    typed_policy_registry: Mapping[str, object] | None = None,
+) -> tuple[StructuredCall, ...]:
+    """Enforce the final transition closure, including legacy wrapper removal."""
+    observed = assert_registry_current(
+        project_root, registry, typed_policy_registry=typed_policy_registry
+    )
+    legacy = [call for call in observed if call.transition_kind == "legacy"]
+    if legacy:
+        raise CallsiteInventoryError(
+            f"Typed dispatch closure requires zero legacy expressions; found {len(legacy)}"
+        )
+    from imas_codex.discovery import base
+
+    public_wrappers = [
+        name
+        for name in ("call_llm_structured", "acall_llm_structured")
+        if hasattr(base, name)
+    ]
+    if public_wrappers:
+        raise CallsiteInventoryError(
+            "Typed dispatch closure requires removing public legacy wrappers: "
+            f"{public_wrappers}"
         )
     return observed
 

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
 from copy import deepcopy
 
 import pytest
@@ -258,6 +260,33 @@ def test_provenance_drift_is_independent(envelope_data: dict[str, object]) -> No
     assert after.authority_fingerprint == before.authority_fingerprint
     assert after.comparator_fingerprint == before.comparator_fingerprint
     assert after.provenance_fingerprint != before.provenance_fingerprint
+
+
+def test_attachment_digest_and_dimensions_are_validated(
+    envelope_data: dict[str, object],
+) -> None:
+    content = b"image-content"
+    envelope_data["batch_items"][0]["attachments"] = [  # type: ignore[index]
+        {
+            "attachment_id": "image:one",
+            "media_type": "image/png",
+            "content_digest": hashlib.sha256(content).hexdigest(),
+            "data_base64": base64.b64encode(content).decode(),
+            "byte_length": len(content),
+            "width": 10,
+            "height": 20,
+        }
+    ]
+
+    before = fingerprint_envelope(envelope_data)
+    changed = deepcopy(envelope_data)
+    changed["batch_items"][0]["attachments"][0]["width"] = 11  # type: ignore[index]
+    after = fingerprint_envelope(changed)
+    assert before.provenance_fingerprint != after.provenance_fingerprint
+
+    changed["batch_items"][0]["attachments"][0]["content_digest"] = "b" * 64  # type: ignore[index]
+    with pytest.raises(ContextEnvelopeError, match="does not match"):
+        validate_envelope(changed)
 
 
 def test_item_fingerprint_does_not_depend_on_batch_position(

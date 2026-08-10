@@ -79,11 +79,10 @@ def _get_section(section: str) -> dict:
 def get_openrouter_pricing(model: str) -> dict[str, Any]:
     """Return the centrally cataloged OpenRouter pricing for *model*.
 
-    Token rates are normalized to USD per million tokens.  ``request`` is a
-    fixed per-request USD charge, and optional overrides apply at or above
-    their ``min_input_tokens`` threshold.  An empty mapping means the project
-    has no explicit catalog entry and lets the LLM layer consult LiteLLM's
-    bundled catalog before failing closed.
+    Token rates are normalized to USD per million tokens. ``request`` and
+    ``image`` are fixed per-request and per-image charges. Optional overrides
+    apply at or above their ``min_input_tokens`` threshold. An empty mapping
+    means the project has no explicit checked-in pricing entry.
     """
     catalog = _get_section("llm").get("openrouter-pricing", {})
     raw = catalog.get(model)
@@ -103,6 +102,7 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
         "prompt": raw.get("prompt"),
         "completion": raw.get("completion"),
         "request": raw.get("request", 0.0),
+        "image": raw.get("image", 0.0),
         "source": raw.get("source"),
         "verified_at": raw.get("verified-at"),
         "overrides": overrides,
@@ -288,6 +288,7 @@ def register_model_endpoints() -> None:
             _MODEL_ENDPOINTS[model_id] = {
                 "api_base": cfg["api_base"],
                 "api_key_env": cfg.get("api_key_env"),
+                "endpoint_class": _get_section(section).get("endpoint-class"),
             }
 
     def _walk(node: dict) -> None:
@@ -303,6 +304,7 @@ def register_model_endpoints() -> None:
                         {
                             "api_base": api_base,
                             "api_key_env": node.get("api-key-env"),
+                            "endpoint_class": node.get("endpoint-class"),
                         },
                     )
         for value in node.values():
@@ -319,6 +321,16 @@ def get_model_endpoint(model: str) -> dict[str, str | None] | None:
     (i.e. it should use the default OpenRouter/proxy routing).
     """
     return _MODEL_ENDPOINTS.get(model)
+
+
+def is_explicit_free_local_endpoint(model: str) -> bool:
+    """Return whether trusted config explicitly marks a local model as free."""
+    endpoint = get_model_endpoint(model)
+    return bool(
+        model.startswith(_LOCAL_ENDPOINT_PREFIXES)
+        and endpoint
+        and endpoint.get("endpoint_class") == "local-free"
+    )
 
 
 # Populate at import time

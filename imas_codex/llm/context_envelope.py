@@ -6,6 +6,8 @@ import hashlib
 import json
 import math
 import re
+from base64 import b64decode
+from binascii import Error as Base64Error
 from collections.abc import Mapping, Sequence
 from datetime import date, datetime, time
 from enum import Enum
@@ -279,6 +281,43 @@ def _validate_item(item: PromptItemEnvelope, index: int) -> None:
             allowed_scopes=_ITEM_SCOPES,
             location=f"{location}.mutable_candidate",
         )
+    attachment_ids: set[str] = set()
+    for attachment_index, attachment in enumerate(item.attachments or []):
+        attachment_location = f"{location}.attachments[{attachment_index}]"
+        for field_name in ("attachment_id", "media_type"):
+            if not getattr(attachment, field_name).strip():
+                raise ContextEnvelopeError(
+                    f"{attachment_location}.{field_name} must not be blank"
+                )
+        if attachment.attachment_id in attachment_ids:
+            raise ContextEnvelopeError(
+                f"{location}.attachments contains duplicate attachment_id"
+            )
+        attachment_ids.add(attachment.attachment_id)
+        _validate_digest(
+            attachment.content_digest, f"{attachment_location}.content_digest"
+        )
+        if any(
+            isinstance(value, bool) or not isinstance(value, int) or value <= 0
+            for value in (attachment.byte_length, attachment.width, attachment.height)
+        ):
+            raise ContextEnvelopeError(
+                f"{attachment_location} dimensions and byte_length must be positive integers"
+            )
+        try:
+            content = b64decode(attachment.data_base64, validate=True)
+        except (Base64Error, ValueError) as exc:
+            raise ContextEnvelopeError(
+                f"{attachment_location}.data_base64 is invalid"
+            ) from exc
+        if len(content) != attachment.byte_length:
+            raise ContextEnvelopeError(
+                f"{attachment_location}.byte_length does not match decoded content"
+            )
+        if hashlib.sha256(content).hexdigest() != attachment.content_digest:
+            raise ContextEnvelopeError(
+                f"{attachment_location}.content_digest does not match decoded content"
+            )
     _validate_authority_consistency(item, location)
 
 
@@ -363,6 +402,17 @@ def _item_payloads(item: PromptItemEnvelope) -> tuple[dict[str, Any], ...]:
         "item_id": item.item_id,
         "provenance": item.provenance,
         "mutable_candidate": item.mutable_candidate,
+        "attachments": [
+            {
+                "attachment_id": attachment.attachment_id,
+                "media_type": attachment.media_type,
+                "content_digest": attachment.content_digest,
+                "byte_length": attachment.byte_length,
+                "width": attachment.width,
+                "height": attachment.height,
+            }
+            for attachment in (item.attachments or [])
+        ],
     }
     return authority, comparators, provenance
 

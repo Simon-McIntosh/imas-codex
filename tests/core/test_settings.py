@@ -219,6 +219,13 @@ class TestModuleLevelConstants:
         assert isinstance(settings.EMBEDDING_DIMENSION, int)
 
 
+def test_free_local_endpoint_requires_explicit_trusted_classification():
+    assert settings.is_explicit_free_local_endpoint("hosted_vllm/deepseek-v4-flash")
+    assert not settings.is_explicit_free_local_endpoint(
+        "openrouter/openai/gpt-5.6-luna"
+    )
+
+
 class TestGraphSettings:
     """Tests for graph (Neo4j) settings accessors."""
 
