@@ -16,8 +16,8 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-09">
-<meta name="plan-version" content="124">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="126">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S7">
 <meta name="plan-capability-version" content="1.0">
@@ -333,27 +333,99 @@
       canonicalizer.
     </p>
 
-    <h2 id="s7">§7 — Sequencing and budget</h2>
+    <h2 id="s7">§7 — Recovery routes, sequencing, and budget</h2>
     <p>
-      Compose is free (local GPU); review is the only paid stage, measured at
-      <strong>$0.27/name</strong>. A graph-wide review of the ~890 sources awaiting
-      compose is therefore roughly <strong>$150–250</strong> — real money, and the
-      reason this is a separate plan rather than a tail on the release.
+      The intact 22 July WEST stage-0 archive was loaded into a disposable
+      loopback-only Neo4j instance and compared with the current graph without
+      touching production or calling a provider. It is a useful historical
+      comparator, but it is <strong>not</strong> a clean pre-fold authority. The
+      snapshot already binds the control-surface normal vector to
+      <code>vertical_coordinate_of_control_surface</code>, the passive-loop
+      <code>arcs_of_circle/r</code> leaf to
+      <code>radial_outline_of_coil_conductor_element</code>, and the iron-core
+      <code>arcs_of_circle/r</code> leaf to
+      <code>radial_coordinate_of_iron_core_segment</code>. A wholesale rollback
+      would therefore exchange the current defects for older defects.
     </p>
-    <p>Recommended order, cheapest-signal-first:</p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Recovery route</th>
+            <th>Provider cost</th>
+            <th>What it preserves or loses</th>
+            <th>Verdict</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Replace production with the 22 July graph dump</td>
+            <td>$0 for the load; expensive later rework</td>
+            <td>Restores known-wrong geometry, loses 5,046 later cost rows, 156 runs, 347 edit intents, 990 later source compositions, and post-snapshot DD/classification work. Most later changes lack complete replay closure.</td>
+            <td><strong>Reject.</strong> It is neither semantically clean nor deterministically replayable.</td>
+          </tr>
+          <tr>
+            <td>Replace only the Standard Names subgraph</td>
+            <td>$0 for copying stored nodes; paid review needed after semantic changes</td>
+            <td>Neo4j dumps are database-wide, so this would be a custom migration across names, sources, Reviews, revisions, costs, runs, grammar, DD projections, and provenance. It still imports the known defects.</td>
+            <td><strong>Reject as a baseline.</strong> The closure is broad and the source is dirty.</td>
+          </tr>
+          <tr>
+            <td>Blindly restore snapshot source-to-name memberships</td>
+            <td>$0</td>
+            <td>Small blast radius, but the three reported memberships are already wrong in the snapshot. The four synchronized projections can be compared, not trusted.</td>
+            <td><strong>Evidence only.</strong> Never treat snapshot membership as apply authority.</td>
+          </tr>
+          <tr>
+            <td>Keep current graph; diff the isolated snapshot; build exact reviewed per-source manifests</td>
+            <td>$0 for deterministic comparison and membership repair; local DSv4 for advisory classification; paid quorum only when identity or documentation changes</td>
+            <td>Preserves later Reviews, edits, costs, lineage, and DD work. Classifies each source as unchanged, later trustworthy, later defective, snapshot defective, or unresolved before any write.</td>
+            <td><strong>Recommended.</strong> Lowest-cost path with the strongest provenance.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>
+      The recommended route is <strong>snapshot-assisted selective
+      reconstruction</strong>, not regeneration. Existing Reviews,
+      <code>DocsRevision</code> chains, costs, runs, hints, edit intent, and exact
+      recovery receipts can be retained whenever their identity and review-input
+      hashes still match. Deterministic source membership and projection repairs
+      require no LLM call. Fresh paid quorum is reserved for rows whose owner,
+      representation, carrier, frame, section plane, locus, axis, name, or
+      documentation actually changes.
+    </p>
+    <p>Required order, cheapest and safest signal first:</p>
     <ol>
-      <li><strong>Settle the fan-out invariant</strong> (§4). Free, and it decides
-        whether 240 of the 1458 violations are defects at all.</li>
-      <li><strong>The embed dimension mismatch</strong> (§6). Independent, breaks
-        a whole capability, probably small.</li>
-      <li><strong>Find the supersede-without-retarget path</strong> (§4, 596
-        cases). One code fix likely collapses the largest class.</li>
-      <li><strong>Gate the three write paths + add the geometry rule</strong> (§5).
-        Free, and it stops the defect classes regenerating.</li>
-      <li><strong>Then</strong> the orphan decisions (§3) and a budgeted
-        graph-wide review — in that order, because gating first means the review
-        does not have to be repeated.</li>
+      <li>Land the typed semantic-signature and context-authority guards before
+        changing another family membership.</li>
+      <li>Create and hash a real current production dump. The existing graph-load
+        “backup” marker is not a backup, so no rollback rehearsal is reversible
+        without this dump.</li>
+      <li>Export canonical source-level projections from the isolated snapshot
+        and current graph; produce the five-way classification and exact
+        before/after closure hashes.</li>
+      <li>Use local DSv4 in frozen, flag-only advisory mode for ambiguous rows;
+        it may prioritize defects but cannot attach, rename, accept, or rewrite
+        graph state.</li>
+      <li>Independently adjudicate exact manifests, dry-run on a disposable copy
+        of the current graph, prove rollback and idempotence, then apply only in a
+        quiet production window.</li>
+      <li>Spend from the remaining campaign ceiling only on ordinary hosted
+        quorum review for identity- or documentation-changing rows. The
+        authorized ceiling is cumulative run authority, not a per-name
+        reservation.</li>
     </ol>
+    <p>
+      Evidence: <code>/tmp/sn_prefold_snapshot_recovery.json</code>, SHA-256
+      <code>99e074e02d502f9353227feaf3ccd1f1fc214d0f3d879b86e34bc90d9cd9d608</code>.
+      The assessed archive is
+      <code>imas-codex-graph-west-rehearsal-snapshot.tar.gz</code>, timestamp
+      <code>2026-07-22T07:59:59.607031Z</code>, archive SHA-256
+      <code>3379a893436cc6b732930be6535b2f888894211cee5b0906bd891fcd95f7ab6c</code>.
+    </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -1229,6 +1301,11 @@ Done-when (ordered)
     <p class="r-q-body"><p>The promised verbatim radius-locus refine rule is absent from all asserted authorities, and the runbook §5b query currently returns 87 rows rather than zero. Please authorize the reviewed verbatim rule and a scope/cardinality-aware replacement census before this follow-up is declared complete.</p></p>
     <p class="r-q-resolution">Replace the absent radius-locus wording with the strict no-ordinal-position rule and implement a source-scope/cardinality-aware census. The census must evaluate the intended cohort rather than demand zero across unrelated valid rows.</p>
     </div>
+</section>
+<section data-reckon="research" id="research" class="r-research-list">
+<h2><span class="sec">§</span> Research</h2>
+<div class="r-research" data-id="prefold-snapshot-recovery" data-type="graph-snapshot-forensics" data-source="/tmp/sn_prefold_snapshot_recovery.json; sha256 99e074e02d502f9353227feaf3ccd1f1fc214d0f3d879b86e34bc90d9cd9d608" data-added-by="reckon-ship" data-when="2026-08-10T00:00:00+02:00">
+    <span class="r-research-title">The July 22 graph snapshot is a forensic comparator, not a clean rollback baseline</span></div>
 </section>
 </main>
 </body>
