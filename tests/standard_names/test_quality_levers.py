@@ -1,4 +1,4 @@
-"""Tests for quality levers L1, L2, L4, L6, L7."""
+"""Tests for Standard Names quality mechanisms."""
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 # =========================================================================
-# L1: Domain-vocabulary pre-seeding
+# Domain-vocabulary pre-seeding
 # =========================================================================
 
 
@@ -70,7 +70,7 @@ class TestDomainVocabularyPreseed:
 
 
 # =========================================================================
-# L2: Reference SN few-shot retrieval
+# Reference standard-name few-shot retrieval
 # =========================================================================
 
 
@@ -180,7 +180,7 @@ class TestReferenceSNRetrieval:
 
 
 # =========================================================================
-# L4: Reviewer-theme extraction
+# Reviewer-theme extraction
 # =========================================================================
 
 
@@ -227,12 +227,12 @@ class TestReviewerThemes:
 
 
 # =========================================================================
-# L6: Grammar-failure re-prompt
+# Grammar-failure re-prompt
 # =========================================================================
 
 
 class TestGrammarRetry:
-    """Tests for L6 grammar-failure re-prompt."""
+    """Tests for the grammar-failure re-prompt."""
 
     @pytest.mark.asyncio
     async def test_retry_returns_revised_name(self):
@@ -274,61 +274,6 @@ class TestGrammarRetry:
 
 
 # =========================================================================
-# L7: Opus revision pass
-# =========================================================================
-
-
-class TestOpusRevision:
-    """Tests for L7 Opus revision pass."""
-
-    @pytest.mark.asyncio
-    async def test_revision_returns_name_on_success(self):
-        """Opus revision returns revised name when LLM responds."""
-        from imas_codex.standard_names.workers import _opus_revise_candidate
-
-        class MockResponse:
-            revised_name = "electron_temperature"
-            explanation = "Better naming"
-
-        async def mock_acall(*args, **kwargs):
-            return MockResponse(), 0.05, 500
-
-        candidate = {
-            "id": "te_profile",
-            "reason": "ambiguous",
-            "description": "Electron temperature",
-        }
-        result = await _opus_revise_candidate(
-            candidate,
-            "",
-            [],
-            mock_acall,
-        )
-        assert result[0] == "electron_temperature"
-
-    @pytest.mark.asyncio
-    async def test_revision_returns_none_on_error(self):
-        """Opus revision returns None on LLM error."""
-        from imas_codex.standard_names.workers import _opus_revise_candidate
-
-        async def mock_acall(*args, **kwargs):
-            raise Exception("LLM unavailable")
-
-        candidate = {
-            "id": "te_profile",
-            "reason": "ambiguous",
-            "description": "Electron temperature",
-        }
-        result = await _opus_revise_candidate(
-            candidate,
-            "domain vocab",
-            ["theme1"],
-            mock_acall,
-        )
-        assert result[0] is None
-
-
-# =========================================================================
 # State fields
 # =========================================================================
 
@@ -337,7 +282,7 @@ class TestStateFields:
     """Tests for new state tracking fields."""
 
     def test_state_has_quality_lever_fields(self):
-        """StandardNameBuildState has L3/L6/L7 tracking fields."""
+        """StandardNameBuildState has retry, revision, and audit counters."""
         from imas_codex.standard_names.state import StandardNameBuildState
 
         state = StandardNameBuildState(facility="dd")

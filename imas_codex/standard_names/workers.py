@@ -3146,12 +3146,6 @@ def _search_reference_exemplars(
         return []
 
 
-# Escalation-tier model for the borderline-candidate revision pass.
-_CANDIDATE_REVISION_MODEL = DEFAULT_ESCALATION_MODEL
-# Skip the revision pass when the remaining budget falls below this.
-_CANDIDATE_REVISION_MIN_BUDGET = 0.50
-
-
 async def _grammar_retry(
     original_name: str,
     parse_error: str,
@@ -3355,71 +3349,6 @@ async def _self_refine_candidate(
     new_desc = normalize_description_text((result.description or "").strip())
     logger.info("Self-refine improved %r → %r", name, new_name)
     return new_name, (new_desc or description)
-
-
-async def _opus_revise_candidate(
-    candidate: dict,
-    domain_vocabulary: str,
-    reviewer_themes: list[str],
-    acall_fn,
-) -> tuple[str | None, float, int, int]:
-    """Revision pass for borderline candidates using the escalation-tier model.
-
-    Returns ``(revised_name_or_None, cost_usd, tokens_in, tokens_out)``.
-    The cost is always returned so callers can account for it even when
-    the revision is discarded.
-    """
-    from pydantic import BaseModel, Field
-
-    class OpusRevisionResponse(BaseModel):
-        revised_name: str = Field(description="Improved standard name")
-        explanation: str = Field(description="Why this revision is better")
-
-    name = candidate.get("id", "")
-    reason = candidate.get("reason", "")
-    description = candidate.get("description", "")
-
-    prompt_parts = [
-        "A standard name candidate requires revision:",
-        f"  Name: `{name}`",
-        f"  Description: {description}",
-        f"  Reason: {reason}",
-        "",
-        "Revise the name to be more precise, following ISN grammar rules.",
-        "Pattern: [subject_][physical_base|geometric_base][_component][_position][_process][_object]",
-        "",
-    ]
-
-    if domain_vocabulary:
-        prompt_parts.append("Domain vocabulary (prefer these terms):")
-        # Include first 10 lines of vocabulary
-        for line in domain_vocabulary.split("\n")[:10]:
-            prompt_parts.append(f"  {line}")
-        prompt_parts.append("")
-
-    if reviewer_themes:
-        prompt_parts.append("Reviewer feedback themes to address:")
-        for theme in reviewer_themes[:5]:
-            prompt_parts.append(f"  - {theme}")
-        prompt_parts.append("")
-
-    prompt_parts.append("Return a revised name only if you can do CLEARLY better.")
-
-    try:
-        llm_out = await acall_fn(
-            model=_CANDIDATE_REVISION_MODEL,
-            messages=[{"role": "user", "content": "\n".join(prompt_parts)}],
-            response_model=OpusRevisionResponse,
-            service="standard-names",
-        )
-        result, _cost, _tokens = llm_out
-        _ti = getattr(llm_out, "input_tokens", 0) or 0
-        _to = getattr(llm_out, "output_tokens", 0) or 0
-        if result:
-            return result.revised_name, float(_cost or 0.0), _ti, _to
-        return None, float(_cost or 0.0), _ti, _to
-    except Exception:
-        return None, 0.0, 0, 0
 
 
 async def compose_worker(state: StandardNameBuildState, **_kwargs) -> None:
