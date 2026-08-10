@@ -941,6 +941,15 @@ classes:
         range: DDGap
         annotations:
           relationship_type: HAS_DD_GAP
+      dd_resolutions:
+        description: >-
+          Graph mirrors of separately reviewed, version-bound effective values
+          for this exact raw DD path. Runtime behavior reads the packaged
+          resolution manifest and treats mirror digest drift as an error.
+        multivalued: true
+        range: DDResolution
+        annotations:
+          relationship_type: HAS_DD_RESOLUTION
       coordinates:
         description: >-
           Coordinate specifications for this path (axis definitions).
