@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -282,6 +282,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="dd-resolution-transition-hold-20260810" data-who="reckon-ship" data-when="2026-08-10T18:10:00+02:00">
     <div class="r-comment-body"><p><strong>Semantics-changing transition is on authority HOLD.</strong> A row-by-row audit of all 62 legacy rules found 3 safe deterministic normalizations, 0 active-resolution-eligible rules, 49 candidates missing exact authority, 4 explicit qualification skips, 0 obsolete rules safe to retire, and 6 ambiguous rules. The current override inventory is 24 replacements plus 4 skips, correcting the earlier 25/3 split. No consumer cutover, raw-DD restoration, graph rewrite retirement, or live backfill is safe until exact path/version/raw-release facts, DDGap observation evidence, an upstream solution reference, and a governed approval receipt exist for each promoted record. The audit was read-only: no graph, provider, pipeline, or service operation ran. Evidence: <code>/tmp/reckon-s8-scope/dd-resolution-transition-audit.md</code>, SHA-256 <code>fd5bb1e70ab0945df501550c38b0b202740eea0046b53d6d17c7b1c88aabbaf1</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="dd-resolution-machine-evidence-20260810" data-who="reckon-ship" data-when="2026-08-10T18:35:00+02:00">
+    <div class="r-comment-body"><p><strong>The immutable-release and live-evidence export confirms zero activation authority.</strong> DD 4.1.1 supplied exact raw tuples for 45 of 62 legacy rows, expanding to 1,637 unique published paths and 1,619 deduplicated replacement tuples for review; 17 rows had no exact release match. Comparison with 35 live DDGap facts and 451 observations found 57 release conflicts: 35 observed paths absent from DD 4.1.1 and 22 published paths whose raw unit differs from the observation. The graph currently has zero <code>DDResolution</code> nodes, zero version bindings, zero approval receipts, and zero lifecycle receipts. All 62 rows still lack an exact upstream solution, governed approval actor/receipt/reason, and fresh evidence after conflict resolution. The guarded export is <code>NOT_AUTHORIZED_REVIEW_INPUT_ONLY</code>; it cannot affect runtime. Human report: <code>/tmp/reckon-s8-scope/dd-resolution-evidence-export.md</code>, SHA-256 <code>51340f7777aeb112f18f3959b6469d3db6372e7d1a896be5e0b39fddb5483945</code>. Complete machine payload: <code>/tmp/reckon-s8-scope/dd-resolution-evidence-export.json</code>, SHA-256 <code>93ad2ae36bbb9e322591bbf6f71539b3c170d09672059ca7078f74ed9129512e</code>.</p></div>
 </div>
 </section>
 </main>
