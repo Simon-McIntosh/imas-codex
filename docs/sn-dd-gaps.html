@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -259,6 +259,11 @@ CONSTRAINTS
     <div class="r-fu-body"><p>Add the typed resolution layer above immutable DDGap observations and route every Standard Names context/parser through it. The graph must preserve both observed DD truth and the reviewed effective value, with exact applicability and upstream provenance.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
     </article>
+<article class="r-fu" data-id="f-dd-candidate-parser" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-10T19:15:00+02:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Make review-only DD candidate intake duplicate-safe and scalar-strict</h4>
+    <div class="r-fu-body"><p>Resume from unmerged candidate <code>9b37dd6f</code>. Replace the permissive YAML boundary with duplicate-key rejection, enforce strict authority scalar types, add nested duplicate/coercion regressions, and run a fresh provisioned focused suite plus independent review. Keep the active authority manifest empty and preserve zero runtime or graph consumption.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -288,6 +293,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="dd-upstream-provenance-20260810" data-who="reckon-ship" data-when="2026-08-10T19:00:00+02:00">
     <div class="r-comment-body"><p><strong>Official upstream provenance is now row-complete, but activation remains held.</strong> A read-only audit covered all 62 legacy rows and found exact official solution references for 21 row mappings: merged PR 242 (<code>cb0d86de</code>) covers direction and unit-vector families; open PR 273 (<code>f34c85d3</code>) covers three wall neutral energy-flux rows; open PR 280 (<code>30a5ddd4</code>) covers six exact ionisation-potential paths but not the mixed fourteen-path row; and merged PR 281 (<code>d07172e8</code>) covers five reconstructed-unit rows. No row is eligible or active: every row still lacks the repo-governed approval receipt, actor, timestamp, decision reason and positive revision; 12 rows remain graph-conflict-held; open changes are unmerged, and merged changes post-date DD 4.1.1 with no fixed published tag. The audit also preserves contrary semantics: <code>ec_launchers/beam/direction/kphi</code> remains a wavevector component in <code>m^-1</code>, and PR 280 explicitly retains adjacent charge-number fields in <code>e</code>. Evidence: <code>/tmp/reckon-s8-scope/dd-upstream-provenance.md</code>, SHA-256 <code>bee4c1a8977eaedc279754af0dacb623a844edbcfc935e0ad457cf2c53818496</code>. No graph, catalog, runtime, provider or pipeline mutation ran; implementation remains 72%.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="dd-candidate-review-hold-20260810" data-who="reckon-ship" data-when="2026-08-10T19:15:00+02:00">
+    <div class="r-comment-body"><p><strong>The review-only candidate-provenance layer is preserved but unmerged.</strong> Candidate <code>9b37dd6f</code> correctly stores 21 official upstream mappings as 16 exact bounded review inputs plus five zero-path broad holds; it splits U19 to six exact paths, leaves <code>dd_resolutions.yaml</code> empty, has no runtime/graph consumer and fabricates no approval. Independent review nevertheless blocks integration with 0 critical, 0 high and 2 medium findings: plain <code>yaml.safe_load</code> accepts duplicate keys before Pydantic validation, and authority-relevant integer facts accept coercive scalar forms. The compute test result is unknown because node-local logs were unavailable and was not rerun; login sync passed. Active resolutions remain 0, implementation remains 72%, and no graph/catalog/pipeline mutation ran. Implementation evidence: <code>/tmp/reckon-s8-evidence/dd-candidate-provenance-manifest.md</code>. Review: <code>/tmp/reckon-s8-evidence/dd-candidate-provenance-review.md</code>, SHA-256 <code>0d16c8ba819c794bf404bce61658882ec23ab9cc3352ddf68b0d8225daae65bd</code>. Test receipt: <code>/tmp/reckon-s8-evidence/dd-candidate-provenance-test.md</code>.</p></div>
 </div>
 </section>
 </main>
