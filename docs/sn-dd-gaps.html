@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -285,6 +285,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="dd-resolution-machine-evidence-20260810" data-who="reckon-ship" data-when="2026-08-10T18:35:00+02:00">
     <div class="r-comment-body"><p><strong>The immutable-release and live-evidence export confirms zero activation authority.</strong> DD 4.1.1 supplied exact raw tuples for 45 of 62 legacy rows, expanding to 1,637 unique published paths and 1,619 deduplicated replacement tuples for review; 17 rows had no exact release match. Comparison with 35 live DDGap facts and 451 observations found 57 release conflicts: 35 observed paths absent from DD 4.1.1 and 22 published paths whose raw unit differs from the observation. The graph currently has zero <code>DDResolution</code> nodes, zero version bindings, zero approval receipts, and zero lifecycle receipts. All 62 rows still lack an exact upstream solution, governed approval actor/receipt/reason, and fresh evidence after conflict resolution. The guarded export is <code>NOT_AUTHORIZED_REVIEW_INPUT_ONLY</code>; it cannot affect runtime. Human report: <code>/tmp/reckon-s8-scope/dd-resolution-evidence-export.md</code>, SHA-256 <code>51340f7777aeb112f18f3959b6469d3db6372e7d1a896be5e0b39fddb5483945</code>. Complete machine payload: <code>/tmp/reckon-s8-scope/dd-resolution-evidence-export.json</code>, SHA-256 <code>93ad2ae36bbb9e322591bbf6f71539b3c170d09672059ca7078f74ed9129512e</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="dd-upstream-provenance-20260810" data-who="reckon-ship" data-when="2026-08-10T19:00:00+02:00">
+    <div class="r-comment-body"><p><strong>Official upstream provenance is now row-complete, but activation remains held.</strong> A read-only audit covered all 62 legacy rows and found exact official solution references for 21 row mappings: merged PR 242 (<code>cb0d86de</code>) covers direction and unit-vector families; open PR 273 (<code>f34c85d3</code>) covers three wall neutral energy-flux rows; open PR 280 (<code>30a5ddd4</code>) covers six exact ionisation-potential paths but not the mixed fourteen-path row; and merged PR 281 (<code>d07172e8</code>) covers five reconstructed-unit rows. No row is eligible or active: every row still lacks the repo-governed approval receipt, actor, timestamp, decision reason and positive revision; 12 rows remain graph-conflict-held; open changes are unmerged, and merged changes post-date DD 4.1.1 with no fixed published tag. The audit also preserves contrary semantics: <code>ec_launchers/beam/direction/kphi</code> remains a wavevector component in <code>m^-1</code>, and PR 280 explicitly retains adjacent charge-number fields in <code>e</code>. Evidence: <code>/tmp/reckon-s8-scope/dd-upstream-provenance.md</code>, SHA-256 <code>bee4c1a8977eaedc279754af0dacb623a844edbcfc935e0ad457cf2c53818496</code>. No graph, catalog, runtime, provider or pipeline mutation ran; implementation remains 72%.</p></div>
 </div>
 </section>
 </main>
