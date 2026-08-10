@@ -231,19 +231,6 @@ def _provider_rate(value: Any, dimension: str, model: str) -> float:
     return float(normalized)
 
 
-def _is_chargeable_price(value: Any) -> bool:
-    """Return whether a provider price field can represent a non-zero charge."""
-    if value is None or value == "":
-        return False
-    if isinstance(value, bool):
-        return True
-    try:
-        rate = Decimal(str(value))
-    except (InvalidOperation, TypeError, ValueError):
-        return True
-    return not rate.is_finite() or rate != 0
-
-
 def _canonical_payload_bytes(value: Mapping[str, Any]) -> bytes:
     return json.dumps(
         value,
@@ -412,19 +399,19 @@ def get_typed_openrouter_pricing(
         raise PricingAuthorityError(
             f"Typed pricing for {model!r} cannot enable unpriced cache control"
         )
-    chargeable_cache_write = sorted(
+    cache_write_fields = sorted(
         f"{payload_name}.{dimension}"
         for payload_name, pricing in (
             ("model", model_pricing),
             ("endpoint", endpoint_pricing),
         )
         for dimension in _CACHE_WRITE_PRICE_DIMENSIONS
-        if _is_chargeable_price(pricing.get(dimension))
+        if dimension in pricing
     )
-    if chargeable_cache_write:
+    if cache_write_fields:
         raise PricingAuthorityError(
-            f"Typed pricing for {model!r} has an unenforceable cache-write charge: "
-            f"{chargeable_cache_write}"
+            f"Typed pricing for {model!r} contains cache-write pricing without an "
+            f"enforceable ceiling and unit: {cache_write_fields}"
         )
     charged_unknown = sorted(
         name

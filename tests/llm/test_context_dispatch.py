@@ -12,7 +12,7 @@ from types import MappingProxyType, SimpleNamespace
 
 import pytest
 from PIL import Image
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel, ValidationError, create_model
 
 import imas_codex.llm.context_dispatch as context_dispatch
 import imas_codex.llm.dispatch_policy_registry as policy_registry
@@ -513,6 +513,9 @@ def test_same_named_different_schema_refuses_stale_static_refs(
     dispatch_case, monkeypatch
 ) -> None:
     spec, envelope, prompts_dir = dispatch_case
+    stale_schema_ref = next(
+        ref for ref in envelope["static_context"] if ref["kind"] == "schema"
+    )
     changed = replace(spec, response_model_path=f"{__name__}:ShadowClusterLabelBatch")
     monkeypatch.setattr(
         policy_registry,
@@ -530,6 +533,17 @@ def test_same_named_different_schema_refuses_stale_static_refs(
             response_model_identity=changed.response_model_path,
         ),
     )
+    refreshed_refs = [
+        ref.model_dump(mode="json")
+        for ref in static_context_refs(
+            changed.callsite_id,
+            route_id=changed.route_id,
+            prompts_dir=prompts_dir,
+        )
+    ]
+    envelope["static_context"] = [
+        stale_schema_ref if ref["kind"] == "schema" else ref for ref in refreshed_refs
+    ]
 
     with pytest.raises(ContextPolicyError, match="response identity"):
         prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
@@ -758,7 +772,7 @@ def test_dispatch_sends_the_fingerprinted_frozen_request(
     assert result.receipt.provider_usage.input_tokens == 100
     assert result.receipt.provider_usage.attempt_count == 1
     assert result.receipt.provider_usage.response_count == 1
-    assert result.receipt.provider_usage.billability_state.value == "valid"
+    assert result.receipt.provider_usage.billability_state == "valid"
     assert result.receipt.parsed_output_digest
 
 
@@ -798,7 +812,34 @@ def test_missing_boolean_and_fractional_usage_refuse(dispatch_case) -> None:
         with pytest.raises(UsageReconciliationError) as caught:
             reconcile_context_receipt(prepared.receipt, result, paid=True)
         assert caught.value.receipt is not None
-        assert caught.value.receipt.provider_usage.input_tokens_state.value != "valid"
+        assert caught.value.receipt.provider_usage.input_tokens_state != "valid"
+
+
+def test_provider_usage_requires_enum_inputs_and_stores_serializable_values() -> None:
+    values = {
+        "input_tokens": 100,
+        "input_tokens_state": context_dispatch.TelemetryState.valid,
+        "output_tokens": 20,
+        "output_tokens_state": context_dispatch.TelemetryState.valid,
+        "cached_read_tokens": 0,
+        "cached_read_tokens_state": context_dispatch.TelemetryState.valid,
+        "cached_write_tokens": 0,
+        "cached_write_tokens_state": context_dispatch.TelemetryState.valid,
+        "actual_cost": 0.001,
+        "actual_cost_state": context_dispatch.TelemetryState.valid,
+        "attempt_count": 1,
+        "attempt_count_state": context_dispatch.TelemetryState.valid,
+        "response_count": 1,
+        "response_count_state": context_dispatch.TelemetryState.valid,
+        "billability_state": context_dispatch.TelemetryState.valid,
+    }
+
+    with pytest.raises(ValidationError):
+        context_dispatch.ProviderUsage(**{**values, "input_tokens_state": "valid"})
+
+    usage = context_dispatch.ProviderUsage(**values)
+    assert usage.input_tokens_state == "valid"
+    assert usage.model_dump(mode="json")["input_tokens_state"] == "valid"
 
 
 def test_malformed_billable_telemetry_carries_explicit_failure_receipt(
@@ -839,8 +880,8 @@ def test_malformed_billable_telemetry_carries_explicit_failure_receipt(
         dispatch_context(envelope, spec.callsite_id)
 
     usage = caught.value.receipt.provider_usage
-    assert usage.input_tokens_state.value == "unavailable"
-    assert usage.actual_cost_state.value == "invalid"
+    assert usage.input_tokens_state == "unavailable"
+    assert usage.actual_cost_state == "invalid"
     assert usage.attempt_count == 1
 
 
@@ -868,10 +909,10 @@ def test_missing_provider_telemetry_carries_unavailable_failure_receipt(
         dispatch_context(envelope, spec.callsite_id)
 
     usage = caught.value.receipt.provider_usage
-    assert usage.input_tokens_state.value == "unavailable"
-    assert usage.actual_cost_state.value == "unavailable"
+    assert usage.input_tokens_state == "unavailable"
+    assert usage.actual_cost_state == "unavailable"
     assert usage.attempt_count is None
-    assert usage.attempt_count_state.value == "unavailable"
+    assert usage.attempt_count_state == "unavailable"
 
 
 def test_ambiguous_send_carries_consumed_attempt_and_unknown_billability(
@@ -919,8 +960,8 @@ def test_ambiguous_send_carries_consumed_attempt_and_unknown_billability(
     usage = caught.value.receipt.provider_usage
     assert usage.attempt_count == 1
     assert usage.response_count == 0
-    assert usage.billability_state.value == "unavailable"
-    assert usage.actual_cost_state.value == "unavailable"
+    assert usage.billability_state == "unavailable"
+    assert usage.actual_cost_state == "unavailable"
 
 
 def test_cache_write_telemetry_refuses_against_disabled_cache(dispatch_case) -> None:

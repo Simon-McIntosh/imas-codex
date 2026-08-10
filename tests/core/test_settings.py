@@ -241,8 +241,15 @@ def test_checked_in_pricing_preserves_missing_dimensions_and_stays_inactive():
         settings.get_typed_openrouter_pricing(model)
 
 
+_MISSING_CACHE_WRITE = object()
+
+
 def _typed_pricing_authority(
-    *, require_image: bool, cache_write: str | None = None
+    *,
+    require_image: bool,
+    cache_write: object = _MISSING_CACHE_WRITE,
+    cache_write_location: str = "model",
+    cache_write_dimension: str = "input_cache_write",
 ) -> dict[str, object]:
     model = "openrouter/openai/example-alias"
     canonical = "openai/example-canonical"
@@ -252,8 +259,13 @@ def _typed_pricing_authority(
         "request": "0.01",
         "image": "0.02",
     }
-    if cache_write is not None:
-        model_pricing["input_cache_write"] = cache_write
+    endpoint_pricing = dict(model_pricing)
+    if cache_write is not _MISSING_CACHE_WRITE:
+        pricing = {
+            "model": model_pricing,
+            "endpoint": endpoint_pricing,
+        }[cache_write_location]
+        pricing[cache_write_dimension] = cache_write
     architecture = {
         "input_modalities": ["text", "image"],
         "output_modalities": ["text"],
@@ -268,7 +280,6 @@ def _typed_pricing_authority(
         },
         separators=(",", ":"),
     )
-    endpoint_pricing = dict(model_pricing)
     endpoints_payload = json.dumps(
         {
             "data": {
@@ -399,14 +410,47 @@ def test_typed_pricing_rejects_payload_tampering_and_requires_image_by_modality(
         )
 
 
-def test_typed_pricing_rejects_hashed_positive_cache_write_surcharge(monkeypatch):
+@pytest.mark.parametrize("cache_write_location", ["model", "endpoint"])
+@pytest.mark.parametrize("cache_write_dimension", ["input_cache_write", "cache_write"])
+@pytest.mark.parametrize(
+    "cache_write",
+    [
+        "0.000000125",
+        "-0.000000125",
+        0,
+        0.0,
+        "0",
+        "",
+        None,
+        "not-a-price",
+        "NaN",
+        {"unit": "unknown"},
+    ],
+    ids=[
+        "positive",
+        "negative",
+        "integer-zero",
+        "float-zero",
+        "string-zero",
+        "empty-string",
+        "null",
+        "malformed",
+        "nonfinite",
+        "structured-value",
+    ],
+)
+def test_typed_pricing_rejects_cache_write_key_presence(
+    monkeypatch, cache_write_location, cache_write_dimension, cache_write
+):
     authority = _typed_pricing_authority(
         require_image=False,
-        cache_write="0.000000125",
+        cache_write=cache_write,
+        cache_write_location=cache_write_location,
+        cache_write_dimension=cache_write_dimension,
     )
     monkeypatch.setattr(settings, "get_openrouter_pricing", lambda model: authority)
 
-    with pytest.raises(settings.PricingAuthorityError, match="cache-write charge"):
+    with pytest.raises(settings.PricingAuthorityError, match="cache-write pricing"):
         settings.get_typed_openrouter_pricing(
             "openrouter/openai/example-alias",
             now=datetime(2026, 8, 10, 1, tzinfo=UTC),
