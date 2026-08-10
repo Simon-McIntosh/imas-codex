@@ -21,7 +21,7 @@
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-impl" content="0.1">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -251,41 +251,7 @@ CLI cleanup after Phase 3&rsquo;s alias additions settle.</p>
 <article class="r-fu" data-id="f-cli-consolidation" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship 33-cli-harmonization" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Cut over the 30-command SN surface to eight typed operator intents</h4>
     <div class="r-fu-body"><p>Freeze the complete command and consumer inventory, extract typed planners/executors from Click bodies, converge every mutation on one manifest contract, then remove all superseded registrations in one documented breaking change.</p></div>
-    <pre class="r-fu-prompt">Project: imas-codex
-Plan: 33-cli-harmonization
-
-Entry gate
-The semantic graph recovery and documentation evidence recovery workflows must be stable before their final operator grammar is frozen. Refresh the live command/call-graph/automation inventory immediately before implementation.
-
-Target grammar
-- sn status: summary, coverage, family, DD-gap and recovery state.
-- sn run: authoritative pipeline, bounded cohort, review axis, and documentation execution.
-- sn audit: read-only graph/context/DD/advisory inspection, including DSv4 metadata advisory.
-- sn edit: governed name, documentation, binding, source-hint, and domain intents.
-- sn recover: source, name, docs, claim, and attachment recovery.
-- sn maintain: source authority, semantic bindings, grammar projections, structural closure, vocabulary/DD-gap governance, and bounded cleanup.
-- sn catalog: preview, release, merge, decision, import/export, freeze and undo.
-- sn bench: model/seat/context benchmarks.
-
-Required work
-1. Rebuild and freeze the exact 30-command disposition and every shell/test/docs/automation consumer. No command may disappear without an explicit old-to-new mapping.
-2. Define typed request, planner, executor, postflight, and receipt APIs independent of Click. Click commands only validate syntax and call these APIs.
-3. Give every bounded run, recovery, maintenance, and authority-changing edit one shared contract: non-mutating plan by default; canonical JSON plus SHA-256; apply requires --apply, exact manifest bytes, and manifest hash; transactional revalidation and immutable receipt.
-4. Keep DSv4 under sn audit metadata --profile advisory. It must never share the authority-bearing review surface or emit an apply-ready mutation manifest.
-5. Deliver the complete documentation recovery lifecycle under sn recover docs: plan, apply, rollback, and status, with dynamic render-price-admit and durable admission.
-6. Narrow sn run to pipeline execution. Move resets, rename, family refresh, campaigns, and maintenance to their typed owners. Split the mixed --only vocabulary.
-7. Remove all superseded command registrations, aliases, hidden commands, forwarding shims, and deprecated options in one breaking cutover after every in-repo consumer is migrated.
-8. Update AGENTS.md, architecture docs, README, skill/agent prompts, shell examples, help snapshots, and the complete migration table.
-9. Run CLI tests, command-consumer scans, full Standard Names suite, schema checks, and an independent help/disposition comparison.
-
-Safety
-- --force cannot bypass semantic or authority fences.
-- Advisory output cannot be used directly as an apply manifest.
-- Every cost-bearing operation shows campaign ceiling, reserved expected exposure, actual spend, and per-attempt pricing separately.
-- Unknown old commands must fail as unknown after cutover.
-
-Done when
-Exactly eight top-level intents are visible, all 30 old commands have tested dispositions, all mutations use the shared typed harness, and no alias or private single-shot operator command remains.</pre>
+    <pre class="r-fu-prompt">/reckon-ship 33-cli-harmonization</pre>
     </article>
 </section>
   </main>

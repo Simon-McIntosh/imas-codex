@@ -23,7 +23,7 @@
 <meta name="plan-depends-on" content="llm-context-integrity,sn-dd-gaps,imas-standard-names:geometry-plane-and-arc-grammar,sn-pipeline-hardening">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -111,28 +111,7 @@
 <article class="r-fu" data-id="f-dsv4-advisory" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-benchmark-evolution" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Benchmark DSv4 and produce a graph-wide advisory defect census</h4>
     <div class="r-fu-body"><p>Build a production-faithful, typed-context benchmark for DSv4, calibrate it against hosted quorum and adversarial geometry cases, then run a frozen full-graph advisory sweep with zero graph mutation.</p></div>
-    <pre class="r-fu-prompt">Project: imas-codex
-Plan: sn-benchmark-evolution
-
-Prerequisites
-The typed context envelope, local DD resolution view, public ISN plane/arc grammar, and hardened Standard Names renderer/semantic signature must be available. Verify the imas-ambix DSv4 service health, exact model identity, structured-output behavior, and zero provider spend before any benchmark call.
-
-Objective
-Develop, benchmark, and calibrate a local DSv4 advisory reviewer, then use it to triage the entire Standard Names graph without changing lifecycle, source bindings, prose, scores, or authority.
-
-Required work
-1. Freeze a versioned gold corpus covering clean names, known semantic folds, stale/missing docs evidence, ambiguous DD defects, frame/plane/representation errors, ordinal traps, family topology, claim/lifecycle residue, and negative controls.
-2. Reproduce the production typed renderer exactly. Benchmarking must not use a simplified enrichment or different field ordering.
-3. Measure classification and ranking quality against independent human/hosted-quorum labels: precision/recall by defect class, false-negative rate on critical semantic defects, false-positive rate on clean accepted names, calibration, context sensitivity, repeatability, throughput, and zero-cost accounting.
-4. Use bounded hosted quorum only to establish or adjudicate benchmark labels. Report actual spend and the dynamic expected/p95/hard reservation per call; never quote the run ceiling as a per-name cost.
-5. Lock pass/fail thresholds before the full sweep. If a critical defect class misses threshold, improve prompts/context/typed features and re-benchmark; do not compensate by granting authority.
-6. Run the full graph-wide advisory census from a frozen snapshot. Emit immutable, exact, ranked manifests with reason codes, evidence hashes, source bindings, proposed disposition, confidence/calibration, and the context/request identity used.
-7. Partition outcomes into already authoritative, metadata/traceability recovery candidate, exact hosted-rescore candidate, semantic source/name defect, local-DD-resolution dependency, historical/superseded hold, and ambiguous hold.
-8. Compare the current graph with the pre-fold snapshot only as forensic evidence; the snapshot cannot authorize rollback or membership.
-9. Verify zero graph writes, zero lifecycle changes, zero claims/scopes, and no OpenRouter call during the advisory sweep.
-
-Done when
-DSv4 meets locked critical-defect and clean-name thresholds, the full census is reproducible and zero-mutation, and every flagged row is routed to a governed next step rather than applied directly.</pre>
+    <pre class="r-fu-prompt">/reckon-ship sn-benchmark-evolution</pre>
     </article>
 </section>
   </main>

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-impl" content="0.65">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2228,26 +2228,7 @@ Done-when
 <article class="r-fu" data-id="f-west-expert-review" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-west-review-rehearsal" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Rebuild the WEST reviewer packet after graph-wide hardening</h4>
     <div class="r-fu-body"><p>At the closed pre-WEST baseline, freeze the exact current WEST cohort and expose every name, description, source path, score, DD-resolution dependency, semantic signature, and advisory/hosted review finding for human disposition.</p></div>
-    <pre class="r-fu-prompt">Project: imas-codex
-Plan: sn-west-review-rehearsal
-
-Entry gate
-Do not start until the pre-WEST semantic hardening sprint is closed and all dependent plans are green. The historic WEST packet is evidence only. WEST names have no special protection and must reflect the current graph-wide delivery.
-
-Objective
-Prepare and conduct expert human review of the current WEST cohort without publishing it.
-
-Required work
-1. Rebuild the exact WEST source cohort from current facility/DD authority. Freeze graph, code, ISN, DD, local DD resolutions, semantic signatures, source memberships, names, descriptions, scores, complete review groups, and DSv4 advisory findings.
-2. Require every row to pass the graph-wide gates: strict ISN round trip; no ordinal identity; compatible role/carrier/representation/frame/plane/owner/locus/axis/unit; one compatible live identity per source; complete docs authority; and no claim/scope/run/admission residue.
-3. Show representative before/after semantics and all changed identities. In particular expose outline versus normal-vector components, hardware outline versus local arc parameters, global radial coordinate versus local circle radius, and plane-qualified cross-sections.
-4. Prepare a human packet with exact source paths, current/proposed name, one-line description, rationale, review scores/methods, local DD resolution and upstream PR provenance, advisory flags, hosted-quorum evidence, and accept/change/hold controls.
-5. Human decisions must be explicit and exact. A hold remains a hold; the packet must not average or word partial review into approval.
-6. Route requested changes back through the governed edit/review pipeline and rebuild the affected rows. Never hand-edit graph text or directly accept.
-7. Freeze the final disposition and reviewed artifact hashes for sn-west-catalog-release. Do not tag, merge, fold back, or publish in this plan.
-
-Done when
-Every WEST row has explicit human disposition on the hardened current state, all requested changes have re-entered and passed the ordinary review pipeline, no special protection or unexplained residual remains, and the exact frozen packet is ready for the separate catalog-release plan.</pre>
+    <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     </article>
 </section>
 

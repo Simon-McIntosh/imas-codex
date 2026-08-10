@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -257,28 +257,7 @@ CONSTRAINTS
 <article class="r-fu" data-id="f-ddg-local-resolution" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Make reviewed local DD resolutions first-class pipeline authority</h4>
     <div class="r-fu-body"><p>Add the typed resolution layer above immutable DDGap observations and route every Standard Names context/parser through it. The graph must preserve both observed DD truth and the reviewed effective value, with exact applicability and upstream provenance.</p></div>
-    <pre class="r-fu-prompt">Project: imas-codex
-Plan: sn-dd-gaps
-
-Objective
-Extend the existing DDGapObservation/DDGapStateChange registry so known Data-Dictionary defects with reviewed upstream solutions can be consumed immediately and safely by imas-codex. Do not wait for upstream release publication, and do not hide the correction in ad-hoc Python maps.
-
-Required work
-1. Inventory the current repo-local DD defect registry, existing upstream issue/PR metadata, unit exception handling, graph DDGap nodes, CLI/status surfaces, and every Standard Names parser/context call that reads affected DD fields.
-2. Design the LinkML authority model. Prefer an explicit resolution entity or equivalent typed extension that binds: exact path or validated selector; DD version/range; defect kind; affected semantic field; observed typed value; corrected typed value; evidence rule; upstream PR/commit/target release; approval identity/time/reason; deterministic content hash; lifecycle; and supersession/retirement.
-3. Support at least units, documentation, data type/cardinality, coordinate frame, representation role, section plane, and other source facts required by the geometry repairs. Preserve immutable raw DD observations and make the effective resolved view explicit.
-4. Build one canonical resolution accessor used by extraction, context rendering, classification, compose/review/refine, attachment guards, audits, manifests, export caveats, and status. Every consumed resolution must be recorded in the request/manifest receipt.
-5. Fail closed on overlapping, ambiguous, stale-version, unapproved, malformed, or drifted resolutions. A resolution must never silently make a non-nameable source eligible or direct-accept a name.
-6. Reconcile against each new DD release: prove whether the published value matches the local resolution, retire the overlay when it does, and surface disagreement when it does not.
-7. Add schema generation, graph compliance, exact-path/version, parser, pipeline, status, release-reporting, idempotency, and Neo4j compatibility tests.
-
-Known geometry use cases
-- control_surface/normal_vector components must use corrected source semantics and must never share the outline-coordinate identity;
-- arcs_of_circle/r must distinguish local circle representation parameters from global tokamak radial coordinates and hardware outlines;
-- cross-sections require an explicit section plane once ISN exposes the grammar.
-
-Done when
-The pipeline deterministically parses reviewed local corrections end to end, receipts show which resolution was used, raw DD provenance remains unchanged, ambiguous authority refuses before LLM or graph mutation, and upstream convergence retires the overlay automatically.</pre>
+    <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
     </article>
 </section>
 

@@ -27,7 +27,7 @@
 <meta name="plan-capability-risk" content="elevated">
 <meta name="plan-impl" content="0.1">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 </head>
 <body>
 <main class="plan-doc">
@@ -315,25 +315,7 @@ Done when
 <article class="r-fu" data-id="f-mast-post-hardening" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship mast-semantic-source-repair" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Rebuild and repair the MAST source manifest on the hardened graph</h4>
     <div class="r-fu-body"><p>After graph-wide integrity closes, refresh the MAST manifest against current DD/local-resolution/ISN authority, adjudicate exact source and identity gaps, and apply only separately authorized guarded changes.</p></div>
-    <pre class="r-fu-prompt">Project: imas-codex
-Plan: mast-semantic-source-repair
-
-Entry gate
-sn-graph-wide-integrity must be closed on the current graph. Use the pinned public ISN geometry grammar and typed local DD resolution accessor. Rebuild every baseline; do not reuse the 2026-08-02 spelling hypotheses as authority.
-
-Objective
-Deliver exact MAST semantic-source parity without conflating Standard Names with catalog mappings and without introducing a MAST-specific repair mechanism.
-
-Required work
-1. Freeze the current MAST DD 4.1.1 and facility-signal manifest, semantic signatures, graph bindings, catalog identities, local DD resolutions, source categories, and provenance.
-2. Classify every discrepancy as missing identity, wrong source membership, under-specific identity, local/upstream DD defect, stale provenance, absent facility source, or reviewed non-nameable.
-3. Adjudicate names through the public ISN grammar, including section-plane and local-arc semantics. Preserve no-ordinal identity and exact frame/representation distinctions.
-4. Use the common graph-wide exact manifest/reset/edit/review/reconcile harness. Do not create facility-specific Cypher, broad reconcile, direct accept, or catalog text edits.
-5. Run read-only and dry-run gates now. Apply graph changes, facility writes, or publish an ISN/catalog release candidate only under separate exact authority.
-6. Re-query the final state through imas-cx and prove stable-id/source parity, strict round trips, unit authority, and no collateral change.
-
-Done when
-Every MAST focus source has one compatible accepted identity or an explicit reviewed hold/non-nameable disposition, facility-source coverage is typed and non-empty where supported, all local DD resolutions are explicit, and any authorized graph/catalog apply has exact reversible receipts.</pre>
+    <pre class="r-fu-prompt">/reckon-ship mast-semantic-source-repair</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

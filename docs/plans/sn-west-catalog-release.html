@@ -27,7 +27,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
@@ -77,25 +77,7 @@
 <article class="r-fu" data-id="f-west-catalog-release" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-west-catalog-release" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Publish the expert-reviewed WEST cohort and prove reversible graph parity</h4>
     <div class="r-fu-body"><p>Consume the completed expert-review disposition, cut the governed catalog release, fold the reviewed catalog state back into the graph with exact receipts, and prove that undo restores the pre-release state without losing source or review history.</p></div>
-    <pre class="r-fu-prompt">Project: imas-codex
-Plan: sn-west-catalog-release
-
-Entry gate
-Do not begin until sn-west-review-rehearsal is complete and the pre-WEST hardening sprint is closed. The WEST cohort has no special protection and must enter with the same graph-wide semantic, source, context, claim, cost, and lifecycle gates as every other unreleased name.
-
-Required work
-1. Freeze the expert-review disposition and exact reviewed artifact hashes. Refuse missing, changed, ambiguous, or unreviewed rows.
-2. Produce the catalog diff and release notes from the governed export path. Prove strict ISN parse/compose, unit authority, documentation authority, unique compatible source membership, and absence of unresolved local DD-resolution drift.
-3. Open/merge the authorized catalog change and tag only the reviewed merge commit according to the release workflow. Record the exact version, commit, URL, and batch cardinality.
-4. Fold the reviewed catalog state back into the graph using the supported merge/reconcile path. Require exact preflight, manifest, dry-run, quiet window, transactional apply, postflight, and independent verification.
-5. Run freeze-check and undo rehearsal. Undo must restore the exact pre-release graph projection while retaining audit receipts and without broad resets or raw Cypher.
-6. Re-run the graph-wide release census, Standard Names suite, schema gates, and public search/fetch checks.
-
-Done when
-- Every released WEST identity has explicit human disposition and catalog authority.
-- Catalog, graph, source paths, provenance edges, review evidence, and lifecycle state agree by stable identity.
-- Undo is proven exact and reversible.
-- No open claims, scopes, runs, admissions, unresolved DD overlays, or WEST-specific exceptions remain.</pre>
+    <pre class="r-fu-prompt">/reckon-ship sn-west-catalog-release</pre>
     </article>
 </section>
 </main>

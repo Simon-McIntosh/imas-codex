@@ -27,7 +27,7 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.0">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
@@ -96,26 +96,7 @@
 <article class="r-fu" data-id="f-context-integrity" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship llm-context-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Migrate every active LLM call site to typed, inspectable context authority</h4>
     <div class="r-fu-body"><p>Freeze the complete call-site and template inventory; define one typed prompt envelope with explicit authority classes; rebuild renderers so obligations, comparators, provenance, frames, representations, owners, loci, axes, and planes cannot cross roles; then migrate and adversarially test every active call site before WEST.</p></div>
-    <pre class="r-fu-prompt">Project: imas-codex
-Plan: llm-context-integrity
-
-Objective
-Migrate every active imas-codex structured LLM call site to a typed, inspectable context envelope and a canonical renderer. This includes Standard Names, DD enrichment/classification, facility discovery, mappings, benchmarks, and any injected-callable adapter. No active call site may be deferred past the WEST review gate.
-
-Required work
-1. Rebuild the exact dispatch-expression -&gt; template -&gt; dynamic-field inventory from the current tree and make an executable registry/gate that fails when a reachable call site is missing.
-2. Define LinkML/Pydantic authority types for pinned source facts, semantic obligations, non-binding comparators, provenance, owner, carrier, representation, coordinate frame, section plane, locus, axis, unit, family, and reviewer intent. Unknown or conflicting authority must fail before provider dispatch.
-3. Build one canonical static-first renderer and one request identity/fingerprint. Remove duplicate templates, silent Jinja Undefined behavior, system/user duplication, stale inline grammar fragments, and lossy key remaps.
-4. Migrate all active call sites. Preserve dedicated sn-* model seats for every Standard Names provider call and retain graph-backed claim-before-provider ordering.
-5. Add golden and adversarial fixtures covering the known failures: control-surface outline versus normal vector, conductor outline versus circle-arc radius, local arc radius versus tokamak radial coordinate, poloidal cross-section plane, ninth-plus attached paths, mixed benchmark batches, and misleading rich descriptions.
-6. Add per-seat allowlists, rendered-context receipts, exact token/cost preflight, and a context-diff inspection surface suitable for RCA without provider calls.
-7. Run focused tests, the full relevant service suites, the full Standard Names suite, schema generation, and an independent inventory comparison.
-
-Safety and completion
-- Broad production paid generation/review stays paused while this plan is open.
-- Local DSv4 may run only offline/advisory against frozen manifests until its benchmark gates pass.
-- No graph mutation is authorized by this plan.
-- Done only when all active call sites are registered, typed, migrated, adversarially covered, and no context role can silently become naming or attachment authority.</pre>
+    <pre class="r-fu-prompt">/reckon-ship llm-context-integrity</pre>
     </article>
 </section>
 </main>
