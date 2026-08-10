@@ -18,11 +18,18 @@ Configuration is organized into subsections:
 All settings support environment variable overrides (IMAS_CODEX_* prefix / NEO4J_*).
 """
 
+import hashlib
 import importlib.resources
+import json
 import os
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from decimal import Decimal, InvalidOperation
 from functools import cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 try:
     import tomllib
@@ -79,11 +86,9 @@ def _get_section(section: str) -> dict:
 def get_openrouter_pricing(model: str) -> dict[str, Any]:
     """Return the centrally cataloged OpenRouter pricing for *model*.
 
-    Token rates are normalized to USD per million tokens.  ``request`` is a
-    fixed per-request USD charge, and optional overrides apply at or above
-    their ``min_input_tokens`` threshold.  An empty mapping means the project
-    has no explicit catalog entry and lets the LLM layer consult LiteLLM's
-    bundled catalog before failing closed.
+    Missing dimensions remain ``None``. This legacy-facing accessor never
+    converts absence into a numeric zero; typed dispatch uses the stricter
+    :func:`get_typed_openrouter_pricing` authority accessor below.
     """
     catalog = _get_section("llm").get("openrouter-pricing", {})
     raw = catalog.get(model)
@@ -94,7 +99,8 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
             "min_input_tokens": item.get("min-input-tokens"),
             "prompt": item.get("prompt"),
             "completion": item.get("completion"),
-            "request": item.get("request", raw.get("request", 0.0)),
+            "request": item.get("request", raw.get("request")),
+            "image": item.get("image", raw.get("image")),
         }
         for item in raw.get("overrides", [])
         if isinstance(item, dict)
@@ -102,11 +108,356 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
     return {
         "prompt": raw.get("prompt"),
         "completion": raw.get("completion"),
-        "request": raw.get("request", 0.0),
+        "request": raw.get("request"),
+        "image": raw.get("image"),
+        "cache_read": raw.get("cache-read"),
+        "cache_write": raw.get("cache-write"),
+        "cache_write_ttl": raw.get("cache-write-ttl"),
+        "image_unit": raw.get("image-unit"),
+        "canonical_slug": raw.get("canonical-slug"),
+        "provider": raw.get("provider"),
+        "provider_selector": raw.get("provider-selector"),
         "source": raw.get("source"),
         "verified_at": raw.get("verified-at"),
+        "endpoints_source": raw.get("endpoints-source"),
+        "retrieved_at": raw.get("retrieved-at"),
+        "model_payload_sha256": raw.get("model-payload-sha256"),
+        "endpoints_payload_sha256": raw.get("endpoints-payload-sha256"),
+        "canonical_projection_sha256": raw.get("canonical-projection-sha256"),
+        "model_payload_json": raw.get("model-payload-json"),
+        "endpoints_payload_json": raw.get("endpoints-payload-json"),
+        "other_charged_dimensions": raw.get("other-charged-dimensions"),
         "overrides": overrides,
     }
+
+
+class PricingAuthorityError(ValueError):
+    """Checked-in provider pricing is incomplete, stale, or ambiguous."""
+
+
+_TYPED_PRICE_MAX_AGE = timedelta(days=7)
+_SHA256_LENGTH = 64
+_TEXT_PRICE_DIMENSIONS = frozenset({"prompt", "completion", "request"})
+_CACHE_WRITE_PRICE_DIMENSIONS = frozenset({"input_cache_write", "cache_write"})
+_KNOWN_PRICE_DIMENSIONS = frozenset(
+    {
+        "prompt",
+        "completion",
+        "request",
+        "image",
+        "input_cache_read",
+        "input_cache_write",
+        "cache_read",
+        "cache_write",
+    }
+)
+
+
+def _required_pricing_value(raw: dict[str, Any], key: str, model: str) -> Any:
+    value = raw.get(key)
+    if value is None or value == "":
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks authoritative {key!r}"
+        )
+    return value
+
+
+def _payload_object(
+    raw: Mapping[str, Any], key: str, expected_hash: str, model: str
+) -> Mapping[str, Any]:
+    """Parse one exact checked-in provider payload after verifying its raw hash."""
+    payload = _required_pricing_value(dict(raw), key, model)
+    if not isinstance(payload, str):
+        raise PricingAuthorityError(f"Typed pricing for {model!r} has a non-text {key}")
+    actual_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    if actual_hash != expected_hash:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has a mismatched {key} receipt"
+        )
+
+    def reject_duplicate(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for name, value in pairs:
+            if name in result:
+                raise PricingAuthorityError(
+                    f"Typed pricing for {model!r} has duplicate payload key {name!r}"
+                )
+            result[name] = value
+        return result
+
+    try:
+        parsed = json.loads(payload, object_pairs_hook=reject_duplicate)
+    except (json.JSONDecodeError, TypeError) as exc:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has invalid {key}"
+        ) from exc
+    if not isinstance(parsed, Mapping):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has a non-object {key}"
+        )
+    return parsed
+
+
+def _payload_data(
+    payload: Mapping[str, Any], name: str, model: str
+) -> Mapping[str, Any]:
+    data = payload.get("data")
+    if not isinstance(data, Mapping):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks an object {name}.data"
+        )
+    return data
+
+
+def _provider_rate(value: Any, dimension: str, model: str) -> float:
+    """Normalize OpenRouter payload units to its provider max-price units."""
+    if isinstance(value, bool):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has invalid {dimension!r} pricing"
+        )
+    try:
+        rate = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has invalid {dimension!r} pricing"
+        ) from exc
+    if not rate.is_finite() or rate <= 0:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has unsupported {dimension!r} pricing"
+        )
+    normalized = (
+        rate * Decimal(1_000_000) if dimension in {"prompt", "completion"} else rate
+    )
+    return float(normalized)
+
+
+def _canonical_payload_bytes(value: Mapping[str, Any]) -> bytes:
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode("utf-8")
+
+
+def get_typed_openrouter_pricing(
+    model: str,
+    *,
+    require_image: bool = False,
+    now: datetime | None = None,
+) -> dict[str, Any]:
+    """Return a fresh, provider-pinned complete typed pricing authority.
+
+    This accessor accepts only reviewed checked-in metadata. Every provider
+    identity, source receipt, and potentially charged dimension is mandatory;
+    missing or zero-looking values are unsupported rather than free.
+    """
+    raw = get_openrouter_pricing(model)
+    if not raw:
+        raise PricingAuthorityError(
+            f"No checked-in typed OpenRouter pricing authority for {model!r}"
+        )
+    if not model.startswith("openrouter/"):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks the OpenRouter transport identity"
+        )
+    canonical_slug = str(_required_pricing_value(raw, "canonical_slug", model))
+    provider = str(_required_pricing_value(raw, "provider", model))
+    provider_selector = str(_required_pricing_value(raw, "provider_selector", model))
+    source = str(_required_pricing_value(raw, "source", model))
+    endpoints_source = str(_required_pricing_value(raw, "endpoints_source", model))
+    for source_name, source_url in (
+        ("source", source),
+        ("endpoints_source", endpoints_source),
+    ):
+        parsed_source = urlparse(source_url)
+        if (
+            parsed_source.scheme != "https"
+            or parsed_source.netloc != "openrouter.ai"
+            or not parsed_source.path.startswith("/api/v1/")
+            or parsed_source.params
+            or parsed_source.query
+            or parsed_source.fragment
+        ):
+            raise PricingAuthorityError(
+                f"Typed pricing for {model!r} has invalid {source_name} provenance"
+            )
+    alias = model.removeprefix("openrouter/")
+    if urlparse(source).path != f"/api/v1/model/{alias}":
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has a source URL for a different alias"
+        )
+    if urlparse(endpoints_source).path != f"/api/v1/models/{canonical_slug}/endpoints":
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has an endpoints URL for another model"
+        )
+    retrieved_text = str(_required_pricing_value(raw, "retrieved_at", model))
+    try:
+        retrieved_at = datetime.fromisoformat(retrieved_text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has an invalid retrieval time"
+        ) from exc
+    if retrieved_at.tzinfo is None:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has a timezone-naive retrieval time"
+        )
+    current = now or datetime.now(UTC)
+    age = current.astimezone(UTC) - retrieved_at.astimezone(UTC)
+    if age < timedelta(0) or age > _TYPED_PRICE_MAX_AGE:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} is outside the seven-day authority window"
+        )
+    hashes: dict[str, str] = {}
+    for name in (
+        "model_payload_sha256",
+        "endpoints_payload_sha256",
+        "canonical_projection_sha256",
+    ):
+        value = str(_required_pricing_value(raw, name, model))
+        if len(value) != _SHA256_LENGTH or any(
+            character not in "0123456789abcdef" for character in value
+        ):
+            raise PricingAuthorityError(
+                f"Typed pricing for {model!r} has an invalid {name}"
+            )
+        hashes[name] = value
+    model_payload = _payload_object(
+        raw, "model_payload_json", hashes["model_payload_sha256"], model
+    )
+    endpoints_payload = _payload_object(
+        raw, "endpoints_payload_json", hashes["endpoints_payload_sha256"], model
+    )
+    model_data = _payload_data(model_payload, "model_payload", model)
+    endpoints_data = _payload_data(endpoints_payload, "endpoints_payload", model)
+    if (
+        model_data.get("id") != canonical_slug
+        or endpoints_data.get("id") != canonical_slug
+    ):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} does not bind its canonical model"
+        )
+    architecture = model_data.get("architecture")
+    model_pricing = model_data.get("pricing")
+    if not isinstance(architecture, Mapping) or not isinstance(model_pricing, Mapping):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks canonical model architecture/pricing"
+        )
+    endpoint_rows = endpoints_data.get("endpoints")
+    if not isinstance(endpoint_rows, list):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks provider endpoint rows"
+        )
+    matches = [
+        endpoint
+        for endpoint in endpoint_rows
+        if isinstance(endpoint, Mapping) and endpoint.get("name") == provider_selector
+    ]
+    if len(matches) != 1:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks one exact provider selector"
+        )
+    endpoint = matches[0]
+    if endpoint.get("provider_name") != provider:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has a provider identity mismatch"
+        )
+    endpoint_pricing = endpoint.get("pricing")
+    if not isinstance(endpoint_pricing, Mapping):
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks endpoint pricing"
+        )
+    required_dimensions = set(_TEXT_PRICE_DIMENSIONS)
+    if require_image:
+        required_dimensions.add("image")
+    rates = {
+        name: _provider_rate(endpoint_pricing.get(name), name, model)
+        for name in sorted(required_dimensions)
+    }
+    for name in required_dimensions:
+        configured_rate = raw.get(name)
+        if (
+            isinstance(configured_rate, bool)
+            or not isinstance(configured_rate, int | float)
+            or float(configured_rate) != rates[name]
+        ):
+            raise PricingAuthorityError(
+                f"Typed pricing for {model!r} has a configured {name!r} mismatch"
+            )
+    if require_image and raw.get("image_unit") != "per-image":
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} lacks an enforceable per-image unit"
+        )
+    if not require_image and raw.get("image") is not None:
+        rates["image"] = _provider_rate(endpoint_pricing.get("image"), "image", model)
+        if float(raw["image"]) != rates["image"]:
+            raise PricingAuthorityError(
+                f"Typed pricing for {model!r} has a configured 'image' mismatch"
+            )
+    if raw.get("cache_write") is not None or raw.get("cache_write_ttl") is not None:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} cannot enable unpriced cache control"
+        )
+    cache_write_fields = sorted(
+        f"{payload_name}.{dimension}"
+        for payload_name, pricing in (
+            ("model", model_pricing),
+            ("endpoint", endpoint_pricing),
+        )
+        for dimension in _CACHE_WRITE_PRICE_DIMENSIONS
+        if dimension in pricing
+    )
+    if cache_write_fields:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} contains cache-write pricing without an "
+            f"enforceable ceiling and unit: {cache_write_fields}"
+        )
+    charged_unknown = sorted(
+        name
+        for name, value in endpoint_pricing.items()
+        if name not in _KNOWN_PRICE_DIMENSIONS
+        and value not in (None, "", 0, 0.0, "0", "0.0")
+    )
+    if raw.get("other_charged_dimensions") != charged_unknown or charged_unknown:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has unresolved charged dimensions"
+        )
+    if raw["overrides"]:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has unverified threshold overrides"
+        )
+    projection = {
+        "configured_alias": model,
+        "canonical_slug": canonical_slug,
+        "canonical_wire_model": f"openrouter/{canonical_slug}",
+        "provider": provider,
+        "provider_selector": provider_selector,
+        "source": source,
+        "endpoints_source": endpoints_source,
+        "retrieved_at": retrieved_at.astimezone(UTC).isoformat(),
+        "model_payload_sha256": hashes["model_payload_sha256"],
+        "endpoints_payload_sha256": hashes["endpoints_payload_sha256"],
+        "architecture": architecture,
+        "model_pricing": model_pricing,
+        "provider_endpoint": {
+            "name": provider_selector,
+            "provider_name": provider,
+            "pricing": dict(endpoint_pricing),
+        },
+        **rates,
+        "required_dimensions": sorted(required_dimensions),
+        "image_unit": "per-image" if require_image else None,
+        "cache_control": "disabled",
+        "other_charged_dimensions": charged_unknown,
+        "overrides": raw["overrides"],
+    }
+    projection_hash = hashlib.sha256(_canonical_payload_bytes(projection)).hexdigest()
+    if projection_hash != hashes["canonical_projection_sha256"]:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has a mismatched canonical projection"
+        )
+    return {**projection, "canonical_projection_sha256": projection_hash}
 
 
 # ─── Valid model sections ───────────────────────────────────────────────────
@@ -288,6 +639,7 @@ def register_model_endpoints() -> None:
             _MODEL_ENDPOINTS[model_id] = {
                 "api_base": cfg["api_base"],
                 "api_key_env": cfg.get("api_key_env"),
+                "endpoint_class": _get_section(section).get("endpoint-class"),
             }
 
     def _walk(node: dict) -> None:
@@ -303,6 +655,7 @@ def register_model_endpoints() -> None:
                         {
                             "api_base": api_base,
                             "api_key_env": node.get("api-key-env"),
+                            "endpoint_class": node.get("endpoint-class"),
                         },
                     )
         for value in node.values():
@@ -319,6 +672,159 @@ def get_model_endpoint(model: str) -> dict[str, str | None] | None:
     (i.e. it should use the default OpenRouter/proxy routing).
     """
     return _MODEL_ENDPOINTS.get(model)
+
+
+def is_explicit_free_local_endpoint(model: str) -> bool:
+    """Return whether trusted config explicitly marks a local model as free."""
+    endpoint = get_model_endpoint(model)
+    return bool(
+        model.startswith(_LOCAL_ENDPOINT_PREFIXES)
+        and endpoint
+        and endpoint.get("endpoint_class") == "local-free"
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class ResolvedModelSource:
+    """One model and endpoint selected from a registered source identity."""
+
+    source_id: str
+    model: str
+    api_base: str | None
+    api_key_env: str | None
+    endpoint_class: str | None
+
+
+def _unique_models(values: Any, source_id: str) -> tuple[str, ...]:
+    if isinstance(values, str | bytes) or not isinstance(values, Sequence):
+        raise ValueError(f"Model source {source_id!r} must be a finite sequence")
+    models = tuple(values)
+    if (
+        not models
+        or any(not isinstance(model, str) or not model.strip() for model in models)
+        or len(models) != len(set(models))
+    ):
+        raise ValueError(
+            f"Model source {source_id!r} must contain distinct non-blank models"
+        )
+    return models
+
+
+def get_model_source_models(source_id: str) -> tuple[str, ...]:
+    """Return the finite configured model set owned by *source_id*.
+
+    A source identifies where model choice comes from; it is deliberately
+    separate from the pipeline seat that describes what a route does.
+    """
+    prefix, separator, name = source_id.partition(":")
+    if not separator or not prefix or not name:
+        raise ValueError(f"Invalid model source identity {source_id!r}")
+    if prefix == "section":
+        if name not in MODEL_SECTIONS:
+            raise ValueError(f"Unknown model section source {source_id!r}")
+        return _unique_models([get_model(name)], source_id)
+    if prefix == "sn-review":
+        if name == "docs":
+            return _unique_models(get_sn_review_docs_models(), source_id)
+        if name == "names":
+            names = _get_section("sn-review").get("names", {})
+            values = list(
+                _unique_models(
+                    names.get("models", _SN_REVIEW_DEFAULTS["names-models"]),
+                    f"{source_id}:top-level",
+                )
+            )
+            profiles = names.get("profiles", {})
+            if not isinstance(profiles, dict):
+                raise ValueError("[sn-review.names].profiles must be a mapping")
+            for profile in profiles.values():
+                if not isinstance(profile, dict):
+                    raise ValueError("Reviewer profiles must be mappings")
+                values.extend(
+                    _unique_models(profile.get("models", ()), f"{source_id}:profile")
+                )
+            return tuple(dict.fromkeys(values))
+    if prefix == "sn-benchmark":
+        if name == "candidates":
+            values = get_sn_benchmark_candidate_models()
+        elif name == "compose":
+            values = get_sn_benchmark_compose_models()
+        elif name == "reviewers":
+            values = get_sn_benchmark_reviewer_models()
+        elif name == "judges":
+            values = [
+                *_unique_models(
+                    [get_sn_benchmark_reviewer_model()],
+                    "sn-benchmark:judge",
+                ),
+                *_unique_models(
+                    get_sn_benchmark_reviewer_models(),
+                    "sn-benchmark:reviewers",
+                ),
+            ]
+            return tuple(dict.fromkeys(values))
+        elif name == "refine":
+            values = [
+                *_unique_models([get_model("sn-refine")], "section:sn-refine"),
+                *_unique_models(
+                    get_sn_benchmark_candidate_models(),
+                    "sn-benchmark:candidates",
+                ),
+            ]
+            return tuple(dict.fromkeys(values))
+        else:
+            raise ValueError(f"Unknown benchmark model source {source_id!r}")
+        checked = _unique_models(values, source_id)
+        return tuple(dict.fromkeys(checked))
+    if source_id == "sn-fanout:proposer":
+        return _unique_models(
+            [_get_section("sn-fanout").get("proposer-model")], source_id
+        )
+    raise ValueError(f"Unknown model source identity {source_id!r}")
+
+
+def resolve_model_source(
+    source_id: str, *, candidate_model: str | None = None
+) -> ResolvedModelSource:
+    """Resolve a registered source without borrowing endpoint configuration."""
+    models = get_model_source_models(source_id)
+    if candidate_model is None:
+        if len(models) != 1:
+            raise ValueError(
+                f"Model source {source_id!r} requires an explicit configured candidate"
+            )
+        model = models[0]
+    elif candidate_model not in models:
+        raise ValueError(
+            f"Candidate model {candidate_model!r} is outside source {source_id!r}"
+        )
+    else:
+        model = candidate_model
+
+    api_base: str | None = None
+    api_key_env: str | None = None
+    endpoint_class: str | None = None
+    prefix, _, name = source_id.partition(":")
+    if prefix == "section":
+        config = get_model_config(name)
+        api_base = config["api_base"]
+        api_key_env = config["api_key_env"]
+        endpoint_class = _get_section(name).get("endpoint-class")
+    elif source_id == "sn-review:names" and model.startswith(_LOCAL_ENDPOINT_PREFIXES):
+        config = _get_section("sn-review").get("names", {})
+        api_base = config.get("api-base")
+        api_key_env = config.get("api-key-env")
+        endpoint_class = config.get("endpoint-class")
+    if model.startswith(_LOCAL_ENDPOINT_PREFIXES):
+        if not api_base or not api_key_env or endpoint_class != "local-free":
+            raise ValueError(
+                f"Local model {model!r} lacks a complete local-free endpoint contract"
+            )
+    elif any((api_base, api_key_env, endpoint_class)):
+        raise ValueError(
+            f"OpenRouter model {model!r} cannot inherit a custom endpoint contract"
+        )
+    return ResolvedModelSource(source_id, model, api_base, api_key_env, endpoint_class)
 
 
 # Populate at import time

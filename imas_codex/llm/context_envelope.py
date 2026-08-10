@@ -6,11 +6,16 @@ import hashlib
 import json
 import math
 import re
+import warnings
+from base64 import b64decode
+from binascii import Error as Base64Error
 from collections.abc import Mapping, Sequence
 from datetime import date, datetime, time
 from enum import Enum
+from io import BytesIO
 from typing import Any
 
+from PIL import Image, UnidentifiedImageError
 from pydantic import BaseModel, ValidationError
 
 from imas_codex.llm.context_models import (
@@ -47,6 +52,56 @@ _AUTHORITY_PLACEMENTS = {
 _ITEM_SCOPES = {ContextScope.exact_item}
 _COMPARATOR_SCOPES = {ContextScope.exact_item, ContextScope.family}
 _BATCH_COMPARATOR_SCOPES = {ContextScope.batch, ContextScope.global_static}
+_MAX_ATTACHMENT_BYTES = 32 * 1024 * 1024
+_MAX_IMAGE_PIXELS = 100_000_000
+
+
+def _decode_and_inspect_image(
+    data_base64: str, location: str
+) -> tuple[bytes, str, int, int]:
+    """Decode and validate one bounded, single-frame image payload."""
+    if len(data_base64) > ((_MAX_ATTACHMENT_BYTES + 2) // 3) * 4:
+        raise ContextEnvelopeError(
+            f"{location}.data_base64 exceeds the hard byte bound"
+        )
+    try:
+        content = b64decode(data_base64, validate=True)
+    except (Base64Error, ValueError) as exc:
+        raise ContextEnvelopeError(f"{location}.data_base64 is invalid") from exc
+    if not content or len(content) > _MAX_ATTACHMENT_BYTES:
+        raise ContextEnvelopeError(
+            f"{location} decoded content exceeds the hard byte bound"
+        )
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(BytesIO(content)) as image:
+                media_type = image.get_format_mimetype()
+                width, height = image.size
+                if not media_type or not media_type.startswith("image/"):
+                    raise ContextEnvelopeError(
+                        f"{location} has an unsupported image signature"
+                    )
+                if (
+                    getattr(image, "is_animated", False)
+                    or getattr(image, "n_frames", 1) != 1
+                ):
+                    raise ContextEnvelopeError(
+                        f"{location} animated or multi-frame images are unsupported"
+                    )
+                if width <= 0 or height <= 0 or width * height > _MAX_IMAGE_PIXELS:
+                    raise ContextEnvelopeError(
+                        f"{location} image dimensions exceed the hard pixel bound"
+                    )
+                image.verify()
+    except (
+        Image.DecompressionBombError,
+        Image.DecompressionBombWarning,
+        UnidentifiedImageError,
+        OSError,
+    ) as exc:
+        raise ContextEnvelopeError(f"{location} is not a safe supported image") from exc
+    return content, media_type, width, height
 
 
 class ContextEnvelopeError(ValueError):
@@ -279,6 +334,48 @@ def _validate_item(item: PromptItemEnvelope, index: int) -> None:
             allowed_scopes=_ITEM_SCOPES,
             location=f"{location}.mutable_candidate",
         )
+    attachment_ids: set[str] = set()
+    for attachment_index, attachment in enumerate(item.attachments or []):
+        attachment_location = f"{location}.attachments[{attachment_index}]"
+        for field_name in ("attachment_id", "media_type"):
+            if not getattr(attachment, field_name).strip():
+                raise ContextEnvelopeError(
+                    f"{attachment_location}.{field_name} must not be blank"
+                )
+        if attachment.attachment_id in attachment_ids:
+            raise ContextEnvelopeError(
+                f"{location}.attachments contains duplicate attachment_id"
+            )
+        attachment_ids.add(attachment.attachment_id)
+        _validate_digest(
+            attachment.content_digest, f"{attachment_location}.content_digest"
+        )
+        if any(
+            isinstance(value, bool) or not isinstance(value, int) or value <= 0
+            for value in (attachment.byte_length, attachment.width, attachment.height)
+        ):
+            raise ContextEnvelopeError(
+                f"{attachment_location} dimensions and byte_length must be positive integers"
+            )
+        content, derived_media_type, derived_width, derived_height = (
+            _decode_and_inspect_image(attachment.data_base64, attachment_location)
+        )
+        if len(content) != attachment.byte_length:
+            raise ContextEnvelopeError(
+                f"{attachment_location}.byte_length does not match decoded content"
+            )
+        if hashlib.sha256(content).hexdigest() != attachment.content_digest:
+            raise ContextEnvelopeError(
+                f"{attachment_location}.content_digest does not match decoded content"
+            )
+        if attachment.media_type != derived_media_type:
+            raise ContextEnvelopeError(
+                f"{attachment_location}.media_type does not match decoded content"
+            )
+        if (attachment.width, attachment.height) != (derived_width, derived_height):
+            raise ContextEnvelopeError(
+                f"{attachment_location} dimensions do not match decoded content"
+            )
     _validate_authority_consistency(item, location)
 
 
@@ -363,6 +460,17 @@ def _item_payloads(item: PromptItemEnvelope) -> tuple[dict[str, Any], ...]:
         "item_id": item.item_id,
         "provenance": item.provenance,
         "mutable_candidate": item.mutable_candidate,
+        "attachments": [
+            {
+                "attachment_id": attachment.attachment_id,
+                "media_type": attachment.media_type,
+                "content_digest": attachment.content_digest,
+                "byte_length": attachment.byte_length,
+                "width": attachment.width,
+                "height": attachment.height,
+            }
+            for attachment in (item.attachments or [])
+        ],
     }
     return authority, comparators, provenance
 

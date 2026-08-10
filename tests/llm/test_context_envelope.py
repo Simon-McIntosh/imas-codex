@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import base64
+import hashlib
 from copy import deepcopy
+from io import BytesIO
 
 import pytest
+from PIL import Image
 from pydantic import ValidationError
 
 from imas_codex.llm.context_envelope import (
@@ -21,6 +25,30 @@ from imas_codex.llm.context_envelope import (
 
 _SOURCE_DIGEST = "a" * 64
 _TEMPLATE_DIGEST = "b" * 64
+
+
+def _image_bytes(
+    *,
+    width: int = 10,
+    height: int = 20,
+    image_format: str = "PNG",
+    animated: bool = False,
+) -> bytes:
+    output = BytesIO()
+    first = Image.new("RGB", (width, height), color="navy")
+    if animated:
+        second = Image.new("RGB", (width, height), color="gold")
+        first.save(
+            output,
+            format=image_format,
+            save_all=True,
+            append_images=[second],
+            duration=100,
+            loop=0,
+        )
+    else:
+        first.save(output, format=image_format)
+    return output.getvalue()
 
 
 def _text_value(value: str) -> dict[str, object]:
@@ -85,6 +113,7 @@ def envelope_data() -> dict[str, object]:
     return {
         "schema_version": "prompt-context",
         "callsite_id": "compose_name",
+        "route_id": "sn-compose",
         "service": "standard-names",
         "seat": "sn-compose",
         "task_kind": "name_composition",
@@ -258,6 +287,53 @@ def test_provenance_drift_is_independent(envelope_data: dict[str, object]) -> No
     assert after.authority_fingerprint == before.authority_fingerprint
     assert after.comparator_fingerprint == before.comparator_fingerprint
     assert after.provenance_fingerprint != before.provenance_fingerprint
+
+
+def test_attachment_digest_and_dimensions_are_validated(
+    envelope_data: dict[str, object],
+) -> None:
+    content = _image_bytes()
+    envelope_data["batch_items"][0]["attachments"] = [  # type: ignore[index]
+        {
+            "attachment_id": "image:one",
+            "media_type": "image/png",
+            "content_digest": hashlib.sha256(content).hexdigest(),
+            "data_base64": base64.b64encode(content).decode(),
+            "byte_length": len(content),
+            "width": 10,
+            "height": 20,
+        }
+    ]
+
+    before = fingerprint_envelope(envelope_data)
+    changed = deepcopy(envelope_data)
+    changed["batch_items"][0]["attachments"][0]["width"] = 11  # type: ignore[index]
+    with pytest.raises(ContextEnvelopeError, match="dimensions do not match"):
+        fingerprint_envelope(changed)
+    assert before.provenance_fingerprint
+
+    changed = deepcopy(envelope_data)
+    changed["batch_items"][0]["attachments"][0]["content_digest"] = "b" * 64  # type: ignore[index]
+    with pytest.raises(ContextEnvelopeError, match="does not match"):
+        validate_envelope(changed)
+
+
+def test_animated_images_are_rejected(envelope_data: dict[str, object]) -> None:
+    content = _image_bytes(image_format="GIF", animated=True)
+    envelope_data["batch_items"][0]["attachments"] = [  # type: ignore[index]
+        {
+            "attachment_id": "image:animated",
+            "media_type": "image/gif",
+            "content_digest": hashlib.sha256(content).hexdigest(),
+            "data_base64": base64.b64encode(content).decode(),
+            "byte_length": len(content),
+            "width": 10,
+            "height": 20,
+        }
+    ]
+
+    with pytest.raises(ContextEnvelopeError, match="multi-frame"):
+        validate_envelope(envelope_data)
 
 
 def test_item_fingerprint_does_not_depend_on_batch_position(

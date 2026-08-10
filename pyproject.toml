@@ -72,6 +72,7 @@ dependencies = [
     # Security: CVE fix requires lxml>=6.1.0 (indirect via python-pptx/python-docx)
     "lxml>=6.1.0",
     "breame>=0.1.2",
+    "Pillow>=12.2.0",           # bounded typed image validation
     # Security floor constraints for transitive dependencies
     "urllib3>=2.7.0",            # CVE-2026-44432, CVE-2026-44431
     "python-multipart>=0.0.27", # CVE-2026-42561, CVE-2026-40347
@@ -149,7 +150,6 @@ dev = [
     "hdbscan>=0.8.41",
     # --- Wiki & document parsing ---
     "beautifulsoup4>=4.14.3",
-    "Pillow>=12.2.0",           # CVE-2026-42311, CVE-2026-40192 + 3 more
     "python-docx>=1.1.2",
     "python-pptx>=1.0.2",
     "openpyxl>=3.1.5",
@@ -389,6 +389,7 @@ max-concurrency = 256
 model = "hosted_vllm/deepseek-v4-flash"
 api-base = "http://98dci4-gpu-0003:18800/v1"
 api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
 batch-size = 25
 # DeepSeek V4 thinking mode via vLLM chat_template_kwargs
 # {"thinking": true, "reasoning_effort": <level>}.
@@ -561,7 +562,7 @@ escalation-reasoning-effort = "high"
 # breaks the same-family bias that caused the DS4 rsd=1.0 false positives.
 # Cycle 2 (escalator, context-aware): GPT-5.5 — cross-vendor authority on
 # disputed items (sees both blind critiques).
-# Switch-back to single-DS4: see profile.local-only below.
+# To use one local reviewer, configure only the local model in this list.
 models = [
   "hosted_vllm/deepseek-v4-flash",
   "openrouter/anthropic/claude-haiku-4.5",
@@ -570,6 +571,7 @@ models = [
 disagreement-threshold = 0.20
 api-base = "http://98dci4-gpu-0003:18800/v1"
 api-key-env = "AMBIX_API_KEY"
+endpoint-class = "local-free"
 
 # ---------------------------------------------------------------------------
 # Reviewer profiles — select with IMAS_CODEX_SN_REVIEW_PROFILE env var or
@@ -746,14 +748,12 @@ location = "iter"       # facility hosting LLM proxy (or "local" for in-process)
 [tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4-flash"]
 prompt = 0.14
 completion = 0.28
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash"
 verified-at = "2026-08-09"
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.5"]
 prompt = 2.0
 completion = 6.0
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/x-ai/grok-4.5"
 verified-at = "2026-08-09"
 overrides = [
@@ -763,7 +763,6 @@ overrides = [
 [tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.6-luna"]
 prompt = 0.10
 completion = 0.60
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/openai/gpt-5.6-luna"
 verified-at = "2026-08-09"
 overrides = [
@@ -773,19 +772,17 @@ overrides = [
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-5"]
 prompt = 2.0
 completion = 10.0
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5"
 verified-at = "2026-08-09"
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-fable-5"]
 prompt = 10.0
 completion = 50.0
-request = 0.0
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-fable-5"
 verified-at = "2026-08-09"
 
 [tool.imas-codex.docs-server]
-# Host-wide HTML docs server (~/docs-server/serve.py): fronts every
+# Host-wide HTML docs server (~/Code/dotfiles/docs-server/serve.py): fronts every
 # project's docs/plans-html/ under a single URL prefix and exposes a
 # /state/<project>/<doc> JSON store shared by browser and agents.
 # Runs on the login node — same lifetime pattern as the LLM proxy.

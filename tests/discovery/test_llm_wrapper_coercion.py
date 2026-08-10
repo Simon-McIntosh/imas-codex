@@ -8,7 +8,7 @@ must succeed without consuming a retry.
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from pydantic import BaseModel, Field
@@ -16,6 +16,8 @@ from pydantic import BaseModel, Field
 from imas_codex.discovery.base.llm import (
     LLMStructuredCallError,
     ProviderBudgetExhausted,
+    _acall_frozen_structured_transport,
+    _call_frozen_structured_transport,
     _coerce_to_wrapper,
     _parse_structured_content,
     _wrapper_field,
@@ -272,6 +274,24 @@ class _MeteredResponse(_FakeResponse):
         self._hidden_params = {"response_cost": cost}
 
 
+class _FrozenHandle:
+    def _transport_copy(self) -> dict[str, object]:
+        return {"model": "openrouter/test", "messages": []}
+
+
+class _MissingUsageResponse:
+    def __init__(self) -> None:
+        self.choices = [_FakeChoice('{"name": "candidate", "score": 1.0}')]
+        self.model = "test-model"
+        self._hidden_params = {"response_cost": 0.01}
+
+
+class _MissingCostResponse(_FakeResponse):
+    def __init__(self) -> None:
+        super().__init__('{"name": "candidate", "score": 1.0}')
+        self._hidden_params = {}
+
+
 async def test_acall_structured_coerces_bare_item_no_retry(monkeypatch):
     """qwen-style bare inner object → coerced, single API call, no retry."""
     monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "sk-test")
@@ -339,6 +359,115 @@ async def test_structured_failure_exposes_accumulated_billed_telemetry(monkeypat
     assert exc.output_tokens == 25
     assert exc.tokens == 235
     assert exc.response_count == 2
+
+
+def test_frozen_transport_does_not_retry_malformed_billable_usage() -> None:
+    fake = Mock(return_value=_MissingUsageResponse())
+    with (
+        patch("litellm.completion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        _call_frozen_structured_transport(
+            _FrozenHandle(),
+            response_model=SingleObject,
+            model="openrouter/test",
+            max_attempts=3,
+            retry_base_delay=0.0,
+        )
+
+    assert fake.call_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.attempt_count == 1
+    assert raised.value.telemetry_states["input_tokens"] == "unavailable"
+    assert raised.value.telemetry_failure is True
+
+
+def test_frozen_transport_does_not_invent_missing_provider_cost() -> None:
+    fake = Mock(return_value=_MissingCostResponse())
+    with (
+        patch("litellm.completion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        _call_frozen_structured_transport(
+            _FrozenHandle(),
+            response_model=SingleObject,
+            model="openrouter/test",
+            max_attempts=3,
+            retry_base_delay=0.0,
+        )
+
+    assert fake.call_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.attempt_count == 1
+    assert raised.value.telemetry_states["actual_cost"] == "unavailable"
+
+
+async def test_async_frozen_transport_does_not_retry_malformed_cost() -> None:
+    response = _MeteredResponse(
+        '{"name": "candidate", "score": 1.0}',
+        cost=0.01,
+        prompt_tokens=10,
+        completion_tokens=5,
+    )
+    response._hidden_params = {"response_cost": "not-a-number"}
+    fake = AsyncMock(return_value=response)
+    with (
+        patch("litellm.acompletion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        await _acall_frozen_structured_transport(
+            _FrozenHandle(),
+            response_model=SingleObject,
+            model="openrouter/test",
+            max_attempts=3,
+            retry_base_delay=0.0,
+        )
+
+    assert fake.call_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.attempt_count == 1
+    assert raised.value.telemetry_states["actual_cost"] == "invalid"
+
+
+def test_frozen_transport_does_not_retry_an_ambiguous_send_failure() -> None:
+    fake = Mock(side_effect=TimeoutError("upstream completion timed out"))
+    with (
+        patch("litellm.completion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        _call_frozen_structured_transport(
+            _FrozenHandle(),
+            response_model=SingleObject,
+            model="openrouter/test",
+            max_attempts=3,
+            retry_base_delay=0.0,
+        )
+
+    assert fake.call_count == 1
+    assert raised.value.attempt_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.cost is None
+    assert raised.value.telemetry_states["billability"] == "unavailable"
+
+
+async def test_async_frozen_transport_does_not_retry_an_ambiguous_send_failure():
+    fake = AsyncMock(side_effect=TimeoutError("upstream completion timed out"))
+    with (
+        patch("litellm.acompletion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        await _acall_frozen_structured_transport(
+            _FrozenHandle(),
+            response_model=SingleObject,
+            model="openrouter/test",
+            max_attempts=3,
+            retry_base_delay=0.0,
+        )
+
+    assert fake.call_count == 1
+    assert raised.value.attempt_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.telemetry_states["actual_cost"] == "unavailable"
 
 
 async def test_pre_response_network_failure_keeps_unmetered_error(monkeypatch):
@@ -642,6 +771,32 @@ def test_bump_max_tokens_grows_then_caps():
     # A value just below the cap doubles but clamps to the cap, never overshoots.
     kwargs2 = {"max_tokens": _LENGTH_RETRY_TOKEN_CAP - 1}
     assert _bump_max_tokens_for_length(kwargs2) == _LENGTH_RETRY_TOKEN_CAP
+
+
+def test_bump_max_tokens_honors_prepriced_ceiling():
+    """A typed dispatch retry cannot exceed its receipt's output allowance."""
+    from imas_codex.discovery.base.llm import _bump_max_tokens_for_length
+
+    kwargs = {"max_tokens": 64}
+    assert _bump_max_tokens_for_length(kwargs, output_token_ceiling=64) is None
+    assert kwargs["max_tokens"] == 64
+
+
+def test_structured_transport_rejects_unbounded_initial_allowance(monkeypatch):
+    """An invalid pre-priced ceiling refuses before the provider is invoked."""
+    fake = Mock()
+    monkeypatch.setattr("litellm.completion", fake)
+
+    with pytest.raises(ValueError, match="output_token_ceiling"):
+        call_llm_structured(
+            model="configured-test-model",
+            messages=[{"role": "user", "content": "content"}],
+            response_model=SingleObject,
+            max_tokens=65,
+            output_token_ceiling=64,
+        )
+
+    fake.assert_not_called()
 
 
 async def test_empty_length_response_retries_and_bumps_budget(monkeypatch):

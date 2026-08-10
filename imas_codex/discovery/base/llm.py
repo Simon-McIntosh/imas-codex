@@ -55,7 +55,7 @@ import math
 import os
 import re
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, get_args, get_origin
@@ -186,6 +186,7 @@ class ProviderBudgetExhausted(Exception):
         cache_read_tokens: int = 0,
         cache_creation_tokens: int = 0,
         response_count: int = 0,
+        attempt_count: int | None = None,
     ) -> None:
         super().__init__(message)
         self.cost = cost
@@ -195,6 +196,7 @@ class ProviderBudgetExhausted(Exception):
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
+        self.attempt_count = response_count if attempt_count is None else attempt_count
 
 
 class ProviderPricingUnbounded(RuntimeError):
@@ -472,6 +474,8 @@ class LLMResult:
         "output_tokens",
         "cache_read_tokens",
         "cache_creation_tokens",
+        "response_count",
+        "attempt_count",
     )
 
     def __init__(
@@ -483,6 +487,8 @@ class LLMResult:
         cache_creation_tokens: int = 0,
         input_tokens: int = 0,
         output_tokens: int = 0,
+        response_count: int = 1,
+        attempt_count: int | None = None,
     ) -> None:
         self.parsed = parsed
         self.cost = cost
@@ -494,6 +500,8 @@ class LLMResult:
         self.output_tokens = output_tokens
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
+        self.response_count = response_count
+        self.attempt_count = response_count if attempt_count is None else attempt_count
 
     # Allow ``result, cost, tokens = call_llm_structured(...)``
     def __iter__(self):
@@ -527,27 +535,47 @@ class LLMStructuredCallError(ValueError):
         "cache_read_tokens",
         "cache_creation_tokens",
         "response_count",
+        "attempt_count",
+        "telemetry_states",
+        "telemetry_failure",
     )
 
     def __init__(
         self,
         message: str,
         *,
-        cost: float,
-        input_tokens: int,
-        output_tokens: int,
-        cache_read_tokens: int,
-        cache_creation_tokens: int,
+        cost: float | None,
+        input_tokens: int | None,
+        output_tokens: int | None,
+        cache_read_tokens: int | None,
+        cache_creation_tokens: int | None,
         response_count: int,
+        attempt_count: int | None = None,
+        telemetry_states: Mapping[str, str] | None = None,
+        telemetry_failure: bool = False,
     ) -> None:
         super().__init__(message)
         self.cost = cost
         self.input_tokens = input_tokens
         self.output_tokens = output_tokens
-        self.tokens = input_tokens + output_tokens
+        self.tokens = (input_tokens or 0) + (output_tokens or 0)
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
+        self.attempt_count = response_count if attempt_count is None else attempt_count
+        states = {
+            "input_tokens": "valid",
+            "output_tokens": "valid",
+            "cached_read_tokens": "valid",
+            "cached_write_tokens": "valid",
+            "actual_cost": "valid",
+            "attempt_count": "valid",
+            "response_count": "valid",
+            "billability": "valid",
+        }
+        states.update(telemetry_states or {})
+        self.telemetry_states = states
+        self.telemetry_failure = telemetry_failure
 
 
 def _structured_call_error(
@@ -559,6 +587,9 @@ def _structured_call_error(
     cache_read_tokens: int,
     cache_creation_tokens: int,
     response_count: int,
+    attempt_count: int | None = None,
+    telemetry_states: Mapping[str, str] | None = None,
+    telemetry_failure: bool = False,
 ) -> LLMStructuredCallError:
     """Build a telemetry-bearing terminal structured-call error."""
     return LLMStructuredCallError(
@@ -570,6 +601,9 @@ def _structured_call_error(
         cache_read_tokens=cache_read_tokens,
         cache_creation_tokens=cache_creation_tokens,
         response_count=response_count,
+        attempt_count=attempt_count,
+        telemetry_states=telemetry_states,
+        telemetry_failure=telemetry_failure,
     )
 
 
@@ -818,12 +852,17 @@ def get_api_key_for_service(service: str) -> str:
         service="standard-names" → checks OPENROUTER_API_KEY_STANDARD_NAMES
         service="untagged" → checks OPENROUTER_API_KEY_UNTAGGED (unlikely set)
     """
+    return get_api_key_for_service_with_source(service)[0]
+
+
+def get_api_key_for_service_with_source(service: str) -> tuple[str, str]:
+    """Return a service credential and its non-secret registry identity."""
     if service and service != "untagged":
         env_var = f"OPENROUTER_API_KEY_{service.upper().replace('-', '_')}"
         per_service_key = os.environ.get(env_var)
         if per_service_key:
-            return per_service_key
-    return get_api_key()
+            return per_service_key, env_var
+    return get_api_key(), "OPENROUTER_API_KEY_IMAS_CODEX"
 
 
 _LOCAL_MODEL_PREFIXES = ("ollama/", "hosted_vllm/", "openai/localhost")
@@ -1423,7 +1462,9 @@ _LENGTH_RETRY_TOKEN_MULTIPLIER = 2
 _LENGTH_RETRY_TOKEN_CAP = 262144
 
 
-def _bump_max_tokens_for_length(kwargs: dict[str, Any]) -> int | None:
+def _bump_max_tokens_for_length(
+    kwargs: dict[str, Any], *, output_token_ceiling: int | None = None
+) -> int | None:
     """Grow ``kwargs['max_tokens']`` after a length-exhaustion empty response.
 
     Mutates *kwargs* in place and returns the new budget (or ``None`` when no
@@ -1434,11 +1475,35 @@ def _bump_max_tokens_for_length(kwargs: dict[str, Any]) -> int | None:
     current = kwargs.get("max_tokens")
     if not isinstance(current, int) or current <= 0:
         return None
-    if current >= _LENGTH_RETRY_TOKEN_CAP:
+    ceiling = (
+        min(output_token_ceiling, _LENGTH_RETRY_TOKEN_CAP)
+        if output_token_ceiling is not None
+        else _LENGTH_RETRY_TOKEN_CAP
+    )
+    if current >= ceiling:
         return None
-    bumped = min(current * _LENGTH_RETRY_TOKEN_MULTIPLIER, _LENGTH_RETRY_TOKEN_CAP)
+    bumped = min(current * _LENGTH_RETRY_TOKEN_MULTIPLIER, ceiling)
     kwargs["max_tokens"] = bumped
     return bumped
+
+
+def _validate_output_token_bound(
+    max_tokens: int | None, output_token_ceiling: int | None
+) -> None:
+    """Require a pre-priced ceiling to bound the initial request as well as retries."""
+    if output_token_ceiling is None:
+        return
+    if (
+        not isinstance(output_token_ceiling, int)
+        or output_token_ceiling <= 0
+        or max_tokens is None
+        or max_tokens <= 0
+        or max_tokens > output_token_ceiling
+    ):
+        raise ValueError(
+            "output_token_ceiling requires a positive max_tokens value at or "
+            "below the ceiling"
+        )
 
 
 def _is_local_model(model_id: str) -> bool:
@@ -1838,6 +1903,10 @@ def _build_kwargs(
     api_base: str | None = None,
     api_key_override: str | None = None,
     reasoning_effort: str | None = None,
+    typed_max_price: dict[str, float] | None = None,
+    typed_provider_selector: str | None = None,
+    typed_endpoint_contract: str | None = None,
+    typed_resolved_api_key: str | None = None,
 ) -> dict[str, Any]:
     """Build litellm completion kwargs with model-aware defaults.
 
@@ -1860,7 +1929,7 @@ def _build_kwargs(
     bypass_proxy = False
 
     # Auto-resolve endpoint from the model registry if not explicitly passed
-    if not api_base:
+    if not api_base and typed_endpoint_contract is None:
         endpoint = get_model_endpoint(model)
         if endpoint:
             api_base = endpoint["api_base"]
@@ -1891,12 +1960,16 @@ def _build_kwargs(
         llm_location = get_llm_location()
 
         # Inject cache_control for models that support explicit breakpoints.
-        supports_cache = _supports_cache_control(model)
+        supports_cache = (
+            _supports_cache_control(model) and typed_endpoint_contract is None
+        )
         if supports_cache:
             messages = inject_cache_control(messages)
 
         use_proxy = llm_location != "local" or bool(os.getenv("LITELLM_PROXY_URL"))
-        has_direct_key = bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
+        has_direct_key = bool(
+            typed_resolved_api_key or os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
+        )
         is_openrouter_model = "openrouter/" in model.lower() or any(
             p in model.lower()
             for p in (
@@ -1930,7 +2003,11 @@ def _build_kwargs(
             }
         else:
             model_id = ensure_model_prefix(model)
-            direct_key = get_api_key_for_service(service) if bypass_proxy else api_key
+            direct_key = (
+                typed_resolved_api_key or get_api_key_for_service(service)
+                if bypass_proxy
+                else api_key
+            )
 
             kwargs = {
                 "model": model_id,
@@ -1947,7 +2024,39 @@ def _build_kwargs(
                     "Bypassing proxy for %s (cache_control preserved)", model_id
                 )
 
-    if service == "standard-names" and not _is_local_model(model):
+    if typed_max_price is not None:
+        if _is_local_model(model):
+            raise ProviderPricingUnbounded(
+                "a local typed route cannot carry paid provider pricing"
+            )
+        if typed_endpoint_contract != "direct-openrouter":
+            raise ProviderPricingUnbounded(
+                "paid typed calls require the direct OpenRouter endpoint contract"
+            )
+        if api_base or not bypass_proxy or not typed_resolved_api_key:
+            raise ProviderPricingUnbounded(
+                "paid typed calls require direct OpenRouter routing with a resolved "
+                "service credential"
+            )
+        if not typed_provider_selector:
+            raise ProviderPricingUnbounded(
+                "paid typed calls require an exact provider selector"
+            )
+        extra_body = kwargs.setdefault("extra_body", {})
+        extra_body["provider"] = {
+            "max_price": dict(typed_max_price),
+            "only": [typed_provider_selector],
+            "allow_fallbacks": False,
+        }
+    elif typed_endpoint_contract == "direct-openrouter":
+        raise ProviderPricingUnbounded(
+            "the direct OpenRouter endpoint contract requires an enforceable max_price"
+        )
+    elif typed_endpoint_contract == "local-free" and not _is_local_model(model):
+        raise ProviderPricingUnbounded(
+            "the local-free endpoint contract requires an explicitly local model"
+        )
+    elif service == "standard-names" and not _is_local_model(model):
         if api_base or not bypass_proxy:
             raise ProviderPricingUnbounded(
                 "paid Standard Names calls require direct OpenRouter routing "
@@ -2035,6 +2144,7 @@ def call_llm_structured(
     response_model: type[BaseModel],
     *,
     max_tokens: int | None = None,
+    output_token_ceiling: int | None = None,
     temperature: float | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
@@ -2056,6 +2166,8 @@ def call_llm_structured(
         messages: Chat messages [{"role": ..., "content": ...}].
         response_model: Pydantic model for structured output parsing.
         max_tokens: Max output tokens (None = model-family default).
+        output_token_ceiling: Immutable retry ceiling for a pre-priced request.
+            Legacy callers leave this unset and retain adaptive length retries.
         temperature: Sampling temperature (None = model default).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
@@ -2073,6 +2185,7 @@ def call_llm_structured(
     import litellm
 
     suppress_litellm_noise()
+    _validate_output_token_bound(max_tokens, output_token_ceiling)
 
     api_key = get_api_key()
     kwargs = _build_kwargs(
@@ -2125,6 +2238,7 @@ def call_llm_structured(
                 total_cache_creation,
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
+                response_count=response_count,
             )
 
         except Exception as e:
@@ -2145,7 +2259,9 @@ def call_llm_structured(
                 # completion budget on thinking): grow the token budget so the
                 # retry can finish reasoning AND emit the answer.
                 if isinstance(e, EmptyResponseError) and e.finish_reason == "length":
-                    bumped = _bump_max_tokens_for_length(kwargs)
+                    bumped = _bump_max_tokens_for_length(
+                        kwargs, output_token_ceiling=output_token_ceiling
+                    )
                     if bumped is not None:
                         logger.debug(
                             "Empty response (finish_reason=length): raised "
@@ -2202,6 +2318,7 @@ async def acall_llm_structured(
     response_model: type[BaseModel],
     *,
     max_tokens: int | None = None,
+    output_token_ceiling: int | None = None,
     temperature: float | None = None,
     timeout: int | None = None,
     max_retries: int = DEFAULT_MAX_RETRIES,
@@ -2220,6 +2337,8 @@ async def acall_llm_structured(
         messages: Chat messages [{"role": ..., "content": ...}].
         response_model: Pydantic model for structured output parsing.
         max_tokens: Max output tokens (None = model-family default).
+        output_token_ceiling: Immutable retry ceiling for a pre-priced request.
+            Legacy callers leave this unset and retain adaptive length retries.
         temperature: Sampling temperature (None = model default).
         timeout: Request timeout seconds (None = model-family default).
         max_retries: Maximum retry attempts.
@@ -2242,6 +2361,7 @@ async def acall_llm_structured(
     import litellm
 
     suppress_litellm_noise()
+    _validate_output_token_bound(max_tokens, output_token_ceiling)
 
     api_key = get_api_key()
     kwargs = _build_kwargs(
@@ -2344,6 +2464,7 @@ async def acall_llm_structured(
                     total_cache_creation,
                     input_tokens=total_input_tokens,
                     output_tokens=total_output_tokens,
+                    response_count=response_count,
                 )
 
             except Exception as e:
@@ -2371,7 +2492,9 @@ async def acall_llm_structured(
                         isinstance(e, EmptyResponseError)
                         and e.finish_reason == "length"
                     ):
-                        bumped = _bump_max_tokens_for_length(kwargs)
+                        bumped = _bump_max_tokens_for_length(
+                            kwargs, output_token_ceiling=output_token_ceiling
+                        )
                         if bumped is not None:
                             logger.debug(
                                 "Empty response (finish_reason=length): raised "
@@ -2423,6 +2546,416 @@ async def acall_llm_structured(
     finally:
         if not succeeded:
             _ACTIVITY.record_failed()
+
+
+def _typed_response_telemetry(response: Any, *, model: str) -> dict[str, Any]:
+    """Extract one response's telemetry or fail with explicit field states."""
+    values: dict[str, Any] = {
+        "cost": None,
+        "input_tokens": None,
+        "output_tokens": None,
+        "cache_read_tokens": None,
+        "cache_creation_tokens": None,
+    }
+    states = {
+        "actual_cost": "unavailable",
+        "input_tokens": "unavailable",
+        "output_tokens": "unavailable",
+        "cached_read_tokens": "unavailable",
+        "cached_write_tokens": "unavailable",
+    }
+    problems: list[str] = []
+    if _is_local_model(model):
+        values["cost"] = 0.0
+        states["actual_cost"] = "valid"
+    else:
+        try:
+            hidden = getattr(response, "_hidden_params", None)
+            reported_cost = (
+                hidden.get("response_cost") if isinstance(hidden, Mapping) else None
+            )
+        except Exception as exc:
+            hidden = None
+            reported_cost = None
+            states["actual_cost"] = "invalid"
+            problems.append(f"provider response cost cannot be read: {exc}")
+        if reported_cost is None and states["actual_cost"] != "invalid":
+            problems.append("provider response cost is unavailable")
+        elif reported_cost is not None:
+            cost = reported_cost
+            if (
+                isinstance(cost, bool)
+                or not isinstance(cost, int | float)
+                or not math.isfinite(float(cost))
+                or cost < 0
+            ):
+                states["actual_cost"] = "invalid"
+                problems.append("provider response cost is invalid")
+            else:
+                values["cost"] = float(cost)
+                states["actual_cost"] = "valid"
+
+    try:
+        usage = getattr(response, "usage", None)
+    except Exception as exc:
+        usage = None
+        problems.append(f"provider usage cannot be read: {exc}")
+    for provider_name, result_name, state_name in (
+        ("prompt_tokens", "input_tokens", "input_tokens"),
+        ("completion_tokens", "output_tokens", "output_tokens"),
+    ):
+        if usage is None:
+            problems.append(f"provider usage is missing {provider_name}")
+            continue
+        try:
+            value = getattr(usage, provider_name)
+        except AttributeError:
+            problems.append(f"provider usage is missing {provider_name}")
+            continue
+        except Exception as exc:
+            states[state_name] = "invalid"
+            problems.append(f"provider usage {provider_name} cannot be read: {exc}")
+            continue
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            states[state_name] = "invalid"
+            problems.append(f"provider usage {provider_name} is invalid")
+            continue
+        values[result_name] = value
+        states[state_name] = "valid"
+
+    try:
+        cache_read, cache_creation = extract_cache_tokens(response)
+        for value, result_name, state_name in (
+            (cache_read, "cache_read_tokens", "cached_read_tokens"),
+            (cache_creation, "cache_creation_tokens", "cached_write_tokens"),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"provider {result_name} is invalid")
+            values[result_name] = value
+            states[state_name] = "valid"
+    except Exception as exc:
+        states["cached_read_tokens"] = "invalid"
+        states["cached_write_tokens"] = "invalid"
+        problems.append(str(exc))
+
+    if problems:
+        raise LLMStructuredCallError(
+            "Provider response telemetry is invalid or unavailable: "
+            + "; ".join(problems)[:400],
+            response_count=1,
+            telemetry_states=states,
+            telemetry_failure=True,
+            **values,
+        )
+    return values
+
+
+def _aggregate_typed_telemetry(
+    error: LLMStructuredCallError,
+    *,
+    total_cost: float,
+    total_input_tokens: int,
+    total_output_tokens: int,
+    total_cache_read: int,
+    total_cache_creation: int,
+    response_count: int,
+    attempt_count: int,
+) -> LLMStructuredCallError:
+    """Bind a malformed response to all telemetry known before it arrived."""
+
+    def known(name: str, prior: int | float) -> int | float | None:
+        value = getattr(error, name)
+        return prior + value if value is not None else (prior or None)
+
+    return LLMStructuredCallError(
+        str(error),
+        cost=known("cost", total_cost),
+        input_tokens=known("input_tokens", total_input_tokens),
+        output_tokens=known("output_tokens", total_output_tokens),
+        cache_read_tokens=known("cache_read_tokens", total_cache_read),
+        cache_creation_tokens=known("cache_creation_tokens", total_cache_creation),
+        response_count=response_count,
+        attempt_count=attempt_count,
+        telemetry_states={
+            **error.telemetry_states,
+            "attempt_count": "valid",
+            "response_count": "valid",
+            "billability": "unavailable",
+        },
+        telemetry_failure=True,
+    )
+
+
+def _ambiguous_typed_send_error(
+    error: BaseException,
+    *,
+    attempt_count: int,
+    response_count: int,
+) -> LLMStructuredCallError:
+    """Terminate an invocation that may have reached a billable provider."""
+    return LLMStructuredCallError(
+        f"Provider invocation billability is indeterminate: {str(error)[:200]}",
+        cost=None,
+        input_tokens=None,
+        output_tokens=None,
+        cache_read_tokens=None,
+        cache_creation_tokens=None,
+        response_count=response_count,
+        attempt_count=attempt_count,
+        telemetry_states={
+            "input_tokens": "unavailable",
+            "output_tokens": "unavailable",
+            "cached_read_tokens": "unavailable",
+            "cached_write_tokens": "unavailable",
+            "actual_cost": "unavailable",
+            "attempt_count": "valid",
+            "response_count": "valid",
+            "billability": "unavailable",
+        },
+        telemetry_failure=True,
+    )
+
+
+def _call_frozen_structured_transport(
+    request: Any,
+    *,
+    response_model: type[BaseModel],
+    model: str,
+    max_attempts: int,
+    retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+) -> LLMResult:
+    """Send one already-built typed request without rebuilding or mutating it."""
+    import litellm
+
+    suppress_litellm_noise()
+    total_cost = 0.0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_cache_read = 0
+    total_cache_creation = 0
+    response_count = 0
+    attempt_count = 0
+    last_error: Exception | None = None
+    for attempt in range(max_attempts):
+        attempt_count += 1
+        try:
+            try:
+                response = litellm.completion(**request._transport_copy())
+            except Exception as exc:
+                raise _ambiguous_typed_send_error(
+                    exc,
+                    attempt_count=attempt_count,
+                    response_count=response_count,
+                ) from exc
+            response_count += 1
+            try:
+                telemetry = _typed_response_telemetry(response, model=model)
+            except LLMStructuredCallError as telemetry_error:
+                raise _aggregate_typed_telemetry(
+                    telemetry_error,
+                    total_cost=total_cost,
+                    total_input_tokens=total_input_tokens,
+                    total_output_tokens=total_output_tokens,
+                    total_cache_read=total_cache_read,
+                    total_cache_creation=total_cache_creation,
+                    response_count=response_count - 1,
+                    attempt_count=attempt_count,
+                ) from telemetry_error
+            total_cost += telemetry["cost"]
+            input_tokens = telemetry["input_tokens"]
+            output_tokens = telemetry["output_tokens"]
+            cache_read = telemetry["cache_read_tokens"]
+            cache_creation = telemetry["cache_creation_tokens"]
+            total_input_tokens += input_tokens
+            total_output_tokens += output_tokens
+            total_cache_read += cache_read
+            total_cache_creation += cache_creation
+            content = response.choices[0].message.content
+            if not content:
+                raise EmptyResponseError(_finish_reason(response))
+            parsed = _parse_structured_content(
+                _sanitize_content(content), response_model, model
+            )
+            return LLMResult(
+                parsed,
+                total_cost,
+                total_input_tokens + total_output_tokens,
+                total_cache_read,
+                total_cache_creation,
+                input_tokens=total_input_tokens,
+                output_tokens=total_output_tokens,
+                response_count=response_count,
+                attempt_count=attempt_count,
+            )
+        except Exception as exc:
+            last_error = exc
+            if isinstance(exc, LLMStructuredCallError) and exc.telemetry_failure:
+                raise
+            message = str(exc)
+            if _is_budget_exhausted(message):
+                raise ProviderBudgetExhausted(
+                    f"LLM provider budget exhausted: {message[:200]}",
+                    cost=total_cost,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
+                    cache_read_tokens=total_cache_read,
+                    cache_creation_tokens=total_cache_creation,
+                    response_count=response_count,
+                    attempt_count=attempt_count,
+                ) from exc
+            if _is_retryable(message) and attempt < max_attempts - 1:
+                time.sleep(retry_base_delay * (2**attempt))
+                continue
+            if response_count:
+                raise _structured_call_error(
+                    message,
+                    cost=total_cost,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
+                    cache_read_tokens=total_cache_read,
+                    cache_creation_tokens=total_cache_creation,
+                    response_count=response_count,
+                    attempt_count=attempt_count,
+                ) from exc
+            raise
+    raise last_error  # type: ignore[misc]
+
+
+async def _acall_frozen_structured_transport(
+    request: Any,
+    *,
+    response_model: type[BaseModel],
+    model: str,
+    max_attempts: int,
+    retry_base_delay: float = DEFAULT_RETRY_BASE_DELAY,
+) -> LLMResult:
+    """Async exact-wire counterpart of :func:`_call_frozen_structured_transport`."""
+    import litellm
+
+    suppress_litellm_noise()
+    routing_kwargs = request._transport_copy()
+    total_cost = 0.0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    total_cache_read = 0
+    total_cache_creation = 0
+    response_count = 0
+    attempt_count = 0
+    last_error: Exception | None = None
+    use_local = model.startswith("hosted_vllm/") and _is_local_api_base(
+        routing_kwargs.get("api_base")
+    )
+    governor = None if use_local else get_rate_governor()
+    _heartbeat_ensure_started()
+    _ACTIVITY.record_started()
+    succeeded = False
+    try:
+        for attempt in range(max_attempts):
+            attempt_count += 1
+            try:
+                try:
+                    if use_local:
+                        response = await _acompletion_local(request._transport_copy())
+                    else:
+                        async with governor.slot():
+                            response = await litellm.acompletion(
+                                **request._transport_copy()
+                            )
+                        governor.record_success()
+                except Exception as exc:
+                    raise _ambiguous_typed_send_error(
+                        exc,
+                        attempt_count=attempt_count,
+                        response_count=response_count,
+                    ) from exc
+                response_count += 1
+                try:
+                    telemetry = _typed_response_telemetry(response, model=model)
+                except LLMStructuredCallError as telemetry_error:
+                    raise _aggregate_typed_telemetry(
+                        telemetry_error,
+                        total_cost=total_cost,
+                        total_input_tokens=total_input_tokens,
+                        total_output_tokens=total_output_tokens,
+                        total_cache_read=total_cache_read,
+                        total_cache_creation=total_cache_creation,
+                        response_count=response_count - 1,
+                        attempt_count=attempt_count,
+                    ) from telemetry_error
+                cost_delta = telemetry["cost"]
+                total_cost += cost_delta
+                _ACTIVITY.add_spend(cost_delta)
+                input_tokens = telemetry["input_tokens"]
+                output_tokens = telemetry["output_tokens"]
+                cache_read = telemetry["cache_read_tokens"]
+                cache_creation = telemetry["cache_creation_tokens"]
+                total_input_tokens += input_tokens
+                total_output_tokens += output_tokens
+                total_cache_read += cache_read
+                total_cache_creation += cache_creation
+                content = response.choices[0].message.content
+                if not content:
+                    raise EmptyResponseError(_finish_reason(response))
+                parsed = _parse_structured_content(
+                    _sanitize_content(content), response_model, model
+                )
+                _ACTIVITY.record_completed()
+                succeeded = True
+                return LLMResult(
+                    parsed,
+                    total_cost,
+                    total_input_tokens + total_output_tokens,
+                    total_cache_read,
+                    total_cache_creation,
+                    input_tokens=total_input_tokens,
+                    output_tokens=total_output_tokens,
+                    response_count=response_count,
+                    attempt_count=attempt_count,
+                )
+            except Exception as exc:
+                last_error = exc
+                if isinstance(exc, LLMStructuredCallError) and exc.telemetry_failure:
+                    raise
+                message = str(exc)
+                if _is_budget_exhausted(message):
+                    raise ProviderBudgetExhausted(
+                        f"LLM provider budget exhausted: {message[:200]}",
+                        cost=total_cost,
+                        input_tokens=total_input_tokens,
+                        output_tokens=total_output_tokens,
+                        cache_read_tokens=total_cache_read,
+                        cache_creation_tokens=total_cache_creation,
+                        response_count=response_count,
+                        attempt_count=attempt_count,
+                    ) from exc
+                if governor is not None and _is_rate_limited(message):
+                    governor.record_rate_limited()
+                if _is_retryable(message) and attempt < max_attempts - 1:
+                    await asyncio.sleep(retry_base_delay * (2**attempt))
+                    continue
+                if response_count:
+                    raise _structured_call_error(
+                        message,
+                        cost=total_cost,
+                        input_tokens=total_input_tokens,
+                        output_tokens=total_output_tokens,
+                        cache_read_tokens=total_cache_read,
+                        cache_creation_tokens=total_cache_creation,
+                        response_count=response_count,
+                        attempt_count=attempt_count,
+                    ) from exc
+                raise
+        raise last_error  # type: ignore[misc]
+    finally:
+        if not succeeded:
+            _ACTIVITY.record_failed()
+
+
+# Public legacy wrappers remain unchanged until the executable inventory has
+# reached zero legacy expressions. Typed business calls use only the frozen
+# private transport functions above.
+_call_structured_transport = call_llm_structured
+_acall_structured_transport = acall_llm_structured
 
 
 # ---------------------------------------------------------------------------

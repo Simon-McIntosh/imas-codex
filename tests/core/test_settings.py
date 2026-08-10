@@ -1,5 +1,9 @@
 """Tests for settings.py module."""
 
+import hashlib
+import json
+from datetime import UTC, datetime
+
 import pytest
 
 from imas_codex import settings
@@ -217,6 +221,267 @@ class TestModuleLevelConstants:
         assert isinstance(settings.INCLUDE_GGD, bool)
         assert isinstance(settings.INCLUDE_ERROR_FIELDS, bool)
         assert isinstance(settings.EMBEDDING_DIMENSION, int)
+
+
+def test_free_local_endpoint_requires_explicit_trusted_classification():
+    assert settings.is_explicit_free_local_endpoint("hosted_vllm/deepseek-v4-flash")
+    assert not settings.is_explicit_free_local_endpoint(
+        "openrouter/openai/gpt-5.6-luna"
+    )
+
+
+def test_checked_in_pricing_preserves_missing_dimensions_and_stays_inactive():
+    model = "openrouter/openai/gpt-5.6-luna"
+
+    pricing = settings.get_openrouter_pricing(model)
+
+    assert pricing["request"] is None
+    assert pricing["image"] is None
+    with pytest.raises(settings.PricingAuthorityError):
+        settings.get_typed_openrouter_pricing(model)
+
+
+_MISSING_CACHE_WRITE = object()
+
+
+def _typed_pricing_authority(
+    *,
+    require_image: bool,
+    cache_write: object = _MISSING_CACHE_WRITE,
+    cache_write_location: str = "model",
+    cache_write_dimension: str = "input_cache_write",
+) -> dict[str, object]:
+    model = "openrouter/openai/example-alias"
+    canonical = "openai/example-canonical"
+    model_pricing = {
+        "prompt": "0.0000001",
+        "completion": "0.0000006",
+        "request": "0.01",
+        "image": "0.02",
+    }
+    endpoint_pricing = dict(model_pricing)
+    if cache_write is not _MISSING_CACHE_WRITE:
+        pricing = {
+            "model": model_pricing,
+            "endpoint": endpoint_pricing,
+        }[cache_write_location]
+        pricing[cache_write_dimension] = cache_write
+    architecture = {
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+    }
+    model_payload = json.dumps(
+        {
+            "data": {
+                "id": canonical,
+                "architecture": architecture,
+                "pricing": model_pricing,
+            }
+        },
+        separators=(",", ":"),
+    )
+    endpoints_payload = json.dumps(
+        {
+            "data": {
+                "id": canonical,
+                "endpoints": [
+                    {
+                        "name": "OpenAI/standard",
+                        "provider_name": "OpenAI",
+                        "pricing": endpoint_pricing,
+                    }
+                ],
+            }
+        },
+        separators=(",", ":"),
+    )
+    raw: dict[str, object] = {
+        "prompt": 0.1,
+        "completion": 0.6,
+        "request": 0.01,
+        "image": 0.02 if require_image else None,
+        "cache_read": None,
+        "cache_write": None,
+        "cache_write_ttl": None,
+        "image_unit": "per-image" if require_image else None,
+        "canonical_slug": canonical,
+        "provider": "OpenAI",
+        "provider_selector": "OpenAI/standard",
+        "source": "https://openrouter.ai/api/v1/model/openai/example-alias",
+        "endpoints_source": (
+            "https://openrouter.ai/api/v1/models/openai/example-canonical/endpoints"
+        ),
+        "retrieved_at": "2026-08-10T00:00:00Z",
+        "model_payload_json": model_payload,
+        "endpoints_payload_json": endpoints_payload,
+        "model_payload_sha256": hashlib.sha256(model_payload.encode()).hexdigest(),
+        "endpoints_payload_sha256": hashlib.sha256(
+            endpoints_payload.encode()
+        ).hexdigest(),
+        "other_charged_dimensions": [],
+        "overrides": [],
+    }
+    required = (
+        ["completion", "image", "prompt", "request"]
+        if require_image
+        else [
+            "completion",
+            "prompt",
+            "request",
+        ]
+    )
+    projection = {
+        "configured_alias": model,
+        "canonical_slug": canonical,
+        "canonical_wire_model": f"openrouter/{canonical}",
+        "provider": "OpenAI",
+        "provider_selector": "OpenAI/standard",
+        "source": raw["source"],
+        "endpoints_source": raw["endpoints_source"],
+        "retrieved_at": "2026-08-10T00:00:00+00:00",
+        "model_payload_sha256": raw["model_payload_sha256"],
+        "endpoints_payload_sha256": raw["endpoints_payload_sha256"],
+        "architecture": architecture,
+        "model_pricing": model_pricing,
+        "provider_endpoint": {
+            "name": "OpenAI/standard",
+            "provider_name": "OpenAI",
+            "pricing": endpoint_pricing,
+        },
+        "completion": 0.6,
+        **({"image": 0.02} if require_image else {}),
+        "prompt": 0.1,
+        "request": 0.01,
+        "required_dimensions": required,
+        "image_unit": "per-image" if require_image else None,
+        "cache_control": "disabled",
+        "other_charged_dimensions": [],
+        "overrides": [],
+    }
+    raw["canonical_projection_sha256"] = hashlib.sha256(
+        settings._canonical_payload_bytes(projection)
+    ).hexdigest()
+    return raw
+
+
+def test_typed_pricing_recomputes_payloads_projection_and_exact_selector(monkeypatch):
+    authority = _typed_pricing_authority(require_image=False)
+    monkeypatch.setattr(settings, "get_openrouter_pricing", lambda model: authority)
+
+    pricing = settings.get_typed_openrouter_pricing(
+        "openrouter/openai/example-alias",
+        now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+    )
+
+    assert pricing["canonical_wire_model"] == "openrouter/openai/example-canonical"
+    assert pricing["provider_selector"] == "OpenAI/standard"
+    assert pricing["required_dimensions"] == ["completion", "prompt", "request"]
+    assert "image" not in pricing
+
+    authority["provider"] = "unverified-provider"
+    with pytest.raises(settings.PricingAuthorityError, match="provider identity"):
+        settings.get_typed_openrouter_pricing(
+            "openrouter/openai/example-alias",
+            now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+        )
+
+
+def test_typed_pricing_rejects_payload_tampering_and_requires_image_by_modality(
+    monkeypatch,
+):
+    authority = _typed_pricing_authority(require_image=True)
+    monkeypatch.setattr(settings, "get_openrouter_pricing", lambda model: authority)
+
+    pricing = settings.get_typed_openrouter_pricing(
+        "openrouter/openai/example-alias",
+        require_image=True,
+        now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+    )
+    assert pricing["image"] == pytest.approx(0.02)
+
+    authority["endpoints_payload_json"] = str(
+        authority["endpoints_payload_json"]
+    ).replace("0.02", "0.03")
+    with pytest.raises(settings.PricingAuthorityError, match="payload_json receipt"):
+        settings.get_typed_openrouter_pricing(
+            "openrouter/openai/example-alias",
+            require_image=True,
+            now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+        )
+
+
+@pytest.mark.parametrize("cache_write_location", ["model", "endpoint"])
+@pytest.mark.parametrize("cache_write_dimension", ["input_cache_write", "cache_write"])
+@pytest.mark.parametrize(
+    "cache_write",
+    [
+        "0.000000125",
+        "-0.000000125",
+        0,
+        0.0,
+        "0",
+        "",
+        None,
+        "not-a-price",
+        "NaN",
+        {"unit": "unknown"},
+    ],
+    ids=[
+        "positive",
+        "negative",
+        "integer-zero",
+        "float-zero",
+        "string-zero",
+        "empty-string",
+        "null",
+        "malformed",
+        "nonfinite",
+        "structured-value",
+    ],
+)
+def test_typed_pricing_rejects_cache_write_key_presence(
+    monkeypatch, cache_write_location, cache_write_dimension, cache_write
+):
+    authority = _typed_pricing_authority(
+        require_image=False,
+        cache_write=cache_write,
+        cache_write_location=cache_write_location,
+        cache_write_dimension=cache_write_dimension,
+    )
+    monkeypatch.setattr(settings, "get_openrouter_pricing", lambda model: authority)
+
+    with pytest.raises(settings.PricingAuthorityError, match="cache-write pricing"):
+        settings.get_typed_openrouter_pricing(
+            "openrouter/openai/example-alias",
+            now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+        )
+
+
+def test_model_sources_separate_route_seats_from_candidate_selection():
+    fixed = settings.resolve_model_source("section:sn-compose")
+    assert fixed.source_id == "section:sn-compose"
+    assert fixed.model == settings.get_model("sn-compose")
+    assert fixed.endpoint_class == "local-free"
+
+    review_models = settings.get_model_source_models("sn-review:names")
+    assert "hosted_vllm/deepseek-v4-flash" in review_models
+    assert any(model.startswith("openrouter/") for model in review_models)
+    with pytest.raises(ValueError, match="requires an explicit"):
+        settings.resolve_model_source("sn-review:names")
+    with pytest.raises(ValueError, match="outside source"):
+        settings.resolve_model_source(
+            "sn-review:names", candidate_model="openrouter/unregistered/model"
+        )
+
+
+def test_local_reviewer_source_binds_its_own_endpoint_contract():
+    resolved = settings.resolve_model_source(
+        "sn-review:names", candidate_model="hosted_vllm/deepseek-v4-flash"
+    )
+
+    assert resolved.api_key_env == "AMBIX_API_KEY"
+    assert resolved.api_base
+    assert resolved.endpoint_class == "local-free"
 
 
 class TestGraphSettings:

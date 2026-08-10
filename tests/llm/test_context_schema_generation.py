@@ -14,6 +14,17 @@ def test_context_schema_is_dedicated_and_not_imported_by_graph_schemas() -> None
     schema_path = _PROJECT_ROOT / "imas_codex" / "schemas" / "llm_context.yaml"
     assert schema_path.exists()
     assert "PromptEnvelope:" in schema_path.read_text()
+    assert "PromptAttachment:" in schema_path.read_text()
+    assert "BatchComparatorReceipt:" in schema_path.read_text()
+    assert "TelemetryState:" in schema_path.read_text()
+    assert "credential_source_identity:" in schema_path.read_text()
+    assert "route_id:" in schema_path.read_text()
+    assert "pricing_contract_digest:" in schema_path.read_text()
+    assert "pricing_provider_identity:" in schema_path.read_text()
+    assert "pricing_provider_selector:" in schema_path.read_text()
+    assert "attempt_count_state:" in schema_path.read_text()
+    assert "response_count_state:" in schema_path.read_text()
+    assert "billability_state:" in schema_path.read_text()
 
     for name in ("facility.yaml", "imas_dd.yaml", "standard_name.yaml"):
         assert (
