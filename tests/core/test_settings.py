@@ -1,5 +1,9 @@
 """Tests for settings.py module."""
 
+import hashlib
+import json
+from datetime import UTC, datetime
+
 import pytest
 
 from imas_codex import settings
@@ -235,6 +239,160 @@ def test_checked_in_pricing_preserves_missing_dimensions_and_stays_inactive():
     assert pricing["image"] is None
     with pytest.raises(settings.PricingAuthorityError):
         settings.get_typed_openrouter_pricing(model)
+
+
+def _typed_pricing_authority(*, require_image: bool) -> dict[str, object]:
+    model = "openrouter/openai/example-alias"
+    canonical = "openai/example-canonical"
+    model_pricing = {
+        "prompt": "0.0000001",
+        "completion": "0.0000006",
+        "request": "0.01",
+        "image": "0.02",
+    }
+    architecture = {
+        "input_modalities": ["text", "image"],
+        "output_modalities": ["text"],
+    }
+    model_payload = json.dumps(
+        {
+            "data": {
+                "id": canonical,
+                "architecture": architecture,
+                "pricing": model_pricing,
+            }
+        },
+        separators=(",", ":"),
+    )
+    endpoint_pricing = dict(model_pricing)
+    endpoints_payload = json.dumps(
+        {
+            "data": {
+                "id": canonical,
+                "endpoints": [
+                    {
+                        "name": "OpenAI/standard",
+                        "provider_name": "OpenAI",
+                        "pricing": endpoint_pricing,
+                    }
+                ],
+            }
+        },
+        separators=(",", ":"),
+    )
+    raw: dict[str, object] = {
+        "prompt": 0.1,
+        "completion": 0.6,
+        "request": 0.01,
+        "image": 0.02 if require_image else None,
+        "cache_read": None,
+        "cache_write": None,
+        "cache_write_ttl": None,
+        "image_unit": "per-image" if require_image else None,
+        "canonical_slug": canonical,
+        "provider": "OpenAI",
+        "provider_selector": "OpenAI/standard",
+        "source": "https://openrouter.ai/api/v1/model/openai/example-alias",
+        "endpoints_source": (
+            "https://openrouter.ai/api/v1/models/openai/example-canonical/endpoints"
+        ),
+        "retrieved_at": "2026-08-10T00:00:00Z",
+        "model_payload_json": model_payload,
+        "endpoints_payload_json": endpoints_payload,
+        "model_payload_sha256": hashlib.sha256(model_payload.encode()).hexdigest(),
+        "endpoints_payload_sha256": hashlib.sha256(
+            endpoints_payload.encode()
+        ).hexdigest(),
+        "other_charged_dimensions": [],
+        "overrides": [],
+    }
+    required = (
+        ["completion", "image", "prompt", "request"]
+        if require_image
+        else [
+            "completion",
+            "prompt",
+            "request",
+        ]
+    )
+    projection = {
+        "configured_alias": model,
+        "canonical_slug": canonical,
+        "canonical_wire_model": f"openrouter/{canonical}",
+        "provider": "OpenAI",
+        "provider_selector": "OpenAI/standard",
+        "source": raw["source"],
+        "endpoints_source": raw["endpoints_source"],
+        "retrieved_at": "2026-08-10T00:00:00+00:00",
+        "model_payload_sha256": raw["model_payload_sha256"],
+        "endpoints_payload_sha256": raw["endpoints_payload_sha256"],
+        "architecture": architecture,
+        "model_pricing": model_pricing,
+        "provider_endpoint": {
+            "name": "OpenAI/standard",
+            "provider_name": "OpenAI",
+            "pricing": endpoint_pricing,
+        },
+        "completion": 0.6,
+        **({"image": 0.02} if require_image else {}),
+        "prompt": 0.1,
+        "request": 0.01,
+        "required_dimensions": required,
+        "image_unit": "per-image" if require_image else None,
+        "cache_control": "disabled",
+        "other_charged_dimensions": [],
+        "overrides": [],
+    }
+    raw["canonical_projection_sha256"] = hashlib.sha256(
+        settings._canonical_payload_bytes(projection)
+    ).hexdigest()
+    return raw
+
+
+def test_typed_pricing_recomputes_payloads_projection_and_exact_selector(monkeypatch):
+    authority = _typed_pricing_authority(require_image=False)
+    monkeypatch.setattr(settings, "get_openrouter_pricing", lambda model: authority)
+
+    pricing = settings.get_typed_openrouter_pricing(
+        "openrouter/openai/example-alias",
+        now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+    )
+
+    assert pricing["canonical_wire_model"] == "openrouter/openai/example-canonical"
+    assert pricing["provider_selector"] == "OpenAI/standard"
+    assert pricing["required_dimensions"] == ["completion", "prompt", "request"]
+    assert "image" not in pricing
+
+    authority["provider"] = "unverified-provider"
+    with pytest.raises(settings.PricingAuthorityError, match="provider identity"):
+        settings.get_typed_openrouter_pricing(
+            "openrouter/openai/example-alias",
+            now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+        )
+
+
+def test_typed_pricing_rejects_payload_tampering_and_requires_image_by_modality(
+    monkeypatch,
+):
+    authority = _typed_pricing_authority(require_image=True)
+    monkeypatch.setattr(settings, "get_openrouter_pricing", lambda model: authority)
+
+    pricing = settings.get_typed_openrouter_pricing(
+        "openrouter/openai/example-alias",
+        require_image=True,
+        now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+    )
+    assert pricing["image"] == pytest.approx(0.02)
+
+    authority["endpoints_payload_json"] = str(
+        authority["endpoints_payload_json"]
+    ).replace("0.02", "0.03")
+    with pytest.raises(settings.PricingAuthorityError, match="payload_json receipt"):
+        settings.get_typed_openrouter_pricing(
+            "openrouter/openai/example-alias",
+            require_image=True,
+            now=datetime(2026, 8, 10, 1, tzinfo=UTC),
+        )
 
 
 def test_model_sources_separate_route_seats_from_candidate_selection():

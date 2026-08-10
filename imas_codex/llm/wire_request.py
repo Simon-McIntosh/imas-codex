@@ -127,7 +127,8 @@ def _build_frozen_wire_request(
     service: str,
     reasoning_effort: str | None,
     provider_max_price: Mapping[str, float] | None,
-    provider_name: str | None,
+    provider_selector: str | None,
+    configured_model: str,
     zero_cost_local: bool,
     api_base: str | None,
     api_key_env: str | None,
@@ -154,6 +155,14 @@ def _build_frozen_wire_request(
     else:
         if any((api_base, api_key_env, endpoint_class)):
             raise ValueError("Paid typed route cannot use a custom endpoint")
+        if not model.startswith("openrouter/") or not configured_model.startswith(
+            "openrouter/"
+        ):
+            raise ValueError(
+                "Paid typed route lacks an exact OpenRouter model identity"
+            )
+        if not provider_selector:
+            raise ValueError("Paid typed route lacks an exact provider selector")
         api_key, credential_source = get_api_key_for_service_with_source(service)
         endpoint_identity = "https://openrouter.ai/api/v1"
     kwargs = _build_kwargs(
@@ -169,7 +178,7 @@ def _build_frozen_wire_request(
         api_key_override=api_key if zero_cost_local else None,
         reasoning_effort=reasoning_effort,
         typed_max_price=dict(provider_max_price) if provider_max_price else None,
-        typed_provider_name=provider_name,
+        typed_provider_selector=provider_selector,
         typed_endpoint_contract=endpoint_contract,
         typed_resolved_api_key=api_key,
     )
@@ -185,6 +194,7 @@ def _build_frozen_wire_request(
         canonical_json(
             {
                 "endpoint_contract": endpoint_contract,
+                "configured_model": configured_model,
                 "credential_source_identity": credential_identity,
                 "payload": redacted,
             }

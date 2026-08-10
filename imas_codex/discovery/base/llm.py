@@ -186,6 +186,7 @@ class ProviderBudgetExhausted(Exception):
         cache_read_tokens: int = 0,
         cache_creation_tokens: int = 0,
         response_count: int = 0,
+        attempt_count: int | None = None,
     ) -> None:
         super().__init__(message)
         self.cost = cost
@@ -195,6 +196,7 @@ class ProviderBudgetExhausted(Exception):
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
+        self.attempt_count = response_count if attempt_count is None else attempt_count
 
 
 class ProviderPricingUnbounded(RuntimeError):
@@ -473,6 +475,7 @@ class LLMResult:
         "cache_read_tokens",
         "cache_creation_tokens",
         "response_count",
+        "attempt_count",
     )
 
     def __init__(
@@ -485,6 +488,7 @@ class LLMResult:
         input_tokens: int = 0,
         output_tokens: int = 0,
         response_count: int = 1,
+        attempt_count: int | None = None,
     ) -> None:
         self.parsed = parsed
         self.cost = cost
@@ -497,6 +501,7 @@ class LLMResult:
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
+        self.attempt_count = response_count if attempt_count is None else attempt_count
 
     # Allow ``result, cost, tokens = call_llm_structured(...)``
     def __iter__(self):
@@ -530,6 +535,7 @@ class LLMStructuredCallError(ValueError):
         "cache_read_tokens",
         "cache_creation_tokens",
         "response_count",
+        "attempt_count",
         "telemetry_states",
         "telemetry_failure",
     )
@@ -544,6 +550,7 @@ class LLMStructuredCallError(ValueError):
         cache_read_tokens: int | None,
         cache_creation_tokens: int | None,
         response_count: int,
+        attempt_count: int | None = None,
         telemetry_states: Mapping[str, str] | None = None,
         telemetry_failure: bool = False,
     ) -> None:
@@ -555,16 +562,19 @@ class LLMStructuredCallError(ValueError):
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
-        self.telemetry_states = dict(
-            telemetry_states
-            or {
-                "input_tokens": "valid",
-                "output_tokens": "valid",
-                "cached_read_tokens": "valid",
-                "cached_write_tokens": "valid",
-                "actual_cost": "valid",
-            }
-        )
+        self.attempt_count = response_count if attempt_count is None else attempt_count
+        states = {
+            "input_tokens": "valid",
+            "output_tokens": "valid",
+            "cached_read_tokens": "valid",
+            "cached_write_tokens": "valid",
+            "actual_cost": "valid",
+            "attempt_count": "valid",
+            "response_count": "valid",
+            "billability": "valid",
+        }
+        states.update(telemetry_states or {})
+        self.telemetry_states = states
         self.telemetry_failure = telemetry_failure
 
 
@@ -577,6 +587,7 @@ def _structured_call_error(
     cache_read_tokens: int,
     cache_creation_tokens: int,
     response_count: int,
+    attempt_count: int | None = None,
     telemetry_states: Mapping[str, str] | None = None,
     telemetry_failure: bool = False,
 ) -> LLMStructuredCallError:
@@ -590,6 +601,7 @@ def _structured_call_error(
         cache_read_tokens=cache_read_tokens,
         cache_creation_tokens=cache_creation_tokens,
         response_count=response_count,
+        attempt_count=attempt_count,
         telemetry_states=telemetry_states,
         telemetry_failure=telemetry_failure,
     )
@@ -1892,7 +1904,7 @@ def _build_kwargs(
     api_key_override: str | None = None,
     reasoning_effort: str | None = None,
     typed_max_price: dict[str, float] | None = None,
-    typed_provider_name: str | None = None,
+    typed_provider_selector: str | None = None,
     typed_endpoint_contract: str | None = None,
     typed_resolved_api_key: str | None = None,
 ) -> dict[str, Any]:
@@ -2026,14 +2038,14 @@ def _build_kwargs(
                 "paid typed calls require direct OpenRouter routing with a resolved "
                 "service credential"
             )
-        if not typed_provider_name:
+        if not typed_provider_selector:
             raise ProviderPricingUnbounded(
-                "paid typed calls require an exact provider identity"
+                "paid typed calls require an exact provider selector"
             )
         extra_body = kwargs.setdefault("extra_body", {})
         extra_body["provider"] = {
             "max_price": dict(typed_max_price),
-            "only": [typed_provider_name],
+            "only": [typed_provider_selector],
             "allow_fallbacks": False,
         }
     elif typed_endpoint_contract == "direct-openrouter":
@@ -2647,6 +2659,7 @@ def _aggregate_typed_telemetry(
     total_cache_read: int,
     total_cache_creation: int,
     response_count: int,
+    attempt_count: int,
 ) -> LLMStructuredCallError:
     """Bind a malformed response to all telemetry known before it arrived."""
 
@@ -2662,7 +2675,43 @@ def _aggregate_typed_telemetry(
         cache_read_tokens=known("cache_read_tokens", total_cache_read),
         cache_creation_tokens=known("cache_creation_tokens", total_cache_creation),
         response_count=response_count,
-        telemetry_states=error.telemetry_states,
+        attempt_count=attempt_count,
+        telemetry_states={
+            **error.telemetry_states,
+            "attempt_count": "valid",
+            "response_count": "valid",
+            "billability": "unavailable",
+        },
+        telemetry_failure=True,
+    )
+
+
+def _ambiguous_typed_send_error(
+    error: BaseException,
+    *,
+    attempt_count: int,
+    response_count: int,
+) -> LLMStructuredCallError:
+    """Terminate an invocation that may have reached a billable provider."""
+    return LLMStructuredCallError(
+        f"Provider invocation billability is indeterminate: {str(error)[:200]}",
+        cost=None,
+        input_tokens=None,
+        output_tokens=None,
+        cache_read_tokens=None,
+        cache_creation_tokens=None,
+        response_count=response_count,
+        attempt_count=attempt_count,
+        telemetry_states={
+            "input_tokens": "unavailable",
+            "output_tokens": "unavailable",
+            "cached_read_tokens": "unavailable",
+            "cached_write_tokens": "unavailable",
+            "actual_cost": "unavailable",
+            "attempt_count": "valid",
+            "response_count": "valid",
+            "billability": "unavailable",
+        },
         telemetry_failure=True,
     )
 
@@ -2685,10 +2734,19 @@ def _call_frozen_structured_transport(
     total_cache_read = 0
     total_cache_creation = 0
     response_count = 0
+    attempt_count = 0
     last_error: Exception | None = None
     for attempt in range(max_attempts):
+        attempt_count += 1
         try:
-            response = litellm.completion(**request._transport_copy())
+            try:
+                response = litellm.completion(**request._transport_copy())
+            except Exception as exc:
+                raise _ambiguous_typed_send_error(
+                    exc,
+                    attempt_count=attempt_count,
+                    response_count=response_count,
+                ) from exc
             response_count += 1
             try:
                 telemetry = _typed_response_telemetry(response, model=model)
@@ -2700,7 +2758,8 @@ def _call_frozen_structured_transport(
                     total_output_tokens=total_output_tokens,
                     total_cache_read=total_cache_read,
                     total_cache_creation=total_cache_creation,
-                    response_count=response_count,
+                    response_count=response_count - 1,
+                    attempt_count=attempt_count,
                 ) from telemetry_error
             total_cost += telemetry["cost"]
             input_tokens = telemetry["input_tokens"]
@@ -2726,6 +2785,7 @@ def _call_frozen_structured_transport(
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
                 response_count=response_count,
+                attempt_count=attempt_count,
             )
         except Exception as exc:
             last_error = exc
@@ -2741,6 +2801,7 @@ def _call_frozen_structured_transport(
                     cache_read_tokens=total_cache_read,
                     cache_creation_tokens=total_cache_creation,
                     response_count=response_count,
+                    attempt_count=attempt_count,
                 ) from exc
             if _is_retryable(message) and attempt < max_attempts - 1:
                 time.sleep(retry_base_delay * (2**attempt))
@@ -2754,6 +2815,7 @@ def _call_frozen_structured_transport(
                     cache_read_tokens=total_cache_read,
                     cache_creation_tokens=total_cache_creation,
                     response_count=response_count,
+                    attempt_count=attempt_count,
                 ) from exc
             raise
     raise last_error  # type: ignore[misc]
@@ -2778,6 +2840,7 @@ async def _acall_frozen_structured_transport(
     total_cache_read = 0
     total_cache_creation = 0
     response_count = 0
+    attempt_count = 0
     last_error: Exception | None = None
     use_local = model.startswith("hosted_vllm/") and _is_local_api_base(
         routing_kwargs.get("api_base")
@@ -2788,15 +2851,23 @@ async def _acall_frozen_structured_transport(
     succeeded = False
     try:
         for attempt in range(max_attempts):
+            attempt_count += 1
             try:
-                if use_local:
-                    response = await _acompletion_local(request._transport_copy())
-                else:
-                    async with governor.slot():
-                        response = await litellm.acompletion(
-                            **request._transport_copy()
-                        )
-                    governor.record_success()
+                try:
+                    if use_local:
+                        response = await _acompletion_local(request._transport_copy())
+                    else:
+                        async with governor.slot():
+                            response = await litellm.acompletion(
+                                **request._transport_copy()
+                            )
+                        governor.record_success()
+                except Exception as exc:
+                    raise _ambiguous_typed_send_error(
+                        exc,
+                        attempt_count=attempt_count,
+                        response_count=response_count,
+                    ) from exc
                 response_count += 1
                 try:
                     telemetry = _typed_response_telemetry(response, model=model)
@@ -2808,7 +2879,8 @@ async def _acall_frozen_structured_transport(
                         total_output_tokens=total_output_tokens,
                         total_cache_read=total_cache_read,
                         total_cache_creation=total_cache_creation,
-                        response_count=response_count,
+                        response_count=response_count - 1,
+                        attempt_count=attempt_count,
                     ) from telemetry_error
                 cost_delta = telemetry["cost"]
                 total_cost += cost_delta
@@ -2838,6 +2910,7 @@ async def _acall_frozen_structured_transport(
                     input_tokens=total_input_tokens,
                     output_tokens=total_output_tokens,
                     response_count=response_count,
+                    attempt_count=attempt_count,
                 )
             except Exception as exc:
                 last_error = exc
@@ -2853,6 +2926,7 @@ async def _acall_frozen_structured_transport(
                         cache_read_tokens=total_cache_read,
                         cache_creation_tokens=total_cache_creation,
                         response_count=response_count,
+                        attempt_count=attempt_count,
                     ) from exc
                 if governor is not None and _is_rate_limited(message):
                     governor.record_rate_limited()
@@ -2868,6 +2942,7 @@ async def _acall_frozen_structured_transport(
                         cache_read_tokens=total_cache_read,
                         cache_creation_tokens=total_cache_creation,
                         response_count=response_count,
+                        attempt_count=attempt_count,
                     ) from exc
                 raise
         raise last_error  # type: ignore[misc]

@@ -240,13 +240,14 @@ def dispatch_case(tmp_path, monkeypatch):
             endpoint_class=None,
         ),
     )
-    monkeypatch.setattr(
-        "imas_codex.settings.get_typed_openrouter_pricing",
-        lambda model: {
+
+    def typed_pricing(model, *, require_image=False):
+        pricing = {
             "configured_alias": model,
             "canonical_slug": "openai/gpt-5.6-luna-canonical",
+            "canonical_wire_model": "openrouter/openai/gpt-5.6-luna-canonical",
             "provider": "OpenAI",
-            "provider_tier": "default",
+            "provider_selector": "OpenAI/standard",
             "source": "https://openrouter.ai/api/v1/models",
             "endpoints_source": "https://openrouter.ai/api/v1/models/x/endpoints",
             "retrieved_at": "2026-08-10T00:00:00+00:00",
@@ -256,12 +257,17 @@ def dispatch_case(tmp_path, monkeypatch):
             "prompt": 0.1,
             "completion": 0.6,
             "request": 0.01,
-            "image": 0.02,
-            "image_unit": "per-image",
+            "image_unit": "per-image" if require_image else None,
             "cache_control": "disabled",
             "other_charged_dimensions": [],
             "overrides": [],
-        },
+        }
+        if require_image:
+            pricing["image"] = 0.02
+        return pricing
+
+    monkeypatch.setattr(
+        "imas_codex.settings.get_typed_openrouter_pricing", typed_pricing
     )
     return spec, _envelope(spec.callsite_id, tmp_path), tmp_path
 
@@ -295,11 +301,15 @@ def test_preflight_binds_final_wire_and_separates_dynamic_context(
     assert prepared.receipt.max_attempts == 2
     provider = prepared.wire_request.redacted_payload["extra_body"]["provider"]
     assert provider["max_price"]
-    assert provider["only"] == ["OpenAI"]
+    assert provider["max_price"]["image"] == pytest.approx(0.02)
+    assert provider["only"] == ("OpenAI/standard",)
     assert provider["allow_fallbacks"] is False
+    assert prepared.wire_request.redacted_payload["model"] == (
+        "openrouter/openai/gpt-5.6-luna-canonical"
+    )
     assert prepared.receipt.endpoint_contract == "direct-openrouter"
     assert prepared.receipt.pricing_provider_identity == "OpenAI"
-    assert prepared.receipt.pricing_provider_tier == "default"
+    assert prepared.receipt.pricing_provider_selector == "OpenAI/standard"
     assert prepared.receipt.pricing_contract_digest
     assert "OPENROUTER_API_KEY_IMAS_CODEX:sha256:" in (
         prepared.receipt.credential_source_identity
@@ -340,6 +350,12 @@ def test_paid_typed_route_rejects_custom_and_never_uses_configured_proxy(
             endpoint_class="custom",
         ),
     )
+    envelope["static_context"] = [
+        ref.model_dump(mode="json")
+        for ref in static_context_refs(
+            spec.callsite_id, route_id=spec.route_id, prompts_dir=prompts_dir
+        )
+    ]
     with pytest.raises(PricingUnavailable, match="custom endpoint"):
         prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
 
@@ -352,6 +368,12 @@ def test_paid_typed_route_rejects_custom_and_never_uses_configured_proxy(
             endpoint_class=None,
         ),
     )
+    envelope["static_context"] = [
+        ref.model_dump(mode="json")
+        for ref in static_context_refs(
+            spec.callsite_id, route_id=spec.route_id, prompts_dir=prompts_dir
+        )
+    ]
     monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX")
     monkeypatch.setenv("OPENROUTER_API_KEY_DATA_DICTIONARY", "service-key")
     monkeypatch.setenv("LITELLM_PROXY_URL", "https://proxy.invalid/v1")
@@ -369,6 +391,68 @@ def test_typed_route_disables_unpriced_cache_control(dispatch_case) -> None:
     )
 
     assert "cache_control" not in repr(prepared.messages)
+
+
+def test_text_only_route_does_not_require_or_send_image_pricing(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    changed = replace(
+        spec,
+        attachment_policy=replace(spec.attachment_policy, max_count=0),
+    )
+    monkeypatch.setattr(
+        policy_registry,
+        "DISPATCH_POLICY_REGISTRY",
+        MappingProxyType({(changed.callsite_id, changed.route_id): changed}),
+    )
+    monkeypatch.setattr(
+        policy_registry,
+        "get_route_binding",
+        lambda callsite_id, route_id: SimpleNamespace(
+            service=changed.service,
+            seat=changed.seat,
+            model_source=changed.model_source,
+            templates=tuple(template.name for template in changed.templates),
+            response_model_identity=changed.response_model_path,
+        ),
+    )
+
+    def text_pricing(model, *, require_image=False):
+        assert require_image is False
+        return {
+            "configured_alias": model,
+            "canonical_slug": "openai/gpt-5.6-luna-canonical",
+            "canonical_wire_model": "openrouter/openai/gpt-5.6-luna-canonical",
+            "provider": "OpenAI",
+            "provider_selector": "OpenAI/standard",
+            "prompt": 0.1,
+            "completion": 0.6,
+            "request": 0.01,
+            "overrides": [],
+        }
+
+    monkeypatch.setattr(
+        "imas_codex.settings.get_typed_openrouter_pricing", text_pricing
+    )
+    envelope["static_context"] = [
+        ref.model_dump(mode="json")
+        for ref in static_context_refs(
+            changed.callsite_id,
+            route_id=changed.route_id,
+            prompts_dir=prompts_dir,
+        )
+    ]
+
+    prepared = prepare_context_dispatch(
+        envelope, changed.callsite_id, prompts_dir=prompts_dir
+    )
+
+    maximums = prepared.wire_request.redacted_payload["extra_body"]["provider"][
+        "max_price"
+    ]
+    assert "image" not in maximums
+    assert prepared.receipt.maximum_image_count == 0
 
 
 def test_local_wire_receipt_binds_the_actual_endpoint_credential(
@@ -391,6 +475,12 @@ def test_local_wire_receipt_binds_the_actual_endpoint_credential(
     )
     monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX")
     monkeypatch.setenv("AMBIX_API_KEY", "first-local-key")
+    envelope["static_context"] = [
+        ref.model_dump(mode="json")
+        for ref in static_context_refs(
+            spec.callsite_id, route_id=spec.route_id, prompts_dir=prompts_dir
+        )
+    ]
     first = prepare_context_dispatch(
         envelope, spec.callsite_id, prompts_dir=prompts_dir
     )
@@ -428,6 +518,17 @@ def test_same_named_different_schema_refuses_stale_static_refs(
         policy_registry,
         "DISPATCH_POLICY_REGISTRY",
         MappingProxyType({(spec.callsite_id, spec.route_id): changed}),
+    )
+    monkeypatch.setattr(
+        policy_registry,
+        "get_route_binding",
+        lambda callsite_id, route_id: SimpleNamespace(
+            service=changed.service,
+            seat=changed.seat,
+            model_source=changed.model_source,
+            templates=tuple(template.name for template in changed.templates),
+            response_model_identity=changed.response_model_path,
+        ),
     )
 
     with pytest.raises(ContextPolicyError, match="response identity"):
@@ -656,6 +757,8 @@ def test_dispatch_sends_the_fingerprinted_frozen_request(
     )
     assert result.receipt.provider_usage.input_tokens == 100
     assert result.receipt.provider_usage.attempt_count == 1
+    assert result.receipt.provider_usage.response_count == 1
+    assert result.receipt.provider_usage.billability_state.value == "valid"
     assert result.receipt.parsed_output_digest
 
 
@@ -769,6 +872,55 @@ def test_missing_provider_telemetry_carries_unavailable_failure_receipt(
     assert usage.actual_cost_state.value == "unavailable"
     assert usage.attempt_count is None
     assert usage.attempt_count_state.value == "unavailable"
+
+
+def test_ambiguous_send_carries_consumed_attempt_and_unknown_billability(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    internal = context_dispatch._prepare_context_transport(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+
+    def transport(*args, **kwargs):
+        error = ValueError("provider invocation billability is indeterminate")
+        error.input_tokens = None
+        error.output_tokens = None
+        error.cache_read_tokens = None
+        error.cache_creation_tokens = None
+        error.cost = None
+        error.attempt_count = 1
+        error.response_count = 0
+        error.telemetry_states = {
+            "input_tokens": "unavailable",
+            "output_tokens": "unavailable",
+            "cached_read_tokens": "unavailable",
+            "cached_write_tokens": "unavailable",
+            "actual_cost": "unavailable",
+            "attempt_count": "valid",
+            "response_count": "valid",
+            "billability": "unavailable",
+        }
+        raise error
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.llm._call_frozen_structured_transport",
+        transport,
+    )
+    monkeypatch.setattr(
+        context_dispatch,
+        "_prepare_context_transport",
+        lambda *args, **kwargs: internal,
+    )
+
+    with pytest.raises(ContextTransportError) as caught:
+        dispatch_context(envelope, spec.callsite_id)
+
+    usage = caught.value.receipt.provider_usage
+    assert usage.attempt_count == 1
+    assert usage.response_count == 0
+    assert usage.billability_state.value == "unavailable"
+    assert usage.actual_cost_state.value == "unavailable"
 
 
 def test_cache_write_telemetry_refuses_against_disabled_cache(dispatch_case) -> None:

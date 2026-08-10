@@ -30,6 +30,7 @@ from imas_codex.llm.context_models import (
     ProviderUsage,
     StaticContextKind,
     StaticContextRef,
+    TelemetryState,
     TemplateRole,
 )
 from imas_codex.llm.dispatch_policy_registry import (
@@ -113,9 +114,9 @@ class PricingContract:
     input_per_million: float
     output_per_million: float
     per_request: float
-    per_image: float
+    per_image: float | None
     provider_name: str
-    provider_tier: str
+    provider_selector: str
     canonical_model: str
     authority_digest: str
     zero_cost_local: bool = False
@@ -124,12 +125,14 @@ class PricingContract:
         """Return the exact OpenRouter provider ceiling for paid routes."""
         if self.zero_cost_local:
             return None
-        return {
+        prices = {
             "prompt": self.input_per_million,
             "completion": self.output_per_million,
             "request": self.per_request,
-            "image": self.per_image,
         }
+        if self.per_image is not None:
+            prices["image"] = self.per_image
+        return prices
 
 
 @dataclass(frozen=True, slots=True)
@@ -170,6 +173,7 @@ def _value(value: Any) -> Any:
 def pricing_contract_for_model(
     model: str,
     *,
+    require_image: bool = False,
     zero_cost_local: bool = False,
     endpoint_class: str | None = None,
 ) -> PricingContract:
@@ -186,7 +190,7 @@ def pricing_contract_for_model(
             0.0,
             0.0,
             0.0,
-            0.0,
+            0.0 if require_image else None,
             "local-free",
             "local-free",
             model,
@@ -196,7 +200,7 @@ def pricing_contract_for_model(
     from imas_codex.settings import get_typed_openrouter_pricing
 
     try:
-        configured = get_typed_openrouter_pricing(model)
+        configured = get_typed_openrouter_pricing(model, require_image=require_image)
         variants = [configured, *configured["overrides"]]
 
         def maximum(field: str) -> float:
@@ -213,10 +217,10 @@ def pricing_contract_for_model(
             input_per_million=maximum("prompt"),
             output_per_million=maximum("completion"),
             per_request=maximum("request"),
-            per_image=maximum("image"),
+            per_image=maximum("image") if require_image else None,
             provider_name=configured["provider"],
-            provider_tier=configured["provider_tier"],
-            canonical_model=configured["canonical_slug"],
+            provider_selector=configured["provider_selector"],
+            canonical_model=configured["canonical_wire_model"],
             authority_digest=canonical_fingerprint(configured),
         )
     except (KeyError, TypeError, ValueError) as exc:
@@ -226,12 +230,13 @@ def pricing_contract_for_model(
 
 
 def _validate_pricing(pricing: PricingContract) -> None:
-    rates = (
+    rates = [
         pricing.input_per_million,
         pricing.output_per_million,
         pricing.per_request,
-        pricing.per_image,
-    )
+    ]
+    if pricing.per_image is not None:
+        rates.append(pricing.per_image)
     if any(not math.isfinite(rate) or rate < 0 for rate in rates):
         raise PricingUnavailable(
             "Dispatch pricing rates must be finite and non-negative"
@@ -239,7 +244,12 @@ def _validate_pricing(pricing: PricingContract) -> None:
     if pricing.zero_cost_local:
         if any(rate != 0 for rate in rates):
             raise PricingUnavailable("A local-free route must have zero rates")
-    elif any(rate <= 0 for rate in rates) or not pricing.provider_name:
+    elif (
+        any(rate <= 0 for rate in rates)
+        or not pricing.provider_name
+        or not pricing.provider_selector
+        or not pricing.canonical_model.startswith("openrouter/")
+    ):
         raise PricingUnavailable(
             "A paid route requires positive rates and an exact provider identity"
         )
@@ -436,6 +446,16 @@ def _validate_static_context(
     ):
         raise ContextPolicyError("Static context contains duplicate references")
     if set(actual) != set(expected):
+        expected_schemas = {
+            key for key in expected if key[0] == StaticContextKind.schema.value
+        }
+        actual_schemas = {
+            key for key in actual if key[0] == StaticContextKind.schema.value
+        }
+        if expected_schemas != actual_schemas:
+            raise ContextPolicyError(
+                "Envelope response identity differs from the registered schema"
+            )
         raise ContextPolicyError(
             "Envelope static references differ from the exact registered bundle: "
             f"expected={sorted(expected)}, actual={sorted(actual)}"
@@ -810,8 +830,10 @@ def _prepare_context_transport(
         messages = _render_messages(validated_envelope, policy, bundle)
     except StrictPromptError as exc:
         raise ContextDispatchError(str(exc)) from exc
+    require_image = policy.spec.attachment_policy.max_count > 0
     pricing = pricing_contract_for_model(
         policy.model,
+        require_image=require_image,
         zero_cost_local=policy.endpoint_class == "local-free",
         endpoint_class=policy.endpoint_class,
     )
@@ -819,7 +841,9 @@ def _prepare_context_transport(
 
     try:
         wire_request, transport_handle = _build_frozen_wire_request(
-            model=policy.model,
+            model=pricing.canonical_model
+            if not pricing.zero_cost_local
+            else policy.model,
             messages=messages,
             response_model=policy.response_model,
             max_output_tokens=policy.spec.max_output_tokens,
@@ -828,7 +852,8 @@ def _prepare_context_transport(
             service=policy.spec.service,
             reasoning_effort=policy.spec.reasoning_effort,
             provider_max_price=pricing.provider_max_price(),
-            provider_name=pricing.provider_name,
+            provider_selector=pricing.provider_selector,
+            configured_model=policy.model,
             zero_cost_local=policy.endpoint_class == "local-free",
             api_base=policy.api_base,
             api_key_env=policy.api_key_env,
@@ -856,7 +881,7 @@ def _prepare_context_transport(
     attachment_receipts = _attachment_receipts(validated_envelope)
     attachment_count = len(attachment_receipts)
     attachment_bytes = sum(item.byte_length for item in attachment_receipts)
-    if attachment_count and pricing.per_image <= 0:
+    if attachment_count and (pricing.per_image is None or pricing.per_image <= 0):
         raise PricingUnavailable(
             "Multimodal request has no explicit bounded image price"
         )
@@ -864,7 +889,7 @@ def _prepare_context_transport(
         exact_input_tokens * pricing.input_per_million / 1_000_000
         + policy.spec.max_output_tokens * pricing.output_per_million / 1_000_000
         + pricing.per_request
-        + attachment_count * pricing.per_image
+        + attachment_count * (pricing.per_image or 0.0)
     )
     maximum_cost_exposure = per_attempt * policy.spec.max_attempts
     if maximum_cost_exposure > policy.spec.maximum_cost_exposure + 1e-12:
@@ -923,7 +948,7 @@ def _prepare_context_transport(
         endpoint_contract=wire_request.endpoint_contract,
         pricing_contract_digest=pricing.authority_digest,
         pricing_provider_identity=pricing.provider_name,
-        pricing_provider_tier=pricing.provider_tier,
+        pricing_provider_selector=pricing.provider_selector,
         pricing_canonical_model=pricing.canonical_model,
         prompt_bundle_digest=bundle.source_digest,
         response_model_identity=wire_request.response_model_identity,
@@ -973,7 +998,7 @@ def _usage_values(result: Any) -> dict[str, Any]:
         ("cached_read_tokens", "cache_read_tokens"),
         ("cached_write_tokens", "cache_creation_tokens"),
     ):
-        state = explicit_states.get(receipt_name)
+        state = _value(explicit_states.get(receipt_name))
         value = getattr(result, result_name, None)
         if state not in {"valid", "invalid", "unavailable"}:
             state = (
@@ -986,10 +1011,10 @@ def _usage_values(result: Any) -> dict[str, Any]:
         ):
             state = "invalid"
         values[receipt_name] = value if state == "valid" else None
-        values[f"{receipt_name}_state"] = state
+        values[f"{receipt_name}_state"] = TelemetryState(state)
 
     cost = getattr(result, "cost", None)
-    cost_state = explicit_states.get("actual_cost")
+    cost_state = _value(explicit_states.get("actual_cost"))
     if cost_state not in {"valid", "invalid", "unavailable"}:
         cost_state = (
             "valid"
@@ -1007,10 +1032,12 @@ def _usage_values(result: Any) -> dict[str, Any]:
     ):
         cost_state = "invalid"
     values["actual_cost"] = float(cost) if cost_state == "valid" else None
-    values["actual_cost_state"] = cost_state
+    values["actual_cost_state"] = TelemetryState(cost_state)
 
-    attempts = getattr(result, "response_count", None)
-    attempt_state = explicit_states.get("attempt_count")
+    attempts = getattr(result, "attempt_count", None)
+    if attempts is None and not hasattr(result, "attempt_count"):
+        attempts = getattr(result, "response_count", None)
+    attempt_state = _value(explicit_states.get("attempt_count"))
     if attempt_state not in {"valid", "invalid", "unavailable"}:
         attempt_state = (
             "valid"
@@ -1024,7 +1051,43 @@ def _usage_values(result: Any) -> dict[str, Any]:
     ):
         attempt_state = "invalid"
     values["attempt_count"] = attempts if attempt_state == "valid" else None
-    values["attempt_count_state"] = attempt_state
+    values["attempt_count_state"] = TelemetryState(attempt_state)
+
+    responses = getattr(result, "response_count", None)
+    response_state = _value(explicit_states.get("response_count"))
+    if response_state not in {"valid", "invalid", "unavailable"}:
+        response_state = (
+            "valid"
+            if not isinstance(responses, bool)
+            and isinstance(responses, int)
+            and responses >= 0
+            else ("unavailable" if responses is None else "invalid")
+        )
+    if response_state == "valid" and (
+        isinstance(responses, bool) or not isinstance(responses, int) or responses < 0
+    ):
+        response_state = "invalid"
+    values["response_count"] = responses if response_state == "valid" else None
+    values["response_count_state"] = TelemetryState(response_state)
+
+    billability_state = _value(explicit_states.get("billability"))
+    if billability_state not in {"valid", "invalid", "unavailable"}:
+        complete_states = (
+            "input_tokens_state",
+            "output_tokens_state",
+            "cached_read_tokens_state",
+            "cached_write_tokens_state",
+            "actual_cost_state",
+            "attempt_count_state",
+            "response_count_state",
+        )
+        billability_state = (
+            "valid"
+            if all(_value(values[name]) == "valid" for name in complete_states)
+            and attempts == responses
+            else "unavailable"
+        )
+    values["billability_state"] = TelemetryState(billability_state)
     return values
 
 
@@ -1060,8 +1123,10 @@ def reconcile_context_receipt(
             "cached_write_tokens",
             "actual_cost",
             "attempt_count",
+            "response_count",
+            "billability",
         )
-        if values[f"{name}_state"] != "valid"
+        if _value(values[f"{name}_state"]) != "valid"
     }
     if invalid_states:
         raise UsageReconciliationError(
@@ -1072,6 +1137,12 @@ def reconcile_context_receipt(
     if attempts <= 0 or attempts > receipt.max_attempts:
         raise UsageReconciliationError(
             "Provider attempt count is outside the preflight bound", receipt=post
+        )
+    responses = int(values["response_count"])
+    if responses != attempts:
+        raise UsageReconciliationError(
+            "Provider sent attempts lack complete priced response telemetry",
+            receipt=post,
         )
     expected_input = receipt.exact_input_tokens * attempts
     if int(values["input_tokens"]) != expected_input:

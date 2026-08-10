@@ -376,7 +376,8 @@ def test_frozen_transport_does_not_retry_malformed_billable_usage() -> None:
         )
 
     assert fake.call_count == 1
-    assert raised.value.response_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.attempt_count == 1
     assert raised.value.telemetry_states["input_tokens"] == "unavailable"
     assert raised.value.telemetry_failure is True
 
@@ -396,7 +397,8 @@ def test_frozen_transport_does_not_invent_missing_provider_cost() -> None:
         )
 
     assert fake.call_count == 1
-    assert raised.value.response_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.attempt_count == 1
     assert raised.value.telemetry_states["actual_cost"] == "unavailable"
 
 
@@ -422,8 +424,50 @@ async def test_async_frozen_transport_does_not_retry_malformed_cost() -> None:
         )
 
     assert fake.call_count == 1
-    assert raised.value.response_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.attempt_count == 1
     assert raised.value.telemetry_states["actual_cost"] == "invalid"
+
+
+def test_frozen_transport_does_not_retry_an_ambiguous_send_failure() -> None:
+    fake = Mock(side_effect=TimeoutError("upstream completion timed out"))
+    with (
+        patch("litellm.completion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        _call_frozen_structured_transport(
+            _FrozenHandle(),
+            response_model=SingleObject,
+            model="openrouter/test",
+            max_attempts=3,
+            retry_base_delay=0.0,
+        )
+
+    assert fake.call_count == 1
+    assert raised.value.attempt_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.cost is None
+    assert raised.value.telemetry_states["billability"] == "unavailable"
+
+
+async def test_async_frozen_transport_does_not_retry_an_ambiguous_send_failure():
+    fake = AsyncMock(side_effect=TimeoutError("upstream completion timed out"))
+    with (
+        patch("litellm.acompletion", fake),
+        pytest.raises(LLMStructuredCallError) as raised,
+    ):
+        await _acall_frozen_structured_transport(
+            _FrozenHandle(),
+            response_model=SingleObject,
+            model="openrouter/test",
+            max_attempts=3,
+            retry_base_delay=0.0,
+        )
+
+    assert fake.call_count == 1
+    assert raised.value.attempt_count == 1
+    assert raised.value.response_count == 0
+    assert raised.value.telemetry_states["actual_cost"] == "unavailable"
 
 
 async def test_pre_response_network_failure_keeps_unmetered_error(monkeypatch):
