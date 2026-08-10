@@ -7,21 +7,23 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-extraction-prompt-overhaul">
   <meta name="plan-title" content="Extraction Classifier Audit &amp; Prompt Overhaul">
-  <meta name="plan-summary" content="Records the node-category audit, prompt A/B/C bake-off, winner implementation, and DD-completion endpoint outcome from plan 32.">
-  <meta name="plan-status" content="done">
+  <meta name="plan-summary" content="Archived 2026-08-10. Its landed classifier and prompt work is historical; remaining context and compose evaluation moved to the project-wide context-integrity and semantic pipeline plans.">
+  <meta name="plan-status" content="archived">
   <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-quality-bootstrap-v2">
-  <meta name="plan-blocks" content="sn-structured-fanout">
+  <meta name="plan-depends-on" content="">
+  <meta name="plan-blocks" content="">
   <meta name="plan-informs" content="sn-structured-fanout">
   <title>Extraction Classifier Audit &amp; Prompt Overhaul | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-09">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="2">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -76,7 +78,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-20260609-quantity-mislabel" data-status="open" data-tier="sonnet" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-implement sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260609-quantity-mislabel" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-implement sn-extraction-prompt-overhaul" data-resolved-at="2026-08-10T08:18:07+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Clean up quantity-class false positives surfaced by the node-category audit</h4>
     <div class="r-fu-body"><p>The node-category audit surfaced a tail of false positives inside the <code>quantity</code> class (paths classified as quantity that are not SN-eligible measurands). Left as a deferred cleanup ticket at plan close.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -84,8 +86,9 @@ Plan: sn-extraction-prompt-overhaul
 
 Task: Re-run the node-category false-negative/false-positive audit (research/standard-names/node-category-audit) against the current DD graph and identify quantity-class nodes that should be reclassified out of SN eligibility. Fix the classifier or the data; record before/after counts. Do not widen SN_SOURCE_CATEGORIES (locked: retain quantity+geometry).
 Done-when: misclassified quantity nodes reclassified, counts recorded, followup resolved.</pre>
+    <p class="r-fu-outcome">Transferred to the consolidated current Standard Names plans named in this plan's retirement summary; this historical prompt must not be executed.</p>
     </article>
-<article class="r-fu" data-id="f-20260609-variantc-revisit" data-status="open" data-tier="opus" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-implement sn-extraction-prompt-overhaul" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-20260609-variantc-revisit" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="claude-opus-4.8" data-written-at="2026-06-09" data-recommends-skill="/reckon-implement sn-extraction-prompt-overhaul" data-resolved-at="2026-08-10T08:18:07+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Revisit tool-calling compose variant C when compose_worker next changes materially</h4>
     <div class="r-fu-body"><p>Phase 3 locked Variant A (rich static prompt) because B and C did not clear the cost gate under the measured baseline. The plan explicitly flags re-evaluating Variant C (tool-calling hybrid) when <code>compose_worker</code> is next materially changed, because the production cache block shifts the cost picture.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -94,6 +97,7 @@ Plan: sn-extraction-prompt-overhaul
 Trigger: only when compose_worker is materially changed (e.g. new model, restructured prompt, cache-block change).
 Task: Re-benchmark compose Variant C (tool-calling hybrid) vs the locked Variant A under the new baseline, accounting for the production prompt-cache block. Use the existing prompt A/B/C eval harness. If C now clears the cost+quality gate, propose switching; else record the negative result.
 Done-when: re-benchmark recorded with cost/quality numbers and a keep-A-or-switch verdict; followup resolved.</pre>
+    <p class="r-fu-outcome">Transferred to the consolidated current Standard Names plans named in this plan's retirement summary; this historical prompt must not be executed.</p>
     </article>
 </section>
   </main>

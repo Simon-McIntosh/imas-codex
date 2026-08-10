@@ -1,11 +1,11 @@
 {
-  "updated": "2026-08-08T17:36:40",
+  "updated": "2026-08-10T10:30:00",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": "S7",
+    "active_sprint_id": "S8",
     "sprints": [
       {
         "id": "S1",
@@ -89,16 +89,6 @@
         "status": "done",
         "items": [
           {
-            "slug": "sn-benchmark-evolution",
-            "why_now": "Explicit blocker for sn-benchmark-v1 and the path to meaningful production-quality benchmark gates.",
-            "done_when": "The production reviewer panel, expanded anchors, finer grammar scoring, and baseline storage policy are all locked.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
-          },
-          {
             "slug": "sn-benchmark-v1",
             "why_now": "Should follow sn-benchmark-evolution so the benchmark set and pass/fail gates are aligned with the actual reviewer stack.",
             "done_when": "The full 50-positive and 20-negative set exists, consensus policy is resolved, and the gates are meaningful on production runs.",
@@ -117,16 +107,6 @@
               "class": "orchestrator",
               "requirements": {}
             }
-          },
-          {
-            "slug": "sn-quality-parity",
-            "why_now": "Umbrella quality plan that should advance only once benchmarking and export/link lifecycle work are credible.",
-            "done_when": "Benchmark harness, richer DD context, docs template rewrite, async link resolution, and the A/B validation loop are all landed.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {}
-            }
           }
         ]
       },
@@ -139,16 +119,6 @@
         "ends": "2026-07-03",
         "status": "done",
         "items": [
-          {
-            "slug": "33-cli-harmonization",
-            "why_now": "Mid-ROI cleanup that should follow stabilization of the SN command surface.",
-            "done_when": "Deferred sn generate renames, -f cleanup, discover-limit aliases, and subcommand consolidation/deprecation planning are complete.",
-            "capability": {
-              "version": "1.0",
-              "class": "general",
-              "requirements": {}
-            }
-          },
           {
             "slug": "docs-refresh",
             "why_now": "This work is safest after the code and plan migration dust settles.",
@@ -163,18 +133,13 @@
       },
       {
         "id": "S5",
-        "status": "planned",
-        "theme": "WEST RC dress rehearsal",
-        "items": [
-          {
-            "slug": "sn-west-review-rehearsal",
-            "why_now": "S6 is closed at the exact rc64 pin with HOLD/HOLD/HOLD/HOLD/HOLD. The WEST manifest is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained, with strict accepted parsing, authoritative units, unique accepted bindings, and source invariants green. The fork-PR rehearsal is now the next cost- and human-triggered act.",
-            "done_when": "Stage 2: exact current partition rechecked, fork review-batch RC and PR opened with version, URL, batch size, and judgement rubric. Stages 3-6: human review and merge, graph fold-back using the graph-merged tag, freeze-check, and --undo unwind with matching counts; then act-2 upstream readiness stated."
-          }
-        ],
+        "status": "done",
+        "theme": "Retired WEST RC dress rehearsal",
+        "items": [],
         "starts": "2026-08-12",
-        "ends": "2026-08-19",
-        "description": "Run the WEST fork-PR review rehearsal at the stable post-S6 rc64 pin. S6 entry gates are green; this sprint owns only the cost-gated backlog handling and human-in-the-loop RC/PR, fold-back, freeze-check, and unwind workflow."
+        "ends": "2026-08-10",
+        "description": "Retired before execution when graph-wide context and geometry defects invalidated the historic review packet as release authority.",
+        "summary": "Closed without a WEST release. Human review and catalog publication were separated into a later two-plan sprint after complete context, DD-resolution, grammar, pipeline, graph, evidence and operator hardening."
       },
       {
         "id": "S6",
@@ -194,40 +159,85 @@
       },
       {
         "id": "S7",
+        "status": "done",
+        "theme": "Graph-wide integrity investigation and containment",
+        "items": [],
+        "starts": "2026-08-04",
+        "ends": "2026-08-10",
+        "description": "Investigated graph-wide provenance, claims, families, cost admission and documentation authority; landed substantial enabling repairs while preserving exact authority boundaries.",
+        "summary": "Closed honestly as investigation and containment, not a finished delivery. The sprint exposed systemic context pollution, geometry folding defects, stale/incomplete review evidence and misleading budget presentation. Unresolved work moved into the active pre-WEST semantic-integrity sprint; no WEST release-readiness claim is carried forward."
+      },
+      {
+        "id": "S8",
         "status": "active",
-        "theme": "Graph-wide integrity programme",
+        "theme": "Pre-WEST semantic integrity and graph-wide recovery",
+        "starts": "2026-08-10",
+        "ends": "2026-09-25",
+        "description": "Ship typed LLM context, explicit local DD resolutions and public ISN plane/arc grammar first; harden every Standard Names stage; benchmark DSv4 as advisory-only; then recover graph semantics and evidence selectively, finish MAST parity, and consolidate the operator surface. Broad paid production remains paused until the prevention gates pass. WEST is not protected and cannot enter human review until this sprint closes.",
+        "summary": "Active. Foundations can start in parallel: project-wide context integrity, repo-local DD resolution authority and the cross-project ISN geometry grammar. All mutation and paid-recovery waves are dependency-gated behind those foundations.",
         "items": [
           {
-            "slug": "sn-graph-wide-integrity",
-            "why_now": "After S6 closes, the remaining 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, global writer/fan-out/embedding debt, and the rejected bounded-manifest prototype are explicit graph-wide work. Per the west-batch-repair-scope decision the unreleased WEST batch now folds into repair scope rather than being held frozen.",
-            "done_when": "f-sgwi-001, f-sgwi-004, f-sgwi-005, and f-sgwi-007 close: graph-wide provenance/parser residue is evidence-partitioned; the WEST-batch protection is lifted per the locked decision (published-catalog and test-fixture protection retained); fan-out, embedding, writer gates, geometry rules, and bounded-manifest execution are tested; the two protected structural identities receive exact explicit authority or remain visibly held as non-actionable; fresh one-query census, DD 4.1.1/global COCOS 17, psi_like/ip_like, null-fixture, transactional, scope-cleanup, independent-review, and full-suite gates pass."
+            "slug": "llm-context-integrity",
+            "why_now": "Untyped dynamic context is the systemic authority-pollution root cause across 22 active call expressions.",
+            "done_when": "Every active LLM call site uses the typed envelope, strict renderer, independent fingerprints and adversarial goldens; broad production calls remain blocked on any inventory gap."
           },
           {
             "slug": "sn-dd-gaps",
-            "why_now": "The S6 evidence-only DDGap foundation is complete. The remaining storage-authority decision and automated writer/triage/reconcile/release-reporting policy are explicitly deferred rather than hidden inside sprint closure.",
-            "done_when": "f-ddg-002 closes: storage authority is locked; agent-side facts are evidence-grounded and idempotent; triage/reconcile semantics and release reporting are implemented with no silent suppression of source eligibility; tests and status surfaces are green."
+            "why_now": "Known DD defects already have upstream solutions and cannot block local correctness, but their effective values need explicit typed authority.",
+            "done_when": "Approved exact path/version resolutions flow through every Standard Names consumer, are visible in receipts, fail closed on ambiguity and retire automatically when upstream DD converges."
+          },
+          {
+            "slug": "sn-pipeline-hardening",
+            "why_now": "Grouping, family, review and attachment paths must stop producing semantic folds before any recovery rerun.",
+            "done_when": "All seven pools and side cars enforce the exact semantic signature, graph claims, scope/admission continuity, dynamic pricing and deterministic terminal drain."
+          },
+          {
+            "slug": "sn-benchmark-evolution",
+            "why_now": "The local DSv4 resource can triage the full graph cheaply only after it is benchmarked against production-faithful context and independent authority.",
+            "done_when": "Locked critical-defect and clean-name thresholds pass, then a reproducible zero-mutation full-graph advisory census is emitted."
+          },
+          {
+            "slug": "sn-graph-wide-integrity",
+            "why_now": "Known mixed representations and family folds require exact source-level repair after prevention lands; the pre-fold snapshot is evidence, not rollback authority.",
+            "done_when": "No live name mixes incompatible signatures; every source has one compatible identity or explicit disposition; exact manifests, selective reruns and reversible receipts cover all mutations, including WEST."
+          },
+          {
+            "slug": "sn-quality-parity",
+            "why_now": "More than two thousand names carry incomplete or stale authority evidence, but only a small subset is immediately safe to rescore.",
+            "done_when": "A fresh exact census partitions every row honestly; proof-complete metadata and hash-bound hosted rescores land under the cumulative USD 200 ceiling; ambiguous history remains visible."
           },
           {
             "slug": "mast-semantic-source-repair",
-            "why_now": "The MAST DD and facility-source audit found six absent semantic identities, incorrect or under-specific DD attachments, stale DD provenance, and no MAST facility discovery roots. This scoped repair should use the fail-closed source and writer invariants completed by the graph-wide integrity plan rather than live in the ISN grammar repository.",
-            "done_when": "The exact MAST manifest is adjudicated through ISN grammar, targeted graph detach/attach/create operations and facility-source discovery pass dry-run and stable-id parity gates, and\u2014only after explicit publication authority\u2014one scoped graph transaction and ISNC release candidate re-query cleanly through imas-cx.",
-            "capability": {
-              "version": "1.0",
-              "class": "orchestrator",
-              "requirements": {
-                "reasoning": "deep",
-                "context": "extended",
-                "tool_autonomy": "guided",
-                "verification": "strict",
-                "risk": "elevated"
-              }
-            }
+            "why_now": "MAST source parity must consume the hardened generic mechanisms rather than introducing facility-specific recovery code.",
+            "done_when": "The refreshed MAST manifest has exact DD/local-resolution/ISN authority, guarded dry-runs and any separately authorized applies with stable-id parity and zero collateral."
+          },
+          {
+            "slug": "33-cli-harmonization",
+            "why_now": "The current 30-command surface exposes private recovery details and mixes advisory, pipeline, maintenance and publication semantics.",
+            "done_when": "Exactly eight typed intents remain, all consumers migrate, all mutations share one manifest/apply/receipt harness, and old commands fail as unknown."
           }
-        ],
-        "starts": "2026-08-14",
-        "ends": "2026-08-28",
-        "description": "Graph-wide integrity and evidence-policy follow-on after S6: 961 non-WEST semantic-source violations, 15 legacy parser/stamp residues, writer/fan-out/embedding debt, a safe bounded-manifest operator, and DDGap storage/writer/triage policy. Per the west-batch-repair-scope decision (2026-08-08) the unreleased WEST batch is no longer a frozen baseline: it folds into best-effort repair scope through the normal quorum pipeline; only the published ISN catalog and test fixtures retain protected status.",
-        "summary": "Restart checkpoint 2026-08-04: 1/3 plans are lifecycle-complete and S7 is 66.3% implemented. sn-dd-gaps is done; sn-graph-wide-integrity is 0.99 with one protected-closure followup open; mast-semantic-source-repair is correctly 0/5 and dependency-blocked. Remaining order: repair and verify honest flush terminality plus hard budget reservations; complete one corrected aggregate census; close graph integrity with protected rows held unless separately authorized; execute MAST manifest/adjudication/discovery/dry-run work and separately authorized apply/publication; then run the bounded MAST cohort and the final global sn run --flush under the shared USD 200 ceiling, followed only by a fresh census, full suite, and closure."
+        ]
+      },
+      {
+        "id": "S9",
+        "status": "planned",
+        "theme": "WEST expert review and catalog release",
+        "starts": "2026-09-28",
+        "ends": "2026-10-16",
+        "description": "A deliberately later two-plan chain. First rebuild and conduct human review of the hardened current WEST cohort. Then publish only the exact reviewed dispositions and prove graph fold-back and undo. WEST has no special protection or bypass.",
+        "summary": "Planned behind complete S8 closure.",
+        "items": [
+          {
+            "slug": "sn-west-review-rehearsal",
+            "why_now": "Human experts should review only the current graph-wide-delivery output, not the historic pre-hardening packet.",
+            "done_when": "Every WEST row has an explicit human accept/change/hold disposition with complete current semantic, source, description and review evidence; requested changes pass the ordinary pipeline."
+          },
+          {
+            "slug": "sn-west-catalog-release",
+            "why_now": "Catalog publication and graph fold-back are a separate authority class after human disposition.",
+            "done_when": "The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release projection while retaining audit history."
+          }
+        ]
       }
     ],
     "milestones": [],
@@ -291,9 +301,14 @@
         "when": "2026-08-08",
         "who": "Simon McIntosh",
         "what": "WEST batch de-protection locked (west-batch-repair-scope): the unreleased WEST review batch folds into best-effort graph-wide repair scope through the normal quorum pipeline; only the published ISN catalog and test fixtures retain protected status. S7 scope text updated; f-sgwi-007 queued to lift the structural_closure zero-intersection gate and census-overlay protection."
+      },
+      {
+        "when": "2026-08-10",
+        "who": "Simon McIntosh",
+        "what": "S7 closed honestly as investigation and containment. S8 started as the hard pre-WEST semantic-integrity sprint with typed context, repo-local DD resolution authority, external ISN plane/arc grammar, semantic pipeline hardening, DSv4 advisory benchmarking, exact graph/evidence recovery, MAST parity and an eight-intent CLI. S9 now owns later WEST expert review and catalog release; WEST is not protected."
       }
     ],
     "blockers": [],
-    "_version": 24
+    "_version": 25
   }
 }

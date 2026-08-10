@@ -6,21 +6,31 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-quality-parity">
-  <meta name="plan-title" content="SN Quality Parity">
-  <meta name="plan-summary" content="Close the quality gap between automated StandardName output and the ISN catalog by landing benchmark, enrichment, prompt, link-resolution, and validation loops.">
-  <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.12">
+  <meta name="plan-title" content="Graph-Wide Standard Name Evidence Recovery">
+  <meta name="plan-summary" content="Use the calibrated DSv4 advisory census and hardened hosted review path to recover provable documentation authority, selectively rescore current prose, and partition ambiguous or superseded history without regenerating sound names or treating missing metadata as semantic correctness.">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-impl" content="0.25">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-informs" content="sn-benchmark-v1,sn-catalog-quality-refactor">
   <title>SN Quality Parity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S8">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-depends-on" content="sn-pipeline-hardening,sn-benchmark-evolution">
+<meta name="plan-blocks" content="33-cli-harmonization">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
+    <section class="callout" id="current-scope">
+      <h2>Current scope: evidence recovery, not wholesale regeneration</h2>
+      <p>A prior qualified census found 14 already-authoritative rows, 32 exact current rescores, 270 superseded historical holds and 1,922 ambiguous holds. Rebuild those counts live. Apply only proof-complete metadata and ordinary hosted review of hash-bound current prose; DSv4 flags prioritize work but never grant authority.</p>
+    </section>
     <h2 id="s1">§1 — Problem and current baseline</h2>
     <p>Plan 23 remains a low-implementation, high-value backlog item: the survey pegs it at <strong>0.12</strong> because only one narrow fix is actually resolved today. Everything else is still a roadmap for bringing generated StandardNames up to catalog quality in content, links, and validation discipline.</p>
     <figure>
@@ -60,8 +70,58 @@
     </ul>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-evidence-recovery" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-quality-parity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Recover documentation authority with proof, advisory triage, and bounded hosted review</h4>
+    <div class="r-fu-body"><p>Refresh the exact evidence census, apply only proof-complete zero-cost metadata repairs, stage exact current prose for ordinary hosted docs quorum, and use DSv4 flags to prioritize—but never authorize—semantic repair.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-quality-parity
+
+Prerequisites
+Complete the semantic pipeline hardening and DSv4 advisory benchmark. Do not reuse stale long-running processes or manifests.
+
+Objective
+Recover the Standard Names review/documentation history without broad regeneration and without confusing traceability debt with semantic correctness.
+
+Starting evidence
+The last qualified 2,238-row census partitioned 14 already authoritative, 0 proof-complete missing-method backfills, 32 exact current rescores, 270 superseded historical holds, and 1,922 ambiguous holds. Treat these counts as a prior baseline only; rebuild at the live quiet window.
+
+Required work
+1. Build a fresh versioned exact census from current content hashes, review-input hashes, latest complete Review groups, lifecycle, aggregate score/timestamp, source membership, DD-resolution dependencies, and current context signature.
+2. Partition disjointly into: already authoritative; proof-complete metadata-only backfill; exact current hosted rescore; superseded historical hold; semantic defect; local-DD-resolution dependency; and evidence-ambiguous hold.
+3. Apply metadata-only backfill only through the canonical fingerprinted public API, with dry-run, exact manifest, full one-hop collateral snapshot, and independent verification. Never infer quorum from aggregate scores alone.
+4. For exact current rescores, preserve name and prose, hash-bind staging in the same transaction, use durable docs-review admission, require the exact scope, and run ordinary hosted documentation quorum. Failure/cancellation/crash must restore the complete prior authority without replaying paid calls.
+5. Use the DSv4 full-graph advisory result only to rank exact hosted-review and semantic-repair cohorts. It cannot set scores, accept, detach, rename, or overwrite authority.
+6. Run sequential budget tranches. Before each provider call render the exact request and compute expected/p95/hard exposure. Stop before a call that would exceed the remaining cumulative USD 200 campaign ceiling; remeasure after every tranche.
+7. Publish operator receipts with campaign ceiling, remaining authority, reserved expected exposure, actual spend, per-attempt price envelope, optional escalator exposure, provider ceiling, rows changed, and residual reasons.
+8. Leave ambiguous and historical rows visible. Do not word holds into completion or regenerate them merely to create fresh evidence.
+
+Done when
+Every docs-accepted current name is honestly classified, every applied metadata field has proof-complete canonical evidence, exact rescores have durable authority and bounded spend, semantic defects are routed to graph-wide repair, and residual holds have explicit reason counts and next authority needed.</pre>
+    </article>
+</section>
+  <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="history-recovery-policy" data-choice="partition-and-selectively-review" data-by="Simon McIntosh" data-when="2026-08-10T08:15:05+00:00">
+    <p class="r-dec-q">How are the two-thousand-plus names with stale or incomplete review evidence recovered?</p>
+    <p class="r-dec-ctx">The last exact census separated already-authoritative rows, a small exact current rescore cohort, superseded history, and a much larger ambiguous evidence cohort. Missing evidence does not prove bad prose or a bad name.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="partition-and-selectively-review">Prove metadata-only rows, rescore exact current prose, hold ambiguous history, and separately flag semantic defects.</button>
+      <button class="r-opt" data-value="regenerate-all">Regenerate names and docs broadly.</button>
+      <button class="r-opt" data-value="metadata-only-backfill">Write missing authority metadata without proof.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 3A/6A/7A. Preserve sound content and history. Use DSv4 for advisory triage, exact proof for zero-cost metadata repair, hosted quorum for current rescores, and visible holds where evidence is incomplete.</p>
+    </div>
+<div class="r-dec" data-key="recovery-budget" data-choice="dynamic-render-price-admit" data-by="Simon McIntosh" data-when="2026-08-10T08:15:05+00:00">
+    <p class="r-dec-q">How is the USD 200 recovery authorization represented and consumed?</p>
+    <p class="r-dec-ctx">A campaign/run ceiling was previously displayed as if it were a single-name cost, while conservative unrendered output allowances inflated reservations.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="dynamic-render-price-admit">Render the exact request, price it, admit only if it fits, then stop and remeasure between tranches.</button>
+      <button class="r-opt" data-value="fixed-per-name-cap">Reserve a fixed large amount for each name.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 12A. USD 200 is the cumulative campaign ceiling, never a per-name authorization. UI and receipts must separate campaign ceiling, remaining authority, reserved expected exposure, actual spend, per-attempt expected/p95/hard ceiling, conditional escalation, and provider policy ceiling.</p>
+    </div>
+</section>
+</main>
 </body>
 </html>

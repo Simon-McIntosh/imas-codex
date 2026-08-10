@@ -7,18 +7,22 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-catalog-approval-pipeline">
   <meta name="plan-title" content="Standard-Name Catalog Approval Pipeline (WEST first-review gate)">
-  <meta name="plan-summary" content="Drive eligible WEST DD paths to accepted standard names, PR reviewed batches upstream for first human review, and freeze approved names back into the graph.">
-  <meta name="plan-status" content="shipped">
+  <meta name="plan-summary" content="Archived 2026-08-10 after its shipped catalog approval, merge, tag, freeze, and unwind mechanisms were absorbed by the later WEST human-review and catalog-release chain.">
+  <meta name="plan-status" content="archived">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
   <title>Standard-Name Catalog Approval Pipeline | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-22">
+<meta name="plan-modified" content="2026-08-10">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-depends-on" content="">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -670,14 +674,14 @@ review_candidates:             # dimensionless physical signals mis-gated as str
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-scap-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="Simon McIntosh">
+<article class="r-fu" data-id="f-scap-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="Simon McIntosh">
     <h4 class="r-fu-title">Gap A — sn run --focus &lt;file.yaml&gt; (SHIPPED)</h4>
     <div class="r-fu-body"><p>Shipped this session: <code>sources_manifest.py</code> loader + expander wired into
           <code>--focus</code> token handling, schema-validated, 10 unit tests. The committed WEST
           manifest expands to its 355 sources through the CLI. See §5.</p></div>
     <pre class="r-fu-prompt">Superseded by the shipped implementation — see §5. Retained for provenance.</pre>
     </article>
-<article class="r-fu" data-id="f-scap-002" data-status="resolved" data-tier="opus" data-written-by="reckon-edit" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21T22:04:50+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21T22:04:50+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Implement the complete approval pipeline (single long session)</h4>
     <div class="r-fu-body"><p>All design decisions are locked. Build the whole pipeline (Gaps A-tail → D) in one
           long TDD session, in the phase order below. Read the full plan first; honour every
@@ -741,43 +745,43 @@ Done-when
   3. Plan sections collapsed to shipped summaries; this followup resolved.</pre>
     <p class="r-fu-outcome">All six phases shipped (P1 c34bff2e, P2 b84825b1, P3 f4ea9780, P4 d291c09c, P5 ISN ddf76ef+411d812, P6 83a77011); graph-marked tests green. The live §10 end-to-end rehearsal on the real WEST corpus remains an operational, cost-gated run (see f-scap-rehearsal).</p>
     </article>
-<article class="r-fu" data-id="f-scap-p1" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-p1" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Phase 1 — focus --reseed (gap-only default) SHIPPED</h4>
     <div class="r-fu-body"><p>Gap-only focus seeding landed (commit <code>c34bff2e</code>): <code>sn run --focus</code> no longer churns paths carrying a live accepted/approved name; <code>--reseed</code> restores reset-all. New <code>partition_focus_by_accepted</code> graph helper + 5 tests (4 graph-marked) green.</p></div>
     <pre class="r-fu-prompt">done — superseded by shipped implementation (commit c34bff2e).</pre>
     <p class="r-fu-outcome">Phase 1 landed — commit c34bff2e; gap-only default + --reseed, 5 tests green.</p>
     </article>
-<article class="r-fu" data-id="f-scap-p2" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-p2" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Phase 2 — two-schema dispatch + mint_sn_list SHIPPED</h4>
     <div class="r-fu-body"><p>Landed (commit <code>b84825b1</code>): <code>kind</code> discriminator on both schemas + new <code>sn_names.schema.json</code>; <code>load_focus_file</code> dispatches by kind (raises if absent). <code>mint_sn_list</code> = source_paths base join + immediate-family closure (parent, siblings, own children; one hop, non-transitive, dead names excluded), reports unmatched. Pure + graph tests.</p></div>
     <pre class="r-fu-prompt">done — shipped (commit b84825b1).</pre>
     <p class="r-fu-outcome">Phase 2 landed — commit b84825b1; two schemas + mint, tests green.</p>
     </article>
-<article class="r-fu" data-id="f-scap-p3" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-p3" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-21" data-recommends-skill="" data-resolved-at="2026-07-21" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Phase 3 — additive review-batch export SHIPPED</h4>
     <div class="r-fu-body"><p>Landed (commit <code>f4ea9780</code>): <code>_fetch_candidates(batch=...)</code> returns approved ∪ batch (additive diff), still validation/docs gated; <code>run_export</code> stamps <code>export_scope: review</code> + sorted <code>review_batch</code> into catalog.yml. Graph + pure tests; existing export suite green.</p></div>
     <pre class="r-fu-prompt">done — shipped (commit f4ea9780).</pre>
     <p class="r-fu-outcome">Phase 3 landed — commit f4ea9780; additive export + review_batch marker.</p>
     </article>
-<article class="r-fu" data-id="f-scap-p4" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-p4" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Phase 4 — single sn release --review-batch orchestrator SHIPPED</h4>
     <div class="r-fu-body"><p>Landed (commit <code>d291c09c</code>): <code>run_review_release</code> folds mint → freeze artifact → export → branch → push(fork) → gh pr create → back-fill into one call; artifact under <code>manifests/reviews/&lt;rc&gt;.sn_names.yaml</code>. Export/publish/PR injectable; 4 tests (offline bare-repo + graph mint).</p></div>
     <pre class="r-fu-prompt">done — shipped (commit d291c09c).</pre>
     <p class="r-fu-outcome">Phase 4 landed — commit d291c09c.</p>
     </article>
-<article class="r-fu" data-id="f-scap-p5" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-p5" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Phase 5 — SPA fixed review view (ISN repo) SHIPPED</h4>
     <div class="r-fu-body"><p>Landed on the ISN fork (commits <code>ddf76ef</code>, <code>411d812</code>): manifest model + dataset carry <code>review_batch</code>; the SPA renders a fixed view of exactly those names (no toggle). 4 pytest + 4 vitest green. imas-codex ISN pin bump is optional (raw-write fallback already carries the marker).</p></div>
     <pre class="r-fu-prompt">done — shipped on the ISN fork (ddf76ef, 411d812).</pre>
     <p class="r-fu-outcome">Phase 5 landed — ISN fork ddf76ef, 411d812; 8 tests green.</p>
     </article>
-<article class="r-fu" data-id="f-scap-p6" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-p6" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Phase 6 — sn merge state machine + contested SHIPPED</h4>
     <div class="r-fu-body"><p>Landed (commit <code>83a77011</code>): untouched batch names auto-promote accepted→approved; edited names re-review (pass→approved, fail→<code>contested</code>). <code>contested</code> is pool-excluded everywhere; resolved by sn edit / sn approve --override / sn revert; sn status --contested lists them. 6 graph tests + regression fixes green.</p></div>
     <pre class="r-fu-prompt">done — shipped (commit 83a77011).</pre>
     <p class="r-fu-outcome">Phase 6 landed — commit 83a77011.</p>
     </article>
-<article class="r-fu" data-id="f-scap-rehearsal" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22T04:42:56+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-scap-rehearsal" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-07-22T04:42:56+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Run the §10 end-to-end rehearsal on the real WEST corpus</h4>
     <div class="r-fu-body"><p>All pipeline code is shipped and unit/graph tested. The remaining step is the §10 operational rehearsal against the live graph + a scratch ISNC checkout: drive the 355 WEST sources to accepted names, cut a review-batch RC, open the scratch PR, merge, and confirm freeze. It is deliberately deferred because step 1 (<code>sn run --focus west_task_2e.yaml</code>) drains 355 names through the LLM pipeline — significant spend + time — so it is a user-triggered run, not autonomous.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -791,9 +795,9 @@ Run the §10 end-to-end rehearsal now that all six phases are shipped:
 5. Re-run sn run (no focus) — assert no approved name mutated and contested names are pool-excluded.
 Only then open the real upstream ISNC PR for expert review.
 Optional first: bump the imas-codex ISN dep pin to 411d812 so review exports validate the manifest without a warning.</pre>
-    <p class="r-fu-outcome">Superseded by f-scap-rehearsal-2: CLI converged first (commit c2983802 — release --batch, merge --pr <url>, merge --undo, remotes-derived PR target); rehearsal commands updated to the new surface.</p>
+    <p class="r-fu-outcome">Superseded by f-scap-rehearsal-2: CLI converged first (commit c2983802 — release --batch, merge --pr <url>, merge --undo, remotes-derived PR target); rehearsal commands updated to the new surface.</url></p>
     </article>
-<article class="r-fu" data-id="f-scap-rehearsal-2" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-scap-rehearsal-2" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-22" data-recommends-skill="" data-resolved-at="2026-08-10T08:18:06+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Run the §10 end-to-end rehearsal on the real WEST corpus (converged CLI)</h4>
     <div class="r-fu-body"><p>All pipeline code is shipped, plus the converged CLI (commit <code>c2983802</code>): <code>sn release --batch</code>, <code>sn merge --pr &lt;url&gt;</code> (URL-only resolution), <code>sn merge --undo</code> (unwind), remotes-derived PR target. The rehearsal is a user-triggered, cost-gated run (drains ~355 WEST names through the LLM pipeline). Snapshot the graph first; use --undo to clear the scratch approvals afterwards — which also exercises the unwind path.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -813,6 +817,7 @@ Run the §10 end-to-end rehearsal with the converged CLI (all against a SCRATCH 
 6. Unwind the scratch state: uv run imas-codex sn merge --undo --pr &lt;merged-pr-url&gt;  (verifies the unwind path; graph back to accepted).
 Only after this passes: re-run steps 2–4 for real against the true ISNC checkout (remotes → iterorganization/imas-standard-names-catalog) and leave the approvals in place.
 Optional first: bump the imas-codex ISN dep pin to 411d812 so review exports validate the manifest cleanly.</pre>
+    <p class="r-fu-outcome">Transferred to the consolidated current Standard Names plans named in this plan's retirement summary; this historical prompt must not be executed.</p>
     </article>
 </section>
 

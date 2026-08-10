@@ -7,19 +7,22 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-dd-attachment-completeness">
   <meta name="plan-title" content="SN↔DD Attachment Completeness">
-  <meta name="plan-summary" content="Backfill missing HAS_STANDARD_NAME edges so every accepted StandardName attaches to all DD-eligible, unit-agreeing nodes — not only its generating source">
-  <meta name="plan-status" content="shipped">
+  <meta name="plan-summary" content="Archived 2026-08-10 as landed historical evidence. Current attachment completeness and compatibility gates are owned by graph-wide semantic integrity.">
+  <meta name="plan-status" content="archived">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-dd-unit-curation">
+  <meta name="plan-depends-on" content="">
   <title>SN↔DD Attachment Completeness | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-23">
+<meta name="plan-modified" content="2026-08-10">
 <meta name="plan-impl" content="1.0">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -278,7 +281,7 @@ RETURN count(*)  -- 3423 edges · 1522 names · 3348 DD nodes</pre>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sdac-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship sn-dd-attachment-completeness §3" data-resolved-at="2026-07-23T13:35:26+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-sdac-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-07-23" data-recommends-skill="/reckon-ship sn-dd-attachment-completeness §3" data-resolved-at="2026-07-23T13:35:26+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Reconcile HAS_STANDARD_NAME from provenance (3423 derivable edges)</h4>
     <div class="r-fu-body"><p>Materialize the DD-side edge as a projection of the per-source provenance (<code>PRODUCED_NAME</code> + <code>FROM_DD_PATH</code>), gated on DD-eligibility + <code>units_agree</code> — symmetric with the existing <code>source_paths</code> reconcile. The <code>units_agree</code> gate has already shipped (<code>7d9648e7</code>). Decisions <code>edge-model</code>, <code>where-it-runs</code>, and <code>units-disagree</code> are locked; honour them.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex

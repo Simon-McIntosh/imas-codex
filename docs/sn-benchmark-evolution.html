@@ -6,22 +6,31 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-benchmark-evolution">
-  <meta name="plan-title" content="SN Benchmark Evolution Strategy">
-  <meta name="plan-summary" content="Preserves the research plan for multi-family benchmark review, calibration expansion, softer grammar scoring, and workflow integration from plan 33.">
+  <meta name="plan-title" content="DSv4 Advisory Review Benchmark and Recovery Triage">
+  <meta name="plan-summary" content="Benchmark the local DSv4 model against frozen semantic goldens and hosted quorum evidence, then run a graph-wide advisory-only census that recovers traceability metadata where provable and flags semantic defects for exact hosted review without mutating acceptance.">
   <meta name="plan-status" content="pending">
-  <meta name="plan-impl" content="0.05">
+  <meta name="plan-impl" content="0.1">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-blocks" content="sn-benchmark-v1">
+  <meta name="plan-blocks" content="sn-graph-wide-integrity,sn-quality-parity">
   <meta name="plan-informs" content="sn-benchmark-v1">
   <title>SN Benchmark Evolution Strategy | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S8">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-depends-on" content="llm-context-integrity,sn-dd-gaps,imas-standard-names:geometry-plane-and-arc-grammar,sn-pipeline-hardening">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
+    <section class="callout" id="current-scope">
+      <h2>Current scope: DSv4 is advisory, benchmarked and graph-wide</h2>
+      <p>The old benchmark-v1 plan is consolidated here. A production-faithful frozen corpus first measures critical-defect recall, clean-name false positives, calibration, repeatability and hosted-quorum agreement. Only after locked gates pass may DSv4 run a full zero-mutation advisory census.</p>
+    </section>
     <h1>SN Benchmark Evolution Strategy</h1>
     <p>This HTML migration keeps plan 33 in design / research state. The implementation fraction remains <strong>0.05</strong>: the problem statement, phases, and acceptance criteria are explicit, but the code and benchmark integration work were still queued.</p>
 
@@ -51,45 +60,81 @@
     <p>Plan 33 directly informs and partially blocks the benchmark-v1 build-out, especially where the eval set wants multi-reviewer consensus, grammar-equivalence scoring, and expanded anchor coverage.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="reviewer-panel-size" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What should the default benchmark reviewer panel size be?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="two-reviewers">Two reviewers</button>
-          <button class="r-opt" data-value="three-reviewers">Three reviewers</button>
-        </p>
-        <p class="r-dec-rat">The markdown plan leaves this open because it drives the steady-state CI cost floor.</p>
-      </div>
-      <div class="r-dec" data-key="consensus-lift-scope" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Should semantic-equivalence consensus lift apply within a batch or across an entire run?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="within-batch">Within a single batch only</button>
-          <button class="r-opt" data-value="entire-run">Across the entire run</button>
-        </p>
-        <p class="r-dec-rat">The stronger run-wide option may mask prompt-instability effects, so the scope remains open.</p>
-      </div>
-      <div class="r-dec" data-key="anchor-refresh-cadence" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">How often should calibration anchors refresh?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="grammar-sync">At grammar-sync boundaries</button>
-          <button class="r-opt" data-value="every-benchmark">After every benchmark</button>
-          <button class="r-opt" data-value="quarterly">Quarterly</button>
-        </p>
-        <p class="r-dec-rat">The draft leans toward grammar-sync boundaries but explicitly keeps the cadence unresolved.</p>
-      </div>
-      <div class="r-dec" data-key="baseline-location" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Where should the regression baseline live?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="repo-json">Committed JSON in the repo</button>
-          <button class="r-opt" data-value="nightly-artifact">Nightly-generated artifact outside the repo</button>
-        </p>
-        <p class="r-dec-rat">The markdown plan asks this explicitly because rubric evolution changes the maintenance burden.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="reviewer-panel-size" data-choice="three-reviewers" data-by="Simon McIntosh" data-when="2026-08-10T08:14:32+00:00">
+    <p class="r-dec-q">What should the default benchmark reviewer panel size be?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="two-reviewers">Two reviewers</button>
+      <button class="r-opt chosen" data-value="three-reviewers">Three reviewers</button>
+      </p>
+    <p class="r-dec-rat">Use the existing three-seat hosted reference panel for bounded benchmark adjudication. DSv4 itself remains one advisory model and never self-authorizes acceptance.</p>
+    </div>
+<div class="r-dec" data-key="consensus-lift-scope" data-choice="within-batch" data-by="Simon McIntosh" data-when="2026-08-10T08:14:32+00:00">
+    <p class="r-dec-q">Should semantic-equivalence consensus lift apply within a batch or across an entire run?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="within-batch">Within a single batch only</button>
+      <button class="r-opt" data-value="entire-run">Across the entire run</button>
+      </p>
+    <p class="r-dec-rat">Keep equivalence evaluation within each frozen batch so prompt and cohort instability stays visible rather than being masked by run-wide aggregation.</p>
+    </div>
+<div class="r-dec" data-key="anchor-refresh-cadence" data-choice="grammar-sync" data-by="Simon McIntosh" data-when="2026-08-10T08:14:32+00:00">
+    <p class="r-dec-q">How often should calibration anchors refresh?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="grammar-sync">At grammar-sync boundaries</button>
+      <button class="r-opt" data-value="every-benchmark">After every benchmark</button>
+      <button class="r-opt" data-value="quarterly">Quarterly</button>
+      </p>
+    <p class="r-dec-rat">Refresh and version the gold corpus when the grammar/public semantic contract changes; otherwise comparisons lose longitudinal meaning.</p>
+    </div>
+<div class="r-dec" data-key="baseline-location" data-choice="repo-json" data-by="Simon McIntosh" data-when="2026-08-10T08:14:32+00:00">
+    <p class="r-dec-q">Where should the regression baseline live?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="repo-json">Committed JSON in the repo</button>
+      <button class="r-opt" data-value="nightly-artifact">Nightly-generated artifact outside the repo</button>
+      </p>
+    <p class="r-dec-rat">Commit the frozen benchmark inputs, expected semantic labels, and thresholds for reproducibility; write measured run results to the established benchmark artifact store.</p>
+    </div>
+<div class="r-dec" data-key="advisory-scope" data-choice="full-graph-advisory" data-by="Simon McIntosh" data-when="2026-08-10T08:14:32+00:00">
+    <p class="r-dec-q">How broadly may DSv4 review the existing graph after benchmarking?</p>
+    <p class="r-dec-ctx">The local model is effectively free at point of use and can triage thousands of names, but it must not bootstrap its own authority.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="full-graph-advisory">Run a full graph-wide flag-only advisory census after benchmark gates.</button>
+      <button class="r-opt" data-value="small-pilot-only">Stop after a small sample.</button>
+      <button class="r-opt" data-value="authoritative-local-review">Let DSv4 change acceptance or source membership.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 6A. After benchmark gates, run the full graph-wide DSv4 advisory census. Outputs are flags and ranked exact manifests only; hosted quorum and governed graph APIs retain authority.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dsv4-advisory" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-benchmark-evolution" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Benchmark DSv4 and produce a graph-wide advisory defect census</h4>
+    <div class="r-fu-body"><p>Build a production-faithful, typed-context benchmark for DSv4, calibrate it against hosted quorum and adversarial geometry cases, then run a frozen full-graph advisory sweep with zero graph mutation.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-benchmark-evolution
+
+Prerequisites
+The typed context envelope, local DD resolution view, public ISN plane/arc grammar, and hardened Standard Names renderer/semantic signature must be available. Verify the imas-ambix DSv4 service health, exact model identity, structured-output behavior, and zero provider spend before any benchmark call.
+
+Objective
+Develop, benchmark, and calibrate a local DSv4 advisory reviewer, then use it to triage the entire Standard Names graph without changing lifecycle, source bindings, prose, scores, or authority.
+
+Required work
+1. Freeze a versioned gold corpus covering clean names, known semantic folds, stale/missing docs evidence, ambiguous DD defects, frame/plane/representation errors, ordinal traps, family topology, claim/lifecycle residue, and negative controls.
+2. Reproduce the production typed renderer exactly. Benchmarking must not use a simplified enrichment or different field ordering.
+3. Measure classification and ranking quality against independent human/hosted-quorum labels: precision/recall by defect class, false-negative rate on critical semantic defects, false-positive rate on clean accepted names, calibration, context sensitivity, repeatability, throughput, and zero-cost accounting.
+4. Use bounded hosted quorum only to establish or adjudicate benchmark labels. Report actual spend and the dynamic expected/p95/hard reservation per call; never quote the run ceiling as a per-name cost.
+5. Lock pass/fail thresholds before the full sweep. If a critical defect class misses threshold, improve prompts/context/typed features and re-benchmark; do not compensate by granting authority.
+6. Run the full graph-wide advisory census from a frozen snapshot. Emit immutable, exact, ranked manifests with reason codes, evidence hashes, source bindings, proposed disposition, confidence/calibration, and the context/request identity used.
+7. Partition outcomes into already authoritative, metadata/traceability recovery candidate, exact hosted-rescore candidate, semantic source/name defect, local-DD-resolution dependency, historical/superseded hold, and ambiguous hold.
+8. Compare the current graph with the pre-fold snapshot only as forensic evidence; the snapshot cannot authorize rollback or membership.
+9. Verify zero graph writes, zero lifecycle changes, zero claims/scopes, and no OpenRouter call during the advisory sweep.
+
+Done when
+DSv4 meets locked critical-defect and clean-name thresholds, the full census is reproducible and zero-mutation, and every flagged row is routed to a governed next step rather than applied directly.</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>

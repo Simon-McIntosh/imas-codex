@@ -7,19 +7,22 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-family-harmonization">
   <meta name="plan-title" content="SN family harmonization: a group-aware docs clean-up &amp; refine operator">
-  <meta name="plan-summary" content="SHIPPED 2026-07-03: family context + parallel-structure prompts wired into generate/review/refine docs (always-on root-cause fix); sn harmonize --report/--mark/--stamp/--lint-links + sn run --scope-run-id; 30 drifted/defective docs reset in the graph and regenerated through the pools across 6 waves, all review-accepted; 110 families stamped with the idempotency signature; worklist residue defers only on gate-excluded stragglers. LLM triage collapsed the 137-family metric worklist to the genuinely drifted few — spend ≈ $32 vs $80–200 planned.">
-  <meta name="plan-status" content="shipped">
+  <meta name="plan-summary" content="Archived 2026-08-10. The shipped family documentation mechanics remain; unsafe family/fold authority and residual catalog work moved to semantic pipeline hardening, graph-wide recovery, and the later catalog-release plan.">
+  <meta name="plan-status" content="archived">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-coverage-and-hygiene,sn-structural-repair">
+  <meta name="plan-depends-on" content="">
   <title>SN family harmonization | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-03">
-<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="8">
 <meta name="plan-impl" content="1.0">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -251,7 +254,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-snfh-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-family-harmonization §1" data-resolved-at="2026-07-03T03:46:05+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-snfh-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-family-harmonization §1" data-resolved-at="2026-07-03T03:46:05+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">§1 — drift detection + sn harmonize --report (ships now, ungated)</h4>
     <div class="r-fu-body">Build the deterministic drift metric and the read-only <code>sn harmonize --report</code>. This is the foundation for the whole operator and is NOT gated on sn-coverage §1 enrichment (it reads existing docs). Validate the worklist reproduces 164 sets and flags the mode_number / density_at_locus / diffusivity families. §3 (the LLM harmonization) is gated on §1 enrichment landing first; queue it as a successor followup.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -291,7 +294,7 @@ Done-when
      enrichment); this followup resolved.</pre>
     <p class="r-fu-outcome">§1+§2 landed in ed302e04: harmonize.py (doc_sig / drift / group_signature / select_anchor / assemble_family / build_worklist) + read-only `sn harmonize --report` (--min-drift/--min-size/--limit/--json/--seed), 24 tests green. Live worklist: 135-137 families (n≥3, drift≥0.5), 624 members (560 docs-accepted), mode_number at 0.667 (all-three-distinct, not 2-vs-1), density_at_<locus> at 0.895, 134/137 with a parent-accepted anchor. KEY FINDING (LLM triage over all 137 families): the deterministic metric over-flags — 127/137 are genuinely parallel (member-token variation only); only 9 families / ~12 docs need regen, plus content-defect members from the qualitative deep-read (parent-scope mismatches, link text/target bugs, q95 conflation). Deterministic detection = ranking; LLM triage = the worklist.</locus></p>
     </article>
-<article class="r-fu" data-id="f-snfh-002" data-status="resolved" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship sn-family-harmonization" data-resolved-at="2026-07-03T05:39:18+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-snfh-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship sn-family-harmonization" data-resolved-at="2026-07-03T05:39:18+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Complete regen waves 1-2, stamp harmonized families, land §4/§6/§8 tail</h4>
     <div class="r-fu-body">Pipeline fix (8e2b7880), apply path (d6d03547: sn harmonize --mark/--stamp/--lint-links + sn run --scope-run-id), and §5 scalars (1d751512) are in. Wave 1 (8 docs, 5 families) marked + scoped rotation launched. Remaining: verify wave-1 outputs converge (family template + physics preserved), run wave 2 (10 docs incl. wrong-scope parents energy_diffusivity/power_density, q95 conflation, carbon-ratio bug), stamp, decide the 289-finding link-lint remediation, §8 docs, archive + collapse.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -308,18 +311,19 @@ Done-when
   3. §8 docs (AGENTS.md + docs/architecture/standard-names.md + plans/README.md); archive HTML + evergreen collapse; impl -&gt; 1.0.</pre>
     <p class="r-fu-outcome">All regen waves complete: 22 docs regenerated across 4 waves (17 drift/defect targets + 5 pre-existing stragglers), ALL review-accepted 0.85–1.00. Two fleet reviews: wave 1 8/8 PASS (the apparent ΔE loss adjudicated vs DD ground truth — the regen was the faithfulness FIX); wave 2 8/9 first pass — the `fraction` FAIL exposed a real prompt gap (non-derived parents lacked generalize-over-children pressure), fixed and re-regenerated clean. energy_diffusivity re-rolled to 0.900 with textbook electron/ion/neutral generalization; carbon-ratio regen also fixed a latent Zeff coefficient bug. §5 done-state: 11 campaign families + 88 triage-verified-parallel families stamped; worklist 135→54, residue = families deferring on non-accepted straggler members (correct defer semantics) + 14 locus-expansion families in final triage. Link-lint: physics-error subset regenerated; ~280 shorthand-label findings tracked as followup. §8 docs + archive landed; total SN LLM spend ≈ $26 vs $80–200 planned. Record: archive/sn-family-harmonization-landed.html.</p>
     </article>
-<article class="r-fu" data-id="f-snfh-003" data-status="resolved" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="" data-resolved-at="2026-07-03T08:12:41+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-snfh-003" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="" data-resolved-at="2026-07-03T08:12:41+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Residuals: link-lint shorthand labels, gate-excluded stubs, locus-triage tail, catalog RC</h4>
     <div class="r-fu-body">Campaign residuals, none blocking: (1) ~280 link label/target shorthand mismatches (sn harmonize --lint-links) — fix via targeted regen waves or a persist-time label/target validator; (2) ion_state_energy_diffusivity + deposited_power_density are origin=None/no-name-score stubs the docs gate excludes (known residual class from sn-structural-repair) — their families stamp once resolved; (3) triage_verdicts_4.json verdicts for the 14 locus-expansion families — stamp parallels, regen any drifted; (4) cut an ISNC catalog RC (sn release) to publish the 22 regenerated docs.</div>
     <pre class="r-fu-prompt">Project: imas-codex
 Task: close the sn-family-harmonization residuals — (1) link-lint remediation: run `sn harmonize --lint-links --json`, fix the physics-error class via `sn harmonize --mark` waves and decide shorthand-label policy (persist-time validator preferred); (2) once the origin=None/no-score docs-gate residual class is resolved (see sn-structural-repair notes), drain the excluded stubs and re-run `sn harmonize --stamp` on their families; (3) apply triage_verdicts_4.json (scratchpad) — stamp the parallel families, mark+regen any drifted; (4) `sn release` an ISNC RC to publish the regenerated docs.</pre>
     <p class="r-fu-outcome">Residuals substantially closed by the CLI fold (09330e45, owner-directed): (1) link-lint → PREVENTION — persist-time link-integrity gate on the docs accept path (mismatched label/target demotes to reviewed with a link_integrity comment; refine fixes it; never exhausts over a link nit). The ~280 legacy shorthand findings now surface only when a doc re-enters the pipeline — no batch remediation needed. (3) triage_verdicts_4 applied earlier: 11 parallels stamped, poloidal_angle sign-convention + power_due_to_conduction halo-scope + safety_factor stale anchors regenerated (wave 5), plus reviewer-flagged wave 7 (power_density registers, magnetic_shear mislinks) — all accepted; auto-restamp then stamped 129 more families live (243/296 n≥2 families stamped; 61 defer on non-accepted members). STILL OPEN → (2) gate-excluded stubs (origin=None class, sn-structural-repair residual) and (4) the ISNC catalog RC — `sn release` remains permission-gated; user runs it.</p>
     </article>
-<article class="r-fu" data-id="f-snfh-004" data-status="open" data-tier="sonnet" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snfh-004" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="" data-resolved-at="2026-08-10T08:18:07+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Final residuals: catalog RC (user-run) + gate-excluded stub class</h4>
     <div class="r-fu-body">Two items remain: (a) `imas-codex sn release` to publish the ~34 regenerated docs as an ISNC RC — outward push, permission-gated in-session, user runs it; (b) ion_state_energy_diffusivity + deposited_power_density are origin=None/no-name-score stubs the docs gate excludes (sn-structural-repair residual class) — once that class is resolved, their docs drain and the post-drain reconcile stamps their families automatically (no manual stamp needed since 09330e45).</div>
     <pre class="r-fu-prompt">Project: imas-codex
 Task: (a) run `uv run imas-codex sn release -m &quot;family-harmonized documentation&quot;` and confirm the ISNC catalog RC publishes the regenerated docs; (b) resolve the origin=None/no-name-score docs-gate exclusion (see sn-structural-repair residuals), drain the two stub docs, and verify the next `sn run` restamps their families automatically.</pre>
+    <p class="r-fu-outcome">Transferred to the consolidated current Standard Names plans named in this plan's retirement summary; this historical prompt must not be executed.</p>
     </article>
 </section>
 

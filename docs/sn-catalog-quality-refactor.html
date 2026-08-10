@@ -7,20 +7,22 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-catalog-quality-refactor">
   <meta name="plan-title" content="SN Catalog Quality Refactor">
-  <meta name="plan-summary" content="Catalog quality refactor covering postfix grammar unification, derived-parent lifecycle, catalog round-trip improvements, and Phase 6 deletion of failed derived parents.">
-  <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.21">
+  <meta name="plan-summary" content="Superseded on 2026-08-10. Live semantic prevention, lifecycle, export, and docs-authority work moved to Standard Names Semantic Pipeline Hardening and Graph-Wide Standard Name Evidence Recovery; locked historical design decisions remain here.">
+  <meta name="plan-status" content="superseded">
+  <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-quality-parity">
-  <meta name="plan-informs" content="sn-closed-physical-base">
+  <meta name="plan-depends-on" content="">
+  <meta name="plan-informs" content="sn-pipeline-hardening,sn-quality-parity">
   <title>SN Catalog Quality Refactor | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-06-09">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="2">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -83,13 +85,13 @@
       </p>
     <p class="r-dec-rat">docs and links are already tracked by distinct state machines (docs_stage: pending-&gt;drafted-&gt;reviewed-&gt;accepted; link_status: resolved/unresolved/failed with retry_count, max 5). Unifying conflates a generation/review lifecycle with a retry-bounded resolution queue and breaks age-weighted link-retry priority. Confirm current parallel design.</p>
     </div>
-<div class="r-dec" data-key="verifier-gate" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="verifier-gate" data-choice="structural-plus-score" data-by="Simon McIntosh" data-when="2026-08-10T08:17:45+00:00">
     <p class="r-dec-q">Should Phase 4 gating include reviewer-score thresholds?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="structural-only">Structural checks only</button>
-      <button class="r-opt" data-value="structural-plus-score">Structural + reviewer score</button>
+      <button class="r-opt chosen" data-value="structural-plus-score">Structural + reviewer score</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Ordinary current names and documentation require both structural validity and canonical review authority. The only structural-accept exception remains the explicitly sanctioned deterministic derived-parent path.</p>
     </div>
 <div class="r-dec" data-key="link-ordering" data-choice="canonicalize-alpha" data-by="Simon McIntosh" data-when="2026-06-09T09:10:59+00:00">
     <p class="r-dec-q">How should exported link order be normalized?</p>

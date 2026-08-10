@@ -6,26 +6,32 @@
   <meta name="docs-project"    content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-graph-wide-integrity">
-  <meta name="plan-title" content="Graph-wide name integrity (everything outside the release batch)">
-  <meta name="plan-summary" content="Close the provenance and attachment defects in the exploratory half of the corpus — the deliberately-broad generation across ~half the DD catalog — plus the write-path gaps and carried findings that the WEST release does not depend on.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-title" content="Graph-Wide Standard Name Semantic Integrity and Exact Recovery">
+  <meta name="plan-summary" content="After prevention gates land, audit every unreleased source—including WEST—against typed semantic signatures, use the pre-fold snapshot only as forensic evidence, and repair exact source cohorts through reviewed manifests, selective reset, ordinary quorum, and reversible graph transactions.">
+  <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="">
+  <meta name="plan-depends-on" content="sn-pipeline-hardening,sn-benchmark-evolution">
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="126">
-<meta name="plan-impl" content="0.98">
-<meta name="plan-sprint" content="S7">
+<meta name="plan-version" content="128">
+<meta name="plan-impl" content="0.75">
+<meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html,docs/archive/sn-graph-wide-integrity-guards-landed.html,docs/archive/sn-gas-unit-cache-repair-landed.html">
+<meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
 </head>
 <body>
   <main class="plan-doc">
+    <section class="callout" id="current-scope">
+      <h2>Current scope: exact graph-wide semantic recovery</h2>
+      <p>WEST is not protected. The pre-fold snapshot is a read-only forensic comparator because it already contains the reported geometry defects. Prevention lands first; then exact source manifests, selective reset-to-extracted, ordinary quorum and reversible transactions repair the current graph.</p>
+      <p><strong>Known incompatible bindings:</strong> control-surface outline versus normal vector; conductor outline versus local circle arc; local arc radius versus global cylindrical radial coordinate; and unqualified conductor cross-section plane.</p>
+    </section>
 
     <section id="current-bounded-closure">
       <h2>Current bounded closure</h2>
@@ -513,6 +519,24 @@
       </p>
     <p class="r-dec-rat">Lead decision 2026-08-09: check that the local DSv4 model managed by imas-ambix is running and that imas-codex is routed to the intended local compose endpoint before any new-name generation.</p>
     </div>
+<div class="r-dec" data-key="snapshot-recovery-route" data-choice="forensic-comparator" data-by="Simon McIntosh" data-when="2026-08-10T08:15:46+00:00">
+    <p class="r-dec-q">What authority does the pre-fold graph snapshot provide?</p>
+    <p class="r-dec-ctx">The snapshot predates later paid campaigns but already contains the reported control-surface and circle-arc semantic defects and lacks deterministic replay closure for subsequent changes.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="forensic-comparator">Mount it read-only, diff it against current state, and use changes only as evidence for exact reviewed manifests.</button>
+      <button class="r-opt" data-value="production-rollback">Replace the current graph with the snapshot and replay later work.</button>
+      </p>
+    <p class="r-dec-rat">The audited snapshot already contains the three reported geometry defects and rollback would discard substantial review, cost, run, hint, and provenance history that cannot be deterministically replayed. Take a real current dump, rehearse read-only, and use snapshot differences only as evidence.</p>
+    </div>
+<div class="r-dec" data-key="budget-presentation" data-choice="separate-budget-fields" data-by="Simon McIntosh" data-when="2026-08-10T08:15:46+00:00">
+    <p class="r-dec-q">What does a near-USD-50 number mean in a single-name recovery receipt?</p>
+    <p class="r-dec-ctx">Prior receipts displayed the remaining run authorization or a fixed tranche cap next to one row, which looked like the row&#x27;s estimated cost. Conservative maximum output allowances also inflated attempt reservations.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="separate-budget-fields">Separate campaign/tranche authority from rendered per-attempt expected, p95, hard, escalator, provider-ceiling, reserved, and actual values.</button>
+      <button class="r-opt" data-value="single-bounded-auth">Display one bounded authorization number.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 12A. A name is never allocated USD 50. The near-50 figure was remaining run/tranche authority, not actual or expected row cost. Admission must render and price the exact call, and the UI must label every budget dimension separately.</p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -876,7 +900,7 @@ Done-when
   4. followup written + this followup marked resolved</pre>
     <p class="r-fu-outcome">Code deliverables landed and integrated (SNRun invocation persistence + replica recording afc5b6a9/bd3343f5, BudgetExceeded contract fix ef77d52a): every run now records argv/flags/scope. Reservation math documented: review request reserves $6.7513 at policy-ceiling pricing, min viable budget $21; the 09:02Z degraded probe was a GENUINE reservation refusal ($10 &lt; $13.50 two-cycle start), the $0-saturation compose crash was a separate pool contract bug, both explained. Funded probe deferred into f-sgwi-009 BEHIND the budget-reservation-policy decision — with mean-based reservations the probe budget collapses to a few dollars.</p>
     </article>
-<article class="r-fu" data-id="f-sgwi-009" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-09T08:00:00+02:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-009" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-09T08:00:00+02:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-10T08:15:46+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Land the exact-apply tail: reservation-policy fix, gated retargets, conformance repairs, closure census, funded drain</h4>
     <div class="r-fu-body"><p>The generation phase is complete (comment c-20260809-wave2-execution); the remaining tail is deterministic and mostly $0. First implement the locked mean-based reservation policy (it unblocks a cheap funded drain), then run the quiet-window exact applies from the preserved runbook, the R1–R4 conformance repairs, the reviews/rescores that need healthy seats, the closure census, and the funded review probe. All state, receipts, manifests, and per-step gates live under receipts/standard-names/s7-attachment-repair/ (orchestration/runbook.md + d2-rows.md are authoritative).</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -904,6 +928,40 @@ Done-when (ordered)
   6. Closure census against runbook §6 AS AMENDED (husk ends pending/quarantined/0 sources; A3 = +1 identity; A6 = 0 new identities; step B = 3 accepts) + the §5b conformance sweep reads zero + fresh one-query census + full suite green.
   7. Funded drain: with mean-based reservations, run the review probe (sn run --only review_name, budget per new math, NO trailing s, NO --min-score) — names_reviewed &gt; 0, honest stop_reason, SNRun invocation fields populated.
   8. Plan writeback: resolve this followup with the census numbers; collapse the evergreen; per-stage archive HTML with plan-evidence-for; update impl; commit+push; then sn-west-review-rehearsal f-swrr-020 and mast-semantic-source-repair unblock.</pre>
+    <p class="r-fu-outcome">Partially executed and then superseded by the pre-WEST semantic-integrity programme. Reservation, claim, scope, family, docs-authority, and exact-reset improvements landed, while geometry pollution and recovery-authority defects proved the graph was not ready for closure or a broad funded drain.</p>
+    </article>
+<article class="r-fu" data-id="f-graph-semantic-recovery" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Census and repair graph-wide semantic membership after prevention lands</h4>
+    <div class="r-fu-body"><p>Freeze a fresh quiet-window graph and forensic snapshot diff, enumerate incompatible memberships and mixed semantic signatures, then apply only independently reviewed exact source manifests through selective reset and ordinary quorum.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-graph-wide-integrity
+
+Entry gate
+Do not mutate the graph until context integrity, typed DD local resolutions, ISN plane/arc grammar, semantic pipeline hardening, and the DSv4 advisory benchmark are complete and integrated. Take a real current graph dump before any apply.
+
+Objective
+Deliver a graph-wide, release-grade Standard Names corpus. WEST is in ordinary audit and repair scope and has no special protection.
+
+Required work
+1. Freeze the current graph, code, schema, DD version, ISN version, claims/scopes/runs/admissions, accepted-name projection, complete source membership, review evidence, and LLMCost ledger.
+2. Mount the pre-fold snapshot in a disposable read-only instance. Produce a source-by-source diff, but treat snapshot state only as forensic evidence because it already contains known defects.
+3. Census every source and live name against the typed semantic signature. Detect mixed role, carrier, representation, frame, section plane, owner, locus, axis, unit, scalar/cardinality, grammar, provenance scalar, and relationship membership.
+4. Explicitly adjudicate the known defects:
+   - vertical_coordinate_of_control_surface may describe outline/z points, never normal_vector/z components;
+   - radial_outline_of_coil_conductor_element may describe a conductor outline, never passive-loop arcs_of_circle/r;
+   - iron_core arcs_of_circle/r must not become a global radial coordinate unless source authority proves that frame and quantity;
+   - conductor cross-sections require a plane-qualified identity such as a poloidal section, subject to the final ISN grammar.
+5. Build exact source manifests with expected current bindings, hashes, source status/scalar, local DD resolution IDs, proposed action, rollback projection, and independent semantic disposition. No lexical survivor selection and no broad family cascade.
+6. Use selective exact reset-to-extracted only after prevention gates and only for approved source cohorts. Rerun the ordinary scoped seven-pool pipeline with local DSv4 compose readiness and hosted quorum; no hand accept.
+7. For sole-source identities, use atomic source membership reset plus governed lifecycle disposition. Ordinary detach must continue to refuse orphaning.
+8. Apply graph changes only through fresh manifest, dry-run, quiet window, exact CAS, transactional mutation, postflight, independent verification, and reversible receipts.
+9. Run the full graph census, Standard Names suite, graph schema/integrity suite, accepted-baseline/source collateral checks, and zero-open-work terminal gate.
+
+Budget
+USD 200 is the cumulative campaign ceiling. Price each rendered request immediately before admission. Report campaign ceiling and remaining authority separately from expected/p95/hard attempt exposure, conditional escalator, provider ceiling, currently reserved exposure, and actual spend.
+
+Done when
+No live name mixes incompatible semantic signatures; every source has one compatible live identity or an explicit reviewed non-nameable/hold disposition; WEST meets the same gates; residual holds are quantified; and no claim, scope, run, admission, or unverified mutation remains.</pre>
     </article>
 </section>
 

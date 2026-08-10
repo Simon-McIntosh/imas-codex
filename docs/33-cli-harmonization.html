@@ -6,18 +6,29 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="33-cli-harmonization">
-  <meta name="plan-title" content="Feature 33 — CLI Option Harmonization">
-  <meta name="plan-summary" content="Partially landed CLI harmonization plan covering canonical option vocabulary, deferred subcommand consolidation, and remaining alias cleanup.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-title" content="Standard Names Typed Operator Surface Consolidation">
+  <meta name="plan-summary" content="Replace the fragmented 30-command Standard Names CLI with eight typed operator intents—status, run, audit, edit, recover, maintain, catalog, and bench—sharing one exact manifest/apply/receipt contract and no compatibility aliases.">
+  <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="M">
-  <meta name="plan-tier" content="sonnet">
   <title>Feature 33 — CLI Option Harmonization | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-sprint" content="S8">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-depends-on" content="sn-graph-wide-integrity,sn-quality-parity">
+<meta name="plan-blocks" content="sn-west-review-rehearsal">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="general">
+<meta name="plan-impl" content="0.1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
+    <section class="callout" id="current-scope">
+      <h2>Current scope: eight typed operator intents</h2>
+      <p>The live surface has 30 visible Standard Names commands. Replace it in one breaking cutover with <code>status</code>, <code>run</code>, <code>audit</code>, <code>edit</code>, <code>recover</code>, <code>maintain</code>, <code>catalog</code> and <code>bench</code>. There are no aliases or forwarding shims; every mutation shares one exact manifest/apply/receipt contract.</p>
+    </section>
 <h1>Feature 33 — CLI option harmonization</h1>
 <figure><svg viewBox="0 0 760 170" role="img" aria-label="CLI harmonization status" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">CLI harmonization status</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Research</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Name-only review</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Alias rollout</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Deferred consolidation</text></svg><figcaption>Feature 33 has landed its research, name-only review mode, and most aliases; the remaining work is consolidation and final vocabulary cleanup.</figcaption></figure>
 <p><strong>Status:</strong> Partially implemented — moved to pending/ (2025-05-xx)</p>
@@ -191,42 +202,91 @@ CLI cleanup after Phase 3&rsquo;s alias additions settle.</p>
   that PR lands).</li>
 </ul>
 <section data-reckon="decisions" id="decisions" class="r-decisions">
-  <h2><span class="sec">§</span> Decisions</h2>
-  <div class="r-dec" data-key="subcommand-consolidation-timing" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">When should <code>sn</code> subcommand consolidation move from deferred to active work?</p>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="subcommand-consolidation-timing" data-choice="immediate-cleanup" data-by="Simon McIntosh" data-when="2026-08-10T08:16:28+00:00">
+    <p class="r-dec-q">When should sn subcommand consolidation move from deferred to active work?</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="after-migration-note">After migration note + deprecation window</button>
-      <button class="r-opt" data-value="immediate-cleanup">Immediate cleanup</button>
-    </p>
-    <p class="r-dec-rat"></p>
-  </div>
-  <div class="r-dec" data-key="free-f-short-flag" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">Should facility-aware commands free <code>-f</code> so it consistently means <code>--facility</code>?</p>
+      <button class="r-opt chosen" data-value="immediate-cleanup">Immediate cleanup</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 8A. This is a greenfield breaking cutover after a complete automation-consumer inventory; no deprecation layer or command forwarding remains.</p>
+    </div>
+<div class="r-dec" data-key="free-f-short-flag" data-choice="yes-free-it" data-by="Simon McIntosh" data-when="2026-08-10T08:16:28+00:00">
+    <p class="r-dec-q">Should facility-aware commands free -f so it consistently means --facility ?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="yes-free-it">Yes, free <code>-f</code></button>
+      <button class="r-opt chosen" data-value="yes-free-it">Yes, free -f</button>
       <button class="r-opt" data-value="keep-local-meanings">Keep local meanings</button>
-    </p>
-    <p class="r-dec-rat"></p>
-  </div>
-  <div class="r-dec" data-key="discover-limit-aliases" data-choice="" data-by="" data-when="">
+      </p>
+    <p class="r-dec-rat">Reserve -f consistently for facility where applicable. Typed subcommands remove the need for conflicting local meanings.</p>
+    </div>
+<div class="r-dec" data-key="discover-limit-aliases" data-choice="keep-specialised-flags" data-by="Simon McIntosh" data-when="2026-08-10T08:16:28+00:00">
     <p class="r-dec-q">How should discover-command limit flags be harmonised?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="add-shared-limit-aliases">Add shared <code>--limit</code> aliases</button>
-      <button class="r-opt" data-value="keep-specialised-flags">Keep specialised flags</button>
-    </p>
-    <p class="r-dec-rat"></p>
-  </div>
-  <div class="r-dec" data-key="sn-generate-rename-window" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">Should <code>sn generate</code> option renames ship now that the extraction PR is unblocked?</p>
+      <button class="r-opt" data-value="add-shared-limit-aliases">Add shared --limit aliases</button>
+      <button class="r-opt chosen" data-value="keep-specialised-flags">Keep specialised flags</button>
+      </p>
+    <p class="r-dec-rat">Do not add compatibility aliases. Each typed intent keeps only options meaningful to that operation; common concepts share a name only when their semantics are actually identical.</p>
+    </div>
+<div class="r-dec" data-key="sn-generate-rename-window" data-choice="ship-now" data-by="Simon McIntosh" data-when="2026-08-10T08:16:28+00:00">
+    <p class="r-dec-q">Should sn generate option renames ship now that the extraction PR is unblocked?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="ship-now">Ship now</button>
+      <button class="r-opt chosen" data-value="ship-now">Ship now</button>
       <button class="r-opt" data-value="bundle-later-cleanup">Bundle into later cleanup</button>
-    </p>
-    <p class="r-dec-rat"></p>
-  </div>
+      </p>
+    <p class="r-dec-rat">Include the naming cleanup in the single breaking boundary, update all in-repo consumers at once, and remove obsolete registrations rather than forwarding them.</p>
+    </div>
+<div class="r-dec" data-key="operator-intents" data-choice="eight-typed-groups" data-by="Simon McIntosh" data-when="2026-08-10T08:16:28+00:00">
+    <p class="r-dec-q">What is the final top-level Standard Names operator surface?</p>
+    <p class="r-dec-ctx">The live CLI has 30 visible subcommands and mixes pipeline stages, maintenance, recovery, catalog publication, and advisory inspection in flat commands and --only modes.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="eight-typed-groups">status, run, audit, edit, recover, maintain, catalog, bench.</button>
+      <button class="r-opt" data-value="flat-mode-command">One command with a mode flag and mode-specific option refusals.</button>
+      <button class="r-opt" data-value="retain-current">Keep the 30-command surface.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 8A. Typed nested commands let Click reject foreign options structurally and keep advisory, authority-bearing, recovery, maintenance, and release workflows visibly distinct.</p>
+    </div>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
-  <h2><span class="sec">§</span> Followups</h2>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cli-consolidation" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship 33-cli-harmonization" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Cut over the 30-command SN surface to eight typed operator intents</h4>
+    <div class="r-fu-body"><p>Freeze the complete command and consumer inventory, extract typed planners/executors from Click bodies, converge every mutation on one manifest contract, then remove all superseded registrations in one documented breaking change.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: 33-cli-harmonization
+
+Entry gate
+The semantic graph recovery and documentation evidence recovery workflows must be stable before their final operator grammar is frozen. Refresh the live command/call-graph/automation inventory immediately before implementation.
+
+Target grammar
+- sn status: summary, coverage, family, DD-gap and recovery state.
+- sn run: authoritative pipeline, bounded cohort, review axis, and documentation execution.
+- sn audit: read-only graph/context/DD/advisory inspection, including DSv4 metadata advisory.
+- sn edit: governed name, documentation, binding, source-hint, and domain intents.
+- sn recover: source, name, docs, claim, and attachment recovery.
+- sn maintain: source authority, semantic bindings, grammar projections, structural closure, vocabulary/DD-gap governance, and bounded cleanup.
+- sn catalog: preview, release, merge, decision, import/export, freeze and undo.
+- sn bench: model/seat/context benchmarks.
+
+Required work
+1. Rebuild and freeze the exact 30-command disposition and every shell/test/docs/automation consumer. No command may disappear without an explicit old-to-new mapping.
+2. Define typed request, planner, executor, postflight, and receipt APIs independent of Click. Click commands only validate syntax and call these APIs.
+3. Give every bounded run, recovery, maintenance, and authority-changing edit one shared contract: non-mutating plan by default; canonical JSON plus SHA-256; apply requires --apply, exact manifest bytes, and manifest hash; transactional revalidation and immutable receipt.
+4. Keep DSv4 under sn audit metadata --profile advisory. It must never share the authority-bearing review surface or emit an apply-ready mutation manifest.
+5. Deliver the complete documentation recovery lifecycle under sn recover docs: plan, apply, rollback, and status, with dynamic render-price-admit and durable admission.
+6. Narrow sn run to pipeline execution. Move resets, rename, family refresh, campaigns, and maintenance to their typed owners. Split the mixed --only vocabulary.
+7. Remove all superseded command registrations, aliases, hidden commands, forwarding shims, and deprecated options in one breaking cutover after every in-repo consumer is migrated.
+8. Update AGENTS.md, architecture docs, README, skill/agent prompts, shell examples, help snapshots, and the complete migration table.
+9. Run CLI tests, command-consumer scans, full Standard Names suite, schema checks, and an independent help/disposition comparison.
+
+Safety
+- --force cannot bypass semantic or authority fences.
+- Advisory output cannot be used directly as an apply manifest.
+- Every cost-bearing operation shows campaign ceiling, reserved expected exposure, actual spend, and per-attempt pricing separately.
+- Unknown old commands must fail as unknown after cutover.
+
+Done when
+Exactly eight top-level intents are visible, all 30 old commands have tested dispositions, all mutations use the shared typed harness, and no alias or private single-shot operator command remains.</pre>
+    </article>
 </section>
   </main>
 </body>

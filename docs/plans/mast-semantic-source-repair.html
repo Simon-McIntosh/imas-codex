@@ -10,14 +10,14 @@
 <link rel="stylesheet" href="/_shared/foundation.css">
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="MAST Standard Name Semantic Source Repair">
-<meta name="plan-summary" content="Enumerate the MAST machine-description Standard Names, distinguish missing names from wrong DD-path attachments and absent experimental signal sources, repair the graph source contract through imas-codex, and publish only through an authorized ISNC release candidate.">
-<meta name="plan-status" content="active">
+<meta name="plan-summary" content="After graph-wide hardening, rebuild the exact MAST source manifest with typed local DD resolutions and the public ISN geometry grammar, repair only proven source/identity gaps through exact guarded workflows, and keep publication behind its separate authority gate.">
+<meta name="plan-status" content="pending">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="L">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-informs" content="nova:mast-machine-description,nova:mast-catalog-geometry-recovery">
 <meta name="plan-depends-on" content="sn-graph-wide-integrity">
-<meta name="plan-sprint" content="S7">
+<meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-capability-reasoning" content="deep">
@@ -25,12 +25,16 @@
 <meta name="plan-capability-tool-autonomy" content="guided">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="elevated">
-<meta name="plan-impl" content="0.0">
-<meta name="plan-modified" content="2026-08-05">
-<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.1">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="4">
 </head>
 <body>
 <main class="plan-doc">
+<section class="callout" id="current-scope">
+  <h2>Current scope: post-hardening exact MAST parity</h2>
+  <p>Rebuild this plan only after graph-wide integrity closes. The earlier six spellings remain hypotheses. Current ISN plane/arc grammar, typed local DD resolutions and the common exact recovery harness govern all source and identity adjudication.</p>
+</section>
 <header>
   <span class="badge badge-active">active plan · relocated 2026-08-03</span>
   <h1>MAST Standard Name semantic source repair</h1>
@@ -271,7 +275,7 @@ must never be promoted into a globally scoped Standard Name.</p>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-mssr-source-contract" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship mast-semantic-source-repair" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-mssr-source-contract" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-capability-reasoning="deep" data-capability-context="extended" data-capability-tool-autonomy="guided" data-capability-verification="strict" data-capability-risk="elevated" data-written-by="reckon-create" data-written-at="2026-08-02" data-recommends-skill="/reckon-ship mast-semantic-source-repair" data-resolved-at="2026-08-10T08:17:09+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Repair MAST name and source parity without conflating names with source mappings</h4>
     <div class="r-fu-body"><p>Build the exact MAST semantic-source manifest, adjudicate six absent names and the wrong or under-specific DD attachments, add a facility-signal provenance plan, and prove graph/ISNC/DD 4.1.1 parity. Run read-only and dry-run gates now; no graph apply, catalog export, release, commit or push outside this plan repository until explicit authority is granted.</p></div>
     <pre class="r-fu-prompt">Project record: imas-codex
@@ -306,6 +310,30 @@ Done when
 - DD sources cite and validate against 4.1.1; facility MAST coverage is non-empty and typed by source category.
 - Graph and authorized ISNC release candidate agree by stable id, name, stage and complete sources; ISN strict parse/compose and catalog validation pass.
 - The Nova MAST ledger re-queries cleanly through imas-cx with all residual gaps explicitly explained.</pre>
+    <p class="r-fu-outcome">Superseded by the post-hardening MAST execution prompt. The source-contract decision remains locked; the old spelling hypotheses and pre-hardening graph assumptions are historical only.</p>
+    </article>
+<article class="r-fu" data-id="f-mast-post-hardening" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship mast-semantic-source-repair" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Rebuild and repair the MAST source manifest on the hardened graph</h4>
+    <div class="r-fu-body"><p>After graph-wide integrity closes, refresh the MAST manifest against current DD/local-resolution/ISN authority, adjudicate exact source and identity gaps, and apply only separately authorized guarded changes.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: mast-semantic-source-repair
+
+Entry gate
+sn-graph-wide-integrity must be closed on the current graph. Use the pinned public ISN geometry grammar and typed local DD resolution accessor. Rebuild every baseline; do not reuse the 2026-08-02 spelling hypotheses as authority.
+
+Objective
+Deliver exact MAST semantic-source parity without conflating Standard Names with catalog mappings and without introducing a MAST-specific repair mechanism.
+
+Required work
+1. Freeze the current MAST DD 4.1.1 and facility-signal manifest, semantic signatures, graph bindings, catalog identities, local DD resolutions, source categories, and provenance.
+2. Classify every discrepancy as missing identity, wrong source membership, under-specific identity, local/upstream DD defect, stale provenance, absent facility source, or reviewed non-nameable.
+3. Adjudicate names through the public ISN grammar, including section-plane and local-arc semantics. Preserve no-ordinal identity and exact frame/representation distinctions.
+4. Use the common graph-wide exact manifest/reset/edit/review/reconcile harness. Do not create facility-specific Cypher, broad reconcile, direct accept, or catalog text edits.
+5. Run read-only and dry-run gates now. Apply graph changes, facility writes, or publish an ISN/catalog release candidate only under separate exact authority.
+6. Re-query the final state through imas-cx and prove stable-id/source parity, strict round trips, unit authority, and no collateral change.
+
+Done when
+Every MAST focus source has one compatible accepted identity or an explicit reviewed hold/non-nameable disposition, facility-source coverage is typed and non-empty where supported, all local DD resolutions are explicit, and any authorized graph/catalog apply has exact reversible receipts.</pre>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">

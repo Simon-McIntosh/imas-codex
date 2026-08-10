@@ -7,17 +7,21 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-expert-hints">
   <meta name="plan-title" content="sn edit: human/agent-steered name and doc proposals through the SN pipeline">
-  <meta name="plan-summary" content="An sn edit tool that lets a human or agent propose a name/doc change that rides the generate-review-score pipeline as a steered candidate, with the reason carried into review to break the pull-back to original variants, without decoupling from style, grammar, and checks.">
-  <meta name="plan-status" content="shipped">
+  <meta name="plan-summary" content="Archived 2026-08-10. The shipped governed edit mechanism remains canonical; its remaining rollback, review-grounding, and cascade hardening moved to the consolidated semantic pipeline and typed operator plans.">
+  <meta name="plan-status" content="archived">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
-  <meta name="plan-tier" content="opus">
   <title>sn edit — steered proposals | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-07-03">
-<meta name="plan-version" content="8">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="9">
 <meta name="plan-impl" content="1.0">
+<meta name="plan-archived" content="2026-08-10">
+<meta name="plan-depends-on" content="">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
 </head>
 <body>
   <main class="plan-doc">
@@ -430,7 +434,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-snedit-001" data-status="resolved" data-tier="opus" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-expert-hints §5a" data-resolved-at="2026-07-03T11:00:48+00:00" data-resolved-by="reckon-ship">
+<article class="r-fu" data-id="f-snedit-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-06-23" data-recommends-skill="/reckon-implement sn-expert-hints §5a" data-resolved-at="2026-07-03T11:00:48+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Build sn edit §5a–§5h + dog-food the plasma-area demo §6</h4>
     <div class="r-fu-body">Implement in a separate session. Two modes: redesign (--rename/--docs) skips generate and enters at REVIEW; hint (--hint) injects into GENERATE. The --reason rides into BOTH generate (hint) and the REVIEW gate (both modes) to break the pull-back to original variants. SN id is the positional arg; --scope self|family|subtree handles parent-&gt;children cascade and the sibling-desync guard. Add an MCP write tool mirroring the CLI and a .claude/skills/sn-edit skill so agents can use it. Resolve the 3 decisions (edit-storage, reason-review-strength, leaf-edit-default-scope) before §5b/§5c. Land sn-coverage-and-hygiene §1 (derived-parent enrichment) first so the §6 demo edits a real-description parent.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -467,7 +471,7 @@ Done-when
   10. uv run pytest tests/standard_names/ green; followup written + this resolved.</pre>
     <p class="r-fu-outcome">All of §5a–§5h + §6 shipped 2026-07-03 across commits 2e338a54 (schema), 3a304f92 (prompt steering + golden byte-identity), fcf3db0c/a7fe9487 (edit engine, cascade-on-acceptance, run_id scoping), 2b6aa969/95494bd8 (CLI + first MCP write tool + status table; import-cycle fix), c55c196f (skill + docs), 85f45373 (review grammar-grounding fix). Full tests/standard_names suite green. §6 dog-food: area_of_plasma_boundary (superseded orphan) → cross_section_of_plasma_boundary ACCEPTED 0.988 + docs accepted 0.925, edit_status=applied; attempt-1 rejection (0.675, reviewer hallucinated vocabulary) root-caused → grounding fix; bad control rejected 0.825 on physics — scores discriminate. Record: docs/archive/sn-expert-hints-landed.html</p>
     </article>
-<article class="r-fu" data-id="f-snedit-002" data-status="open" data-tier="opus" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship sn-expert-hints" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snedit-002" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-07-03" data-recommends-skill="/reckon-ship sn-expert-hints" data-resolved-at="2026-08-10T08:18:07+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">sn edit hardening: rejected-rename rollback, generalized review grammar-grounding, live cascade exercise</h4>
     <div class="r-fu-body">Three residuals from the §6 demo. (1) No-rollback gap: a rename edit supersedes the target BEFORE review; a rejected/exhausted edit leaves the predecessor superseded without an accepted successor — fine for orphans, risky for accepted targets (needs restore-predecessor-on-terminal-reject or a propose-without-supersede variant). (2) The reviewer-hallucination fix (deterministic grammar grounding) currently applies only to steered candidates; the failure mode is not edit-specific — consider grounding ALL pool name-reviews. (3) Hint mode, docs mode, and the subtree cascade are unit-tested but not live-exercised; run a live subtree edit on a derived parent with children. Minor residue: the retired control name holds the PRODUCED_NAME provenance for dd source of major_radius_of_secondary_x_point.</div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -486,6 +490,7 @@ Work
 
 Done-when
   1. Rollback decision locked + implemented + tested; 2. grounding generalization verdict recorded with data; 3. live cascade/hint/docs exercises recorded in the plan; 4. control provenance cleaned; full suite green; followup resolved.</pre>
+    <p class="r-fu-outcome">Transferred to the consolidated current Standard Names plans named in this plan's retirement summary; this historical prompt must not be executed.</p>
     </article>
 </section>
   </main>

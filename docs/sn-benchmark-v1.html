@@ -7,17 +7,22 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-benchmark-v1">
   <meta name="plan-title" content="Standard Name Benchmark Set v1">
-  <meta name="plan-summary" content="Tracks the fixed positive/negative benchmark set, runner, thresholds, and consensus dependencies from plan 34.">
-  <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.35">
+  <meta name="plan-summary" content="Superseded on 2026-08-10. Its fixed corpus, runner, thresholds, and publication-consensus requirement are consolidated into DSv4 Advisory Review Benchmark and Recovery Triage.">
+  <meta name="plan-status" content="superseded">
+  <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
-  <meta name="plan-tier" content="opus">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-benchmark-evolution,sn-quality-parity">
+  <meta name="plan-depends-on" content="">
   <title>Standard Name Benchmark Set v1 | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-blocks" content="">
+<meta name="plan-informs" content="sn-benchmark-evolution">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
@@ -55,28 +60,26 @@
     <p>The plan explicitly keeps CLI integration out of v1 scope. The benchmark is script-level until the set is full and the gate is worth wiring into CI.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="v1-cli-surface" data-choice="script-only" data-by="plan-34" data-when="2026-04-21">
-        <p class="r-dec-q">How should benchmark-v1 ship operationally?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt chosen" data-value="script-only">Script only for v1</button>
-          <button class="r-opt" data-value="new-cli-command">Add a new CLI command immediately</button>
-        </p>
-        <p class="r-dec-rat">The markdown plan explicitly defers CLI wrapping until the benchmark is full and stable.</p>
-      </div>
-      <div class="r-dec" data-key="publish-threshold" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Can tentative examples without cross-family endorsement count as published benchmark items?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="published-requires-consensus">No, published items require two-reviewer consensus</button>
-          <button class="r-opt" data-value="allow-tentative-publish">Yes, tentative items may publish before consensus</button>
-        </p>
-        <p class="r-dec-rat">The body of the plan leans toward consensus-only publication, but the dependency is still open because the reviewer pool is blocked.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="v1-cli-surface" data-choice="script-only" data-by="plan-34" data-when="2026-04-21">
+    <p class="r-dec-q">How should benchmark-v1 ship operationally?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="script-only">Script only for v1</button>
+      <button class="r-opt" data-value="new-cli-command">Add a new CLI command immediately</button>
+      </p>
+    <p class="r-dec-rat">The markdown plan explicitly defers CLI wrapping until the benchmark is full and stable.</p>
+    </div>
+<div class="r-dec" data-key="publish-threshold" data-choice="published-requires-consensus" data-by="Simon McIntosh" data-when="2026-08-10T08:17:45+00:00">
+    <p class="r-dec-q">Can tentative examples without cross-family endorsement count as published benchmark items?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="published-requires-consensus">No, published items require two-reviewer consensus</button>
+      <button class="r-opt" data-value="allow-tentative-publish">Yes, tentative items may publish before consensus</button>
+      </p>
+    <p class="r-dec-rat">Only independently adjudicated benchmark labels may enter the frozen gold corpus. Tentative examples remain candidates and cannot define gates.</p>
+    </div>
+</section>
 
-    <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
+
   </main>
 </body>
 </html>

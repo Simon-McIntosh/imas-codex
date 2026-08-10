@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-codex">
+<meta name="plan-slug" content="sn-west-catalog-release">
+<meta name="reckon-type" content="plan">
+<title>sn-west-catalog-release</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="WEST Catalog Release and Graph Fold-Back">
+<meta name="plan-summary" content="After expert review of the fully hardened, graph-wide-audited WEST cohort, publish the accepted changes through the normal catalog release workflow, fold the reviewed catalog state back into the graph, and prove reversible source and lifecycle parity.">
+<meta name="plan-status" content="pending">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort" content="M">
+<meta name="plan-sprint" content="S9">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-depends-on" content="sn-west-review-rehearsal">
+<meta name="plan-blocks" content="">
+<meta name="plan-capability-version" content="1.0">
+<meta name="plan-capability-class" content="orchestrator">
+<meta name="plan-capability-reasoning" content="deep">
+<meta name="plan-capability-context" content="extended">
+<meta name="plan-capability-tool-autonomy" content="guided">
+<meta name="plan-capability-verification" content="strict">
+<meta name="plan-capability-risk" content="critical">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="2">
+</head>
+<body>
+<main class="plan-doc">
+<section class="plan-hero">
+  <p class="eyebrow">Later WEST plan · publication only after expert disposition</p>
+  <h1>WEST Catalog Release and Graph Fold-Back</h1>
+  <p class="lead">This plan does not repair, generate or approve the WEST cohort. It consumes a frozen human-reviewed packet from the hardened current graph, publishes only those exact dispositions, and proves reversible graph/catalog parity.</p>
+</section>
+<section id="entry-gate">
+  <h2>Hard entry gate</h2>
+  <figure>
+    <img src="/imas-codex/figures/sn-pre-west/delivery-dag.svg" alt="Pre-WEST hardening and recovery plans preceding WEST expert review and catalog release">
+    <figcaption>The release plan is the final node. WEST is audited and repaired with every other unreleased name; it receives no special graph protection.</figcaption>
+  </figure>
+  <ul>
+    <li>The complete pre-WEST hardening sprint is closed on a committed, independently validated graph/code/schema baseline.</li>
+    <li>The expert-review plan has an explicit disposition and content hash for every WEST row.</li>
+    <li>No open claim, scope, run, durable admission, ambiguous DD resolution or unexplained semantic hold is present.</li>
+  </ul>
+</section>
+<section id="release-contract">
+  <h2>Release and fold-back contract</h2>
+  <table>
+    <thead><tr><th>Step</th><th>Authority</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Catalog diff and review notes</td><td>Exact human disposition plus current ISN/DD/context hashes</td><td>Stable identity and complete source/documentation evidence</td></tr>
+      <tr><td>Merge and tag</td><td>Authorized catalog workflow on the reviewed commit</td><td>Version, commit, URL and exact cardinality</td></tr>
+      <tr><td>Graph fold-back</td><td>Fresh manifest, dry-run, quiet window and transactional CAS</td><td>Pre/postflight, collateral-zero and independent verification</td></tr>
+      <tr><td>Undo rehearsal</td><td>The exact pre-release projection</td><td>Byte-stable restored graph state plus retained audit history</td></tr>
+    </tbody>
+  </table>
+</section>
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="west-protection" data-choice="no-special-protection" data-by="Simon McIntosh" data-when="2026-08-10T08:11:07+00:00">
+    <p class="r-dec-q">Does the unreleased WEST cohort receive special graph protection?</p>
+    <p class="r-dec-ctx">Special protection would preserve known semantic defects and make the human batch differ from the graph-wide quality standard.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="no-special-protection">WEST stays in ordinary graph-wide audit and exact repair scope until human review.</button>
+      <button class="r-opt" data-value="protect-west">Freeze the current WEST identities as a special batch.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead: WEST names are not protected. Only already published catalog authority and test fixtures retain their normal safeguards.</p>
+    </div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-west-catalog-release" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-west-catalog-release" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Publish the expert-reviewed WEST cohort and prove reversible graph parity</h4>
+    <div class="r-fu-body"><p>Consume the completed expert-review disposition, cut the governed catalog release, fold the reviewed catalog state back into the graph with exact receipts, and prove that undo restores the pre-release state without losing source or review history.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-west-catalog-release
+
+Entry gate
+Do not begin until sn-west-review-rehearsal is complete and the pre-WEST hardening sprint is closed. The WEST cohort has no special protection and must enter with the same graph-wide semantic, source, context, claim, cost, and lifecycle gates as every other unreleased name.
+
+Required work
+1. Freeze the expert-review disposition and exact reviewed artifact hashes. Refuse missing, changed, ambiguous, or unreviewed rows.
+2. Produce the catalog diff and release notes from the governed export path. Prove strict ISN parse/compose, unit authority, documentation authority, unique compatible source membership, and absence of unresolved local DD-resolution drift.
+3. Open/merge the authorized catalog change and tag only the reviewed merge commit according to the release workflow. Record the exact version, commit, URL, and batch cardinality.
+4. Fold the reviewed catalog state back into the graph using the supported merge/reconcile path. Require exact preflight, manifest, dry-run, quiet window, transactional apply, postflight, and independent verification.
+5. Run freeze-check and undo rehearsal. Undo must restore the exact pre-release graph projection while retaining audit receipts and without broad resets or raw Cypher.
+6. Re-run the graph-wide release census, Standard Names suite, schema gates, and public search/fetch checks.
+
+Done when
+- Every released WEST identity has explicit human disposition and catalog authority.
+- Catalog, graph, source paths, provenance edges, review evidence, and lifecycle state agree by stable identity.
+- Undo is proven exact and reversible.
+- No open claims, scopes, runs, admissions, unresolved DD overlays, or WEST-specific exceptions remain.</pre>
+    </article>
+</section>
+</main>
+</body>
+</html>

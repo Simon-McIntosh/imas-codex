@@ -6,25 +6,30 @@
   <meta name="docs-project"    content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-west-review-rehearsal">
-  <meta name="plan-title" content="WEST Review Rehearsal (fork-PR dress run → real upstream PR)">
-  <meta name="plan-summary" content="Operate the shipped approval pipeline end-to-end on the real WEST corpus: drive 355 sources to accepted names, cut a review-batch RC with a fork PR (gh in the loop), merge and fold back, unwind — then raise the real upstream expert-review PR.">
-  <meta name="plan-status" content="in-progress">
+  <meta name="plan-title" content="WEST Expert Review Preparation and Human Disposition">
+  <meta name="plan-summary" content="After the pre-WEST hardening sprint closes, rebuild the WEST cohort from the current graph, prove it meets the same graph-wide semantic and evidence gates as every unreleased name, and present an exact reviewer packet for human accept/change/hold decisions.">
+  <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-catalog-approval-pipeline">
+  <meta name="plan-depends-on" content="33-cli-harmonization,sn-graph-wide-integrity,sn-quality-parity">
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-01">
-<meta name="plan-version" content="22">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-version" content="24">
+<meta name="plan-impl" content="0.65">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-sprint" content="S5">
+<meta name="plan-sprint" content="S9">
+<meta name="plan-blocks" content="sn-west-catalog-release">
 </head>
 <body>
   <main class="plan-doc">
+    <section class="callout" id="current-scope">
+      <h2>Current scope: later expert review, not an immediate release cut</h2>
+      <p>The historical WEST packet and residual counts are evidence only. Rebuild the cohort after the complete pre-WEST hardening sprint. Show reviewers the current name, description, complete sources, scores, semantic signature, local DD resolution provenance and all changes; route corrections through ordinary review.</p>
+    </section>
 
     <h2 id="s1">§1 — Goal &amp; scope</h2>
     <p>
@@ -595,6 +600,15 @@ uv run imas-codex sn merge --pr &lt;upstream-pr-url&gt;      # approvals are FIN
       <button class="r-opt" data-value="keep-direct">Keep the current direct upstream push for finals (content already merged via the fork-main PR workflow)</button>
       </p>
     <p class="r-dec-rat">Locked, refined (§4b): the version tag is the FOLD-BACK RECEIPT, owned by sn merge — created on the merge commit after a successful graph fold-back, message prefixed &#x27;graph-merged:&#x27; with PR + batch + outcome counts. Contract: tag present with that shape ⇒ catalog and graph are in sync. sn merge checks it first (idempotency); --undo deletes it. Applies to batch RCs and plain finals alike; no direct upstream-main or release-time tag push remains.</p>
+    </div>
+<div class="r-dec" data-key="west-entry-gate" data-choice="after-pre-west-hardening" data-by="Simon McIntosh" data-when="2026-08-10T08:16:52+00:00">
+    <p class="r-dec-q">When may the WEST cohort be released for human review?</p>
+    <p class="r-dec-ctx">The prior rehearsal packet predates the discovered context pollution, geometry folds, local DD-resolution requirement, and graph-wide evidence recovery.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="after-pre-west-hardening">Rebuild and verify the packet only after the complete pre-WEST sprint closes.</button>
+      <button class="r-opt" data-value="use-existing-packet">Release the historic packet now.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead as 11A/12A: hardening and graph-wide delivery precede WEST. The names are not protected and must be regenerated or repaired where the ordinary graph-wide process requires it before human review.</p>
     </div>
 </section>
 
@@ -2159,7 +2173,7 @@ Done-when
   2. §3 stages 0–2 collapsed; stages 3–6 queued; this followup resolved.</pre>
     <p class="r-fu-outcome">Superseded by f-swrr-020 after the deep sweep (2026-07-29): the sweep found one live RC blocker the morning pass missed — poloidal_magnetic_flux_at_measurement_position carried unit W on the WEST-realized ece psi paths (its staged repair was a hint edit on an accepted name, unreachable by construction) — REPAIRED same day (unit_correction to Wb, ledgered; unit-integrity tests green). The sweep also quantified the residual at exactly 14 sources (3 compose-only, 4 review-only) and showed gm1/gm5/gm6 are blocked on a missing retry instrument for failed-at-cap sources. f-swrr-020 carries the updated brief.</p>
     </article>
-<article class="r-fu" data-id="f-swrr-020" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T12:30:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-swrr-020" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-edit" data-written-at="2026-07-29T12:30:00+00:00" data-recommends-skill="/reckon-ship sn-west-review-rehearsal §3" data-resolved-at="2026-08-10T08:16:52+00:00" data-resolved-by="reckon-edit">
     <h4 class="r-fu-title">Close the 14-source residual (needs the failed-retry instrument), re-verify, then stage 2: cut the fork-PR RC</h4>
     <div class="r-fu-body"><p>The deep sweep sharpened the picture: the residual is exactly <strong>14 sources</strong> — 3 need only a compose claim, 4 only a review, the rest need a fresh name because every candidate is terminal; gm1/gm5/gm6 sit at the attempt cap with <strong>no sanctioned retry for status='failed'</strong> (the gate at graph_ops.py:9246/9259 has no covering revival instrument — that instrument lands first in sn-naming-loop-robustness). The psi unit blocker found by the sweep is already repaired (W→Wb, ledgered). Then the RC cut per D-release-standard — gates hold; the trigger is the lead's.</p></div>
     <pre class="r-fu-prompt">Project: imas-codex
@@ -2209,6 +2223,31 @@ Done-when
   1. Every one of the 355 accepted or documented; parse-check green; ambiguity 0.
   2. Fork PR OPEN with RC version, URL, batch size, PR-body judgement recorded.
   3. §3 stages 0-2 collapsed; stages 3-6 queued; this followup resolved.</pre>
+    <p class="r-fu-outcome">Superseded by the later WEST expert-review plan entry gate. The historic 14-source residual and RC-cut wording is no longer current authority because the cohort must be rebuilt after graph-wide semantic hardening.</p>
+    </article>
+<article class="r-fu" data-id="f-west-expert-review" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-west-review-rehearsal" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Rebuild the WEST reviewer packet after graph-wide hardening</h4>
+    <div class="r-fu-body"><p>At the closed pre-WEST baseline, freeze the exact current WEST cohort and expose every name, description, source path, score, DD-resolution dependency, semantic signature, and advisory/hosted review finding for human disposition.</p></div>
+    <pre class="r-fu-prompt">Project: imas-codex
+Plan: sn-west-review-rehearsal
+
+Entry gate
+Do not start until the pre-WEST semantic hardening sprint is closed and all dependent plans are green. The historic WEST packet is evidence only. WEST names have no special protection and must reflect the current graph-wide delivery.
+
+Objective
+Prepare and conduct expert human review of the current WEST cohort without publishing it.
+
+Required work
+1. Rebuild the exact WEST source cohort from current facility/DD authority. Freeze graph, code, ISN, DD, local DD resolutions, semantic signatures, source memberships, names, descriptions, scores, complete review groups, and DSv4 advisory findings.
+2. Require every row to pass the graph-wide gates: strict ISN round trip; no ordinal identity; compatible role/carrier/representation/frame/plane/owner/locus/axis/unit; one compatible live identity per source; complete docs authority; and no claim/scope/run/admission residue.
+3. Show representative before/after semantics and all changed identities. In particular expose outline versus normal-vector components, hardware outline versus local arc parameters, global radial coordinate versus local circle radius, and plane-qualified cross-sections.
+4. Prepare a human packet with exact source paths, current/proposed name, one-line description, rationale, review scores/methods, local DD resolution and upstream PR provenance, advisory flags, hosted-quorum evidence, and accept/change/hold controls.
+5. Human decisions must be explicit and exact. A hold remains a hold; the packet must not average or word partial review into approval.
+6. Route requested changes back through the governed edit/review pipeline and rebuild the affected rows. Never hand-edit graph text or directly accept.
+7. Freeze the final disposition and reviewed artifact hashes for sn-west-catalog-release. Do not tag, merge, fold back, or publish in this plan.
+
+Done when
+Every WEST row has explicit human disposition on the hardened current state, all requested changes have re-entered and passed the ordinary review pipeline, no special protection or unexplained residual remains, and the exact frozen packet is ready for the separate catalog-release plan.</pre>
     </article>
 </section>
 
