@@ -101,3 +101,16 @@ def test_raw_dd_node_has_no_hidden_effective_resolution_fields() -> None:
     assert "effective_unit" not in attributes
     assert "resolved_unit" not in attributes
     assert "effective_documentation" not in attributes
+
+
+def test_review_candidates_are_not_graph_writable_schema_types() -> None:
+    schema = _schema("standard_name.yaml")
+
+    assert "DDResolutionCandidate" not in schema["classes"]
+    assert "DDResolutionCandidateManifest" not in schema["classes"]
+    for class_definition in schema["classes"].values():
+        for attribute in class_definition.get("attributes", {}).values():
+            assert attribute.get("range") not in {
+                "DDResolutionCandidate",
+                "DDResolutionCandidateManifest",
+            }

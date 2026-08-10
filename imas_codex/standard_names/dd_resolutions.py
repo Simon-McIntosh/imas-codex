@@ -14,7 +14,7 @@ import json
 import re
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
-from enum import Enum
+from enum import Enum, StrEnum
 from functools import lru_cache
 from importlib import resources
 from typing import Any, Self
@@ -24,6 +24,7 @@ import yaml
 from pydantic import (
     BaseModel,
     ConfigDict,
+    StrictInt,
     ValidationError,
     field_validator,
     model_validator,
@@ -43,6 +44,8 @@ from imas_codex.graph.models import (
 
 _MANIFEST_RESOURCE = "dd_resolutions.yaml"
 _MANIFEST_SCHEMA_VERSION = 1
+_CANDIDATE_RESOURCE = "dd_resolution_candidates.yaml"
+_CANDIDATE_SCHEMA_VERSION = 1
 _RESOLUTION_MARKER = "resolved-dd-context"
 _EXACT_VERSION_RE = re.compile(
     r"[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z][0-9A-Za-z.-]*)?\Z"
@@ -51,7 +54,22 @@ _DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _RESOLUTION_ID_RE = re.compile(r"dd_resolution:[0-9a-f]{64}\Z")
 _OBSERVATION_ID_RE = re.compile(r"dd_gap_observation:[0-9a-f]{64}\Z")
 _EVIDENCE_TOKEN_RE = re.compile(r"dd-gap-evidence:[0-9a-f]{64}\Z")
+_UPSTREAM_COMMIT_RE = re.compile(r"[0-9a-f]{40}\Z")
+_SOURCE_ROW_RE = re.compile(r"[UO][0-9]{2}\Z")
+_UPSTREAM_CHANGE_KEY_RE = re.compile(r"[a-z][a-z0-9]*(?:-[a-z0-9]+)*\Z")
 _PATTERN_CHARACTERS = frozenset("*?[]{}\\^$|")
+
+_CANDIDATE_MISSING_REQUIREMENTS = frozenset(
+    {
+        "approval_receipt",
+        "approved_at",
+        "approved_by",
+        "fresh_evidence_token",
+        "governed_decision_reason",
+        "resolution_revision",
+        "review_decision",
+    }
+)
 
 
 class DDResolutionError(RuntimeError):
@@ -80,6 +98,59 @@ class DDResolutionEvidenceMismatch(DDResolutionError):
 
 class DDResolutionAmbiguity(DDResolutionError):
     """A deterministic resolution receipt cannot be selected."""
+
+
+class DDResolutionCandidateDisposition(StrEnum):
+    """Review routing for evidence that has no behavior authority."""
+
+    bounded_review_input = "bounded_review_input"
+    broad_scope_hold = "broad_scope_hold"
+
+
+class DDResolutionUpstreamStatus(StrEnum):
+    """Official change state observed for review-only provenance."""
+
+    open = "open"
+    merged = "merged"
+
+
+class _UniqueKeySafeLoader(yaml.SafeLoader):
+    """Safe YAML loader that refuses duplicate mapping keys recursively."""
+
+
+def _construct_unique_mapping(
+    loader: _UniqueKeySafeLoader,
+    node: yaml.MappingNode,
+    deep: bool = False,
+) -> dict[Any, Any]:
+    loader.flatten_mapping(node)
+    mapping: dict[Any, Any] = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        try:
+            duplicate = key in mapping
+        except TypeError as exc:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                "found an unhashable key",
+                key_node.start_mark,
+            ) from exc
+        if duplicate:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                f"found duplicate key {key!r}",
+                key_node.start_mark,
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+_UniqueKeySafeLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    _construct_unique_mapping,
+)
 
 
 def _enum_text(value: Any) -> str:
@@ -478,6 +549,234 @@ class DDResolutionManifest(BaseModel):
         return _canonical_digest(payload)
 
 
+class DDResolutionCandidateUpstreamChange(BaseModel):
+    """Exact official change provenance without local review authority."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    change_url: str
+    issue_url: str | None = None
+    solution_commits: tuple[str, ...]
+    status: DDResolutionUpstreamStatus
+    merge_commit: str | None = None
+    affected_since_dd_version: str | None = None
+    proposed_change_dd_version: str | None = None
+    fixed_dd_version: str | None = None
+
+    @field_validator("change_url", "issue_url")
+    @classmethod
+    def _official_https_url(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        parsed = urlparse(value)
+        if (
+            parsed.scheme != "https"
+            or parsed.netloc != "github.com"
+            or parsed.username
+            or parsed.password
+            or not parsed.path.startswith("/iterorganization/IMAS-Data-Dictionary/")
+        ):
+            raise ValueError(
+                "candidate provenance URLs must be credential-free official HTTPS URLs"
+            )
+        return value
+
+    @field_validator("solution_commits", mode="before")
+    @classmethod
+    def _exact_solution_commits(cls, value: Any) -> tuple[str, ...]:
+        if isinstance(value, str | bytes) or not isinstance(value, Sequence):
+            raise ValueError("solution_commits must be a nonempty sequence")
+        commits = tuple(str(item).strip() for item in value)
+        if not commits or any(
+            not _UPSTREAM_COMMIT_RE.fullmatch(item) for item in commits
+        ):
+            raise ValueError("every solution commit must be one full lowercase SHA")
+        if len(commits) != len(set(commits)):
+            raise ValueError("solution commits must be unique")
+        return commits
+
+    @field_validator("merge_commit")
+    @classmethod
+    def _exact_merge_commit(cls, value: str | None) -> str | None:
+        if value is not None and not _UPSTREAM_COMMIT_RE.fullmatch(value):
+            raise ValueError("merge_commit must be one full lowercase SHA")
+        return value
+
+    @field_validator(
+        "affected_since_dd_version",
+        "proposed_change_dd_version",
+        "fixed_dd_version",
+    )
+    @classmethod
+    def _exact_optional_version(cls, value: str | None) -> str | None:
+        return _validate_exact_version(value) if value is not None else None
+
+    @model_validator(mode="after")
+    def _preserve_change_state(self) -> Self:
+        if self.status == DDResolutionUpstreamStatus.merged and not self.merge_commit:
+            raise ValueError("merged upstream provenance requires the merge commit")
+        if self.status == DDResolutionUpstreamStatus.open and self.merge_commit:
+            raise ValueError("an open upstream change cannot carry a merge commit")
+        if self.status == DDResolutionUpstreamStatus.open and self.fixed_dd_version:
+            raise ValueError("an open upstream change cannot claim a fixed DD release")
+        return self
+
+
+class DDResolutionCandidate(BaseModel):
+    """One strictly non-runtime row mapping retained for governed review."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    source_row: str
+    source_pattern: str
+    dd_version: str
+    field: DDResolutionField
+    observed: DDResolutionValue
+    proposed_effective: DDResolutionValue
+    disposition: DDResolutionCandidateDisposition
+    source_release_match_count: StrictInt
+    exact_paths: tuple[str, ...]
+    narrow_evidence_overlap_count: StrictInt | None = None
+    upstream_change: str
+
+    _exact_version = field_validator("dd_version")(_validate_exact_version)
+
+    @field_validator("source_row")
+    @classmethod
+    def _source_row_identity(cls, value: str) -> str:
+        if not _SOURCE_ROW_RE.fullmatch(value):
+            raise ValueError("source_row must identify one audited legacy registry row")
+        return value
+
+    @field_validator("source_pattern")
+    @classmethod
+    def _source_pattern_present(cls, value: str) -> str:
+        if not value:
+            raise ValueError(
+                "source_pattern must preserve the audited registry pattern"
+            )
+        return value
+
+    @field_validator("exact_paths", mode="before")
+    @classmethod
+    def _canonical_exact_paths(cls, value: Any) -> tuple[str, ...]:
+        if isinstance(value, str | bytes) or not isinstance(value, Sequence):
+            raise ValueError("exact_paths must be a sequence")
+        paths = tuple(_validate_exact_path(str(item)) for item in value)
+        if len(paths) != len(set(paths)):
+            raise ValueError("candidate exact paths must be unique")
+        if paths != tuple(sorted(paths)):
+            raise ValueError("candidate exact paths must be sorted")
+        return paths
+
+    @field_validator("upstream_change")
+    @classmethod
+    def _upstream_change_key(cls, value: str) -> str:
+        if not _UPSTREAM_CHANGE_KEY_RE.fullmatch(value):
+            raise ValueError("upstream_change must be a stable mechanism key")
+        return value
+
+    @model_validator(mode="after")
+    def _validate_review_boundary(self) -> Self:
+        if self.source_release_match_count < 1:
+            raise ValueError("candidate source release match count must be positive")
+        if self.observed == self.proposed_effective:
+            raise ValueError("candidate input must preserve a proposed value change")
+        allowed_kinds = (
+            {DDResolutionValueKind.string_list}
+            if self.field == DDResolutionField.coordinates
+            else {DDResolutionValueKind.string, DDResolutionValueKind.null}
+        )
+        if (
+            self.observed.kind not in allowed_kinds
+            or self.proposed_effective.kind not in allowed_kinds
+        ):
+            raise ValueError(
+                f"field={self.field.value!r} requires value kinds "
+                f"{sorted(item.value for item in allowed_kinds)!r}"
+            )
+        _validate_field_value(self.field, self.observed)
+        _validate_field_value(self.field, self.proposed_effective)
+        if self.disposition == DDResolutionCandidateDisposition.bounded_review_input:
+            if not self.exact_paths:
+                raise ValueError("bounded review input requires exact paths")
+            if len(self.exact_paths) > self.source_release_match_count:
+                raise ValueError("bounded paths exceed the audited release cohort")
+            if self.narrow_evidence_overlap_count is not None:
+                raise ValueError(
+                    "bounded review input cannot carry a broad overlap count"
+                )
+        else:
+            if self.exact_paths:
+                raise ValueError("broad scope holds cannot enumerate candidate paths")
+            if self.narrow_evidence_overlap_count is None:
+                raise ValueError(
+                    "broad scope holds require the narrow evidence overlap"
+                )
+            if (
+                not 0
+                <= self.narrow_evidence_overlap_count
+                < self.source_release_match_count
+            ):
+                raise ValueError(
+                    "broad scope hold overlap must be smaller than its release cohort"
+                )
+        return self
+
+
+class DDResolutionCandidateManifest(BaseModel):
+    """Complete typed review input, deliberately separate from behavior authority."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    schema_version: StrictInt
+    authority: str
+    missing_requirements: tuple[str, ...]
+    upstream_changes: dict[str, DDResolutionCandidateUpstreamChange]
+    candidates: tuple[DDResolutionCandidate, ...]
+
+    @field_validator("missing_requirements", mode="before")
+    @classmethod
+    def _canonical_missing_requirements(cls, value: Any) -> tuple[str, ...]:
+        if isinstance(value, str | bytes) or not isinstance(value, Sequence):
+            raise ValueError("missing_requirements must be a sequence")
+        requirements = tuple(str(item).strip() for item in value)
+        if len(requirements) != len(set(requirements)):
+            raise ValueError("missing requirements must be unique")
+        return tuple(sorted(requirements))
+
+    @model_validator(mode="after")
+    def _validate_review_manifest(self) -> Self:
+        if self.schema_version != _CANDIDATE_SCHEMA_VERSION:
+            raise ValueError(
+                "unsupported DD resolution candidate schema_version "
+                f"{self.schema_version!r}"
+            )
+        if self.authority != "review_input_only":
+            raise ValueError("candidate resource authority must be review_input_only")
+        if frozenset(self.missing_requirements) != _CANDIDATE_MISSING_REQUIREMENTS:
+            raise ValueError(
+                "candidate resource must enumerate every missing activation requirement"
+            )
+        if not self.candidates:
+            raise ValueError("candidate resource must contain review input")
+        source_rows = [candidate.source_row for candidate in self.candidates]
+        if len(source_rows) != len(set(source_rows)):
+            raise ValueError("candidate source rows must be unique")
+        change_keys = set(self.upstream_changes)
+        if any(not _UPSTREAM_CHANGE_KEY_RE.fullmatch(key) for key in change_keys):
+            raise ValueError("upstream change keys must be stable mechanism keys")
+        used_keys = {candidate.upstream_change for candidate in self.candidates}
+        if used_keys != change_keys:
+            raise ValueError("every declared upstream change must be used and defined")
+        return self
+
+    @property
+    def digest(self) -> str:
+        """Canonical digest of review input; never an active-manifest digest."""
+        return _canonical_digest(self)
+
+
 def _verify_record_provenance(record: DDResolutionRecord) -> None:
     prefix = f"dd_gap:{record.path}:"
     if not record.gap_id.startswith(prefix):
@@ -653,6 +952,41 @@ def load_dd_resolution_manifest() -> DDResolutionManifest:
             f"packaged DD resolution manifest {_MANIFEST_RESOURCE!r} is unavailable"
         ) from exc
     return _parse_manifest_content(content)
+
+
+@lru_cache(maxsize=8)
+def _parse_candidate_content(content: str) -> DDResolutionCandidateManifest:
+    try:
+        document = yaml.load(content, Loader=_UniqueKeySafeLoader)
+    except yaml.YAMLError as exc:
+        raise DDResolutionManifestInvalid(
+            f"DD resolution candidate resource is not valid YAML: {exc}"
+        ) from exc
+    if not isinstance(document, dict):
+        raise DDResolutionManifestInvalid(
+            "DD resolution candidate top level must be a mapping"
+        )
+    try:
+        return DDResolutionCandidateManifest.model_validate(document)
+    except ValidationError as exc:
+        raise DDResolutionManifestInvalid(
+            f"DD resolution candidate resource is not schema-compliant: {exc}"
+        ) from exc
+
+
+def load_dd_resolution_candidates_for_review() -> DDResolutionCandidateManifest:
+    """Load non-authoritative provenance for a governed review workflow."""
+    reference = resources.files("imas_codex.standard_names.config").joinpath(
+        _CANDIDATE_RESOURCE
+    )
+    try:
+        content = reference.read_text(encoding="utf-8")
+    except (FileNotFoundError, OSError) as exc:
+        raise DDResolutionManifestInvalid(
+            f"packaged DD resolution candidate resource {_CANDIDATE_RESOURCE!r} "
+            "is unavailable"
+        ) from exc
+    return _parse_candidate_content(content)
 
 
 def _same_value(left: DDResolutionValue, right: DDResolutionValue) -> bool:
@@ -895,6 +1229,10 @@ DDResolutionState = DDResolutionStatus
 
 __all__ = [
     "DDResolutionAmbiguity",
+    "DDResolutionCandidate",
+    "DDResolutionCandidateDisposition",
+    "DDResolutionCandidateManifest",
+    "DDResolutionCandidateUpstreamChange",
     "DDResolutionCollision",
     "DDResolutionError",
     "DDResolutionEvidenceMismatch",
@@ -907,11 +1245,13 @@ __all__ = [
     "DDResolutionStatus",
     "DDResolutionValue",
     "DDResolutionVersionMismatch",
+    "DDResolutionUpstreamStatus",
     "RawDDContext",
     "ResolvedDDContext",
     "ResolvedDDField",
     "content_addressed_resolution_id",
     "dd_resolution_value_hash",
+    "load_dd_resolution_candidates_for_review",
     "load_dd_resolution_manifest",
     "resolve_dd_context",
     "resolve_dd_field",
