@@ -10,8 +10,12 @@ from imas_codex.graph.models import (
     DDResolutionStatus,
     DDResolutionValueKind,
 )
+from imas_codex.standard_names import dd_resolutions as dd_resolution_module
 from imas_codex.standard_names.dd_resolutions import (
     DDResolutionAmbiguity,
+    DDResolutionCandidate,
+    DDResolutionCandidateDisposition,
+    DDResolutionCandidateManifest,
     DDResolutionCollision,
     DDResolutionEvidenceMismatch,
     DDResolutionManifest,
@@ -22,6 +26,7 @@ from imas_codex.standard_names.dd_resolutions import (
     RawDDContext,
     content_addressed_resolution_id,
     dd_resolution_value_hash,
+    load_dd_resolution_candidates_for_review,
     load_dd_resolution_manifest,
     resolve_dd_context,
     resolve_dd_field,
@@ -78,6 +83,205 @@ def test_packaged_manifest_is_reviewed_empty_authority() -> None:
     assert manifest.schema_version == 1
     assert manifest.resolutions == ()
     assert manifest.digest.startswith("sha256:")
+
+
+def test_packaged_candidates_are_separate_review_only_input() -> None:
+    active_before = load_dd_resolution_manifest()
+    review_input = load_dd_resolution_candidates_for_review()
+    active_after = load_dd_resolution_manifest()
+
+    assert review_input.authority == "review_input_only"
+    assert len(review_input.candidates) == 21
+    assert active_after is active_before
+    assert active_after.resolutions == ()
+    assert active_after.digest == active_before.digest
+    for candidate in review_input.candidates:
+        with pytest.raises(ValidationError):
+            DDResolutionRecord.model_validate(candidate.model_dump(mode="json"))
+
+
+def test_candidate_type_has_no_activation_or_fresh_evidence_fields() -> None:
+    assert set(DDResolutionCandidate.model_fields).isdisjoint(
+        {
+            "approval_receipt",
+            "approved_at",
+            "approved_by",
+            "evidence_token",
+            "gap_id",
+            "id",
+            "reason",
+            "resolution_revision",
+            "state",
+        }
+    )
+
+
+def test_candidate_resource_preserves_exact_upstream_change_state() -> None:
+    review_input = load_dd_resolution_candidates_for_review()
+    changes = review_input.upstream_changes
+
+    assert set(changes) == {
+        "geometric-vector-component-units",
+        "ionization-potential-units",
+        "neutral-energy-flux-wiring",
+        "reconstructed-constraint-units",
+    }
+    assert changes["geometric-vector-component-units"].status.value == "merged"
+    assert changes["geometric-vector-component-units"].merge_commit == (
+        "cb0d86de388dbbdf62acca36de7b7f8c62bb9889"
+    )
+    assert changes["geometric-vector-component-units"].solution_commits == (
+        "fd0c145cb897770738c20de4a426c27b2d8d1a2d",
+        "721638233cd87f5ca3f9e71b36d66c46e146af2e",
+    )
+    assert changes["neutral-energy-flux-wiring"].status.value == "open"
+    assert changes["neutral-energy-flux-wiring"].merge_commit is None
+    assert changes["neutral-energy-flux-wiring"].solution_commits == (
+        "f34c85d33497f2bd777db7eaf0f6fb93fddc66f2",
+    )
+    assert changes["ionization-potential-units"].status.value == "open"
+    assert changes["ionization-potential-units"].proposed_change_dd_version == ("4.2.0")
+    assert changes["ionization-potential-units"].solution_commits == (
+        "30a5ddd4b7037b9f93a8f00f7837809403349d99",
+    )
+    assert changes["reconstructed-constraint-units"].status.value == "merged"
+    assert changes["reconstructed-constraint-units"].merge_commit == (
+        "d07172e814e91900cb4ed5d0b5f41547be3eef90"
+    )
+    assert changes["reconstructed-constraint-units"].solution_commits == (
+        "35c146031bf98028911b8266d286dcdf6ee85e2e",
+    )
+    assert all(change.fixed_dd_version is None for change in changes.values())
+
+
+def test_candidate_resource_is_exactly_row_bounded() -> None:
+    review_input = load_dd_resolution_candidates_for_review()
+    by_row = {candidate.source_row: candidate for candidate in review_input.candidates}
+
+    assert set(by_row) == {
+        "U11",
+        "U12",
+        "U13",
+        "U14",
+        "U15",
+        "U16",
+        "U19",
+        "U21",
+        "U22",
+        "U25",
+        "U26",
+        "U27",
+        "U28",
+        "U29",
+        "U32",
+        "O17",
+        "O20",
+        "O21",
+        "O22",
+        "O23",
+        "O24",
+    }
+    assert by_row["U19"].source_release_match_count == 14
+    assert by_row["U19"].exact_paths == (
+        "edge_profiles/ggd/ion/state/ionisation_potential",
+        "edge_profiles/ggd/ion/state/ionisation_potential/coefficients",
+        "edge_profiles/ggd/ion/state/ionisation_potential/values",
+        "plasma_profiles/ggd/ion/state/ionisation_potential",
+        "plasma_profiles/ggd/ion/state/ionisation_potential/coefficients",
+        "plasma_profiles/ggd/ion/state/ionisation_potential/values",
+    )
+
+    held = {
+        "O20": (1188, 6),
+        "O21": (36, 12),
+        "O22": (9, 3),
+        "O23": (9, 3),
+        "O24": (9, 3),
+    }
+    for row, (release_count, overlap_count) in held.items():
+        candidate = by_row[row]
+        assert (
+            candidate.disposition == DDResolutionCandidateDisposition.broad_scope_hold
+        )
+        assert candidate.exact_paths == ()
+        assert candidate.source_release_match_count == release_count
+        assert candidate.narrow_evidence_overlap_count == overlap_count
+
+
+def test_candidate_resource_preserves_contrary_semantic_boundaries() -> None:
+    review_input = load_dd_resolution_candidates_for_review()
+    exact_paths = {
+        path for candidate in review_input.candidates for path in candidate.exact_paths
+    }
+    source_rows = {candidate.source_row for candidate in review_input.candidates}
+
+    assert "ec_launchers/beam/direction/kphi" not in exact_paths
+    assert not any(path.endswith("/position/psi") for path in exact_paths)
+    assert "U17" not in source_rows
+    assert "U33" not in source_rows
+    assert not source_rows.intersection({"O12", "O13", "O14", "O15"})
+
+
+def test_candidate_manifest_requires_every_missing_authority_field() -> None:
+    review_input = load_dd_resolution_candidates_for_review()
+    payload = review_input.model_dump(mode="json")
+    payload["missing_requirements"].remove("approval_receipt")
+
+    with pytest.raises(ValidationError, match="missing activation requirement"):
+        DDResolutionCandidateManifest.model_validate(payload)
+
+
+def test_broad_candidate_cannot_silently_gain_exact_paths() -> None:
+    review_input = load_dd_resolution_candidates_for_review()
+    held = next(
+        candidate
+        for candidate in review_input.candidates
+        if candidate.disposition == DDResolutionCandidateDisposition.broad_scope_hold
+    )
+    payload = held.model_dump(mode="json")
+    payload["exact_paths"] = [_PATH]
+
+    with pytest.raises(ValidationError, match="cannot enumerate candidate paths"):
+        DDResolutionCandidate.model_validate(payload)
+
+
+def test_runtime_resolvers_never_consult_candidate_resource(monkeypatch) -> None:
+    active_digest = load_dd_resolution_manifest().digest
+
+    def _candidate_access_is_forbidden() -> None:
+        raise AssertionError("runtime attempted to load review-only candidates")
+
+    monkeypatch.setattr(
+        dd_resolution_module,
+        "load_dd_resolution_candidates_for_review",
+        _candidate_access_is_forbidden,
+    )
+    field = resolve_dd_field(
+        path="camera_ir/channel/camera/direction/x",
+        dd_version="4.1.1",
+        field=DDResolutionField.unit,
+        raw_value=_value("m"),
+    )
+    context = resolve_dd_context(
+        RawDDContext(
+            path="camera_ir/channel/camera/direction/x",
+            dd_version="4.1.1",
+            unit="m",
+        )
+    )
+    rows = resolve_dd_rows(
+        [{"path": "camera_ir/channel/camera/direction/x", "unit": "m"}],
+        dd_version="4.1.1",
+    )
+
+    assert field.effective.value == "m"
+    assert field.applied is False
+    assert context.unit == "m"
+    assert context.applied_resolution_ids == ()
+    assert rows[0].unit == "m"
+    assert context.manifest_digest == active_digest
+    assert rows[0].manifest_digest == active_digest
+    assert not any("candidate" in key for key in context.as_pipeline_item())
 
 
 def test_manifest_digest_is_record_order_independent() -> None:

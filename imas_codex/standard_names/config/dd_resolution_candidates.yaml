@@ -1,0 +1,329 @@
+schema_version: 1
+authority: review_input_only
+missing_requirements:
+  - approval_receipt
+  - approved_at
+  - approved_by
+  - fresh_evidence_token
+  - governed_decision_reason
+  - resolution_revision
+  - review_decision
+
+upstream_changes:
+  geometric-vector-component-units:
+    change_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    issue_url: null
+    solution_commits:
+      - fd0c145cb897770738c20de4a426c27b2d8d1a2d
+      - 721638233cd87f5ca3f9e71b36d66c46e146af2e
+    status: merged
+    merge_commit: cb0d86de388dbbdf62acca36de7b7f8c62bb9889
+    affected_since_dd_version: null
+    proposed_change_dd_version: null
+    fixed_dd_version: null
+  neutral-energy-flux-wiring:
+    change_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/273
+    issue_url: https://github.com/iterorganization/IMAS-Data-Dictionary/issues/272
+    solution_commits:
+      - f34c85d33497f2bd777db7eaf0f6fb93fddc66f2
+    status: open
+    merge_commit: null
+    affected_since_dd_version: 3.38.0
+    proposed_change_dd_version: null
+    fixed_dd_version: null
+  ionization-potential-units:
+    change_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280
+    issue_url: https://github.com/iterorganization/IMAS-Data-Dictionary/issues/277
+    solution_commits:
+      - 30a5ddd4b7037b9f93a8f00f7837809403349d99
+    status: open
+    merge_commit: null
+    affected_since_dd_version: null
+    proposed_change_dd_version: 4.2.0
+    fixed_dd_version: null
+  reconstructed-constraint-units:
+    change_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/281
+    issue_url: https://github.com/iterorganization/IMAS-Data-Dictionary/issues/278
+    solution_commits:
+      - 35c146031bf98028911b8266d286dcdf6ee85e2e
+    status: merged
+    merge_commit: d07172e814e91900cb4ed5d0b5f41547be3eef90
+    affected_since_dd_version: null
+    proposed_change_dd_version: null
+    fixed_dd_version: null
+
+candidates:
+  - source_row: U11
+    source_pattern: "*/direction/[xyz]"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: bounded_review_input
+    source_release_match_count: 12
+    exact_paths:
+      - camera_ir/channel/camera/direction/x
+      - camera_ir/channel/camera/direction/y
+      - camera_ir/channel/camera/direction/z
+      - ec_launchers/mirror/movement/direction/x
+      - ec_launchers/mirror/movement/direction/y
+      - ec_launchers/mirror/movement/direction/z
+      - operational_instrumentation/sensor/direction/x
+      - operational_instrumentation/sensor/direction/y
+      - operational_instrumentation/sensor/direction/z
+      - spi/injector/shatter_cone/direction/x
+      - spi/injector/shatter_cone/direction/y
+      - spi/injector/shatter_cone/direction/z
+    narrow_evidence_overlap_count: null
+    upstream_change: geometric-vector-component-units
+  - source_row: U12
+    source_pattern: "*/direction_second/[xyz]"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: bounded_review_input
+    source_release_match_count: 3
+    exact_paths:
+      - operational_instrumentation/sensor/direction_second/x
+      - operational_instrumentation/sensor/direction_second/y
+      - operational_instrumentation/sensor/direction_second/z
+    narrow_evidence_overlap_count: null
+    upstream_change: geometric-vector-component-units
+  - source_row: U13
+    source_pattern: "*/up/[xyz]"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: bounded_review_input
+    source_release_match_count: 3
+    exact_paths:
+      - camera_ir/channel/camera/up/x
+      - camera_ir/channel/camera/up/y
+      - camera_ir/channel/camera/up/z
+    narrow_evidence_overlap_count: null
+    upstream_change: geometric-vector-component-units
+  - source_row: U14
+    source_pattern: "*/injection_direction/[xyz]"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: bounded_review_input
+    source_release_match_count: 3
+    exact_paths:
+      - spi/injector/injection_direction/x
+      - spi/injector/injection_direction/y
+      - spi/injector/injection_direction/z
+    narrow_evidence_overlap_count: null
+    upstream_change: geometric-vector-component-units
+  - source_row: U15
+    source_pattern: "*/unit_vector_major/[xyz]"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: bounded_review_input
+    source_release_match_count: 3
+    exact_paths:
+      - spi/injector/shatter_cone/unit_vector_major/x
+      - spi/injector/shatter_cone/unit_vector_major/y
+      - spi/injector/shatter_cone/unit_vector_major/z
+    narrow_evidence_overlap_count: null
+    upstream_change: geometric-vector-component-units
+  - source_row: U16
+    source_pattern: "*/unit_vector_minor/[xyz]"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: bounded_review_input
+    source_release_match_count: 3
+    exact_paths:
+      - spi/injector/shatter_cone/unit_vector_minor/x
+      - spi/injector/shatter_cone/unit_vector_minor/y
+      - spi/injector/shatter_cone/unit_vector_minor/z
+    narrow_evidence_overlap_count: null
+    upstream_change: geometric-vector-component-units
+  - source_row: U19
+    source_pattern: "*/ggd/ion/state/ionisation_potential*"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: e}
+    proposed_effective: {kind: string, value: eV}
+    disposition: bounded_review_input
+    source_release_match_count: 14
+    exact_paths:
+      - edge_profiles/ggd/ion/state/ionisation_potential
+      - edge_profiles/ggd/ion/state/ionisation_potential/coefficients
+      - edge_profiles/ggd/ion/state/ionisation_potential/values
+      - plasma_profiles/ggd/ion/state/ionisation_potential
+      - plasma_profiles/ggd/ion/state/ionisation_potential/coefficients
+      - plasma_profiles/ggd/ion/state/ionisation_potential/values
+    narrow_evidence_overlap_count: null
+    upstream_change: ionization-potential-units
+  - source_row: U21
+    source_pattern: "*/energy_fluxes/kinetic/neutral/state/incident/values"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "m^-2.s^-1"}
+    proposed_effective: {kind: string, value: "W.m^-2"}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values
+    narrow_evidence_overlap_count: null
+    upstream_change: neutral-energy-flux-wiring
+  - source_row: U22
+    source_pattern: "*/energy_fluxes/kinetic/neutral/incident/values"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "m^-2.s^-1"}
+    proposed_effective: {kind: string, value: "W.m^-2"}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values
+    narrow_evidence_overlap_count: null
+    upstream_change: neutral-energy-flux-wiring
+  - source_row: U25
+    source_pattern: equilibrium/time_slice/constraints/pressure/reconstructed
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "1"}
+    proposed_effective: {kind: string, value: Pa}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - equilibrium/time_slice/constraints/pressure/reconstructed
+    narrow_evidence_overlap_count: null
+    upstream_change: reconstructed-constraint-units
+  - source_row: U26
+    source_pattern: equilibrium/time_slice/constraints/pressure_rotational/reconstructed
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "1"}
+    proposed_effective: {kind: string, value: Pa}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - equilibrium/time_slice/constraints/pressure_rotational/reconstructed
+    narrow_evidence_overlap_count: null
+    upstream_change: reconstructed-constraint-units
+  - source_row: U27
+    source_pattern: equilibrium/time_slice/constraints/n_e/reconstructed
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "1"}
+    proposed_effective: {kind: string, value: "m^-3"}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - equilibrium/time_slice/constraints/n_e/reconstructed
+    narrow_evidence_overlap_count: null
+    upstream_change: reconstructed-constraint-units
+  - source_row: U28
+    source_pattern: equilibrium/time_slice/constraints/j_phi/reconstructed
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "1"}
+    proposed_effective: {kind: string, value: "A.m^-2"}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - equilibrium/time_slice/constraints/j_phi/reconstructed
+    narrow_evidence_overlap_count: null
+    upstream_change: reconstructed-constraint-units
+  - source_row: U29
+    source_pattern: equilibrium/time_slice/constraints/j_parallel/reconstructed
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "1"}
+    proposed_effective: {kind: string, value: "A.m^-2"}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - equilibrium/time_slice/constraints/j_parallel/reconstructed
+    narrow_evidence_overlap_count: null
+    upstream_change: reconstructed-constraint-units
+  - source_row: U32
+    source_pattern: "*/energy_fluxes/recombination/neutral/incident/values"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: "m^-2.s^-1"}
+    proposed_effective: {kind: string, value: "W.m^-2"}
+    disposition: bounded_review_input
+    source_release_match_count: 1
+    exact_paths:
+      - wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values
+    narrow_evidence_overlap_count: null
+    upstream_change: neutral-energy-flux-wiring
+  - source_row: O17
+    source_pattern: "**/ionisation_potential"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: e}
+    proposed_effective: {kind: string, value: eV}
+    disposition: bounded_review_input
+    source_release_match_count: 2
+    exact_paths:
+      - edge_profiles/ggd/ion/state/ionisation_potential
+      - plasma_profiles/ggd/ion/state/ionisation_potential
+    narrow_evidence_overlap_count: null
+    upstream_change: ionization-potential-units
+  - source_row: O20
+    source_pattern: "**/*unit_vector*/*"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: broad_scope_hold
+    source_release_match_count: 1188
+    exact_paths: []
+    narrow_evidence_overlap_count: 6
+    upstream_change: geometric-vector-component-units
+  - source_row: O21
+    source_pattern: "**/direction/*"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: broad_scope_hold
+    source_release_match_count: 36
+    exact_paths: []
+    narrow_evidence_overlap_count: 12
+    upstream_change: geometric-vector-component-units
+  - source_row: O22
+    source_pattern: "**/direction_second/*"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: broad_scope_hold
+    source_release_match_count: 9
+    exact_paths: []
+    narrow_evidence_overlap_count: 3
+    upstream_change: geometric-vector-component-units
+  - source_row: O23
+    source_pattern: "**/up/*"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: broad_scope_hold
+    source_release_match_count: 9
+    exact_paths: []
+    narrow_evidence_overlap_count: 3
+    upstream_change: geometric-vector-component-units
+  - source_row: O24
+    source_pattern: "**/injection_direction/*"
+    dd_version: 4.1.1
+    field: unit
+    observed: {kind: string, value: m}
+    proposed_effective: {kind: string, value: "1"}
+    disposition: broad_scope_hold
+    source_release_match_count: 9
+    exact_paths: []
+    narrow_evidence_overlap_count: 3
+    upstream_change: geometric-vector-component-units
