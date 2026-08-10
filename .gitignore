@@ -8,6 +8,7 @@ __pycache__/
 imas_codex/graph/models.py
 imas_codex/graph/schema_context_data.py
 imas_codex/config/models.py
+imas_codex/llm/context_models.py
 agents/schema-reference.md
 
 # Generated index files
