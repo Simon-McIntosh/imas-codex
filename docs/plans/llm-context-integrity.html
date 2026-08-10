@@ -26,9 +26,9 @@
 <meta name="plan-capability-tool-autonomy" content="guided">
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
-<meta name="plan-impl" content="0.2">
-<meta name="plan-version" content="6">
-<meta name="plan-commits" content="dbed509d6d50b51a63f57abc7a031ba831b84320,a7df7b4ce01f821343d77fb9a6a3a27838771833,a19eeb2f1e37e1709bd0c12123766608aa61d3c4">
+<meta name="plan-impl" content="0.3">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="dbed509d6d50b51a63f57abc7a031ba831b84320,a7df7b4ce01f821343d77fb9a6a3a27838771833,a19eeb2f1e37e1709bd0c12123766608aa61d3c4,c5fa4e3c,0c8cb3c2d36f1a68cd1d3d9d76401844a4161836,789aa26896e0e497ea74f3ae2173b056d14b128f,434baf483d332bd949d21fd849a776ddfcbbfd16,aba3a0c0f342c3199d4b5daba74d15cf37de4e84,ea468e2deb4d9cfa73bbe0ef5c38ad59f25960e5,d8003611ce1874caae07bd04cb6f2294f3e61b80,5f67176692315ae9e1d7e14de09cb3d171d17634,fae3d665f2280654ba105f40e2b17da6e7f5f9fa,5222b5c7">
 </head>
 <body>
 <main class="plan-doc">
@@ -75,7 +75,7 @@
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="migration-scope" data-choice="all-active-call-sites" data-by="Simon McIntosh" data-when="2026-08-10T08:10:17+00:00">
     <p class="r-dec-q">How much of the imas-codex LLM surface must migrate before WEST?</p>
-    <p class="r-dec-ctx">The audit found 23 structured-dispatch expressions, 22 active, across Standard Names, DD enrichment, facility discovery, mapping, and benchmark paths. Partial migration would leave the same untyped authority-pollution class reachable elsewhere.</p>
+    <p class="r-dec-ctx">The frozen inventory contains 48 semantic structured-dispatch expressions across 23 carrier files: 46 are active or publicly reachable and two production-dead helpers were removed. Those 46 expressions expand to 51 registered service/seat/model-source routes. Partial migration would leave the same untyped authority-pollution class reachable elsewhere.</p>
     <p class="r-dec-opts">
       <button class="r-opt chosen" data-value="all-active-call-sites">Migrate and adversarially test every active call site before WEST.</button>
       <button class="r-opt" data-value="standard-names-only">Limit the work to Standard Names call sites.</button>
@@ -99,10 +99,11 @@
     <div class="r-fu-body"><p>Freeze the complete call-site and template inventory; define one typed prompt envelope with explicit authority classes; rebuild renderers so obligations, comparators, provenance, frames, representations, owners, loci, axes, and planes cannot cross roles; then migrate and adversarially test every active call site before WEST.</p></div>
     <pre class="r-fu-prompt">/reckon-ship llm-context-integrity</pre>
     </article>
-<article class="r-fu" data-id="f-context-boundary-repair" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-10T19:15:00+02:00" data-recommends-skill="/reckon-ship llm-context-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-context-boundary-repair" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-10T19:15:00+02:00" data-recommends-skill="/reckon-ship llm-context-integrity" data-resolved-at="2026-08-10T18:45:45+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Repair pricing authority, route cardinality, credential identity and closure before callsite migration</h4>
     <div class="r-fu-body"><p>Resume from unmerged candidate <code>434baf48</code>. Make pricing dimensions explicitly supported or unavailable, bind the actual sent credential, represent all 51 routes without conflating seats and model sources, and make static closure equivalent to dispatch validation. Then run a fresh provisioned one-shot focused suite and independent adversarial review before integrating or migrating any production callsite.</p></div>
     <pre class="r-fu-prompt">/reckon-ship llm-context-integrity</pre>
+    <p class="r-fu-outcome">Integrated on main in merge 5222b5c7 after cumulative candidate fae3d665 cleared independent static review with 0 P0/P1/P2 and only two nonblocking P3 observations. The previously failing identity target passed 1/1 and the full focused eight-module suite passed 233/233 with zero warnings; generation, Ruff, pricing tamper probes, receipt probes, and inventory closure passed. The foundation remains fail-closed with 46 legacy expressions, 51 routes, 0 typed production expressions, 0 active policies, 0 price-ready routes, and zero provider/graph/pipeline activity.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
@@ -114,6 +115,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="context-security-boundary-20260810" data-who="reckon-ship" data-when="2026-08-10T19:15:00+02:00">
     <div class="r-comment-body"><p><strong>The cumulative typed-dispatch repair remains unmerged at a clean review hold.</strong> Candidate <code>434baf48</code> closes many prior mechanisms, but independent review reports 0 critical, 4 blocking-high, 2 medium and 1 low finding: the five checked-in price rows manufacture an unsupported per-request zero while official metadata leaves 0/51 registered routes price-ready; local receipts hash the OpenRouter key rather than the actual endpoint credential; one policy per callsite plus <code>model_section == seat</code> cannot represent the frozen 46-expression/51-route inventory; and closure still misses several typed/raw alias shapes and can certify a policy that dispatch rejects. The one-shot executable run was invalidated by provisioning order—generation exited 2 and pytest exited 4 with zero tests collected before the successful sync completed—so it supplies no product verdict; Ruff passed. Image scoring remains a segregated facility-discovery blocker and is not an SN prerequisite. No policy or business callsite was activated, no provider call ran and spend was USD 0.00. Repair evidence: <code>/tmp/reckon-s8-evidence/context-dispatch-security-repair-manifest.md</code>. Review: <code>/tmp/reckon-s8-evidence/context-dispatch-security-review.md</code>, SHA-256 <code>a78a5eea65a945187ed7d55ed0daaaa5514761bd71f1e169016a3e041d64b283</code>. Test: <code>/tmp/reckon-s8-evidence/context-dispatch-security-test.md</code>, SHA-256 <code>0a69b8480a288880eb5e4ca7762883d74b9af80c0d29bf79011f59b36ba02dcf</code>. Pricing audit: <code>/tmp/reckon-s8-scope/context-pricing-provenance.md</code>, SHA-256 <code>6f0c65355105914bddc8daba065a2c18dc6e98554188bf99804e85f12153ee3c</code>. Implementation stays 20%.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="typed-dispatch-authority-landed-20260810" data-who="reckon-ship" data-when="2026-08-10T20:50:00+02:00">
+    <div class="r-comment-body"><p><strong>The fail-closed typed-dispatch authority foundation landed on main at <code>5222b5c7</code>.</strong> Registry-owned route policy now represents all 51 routes independently from 46 callsite expressions; frozen requests bind exact prompt/schema/output identities, the actual endpoint credential, canonical model and provider selector, provider fallback refusal, route-modality pricing, spend ceilings, and request-bound postflight receipts. Pricing authority is recomputed from duplicate-safe retained payloads and rejects unsupported request, image, cache-write, or unknown charged dimensions; ambiguous post-send failures consume one terminal attempt with unavailable-billability evidence and no retry. Independent review reports 0 critical/high/medium findings and two nonblocking low observations; the isolated identity regression passed 1/1 and the complete focused set passed 233/233 with zero warnings. Transition remains deliberately inactive: 46 legacy expressions, 0 typed expressions, 51 registered routes, 0 active policies, 0 price-ready routes, and 0 raw-provider bypasses. Discovery image scoring is one segregated facility-discovery blocker, not an SN dependency. Remaining work is the governed callsite migration and reviewed pricing/response-contract activation; no provider, graph, pipeline, service, or production call ran.</p></div>
 </div>
 </section>
 </main>
