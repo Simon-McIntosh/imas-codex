@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -279,6 +279,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="dd-resolution-contract-20260810" data-who="reckon-ship" data-when="2026-08-10T17:15:00+02:00">
     <div class="r-comment-body"><p><strong>The reviewed local-resolution contract landed on main at <code>c5fa4e3c</code>.</strong> LinkML now carries typed <code>DDResolution</code> and immutable state receipts; the packaged strict resolver enforces exact path/version/field applicability, approval/evidence/upstream provenance, collision and stale-value refusal, and non-mutating upstream convergence. The authority manifest intentionally contains zero active records: none of the 35 evidence facts was promoted into behavior without an exact approval receipt. Independent SLURM generation and 37 focused tests passed. Raw DD unit restoration, all 16 Standard Names consumer cutovers, source snapshots, guards, lifecycle CLI, and any separately authorized live graph mirror/backfill remain open.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="dd-resolution-transition-hold-20260810" data-who="reckon-ship" data-when="2026-08-10T18:10:00+02:00">
+    <div class="r-comment-body"><p><strong>Semantics-changing transition is on authority HOLD.</strong> A row-by-row audit of all 62 legacy rules found 3 safe deterministic normalizations, 0 active-resolution-eligible rules, 49 candidates missing exact authority, 4 explicit qualification skips, 0 obsolete rules safe to retire, and 6 ambiguous rules. The current override inventory is 24 replacements plus 4 skips, correcting the earlier 25/3 split. No consumer cutover, raw-DD restoration, graph rewrite retirement, or live backfill is safe until exact path/version/raw-release facts, DDGap observation evidence, an upstream solution reference, and a governed approval receipt exist for each promoted record. The audit was read-only: no graph, provider, pipeline, or service operation ran. Evidence: <code>/tmp/reckon-s8-scope/dd-resolution-transition-audit.md</code>, SHA-256 <code>fd5bb1e70ab0945df501550c38b0b202740eea0046b53d6d17c7b1c88aabbaf1</code>.</p></div>
 </div>
 </section>
 </main>
