@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d">
+<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
-<meta name="plan-impl" content="0.72">
+<meta name="plan-impl" content="0.74">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="sn-pipeline-hardening,sn-graph-wide-integrity">
 </head>
@@ -259,10 +259,11 @@ CONSTRAINTS
     <div class="r-fu-body"><p>Add the typed resolution layer above immutable DDGap observations and route every Standard Names context/parser through it. The graph must preserve both observed DD truth and the reviewed effective value, with exact applicability and upstream provenance.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
     </article>
-<article class="r-fu" data-id="f-dd-candidate-parser" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-10T19:15:00+02:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dd-candidate-parser" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-10T19:15:00+02:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="2026-08-10T17:24:31+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Make review-only DD candidate intake duplicate-safe and scalar-strict</h4>
     <div class="r-fu-body"><p>Resume from unmerged candidate <code>9b37dd6f</code>. Replace the permissive YAML boundary with duplicate-key rejection, enforce strict authority scalar types, add nested duplicate/coercion regressions, and run a fresh provisioned focused suite plus independent review. Keep the active authority manifest empty and preserve zero runtime or graph consumption.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
+    <p class="r-fu-outcome">Integrated on main in merge fc23f8cf after candidate commit 9b37dd6f and parser repair cc3f4278. Recursive duplicate-key rejection and StrictInt authority fields cleared independent review with 0 findings. One-shot SLURM validation passed model generation, 60 focused tests, Ruff, and adversarial non-consumption probes. The 21 records remain review-only, the active authority manifest remains empty, and no runtime, graph, pipeline, catalog, provider, or release behavior changed.</p>
     </article>
 </section>
 
@@ -296,6 +297,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="dd-candidate-review-hold-20260810" data-who="reckon-ship" data-when="2026-08-10T19:15:00+02:00">
     <div class="r-comment-body"><p><strong>The review-only candidate-provenance layer is preserved but unmerged.</strong> Candidate <code>9b37dd6f</code> correctly stores 21 official upstream mappings as 16 exact bounded review inputs plus five zero-path broad holds; it splits U19 to six exact paths, leaves <code>dd_resolutions.yaml</code> empty, has no runtime/graph consumer and fabricates no approval. Independent review nevertheless blocks integration with 0 critical, 0 high and 2 medium findings: plain <code>yaml.safe_load</code> accepts duplicate keys before Pydantic validation, and authority-relevant integer facts accept coercive scalar forms. The compute test result is unknown because node-local logs were unavailable and was not rerun; login sync passed. Active resolutions remain 0, implementation remains 72%, and no graph/catalog/pipeline mutation ran. Implementation evidence: <code>/tmp/reckon-s8-evidence/dd-candidate-provenance-manifest.md</code>. Review: <code>/tmp/reckon-s8-evidence/dd-candidate-provenance-review.md</code>, SHA-256 <code>0d16c8ba819c794bf404bce61658882ec23ab9cc3352ddf68b0d8225daae65bd</code>. Test receipt: <code>/tmp/reckon-s8-evidence/dd-candidate-provenance-test.md</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="dd-candidate-intake-landed-20260810" data-who="reckon-ship" data-when="2026-08-10T19:35:00+02:00">
+    <div class="r-comment-body"><p><strong>Strict review-only DD candidate intake landed on main at <code>fc23f8cf</code>.</strong> The resource preserves 21 official-upstream mappings as 16 exact bounded candidates and five broad-scope holds, including the six-path <code>U19</code> split. Recursive YAML duplicate-key rejection and strict authority integers cleared independent review with zero findings; one-shot SLURM validation passed generation, 60 focused tests, Ruff, and adversarial runtime-non-consumption probes. Candidate SHA-256 remains <code>c6ee52aedd65cad1fa42c539661a127fffaa6bb2d25e87808f5fda9db35cd4b1</code>; empty active-manifest SHA-256 remains <code>64c20eb0405022f33265e4bc222919c25f51b1c98b00b6e473ff615c963b33cf</code>. This is review evidence only: zero resolutions are active and governed approval, fresh evidence, positive revisions, consumer cutover, and any graph mirror remain open.</p></div>
 </div>
 </section>
 </main>
