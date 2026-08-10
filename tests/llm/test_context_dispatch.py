@@ -516,6 +516,11 @@ def test_same_named_different_schema_refuses_stale_static_refs(
     stale_schema_ref = next(
         ref for ref in envelope["static_context"] if ref["kind"] == "schema"
     )
+    monkeypatch.setattr(
+        ShadowClusterLabelBatch,
+        "__module__",
+        f"{__name__}.shadow_response_contract",
+    )
     changed = replace(spec, response_model_path=f"{__name__}:ShadowClusterLabelBatch")
     monkeypatch.setattr(
         policy_registry,
