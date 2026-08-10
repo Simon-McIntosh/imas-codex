@@ -790,13 +790,17 @@ git merge --no-ff $WORKTREE_HEAD -m "merge: worktree changes for <description>"
 git push origin main
 ```
 
-### Sub-Agent Model Selection
+### Sub-Agent Runtime Routing
 
-Model selection follows `~/.agents/AGENTS.md` (3-tier: Opus 4.6 top, Sonnet 4.6 floor, Haiku 4.6 menial-only). Repo-specific additions:
+The current user prompt and coordinator own agent model, effort, and
+concurrency choices. Every worker dispatch states those runtime choices
+explicitly; this repository defines no fixed provider family, named-model
+preference, ban, or relative model hierarchy.
 
-- **EFIT++ campaigns, solver/numerics/physics analysis, schema redesigns, cross-cutting refactors** → always `claude-opus-4.6`.
-- **Rubber-duck reviews** of complex designs → `claude-opus-4.6` (weak critic produces weak critiques).
-- **LLM-pipeline model choices** (standard names, DD enrichment, etc.) are governed by `pyproject.toml` `[tool.imas-codex.*]` sections — independent of sub-agent model policy.
+Task prompts still describe physics risk, coupling, verification, and file
+scope so the coordinator can route work appropriately. LLM-pipeline model
+seats for Standard Names and DD enrichment remain application configuration in
+`pyproject.toml`; they are independent of agent and sub-agent routing.
 
 ### Parallel Agents
 
