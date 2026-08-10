@@ -608,6 +608,10 @@ def embed_stop() -> None:
         imas-codex embed stop
     """
     stopped = False
+    embed_job = _get_embed_job()
+    live_embed_node = None
+    if embed_job and embed_job.get("state") == "RUNNING":
+        live_embed_node = embed_job.get("node")
 
     # Cancel embed SLURM job
     slurm_cancelled = _cancel_service_job(_EMBED_JOB)
@@ -656,7 +660,7 @@ def embed_stop() -> None:
     try:
         from imas_codex.cli.services import _gpu_entry, _kill_embed_orphans
 
-        host = _gpu_entry()["location"]
+        host = live_embed_node or _gpu_entry()["location"]
         # Check for orphans before kill to report accurately
         from imas_codex.cli.services import _run_on_node
 

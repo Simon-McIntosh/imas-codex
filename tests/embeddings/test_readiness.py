@@ -1,8 +1,37 @@
 """Tests for embedding readiness check."""
 
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+
+class TestEmbeddingHostDiscovery:
+    """Embedding host lookup uses the embedding service job identity."""
+
+    def test_graph_and_embedding_jobs_may_run_on_different_nodes(self):
+        """A compute location's graph default cannot redirect embed discovery."""
+        location = SimpleNamespace(
+            facility="iter",
+            service_job_name="codex-neo4j",
+        )
+        with (
+            patch("imas_codex.settings.get_embedding_location", return_value="titan"),
+            patch(
+                "imas_codex.remote.locations.resolve_location",
+                return_value=location,
+            ),
+            patch(
+                "imas_codex.remote.tunnel.discover_compute_node_local",
+                return_value="98dci4-gpu-0002",
+            ) as discover,
+        ):
+            from imas_codex.settings import _embed_host_from_facility
+
+            host = _embed_host_from_facility()
+
+        assert host == "98dci4-gpu-0002"
+        discover.assert_called_once_with(service_job_name="codex-embed")
 
 
 class TestEnsureEmbeddingReady:
