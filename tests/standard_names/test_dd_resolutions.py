@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 
 import pytest
+import yaml
 from pydantic import ValidationError
 
 from imas_codex.graph.models import (
@@ -19,6 +21,7 @@ from imas_codex.standard_names.dd_resolutions import (
     DDResolutionCollision,
     DDResolutionEvidenceMismatch,
     DDResolutionManifest,
+    DDResolutionManifestInvalid,
     DDResolutionRecord,
     DDResolutionStale,
     DDResolutionValue,
@@ -36,6 +39,17 @@ from imas_codex.standard_names.dd_resolutions import (
 _PATH = "equilibrium/time_slice/global_quantities/magnetic_axis/r"
 _OBSERVATION_ID = f"dd_gap_observation:{'a' * 64}"
 _EVIDENCE_TOKEN = f"dd-gap-evidence:{'b' * 64}"
+_CANDIDATE_RESOURCE = (
+    Path(__file__).parents[2]
+    / "imas_codex"
+    / "standard_names"
+    / "config"
+    / "dd_resolution_candidates.yaml"
+)
+
+
+def _candidate_content() -> str:
+    return _CANDIDATE_RESOURCE.read_text()
 
 
 def _value(value: str | None) -> DDResolutionValue:
@@ -114,6 +128,106 @@ def test_candidate_type_has_no_activation_or_fresh_evidence_fields() -> None:
             "state",
         }
     )
+
+
+@pytest.mark.parametrize(
+    ("needle", "replacement"),
+    [
+        (
+            "authority: review_input_only\n",
+            "authority: review_input_only\nauthority: review_input_only\n",
+        ),
+        (
+            "upstream_changes:\n",
+            "upstream_changes:\n  geometric-vector-component-units: {}\n",
+        ),
+        (
+            "    status: merged\n",
+            "    status: merged\n    status: merged\n",
+        ),
+        (
+            "  - source_row: U11\n",
+            "  - source_row: U11\n    source_row: U11\n",
+        ),
+    ],
+)
+def test_candidate_parser_rejects_duplicate_keys_at_every_mapping_depth(
+    needle: str,
+    replacement: str,
+) -> None:
+    content = _candidate_content()
+    assert content.count(needle) >= 1
+
+    with pytest.raises(DDResolutionManifestInvalid, match="duplicate key") as caught:
+        dd_resolution_module._parse_candidate_content(
+            content.replace(needle, replacement, 1)
+        )
+
+    assert isinstance(caught.value.__cause__, yaml.constructor.ConstructorError)
+
+
+def test_candidate_parser_rejects_unknown_fields() -> None:
+    content = _candidate_content().replace(
+        "authority: review_input_only\n",
+        "authority: review_input_only\nunknown_authority_field: forbidden\n",
+        1,
+    )
+
+    with pytest.raises(DDResolutionManifestInvalid) as caught:
+        dd_resolution_module._parse_candidate_content(content)
+
+    cause = caught.value.__cause__
+    assert isinstance(cause, ValidationError)
+    assert any(error["type"] == "extra_forbidden" for error in cause.errors())
+
+
+@pytest.mark.parametrize(
+    ("needle", "replacement"),
+    [
+        ("schema_version: 1\n", 'schema_version: "1"\n'),
+        ("schema_version: 1\n", "schema_version: 1.0\n"),
+        ("schema_version: 1\n", "schema_version: true\n"),
+        (
+            "    source_release_match_count: 12\n",
+            '    source_release_match_count: "12"\n',
+        ),
+        (
+            "    source_release_match_count: 12\n",
+            "    source_release_match_count: 12.0\n",
+        ),
+        (
+            "    source_release_match_count: 12\n",
+            "    source_release_match_count: true\n",
+        ),
+        (
+            "    narrow_evidence_overlap_count: 6\n",
+            '    narrow_evidence_overlap_count: "6"\n',
+        ),
+        (
+            "    narrow_evidence_overlap_count: 6\n",
+            "    narrow_evidence_overlap_count: 6.0\n",
+        ),
+        (
+            "    narrow_evidence_overlap_count: 6\n",
+            "    narrow_evidence_overlap_count: false\n",
+        ),
+    ],
+)
+def test_candidate_parser_rejects_coercible_authority_integers(
+    needle: str,
+    replacement: str,
+) -> None:
+    content = _candidate_content()
+    assert content.count(needle) >= 1
+
+    with pytest.raises(DDResolutionManifestInvalid) as caught:
+        dd_resolution_module._parse_candidate_content(
+            content.replace(needle, replacement, 1)
+        )
+
+    cause = caught.value.__cause__
+    assert isinstance(cause, ValidationError)
+    assert any(error["type"] == "int_type" for error in cause.errors())
 
 
 def test_candidate_resource_preserves_exact_upstream_change_state() -> None:

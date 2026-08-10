@@ -24,6 +24,7 @@ import yaml
 from pydantic import (
     BaseModel,
     ConfigDict,
+    StrictInt,
     ValidationError,
     field_validator,
     model_validator,
@@ -111,6 +112,45 @@ class DDResolutionUpstreamStatus(StrEnum):
 
     open = "open"
     merged = "merged"
+
+
+class _UniqueKeySafeLoader(yaml.SafeLoader):
+    """Safe YAML loader that refuses duplicate mapping keys recursively."""
+
+
+def _construct_unique_mapping(
+    loader: _UniqueKeySafeLoader,
+    node: yaml.MappingNode,
+    deep: bool = False,
+) -> dict[Any, Any]:
+    loader.flatten_mapping(node)
+    mapping: dict[Any, Any] = {}
+    for key_node, value_node in node.value:
+        key = loader.construct_object(key_node, deep=deep)
+        try:
+            duplicate = key in mapping
+        except TypeError as exc:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                "found an unhashable key",
+                key_node.start_mark,
+            ) from exc
+        if duplicate:
+            raise yaml.constructor.ConstructorError(
+                "while constructing a mapping",
+                node.start_mark,
+                f"found duplicate key {key!r}",
+                key_node.start_mark,
+            )
+        mapping[key] = loader.construct_object(value_node, deep=deep)
+    return mapping
+
+
+_UniqueKeySafeLoader.add_constructor(
+    yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+    _construct_unique_mapping,
+)
 
 
 def _enum_text(value: Any) -> str:
@@ -594,9 +634,9 @@ class DDResolutionCandidate(BaseModel):
     observed: DDResolutionValue
     proposed_effective: DDResolutionValue
     disposition: DDResolutionCandidateDisposition
-    source_release_match_count: int
+    source_release_match_count: StrictInt
     exact_paths: tuple[str, ...]
-    narrow_evidence_overlap_count: int | None = None
+    narrow_evidence_overlap_count: StrictInt | None = None
     upstream_change: str
 
     _exact_version = field_validator("dd_version")(_validate_exact_version)
@@ -689,7 +729,7 @@ class DDResolutionCandidateManifest(BaseModel):
 
     model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
 
-    schema_version: int
+    schema_version: StrictInt
     authority: str
     missing_requirements: tuple[str, ...]
     upstream_changes: dict[str, DDResolutionCandidateUpstreamChange]
@@ -917,10 +957,10 @@ def load_dd_resolution_manifest() -> DDResolutionManifest:
 @lru_cache(maxsize=8)
 def _parse_candidate_content(content: str) -> DDResolutionCandidateManifest:
     try:
-        document = yaml.safe_load(content)
+        document = yaml.load(content, Loader=_UniqueKeySafeLoader)
     except yaml.YAMLError as exc:
         raise DDResolutionManifestInvalid(
-            "DD resolution candidate resource is not valid YAML"
+            f"DD resolution candidate resource is not valid YAML: {exc}"
         ) from exc
     if not isinstance(document, dict):
         raise DDResolutionManifestInvalid(
