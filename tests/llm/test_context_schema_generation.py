@@ -16,6 +16,8 @@ def test_context_schema_is_dedicated_and_not_imported_by_graph_schemas() -> None
     assert "PromptEnvelope:" in schema_path.read_text()
     assert "PromptAttachment:" in schema_path.read_text()
     assert "BatchComparatorReceipt:" in schema_path.read_text()
+    assert "TelemetryState:" in schema_path.read_text()
+    assert "credential_source_identity:" in schema_path.read_text()
 
     for name in ("facility.yaml", "imas_dd.yaml", "standard_name.yaml"):
         assert (

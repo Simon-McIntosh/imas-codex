@@ -8,9 +8,11 @@ import math
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
+from datetime import date
 from enum import Enum
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 from pydantic import BaseModel
 
@@ -48,7 +50,7 @@ from imas_codex.llm.prompt_loader import (
 )
 from imas_codex.llm.wire_request import (
     FrozenWireRequest,
-    build_frozen_wire_request,
+    _build_frozen_wire_request,
     response_model_identity,
     response_schema_digest,
 )
@@ -141,11 +143,8 @@ class PricingContract:
 
 @dataclass(frozen=True, slots=True)
 class PreparedDispatch:
-    """Frozen wire request and pre-transport receipt."""
+    """Public redacted request view and pre-transport receipt."""
 
-    envelope: PromptEnvelope
-    policy: ResolvedDispatchPolicy
-    prompt_bundle: PromptBundle
     wire_request: FrozenWireRequest
     receipt: PromptReceipt
 
@@ -154,6 +153,15 @@ class PreparedDispatch:
         """Expose the final wire messages for diagnostics without rebuilding them."""
         value = self.wire_request.redacted_payload.get("messages", ())
         return tuple(value) if isinstance(value, Sequence) else ()
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedTransport:
+    """Private credential-bearing state required to perform one dispatch."""
+
+    public: PreparedDispatch
+    policy: ResolvedDispatchPolicy
+    transport_handle: Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -189,6 +197,29 @@ def pricing_contract_for_model(
                 f"No explicit project pricing contract for {model!r}"
             )
         variants = [configured, *configured.get("overrides", [])]
+        source = configured.get("source")
+        verified_at = configured.get("verified_at")
+        parsed_source = urlparse(source) if isinstance(source, str) else None
+        expected_source_path = "/api/v1/model/" + model.removeprefix("openrouter/")
+        try:
+            verified_date = date.fromisoformat(verified_at)
+        except (TypeError, ValueError) as exc:
+            raise PricingUnavailable(
+                f"OpenRouter pricing verification date is invalid for {model!r}"
+            ) from exc
+        if (
+            parsed_source is None
+            or parsed_source.scheme != "https"
+            or parsed_source.netloc != "openrouter.ai"
+            or parsed_source.path.rstrip("/") != expected_source_path
+            or bool(
+                parsed_source.params or parsed_source.query or parsed_source.fragment
+            )
+            or verified_date > date.today()
+        ):
+            raise PricingUnavailable(
+                f"OpenRouter pricing provenance is invalid for {model!r}"
+            )
 
         def maximum(field: str) -> float:
             values = [
@@ -312,13 +343,20 @@ def _validate_policy(policy: ResolvedDispatchPolicy) -> ResolvedDispatchPolicy:
         raise ContextPolicyError(
             f"Typed policy service/seat is not registered for {spec.callsite_id!r}"
         )
-    expected_symbol = registration.response_model_symbol
-    if expected_symbol not in {"caller-supplied", "response_model"} and (
-        policy.response_model.__name__ != expected_symbol
-    ):
+    if spec.model_section != spec.seat:
         raise ContextPolicyError(
-            f"Registered response symbol {expected_symbol!r} differs from "
-            f"{response_model_identity(policy.response_model)!r}"
+            "Typed policy model_section must exactly match its registered seat"
+        )
+    expected_identity = registration.response_model_identity
+    actual_identity = response_model_identity(policy.response_model)
+    if expected_identity is None:
+        raise ContextPolicyError(
+            f"Callsite {spec.callsite_id!r} has no registered response contract identity"
+        )
+    if actual_identity != expected_identity:
+        raise ContextPolicyError(
+            f"Registered response identity {expected_identity!r} differs from "
+            f"{actual_identity!r}"
         )
     roles = [template.role for template in spec.templates]
     if any(template.name.startswith("inline:") for template in spec.templates):
@@ -809,15 +847,31 @@ def _validate_envelope_identity(
         raise ContextPolicyError("Envelope identity does not match registry policy")
 
 
-def prepare_context_dispatch(
+def _attachment_redactions(envelope: PromptEnvelope) -> dict[str, str]:
+    redactions: dict[str, str] = {}
+    for item in envelope.batch_items:
+        for attachment in item.attachments or []:
+            data_url = f"data:{attachment.media_type};base64,{attachment.data_base64}"
+            descriptor = (
+                f"data:{attachment.media_type};sha256={attachment.content_digest};"
+                f"bytes={attachment.byte_length};width={attachment.width};"
+                f"height={attachment.height}"
+            )
+            if data_url in redactions and redactions[data_url] != descriptor:
+                raise ContextPolicyError("Attachment wire identity is ambiguous")
+            redactions[data_url] = descriptor
+    return redactions
+
+
+def _prepare_context_transport(
     envelope: PromptEnvelope | Mapping[str, Any],
     callsite_id: str,
     *,
     candidate_model: str | None = None,
     operation_budget: float | None = None,
     prompts_dir: Path = PROMPTS_DIR,
-) -> PreparedDispatch:
-    """Build, tokenize, price, and receipt one request without transport."""
+) -> _PreparedTransport:
+    """Build private transport state and its public preflight result."""
     policy = _resolve_policy(callsite_id, candidate_model)
     validated_envelope = validate_envelope(envelope)
     _validate_envelope_identity(validated_envelope, policy)
@@ -834,19 +888,26 @@ def prepare_context_dispatch(
     pricing = pricing_contract_for_model(
         policy.model, zero_cost_local=policy.spec.zero_cost_local
     )
-    wire_request = build_frozen_wire_request(
-        model=policy.model,
-        messages=messages,
-        response_model=policy.response_model,
-        max_output_tokens=policy.spec.max_output_tokens,
-        temperature=policy.spec.temperature,
-        timeout=policy.spec.timeout,
-        service=policy.spec.service,
-        reasoning_effort=policy.spec.reasoning_effort,
-        provider_max_price=pricing.provider_max_price(),
-    )
+    from imas_codex.discovery.base.llm import ProviderPricingUnbounded
+
     try:
-        exact_input_tokens = policy.token_counter(wire_request)
+        wire_request, transport_handle = _build_frozen_wire_request(
+            model=policy.model,
+            messages=messages,
+            response_model=policy.response_model,
+            max_output_tokens=policy.spec.max_output_tokens,
+            temperature=policy.spec.temperature,
+            timeout=policy.spec.timeout,
+            service=policy.spec.service,
+            reasoning_effort=policy.spec.reasoning_effort,
+            provider_max_price=pricing.provider_max_price(),
+            zero_cost_local=policy.spec.zero_cost_local,
+            attachment_redactions=_attachment_redactions(validated_envelope),
+        )
+    except ProviderPricingUnbounded as exc:
+        raise PricingUnavailable(str(exc)) from exc
+    try:
+        exact_input_tokens = policy.token_counter(transport_handle._tokenization_copy())
     except Exception as exc:
         raise TokenizerUnavailable(
             f"Tokenizer {policy.spec.tokenizer_key!r} failed: {exc}"
@@ -927,6 +988,8 @@ def prepare_context_dispatch(
         attachment_receipts=attachment_receipts,
         batch_comparator_receipt=_batch_comparator_receipt(validated_envelope),
         wire_request_digest=wire_request.request_digest,
+        credential_source_identity=wire_request.credential_source_identity,
+        endpoint_contract=wire_request.endpoint_contract,
         prompt_bundle_digest=bundle.source_digest,
         response_model_identity=wire_request.response_model_identity,
         response_schema_digest=wire_request.response_schema_digest,
@@ -940,44 +1003,85 @@ def prepare_context_dispatch(
         maximum_image_count=policy.spec.attachment_policy.max_count,
         maximum_cost_exposure=maximum_cost_exposure,
     )
-    return PreparedDispatch(validated_envelope, policy, bundle, wire_request, receipt)
+    public = PreparedDispatch(wire_request=wire_request, receipt=receipt)
+    return _PreparedTransport(public, policy, transport_handle)
 
 
-def _integral_usage(result: Any, name: str) -> int:
-    if not hasattr(result, name):
-        raise UsageReconciliationError(f"Provider usage is missing {name}")
-    value = getattr(result, name)
-    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
-        raise UsageReconciliationError(
-            f"Provider usage {name} must be a non-negative integer"
+def prepare_context_dispatch(
+    envelope: PromptEnvelope | Mapping[str, Any],
+    callsite_id: str,
+    *,
+    candidate_model: str | None = None,
+    operation_budget: float | None = None,
+    prompts_dir: Path = PROMPTS_DIR,
+) -> PreparedDispatch:
+    """Return only a redacted request view and receipt without transport."""
+    return _prepare_context_transport(
+        envelope,
+        callsite_id,
+        candidate_model=candidate_model,
+        operation_budget=operation_budget,
+        prompts_dir=prompts_dir,
+    ).public
+
+
+def _usage_values(result: Any) -> dict[str, Any]:
+    explicit_states = getattr(result, "telemetry_states", {})
+    if not isinstance(explicit_states, Mapping):
+        explicit_states = {}
+    values: dict[str, Any] = {}
+    for receipt_name, result_name in (
+        ("input_tokens", "input_tokens"),
+        ("output_tokens", "output_tokens"),
+        ("cached_read_tokens", "cache_read_tokens"),
+        ("cached_write_tokens", "cache_creation_tokens"),
+    ):
+        state = explicit_states.get(receipt_name)
+        value = getattr(result, result_name, None)
+        if state not in {"valid", "invalid", "unavailable"}:
+            state = (
+                "valid"
+                if not isinstance(value, bool) and isinstance(value, int) and value >= 0
+                else ("unavailable" if value is None else "invalid")
+            )
+        if state == "valid" and (
+            isinstance(value, bool) or not isinstance(value, int) or value < 0
+        ):
+            state = "invalid"
+        values[receipt_name] = value if state == "valid" else None
+        values[f"{receipt_name}_state"] = state
+
+    cost = getattr(result, "cost", None)
+    cost_state = explicit_states.get("actual_cost")
+    if cost_state not in {"valid", "invalid", "unavailable"}:
+        cost_state = (
+            "valid"
+            if not isinstance(cost, bool)
+            and isinstance(cost, int | float)
+            and math.isfinite(float(cost))
+            and cost >= 0
+            else ("unavailable" if cost is None else "invalid")
         )
-    return value
+    if cost_state == "valid" and (
+        isinstance(cost, bool)
+        or not isinstance(cost, int | float)
+        or not math.isfinite(float(cost))
+        or cost < 0
+    ):
+        cost_state = "invalid"
+    values["actual_cost"] = float(cost) if cost_state == "valid" else None
+    values["actual_cost_state"] = cost_state
 
-
-def _usage_values(result: Any) -> dict[str, int | float]:
-    values: dict[str, int | float] = {
-        "input_tokens": _integral_usage(result, "input_tokens"),
-        "output_tokens": _integral_usage(result, "output_tokens"),
-        "cached_read_tokens": _integral_usage(result, "cache_read_tokens"),
-        "cached_write_tokens": _integral_usage(result, "cache_creation_tokens"),
-        "attempt_count": _integral_usage(result, "response_count"),
-    }
-    if not hasattr(result, "cost"):
-        raise UsageReconciliationError("Provider usage is missing cost")
-    cost = result.cost
-    if isinstance(cost, bool) or not isinstance(cost, int | float):
-        raise UsageReconciliationError("Provider usage cost must be numeric")
-    values["actual_cost"] = float(cost)
-    if not math.isfinite(values["actual_cost"]) or values["actual_cost"] < 0:
-        raise UsageReconciliationError(
-            "Provider usage cost must be finite and non-negative"
-        )
+    attempts = getattr(result, "response_count", None)
+    if isinstance(attempts, bool) or not isinstance(attempts, int) or attempts <= 0:
+        raise UsageReconciliationError("Provider response count is absent or invalid")
+    values["attempt_count"] = attempts
     return values
 
 
 def _receipt_with_usage(
     receipt: PromptReceipt,
-    values: Mapping[str, int | float],
+    values: Mapping[str, Any],
     *,
     failure_type: str | None,
 ) -> PromptReceipt:
@@ -997,20 +1101,24 @@ def reconcile_context_receipt(
     failure_type: str | None = None,
 ) -> PromptReceipt:
     """Reconcile exact typed telemetry against bounds stored in the pre receipt."""
-    try:
-        values = _usage_values(result)
-    except UsageReconciliationError:
-        if require_usage or paid:
-            raise
-        values = {
-            "input_tokens": 0,
-            "output_tokens": 0,
-            "cached_read_tokens": 0,
-            "cached_write_tokens": 0,
-            "attempt_count": 0,
-            "actual_cost": 0.0,
-        }
+    values = _usage_values(result)
     post = _receipt_with_usage(receipt, values, failure_type=failure_type)
+    invalid_states = {
+        name: values[f"{name}_state"]
+        for name in (
+            "input_tokens",
+            "output_tokens",
+            "cached_read_tokens",
+            "cached_write_tokens",
+            "actual_cost",
+        )
+        if values[f"{name}_state"] != "valid"
+    }
+    if invalid_states:
+        raise UsageReconciliationError(
+            f"Provider telemetry is invalid or unavailable: {invalid_states}",
+            receipt=post,
+        )
     attempts = int(values["attempt_count"])
     if attempts <= 0 or attempts > receipt.max_attempts:
         raise UsageReconciliationError(
@@ -1025,6 +1133,11 @@ def reconcile_context_receipt(
     if int(values["output_tokens"]) > receipt.max_output_tokens * attempts:
         raise UsageReconciliationError(
             "Provider output usage exceeds the registered attempt bound", receipt=post
+        )
+    if int(values["cached_write_tokens"]) != 0:
+        raise UsageReconciliationError(
+            "Typed routes disable cache creation because no cache-write price is authorized",
+            receipt=post,
         )
     if success and int(values["output_tokens"]) <= 0:
         raise UsageReconciliationError(
@@ -1042,26 +1155,16 @@ def reconcile_context_receipt(
 
 
 def _has_billable_telemetry(error: BaseException) -> bool:
-    fields = (
-        "input_tokens",
-        "output_tokens",
-        "cache_read_tokens",
-        "cache_creation_tokens",
-        "response_count",
-        "cost",
-    )
-    return all(hasattr(error, field) for field in fields) and bool(
-        getattr(error, "response_count", 0)
-    )
+    return bool(getattr(error, "response_count", 0))
 
 
 def _bind_success(
-    prepared: PreparedDispatch,
+    prepared: _PreparedTransport,
     result: Any,
 ) -> ContextDispatchResult:
     paid = not prepared.policy.spec.zero_cost_local
     post = reconcile_context_receipt(
-        prepared.receipt,
+        prepared.public.receipt,
         result,
         paid=paid,
         require_usage=prepared.policy.spec.require_usage,
@@ -1080,17 +1183,24 @@ def _bind_success(
     return ContextDispatchResult(parsed=parsed, receipt=post)
 
 
-def _raise_transport_failure(prepared: PreparedDispatch, error: BaseException) -> None:
+def _raise_transport_failure(
+    prepared: _PreparedTransport, error: BaseException
+) -> None:
     if not _has_billable_telemetry(error):
         raise error
-    post = reconcile_context_receipt(
-        prepared.receipt,
-        error,
-        paid=not prepared.policy.spec.zero_cost_local,
-        require_usage=prepared.policy.spec.require_usage,
-        success=False,
-        failure_type=type(error).__name__,
-    )
+    try:
+        post = reconcile_context_receipt(
+            prepared.public.receipt,
+            error,
+            paid=not prepared.policy.spec.zero_cost_local,
+            require_usage=prepared.policy.spec.require_usage,
+            success=False,
+            failure_type=type(error).__name__,
+        )
+    except UsageReconciliationError as reconciliation_error:
+        if reconciliation_error.receipt is None:
+            raise
+        post = reconciliation_error.receipt
     raise ContextTransportError(str(error), receipt=post) from error
 
 
@@ -1102,7 +1212,7 @@ def dispatch_context(
     operation_budget: float | None = None,
 ) -> ContextDispatchResult:
     """Send one registry-owned typed request through the exact frozen transport."""
-    prepared = prepare_context_dispatch(
+    prepared = _prepare_context_transport(
         envelope,
         callsite_id,
         candidate_model=candidate_model,
@@ -1112,7 +1222,7 @@ def dispatch_context(
 
     try:
         result = _call_frozen_structured_transport(
-            prepared.wire_request,
+            prepared.transport_handle,
             response_model=prepared.policy.response_model,
             model=prepared.policy.model,
             max_attempts=prepared.policy.spec.max_attempts,
@@ -1131,7 +1241,7 @@ async def adispatch_context(
     operation_budget: float | None = None,
 ) -> ContextDispatchResult:
     """Async registry-owned dispatch using the identical frozen request object."""
-    prepared = prepare_context_dispatch(
+    prepared = _prepare_context_transport(
         envelope,
         callsite_id,
         candidate_model=candidate_model,
@@ -1141,7 +1251,7 @@ async def adispatch_context(
 
     try:
         result = await _acall_frozen_structured_transport(
-            prepared.wire_request,
+            prepared.transport_handle,
             response_model=prepared.policy.response_model,
             model=prepared.policy.model,
             max_attempts=prepared.policy.spec.max_attempts,

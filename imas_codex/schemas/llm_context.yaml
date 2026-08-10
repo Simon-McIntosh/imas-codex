@@ -85,6 +85,13 @@ enums:
       assistant:
         description: Registered assistant-prefill material.
 
+  TelemetryState:
+    description: Whether one provider telemetry dimension is trustworthy.
+    permissible_values:
+      valid:
+      invalid:
+      unavailable:
+
   StaticContextKind:
     description: Kind of immutable input included in the static fingerprint.
     permissible_values:
@@ -332,13 +339,18 @@ classes:
       provenance_fingerprint: {required: true}
 
   ProviderUsage:
-    description: Provider-reported usage reconciled after a response.
+    description: Provider-reported usage and explicit validity after a response.
     attributes:
-      input_tokens: {range: integer, required: true}
-      output_tokens: {range: integer, required: true}
-      cached_read_tokens: {range: integer, required: true}
-      cached_write_tokens: {range: integer, required: true}
-      actual_cost: {range: double, required: true}
+      input_tokens: {range: integer}
+      input_tokens_state: {range: TelemetryState, required: true}
+      output_tokens: {range: integer}
+      output_tokens_state: {range: TelemetryState, required: true}
+      cached_read_tokens: {range: integer}
+      cached_read_tokens_state: {range: TelemetryState, required: true}
+      cached_write_tokens: {range: integer}
+      cached_write_tokens_state: {range: TelemetryState, required: true}
+      actual_cost: {range: double}
+      actual_cost_state: {range: TelemetryState, required: true}
       attempt_count: {range: integer, required: true}
 
   PromptItemReceipt:
@@ -387,6 +399,12 @@ classes:
         range: BatchComparatorReceipt
         required: true
       wire_request_digest: {required: true}
+      credential_source_identity:
+        required: true
+        description: Non-secret registry name and one-way key identity.
+      endpoint_contract:
+        required: true
+        description: Enforceable route contract used for the frozen request.
       prompt_bundle_digest: {required: true}
       response_model_identity: {required: true}
       response_schema_digest: {required: true}

@@ -118,6 +118,79 @@ async def async_call(envelope):
     assert [call.callsite_id for call in calls] == ["example.sync", "example.async"]
 
 
+def test_scanner_resolves_import_assignment_attribute_and_thread_aliases(tmp_path):
+    _write_source(
+        tmp_path,
+        "imas_codex/carrier.py",
+        """
+from asyncio import to_thread as run_thread
+from imas_codex.discovery.base.llm import call_llm_structured as invoke
+import imas_codex.llm.context_dispatch as typed
+
+assigned = invoke
+
+async def threaded_alias():
+    await run_thread(
+        assigned,
+        model=model,
+        messages=[],
+        response_model=Response,
+        service="data-dictionary",
+    )
+
+async def typed_attribute(envelope):
+    return await typed.adispatch_context(envelope, "example.typed")
+""",
+    )
+
+    calls = scan_structured_calls(tmp_path)
+
+    assert [call.dispatch_style for call in calls] == ["to-thread", "typed-async"]
+    assert [call.transition_kind for call in calls] == ["legacy", "typed"]
+
+
+def test_scanner_only_accepts_explicitly_registered_injected_parameter(tmp_path):
+    _write_source(
+        tmp_path,
+        "imas_codex/carrier.py",
+        """
+async def injected(invoke_async):
+    return await invoke_async(
+        model=model,
+        messages=[],
+        response_model=Response,
+        service="data-dictionary",
+    )
+""",
+    )
+    registration = (
+        CallsiteRegistration(
+            callsite_id="example.injected",
+            source=SourceCallIdentity(
+                "imas_codex/carrier.py", "injected", "invoke_async"
+            ),
+            dispatch_style="injected",
+            service_argument="'data-dictionary'",
+            response_model_symbol="Response",
+            reachability="active",
+            routes=(
+                RouteBinding(
+                    "data-dictionary",
+                    "language",
+                    ("example/system",),
+                    "legacy-template",
+                ),
+            ),
+        ),
+    )
+
+    calls = scan_structured_calls(tmp_path, registry=registration)
+
+    assert len(calls) == 1
+    assert calls[0].dispatch_style == "injected"
+    assert calls[0].source.dispatch_symbol == "invoke_async"
+
+
 def test_unregistered_dispatch_fails_loudly(tmp_path):
     _write_source(
         tmp_path,
@@ -202,7 +275,9 @@ def test_legacy_route_matching_is_exact_and_inline_assets_are_explicit() -> None
     )
 
 
-def test_registry_accepts_exact_legacy_to_typed_expression_transition(tmp_path) -> None:
+def test_registry_accepts_exact_legacy_to_typed_expression_transition(
+    tmp_path, monkeypatch
+) -> None:
     _write_source(
         tmp_path,
         "imas_codex/carrier.py",
@@ -232,6 +307,10 @@ def dispatch(envelope):
         ),
     )
 
+    monkeypatch.setattr(
+        "imas_codex.llm.dispatch_policy_registry.policy_registry_closure",
+        lambda observed, registry: (0, 1),
+    )
     observed = assert_registry_current(
         tmp_path, registry, typed_policy_registry={"example.typed": object()}
     )
@@ -243,3 +322,16 @@ def dispatch(envelope):
 def test_final_closure_rejects_current_legacy_expressions() -> None:
     with pytest.raises(CallsiteInventoryError, match="zero legacy expressions"):
         assert_zero_legacy_dispatches()
+
+
+def test_final_closure_reports_all_public_raw_message_surfaces() -> None:
+    with pytest.raises(
+        CallsiteInventoryError, match="public raw-message wrapper"
+    ) as caught:
+        assert_zero_legacy_dispatches()
+
+    message = str(caught.value)
+    assert "call_llm" in message
+    assert "acall_llm" in message
+    assert "call_llm_structured" in message
+    assert "acall_llm_structured" in message

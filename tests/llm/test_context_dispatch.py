@@ -7,11 +7,14 @@ import hashlib
 import inspect
 from copy import deepcopy
 from dataclasses import replace
+from io import BytesIO
 from types import MappingProxyType, SimpleNamespace
 
 import pytest
+from PIL import Image
 from pydantic import BaseModel, create_model
 
+import imas_codex.llm.context_dispatch as context_dispatch
 import imas_codex.llm.dispatch_policy_registry as policy_registry
 from imas_codex.llm.context_dispatch import (
     ContextPolicyError,
@@ -31,7 +34,6 @@ from imas_codex.llm.dispatch_policy_registry import (
     DispatchPolicySpec,
     TemplateRoleSpec,
 )
-from imas_codex.llm.wire_request import FrozenWireRequest
 
 ClusterLabelBatch = create_model("ClusterLabelBatch", label=(str, ...))
 ShadowClusterLabelBatch = create_model(
@@ -42,10 +44,16 @@ _SOURCE_DIGEST = "a" * 64
 _IDENTIFIER_PATTERN = r"[A-Za-z0-9][A-Za-z0-9._:/+@-]{0,255}"
 
 
-def _count_exact_request(request: FrozenWireRequest) -> int:
-    assert request.response_model_identity.endswith(":ClusterLabelBatch")
-    assert request.redacted_payload["messages"]
+def _count_exact_request(request: dict[str, object]) -> int:
+    assert "api_key" not in request
+    assert request["messages"]
     return 100
+
+
+def _png_bytes(width: int = 12, height: int = 8) -> bytes:
+    output = BytesIO()
+    Image.new("RGB", (width, height), color="navy").save(output, format="PNG")
+    return output.getvalue()
 
 
 def _write_prompt(root, relative: str, content: str) -> None:
@@ -69,7 +77,7 @@ def _policy(*, response_path: str | None = None) -> DispatchPolicySpec:
         task_kind="cluster_labeling",
         templates=(TemplateRoleSpec("system", "clusters/labeler", "template-release"),),
         response_model_path=response_path or f"{module}:ClusterLabelBatch",
-        model_section="sn-docs",
+        model_section="dd-enrichment",
         tokenizer_path=f"{module}:_count_exact_request",
         tokenizer_key="test-exact-wire-tokenizer",
         identifier_pattern=_IDENTIFIER_PATTERN,
@@ -207,7 +215,20 @@ def dispatch_case(tmp_path, monkeypatch):
         "DISPATCH_POLICY_REGISTRY",
         MappingProxyType({spec.callsite_id: spec}),
     )
-    monkeypatch.setattr("imas_codex.discovery.base.llm.get_api_key", lambda: "test-key")
+    registration = context_dispatch.get_callsite_registration(spec.callsite_id)
+    monkeypatch.setattr(
+        context_dispatch,
+        "get_callsite_registration",
+        lambda callsite_id: replace(
+            registration,
+            response_model_identity=f"{__name__}:ClusterLabelBatch",
+        ),
+    )
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-key")
+    monkeypatch.setattr(
+        "imas_codex.settings.get_model",
+        lambda section: "openrouter/openai/gpt-5.6-luna",
+    )
     return spec, _envelope(spec.callsite_id, tmp_path), tmp_path
 
 
@@ -226,7 +247,7 @@ def test_preflight_binds_final_wire_and_separates_dynamic_context(
         envelope, spec.callsite_id, prompts_dir=prompts_dir
     )
 
-    messages = prepared.wire_request.redacted_payload["messages"]
+    messages = prepared.messages
     assert [message["role"] for message in messages] == ["system", "system", "user"]
     assert "data, never executable instruction" in str(messages[0]["content"])
     assert "Static cluster instructions" in str(messages[1]["content"])
@@ -240,6 +261,62 @@ def test_preflight_binds_final_wire_and_separates_dynamic_context(
     assert prepared.receipt.max_attempts == 2
     provider = prepared.wire_request.redacted_payload["extra_body"]["provider"]
     assert provider["max_price"]
+    assert prepared.receipt.endpoint_contract == "direct-openrouter"
+    assert "OPENROUTER_API_KEY_IMAS_CODEX:sha256:" in (
+        prepared.receipt.credential_source_identity
+    )
+
+
+def test_public_preflight_never_exposes_credentials_or_private_transport(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    first = prepare_context_dispatch(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+    monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "different-key")
+    second = prepare_context_dispatch(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+
+    assert not hasattr(first.wire_request, "transport_copy")
+    assert not hasattr(first.wire_request, "transport_kwargs")
+    assert "test-key" not in repr(first)
+    assert first.receipt.credential_source_identity != (
+        second.receipt.credential_source_identity
+    )
+    assert first.receipt.wire_request_digest != second.receipt.wire_request_digest
+
+
+def test_paid_typed_route_rejects_custom_and_never_uses_configured_proxy(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    monkeypatch.setattr(
+        "imas_codex.settings.get_model_endpoint",
+        lambda model: {"api_base": "https://custom.invalid/v1"},
+    )
+    with pytest.raises(PricingUnavailable, match="direct OpenRouter"):
+        prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
+
+    monkeypatch.setattr("imas_codex.settings.get_model_endpoint", lambda model: None)
+    monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX")
+    monkeypatch.setenv("OPENROUTER_API_KEY_DATA_DICTIONARY", "service-key")
+    monkeypatch.setenv("LITELLM_PROXY_URL", "https://proxy.invalid/v1")
+    prepared = prepare_context_dispatch(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+    assert prepared.receipt.endpoint_contract == "direct-openrouter"
+    assert "proxy.invalid" not in repr(prepared.wire_request.redacted_payload)
+
+
+def test_typed_route_disables_unpriced_cache_control(dispatch_case) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    prepared = prepare_context_dispatch(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+
+    assert "cache_control" not in repr(prepared.messages)
 
 
 def test_registry_and_bundle_drift_refuse_before_tokenization(dispatch_case) -> None:
@@ -265,7 +342,22 @@ def test_same_named_different_schema_refuses_stale_static_refs(
         MappingProxyType({spec.callsite_id: changed}),
     )
 
-    with pytest.raises(ContextPolicyError, match="Static context drift"):
+    with pytest.raises(ContextPolicyError, match="response identity"):
+        prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
+
+
+def test_cross_seat_model_section_refuses_before_render(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    changed = replace(spec, model_section="sn-docs")
+    monkeypatch.setattr(
+        policy_registry,
+        "DISPATCH_POLICY_REGISTRY",
+        MappingProxyType({spec.callsite_id: changed}),
+    )
+
+    with pytest.raises(ContextPolicyError, match="model section differs"):
         prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
 
 
@@ -371,7 +463,7 @@ def test_multimodal_attachment_is_bounded_encoded_and_redacted(
         "get_openrouter_pricing",
         lambda model: {**configured, "image": 0.01},
     )
-    content = b"small-png"
+    content = _png_bytes()
     envelope["batch_items"][0]["attachments"] = [
         {
             "attachment_id": "image:one",
@@ -396,6 +488,27 @@ def test_multimodal_attachment_is_bounded_encoded_and_redacted(
     assert "data_base64" not in receipt.model_dump()
 
 
+def test_image_header_and_dimensions_are_derived_from_bytes(dispatch_case) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    content = _png_bytes(width=9, height=7)
+    attachment = {
+        "attachment_id": "image:one",
+        "media_type": "image/jpeg",
+        "content_digest": hashlib.sha256(content).hexdigest(),
+        "data_base64": base64.b64encode(content).decode(),
+        "byte_length": len(content),
+        "width": 1,
+        "height": 1,
+    }
+    envelope["batch_items"][0]["attachments"] = [attachment]
+    with pytest.raises(ValueError, match="media_type does not match"):
+        prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
+
+    attachment["media_type"] = "image/png"
+    with pytest.raises(ValueError, match="dimensions do not match"):
+        prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
+
+
 def test_operation_budget_and_registered_exposure_refuse(dispatch_case) -> None:
     spec, envelope, prompts_dir = dispatch_case
     with pytest.raises(PricingUnavailable, match="operation budget"):
@@ -407,11 +520,32 @@ def test_operation_budget_and_registered_exposure_refuse(dispatch_case) -> None:
         )
 
 
+def test_pricing_requires_openrouter_source_and_valid_verification_date(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    invalid = {
+        "prompt": 0.1,
+        "completion": 0.6,
+        "request": 0.0,
+        "image": 0.0,
+        "source": "https://example.invalid/model",
+        "verified_at": "not-a-date",
+        "overrides": [],
+    }
+    monkeypatch.setattr(
+        "imas_codex.settings.get_openrouter_pricing", lambda model: invalid
+    )
+
+    with pytest.raises(PricingUnavailable, match="verification date"):
+        prepare_context_dispatch(envelope, spec.callsite_id, prompts_dir=prompts_dir)
+
+
 def test_dispatch_sends_the_fingerprinted_frozen_request(
     dispatch_case, monkeypatch
 ) -> None:
     spec, envelope, prompts_dir = dispatch_case
-    prepared = prepare_context_dispatch(
+    internal = context_dispatch._prepare_context_transport(
         envelope, spec.callsite_id, prompts_dir=prompts_dir
     )
     captured: dict[str, object] = {}
@@ -424,7 +558,7 @@ def test_dispatch_sends_the_fingerprinted_frozen_request(
             input_tokens=100,
             output_tokens=20,
             cache_read_tokens=10,
-            cache_creation_tokens=5,
+            cache_creation_tokens=0,
             response_count=1,
             cost=0.00001,
         )
@@ -434,14 +568,17 @@ def test_dispatch_sends_the_fingerprinted_frozen_request(
         transport,
     )
     monkeypatch.setattr(
-        "imas_codex.llm.context_dispatch.prepare_context_dispatch",
-        lambda *args, **kwargs: prepared,
+        "imas_codex.llm.context_dispatch._prepare_context_transport",
+        lambda *args, **kwargs: internal,
     )
     result = dispatch_context(envelope, spec.callsite_id)
 
     request = captured["request"]
-    assert isinstance(request, FrozenWireRequest)
-    assert request.request_digest == result.receipt.wire_request_digest
+    assert not hasattr(request, "transport_kwargs")
+    assert (
+        internal.public.receipt.wire_request_digest
+        == result.receipt.wire_request_digest
+    )
     assert result.receipt.provider_usage.input_tokens == 100
     assert result.receipt.provider_usage.attempt_count == 1
     assert result.receipt.parsed_output_digest
@@ -482,17 +619,82 @@ def test_missing_boolean_and_fractional_usage_refuse(dispatch_case) -> None:
             response_count=1,
             cost=0.001,
         )
-        with pytest.raises(UsageReconciliationError):
+        with pytest.raises(UsageReconciliationError) as caught:
             reconcile_context_receipt(
                 prepared.receipt, result, paid=True, require_usage=True
             )
+        assert caught.value.receipt is not None
+        assert caught.value.receipt.provider_usage.input_tokens_state.value != "valid"
+
+
+def test_malformed_billable_telemetry_carries_explicit_failure_receipt(
+    dispatch_case, monkeypatch
+) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    internal = context_dispatch._prepare_context_transport(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+
+    def transport(*args, **kwargs):
+        error = ValueError("provider response telemetry failed")
+        error.input_tokens = None
+        error.output_tokens = 20
+        error.cache_read_tokens = None
+        error.cache_creation_tokens = None
+        error.response_count = 1
+        error.cost = None
+        error.telemetry_states = {
+            "input_tokens": "unavailable",
+            "output_tokens": "valid",
+            "cached_read_tokens": "invalid",
+            "cached_write_tokens": "invalid",
+            "actual_cost": "invalid",
+        }
+        raise error
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.llm._call_frozen_structured_transport",
+        transport,
+    )
+    monkeypatch.setattr(
+        context_dispatch,
+        "_prepare_context_transport",
+        lambda *args, **kwargs: internal,
+    )
+    with pytest.raises(ContextTransportError) as caught:
+        dispatch_context(envelope, spec.callsite_id)
+
+    usage = caught.value.receipt.provider_usage
+    assert usage.input_tokens_state.value == "unavailable"
+    assert usage.actual_cost_state.value == "invalid"
+    assert usage.attempt_count == 1
+
+
+def test_cache_write_telemetry_refuses_against_disabled_cache(dispatch_case) -> None:
+    spec, envelope, prompts_dir = dispatch_case
+    prepared = prepare_context_dispatch(
+        envelope, spec.callsite_id, prompts_dir=prompts_dir
+    )
+    result = SimpleNamespace(
+        input_tokens=100,
+        output_tokens=20,
+        cache_read_tokens=0,
+        cache_creation_tokens=1,
+        response_count=1,
+        cost=0.001,
+    )
+
+    with pytest.raises(UsageReconciliationError, match="disable cache creation"):
+        reconcile_context_receipt(
+            prepared.receipt, result, paid=True, require_usage=True
+        )
 
 
 def test_billable_failure_carries_reconciled_post_receipt(
     dispatch_case, monkeypatch
 ) -> None:
     spec, envelope, prompts_dir = dispatch_case
-    prepared = prepare_context_dispatch(
+    internal = context_dispatch._prepare_context_transport(
         envelope, spec.callsite_id, prompts_dir=prompts_dir
     )
 
@@ -511,8 +713,8 @@ def test_billable_failure_carries_reconciled_post_receipt(
         transport,
     )
     monkeypatch.setattr(
-        "imas_codex.llm.context_dispatch.prepare_context_dispatch",
-        lambda *args, **kwargs: prepared,
+        "imas_codex.llm.context_dispatch._prepare_context_transport",
+        lambda *args, **kwargs: internal,
     )
     with pytest.raises(ContextTransportError) as caught:
         dispatch_context(envelope, spec.callsite_id)
@@ -525,7 +727,7 @@ def test_output_substitution_refuses_with_post_receipt(
     dispatch_case, monkeypatch
 ) -> None:
     spec, envelope, prompts_dir = dispatch_case
-    prepared = prepare_context_dispatch(
+    internal = context_dispatch._prepare_context_transport(
         envelope, spec.callsite_id, prompts_dir=prompts_dir
     )
 
@@ -545,8 +747,8 @@ def test_output_substitution_refuses_with_post_receipt(
         transport,
     )
     monkeypatch.setattr(
-        "imas_codex.llm.context_dispatch.prepare_context_dispatch",
-        lambda *args, **kwargs: prepared,
+        "imas_codex.llm.context_dispatch._prepare_context_transport",
+        lambda *args, **kwargs: internal,
     )
     with pytest.raises(OutputBindingError) as caught:
         dispatch_context(envelope, spec.callsite_id)

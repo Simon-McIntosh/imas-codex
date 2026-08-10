@@ -55,7 +55,7 @@ import math
 import os
 import re
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from functools import lru_cache
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Literal, TypeVar, get_args, get_origin
@@ -530,27 +530,42 @@ class LLMStructuredCallError(ValueError):
         "cache_read_tokens",
         "cache_creation_tokens",
         "response_count",
+        "telemetry_states",
+        "telemetry_failure",
     )
 
     def __init__(
         self,
         message: str,
         *,
-        cost: float,
-        input_tokens: int,
-        output_tokens: int,
-        cache_read_tokens: int,
-        cache_creation_tokens: int,
+        cost: float | None,
+        input_tokens: int | None,
+        output_tokens: int | None,
+        cache_read_tokens: int | None,
+        cache_creation_tokens: int | None,
         response_count: int,
+        telemetry_states: Mapping[str, str] | None = None,
+        telemetry_failure: bool = False,
     ) -> None:
         super().__init__(message)
         self.cost = cost
         self.input_tokens = input_tokens
         self.output_tokens = output_tokens
-        self.tokens = input_tokens + output_tokens
+        self.tokens = (input_tokens or 0) + (output_tokens or 0)
         self.cache_read_tokens = cache_read_tokens
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
+        self.telemetry_states = dict(
+            telemetry_states
+            or {
+                "input_tokens": "valid",
+                "output_tokens": "valid",
+                "cached_read_tokens": "valid",
+                "cached_write_tokens": "valid",
+                "actual_cost": "valid",
+            }
+        )
+        self.telemetry_failure = telemetry_failure
 
 
 def _structured_call_error(
@@ -562,6 +577,8 @@ def _structured_call_error(
     cache_read_tokens: int,
     cache_creation_tokens: int,
     response_count: int,
+    telemetry_states: Mapping[str, str] | None = None,
+    telemetry_failure: bool = False,
 ) -> LLMStructuredCallError:
     """Build a telemetry-bearing terminal structured-call error."""
     return LLMStructuredCallError(
@@ -573,6 +590,8 @@ def _structured_call_error(
         cache_read_tokens=cache_read_tokens,
         cache_creation_tokens=cache_creation_tokens,
         response_count=response_count,
+        telemetry_states=telemetry_states,
+        telemetry_failure=telemetry_failure,
     )
 
 
@@ -821,12 +840,17 @@ def get_api_key_for_service(service: str) -> str:
         service="standard-names" → checks OPENROUTER_API_KEY_STANDARD_NAMES
         service="untagged" → checks OPENROUTER_API_KEY_UNTAGGED (unlikely set)
     """
+    return get_api_key_for_service_with_source(service)[0]
+
+
+def get_api_key_for_service_with_source(service: str) -> tuple[str, str]:
+    """Return a service credential and its non-secret registry identity."""
     if service and service != "untagged":
         env_var = f"OPENROUTER_API_KEY_{service.upper().replace('-', '_')}"
         per_service_key = os.environ.get(env_var)
         if per_service_key:
-            return per_service_key
-    return get_api_key()
+            return per_service_key, env_var
+    return get_api_key(), "OPENROUTER_API_KEY_IMAS_CODEX"
 
 
 _LOCAL_MODEL_PREFIXES = ("ollama/", "hosted_vllm/", "openai/localhost")
@@ -1868,6 +1892,8 @@ def _build_kwargs(
     api_key_override: str | None = None,
     reasoning_effort: str | None = None,
     typed_max_price: dict[str, float] | None = None,
+    typed_endpoint_contract: str | None = None,
+    typed_resolved_api_key: str | None = None,
 ) -> dict[str, Any]:
     """Build litellm completion kwargs with model-aware defaults.
 
@@ -1921,12 +1947,16 @@ def _build_kwargs(
         llm_location = get_llm_location()
 
         # Inject cache_control for models that support explicit breakpoints.
-        supports_cache = _supports_cache_control(model)
+        supports_cache = (
+            _supports_cache_control(model) and typed_endpoint_contract is None
+        )
         if supports_cache:
             messages = inject_cache_control(messages)
 
         use_proxy = llm_location != "local" or bool(os.getenv("LITELLM_PROXY_URL"))
-        has_direct_key = bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
+        has_direct_key = bool(
+            typed_resolved_api_key or os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
+        )
         is_openrouter_model = "openrouter/" in model.lower() or any(
             p in model.lower()
             for p in (
@@ -1960,7 +1990,11 @@ def _build_kwargs(
             }
         else:
             model_id = ensure_model_prefix(model)
-            direct_key = get_api_key_for_service(service) if bypass_proxy else api_key
+            direct_key = (
+                typed_resolved_api_key or get_api_key_for_service(service)
+                if bypass_proxy
+                else api_key
+            )
 
             kwargs = {
                 "model": model_id,
@@ -1982,8 +2016,25 @@ def _build_kwargs(
             raise ProviderPricingUnbounded(
                 "a local typed route cannot carry paid provider pricing"
             )
+        if typed_endpoint_contract != "direct-openrouter":
+            raise ProviderPricingUnbounded(
+                "paid typed calls require the direct OpenRouter endpoint contract"
+            )
+        if api_base or not bypass_proxy or not typed_resolved_api_key:
+            raise ProviderPricingUnbounded(
+                "paid typed calls require direct OpenRouter routing with a resolved "
+                "service credential"
+            )
         extra_body = kwargs.setdefault("extra_body", {})
         extra_body["provider"] = {"max_price": dict(typed_max_price)}
+    elif typed_endpoint_contract == "direct-openrouter":
+        raise ProviderPricingUnbounded(
+            "the direct OpenRouter endpoint contract requires an enforceable max_price"
+        )
+    elif typed_endpoint_contract == "local-free" and not _is_local_model(model):
+        raise ProviderPricingUnbounded(
+            "the local-free endpoint contract requires an explicitly local model"
+        )
     elif service == "standard-names" and not _is_local_model(model):
         if api_base or not bypass_proxy:
             raise ProviderPricingUnbounded(
@@ -2476,6 +2527,137 @@ async def acall_llm_structured(
             _ACTIVITY.record_failed()
 
 
+def _typed_response_telemetry(response: Any, *, model: str) -> dict[str, Any]:
+    """Extract one response's telemetry or fail with explicit field states."""
+    values: dict[str, Any] = {
+        "cost": None,
+        "input_tokens": None,
+        "output_tokens": None,
+        "cache_read_tokens": None,
+        "cache_creation_tokens": None,
+    }
+    states = {
+        "actual_cost": "unavailable",
+        "input_tokens": "unavailable",
+        "output_tokens": "unavailable",
+        "cached_read_tokens": "unavailable",
+        "cached_write_tokens": "unavailable",
+    }
+    problems: list[str] = []
+    if _is_local_model(model):
+        values["cost"] = 0.0
+        states["actual_cost"] = "valid"
+    else:
+        try:
+            hidden = getattr(response, "_hidden_params", None)
+            reported_cost = (
+                hidden.get("response_cost") if isinstance(hidden, Mapping) else None
+            )
+        except Exception as exc:
+            hidden = None
+            reported_cost = None
+            states["actual_cost"] = "invalid"
+            problems.append(f"provider response cost cannot be read: {exc}")
+        if reported_cost is None and states["actual_cost"] != "invalid":
+            problems.append("provider response cost is unavailable")
+        elif reported_cost is not None:
+            cost = reported_cost
+            if (
+                isinstance(cost, bool)
+                or not isinstance(cost, int | float)
+                or not math.isfinite(float(cost))
+                or cost < 0
+            ):
+                states["actual_cost"] = "invalid"
+                problems.append("provider response cost is invalid")
+            else:
+                values["cost"] = float(cost)
+                states["actual_cost"] = "valid"
+
+    try:
+        usage = getattr(response, "usage", None)
+    except Exception as exc:
+        usage = None
+        problems.append(f"provider usage cannot be read: {exc}")
+    for provider_name, result_name, state_name in (
+        ("prompt_tokens", "input_tokens", "input_tokens"),
+        ("completion_tokens", "output_tokens", "output_tokens"),
+    ):
+        if usage is None:
+            problems.append(f"provider usage is missing {provider_name}")
+            continue
+        try:
+            value = getattr(usage, provider_name)
+        except AttributeError:
+            problems.append(f"provider usage is missing {provider_name}")
+            continue
+        except Exception as exc:
+            states[state_name] = "invalid"
+            problems.append(f"provider usage {provider_name} cannot be read: {exc}")
+            continue
+        if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+            states[state_name] = "invalid"
+            problems.append(f"provider usage {provider_name} is invalid")
+            continue
+        values[result_name] = value
+        states[state_name] = "valid"
+
+    try:
+        cache_read, cache_creation = extract_cache_tokens(response)
+        for value, result_name, state_name in (
+            (cache_read, "cache_read_tokens", "cached_read_tokens"),
+            (cache_creation, "cache_creation_tokens", "cached_write_tokens"),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"provider {result_name} is invalid")
+            values[result_name] = value
+            states[state_name] = "valid"
+    except Exception as exc:
+        states["cached_read_tokens"] = "invalid"
+        states["cached_write_tokens"] = "invalid"
+        problems.append(str(exc))
+
+    if problems:
+        raise LLMStructuredCallError(
+            "Provider response telemetry is invalid or unavailable: "
+            + "; ".join(problems)[:400],
+            response_count=1,
+            telemetry_states=states,
+            telemetry_failure=True,
+            **values,
+        )
+    return values
+
+
+def _aggregate_typed_telemetry(
+    error: LLMStructuredCallError,
+    *,
+    total_cost: float,
+    total_input_tokens: int,
+    total_output_tokens: int,
+    total_cache_read: int,
+    total_cache_creation: int,
+    response_count: int,
+) -> LLMStructuredCallError:
+    """Bind a malformed response to all telemetry known before it arrived."""
+
+    def known(name: str, prior: int | float) -> int | float | None:
+        value = getattr(error, name)
+        return prior + value if value is not None else (prior or None)
+
+    return LLMStructuredCallError(
+        str(error),
+        cost=known("cost", total_cost),
+        input_tokens=known("input_tokens", total_input_tokens),
+        output_tokens=known("output_tokens", total_output_tokens),
+        cache_read_tokens=known("cache_read_tokens", total_cache_read),
+        cache_creation_tokens=known("cache_creation_tokens", total_cache_creation),
+        response_count=response_count,
+        telemetry_states=error.telemetry_states,
+        telemetry_failure=True,
+    )
+
+
 def _call_frozen_structured_transport(
     request: Any,
     *,
@@ -2497,20 +2679,29 @@ def _call_frozen_structured_transport(
     last_error: Exception | None = None
     for attempt in range(max_attempts):
         try:
-            response = litellm.completion(**request.transport_copy())
-            total_cost += extract_cost(response, model=model)
-            input_tokens = response.usage.prompt_tokens
-            output_tokens = response.usage.completion_tokens
-            if isinstance(input_tokens, bool) or not isinstance(input_tokens, int):
-                raise ValueError("provider prompt usage is not an integer")
-            if isinstance(output_tokens, bool) or not isinstance(output_tokens, int):
-                raise ValueError("provider completion usage is not an integer")
-            cache_read, cache_creation = extract_cache_tokens(response)
+            response = litellm.completion(**request._transport_copy())
+            response_count += 1
+            try:
+                telemetry = _typed_response_telemetry(response, model=model)
+            except LLMStructuredCallError as telemetry_error:
+                raise _aggregate_typed_telemetry(
+                    telemetry_error,
+                    total_cost=total_cost,
+                    total_input_tokens=total_input_tokens,
+                    total_output_tokens=total_output_tokens,
+                    total_cache_read=total_cache_read,
+                    total_cache_creation=total_cache_creation,
+                    response_count=response_count,
+                ) from telemetry_error
+            total_cost += telemetry["cost"]
+            input_tokens = telemetry["input_tokens"]
+            output_tokens = telemetry["output_tokens"]
+            cache_read = telemetry["cache_read_tokens"]
+            cache_creation = telemetry["cache_creation_tokens"]
             total_input_tokens += input_tokens
             total_output_tokens += output_tokens
             total_cache_read += cache_read
             total_cache_creation += cache_creation
-            response_count += 1
             content = response.choices[0].message.content
             if not content:
                 raise EmptyResponseError(_finish_reason(response))
@@ -2529,6 +2720,8 @@ def _call_frozen_structured_transport(
             )
         except Exception as exc:
             last_error = exc
+            if isinstance(exc, LLMStructuredCallError) and exc.telemetry_failure:
+                raise
             message = str(exc)
             if _is_budget_exhausted(message):
                 raise ProviderBudgetExhausted(
@@ -2569,7 +2762,7 @@ async def _acall_frozen_structured_transport(
     import litellm
 
     suppress_litellm_noise()
-    routing_kwargs = request.transport_copy()
+    routing_kwargs = request._transport_copy()
     total_cost = 0.0
     total_input_tokens = 0
     total_output_tokens = 0
@@ -2588,28 +2781,37 @@ async def _acall_frozen_structured_transport(
         for attempt in range(max_attempts):
             try:
                 if use_local:
-                    response = await _acompletion_local(request.transport_copy())
+                    response = await _acompletion_local(request._transport_copy())
                 else:
                     async with governor.slot():
-                        response = await litellm.acompletion(**request.transport_copy())
+                        response = await litellm.acompletion(
+                            **request._transport_copy()
+                        )
                     governor.record_success()
-                cost_delta = extract_cost(response, model=model)
+                response_count += 1
+                try:
+                    telemetry = _typed_response_telemetry(response, model=model)
+                except LLMStructuredCallError as telemetry_error:
+                    raise _aggregate_typed_telemetry(
+                        telemetry_error,
+                        total_cost=total_cost,
+                        total_input_tokens=total_input_tokens,
+                        total_output_tokens=total_output_tokens,
+                        total_cache_read=total_cache_read,
+                        total_cache_creation=total_cache_creation,
+                        response_count=response_count,
+                    ) from telemetry_error
+                cost_delta = telemetry["cost"]
                 total_cost += cost_delta
                 _ACTIVITY.add_spend(cost_delta)
-                input_tokens = response.usage.prompt_tokens
-                output_tokens = response.usage.completion_tokens
-                if isinstance(input_tokens, bool) or not isinstance(input_tokens, int):
-                    raise ValueError("provider prompt usage is not an integer")
-                if isinstance(output_tokens, bool) or not isinstance(
-                    output_tokens, int
-                ):
-                    raise ValueError("provider completion usage is not an integer")
-                cache_read, cache_creation = extract_cache_tokens(response)
+                input_tokens = telemetry["input_tokens"]
+                output_tokens = telemetry["output_tokens"]
+                cache_read = telemetry["cache_read_tokens"]
+                cache_creation = telemetry["cache_creation_tokens"]
                 total_input_tokens += input_tokens
                 total_output_tokens += output_tokens
                 total_cache_read += cache_read
                 total_cache_creation += cache_creation
-                response_count += 1
                 content = response.choices[0].message.content
                 if not content:
                     raise EmptyResponseError(_finish_reason(response))
@@ -2630,6 +2832,8 @@ async def _acall_frozen_structured_transport(
                 )
             except Exception as exc:
                 last_error = exc
+                if isinstance(exc, LLMStructuredCallError) and exc.telemetry_failure:
+                    raise
                 message = str(exc)
                 if _is_budget_exhausted(message):
                     raise ProviderBudgetExhausted(

@@ -1,10 +1,8 @@
-"""Immutable structured-provider request construction for typed dispatch."""
+"""Immutable, redacted structured-provider request identities."""
 
 from __future__ import annotations
 
 import hashlib
-from base64 import b64decode
-from binascii import Error as Base64Error
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from types import MappingProxyType
@@ -35,7 +33,10 @@ def _thaw(value: Any) -> Any:
     return value
 
 
-def _redact(value: Any) -> Any:
+def _redact(
+    value: Any,
+    attachment_redactions: Mapping[str, str],
+) -> Any:
     if isinstance(value, Mapping):
         redacted: dict[str, Any] = {}
         for key, item in value.items():
@@ -43,39 +44,58 @@ def _redact(value: Any) -> Any:
             if name.lower() in _SECRET_KEYS:
                 redacted[name] = "<redacted>"
             elif name == "url" and isinstance(item, str) and item.startswith("data:"):
-                header, separator, encoded = item.partition(",")
-                if not separator or ";base64" not in header:
-                    raise ValueError("Typed attachment data URL must use base64")
-                try:
-                    content = b64decode(encoded, validate=True)
-                except (Base64Error, ValueError) as exc:
-                    raise ValueError("Typed attachment data URL is invalid") from exc
-                media_type = header.removeprefix("data:").removesuffix(";base64")
-                digest = hashlib.sha256(content).hexdigest()
-                redacted[name] = (
-                    f"data:{media_type};sha256={digest};bytes={len(content)}"
-                )
+                replacement = attachment_redactions.get(item)
+                if replacement is None:
+                    raise ValueError(
+                        "Typed attachment data URL lacks a validated redaction identity"
+                    )
+                redacted[name] = replacement
             else:
-                redacted[name] = _redact(item)
+                redacted[name] = _redact(item, attachment_redactions)
         return redacted
     if isinstance(value, tuple | list):
-        return [_redact(item) for item in value]
+        return [_redact(item, attachment_redactions) for item in value]
+    return value
+
+
+def _without_secrets(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {
+            str(key): _without_secrets(item)
+            for key, item in value.items()
+            if str(key).lower() not in _SECRET_KEYS
+        }
+    if isinstance(value, tuple | list):
+        return [_without_secrets(item) for item in value]
     return value
 
 
 @dataclass(frozen=True, slots=True)
 class FrozenWireRequest:
-    """The exact post-routing request sent on every typed transport attempt."""
+    """Public redacted identity of one exact private transport request."""
 
-    transport_kwargs: Mapping[str, Any]
     redacted_payload: Mapping[str, Any]
     request_digest: str
     response_model_identity: str
     response_schema_digest: str
+    credential_source_identity: str
+    endpoint_contract: str
 
-    def transport_copy(self) -> dict[str, Any]:
-        """Return the exact mutable shape required by the provider client."""
-        return _thaw(self.transport_kwargs)
+
+class _FrozenTransportHandle:
+    """Module-private opaque access to credential-bearing transport state."""
+
+    __slots__ = ("__transport_kwargs", "__tokenization_payload")
+
+    def __init__(self, transport_kwargs: Any, tokenization_payload: Any) -> None:
+        self.__transport_kwargs = transport_kwargs
+        self.__tokenization_payload = tokenization_payload
+
+    def _transport_copy(self) -> dict[str, Any]:
+        return _thaw(self.__transport_kwargs)
+
+    def _tokenization_copy(self) -> dict[str, Any]:
+        return _thaw(self.__tokenization_payload)
 
 
 def response_model_identity(response_model: type[BaseModel]) -> str:
@@ -88,7 +108,12 @@ def response_schema_digest(response_model: type[BaseModel]) -> str:
     return canonical_fingerprint(response_model.model_json_schema())
 
 
-def build_frozen_wire_request(
+def _credential_identity(source_name: str, api_key: str) -> str:
+    key_id = hashlib.sha256(api_key.encode("utf-8")).hexdigest()
+    return f"{source_name}:sha256:{key_id}"
+
+
+def _build_frozen_wire_request(
     *,
     model: str,
     messages: Sequence[Mapping[str, Any]],
@@ -99,13 +124,20 @@ def build_frozen_wire_request(
     service: str,
     reasoning_effort: str | None,
     provider_max_price: Mapping[str, float] | None,
-) -> FrozenWireRequest:
-    """Apply every transport transformation once and freeze the resulting object."""
-    from imas_codex.discovery.base.llm import _build_kwargs, get_api_key
+    zero_cost_local: bool,
+    attachment_redactions: Mapping[str, str],
+) -> tuple[FrozenWireRequest, _FrozenTransportHandle]:
+    """Apply transport transformations once and return public/private halves."""
+    from imas_codex.discovery.base.llm import (
+        _build_kwargs,
+        get_api_key_for_service_with_source,
+    )
 
+    api_key, credential_source = get_api_key_for_service_with_source(service)
+    endpoint_contract = "local-free" if zero_cost_local else "direct-openrouter"
     kwargs = _build_kwargs(
         model,
-        get_api_key(),
+        api_key,
         [_thaw(message) for message in messages],
         response_model,
         max_output_tokens,
@@ -114,24 +146,37 @@ def build_frozen_wire_request(
         service=service,
         reasoning_effort=reasoning_effort,
         typed_max_price=dict(provider_max_price) if provider_max_price else None,
+        typed_endpoint_contract=endpoint_contract,
+        typed_resolved_api_key=api_key,
     )
     identity = response_model_identity(response_model)
     schema_digest = response_schema_digest(response_model)
+    credential_identity = _credential_identity(credential_source, api_key)
     frozen = _freeze(kwargs)
-    redacted = _freeze(_redact(frozen))
-    digest = hashlib.sha256(canonical_json(redacted).encode("utf-8")).hexdigest()
-    return FrozenWireRequest(
-        transport_kwargs=frozen,
+    tokenization_payload = _freeze(_without_secrets(frozen))
+    redacted = _freeze(_redact(frozen, attachment_redactions))
+    digest = hashlib.sha256(
+        canonical_json(
+            {
+                "endpoint_contract": endpoint_contract,
+                "credential_source_identity": credential_identity,
+                "payload": redacted,
+            }
+        ).encode("utf-8")
+    ).hexdigest()
+    public = FrozenWireRequest(
         redacted_payload=redacted,
         request_digest=digest,
         response_model_identity=identity,
         response_schema_digest=schema_digest,
+        credential_source_identity=credential_identity,
+        endpoint_contract=endpoint_contract,
     )
+    return public, _FrozenTransportHandle(frozen, tokenization_payload)
 
 
 __all__ = [
     "FrozenWireRequest",
-    "build_frozen_wire_request",
     "response_model_identity",
     "response_schema_digest",
 ]

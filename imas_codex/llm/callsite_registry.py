@@ -53,6 +53,7 @@ class CallsiteRegistration:
     response_model_symbol: str
     reachability: Reachability
     routes: tuple[RouteBinding, ...]
+    response_model_identity: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -939,12 +940,39 @@ def get_route_binding(
     return matches[0]
 
 
-def _call_symbol(node: ast.expr) -> str | None:
-    if isinstance(node, ast.Name):
-        return node.id
-    if isinstance(node, ast.Attribute):
-        return node.attr
-    return None
+_LEGACY_DISPATCH_SYMBOLS = frozenset({"call_llm_structured", "acall_llm_structured"})
+_TYPED_DISPATCH_SYMBOLS = frozenset({"dispatch_context", "adispatch_context"})
+_DISPATCH_MODULES = frozenset(
+    {
+        "imas_codex.discovery.base",
+        "imas_codex.discovery.base.llm",
+        "imas_codex.llm.context_dispatch",
+    }
+)
+
+
+def _base_import_bindings(tree: ast.Module) -> dict[str, str]:
+    bindings: dict[str, str] = {"asyncio": "asyncio"}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            for imported in node.names:
+                if imported.name in _DISPATCH_MODULES or imported.name == "asyncio":
+                    bindings[imported.asname or imported.name.split(".")[0]] = (
+                        imported.name
+                    )
+        elif isinstance(node, ast.ImportFrom):
+            if node.module in _DISPATCH_MODULES:
+                for imported in node.names:
+                    if (
+                        imported.name
+                        in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS
+                    ):
+                        bindings[imported.asname or imported.name] = imported.name
+            elif node.module == "asyncio":
+                for imported in node.names:
+                    if imported.name == "to_thread":
+                        bindings[imported.asname or imported.name] = "asyncio.to_thread"
+    return bindings
 
 
 def _keyword_expression(node: ast.Call, name: str) -> str | None:
@@ -955,11 +983,69 @@ def _keyword_expression(node: ast.Call, name: str) -> str | None:
 
 
 class _StructuredCallVisitor(ast.NodeVisitor):
-    def __init__(self, source_path: str) -> None:
+    def __init__(
+        self,
+        source_path: str,
+        bindings: Mapping[str, str],
+        registry: tuple[CallsiteRegistration, ...],
+    ) -> None:
         self.source_path = source_path
         self.scopes: list[str] = []
         self.calls: list[StructuredCall] = []
         self._occurrences: dict[tuple[str, str], int] = {}
+        self._bindings = dict(bindings)
+        self._injected_by_scope = {
+            (entry.source.source_path, entry.source.scope): entry.source.dispatch_symbol
+            for entry in registry
+            if entry.dispatch_style == "injected"
+        }
+
+    def _resolve(self, node: ast.expr) -> str | None:
+        if isinstance(node, ast.Name):
+            return self._bindings.get(node.id, node.id)
+        if isinstance(node, ast.Attribute):
+            owner = self._resolve(node.value)
+            dotted = f"{owner}.{node.attr}" if owner else node.attr
+            if node.attr in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS:
+                return node.attr
+            return dotted
+        return None
+
+    def visit_Import(self, node: ast.Import) -> None:
+        for imported in node.names:
+            if imported.name in _DISPATCH_MODULES or imported.name == "asyncio":
+                self._bindings[imported.asname or imported.name.split(".")[0]] = (
+                    imported.name
+                )
+
+    def visit_ImportFrom(self, node: ast.ImportFrom) -> None:
+        if node.module in _DISPATCH_MODULES:
+            for imported in node.names:
+                if imported.name in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS:
+                    self._bindings[imported.asname or imported.name] = imported.name
+        elif node.module == "asyncio":
+            for imported in node.names:
+                if imported.name == "to_thread":
+                    self._bindings[imported.asname or imported.name] = (
+                        "asyncio.to_thread"
+                    )
+
+    def visit_Assign(self, node: ast.Assign) -> None:
+        resolved = self._resolve(node.value)
+        if resolved in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS:
+            for target in node.targets:
+                if isinstance(target, ast.Name):
+                    self._bindings[target.id] = resolved
+        self.generic_visit(node)
+
+    def visit_AnnAssign(self, node: ast.AnnAssign) -> None:
+        resolved = self._resolve(node.value) if node.value is not None else None
+        if (
+            isinstance(node.target, ast.Name)
+            and resolved in _LEGACY_DISPATCH_SYMBOLS | _TYPED_DISPATCH_SYMBOLS
+        ):
+            self._bindings[node.target.id] = resolved
+        self.generic_visit(node)
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         self._visit_scope(node)
@@ -974,33 +1060,44 @@ class _StructuredCallVisitor(ast.NodeVisitor):
         self,
         node: ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef,
     ) -> None:
+        previous_bindings = self._bindings.copy()
         self.scopes.append(node.name)
+        scope = ".".join(self.scopes)
+        injected = self._injected_by_scope.get((self.source_path, scope))
+        if injected is not None:
+            parameter_names = {
+                argument.arg
+                for argument in (
+                    *node.args.posonlyargs,
+                    *node.args.args,
+                    *node.args.kwonlyargs,
+                )
+            }
+            if injected in parameter_names:
+                self._bindings[injected] = injected
         self.generic_visit(node)
         self.scopes.pop()
+        self._bindings = previous_bindings
 
     def visit_Call(self, node: ast.Call) -> None:
         dispatch_symbol: str | None = None
         dispatch_style: DispatchStyle | None = None
         transition_kind: TransitionKind = "legacy"
         callsite_id: str | None = None
-        symbol = _call_symbol(node.func)
+        symbol = self._resolve(node.func)
 
-        if symbol in {"call_llm_structured", "acall_llm_structured"}:
+        if symbol in _LEGACY_DISPATCH_SYMBOLS:
             dispatch_symbol = symbol
             dispatch_style = "direct"
-        elif (
-            isinstance(node.func, ast.Attribute)
-            and node.func.attr == "to_thread"
-            and node.args
-        ):
-            injected_symbol = _call_symbol(node.args[0])
-            if injected_symbol in {"call_llm_structured", "acall_llm_structured"}:
+        elif symbol == "asyncio.to_thread" and node.args:
+            injected_symbol = self._resolve(node.args[0])
+            if injected_symbol in _LEGACY_DISPATCH_SYMBOLS:
                 dispatch_symbol = injected_symbol
                 dispatch_style = "to-thread"
-        elif symbol == "acall_fn":
+        elif symbol in set(self._injected_by_scope.values()):
             dispatch_symbol = symbol
             dispatch_style = "injected"
-        elif symbol in {"dispatch_context", "adispatch_context"}:
+        elif symbol in _TYPED_DISPATCH_SYMBOLS:
             dispatch_symbol = symbol
             dispatch_style = (
                 "typed-async" if symbol == "adispatch_context" else "typed-sync"
@@ -1058,6 +1155,7 @@ def _parse_source(path: Path) -> ast.Module:
 def scan_structured_calls(
     project_root: Path | str = Path("."),
     source_directory: str = "imas_codex",
+    registry: tuple[CallsiteRegistration, ...] = CALLSITE_REGISTRY,
 ) -> tuple[StructuredCall, ...]:
     """Scan every project source file for semantic structured dispatches."""
 
@@ -1067,7 +1165,9 @@ def scan_structured_calls(
     for path in sorted(source_root.rglob("*.py")):
         tree = _parse_source(path)
         relative_path = path.relative_to(root).as_posix()
-        visitor = _StructuredCallVisitor(relative_path)
+        visitor = _StructuredCallVisitor(
+            relative_path, _base_import_bindings(tree), registry
+        )
         visitor.visit(tree)
         calls.extend(visitor.calls)
     return tuple(calls)
@@ -1081,7 +1181,7 @@ def assert_registry_current(
 ) -> tuple[StructuredCall, ...]:
     """Return observed calls or raise with a complete registry drift report."""
 
-    observed = scan_structured_calls(project_root)
+    observed = scan_structured_calls(project_root, registry=registry)
     registered_by_source = {entry.source: entry for entry in registry}
     legacy_calls = [call for call in observed if call.transition_kind == "legacy"]
     typed_calls = [call for call in observed if call.transition_kind == "typed"]
@@ -1176,22 +1276,39 @@ def assert_zero_legacy_dispatches(
     observed = assert_registry_current(
         project_root, registry, typed_policy_registry=typed_policy_registry
     )
+    problems: list[str] = []
     legacy = [call for call in observed if call.transition_kind == "legacy"]
     if legacy:
-        raise CallsiteInventoryError(
-            f"Typed dispatch closure requires zero legacy expressions; found {len(legacy)}"
-        )
+        problems.append(f"zero legacy expressions; found {len(legacy)}")
     from imas_codex.discovery import base
+    from imas_codex.discovery.base import llm
 
-    public_wrappers = [
-        name
-        for name in ("call_llm_structured", "acall_llm_structured")
-        if hasattr(base, name)
-    ]
+    wrapper_names = (
+        "call_llm",
+        "acall_llm",
+        "call_llm_structured",
+        "acall_llm_structured",
+    )
+    wrapper_objects = {
+        getattr(llm, name)
+        for name in wrapper_names
+        if callable(getattr(llm, name, None))
+    }
+    public_wrappers = sorted(
+        {
+            f"{module.__name__}.{name}"
+            for module in (base, llm)
+            for name, value in vars(module).items()
+            if not name.startswith("_") and callable(value) and value in wrapper_objects
+        }
+    )
     if public_wrappers:
+        problems.append(
+            f"remove every public raw-message wrapper surface: {public_wrappers}"
+        )
+    if problems:
         raise CallsiteInventoryError(
-            "Typed dispatch closure requires removing public legacy wrappers: "
-            f"{public_wrappers}"
+            "Typed dispatch closure requires " + "; ".join(problems)
         )
     return observed
 
