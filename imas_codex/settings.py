@@ -138,6 +138,7 @@ class PricingAuthorityError(ValueError):
 _TYPED_PRICE_MAX_AGE = timedelta(days=7)
 _SHA256_LENGTH = 64
 _TEXT_PRICE_DIMENSIONS = frozenset({"prompt", "completion", "request"})
+_CACHE_WRITE_PRICE_DIMENSIONS = frozenset({"input_cache_write", "cache_write"})
 _KNOWN_PRICE_DIMENSIONS = frozenset(
     {
         "prompt",
@@ -228,6 +229,19 @@ def _provider_rate(value: Any, dimension: str, model: str) -> float:
         rate * Decimal(1_000_000) if dimension in {"prompt", "completion"} else rate
     )
     return float(normalized)
+
+
+def _is_chargeable_price(value: Any) -> bool:
+    """Return whether a provider price field can represent a non-zero charge."""
+    if value is None or value == "":
+        return False
+    if isinstance(value, bool):
+        return True
+    try:
+        rate = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        return True
+    return not rate.is_finite() or rate != 0
 
 
 def _canonical_payload_bytes(value: Mapping[str, Any]) -> bytes:
@@ -397,6 +411,20 @@ def get_typed_openrouter_pricing(
     if raw.get("cache_write") is not None or raw.get("cache_write_ttl") is not None:
         raise PricingAuthorityError(
             f"Typed pricing for {model!r} cannot enable unpriced cache control"
+        )
+    chargeable_cache_write = sorted(
+        f"{payload_name}.{dimension}"
+        for payload_name, pricing in (
+            ("model", model_pricing),
+            ("endpoint", endpoint_pricing),
+        )
+        for dimension in _CACHE_WRITE_PRICE_DIMENSIONS
+        if _is_chargeable_price(pricing.get(dimension))
+    )
+    if chargeable_cache_write:
+        raise PricingAuthorityError(
+            f"Typed pricing for {model!r} has an unenforceable cache-write charge: "
+            f"{chargeable_cache_write}"
         )
     charged_unknown = sorted(
         name
