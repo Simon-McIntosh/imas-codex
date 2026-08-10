@@ -87,6 +87,9 @@ dependencies = [
 test = [
     "torch",
     "sentence-transformers>=5.0.0",
+    # Generation tests import the build hook in the ordinary test interpreter.
+    # Build isolation alone does not make its backend available there.
+    "hatchling",
     "pytest>=9.0.3,<10.0.0",    # CVE-2025-71176
     "pytest-cov>=6.1.1,<7.0.0",
     "pytest-asyncio>=1.0.0,<2.0.0",
