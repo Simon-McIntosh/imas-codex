@@ -218,50 +218,6 @@ class TestGrammarRetryChargeEvent:
 
 
 # =====================================================================
-# 3. Borderline-candidate revision pass — phase="generate"
-# =====================================================================
-
-
-class TestOpusReviseChargeEvent:
-    """The borderline-candidate revision pass returns cost/tokens to track."""
-
-    @pytest.mark.asyncio
-    async def test_opus_revise_returns_tokens(self):
-        """_opus_revise_candidate returns (name, cost, ti, to)."""
-        from pydantic import BaseModel, Field
-
-        from imas_codex.standard_names.workers import _opus_revise_candidate
-
-        class _OpusResponse(BaseModel):
-            revised_name: str = "plasma_current"
-            explanation: str = "improved"
-
-        mock_result = _LLMResult(
-            _OpusResponse(),
-            cost=0.08,
-            tokens=300,
-            input_tokens=250,
-            output_tokens=50,
-        )
-
-        async def mock_acall(**kwargs):
-            return mock_result
-
-        cand = {
-            "id": "plasma_curr",
-            "reason": "low conf",
-            "description": "test",
-        }
-
-        revised, cost, ti, to = await _opus_revise_candidate(cand, "", [], mock_acall)
-
-        assert revised == "plasma_current"
-        assert cost == 0.08
-        assert ti == 250
-        assert to == 50
-
-
-# =====================================================================
 # 4. Enrich — phase="enrich", soft-stop
 # =====================================================================
 
