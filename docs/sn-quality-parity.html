@@ -6,10 +6,10 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-quality-parity">
-  <meta name="plan-title" content="Graph-Wide Standard Name Evidence Recovery">
-  <meta name="plan-summary" content="Use the calibrated DSv4 advisory census and hardened hosted review path to recover provable documentation authority, selectively rescore current prose, and partition ambiguous or superseded history without regenerating sound names or treating missing metadata as semantic correctness.">
+  <meta name="plan-title" content="Standard Name Documentation Quality">
+  <meta name="plan-summary" content="Bring generated Standard Name documentation to catalog quality: a measurable holdout benchmark, richer DD/COCOS context into compose, a content-gated documentation template (definition, governing equation, significance, measurement, typical values, sign convention, cross-references), curated full examples, and an asynchronous link-resolution lifecycle with publish-time safety.">
   <meta name="plan-status" content="pending">
-  <meta name="plan-impl" content="0.25">
+  <meta name="plan-impl" content="0.12">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,19 +17,27 @@
   <title>SN Quality Parity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-sprint" content="S9">
+<meta name="plan-sprint" content="S10">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-depends-on" content="sn-pipeline-hardening,sn-benchmark-evolution">
-<meta name="plan-blocks" content="33-cli-harmonization">
+<meta name="plan-depends-on" content="">
+<meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="6">
 </head>
 <body>
   <main class="plan-doc">
     <section class="callout" id="current-scope">
-      <h2>Current scope: evidence recovery, not wholesale regeneration</h2>
-      <p>A prior qualified census found 14 already-authoritative rows, 32 exact current rescores, 270 superseded historical holds and 1,922 ambiguous holds. Rebuild those counts live. Apply only proof-complete metadata and ordinary hosted review of hash-bound current prose; DSv4 flags prioritize work but never grant authority.</p>
+      <h2>Current scope: catalog-quality documentation, measured against a holdout</h2>
+      <p>This plan owns the documentation half of the project goal — names whose
+      docs carry the definition, governing equation, significance, measurement
+      basis, typical values, sign convention where COCOS applies, and working
+      cross-references a physicist actually needs. Every phase proves itself
+      against the Phase 0 holdout benchmark; nothing regenerates sound content
+      wholesale. The 2026-08-10 evidence-recovery overlay was removed in the
+      2026-08-11 portfolio review — advisory triage and rescores live in
+      sn-benchmark-evolution; the backlog drain already ran under
+      sn-pipeline-recovery §4.</p>
     </section>
     <h2 id="s1">§1 — Problem and current baseline</h2>
     <p>Plan 23 remains a low-implementation, high-value backlog item: the survey pegs it at <strong>0.12</strong> because only one narrow fix is actually resolved today. Everything else is still a roadmap for bringing generated StandardNames up to catalog quality in content, links, and validation discipline.</p>
@@ -71,9 +79,15 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-evidence-recovery" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-quality-parity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-evidence-recovery" data-status="resolved" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-quality-parity" data-resolved-at="2026-08-11T20:29:58+00:00" data-resolved-by="portfolio-review-2026-08-11">
     <h4 class="r-fu-title">Recover documentation authority with proof, advisory triage, and bounded hosted review</h4>
     <div class="r-fu-body"><p>Refresh the exact evidence census, apply only proof-complete zero-cost metadata repairs, stage exact current prose for ordinary hosted docs quorum, and use DSv4 flags to prioritize—but never authorize—semantic repair.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
+    <p class="r-fu-outcome">Moved out of this plan. The evidence-recovery census overlay (2026-08-10 header) conflicted with the plan's real body and double-claimed the docs-pending drain that sn-pipeline-recovery §4 then executed ($240 of tranches; docs-accepted 2,238→2,772). What remains of evidence recovery — advisory triage of the exhausted tail and prioritized rescores — is owned by sn-benchmark-evolution. This plan returns to its original, goal-aligned scope: documentation quality.</p>
+    </article>
+<article class="r-fu" data-id="f-docs-quality-baseline" data-status="open" data-written-by="portfolio-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-quality-parity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the documentation-quality holdout benchmark, then execute the phases against it</h4>
+    <div class="r-fu-body">Start with Phase 0: a holdout set of DD paths with catalog counterparts, scored on content gates (definition, equation, sign convention, typical values, measurement, link hygiene) so every later phase proves improvement against a baseline. Then rich DD context into compose (library layer, not the MCP formatting surface), COCOS sign-convention injection, the content-gated documentation template, curated full examples disjoint from the holdout, and the async link-resolution lifecycle with a terminal failed state and publish-time filtering.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
     </article>
 </section>

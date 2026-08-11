@@ -8,20 +8,20 @@
   <meta name="plan-slug" content="33-cli-harmonization">
   <meta name="plan-title" content="Standard Names Typed Operator Surface Consolidation">
   <meta name="plan-summary" content="Replace the fragmented 30-command Standard Names CLI with eight typed operator intents—status, run, audit, edit, recover, maintain, catalog, and bench—sharing one exact manifest/apply/receipt contract and no compatibility aliases.">
-  <meta name="plan-status" content="archived">
+  <meta name="plan-status" content="pending">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="M">
   <title>Feature 33 — CLI Option Harmonization | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-sprint" content="">
+<meta name="plan-sprint" content="S9">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-depends-on" content="">
-<meta name="plan-blocks" content="">
+<meta name="plan-depends-on" content="sn-west-catalog-release">
+<meta name="plan-blocks" content="sn-west-review-rehearsal">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-impl" content="0.1">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -29,15 +29,6 @@
       <h2>Current scope: eight typed operator intents</h2>
       <p>The live surface has 30 visible Standard Names commands. Replace it in one breaking cutover with <code>status</code>, <code>run</code>, <code>audit</code>, <code>edit</code>, <code>recover</code>, <code>maintain</code>, <code>catalog</code> and <code>bench</code>. There are no aliases or forwarding shims; every mutation shares one exact manifest/apply/receipt contract.</p>
     </section>
-<div class="card" style="border-left:4px solid #b00; padding-left:12px;">
-  <p><strong>Retired 2026-08-11 (portfolio review).</strong> The eight-typed-intents
-  cutover with a single manifest/apply/receipt contract belongs to the same
-  authority-ceremony class the wave review flagged: executing it would have
-  broken every command the WEST release runs, and the body below was a year
-  stale against the live surface. CLI ergonomics can return post-release as a
-  small measured cleanup against the then-current command set. Frozen
-  snapshot: <a href="/imas-codex/plans/archive/33-cli-harmonization-final">final</a>.</p>
-</div>
 <h1>Feature 33 — CLI option harmonization</h1>
 <figure><svg viewBox="0 0 760 170" role="img" aria-label="CLI harmonization status" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="760" height="170" fill="#ffffff"/><text x="20" y="24" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#111827">CLI harmonization status</text><rect x="20" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="20" y1="64" x2="176" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="98.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Research</text><line x1="184" y1="80.0" x2="194" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="194,76.0 194,84.0 202,80.0" fill="#4b5563"/><rect x="206" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="206" y1="64" x2="362" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="284.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Name-only review</text><line x1="370" y1="80.0" x2="380" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="380,76.0 380,84.0 388,80.0" fill="#4b5563"/><rect x="392" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="392" y1="64" x2="548" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="470.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Alias rollout</text><line x1="556" y1="80.0" x2="566" y2="80.0" stroke="#4b5563" stroke-width="1.5"/><polygon points="566,76.0 566,84.0 574,80.0" fill="#4b5563"/><rect x="578" y="48" width="156" height="64" rx="8" fill="#ffffff" stroke="#1f4b99" stroke-width="1.5"/><line x1="578" y1="64" x2="734" y2="64" stroke="#1f4b99" stroke-width="1.5"/><text x="656.0" y="86" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13.5" fill="#111827">Deferred consolidation</text></svg><figcaption>Feature 33 has landed its research, name-only review mode, and most aliases; the remaining work is consolidation and final vocabulary cleanup.</figcaption></figure>
 <p><strong>Status:</strong> Partially implemented — moved to pending/ (2025-05-xx)</p>
@@ -257,11 +248,10 @@ CLI cleanup after Phase 3&rsquo;s alias additions settle.</p>
 </section>
 <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-cli-consolidation" data-status="resolved" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship 33-cli-harmonization" data-resolved-at="2026-08-11T20:28:19+00:00" data-resolved-by="portfolio-review-2026-08-11">
+<article class="r-fu" data-id="f-cli-consolidation" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship 33-cli-harmonization" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Cut over the 30-command SN surface to eight typed operator intents</h4>
     <div class="r-fu-body"><p>Freeze the complete command and consumer inventory, extract typed planners/executors from Click bodies, converge every mutation on one manifest contract, then remove all superseded registrations in one documented breaking change.</p></div>
     <pre class="r-fu-prompt">/reckon-ship 33-cli-harmonization</pre>
-    <p class="r-fu-outcome">Retired with the plan. The eight-typed-intents cutover with a single manifest/apply/receipt contract is the same authority-ceremony class the wave review flagged: executing it would break every command the WEST release runs, its body was stale by a year, and the post-triage CLI surface (several recovery verbs already deleted under sn-pipeline-recovery §3) no longer matches its inventory. CLI ergonomics can be revisited post-release as a small, measured cleanup against the then-current surface — without a manifest/receipt harness.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">

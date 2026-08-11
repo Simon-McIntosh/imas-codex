@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-11T07:27:50",
+  "updated": "2026-08-11T22:33:42",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -170,34 +170,26 @@
       {
         "id": "S8",
         "status": "active",
-        "theme": "Pre-WEST semantic integrity and graph-wide recovery",
+        "theme": "Pipeline robustness and semantic integrity",
         "starts": "2026-08-10",
         "ends": "2026-09-25",
-        "description": "Ship typed LLM context, explicit local DD resolutions and public ISN plane/arc grammar first; harden every Standard Names stage; benchmark DSv4 as advisory-only; then recover graph semantics and evidence selectively, finish MAST parity, and consolidate the operator surface. Broad paid production remains paused until the prevention gates pass. WEST is not protected and cannot enter human review until this sprint closes.",
-        "summary": "Active. Foundations can start in parallel: project-wide context integrity, repo-local DD resolution authority and the cross-project ISN geometry grammar. All mutation and paid-recovery waves are dependency-gated behind those foundations.",
+        "description": "Finish the work that makes the pipeline trustworthy: complete the local DD-resolution channel, then repair the measured semantic-integrity worklist (the WEST-blocking subset first, then the dual-bound sources and gated detaches). The pipeline itself was restored and instrumented under sn-pipeline-recovery: attempt-budgeted refinement, write-boundary attachment guards, ISN locus typing, and typical-bill cost admission are live.",
+        "summary": "Recovery shipped 2026-08-11 ($240 of drain tranches: edits 255\u2192142 open, docs-accepted 2,238\u21922,772; the 837-call refine churn now completes in 23 calls with recorded stop reasons). The 2026-08-10 typed-authority framing was retired in the same-day portfolio review: llm-context-integrity and the sn-pipeline-hardening overlay are archived; prevention landed by narrower, measured means. Remaining: sn-dd-gaps (74%) and sn-graph-wide-integrity (75%).",
         "items": [
           {
-            "slug": "llm-context-integrity",
-            "why_now": "Untyped dynamic context is the systemic authority-pollution root cause across 22 active call expressions.",
-            "done_when": "Every active LLM call site uses the typed envelope, strict renderer, independent fingerprints and adversarial goldens; broad production calls remain blocked on any inventory gap."
+            "slug": "sn-pipeline-recovery",
+            "why_now": "Shipped: restored operability, triaged the wave machinery, drained the backlog to convergence.",
+            "done_when": "Done \u2014 suite green, proof-of-life and four drain tranches recorded, attempt budget and attachment guards live."
           },
           {
             "slug": "sn-dd-gaps",
-            "why_now": "Known DD defects already have upstream solutions and cannot block local correctness, but their effective values need explicit typed authority.",
-            "done_when": "Approved exact path/version resolutions flow through every Standard Names consumer, are visible in receipts, fail closed on ambiguity and retire automatically when upstream DD converges."
-          },
-          {
-            "slug": "sn-pipeline-hardening",
-            "why_now": "Grouping, family, review and attachment paths must stop producing semantic folds before any recovery rerun.",
-            "done_when": "All seven pools and side cars enforce the exact semantic signature, graph claims, scope/admission continuity, dynamic pricing and deterministic terminal drain."
+            "why_now": "Known DD defects need reviewed repo-local resolutions so names stay properly sourced while upstream DD pull requests are pending.",
+            "done_when": "Approved exact path/version resolutions flow through every Standard Names consumer, fail closed on ambiguity, and retire automatically when upstream DD converges."
           },
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "Known mixed representations and family folds require exact source-level repair after prevention lands; the pre-fold snapshot is evidence, not rollback authority.",
-            "done_when": "No live name mixes incompatible signatures; every source has one compatible identity or explicit disposition; exact manifests, selective reruns and reversible receipts cover all mutations, including WEST."
-          },
-          {
-            "slug": "sn-pipeline-recovery"
+            "why_now": "The measured semantic worklist is the honest release gate: the WEST-blocking subset first, then the 362 dual-bound sources, gated detaches, and proven mis-attachments.",
+            "done_when": "Every WEST-blocking class has a recorded repair or reviewed refusal; one live name per source is established; the parked attachment worklist is dispositioned."
           }
         ]
       },
@@ -207,40 +199,46 @@
         "theme": "WEST expert review and catalog release",
         "starts": "2026-09-28",
         "ends": "2026-10-16",
-        "description": "A deliberately later two-plan chain. First rebuild and conduct human review of the hardened current WEST cohort. Then publish only the exact reviewed dispositions and prove graph fold-back and undo. WEST has no special protection or bypass.",
-        "summary": "Planned behind complete S8 closure.",
+        "description": "The visible milestone: put the hardened WEST cohort in front of human experts, then publish exactly their dispositions. First rebuild the reviewer packet from the current graph and close the 14-source residual; after human accept/change/hold, cut the catalog release, fold the reviewed state back into the graph, and prove the undo path.",
+        "summary": "Planned behind S8 closure. Trimmed in the 2026-08-11 portfolio review to the two WEST plans \u2014 the benchmark, documentation-quality, MAST, and CLI items moved to S10 or were retired so the release chain carries no passenger work.",
         "items": [
           {
             "slug": "sn-west-review-rehearsal",
-            "why_now": "Human experts should review only the current graph-wide-delivery output, not the historic pre-hardening packet.",
-            "done_when": "Every WEST row has an explicit human accept/change/hold disposition with complete current semantic, source, description and review evidence; requested changes pass the ordinary pipeline."
+            "why_now": "Human experts review the current hardened cohort; the 14-source residual and the reviewer packet are the only remaining work.",
+            "done_when": "Every WEST row has an explicit human accept/change/hold disposition with complete current name, source, description, and review evidence; requested changes pass the ordinary pipeline."
           },
           {
             "slug": "sn-west-catalog-release",
-            "why_now": "Catalog publication and graph fold-back are a separate authority class after human disposition.",
-            "done_when": "The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release projection while retaining audit history."
+            "why_now": "Publication and graph fold-back are a separate authority class after human disposition.",
+            "done_when": "The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release state while retaining audit history."
+          }
+        ]
+      },
+      {
+        "id": "S10",
+        "status": "planned",
+        "theme": "Quality depth and facility breadth",
+        "items": [
+          {
+            "slug": "sn-quality-parity",
+            "why_now": "Documentation depth is half the project goal and untouched by the release chain; the holdout benchmark makes every later docs phase measurable.",
+            "done_when": "Holdout benchmark exists and is baselined; DD/COCOS context reaches compose; the content-gated docs template, curated examples, and the link-resolution lifecycle land with publish-time safety."
           },
           {
             "slug": "sn-benchmark-evolution",
-            "why_now": "The local DSv4 resource can triage the full graph cheaply only after it is benchmarked against production-faithful context and independent authority.",
-            "done_when": "Locked critical-defect and clean-name thresholds pass, then a reproducible zero-mutation full-graph advisory census is emitted."
-          },
-          {
-            "slug": "sn-quality-parity",
-            "why_now": "More than two thousand names carry incomplete or stale authority evidence, but only a small subset is immediately safe to rescore.",
-            "done_when": "A fresh exact census partitions every row honestly; proof-complete metadata and hash-bound hosted rescores land under the cumulative USD 200 ceiling; ambiguous history remains visible."
+            "why_now": "The review benchmark must discriminate before it can gate quality claims, and the free local advisory census is the cheap triage instrument for the parked tail.",
+            "done_when": "Panel-judged benchmark with domain-balanced anchors passes its locked gates; a zero-mutation advisory census ranks the exhausted-tail rescores and vocabulary gaps."
           },
           {
             "slug": "mast-semantic-source-repair",
-            "why_now": "MAST source parity must consume the hardened generic mechanisms rather than introducing facility-specific recovery code.",
-            "done_when": "The refreshed MAST manifest has exact DD/local-resolution/ISN authority, guarded dry-runs and any separately authorized applies with stable-id parity and zero collateral."
-          },
-          {
-            "slug": "33-cli-harmonization",
-            "why_now": "The current 30-command surface exposes private recovery details and mixes advisory, pipeline, maintenance and publication semantics.",
-            "done_when": "Exactly eight typed intents remain, all consumers migrate, all mutations share one manifest/apply/receipt harness, and old commands fail as unknown."
+            "why_now": "Facility breadth: MAST parity consumes the hardened generic mechanisms once graph-wide integrity closes.",
+            "done_when": "The refreshed MAST manifest has exact DD/local-resolution/ISN authority, guarded dry-runs, and any separately authorized applies with stable-id parity and zero collateral."
           }
-        ]
+        ],
+        "starts": "2026-10-19",
+        "ends": "2026-11-13",
+        "description": "After the WEST release: raise documentation to catalog quality against a measured holdout benchmark, make the review benchmark discriminate and run the DSv4 advisory census to triage the exhausted tail, and extend properly-sourced coverage to MAST. Everything here serves the standing goal \u2014 semantically correct, properly sourced, ISN-conforming names with high scores and useful detailed documentation.",
+        "summary": "Planned. Assembled in the 2026-08-11 portfolio review from the goal-aligned halves of the former S9 passenger items."
       }
     ],
     "milestones": [],
@@ -309,9 +307,14 @@
         "when": "2026-08-10",
         "who": "Simon McIntosh",
         "what": "S7 closed honestly as investigation and containment. S8 started as the hard pre-WEST semantic-integrity sprint with typed context, repo-local DD resolution authority, external ISN plane/arc grammar, semantic pipeline hardening, DSv4 advisory benchmarking, exact graph/evidence recovery, MAST parity and an eight-intent CLI. S9 now owns later WEST expert review and catalog release; WEST is not protected."
+      },
+      {
+        "when": "2026-08-11",
+        "who": "Simon McIntosh",
+        "what": "SN plan-portfolio review: llm-context-integrity, 33-cli-harmonization, and the sn-pipeline-hardening overlay retired as unexecuted authority ceremony (the June hardening programme stays archived as a completed record); sn-quality-parity rewritten to its original documentation-quality scope; sn-benchmark-evolution de-gated and pointed at the exhausted-tail triage. S8 refocused on sn-dd-gaps plus sn-graph-wide-integrity, S9 trimmed to the two WEST release plans, S10 created for quality depth and MAST breadth."
       }
     ],
     "blockers": [],
-    "_version": 26
+    "_version": 31
   }
 }

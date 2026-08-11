@@ -11,10 +11,10 @@
 <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-title" content="LLM Context Integrity and Typed Prompt Envelopes">
 <meta name="plan-summary" content="Type and adversarially test the prompt context of the Standard Names compose, review, refine, and docs paths — the call sites where comparator/authority pollution was actually observed — so cluster, vector, and neighbor evidence cannot masquerade as identity. The project-wide 46-call-site migration is descoped to a separate non-WEST backlog plan.">
-<meta name="plan-status" content="archived">
+<meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="M">
-<meta name="plan-sprint" content="">
+<meta name="plan-sprint" content="S8">
 <meta name="plan-owner" content="Simon McIntosh">
 <meta name="plan-modified" content="2026-08-11">
 <meta name="plan-depends-on" content="">
@@ -27,27 +27,13 @@
 <meta name="plan-capability-verification" content="strict">
 <meta name="plan-capability-risk" content="critical">
 <meta name="plan-impl" content="0.1">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="8">
 <meta name="plan-commits" content="dbed509d6d50b51a63f57abc7a031ba831b84320,a7df7b4ce01f821343d77fb9a6a3a27838771833,a19eeb2f1e37e1709bd0c12123766608aa61d3c4,c5fa4e3c,0c8cb3c2d36f1a68cd1d3d9d76401844a4161836,789aa26896e0e497ea74f3ae2173b056d14b128f,434baf483d332bd949d21fd849a776ddfcbbfd16,aba3a0c0f342c3199d4b5daba74d15cf37de4e84,ea468e2deb4d9cfa73bbe0ef5c38ad59f25960e5,d8003611ce1874caae07bd04cb6f2294f3e61b80,5f67176692315ae9e1d7e14de09cb3d171d17634,fae3d665f2280654ba105f40e2b17da6e7f5f9fa,5222b5c7">
 </head>
 <body>
 <main class="plan-doc">
 <section class="plan-hero">
-  <p class="eyebrow">Retired 2026-08-11 · portfolio review</p>
-  <div class="card" style="border-left:4px solid #b00; padding-left:12px;">
-    <p><strong>Retired without further execution.</strong> This plan produced the
-    7,641-line typed-dispatch subsystem with zero production consumers; the
-    subsystem was deleted under sn-pipeline-recovery §3 (the review's
-    recommendation, decision locked by the lead) and its own hardening commit
-    caused the production pricing outage. The defects the 2026-08-11 rescope
-    still named were closed elsewhere: the golden-render leak by a recapture,
-    and physical mis-attachment by the write-boundary pairing guard with ISN
-    locus typing. What remains of the idea — evidence must not masquerade as
-    identity — survives as the failure-model table below and is enforced where
-    it matters: at the attachment write boundary, not in a parallel prompt
-    type system. Frozen snapshot:
-    <a href="/imas-codex/plans/archive/llm-context-integrity-final">final</a>.</p>
-  </div>
+  <p class="eyebrow">Pre-WEST foundation · project-wide LLM safety</p>
   <h1>LLM Context Integrity and Typed Prompt Envelopes</h1>
   <p class="lead">The reported Standard Name folds are symptoms of a wider authority bug: related evidence is injected as though it proves identity. This plan replaces raw prompt concatenation with typed, inspectable context for every active imas-codex LLM call site.</p>
   <div class="stats">
@@ -120,11 +106,10 @@
     <pre class="r-fu-prompt">/reckon-ship llm-context-integrity</pre>
     <p class="r-fu-outcome">Integrated on main in merge 5222b5c7 after cumulative candidate fae3d665 cleared independent static review with 0 P0/P1/P2 and only two nonblocking P3 observations. The previously failing identity target passed 1/1 and the full focused eight-module suite passed 233/233 with zero warnings; generation, Ruff, pricing tamper probes, receipt probes, and inventory closure passed. The foundation remains fail-closed with 46 legacy expressions, 51 routes, 0 typed production expressions, 0 active policies, 0 price-ready routes, and zero provider/graph/pipeline activity.</p>
     </article>
-<article class="r-fu" data-id="f-context-compose-review" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship llm-context-integrity" data-resolved-at="2026-08-11T20:27:38+00:00" data-resolved-by="portfolio-review-2026-08-11">
+<article class="r-fu" data-id="f-context-compose-review" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship llm-context-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Typed, adversarially-tested prompt context for the SN compose, review, refine, and docs paths</h4>
     <div class="r-fu-body"><p>Scope is the Standard Names prompt-rendering paths only, where the authority-pollution failure was observed. Reuse the failure-model table and the adversarial examples already in this plan (<code>control_surface/outline/z</code> vs <code>normal_vector/z</code>; conductor <code>outline/r</code> vs passive-loop <code>arcs_of_circle/r</code>; local arc radius vs global radial coordinate). First acceptance target: the currently red golden-render test <code>tests/standard_names/test_edit_prompt_injection.py::test_no_edit_render_matches_golden</code>, which shows comparator-only prose leaking into an un-edited render. Build inside the existing <code>render_prompt()</code>/Jinja pipeline (75 live call sites, cache-friendly) — do not resurrect the parallel dispatch stack. The LinkML authority-envelope schema from the wave may be salvaged if it fits; the dispatcher must not be.</p></div>
     <pre class="r-fu-prompt">/reckon-ship llm-context-integrity</pre>
-    <p class="r-fu-outcome">Retired with the plan. The observed defects this rescope named are all closed by other landed work: the comparator-prose golden leak was fixed in sn-pipeline-recovery §2 (stale golden capture, not a renderer defect), and the physical phantom-attach class is now refused at the write boundary by guard_source_pairings (merge 1d637118) with ISN locus typing (55352a83). No measured prompt-context defect remains; a typed prompt envelope without one is speculative machinery of the same class as the deleted dispatch subsystem. If a real context-pollution defect is measured later, cut a narrow plan against that defect.</p>
     </article>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
