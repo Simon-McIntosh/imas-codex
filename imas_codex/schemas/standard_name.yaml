@@ -593,6 +593,44 @@ enums:
           like 'exhausted'/'superseded'; resolved by sn edit (→re-review),
           sn approve --override (force approve), or sn revert (→accepted).
 
+  RefineStopReason:
+    description: >-
+      Why the name-refinement axis stopped working on a StandardName. Recorded
+      on ``refine_stop_reason`` alongside ``name_stage='exhausted'`` so an
+      operator can tell an ordinary spent budget from a conflict no further
+      attempt could have resolved. Every value is recoverable: ``sn rescore``
+      resubmits the same name to a fresh quorum, and ``sn edit`` supplies the
+      new steering information that reopens rewriting.
+    permissible_values:
+      attempts_exhausted:
+        description: >-
+          The refinement budget (``refine_attempts`` reaching ``rotation_cap``)
+          was spent without a successor clearing review.
+      successor_collision:
+        description: >-
+          The refiner proposed an identity that already exists as a
+          StandardName. Refinement cannot take an occupied identity — merging
+          into it is a fold decision carrying source-migration semantics, not a
+          rewrite — and the proposal is reproduced on every attempt, across
+          models, so the remaining budget is not spent. The occupied identity
+          is recorded on ``refine_collision_name``.
+      successor_lifecycle_collision:
+        description: >-
+          The proposed identity exists in a lifecycle state the persistence
+          fence will not reuse (a live, derived, or differently-scoped node),
+          so the successor could never be provisioned under that name.
+      vocabulary_gap:
+        description: >-
+          The refiner needs a token the closed grammar does not define, so no
+          further attempt can compose the name it is reaching for. Resolved on
+          the ISN side by admitting the token, not by re-running refinement.
+      grammar_invalid:
+        description: >-
+          The proposed successor failed strict grammar validation for a reason
+          other than a missing token — a malformed transformation, an invalid
+          operator, or a self-referential rewrite. Deterministic for a given
+          input, so terminal.
+
   EditMode:
     description: >-
       How an externally steered edit candidate originated. Set alongside
@@ -1080,8 +1118,39 @@ classes:
         description: >-
           REFINED_FROM chain depth: 0 for original generated names,
           incremented by 1 on each refine_name pass that creates a new node.
-          Used together with rotation_cap to decide when a name is exhausted.
+          Lineage depth only — it counts PERSISTED successors, so it does not
+          bound refinement work. refine_attempts is the budget counter.
         range: integer
+      refine_attempts:
+        description: >-
+          Durable count of name-refinement attempts spent on this identity
+          lineage. Incremented once per verified refine_name claim, before
+          the model call, so an attempt whose successor never persists (the
+          proposed identity already exists, the persistence fence refuses it,
+          the candidate fails grammar validation) still consumes budget. A
+          refined successor inherits the predecessor's count, so the cap
+          bounds the whole chain rather than each node. Compared against
+          rotation_cap by REFINE_NAME_ELIGIBILITY_WHERE, by the escalation
+          decision, and by the review worker's exhaustion check.
+        range: integer
+      refine_stop_reason:
+        description: >-
+          Why the name axis stopped refining this name. Null while further
+          refinement is possible. Set together with name_stage='exhausted';
+          cleared when the name is re-staged with new steering information.
+        range: RefineStopReason
+      refine_stopped_at:
+        description: >-
+          ISO 8601 timestamp when refinement stopped. Null whenever
+          refine_stop_reason is null.
+        range: datetime
+      refine_collision_name:
+        description: >-
+          The existing StandardName id the refiner proposed to become, for
+          the collision stop reasons. Diagnostic only — lineage lives on
+          REFINED_FROM, and this pairing is explicitly NOT lineage: it names
+          the identity refinement could not take, which is the operator's
+          cue to fold or edit rather than re-run refinement.
       # --- generate_docs provenance ---
       docs_stage:
         description: >-
