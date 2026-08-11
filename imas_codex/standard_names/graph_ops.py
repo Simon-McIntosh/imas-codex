@@ -1770,9 +1770,9 @@ def scope_exact_standard_names(
             "duplicate exact StandardName identity: " + ", ".join(duplicates)
         )
 
-    from imas_codex.standard_names.grammar_segment_reconciliation import (
-        _FIXTURE_SOURCE_ID_PREFIX,
-        _west_source_ids,
+    from imas_codex.standard_names.protected_sources import (
+        FIXTURE_SOURCE_ID_PREFIX,
+        protected_source_ids,
     )
 
     requested = sorted(normalized)
@@ -1787,8 +1787,8 @@ def scope_exact_standard_names(
                     for row in transaction.run(
                         _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
                         names=requested,
-                        west_source_ids=sorted(_west_source_ids()),
-                        fixture_source_id_prefix=_FIXTURE_SOURCE_ID_PREFIX,
+                        west_source_ids=sorted(protected_source_ids()),
+                        fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
                     )
                 ]
                 returned = [str(row.get("requested_name") or "") for row in rows]
@@ -1811,8 +1811,8 @@ def scope_exact_standard_names(
                                 _EXACT_SCOPE_TERMINAL_NAME_STAGES
                             ),
                             terminal_statuses=sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
-                            west_source_ids=sorted(_west_source_ids()),
-                            fixture_source_id_prefix=_FIXTURE_SOURCE_ID_PREFIX,
+                            west_source_ids=sorted(protected_source_ids()),
+                            fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
                         )
                     )
                     if len(stamp_rows) != 1:
