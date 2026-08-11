@@ -277,6 +277,73 @@ class TestQuorumCompletenessGuard:
         assert quorum_incomplete_snapshot("run-x") == {}
         reset_quorum_incomplete("run-x")
 
+    def test_lost_primary_does_not_bill_the_secondary(self):
+        """A lost primary puts the quorum out of reach — stop before paying more.
+
+        The escalator fires only when both base cycles survived, so with the
+        primary gone no further call can carry the item to two reviews. Any
+        secondary bought here is billed and then discarded by the guard.
+        """
+        reset_quorum_incomplete("run-x")
+        result, calls = _run(
+            models=["m0", "m1", "m2"],
+            responses=[None, {"score": 0.8, "dims": _NAMES_DIMS}],
+        )
+        assert result is None
+        assert calls["n"] == 1  # only the primary was attempted
+        assert quorum_incomplete_snapshot("run-x") == {"names": 1}
+        reset_quorum_incomplete("run-x")
+
+
+class TestUnfundedSeatIsAttributed:
+    """An unaffordable seat calls no provider and raises nothing.
+
+    Left unreported it looks exactly like a provider outage, which sends an
+    operator debugging the reviewer chain when the lever is the run's cost
+    limit or its reviewer replica count.
+    """
+
+    def test_deferral_names_the_budget_and_the_seat(self, caplog):
+        starved = MagicMock()
+        starved.reserve = MagicMock(return_value=None)
+
+        acall, calls = _make_acall([{"score": 0.8, "dims": _NAMES_DIMS}])
+        with (
+            patch(
+                "imas_codex.standard_names.workers.model_provider_exposure",
+                return_value=0.2773,
+            ),
+            caplog.at_level(
+                logging.WARNING, logger="imas_codex.standard_names.workers"
+            ),
+        ):
+            reset_quorum_incomplete("run-x")
+            result = asyncio.run(
+                _run_rd_quorum_cycles(
+                    sn_id="poloidal_electric_field",
+                    review_axis="names",
+                    response_model=None,
+                    user_prompt="u",
+                    system_prompt="s",
+                    models=["m0", "m1", "m2"],
+                    disagreement_threshold=0.15,
+                    rubric_dims=tuple(_NAMES_DIMS),
+                    lease=None,
+                    phase="review_name",
+                    acall_llm_structured=acall,
+                    budget_manager=starved,
+                    run_id="run-x",
+                )
+            )
+
+        assert result is None
+        assert calls["n"] == 0  # no provider was ever reached
+        assert "budget refused" in caplog.text
+        assert "m0" in caplog.text
+        assert "0.2773" in caplog.text
+        assert quorum_incomplete_snapshot("run-x") == {"names": 1}
+        reset_quorum_incomplete("run-x")
+
 
 # ---------------------------------------------------------------------------
 # Caller contract: a deferred (None) review releases the claim, no persist
