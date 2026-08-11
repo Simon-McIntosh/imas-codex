@@ -2095,7 +2095,7 @@ class _BatchRecoveryTransaction:
                 {"participant_id": sn_id, "participants": deepcopy(by_name[sn_id])}
                 for sn_id in sorted(by_name)
             ]
-        if "SOURCE_SNAPSHOT_MIGRATION_LOCK" in query:
+        if "SOURCE_AUTHORITY_PARTICIPANT_LOCK" in query:
             if self.race and not self.raced:
                 self.working[0]["names"][0]["relationships"][-1]["properties"][
                     "concurrent"

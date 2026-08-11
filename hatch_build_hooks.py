@@ -40,7 +40,6 @@ class CustomBuildHook(BuildHookInterface):
             schemas_dir / "facility_config.yaml",
             schemas_dir / "standard_name.yaml",
             schemas_dir / "task_groups.yaml",
-            schemas_dir / "llm_context.yaml",
         ]
 
         # All generated output files that must exist
@@ -48,7 +47,6 @@ class CustomBuildHook(BuildHookInterface):
             package_root / "imas_codex" / "graph" / "models.py",
             package_root / "imas_codex" / "graph" / "dd_models.py",
             package_root / "imas_codex" / "config" / "models.py",
-            package_root / "imas_codex" / "llm" / "context_models.py",
             # schema_context_data.py is a runtime dependency
             # (imported by schema_context.py, query_builder.py, client.py)
             package_root / "imas_codex" / "graph" / "schema_context_data.py",

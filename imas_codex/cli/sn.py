@@ -638,7 +638,6 @@ def _run_sn_cmd(
     drain_dd_version: str | None = None,
     edits_only: bool = False,
     skip_global_maintenance: bool = False,
-    require_docs_admission: bool = False,
     scope_started_callback: Callable[[], None] | None = None,
 ) -> dict[str, Any] | None:
     """Execute the pool-based SN orchestrator with Rich progress display.
@@ -860,7 +859,6 @@ def _run_sn_cmd(
             skip_review=skip_review,
             skip_generate=skip_generate,
             only_pool=exact_pool_from_only(only),
-            require_docs_admission=require_docs_admission,
             attach_only=(only == "attach"),
             reconcile_only=(only == "reconcile"),
             skip_global_maintenance=skip_global_maintenance,
@@ -1264,7 +1262,7 @@ def _reject_unscoped_accepted_reset(
         "on disk is loaded as a schema_version 1 sn-sources manifest "
         "(config/sn_sources.schema.json); its sources are validated and expanded "
         "to focus paths, and a malformed manifest raises. "
-        "(e.g., --focus standard_names/manifests/west_task_2e.yaml)."
+        "(e.g., --focus standard_names/manifests/west_production_dd_paths.yaml)."
     ),
 )
 @click.option(
@@ -1274,8 +1272,8 @@ def _reject_unscoped_accepted_reset(
     default=None,
     help=(
         "Scope the run to a committed manifest by NAME or path — "
-        "'--batch west_task_2e' resolves to standard_names/manifests/"
-        "west_task_2e.yaml and behaves exactly like --focus <that file>. The "
+        "'--batch west_production_dd_paths' resolves to standard_names/manifests/"
+        "west_production_dd_paths.yaml and behaves exactly like --focus <that file>. The "
         "same token drives sn release --batch, keeping one batch identity "
         "across mop-up, release, and merge."
     ),
@@ -1511,15 +1509,6 @@ def _reject_unscoped_accepted_reset(
     ),
 )
 @click.option(
-    "--require-docs-admission",
-    is_flag=True,
-    default=False,
-    help=(
-        "Require one active priced documentation admission for every claimed "
-        "row. Requires --scope-run-id and --only review_docs."
-    ),
-)
-@click.option(
     "--skip-global-maintenance",
     is_flag=True,
     default=False,
@@ -1743,7 +1732,6 @@ def sn_run(
     flush: bool,
     edits_only: bool,
     scope_run_id: str | None,
-    require_docs_admission: bool,
     skip_global_maintenance: bool,
     families: str | None,
     only_phase: str | None,
@@ -1790,33 +1778,22 @@ def sn_run(
       imas-codex sn run --reviewer-profile quality-cost-balanced -c 5
       imas-codex sn run --min-score 0.85 --rotation-cap 5    # tighter thresholds
     """
-    import os as _os
 
-    # Click has already resolved explicit option > environment > default.
-    # Always propagate that resolved value so an explicit ``default`` replaces
-    # any profile left in the process environment by an earlier invocation.
+    from imas_codex.settings import (
+        bind_sn_review_profile,
+        release_sn_review_profile,
+    )
+
+    # Click has already resolved explicit option > environment > default. Bind
+    # that resolved value for this invocation only: the pools and every thread
+    # they dispatch inherit the binding through the context, and it is released
+    # when the command closes so a second invocation in the same process starts
+    # from its own resolution rather than this one's.
     reviewer_profile = reviewer_profile.lower()
-    _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
-
-    if require_docs_admission and (scope_run_id is None or only_phase != "review_docs"):
-        raise click.UsageError(
-            "--require-docs-admission requires --scope-run-id and --only review_docs"
-        )
-    if require_docs_admission and any(
-        (
-            exact_names,
-            focus_paths,
-            paths,
-            batch_name,
-            drain_batch,
-            families,
-            campaign,
-            campaign_manifest,
-        )
-    ):
-        raise click.UsageError(
-            "--require-docs-admission accepts only a pre-staged --scope-run-id"
-        )
+    _profile_token = bind_sn_review_profile(reviewer_profile)
+    click.get_current_context().call_on_close(
+        lambda: release_sn_review_profile(_profile_token)
+    )
 
     if exact_names:
         scope_conflicts = {
@@ -2421,7 +2398,6 @@ def sn_run(
             scope_run_id=scope_run_id,
             edits_only=edits_only,
             skip_global_maintenance=skip_global_maintenance,
-            require_docs_admission=require_docs_admission,
         )
         return
 
@@ -2778,7 +2754,6 @@ def sn_run(
             scope_run_id=scope_run_id,
             edits_only=edits_only,
             skip_global_maintenance=skip_global_maintenance,
-            require_docs_admission=require_docs_admission,
         )
         return
 
@@ -4486,7 +4461,7 @@ def sn_preview(
     default=None,
     help=(
         "Cut a review-batch RC from a manifest (sn_sources or sn_names), given "
-        "as a NAME ('west_task_2e' resolves under standard_names/manifests/) or "
+        "as a NAME ('west_production_dd_paths' resolves under standard_names/manifests/) or "
         "a path: mint the SN set, freeze it under manifests/reviews/"
         "<rc>.sn_names.yaml, export approved ∪ batch, branch + push to the "
         "fork, open the PR, and back-fill the PR number/URL — all in one step. "
@@ -6447,202 +6422,6 @@ def sn_supersede(old_name: str, into_name: str, dry_run: bool) -> None:
         )
 
 
-@sn.command("migrate-source-snapshots")
-@click.option(
-    "--manifest",
-    "manifest_path",
-    type=click.Path(exists=True, dir_okay=False),
-    required=True,
-    help="Bounded integrity manifest from which to derive the exact DD allowlist.",
-)
-@click.option(
-    "--from-version",
-    "expected_from_version",
-    required=True,
-    help="Exact DD version every non-current allowlisted source must be pinned to.",
-)
-@click.option(
-    "--reason",
-    required=True,
-    help="Operator reason recorded on every immutable migration event.",
-)
-@click.option(
-    "--apply",
-    is_flag=True,
-    help="Apply the atomic migration; the default is a zero-write dry run.",
-)
-@click.option(
-    "--manifest-sha256",
-    "expected_manifest_hash",
-    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
-)
-def sn_migrate_source_snapshots(
-    manifest_path: str,
-    expected_from_version: str,
-    reason: str,
-    apply: bool,
-    expected_manifest_hash: str | None,
-) -> None:
-    """Plan or apply exact DD source snapshot migrations with full CAS fencing."""
-    import json
-
-    from imas_codex.standard_names.source_snapshot_migration import (
-        migrate_source_snapshots,
-    )
-
-    if apply and not expected_manifest_hash:
-        raise click.UsageError("--apply requires --manifest-sha256")
-    receipt = migrate_source_snapshots(
-        manifest_path,
-        expected_from_version=expected_from_version,
-        reason=reason,
-        apply=apply,
-        expected_manifest_hash=expected_manifest_hash,
-    )
-    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
-
-
-@sn.command("reconcile-source-authority")
-@click.option(
-    "--manifest",
-    "manifest_path",
-    type=click.Path(exists=True, dir_okay=False),
-    required=True,
-    help="Exact homogeneous source-authority reconciliation manifest.",
-)
-@click.option(
-    "--reason",
-    required=True,
-    help="Operator reason recorded on every immutable authority event.",
-)
-@click.option(
-    "--apply",
-    is_flag=True,
-    help="Apply the atomic reconciliation; the default is a zero-write dry run.",
-)
-@click.option(
-    "--manifest-sha256",
-    "expected_manifest_hash",
-    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
-)
-def sn_reconcile_source_authority(
-    manifest_path: str,
-    reason: str,
-    apply: bool,
-    expected_manifest_hash: str | None,
-) -> None:
-    """Plan or apply one exact source-authority operation with full CAS fencing."""
-    import json
-
-    from imas_codex.standard_names.source_authority_reconciliation import (
-        reconcile_source_authority,
-    )
-
-    if apply and not expected_manifest_hash:
-        raise click.UsageError("--apply requires --manifest-sha256")
-    receipt = reconcile_source_authority(
-        manifest_path,
-        reason=reason,
-        apply=apply,
-        expected_manifest_hash=expected_manifest_hash,
-    )
-    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
-
-
-@sn.command("reconcile-semantic-sources")
-@click.option(
-    "--manifest",
-    "manifest_path",
-    type=click.Path(exists=True, dir_okay=False),
-    required=True,
-    help="Exact semantic-source reconciliation manifest.",
-)
-@click.option(
-    "--reason",
-    required=True,
-    help="Non-empty operator reason recorded on every immutable change event.",
-)
-@click.option(
-    "--apply",
-    is_flag=True,
-    help="Apply the atomic reconciliation; the default is a zero-write dry run.",
-)
-@click.option(
-    "--manifest-sha256",
-    "expected_manifest_hash",
-    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
-)
-def sn_reconcile_semantic_sources(
-    manifest_path: str,
-    reason: str,
-    apply: bool,
-    expected_manifest_hash: str | None,
-) -> None:
-    """Plan or reconcile one exact semantic source-binding cohort."""
-    import json
-
-    from imas_codex.standard_names.semantic_source_reconciliation import (
-        reconcile_semantic_sources,
-    )
-
-    if apply and not expected_manifest_hash:
-        raise click.UsageError("--apply requires --manifest-sha256")
-    receipt = reconcile_semantic_sources(
-        manifest_path,
-        reason=reason,
-        apply=apply,
-        expected_manifest_hash=expected_manifest_hash,
-    )
-    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
-
-
-@sn.command("reconcile-grammar-segments")
-@click.option(
-    "--manifest",
-    "manifest_path",
-    type=click.Path(exists=True, dir_okay=False),
-    required=True,
-    help="Exact grammar-segment projection reconciliation manifest.",
-)
-@click.option(
-    "--reason",
-    required=True,
-    help="Operator reason bound into every immutable name-change event.",
-)
-@click.option(
-    "--apply",
-    is_flag=True,
-    help="Apply the atomic reconciliation; the default is a zero-write dry run.",
-)
-@click.option(
-    "--manifest-sha256",
-    "expected_manifest_hash",
-    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
-)
-def sn_reconcile_grammar_segments(
-    manifest_path: str,
-    reason: str,
-    apply: bool,
-    expected_manifest_hash: str | None,
-) -> None:
-    """Plan or apply one exact grammar projection cohort with CAS fencing."""
-    import json
-
-    from imas_codex.standard_names.grammar_segment_reconciliation import (
-        reconcile_grammar_segments,
-    )
-
-    if apply and not expected_manifest_hash:
-        raise click.UsageError("--apply requires --manifest-sha256")
-    receipt = reconcile_grammar_segments(
-        manifest_path,
-        reason=reason,
-        apply=apply,
-        expected_manifest_hash=expected_manifest_hash,
-    )
-    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
-
-
 @sn.command("recover-terminal-attachments")
 @click.option(
     "--manifest",
@@ -6685,248 +6464,6 @@ def sn_recover_terminal_attachments(
         manifest_path,
         reason=reason,
         apply=apply,
-        expected_manifest_hash=expected_manifest_hash,
-    )
-    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
-
-
-@sn.command("reconcile-protected-structure")
-@click.option(
-    "--manifest",
-    "manifest_path",
-    type=click.Path(exists=True, dir_okay=False, path_type=str),
-    required=True,
-    help="Exact protected-structure reconciliation manifest.",
-)
-@click.option(
-    "--authority-artifact",
-    "authority_artifact_path",
-    type=click.Path(exists=True, dir_okay=False, path_type=str),
-    required=True,
-    help="Exact signed authority artifact bound by the manifest.",
-)
-@click.option(
-    "--apply",
-    is_flag=True,
-    help="Apply the atomic reconciliation; the default is a zero-write dry run.",
-)
-@click.option(
-    "--manifest-sha256",
-    "expected_manifest_hash",
-    help="Expected SHA-256 of the exact manifest bytes; required with --apply.",
-)
-@click.option(
-    "--receipt",
-    "receipt_path",
-    type=click.Path(dir_okay=False, path_type=str),
-    help="Explicit path for the complete receipt and release-census result.",
-)
-def sn_reconcile_protected_structure(
-    manifest_path: str,
-    authority_artifact_path: str,
-    apply: bool,
-    expected_manifest_hash: str | None,
-    receipt_path: str | None,
-) -> None:
-    """Dry-run or apply an exact authority-bound protected-structure change.
-
-    Dry-run is the default. Apply requires the digest of the exact manifest
-    bytes and runs the separate receipt-bound release census after commit.
-    """
-    import hashlib
-    import hmac
-    import json
-    import re
-    from pathlib import Path
-
-    if apply and not expected_manifest_hash:
-        raise click.UsageError("--apply requires --manifest-sha256")
-
-    manifest = Path(manifest_path).expanduser().resolve()
-    authority_artifact = Path(authority_artifact_path).expanduser().resolve()
-    output_path = (
-        Path(receipt_path).expanduser().resolve() if receipt_path is not None else None
-    )
-    if output_path is not None:
-        receipt_collides = output_path in {manifest, authority_artifact}
-        if not receipt_collides:
-            try:
-                receipt_collides = output_path.samefile(
-                    manifest
-                ) or output_path.samefile(authority_artifact)
-            except FileNotFoundError:
-                receipt_collides = False
-            except OSError as exc:
-                raise click.ClickException(
-                    f"cannot verify receipt filesystem identity: {exc}"
-                ) from exc
-        if receipt_collides:
-            raise click.UsageError("--receipt must not overwrite an input artifact")
-    try:
-        manifest_bytes = manifest.read_bytes()
-    except OSError as exc:
-        raise click.ClickException(f"cannot read exact manifest bytes: {exc}") from exc
-    manifest_hash = hashlib.sha256(manifest_bytes).hexdigest()
-
-    normalized_expected_hash = (
-        expected_manifest_hash.strip().casefold()
-        if expected_manifest_hash is not None
-        else None
-    )
-    if (
-        normalized_expected_hash is not None
-        and re.fullmatch(r"[0-9a-f]{64}", normalized_expected_hash) is None
-    ):
-        raise click.UsageError(
-            "--manifest-sha256 must be exactly 64 hexadecimal characters"
-        )
-    if normalized_expected_hash is not None and not hmac.compare_digest(
-        normalized_expected_hash, manifest_hash
-    ):
-        raise click.UsageError(
-            "--manifest-sha256 does not match the exact manifest bytes"
-        )
-
-    try:
-        authority_bytes = authority_artifact.read_bytes()
-    except OSError as exc:
-        raise click.ClickException(
-            f"cannot read exact authority artifact bytes: {exc}"
-        ) from exc
-    authority_hash = hashlib.sha256(authority_bytes).hexdigest()
-    try:
-        manifest_payload = json.loads(manifest_bytes)
-        catalog_contract = manifest_payload["catalog_contract"]
-        bound_authority_hash = catalog_contract["authority_evidence_sha256"]
-        bound_authority_path = catalog_contract["authority_evidence_path"]
-    except (KeyError, TypeError, ValueError) as exc:
-        raise click.ClickException(
-            "manifest does not expose an exact authority artifact contract"
-        ) from exc
-    if not isinstance(bound_authority_hash, str) or not hmac.compare_digest(
-        bound_authority_hash.casefold(), authority_hash
-    ):
-        raise click.ClickException(
-            "authority artifact SHA-256 does not match the manifest contract"
-        )
-    if bound_authority_path is not None and (
-        not isinstance(bound_authority_path, str)
-        or Path(bound_authority_path).expanduser().resolve() != authority_artifact
-    ):
-        raise click.ClickException(
-            "authority artifact path does not match the manifest contract"
-        )
-
-    from imas_codex.standard_names.protected_structural_reconciliation import (
-        ProtectedStructuralConflict,
-        census_protected_structural_release,
-        reconcile_protected_structure,
-    )
-    from imas_codex.standard_names.receipt_store import (
-        ReceiptPersistenceError,
-        persist_receipt,
-    )
-
-    try:
-        operator_receipt = reconcile_protected_structure(
-            manifest,
-            apply=apply,
-            expected_manifest_hash=manifest_hash,
-        )
-        release_census = None
-        if apply and operator_receipt.get("mode") in {
-            "applied",
-            "already_current",
-        }:
-            release_census = census_protected_structural_release(
-                manifest,
-                operator_receipt,
-                expected_receipt_hash=operator_receipt.get("receipt_hash", ""),
-            )
-    except (OSError, ValueError, ProtectedStructuralConflict) as exc:
-        raise click.ClickException(str(exc)) from exc
-
-    result_payload = {
-        "manifest_hash": manifest_hash,
-        "receipt": operator_receipt,
-        "release_census": release_census,
-    }
-    try:
-        stored_receipt = persist_receipt(
-            "protected-structural-reconciliation",
-            result_payload,
-            output_path=output_path,
-            protected_inputs=(manifest, authority_artifact),
-        )
-    except (OSError, ReceiptPersistenceError) as exc:
-        raise click.ClickException(f"cannot write receipt: {exc}") from exc
-
-    counts = operator_receipt.get("counts") or {}
-    count_summary = ",".join(f"{key}={counts[key]}" for key in sorted(counts)) or "none"
-    mode = str(operator_receipt.get("mode") or ("apply" if apply else "dry_run"))
-    receipt_hash = str(operator_receipt.get("receipt_hash") or "missing")
-    if release_census is None:
-        census_summary = "not_run"
-    else:
-        census_summary = (
-            f"release_ready={str(bool(release_census.get('release_ready'))).lower()}"
-            f",census_hash={release_census.get('census_hash', 'missing')}"
-        )
-    click.echo(
-        f"mode={mode} manifest_sha256={manifest_hash} counts={count_summary} "
-        f"receipt_hash={receipt_hash} release_census={census_summary}"
-    )
-    click.echo(f"receipt={stored_receipt.path}")
-    if apply and release_census is None:
-        raise click.ClickException(
-            "apply did not produce an applicable receipt for release census"
-        )
-    if release_census is not None and not release_census.get("release_ready"):
-        raise click.ClickException("release census did not certify the committed state")
-
-
-@sn.command("reconcile-structural-closure")
-@click.option(
-    "--manifest",
-    "manifest_path",
-    type=click.Path(exists=True, dir_okay=False),
-    required=True,
-    help="Exact structural closure reconciliation manifest.",
-)
-@click.option(
-    "--dry-run",
-    is_flag=True,
-    help="Plan the exact closure without graph mutation.",
-)
-@click.option(
-    "--include-accepted",
-    is_flag=True,
-    help="Authorize exact manifest-bound deletion of accepted names.",
-)
-@click.option(
-    "--manifest-sha256",
-    "expected_manifest_hash",
-    help="Expected SHA-256 of exact manifest bytes; required unless --dry-run.",
-)
-def sn_reconcile_structural_closure(
-    manifest_path: str,
-    dry_run: bool,
-    include_accepted: bool,
-    expected_manifest_hash: str | None,
-) -> None:
-    """Reconcile one exact structural closure cohort with full CAS fencing."""
-    import json
-
-    from imas_codex.standard_names.structural_closure import (
-        reconcile_structural_closure,
-    )
-
-    if not dry_run and not expected_manifest_hash:
-        raise click.UsageError("apply requires --manifest-sha256 or use --dry-run")
-    receipt = reconcile_structural_closure(
-        manifest_path,
-        dry_run=dry_run,
-        include_accepted=include_accepted,
         expected_manifest_hash=expected_manifest_hash,
     )
     click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))

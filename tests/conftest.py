@@ -320,12 +320,12 @@ def temporary_embedding_cache_dir(tmp_path_factory, monkeypatch):
 def isolated_reviewer_profile_env():
     """Confine a reviewer-profile selection to the test that made it.
 
-    ``sn run`` propagates its resolved ``--reviewer-profile`` to deeper settings
-    lookups through ``os.environ``, which is process-wide. A ``CliRunner``
-    invocation runs inside this process, so without this restore a single CLI
-    test naming a one-reviewer profile re-seats the reviewer chain for every
-    later test. That profile's model carries no checked-in pricing row, so the
-    damage surfaces far from its cause as unpriceable routes and empty quorums.
+    ``IMAS_CODEX_SN_REVIEW_PROFILE`` is the environment channel a reviewer
+    profile can arrive on, and it is process-wide. A ``CliRunner`` invocation
+    runs inside this process, so without this restore a single test that sets
+    it re-seats the reviewer chain for every later test. A one-reviewer
+    profile's model carries no checked-in pricing row, so the damage surfaces
+    far from its cause as unpriceable routes and empty quorums.
     """
     name = "IMAS_CODEX_SN_REVIEW_PROFILE"
     before = os.environ.get(name)

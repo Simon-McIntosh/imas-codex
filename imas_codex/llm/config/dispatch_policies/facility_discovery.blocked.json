@@ -1,8 +1,0 @@
-{
-  "unsupported": [
-    {
-      "callsite_id": "discovery.image-scoring",
-      "closure_blocker": "The configured vision route lacks an enforceable exact image-token pricing contract; migration remains blocked until its provider exposes a bounded image dimension compatible with the frozen wire request."
-    }
-  ]
-}

@@ -36,7 +36,7 @@ _EVENT_PREFIX = "sn-change:grammar-segment-reconciliation:"
 _RUN_PREFIX = "grammar-segment-reconciliation:"
 _FIXTURE_SOURCE_ID_PREFIX = "dd:test_review_entry__"
 _FIXTURE_PATH_PREFIX = "test/"
-_WEST_MANIFEST = Path(__file__).parent / "manifests" / "west_task_2e.yaml"
+_WEST_MANIFEST = Path(__file__).parent / "manifests" / "west_production_dd_paths.yaml"
 
 _ROW_FIELDS = frozenset(
     {

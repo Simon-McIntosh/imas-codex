@@ -112,7 +112,7 @@ def _scope(
     dry_run: bool = False,
 ) -> dict[str, object]:
     with patch(
-        "imas_codex.standard_names.grammar_segment_reconciliation._west_source_ids",
+        "imas_codex.standard_names.protected_sources.protected_source_ids",
         return_value=frozenset({"dd:west/protected"}),
     ):
         return scope_exact_standard_names(
@@ -302,7 +302,7 @@ def test_exact_name_dry_run_splits_values_and_uses_zero_write_helper() -> None:
     "conflicting_args",
     [
         ["--focus", "equilibrium/time_slice/psi"],
-        ["--batch", "west_task_2e"],
+        ["--batch", "west_production_dd_paths"],
         ["--scope-run-id", "other-run"],
         ["--families", "flux"],
     ],

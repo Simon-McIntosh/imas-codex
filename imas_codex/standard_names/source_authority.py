@@ -182,11 +182,13 @@ ORDER BY path
 """
 
 PARTICIPANT_LOCK_QUERY = """
-// SOURCE_SNAPSHOT_MIGRATION_LOCK
+// SOURCE_AUTHORITY_PARTICIPANT_LOCK
+// Touch every participant so the transaction holds their write locks for the
+// rest of its statements; the property itself never survives the query.
 MATCH (participant)
 WHERE elementId(participant) IN $element_ids AND participant.id IS NOT NULL
-SET participant._source_snapshot_migration_lock = true
-REMOVE participant._source_snapshot_migration_lock
+SET participant._source_authority_participant_lock = true
+REMOVE participant._source_authority_participant_lock
 RETURN count(participant) AS locked
 """
 

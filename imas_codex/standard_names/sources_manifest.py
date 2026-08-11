@@ -54,7 +54,7 @@ def resolve_batch_token(token: str) -> Path | None:
     Accepts a literal path, or a short name resolved against the committed
     manifest homes — ``manifests/<name>.yaml`` (sn-sources) and
     ``manifests/reviews/<name>.sn_names.yaml`` (frozen batch artifacts) — so
-    ``--batch west_task_2e`` finds the WEST manifest without a path.
+    ``--batch west_production_dd_paths`` finds the WEST manifest without a path.
     Returns None when nothing matches (the caller raises with context).
     """
     p = Path(token)

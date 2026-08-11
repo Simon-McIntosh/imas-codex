@@ -102,9 +102,9 @@ def test_resolve_batch_token_literal_path(tmp_path):
 def test_resolve_batch_token_short_name_finds_committed_manifest():
     from imas_codex.standard_names.sources_manifest import resolve_batch_token
 
-    resolved = resolve_batch_token("west_task_2e")
+    resolved = resolve_batch_token("west_production_dd_paths")
     assert resolved is not None
-    assert resolved.name == "west_task_2e.yaml"
+    assert resolved.name == "west_production_dd_paths.yaml"
     assert resolved.parent.name == "manifests"
 
 

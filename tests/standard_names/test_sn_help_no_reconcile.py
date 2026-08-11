@@ -27,7 +27,6 @@ class TestSnHelpNoLegacyVerbs:
             if (match := re.match(r"^  ([a-z0-9][a-z0-9-]*)\s{2,}", line))
         }
         assert "reconcile" not in listed_commands
-        assert "reconcile-grammar-segments" in listed_commands
 
     def test_no_resolve_links_as_command(self):
         runner = CliRunner()

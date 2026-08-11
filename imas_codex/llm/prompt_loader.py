@@ -1167,34 +1167,6 @@ class StrictPromptSource:
     provider_names: tuple[str, ...]
 
 
-@dataclass(frozen=True, slots=True)
-class StaticProviderSnapshot:
-    """One versioned static-provider result captured before rendering."""
-
-    name: str
-    kind: str
-    source_version: str
-    source_digest: str
-    context: Mapping[str, Any]
-
-
-@dataclass(frozen=True, slots=True)
-class PromptBundle:
-    """Templates, includes, and providers loaded once for a typed request."""
-
-    prompts: tuple[StrictPromptSource, ...]
-    providers: tuple[StaticProviderSnapshot, ...]
-    source_digest: str
-
-    def prompt(self, name: str) -> StrictPromptSource:
-        matches = [prompt for prompt in self.prompts if prompt.name == name]
-        if len(matches) != 1:
-            raise UnregisteredPromptError(
-                f"Expected one bundled prompt {name!r}; found {len(matches)}"
-            )
-        return matches[0]
-
-
 def _safe_template_name(name: str) -> str:
     candidate = name.strip()
     path = Path(candidate)
@@ -1324,6 +1296,22 @@ def _referenced_sources(
     return sources, frozenset(required)
 
 
+def _freeze_static_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return MappingProxyType(
+            {str(key): _freeze_static_value(item) for key, item in value.items()}
+        )
+    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
+        return tuple(_freeze_static_value(item) for item in value)
+    return value
+
+
+def _freeze_static_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
+    return MappingProxyType(
+        {str(key): _freeze_static_value(item) for key, item in value.items()}
+    )
+
+
 def load_strict_prompt(
     name: str,
     prompts_dir: Path | None = None,
@@ -1387,171 +1375,6 @@ def _load_strict_prompt_from_path(
         source_texts=tuple(sorted(sources.items())),
         provider_names=tuple(schema_needs),
     )
-
-
-def _provider_snapshot(
-    name: str,
-    kind: str,
-    source_version: str,
-) -> StaticProviderSnapshot:
-    """Capture one provider once; empty or failed authority is fatal."""
-    import json
-
-    provider = _SCHEMA_PROVIDERS.get(name)
-    if provider is None:
-        raise StrictPromptError(f"Unknown static provider {name!r}")
-    try:
-        raw = provider()
-    except Exception as exc:
-        raise StrictPromptError(f"Static provider {name!r} failed") from exc
-    if not isinstance(raw, Mapping) or not raw:
-        raise StrictPromptError(f"Static provider {name!r} returned no authority")
-    for key, value in raw.items():
-        if not isinstance(key, str) or not key:
-            raise StrictPromptError(f"Static provider {name!r} returned an invalid key")
-        if value is None or value == "" or value == [] or value == {}:
-            raise StrictPromptError(
-                f"Static provider {name!r} returned empty authority for {key!r}"
-            )
-    try:
-        payload = json.dumps(
-            raw,
-            ensure_ascii=False,
-            allow_nan=False,
-            separators=(",", ":"),
-            sort_keys=True,
-        )
-    except (TypeError, ValueError) as exc:
-        raise StrictPromptError(
-            f"Static provider {name!r} returned non-canonical authority"
-        ) from exc
-    return StaticProviderSnapshot(
-        name=name,
-        kind=kind,
-        source_version=source_version,
-        source_digest=hashlib.sha256(payload.encode("utf-8")).hexdigest(),
-        context=_freeze_static_mapping(raw),
-    )
-
-
-def _freeze_static_value(value: Any) -> Any:
-    if isinstance(value, Mapping):
-        return MappingProxyType(
-            {str(key): _freeze_static_value(item) for key, item in value.items()}
-        )
-    if isinstance(value, Sequence) and not isinstance(value, str | bytes | bytearray):
-        return tuple(_freeze_static_value(item) for item in value)
-    return value
-
-
-def _freeze_static_mapping(value: Mapping[str, Any]) -> Mapping[str, Any]:
-    return MappingProxyType(
-        {str(key): _freeze_static_value(item) for key, item in value.items()}
-    )
-
-
-def load_prompt_bundle(
-    template_names: Sequence[str],
-    provider_specs: Sequence[Any],
-    prompts_dir: Path | None = None,
-) -> PromptBundle:
-    """Load an immutable prompt/provider bundle with no later filesystem reads."""
-    import json
-
-    root = prompts_dir or PROMPTS_DIR
-    if not template_names or len(template_names) != len(set(template_names)):
-        raise StrictPromptError("Prompt bundle requires unique template names")
-    index = _prompt_file_index(root)
-    prompts = tuple(
-        _load_strict_prompt_from_path(
-            _safe_template_name(name), index.get(_safe_template_name(name)), root
-        )
-        for name in template_names
-    )
-    declared_needs: set[str] = set()
-    for prompt in prompts:
-        declared_needs.update(prompt.provider_names)
-    expected_names = {spec.name for spec in provider_specs}
-    if declared_needs != expected_names:
-        raise StrictPromptError(
-            "Prompt static-provider set differs from the registered policy: "
-            f"declared={sorted(declared_needs)}, expected={sorted(expected_names)}"
-        )
-    providers = tuple(
-        _provider_snapshot(spec.name, spec.kind, spec.source_version)
-        for spec in provider_specs
-    )
-    digest_payload = {
-        "prompts": [
-            {"name": prompt.name, "source_digest": prompt.source_digest}
-            for prompt in prompts
-        ],
-        "providers": [
-            {
-                "name": provider.name,
-                "kind": provider.kind,
-                "source_version": provider.source_version,
-                "source_digest": provider.source_digest,
-            }
-            for provider in providers
-        ],
-    }
-    source_digest = hashlib.sha256(
-        json.dumps(
-            digest_payload,
-            ensure_ascii=False,
-            separators=(",", ":"),
-            sort_keys=True,
-        ).encode("utf-8")
-    ).hexdigest()
-    return PromptBundle(prompts, providers, source_digest)
-
-
-def render_prompt_bundle(
-    bundle: PromptBundle,
-    name: str,
-    context: Mapping[str, Any] | None = None,
-) -> str:
-    """Render from an immutable bundle without rereading templates or providers."""
-    from jinja2 import DictLoader, Environment, StrictUndefined
-
-    prompt = bundle.prompt(name)
-    supplied = dict(context or {})
-    unknown = set(supplied) - prompt.required_context
-    if unknown:
-        raise PromptContextError(
-            f"Prompt {name!r} received unknown context keys: {sorted(unknown)}"
-        )
-    static_context: dict[str, Any] = {}
-    for provider in bundle.providers:
-        collisions = set(static_context) & set(provider.context)
-        if collisions:
-            raise StrictPromptError(
-                f"Static providers collide on context keys: {sorted(collisions)}"
-            )
-        static_context.update(provider.context)
-    collisions = set(supplied) & set(static_context)
-    if collisions:
-        raise PromptContextError(
-            f"Prompt {name!r} caller context overrides static schema keys: "
-            f"{sorted(collisions)}"
-        )
-    full_context = {**static_context, **supplied}
-    missing = prompt.required_context - set(full_context)
-    if missing:
-        raise PromptContextError(
-            f"Prompt {name!r} is missing context keys: {sorted(missing)}"
-        )
-    sources = dict(prompt.source_texts)
-    env = Environment(
-        loader=DictLoader(
-            {key: value for key, value in sources.items() if key != "<root>"}
-        ),
-        undefined=StrictUndefined,
-        autoescape=False,
-    )
-    env.filters["fromjson"] = __import__("json").loads
-    return env.from_string(sources["<root>"]).render(full_context)
 
 
 def render_prompt_strict(
