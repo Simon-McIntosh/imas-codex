@@ -230,13 +230,20 @@ def test_free_local_endpoint_requires_explicit_trusted_classification():
     )
 
 
-def test_checked_in_pricing_preserves_missing_dimensions_and_stays_inactive():
+def test_checked_in_pricing_zeroes_uncharged_dimensions_and_stays_inactive():
+    """An undeclared per-request or per-image charge prices at zero.
+
+    The arithmetic consumers multiply and sum these dimensions directly, so a
+    route that charges neither must yield a number rather than ``None``. Typed
+    pricing is a separate, stricter authority and still refuses this route for
+    want of provider-pinned metadata.
+    """
     model = "openrouter/openai/gpt-5.6-luna"
 
     pricing = settings.get_openrouter_pricing(model)
 
-    assert pricing["request"] is None
-    assert pricing["image"] is None
+    assert pricing["request"] == 0.0
+    assert pricing["image"] == 0.0
     with pytest.raises(settings.PricingAuthorityError):
         settings.get_typed_openrouter_pricing(model)
 

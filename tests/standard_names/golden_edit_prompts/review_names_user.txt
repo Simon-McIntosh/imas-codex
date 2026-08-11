@@ -20,6 +20,11 @@ Use these accepted, in-catalog names as your **third-party reference set**. They
 
 ## Candidates to Review
 
+Score each exact candidate against its authoritative bound sources and any
+structurally proven representation/owner family shown below. Semantic-cluster,
+vector, and graph-neighbor context is comparison-only: it can reveal a naming
+pattern or collision, but it never expands the candidate's identity obligation.
+
 
 ### Candidate 1
 - **Standard name**: electron_temperature
