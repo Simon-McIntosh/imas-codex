@@ -1903,10 +1903,6 @@ def _build_kwargs(
     api_base: str | None = None,
     api_key_override: str | None = None,
     reasoning_effort: str | None = None,
-    typed_max_price: dict[str, float] | None = None,
-    typed_provider_selector: str | None = None,
-    typed_endpoint_contract: str | None = None,
-    typed_resolved_api_key: str | None = None,
 ) -> dict[str, Any]:
     """Build litellm completion kwargs with model-aware defaults.
 
@@ -1929,7 +1925,7 @@ def _build_kwargs(
     bypass_proxy = False
 
     # Auto-resolve endpoint from the model registry if not explicitly passed
-    if not api_base and typed_endpoint_contract is None:
+    if not api_base:
         endpoint = get_model_endpoint(model)
         if endpoint:
             api_base = endpoint["api_base"]
@@ -1960,16 +1956,11 @@ def _build_kwargs(
         llm_location = get_llm_location()
 
         # Inject cache_control for models that support explicit breakpoints.
-        supports_cache = (
-            _supports_cache_control(model) and typed_endpoint_contract is None
-        )
-        if supports_cache:
+        if _supports_cache_control(model):
             messages = inject_cache_control(messages)
 
         use_proxy = llm_location != "local" or bool(os.getenv("LITELLM_PROXY_URL"))
-        has_direct_key = bool(
-            typed_resolved_api_key or os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
-        )
+        has_direct_key = bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
         is_openrouter_model = "openrouter/" in model.lower() or any(
             p in model.lower()
             for p in (
@@ -2003,11 +1994,7 @@ def _build_kwargs(
             }
         else:
             model_id = ensure_model_prefix(model)
-            direct_key = (
-                typed_resolved_api_key or get_api_key_for_service(service)
-                if bypass_proxy
-                else api_key
-            )
+            direct_key = get_api_key_for_service(service) if bypass_proxy else api_key
 
             kwargs = {
                 "model": model_id,
@@ -2024,39 +2011,7 @@ def _build_kwargs(
                     "Bypassing proxy for %s (cache_control preserved)", model_id
                 )
 
-    if typed_max_price is not None:
-        if _is_local_model(model):
-            raise ProviderPricingUnbounded(
-                "a local typed route cannot carry paid provider pricing"
-            )
-        if typed_endpoint_contract != "direct-openrouter":
-            raise ProviderPricingUnbounded(
-                "paid typed calls require the direct OpenRouter endpoint contract"
-            )
-        if api_base or not bypass_proxy or not typed_resolved_api_key:
-            raise ProviderPricingUnbounded(
-                "paid typed calls require direct OpenRouter routing with a resolved "
-                "service credential"
-            )
-        if not typed_provider_selector:
-            raise ProviderPricingUnbounded(
-                "paid typed calls require an exact provider selector"
-            )
-        extra_body = kwargs.setdefault("extra_body", {})
-        extra_body["provider"] = {
-            "max_price": dict(typed_max_price),
-            "only": [typed_provider_selector],
-            "allow_fallbacks": False,
-        }
-    elif typed_endpoint_contract == "direct-openrouter":
-        raise ProviderPricingUnbounded(
-            "the direct OpenRouter endpoint contract requires an enforceable max_price"
-        )
-    elif typed_endpoint_contract == "local-free" and not _is_local_model(model):
-        raise ProviderPricingUnbounded(
-            "the local-free endpoint contract requires an explicitly local model"
-        )
-    elif service == "standard-names" and not _is_local_model(model):
+    if service == "standard-names" and not _is_local_model(model):
         if api_base or not bypass_proxy:
             raise ProviderPricingUnbounded(
                 "paid Standard Names calls require direct OpenRouter routing "
