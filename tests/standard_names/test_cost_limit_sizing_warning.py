@@ -57,7 +57,9 @@ def test_limit_below_one_quorum_warns_with_both_remedies(
     assert "$1.50" in joined  # one quorum's reservation
     assert "--cost-limit" in joined  # remedy one: more money
     assert "IMAS_CODEX_SN_POOLS_REVIEW_DOCS_REPLICAS" in joined  # remedy two
-    assert "$12.00" in joined  # 8 replicas x one quorum
+    # Peak concurrent hold is 8 replicas x the dearest seat, since a replica
+    # runs its quorum cycles one after another.
+    assert "$4.00" in joined
 
 
 def test_limit_covering_a_quorum_is_silent(

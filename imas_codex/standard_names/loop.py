@@ -65,7 +65,7 @@ def _warn_if_cost_limit_cannot_fund_a_quorum(cost_limit: float) -> None:
             {"role": "system", "content": "x" * _SIZING_PROBE_REQUEST_BYTES},
             {"role": "user", "content": ""},
         ]
-        demands: list[tuple[str, str, float, int]] = []
+        demands: list[tuple[str, str, float, float, int]] = []
         for pool, models in (
             ("review_name", get_sn_review_names_models()),
             ("review_docs", get_sn_review_docs_models()),
@@ -86,27 +86,35 @@ def _warn_if_cost_limit_cannot_fund_a_quorum(cost_limit: float) -> None:
                 worst_seat = max(worst_seat, seat)
             if quorum > 0:
                 demands.append(
-                    (pool, ", ".join(models), quorum, get_pool_replicas(pool))
+                    (
+                        pool,
+                        ", ".join(models),
+                        quorum,
+                        worst_seat,
+                        get_pool_replicas(pool),
+                    )
                 )
     except Exception:  # noqa: BLE001
         logger.debug("cost-limit sizing probe unavailable", exc_info=True)
         return
 
-    for pool, seats, quorum, replicas in demands:
+    for pool, seats, quorum, worst_seat, replicas in demands:
         if cost_limit + 1e-9 >= quorum:
             continue
+        # A replica holds one cycle's reservation at a time, so peak concurrent
+        # demand is the replica count times the dearest seat, not the quorum.
         logger.warning(
             "cost limit $%.2f cannot fund one %s quorum (needs $%.2f of "
-            "concurrent reservation for seats %s). Every review cycle reserves "
-            "its expected exposure before calling a provider, so the axis will "
+            "reservation across seats %s). Every review cycle reserves its "
+            "expected exposure before calling a provider, so the axis will "
             "defer instead of spending. Either raise --cost-limit (this pool "
-            "holds up to $%.2f at its %d configured replicas) or lower "
-            "IMAS_CODEX_SN_POOLS_%s_REPLICAS.",
+            "peaks at $%.2f held at once across its %d configured replicas) or "
+            "lower IMAS_CODEX_SN_POOLS_%s_REPLICAS.",
             cost_limit,
             pool,
             quorum,
             seats,
-            quorum * replicas,
+            worst_seat * replicas,
             replicas,
             pool.upper(),
         )
