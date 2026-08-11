@@ -42,12 +42,12 @@ def _preflight_row(
     name_id: str,
     *,
     matches: list[dict[str, object]] | None = None,
-    protected: list[str] | None = None,
+    fixture: list[str] | None = None,
 ) -> dict[str, object]:
     return {
         "requested_name": name_id,
         "matches": [_candidate(name_id)] if matches is None else matches,
-        "protected_producers": protected or [],
+        "fixture_producers": fixture or [],
     }
 
 
@@ -111,13 +111,9 @@ def _scope(
     *,
     dry_run: bool = False,
 ) -> dict[str, object]:
-    with patch(
-        "imas_codex.standard_names.protected_sources.protected_source_ids",
-        return_value=frozenset({"dd:west/protected"}),
-    ):
-        return scope_exact_standard_names(
-            names, "scope-run", dry_run=dry_run, gc=_Client(transaction)
-        )
+    return scope_exact_standard_names(
+        names, "scope-run", dry_run=dry_run, gc=_Client(transaction)
+    )
 
 
 def test_dry_run_reads_complete_set_once_and_never_writes() -> None:
@@ -136,7 +132,7 @@ def test_dry_run_reads_complete_set_once_and_never_writes() -> None:
     assert "HAS_PARENT*0.." in query
     assert "HAS_PARENT*1.." in query
     assert params["names"] == ["alpha", "beta"]
-    assert params["west_source_ids"] == ["dd:west/protected"]
+    assert params["fixture_source_id_prefix"] == "dd:test_review_entry__"
     assert transaction.committed is False
 
 
@@ -198,12 +194,8 @@ def test_duplicate_request_refuses_before_graph_access() -> None:
             "current drain scope",
         ),
         (
-            _preflight_row("protected", protected=["dd:west/protected"]),
-            "HAS_PARENT lineage",
-        ),
-        (
-            _preflight_row("fixture", protected=["dd:test_review_entry__persistent"]),
-            "protected source",
+            _preflight_row("fixture", fixture=["dd:test_review_entry__persistent"]),
+            "fixture source",
         ),
     ],
 )

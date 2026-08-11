@@ -1666,8 +1666,7 @@ RETURN requested_name,
          drain_claim_scope_id: candidate.drain_claim_scope_id
        }] AS matches,
        [producer_id IN producer_ids
-        WHERE producer_id IN $west_source_ids
-           OR producer_id STARTS WITH $fixture_source_id_prefix] AS protected_producers
+        WHERE producer_id STARTS WITH $fixture_source_id_prefix] AS fixture_producers
 ORDER BY requested_name
 """
 
@@ -1684,15 +1683,13 @@ WHERE NOT coalesce(name.name_stage, '') IN $terminal_name_stages
   AND name.drain_claim_scope_id IS NULL
   AND NOT EXISTS {
     MATCH (name)-[:HAS_PARENT*0..]->(ancestor:StandardName)
-    MATCH (protected_source:StandardNameSource)-[:PRODUCED_NAME]->(ancestor)
-    WHERE protected_source.id IN $west_source_ids
-       OR protected_source.id STARTS WITH $fixture_source_id_prefix
+    MATCH (fixture_source:StandardNameSource)-[:PRODUCED_NAME]->(ancestor)
+    WHERE fixture_source.id STARTS WITH $fixture_source_id_prefix
   }
   AND NOT EXISTS {
     MATCH (descendant:StandardName)-[:HAS_PARENT*1..]->(name)
-    MATCH (protected_source:StandardNameSource)-[:PRODUCED_NAME]->(descendant)
-    WHERE protected_source.id IN $west_source_ids
-       OR protected_source.id STARTS WITH $fixture_source_id_prefix
+    MATCH (fixture_source:StandardNameSource)-[:PRODUCED_NAME]->(descendant)
+    WHERE fixture_source.id STARTS WITH $fixture_source_id_prefix
   }
 SET name.run_id = $run_id
 RETURN collect(name.id) AS stamped_ids
@@ -1731,11 +1728,11 @@ def _exact_name_scope_refusals(rows: list[dict[str, Any]]) -> list[str]:
             )
         ):
             refusals.append(f"{requested_name}: current drain scope")
-        protected_producers = sorted(set(row.get("protected_producers") or []))
-        if protected_producers:
+        fixture_producers = sorted(set(row.get("fixture_producers") or []))
+        if fixture_producers:
             refusals.append(
-                f"{requested_name}: HAS_PARENT lineage is produced by protected "
-                f"source(s): {', '.join(protected_producers)}"
+                f"{requested_name}: HAS_PARENT lineage is produced by fixture "
+                f"source(s): {', '.join(fixture_producers)}"
             )
     return refusals
 
@@ -1752,7 +1749,7 @@ def scope_exact_standard_names(
 
     The read covers the complete requested set and both directions of its
     transitive ``HAS_PARENT`` lineage.  Any missing, ambiguous, terminal,
-    claimed, drain-scoped, or protected-lineage identity refuses the whole
+    claimed, drain-scoped, or fixture-lineage identity refuses the whole
     invocation.  ``run_id`` is durable provenance rather than a live lock, so a
     live invocation atomically replaces it on exactly the requested
     ``StandardName`` nodes after every live claim and drain field is clear.  It
@@ -1770,10 +1767,7 @@ def scope_exact_standard_names(
             "duplicate exact StandardName identity: " + ", ".join(duplicates)
         )
 
-    from imas_codex.standard_names.protected_sources import (
-        FIXTURE_SOURCE_ID_PREFIX,
-        protected_source_ids,
-    )
+    from imas_codex.standard_names.fixture_sources import FIXTURE_SOURCE_ID_PREFIX
 
     requested = sorted(normalized)
     own = gc is None
@@ -1787,7 +1781,6 @@ def scope_exact_standard_names(
                     for row in transaction.run(
                         _EXACT_NAME_SCOPE_PREFLIGHT_QUERY,
                         names=requested,
-                        west_source_ids=sorted(protected_source_ids()),
                         fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
                     )
                 ]
@@ -1811,7 +1804,6 @@ def scope_exact_standard_names(
                                 _EXACT_SCOPE_TERMINAL_NAME_STAGES
                             ),
                             terminal_statuses=sorted(_EXACT_SCOPE_TERMINAL_STATUSES),
-                            west_source_ids=sorted(protected_source_ids()),
                             fixture_source_id_prefix=FIXTURE_SOURCE_ID_PREFIX,
                         )
                     )
