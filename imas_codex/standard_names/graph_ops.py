@@ -11730,19 +11730,30 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
     return {"edges_created": len(attach), "pairs_dropped": len(dropped)}
 
 
-def reconcile_grammar_segments() -> dict[str, int | bool]:
-    """Audit live grammar projections without performing an ungoverned write.
+def reconcile_grammar_segments() -> dict[str, int]:
+    """Realign each live name's grammar segment columns with its canonical id.
 
-    Startup retains this compatibility call so projection drift stays visible.
-    Exact repair is intentionally delegated to the manifest-bound
-    ``sn reconcile-grammar-segments`` operator, which supplies closure hashes,
-    compare-and-set fencing, an immutable event, and an atomic postflight.
+    The bare-name segments (``position``, ``component``, ``subject``, …) are a
+    deterministic function of the canonical name id via the ISN parser. A name
+    written by an out-of-grammar path — e.g. the since-removed bulk catalog
+    import — can carry stale segments that disagree with its own id: an
+    ``…_at_pedestal_top`` name storing ``position='pedestal'`` is the observed
+    case. Such a name no longer recomposes to itself, and a re-composition from
+    its DD leaf would mint a divergent ``_at_pedestal`` near-duplicate.
+
+    This idempotent sweep re-parses every live name through the authoritative
+    ISN parser and realigns any drifted segment column to the parse. Names the
+    ISN grammar cannot parse are skipped (their segments are owned by the
+    quarantine path, never wiped here). Safe to run every rotation.
+
+    Returns ``{"names_realigned": n}``.
     """
     from imas_codex.standard_names.ledger import LIVE_NAME
 
     cols = _GRAMMAR_SEGMENT_COLUMNS
     select = ", ".join(f"sn.{c} AS {c}" for c in cols)
-    drift: list[str] = []
+    set_clause = ", ".join(f"sn.{c} = b.{c}" for c in cols)
+    batch: list[dict[str, Any]] = []
     with GraphClient() as gc:
         rows = gc.query(
             f"MATCH (sn:StandardName) WHERE {LIVE_NAME} RETURN sn.id AS id, {select}"
@@ -11755,20 +11766,20 @@ def reconcile_grammar_segments() -> dict[str, int | bool]:
             if not parsed.get("physical_base"):
                 continue
             if any(parsed.get(c) != r.get(c) for c in cols):
-                drift.append(str(r["id"]))
-    if drift:
-        logger.warning(
-            "reconcile_grammar_segments: %d live projection(s) require the exact "
-            "manifest-bound `sn reconcile-grammar-segments` operator; startup "
-            "made no grammar writes. First few: %s",
-            len(drift),
-            ", ".join(drift[:10]),
+                batch.append({"id": r["id"], **{c: parsed.get(c) for c in cols}})
+        if batch:
+            gc.query(
+                f"UNWIND $batch AS b MATCH (sn:StandardName {{id: b.id}}) "
+                f"SET {set_clause}",
+                batch=batch,
+            )
+    if batch:
+        logger.info(
+            "reconcile_grammar_segments: realigned %d name(s) to their canonical "
+            "id parse",
+            len(batch),
         )
-    return {
-        "names_realigned": 0,
-        "names_planned": len(drift),
-        "governed_apply_required": bool(drift),
-    }
+    return {"names_realigned": len(batch)}
 
 
 def reconcile_error_siblings() -> dict[str, int]:
