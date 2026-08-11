@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -152,10 +152,16 @@
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
     <p class="r-fu-outcome">Tranche 4 ran under the fresh +$100 authorization (sn run --flush -c 120): $55.01 spent, stopped stalled with $65 unspent — funding was not the constraint (0 budget-refused seats, 0 overspend). generate_docs/review_docs pending hit 0; $54.7 went to refine_name churn for +1 acceptance. The flush drain has CONVERGED; the residual tail (77 refine-pending names, 142 open edits, 349 exhausted) cycles review→refine without clearing and needs sn rescore + quality triage, not flush money.</p>
     </article>
-<article class="r-fu" data-id="f-spr-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-spr-005" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T19:13:40+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Triage the non-converging refine tail through sn rescore</h4>
     <div class="r-fu-body">The flush drain converged: further spend converts to refine churn, not acceptances. The residual population — 349 exhausted names, 77 refine-pending, 142 open edit proposals, 40 refine-docs — needs the standing recovery rule (sn rescore for quorum-variance exhaustion) and per-item quality triage (vocab gaps, hint quality). This is the recovery-triage scope of the sn-benchmark-evolution plan, now unblocked.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-benchmark-evolution</pre>
+    <p class="r-fu-outcome">Superseded by the landed churn RCA: the tail was not quorum variance but a deterministic successor-collision loop with a dead attempt counter. Fixed by the attempt budget (5b4d1254), attach-time pairing guard (1d637118), and ISN locus typing (55352a83). Live validation: the 837-call/$54.74 tail completed in 23 calls/$2.75 with 10 successor_collision + 4 attempts_exhausted parks, all with queryable reasons; the worklist rename accepted at 0.869.</p>
+    </article>
+<article class="r-fu" data-id="f-spr-006" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Resolve the dual-bound sources and the parked semantic worklist</h4>
+    <div class="r-fu-body">Route through sn-graph-wide-integrity: (1) 362 StandardNameSource nodes bound to >1 live name block retargets and underlie the fold pairs (atomic_count_of_ion_state shares 39/76 sources with accepted atomic_count) — needs the one-live-name-per-source dedup; (2) propose the include_accepted detach pass for the 41 gated inconsistent attachments plus the proven mis-attachments (faraday_angle→polarimeter, wavelength_bragg stale edge, electrons-path on the renamed particle source); (3) the deferred stricter locus rule (ISN entity typing: 189 flags vs shipped 17, ~172 new write-time refusals) needs per-family review before adoption; (4) ISN vocab gap: a locus token for a wave-diagnostic receiver channel (ECE/reflectometer/refractometer); (5) electron_source_rate stale s^-1 unit scalar + contradicting docs; (6) synthetic score=0.0 'skipped reviewer LLM call' on thermal_radiative_power_of_divertor_target.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
     </article>
 </section>
   </main>
