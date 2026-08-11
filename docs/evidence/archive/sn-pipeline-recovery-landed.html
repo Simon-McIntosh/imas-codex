@@ -190,6 +190,33 @@
     (343 calls), enrich_parents $0.02. Warm-cache hit rates ~82% throughout, confirming
     the §3 <code>supports_cache</code> restoration. Authorization consumed to date:
     ~$71 of the $200 (prior $10.64 + proof-of-life $0.94 + tranche 1 $59.69).</p>
+    <p><strong>Reservation accountancy repair</strong> (between tranches; merges
+    <code>ff05fd91</code> then <code>5ed709d0</code>): tranche 1's stall exposed that
+    admission priced request <em>bytes</em> as <em>tokens</em> (~4× on input) and the
+    full 32,000-token published output allowance (~9× on the dominant term), and that
+    the charge path <em>dropped billed spend from the ledger</em> when a bill outran
+    its reservation, so <code>cost_spent</code> under-reported and caps fired late.
+    Two passes fixed it. First: bytes→tokens at a measured 2.5 floor, an
+    empirically-grounded output allowance, and a reconciling charge path that records
+    <code>overspend</code>. Second, at the lead's direction, admission was retargeted
+    from a tail bound to the <em>typical bill</em>: the input term blends the three
+    rates a request actually pays (measured mean cache shares — 46% cache-read,
+    18% cache-write, 36% fresh), the completion term sizes from the observed mean
+    (2,977 tokens over 24,788 calls), and the pricing catalog gained verified
+    cache-read/cache-write rates for every configured seat. Admission fidelity landed
+    0.80–1.50× of the median bill on every high-volume seat (0.95–1.10× on the five
+    largest); whole-run concurrent hold at default replicas fell
+    <strong>$176.84 → $70.33 → $22.41</strong>. A startup warning now fires when a
+    cost limit cannot fund one review quorum.</p>
+    <p><strong>Tranche 2</strong> (<code>sn run --flush -c 75</code>, SNRun
+    <code>cb406746-1710-43fa-b2aa-0ee136ad53d6</code>, under expected-bill admission):
+    spent <strong>$75.04 of $75.00</strong>, stop reason
+    <code>budget_exhausted</code> — the cap fired at its true point with $0.04
+    overshoot, against tranche 1's <code>stalled</code>. Docs accepted +262
+    (2,407 → 2,669), edit proposals applied +31 (open 180 → 151), names axis
+    completed its backlog (+4 accepted; review_name near-idle at 24 calls). Spend
+    concentrated where the work was: docs review $45.8, refine_docs $13.9,
+    refine_name $10.9.</p>
     <p>Also under §4 scope: the quarantined reconciliation modules were deleted
     outright at the lead's direction (<code>464d60b5</code>, −9,661 lines — git history
     retains them), and the exact-name lineage guard was rescoped to fixture-produced
