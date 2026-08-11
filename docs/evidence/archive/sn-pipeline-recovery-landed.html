@@ -158,6 +158,44 @@
     merged, then removed by the orchestrator; two needed <code>--force</code> for
     directories the interrupted wave had left half-populated, verified merged and
     content-free of unpushed work first.</p>
+    <h2 id="s4">§4 — Drain the standing backlog</h2>
+    <p><strong>Quorum-deferral root cause (pre-drain gate):</strong> the proof-of-life
+    run's "0/3 reviews succeeded" deferrals (806 name + 322 docs) were
+    <em>budget-reservation starvation</em>, not a reviewer defect. Every review cycle
+    reserves worst-case provider exposure before calling; at default replica counts the
+    docs pool alone demands ~$26 of concurrent headroom against what was a $2.00 cap,
+    and the refusal path was silent. Fixed in merge <code>25722901</code>: a lost
+    primary no longer buys a doomed secondary review (33% of the proof-of-life
+    review_name spend had been billed after its quorum was already unreachable), and
+    budget-refused seats are named in the deferral warning. The reservation itself
+    over-accounts ~4× — request <em>bytes</em> priced as <em>tokens</em>, and output
+    priced at the full 32,000-token published allowance against ~3.5k actual — fix in
+    a follow-on commit.</p>
+    <p><strong>Tranche 1</strong> (<code>sn run --flush -c 60</code>, SNRun
+    <code>66237f23-96ec-4abe-b1a5-deac9538b22e</code>): spent <strong>$59.69 of
+    $60.00</strong>, stop reason <code>stalled</code> (cap-tail reservation starvation;
+    expected pre-fix). Product movement:</p>
+    <table>
+      <thead><tr><th>Measure</th><th>Before</th><th>After</th><th>Δ</th></tr></thead>
+      <tbody>
+        <tr><td>Names accepted</td><td>2,364</td><td>2,532</td><td>+168</td></tr>
+        <tr><td>Names drafted (backlog)</td><td>318</td><td>26</td><td>−292</td></tr>
+        <tr><td>Docs accepted</td><td>2,238</td><td>2,407</td><td>+169</td></tr>
+        <tr><td>Docs pending</td><td>2,001</td><td>1,595</td><td>−406</td></tr>
+        <tr><td>Edit proposals applied</td><td>431</td><td>509</td><td>+78</td></tr>
+        <tr><td>Edit proposals open</td><td>255</td><td>180</td><td>−75 (+3 new hints)</td></tr>
+      </tbody>
+    </table>
+    <p>Spend by pool: docs/name review quorums $50.3, refine $8.6, generate_docs $0.71
+    (343 calls), enrich_parents $0.02. Warm-cache hit rates ~82% throughout, confirming
+    the §3 <code>supports_cache</code> restoration. Authorization consumed to date:
+    ~$71 of the $200 (prior $10.64 + proof-of-life $0.94 + tranche 1 $59.69).</p>
+    <p>Also under §4 scope: the quarantined reconciliation modules were deleted
+    outright at the lead's direction (<code>464d60b5</code>, −9,661 lines — git history
+    retains them), and the exact-name lineage guard was rescoped to fixture-produced
+    lineage only (<code>4661b285</code>): WEST sources are not in review and need no
+    protection; the fixture guard remains because graph-marked tests share the
+    production Neo4j instance (73 fixture-source rows live in the graph).</p>
   </main>
 </body>
 </html>
