@@ -2470,10 +2470,21 @@ _TIME_DERIVATIVE_SEGMENT_RE = _re.compile(r"d(?:_|.+_)dt(?:_.*)?")
 
 _AXIS_LEAVES = frozenset({"x", "y", "z", "r", "phi"})
 
-# Words that mark a locus token as a concrete hardware device (as opposed to a
-# spatial feature such as ``magnetic_axis`` / ``plasma_boundary``). Only when
-# the name's locus is one of these do we apply the zero-overlap rejection — a
-# spatial-feature locus need not appear in the source path.
+# Device WORDS a hardware locus is expected to echo in its source path. Only
+# when the name's locus contains one of these do we apply the zero-overlap
+# rejection — a locus naming a place need not appear in the source path.
+#
+# This is codex-side POLICY over ordinary English device nouns, not a copy of
+# ISN vocabulary: 18 of the 25 are not ISN locus tokens at all, and the 7 that
+# are (bolometer, camera, detector, gauge, sensor, spectrometer, valve) are used
+# here as word FRAGMENTS of compound loci. What the words cannot tell us is
+# whether a locus names an object or a place — ``detector_pixel`` and
+# ``antenna_row`` read as hardware and are declared ``position`` — so that half
+# of the question is answered by ISN through ``is_place_locus``. Widening the
+# trigger to every ISN entity locus instead would be a different rule: measured
+# over the live corpus it takes the flag count from 27 to 189, newly rejecting
+# whole families (``area_of_diagnostic_aperture``, ``…_of_optical_element``)
+# whose locus is simply not spelled in the DD path.
 _HARDWARE_LOCUS_WORDS = frozenset(
     {
         "coil",
@@ -2793,6 +2804,8 @@ def _is_attachment_consistent(
     # hardware locus (``_of_<device>``/``_at_<device>``), the source path must
     # share at least one content token with that device. Conservative — only
     # rejects on ZERO overlap when the locus is a recognised hardware token.
+    from imas_codex.standard_names.segments import is_place_locus
+
     locus = _name_locus_token(sn_name)
     if locus:
         if _geometry_representation_conflicts(source_id, locus):
@@ -2801,7 +2814,7 @@ def _is_attachment_consistent(
                 f"SN '{sn_name}' describe incompatible solid/optical geometry"
             )
         locus_tokens = _content_tokens(locus)
-        if locus_tokens & _HARDWARE_LOCUS_WORDS:
+        if locus_tokens & _HARDWARE_LOCUS_WORDS and not is_place_locus(locus):
             path_tokens = _expanded_path_tokens(source_id)
             if not (locus_tokens & path_tokens):
                 return False, (

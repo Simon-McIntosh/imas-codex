@@ -1419,9 +1419,13 @@ def _reject_unscoped_accepted_reset(
     default=DEFAULT_REFINE_ROTATIONS,
     show_default=True,
     help=(
-        "Maximum REFINED_FROM / DOCS_REVISION_OF chain depth before a name "
-        "is marked exhausted.  Sourced from "
-        "``defaults.DEFAULT_REFINE_ROTATIONS`` (3) when not provided."
+        "Refinement rotations one name or documentation record may spend "
+        "before it is marked exhausted.  A rotation is a CLAIMED attempt: on "
+        "the name axis it is charged even when the attempt persists no "
+        "successor, so a proposal the graph cannot accept — an identity that "
+        "already exists, an ungrammatical candidate — cannot re-claim "
+        "indefinitely.  Sourced from "
+        "``[tool.imas-codex.sn].refine-rotations`` when not provided."
     ),
 )
 @click.option(
@@ -1431,8 +1435,8 @@ def _reject_unscoped_accepted_reset(
     default=DEFAULT_ESCALATION_MODEL,
     show_default=True,
     help=(
-        "Higher-capability model used on the final refine attempt "
-        "(chain_length == rotation_cap - 1).  Sourced from "
+        "Higher-capability model used on the last rotation the cap allows "
+        "(refine_attempts == rotation_cap).  Sourced from "
         "``defaults.DEFAULT_ESCALATION_MODEL`` when not provided."
     ),
 )

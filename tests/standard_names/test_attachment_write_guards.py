@@ -382,3 +382,64 @@ def test_compose_persist_guards_a_binding_onto_an_established_name() -> None:
     assert finalized == []
     locked = tx.params_with("AS outcome")["batch"]
     assert "distinct" in (locked[0]["attachment_error"] or "").lower()
+
+
+# ---------------------------------------------------------------------------
+# The device test applies to loci that name a device
+# ---------------------------------------------------------------------------
+#
+# The locus rule triggers on device WORDS, which cannot tell an object from a
+# place: `detector_pixel` reads as hardware and ISN declares it `position`. So
+# the rule was applied to a position locus and then matched lexically against
+# the DD path, passing or failing on whether the path happened to spell
+# "pixel" — in one IDS, `…/camera/pixel_dimensions → extent_of_detector_pixel`
+# passed while `…/energy_bound_lower → lower_bound_energy_of_detector_pixel`
+# failed on the identical locus. ISN's locus registry answers the
+# object-or-place half of the question.
+
+
+def test_position_locus_is_not_tested_as_a_device() -> None:
+    from imas_codex.standard_names.segments import is_place_locus
+
+    assert is_place_locus("detector_pixel")
+
+    # Per-pixel-ness lives in this path's documentation, not its spelling.
+    accepted, reason = _is_attachment_consistent(
+        "spectrometer_x_ray_crystal/channel/energy_bound_lower",
+        "lower_bound_energy_of_detector_pixel",
+    )
+
+    assert accepted, reason
+
+
+def test_entity_locus_still_enters_the_device_test() -> None:
+    from imas_codex.standard_names.segments import is_place_locus
+
+    assert not is_place_locus("langmuir_probe")
+
+    accepted, reason = _is_attachment_consistent(
+        "equilibrium/time_slice/global_quantities/ip",
+        "radial_coordinate_of_langmuir_probe",
+    )
+
+    assert not accepted
+    assert "locus/source device mismatch" in reason
+
+
+def test_unregistered_locus_keeps_the_device_test() -> None:
+    """Withdrawing the rule needs ISN evidence, which an unknown token is not."""
+    from imas_codex.standard_names.segments import is_place_locus
+
+    assert not is_place_locus("entirely_made_up_locus")
+
+
+def test_locus_types_are_read_from_isn_not_duplicated_in_codex() -> None:
+    """A restructured registry must fail loudly, not silently disable the rule."""
+    from imas_codex.standard_names.segments import locus_types
+
+    types = locus_types()
+    assert types, "ISN locus registry unreachable — the rule would turn off"
+    assert types.get("detector_pixel") == "position"
+    assert types.get("langmuir_probe") == "entity"
+    # Every type the rule reasons about is one ISN actually declares.
+    assert set(types.values()) <= {"entity", "position", "region", "geometry"}

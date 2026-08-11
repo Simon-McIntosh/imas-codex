@@ -269,6 +269,51 @@ def grammar_tokens_by_segment(
 
 
 @lru_cache(maxsize=1)
+def locus_types() -> dict[str, str]:
+    """ISN locus token → its declared type (``entity``/``position``/…).
+
+    The locus registry is the only authority on whether a locus names a
+    physical OBJECT or a PLACE, and the distinction is not recoverable from the
+    spelling: ``detector_pixel`` and ``line_of_sight`` read like hardware and
+    are declared ``position``, while ``spectrometer_channel`` carries no device
+    word and is declared ``entity``. A rule asking "is this locus a device"
+    must come through here rather than matching words — matching words is how a
+    position locus came to be tested as hardware.
+
+    Returns an empty mapping when ISN is unavailable, so a rule built on it
+    turns off rather than falling back to a vocabulary snapshot that would rot.
+    """
+    try:
+        from imas_standard_names import get_grammar_context
+
+        registry = get_grammar_context()["grammar"]["vocabularies"]["locus_registry"]
+        return {
+            token: str(entry["type"])
+            for token, entry in registry.items()
+            if isinstance(entry, dict) and entry.get("type")
+        }
+    except Exception:  # pragma: no cover — ISN absent or restructured
+        return {}
+
+
+#: Locus types that name a PLACE rather than a physical object. ``entity`` is
+#: the only type that names a thing; everything else locates one.
+_PLACE_LOCUS_TYPES: frozenset[str] = frozenset({"position", "region", "geometry"})
+
+
+def is_place_locus(locus: str | None) -> bool:
+    """Whether ISN declares *locus* to be a place rather than an object.
+
+    Answers False for an unregistered locus: this is used to WITHDRAW a rule
+    from loci ISN says are places, and an unknown token is no evidence for
+    withdrawing anything.
+    """
+    if not locus:
+        return False
+    return locus_types().get(locus, "") in _PLACE_LOCUS_TYPES
+
+
+@lru_cache(maxsize=1)
 def grammar_token_index() -> dict[str, tuple[str, ...]]:
     """Reverse of :func:`grammar_tokens_by_segment`: token → classes admitting it.
 
