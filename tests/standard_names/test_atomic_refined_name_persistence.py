@@ -12,7 +12,11 @@ from imas_codex.standard_names.attachment_audit import (
     AttachmentPairingGuardResult,
     AttachmentVerdict,
 )
-from imas_codex.standard_names.graph_ops import persist_refined_name
+from imas_codex.standard_names.graph_ops import (
+    RefinedNamePersistenceRefusal,
+    RefinedNamePersistenceRefusalReason,
+    persist_refined_name,
+)
 
 _EDIT_FIELDS = (
     "edit_mode",
@@ -254,7 +258,15 @@ def test_source_less_rename_still_records_human_edit() -> None:
 
 def test_predecessor_compare_and_set_loss_has_no_mutation() -> None:
     transaction = _transaction([])
-    transaction.run.side_effect = lambda *_args, **_kwargs: []
+
+    def run(cypher: str, **_params):
+        if "OPTIONAL MATCH (old:StandardName {id: $old_name})" in cypher:
+            # The predecessor moved out of the stage the preflight demanded,
+            # which is what left the compare-and-set matching nothing.
+            return [{"old_exists": True, "old_stage": "refining"}]
+        return []
+
+    transaction.run.side_effect = run
     graph = _graph(transaction)
     with (
         patch("imas_codex.standard_names.graph_ops.GraphClient", return_value=graph),
@@ -262,9 +274,10 @@ def test_predecessor_compare_and_set_loss_has_no_mutation() -> None:
             "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
         ) as record,
     ):
-        with pytest.raises(RuntimeError, match="predecessor stage"):
+        with pytest.raises(RefinedNamePersistenceRefusal) as refusal:
             _persist()
 
+    assert refusal.value.reason is RefinedNamePersistenceRefusalReason.PREDECESSOR_STAGE
     transaction.rollback.assert_called_once_with()
     transaction.commit.assert_not_called()
     record.assert_not_called()
@@ -363,7 +376,7 @@ def test_edit_state_race_fails_the_finalization_fence_and_rolls_back() -> None:
             "imas_codex.standard_names.provenance_lifecycle.record_standard_name_change"
         ) as record,
     ):
-        with pytest.raises(RuntimeError, match="left name_stage='refining'"):
+        with pytest.raises(RefinedNamePersistenceRefusal) as refusal:
             _persist(
                 edit_mode=None,
                 edit_reason=None,
@@ -371,6 +384,13 @@ def test_edit_state_race_fails_the_finalization_fence_and_rolls_back() -> None:
                 edit_status=None,
                 expected_old_stage=None,
             )
+
+    # The finalization write carries the edit snapshot in its compare-and-set,
+    # so a raced edit leaves it matching no row and no successor is written.
+    assert (
+        refusal.value.reason
+        is RefinedNamePersistenceRefusalReason.SUCCESSOR_NOT_PERSISTED
+    )
 
     transaction.rollback.assert_called_once_with()
     transaction.commit.assert_not_called()

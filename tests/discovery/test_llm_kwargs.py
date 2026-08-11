@@ -287,6 +287,11 @@ class TestBuildKwargsServiceTag:
 
         monkeypatch.setattr(llm, "get_llm_location", lambda: "local", raising=False)
         monkeypatch.setattr(llm, "get_llm_proxy_url", lambda: None, raising=False)
+        # Paid Standard Names routing is admitted only on the direct OpenRouter
+        # path, which needs a resolvable credential. Supply a placeholder so
+        # header construction is asserted identically whether or not the
+        # checkout happens to carry a developer .env.
+        monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "placeholder-key")
         defaults = {
             "model": "anthropic/claude-sonnet-4.6",
             "api_key": "test-key",

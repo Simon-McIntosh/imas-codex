@@ -104,6 +104,13 @@ def _patch_common(
     return [
         patch("imas_codex.discovery.base.llm.acall_llm_structured", new=llm_mock),
         patch(models_getter, return_value=models),
+        # The docs path sizes its escalation prompt against the third reviewer's
+        # published input allowance. These placeholder model names appear in no
+        # catalog, so that allowance has to be supplied alongside them.
+        patch(
+            "imas_codex.discovery.base.llm.get_catalog_model_info",
+            return_value={"max_input_tokens": 128_000},
+        ),
         patch(
             "imas_codex.settings.get_sn_review_disagreement_threshold",
             return_value=0.20,

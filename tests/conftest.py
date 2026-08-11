@@ -317,6 +317,26 @@ def temporary_embedding_cache_dir(tmp_path_factory, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def isolated_reviewer_profile_env():
+    """Confine a reviewer-profile selection to the test that made it.
+
+    ``sn run`` propagates its resolved ``--reviewer-profile`` to deeper settings
+    lookups through ``os.environ``, which is process-wide. A ``CliRunner``
+    invocation runs inside this process, so without this restore a single CLI
+    test naming a one-reviewer profile re-seats the reviewer chain for every
+    later test. That profile's model carries no checked-in pricing row, so the
+    damage surfaces far from its cause as unpriceable routes and empty quorums.
+    """
+    name = "IMAS_CODEX_SN_REVIEW_PROFILE"
+    before = os.environ.get(name)
+    yield
+    if before is None:
+        os.environ.pop(name, None)
+    else:
+        os.environ[name] = before
+
+
+@pytest.fixture(autouse=True)
 def disable_caching():
     """Automatically disable caching for all tests by making cache always miss."""
     # Patch the cache get method to always return None (cache miss)
