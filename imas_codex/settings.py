@@ -21,6 +21,7 @@ All settings support environment variable overrides (IMAS_CODEX_* prefix / NEO4J
 import importlib.resources
 import os
 from collections.abc import Sequence
+from contextvars import ContextVar, Token
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -1427,12 +1428,36 @@ _VALID_REVIEWER_PROFILES: frozenset[str] = frozenset(
 )
 
 
+_BOUND_REVIEW_PROFILE: ContextVar[str | None] = ContextVar(
+    "sn_review_profile", default=None
+)
+
+
+def bind_sn_review_profile(profile: str) -> Token[str | None]:
+    """Bind *profile* for the current context and return its release token.
+
+    A caller that resolves a profile (the ``sn`` CLI resolving
+    ``--reviewer-profile``) binds it here rather than exporting it, so the
+    choice reaches the reviewer accessors through the context the run already
+    carries — asyncio tasks and ``to_thread`` workers inherit it — without
+    mutating the process for anything that runs afterwards. Release the token
+    with :func:`release_sn_review_profile` when the invocation ends.
+    """
+    return _BOUND_REVIEW_PROFILE.set(profile)
+
+
+def release_sn_review_profile(token: Token[str | None]) -> None:
+    """Undo one :func:`bind_sn_review_profile` binding."""
+    _BOUND_REVIEW_PROFILE.reset(token)
+
+
 def get_sn_review_active_profile() -> str:
     """Return the active reviewer profile name.
 
     Resolution order:
-      1. ``IMAS_CODEX_SN_REVIEW_PROFILE`` environment variable.
-      2. Hard-coded default: ``"default"``.
+      1. A profile bound by :func:`bind_sn_review_profile`.
+      2. ``IMAS_CODEX_SN_REVIEW_PROFILE`` environment variable.
+      3. Hard-coded default: ``"default"``.
 
     Valid profile names: ``"default"``, ``"quality-cost-balanced"``,
     ``"opus-only"``. (Reviewer floor is Sonnet 4.6 — no Haiku profiles.)
@@ -1443,6 +1468,9 @@ def get_sn_review_active_profile() -> str:
     """
     import os as _os
 
+    bound = _BOUND_REVIEW_PROFILE.get()
+    if bound is not None:
+        return bound
     return _os.environ.get("IMAS_CODEX_SN_REVIEW_PROFILE", "default")
 
 

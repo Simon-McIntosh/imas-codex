@@ -1779,13 +1779,21 @@ def sn_run(
       imas-codex sn run --min-score 0.85 --rotation-cap 5    # tighter thresholds
     """
 
-    import os as _os
+    from imas_codex.settings import (
+        bind_sn_review_profile,
+        release_sn_review_profile,
+    )
 
-    # Click has already resolved explicit option > environment > default.
-    # Always propagate that resolved value so an explicit ``default`` replaces
-    # any profile left in the process environment by an earlier invocation.
+    # Click has already resolved explicit option > environment > default. Bind
+    # that resolved value for this invocation only: the pools and every thread
+    # they dispatch inherit the binding through the context, and it is released
+    # when the command closes so a second invocation in the same process starts
+    # from its own resolution rather than this one's.
     reviewer_profile = reviewer_profile.lower()
-    _os.environ["IMAS_CODEX_SN_REVIEW_PROFILE"] = reviewer_profile
+    _profile_token = bind_sn_review_profile(reviewer_profile)
+    click.get_current_context().call_on_close(
+        lambda: release_sn_review_profile(_profile_token)
+    )
 
     if exact_names:
         scope_conflicts = {
