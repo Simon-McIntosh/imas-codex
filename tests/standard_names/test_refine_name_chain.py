@@ -1,11 +1,14 @@
 """Tests for successor-chain creation in the refine_name pipeline.
 
 Covers:
-- Claim eligibility (reviewed + low score + chain < cap)
+- Claim eligibility (reviewed + low score + rotations remaining)
 - Persist semantics (new node, REFINED_FROM edge, chain_length, edge migration)
-- Release (revert refining → reviewed, token+stage verification)
-- Worker behavior (escalation model selection, failure release)
+- Stopping an attempt (reason recorded, stage chosen, token+stage fence)
+- Worker behavior (escalation model selection, failure routing)
 - Prompt rendering
+
+The rotation budget itself — charge, inheritance, exhaustion, recovery — is
+pinned in ``test_refine_attempt_budget.py``.
 """
 
 from __future__ import annotations
@@ -497,71 +500,67 @@ class TestPersistCypherContent:
 # =============================================================================
 
 
-class TestReleaseRefineNameFailedClaims:
-    """release_refine_name_failed_claims reverts name_stage and clears token."""
+class TestStopRefineNameAttempt:
+    """A failed attempt is closed with its reason and the right next stage."""
 
-    def test_release_reverts_stage(self):
-        from imas_codex.standard_names.graph_ops import (
-            release_refine_name_failed_claims,
-        )
+    def test_recoverable_failure_returns_the_name_to_review(self):
+        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
 
         gc = _mock_gc_query()
-        gc.query = MagicMock(return_value=[{"released": 1}])
+        gc.query = MagicMock(return_value=[{"stage": "reviewed"}])
 
         with _patch_gc(gc):
-            released = release_refine_name_failed_claims(sn_ids=["a"], token="tok")
-
-        assert released == 1
-        cypher = gc.query.call_args.args[0]
-        assert "name_stage = 'reviewed'" in cypher
-        assert "name_stage = 'refining'" in cypher
-
-    def test_release_checks_token(self):
-        from imas_codex.standard_names.graph_ops import (
-            release_refine_name_failed_claims,
-        )
-
-        gc = _mock_gc_query()
-        gc.query = MagicMock(return_value=[{"released": 0}])
-
-        with _patch_gc(gc):
-            released = release_refine_name_failed_claims(
-                sn_ids=["a"], token="wrong-token"
+            stage = stop_refine_name_attempt(
+                sn_id="a", token="tok", reason="transient_failure"
             )
 
-        assert released == 0
+        assert stage == "reviewed"
+        cypher = " ".join(gc.query.call_args.args[0].split())
+        # Terminality is decided from committed state inside the write, so a
+        # concurrent charge cannot be read stale by the caller.
+        assert "coalesce(sn.refine_attempts, 0) >= $rotation_cap" in cypher
+        assert gc.query.call_args.kwargs["terminal"] is False
 
-    def test_release_checks_stage(self):
-        from imas_codex.standard_names.graph_ops import (
-            release_refine_name_failed_claims,
-        )
+    def test_collision_is_terminal_and_records_the_occupied_identity(self):
+        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
 
         gc = _mock_gc_query()
-        gc.query = MagicMock(return_value=[{"released": 0}])
+        gc.query = MagicMock(return_value=[{"stage": "exhausted"}])
 
         with _patch_gc(gc):
-            release_refine_name_failed_claims(sn_ids=["a"], token="tok")
+            stage = stop_refine_name_attempt(
+                sn_id="a",
+                token="tok",
+                reason="successor_collision",
+                collision_name="b",
+            )
 
-        # With wrong stage, should not release
-        cypher = gc.query.call_args.args[0]
-        assert "claim_token = $token" in cypher
+        assert stage == "exhausted"
+        assert gc.query.call_args.kwargs["terminal"] is True
+        assert gc.query.call_args.kwargs["collision_name"] == "b"
 
-    def test_empty_ids_returns_zero(self):
-        from imas_codex.standard_names.graph_ops import (
-            release_refine_name_failed_claims,
-        )
+    def test_write_is_fenced_on_the_active_claim(self):
+        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
 
-        released = release_refine_name_failed_claims(sn_ids=[], token="tok")
-        assert released == 0
+        gc = _mock_gc_query()
+        gc.query = MagicMock(return_value=[])
+
+        with _patch_gc(gc):
+            stage = stop_refine_name_attempt(
+                sn_id="a", token="stale", reason="transient_failure"
+            )
+
+        assert stage == ""
+        cypher = " ".join(gc.query.call_args.args[0].split())
+        assert "sn.claim_token = $token" in cypher
+        assert "sn.name_stage = 'refining'" in cypher
 
 
 class TestRefineTerminalClaimFence:
     """Deterministic termination is fenced by the exact active claim token."""
 
     def test_stale_token_does_not_mutate_current_claim(self):
-        from imas_codex.standard_names.graph_ops import (
-            _mark_refine_vocab_gap_exhausted,
-        )
+        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
 
         state = {
             "name_stage": "refining",
@@ -583,10 +582,11 @@ class TestRefineTerminalClaimFence:
         gc = _mock_gc_query()
         gc.query = MagicMock(side_effect=_query)
         with _patch_gc(gc):
-            _mark_refine_vocab_gap_exhausted(
+            stop_refine_name_attempt(
                 sn_id="test_name",
                 token="stale-token",
-                error_msg="strict grammar validation failed",
+                reason="grammar_invalid",
+                detail="strict grammar validation failed",
             )
 
         assert state == {
@@ -597,17 +597,16 @@ class TestRefineTerminalClaimFence:
         }
 
     def test_terminal_query_preserves_identity_provenance_and_counters(self):
-        from imas_codex.standard_names.graph_ops import (
-            _mark_refine_vocab_gap_exhausted,
-        )
+        from imas_codex.standard_names.graph_ops import stop_refine_name_attempt
 
         gc = _mock_gc_query()
         gc.query = MagicMock(return_value=[])
         with _patch_gc(gc):
-            _mark_refine_vocab_gap_exhausted(
+            stop_refine_name_attempt(
                 sn_id="test_name",
                 token="active-token",
-                error_msg="strict grammar validation failed",
+                reason="grammar_invalid",
+                detail="strict grammar validation failed",
             )
 
         cypher = " ".join(gc.query.call_args.args[0].split())
@@ -807,8 +806,8 @@ class TestPinnedRenameShortCircuit:
                 "imas_codex.standard_names.graph_ops.persist_refined_name",
             ) as mock_persist,
             patch(
-                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
-            ) as mock_exhaust,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+            ) as mock_stop,
             patch(
                 "imas_codex.standard_names.graph_ops.resubmit_pinned_rename_for_review",
                 return_value="resubmitted",
@@ -828,11 +827,11 @@ class TestPinnedRenameShortCircuit:
         assert mock_resubmit.call_args.kwargs["sn_id"] == item["id"]
         mock_llm.assert_not_called()
         mock_persist.assert_not_called()
-        mock_exhaust.assert_not_called()
+        mock_stop.assert_not_called()
 
 
 class TestProcessReleasesOnFailure:
-    """On LLM error, release_refine_name_failed_claims is called."""
+    """Every failed attempt is closed through ``stop_refine_name_attempt``."""
 
     @pytest.mark.asyncio
     async def test_releases_claim_on_llm_failure(self):
@@ -858,9 +857,9 @@ class TestProcessReleasesOnFailure:
                 return_value="default-model",
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
-                return_value=1,
-            ) as mock_release,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                return_value="reviewed",
+            ) as mock_stop,
             patch(
                 _GC_WORKERS_PATH,
                 return_value=_mock_worker_gc(),
@@ -872,10 +871,13 @@ class TestProcessReleasesOnFailure:
             count = await process_refine_name_batch([item], mgr, stop)
 
         assert count == 0
-        mock_release.assert_called_once()
-        call_kwargs = mock_release.call_args.kwargs
-        assert call_kwargs["sn_ids"] == ["test_name"]
+        mock_stop.assert_called_once()
+        call_kwargs = mock_stop.call_args.kwargs
+        assert call_kwargs["sn_id"] == "test_name"
         assert call_kwargs["token"] == "tok-abc-123"
+        # An unclassified model error may not recur, so the name keeps the
+        # rotations it has left.
+        assert call_kwargs["reason"] == "transient_failure"
 
     @pytest.mark.asyncio
     async def test_exact_id_collision_emits_both_ids_and_releases_claim(self, caplog):
@@ -918,9 +920,9 @@ class TestProcessReleasesOnFailure:
                 "imas_codex.standard_names.graph_ops.persist_refined_name"
             ) as mock_persist,
             patch(
-                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
-                return_value=1,
-            ) as mock_release,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                return_value="exhausted",
+            ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
             caplog.at_level("WARNING"),
         ):
@@ -930,8 +932,16 @@ class TestProcessReleasesOnFailure:
 
         assert count == 0
         mock_persist.assert_not_called()
-        mock_release.assert_called_once_with(
-            sn_ids=["radial_outline_of_passive_loop"], token="tok-abc-123"
+        # The proposal names an identity the graph already holds, and the same
+        # prompt reproduces it every cycle — park it instead of spending the
+        # rotations that remain.
+        stop_kwargs = mock_stop.call_args.kwargs
+        assert mock_stop.call_count == 1
+        assert stop_kwargs["sn_id"] == "radial_outline_of_passive_loop"
+        assert stop_kwargs["token"] == "tok-abc-123"
+        assert stop_kwargs["reason"] == "successor_collision"
+        assert stop_kwargs["collision_name"] == (
+            "radial_outline_of_conductor_cross_section"
         )
         collision = events[-1]
         assert collision["outcome"] == "dup_prevented"
@@ -941,7 +951,7 @@ class TestProcessReleasesOnFailure:
         assert collision["existing_name"] == (
             "radial_outline_of_conductor_cross_section"
         )
-        assert collision["claim_release_count"] == 1
+        assert collision["resulting_stage"] == "exhausted"
         assert "refine_name_persistence_refused" in caplog.text
         assert "radial_outline_of_passive_loop" in caplog.text
         assert "radial_outline_of_conductor_cross_section" in caplog.text
@@ -997,9 +1007,9 @@ class TestProcessReleasesOnFailure:
                 side_effect=refusal,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
-                return_value=0,
-            ) as mock_release,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                return_value="",
+            ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
             caplog.at_level("WARNING"),
         ):
@@ -1008,9 +1018,13 @@ class TestProcessReleasesOnFailure:
             )
 
         assert count == 0
-        mock_release.assert_called_once_with(
-            sn_ids=[item["id"]], token=item["claim_token"]
-        )
+        stop_kwargs = mock_stop.call_args.kwargs
+        assert mock_stop.call_count == 1
+        assert stop_kwargs["sn_id"] == item["id"]
+        assert stop_kwargs["token"] == item["claim_token"]
+        # A claim this worker no longer holds proves nothing about the name,
+        # so it must not be treated as a decided conflict.
+        assert stop_kwargs["reason"] == "transient_failure"
         assert events[-1]["outcome"] == "claim_lost"
         assert events[-1]["refusal_reason"] == "claim_lost"
         assert "orphan_sweep beat us" not in caplog.text
@@ -1064,12 +1078,9 @@ class TestProcessReleasesOnFailure:
                 "imas_codex.standard_names.graph_ops.persist_refined_name"
             ) as mock_persist,
             patch(
-                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
-                return_value=None,
-            ) as mock_exhaust,
-            patch(
-                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims"
-            ) as mock_release,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                return_value="exhausted",
+            ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
         ):
             mgr = _mock_budget_manager()
@@ -1086,11 +1097,14 @@ class TestProcessReleasesOnFailure:
         assert charged_event.sn_ids == (item["id"],)
         assert charged_event.tokens_in == 100
         assert charged_event.tokens_out == 50
-        mock_exhaust.assert_called_once()
-        assert mock_exhaust.call_args.kwargs["sn_id"] == item["id"]
-        assert mock_exhaust.call_args.kwargs["token"] == item["claim_token"]
-        assert "strict grammar validation" in mock_exhaust.call_args.kwargs["error_msg"]
-        mock_release.assert_not_called()
+        mock_stop.assert_called_once()
+        stop_kwargs = mock_stop.call_args.kwargs
+        assert stop_kwargs["sn_id"] == item["id"]
+        assert stop_kwargs["token"] == item["claim_token"]
+        # An ungrammatical composition is reproduced by the same prompt every
+        # cycle, so it parks the name rather than costing another rotation.
+        assert stop_kwargs["reason"] == "grammar_invalid"
+        assert "strict grammar validation" in stop_kwargs["detail"]
         mock_persist.assert_not_called()
         assert events[-1]["outcome"] == "refine_failed"
         assert events[-1]["cost"] == pytest.approx(0.37)
@@ -1126,12 +1140,9 @@ class TestProcessReleasesOnFailure:
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
             patch(
-                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
-                return_value=None,
-            ) as mock_exhaust,
-            patch(
-                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims"
-            ) as mock_release,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                return_value="exhausted",
+            ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
         ):
             mgr = _mock_budget_manager()
@@ -1147,8 +1158,8 @@ class TestProcessReleasesOnFailure:
         assert charged_event.tokens_out == 30
         assert charged_event.tokens_cached_read == 40
         assert charged_event.tokens_cached_write == 5
-        mock_exhaust.assert_called_once()
-        mock_release.assert_not_called()
+        mock_stop.assert_called_once()
+        assert mock_stop.call_args.kwargs["reason"] == "grammar_invalid"
 
     @pytest.mark.asyncio
     async def test_provider_budget_error_charges_prior_responses_then_propagates(self):
@@ -1181,11 +1192,8 @@ class TestProcessReleasesOnFailure:
             ),
             patch("imas_codex.settings.get_model", return_value="default-model"),
             patch(
-                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted"
-            ) as mock_exhaust,
-            patch(
-                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims"
-            ) as mock_release,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt"
+            ) as mock_stop,
             patch(_GC_WORKERS_PATH, return_value=_mock_worker_gc()),
         ):
             mgr = _mock_budget_manager()
@@ -1202,8 +1210,7 @@ class TestProcessReleasesOnFailure:
         assert charged_event.tokens_cached_read == 30
         assert charged_event.tokens_cached_write == 4
         lease.release_unused.assert_called_once()
-        mock_exhaust.assert_not_called()
-        mock_release.assert_not_called()
+        mock_stop.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_pre_response_provider_budget_error_does_not_charge(self):

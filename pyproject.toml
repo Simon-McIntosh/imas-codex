@@ -528,6 +528,13 @@ retry-attempts = 1
 # Hybrid-search k expansion factor used on retry.
 retry-k-expansion = 12
 
+# Refinement rotations one name (or documentation record) may spend before it
+# is terminal. On the name axis this is an ATTEMPT budget: a claimed refine
+# that fails to persist a successor still spends a rotation, so a name whose
+# proposal is structurally impossible cannot re-claim indefinitely. The final
+# rotation runs on the escalation seat.
+refine-rotations = 3
+
 # Desc-name similarity gate: cosine threshold below which a derived parent's
 # description is considered misaligned with the name, routing the item to
 # REFINE_DOCS instead of completing name review.

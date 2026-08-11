@@ -26,6 +26,7 @@ from collections.abc import Callable, Sequence
 from functools import cache as _cache, lru_cache
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.graph.models import RefineStopReason
 from imas_codex.standard_names.budget import (
     bind_attempt_exposure,
     charge_billable_exception,
@@ -6427,6 +6428,25 @@ def _is_refine_grammar_failure(exc: BaseException) -> bool:
     return any(marker in msg for marker in _GRAMMAR_FAILURE_MARKERS)
 
 
+#: Markers within the deterministic set that identify a MISSING TOKEN rather
+#: than a malformed composition. The distinction is the operator's next move:
+#: a missing token is admitted on the ISN side, while a malformed composition
+#: is a prompt or model problem in this repository.
+_VOCABULARY_GAP_MARKERS: tuple[str, ...] = ("not a registered",)
+
+
+def _refine_failure_stop_reason(
+    exc: BaseException, *, terminal: bool
+) -> RefineStopReason:
+    """Classify a refine failure into the reason recorded on the name."""
+    if not terminal:
+        return RefineStopReason.transient_failure
+    msg = str(exc).lower()
+    if any(marker in msg for marker in _VOCABULARY_GAP_MARKERS):
+        return RefineStopReason.vocabulary_gap
+    return RefineStopReason.grammar_invalid
+
+
 def _is_refine_docs_failure(exc: BaseException) -> bool:
     """Return True if *exc* is a deterministic ``RefinedDocs`` validation failure.
 
@@ -6450,12 +6470,14 @@ async def process_refine_name_batch(
 
     For each item in the batch:
     1. Walk the REFINED_FROM chain via ``chain_history`` (already enriched).
-    2. Decide whether to escalate (chain_length ≥ rotation_cap - 1).
+    2. Escalate when the claim charged the last rotation the cap allows.
     3. Optionally fan out targeted DD context (gated).
     4. Call LLM to produce a refined name (``RefinedName`` response model).
     5. Run the deterministic name-key dup guard before persisting.
     6. Persist via ``persist_refined_name`` (new node + edge migration).
-    7. On failure, release claims via ``release_refine_name_failed_claims``.
+    7. Close a failed attempt with :func:`stop_refine_name_attempt`, which
+       records why it failed and parks the name when the reason is decided or
+       the budget is spent.
 
     Returns count of items successfully processed.
     """
@@ -6487,17 +6509,43 @@ async def process_refine_name_batch(
     from imas_codex.standard_names.graph_ops import (
         RefinedNamePersistenceRefusal,
         RefinedNamePersistenceRefusalReason,
-        _mark_refine_vocab_gap_exhausted,
         bump_sn_run_counter,
         persist_refined_name,
-        release_refine_name_failed_claims,
         resubmit_pinned_rename_for_review,
+        stop_refine_name_attempt,
     )
     from imas_codex.standard_names.models import RefinedName
 
     rotation_cap = DEFAULT_REFINE_ROTATIONS
     focus_scope_id = _refine_batch_scope_id(batch, scope_run_id)
     processed = 0
+
+    async def _stop_attempt(
+        item: dict[str, Any],
+        reason: RefineStopReason,
+        *,
+        detail: str = "",
+        collision_name: str | None = None,
+    ) -> str:
+        """Close this attempt on the graph, returning the stage written."""
+        try:
+            return await _asyncio.to_thread(
+                stop_refine_name_attempt,
+                sn_id=item["id"],
+                token=item.get("claim_token") or "",
+                reason=reason.value,
+                detail=detail,
+                collision_name=collision_name,
+                rotation_cap=rotation_cap,
+            )
+        except Exception:
+            logger.debug(
+                "refine_name: could not record stop for %s (reason=%s)",
+                item["id"],
+                reason.value,
+                exc_info=True,
+            )
+            return ""
 
     # ── GraphClient lifecycle ────────────────────────────────────────
     # One client per cycle, reused by hybrid-neighbour search,
@@ -6555,7 +6603,23 @@ async def process_refine_name_batch(
                 continue
 
             # ── Escalation decision ───────────────────────────────────
-            escalate = chain_length >= rotation_cap - 1
+            # Keyed on the rotations SPENT, which the claim has just charged,
+            # so the last one runs on the escalation seat even when nothing
+            # this name proposed has ever persisted — the exact case the
+            # lineage-depth test never reached.
+            attempt = int(item.get("refine_attempts") or chain_length + 1)
+            escalate = attempt >= rotation_cap
+            logger.info(
+                "refine_name: %s attempt %d/%d%s",
+                sn_id,
+                attempt,
+                rotation_cap,
+                (
+                    f" (previous stop: {item['refine_stop_reason']})"
+                    if item.get("refine_stop_reason")
+                    else ""
+                ),
+            )
             if escalate:
                 model = DEFAULT_ESCALATION_MODEL
             else:
@@ -6848,22 +6912,19 @@ async def process_refine_name_batch(
                         sn_id,
                     )
                 if dup_id:
-                    # Release claim back to 'reviewed' so the cycle
-                    # can pick it up again (with fresh feedback) or
-                    # be marked superseded by manual review.
-                    token = item.get("claim_token") or ""
-                    released = 0
-                    try:
-                        released = await _asyncio.to_thread(
-                            release_refine_name_failed_claims,
-                            sn_ids=[sn_id],
-                            token=token,
-                        )
-                    except Exception:
-                        logger.debug(
-                            "release after dup_prevented failed for %s",
-                            sn_id,
-                        )
+                    # The identity the refiner is reaching for is already
+                    # held. Refinement may not take an occupied identity —
+                    # folding into it migrates sources and belongs to
+                    # `sn edit` — and the same prompt re-proposes the same
+                    # identity on every cycle, across vendors. Park the name
+                    # with the collision recorded rather than spending the
+                    # rotations that remain on a decided outcome.
+                    stage = await _stop_attempt(
+                        item,
+                        RefineStopReason.successor_collision,
+                        detail=f"proposed {candidate_name} which already exists",
+                        collision_name=dup_id,
+                    )
                     collision_event = {
                         "pool": "refine_name",
                         "name": sn_id,
@@ -6872,7 +6933,9 @@ async def process_refine_name_batch(
                         "existing_name": dup_id,
                         "duplicate_of": dup_id,
                         "refusal_reason": "successor_collision",
-                        "claim_release_count": released,
+                        "attempt": attempt,
+                        "rotation_cap": rotation_cap,
+                        "resulting_stage": stage,
                         "outcome": "dup_prevented",
                         "model": model,
                         "cost": cost,
@@ -6971,26 +7034,30 @@ async def process_refine_name_batch(
                 if isinstance(exc, ProviderBudgetExhausted):
                     raise
                 _exc_str = str(exc)
-                token = item.get("claim_token") or ""
                 if isinstance(exc, RefinedNamePersistenceRefusal):
-                    released = 0
-                    try:
-                        released = await _asyncio.to_thread(
-                            release_refine_name_failed_claims,
-                            sn_ids=[sn_id],
-                            token=token,
-                        )
-                    except Exception:
-                        logger.debug(
-                            "release after typed persist refusal failed for %s",
-                            sn_id,
-                            exc_info=True,
-                        )
                     claim_lost = exc.reason in {
                         RefinedNamePersistenceRefusalReason.CLAIM_LOST,
                         RefinedNamePersistenceRefusalReason.PREDECESSOR_STAGE,
                         RefinedNamePersistenceRefusalReason.PREDECESSOR_MISSING,
                     }
+                    # A successor the persistence fence will never provision
+                    # under that name is as decided as a name-key collision;
+                    # a lost claim or a contended drain scope is not, so those
+                    # keep the remaining rotations.
+                    lifecycle_collision = (
+                        exc.reason
+                        is RefinedNamePersistenceRefusalReason.SUCCESSOR_LIFECYCLE
+                    )
+                    stage = await _stop_attempt(
+                        item,
+                        (
+                            RefineStopReason.successor_lifecycle_collision
+                            if lifecycle_collision
+                            else RefineStopReason.transient_failure
+                        ),
+                        detail=f"{exc.reason.value}: proposed {exc.proposed_name}",
+                        collision_name=exc.existing_name,
+                    )
                     refusal_event = {
                         "pool": "refine_name",
                         "name": sn_id,
@@ -6998,7 +7065,9 @@ async def process_refine_name_batch(
                         "proposed_name": exc.proposed_name,
                         "existing_name": exc.existing_name,
                         "refusal_reason": exc.reason.value,
-                        "claim_release_count": released,
+                        "attempt": attempt,
+                        "rotation_cap": rotation_cap,
+                        "resulting_stage": stage,
                         "outcome": "claim_lost" if claim_lost else "persist_refused",
                         "model": model,
                         "cost": cost,
@@ -7029,25 +7098,11 @@ async def process_refine_name_batch(
                     )
                 else:
                     logger.exception("refine_name failed for %s", sn_id)
-                try:
-                    if is_terminal:
-                        await _asyncio.to_thread(
-                            _mark_refine_vocab_gap_exhausted,
-                            sn_id=sn_id,
-                            token=token,
-                            error_msg=str(exc)[:500],
-                        )
-                    else:
-                        await _asyncio.to_thread(
-                            release_refine_name_failed_claims,
-                            sn_ids=[sn_id],
-                            token=token,
-                        )
-                except Exception:
-                    logger.debug(
-                        "release/exhaust also failed for %s",
-                        sn_id,
-                    )
+                stage = await _stop_attempt(
+                    item,
+                    _refine_failure_stop_reason(exc, terminal=is_terminal),
+                    detail=_exc_str[:500],
+                )
                 if on_event is not None:
                     on_event(
                         {
@@ -7055,6 +7110,9 @@ async def process_refine_name_batch(
                             "name": sn_id,
                             "old_name": sn_id,
                             "outcome": "refine_failed",
+                            "attempt": attempt,
+                            "rotation_cap": rotation_cap,
+                            "resulting_stage": stage,
                             "model": model,
                             "cost": cost,
                             "llm_tokens_in": llm_tokens_in,

@@ -349,6 +349,9 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
     graph = MagicMock()
     graph.__enter__.return_value = graph
     graph.__exit__.return_value = False
+    # A verified claim charges one rotation against the committed fence before
+    # the batch reaches the model.
+    graph.query.return_value = [{"id": "radial_coordinate", "refine_attempts": 1}]
 
     @contextmanager
     def _session():
@@ -372,6 +375,7 @@ def test_atomic_claim_returns_canonical_scope_identity() -> None:
     readback_query = transaction.run.call_args_list[1].args[0]
     assert "sn.run_id AS scope_run_id" in readback_query
     assert claimed[0]["scope_run_id"] == "source-focus-scope"
+    assert claimed[0]["refine_attempts"] == 1
 
 
 @pytest.mark.asyncio

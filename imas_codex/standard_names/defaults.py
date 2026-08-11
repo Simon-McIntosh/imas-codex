@@ -7,7 +7,7 @@ file.  Model *selections* are NOT tunables — they live in their own
 ``settings.get_model()``; never hardcode a model id here.
 """
 
-from imas_codex.settings import get_model
+from imas_codex.settings import get_model, get_sn_refine_rotations
 
 # Reviewer-score thresholds
 DEFAULT_MIN_SCORE: float = 0.85
@@ -31,8 +31,16 @@ SEMANTIC_SIM_SYNTHETIC_SCORE: float = 0.30
 Low enough to guarantee routing to the refine_name pool."""
 
 # Refine rotation cap
-DEFAULT_REFINE_ROTATIONS: int = 3
-"""Maximum REFINED_FROM (or DOCS_REVISION_OF) chain depth before exhaustion."""
+DEFAULT_REFINE_ROTATIONS: int = get_sn_refine_rotations()
+"""Refinement rotations one name or documentation record may spend.
+
+A rotation is one CLAIMED refinement attempt. On the name axis it is charged
+at claim time to ``StandardName.refine_attempts``, so an attempt that produces
+no persisted successor — the proposed identity is taken, the persistence fence
+refuses it, the candidate fails grammar validation — still spends the budget;
+``chain_length`` counts only the successors that landed and therefore cannot
+bound the work. On the docs axis every attempt rewrites in place, so rotations
+and ``docs_chain_length`` advance together."""
 
 # Model used on the final refine attempt before exhaustion, for BOTH
 # name-refine and docs-refine escalation. Configured in

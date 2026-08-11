@@ -117,15 +117,23 @@ def patched(monkeypatch: pytest.MonkeyPatch):
         persist_calls.append(kwargs)
         return {}
 
-    def _release(*, sn_ids, token):
-        release_calls.append({"sn_ids": list(sn_ids), "token": token})
+    def _stop(*, sn_id, token, reason, detail="", collision_name=None, **_kwargs):
+        release_calls.append(
+            {
+                "sn_id": sn_id,
+                "token": token,
+                "reason": reason,
+                "collision_name": collision_name,
+            }
+        )
+        return "exhausted" if collision_name else "reviewed"
 
     monkeypatch.setattr(
         "imas_codex.standard_names.graph_ops.persist_refined_name", _persist
     )
     monkeypatch.setattr(
-        "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
-        _release,
+        "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+        _stop,
     )
 
     def _charge_event(self, cost, event):
@@ -166,8 +174,11 @@ async def test_dup_guard_drops_candidate(
     assert processed == 0
     # No persist call — dup_prevented short-circuited the path.
     assert persist_calls == []
-    # Claim released back to 'reviewed'.
-    assert any(c["sn_ids"] == ["old_name"] for c in release_calls)
+    # The attempt is closed against the occupied identity, and a collision is
+    # decided — the name parks rather than returning to 'reviewed' to re-claim.
+    assert [c["sn_id"] for c in release_calls] == ["old_name"]
+    assert release_calls[0]["reason"] == "successor_collision"
+    assert release_calls[0]["collision_name"] == "Electron_Temperature"
     # Outcome surfaced in on_event payload.
     dup_events = [e for e in events if e.get("outcome") == "dup_prevented"]
     assert len(dup_events) == 1
