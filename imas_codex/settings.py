@@ -1114,6 +1114,7 @@ _SN_DEFAULTS: dict[str, Any] = {
     "example-per-bucket": 1,
     "retry-attempts": 1,
     "retry-k-expansion": 12,
+    "refine-rotations": 3,
 }
 
 
@@ -1168,6 +1169,25 @@ def get_sn_retry_attempts() -> int:
         return int(env)
     section = _get_section("sn")
     return int(section.get("retry-attempts", _SN_DEFAULTS["retry-attempts"]))
+
+
+def get_sn_refine_rotations() -> int:
+    """Refinement rotations a single name or documentation record may spend.
+
+    One rotation is one claimed refinement attempt. On the name axis the
+    budget is charged whether or not the attempt produces a persisted
+    successor, and the last rotation runs on the escalation seat; on the docs
+    axis every attempt rewrites in place, so a rotation is also a revision.
+    Reaching the cap without clearing review is terminal (``exhausted``),
+    recoverable through ``sn rescore`` or ``sn edit``.
+
+    Priority: IMAS_CODEX_SN_REFINE_ROTATIONS env
+              → [sn].refine-rotations → ``3``.
+    """
+    if env := os.getenv("IMAS_CODEX_SN_REFINE_ROTATIONS"):
+        return int(env)
+    section = _get_section("sn")
+    return int(section.get("refine-rotations", _SN_DEFAULTS["refine-rotations"]))
 
 
 def get_sn_retry_k_expansion() -> int:
