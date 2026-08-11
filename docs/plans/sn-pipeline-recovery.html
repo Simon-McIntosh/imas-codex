@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-pipeline-recovery">
   <meta name="plan-title" content="Standard Names Pipeline Recovery and Machinery Triage">
   <meta name="plan-summary" content="Restore the runnable pipeline (pricing null, broken test collection, 22 red tests, deleted grammar self-heal), triage the August wave&#x27;s machinery by the reviewed keep/quarantine/delete dispositions, then drain the 255-proposal and docs-pending backlog so the WEST release path resumes.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="4">
-<meta name="plan-impl" content="0.67">
+<meta name="plan-version" content="5">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -71,17 +71,21 @@
     </p>
     </section>
 
-    <h2 id="s4">§4 — Drain the standing backlog</h2>
-    <p>Cheapest possible proof that §2 worked, and it converts two weeks of queued agent
-    judgement into graph state: 255 open <code>sn edit</code> proposals (queued 2026-08-08/09,
-    never drained) and roughly 2,001 docs-pending names are standing work requiring no new
-    instrument. Run them through the existing pools — <code>sn run</code> with a hard
-    <code>--cost-limit</code> agreed with the lead (the prior authorization was $200, of
-    which $10.64 was spent) — and record the drain outcome here. Names that exhaust on
-    quorum variance follow the standing recovery rule (<code>sn rescore</code>), never a
-    hand-accept. Done when the edit-proposal queue is empty or every remaining entry has a
-    recorded refusal reason, and docs-pending has moved materially toward the review gate
-    at a recorded cost.</p>
+    <section id="s4-landed" class="section-landed">
+    <h2 id="s4"><span class="badge badge-shipped">✓ landed 2026-08-11</span> §4 — Drain the standing backlog</h2>
+    <p class="landed-summary">
+    Three drain tranches consumed <strong>$196.19 of the $200 authorization</strong>:
+    edits 255 → 142 open (+117 applied), docs-accepted +534 (2,238 → 2,772),
+    names-accepted +172, drafted backlog 318 → 24. The ladder caught and fixed the
+    reservation accountancy en route — admission now prices the typical bill with
+    measured cache shares (fidelity 0.80–1.50× of median bill; concurrent hold
+    $176.84 → $22.41; merges <code>25722901</code>, <code>ff05fd91</code>,
+    <code>5ed709d0</code>) and billed overspend is ledgered, never dropped. The 142
+    remaining edits and 1,513 docs-pending are standing work bounded by the exhausted
+    authorization, not refusals.
+    Full record: <a href="/imas-codex/evidence/archive/sn-pipeline-recovery-landed#s4">§4 landed</a>.
+    </p>
+    </section>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
@@ -134,11 +138,17 @@
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §3</pre>
     <p class="r-fu-outcome">§3 landed — merge 7e88e02c: typed dispatch + preflight/audit + docs-admission deleted (−26,273 net lines), 7 modules (9,650 LOC) quarantined outside the package, _west_source_ids lifted to protected_sources.py, manifests renamed by content, 6 reconcile verbs deregistered, reviewer-profile env leak fixed (ContextVar), suite 11,574 passed / 0 failed with no deselects, 36 leftover worktrees removed.</p>
     </article>
-<article class="r-fu" data-id="f-spr-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-spr-003" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T15:17:09+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Drain the 255 edit proposals and the docs-pending tranche through the existing pools</h4>
     <div class="r-fu-body"><p>Execute §4 after §2 lands and the budget decision is locked. Existing pools
         only, hard cost cap, outcomes recorded in this plan; exhausted-on-variance names go
         through <code>sn rescore</code>.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
+    <p class="r-fu-outcome">§4 landed — three tranches spent $196.19 of the $200 authorization: edits 255→142 open (+117 applied), docs-accepted +534, names-accepted +172, drafted backlog 318→24. Ladder caught+fixed reservation accountancy (typical-bill admission, fidelity 0.80-1.50x, hold $176.84→$22.41; merges 25722901/ff05fd91/5ed709d0). Remainder is standing work bounded by the exhausted authorization.</p>
+    </article>
+<article class="r-fu" data-id="f-spr-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Drain the residual backlog under a fresh authorization</h4>
+    <div class="r-fu-body">142 open edit proposals and 1,513 docs-pending names remain — standing work with no defect, bounded only by the exhausted $200 authorization. With typical-bill admission a full drain projects to roughly $60-90. Agree a fresh cap with the lead, then one sn run --flush per tranche. Watch overspend>0 rows on LLMCost as the genuine at-cap signal, and the startup quorum-sizing warning for underfunded caps.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
     </article>
 </section>

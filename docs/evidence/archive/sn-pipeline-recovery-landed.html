@@ -217,6 +217,20 @@
     completed its backlog (+4 accepted; review_name near-idle at 24 calls). Spend
     concentrated where the work was: docs review $45.8, refine_docs $13.9,
     refine_name $10.9.</p>
+    <p><strong>Tranche 3</strong> (<code>sn run --flush -c 50</code>, SNRun
+    <code>ebf89db5-7140-4837-9dae-e44ef1f2454e</code>): spent <strong>$49.88 of
+    $50.00</strong>, stop <code>stalled</code> at the cap tail with under $1.12 of
+    reservable headroom — the correct behavior at 99.8% spent. Docs accepted +103
+    (2,669 → 2,772), edits applied +8, spend concentrated in the refine tail
+    (refine_name $14.1, refine_docs $12.1) as the review queues emptied
+    (generate_docs and review_docs pending reached 0 and 2 before the cap).</p>
+    <p><strong>§4 close-out.</strong> Authorization consumed: <strong>$196.19 of
+    $200</strong> ($10.64 prior + $0.94 proof-of-life + $59.69 + $75.04 + $49.88).
+    Across the ladder: edit proposals 255 → 142 open (+117 applied), docs-accepted
+    2,238 → 2,772 (+534), docs-pending 2,001 → 1,513, names-accepted 2,364 → 2,536
+    (+172), names-drafted backlog 318 → 24. The 142 remaining edit proposals and
+    1,513 docs-pending are standing work bounded by the exhausted authorization,
+    not refusals — they carry no defect and drain under any future funded run.</p>
     <p>Also under §4 scope: the quarantined reconciliation modules were deleted
     outright at the lead's direction (<code>464d60b5</code>, −9,661 lines — git history
     retains them), and the exact-name lineage guard was rescoped to fixture-produced
