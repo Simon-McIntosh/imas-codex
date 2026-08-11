@@ -4,25 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-pipeline-recovery">
-  <meta name="plan-title"     content="Standard Names Pipeline Recovery and Machinery Triage">
-  <meta name="plan-summary"   content="Restore the runnable pipeline (pricing null, broken test collection, 22 red tests, deleted grammar self-heal), triage the August wave's machinery by the reviewed keep/quarantine/delete dispositions, then drain the 255-proposal and docs-pending backlog so the WEST release path resumes.">
-  <meta name="plan-status"    content="active">
-  <meta name="plan-roi"       content="high">
-  <meta name="plan-effort"    content="L">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-pipeline-recovery">
+  <meta name="plan-title" content="Standard Names Pipeline Recovery and Machinery Triage">
+  <meta name="plan-summary" content="Restore the runnable pipeline (pricing null, broken test collection, 22 red tests, deleted grammar self-heal), triage the August wave&#x27;s machinery by the reviewed keep/quarantine/delete dispositions, then drain the 255-proposal and docs-pending backlog so the WEST release path resumes.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort" content="L">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
   <meta name="plan-capability-reasoning" content="deep">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="moderate">
-  <meta name="plan-sprint"    content="S8">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S8">
+  <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-depends-on" content="">
-  <meta name="plan-blocks"    content="sn-graph-wide-integrity">
+  <meta name="plan-blocks" content="sn-graph-wide-integrity">
   <title>SN Pipeline Recovery and Machinery Triage | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -118,62 +120,62 @@
     at a recorded cost.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="typed-dispatch-disposition" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What happens to the 7,641-line typed-dispatch subsystem under imas_codex/llm/?</p>
-        <p class="r-dec-ctx">Zero production consumers; the dependency arrow points from it into
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="typed-dispatch-disposition" data-choice="delete" data-by="user" data-when="2026-08-11 05:48">
+    <p class="r-dec-q">What happens to the 7,641-line typed-dispatch subsystem under imas_codex/llm/?</p>
+    <p class="r-dec-ctx">Zero production consumers; the dependency arrow points from it into
         production, never the reverse; wiring it in as-built would disable prompt caching. The
         review recommends deletion (git retains the history; the LinkML envelope schema can be
         resurrected if the rescoped context work wants it). Quarantine keeps the code visible at
         the cost of carrying dead weight through every future refactor and test run.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="delete">Delete the subsystem and detach the three production-side touch points (recommended by review)</button>
-          <button class="r-opt" data-value="quarantine">Quarantine alongside the reconciliation modules; revisit after WEST</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="backlog-drain-budget" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What cost cap governs the §4 backlog drain?</p>
-        <p class="r-dec-ctx">The prior recovery authorization was $200 with $10.64 spent. The
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="delete">Delete the subsystem and detach the three production-side touch points (recommended by review)</button>
+      <button class="r-opt" data-value="quarantine">Quarantine alongside the reconciliation modules; revisit after WEST</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="backlog-drain-budget" data-choice="reuse-remaining" data-by="user" data-when="2026-08-11 05:48">
+    <p class="r-dec-q">What cost cap governs the §4 backlog drain?</p>
+    <p class="r-dec-ctx">The prior recovery authorization was $200 with $10.64 spent. The
         drain covers 255 edit proposals plus a docs-pending tranche; the docs axis was the
         dominant cost in earlier rotations.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="reuse-remaining">Reuse the remaining ~$189 of the existing authorization</button>
-          <button class="r-opt" data-value="fresh-cap">Set a fresh cap for the drain</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="reuse-remaining">Reuse the remaining ~$189 of the existing authorization</button>
+      <button class="r-opt" data-value="fresh-cap">Set a fresh cap for the drain</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-spr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Restore pipeline operability: pricing null, test collection, red suite, grammar self-heal</h4>
-        <div class="r-fu-body"><p>Execute §2 in order: the settings.py numeric-zero restoration with the
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-spr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Restore pipeline operability: pricing null, test collection, red suite, grammar self-heal</h4>
+    <div class="r-fu-body"><p>Execute §2 in order: the settings.py numeric-zero restoration with the
         seat-calibration guard suite as the acceptance test; the test-collection repair
         (<code>uv sync --extra test</code> + <code>importorskip</code>); the
         <code>reconcile_grammar_segments</code> self-heal restoration; then the remaining
         nine failures. Finish with the proof-of-life scoped run. No new machinery — every
         item is a repair or a revert to a form that already worked.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §2</pre>
-      </article>
-      <article class="r-fu" data-id="f-spr-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Apply the keep/quarantine/delete dispositions to the wave machinery</h4>
-        <div class="r-fu-body"><p>Execute §3 once the typed-dispatch disposition decision is locked. Lift the
+    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §2</pre>
+    </article>
+<article class="r-fu" data-id="f-spr-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Apply the keep/quarantine/delete dispositions to the wave machinery</h4>
+    <div class="r-fu-body"><p>Execute §3 once the typed-dispatch disposition decision is locked. Lift the
         fixture prefixes and WEST source list out of
         <code>grammar_segment_reconciliation</code> before quarantining it; verify with the
         naming-hygiene pre-stage checks; remove the 36 verified-merged worktrees; keep the
         default suite green throughout.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §3</pre>
-      </article>
-      <article class="r-fu" data-id="f-spr-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-resolved-at="" data-resolved-by="">
-        <h4 class="r-fu-title">Drain the 255 edit proposals and the docs-pending tranche through the existing pools</h4>
-        <div class="r-fu-body"><p>Execute §4 after §2 lands and the budget decision is locked. Existing pools
+    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §3</pre>
+    </article>
+<article class="r-fu" data-id="f-spr-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Drain the 255 edit proposals and the docs-pending tranche through the existing pools</h4>
+    <div class="r-fu-body"><p>Execute §4 after §2 lands and the budget decision is locked. Existing pools
         only, hard cost cap, outcomes recorded in this plan; exhausted-on-variance names go
         through <code>sn rescore</code>.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
-      </article>
-    </section>
+    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
