@@ -9451,9 +9451,18 @@ def _load_docs_review_examples(item: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _enrich_docs_review_dd_context(item: dict[str, Any]) -> None:
-    """Attach the same first-source DD context used at worker dispatch."""
+    """Attach the same first-source DD context used at worker dispatch.
+
+    A name with no bound source has no DD path to read, which is a valid
+    state rather than an error: review proceeds on the name, description, and
+    documentation alone. Reaching for a first element that is not there would
+    abort preparation and fail the whole quorum for that name.
+    """
     source_paths = item.get("source_paths") or []
-    first_source = source_paths[0] if isinstance(source_paths, list) else source_paths
+    if isinstance(source_paths, list):
+        first_source = source_paths[0] if source_paths else None
+    else:
+        first_source = source_paths
     if isinstance(first_source, str):
         first_source = strip_dd_prefix(first_source)
     if not first_source:
