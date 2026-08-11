@@ -24,8 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="3">
-<meta name="plan-impl" content="0.33">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.67">
 </head>
 <body>
   <main class="plan-doc">
@@ -56,33 +56,20 @@
     </p>
     </section>
 
-    <h2 id="s3">§3 — Triage the wave machinery</h2>
-    <p>Apply the review's dispositions (wave review §6). Keep: <code>pool_registry</code>,
-    <code>run_invocation</code>, <code>attachment_audit</code>, <code>claim_seq</code>
-    fencing, <code>sn release-refine-claim</code>, the DD-gap registry. Quarantine (move
-    out of the production import graph, retain for reference): the four manifest-bound
-    reconciliation modules, <code>grammar_segment_reconciliation</code> (after lifting
-    <code>_west_source_ids</code> and the test-fixture prefixes out — production
-    <code>graph_ops.py:1775</code> currently imports fixture identifiers from it, and the
-    shipped manifest filename must be renamed by content, not plan label),
-    <code>receipt_store</code>, <code>source_snapshot_migration</code>. Delete:
-    <code>run_preflight</code>/<code>run_audit</code>, the docs-admission manifest block
-    (<code>graph_ops.py:13584-14990</code> plus
-    <code>workers.admit_docs_review_request</code> and
-    <code>--require-docs-admission</code>), and — pending the §Decisions disposition — the
-    typed-dispatch set under <code>imas_codex/llm/</code> with its three-file
-    production-side detach (<code>discovery/base/llm.py</code> typed params and
-    fail-closed branches including the <code>supports_cache</code> suppression,
-    <code>settings.py</code> typed-pricing accessors, <code>prompt_loader.py</code>
-    bundle loaders; <code>render_prompt()</code> and its 75 call sites untouched).</p>
-    <p>Also under this section: remove the 36 leftover worktrees (19 sibling
-    <code>imas-codex-sgwi-*</code> directories, 17 under
-    <code>/run/user/.../reckon-worktrees/</code>) — every one verified fully merged into
-    <code>origin/main</code> and clean on 2026-08-11 — and re-run the naming-hygiene
-    pre-stage checks over the surviving new modules. Done when the production import graph
-    contains no module from the delete list, no production file imports from a quarantined
-    module, the CLI surface no longer registers the deleted verbs, and the full default
-    suite stays green.</p>
+    <section id="s3-landed" class="section-landed">
+    <h2 id="s3"><span class="badge badge-shipped">✓ landed 2026-08-11</span> §3 — Triage the wave machinery</h2>
+    <p class="landed-summary">
+    All dispositions applied in merge <code>7e88e02c</code>: typed dispatch deleted
+    with its three-file production detach (warm-cache restored), preflight/audit and
+    docs-admission machinery deleted (<code>persist_reviewed_docs</code> fence intact),
+    seven modules (9,650 LOC) quarantined outside the package, manifests renamed by
+    content, six reconcile verbs deregistered — net <strong>−26,273 lines</strong>. The
+    exact-name lineage guard was rescoped to fixture sources only (<code>4661b285</code>):
+    WEST sources are not in review and need no protection.
+    Suite green with no deselects (11,574 passed / 0 failed); 36 leftover worktrees removed.
+    Full record: <a href="/imas-codex/evidence/archive/sn-pipeline-recovery-landed#s3">§3 landed</a>.
+    </p>
+    </section>
 
     <h2 id="s4">§4 — Drain the standing backlog</h2>
     <p>Cheapest possible proof that §2 worked, and it converts two weeks of queued agent
@@ -137,7 +124,7 @@
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §2</pre>
     <p class="r-fu-outcome">§2 landed — merges 1634d0b0 + 6709bd29. Pricing restored (3 paid reviewer seats price), collection repaired, grammar self-heal back (231 names realigned live), suite 11,992 passed / 0 failed, dd-tools contract collision + 36x removals query fixed at source (14/0 graph-backed from main). Proof of life: SNRun spent $0.94 of $2.00 cap, stop time_limit_reached.</p>
     </article>
-<article class="r-fu" data-id="f-spr-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-spr-002" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T10:03:58+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Apply the keep/quarantine/delete dispositions to the wave machinery</h4>
     <div class="r-fu-body"><p>Execute §3 once the typed-dispatch disposition decision is locked. Lift the
         fixture prefixes and WEST source list out of
@@ -145,6 +132,7 @@
         naming-hygiene pre-stage checks; remove the 36 verified-merged worktrees; keep the
         default suite green throughout.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §3</pre>
+    <p class="r-fu-outcome">§3 landed — merge 7e88e02c: typed dispatch + preflight/audit + docs-admission deleted (−26,273 net lines), 7 modules (9,650 LOC) quarantined outside the package, _west_source_ids lifted to protected_sources.py, manifests renamed by content, 6 reconcile verbs deregistered, reviewer-profile env leak fixed (ContextVar), suite 11,574 passed / 0 failed with no deselects, 36 leftover worktrees removed.</p>
     </article>
 <article class="r-fu" data-id="f-spr-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Drain the 255 edit proposals and the docs-pending tranche through the existing pools</h4>

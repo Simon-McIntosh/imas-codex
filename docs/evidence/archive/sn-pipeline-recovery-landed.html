@@ -9,7 +9,7 @@
   <meta name="plan-title" content="SN Pipeline Recovery — Landed Record">
   <meta name="plan-summary" content="Cumulative execution evidence for the sn-pipeline-recovery plan: operability repairs, machinery triage, and backlog drain outcomes.">
   <meta name="plan-evidence-for" content="sn-pipeline-recovery">
-  <meta name="plan-verifies" content="sn-pipeline-recovery#s2">
+  <meta name="plan-verifies" content="sn-pipeline-recovery#s2,sn-pipeline-recovery#s3">
   <title>SN Pipeline Recovery — Landed Record | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -96,6 +96,68 @@
       (~29 tracebacks in six minutes; population is the 76 no-source ledger
       names) — guarded under the §3 worker's scope.</li>
     </ul>
+    <h2 id="s3">§3 — Triage the wave machinery</h2>
+    <p>Merged as <code>7e88e02c</code> (seven worker commits, 71 files,
+    +454/−26,727). Every disposition from the wave review §6 applied:</p>
+    <table>
+      <thead><tr><th>Disposition</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Delete — typed dispatch</strong></td>
+            <td>Five <code>imas_codex/llm/</code> modules, the dispatch-policy config,
+                <code>schemas/llm_context.yaml</code>, and six test files removed
+                (~8,000 lines). Three-file production detach done; the
+                <code>supports_cache</code> suppression is gone, so
+                <code>cache_control</code> is injected whenever the model supports it —
+                warm-cache restored on the direct-bypass route.
+                <code>render_prompt()</code> and its 75 call sites untouched.</td></tr>
+        <tr><td><strong>Delete — preflight/audit + docs admission</strong></td>
+            <td><code>run_preflight</code>/<code>run_audit</code> (one entry point each,
+                test-only callers) removed. Docs-admission manifest block,
+                <code>admit_docs_review_request</code>,
+                <code>--require-docs-admission</code>, and the suite-hanging
+                <code>test_docs_evidence_recovery.py</code> removed;
+                <code>persist_reviewed_docs</code> and its
+                <code>claim_token</code>/<code>claim_seq</code> fence fully intact.
+                <code>stage_docs_for_rescore</code> kept in lifecycle-only form
+                (live caller in <code>merge.py</code>).</td></tr>
+        <tr><td><strong>Quarantine</strong></td>
+            <td>Seven manifest-bound modules (9,650 LOC) moved to
+                <code>quarantine/standard_names/</code> outside the package.
+                <code>_west_source_ids</code> + fixture prefixes were first lifted into
+                a production guard module; the lead then clarified the WEST sources are
+                not in review and carry no released identity, so the guard was rescoped
+                to fixture-produced lineage only (<code>fixture_sources.py</code>,
+                commit <code>4661b285</code>) — WEST names flow through the pipeline
+                like any others, with provenance tracked rather than frozen. Manifest
+                files renamed by content (<code>west_production_dd_paths.*</code>); the
+                declared manifest <em>name</em> deliberately kept because cut RC tags
+                carry it as semver build metadata. Six reconcile CLI verbs
+                deregistered; 14 quarantine-only test files deleted.</td></tr>
+        <tr><td><strong>Keeps confirmed</strong></td>
+            <td><code>pool_registry</code>, <code>run_invocation</code>,
+                <code>attachment_audit</code>, <code>claim_seq</code> fencing,
+                <code>sn release-refine-claim</code>, <code>source_authority.py</code>,
+                the DD-gap registry — all present and imported.</td></tr>
+        <tr><td><strong>Repairs riding with §3</strong></td>
+            <td>The CLI reviewer-profile <code>os.environ</code> write replaced by a
+                ContextVar bound per invocation and released on command close — one
+                <code>sn run --reviewer-profile</code> no longer poisons the process.
+                Docs-review prep now tolerates names with empty
+                <code>source_paths</code> (guard + test); the worker's investigation
+                corrected the earlier diagnosis — the IndexError was swallowed at the
+                call site and was <em>not</em> the cause of the docs-quorum 0/3
+                deferrals, which are under separate investigation before the §4
+                drain.</td></tr>
+      </tbody>
+    </table>
+    <p>Verification: full default suite with <strong>no deselect flags</strong> in the
+    worker worktree — <strong>11,574 passed / 0 failed</strong> (271 s). Import-graph
+    check clean (no reference to any deleted or quarantined module name under
+    <code>imas_codex/</code>). The 36 leftover wave worktrees (19 sibling directories,
+    17 under <code>/run/user/.../reckon-worktrees/</code>) were verified clean and
+    merged, then removed by the orchestrator; two needed <code>--force</code> for
+    directories the interrupted wave had left half-populated, verified merged and
+    content-free of unpushed work first.</p>
   </main>
 </body>
 </html>
