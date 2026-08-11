@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import hatch_build_hooks
+import pytest
+
 from scripts.build_models import _harden_prompt_context_models
 
 _PROJECT_ROOT = Path(__file__).parents[2]
@@ -39,6 +40,10 @@ def test_generated_context_output_is_ignored() -> None:
 
 
 def test_build_hook_requires_context_schema_and_generated_output() -> None:
+    # The build hook needs hatchling, which only the build/test extras install;
+    # importing it at module scope would fail collection for the whole repository.
+    hatch_build_hooks = pytest.importorskip("hatch_build_hooks")
+
     source = Path(hatch_build_hooks.__file__).read_text()
     assert 'schemas_dir / "llm_context.yaml"' in source
     assert 'package_root / "imas_codex" / "llm" / "context_models.py"' in source
