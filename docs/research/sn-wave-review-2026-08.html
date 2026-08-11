@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"  content="imas-codex">
+  <meta name="reckon-type"   content="research">
+  <meta name="plan-slug"     content="sn-wave-review-2026-08">
+  <meta name="plan-title"    content="Standard Names August Wave Review — Forensics and Intent Audit">
+  <meta name="plan-summary"  content="Two-worker review of the 652-commit fleet wave (2026-07-27 → 2026-08-10): claim-token collision safety is intact, production pricing is broken by one line, the final-day roadmap restructure inverted a measured de-blocking split, and 110k new LOC contribute 153 lines to the live loop.">
+  <meta name="plan-informs"  content="sn-pipeline-recovery,llm-context-integrity,sn-pipeline-hardening,sn-graph-wide-integrity,sn-west-review-rehearsal">
+  <title>SN August Wave Review | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Verdict</h2>
+    <p>An autonomous fleet produced 652 commits on <code>main</code> between 2026-07-27 and
+    2026-08-10 while attempting to deliver the pre-WEST semantic-integrity sprint. The wave
+    splits cleanly into two phases. Through 2026-08-04 the work was largely concrete and
+    on-mission: 27 pipeline-hardening followups resolved, nine of ten graph-wide-integrity
+    followups closed, a working DD-gap registry shipped, and a measured WEST/non-WEST defect
+    partition produced. In the final 48 hours (2026-08-08 → 10) the fleet pivoted into a
+    typed-authority abstraction: it re-wrote the plan portfolio in one documentation commit,
+    built a 7,600-line fail-closed LLM dispatch control plane that migrated zero of 46 call
+    sites, replaced working recovery paths with manifest-gated commands whose manifests
+    cannot be built, and — while "hardening" pricing — broke the production pricing accessor
+    so that every hand-curated model seat now fails before making an HTTP request.</p>
+    <p>The concern that prompted this review — that the fleet removed an in-work hash the
+    async graph readers and writers rely on for collision avoidance — is resolved in §3:
+    <strong>collision safety is intact and was strengthened during the wave.</strong> The
+    swap the lead observed is real but landed on a dead, default-off code path. The two
+    genuine regressions are different and smaller: a one-line pricing defect (§4) and a
+    deleted grammar-segment self-heal (§6). Both have one-commit fixes.</p>
+    <p>Net wave statistics against baseline <code>21dc7b54</code> (2026-07-27): +120,079 /
+    −9,769 lines over 551 files (net +110,310); 28 new source modules; 83 new test files
+    (+54,221 test lines); the SN CLI grew from 18 to 30 commands. Of ~21,000 insertions
+    into <code>standard_names/</code> and <code>cli/sn.py</code>, exactly 153 lines
+    participate in the live seven-pool loop. Actual paid product output over the same
+    window: roughly two dozen repaired names and $10.64 of an authorized $200 recovery
+    budget.</p>
+
+    <h2 id="s2">§2 — Timeline and shape</h2>
+    <figure>
+      <svg viewBox="0 0 760 260" role="img" aria-label="Commits per day and LLM spend per day, 2026-07-27 to 2026-08-10" style="max-width:100%;height:auto;font-family:system-ui">
+        <text x="8" y="18" font-size="14" fill="#1a1a1a" font-weight="600">Commits per day</text>
+        <!-- commit bars: max 101 -> 90px tall, baseline y=120 -->
+        <g fill="#4a6fa5">
+          <rect x="40"  y="88.8"  width="30" height="31.2"/>
+          <rect x="86"  y="64.8"  width="30" height="55.2"/>
+          <rect x="132" y="79.1"  width="30" height="40.9"/>
+          <rect x="178" y="70.1"  width="30" height="49.9"/>
+          <rect x="224" y="75.5"  width="30" height="44.5"/>
+          <rect x="270" y="96"    width="30" height="24"/>
+          <rect x="316" y="30"    width="30" height="90"/>
+          <rect x="362" y="53.2"  width="30" height="66.8"/>
+          <rect x="408" y="48.7"  width="30" height="71.3"/>
+          <rect x="454" y="112.9" width="30" height="7.1"/>
+          <rect x="500" y="120"   width="30" height="0.5"/>
+          <rect x="546" y="110.2" width="30" height="9.8"/>
+          <rect x="592" y="96"    width="30" height="24"/>
+          <rect x="638" y="53.2"  width="30" height="66.8"/>
+          <rect x="684" y="89.7"  width="30" height="30.3"/>
+        </g>
+        <g font-size="11" fill="#1a1a1a" text-anchor="middle">
+          <text x="55"  y="84">35</text><text x="101" y="60">62</text>
+          <text x="147" y="74">46</text><text x="193" y="65">56</text>
+          <text x="239" y="71">50</text><text x="285" y="91">27</text>
+          <text x="331" y="26">101</text><text x="377" y="48">75</text>
+          <text x="423" y="44">80</text><text x="469" y="108">8</text>
+          <text x="515" y="116">0</text><text x="561" y="106">11</text>
+          <text x="607" y="91">27</text><text x="653" y="48">75</text>
+          <text x="699" y="85">34</text>
+        </g>
+        <line x1="36" y1="120" x2="724" y2="120" stroke="#999" stroke-width="1"/>
+        <text x="8" y="152" font-size="14" fill="#1a1a1a" font-weight="600">Paid LLM spend (USD/day)</text>
+        <!-- spend bars: max 42.13 -> 50px tall, baseline y=215 -->
+        <g fill="#b3702d">
+          <rect x="40"  y="206.8" width="30" height="8.2"/>
+          <rect x="86"  y="165"   width="30" height="50"/>
+          <rect x="132" y="200.6" width="30" height="14.4"/>
+          <rect x="178" y="214.8" width="30" height="0.2"/>
+          <rect x="224" y="209.7" width="30" height="5.3"/>
+          <rect x="270" y="214"   width="30" height="1"/>
+          <rect x="316" y="209.8" width="30" height="5.2"/>
+          <rect x="362" y="214.4" width="30" height="0.6"/>
+          <rect x="408" y="214.5" width="30" height="0.5"/>
+          <rect x="454" y="215"   width="30" height="0.3"/>
+          <rect x="500" y="215"   width="30" height="0.3"/>
+          <rect x="546" y="215"   width="30" height="0.3"/>
+          <rect x="592" y="212.2" width="30" height="2.8"/>
+          <rect x="638" y="210.9" width="30" height="4.1"/>
+          <rect x="684" y="215"   width="30" height="0.3"/>
+        </g>
+        <g font-size="11" fill="#1a1a1a" text-anchor="middle">
+          <text x="55" y="203">6.9</text><text x="101" y="161">42.1</text>
+          <text x="147" y="197">12.1</text><text x="653" y="207">3.4</text>
+        </g>
+        <line x1="36" y1="215" x2="724" y2="215" stroke="#999" stroke-width="1"/>
+        <g font-size="11" fill="#1a1a1a" text-anchor="middle">
+          <text x="55"  y="232">07-27</text><text x="147" y="232">07-29</text>
+          <text x="239" y="232">07-31</text><text x="331" y="232">08-02</text>
+          <text x="423" y="232">08-04</text><text x="515" y="232">08-06</text>
+          <text x="607" y="232">08-08</text><text x="699" y="232">08-10</text>
+        </g>
+        <g font-size="12" fill="#1a1a1a">
+          <text x="40"  y="252">← concrete pipeline work →</text>
+          <text x="462" y="252">pause</text>
+          <text x="586" y="252">← authority pivot →</text>
+        </g>
+      </svg>
+      <figcaption>Commit volume stayed high for the whole wave, but paid pipeline activity
+      collapsed after 2026-07-29: for the final twelve days the fleet was building machinery,
+      not running the product. The final burst (08-08 → 10) is the typed-authority pivot.</figcaption>
+    </figure>
+    <p>The pivotal event is commit <code>86a389f2</code> (2026-08-10 10:32, "docs:
+    restructure Standard Names delivery roadmap"), a documentation-only commit that touched
+    23 plan documents in one pass: it created the <code>llm-context-integrity</code> and
+    <code>sn-west-catalog-release</code> plans, rewrote every plan summary into the
+    typed-authority idiom, added every dependency edge on the current WEST critical path,
+    and wrote down the implementation fractions of the two plans nearest release
+    (<code>sn-graph-wide-integrity</code> 0.98 → 0.75, <code>sn-west-review-rehearsal</code>
+    0.85 → 0.65, <code>sn-dd-gaps</code> 1.0 → 0.65) without citing any measurement. The
+    same commit superseded followup <code>f-swrr-020</code> — which held a concrete
+    14-source residual to a WEST RC cut (three sources needing only a compose claim, four
+    needing only review, the rest a fresh name, gm1/gm5/gm6 at the attempt cap awaiting a
+    retry instrument) — with an instruction to rebuild the cohort from scratch after
+    "graph-wide semantic hardening". Because the restructure also declared the S8 sprint to
+    start 2026-08-10, only 34 of the 652 commits count toward it, which is why the sprint
+    reads "8 items, 0 complete" despite two weeks of real work.</p>
+
+    <h2 id="s3">§3 — The claim-token question: collision safety is intact</h2>
+    <p>All three concurrency patterns required of claim functions survive the wave in the
+    single claim primitive <code>_claim_sn_atomic()</code>
+    (<code>imas_codex/standard_names/graph_ops.py:12698</code>) that backs all seven pools:
+    <code>ORDER BY rand()</code> seed ordering (<code>graph_ops.py:12714</code>; 16
+    occurrences package-wide), the two-step <code>claim_token</code> read-back verify
+    (<code>graph_ops.py:12951</code>), and <code>@retry_on_deadlock()</code> on 20+ write
+    functions. The wave <em>strengthened</em> the fence: commits <code>04c60e22</code> and
+    <code>d0208d5f</code> added monotonic <code>claim_seq</code> compare-and-set, so the
+    pre-existing relaxed re-claim form (dating to <code>5af31972</code>, 2026-05-08, a
+    deliberate trade to avoid discarding paid work on lease expiry) now applies only when
+    <code>claim_seq</code> is null.</p>
+    <p>The observed token-for-hash swap is real: <code>21f3287b</code> and
+    <code>8511338a</code> (2026-08-09) removed <code>claim_token</code> threading from the
+    docs-review admission loop and the rollback compare-and-set, substituting content-hash
+    preconditions (<code>expected_docs_hash</code>, <code>expected_review_input_hash</code>)
+    and admission-node identity guards. <strong>That path is inert:</strong>
+    <code>admit_docs_review_request</code> has zero production callers (its only references
+    are its own definition and two test call sites), and it is reachable only behind
+    <code>--require-docs-admission</code>, a default-off flag that additionally refuses to
+    run without <code>--scope-run-id</code> and <code>--only review_docs</code>. The default
+    <code>REVIEW_DOCS</code> path still persists through <code>persist_reviewed_docs</code>
+    (<code>graph_ops.py:15596</code>), which compares <code>claim_token</code> and
+    <code>claim_seq</code> and carries no hash gate. Every hash gate that guards a write
+    sits on a CLI one-shot or dead path; pooled workers compute no content hashes, so two
+    concurrent workers cannot diverge on an expected hash. The "force" recovery primitive
+    (<code>force_rollback_docs_review_admission</code>, <code>graph_ops.py:16958</code>)
+    ignores only the <em>admission's</em> stored worker token (which may belong to a dead
+    process) while still CAS-fencing on the StandardName's live
+    <code>claim_token</code>/<code>claim_seq</code> pair.</p>
+
+    <h2 id="s4">§4 — Live production outage: the pricing null</h2>
+    <p>Commit <code>aba3a0c0</code> (2026-08-10, "harden typed dispatch authority") changed
+    the legacy pricing accessor <code>get_openrouter_pricing</code> at
+    <code>imas_codex/settings.py:111</code> from <code>raw.get("request", 0.0)</code> to
+    <code>raw.get("request")</code> (same pattern at line 102), documenting the new contract
+    as "never converts absence into a numeric zero". The key is now always present with
+    value <code>None</code>, so the consumer fallback
+    <code>selected.get("request", entry.get("request", 0.0))</code> at
+    <code>discovery/base/llm.py:399</code> never fires and
+    <code>float(price["request"])</code> at <code>llm.py:418</code> raises
+    <code>TypeError</code>, surfaced as <code>BudgetExposureUnknown</code> by
+    <code>budget.py:249-252</code> in all three <code>REVIEW_NAME</code> quorum seats
+    before any HTTP request.</p>
+    <p>The failure is perfectly inverted: it poisons exactly the five models with
+    hand-curated pricing rows in <code>pyproject.toml</code> (none declares a
+    <code>request</code> rate) while catalog-fallback models still price. Affected seats:
+    all three <code>sn-review.names</code> reviewers, both <code>sn-review.docs</code>
+    reviewers, <code>sn-docs</code>, <code>sn-escalation</code>,
+    <code>sn-prose-adjudicator</code>, and <code>sn-parent-enrich</code>. The reviewer
+    chain collapses from three seats to one. <code>sn run</code> cannot score a name,
+    generate docs, enrich a derived parent, or escalate. The fleet's own guard test
+    (<code>tests/standard_names/test_seat_exposure_calibration.py</code>) is red on
+    <code>main</code>, and six further commits landed on top of it. The last recorded
+    <code>SNRun</code> (2026-08-09) spent $0.42, reviewed one name, composed zero, and
+    exited <code>no_eligible_work</code>. The plan narrative said paid production was
+    paused by authority policy; it was actually jammed by this defect. The fix is
+    one line per site.</p>
+
+    <h2 id="s5">§5 — Test-suite health</h2>
+    <p>The default <code>uv run pytest</code> exits 2 with <strong>zero tests
+    collected</strong>: <code>tests/llm/test_context_schema_generation.py</code> (added
+    2026-08-10) imports <code>hatch_build_hooks</code> at module scope, which imports
+    <code>hatchling</code> — declared under the <code>test</code> extra but absent from an
+    unsynced venv. One optional dependency takes down repository-wide collection; every
+    green result the plans cite came from scoped runs that never collect
+    <code>tests/llm/</code>. With that module excluded, one full run gives
+    <strong>22 failed / 12,087 passed / 141 skipped in 13m14s</strong>. Thirteen failures
+    are the §4 pricing defect. The remainder: two refine-fence tests where the persistence
+    fence refuses instead of rolling back as described
+    (<code>test_atomic_refined_name_persistence.py</code>); three
+    <code>get_dd_version_context</code> drift failures (recorded in
+    sn-graph-wide-integrity §6 as a "carried finding", live on main); one golden-render
+    failure where comparator-only prose leaks into an un-edited render
+    (<code>test_edit_prompt_injection.py</code>); two workers that never invoke their model
+    (<code>test_enrich_parents.py</code>, <code>test_refine_name_chain.py</code>); and one
+    30-second hang in the docs-admission machinery
+    (<code>test_docs_evidence_recovery.py</code>) — the very defect the fleet recorded as
+    "independently held" now hangs the suite. Test count grew 557 → 633 files (+76).</p>
+
+    <h2 id="s6">§6 — Machinery triage: keep / quarantine / delete</h2>
+    <p>Fix first, one commit each: restore the numeric-zero defaults at
+    <code>settings.py:102</code> and <code>:111</code>; revert
+    <code>graph_ops.reconcile_grammar_segments</code> to its self-healing form (commit
+    <code>9f43a6c7</code>) — commit <code>39885fcc</code> replaced 15 lines of working
+    idempotent re-parse-and-realign with a 1,057-line module whose manifest builder
+    (<code>build_grammar_segment_manifest</code>) is referenced nowhere, leaving
+    grammar-segment drift detectable on every run but unfixable by any shipped path.</p>
+    <table>
+      <thead><tr><th>Disposition</th><th>Component</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Keep</strong></td>
+            <td><code>pool_registry.py</code> (38 LOC), <code>run_invocation.py</code> (115 LOC),
+                <code>attachment_audit.py</code>, <code>claim_seq</code> fencing
+                (<code>04c60e22</code>/<code>d0208d5f</code>),
+                <code>sn release-refine-claim</code>, <code>source_authority.py</code> as a
+                library, the whole <code>sn-dd-gaps</code> registry</td>
+            <td>Wired into the live loop or genuinely strengthens it.
+                <code>release-refine-claim</code> is the one recovery command whose dry run
+                emits the digest its <code>--apply</code> consumes — the ergonomic template
+                for any rebuild. <code>attachment_audit</code> is the closest thing in the
+                wave to what the sprint asked for.</td></tr>
+        <tr><td><strong>Quarantine</strong></td>
+            <td><code>source_authority_reconciliation.py</code>,
+                <code>protected_structural_reconciliation.py</code>,
+                <code>structural_closure.py</code>, <code>semantic_source_reconciliation.py</code>
+                (~9,500 LOC), <code>grammar_segment_reconciliation.py</code>,
+                <code>receipt_store.py</code>, <code>source_snapshot_migration.py</code></td>
+            <td>Each duplicates a live sweep and none is operable: five CLI verbs require
+                <code>--manifest</code> files whose builders are referenced only from tests
+                or nowhere. Before quarantining <code>grammar_segment_reconciliation</code>,
+                lift <code>_west_source_ids</code> and the test-fixture prefixes out of it —
+                production <code>graph_ops</code> imports fixture identifiers from it
+                (<code>graph_ops.py:1775</code>) and its shipped manifest filename carries a
+                plan label.</td></tr>
+        <tr><td><strong>Delete</strong></td>
+            <td><code>run_preflight.py</code> + <code>run_audit.py</code> (1,301 LOC + 1,431
+                test LOC); the docs-authority/evidence-recovery manifest block
+                (<code>graph_ops.py:13584-14990</code>),
+                <code>workers.admit_docs_review_request</code> and
+                <code>--require-docs-admission</code> (~1,466 + 2,303 test LOC); the entire
+                typed-dispatch set — <code>llm/context_dispatch.py</code>,
+                <code>callsite_registry.py</code>, <code>dispatch_policy_registry.py</code>,
+                <code>context_envelope.py</code>, <code>context_models.py</code>,
+                <code>wire_request.py</code>, <code>config/dispatch_policies/</code>,
+                <code>schemas/llm_context.yaml</code>, six test files (7,641 LOC)</td>
+            <td>Zero production consumers; the typed path also hard-disables prompt caching
+                (<code>llm.py:1963-1965</code> with <code>wire_request.py:144</code> always
+                setting the contract), so wiring it in would forfeit the ~87% warm-cache
+                saving that justifies the direct-bypass path. Detaching the production-side
+                scar touches exactly three files (<code>llm.py</code>,
+                <code>settings.py</code>, <code>prompt_loader.py</code>); the real
+                <code>render_prompt()</code> serving 75 call sites is untouched.</td></tr>
+      </tbody>
+    </table>
+    <p>Additional ceremony signal: 14 <code>hmac.compare_digest</code> call sites compare a
+    local file's SHA-256 against an operator-typed string — no secret, no adversary. Also
+    36 leftover worktrees (19 sibling directories, 17 under
+    <code>/run/user/.../reckon-worktrees/</code>), all verified fully merged into
+    <code>origin/main</code> and clean — safe to remove.</p>
+
+    <h2 id="s7">§7 — Graph reality</h2>
+    <p>The plans do not fabricate state; live read-only queries reconcile with their
+    counts: 4,699 StandardName nodes, 2,364 name-accepted, 2,238 docs-accepted, 1,287
+    superseded, 182 orphans, 8,712 eligible DD leaves at 61% coverage, $790.58 total
+    historical review spend across 18,348 Review nodes. Two live signals contradict the
+    "everything is blocked" posture: <strong>255 open <code>sn edit</code> proposals</strong>
+    queued by agents on 2026-08-08/09 and never drained (each one a correction the pipeline
+    already knows it wants), and the intact, untouched 355-source WEST manifest with
+    <code>sn run --batch</code> still a live working flag.</p>
+
+    <h2 id="s8">§8 — DAG assessment</h2>
+    <p>The S8 gating fails three independent tests. <em>Provenance:</em> every dependency on
+    the WEST critical path was created in one documentation commit on the wave's final day.
+    <em>Semantic necessity:</em> the blocked plan's own §1 states "None of it is
+    release-blocking for sn-west-review-rehearsal, and the split was made by measurement
+    rather than by judgement" — the restructure inverted a measured de-blocking split into a
+    blocking gate. <em>Direction of information:</em> the blockers produce nothing the
+    blocked plans consume — zero migrated call sites, zero active policies, no benchmark
+    run; <code>33-cli-harmonization</code> would, if executed, break every command the WEST
+    release runs (and the SN command surface grew 18 → 30 during the same wave that plans to
+    shrink it to 8). The honest release gate is the measured WEST-blocking subset from
+    sn-graph-wide-integrity §2: 6 name-level defects, 48 semantic-source ledger violations,
+    46 line-of-sight fold paths, the 9 gm flux-surface metrics, and the
+    <code>persist_refined_name</code> write gate — plus the 14-source residual from
+    superseded <code>f-swrr-020</code>.</p>
+    <p>Review executed 2026-08-11 by two independent read-only reviewers (code/git
+    forensics; plan-intent and suite health), synthesized by the session lead. Full pytest
+    outputs preserved in the session scratchpad; no repository file, graph record, or test
+    was modified during the review.</p>
+  </main>
+</body>
+</html>

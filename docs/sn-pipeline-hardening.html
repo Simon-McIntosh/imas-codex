@@ -15,11 +15,11 @@
   <title>SN Pipeline Hardening | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="44">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-version" content="45">
 <meta name="plan-sprint" content="S8">
-<meta name="plan-depends-on" content="llm-context-integrity,sn-dd-gaps,imas-standard-names:geometry-plane-and-arc-grammar">
-<meta name="plan-blocks" content="sn-benchmark-evolution,sn-graph-wide-integrity,sn-quality-parity">
+<meta name="plan-depends-on" content="sn-pipeline-recovery,sn-dd-gaps,imas-standard-names:geometry-plane-and-arc-grammar">
+<meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-impl" content="0.55">
@@ -888,9 +888,15 @@ Done-when
   5. followup written + this followup resolved.</pre>
     <p class="r-fu-outcome">Resolved by sn-coverage-and-hygiene §1 (commit 610dc0ac). Added the ENRICH_PARENTS pool (7th sn run pool): claims placeholder-description derived parents with live children, synthesizes a children-grounded description (get_model('sn-parent-enrich'), compose-tier), embeds locally, and routes name_stage-&gt;'drafted' so they flow REVIEW_NAME -&gt; accept -&gt; docs. Childless parents skipped. Live verify: 87 enriched in $1.70, 2 name-accepted @0.93-0.94, 2 docs-drafted children-consistent. Backlog 441 enrichable / 282 childless. Full record: docs/archive/sn-coverage-and-hygiene-landed.html; full drain queued as f-snch-002.</p>
     </article>
-<article class="r-fu" data-id="f-snph-semantic-hardening" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snph-semantic-hardening" data-status="resolved" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="2026-08-11T05:25:26+00:00" data-resolved-by="session-review-2026-08-11">
     <h4 class="r-fu-title">Harden every Standard Names stage around typed semantic authority</h4>
     <div class="r-fu-body"><p>Consume the new ISN plane/arc grammar, typed DD resolutions, and context envelope; then make every grouping, claim, review, refine, persist, drain, and attachment path fail closed on semantic mismatch before selective recovery begins.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-pipeline-hardening</pre>
+    <p class="r-fu-outcome">Superseded by the 2026-08-11 repoint (see the wave review, sn-wave-review-2026-08). The consolidated typed-authority rewrite it described is descoped: the context-envelope dependency was cut when llm-context-integrity was rescoped, and the fail-closed-everywhere posture produced the machinery quarantined under sn-pipeline-recovery §3. The one WEST-blocking prevention item it contained — gating the persist_refined_name write path — is tracked in sn-graph-wide-integrity's measured WEST-blocking subset. Concrete remaining hardening scope is re-derived in f-snph-rescope.</p>
+    </article>
+<article class="r-fu" data-id="f-snph-rescope" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-pipeline-hardening" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Re-derive this plan&#x27;s concrete remaining scope from the June phase structure</h4>
+    <div class="r-fu-body"><p>This plan is two documents in one: sections 1–6 and 27 of its 28 followups are the completed June programme (to_ir routing, ISN rc40–rc48, 336 signal-STRUCTURE sources, provenance collapse, prompt consolidation, measured 0.994 reviewer score); the 2026-08-10 header rewrite overlaid an abstract typed-authority programme that was never executed. Do three things: (1) archive the June record per the collapse convention, leaving a landed summary; (2) enumerate what genuinely remains open against the June phase structure and the wave review — anything WEST-blocking is already tracked in sn-graph-wide-integrity §2 and must not be duplicated here; (3) restore the header/summary to describe whatever survives, or propose shipping the plan if nothing does. The six June followups superseded on 2026-08-10 ("no broad regeneration authorized from the old prompt") should be re-examined — that supersession cited no measurement.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-hardening</pre>
     </article>
 </section>
@@ -925,6 +931,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260617T2110-distance-call-allowlist-empty" data-who="orchestrator" data-when="2026-06-17">
     <div class="r-comment-body">DRIFT-GUARD ALLOWLIST NOW EMPTY (8-&gt;0) — item B fully complete (commit 13f3d6cf). DD-EVIDENCED CALL on the distance/grammar gaps (lead: don't wait for the regen, use imas-dd tools + decide now): searched the DD (graph scan + imas-dd search) — there are NO arbitrary multi-locus distance spans. Real distance quantities are a distance/gap base at a SINGLE reference surface/plane: distance-to-separatrix/wall/x-point (camera_ir, langmuir_probes, thomson_scattering — ~8 paths), gaps/clearances (equilibrium/summary boundary gap, gap_limiter_wall — registered `gap` base), named inner-outer separatrix distance, and along-path arc lengths. CONCLUSION: a distance-span (multi-locus) grammar is NOT warranted. Replaced the 2 aspirational exemplars with real round-tripping forms (radial_distance_at_outboard_midplane, gap_at_plasma_boundary), reframed the REJECT rule (single-locus distance/gap or vocab_gap; never fabricate a span), and reframed the operator+geometric_base deep-nest exemplar to a vocab_gap illustration (a transformation cannot act on a geometry-coordinate base). Every checkmark-endorsed compose example now round-trips through ISN; the drift-guard permanently blocks reintroducing non-ISN vocab. This RESOLVES the grammar-limit step of f-snph-008 (no grammar extension to build); f-snph-008's remaining scope is purely the rollout: SN clear + --focus rotations (validate concurrency=24) + names-only domain-by-domain + lock regen-scope. (Note: the ~8 'distance to a reference surface' paths use the midplane/at-reference forms; a dedicated 'distance-from-datum' relation was considered and declined — `_to_` already binds the ratio connector, and the at-reference/midplane forms cover the real quantities.)</div>
+</div>
+<div class="r-comment" data-section="_top" data-id="wave-review-repoint-20260811" data-who="session-review-2026-08-11" data-when="2026-08-11">
+    <div class="r-comment-body"><p><strong>Dependency repoint after the wave audit.</strong> The llm-context-integrity gate added by <code>86a389f2</code> is cut: that plan was rescoped to the SN prompt paths and no longer blocks this one. New prerequisite is sn-pipeline-recovery — the pipeline must be runnable (pricing null fixed, suite green) before any hardening claim can be validated. sn-dd-gaps and the ISN plane/arc grammar remain real inputs. This plan no longer blocks sn-graph-wide-integrity or sn-benchmark-evolution; the measured WEST-blocking subset in sn-graph-wide-integrity §2 is the honest release gate.</p></div>
 </div>
 </section>
 </main>

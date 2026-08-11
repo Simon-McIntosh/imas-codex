@@ -14,14 +14,14 @@
   <title>Feature 33 — CLI Option Harmonization | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-sprint" content="S8">
-<meta name="plan-modified" content="2026-08-10">
-<meta name="plan-depends-on" content="sn-graph-wide-integrity,sn-quality-parity">
+<meta name="plan-sprint" content="S9">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-depends-on" content="sn-west-catalog-release">
 <meta name="plan-blocks" content="sn-west-review-rehearsal">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="general">
 <meta name="plan-impl" content="0.1">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -254,6 +254,11 @@ CLI cleanup after Phase 3&rsquo;s alias additions settle.</p>
     <pre class="r-fu-prompt">/reckon-ship 33-cli-harmonization</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="wave-review-defer-20260811" data-who="session-review-2026-08-11" data-when="2026-08-11">
+    <div class="r-comment-body"><p><strong>Deferred to S9, re-sequenced after the release, after the wave audit.</strong> This plan sat on the WEST critical path, yet executing it would break every command the release runs — consolidation belongs after the catalog ships, so the dependency now points at sn-west-catalog-release instead of gating it. Two inputs for execution: (1) the body is stale by over a year ("2025-05-xx", an alias-and-deprecation strategy the 2026-08-10 decisions reversed) — rewrite it against the current surface before dispatching; (2) the surface to consolidate grew 18→30 commands during the August wave, all twelve additions recovery verbs; sn-pipeline-recovery §3's keep/quarantine/delete pass will remove several of them first, so take the post-triage surface as the consolidation baseline.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

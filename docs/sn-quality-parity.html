@@ -17,13 +17,13 @@
   <title>SN Quality Parity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-sprint" content="S8">
-<meta name="plan-modified" content="2026-08-10">
+<meta name="plan-sprint" content="S9">
+<meta name="plan-modified" content="2026-08-11">
 <meta name="plan-depends-on" content="sn-pipeline-hardening,sn-benchmark-evolution">
 <meta name="plan-blocks" content="33-cli-harmonization">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 </head>
 <body>
   <main class="plan-doc">
@@ -98,6 +98,11 @@
       </p>
     <p class="r-dec-rat">Locked by the lead as 12A. USD 200 is the cumulative campaign ceiling, never a per-name authorization. UI and receipts must separate campaign ceiling, remaining authority, reserved expected exposure, actual spend, per-attempt expected/p95/hard ceiling, conditional escalation, and provider policy ceiling.</p>
     </div>
+</section>
+<section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="wave-review-defer-20260811" data-who="session-review-2026-08-11" data-when="2026-08-11">
+    <div class="r-comment-body"><p><strong>Deferred to S9 after the wave audit, with a structural defect to fix before any execution.</strong> The header (2026-08-10) describes a graph-wide evidence-recovery census — 14 authoritative rows, 32 rescores, 270 superseded holds, 1,922 ambiguous holds — while the body below it is an unrelated earlier programme (benchmark harness, --paths CLI mode, publish.py tag migration, docs template rewrite) self-reporting 0.12 against the header's 0.25. A worker cannot tell which plan it is executing. Split the two programmes into separate plans (or delete the stale body) before dispatching anyone. The evidence-recovery drain itself overlaps sn-pipeline-recovery §4 — reconcile scope there first so the docs-pending tranche is not claimed twice.</p></div>
+</div>
 </section>
 </main>
 </body>

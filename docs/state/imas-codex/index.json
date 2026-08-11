@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-10T10:30:00",
+  "updated": "2026-08-11T07:27:50",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -192,29 +192,12 @@
             "done_when": "All seven pools and side cars enforce the exact semantic signature, graph claims, scope/admission continuity, dynamic pricing and deterministic terminal drain."
           },
           {
-            "slug": "sn-benchmark-evolution",
-            "why_now": "The local DSv4 resource can triage the full graph cheaply only after it is benchmarked against production-faithful context and independent authority.",
-            "done_when": "Locked critical-defect and clean-name thresholds pass, then a reproducible zero-mutation full-graph advisory census is emitted."
-          },
-          {
             "slug": "sn-graph-wide-integrity",
             "why_now": "Known mixed representations and family folds require exact source-level repair after prevention lands; the pre-fold snapshot is evidence, not rollback authority.",
             "done_when": "No live name mixes incompatible signatures; every source has one compatible identity or explicit disposition; exact manifests, selective reruns and reversible receipts cover all mutations, including WEST."
           },
           {
-            "slug": "sn-quality-parity",
-            "why_now": "More than two thousand names carry incomplete or stale authority evidence, but only a small subset is immediately safe to rescore.",
-            "done_when": "A fresh exact census partitions every row honestly; proof-complete metadata and hash-bound hosted rescores land under the cumulative USD 200 ceiling; ambiguous history remains visible."
-          },
-          {
-            "slug": "mast-semantic-source-repair",
-            "why_now": "MAST source parity must consume the hardened generic mechanisms rather than introducing facility-specific recovery code.",
-            "done_when": "The refreshed MAST manifest has exact DD/local-resolution/ISN authority, guarded dry-runs and any separately authorized applies with stable-id parity and zero collateral."
-          },
-          {
-            "slug": "33-cli-harmonization",
-            "why_now": "The current 30-command surface exposes private recovery details and mixes advisory, pipeline, maintenance and publication semantics.",
-            "done_when": "Exactly eight typed intents remain, all consumers migrate, all mutations share one manifest/apply/receipt harness, and old commands fail as unknown."
+            "slug": "sn-pipeline-recovery"
           }
         ]
       },
@@ -236,6 +219,26 @@
             "slug": "sn-west-catalog-release",
             "why_now": "Catalog publication and graph fold-back are a separate authority class after human disposition.",
             "done_when": "The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release projection while retaining audit history."
+          },
+          {
+            "slug": "sn-benchmark-evolution",
+            "why_now": "The local DSv4 resource can triage the full graph cheaply only after it is benchmarked against production-faithful context and independent authority.",
+            "done_when": "Locked critical-defect and clean-name thresholds pass, then a reproducible zero-mutation full-graph advisory census is emitted."
+          },
+          {
+            "slug": "sn-quality-parity",
+            "why_now": "More than two thousand names carry incomplete or stale authority evidence, but only a small subset is immediately safe to rescore.",
+            "done_when": "A fresh exact census partitions every row honestly; proof-complete metadata and hash-bound hosted rescores land under the cumulative USD 200 ceiling; ambiguous history remains visible."
+          },
+          {
+            "slug": "mast-semantic-source-repair",
+            "why_now": "MAST source parity must consume the hardened generic mechanisms rather than introducing facility-specific recovery code.",
+            "done_when": "The refreshed MAST manifest has exact DD/local-resolution/ISN authority, guarded dry-runs and any separately authorized applies with stable-id parity and zero collateral."
+          },
+          {
+            "slug": "33-cli-harmonization",
+            "why_now": "The current 30-command surface exposes private recovery details and mixes advisory, pipeline, maintenance and publication semantics.",
+            "done_when": "Exactly eight typed intents remain, all consumers migrate, all mutations share one manifest/apply/receipt harness, and old commands fail as unknown."
           }
         ]
       }
@@ -309,6 +312,6 @@
       }
     ],
     "blockers": [],
-    "_version": 25
+    "_version": 26
   }
 }

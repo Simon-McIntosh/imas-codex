@@ -12,12 +12,12 @@
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="sn-pipeline-hardening,sn-benchmark-evolution">
+  <meta name="plan-depends-on" content="sn-pipeline-recovery">
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="129">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-version" content="130">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -935,6 +935,11 @@ Done-when (ordered)
     <div class="r-fu-body"><p>Freeze a fresh quiet-window graph and forensic snapshot diff, enumerate incompatible memberships and mixed semantic signatures, then apply only independently reviewed exact source manifests through selective reset and ordinary quorum.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
     </article>
+<article class="r-fu" data-id="f-sgwi-west-blocking" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Execute the measured WEST-blocking subset, and only it, ahead of the rehearsal</h4>
+    <div class="r-fu-body"><p>Take this plan's own §2 partition literally — it was measured path-by-path against the 355-source WEST manifest and is the honest release gate: 6 name-level defects, 48 WEST-touching semantic-source ledger violations, 46 <code>line_of_sight</code> manifest fold paths, the 9 gm1–gm9 flux-surface metrics, and the <code>persist_refined_name</code> write-path gate. Use existing pools and the already-working exact instruments (<code>sn release-refine-claim</code> is the ergonomic template); no new manifest machinery. Everything else in this plan — the 151 orphans, the 1,410 non-WEST ledger violations, thick-line misattachments — stays parked here exactly as §1 intended. Done when each subset class has a recorded repair or a recorded, reviewed refusal, and sn-west-review-rehearsal can start.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -1315,6 +1320,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260809-docs-admission-restart-hold" data-who="reckon-ship" data-when="2026-08-09T18:45:00+00:00">
     <div class="r-comment-body"><p><strong>Pre-price documentation admission is merged but independently held at the process-restart boundary.</strong> Merge <code>4fa6f6c0</code> adds canonical read-only request preparation, dual-remainder expected-exposure checks, exact content/request CAS, docs-axis release/rollback, and exact <code>review_docs</code> pool selection. Focused tests passed 141 cases; one broad run exposed six compatibility failures and all six passed after correction without an unchanged broad rerun. Independent audit found the admission/rollback capability is stored only in process-local memory: a later scoped CLI process can see no admission entry and proceed to providers, while failure cleanup cannot reconstruct the exact prior authority snapshot. No live row was staged and no provider call occurred.</p><p><strong>Required correction:</strong> atomically persist a typed admission record and rollback snapshot with exact ID, scope, request identity, content/review hashes, exposure, claim token, and prior docs authority; worker claims must require and consume that record after restart, and cancellation/missing-admission/skip-maintenance paths must roll back or refuse before spend. A single public crash-recoverable admission-and-drain command is acceptable only if it mechanically closes the same boundary. The paid 32-name queue remains held.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="wave-review-repoint-20260811" data-who="session-review-2026-08-11" data-when="2026-08-11">
+    <div class="r-comment-body"><p><strong>Dependency repoint after the wave audit</strong> (<a href="/imas-codex/sn-wave-review-2026-08.html">sn-wave-review-2026-08</a>). The 2026-08-10 restructure (<code>86a389f2</code>) gated this plan behind sn-pipeline-hardening and sn-benchmark-evolution and wrote its implementation down 0.98→0.75 without citing a measurement — inverting this plan's own §1, which states the split from the WEST path was made by measurement. Both gates are cut; the sole prerequisite is now sn-pipeline-recovery (a runnable pipeline). Two hygiene notes: the §6 embed-dimension item (384-dim server vs 256-dim indexes) is stale — <code>embed status</code> now reports 256; and the <code>get_dd_version_context</code> drift §6 carries as a minor finding is a live red test on main, tracked for repair in sn-pipeline-recovery §2.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

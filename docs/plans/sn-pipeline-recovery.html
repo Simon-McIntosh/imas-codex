@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-pipeline-recovery">
+  <meta name="plan-title"     content="Standard Names Pipeline Recovery and Machinery Triage">
+  <meta name="plan-summary"   content="Restore the runnable pipeline (pricing null, broken test collection, 22 red tests, deleted grammar self-heal), triage the August wave's machinery by the reviewed keep/quarantine/delete dispositions, then drain the 255-proposal and docs-pending backlog so the WEST release path resumes.">
+  <meta name="plan-status"    content="active">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort"    content="L">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint"    content="S8">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-depends-on" content="">
+  <meta name="plan-blocks"    content="sn-graph-wide-integrity">
+  <title>SN Pipeline Recovery and Machinery Triage | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — Why this plan exists</h2>
+    <p>The August fleet wave left the Standard Names pipeline unable to run and the sprint
+    gated behind machinery nothing consumes. The full two-reviewer audit is in
+    <a href="/imas-codex/sn-wave-review-2026-08.html">the wave review</a>; this plan turns
+    its three fix lists into executable work. It has no prerequisites and is the first
+    executable item of the sprint: nothing else on the WEST path can spend a cent until
+    §2 lands. The review's headline facts: production pricing fails for every hand-curated
+    model seat via a one-line null (all three review-quorum seats collapse before any HTTP
+    request); the default <code>uv run pytest</code> collects zero tests; 22 tests fail
+    once collection is repaired; the working grammar-segment self-heal was replaced by an
+    inoperable manifest command; and async claim collision-safety is intact (no repair
+    needed there — do not "restore" claim logic that was never broken).</p>
+
+    <h2 id="s2">§2 — Restore pipeline operability</h2>
+    <p>Done when the default <code>uv run pytest</code> collects and passes with zero
+    failures, and a scoped <code>sn run</code> demonstrably reserves and spends against a
+    small cost cap. Concrete items, each independently verifiable:</p>
+    <ul>
+      <li><strong>Pricing null:</strong> restore numeric-zero defaults for absent optional
+      price dimensions at <code>imas_codex/settings.py:102</code> and <code>:111</code>
+      (<code>raw.get("request")</code> → <code>raw.get("request", 0.0)</code>), and audit
+      the sibling <code>raw.get</code> reads at lines 109–121 for consumers that
+      <code>float()</code> or compare them. The guard suite
+      <code>tests/standard_names/test_seat_exposure_calibration.py</code> must go green for
+      every configured seat, and <code>test_seat_enumeration_is_not_silently_empty</code>
+      must again see three paid reviewers.</li>
+      <li><strong>Test collection:</strong> <code>uv sync --extra test</code>, and convert
+      the module-scope <code>import hatch_build_hooks</code> in
+      <code>tests/llm/test_context_schema_generation.py</code> to
+      <code>pytest.importorskip</code> so one optional dependency can never again take down
+      repository-wide collection.</li>
+      <li><strong>Grammar self-heal:</strong> restore
+      <code>graph_ops.reconcile_grammar_segments</code> to its self-healing form (reference:
+      commit <code>9f43a6c7</code>) so segment drift is repaired in the reconcile pass
+      again, not merely counted and warned about. The detect-only scan currently pays a full
+      live-name scan on every <code>sn run</code> to fix nothing.</li>
+      <li><strong>Remaining red tests:</strong> drive the other 9 failures to zero — the two
+      refine-fence rollback-description mismatches
+      (<code>test_atomic_refined_name_persistence.py</code>), the three
+      <code>get_dd_version_context</code> drift failures, the comparator-prose leak into
+      un-edited renders (<code>test_edit_prompt_injection.py</code>), the two
+      never-invoked-model workers (<code>test_enrich_parents.py</code>,
+      <code>test_refine_name_chain.py</code>), and the hanging docs-admission
+      serialization test (<code>test_docs_evidence_recovery.py</code>) — the latter may
+      resolve by deletion under §3's disposition rather than by repair.</li>
+      <li><strong>Proof of life:</strong> one scoped <code>sn run --focus</code> or small
+      <code>--cost-limit</code> run that reserves, spends, and records an
+      <code>SNRun</code> whose stop reason is not <code>no_eligible_work</code>-on-empty or
+      a pricing refusal.</li>
+    </ul>
+
+    <h2 id="s3">§3 — Triage the wave machinery</h2>
+    <p>Apply the review's dispositions (wave review §6). Keep: <code>pool_registry</code>,
+    <code>run_invocation</code>, <code>attachment_audit</code>, <code>claim_seq</code>
+    fencing, <code>sn release-refine-claim</code>, the DD-gap registry. Quarantine (move
+    out of the production import graph, retain for reference): the four manifest-bound
+    reconciliation modules, <code>grammar_segment_reconciliation</code> (after lifting
+    <code>_west_source_ids</code> and the test-fixture prefixes out — production
+    <code>graph_ops.py:1775</code> currently imports fixture identifiers from it, and the
+    shipped manifest filename must be renamed by content, not plan label),
+    <code>receipt_store</code>, <code>source_snapshot_migration</code>. Delete:
+    <code>run_preflight</code>/<code>run_audit</code>, the docs-admission manifest block
+    (<code>graph_ops.py:13584-14990</code> plus
+    <code>workers.admit_docs_review_request</code> and
+    <code>--require-docs-admission</code>), and — pending the §Decisions disposition — the
+    typed-dispatch set under <code>imas_codex/llm/</code> with its three-file
+    production-side detach (<code>discovery/base/llm.py</code> typed params and
+    fail-closed branches including the <code>supports_cache</code> suppression,
+    <code>settings.py</code> typed-pricing accessors, <code>prompt_loader.py</code>
+    bundle loaders; <code>render_prompt()</code> and its 75 call sites untouched).</p>
+    <p>Also under this section: remove the 36 leftover worktrees (19 sibling
+    <code>imas-codex-sgwi-*</code> directories, 17 under
+    <code>/run/user/.../reckon-worktrees/</code>) — every one verified fully merged into
+    <code>origin/main</code> and clean on 2026-08-11 — and re-run the naming-hygiene
+    pre-stage checks over the surviving new modules. Done when the production import graph
+    contains no module from the delete list, no production file imports from a quarantined
+    module, the CLI surface no longer registers the deleted verbs, and the full default
+    suite stays green.</p>
+
+    <h2 id="s4">§4 — Drain the standing backlog</h2>
+    <p>Cheapest possible proof that §2 worked, and it converts two weeks of queued agent
+    judgement into graph state: 255 open <code>sn edit</code> proposals (queued 2026-08-08/09,
+    never drained) and roughly 2,001 docs-pending names are standing work requiring no new
+    instrument. Run them through the existing pools — <code>sn run</code> with a hard
+    <code>--cost-limit</code> agreed with the lead (the prior authorization was $200, of
+    which $10.64 was spent) — and record the drain outcome here. Names that exhaust on
+    quorum variance follow the standing recovery rule (<code>sn rescore</code>), never a
+    hand-accept. Done when the edit-proposal queue is empty or every remaining entry has a
+    recorded refusal reason, and docs-pending has moved materially toward the review gate
+    at a recorded cost.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+      <div class="r-dec" data-key="typed-dispatch-disposition" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What happens to the 7,641-line typed-dispatch subsystem under imas_codex/llm/?</p>
+        <p class="r-dec-ctx">Zero production consumers; the dependency arrow points from it into
+        production, never the reverse; wiring it in as-built would disable prompt caching. The
+        review recommends deletion (git retains the history; the LinkML envelope schema can be
+        resurrected if the rescoped context work wants it). Quarantine keeps the code visible at
+        the cost of carrying dead weight through every future refactor and test run.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="delete">Delete the subsystem and detach the three production-side touch points (recommended by review)</button>
+          <button class="r-opt" data-value="quarantine">Quarantine alongside the reconciliation modules; revisit after WEST</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+      <div class="r-dec" data-key="backlog-drain-budget" data-choice="" data-by="" data-when="">
+        <p class="r-dec-q">What cost cap governs the §4 backlog drain?</p>
+        <p class="r-dec-ctx">The prior recovery authorization was $200 with $10.64 spent. The
+        drain covers 255 edit proposals plus a docs-pending tranche; the docs axis was the
+        dominant cost in earlier rotations.</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="reuse-remaining">Reuse the remaining ~$189 of the existing authorization</button>
+          <button class="r-opt" data-value="fresh-cap">Set a fresh cap for the drain</button>
+        </p>
+        <p class="r-dec-rat"></p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-spr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Restore pipeline operability: pricing null, test collection, red suite, grammar self-heal</h4>
+        <div class="r-fu-body"><p>Execute §2 in order: the settings.py numeric-zero restoration with the
+        seat-calibration guard suite as the acceptance test; the test-collection repair
+        (<code>uv sync --extra test</code> + <code>importorskip</code>); the
+        <code>reconcile_grammar_segments</code> self-heal restoration; then the remaining
+        nine failures. Finish with the proof-of-life scoped run. No new machinery — every
+        item is a repair or a revert to a form that already worked.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §2</pre>
+      </article>
+      <article class="r-fu" data-id="f-spr-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Apply the keep/quarantine/delete dispositions to the wave machinery</h4>
+        <div class="r-fu-body"><p>Execute §3 once the typed-dispatch disposition decision is locked. Lift the
+        fixture prefixes and WEST source list out of
+        <code>grammar_segment_reconciliation</code> before quarantining it; verify with the
+        naming-hygiene pre-stage checks; remove the 36 verified-merged worktrees; keep the
+        default suite green throughout.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §3</pre>
+      </article>
+      <article class="r-fu" data-id="f-spr-003" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Drain the 255 edit proposals and the docs-pending tranche through the existing pools</h4>
+        <div class="r-fu-body"><p>Execute §4 after §2 lands and the budget decision is locked. Existing pools
+        only, hard cost cap, outcomes recorded in this plan; exhausted-on-variance names go
+        through <code>sn rescore</code>.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

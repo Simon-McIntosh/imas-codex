@@ -12,12 +12,12 @@
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="M">
   <meta name="plan-owner" content="Simon McIntosh">
-  <meta name="plan-depends-on" content="33-cli-harmonization,sn-graph-wide-integrity,sn-quality-parity">
+  <meta name="plan-depends-on" content="sn-graph-wide-integrity">
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="25">
+<meta name="plan-modified" content="2026-08-11">
+<meta name="plan-version" content="26">
 <meta name="plan-impl" content="0.65">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2230,6 +2230,11 @@ Done-when
     <div class="r-fu-body"><p>At the closed pre-WEST baseline, freeze the exact current WEST cohort and expose every name, description, source path, score, DD-resolution dependency, semantic signature, and advisory/hosted review finding for human disposition.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     </article>
+<article class="r-fu" data-id="f-west-residual-14" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-west-review-rehearsal" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Reinstate and close the 14-source residual to the RC cut</h4>
+    <div class="r-fu-body"><p>Restores the concrete worklist that superseded followup f-swrr-020 carried before the 2026-08-10 restructure discarded it in favor of a full cohort rebuild: three sources need only a compose claim, four need only a review, the remainder need a fresh name, and gm1/gm5/gm6 sit at the attempt cap awaiting a retry instrument (the standing recovery rule is <code>sn rescore</code> — a fresh quorum draw on the same name, never a hand-accept). Its closing note read "gates hold; the trigger is the lead's." Work it with existing pools against the intact 355-source manifest (<code>sn run --batch west_task_2e</code> is live). Done when the residual is empty or every remaining source has a recorded, reviewed refusal — at which point the reviewer-packet followup takes over.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -2238,6 +2243,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-entry-gate-handoff-20260801" data-who="reckon-ship" data-when="2026-08-01T12:20:00+02:00">
     <div class="r-comment-body"><p><strong>The S6 entry condition for the review rehearsal now holds at ISN rc64.</strong> The fresh five-gate matrix is HOLD/HOLD/HOLD/HOLD/HOLD. The exact WEST partition is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained; accepted identities have zero strict-parser drift, zero duplicate accepted bindings, zero authoritative unit conflicts, and zero semantic-source invariant violations. S6 did not cut an RC or drain the full backlog. Those human-review and cost-gated acts remain here in S5. The stale 14-source wording in <code>f-swrr-020</code> is superseded by this exact 16-unaccepted partition.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="wave-review-repoint-20260811" data-who="session-review-2026-08-11" data-when="2026-08-11">
+    <div class="r-comment-body"><p><strong>Dependencies restored after the wave audit</strong> (<a href="/imas-codex/sn-wave-review-2026-08.html">sn-wave-review-2026-08</a>). The 2026-08-10 restructure added gates on 33-cli-harmonization and sn-quality-parity and wrote implementation down 0.85→0.65 without a cited measurement; a CLI ergonomics refactor cannot gate a catalog release, and the quality-parity plan currently carries a header/body mismatch that must be split before execution. Both edges are cut. The sole remaining prerequisite is sn-graph-wide-integrity, which now carries the measured WEST-blocking subset (its §2) as an explicit followup — the honest release gate this plan's own cohort math implied all along.</p></div>
 </div>
 </section>
 </main>
