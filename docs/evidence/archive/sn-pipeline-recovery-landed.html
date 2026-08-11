@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-pipeline-recovery-landed">
+  <meta name="plan-title" content="SN Pipeline Recovery — Landed Record">
+  <meta name="plan-summary" content="Cumulative execution evidence for the sn-pipeline-recovery plan: operability repairs, machinery triage, and backlog drain outcomes.">
+  <meta name="plan-evidence-for" content="sn-pipeline-recovery">
+  <meta name="plan-verifies" content="sn-pipeline-recovery#s2">
+  <title>SN Pipeline Recovery — Landed Record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>SN Pipeline Recovery — landed record</h1>
+    <p>Cumulative evidence for
+    <a href="/imas-codex/plans/sn-pipeline-recovery">sn-pipeline-recovery</a>.
+    Work executed 2026-08-11 by dispatched worktree workers integrated on
+    <code>main</code>.</p>
+
+    <h2 id="s2">§2 — Restore pipeline operability</h2>
+    <p>Merged as <code>1634d0b0</code> (worker commits <code>cb5a5cac</code>,
+    <code>bb946949</code>, <code>6b6af5ff</code>, <code>9b08f0bf</code>;
+    10 files, +197/−48). Outcomes per item:</p>
+    <table>
+      <thead><tr><th>Item</th><th>Outcome</th></tr></thead>
+      <tbody>
+        <tr><td>Pricing null</td>
+            <td><code>get_openrouter_pricing</code> defaults <code>request</code> and
+                <code>image</code> to 0.0 at base entries and threshold overrides.
+                <code>prompt</code>/<code>completion</code> deliberately stay
+                <code>None</code> on absence — a zero token rate is not a valid price and
+                both consumers reject ≤ 0. No consumer change needed in
+                <code>discovery/base/llm.py</code> or <code>budget.py</code>. All three
+                configured paid name-review seats price with numeric dimensions;
+                <code>test_seat_exposure_calibration.py</code> fully green.</td></tr>
+        <tr><td>Test collection</td>
+            <td>Module-scope <code>import hatch_build_hooks</code> converted to
+                <code>pytest.importorskip</code> in the one test that reads the hook
+                source; a missing <code>hatchling</code> now costs one test, not
+                repository-wide collection.</td></tr>
+        <tr><td>Grammar self-heal</td>
+            <td><code>reconcile_grammar_segments</code> restored to the idempotent
+                re-parse-and-realign form: drifted names batched into one
+                UNWIND/SET, unparseable names skipped, returns
+                <code>names_realigned</code>. First live run realigned
+                <strong>231 names</strong>.</td></tr>
+        <tr><td>Remaining red tests</td>
+            <td>Refine-fence pair fixed on the test side — the rollback contract is
+                unchanged; tests now assert the typed refusal reason enum instead of
+                message prose. Comparator-prose golden was a stale capture (an
+                unconditional template paragraph landed without recapture); recaptured,
+                +5 lines exactly. The two never-invoked-model tests did not reproduce.
+                Repairing collection surfaced five hidden failures; root causes: a CLI
+                <code>--reviewer-profile</code> selection leaking through
+                <code>os.environ</code> into every later in-process test (contained by an
+                autouse fixture; source defect in <code>cli/sn.py</code> repaired under
+                §3), quorum test doubles missing published token allowances, and
+                service-tag tests depending on an ambient developer credential.</td></tr>
+        <tr><td>Proof of life</td>
+            <td>Scoped <code>sn run -c 2 -t 6</code>: <code>SNRun
+                15426156-b184-4616-a706-6da218a3e863</code> spent
+                <strong>$0.94 of a $2.00 cap</strong>, stop reason
+                <code>time_limit_reached</code> — 170 review_name calls, 79
+                generate_docs, 72 enrich_parents. Pricing, reservation, and
+                spend all live again.</td></tr>
+      </tbody>
+    </table>
+    <p>Final default suite in the worker worktree: <strong>11,992 passed / 0 failed</strong>
+    (237 skipped, 706 deselected, 341 s), with
+    <code>test_docs_evidence_recovery.py</code> deselected pending its §3 deletion.
+    Baseline before repair: zero tests collected; after collection repair alone:
+    22 failed.</p>
+    <p>Two residuals moved to corrective nodes rather than closing §2 outright:
+    the two graph-backed <code>test_dd_tool_features.py</code> failures
+    (bulk version-context missing-filter contract; migration-guide removals query
+    timing out), and a live <code>IndexError</code> in
+    <code>_enrich_docs_review_dd_context</code> when a name has empty
+    <code>source_paths</code> — exposed by the proof-of-life run once pricing
+    stopped masking it (~29 tracebacks in six minutes; population is the 76
+    no-source ledger names).</p>
+  </main>
+</body>
+</html>
