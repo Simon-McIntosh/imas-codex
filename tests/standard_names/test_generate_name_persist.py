@@ -30,6 +30,24 @@ def _mock_gc_tx():
     gc.__exit__ = MagicMock(return_value=False)
 
     def _run(_cypher, **params):
+        if "AS already_bound" in _cypher:
+            # The attachment pairing guard. These tests exercise persistence
+            # mechanics against consistent pairings, so answer with sources
+            # carrying no DD path — the shape the guard admits unchanged.
+            # Guard REFUSAL is covered in test_attachment_write_guards.py.
+            return [
+                {
+                    "source_id": source_id,
+                    "source_type": "dd",
+                    "dd_path": None,
+                    "dd_unit": None,
+                    "sn_unit": None,
+                    "already_bound": False,
+                    "existing_dd_paths": [],
+                    "name_stage": "accepted",
+                }
+                for source_id in params.get("source_ids", [])
+            ]
         if "GENERATED_SUPERSESSION_PREFLIGHT" in _cypher:
             return [
                 {
@@ -90,6 +108,15 @@ def _transaction_call(tx, fragment: str):
     return next(
         call_item
         for call_item in tx.run.call_args_list
+        if fragment in call_item.args[0]
+    )
+
+
+def _query_matching(gc, fragment: str) -> str:
+    """Return the first ``gc.query`` Cypher containing *fragment*."""
+    return next(
+        call_item.args[0]
+        for call_item in gc.query.call_args_list
         if fragment in call_item.args[0]
     )
 
@@ -287,7 +314,7 @@ class TestFinalizeGeneratedNameStage:
         ):
             persist_generated_name_batch([candidate], compose_model="test/model")
 
-        item = tx.run.call_args_list[0].kwargs["batch"][0]
+        item = _transaction_call(tx, "AS outcome").kwargs["batch"][0]
         assert item["claim_token"] == "winner"
         assert item["claim_seq"] == 12
 
@@ -412,7 +439,7 @@ def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
         )
 
     assert winners == ["dd:equilibrium/time_slice/q"]
-    lock_cypher = tx.run.call_args_list[0].args[0]
+    lock_cypher = _transaction_call(tx, "AS outcome").args[0]
     assert "sns.claim_token = b.claim_token" in lock_cypher
     assert "sns.claim_seq = b.claim_seq" in lock_cypher
     assert "sns.status = 'extracted'" in lock_cypher
@@ -428,9 +455,10 @@ def test_candidate_stage_reserves_missing_target_under_source_fence() -> None:
     assert "reservation.claim_seq = b.claim_seq" in lock_cypher
     assert "reservation.created_target = true" in lock_cypher
     assert "HAS_STANDARD_NAME" not in lock_cypher
-    cleanup_cypher = tx.run.call_args_list[1].args[0]
+    cleanup_cypher = _transaction_call(tx, "b.preserve_current = true").args[0]
     assert "b.preserve_current = true" in cleanup_cypher
-    assert tx.run.call_count == 2
+    # Target existence probe, binding lock, stale-reservation cleanup.
+    assert tx.run.call_count == 3
     tx.commit.assert_called_once()
 
 
@@ -470,11 +498,12 @@ class TestClaimedAttachmentPersistence:
             winners = persist_claimed_attachments([self._attachment()])
 
         assert winners == []
-        assert tx.run.call_count == 3
-        cypher = tx.run.call_args_list[0].args[0]
+        # Pairing guard, binding lock, stale-reservation cleanup, release.
+        assert tx.run.call_count == 4
+        cypher = _transaction_call(tx, "AS outcome").args[0]
         assert "sns.claim_token = b.claim_token" in cypher
         assert "sns.claim_seq = b.claim_seq" in cypher
-        release = tx.run.call_args_list[2].args[0]
+        release = _transaction_call(tx, "sns.last_error = CASE").args[0]
         assert "sns.last_error = CASE" in release
         assert "MERGE (source)-[:HAS_STANDARD_NAME]" not in release
         tx.commit.assert_called_once()
@@ -503,8 +532,10 @@ class TestClaimedAttachmentPersistence:
             winners = persist_claimed_attachments([self._attachment()])
 
         assert winners == ["dd:spectrometer/channel/isotope_ratio"]
-        cleanup = tx.run.call_args_list[1].args[0]
-        mutation = tx.run.call_args_list[2].args[0]
+        cleanup = _transaction_call(tx, "b.preserve_current = true").args[0]
+        mutation = _transaction_call(tx, "MERGE (src)-[:HAS_STANDARD_NAME]->(sn)").args[
+            0
+        ]
         assert "b.preserve_current = true" in cleanup
         assert "WHERE sn.name_stage IN $stable_stages" in mutation
         assert "MERGE (sns)-[produced:PRODUCED_NAME]->(sn)" in mutation
@@ -857,8 +888,9 @@ class TestPersistGeneratedNameBatch:
         candidate = _make_candidate(name="hydrogen_fraction")
 
         def _terminal_collision(cypher, **params):
-            assert params["batch"][0]["claim_token"] == "winner"
-            assert params["batch"][0]["claim_seq"] == 7
+            if "batch" in params:
+                assert params["batch"][0]["claim_token"] == "winner"
+                assert params["batch"][0]["claim_seq"] == 7
             if "AS outcome" not in cypher:
                 return []
             return [
@@ -894,10 +926,16 @@ class TestPersistGeneratedNameBatch:
         supersede.assert_not_called()
         counter.assert_not_called()
         self.atomic_tx.commit.assert_called_once()
-        assert self.atomic_tx.run.call_count == 3
-        cypher = self.atomic_tx.run.call_args_list[0].args[0]
-        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
-        release_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        # Target existence probe, binding lock, stale-reservation cleanup,
+        # release.
+        assert self.atomic_tx.run.call_count == 4
+        cypher = _transaction_call(self.atomic_tx, "AS outcome").args[0]
+        cleanup_cypher = _transaction_call(
+            self.atomic_tx, "b.preserve_current = true"
+        ).args[0]
+        release_cypher = _transaction_call(
+            self.atomic_tx, "sns.last_error = CASE"
+        ).args[0]
         assert "SET sns.claimed_at = datetime()" in cypher
         assert "stale.provisional = true" in cleanup_cypher
         assert "sns.last_error = CASE" in release_cypher
@@ -951,13 +989,15 @@ class TestPersistGeneratedNameBatch:
         write.assert_not_called()
         backfill.assert_not_called()
         supersede.assert_not_called()
-        lock_cypher = self.atomic_tx.run.call_args_list[0].args[0]
+        lock_cypher = _transaction_call(self.atomic_tx, "AS outcome").args[0]
         assert "SET target.binding_lock_token = b.claim_token" in lock_cypher
         assert "target.binding_lock_seq = b.claim_seq" in lock_cypher
         assert (
             "REMOVE target.binding_lock_token, target.binding_lock_seq" in lock_cypher
         )
-        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        cleanup_cypher = _transaction_call(
+            self.atomic_tx, "b.preserve_current = true"
+        ).args[0]
         assert "b.preserve_current = true" in cleanup_cypher
         finalize_cypher = _transaction_call(
             self.atomic_tx, "sns.status = 'composed'"
@@ -1036,7 +1076,7 @@ class TestPersistGeneratedNameBatch:
 
         assert winners == ["dd:core_profiles/profiles_1d/electrons/temperature"]
         assert write.called is rich_write_expected
-        cleanup_call = self.atomic_tx.run.call_args_list[1]
+        cleanup_call = _transaction_call(self.atomic_tx, "b.preserve_current = true")
         cleanup_cypher = cleanup_call.args[0]
         cleanup_item = cleanup_call.kwargs["batch"][0]
         assert cleanup_item["preserve_current"] is True
@@ -1100,9 +1140,13 @@ class TestPersistGeneratedNameBatch:
 
         write.assert_called_once()
         backfill.assert_not_called()
-        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        cleanup_cypher = _transaction_call(
+            self.atomic_tx, "b.preserve_current = true"
+        ).args[0]
         assert "b.preserve_current = true" in cleanup_cypher
-        finalize_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        finalize_cypher = _transaction_call(
+            self.atomic_tx, "sns.status = 'composed'"
+        ).args[0]
         assert "sn.name_stage = $pending_stage" in finalize_cypher
         assert "reservation.provisional = true" in finalize_cypher
         assert "reservation.claim_token = b.claim_token" in finalize_cypher
@@ -1144,7 +1188,9 @@ class TestPersistGeneratedNameBatch:
             )
 
         write.assert_not_called()
-        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        cleanup_cypher = _transaction_call(
+            self.atomic_tx, "b.preserve_current = true"
+        ).args[0]
         assert "stale.provisional = true" in cleanup_cypher
         assert "stale.claim_token IS NOT NULL" in cleanup_cypher
         assert "stale.claim_seq IS NOT NULL" in cleanup_cypher
@@ -1156,7 +1202,9 @@ class TestPersistGeneratedNameBatch:
         assert "DELETE owned_target" in cleanup_cypher
         assert "HAS_STANDARD_NAME" not in cleanup_cypher
         assert "SET old.source_paths" not in cleanup_cypher
-        release_cypher = self.atomic_tx.run.call_args_list[2].args[0]
+        release_cypher = _transaction_call(
+            self.atomic_tx, "sns.last_error = CASE"
+        ).args[0]
         assert "sns.status = 'extracted'" in release_cypher
         assert "sns.claim_token = null" in release_cypher
 
@@ -1189,7 +1237,9 @@ class TestPersistGeneratedNameBatch:
             == []
         )
 
-        cleanup_cypher = self.atomic_tx.run.call_args_list[1].args[0]
+        cleanup_cypher = _transaction_call(
+            self.atomic_tx, "b.preserve_current = true"
+        ).args[0]
         assert "stale.provisional = true" in cleanup_cypher
         assert "DELETE stale_edge" in cleanup_cypher
         assert "HAS_STANDARD_NAME" not in cleanup_cypher
@@ -1255,10 +1305,9 @@ class TestPersistGeneratedNameBatch:
 
         assert first[0]["outcome"] == "lifecycle_collision"
         assert second[0]["binding_kind"] == "owned_reservation"
-        cleanup_cypher = gc.query.call_args_list[1].args[0]
-        assert "edge.created_target = true" in cleanup_cypher
+        cleanup_cypher = _query_matching(gc, "edge.created_target = true")
         assert "DELETE owned_target" in cleanup_cypher
-        retry_lock = gc.query.call_args_list[3].args[0]
+        retry_lock = _query_matching(gc, "MERGE (target:StandardName {id: b.sn_id})")
         assert "MERGE (target:StandardName {id: b.sn_id})" in retry_lock
         assert "reservation.created_target = true" in retry_lock
 

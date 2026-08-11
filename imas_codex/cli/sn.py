@@ -359,7 +359,11 @@ def _compute_pool_progress(
         ``physics_domain`` on ``StandardName`` is a *string*, so the
         filter uses ``sn.physics_domain IN $domains``.
     rotation_cap:
-        Maximum chain depth — mirrors ``claim_refine_name_batch``.
+        Refinement rotations a name may spend — mirrors
+        ``claim_refine_name_batch``. The refine predicate reads the rotations
+        already spent, exactly as the claim does: counting lineage depth here
+        would report names the loop can no longer claim as pending, which
+        keeps the idle watchdog open on work that will never be done.
     min_score:
         Reviewer threshold — mirrors ``claim_refine_name_batch``.
     scope_run_id:
@@ -398,6 +402,10 @@ def _compute_pool_progress(
         )
     )
 
+    from imas_codex.standard_names.graph_ops import REFINE_NAME_ATTEMPTS_SPENT
+
+    refine_attempts_spent = REFINE_NAME_ATTEMPTS_SPENT
+
     query = f"""
     CALL {{
       MATCH (s:StandardNameSource {{status: 'extracted'}})
@@ -423,10 +431,11 @@ def _compute_pool_progress(
       WHERE sn.name_stage = 'reviewed'
         AND sn.reviewer_score_name IS NOT NULL
         AND sn.reviewer_score_name < $min_score
-        AND coalesce(sn.chain_length, 0) < $rotation_cap
+        AND {refine_attempts_spent} < $rotation_cap
         AND coalesce(sn.origin, '') <> 'derived'
         AND NOT (coalesce(sn.edit_mode, '') = 'rename'
                  AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap)
+        AND sn.review_quorum_shortfall IS NULL
         {domain_filter_sn}
         {pending_filter_sn}
       RETURN count(sn) AS refine_name
