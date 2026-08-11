@@ -451,10 +451,13 @@ async def pool_loop(
 # set by the requests it may hold concurrently as well as the spend it expects
 # to bill. ``model_provider_exposure`` prices one request as
 #
-#     (request_bytes + chat-framing allowance) x prompt_rate / 1e6
-#   + max_output_tokens x completion_rate / 1e6
+#     (request_tokens + chat-framing allowance) x prompt_rate / 1e6
+#   + expected_completion_allowance x completion_rate / 1e6
 #   + per_request_rate
 #
+# where request_tokens converts the serialized request's byte length at the
+# measured bytes-per-token floor, and the completion term is the allowance
+# such a response actually reaches rather than the published maximum,
 # using the route's centrally cataloged expected rates. Missing price authority
 # refuses admission instead of substituting the policy ceiling. The immutable
 # provider ``max_price`` cap remains a separate dispatch boundary, and actual
