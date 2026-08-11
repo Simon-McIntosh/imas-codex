@@ -249,6 +249,57 @@
     lineage only (<code>4661b285</code>): WEST sources are not in review and need no
     protection; the fixture guard remains because graph-marked tests share the
     production Neo4j instance (73 fixture-source rows live in the graph).</p>
+    <h2 id="s5">Follow-on — refine churn RCA, attempt budget, and attachment integrity</h2>
+    <p><strong>Churn root cause (from run logs, conclusive):</strong> all 830 refine_name
+    failures in the $54.74 run were <code>successor_collision</code> — the dup guard
+    dropped each proposed successor because its identity already existed, the release
+    reverted the row to <code>reviewed</code> with <code>chain_length</code> untouched,
+    and the claim predicate re-selected it immediately. 13 of 14 names collided onto
+    exactly one target across up to 145 attempts, cross-vendor, so retry provably could
+    not fix it; escalation was keyed on the same dead counter and never fired. Docs is
+    immune because <code>persist_refined_docs</code> rewrites in place, so every attempt
+    advances <code>docs_chain_length</code>.</p>
+    <p><strong>Attempt budget landed</strong> (merge <code>5b4d1254</code>): rotations
+    are charged durably at claim time (<code>refine_attempts</code>, inherited by
+    successors so the cap bounds the lineage); escalation fires on the final rotation;
+    deterministic conflicts — successor collision, lifecycle collision, vocabulary gap,
+    grammar failure — park immediately at <code>name_stage='exhausted'</code> with a
+    recorded <code>refine_stop_reason</code> and collision target (never
+    <code>quarantined</code>: the defect is in the proposed successor, not the standing
+    name); transient errors keep their rotations. <code>sn rescore</code> clears the
+    diagnosis without refunding rotations; a name-steering <code>sn edit --hint</code>
+    refunds both. Dry-run over today's 18-name eligible tail: 9 early-quarantine on
+    proven collisions, 5 escalate, 4 keep rotations — <strong>≤26 refine calls worst
+    case against 837 observed</strong>. Suite 11,716 passed / 0 failed.</p>
+    <p><strong>Phantom-attach verdict (read-only probe): detected-but-not-prevented.</strong>
+    Detection is live and gated deliberately (151 of 5,694 attachments flagged, flat
+    across five reconcile passes; 451 detaches all-time; the "0 detached" residue is 41
+    protected-on-accepted + 99 on the rename worklist + 11 superseded-historical). The
+    prevention hole is two persisters that write attachment edges without the
+    <code>guard_source_pairings</code> gate five other paths already use — two real
+    phantom attaches were minted 2026-08-08/09 onto accepted names. Closing it is in
+    flight, together with a proven guard false-positive fix (POSITION-type loci such as
+    <code>detector_pixel</code> lexically tested as hardware devices — 4 of 8 locus
+    flags on the worklist were this). The June fold-product hypothesis did not
+    reproduce (0 of 46 flagged names have a folded predecessor).</p>
+    <p><strong>Rename worklist drained by disposition</strong> (11 names, all through
+    <code>sn edit</code>, zero hand-edits): 1 rename applied and queued for quorum
+    (<code>ion_state_source_rate_due_to_distribution_function_driven</code> →
+    <code>particle_source_rate_due_to_distribution_function_driven</code> — no source is
+    state-resolved); 2 correct renames blocked by write-time guards (one by the
+    device-locus rule, one by a dual-bound source failing the retarget compare-and-set);
+    2 are duplicate pairs to fold, not rename (<code>atomic_count_of_ion_state</code>
+    shares 39 of its 76 sources with the accepted <code>atomic_count</code>);
+    2 are mis-attachments where the name is right; 2 were guard false positives
+    (the position-locus defect); 1 is stale unit residue
+    (<code>electron_source_rate</code>); 1 is a genuine ISN vocabulary gap (a locus
+    token for a wave-diagnostic receiver channel covering ECE/reflectometer/
+    refractometer). Cross-cutting: <strong>362 sources are bound to more than one live
+    name</strong> — the mechanism behind the fold pairs and the blocked retarget; the
+    dedup instrument, not renames, resolves them.</p>
+    <p><strong>Graph hygiene:</strong> the 73 persistent fixture-source rows
+    (<code>dd:test_review_entry__*</code>) were re-verified relationship-free and
+    deleted at the lead's direction.</p>
   </main>
 </body>
 </html>
