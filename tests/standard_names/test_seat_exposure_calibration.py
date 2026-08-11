@@ -1,15 +1,16 @@
 """Every Standard Names launch seat must reserve its actual route exposure.
 
-The pipeline reserves a request's expected billable cost before it reaches a
+The pipeline reserves what a request is typically billed before it reaches a
 provider.  That estimate must use a proven route price rather than the separate
 provider policy ceiling, or a run can fail to fund a single batch despite
 having ample budget for its actual cost.  These tests price the configured
 local compose seat and three default paid name-review seats through the real
 formula.
 
-The ceiling below is a calibration gate, not a physical bound: it is set well
-under a realistic per-run cost limit so a pricing change that inflates
-reservations by orders of magnitude fails here rather than in a paid run.
+The bounds below are a calibration gate, not a physical bound: they sit either
+side of what the seats price today, so both an inflated term (which starves
+concurrency) and a collapsed one (which admits work no money is held for) fail
+here rather than in a paid run.
 """
 
 from __future__ import annotations
@@ -28,10 +29,16 @@ from imas_codex.standard_names.budget import EPSILON, model_provider_exposure
 #: above what the seats price today so an inflated term is caught here rather
 #: than in a paid run — the reservation a pool holds per in-flight request is
 #: what its cost limit must multiply by the replica count.
-MAX_ATTEMPT_EXPOSURE_USD = 0.25
+MAX_ATTEMPT_EXPOSURE_USD = 0.10
 
 #: Upper bound for the stronger model used only after the refine chain is spent.
-ESCALATION_MAX_ATTEMPT_EXPOSURE_USD = 1.00
+ESCALATION_MAX_ATTEMPT_EXPOSURE_USD = 0.50
+
+#: Lower bound for one attempt on a paid seat.  Admission targets the typical
+#: bill rather than a tail bound, so the gate has to catch collapse as well as
+#: inflation: a term silently dropped to zero would admit unlimited concurrency
+#: and only surface as overspend after the money was gone.
+MIN_ATTEMPT_EXPOSURE_USD = 0.001
 
 #: A rendered Standard Names request is a few tens of kilobytes of prompt.
 #: Oversized on purpose so the gate measures a realistic worst case.
@@ -90,10 +97,15 @@ def test_launch_seat_reserves_an_affordable_attempt(seat: str, model: str) -> No
     )
     assert exposure > 0, f"{seat} ({model}) priced a non-positive exposure"
     assert exposure <= MAX_ATTEMPT_EXPOSURE_USD, (
-        f"{seat} ({model}) reserves ${exposure:.2f} for a single provider "
+        f"{seat} ({model}) reserves ${exposure:.4f} for a single provider "
         f"attempt, above the ${MAX_ATTEMPT_EXPOSURE_USD:.2f} calibration "
         "ceiling — a run would exhaust its cost limit on a handful of "
         "concurrent requests and stall without spending it"
+    )
+    assert exposure >= MIN_ATTEMPT_EXPOSURE_USD, (
+        f"{seat} ({model}) reserves only ${exposure:.6f} for a paid attempt, "
+        f"below the ${MIN_ATTEMPT_EXPOSURE_USD:.4f} floor — a collapsed input or "
+        "completion term admits work no reservation is holding money for"
     )
 
 
@@ -106,7 +118,7 @@ def test_escalation_seat_reserves_an_affordable_attempt() -> None:
         response_model=_SeatResponse,
         provider_attempts=1,
     )
-    assert 0 < exposure <= ESCALATION_MAX_ATTEMPT_EXPOSURE_USD
+    assert MIN_ATTEMPT_EXPOSURE_USD <= exposure <= ESCALATION_MAX_ATTEMPT_EXPOSURE_USD
 
 
 def test_local_compose_reserves_no_provider_exposure() -> None:
@@ -125,6 +137,55 @@ def test_seat_enumeration_is_not_silently_empty() -> None:
     seats = _configured_paid_seats()
     assert len(seats) == 3, f"expected three paid reviewers, got {seats}"
     assert len({model for _, model in seats}) == 3
+
+
+def _configured_paid_routes() -> list[tuple[str, str]]:
+    """Every paid route a Standard Names run can dispatch to, with its seat."""
+    from imas_codex.settings import get_sn_review_docs_models
+
+    routes: dict[str, str] = {}
+    for seat in (
+        "sn-docs",
+        "sn-refine",
+        "sn-escalation",
+        "sn-parent-enrich",
+        "sn-classifier",
+        "sn-prose-adjudicator",
+    ):
+        routes.setdefault(get_model(seat), seat)
+    for index, model in enumerate(get_sn_review_names_models()):
+        routes.setdefault(model, f"sn-review.names[{index}]")
+    for index, model in enumerate(get_sn_review_docs_models()):
+        routes.setdefault(model, f"sn-review.docs[{index}]")
+    return [(seat, model) for model, seat in routes.items() if "/" in model]
+
+
+@pytest.mark.parametrize(
+    "seat,model",
+    [(s, m) for s, m in _configured_paid_routes() if not m.startswith("hosted_vllm/")],
+    ids=lambda v: str(v),
+)
+def test_every_paid_seat_is_priced_from_the_project_catalog(
+    seat: str, model: str
+) -> None:
+    """A seated paid route must carry its own catalog entry, cache rates included.
+
+    Without an entry the route can only be priced from LiteLLM's bundled data,
+    which does not carry newer routes at all, and its cache tokens collapse to
+    the base prompt rate — the input term then overstates the bill by the whole
+    cache discount.  Seating a new model without pricing it must fail here.
+    """
+    pricing = get_openrouter_pricing(model)
+    assert pricing, (
+        f"{seat} ({model}) has no [tool.imas-codex.llm.openrouter-pricing] entry"
+    )
+    assert pricing["prompt"] and pricing["completion"], f"{seat} lacks token rates"
+    assert pricing["source"].startswith("https://openrouter.ai/api/v1/model/")
+    assert pricing["verified_at"]
+    assert pricing["cache_read"] is not None, (
+        f"{seat} ({model}) declares no cache-read rate, so the blended input "
+        "term prices its cached prompt tokens as if they were fresh"
+    )
 
 
 def test_exposure_scales_with_the_rendered_request_not_the_context_window() -> None:

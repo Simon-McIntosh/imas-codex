@@ -745,17 +745,34 @@ refine_name = true
 # Runs on login node (needs outbound HTTPS for OpenRouter/Anthropic).
 location = "iter"       # facility hosting LLM proxy (or "local" for in-process)
 
+# Rates are USD per million tokens, transcribed from each route's published
+# OpenRouter pricing. `cache-read` and `cache-write` are what the provider
+# charges for prompt tokens served from, and written to, its cache; the
+# reservation blends all three input rates at the measured mean cache shares, so
+# a route missing them is priced as if every token were fresh. Cache rates are
+# declared at the base tier only — the long-input `overrides` restate prompt and
+# completion, and no Standard Names request approaches those thresholds. A route
+# whose provider publishes no cache-write charge bills writes at the ordinary
+# prompt rate and carries no `cache-write` key.
+#
+# Every configured production seat and reviewer-profile route belongs here: a
+# route absent from this table can only be priced from LiteLLM's bundled
+# catalog, which does not carry newer routes at all and made a curated seat
+# unpriceable when that package was incompletely installed.
+
 [tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4-flash"]
 prompt = 0.14
 completion = 0.28
+cache-read = 0.028
 source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash"
-verified-at = "2026-08-09"
+verified-at = "2026-08-11"
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.5"]
 prompt = 2.0
 completion = 6.0
+cache-read = 0.30
 source = "https://openrouter.ai/api/v1/model/x-ai/grok-4.5"
-verified-at = "2026-08-09"
+verified-at = "2026-08-11"
 overrides = [
   { min-input-tokens = 200000, prompt = 4.0, completion = 12.0 },
 ]
@@ -763,23 +780,92 @@ overrides = [
 [tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.6-luna"]
 prompt = 0.10
 completion = 0.60
+cache-read = 0.01
+cache-write = 0.125
 source = "https://openrouter.ai/api/v1/model/openai/gpt-5.6-luna"
-verified-at = "2026-08-09"
+verified-at = "2026-08-11"
 overrides = [
   { min-input-tokens = 272000, prompt = 0.20, completion = 0.90 },
+]
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.5"]
+prompt = 5.0
+completion = 30.0
+cache-read = 0.50
+source = "https://openrouter.ai/api/v1/model/openai/gpt-5.5"
+verified-at = "2026-08-11"
+overrides = [
+  { min-input-tokens = 272000, prompt = 10.0, completion = 45.0 },
+]
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.4"]
+prompt = 2.50
+completion = 15.0
+cache-read = 0.25
+source = "https://openrouter.ai/api/v1/model/openai/gpt-5.4"
+verified-at = "2026-08-11"
+overrides = [
+  { min-input-tokens = 272000, prompt = 5.0, completion = 22.50 },
 ]
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-5"]
 prompt = 2.0
 completion = 10.0
+cache-read = 0.20
+cache-write = 2.50
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5"
-verified-at = "2026-08-09"
+verified-at = "2026-08-11"
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-4.6"]
+prompt = 3.0
+completion = 15.0
+cache-read = 0.30
+cache-write = 3.75
+source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-4.6"
+verified-at = "2026-08-11"
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-haiku-4.5"]
+prompt = 1.0
+completion = 5.0
+cache-read = 0.10
+cache-write = 1.25
+source = "https://openrouter.ai/api/v1/model/anthropic/claude-haiku-4.5"
+verified-at = "2026-08-11"
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-opus-4.8"]
+prompt = 5.0
+completion = 25.0
+cache-read = 0.50
+cache-write = 6.25
+source = "https://openrouter.ai/api/v1/model/anthropic/claude-opus-4.8"
+verified-at = "2026-08-11"
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-fable-5"]
 prompt = 10.0
 completion = 50.0
+cache-read = 1.0
+cache-write = 12.50
 source = "https://openrouter.ai/api/v1/model/anthropic/claude-fable-5"
-verified-at = "2026-08-09"
+verified-at = "2026-08-11"
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.1-pro-preview"]
+prompt = 2.0
+completion = 12.0
+cache-read = 0.20
+cache-write = 0.375
+source = "https://openrouter.ai/api/v1/model/google/gemini-3.1-pro-preview"
+verified-at = "2026-08-11"
+overrides = [
+  { min-input-tokens = 200000, prompt = 4.0, completion = 18.0 },
+]
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.1-flash-lite-preview"]
+prompt = 0.25
+completion = 1.50
+cache-read = 0.025
+cache-write = 0.0833
+source = "https://openrouter.ai/api/v1/model/google/gemini-3.1-flash-lite-preview"
+verified-at = "2026-08-11"
 
 [tool.imas-codex.docs-server]
 # Host-wide HTML docs server (~/Code/dotfiles/docs-server/serve.py): fronts every

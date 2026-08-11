@@ -14,13 +14,16 @@ from pydantic import BaseModel
 
 from imas_codex.standard_names.budget import (
     _CHAT_FRAMING_TOKEN_ALLOWANCE,
-    _EXPECTED_COMPLETION_TOKEN_ALLOWANCE,
+    _MEAN_CACHE_WRITE_INPUT_FRACTION,
+    _MEAN_CACHED_READ_INPUT_FRACTION,
     _REQUEST_BYTES_PER_TOKEN,
+    _TYPICAL_COMPLETION_TOKENS,
     BudgetExposureUnknown,
     BudgetLease,
     BudgetManager,
     LLMCostEvent,
     bind_attempt_exposure,
+    blended_input_rate,
     charge_billable_exception,
     model_provider_exposure,
 )
@@ -178,8 +181,9 @@ def test_request_bytes_are_converted_to_tokens_before_pricing():
         provider_attempts=1,
     )
 
-    completion_term = _EXPECTED_COMPLETION_TOKEN_ALLOWANCE * price["completion"] / 1e6
-    priced_input_tokens = (exposure - completion_term) / (price["prompt"] / 1e6)
+    completion_term = _TYPICAL_COMPLETION_TOKENS * price["completion"] / 1e6
+    input_rate = blended_input_rate(route, price["prompt"])
+    priced_input_tokens = (exposure - completion_term) / (input_rate / 1e6)
     # The serialized request adds the JSON envelope and the response schema on
     # top of the payload, so the byte length is a lower bound on what is priced.
     lower = len(payload) / _REQUEST_BYTES_PER_TOKEN + _CHAT_FRAMING_TOKEN_ALLOWANCE
@@ -189,19 +193,20 @@ def test_request_bytes_are_converted_to_tokens_before_pricing():
     )
 
 
-def test_admission_prices_the_expected_completion_not_the_published_maximum():
-    """Admission must not reserve an output ceiling no response reaches.
+def test_admission_prices_the_typical_completion_not_the_published_maximum():
+    """Admission must not reserve an output ceiling a typical response never reaches.
 
     Pricing the published maximum makes the reservation nearly request-size
     independent and several times the bill it settles, so a pool starves on
-    reservation headroom while its cost limit stays unspent.
+    reservation headroom while its cost limit stays unspent.  The tail is owned
+    by the run cap and the reconciling charge path, not by admission.
     """
     from imas_codex.discovery.base.llm import get_model_limits
 
     route = "openrouter/anthropic/claude-sonnet-5"
     messages = [{"role": "user", "content": "y" * 38_000}]
     published = get_model_limits(route)["max_tokens"]
-    assert published > _EXPECTED_COMPLETION_TOKEN_ALLOWANCE
+    assert published > _TYPICAL_COMPLETION_TOKENS
 
     admission = model_provider_exposure(
         route, messages, response_model=_BoundedResponse, provider_attempts=1
@@ -213,16 +218,66 @@ def test_admission_prices_the_expected_completion_not_the_published_maximum():
         provider_attempts=1,
         max_tokens=published,
     )
-    at_expected = model_provider_exposure(
+    at_typical = model_provider_exposure(
         route,
         messages,
         response_model=_BoundedResponse,
         provider_attempts=1,
-        max_tokens=_EXPECTED_COMPLETION_TOKEN_ALLOWANCE,
+        max_tokens=_TYPICAL_COMPLETION_TOKENS,
     )
 
-    assert admission == pytest.approx(at_expected)
+    assert admission == pytest.approx(at_typical)
     assert admission < at_published
+
+
+def test_input_term_blends_the_published_cache_rates():
+    """Input is priced at the mix of rates a request actually pays.
+
+    Static-first prompts mean most tokens are served from cache at a fraction of
+    the base rate, while a cache write costs a premium on the routes that charge
+    one.  Pricing every token as fresh overstates the bill by the cache
+    discount; ignoring writes understates it.
+    """
+    from imas_codex.settings import get_openrouter_pricing
+
+    route = "openrouter/anthropic/claude-sonnet-5"
+    catalog = get_openrouter_pricing(route)
+    assert catalog["cache_read"] and catalog["cache_write"], (
+        "this route must declare both cache rates for the blend to be exercised"
+    )
+
+    prompt_rate = float(catalog["prompt"])
+    blended = blended_input_rate(route, prompt_rate)
+    fresh = 1.0 - _MEAN_CACHED_READ_INPUT_FRACTION - _MEAN_CACHE_WRITE_INPUT_FRACTION
+    expected = (
+        fresh * prompt_rate
+        + _MEAN_CACHED_READ_INPUT_FRACTION * float(catalog["cache_read"])
+        + _MEAN_CACHE_WRITE_INPUT_FRACTION * float(catalog["cache_write"])
+    )
+
+    assert blended == pytest.approx(expected)
+    # Cache reads are the cheapest of the three rates and hold the largest
+    # share, so the blend must land below the base rate.
+    assert blended < prompt_rate
+
+
+def test_uncatalogued_cache_rates_fall_back_to_the_base_prompt_rate():
+    """A route publishing no cache rate is priced as if every token were fresh.
+
+    Such providers bill cache tokens at the ordinary prompt rate, so collapsing
+    the blend to that rate is the truthful estimate rather than a safety margin.
+    """
+    # A route absent from the project catalog declares no cache rates at all.
+    assert blended_input_rate("openrouter/absent/route", 4.0) == pytest.approx(4.0)
+    # A cataloged route does use them, so the fallback is not silently universal.
+    assert blended_input_rate("openrouter/anthropic/claude-sonnet-5", 2.0) < 2.0
+
+
+@pytest.mark.parametrize("bad_rate", [0.0, -1.0, float("nan"), float("inf")])
+def test_blended_rate_fails_closed_without_a_base_rate(bad_rate: float):
+    """No usable base prompt rate means no admission, not a silent zero."""
+    with pytest.raises(BudgetExposureUnknown):
+        blended_input_rate("openrouter/anthropic/claude-sonnet-5", bad_rate)
 
 
 def test_admission_never_prices_above_a_routes_published_allowance(monkeypatch):

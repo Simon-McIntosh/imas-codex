@@ -10,13 +10,16 @@ unused headroom on completion.
 A paid provider call passes three gates, and each one prices a different
 quantity.  Conflating them is what makes a cost limit unspendable:
 
-- ``reserve()`` **admits** work against the *expected* bill.
-  ``model_provider_exposure`` converts the rendered request into a token bound
-  and prices one completion at the allowance such a response actually reaches,
-  not the route's published output maximum.  Pricing the maximum makes every
-  reservation nearly request-size independent and several times the bill it
-  settles, so a pool starves on reservation headroom while most of its cost
-  limit sits unspent.
+- ``reserve()`` **admits** work against the *typical* bill.
+  ``model_provider_exposure`` converts the rendered request into a token bound,
+  prices its input at the blend of fresh, cache-read and cache-write rates a
+  request actually pays, and prices one completion at the size a typical
+  response reaches rather than the route's published output maximum.  Pricing
+  the maximum, or charging every input token at the base rate, makes each
+  reservation several times the bill it settles, so a pool starves on
+  reservation headroom while most of its cost limit sits unspent.  Admission
+  does not attempt to bound the tail: the two gates below do that, and an
+  estimate that covered the tail would reserve concurrency the pool cannot use.
 - ``BudgetLease.require_attempt`` **binds** each real provider attempt, drawing
   any shortfall from the pool and refusing before the request leaves the
   process when the pool cannot fund it.  A retry whose output allowance
@@ -107,14 +110,33 @@ _CHAT_FRAMING_TOKEN_ALLOWANCE = 4_096
 # fourfold over-reservation that pricing raw bytes caused.
 _REQUEST_BYTES_PER_TOKEN = 2.5
 
-# Completion allowance priced for one admission when the caller pins no
-# explicit ``max_tokens``.  Sized above the upper tail of observed structured
-# completions on the paid seats and clamped to the route's published allowance.
-# The request itself still carries the published allowance, so nothing is
-# truncated: an overrun settles against the pool at charge time, and a
-# length-escalated retry is re-priced at its real allowance when the attempt
-# binds.
-_EXPECTED_COMPLETION_TOKEN_ALLOWANCE = 12_288
+# Completion size priced for one admission when the caller pins no explicit
+# ``max_tokens``, clamped to the route's published allowance.  This is the
+# TYPICAL completion, not a tail bound: measured across the paid Standard Names
+# call history the mean structured completion is just under this figure and the
+# median is smaller still.  The mean is what predicts aggregate spend, which is
+# what a cost limit governs.
+#
+# Admission deliberately does not cover the tail.  The request still carries the
+# route's published allowance so nothing is truncated; an overrun settles
+# against the pool when the charge lands, a length-escalated retry is re-priced
+# at its real allowance when the attempt binds, and the run-cap stop reads
+# actual spend.  Pricing the tail here would only buy back concurrency the pool
+# cannot then use.
+_TYPICAL_COMPLETION_TOKENS = 3_000
+
+# Mean share of a request's prompt tokens that a provider serves from its cache,
+# and the mean share it bills as a cache write, measured over the paid Standard
+# Names call history (cache reads and writes are both reported as subsets of
+# ``prompt_tokens``).  Static-first prompt ordering means most of a request is a
+# repeated system prefix, so a large fraction is served at the cache-read rate —
+# an order of magnitude below the base prompt rate on every route that publishes
+# one.  Pricing every input token at the base rate therefore overstates the bill
+# by roughly the cache discount, while ignoring cache WRITES understates it on
+# routes that charge a write premium.  Blending both against their published
+# rates is what makes an admission estimate track the bill it settles.
+_MEAN_CACHED_READ_INPUT_FRACTION = 0.46
+_MEAN_CACHE_WRITE_INPUT_FRACTION = 0.18
 
 
 # =====================================================================
@@ -227,6 +249,52 @@ def provider_exposure(
     return exposure
 
 
+def blended_input_rate(model: str, prompt_rate: float) -> float:
+    """Return the per-million input rate a typical request actually pays.
+
+    A request's prompt tokens are billed in three parts — served from cache,
+    written to cache, and charged fresh — at three different published rates.
+    This blends them at the measured mean shares, so the input term tracks the
+    bill instead of pricing every token as if it were fresh.
+
+    A route that publishes no cache rate has its cache tokens priced at the base
+    prompt rate, which is what such providers charge for them.  Only the base
+    rate tier carries cache rates in the project catalog: the long-input
+    override tiers restate prompt and completion, so a request past one of those
+    thresholds blends an override prompt rate with base-tier cache rates. No
+    request this pipeline sends approaches those thresholds.
+    """
+    from imas_codex.settings import get_openrouter_pricing
+
+    if not math.isfinite(prompt_rate) or prompt_rate <= 0:
+        raise BudgetExposureUnknown(
+            f"blended input rate has no positive base prompt rate for {model}"
+        )
+    catalog = get_openrouter_pricing(model) or {}
+
+    def _declared(field: str) -> float:
+        value = catalog.get(field)
+        if isinstance(value, bool) or not isinstance(value, int | float):
+            return prompt_rate
+        if not math.isfinite(value) or value < 0:
+            return prompt_rate
+        return float(value)
+
+    fresh_fraction = (
+        1.0 - _MEAN_CACHED_READ_INPUT_FRACTION - _MEAN_CACHE_WRITE_INPUT_FRACTION
+    )
+    rate = (
+        fresh_fraction * prompt_rate
+        + _MEAN_CACHED_READ_INPUT_FRACTION * _declared("cache_read")
+        + _MEAN_CACHE_WRITE_INPUT_FRACTION * _declared("cache_write")
+    )
+    if not math.isfinite(rate) or rate <= 0:
+        raise BudgetExposureUnknown(
+            f"blended input rate is not finite and positive for {model}"
+        )
+    return rate
+
+
 def model_provider_exposure(
     model: str,
     messages: list[dict[str, Any]],
@@ -236,19 +304,21 @@ def model_provider_exposure(
     calls: int = 1,
     max_tokens: int | None = None,
 ) -> float:
-    """Estimate the expected bill for a rendered structured request.
+    """Estimate the typical bill for a rendered structured request.
 
-    The input term is bounded by the rendered request itself — its serialized
-    UTF-8 length converted to tokens plus a framing allowance — capped by the
-    route's published context limit.  The output term prices *max_tokens* when
-    the caller pins one, and otherwise the expected completion allowance rather
-    than the route's published maximum, so admission tracks the bill it will
-    settle instead of a ceiling no structured response reaches.  Cataloged
-    route rates estimate admission cost; the separate provider ``max_price``
-    policy remains enforced at dispatch.  Every wrapper retry is represented
-    and priced with the output allowance it can reach after a length
-    exhaustion.  Routes without proven expected rates, and requests with
-    unpriced non-text dimensions, fail closed.
+    The input term is sized from the rendered request itself — its serialized
+    UTF-8 length converted to tokens plus a framing allowance, capped by the
+    route's published context limit — and priced at the cache-blended rate a
+    typical request pays rather than at the base prompt rate for every token.
+    The output term prices *max_tokens* when the caller pins one, and otherwise
+    the typical completion size rather than the route's published maximum.  Both
+    choices point the same way: admission tracks the bill it will settle, and
+    the run cap plus the reconciling charge path own the tail.  Cataloged route
+    rates estimate admission cost; the separate provider ``max_price`` policy
+    remains enforced at dispatch.  Every wrapper retry is represented and priced
+    with the output allowance it can reach after a length exhaustion.  Routes
+    without proven expected rates, and requests with unpriced non-text
+    dimensions, fail closed.
     """
     from imas_codex.discovery.base.llm import (
         _LENGTH_RETRY_TOKEN_CAP,
@@ -307,18 +377,17 @@ def model_provider_exposure(
         raise BudgetExposureUnknown(
             "provider output allowance is not positively bounded"
         )
-    output_limit = max_tokens or min(
-        _EXPECTED_COMPLETION_TOKEN_ALLOWANCE, published_output_limit
-    )
+    output_limit = max_tokens or min(_TYPICAL_COMPLETION_TOKENS, published_output_limit)
     if not isinstance(output_limit, int) or output_limit <= 0:
         raise BudgetExposureUnknown(
             "provider output allowance is not positively bounded"
         )
+    input_rate = blended_input_rate(model, expected_price["prompt"])
 
     total = 0.0
     for _ in range(provider_attempts):
         attempt_cost = (
-            input_bound * expected_price["prompt"] / 1_000_000
+            input_bound * input_rate / 1_000_000
             + output_limit * expected_price["completion"] / 1_000_000
             + expected_price["request"]
         )
