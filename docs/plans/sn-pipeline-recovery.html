@@ -24,7 +24,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -41,43 +42,19 @@
     inoperable manifest command; and async claim collision-safety is intact (no repair
     needed there — do not "restore" claim logic that was never broken).</p>
 
-    <h2 id="s2">§2 — Restore pipeline operability</h2>
-    <p>Done when the default <code>uv run pytest</code> collects and passes with zero
-    failures, and a scoped <code>sn run</code> demonstrably reserves and spends against a
-    small cost cap. Concrete items, each independently verifiable:</p>
-    <ul>
-      <li><strong>Pricing null:</strong> restore numeric-zero defaults for absent optional
-      price dimensions at <code>imas_codex/settings.py:102</code> and <code>:111</code>
-      (<code>raw.get("request")</code> → <code>raw.get("request", 0.0)</code>), and audit
-      the sibling <code>raw.get</code> reads at lines 109–121 for consumers that
-      <code>float()</code> or compare them. The guard suite
-      <code>tests/standard_names/test_seat_exposure_calibration.py</code> must go green for
-      every configured seat, and <code>test_seat_enumeration_is_not_silently_empty</code>
-      must again see three paid reviewers.</li>
-      <li><strong>Test collection:</strong> <code>uv sync --extra test</code>, and convert
-      the module-scope <code>import hatch_build_hooks</code> in
-      <code>tests/llm/test_context_schema_generation.py</code> to
-      <code>pytest.importorskip</code> so one optional dependency can never again take down
-      repository-wide collection.</li>
-      <li><strong>Grammar self-heal:</strong> restore
-      <code>graph_ops.reconcile_grammar_segments</code> to its self-healing form (reference:
-      commit <code>9f43a6c7</code>) so segment drift is repaired in the reconcile pass
-      again, not merely counted and warned about. The detect-only scan currently pays a full
-      live-name scan on every <code>sn run</code> to fix nothing.</li>
-      <li><strong>Remaining red tests:</strong> drive the other 9 failures to zero — the two
-      refine-fence rollback-description mismatches
-      (<code>test_atomic_refined_name_persistence.py</code>), the three
-      <code>get_dd_version_context</code> drift failures, the comparator-prose leak into
-      un-edited renders (<code>test_edit_prompt_injection.py</code>), the two
-      never-invoked-model workers (<code>test_enrich_parents.py</code>,
-      <code>test_refine_name_chain.py</code>), and the hanging docs-admission
-      serialization test (<code>test_docs_evidence_recovery.py</code>) — the latter may
-      resolve by deletion under §3's disposition rather than by repair.</li>
-      <li><strong>Proof of life:</strong> one scoped <code>sn run --focus</code> or small
-      <code>--cost-limit</code> run that reserves, spends, and records an
-      <code>SNRun</code> whose stop reason is not <code>no_eligible_work</code>-on-empty or
-      a pricing refusal.</li>
-    </ul>
+    <section id="s2-landed" class="section-landed">
+    <h2 id="s2"><span class="badge badge-shipped">✓ landed 2026-08-11</span> §2 — Restore pipeline operability</h2>
+    <p class="landed-summary">
+    Restored pricing (numeric-zero defaults; three paid reviewer seats price again),
+    repaired collection (<code>importorskip</code>), restored the grammar self-heal
+    (231 names realigned on first live run), and drove the suite to
+    <strong>11,992 passed / 0 failed</strong>; the dd version-context contract collision
+    and the 36×-slow migration removals query were fixed at source (14/0 graph-backed).
+    Proof of life: <code>SNRun</code> spent $0.94 of a $2.00 cap, stop
+    <code>time_limit_reached</code>. Merges <code>1634d0b0</code>, <code>6709bd29</code>.
+    Full record: <a href="/imas-codex/evidence/archive/sn-pipeline-recovery-landed#s2">§2 landed</a>.
+    </p>
+    </section>
 
     <h2 id="s3">§3 — Triage the wave machinery</h2>
     <p>Apply the review's dispositions (wave review §6). Keep: <code>pool_registry</code>,
@@ -149,7 +126,7 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-spr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-spr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T09:34:45+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Restore pipeline operability: pricing null, test collection, red suite, grammar self-heal</h4>
     <div class="r-fu-body"><p>Execute §2 in order: the settings.py numeric-zero restoration with the
         seat-calibration guard suite as the acceptance test; the test-collection repair
@@ -158,6 +135,7 @@
         nine failures. Finish with the proof-of-life scoped run. No new machinery — every
         item is a repair or a revert to a form that already worked.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §2</pre>
+    <p class="r-fu-outcome">§2 landed — merges 1634d0b0 + 6709bd29. Pricing restored (3 paid reviewer seats price), collection repaired, grammar self-heal back (231 names realigned live), suite 11,992 passed / 0 failed, dd-tools contract collision + 36x removals query fixed at source (14/0 graph-backed from main). Proof of life: SNRun spent $0.94 of $2.00 cap, stop time_limit_reached.</p>
     </article>
 <article class="r-fu" data-id="f-spr-002" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Apply the keep/quarantine/delete dispositions to the wave machinery</h4>

@@ -75,14 +75,27 @@
     <code>test_docs_evidence_recovery.py</code> deselected pending its §3 deletion.
     Baseline before repair: zero tests collected; after collection repair alone:
     22 failed.</p>
-    <p>Two residuals moved to corrective nodes rather than closing §2 outright:
-    the two graph-backed <code>test_dd_tool_features.py</code> failures
-    (bulk version-context missing-filter contract; migration-guide removals query
-    timing out), and a live <code>IndexError</code> in
-    <code>_enrich_docs_review_dd_context</code> when a name has empty
-    <code>source_paths</code> — exposed by the proof-of-life run once pricing
-    stopped masking it (~29 tracebacks in six minutes; population is the 76
-    no-source ledger names).</p>
+    <p>Two residuals were closed by corrective nodes; one rides with §3:</p>
+    <ul>
+      <li><strong>Graph-backed dd-tool failures</strong> — merged as
+      <code>6709bd29</code> (worker commit <code>e7aadc14</code>). The
+      <code>get_dd_version_context</code> drift was a contract collision, not a
+      one-sided regression: two earlier fixes toggled the same scope guard in
+      opposite directions, each pinned by a live test. <code>follow_rename_chains</code>
+      is now tri-state — unset enriches per-path/bulk modes, explicit
+      <code>True</code> selects the standalone lineage query, and a call with no
+      scope errors again; neither test was edited. The migration-guide
+      <code>_get_removals</code> correlated subquery (unanchored IMASNode scan
+      re-run per candidate row; 58.5 s live) was rewritten to collect
+      renamed-ancestor prefixes once — <strong>1.63 s, 36×, identical rows</strong>.
+      <code>tests/graph_mcp/test_dd_tool_features.py</code> from the main checkout:
+      14 passed / 0 failed (was 2 failed at 84.5 s; now 17.7 s).</li>
+      <li><strong>Docs-review <code>IndexError</code></strong> on empty
+      <code>source_paths</code> (<code>_enrich_docs_review_dd_context</code>),
+      exposed by the proof-of-life run once pricing stopped masking it
+      (~29 tracebacks in six minutes; population is the 76 no-source ledger
+      names) — guarded under the §3 worker's scope.</li>
+    </ul>
   </main>
 </body>
 </html>
