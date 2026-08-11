@@ -401,3 +401,66 @@ class TestRecoveryRules:
             "sn.refine_attempts = CASE WHEN $name_hint IS NULL "
             "THEN sn.refine_attempts ELSE 0 END" in cypher
         )
+
+
+class TestAttachmentRefusalOfARefineProduct:
+    """A successor the attachment guard refuses still costs its rotation."""
+
+    @pytest.mark.asyncio
+    async def test_attachment_rejection_counts_the_attempt_and_stays_retryable(
+        self,
+    ):
+        from imas_codex.standard_names.workers import process_refine_name_batch
+
+        # persist_refined_name runs the pairing guard over the sources it would
+        # migrate and rolls the rename back when they contradict the successor.
+        rejection = ValueError(
+            "refined-name attachment rejected; rename rolled back: "
+            "dd:pf_active/coil/geometry/outline/r: geometry representation "
+            "mismatch"
+        )
+        item = _refine_item(refine_attempts=1)
+        refined = MagicMock()
+        refined.description = "Radial outline of the coil."
+        refined.kind = "scalar"
+        refined.reason = "Name the geometry primitive explicitly."
+
+        with (
+            patch(
+                "imas_codex.discovery.base.llm.acall_llm_structured",
+                return_value=(refined, 0.01, {"input_tokens": 10, "output_tokens": 5}),
+            ),
+            patch("imas_codex.llm.prompt_loader.render_prompt", return_value="prompt"),
+            patch(
+                "imas_codex.standard_names.workers._hybrid_search_neighbours",
+                return_value=[],
+            ),
+            patch("imas_codex.settings.get_model", return_value="refine-seat"),
+            patch(
+                "imas_codex.standard_names.workers._compose_refined_candidate_name",
+                return_value="radial_outline_of_poloidal_field_coil",
+            ),
+            patch(
+                "imas_codex.standard_names.canonical.find_name_key_duplicate",
+                return_value=None,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.persist_refined_name",
+                side_effect=rejection,
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                return_value="reviewed",
+            ) as mock_stop,
+            patch(_GC_WORKERS_PATH, return_value=_mock_gc()),
+        ):
+            processed = await process_refine_name_batch(
+                [item], _mock_budget_manager(), asyncio.Event()
+            )
+
+        assert processed == 0
+        # The rotation was charged at claim time and is not refunded here.
+        # The refusal judges this successor's source set, not the name's
+        # capacity to be rewritten, so a different candidate may still pass —
+        # it keeps the rotations it has left rather than parking at once.
+        assert mock_stop.call_args.kwargs["reason"] == "transient_failure"
