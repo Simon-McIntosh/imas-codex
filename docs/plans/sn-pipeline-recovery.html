@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-impl" content="1.0">
 </head>
 <body>
@@ -146,10 +146,16 @@
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
     <p class="r-fu-outcome">§4 landed — three tranches spent $196.19 of the $200 authorization: edits 255→142 open (+117 applied), docs-accepted +534, names-accepted +172, drafted backlog 318→24. Ladder caught+fixed reservation accountancy (typical-bill admission, fidelity 0.80-1.50x, hold $176.84→$22.41; merges 25722901/ff05fd91/5ed709d0). Remainder is standing work bounded by the exhausted authorization.</p>
     </article>
-<article class="r-fu" data-id="f-spr-004" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-spr-004" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="2026-08-11T15:46:00+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Drain the residual backlog under a fresh authorization</h4>
-    <div class="r-fu-body">142 open edit proposals and 1,513 docs-pending names remain — standing work with no defect, bounded only by the exhausted $200 authorization. With typical-bill admission a full drain projects to roughly $60-90. Agree a fresh cap with the lead, then one sn run --flush per tranche. Watch overspend>0 rows on LLMCost as the genuine at-cap signal, and the startup quorum-sizing warning for underfunded caps.</div>
+    <div class="r-fu-body">142 open edit proposals and 1,513 docs-pending names remain — standing work with no defect, bounded only by the exhausted $200 authorization. With typical-bill admission a full drain projects to roughly $60-90. Agree a fresh cap with the lead, then one sn run --flush per tranche. Watch overspend&gt;0 rows on LLMCost as the genuine at-cap signal, and the startup quorum-sizing warning for underfunded caps.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-pipeline-recovery §4</pre>
+    <p class="r-fu-outcome">Tranche 4 ran under the fresh +$100 authorization (sn run --flush -c 120): $55.01 spent, stopped stalled with $65 unspent — funding was not the constraint (0 budget-refused seats, 0 overspend). generate_docs/review_docs pending hit 0; $54.7 went to refine_name churn for +1 acceptance. The flush drain has CONVERGED; the residual tail (77 refine-pending names, 142 open edits, 349 exhausted) cycles review→refine without clearing and needs sn rescore + quality triage, not flush money.</p>
+    </article>
+<article class="r-fu" data-id="f-spr-005" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-11" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Triage the non-converging refine tail through sn rescore</h4>
+    <div class="r-fu-body">The flush drain converged: further spend converts to refine churn, not acceptances. The residual population — 349 exhausted names, 77 refine-pending, 142 open edit proposals, 40 refine-docs — needs the standing recovery rule (sn rescore for quorum-variance exhaustion) and per-item quality triage (vocab gaps, hint quality). This is the recovery-triage scope of the sn-benchmark-evolution plan, now unblocked.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-benchmark-evolution</pre>
     </article>
 </section>
   </main>

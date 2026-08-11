@@ -231,6 +231,18 @@
     (+172), names-drafted backlog 318 → 24. The 142 remaining edit proposals and
     1,513 docs-pending are standing work bounded by the exhausted authorization,
     not refusals — they carry no defect and drain under any future funded run.</p>
+    <p><strong>Tranche 4</strong> (<code>sn run --flush -c 120</code>, SNRun
+    <code>612dba4a-44e3-4646-aa70-725f530f8dbe</code>, first under typical-bill
+    admission, fresh +$100 authorization): spent <strong>$55.01 of $120</strong> and
+    stopped <code>stalled</code> with $65 of unspent headroom — the informative stop.
+    Funding was not the constraint (zero budget-refused seats, zero overspend rows);
+    the <em>work</em> was: generate_docs and review_docs pending reached 0, and $54.7
+    of the $55 went into <code>refine_name</code> churn (669 calls) that converted to
+    exactly +1 accepted name. The residual tail — 77 refine-pending names, 40
+    refine-docs, 14 unclaimable review items, 142 open edits, 349 exhausted names —
+    cycles review→refine without clearing, which is the standing pipeline signal for
+    the <code>sn rescore</code> recovery instrument and quality triage, not for
+    further flush spend. Flush passes are done: the drain converged.</p>
     <p>Also under §4 scope: the quarantined reconciliation modules were deleted
     outright at the lead's direction (<code>464d60b5</code>, −9,661 lines — git history
     retains them), and the exact-name lineage guard was rescoped to fixture-produced
