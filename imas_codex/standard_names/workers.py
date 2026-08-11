@@ -7337,10 +7337,13 @@ async def _run_rd_quorum_cycles(
     """Run the configured RD-quorum reviewer chain for a single StandardName.
 
     Calls each configured model in turn (cycle 0 = primary, cycle 1 =
-    secondary, cycle 2 = escalator). Cycle 1 always runs when ≥2 models
-    are configured. Cycle 2 runs only when (a) ≥3 models are configured
-    AND (b) any rubric dimension differs between cycles 0 and 1 by more
-    than *disagreement_threshold* (after normalising 0–20 scores to 0–1).
+    secondary, cycle 2 = escalator). Cycle 1 runs when ≥2 models are
+    configured and the primary survived — a lost primary already puts the
+    two-review quorum out of reach, so the secondary would be billed for a
+    review the completeness guard must discard. Cycle 2 runs only when (a) ≥3
+    models are configured AND (b) any rubric dimension differs between cycles 0
+    and 1 by more than *disagreement_threshold* (after normalising 0–20 scores
+    to 0–1).
 
     Persists no graph state directly — the caller is responsible for
     writing the returned ``records`` list via
@@ -7379,6 +7382,11 @@ async def _run_rd_quorum_cycles(
 
     review_group_id = review_group_id or str(_uuid.uuid4())
     cycles: list[dict[str, Any]] = []  # parsed cycle results (cycle_index 0..N)
+    # Seats the run budget refused to fund, as (cycle index, model, exposure).
+    # A refused reservation calls no provider and raises nothing, so without
+    # this record an underfunded run is indistinguishable from a provider
+    # outage: both surface only as a short quorum.
+    unfunded: list[tuple[int, str, float]] = []
     total_cost = 0.0
     total_tokens_in = 0
     total_tokens_out = 0
@@ -7415,6 +7423,17 @@ async def _run_rd_quorum_cycles(
             )
             cycle_lease = budget_manager.reserve(maximum_exposure, phase=phase)
             if cycle_lease is None:
+                unfunded.append((cycle_idx, model, maximum_exposure))
+                logger.debug(
+                    "rd_quorum %s cycle %d unfunded for %s (model=%s): the run "
+                    "budget could not reserve $%.4f of pre-launch exposure — "
+                    "the reviewer was never called",
+                    review_axis,
+                    cycle_idx,
+                    sn_id,
+                    model,
+                    maximum_exposure,
+                )
                 return None
             owns_lease = True
         try:
@@ -7562,8 +7581,13 @@ async def _run_rd_quorum_cycles(
         cycles.append(c0)
 
     # ── Cycle 1 (secondary, blind) — runs whenever ≥ 2 models ──────────
+    # A multi-seat profile demands two surviving base reviews, and the
+    # escalator fires only when both base cycles already succeeded. So once
+    # the primary is lost the quorum can no longer be reached, and calling the
+    # secondary buys a review that the completeness guard below is obliged to
+    # discard — paid tokens with no reachable outcome. Stop here instead.
     c1 = None
-    if len(models) >= 2:
+    if len(models) >= 2 and c0 is not None:
         c1 = await _run_cycle(1, models[1])
         if c1 is not None:
             cycles.append(c1)
@@ -7581,13 +7605,25 @@ async def _run_rd_quorum_cycles(
     intended_model_count = len(models)
     successful_cycles = len(cycles)
     if intended_model_count >= 2 and successful_cycles < 2:
+        # Name the cause. A seat the budget refused to fund never reached its
+        # provider, so reporting only the shortfall sends an operator hunting a
+        # provider outage when the fix is the run's cost limit or its reviewer
+        # replica count.
+        if unfunded:
+            seats = ", ".join(
+                f"c{idx} {model} ${exposure:.4f}" for idx, model, exposure in unfunded
+            )
+            cause = f"budget refused {len(unfunded)} seat(s): {seats}"
+        else:
+            cause = "reviewer call failed"
         logger.warning(
             "rd_quorum %s incomplete: %d/%d reviews succeeded for %s — "
-            "deferring, NOT accepting on a single review",
+            "deferring, NOT accepting on a single review (%s)",
             review_axis,
             successful_cycles,
             intended_model_count,
             sn_id,
+            cause,
         )
         _record_quorum_incomplete(run_id, review_axis)
         return None
