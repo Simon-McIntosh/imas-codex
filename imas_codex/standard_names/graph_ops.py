@@ -26,7 +26,7 @@ from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
-from imas_codex.graph.models import NameStage
+from imas_codex.graph.models import NameStage, RefineStopReason
 from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
@@ -13673,12 +13673,11 @@ def persist_reviewed_name(
     1. Verify ``claim_token`` matches the stored token.
     2. Compute target stage:
        - ``'accepted'`` if ``score >= min_score`` (score-canonical)
-       - ``'exhausted'`` if ``chain_length >= rotation_cap`` and score below min_score
-         (cap reached, no further refine — the escalated final attempt
-         at chain_length == rotation_cap-1 has already been spent)
-       - ``'reviewed'`` otherwise (eligible for refine_name pickup;
-         at chain_length == rotation_cap-1 this routes through the
-         Opus escalator in process_refine_name_batch)
+       - ``'exhausted'`` if ``refine_attempts >= rotation_cap`` and score below
+         min_score (every rotation spent, including the escalated final one)
+       - ``'reviewed'`` otherwise (eligible for refine_name pickup; the last
+         remaining rotation routes through the escalation seat in
+         process_refine_name_batch)
     3. Record a quorum shortfall whenever the reviewer chain did not reach a
        verdict — see ``resolution_method`` below.  A would-be acceptance is
        withheld and holds at ``'reviewed'``; a below-threshold score keeps its
@@ -13747,6 +13746,8 @@ def persist_reviewed_name(
                     AND (sn.claim_token = $token OR sn.claim_token IS NULL))
                    OR (sn.claim_token = $token AND sn.claim_seq = $claim_seq))
             RETURN coalesce(sn.chain_length, 0) AS chain_length,
+                   coalesce(sn.refine_attempts, coalesce(sn.chain_length, 0))
+                       AS refine_attempts,
                    sn.validation_status AS validation_status,
                    sn.edit_status AS edit_status,
                    sn.edit_scope AS edit_scope,
@@ -13767,6 +13768,7 @@ def persist_reviewed_name(
         return ""
 
     chain_length: int = int(rows[0]["chain_length"])
+    refine_attempts: int = int(rows[0].get("refine_attempts") or chain_length)
     edit_status_before: str | None = rows[0].get("edit_status")
     edit_scope_before: str | None = rows[0].get("edit_scope")
     # Cascade-authorization opt-in recorded at edit time (coalesce to False —
@@ -13777,14 +13779,16 @@ def persist_reviewed_name(
 
     # ── Stage decision ────────────────────────────────────────────────
     # Score is canonical (rubric-driven 0–1).
-    # Exhaustion fires only at chain_length >= rotation_cap so that
-    # chain_length == rotation_cap-1 stays 'reviewed' and routes through
-    # the Opus escalator in process_refine_name_batch (the dead branch
-    # gated by `escalate = chain_length >= rotation_cap - 1`).  Pre-fix
-    # the SN was marked 'exhausted' before the escalator could fire.
+    # Exhaustion is decided by the rotations SPENT, not by the depth of the
+    # persisted chain: rotations charged on attempts that never produced a
+    # successor are exactly the ones a lineage-depth test cannot see, and a
+    # name below threshold with no rotations left is terminal — leaving it at
+    # 'reviewed' would advertise a refinement that can never be claimed.  A
+    # name still holding budget stays 'reviewed'; its last rotation routes
+    # through the escalation seat in process_refine_name_batch.
     if score >= min_score:
         target_stage = "accepted"
-    elif chain_length >= rotation_cap:
+    elif refine_attempts >= rotation_cap:
         target_stage = "exhausted"
     else:
         target_stage = "reviewed"
@@ -13952,7 +13956,16 @@ def persist_reviewed_name(
                   WHEN $quorum_shortfall IS NULL THEN null
                   ELSE datetime()
                 END,
-                sn.review_resolution_method   = $resolution_method
+                sn.review_resolution_method   = $resolution_method,
+                sn.refine_stop_reason = CASE
+                  WHEN $target_stage <> 'exhausted' THEN sn.refine_stop_reason
+                  WHEN NOT $grammar_valid THEN $grammar_invalid_reason
+                  ELSE $attempts_exhausted_reason
+                END,
+                sn.refine_stopped_at = CASE
+                  WHEN $target_stage <> 'exhausted' THEN sn.refine_stopped_at
+                  ELSE datetime()
+                END
             SET sn += $grammar_identity
             RETURN sn.id AS id
             """,
@@ -13971,6 +13984,8 @@ def persist_reviewed_name(
             grammar_identity=grammar_identity,
             quorum_shortfall=quorum_shortfall,
             resolution_method=resolution_method,
+            grammar_invalid_reason=RefineStopReason.grammar_invalid.value,
+            attempts_exhausted_reason=RefineStopReason.attempts_exhausted.value,
         )
 
     # A concurrent reviewer already transitioned this node out of 'drafted'
@@ -13985,12 +14000,14 @@ def persist_reviewed_name(
         return ""
 
     logger.info(
-        "persist_reviewed_name: %s → name_stage=%s (score=%.3f, chain=%d/%d)",
+        "persist_reviewed_name: %s → name_stage=%s "
+        "(score=%.3f, rotations=%d/%d, chain=%d)",
         sn_id,
         target_stage,
         score,
-        chain_length,
+        refine_attempts,
         rotation_cap,
+        chain_length,
     )
 
     # Acceptance refused by the cascade preflight — record why on the node so
@@ -14682,11 +14699,27 @@ def stage_docs_for_rescore(
     }
 
 
+REFINE_NAME_ATTEMPTS_SPENT = (
+    "coalesce(sn.refine_attempts, coalesce(sn.chain_length, 0))"
+)
+"""Rotations already spent on a name.
+
+Reads the durable attempt counter, falling back to the lineage depth for a
+name minted before the counter existed — every persisted successor cost at
+least one attempt, so the fallback never grants budget that was already spent.
+"""
+
+
 REFINE_NAME_ELIGIBILITY_WHERE = (
     "sn.name_stage = 'reviewed'"
     " AND sn.reviewer_score_name IS NOT NULL"
     " AND sn.reviewer_score_name < $min_score"
-    " AND coalesce(sn.chain_length, 0) < $rotation_cap"
+    # Budget is charged per CLAIMED attempt, not per persisted successor: a
+    # proposal the graph cannot accept (the identity is taken, the persistence
+    # fence refuses it, the candidate is ungrammatical) leaves chain_length at
+    # zero, so gating on lineage depth lets such a name re-claim and re-bill on
+    # every poll for as long as the run lasts.
+    f" AND {REFINE_NAME_ATTEMPTS_SPENT} < $rotation_cap"
     " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
     # A pinned rename that has already spent its re-review budget rests at
     # 'reviewed' — refine must not re-claim it (it is never rewritten, only
@@ -14704,6 +14737,69 @@ REFINE_NAME_ELIGIBILITY_WHERE = (
     " AND sn.review_quorum_shortfall IS NULL"
 )
 """Canonical graph predicate for name-refinement eligibility."""
+
+
+@retry_on_deadlock()
+def _charge_refine_name_attempts(
+    items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Spend one refinement rotation on every claimed name.
+
+    Fenced on the claim token and the ``'refining'`` stage, so only the worker
+    that owns the row charges it. Each surviving item carries the committed
+    ``refine_attempts`` value, which numbers this attempt: the caller uses it
+    to decide escalation and to report progress as attempt k of the cap.
+
+    Items whose charge does not commit lost the claim between verification and
+    this write; they are dropped so no model call is made against a fence
+    another worker now holds. An item carrying no claim token has no fence to
+    charge or to drop against, so it passes through uncharged — the same
+    tolerance the claim-race verifier applies.
+    """
+    if not items:
+        return []
+    charged: dict[str, int] = {}
+    by_token: dict[str, list[str]] = {}
+    for item in items:
+        token = item.get("claim_token")
+        if token:
+            by_token.setdefault(str(token), []).append(item["id"])
+    if not by_token:
+        return items
+    with GraphClient() as gc:
+        for token, sn_ids in by_token.items():
+            rows = gc.query(
+                """
+                UNWIND $sn_ids AS sid
+                MATCH (sn:StandardName {id: sid})
+                WHERE sn.claim_token = $token
+                  AND sn.name_stage = 'refining'
+                SET sn.refine_attempts = coalesce(
+                        sn.refine_attempts, coalesce(sn.chain_length, 0)
+                    ) + 1
+                RETURN sn.id AS id, sn.refine_attempts AS refine_attempts
+                """,
+                sn_ids=sn_ids,
+                token=token,
+            )
+            for row in rows:
+                charged[row["id"]] = int(row["refine_attempts"])
+    kept: list[dict[str, Any]] = []
+    for item in items:
+        if not item.get("claim_token"):
+            kept.append(item)
+            continue
+        attempts = charged.get(item["id"])
+        if attempts is None:
+            logger.debug(
+                "claim_refine_name_batch: %s lost its claim before the attempt "
+                "was charged — dropping",
+                item["id"],
+            )
+            continue
+        item["refine_attempts"] = attempts
+        kept.append(item)
+    return kept
 
 
 @retry_on_deadlock()
@@ -14742,6 +14838,8 @@ def claim_refine_name_batch(
             ", sn.reviewer_comments_per_dim_name"
             "     AS reviewer_comments_per_dim_name"
             ", sn.chain_length AS chain_length"
+            ", sn.refine_stop_reason AS refine_stop_reason"
+            ", sn.refine_collision_name AS refine_collision_name"
             ", sn.name_stage AS name_stage"
             ", sn.source_paths AS source_paths"
             ", sn.tags AS tags"
@@ -14768,6 +14866,13 @@ def claim_refine_name_batch(
     # each transition the same node; only the claim_token winner truly owns
     # it. See _verify_name_claim_winners.
     items = _verify_name_claim_winners(items, eligible_stage="refining")
+
+    # Charge the attempt budget once ownership is proven and before any model
+    # call, so the spend is durable across a crash or an orphan sweep and a
+    # race loser — which never calls a model — is not billed for the winner's
+    # attempt. A row that cannot be charged has lost its claim in the interim
+    # and is dropped rather than refined under a stale fence.
+    items = _charge_refine_name_attempts(items)
 
     # Enrich each claimed item with its REFINED_FROM chain history and build
     # a unified prior_reviews list that also includes the current node's own
@@ -15230,6 +15335,13 @@ def persist_refined_name(
                           new.validation_status = 'valid',
                           new.origin            = 'pipeline',
                           new.chain_length      = $new_chain_length,
+                          // The budget follows the identity lineage, not the
+                          // node: a successor born of the predecessor's last
+                          // rotation has none left, so the cap bounds the
+                          // whole chain instead of resetting at every link.
+                          new.refine_attempts   = coalesce(
+                            old.refine_attempts, $new_chain_length
+                          ),
                           new.docs_chain_length = 0,
                           new.description       = $description,
                           new.kind              = $kind,
@@ -15277,6 +15389,8 @@ def persist_refined_name(
                           new.edit_requested_at = successor_edit_requested_at,
                           new.edit_override_edits = successor_edit_override_edits,
                           new.edit_include_accepted = successor_edit_include_accepted,
+                          new.refine_attempts = coalesce(
+                            old.refine_attempts, $new_chain_length),
                           new.drain_scope_id = coalesce(
                             old.drain_scope_id, new.drain_scope_id),
                           new.drain_scope_claimed_at = CASE
@@ -17172,41 +17286,6 @@ def release_refine_name_claims(
     return released
 
 
-@retry_on_deadlock()
-def release_refine_name_failed_claims(
-    *,
-    sn_ids: list[str],
-    token: str,
-) -> int:
-    """Release refine-name claims after LLM or processing failure.
-
-    Token-and-stage verified: only reverts nodes where
-    ``claim_token = $token AND name_stage = 'refining'``.  This prevents
-    late-release from clobbering an SN that was already swept by orphan
-    recovery or successfully persisted.
-
-    Returns the count of nodes released.
-    """
-    if not sn_ids:
-        return 0
-    with GraphClient() as gc:
-        result = gc.query(
-            """
-            UNWIND $sn_ids AS sid
-            MATCH (sn:StandardName {id: sid})
-            WHERE sn.claim_token = $token
-              AND sn.name_stage = 'refining'
-            SET sn.name_stage = 'reviewed',
-                sn.claim_token = null,
-                sn.claimed_at = null
-            RETURN count(sn) AS released
-            """,
-            sn_ids=sn_ids,
-            token=token,
-        )
-    return result[0]["released"] if result else 0
-
-
 def resubmit_pinned_rename_for_review(
     *,
     sn_id: str,
@@ -17269,9 +17348,11 @@ def stage_name_for_rescore(
     name-axis stage — an ``exhausted`` name (refine cap reached, or a
     borderline name wrongly exhausted) or a ``reviewed`` name whose score never
     cleared. Reverts ``name_stage`` to ``'drafted'`` so a review re-scores it
-    with a fresh quorum, clears the stale reviewer name-score, resets the
-    re-review budget, and clears any claim. Edit fields are left intact so an
-    attached hint (e.g. a "keep this form" steer) rides the fresh review.
+    with a fresh quorum, clears the stale reviewer name-score and the stale
+    refinement diagnosis, resets the re-review budget, and clears any claim.
+    ``refine_attempts`` is deliberately preserved — see the query. Edit fields
+    are left intact so an attached hint (e.g. a "keep this form" steer) rides
+    the fresh review.
 
     When *run_id* is given it is stamped on the node so a scoped review
     (``run_sn_pools(scope_run_id=run_id)``) claims exactly this name — the
@@ -17301,6 +17382,15 @@ def stage_name_for_rescore(
                 SET sn.name_stage = 'drafted',
                     sn.reviewer_score_name = null,
                     sn.review_resubmit_count = 0,
+                    // The stale diagnosis of the last refinement goes; the
+                    // rotations it spent stay. A rescore buys a fresh quorum
+                    // draw on the SAME name, never a fresh rewrite budget —
+                    // refunding one would re-open the paid loop for a name
+                    // that scores low again. `sn edit` carries the new
+                    // steering information that reopens rewriting.
+                    sn.refine_stop_reason = null,
+                    sn.refine_stopped_at = null,
+                    sn.refine_collision_name = null,
                     sn.claim_token = null,
                     sn.claimed_at = null,
                     sn.run_id = coalesce($run_id, sn.run_id),
@@ -17389,40 +17479,104 @@ def restore_name_after_failed_rescore(
     return bool(rows and rows[0].get("restored"))
 
 
-def _mark_refine_vocab_gap_exhausted(
+#: Stop reasons proving that no further attempt on this name can succeed.
+#: A collision names an identity the graph already holds, and refinement may
+#: not take an occupied identity — folding into it carries source-migration
+#: semantics that belong to ``sn edit``. A grammar or vocabulary failure is
+#: reproduced by the same prompt every cycle. Measured over one run, 830 of
+#: 830 collisions re-proposed the same identity, across two model vendors.
+_TERMINAL_REFINE_STOP_REASONS = frozenset(
+    {
+        RefineStopReason.successor_collision.value,
+        RefineStopReason.successor_lifecycle_collision.value,
+        RefineStopReason.vocabulary_gap.value,
+        RefineStopReason.grammar_invalid.value,
+    }
+)
+
+
+@retry_on_deadlock()
+def stop_refine_name_attempt(
     *,
     sn_id: str,
     token: str,
-    error_msg: str,
-) -> None:
-    """Mark a name exhausted when refine fails on a vocab gap.
+    reason: str,
+    detail: str = "",
+    collision_name: str | None = None,
+    rotation_cap: int = DEFAULT_REFINE_ROTATIONS,
+) -> str:
+    """Close one failed refinement attempt and decide whether more may follow.
 
-    Vocab-gap errors are deterministic — the LLM keeps producing the same
-    unregistered token. Instead of reverting to 'reviewed' (infinite loop),
-    move to 'exhausted' and record the vocab gap reason.
+    Records *reason* (a :class:`RefineStopReason` value) with its timestamp and,
+    for a collision, the identity the refiner proposed — so the next attempt can
+    report what the last one hit and a parked name can be enumerated by cause.
+
+    The resulting stage is decided from committed state inside the write:
+    ``'exhausted'`` when the reason proves no further attempt can succeed or
+    when the charged budget is spent, otherwise ``'reviewed'`` so the remaining
+    rotations stay available. Exhaustion closes an open name-steering edit,
+    mirroring the acceptance path.
+
+    Fenced on the claim token and the ``'refining'`` stage. Returns the stage
+    written, or ``''`` when the fence did not match (an orphan sweep or another
+    worker already moved the row).
     """
+    terminal = reason in _TERMINAL_REFINE_STOP_REASONS
     with GraphClient() as gc:
-        gc.query(
+        rows = gc.query(
             """
             MATCH (sn:StandardName {id: $sn_id})
             WHERE sn.claim_token = $token
               AND sn.name_stage = 'refining'
-            SET sn.name_stage = 'exhausted',
+            WITH sn, CASE
+                   WHEN $terminal
+                     OR coalesce(sn.refine_attempts, 0) >= $rotation_cap
+                   THEN 'exhausted' ELSE 'reviewed' END AS target_stage
+            SET sn.name_stage = target_stage,
+                sn.refine_stop_reason = CASE
+                    WHEN target_stage = 'exhausted' AND NOT $terminal
+                    THEN $attempts_exhausted ELSE $reason END,
+                sn.refine_stopped_at = datetime(),
+                sn.refine_collision_name = $collision_name,
                 sn.claim_token = null,
                 sn.claimed_at = null,
                 // A name-axis exhaust closes only a name-steering edit.
-                sn.edit_status = CASE WHEN sn.edit_status = 'open'
-                                       AND sn.name_hint IS NOT NULL
-                                      THEN 'exhausted'
-                                      ELSE sn.edit_status END,
-                sn.reviewer_comments_name =
-                    coalesce(sn.reviewer_comments_name, '')
-                    + ' [vocab_gap_exhaust] ' + $error_msg
+                sn.edit_status = CASE
+                    WHEN target_stage = 'exhausted'
+                     AND sn.edit_status = 'open'
+                     AND sn.name_hint IS NOT NULL
+                    THEN 'exhausted' ELSE sn.edit_status END,
+                sn.reviewer_comments_name = CASE
+                    WHEN $detail = '' THEN sn.reviewer_comments_name
+                    ELSE coalesce(sn.reviewer_comments_name, '')
+                         + ' [' + $reason + '] ' + $detail END
+            RETURN target_stage AS stage
             """,
             sn_id=sn_id,
             token=token,
-            error_msg=error_msg[:300],
+            reason=reason,
+            terminal=terminal,
+            rotation_cap=rotation_cap,
+            collision_name=collision_name,
+            detail=detail[:300],
+            attempts_exhausted=RefineStopReason.attempts_exhausted.value,
         )
+    if not rows:
+        logger.debug(
+            "stop_refine_name_attempt: %s no longer holds token %s — no-op",
+            sn_id,
+            token[:8],
+        )
+        return ""
+    stage: str = rows[0]["stage"]
+    logger.info(
+        "refine_name: %s stopped at %s (reason=%s%s)",
+        sn_id,
+        stage,
+        reason,
+        f", collides with {collision_name}" if collision_name else "",
+    )
+    return stage
 
 
 def _mark_refine_docs_exhausted(

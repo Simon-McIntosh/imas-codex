@@ -485,7 +485,20 @@ def _stamp_edit_fields(
             sn.edit_scope        = $edit_scope,
             sn.edit_status       = $edit_status,
             sn.edit_requested_at = $edit_requested_at,
-            sn.run_id            = $run_id
+            sn.run_id            = $run_id,
+            // A name-steering edit is new information: the evidence that
+            // further refinement is futile was gathered without it, so the
+            // rotation budget and its diagnosis are refunded. A docs-only
+            // edit says nothing about the name axis and leaves both alone.
+            sn.refine_attempts = CASE WHEN $name_hint IS NULL
+                                      THEN sn.refine_attempts ELSE 0 END,
+            sn.refine_stop_reason = CASE WHEN $name_hint IS NULL
+                                         THEN sn.refine_stop_reason ELSE null END,
+            sn.refine_stopped_at = CASE WHEN $name_hint IS NULL
+                                        THEN sn.refine_stopped_at ELSE null END,
+            sn.refine_collision_name = CASE
+                WHEN $name_hint IS NULL
+                THEN sn.refine_collision_name ELSE null END
         """,
         id=sn_id,
         edit_mode=edit_mode,

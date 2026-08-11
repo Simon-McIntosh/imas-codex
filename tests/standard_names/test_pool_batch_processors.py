@@ -950,11 +950,9 @@ class TestRefineGrammarFailureNotCrashLoop:
                 return_value=None,
             ),
             patch(
-                "imas_codex.standard_names.graph_ops._mark_refine_vocab_gap_exhausted",
-            ) as mock_exhaust,
-            patch(
-                "imas_codex.standard_names.graph_ops.release_refine_name_failed_claims",
-            ) as mock_release,
+                "imas_codex.standard_names.graph_ops.stop_refine_name_attempt",
+                return_value="exhausted",
+            ) as mock_stop,
         ):
             # MUST NOT raise — a grammar failure is a normal failed refine.
             processed = await process_refine_name_batch(
@@ -962,12 +960,12 @@ class TestRefineGrammarFailureNotCrashLoop:
             )
 
         assert processed == 0, "a failed refine processes 0 items"
-        # Routed to the exhaust path (terminal — item will NOT re-claim).
-        mock_exhaust.assert_called_once()
-        _, kwargs = mock_exhaust.call_args
+        # Terminal: an unregistered token is a vocabulary gap the same prompt
+        # reproduces every cycle, so the name parks instead of re-claiming.
+        mock_stop.assert_called_once()
+        _, kwargs = mock_stop.call_args
         assert kwargs["sn_id"] == "helium_confinement_time"
-        # NOT reverted to 'reviewed' (which would re-claim and re-burn budget).
-        mock_release.assert_not_called()
+        assert kwargs["reason"] == "vocabulary_gap"
         # Failure surfaced as an event with zero additional cost.
         assert events, "expected a refine_failed event"
         assert events[-1]["outcome"] == "refine_failed"
