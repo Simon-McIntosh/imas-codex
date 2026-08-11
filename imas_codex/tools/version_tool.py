@@ -83,7 +83,9 @@ class VersionTool:
         "ids_filter: Limit to specific IDS. "
         "from_version: Start version for range filter (exclusive). "
         "to_version: End version for range filter (inclusive). "
-        "follow_rename_chains: When True, traverse RENAMED_TO graph edges to return full multi-hop rename lineages."
+        "follow_rename_chains: Traverse RENAMED_TO graph edges to return full multi-hop rename lineages. "
+        "Leave unset to append lineages to mode 1/2 output, set True explicitly to run a standalone "
+        "lineage query with neither paths nor change_type_filter, or False to omit lineages entirely."
     )
     async def get_dd_version_context(
         self,
@@ -92,17 +94,27 @@ class VersionTool:
         ids_filter: str | None = None,
         from_version: str | None = None,
         to_version: str | None = None,
-        follow_rename_chains: bool = True,
+        follow_rename_chains: bool | None = None,
     ) -> dict[str, Any]:
         """Get version change context for IMAS paths.
 
         Mode 1 (per-path): Provide paths to get version history per path.
         Mode 2 (bulk query): Omit paths and set change_type_filter to list all
         changes of that type across the Data Dictionary.
+        Mode 3 (lineages only): Omit both and set follow_rename_chains to True.
 
-        When follow_rename_chains is True, an additional query traverses
-        RENAMED_TO edges to return multi-hop rename lineages.
+        ``follow_rename_chains`` is tri-state because it both selects mode 3 and
+        enriches modes 1 and 2. Unset (None) enriches modes 1 and 2 with
+        RENAMED_TO lineages, but does not turn a call carrying no paths and no
+        change_type_filter into a whole-Data-Dictionary lineage dump — such a
+        call supplies no scope at all and returns an error. Only an explicit
+        True opts into mode 3; False omits lineage data everywhere.
         """
+        # Only an explicit True selects the standalone lineage query; an unset
+        # flag still enriches modes 1 and 2, so the two states cannot collapse
+        # into one boolean.
+        chains_requested = follow_rename_chains is True
+        include_chains = follow_rename_chains is not False
         # Normalise paths into a list
         if paths is not None:
             if isinstance(paths, str):
@@ -117,14 +129,14 @@ class VersionTool:
         # ── Mode 2: bulk query ────────────────────────────────────────────────
         if not path_list:
             if not change_type_filter:
-                # Rename-chain-only mode requires an ids_filter for scope;
-                # otherwise error out so callers must supply context.
-                if follow_rename_chains:
+                # ── Mode 3: standalone rename lineages ────────────────────────
+                if chains_requested:
                     return await self._rename_chain_query(ids_filter=ids_filter)
                 return {
                     "error": (
                         "Provide either 'paths' for per-path history, "
-                        "or 'change_type_filter' for a bulk query."
+                        "'change_type_filter' for a bulk query, "
+                        "or 'follow_rename_chains=True' for rename lineages."
                     )
                 }
             result = await self._bulk_query(
@@ -133,7 +145,7 @@ class VersionTool:
                 from_version=from_version,
                 to_version=to_version,
             )
-            if follow_rename_chains:
+            if include_chains:
                 chain_result = await self._rename_chain_query(ids_filter=ids_filter)
                 result["rename_chains"] = chain_result.get("rename_chains", [])
             return result
@@ -232,7 +244,7 @@ class VersionTool:
         }
 
         # Append full rename chains when requested
-        if follow_rename_chains:
+        if include_chains:
             chain_result = await self._rename_chain_query(
                 ids_filter=ids_filter, path_filter=path_list
             )

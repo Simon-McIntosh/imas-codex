@@ -409,6 +409,12 @@ def _get_removals(
     Excludes paths that have a RENAMED_TO successor OR whose ancestor
     (path prefix) was renamed — those are reported by _get_renames()
     instead. Only returns genuine removals.
+
+    The renamed-ancestor prefixes are collected once up front rather than
+    re-derived inside a per-row subquery: correlating the prefix test with
+    each candidate re-scans every IMASNode for each removal, which is
+    quadratic in graph size and pushes a whole-DD version range past a
+    minute.
     """
     ids_clause = ""
     params: dict = {"versions": version_range}
@@ -417,14 +423,14 @@ def _get_removals(
         params["ids_filter"] = ids_filter
     return gc.query(
         f"""
+        MATCH (ancestor:IMASNode)-[:RENAMED_TO]->()
+        WITH collect(DISTINCT ancestor.id + '/') AS renamed_prefixes
         MATCH (c:IMASNodeChange)-[:IN_VERSION]->(v:DDVersion)
         WHERE v.id IN $versions AND c.change_type = 'path_removed'
         MATCH (c)-[:FOR_IMAS_PATH]->(p:IMASNode)
         WHERE NOT EXISTS {{ (p)-[:RENAMED_TO]->() }}
-        AND NOT EXISTS {{
-            MATCH (ancestor:IMASNode)-[:RENAMED_TO]->()
-            WHERE p.id STARTS WITH ancestor.id + '/'
-        }} {ids_clause}
+        AND none(prefix IN renamed_prefixes WHERE p.id STARTS WITH prefix)
+        {ids_clause}
         RETURN p.ids AS ids, p.id AS path
         ORDER BY p.ids, p.id
         """,
