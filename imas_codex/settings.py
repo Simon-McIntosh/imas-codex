@@ -86,9 +86,13 @@ def _get_section(section: str) -> dict:
 def get_openrouter_pricing(model: str) -> dict[str, Any]:
     """Return the centrally cataloged OpenRouter pricing for *model*.
 
-    Missing dimensions remain ``None``. This legacy-facing accessor never
-    converts absence into a numeric zero; typed dispatch uses the stricter
-    :func:`get_typed_openrouter_pricing` authority accessor below.
+    Token rates are normalized to USD per million tokens. ``request`` and
+    ``image`` are fixed per-request and per-image charges; a route that
+    declares neither charges neither, so both default to a numeric zero that
+    the arithmetic consumers in :mod:`imas_codex.discovery.base.llm` and
+    :mod:`imas_codex.standard_names.budget` can price directly. Optional
+    overrides apply at or above their ``min_input_tokens`` threshold. An empty
+    mapping means the project has no explicit checked-in pricing entry.
     """
     catalog = _get_section("llm").get("openrouter-pricing", {})
     raw = catalog.get(model)
@@ -99,8 +103,8 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
             "min_input_tokens": item.get("min-input-tokens"),
             "prompt": item.get("prompt"),
             "completion": item.get("completion"),
-            "request": item.get("request", raw.get("request")),
-            "image": item.get("image", raw.get("image")),
+            "request": item.get("request", raw.get("request", 0.0)),
+            "image": item.get("image", raw.get("image", 0.0)),
         }
         for item in raw.get("overrides", [])
         if isinstance(item, dict)
@@ -108,8 +112,8 @@ def get_openrouter_pricing(model: str) -> dict[str, Any]:
     return {
         "prompt": raw.get("prompt"),
         "completion": raw.get("completion"),
-        "request": raw.get("request"),
-        "image": raw.get("image"),
+        "request": raw.get("request", 0.0),
+        "image": raw.get("image", 0.0),
         "cache_read": raw.get("cache-read"),
         "cache_write": raw.get("cache-write"),
         "cache_write_ttl": raw.get("cache-write-ttl"),
