@@ -160,21 +160,55 @@ class TestLeaseDecisionUsesPendingCache:
 
 
 class TestChargeEventHardLease:
-    """A charge cannot exceed the exposure reserved before launch."""
+    """A charge above its reservation settles into the ledger, never vanishes."""
 
     @pytest.mark.asyncio
-    async def test_over_lease_charge_is_rejected_without_accounting_drift(self):
+    async def test_over_lease_charge_is_recorded_as_overspend(self):
+        """A bill neither lease nor pool can cover stays recorded, and flagged.
+
+        Refusing it would leave money the provider already billed out of both
+        the local counters and the graph — and the hard stop reads those
+        counters, so an understated total lets the run keep working.
+        """
         mgr = BudgetManager(total_budget=0.3)
         lease = mgr.reserve(0.3)
         assert lease is not None
 
-        event = _make_event()
-        with pytest.raises(BudgetExceeded, match="reserved exposure"):
-            lease.charge_event(0.5, event)
+        result = lease.charge_event(0.5, _make_event())
 
-        assert mgr.spent == 0.0
-        assert lease.charged == 0.0
+        assert result.overspend == pytest.approx(0.2)
+        assert result.hard_stop is True
+        assert mgr.spent == pytest.approx(0.5)
+        assert mgr.overspend == pytest.approx(0.2)
+        assert lease.charged == pytest.approx(0.5)
+        assert mgr.hard_exhausted()
         assert mgr.check_invariant()
+
+    @pytest.mark.asyncio
+    async def test_over_lease_charge_draws_from_the_pool_before_overspending(self):
+        """Pool headroom absorbs an under-estimated bill without flagging it."""
+        mgr = BudgetManager(total_budget=1.0)
+        lease = mgr.reserve(0.1)
+        assert lease is not None
+
+        result = lease.charge_event(0.4, _make_event())
+
+        assert result.overspend == 0.0
+        assert mgr.spent == pytest.approx(0.4)
+        assert mgr.overspend == 0.0
+        assert mgr.remaining == pytest.approx(0.6)
+        assert mgr.check_invariant()
+
+    @pytest.mark.asyncio
+    async def test_charging_a_released_lease_still_raises(self):
+        """Settling against a lease that no longer exists is a caller error."""
+        mgr = BudgetManager(total_budget=1.0)
+        lease = mgr.reserve(0.5)
+        assert lease is not None
+        lease.release_unused()
+
+        with pytest.raises(BudgetExceeded, match="released or unknown"):
+            lease.charge_event(0.1, _make_event())
 
     @pytest.mark.parametrize("amount", [0.0, -0.1, float("nan"), float("inf")])
     def test_unproven_exposure_is_rejected_before_reservation(self, amount: float):

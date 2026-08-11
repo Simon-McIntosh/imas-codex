@@ -5,7 +5,30 @@ available budget.  Callers acquire a ``BudgetLease`` via ``reserve()``,
 charge actual costs against it via ``charge_event()``, and release
 unused headroom on completion.
 
-Invariant: ``pool + sum(active_reserved) + spent == total``
+**Three pricing stages, three different jobs**
+
+A paid provider call passes three gates, and each one prices a different
+quantity.  Conflating them is what makes a cost limit unspendable:
+
+- ``reserve()`` **admits** work against the *expected* bill.
+  ``model_provider_exposure`` converts the rendered request into a token bound
+  and prices one completion at the allowance such a response actually reaches,
+  not the route's published output maximum.  Pricing the maximum makes every
+  reservation nearly request-size independent and several times the bill it
+  settles, so a pool starves on reservation headroom while most of its cost
+  limit sits unspent.
+- ``BudgetLease.require_attempt`` **binds** each real provider attempt, drawing
+  any shortfall from the pool and refusing before the request leaves the
+  process when the pool cannot fund it.  A retry whose output allowance
+  escalated after a length exhaustion is re-priced at that larger allowance,
+  so it is funded at the size it will actually reach.
+- ``charge_event`` **settles** the actual bill.  Because admission is an
+  estimate, a bill above the lease remainder tops the lease up from the pool;
+  whatever the pool cannot fund is still recorded and reported as overspend.
+  Spend the provider has already billed is never dropped from the ledger —
+  dropping it understates the total and delays the hard stop that ends the run.
+
+Invariant: ``pool + sum(active_reserved) + spent == total + overspend``
 
 Thread-safe: ``threading.Lock`` protects all mutations.  The lock
 critical sections are pure arithmetic (no I/O), so blocking is
@@ -62,13 +85,36 @@ _WRITER_HEARTBEAT_SEC = 60.0
 # available to bound the request against.
 _UNCATALOGED_INPUT_TOKEN_CEILING = 2_000_000
 
-# Token allowance added to the serialized request's UTF-8 byte length to cover
-# provider chat-template framing (role markers, turn delimiters, control
-# tokens), which the serialized bytes do not contain.  The byte length itself
-# is already a strict over-count of the request's own tokens — a BPE token
-# consumes at least one byte of what it encodes — so the sum bounds the billed
-# input without trusting a local tokenizer.
+# Token allowance added to the request's own token bound to cover provider
+# chat-template framing (role markers, turn delimiters, control tokens), which
+# the serialized request does not contain.
 _CHAT_FRAMING_TOKEN_ALLOWANCE = 4_096
+
+# Bytes per token used to convert a serialized request's UTF-8 length into a
+# token bound.  A byte length is not a token count: prose and JSON both encode
+# several bytes per BPE token, so feeding bytes to a per-token rate over-prices
+# the input term roughly fourfold and can refuse a legal request against the
+# route's published input limit.
+#
+# The divisor sits below the smallest ratio measured over the rendered compose
+# and review prompts and the payloads they carry, so dividing by it keeps the
+# estimate on the high side of the real token count under every tokenizer
+# tried.  A block of nothing but long underscored standard names is the floor —
+# identifiers split into far more pieces than prose or JSON — and it lands near
+# 2.75, which is why a plausible-looking 3.5 or 4 would under-price the very
+# payloads this pipeline sends.  Raising it above the measured floor
+# under-prices a dense request; lowering it far below reintroduces the
+# fourfold over-reservation that pricing raw bytes caused.
+_REQUEST_BYTES_PER_TOKEN = 2.5
+
+# Completion allowance priced for one admission when the caller pins no
+# explicit ``max_tokens``.  Sized above the upper tail of observed structured
+# completions on the paid seats and clamped to the route's published allowance.
+# The request itself still carries the published allowance, so nothing is
+# truncated: an overrun settles against the pool at charge time, and a
+# length-escalated retry is re-priced at its real allowance when the attempt
+# binds.
+_EXPECTED_COMPLETION_TOKEN_ALLOWANCE = 12_288
 
 
 # =====================================================================
@@ -124,7 +170,7 @@ class ChargeResult:
     overspend: float = 0.0
     """Amount charged beyond reserved+pool (0.0 if within budget)."""
     hard_stop: bool = False
-    """True if the charge was rejected because budget is exhausted."""
+    """True when recorded spend has reached the run cap after this charge."""
 
 
 # =====================================================================
@@ -193,12 +239,16 @@ def model_provider_exposure(
     """Estimate the expected bill for a rendered structured request.
 
     The input term is bounded by the rendered request itself — its serialized
-    UTF-8 byte length plus a framing allowance — capped by the route's
-    published context limit.  Cataloged route rates estimate admission cost;
-    the separate provider ``max_price`` policy remains enforced at dispatch.
-    Every wrapper retry is represented and priced with the output allowance it
-    can reach after a length exhaustion.  Routes without proven expected rates,
-    and requests with unpriced non-text dimensions, fail closed.
+    UTF-8 length converted to tokens plus a framing allowance — capped by the
+    route's published context limit.  The output term prices *max_tokens* when
+    the caller pins one, and otherwise the expected completion allowance rather
+    than the route's published maximum, so admission tracks the bill it will
+    settle instead of a ceiling no structured response reaches.  Cataloged
+    route rates estimate admission cost; the separate provider ``max_price``
+    policy remains enforced at dispatch.  Every wrapper retry is represented
+    and priced with the output allowance it can reach after a length
+    exhaustion.  Routes without proven expected rates, and requests with
+    unpriced non-text dimensions, fail closed.
     """
     from imas_codex.discovery.base.llm import (
         _LENGTH_RETRY_TOKEN_CAP,
@@ -230,6 +280,7 @@ def model_provider_exposure(
     request_byte_bound = len(serialized_request.encode("utf-8"))
     if request_byte_bound <= 0:
         raise BudgetExposureUnknown("rendered provider request is empty")
+    request_token_bound = math.ceil(request_byte_bound / _REQUEST_BYTES_PER_TOKEN)
 
     catalog_input_limit = get_catalog_model_info(model).get("max_input_tokens")
     input_limit = (
@@ -237,9 +288,9 @@ def model_provider_exposure(
         if isinstance(catalog_input_limit, int) and catalog_input_limit > 0
         else _UNCATALOGED_INPUT_TOKEN_CEILING
     )
-    if request_byte_bound > input_limit:
+    if request_token_bound > input_limit:
         raise BudgetExposureUnknown("rendered request exceeds the provider input bound")
-    input_bound = min(input_limit, request_byte_bound + _CHAT_FRAMING_TOKEN_ALLOWANCE)
+    input_bound = min(input_limit, request_token_bound + _CHAT_FRAMING_TOKEN_ALLOWANCE)
 
     try:
         expected_price = get_openrouter_expected_price(
@@ -251,7 +302,14 @@ def model_provider_exposure(
             f"proven OpenRouter expected price unavailable for {model}"
         ) from exc
 
-    output_limit = max_tokens or get_model_limits(model)["max_tokens"]
+    published_output_limit = get_model_limits(model)["max_tokens"]
+    if not isinstance(published_output_limit, int) or published_output_limit <= 0:
+        raise BudgetExposureUnknown(
+            "provider output allowance is not positively bounded"
+        )
+    output_limit = max_tokens or min(
+        _EXPECTED_COMPLETION_TOKEN_ALLOWANCE, published_output_limit
+    )
     if not isinstance(output_limit, int) or output_limit <= 0:
         raise BudgetExposureUnknown(
             "provider output allowance is not positively bounded"
@@ -290,22 +348,34 @@ def bind_attempt_exposure(
     """Return a per-attempt hook binding each provider request to *lease*.
 
     Passed to ``acall_llm_structured(before_attempt=...)``.  Each attempt is
-    priced at the output allowance that attempt will actually carry, so a
-    retry that escalated its allowance after a length exhaustion is funded at
-    its real size instead of every call pre-reserving the worst case it might
-    never reach.  Returns ``None`` when there is no lease to bind.
+    funded at the completion size it is expected to reach: the admission
+    estimate while the request still carries its opening allowance, and the
+    full allowance once a length exhaustion has escalated it — an attempt that
+    exhausted its budget mid-response has proven it will use whatever it is
+    given.  The escalation is detected from the allowance itself rather than
+    the attempt index, because a retry after a parse or transport error carries
+    the opening allowance unchanged.  Returns ``None`` when there is no lease
+    to bind.
     """
     if lease is None:
         return None
 
+    opening_allowance: int | None = None
+
     def _bind(attempt: int, max_output_tokens: int) -> None:
+        nonlocal opening_allowance
+        if opening_allowance is None and max_output_tokens > 0:
+            opening_allowance = max_output_tokens
+        escalated = (
+            opening_allowance is not None and max_output_tokens > opening_allowance
+        )
         lease.require_attempt(
             model_provider_exposure(
                 model,
                 messages,
                 response_model=response_model,
                 provider_attempts=1,
-                max_tokens=max_output_tokens or None,
+                max_tokens=max_output_tokens if escalated else None,
             )
         )
 
@@ -447,22 +517,25 @@ class BudgetLease:
     # ------------------------------------------------------------------
 
     def charge_event(self, cost: float, event: LLMCostEvent) -> ChargeResult:
-        """Atomic charge: record spend + enqueue an ``LLMCost`` graph write.
+        """Settle one provider call: record spend + enqueue an ``LLMCost`` write.
 
-        The provider call must already be covered by this lease's declared
-        maximum exposure. A charge beyond the remaining reservation raises
-        :class:`BudgetExceeded` without mutating accounting; reservations are
-        never extended after a paid request has begun.
+        Reservations price an expected bill, so a charge above the remaining
+        reservation draws its shortfall from the manager pool.  Whatever the
+        pool cannot fund is still recorded and returned as ``overspend``,
+        stamped on the ``LLMCost`` row: the provider has already billed it, and
+        refusing the charge would leave real spend out of both the local
+        counters and the graph while the run kept working against an
+        understated total.
         """
         if cost < 0:
             raise ValueError("charge must be non-negative")
         if not math.isfinite(cost):
             raise ValueError("charge must be finite")
-        self._mgr._record_spend(self._lease_id, cost)
+        overspend = self._mgr._record_spend(self._lease_id, cost)
         self._charged += cost
         # Enqueue async graph write
-        self._mgr._enqueue_write(cost, event, 0.0)
-        return ChargeResult()
+        self._mgr._enqueue_write(cost, event, overspend)
+        return ChargeResult(overspend=overspend, hard_stop=self._mgr.hard_exhausted())
 
     def release_unused(self) -> float:
         """Return unspent portion to manager pool.  Idempotent."""
@@ -507,7 +580,7 @@ class BudgetManager:
             result = lease.charge_event(cost, LLMCostEvent(...))
         # Unused portion auto-released
 
-    Invariant: ``pool + sum(active_reserved) + spent == total``
+    Invariant: ``pool + sum(active_reserved) + spent == total + overspend``
 
     When ``run_id`` is set, ``charge_event`` enqueues async graph writes
     via :func:`record_llm_cost`.  Call :meth:`start` before first use
@@ -525,6 +598,10 @@ class BudgetManager:
         self._pool = total_budget
         self._reserved: dict[str, float] = {}  # lease_id → remaining reservation
         self._spent = 0.0
+        # Spend that neither a lease reservation nor the pool could fund at
+        # charge time.  Recorded rather than refused, so the ledger matches what
+        # the provider billed; it is the arithmetic slack in the invariant.
+        self._overspend = 0.0
         self._batch_count = 0
         self._lock = threading.Lock()
         # Per-phase hard caps.  Keys are phase names; values are the cap in
@@ -837,31 +914,45 @@ class BudgetManager:
     # Internal helpers (called by BudgetLease)
     # ------------------------------------------------------------------
 
-    def _record_spend(self, lease_id: str, amount: float) -> None:
-        """Record actual spend from a lease.
+    def _record_spend(self, lease_id: str, amount: float) -> float:
+        """Record actual spend from a lease, returning the unfunded overspend.
 
-        Decrements the reservation's remaining balance and increments
-        the manager-wide spent counter.  Also tracks per-phase spend
-        for diagnostic attribution.
+        Decrements the reservation's remaining balance and increments the
+        manager-wide spent counter, tracking per-phase spend for diagnostic
+        attribution.  A bill above the lease remainder draws its shortfall from
+        the pool, since the reservation priced an expected cost rather than a
+        ceiling.  Whatever neither the lease nor the pool can fund is recorded
+        as overspend and returned: the spend has already happened, and leaving
+        it out of the ledger would understate the total the hard stop reads.
         """
         with self._lock:
             remaining = self._reserved.get(lease_id)
             if remaining is None:
                 raise BudgetExceeded("cannot charge a released or unknown lease")
-            if amount > remaining + EPSILON:
-                raise BudgetExceeded(
-                    f"charge ${amount:.6f} exceeds reserved exposure "
-                    f"${remaining:.6f} for lease {lease_id}"
-                )
-            if self._spent + amount > self._total + EPSILON:
-                raise BudgetExceeded(
-                    f"charge ${amount:.6f} would exceed run cap ${self._total:.6f}"
-                )
+            if amount - remaining > EPSILON:
+                self._extend_reservation_locked(lease_id, amount - remaining)
+                remaining = self._reserved.get(lease_id, 0.0)
+            overspend = max(amount - remaining, 0.0)
             self._spent += amount
+            self._overspend += overspend
             phase = self._lease_phases.get(lease_id, "")
             if phase:
                 self._phase_spent[phase] = self._phase_spent.get(phase, 0.0) + amount
             self._reserved[lease_id] = max(remaining - amount, 0.0)
+            spent_snapshot = self._spent
+        if overspend > EPSILON:
+            logger.warning(
+                "budget: charge $%.6f on lease %s (phase %r) exceeded both its "
+                "reservation and the pool by $%.6f — recorded as overspend "
+                "(spend $%.4f of cap $%.4f)",
+                amount,
+                lease_id,
+                phase,
+                overspend,
+                spent_snapshot,
+                self._total,
+            )
+        return overspend
 
     def _extend_reservation(self, lease_id: str, amount: float) -> float:
         """Atomically extend an active reservation by drawing from the pool.
@@ -870,48 +961,53 @@ class BudgetManager:
         *amount* when the pool is insufficient or the lease's phase would
         exceed its hard cap (``phase_caps[phase] × 1.5``).  The caller is
         responsible for checking whether the extension was sufficient.
+        """
+        with self._lock:
+            return self._extend_reservation_locked(lease_id, amount)
+
+    def _extend_reservation_locked(self, lease_id: str, amount: float) -> float:
+        """Extend a reservation from the pool with ``_lock`` already held.
 
         Phase-cap enforcement on extension prevents a compose batch from
         draining the global pool past its allocated share via in-flight
         overshoot, which would starve downstream phases (review, regen).
         """
-        with self._lock:
-            extended = min(amount, self._pool)
-            # ── Per-phase cap check on extension ───────────────────────────
-            phase = self._lease_phases.get(lease_id, "")
-            if extended > 0 and phase and phase in self._phase_caps:
-                cap = self._phase_caps[phase]
-                committed = self._phase_committed.get(phase, 0.0)
-                room = cap * 1.5 - committed
-                if room < extended:
-                    if room <= EPSILON:
-                        logger.debug(
-                            "Phase %r cap exhausted on extension: "
-                            "committed=%.4f cap*1.5=%.4f — extension refused",
-                            phase,
-                            committed,
-                            cap * 1.5,
-                        )
-                        return 0.0
-                    extended = room
-            if extended > 0:
-                self._pool -= extended
-                if lease_id in self._reserved:
-                    self._reserved[lease_id] += extended
-                if phase:
-                    self._phase_committed[phase] = (
-                        self._phase_committed.get(phase, 0.0) + extended
+        extended = min(amount, self._pool)
+        # ── Per-phase cap check on extension ───────────────────────────
+        phase = self._lease_phases.get(lease_id, "")
+        if extended > 0 and phase and phase in self._phase_caps:
+            cap = self._phase_caps[phase]
+            committed = self._phase_committed.get(phase, 0.0)
+            room = cap * 1.5 - committed
+            if room < extended:
+                if room <= EPSILON:
+                    logger.debug(
+                        "Phase %r cap exhausted on extension: "
+                        "committed=%.4f cap*1.5=%.4f — extension refused",
+                        phase,
+                        committed,
+                        cap * 1.5,
                     )
-                logger.info(
-                    "budget: extended lease %s by $%.4f "
-                    "(requested $%.4f, reservation now $%.4f, pool $%.4f)",
-                    lease_id,
-                    extended,
-                    amount,
-                    self._reserved.get(lease_id, 0.0),
-                    self._pool,
+                    return 0.0
+                extended = room
+        if extended > 0:
+            self._pool -= extended
+            if lease_id in self._reserved:
+                self._reserved[lease_id] += extended
+            if phase:
+                self._phase_committed[phase] = (
+                    self._phase_committed.get(phase, 0.0) + extended
                 )
-            return extended
+            logger.info(
+                "budget: extended lease %s by $%.4f "
+                "(requested $%.4f, reservation now $%.4f, pool $%.4f)",
+                lease_id,
+                extended,
+                amount,
+                self._reserved.get(lease_id, 0.0),
+                self._pool,
+            )
+        return extended
 
     def _release(self, lease_id: str, unused: float) -> None:
         """Return unused reservation back to the pool."""
@@ -935,6 +1031,12 @@ class BudgetManager:
         """Total spend recorded across all leases (in-memory shadow)."""
         with self._lock:
             return self._spent
+
+    @property
+    def overspend(self) -> float:
+        """Recorded spend that no reservation or pool headroom could fund."""
+        with self._lock:
+            return self._overspend
 
     @property
     def phase_spent(self) -> dict[str, float]:
@@ -1201,6 +1303,7 @@ class BudgetManager:
                 "total_budget": self._total,
                 "remaining": self._pool,
                 "total_spent": self._spent,
+                "overspend": self._overspend,
                 "active_reservations": len(self._reserved),
                 "total_reserved": sum(self._reserved.values()),
                 "batch_count": self._batch_count,
@@ -1212,8 +1315,8 @@ class BudgetManager:
             }
 
     def check_invariant(self) -> bool:
-        """Verify pool + sum(active_reserved) + spent == total."""
+        """Verify pool + sum(active_reserved) + spent == total + overspend."""
         with self._lock:
-            expected = self._total
+            expected = self._total + self._overspend
             actual = self._pool + sum(self._reserved.values()) + self._spent
             return abs(expected - actual) < EPSILON * 100
