@@ -180,6 +180,37 @@ This makes the `origin='catalog_edit'` exemption in
 one-live-name-per-source dedup from folding an imported name, which is why one
 coordinate axis resolved to a single name while another stayed split across two.
 
+## The refinement budget is charged per ATTEMPT
+
+`chain_length` is lineage depth: it counts successors that PERSISTED. A refine
+attempt can fail before any write — the proposed identity is already taken
+(`find_name_key_duplicate`), the persistence fence refuses the successor, the
+candidate fails grammar validation — and every one of those leaves lineage
+depth untouched. Gating claim eligibility, escalation, or exhaustion on it
+therefore re-selects the same name on every poll and re-bills it: one measured
+run spent 822 model calls and $54.7 on 14 names and produced one accepted name.
+
+`refine_attempts` is the budget. It is charged on each verified claim, before
+the model call, and a successor inherits it so the cap bounds the lineage. Read
+it through `REFINE_NAME_ATTEMPTS_SPENT`, never `chain_length`.
+
+Two consequences worth keeping straight:
+
+- **A collision is decided, not transient.** The refiner proposes the same
+  successor identity every cycle — measured across two model vendors — and
+  refinement may not take an occupied identity, because merging carries
+  source-migration semantics that belong to `sn edit`. `stop_refine_name_attempt`
+  parks such a name immediately with `refine_collision_name` recorded. A model
+  or provider error is the opposite case and keeps the rotations that remain.
+- **Recovery differs by whether new information arrived.** `sn rescore` buys a
+  fresh quorum draw on the SAME name and deliberately does NOT refund rotations
+  (refunding re-opens the paid loop for a name that scores low again); a
+  name-steering `sn edit --hint` is new information and refunds them.
+
+The docs axis has no such defect and needs no counter: `persist_refined_docs`
+rewrites in place, so every attempt lands and `docs_chain_length` always
+advances. Do not "harmonise" the two axes by giving docs an attempt counter.
+
 ## Acceptance
 
 Never hand-accept, and never edit graph text with Cypher. Acceptance is earned

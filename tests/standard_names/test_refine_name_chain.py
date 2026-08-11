@@ -1,11 +1,14 @@
 """Tests for successor-chain creation in the refine_name pipeline.
 
 Covers:
-- Claim eligibility (reviewed + low score + chain < cap)
+- Claim eligibility (reviewed + low score + rotations remaining)
 - Persist semantics (new node, REFINED_FROM edge, chain_length, edge migration)
-- Release (revert refining → reviewed, token+stage verification)
-- Worker behavior (escalation model selection, failure release)
+- Stopping an attempt (reason recorded, stage chosen, token+stage fence)
+- Worker behavior (escalation model selection, failure routing)
 - Prompt rendering
+
+The rotation budget itself — charge, inheritance, exhaustion, recovery — is
+pinned in ``test_refine_attempt_budget.py``.
 """
 
 from __future__ import annotations
