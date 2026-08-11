@@ -14,9 +14,110 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
+from pydantic import BaseModel
+
 from imas_codex.standard_names.defaults import DEFAULT_MIN_SCORE
 
 logger = logging.getLogger(__name__)
+
+
+#: Rendered-request size used to price one review seat for the startup sizing
+#: check.  A review request carries the rubric, the closed grammar vocabulary
+#: and the batch under review, which lands in the tens of kilobytes; the exact
+#: figure only scales the input term of an estimate whose purpose is to tell a
+#: plainly unfundable cost limit from a workable one.
+_SIZING_PROBE_REQUEST_BYTES = 38_000
+
+
+class _SizingProbeResponse(BaseModel):
+    """Minimal structured shape so the sizing probe prices a real request."""
+
+    answer: str
+
+
+def _warn_if_cost_limit_cannot_fund_a_quorum(cost_limit: float) -> None:
+    """Warn when the cost limit cannot hold one full review quorum at once.
+
+    A review cycle reserves its expected provider exposure before it calls
+    anything, and every replica of a review pool reserves against the same pot.
+    A limit below one quorum's reservation therefore stalls the axis without
+    spending the limit: reservations are refused, no provider is contacted, and
+    the run reports deferrals rather than cost. The two ways out are more money
+    or fewer concurrent requests, so name both.
+
+    Advisory only — a seat whose route has no price authority already fails
+    closed at admission, and a probe failure must never stop a run.
+    """
+    if cost_limit <= 0:
+        return  # unlimited (local, zero-cost routes)
+    try:
+        from imas_codex.settings import (
+            get_pool_replicas,
+            get_sn_review_docs_models,
+            get_sn_review_names_models,
+        )
+        from imas_codex.standard_names.budget import (
+            BudgetExposureUnknown,
+            model_provider_exposure,
+        )
+
+        request = [
+            {"role": "system", "content": "x" * _SIZING_PROBE_REQUEST_BYTES},
+            {"role": "user", "content": ""},
+        ]
+        demands: list[tuple[str, str, float, float, int]] = []
+        for pool, models in (
+            ("review_name", get_sn_review_names_models()),
+            ("review_docs", get_sn_review_docs_models()),
+        ):
+            quorum = 0.0
+            worst_seat = 0.0
+            for model in models:
+                try:
+                    seat = model_provider_exposure(
+                        model,
+                        request,
+                        response_model=_SizingProbeResponse,
+                        provider_attempts=1,
+                    )
+                except BudgetExposureUnknown:
+                    continue  # unpriceable route: refused at admission anyway
+                quorum += seat
+                worst_seat = max(worst_seat, seat)
+            if quorum > 0:
+                demands.append(
+                    (
+                        pool,
+                        ", ".join(models),
+                        quorum,
+                        worst_seat,
+                        get_pool_replicas(pool),
+                    )
+                )
+    except Exception:  # noqa: BLE001
+        logger.debug("cost-limit sizing probe unavailable", exc_info=True)
+        return
+
+    for pool, seats, quorum, worst_seat, replicas in demands:
+        if cost_limit + 1e-9 >= quorum:
+            continue
+        # A replica holds one cycle's reservation at a time, so peak concurrent
+        # demand is the replica count times the dearest seat, not the quorum.
+        logger.warning(
+            "cost limit $%.2f cannot fund one %s quorum (needs $%.2f of "
+            "reservation across seats %s). Every review cycle reserves its "
+            "expected exposure before calling a provider, so the axis will "
+            "defer instead of spending. Either raise --cost-limit (this pool "
+            "peaks at $%.2f held at once across its %d configured replicas) or "
+            "lower IMAS_CODEX_SN_POOLS_%s_REPLICAS.",
+            cost_limit,
+            pool,
+            quorum,
+            seats,
+            worst_seat * replicas,
+            replicas,
+            pool.upper(),
+        )
 
 
 @dataclass
@@ -1020,6 +1121,10 @@ async def run_sn_pools(
     effective_budget = cost_limit if cost_limit > 0 else 1e9
     shared_mgr = BudgetManager(effective_budget, run_id=run_id)
     await shared_mgr.start()
+
+    # The limit and the replica counts are both resolved by now, and nothing
+    # else compares them: say so before the pools start deferring.
+    _warn_if_cost_limit_cannot_fund_a_quorum(cost_limit)
 
     # Pre-create the SNRun node so LLMCost → FOR_RUN edges have a target.
     from imas_codex.settings import get_pool_replicas

@@ -18,7 +18,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 
 from imas_codex.standard_names.budget import (
-    BudgetExceeded,
     BudgetLease,
     BudgetManager,
     ChargeResult,
@@ -243,8 +242,8 @@ class TestEnrichChargeEvent:
         assert event.cycle is None  # enrich has no cycles
 
     @pytest.mark.asyncio
-    async def test_charge_beyond_reservation_is_refused_without_mutation(self):
-        """A provider charge can never extend its lease after launch."""
+    async def test_charge_beyond_reservation_settles_and_reports_overspend(self):
+        """An under-estimated bill is recorded with the unfunded part flagged."""
         mgr = _make_mgr(budget=0.01)  # Tiny budget
         lease = mgr.reserve(0.01, phase="enrich")
         assert lease is not None
@@ -259,10 +258,13 @@ class TestEnrichChargeEvent:
             service="standard-names",
         )
 
-        with pytest.raises(BudgetExceeded):
-            lease.charge_event(5.0, event)
-        assert lease.charged == 0.0
-        assert lease.remaining == pytest.approx(0.01)
+        result = lease.charge_event(5.0, event)
+
+        assert result.overspend == pytest.approx(4.99)
+        assert lease.charged == pytest.approx(5.0)
+        assert mgr.spent == pytest.approx(5.0)
+        assert mgr.phase_spent["enrich"] == pytest.approx(5.0)
+        assert mgr.check_invariant()
 
 
 # =====================================================================

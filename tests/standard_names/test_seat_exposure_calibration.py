@@ -24,11 +24,14 @@ from imas_codex.settings import (
 )
 from imas_codex.standard_names.budget import EPSILON, model_provider_exposure
 
-#: Upper bound for one representative attempt on every launch seat.
-MAX_ATTEMPT_EXPOSURE_USD = 0.50
+#: Upper bound for one representative attempt on every launch seat.  Set just
+#: above what the seats price today so an inflated term is caught here rather
+#: than in a paid run — the reservation a pool holds per in-flight request is
+#: what its cost limit must multiply by the replica count.
+MAX_ATTEMPT_EXPOSURE_USD = 0.25
 
 #: Upper bound for the stronger model used only after the refine chain is spent.
-ESCALATION_MAX_ATTEMPT_EXPOSURE_USD = 2.00
+ESCALATION_MAX_ATTEMPT_EXPOSURE_USD = 1.00
 
 #: A rendered Standard Names request is a few tens of kilobytes of prompt.
 #: Oversized on purpose so the gate measures a realistic worst case.

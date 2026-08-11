@@ -13,10 +13,14 @@ import pytest
 from pydantic import BaseModel
 
 from imas_codex.standard_names.budget import (
+    _CHAT_FRAMING_TOKEN_ALLOWANCE,
+    _EXPECTED_COMPLETION_TOKEN_ALLOWANCE,
+    _REQUEST_BYTES_PER_TOKEN,
     BudgetExposureUnknown,
     BudgetLease,
     BudgetManager,
     LLMCostEvent,
+    bind_attempt_exposure,
     charge_billable_exception,
     model_provider_exposure,
 )
@@ -151,6 +155,194 @@ def test_expected_reservation_does_not_use_the_provider_policy_ceiling(monkeypat
     )
 
     assert 0 < exposure < 0.25
+
+
+def test_request_bytes_are_converted_to_tokens_before_pricing():
+    """The input term prices tokens, not the request's byte length.
+
+    Feeding bytes to a per-token rate over-prices the input several-fold, since
+    prose and JSON both encode multiple bytes per token.  The exposure is
+    reconstructed here from the priced rate to pin the conversion itself.
+    """
+    from imas_codex.settings import get_openrouter_pricing
+
+    route = "openrouter/anthropic/claude-sonnet-5"
+    price = get_openrouter_pricing(route)
+    payload = "y" * 60_000
+    messages = [{"role": "user", "content": payload}]
+
+    exposure = model_provider_exposure(
+        route,
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+    )
+
+    completion_term = _EXPECTED_COMPLETION_TOKEN_ALLOWANCE * price["completion"] / 1e6
+    priced_input_tokens = (exposure - completion_term) / (price["prompt"] / 1e6)
+    # The serialized request adds the JSON envelope and the response schema on
+    # top of the payload, so the byte length is a lower bound on what is priced.
+    lower = len(payload) / _REQUEST_BYTES_PER_TOKEN + _CHAT_FRAMING_TOKEN_ALLOWANCE
+    assert lower <= priced_input_tokens < len(payload), (
+        "the input term must price a token bound derived from the request bytes, "
+        f"not the {len(payload)} bytes themselves"
+    )
+
+
+def test_admission_prices_the_expected_completion_not_the_published_maximum():
+    """Admission must not reserve an output ceiling no response reaches.
+
+    Pricing the published maximum makes the reservation nearly request-size
+    independent and several times the bill it settles, so a pool starves on
+    reservation headroom while its cost limit stays unspent.
+    """
+    from imas_codex.discovery.base.llm import get_model_limits
+
+    route = "openrouter/anthropic/claude-sonnet-5"
+    messages = [{"role": "user", "content": "y" * 38_000}]
+    published = get_model_limits(route)["max_tokens"]
+    assert published > _EXPECTED_COMPLETION_TOKEN_ALLOWANCE
+
+    admission = model_provider_exposure(
+        route, messages, response_model=_BoundedResponse, provider_attempts=1
+    )
+    at_published = model_provider_exposure(
+        route,
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+        max_tokens=published,
+    )
+    at_expected = model_provider_exposure(
+        route,
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+        max_tokens=_EXPECTED_COMPLETION_TOKEN_ALLOWANCE,
+    )
+
+    assert admission == pytest.approx(at_expected)
+    assert admission < at_published
+
+
+def test_admission_never_prices_above_a_routes_published_allowance(monkeypatch):
+    """A route whose published output is smaller than the estimate uses its own."""
+    from imas_codex.discovery.base import llm
+
+    route = "openrouter/anthropic/claude-sonnet-5"
+    messages = [{"role": "user", "content": "prompt"}]
+    small = 2_048
+    monkeypatch.setattr(
+        llm, "get_model_limits", lambda model: {"max_tokens": small, "timeout": 60}
+    )
+
+    clamped = model_provider_exposure(
+        route, messages, response_model=_BoundedResponse, provider_attempts=1
+    )
+    explicit = model_provider_exposure(
+        route,
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+        max_tokens=small,
+    )
+
+    assert clamped == pytest.approx(explicit)
+
+
+class _RecordingLease:
+    """Captures the amounts an attempt binding requires."""
+
+    def __init__(self) -> None:
+        self.required: list[float] = []
+
+    def require_attempt(self, amount: float) -> None:
+        self.required.append(amount)
+
+
+def test_attempt_binding_funds_the_admission_estimate_until_the_allowance_grows():
+    """Each attempt binds the size it will reach, escalation included.
+
+    An unbumped retry (parse or transport failure) carries the opening
+    allowance, so binding the published maximum on every attempt would restore
+    the over-reservation admission just shed.  A length-exhausted attempt has
+    proven it will use everything it is given, so that one binds its full
+    escalated allowance.
+    """
+    route = "openrouter/anthropic/claude-sonnet-5"
+    messages = [{"role": "user", "content": "y" * 20_000}]
+    lease = _RecordingLease()
+    bind = bind_attempt_exposure(
+        lease,  # type: ignore[arg-type]
+        route,
+        messages,
+        response_model=_BoundedResponse,
+    )
+    assert bind is not None
+
+    bind(0, 32_000)  # opening allowance
+    bind(1, 32_000)  # retry after a parse failure — same allowance
+    bind(2, 64_000)  # retry after a length exhaustion — escalated
+
+    admission = model_provider_exposure(
+        route, messages, response_model=_BoundedResponse, provider_attempts=1
+    )
+    escalated = model_provider_exposure(
+        route,
+        messages,
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+        max_tokens=64_000,
+    )
+    assert lease.required[0] == pytest.approx(admission)
+    assert lease.required[1] == pytest.approx(admission)
+    assert lease.required[2] == pytest.approx(escalated)
+    assert lease.required[2] > lease.required[0]
+
+
+def test_binding_without_a_lease_is_a_noop():
+    """An unbudgeted call has nothing to bind and must not build a hook."""
+    assert (
+        bind_attempt_exposure(
+            None,
+            "openrouter/anthropic/claude-sonnet-5",
+            [{"role": "user", "content": "prompt"}],
+            response_model=_BoundedResponse,
+        )
+        is None
+    )
+
+
+def test_oversized_request_is_refused_against_the_token_limit(monkeypatch):
+    """The input-limit refusal compares tokens with tokens.
+
+    Comparing the byte length against a token limit refuses a legal request
+    whose token count fits comfortably inside the route's context window.
+    """
+    from imas_codex.discovery.base import llm
+
+    route = "openrouter/anthropic/claude-sonnet-5"
+    limit = 40_000
+    monkeypatch.setattr(
+        llm, "get_catalog_model_info", lambda model: {"max_input_tokens": limit}
+    )
+
+    # Bytes exceed the limit, tokens do not: this must price, not refuse.
+    fits = model_provider_exposure(
+        route,
+        [{"role": "user", "content": "y" * 60_000}],
+        response_model=_BoundedResponse,
+        provider_attempts=1,
+    )
+    assert fits > 0
+
+    with pytest.raises(BudgetExposureUnknown, match="exceeds the provider input"):
+        model_provider_exposure(
+            route,
+            [{"role": "user", "content": "y" * 200_000}],
+            response_model=_BoundedResponse,
+            provider_attempts=1,
+        )
 
 
 def test_non_text_input_rejects_before_reservation():
