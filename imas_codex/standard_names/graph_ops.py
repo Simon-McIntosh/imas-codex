@@ -8770,6 +8770,61 @@ def _complete_source_fences(items: list[dict[str, Any]]) -> list[dict[str, Any]]
     ]
 
 
+def _guard_existing_target_pairings(
+    gc: Any, batch: list[dict[str, Any]], *, targets_may_be_missing: bool
+) -> dict[str, str]:
+    """Reject fresh pairings onto an EXISTING name that contradict its sources.
+
+    Returns ``{sns_id: reason}`` for every pairing the attachment guard refuses.
+
+    Scope is deliberate on both sides. It runs **before** the binding query,
+    because that query stamps a provisional ``PRODUCED_NAME`` reservation and
+    the guard reads exactly that edge to decide a source is already bound — a
+    guard run afterwards would wave through every pairing it exists to judge.
+    And it runs only where the target name already exists: a name minted by
+    this very batch has no other sources to contradict and takes its unit from
+    the candidate, so there is nothing to compare, while a source binding onto
+    an established name is the case that admits a contradiction — two distinct
+    vector fields of one device, or a unit of a different dimension. That
+    binding previously reached the graph with no graph-aware check at all,
+    because the compose-time gate sees only same-batch siblings and never the
+    units.
+    """
+    from imas_codex.standard_names.attachment_audit import guard_source_pairings
+
+    sources_by_name: dict[str, list[str]] = {}
+    for item in batch:
+        sn_id = item.get("sn_id")
+        sns_id = item.get("sns_id")
+        if sn_id and sns_id:
+            sources_by_name.setdefault(sn_id, []).append(sns_id)
+    if not sources_by_name:
+        return {}
+
+    if targets_may_be_missing:
+        existing = {
+            row["id"]
+            for row in gc.query(
+                """
+                UNWIND $names AS name
+                MATCH (sn:StandardName {id: name})
+                RETURN sn.id AS id
+                """,
+                names=sorted(sources_by_name),
+            )
+        }
+    else:
+        # The caller binds only to targets that already exist, so asking the
+        # graph again would cost a round trip to learn what it guarantees.
+        existing = set(sources_by_name)
+    refusals: dict[str, str] = {}
+    for sn_id in sorted(existing):
+        guarded = guard_source_pairings(gc, sn_id, sources_by_name[sn_id])
+        for verdict in guarded.rejected:
+            refusals[verdict.source_node_id] = verdict.reason
+    return refusals
+
+
 def _lock_claimed_name_bindings(
     gc: Any,
     batch: list[dict[str, Any]],
@@ -8786,6 +8841,13 @@ def _lock_claimed_name_bindings(
     and target identity are locked by the same caller-owned transaction.
     Attachments require an existing stable target and never create a name.
 
+    A binding is refused for three reasons, all reported the same way: the
+    target's lifecycle stage forbids it, its unit disagrees, or the attachment
+    guard finds the pairing inconsistent with the sources the name already
+    carries (see :func:`_guard_existing_target_pairings`). Refusal is per
+    pairing — one bad source never fails its batch — so this is the single
+    point at which every claimed-source persister inherits the guard.
+
     A non-bindable target releases the exact source claim back to
     ``extracted`` without resetting ``attempt_count``. The retained attempt
     count remains subject to the normal claim cap, while ``last_error`` records
@@ -8793,6 +8855,14 @@ def _lock_claimed_name_bindings(
     query runs through the caller's transaction, a later rich-write failure
     rolls the release back with every other graph effect.
     """
+    attachment_refusals = _guard_existing_target_pairings(
+        gc, batch, targets_may_be_missing=allow_missing
+    )
+    if attachment_refusals:
+        batch = [
+            {**item, "attachment_error": attachment_refusals.get(item["sns_id"])}
+            for item in batch
+        ]
     target_clause = (
         """
         MERGE (target:StandardName {id: b.sn_id})
@@ -8853,16 +8923,18 @@ def _lock_claimed_name_bindings(
                     OR target.unit IS NULL OR target.unit = b.unit
                THEN true ELSE false
              END AS unit_bindable,
+             b.attachment_error IS NULL AS attachment_bindable,
              CASE
                WHEN target IS NULL THEN '<missing>'
                ELSE coalesce(target.name_stage, '<unset>')
              END AS target_stage
         WITH b, sns, target, owned, lifecycle_bindable, unit_bindable,
-             target_stage,
-             lifecycle_bindable AND unit_bindable AS bindable
+             attachment_bindable, target_stage,
+             lifecycle_bindable AND unit_bindable
+               AND attachment_bindable AS bindable
         SET sns.claimed_at = datetime()
         WITH b, sns, target, owned, target_stage, bindable,
-             lifecycle_bindable, unit_bindable
+             lifecycle_bindable, unit_bindable, attachment_bindable
         FOREACH (_ IN CASE
           WHEN target.binding_lock_token = b.claim_token
            AND target.binding_lock_seq = b.claim_seq
@@ -8873,7 +8945,8 @@ def _lock_claimed_name_bindings(
                CASE
                  WHEN bindable THEN 'winner'
                  WHEN NOT lifecycle_bindable THEN 'lifecycle_collision'
-                 ELSE 'unit_collision'
+                 WHEN NOT unit_bindable THEN 'unit_collision'
+                 ELSE 'attachment_collision'
                END AS outcome,
                CASE
                  WHEN target.name_stage IN $stable_stages THEN 'stable_reuse'
@@ -8969,6 +9042,11 @@ def _lock_claimed_name_bindings(
                 sns.status = 'extracted',
                 sns.composed_at = null,
                 sns.last_error = CASE
+                  WHEN b.attachment_error IS NOT NULL
+                  THEN 'standard-name attachment rejected: candidate "' +
+                       b.sn_id + '" ' + b.attachment_error +
+                       ' at composition attempt ' +
+                       toString(coalesce(sns.attempt_count, 0))
                   WHEN target IS NULL OR NOT (target.name_stage IN $stable_stages)
                   THEN 'standard-name binding collision: candidate "' + b.sn_id +
                        '" has non-bindable name_stage "' +
@@ -8989,14 +9067,16 @@ def _lock_claimed_name_bindings(
     for row in rows:
         if row.get("outcome", "winner") == "winner":
             continue
+        reason = attachment_refusals.get(row.get("id") or "")
         logger.warning(
             "Released source %s after %s for candidate %s at name stage %s "
-            "(attempt %s retained)",
+            "(attempt %s retained)%s",
             row.get("id"),
             row.get("outcome"),
             row.get("candidate_id"),
             row.get("target_stage"),
             row.get("attempt_count"),
+            f": {reason}" if reason else "",
         )
     return rows
 
