@@ -9367,7 +9367,7 @@ def _canonical_docs_review_item(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _load_docs_review_admission_item(sn_id: str) -> dict[str, Any]:
+def _load_docs_review_source_item(sn_id: str) -> dict[str, Any]:
     """Read the same prompt-bearing projection returned by a docs claim."""
     from imas_codex.graph.client import GraphClient
 
@@ -9567,13 +9567,9 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
     )
 
     source_item = item
-    if item.get("docs_review_admission") or item.get("docs_stage") in {
-        "accepted",
-        "reviewed",
-        "exhausted",
-    }:
+    if item.get("docs_stage") in {"accepted", "reviewed", "exhausted"}:
         source_item = await _asyncio.to_thread(
-            _load_docs_review_admission_item, str(item.get("id") or "")
+            _load_docs_review_source_item, str(item.get("id") or "")
         )
     prepared_item = _canonical_docs_review_item(source_item)
     try:
@@ -9737,121 +9733,13 @@ async def prepare_docs_review_request(item: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-async def admit_docs_review_request(
-    item: dict[str, Any],
-    *,
-    scope_run_id: str,
-    expected_docs_hash: str,
-    expected_review_input_hash: str,
-    tranche_remaining: float,
-    campaign_remaining: float,
-    dry_run: bool = False,
-) -> dict[str, Any]:
-    """Price, admit, and stage one exact docs-review request fail closed."""
-    import asyncio as _asyncio
-    import math
-
-    from imas_codex.standard_names.graph_ops import stage_docs_for_rescore
-
-    request = await prepare_docs_review_request(item)
-    expected_exposure = float(request["expected_exposure"])
-    remainders = (float(tranche_remaining), float(campaign_remaining))
-    if any(not math.isfinite(value) or value < 0 for value in remainders):
-        raise ValueError(
-            "documentation review remainders must be finite and nonnegative"
-        )
-    if expected_exposure > min(remainders):
-        return {
-            "ok": False,
-            "outcome": "insufficient_exposure",
-            "request_identity": request["request_identity"],
-            "expected_exposure": expected_exposure,
-            "tranche_remaining": remainders[0],
-            "campaign_remaining": remainders[1],
-            "provider_policy_ceiling_is_separate": True,
-        }
-    staged = await _asyncio.to_thread(
-        stage_docs_for_rescore,
-        item["id"],
-        run_id=scope_run_id,
-        dry_run=dry_run,
-        expected_docs_hash=expected_docs_hash,
-        expected_review_input_hash=expected_review_input_hash,
-        request_identity=request["request_identity"],
-        mandatory_exposures=request["mandatory_exposures"],
-        conditional_exposure=request["conditional_exposure"],
-        expected_exposure=expected_exposure,
-    )
-    result = {
-        **staged,
-        "request_identity": request["request_identity"],
-        "expected_exposures": request["expected_exposures"],
-        "expected_exposure": expected_exposure,
-        "provider_policy_ceiling_is_separate": True,
-        "required_run_kwargs": {
-            "scope_run_id": scope_run_id,
-            "only_pool": "review_docs",
-            "require_docs_admission": True,
-        },
-    }
-    return result
-
-
-async def _release_or_rollback_docs_review(
-    item: dict[str, Any],
-    *,
-    require_docs_admission: bool = False,
-    scope_run_id: str | None = None,
-) -> None:
-    """Use the exact priced rollback when present, else ordinary claim release."""
+async def _release_docs_review_claim(item: dict[str, Any]) -> None:
+    """Return one unreviewed documentation claim to the drafted pool."""
     import asyncio as _asyncio
 
-    from imas_codex.standard_names.graph_ops import (
-        force_rollback_docs_review_admission,
-        release_review_docs_failed_claims,
-    )
+    from imas_codex.standard_names.graph_ops import release_review_docs_failed_claims
 
     claim_token = item.get("claim_token") or ""
-    admission_id = item.get("docs_review_admission")
-    durable_scope_id = scope_run_id or item.get("run_id") or ""
-    if require_docs_admission or admission_id:
-        rollback_task = _asyncio.create_task(
-            _asyncio.to_thread(
-                force_rollback_docs_review_admission,
-                target_id=item["id"],
-                scope_id=durable_scope_id,
-                intended_admission_id=admission_id,
-                current_claim_token=claim_token or None,
-                current_claim_seq=item.get("claim_seq"),
-            )
-        )
-        try:
-            outcome = await _asyncio.shield(rollback_task)
-        except _asyncio.CancelledError:
-            await rollback_task
-            raise
-        if not outcome.get("ok"):
-            logger.error(
-                "exact documentation rollback refused for %s: %s",
-                item.get("id"),
-                outcome.get("reason"),
-            )
-            if (
-                outcome.get("outcome")
-                in {
-                    "missing_active_admission",
-                    "missing_admission",
-                }
-                and claim_token
-            ):
-                await _asyncio.to_thread(
-                    release_review_docs_failed_claims,
-                    sn_ids=[item["id"]],
-                    claim_token=claim_token,
-                    from_stage="drafted",
-                    to_stage="drafted",
-                )
-        return
     if not claim_token:
         return
     await _asyncio.to_thread(
@@ -9869,8 +9757,6 @@ async def process_review_docs_batch(
     stop_event: asyncio.Event,
     *,
     on_event: Callable[[dict[str, Any]], None] | None = None,
-    require_docs_admission: bool = False,
-    scope_run_id: str | None = None,
 ) -> int:
     """Process a batch of drafted StandardNames for docs review (RD-quorum).
 
@@ -9890,25 +9776,15 @@ async def process_review_docs_batch(
         DEFAULT_REFINE_ROTATIONS,
     )
     from imas_codex.standard_names.graph_ops import (
-        bind_docs_review_admission_claim,
-        persist_admitted_docs_review,
         persist_reviewed_docs,
         update_review_aggregates,
-        verify_docs_review_admission_request,
     )
 
     processed = 0
 
-    if require_docs_admission and not scope_run_id:
-        raise ValueError("required docs admission needs an exact scope_run_id")
-
     for item in batch:
         if stop_event.is_set():
-            await _release_or_rollback_docs_review(
-                item,
-                require_docs_admission=require_docs_admission,
-                scope_run_id=scope_run_id,
-            )
+            await _release_docs_review_claim(item)
             continue
 
         sn_id = item["id"]
@@ -9916,65 +9792,7 @@ async def process_review_docs_batch(
         lease = None
 
         try:
-            admission_id = item.get("docs_review_admission")
-            durable_admission = None
-            if require_docs_admission and item.get("run_id") != scope_run_id:
-                await _release_or_rollback_docs_review(
-                    item,
-                    require_docs_admission=True,
-                    scope_run_id=scope_run_id,
-                )
-                continue
-            if require_docs_admission and not admission_id:
-                await _release_or_rollback_docs_review(
-                    item,
-                    require_docs_admission=True,
-                    scope_run_id=scope_run_id,
-                )
-                continue
-            if admission_id:
-                durable_admission = await _asyncio.to_thread(
-                    bind_docs_review_admission_claim,
-                    admission_id=admission_id,
-                    target_id=sn_id,
-                    scope_id=item.get("run_id") or "",
-                    claim_token=claim_token,
-                    claim_seq=item.get("claim_seq"),
-                )
-                if not durable_admission.get("ok"):
-                    logger.error(
-                        "durable documentation admission refused for %s: %s",
-                        sn_id,
-                        durable_admission.get("outcome"),
-                    )
-                    await _release_or_rollback_docs_review(
-                        item,
-                        require_docs_admission=require_docs_admission,
-                        scope_run_id=scope_run_id,
-                    )
-                    continue
             request = await prepare_docs_review_request(item)
-            if durable_admission is not None:
-                verified = await _asyncio.to_thread(
-                    verify_docs_review_admission_request,
-                    admission_id=admission_id,
-                    target_id=sn_id,
-                    scope_id=item.get("run_id") or "",
-                    claim_token=claim_token,
-                    claim_seq=item.get("claim_seq"),
-                    request_identity=request["request_identity"],
-                )
-                if not verified.get("ok"):
-                    logger.error(
-                        "review_docs durable request drifted for %s before dispatch",
-                        sn_id,
-                    )
-                    await _release_or_rollback_docs_review(
-                        item,
-                        require_docs_admission=require_docs_admission,
-                        scope_run_id=scope_run_id,
-                    )
-                    continue
 
             quorum = await _run_rd_quorum_cycles(
                 sn_id=sn_id,
@@ -9993,77 +9811,39 @@ async def process_review_docs_batch(
                 escalation_reasoning_effort=request["escalation_reasoning_effort"],
                 run_id=mgr.run_id,
                 escalation_prompt_factory=request.get("escalation_prompt_factory"),
-                review_group_id=(
-                    durable_admission.get("review_group_id")
-                    if durable_admission is not None
-                    else None
-                ),
+                review_group_id=None,
             )
 
             if quorum is None:
-                await _release_or_rollback_docs_review(
-                    item,
-                    require_docs_admission=require_docs_admission,
-                    scope_run_id=scope_run_id,
-                )
+                await _release_docs_review_claim(item)
                 continue
 
-            if durable_admission is not None:
-                terminal = await _asyncio.to_thread(
-                    persist_admitted_docs_review,
-                    admission_id=admission_id,
-                    target_id=sn_id,
-                    scope_id=item.get("run_id") or "",
-                    claim_token=claim_token,
-                    claim_seq=item.get("claim_seq"),
-                    request_identity=request["request_identity"],
-                    records=quorum["records"],
-                    score=quorum["winning_score"],
-                    scores=quorum["winning_scores"],
-                    comments=quorum["winning_comments"],
-                    comments_per_dim=quorum["winning_comments_per_dim"],
-                    model=quorum["canonical_model"],
-                    min_score=DEFAULT_MIN_SCORE,
-                    rotation_cap=DEFAULT_REFINE_ROTATIONS,
-                    resolution_method=quorum["resolution_method"],
-                    reviewer_chain_size=len(request["models"]),
-                    total_cost=quorum["total_cost"],
-                )
-                new_stage = terminal.get("stage") if terminal.get("ok") else ""
-                if not new_stage:
-                    await _release_or_rollback_docs_review(
-                        item,
-                        require_docs_admission=require_docs_admission,
-                        scope_run_id=scope_run_id,
-                    )
-                    continue
-            else:
-                from imas_codex.standard_names.graph_ops import write_reviews
+            from imas_codex.standard_names.graph_ops import write_reviews
 
-                await _asyncio.to_thread(write_reviews, quorum["records"])
-                new_stage = await _asyncio.to_thread(
-                    persist_reviewed_docs,
-                    sn_id=sn_id,
-                    claim_token=claim_token,
-                    claim_seq=item.get("claim_seq"),
-                    score=quorum["winning_score"],
-                    scores=quorum["winning_scores"],
-                    comments=quorum["winning_comments"],
-                    comments_per_dim=quorum["winning_comments_per_dim"],
-                    model=quorum["canonical_model"],
-                    min_score=DEFAULT_MIN_SCORE,
-                    rotation_cap=DEFAULT_REFINE_ROTATIONS,
-                    llm_cost=quorum["total_cost"],
-                    llm_tokens_in=quorum["total_tokens_in"],
-                    llm_tokens_out=quorum["total_tokens_out"],
-                    llm_tokens_cached_read=0,
-                    llm_tokens_cached_write=0,
-                    llm_service="standard-names",
-                    run_id=mgr.run_id,
-                    skip_review_node=True,
-                    resolution_method=quorum["resolution_method"],
-                    reviewer_chain_size=len(request["models"]),
-                )
+            await _asyncio.to_thread(write_reviews, quorum["records"])
+            new_stage = await _asyncio.to_thread(
+                persist_reviewed_docs,
+                sn_id=sn_id,
+                claim_token=claim_token,
+                claim_seq=item.get("claim_seq"),
+                score=quorum["winning_score"],
+                scores=quorum["winning_scores"],
+                comments=quorum["winning_comments"],
+                comments_per_dim=quorum["winning_comments_per_dim"],
+                model=quorum["canonical_model"],
+                min_score=DEFAULT_MIN_SCORE,
+                rotation_cap=DEFAULT_REFINE_ROTATIONS,
+                llm_cost=quorum["total_cost"],
+                llm_tokens_in=quorum["total_tokens_in"],
+                llm_tokens_out=quorum["total_tokens_out"],
+                llm_tokens_cached_read=0,
+                llm_tokens_cached_write=0,
+                llm_service="standard-names",
+                run_id=mgr.run_id,
+                skip_review_node=True,
+                resolution_method=quorum["resolution_method"],
+                reviewer_chain_size=len(request["models"]),
+            )
             if new_stage:
                 source_versions = _review_dd_source_bindings(item)
                 await _asyncio.to_thread(
@@ -10112,20 +9892,12 @@ async def process_review_docs_batch(
                 logger.debug("review_docs: %s persist no-op (token mismatch?)", sn_id)
 
         except asyncio.CancelledError:
-            await _release_or_rollback_docs_review(
-                item,
-                require_docs_admission=require_docs_admission,
-                scope_run_id=scope_run_id,
-            )
+            await _release_docs_review_claim(item)
             raise
         except Exception:
             logger.exception("review_docs failed for %s", sn_id)
             try:
-                await _release_or_rollback_docs_review(
-                    item,
-                    require_docs_admission=require_docs_admission,
-                    scope_run_id=scope_run_id,
-                )
+                await _release_docs_review_claim(item)
             except Exception:
                 logger.debug("documentation claim cleanup also failed for %s", sn_id)
         finally:

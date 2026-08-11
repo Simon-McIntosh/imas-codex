@@ -276,47 +276,6 @@ def test_cli_review_docs_selects_only_the_docs_review_pool() -> None:
     }
 
 
-@pytest.mark.asyncio
-async def test_required_docs_admission_threads_into_claim_and_worker() -> None:
-    claim = MagicMock(
-        return_value=[
-            {
-                "id": "admitted-name",
-                "run_id": "priced-scope",
-                "claim_token": None,
-            }
-        ]
-    )
-    process = AsyncMock(return_value=1)
-    with (
-        patch(
-            "imas_codex.standard_names.graph_ops.claim_review_docs_batch",
-            new=claim,
-        ),
-        patch(
-            "imas_codex.standard_names.workers.process_review_docs_batch",
-            new=process,
-        ),
-    ):
-        spec = next(
-            item
-            for item in _build_specs(
-                only_pool="review_docs",
-                scope_run_id="priced-scope",
-                require_docs_admission=True,
-            )
-            if item.name == "review_docs"
-        )
-        batch = await spec.claim()
-        assert batch is not None
-        await spec.process(batch)
-
-    assert claim.call_args.kwargs["require_docs_admission"] is True
-    process.assert_awaited_once()
-    assert process.await_args.kwargs["require_docs_admission"] is True
-    assert process.await_args.kwargs["scope_run_id"] == "priced-scope"
-
-
 def test_build_pool_specs_rejects_unknown_pool() -> None:
     with pytest.raises(ValueError, match="unknown standard-name pool"):
         _build_specs(only_pool="review")
