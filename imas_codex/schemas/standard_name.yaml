@@ -595,17 +595,25 @@ enums:
 
   RefineStopReason:
     description: >-
-      Why the name-refinement axis stopped working on a StandardName. Recorded
-      on ``refine_stop_reason`` alongside ``name_stage='exhausted'`` so an
-      operator can tell an ordinary spent budget from a conflict no further
-      attempt could have resolved. Every value is recoverable: ``sn rescore``
-      resubmits the same name to a fresh quorum, and ``sn edit`` supplies the
-      new steering information that reopens rewriting.
+      Why a name-refinement attempt stopped short of an accepted successor.
+      Recorded on ``refine_stop_reason``: on a name still holding budget it
+      explains the attempt the next one follows, and on a name at
+      ``name_stage='exhausted'`` it is why the name parked — letting an
+      operator tell an ordinary spent budget from a conflict no further attempt
+      could have resolved. Every value is recoverable: ``sn rescore`` resubmits
+      the same name to a fresh quorum, and ``sn edit`` supplies the new
+      steering information that reopens rewriting.
     permissible_values:
       attempts_exhausted:
         description: >-
           The refinement budget (``refine_attempts`` reaching ``rotation_cap``)
           was spent without a successor clearing review.
+      transient_failure:
+        description: >-
+          The attempt failed for a reason that may not recur — a model or
+          provider error, or a lost claim. Budget is still charged, because an
+          attempt that cannot be distinguished from a permanent failure must
+          not be free, but the name stays refinable while rotations remain.
       successor_collision:
         description: >-
           The refiner proposed an identity that already exists as a
@@ -1135,13 +1143,17 @@ classes:
         range: integer
       refine_stop_reason:
         description: >-
-          Why the name axis stopped refining this name. Null while further
-          refinement is possible. Set together with name_stage='exhausted';
-          cleared when the name is re-staged with new steering information.
+          Why the most recent name-refinement attempt stopped short of an
+          accepted successor. Recorded on every failed attempt, so the next
+          attempt can report what the last one hit, and it is the reason the
+          name parked once name_stage reaches 'exhausted'. A persisted
+          successor is a different node, so nothing carries a stale reason
+          forward. Cleared when the name is re-staged with new steering
+          information.
         range: RefineStopReason
       refine_stopped_at:
         description: >-
-          ISO 8601 timestamp when refinement stopped. Null whenever
+          ISO 8601 timestamp of the most recent refinement stop. Null whenever
           refine_stop_reason is null.
         range: datetime
       refine_collision_name:
