@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-11T22:33:42",
+  "updated": "2026-08-12T06:28:43",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -196,15 +196,32 @@
       {
         "id": "S9",
         "status": "planned",
+        "theme": "Quality before review",
+        "starts": "2026-08-24",
+        "ends": "2026-09-11",
+        "description": "Raise quality where it multiplies the value of the human review, without graph-wide regeneration (lead decision 2026-08-12: too expensive). The docs template, DD/COCOS context, and holdout benchmark land first so every future generation is born at the new standard and the ~350-name WEST cohort gets the one authorized scoped refresh before experts see it. The discriminating benchmark and free DSv4 advisory census pre-screen the WEST rows and rank the exhausted-tail rescores.",
+        "summary": "Planned ahead of the WEST review at the lead's direction: reviewer attention is the scarcest resource, so the packet must carry the best attainable docs. Regeneration stays scoped \u2014 WEST cohort plus census-flagged holdout failures only.",
+        "items": [
+          {
+            "slug": "sn-quality-parity",
+            "why_now": "The docs standard must exist before the WEST packet is frozen \u2014 template-first means the pending backlog is generated at the new standard for free, and the WEST cohort gets its one authorized scoped refresh.",
+            "done_when": "Holdout benchmark baselined; DD/COCOS context reaches compose; content-gated template and curated examples live; the WEST-cohort docs refresh passes quorum under a hard cap; link lifecycle lands with publish-time safety."
+          },
+          {
+            "slug": "sn-benchmark-evolution",
+            "why_now": "A discriminating panel benchmark plus the free advisory census pre-screens the WEST rows for defects and ranks the exhausted-tail rescores before any human looks.",
+            "done_when": "Panel-judged benchmark with domain-balanced anchors passes its locked gates; the zero-mutation census has flagged WEST rows and ranked the parked tail."
+          }
+        ]
+      },
+      {
+        "id": "S10",
+        "status": "planned",
         "theme": "WEST expert review and catalog release",
-        "starts": "2026-09-28",
-        "ends": "2026-10-16",
-        "description": "The visible milestone: put the hardened WEST cohort in front of human experts, then publish exactly their dispositions. First rebuild the reviewer packet from the current graph and close the 14-source residual; after human accept/change/hold, cut the catalog release, fold the reviewed state back into the graph, and prove the undo path.",
-        "summary": "Planned behind S8 closure. Trimmed in the 2026-08-11 portfolio review to the two WEST plans \u2014 the benchmark, documentation-quality, MAST, and CLI items moved to S10 or were retired so the release chain carries no passenger work.",
         "items": [
           {
             "slug": "sn-west-review-rehearsal",
-            "why_now": "Human experts review the current hardened cohort; the 14-source residual and the reviewer packet are the only remaining work.",
+            "why_now": "Human experts review the refreshed cohort at the new docs standard; the census pre-screen and 14-source residual close first.",
             "done_when": "Every WEST row has an explicit human accept/change/hold disposition with complete current name, source, description, and review evidence; requested changes pass the ordinary pipeline."
           },
           {
@@ -212,33 +229,27 @@
             "why_now": "Publication and graph fold-back are a separate authority class after human disposition.",
             "done_when": "The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release state while retaining audit history."
           }
-        ]
+        ],
+        "starts": "2026-09-14",
+        "ends": "2026-10-02",
+        "description": "The visible milestone, now consuming the S9 quality standard: freeze the reviewer packet from the refreshed WEST cohort, close the 14-source residual, conduct human accept/change/hold review, then publish exactly those dispositions, fold the reviewed state back into the graph, and prove the undo path.",
+        "summary": "Planned behind S9 at the lead's direction (2026-08-12): quality lands before human review so reviewer attention is never spent on docs the pipeline was about to improve."
       },
       {
-        "id": "S10",
+        "id": "S11",
         "status": "planned",
-        "theme": "Quality depth and facility breadth",
+        "theme": "Facility breadth",
         "items": [
           {
-            "slug": "sn-quality-parity",
-            "why_now": "Documentation depth is half the project goal and untouched by the release chain; the holdout benchmark makes every later docs phase measurable.",
-            "done_when": "Holdout benchmark exists and is baselined; DD/COCOS context reaches compose; the content-gated docs template, curated examples, and the link-resolution lifecycle land with publish-time safety."
-          },
-          {
-            "slug": "sn-benchmark-evolution",
-            "why_now": "The review benchmark must discriminate before it can gate quality claims, and the free local advisory census is the cheap triage instrument for the parked tail.",
-            "done_when": "Panel-judged benchmark with domain-balanced anchors passes its locked gates; a zero-mutation advisory census ranks the exhausted-tail rescores and vocabulary gaps."
-          },
-          {
             "slug": "mast-semantic-source-repair",
-            "why_now": "Facility breadth: MAST parity consumes the hardened generic mechanisms once graph-wide integrity closes.",
+            "why_now": "Facility breadth after the release pattern is proven on WEST; consumes graph-wide integrity's hardened mechanisms.",
             "done_when": "The refreshed MAST manifest has exact DD/local-resolution/ISN authority, guarded dry-runs, and any separately authorized applies with stable-id parity and zero collateral."
           }
         ],
-        "starts": "2026-10-19",
-        "ends": "2026-11-13",
-        "description": "After the WEST release: raise documentation to catalog quality against a measured holdout benchmark, make the review benchmark discriminate and run the DSv4 advisory census to triage the exhausted tail, and extend properly-sourced coverage to MAST. Everything here serves the standing goal \u2014 semantically correct, properly sourced, ISN-conforming names with high scores and useful detailed documentation.",
-        "summary": "Planned. Assembled in the 2026-08-11 portfolio review from the goal-aligned halves of the former S9 passenger items."
+        "starts": "2026-10-05",
+        "ends": "2026-10-23",
+        "description": "Extend properly-sourced coverage beyond WEST: MAST parity consumes the hardened generic mechanisms, piloting the facility-signal provenance layer alongside exact DD sources.",
+        "summary": "Planned. MAST kept out of the release chain \u2014 it depends on graph integrity, not on the WEST review, and adds no value ahead of it."
       }
     ],
     "milestones": [],
@@ -312,9 +323,14 @@
         "when": "2026-08-11",
         "who": "Simon McIntosh",
         "what": "SN plan-portfolio review: llm-context-integrity, 33-cli-harmonization, and the sn-pipeline-hardening overlay retired as unexecuted authority ceremony (the June hardening programme stays archived as a completed record); sn-quality-parity rewritten to its original documentation-quality scope; sn-benchmark-evolution de-gated and pointed at the exhausted-tail triage. S8 refocused on sn-dd-gaps plus sn-graph-wide-integrity, S9 trimmed to the two WEST release plans, S10 created for quality depth and MAST breadth."
+      },
+      {
+        "when": "2026-08-12",
+        "who": "Simon McIntosh",
+        "what": "Sprint order revised at the lead's direction: quality lands before the WEST human review (S9 = docs quality + benchmark/census, S10 = WEST review + release, S11 = MAST breadth). Graph-wide docs regeneration is locked out as too expensive \u2014 the scoped-only decision on sn-quality-parity authorizes exactly the WEST-cohort refresh plus census-flagged holdout failures."
       }
     ],
     "blockers": [],
-    "_version": 31
+    "_version": 35
   }
 }
