@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T21:34:04",
+  "updated": "2026-08-16T21:43:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1059,9 +1059,101 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T193551965752-stall-fix-convergence-proof",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stall-fix-convergence-proof",
+        "role": "implement",
+        "member": "impl-stall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T19:35:54Z",
+        "completed_at": "2026-08-16T19:42:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 411,
+        "time_budget": "25m",
+        "base_sha": "502ad7b7e97b6af93224070a0797ec43f8886142",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Live convergence measure PASS: SNRun b5ab4a40 (sn run --only review_name --cost-limit 10 -t 15) ended completed/no_eligible_work in 162.7s, 64 replicas at in_flight=0/error_count=0, spend 0.00 of the authorized 150 USD; watchdog never persisted stalled",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stall-fix-convergence-proof-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd9-04e9-71b1-b0eb-c4e7f232e794",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 12723456,
+            "input_tokens": 13181691,
+            "output_tokens": 38664,
+            "reasoning_output_tokens": 13688
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T193530128461-stub-operator-review",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-operator-review",
+        "role": "review",
+        "member": "rev-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T19:35:32Z",
+        "completed_at": "2026-08-16T19:40:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 324,
+        "time_budget": "20m",
+        "base_sha": "502ad7b7e97b6af93224070a0797ec43f8886142",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Adversarial review of 8ae129f2: BLOCK with 3 high (child-derived parent-unit inference bypassing binary-operand exclusions, incomplete signed mutation closure omitting incident edges, missing topology-aware parent admission) and 2 medium (fixture gaps, order-sensitive nested hash)",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-operator-review-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5388032,
+            "input_tokens": 5898914,
+            "output_tokens": 34904,
+            "reasoning_output_tokens": 19471
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 41
+    "_version": 43
   }
 }
