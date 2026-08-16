@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="142">
+<meta name="plan-version" content="143">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1365,6 +1365,12 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stub-prevention-approved" data-who="reckon-ship" data-when="2026-08-16T19:35:00+00:00">
     <div class="r-comment-body"><p><strong>Stub prevention is independently APPROVED with zero findings and is being integrated.</strong> Re-review of corrective commit <code>484d9829</code> confirmed all four prior findings resolved: an existing admitted null-stage parent bootstraps through the sanctioned materializer before reconciliation and survives in its child's keep set, the single bootstrap mutation CAS-rechecks child id, cardinality, name_stage, unit, kind, physics domain, and COCOS null-safely with zero-row refusal, the executable disposable-Neo4j test proves whole-transaction rollback after a late failure, and the endpoint scan requires all seven secondary writers. The reviewer independently matched all six declared log SHA-256 values. The prevention half of f-stub-reconcile merges to main now (chain <code>6aae3d04</code> → <code>484d9829</code>), gated on a post-merge focused test node before push. The 297-stub exact-manifest reconcile operator remains the followup's next node.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stub-prevention-landed" data-who="reckon-ship" data-when="2026-08-16T19:55:00+00:00">
+    <div class="r-comment-body"><p><strong>Stub prevention is LANDED on main (f-stub-reconcile prevention half complete).</strong> Merge <code>60f5777a</code> integrates the approved chain <code>6aae3d04</code> to <code>484d9829</code>; the post-merge gate passed the full Standard Names suite at <strong>6501 passed / 10 skipped / 0 failed</strong> plus the focused edge-writer suite 25/25 (logs sha-pinned in the crew ledger). Secondary StandardName edge writers can no longer mint bare lifecycle-less endpoints. Remaining in f-stub-reconcile: the exact-manifest <code>reconcile_lifecycleless_standard_name_stubs</code> operator for the existing 297 stubs, then its quiet-window apply. Separately, the second stall-fix corrective <code>c87483fc</code> (per-active-batch completion identity, minimum still-active timestamp, out-of-order two-replica regression, 32/32 focused) is produced and enters third-round review.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-sn-run-spend-authority" data-who="Simon McIntosh" data-when="2026-08-16T19:50:00+00:00">
+    <div class="r-comment-body"><p><strong>USD 150 of pipeline spend is authorized for any sn runs this execution needs</strong> (lead's live instruction, 2026-08-16: authorization for a 150 USD pipeline spend for any sn runs needed). This funds the drain-dependent work in this plan, the WEST-blocking subset execution and any scoped convergence proof runs, once the stall-watchdog fix lands, which remains the gate every paid drain waits on. Guarded-cohort discipline from the prior authorization carries over: bounded scoped runs, honest stop reasons, spend recorded per run.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

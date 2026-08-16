@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T20:53:48",
+  "updated": "2026-08-16T21:07:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -65,6 +65,13 @@
         "harness": "codex",
         "role": "review",
         "session_id": "01a00be4-ae97-7ab2-be65-54e8e3b29ec5",
+        "created": "2026-08-16"
+      },
+      {
+        "id": "verify-a",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
         "created": "2026-08-16"
       }
     ],
@@ -676,9 +683,103 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T185459691901-stub-integration-tests",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-integration-tests",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T18:55:01Z",
+        "completed_at": "2026-08-16T19:05:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 636,
+        "time_budget": "20m",
+        "base_sha": "60f5777ac7fc9403d1931ce13cf0649c99a7a9e9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Post-merge gate for stub prevention on main 60f5777a: full SN suite 6501 passed / 10 skipped / 0 failed, focused edge-writer suite 25/25; main pushed",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-integration-tests-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 6228736,
+            "input_tokens": 6391903,
+            "output_tokens": 11799,
+            "reasoning_output_tokens": 4717
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T185516976334-stall-fix-repair-2",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stall-fix-repair-2",
+        "role": "implement",
+        "member": "impl-stall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T18:55:19Z",
+        "completed_at": "2026-08-16T19:03:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 508,
+        "time_budget": "25m",
+        "base_sha": "ab24299868b909906205751b991d8f60a12c13d0",
+        "commits": [
+          "c87483fc16003899fc9032be0d53c43e2cf2bf15"
+        ],
+        "changed_lines": null,
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "Second corrective on ab242998: per-active-batch completion identity with minimum still-active timestamp; out-of-order two-replica regression proves the younger batch keeps its full age window; 32/32 focused tests; awaiting third-round review",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stall-fix-repair-2-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd9-04e9-71b1-b0eb-c4e7f232e794",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 8949760,
+            "input_tokens": 9293911,
+            "output_tokens": 31298,
+            "reasoning_output_tokens": 10944
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 31
+    "_version": 35
   }
 }
