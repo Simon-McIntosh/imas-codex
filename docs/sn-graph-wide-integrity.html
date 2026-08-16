@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="152">
+<meta name="plan-version" content="153">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1399,6 +1399,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stub-apply-refused" data-who="reckon-ship" data-when="2026-08-16T23:45:00+00:00">
     <div class="r-comment-body"><p><strong>The stub-reconcile production apply refused fail-closed — exactly as reviewed.</strong> The operator's fresh cohort is 286 rows partitioned <strong>0 materialize / 284 delete-as-dead-link-stub / 0 rebind / 2 refused</strong> (manifest sha <code>ac8932ac…</code>): of the historical 57 childful candidates, 46 are now childless dead-link stubs and 11 are absent, so zero materializations remain. The two refused rows carry incomplete authority: <code>critical_alpha_parameter</code> (composed source <code>dd:summary/pedestal_fits/mtanh/stability</code>, matching scalar/edge, empty unit authority) and <code>fast_neutral_beam_motional_stark_wavelength</code> (<code>dd:charge_exchange/channel/bes/lorentz_shift</code>, unit m, null scalar, two live PRODUCED_NAME bindings — a dual-binding case). The approved operator raises on any refusal, so nothing mutated: collateral hashes flat over 4,672 rows, counters unchanged, provider calls zero. Next node: repair the two rows' source authority through sanctioned instruments (reset-to-extracted is sanctioned by the family-topology-repair decision, with the dual-binding row adjudicated, never blind-reset), regenerate the fresh cohort, and run the zero-refusal apply.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stub-detach-instrument-gap" data-who="reckon-ship" data-when="2026-08-17T00:05:00+00:00">
+    <div class="r-comment-body"><p><strong>The two refused stub rows exposed an instrument gap; a targeted operator extension is dispatched.</strong> Row-2 adjudication proved the source's second target authoritative (<code>difference_of_fast_neutral_beam_motional_stark_wavelength_and_…</code>: accepted/accepted, valid, score 1.0, catalog_edit), so the locked disposition is stub-side detach only — but <code>detach_one_attachment</code>'s would-orphan guard refuses any single-attachment name and directs to <code>sn edit --rename</code>, advice that cannot apply to a lifecycle-less stub already signed for deletion. Resetting the whole source is out: it would detach the accepted target too. Fix: extend <code>reconcile_lifecycleless_standard_name_stubs</code> so a stub whose producing source also carries an authoritative accepted binding is classified delete-as-dead-link-stub — deleting the stub with its spurious edge and reconciling the source scalar to the surviving accepted target — with a disposable-Neo4j regression, ordinary review, then the rerun (row-1 source reset via the already-sanctioned <code>reset_standard_name_sources</code>, fresh cohort, zero-refusal apply). Zero mutations have occurred; every refusal is receipted.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

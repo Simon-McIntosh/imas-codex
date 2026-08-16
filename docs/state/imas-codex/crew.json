@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:25:46",
+  "updated": "2026-08-16T22:30:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1463,9 +1463,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T202628363385-stub-refused-rows-repair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-refused-rows-repair",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T20:26:30Z",
+        "completed_at": "2026-08-16T20:30:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 228,
+        "time_budget": "25m",
+        "base_sha": "af1622c4e8092fcc5fd7460aa474202a720fa5fe",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked on an instrument gap: row-2 adjudication proved the second target authoritative (accepted, 1.0) so only stub-side detach is licit, but detach_one_attachment's would-orphan guard refuses single-attachment names and its rename advice cannot apply to a lifecycle-less stub signed for deletion; zero mutations, row-1 reset deliberately held for atomicity",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-refused-rows-repair-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 55574016,
+            "input_tokens": 57020471,
+            "output_tokens": 130756,
+            "reasoning_output_tokens": 41247
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 50
+    "_version": 51
   }
 }
