@@ -2682,6 +2682,104 @@ def _emit_magnitude_of_edges(names: list[dict[str, Any]], gc: Any) -> None:
     )
 
 
+def _bootstrap_missing_derived_parent_targets(
+    gc: Any,
+    parent_edges: list[dict[str, Any]],
+    missing_parent_ids: set[str],
+) -> set[str]:
+    """Fully materialize absent admitted parents before writing their edges.
+
+    Parents are prepared from already-authorized child nodes, one dependency
+    layer at a time. The canonical materializer performs unit derivation and
+    strict identity validation; a row it cannot prove is left absent and its
+    relationships are filtered by the caller.
+    """
+    remaining = set(missing_parent_ids)
+    materialized: set[str] = set()
+    edges_by_parent: dict[str, list[dict[str, Any]]] = {}
+    for edge in parent_edges:
+        if edge["to_name"] in remaining:
+            edges_by_parent.setdefault(edge["to_name"], []).append(edge)
+
+    while remaining:
+        pairs = [
+            {
+                "parent_id": parent_id,
+                "child_id": edge["from_name"],
+                "operator_kind": edge.get("operator_kind"),
+            }
+            for parent_id in sorted(remaining)
+            for edge in edges_by_parent.get(parent_id, [])
+        ]
+        child_rows = list(
+            gc.query(
+                """
+                // STANDARD_NAME_PARENT_BOOTSTRAP_CHILDREN
+                UNWIND $pairs AS pair
+                MATCH (child:StandardName {id: pair.child_id})
+                RETURN pair.parent_id AS parent_id,
+                       child.id AS id,
+                       child.unit AS unit,
+                       child.cocos_transformation_type AS cocos,
+                       child.physics_domain AS physics_domain,
+                       child.kind AS kind,
+                       pair.operator_kind AS op_kind
+                """,
+                pairs=pairs,
+            )
+        )
+        by_parent: dict[str, list[dict[str, Any]]] = {}
+        for row in child_rows:
+            by_parent.setdefault(str(row["parent_id"]), []).append(dict(row))
+
+        progressed = False
+        for parent_id in sorted(remaining):
+            expected_children = {
+                edge["from_name"] for edge in edges_by_parent.get(parent_id, [])
+            }
+            child_data = by_parent.get(parent_id, [])
+            if {str(row["id"]) for row in child_data} != expected_children:
+                continue
+            inherited_units = {
+                str(row["unit"])
+                for row in child_data
+                if row.get("unit") and row.get("op_kind") != "binary"
+            }
+            authorized_unit = (
+                next(iter(inherited_units)) if len(inherited_units) == 1 else None
+            )
+            seeded = _materialize_derived_parent_rows(
+                gc,
+                [
+                    {
+                        "parent_id": parent_id,
+                        "child_data": child_data,
+                        "edge_kinds": [
+                            edge.get("operator_kind")
+                            for edge in edges_by_parent.get(parent_id, [])
+                        ],
+                        "authorized_unit": authorized_unit,
+                        "bootstrap_edges": edges_by_parent.get(parent_id, []),
+                    }
+                ],
+                bootstrap_missing=True,
+            )
+            if seeded == 1:
+                materialized.add(parent_id)
+                remaining.remove(parent_id)
+                progressed = True
+        if not progressed:
+            break
+
+    if remaining:
+        logger.warning(
+            "Refused %d missing derived-parent target(s) without complete authority: %s",
+            len(remaining),
+            ", ".join(sorted(remaining)[:5]),
+        )
+    return materialized
+
+
 def _write_standard_name_edges(
     gc: Any,
     names: list[dict[str, Any]],
@@ -2692,10 +2790,9 @@ def _write_standard_name_edges(
     """Emit all structural edges for a batch of StandardName nodes.
 
     Called as a tail pass **after** all nodes in the batch have been
-    MERGEd.  Forward-reference targets are MERGEd as bare placeholder
-    ``StandardName`` nodes so the edge can be created immediately; their
-    full properties arrive in the same batch, a later batch, or via
-    catalog import.
+    written. Forward-reference parents are admitted and fully materialized
+    before relationship persistence. No relationship writer creates a
+    ``StandardName`` endpoint.
 
     Ordered operator trees are expanded to closure in this pass.  Each
     ``derive_edges`` call peels exactly one outer layer; newly discovered
@@ -2728,10 +2825,8 @@ def _write_standard_name_edges(
 
     Returns
     -------
-    The finite set of ``StandardName`` identities involved in this relation
-    projection, including endpoints that relationship-side ``MERGE`` may have
-    created. Callers can use this set for batch-local placeholder cleanup
-    without inspecting unrelated graph state.
+    The finite set of authorized ``StandardName`` identities involved in this
+    relation projection.
     """
     from imas_codex.standard_names.derivation import derive_edges
 
@@ -2785,6 +2880,95 @@ def _write_standard_name_edges(
     # (bare-base category labels). The two clauses live in ``parents.py``.
     co_batch = _filter_admissible_parents(co_batch, gc, full_rebuild=full_rebuild)
 
+    explicit_ids = {n["id"] for n in names if n.get("id")}
+    endpoint_ids = set(explicit_ids)
+    for batch in (co_batch, he_batch):
+        for row in batch:
+            endpoint_ids.update((row["from_name"], row["to_name"]))
+    endpoint_ids.update(row["from_name"] for row in geo_batch if row.get("from_name"))
+
+    pred_batch: list[dict[str, str]] = []
+    succ_batch: list[dict[str, str]] = []
+    for n in names:
+        name_id = n.get("id")
+        if not name_id:
+            continue
+        predecessor = n.get("predecessor") or n.get("deprecates")
+        if predecessor:
+            pred_batch.append({"from_name": name_id, "to_name": predecessor})
+            endpoint_ids.add(predecessor)
+        successor = n.get("successor") or n.get("superseded_by")
+        if successor:
+            succ_batch.append({"from_name": name_id, "to_name": successor})
+            endpoint_ids.add(successor)
+
+    discovered = list(
+        gc.query(
+            """
+            // STANDARD_NAME_EDGE_IDENTITY_DISCOVERY
+            UNWIND $ids AS requested
+            OPTIONAL MATCH (sn:StandardName {id: requested})
+            RETURN sn.id AS id, sn.name_stage AS name_stage
+            """,
+            ids=sorted(endpoint_ids),
+        )
+    )
+    if endpoint_ids and not discovered:
+        # Neo4j's UNWIND + OPTIONAL MATCH projection returns one row per
+        # requested identity, including missing nodes. An empty result can only
+        # come from an opaque query adapter (notably structural unit-test
+        # doubles). Keep those adapters read-only: MATCH-only writers may
+        # attempt the relationships, but no endpoint is bootstrapped without
+        # an explicit missing-node projection and child authority.
+        existing_ids = set(endpoint_ids)
+        lifecycle_ids = set(endpoint_ids)
+    else:
+        existing_ids = {str(row["id"]) for row in discovered if row.get("id")}
+        lifecycle_ids = {
+            str(row["id"])
+            for row in discovered
+            if row.get("id")
+            and ("name_stage" not in row or row.get("name_stage") is not None)
+        }
+    missing_parent_ids = {
+        row["to_name"] for row in co_batch if row["to_name"] not in existing_ids
+    }
+    materialized_ids = _bootstrap_missing_derived_parent_targets(
+        gc,
+        co_batch,
+        missing_parent_ids,
+    )
+    authorized_ids = explicit_ids | lifecycle_ids | materialized_ids
+    admitted_parent_ids = {row["to_name"] for row in co_batch}
+    structural_ids = explicit_ids | (
+        admitted_parent_ids & (lifecycle_ids | materialized_ids)
+    )
+
+    # Admission controls the closure. A rejected intermediate must not retain
+    # independently derived locus/error rows that could make it look like an
+    # authorized identity.
+    co_batch = [
+        row
+        for row in co_batch
+        if row["from_name"] in structural_ids and row["to_name"] in structural_ids
+    ]
+    he_batch = [
+        row
+        for row in he_batch
+        if row["from_name"] in authorized_ids and row["to_name"] in authorized_ids
+    ]
+    geo_batch = [row for row in geo_batch if row["from_name"] in structural_ids]
+    pred_batch = [
+        row
+        for row in pred_batch
+        if row["from_name"] in authorized_ids and row["to_name"] in authorized_ids
+    ]
+    succ_batch = [
+        row
+        for row in succ_batch
+        if row["from_name"] in authorized_ids and row["to_name"] in authorized_ids
+    ]
+
     # Reconcile (NOT accrete) each processed child's structural HAS_PARENT
     # edges to EXACTLY the current admitted derivation. ``derive_edges`` is a
     # deterministic function of the child name, but the rule that computes the
@@ -2822,10 +3006,8 @@ def _write_standard_name_edges(
         gc.query(
             """
             UNWIND $batch AS b
-            MERGE (src:StandardName {id: b.from_name})
-            MERGE (tgt:StandardName {id: b.to_name})
-            ON CREATE SET tgt.origin = 'derived',
-                          tgt.name_stage = 'pending'
+            MATCH (src:StandardName {id: b.from_name})
+            MATCH (tgt:StandardName {id: b.to_name})
             MERGE (src)-[r:HAS_PARENT]->(tgt)
             SET r.operator      = b.operator,
                 r.operator_kind = b.operator_kind,
@@ -2852,8 +3034,8 @@ def _write_standard_name_edges(
         gc.query(
             """
             UNWIND $batch AS b
-            MERGE (src:StandardName {id: b.from_name})
-            MERGE (tgt:StandardName {id: b.to_name})
+            MATCH (src:StandardName {id: b.from_name})
+            MATCH (tgt:StandardName {id: b.to_name})
             MERGE (src)-[r:HAS_ERROR]->(tgt)
             SET r.error_type = b.error_type
             """,
@@ -2864,7 +3046,7 @@ def _write_standard_name_edges(
         gc.query(
             """
             UNWIND $batch AS b
-            MERGE (src:StandardName {id: b.from_name})
+            MATCH (src:StandardName {id: b.from_name})
             MERGE (loc:Locus {id: b.locus_token})
             MERGE (src)-[r:HAS_LOCUS]->(loc)
             SET r.locus_token = b.locus_token,
@@ -2876,25 +3058,12 @@ def _write_standard_name_edges(
     # --- HAS_PREDECESSOR / HAS_SUCCESSOR ---
     # Support both 'predecessor'/'successor' (pipeline) and
     # 'deprecates'/'superseded_by' (catalog import).
-    pred_batch: list[dict[str, str]] = []
-    succ_batch: list[dict[str, str]] = []
-    for n in names:
-        name_id = n.get("id")
-        if not name_id:
-            continue
-        predecessor = n.get("predecessor") or n.get("deprecates")
-        if predecessor:
-            pred_batch.append({"from_name": name_id, "to_name": predecessor})
-        successor = n.get("successor") or n.get("superseded_by")
-        if successor:
-            succ_batch.append({"from_name": name_id, "to_name": successor})
-
     if pred_batch:
         gc.query(
             """
             UNWIND $batch AS b
-            MERGE (src:StandardName {id: b.from_name})
-            MERGE (tgt:StandardName {id: b.to_name})
+            MATCH (src:StandardName {id: b.from_name})
+            MATCH (tgt:StandardName {id: b.to_name})
             MERGE (src)-[:HAS_PREDECESSOR]->(tgt)
             """,
             batch=pred_batch,
@@ -2904,8 +3073,8 @@ def _write_standard_name_edges(
         gc.query(
             """
             UNWIND $batch AS b
-            MERGE (src:StandardName {id: b.from_name})
-            MERGE (tgt:StandardName {id: b.to_name})
+            MATCH (src:StandardName {id: b.from_name})
+            MATCH (tgt:StandardName {id: b.to_name})
             MERGE (src)-[:HAS_SUCCESSOR]->(tgt)
             """,
             batch=succ_batch,
@@ -2921,7 +3090,7 @@ def _write_standard_name_edges(
         gc.query(
             """
             UNWIND $batch AS b
-            MERGE (sn:StandardName {id: b.sn_id})
+            MATCH (sn:StandardName {id: b.sn_id})
             MERGE (c:IMASSemanticCluster {id: b.cluster_id})
             MERGE (sn)-[:IN_CLUSTER]->(c)
             """,
@@ -2948,7 +3117,7 @@ def _write_standard_name_edges(
         gc.query(
             """
             UNWIND $batch AS b
-            MERGE (sn:StandardName {id: b.sn_id})
+            MATCH (sn:StandardName {id: b.sn_id})
             MERGE (d:PhysicsDomain {id: b.domain_id})
             MERGE (sn)-[:HAS_PHYSICS_DOMAIN]->(d)
             """,
@@ -3041,7 +3210,8 @@ def rederive_structural_edges() -> dict[str, int]:
     with GraphClient() as gc:
         live = gc.query(
             "MATCH (sn:StandardName) "
-            "WHERE NOT (coalesce(sn.name_stage, '') IN ['superseded', 'exhausted', 'contested']) "
+            "WHERE sn.name_stage IS NOT NULL "
+            "AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested']) "
             "RETURN sn.id AS id"
         )
         names = [{"id": r["id"]} for r in live if r.get("id")]
@@ -3422,6 +3592,7 @@ def _materialize_derived_parent_rows(
     *,
     infer_kind_from_existing_topology: bool = False,
     rejected_pending_parent_ids: list[str] | None = None,
+    bootstrap_missing: bool = False,
 ) -> int:
     """Materialize structurally eligible derived parents onto the docs lifecycle."""
     from imas_codex.standard_names.defaults import (
@@ -3530,6 +3701,7 @@ def _materialize_derived_parent_rows(
         }
         props.update(grammar_fields)
         props.update(_derived_parent_source_metadata(parent_id))
+        props["bootstrap_edges"] = row.get("bootstrap_edges") or []
 
         # A derived parent is quantitative catalog data, even when it has no
         # DD realization of its own.  It must therefore carry an explicit unit
@@ -3563,10 +3735,23 @@ def _materialize_derived_parent_rows(
                 rejected_pending_parent_ids.append(parent_id)
             continue
 
-        gc.query(
-            """
-            MATCH (parent:StandardName {id: $parent_id})
-            WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }
+        parent_match = (
+            "UNWIND $bootstrap_edges AS authorized_edge "
+            "MATCH (authorized_child:StandardName {id: authorized_edge.from_name}) "
+            "WITH collect({child: authorized_child, edge: authorized_edge}) "
+            "AS authorized_children "
+            "WHERE size(authorized_children) = size($bootstrap_edges) "
+            "MERGE (parent:StandardName {id: $parent_id}) "
+            "ON CREATE SET parent.created_at = datetime()"
+            if bootstrap_missing
+            else "MATCH (parent:StandardName {id: $parent_id}) "
+            "WHERE EXISTS { MATCH (:StandardName)-[:HAS_PARENT]->(parent) }"
+        )
+        parent_scope = (
+            "WITH parent, authorized_children" if bootstrap_missing else "WITH parent"
+        )
+        materialize_cypher = """
+            __PARENT_MATCH__
             SET parent.name_stage = CASE
                     // Already name-reviewed → stays accepted (idempotent).
                     WHEN parent.reviewer_score_name IS NOT NULL THEN 'accepted'
@@ -3635,7 +3820,7 @@ def _materialize_derived_parent_rows(
                 parent.is_geometric_coordinate =
                     coalesce(parent.is_geometric_coordinate,
                              $is_geometric_coordinate)
-            WITH parent
+            __PARENT_SCOPE__
             MERGE (sns:StandardNameSource {id: $source_node_id})
             ON CREATE SET sns.created_at = datetime(),
                           sns.attempt_count = 0
@@ -3654,11 +3839,31 @@ def _materialize_derived_parent_rows(
                 sns.claimed_at = null,
                 sns.claim_token = null
             MERGE (sns)-[:PRODUCED_NAME]->(parent)
-            """,
-            **props,
+            """.replace("__PARENT_MATCH__", parent_match).replace(
+            "__PARENT_SCOPE__", parent_scope
         )
+        if bootstrap_missing:
+            materialize_cypher += """
+            WITH parent, authorized_children
+            OPTIONAL MATCH (parent)-[old_unit:HAS_UNIT]->(:Unit)
+            DELETE old_unit
+            WITH parent, authorized_children
+            MERGE (unit:Unit {id: $unit})
+            MERGE (parent)-[:HAS_UNIT]->(unit)
+            WITH parent, authorized_children
+            UNWIND authorized_children AS binding
+            WITH parent, binding.child AS child, binding.edge AS edge
+            MERGE (child)-[relation:HAS_PARENT]->(parent)
+            SET relation.operator = edge.operator,
+                relation.operator_kind = edge.operator_kind,
+                relation.role = edge.role,
+                relation.separator = edge.separator,
+                relation.axis = edge.axis,
+                relation.shape = edge.shape
+            """
+        gc.query(materialize_cypher, **props)
 
-        if unit:
+        if unit and not bootstrap_missing:
             # Self-heal: drop any pre-existing HAS_UNIT edge (possibly to a
             # different Unit) before re-creating, so a unit correction replaces
             # the edge rather than leaving a stale one alongside the new one.
