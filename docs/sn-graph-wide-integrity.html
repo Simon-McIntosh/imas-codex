@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="150">
-<meta name="plan-impl" content="0.83">
+<meta name="plan-version" content="151">
+<meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1393,6 +1393,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-operator-integrated" data-who="reckon-ship" data-when="2026-08-16T23:00:00+00:00">
     <div class="r-comment-body"><p><strong>The stub-reconcile operator is integrated on main (merge <code>fb821176</code>) and gate-proven.</strong> Full Standard Names suite 6533 passed / 10 skipped / 0 failed on the merged HEAD; the operator's six graph-marked transactional cases were executed green against disposable Neo4j 2026.01.4 in the corrective run (12/12, logs SHA-256-verified during re-review) and auto-skipped in the merge gate without a server — an honestly qualified pass. f-stub-reconcile now has both its prevention (landed <code>60f5777a</code>) and its operator (landed <code>fb821176</code>); what remains is the quiet-window production apply with a fresh closure, sequenced after the running WEST scalar-mirror repair so each mutation sees a stable graph.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-west-scalar-repair-closed" data-who="reckon-ship" data-when="2026-08-16T23:20:00+00:00">
+    <div class="r-comment-body"><p><strong>WEST class 2 is repaired and closed: semantic-source invariant violations in the 355-path closure went 4 → 0 (global 487 → 483).</strong> The four null <code>produced_sn_id</code> mirrors (equilibrium <code>dpsi_drho_tor</code>, <code>dvolume_drho_tor</code>, <code>surface</code>, and summary <code>power_additional/value</code>) were repaired through the landed <code>repair_semantic_source_invariants</code> exact-allowlist instrument: frozen allowlist SHA-256 <code>fec5658e…</code>, one transaction, four <code>repair_semantic_source_binding</code> change events, replay <code>already_clean</code> with zero writes. Out-of-allowlist immutability proven by identical before/after hashes over 9,527 unrelated mirror rows and 4,668 unrelated <code>source_paths</code> rows; LLMCost and SNRun counters unchanged. Next sequenced mutation: the f-stub-reconcile quiet-window production apply, then the three class-1 reviewed renames, then the twelve-path class-3 fold adjudication.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

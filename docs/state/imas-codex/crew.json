@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:13:59",
+  "updated": "2026-08-16T22:18:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1377,9 +1377,49 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T201331842603-west-scalar-mirror-repair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "west-scalar-mirror-repair",
+        "role": "implement",
+        "member": "inv-west",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T20:13:34Z",
+        "completed_at": "2026-08-16T20:18:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 273,
+        "time_budget": "20m",
+        "base_sha": "b190d03393304b14aebeb11b730292300f968667",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Class-2 WEST repair complete: 4 null scalar mirrors repaired via repair_semantic_source_invariants (allowlist hash fec5658e, 4 change events, replay already_clean); WEST-closure violations 4 to 0, global 487 to 483; out-of-allowlist immutability proven over 9527+4668 rows; zero provider calls",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/west-scalar-mirror-repair-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b77-49b1-7230-8705-4f587cc2d769",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        }
       }
     ],
     "holds": [],
-    "_version": 48
+    "_version": 49
   }
 }
