@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T20:44:31",
+  "updated": "2026-08-16T20:49:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -58,6 +58,13 @@
         "harness": "codex",
         "role": "review",
         "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "created": "2026-08-16"
+      },
+      {
+        "id": "rev-c",
+        "harness": "codex",
+        "role": "review",
+        "session_id": null,
         "created": "2026-08-16"
       }
     ],
@@ -483,9 +490,57 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T183212149852-stub-prevention-repair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-prevention-repair",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T18:32:14Z",
+        "completed_at": "2026-08-16T18:49:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1056,
+        "time_budget": "25m",
+        "base_sha": "6aae3d04c442854a40b104a82a0e274805ec5862",
+        "commits": [
+          "484d98294f5c41c41772706c9f909609cc3c3cb4"
+        ],
+        "changed_lines": null,
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Corrective commit 484d9829 on 6aae3d04: null-stage HAS_PARENT targets bootstrap-materialize before reconcile and stay in keep-set; final-query CAS rechecks child lifecycle/unit/kind/domain/COCOS; executable disposable-Neo4j rollback test passes; 25/25 focused + 1/1 graph, ruff exit 0; awaiting re-review by rev-b",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-prevention-repair-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 32288512,
+            "input_tokens": 33101668,
+            "output_tokens": 64153,
+            "reasoning_output_tokens": 21288
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 25
+    "_version": 27
   }
 }

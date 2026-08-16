@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="139">
+<meta name="plan-version" content="140">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1356,6 +1356,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stall-fix-repair" data-who="reckon-ship" data-when="2026-08-16T18:55:00+00:00">
     <div class="r-comment-body"><p><strong>Stall-fix corrective commit produced (f-stall-fix-landing; not yet merged).</strong> Commit <code>ab242998</code>, a direct child of prototype <code>136524e9</code>, resolves both review findings: <code>PoolHealth</code> now tracks the oldest active batch per pool and the watchdog terminalizes an overdue in-flight processor as a typed stall (default bound = the existing 600 s limit) while preserving the live-batch grace, and the parity tests normalize against the canonical <code>graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE</code> and the actual <code>claim_refine_docs_batch</code> eligibility instead of local literals. Focused suites 31/31 pass, ruff check/format exit 0, pre-stage naming scan reviewed (3 false positives on the ordinary verb). Re-review dispatched to the original reviewer session; merge follows an APPROVE verdict.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stub-prevention-repair" data-who="reckon-ship" data-when="2026-08-16T19:05:00+00:00">
+    <div class="r-comment-body"><p><strong>Stub-prevention corrective commit produced (f-stub-reconcile prevention half; not yet merged).</strong> Commit <code>484d9829</code>, a direct child of prototype <code>6aae3d04</code>, resolves both HIGH review findings: an admitted HAS_PARENT target absent from <code>lifecycle_ids</code> — including an already-existing null-stage node — is now a bootstrap candidate that fully materializes before reconciliation and remains in its child's exact keep set, and the single bootstrap mutation carries final-query CAS predicates over child id, name_stage, unit, kind, physics domain, and COCOS (null-safe) with zero-row refusal. The regression uses the same existing-null-parent-plus-authoritative-child shape as the 57 materialize-as-derived-parent rows in receipt <code>fafba986</code>. An executable disposable-Neo4j 2026.01.4 test injects a late relationship-property error and proves whole-transaction rollback (parent stays lifecycle-null, zero derived source, zero edge). Focused suite 25/25 + 1/1 graph-marked, ruff exit 0, endpoint scan widened to all seven secondary writers. Re-review dispatched to the original reviewer session; merge follows an APPROVE verdict. The 297-stub cleanup operator remains this followup's next node.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
