@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="154">
+<meta name="plan-version" content="155">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1405,6 +1405,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-spurious-edge-extension" data-who="reckon-ship" data-when="2026-08-17T00:30:00+00:00">
     <div class="r-comment-body"><p><strong>The spurious-edge stub classification is implemented (worktree commit <code>67170f53</code>; review dispatched).</strong> A childless lifecycle-less StandardName is now deletable only when every producing DD source has exactly two signed bindings — the stub plus exactly one sibling with name_stage accepted and validation_status valid — with the sibling identity recorded in the signed manifest as the authority basis, a caller-owned-transaction CAS recheck before deletion, and the null source scalar reconciled to the accepted sibling in the same transaction. Every other shape keeps the existing refusal. 16/16 operator tests pass including the real-shaped regression (the motional-Stark row) and a drafted-sibling refusal, both on disposable Neo4j. After review and merge, the final node resets row 1's source via <code>reset_standard_name_sources</code>, regenerates the fresh cohort expecting zero refusals, and runs the hash-bound apply.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-spurious-edge-review-block" data-who="reckon-ship" data-when="2026-08-17T01:00:00+00:00">
+    <div class="r-comment-body"><p><strong>The spurious-edge classification is blocked on one high finding; corrective dispatched.</strong> Review of <code>67170f53</code>: the qualifying-sibling proof runs over DD producers only while the signed closure deliberately includes every producer, so a stub with one sanctioned DD source plus an extra non-DD producer would still enter deletion, and the deletion CAS would not cover that extra producer. Required repair: quantify the authority over the complete producer identity set (refusing any extra producer) and extend the CAS accordingly, plus a mixed-producer disposable-Neo4j regression and parameterized invalid-sibling / third-binding / wrong-scalar refusal cases. The DD-cohort semantics themselves were confirmed sound (exact two-binding shape, accepted+valid sibling, in-transaction CAS, scalar reconcile).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

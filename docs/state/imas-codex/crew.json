@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:44:15",
+  "updated": "2026-08-16T22:48:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1557,9 +1557,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T204448679444-spurious-edge-review",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "spurious-edge-review",
+        "role": "review",
+        "member": "rev-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T20:44:51Z",
+        "completed_at": "2026-08-16T20:47:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 184,
+        "time_budget": "15m",
+        "base_sha": "9ab5b518fb627ebfa0ceb36abb8cf8d6801ccd34",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Review of 67170f53: BLOCK with 1 high (deletion class proves the sibling shape for DD sources only, not the complete producer closure \u2014 an extra non-DD producer slips through) and 1 medium (missing mixed-producer and parameterized refusal regressions); DD-cohort semantics otherwise confirmed sound",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/spurious-edge-review-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 7968000,
+            "input_tokens": 8583256,
+            "output_tokens": 51732,
+            "reasoning_output_tokens": 28393
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 52
+    "_version": 53
   }
 }
