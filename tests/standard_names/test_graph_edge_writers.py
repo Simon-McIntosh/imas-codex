@@ -1,8 +1,8 @@
-"""Graph edge writer integration tests.
+"""Graph edge writer tests.
 
-All tests are mocked — no live Neo4j required.  They verify that
-``write_standard_names`` emits the correct Cypher queries with the
-expected batch parameters for every structural edge type.
+Default-tier tests verify emitted Cypher and batch parameters with mocks. The
+graph-marked rollback test executes the bootstrap against a disposable Neo4j
+instance.
 
 Edge types covered:
   HAS_PARENT      — derived from the ISN parser
@@ -15,9 +15,17 @@ Edge types covered:
 
 from __future__ import annotations
 
+import os
+import re
+from collections.abc import Iterator
 from unittest.mock import MagicMock, call, patch
 
 import pytest
+from neo4j import GraphDatabase
+from neo4j.exceptions import ClientError
+
+from imas_codex.graph.client import GraphClient as RealGraphClient
+from imas_codex.settings import get_graph_uri
 
 imas_sn = pytest.importorskip("imas_standard_names")
 
@@ -30,7 +38,13 @@ imas_sn = pytest.importorskip("imas_standard_names")
 def _make_mock_gc() -> MagicMock:
     """Return a fresh MagicMock for GraphClient."""
     gc = MagicMock()
-    gc.query = MagicMock(return_value=[])
+
+    def _query(cypher: str, **params):
+        if "STANDARD_NAME_EDGE_IDENTITY_DISCOVERY" in cypher:
+            return [{"id": name_id} for name_id in params["ids"]]
+        return []
+
+    gc.query = MagicMock(side_effect=_query)
     return gc
 
 
@@ -185,8 +199,8 @@ class TestG2:
                 "Bare-base parent should be dropped by the admission gate"
             )
 
-    def test_target_merged_via_merge_clause(self) -> None:
-        """The HAS_PARENT write Cypher must MERGE the target node (forward ref).
+    def test_target_is_matched_without_relationship_side_creation(self) -> None:
+        """The HAS_PARENT writer may link but never create either endpoint.
 
         Uses an admissible parent (``electron_temperature``) so the
         admission gate keeps the edge. Bare-base parents like
@@ -198,9 +212,9 @@ class TestG2:
 
         write_cyphers = _write_cyphers(mock_gc, "HAS_PARENT")
         assert write_cyphers, "No HAS_PARENT write cypher emitted"
-        assert any("MERGE" in c for c in write_cyphers), (
-            "Target must be MERGEd for forward-ref support"
-        )
+        endpoint_merge = re.compile(r"MERGE\s*\([^)]*:StandardName")
+        assert all(not endpoint_merge.search(c) for c in write_cyphers)
+        assert any("MATCH (tgt:StandardName" in c for c in write_cyphers)
 
 
 # ---------------------------------------------------------------------------
@@ -316,6 +330,363 @@ class TestG5:
             if "HAS_ERROR" in c:
                 assert "MERGE" in c
                 break
+
+
+class TestEndpointAuthority:
+    """Secondary edges consume authorized identities without minting names."""
+
+    def test_secondary_edge_cypher_never_merges_standard_name_endpoints(self) -> None:
+        mock_gc = _make_mock_gc()
+        _call_write(
+            [
+                {
+                    "id": "maximum_of_electron_temperature",
+                    "unit": "eV",
+                    "primary_cluster_id": "transport-cluster",
+                    "physics_domain": "transport",
+                    "deprecates": "electron_temperature",
+                    "superseded_by": "ion_temperature",
+                },
+                {"id": "upper_uncertainty_of_temperature", "unit": "eV"},
+                {"id": "electron_temperature_at_magnetic_axis", "unit": "eV"},
+            ],
+            mock_gc,
+        )
+
+        endpoint_merge = re.compile(r"MERGE\s*\([^)]*:StandardName")
+        for relation in (
+            "HAS_PARENT",
+            "HAS_ERROR",
+            "HAS_LOCUS",
+            "HAS_PREDECESSOR",
+            "HAS_SUCCESSOR",
+            "IN_CLUSTER",
+            "HAS_PHYSICS_DOMAIN",
+        ):
+            relation_writes = [
+                cypher for cypher in _cyphers(mock_gc) if relation in cypher
+            ]
+            assert relation_writes, f"No {relation} writer was exercised"
+            assert all(not endpoint_merge.search(cypher) for cypher in relation_writes)
+
+    def test_missing_admitted_parent_uses_full_materializer_before_edge(self) -> None:
+        from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+
+        graph = MagicMock()
+
+        def _query(cypher: str, **params):
+            if "STANDARD_NAME_EDGE_IDENTITY_DISCOVERY" in cypher:
+                return [
+                    {
+                        "id": "maximum_of_electron_temperature",
+                        "name_stage": "drafted",
+                    }
+                ]
+            if "STANDARD_NAME_PARENT_BOOTSTRAP_CHILDREN" in cypher:
+                return [
+                    {
+                        "parent_id": "electron_temperature",
+                        "id": "maximum_of_electron_temperature",
+                        "name_stage": "drafted",
+                        "unit": "eV",
+                        "cocos": None,
+                        "physics_domain": "transport",
+                        "kind": "scalar",
+                        "op_kind": "unary_prefix",
+                    }
+                ]
+            if "MERGE (parent:StandardName" in cypher:
+                return [{"parent_id": "electron_temperature"}]
+            return []
+
+        graph.query = MagicMock(side_effect=_query)
+        _write_standard_name_edges(
+            graph,
+            [{"id": "maximum_of_electron_temperature"}],
+        )
+
+        bootstrap = next(
+            call.args[0]
+            for call in graph.query.call_args_list
+            if "MERGE (parent:StandardName" in call.args[0]
+        )
+        assert "parent.docs_stage" in bootstrap
+        assert "parent.validation_status" in bootstrap
+        assert "MERGE (sns:StandardNameSource" in bootstrap
+        assert "PRODUCED_NAME" in bootstrap
+        assert "size(authorized_children) = size($bootstrap_edges)" in bootstrap
+        assert "authorized_child.name_stage" in bootstrap
+        assert "authorized_child.unit" in bootstrap
+        assert "authorized_child.kind" in bootstrap
+        assert "authorized_child.physics_domain" in bootstrap
+        assert "authorized_child.cocos_transformation_type" in bootstrap
+        assert "MERGE (parent)-[:HAS_UNIT]" in bootstrap
+        assert "MERGE (child)-[relation:HAS_PARENT]" in bootstrap
+        parent_write = next(
+            call.args[0]
+            for call in graph.query.call_args_list
+            if "MERGE (src)-[r:HAS_PARENT]" in call.args[0]
+        )
+        assert "MATCH (src:StandardName" in parent_write
+        assert "MATCH (tgt:StandardName" in parent_write
+        assert "MERGE (src:StandardName" not in parent_write
+
+    def test_rejected_intermediate_cannot_emit_locus_or_mint_identity(self) -> None:
+        from imas_codex.standard_names.derivation import DerivedEdge
+        from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+
+        graph = _make_mock_gc()
+        edges = {
+            "maximum_of_electron_temperature": [
+                DerivedEdge(
+                    edge_type="HAS_PARENT",
+                    from_name="maximum_of_electron_temperature",
+                    to_name="rejected_intermediate",
+                    props={"operator_kind": "unary_prefix"},
+                )
+            ],
+            "rejected_intermediate": [
+                DerivedEdge(
+                    edge_type="HAS_LOCUS",
+                    from_name="rejected_intermediate",
+                    to_name="ignored",
+                    props={"locus_token": "magnetic_axis"},
+                )
+            ],
+        }
+        with (
+            patch(
+                "imas_codex.standard_names.derivation.derive_edges",
+                side_effect=lambda name: edges.get(name, []),
+            ),
+            patch(
+                "imas_codex.standard_names.graph_ops._filter_admissible_parents",
+                return_value=[],
+            ),
+        ):
+            _write_standard_name_edges(
+                graph,
+                [{"id": "maximum_of_electron_temperature"}],
+            )
+
+        locus_batch = _batch_for(graph, "HAS_LOCUS") or []
+        assert all(row["from_name"] != "rejected_intermediate" for row in locus_batch)
+
+    def test_failure_before_edge_persistence_leaves_no_partial_endpoint_write(
+        self,
+    ) -> None:
+        from imas_codex.standard_names.graph_ops import _write_standard_name_edges
+
+        graph = MagicMock()
+        discovered = False
+
+        def _query(cypher: str, **params):
+            nonlocal discovered
+            if "STANDARD_NAME_EDGE_IDENTITY_DISCOVERY" in cypher:
+                discovered = True
+                return [{"id": name_id} for name_id in params["ids"]]
+            if discovered and "MERGE (src)-[r:HAS_PARENT]" in cypher:
+                raise RuntimeError("injected edge persistence failure")
+            return []
+
+        graph.query = MagicMock(side_effect=_query)
+        with pytest.raises(RuntimeError, match="injected edge persistence failure"):
+            _write_standard_name_edges(
+                graph,
+                [{"id": "maximum_of_electron_temperature"}],
+            )
+
+        endpoint_merge = re.compile(r"MERGE\s*\([^)]*:StandardName")
+        assert all(
+            not endpoint_merge.search(call.args[0])
+            for call in graph.query.call_args_list
+        )
+
+    def test_structural_rederive_materializes_null_stage_parent_before_reconcile(
+        self,
+    ) -> None:
+        from imas_codex.standard_names import graph_ops
+
+        graph = MagicMock()
+        graph.__enter__.return_value = graph
+        graph.__exit__.return_value = None
+
+        def _query(cypher: str, **params):
+            if "RETURN sn.id AS id" in cypher and "EDGE_IDENTITY" not in cypher:
+                return [{"id": "maximum_of_electron_temperature"}]
+            if "STANDARD_NAME_EDGE_IDENTITY_DISCOVERY" in cypher:
+                return [
+                    {
+                        "id": "maximum_of_electron_temperature",
+                        "name_stage": "drafted",
+                    },
+                    {"id": "electron_temperature", "name_stage": None},
+                ]
+            if "STANDARD_NAME_PARENT_BOOTSTRAP_CHILDREN" in cypher:
+                return [
+                    {
+                        "parent_id": "electron_temperature",
+                        "id": "maximum_of_electron_temperature",
+                        "name_stage": "drafted",
+                        "unit": "eV",
+                        "cocos": None,
+                        "physics_domain": "transport",
+                        "kind": "scalar",
+                        "op_kind": "unary_prefix",
+                    }
+                ]
+            if "MERGE (parent:StandardName" in cypher:
+                return [{"parent_id": "electron_temperature"}]
+            if "RETURN count(r) AS n" in cypher:
+                return [{"n": 0}]
+            return []
+
+        graph.query = MagicMock(side_effect=_query)
+        with (
+            patch.object(graph_ops, "GraphClient", return_value=graph),
+            patch.object(
+                graph_ops,
+                "_filter_admissible_parents",
+                side_effect=lambda rows, *_args, **_kwargs: rows,
+            ),
+            patch.object(
+                graph_ops, "_rewire_has_parent_off_superseded", return_value=0
+            ),
+        ):
+            assert graph_ops.rederive_structural_edges()["processed"] == 1
+
+        bootstrap_index = next(
+            index
+            for index, invocation in enumerate(graph.query.call_args_list)
+            if "MERGE (parent:StandardName" in invocation.args[0]
+        )
+        reconcile_index, reconcile = next(
+            (index, invocation)
+            for index, invocation in enumerate(graph.query.call_args_list)
+            if "$recon" in invocation.args[0]
+        )
+        assert bootstrap_index < reconcile_index
+        child_reconcile = next(
+            row
+            for row in reconcile.kwargs["recon"]
+            if row["child"] == "maximum_of_electron_temperature"
+        )
+        assert child_reconcile["keep"] == ["electron_temperature"]
+
+
+@pytest.fixture(scope="module")
+def disposable_neo4j() -> Iterator[tuple[str, str]]:
+    uri = os.environ.get("IMAS_CODEX_TEST_NEO4J_URI")
+    if not uri:
+        pytest.skip("IMAS_CODEX_TEST_NEO4J_URI is not configured")
+    if os.environ.get("IMAS_CODEX_TEST_NEO4J_EPHEMERAL") != "1":
+        pytest.fail("bootstrap transaction test requires a disposable graph")
+    if uri == (os.environ.get("IMAS_CODEX_TEST_PROJECT_NEO4J_URI") or get_graph_uri()):
+        pytest.fail("bootstrap transaction test refuses the project graph")
+    password = os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", "")
+    auth = ("neo4j", password) if password else None
+    with GraphDatabase.driver(uri, auth=auth) as driver:
+        driver.verify_connectivity()
+    yield uri, password
+
+
+@pytest.mark.graph
+def test_bootstrap_transaction_rolls_back_partial_parent(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    from imas_codex.standard_names.graph_ops import _materialize_derived_parent_rows
+
+    uri, password = disposable_neo4j
+    child_id = "maximum_of_electron_temperature"
+    parent_id = "electron_temperature"
+    source_id = f"derived:{parent_id}"
+    client = RealGraphClient(
+        uri=uri,
+        username="neo4j",
+        password=password,
+        graph_name="disposable-parent-bootstrap",
+    )
+    try:
+        client.query(
+            "CREATE (:StandardName {id: $child_id, name_stage: 'drafted', "
+            "unit: 'eV', kind: 'scalar', physics_domain: 'transport'}) "
+            "CREATE (:StandardName {id: $parent_id})",
+            child_id=child_id,
+            parent_id=parent_id,
+        )
+        child_data = [
+            {
+                "id": child_id,
+                "name_stage": "drafted",
+                "unit": "eV",
+                "cocos": None,
+                "physics_domain": "transport",
+                "kind": "scalar",
+                "op_kind": "unary_prefix",
+            }
+        ]
+        bootstrap_edge = {
+            "from_name": child_id,
+            "to_name": parent_id,
+            "operator": "maximum",
+            "operator_kind": "unary_prefix",
+            "role": None,
+            "separator": None,
+            "axis": None,
+            "shape": {"invalid": "property map"},
+            "expected_name_stage": "drafted",
+            "expected_unit": "eV",
+            "expected_cocos": None,
+            "expected_physics_domain": "transport",
+            "expected_kind": "scalar",
+        }
+        with pytest.raises(ClientError):
+            _materialize_derived_parent_rows(
+                client,
+                [
+                    {
+                        "parent_id": parent_id,
+                        "child_data": child_data,
+                        "edge_kinds": ["unary_prefix"],
+                        "authorized_unit": "eV",
+                        "bootstrap_edges": [bootstrap_edge],
+                    }
+                ],
+                bootstrap_missing=True,
+            )
+
+        state = client.query(
+            "MATCH (parent:StandardName {id: $parent_id}) "
+            "OPTIONAL MATCH (:StandardNameSource {id: $source_id}) "
+            "WITH parent, count(*) AS ignored "
+            "RETURN parent.name_stage AS name_stage, parent.origin AS origin, "
+            "parent.unit AS unit",
+            parent_id=parent_id,
+            source_id=source_id,
+        )
+        assert state == [{"name_stage": None, "origin": None, "unit": None}]
+        assert (
+            client.query(
+                "MATCH (source:StandardNameSource {id: $source_id}) "
+                "RETURN count(source) AS count",
+                source_id=source_id,
+            )[0]["count"]
+            == 0
+        )
+        assert (
+            client.query(
+                "MATCH (:StandardName {id: $child_id})-[edge:HAS_PARENT]->"
+                "(:StandardName {id: $parent_id}) RETURN count(edge) AS count",
+                child_id=child_id,
+                parent_id=parent_id,
+            )[0]["count"]
+            == 0
+        )
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id IN $ids DETACH DELETE node",
+            ids=[child_id, parent_id, source_id],
+        )
 
 
 # ---------------------------------------------------------------------------
