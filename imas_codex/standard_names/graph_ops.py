@@ -3480,13 +3480,20 @@ def _query_derived_parents_for_admission_cleanup(gc: Any) -> list[str]:
     return [str(r["parent_id"]) for r in rows if r.get("parent_id")]
 
 
-def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
+def _delete_derived_parent_nodes(
+    gc: Any,
+    parent_ids: list[str],
+    *,
+    manifest_sha256: str | None = None,
+    reason: str | None = None,
+) -> int:
     """Delete derived-parent nodes and their review/derived-source scaffolding."""
     deleted = 0
     deletion_clause = deletion_change_cypher("sn")
     deletion_params = deletion_change_params(
         "remove_derived_parent",
-        reason="structural derived parent no longer satisfies lifecycle admission",
+        reason=reason
+        or "structural derived parent no longer satisfies lifecycle admission",
     )
     for parent_id in parent_ids:
         rows = list(
@@ -3505,6 +3512,7 @@ def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
                      collect(DISTINCT rv) AS reviews,
                      collect(DISTINCT dr) AS revisions
                 {deletion_clause}
+                SET change.manifest_sha256 = $stub_manifest_sha256
                 FOREACH (source IN mirror_sources |
                   SET source.produced_sn_id = null)
                 FOREACH (source IN derived_sources | DETACH DELETE source)
@@ -3514,6 +3522,7 @@ def _delete_derived_parent_nodes(gc: Any, parent_ids: list[str]) -> int:
                 RETURN 1 AS deleted
                 """,
                 parent_id=parent_id,
+                stub_manifest_sha256=manifest_sha256,
                 **deletion_params,
             )
         )
@@ -3599,6 +3608,24 @@ def _validate_derived_parent_identity(
         return [str(exc)]
 
 
+def _eligible_derived_parent_unit_children(
+    parent_id: str, child_data: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Select children whose units authoritatively constrain a parent."""
+    eligible = [child for child in child_data if child.get("op_kind") != "binary"]
+    normalization_markers = ("normalized", "normalised")
+    if not any(marker in parent_id.split("_") for marker in normalization_markers):
+        eligible = [
+            child
+            for child in eligible
+            if not any(
+                marker in str(child.get("id") or "").split("_")
+                for marker in normalization_markers
+            )
+        ]
+    return eligible
+
+
 def _materialize_derived_parent_rows(
     gc: Any,
     parents: list[dict[str, Any]],
@@ -3619,6 +3646,17 @@ def _materialize_derived_parent_rows(
         child_data = row.get("child_data") or []
         edge_kinds = row.get("edge_kinds") or []
         authorized_unit = row.get("authorized_unit")
+        if authorized_unit is None:
+            eligible_unit_children = _eligible_derived_parent_unit_children(
+                parent_id, child_data
+            )
+            eligible_units = {
+                str(child["unit"])
+                for child in eligible_unit_children
+                if child.get("unit")
+            }
+            if len(eligible_units) == 1:
+                authorized_unit = next(iter(eligible_units))
         is_geometric = any(k == "coordinate" for k in edge_kinds)
 
         if infer_kind_from_existing_topology:
@@ -3645,7 +3683,7 @@ def _materialize_derived_parent_rows(
         # qualifier/projection children all share a unit (e.g. m^-3) is wrongly
         # flagged heterogeneous by the ratio's '1' and skipped. Exclude binary
         # children from unit/cocos inheritance.
-        unit_children = [c for c in child_data if c.get("op_kind") != "binary"]
+        unit_children = _eligible_derived_parent_unit_children(parent_id, child_data)
         # Normalization-peel children must not constrain the parent's unit
         # either: a child carrying a normalization marker the parent lacks
         # (``normalized_particle_mass`` → ``particle_mass``) is the
@@ -3653,13 +3691,6 @@ def _materialize_derived_parent_rows(
         # unit '1' is correct for the child and wrong for the parent. With
         # no other unit signal the parent stays unit-less rather than
         # inheriting a dimensionless stamp it cannot honour.
-        _norm_markers = ("normalized", "normalised")
-        if not any(m in parent_id.split("_") for m in _norm_markers):
-            unit_children = [
-                c
-                for c in unit_children
-                if not any(m in (c.get("id") or "").split("_") for m in _norm_markers)
-            ]
         child_units = {c["unit"] for c in unit_children if c.get("unit")}
         if authorized_unit is not None:
             unit = str(authorized_unit)
@@ -4492,6 +4523,501 @@ def normalize_derived_parent_lifecycle(gc: Any | None = None) -> int:
     finally:
         if _own_gc:
             gc.__exit__(None, None, None)
+
+
+LIFECYCLELESS_STUB_MANIFEST_SCHEMA = "imas-codex.lifecycleless-stub-manifest"
+LIFECYCLELESS_STUB_RECEIPT_SCHEMA = "imas-codex.lifecycleless-stub-receipt"
+
+
+class LifecyclelessStubConflict(RuntimeError):
+    """A lifecycle-less StandardName cohort changed or lacks authority."""
+
+
+_READ_LIFECYCLELESS_STUBS_QUERY = """
+// LIFECYCLELESS_STUB_AUTHORITY_READ
+MATCH (stub:StandardName)
+WHERE stub.name_stage IS NULL AND stub.status IS NULL AND stub.origin IS NULL
+CALL (stub) {
+  OPTIONAL MATCH (child:StandardName)-[edge:HAS_PARENT]->(stub)
+  RETURN collect(CASE WHEN child IS NULL THEN null ELSE {
+    id: child.id,
+    name_stage: child.name_stage,
+    unit: child.unit,
+    cocos: child.cocos_transformation_type,
+    physics_domain: child.physics_domain,
+    kind: child.kind,
+    op_kind: edge.operator_kind,
+    operator: edge.operator,
+    role: edge.role,
+    separator: edge.separator,
+    axis: edge.axis,
+    shape: edge.shape
+  } END) AS child_data,
+  collect(CASE WHEN edge IS NULL THEN null ELSE edge.operator_kind END) AS edge_kinds
+}
+CALL (stub) {
+  OPTIONAL MATCH (stub)-[edge]-(related)
+  RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
+    direction: CASE WHEN startNode(edge) = stub THEN 'out' ELSE 'in' END,
+    type: type(edge),
+    properties: properties(edge),
+    related_labels: labels(related),
+    related_properties: properties(related)
+  } END) AS incident_relationships
+}
+CALL (stub) {
+  OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(stub)
+  WHERE source.source_type = 'dd' OR EXISTS { (source)-[:FROM_DD_PATH]->(:IMASNode) }
+  OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+  OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+  WITH source, dd, collect(DISTINCT bound.id) AS bindings
+  RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
+    source_id: source.id,
+    expected_status: source.status,
+    expected_scalar: source.produced_sn_id,
+    expected_bindings: bindings,
+    dd_path: dd.id,
+    unit: coalesce(dd.units, dd.unit, source.unit)
+  } END) AS dd_sources
+}
+CALL (stub) {
+  OPTIONAL MATCH (source:StandardNameSource)
+  WHERE source.produced_sn_id = stub.id
+     OR EXISTS { (source)-[:PRODUCED_NAME]->(stub) }
+     OR (source.source_type = 'derived' AND source.source_id = stub.id)
+  CALL (source) {
+    OPTIONAL MATCH (source)-[edge]-(related)
+    RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
+      direction: CASE WHEN startNode(edge) = source THEN 'out' ELSE 'in' END,
+      type: type(edge), properties: properties(edge),
+      related_labels: labels(related),
+      related_properties: properties(related)
+    } END) AS incident
+  }
+  RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
+    properties: properties(source), incident: incident
+  } END) AS source_closure
+}
+CALL (stub) {
+  OPTIONAL MATCH (stub)-[:HAS_REVIEW]->(review:StandardNameReview)
+  CALL (review) {
+    OPTIONAL MATCH (review)-[edge]-(related)
+    RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
+      direction: CASE WHEN startNode(edge) = review THEN 'out' ELSE 'in' END,
+      type: type(edge), properties: properties(edge),
+      related_labels: labels(related),
+      related_properties: properties(related)
+    } END) AS incident
+  }
+  RETURN collect(CASE WHEN review IS NULL THEN null ELSE {
+    properties: properties(review), incident: incident
+  } END) AS review_closure
+}
+CALL (stub) {
+  OPTIONAL MATCH (stub)-[:DOCS_REVISION_OF]->(revision:DocsRevision)
+  CALL (revision) {
+    OPTIONAL MATCH (revision)-[edge]-(related)
+    RETURN collect(CASE WHEN edge IS NULL THEN null ELSE {
+      direction: CASE WHEN startNode(edge) = revision THEN 'out' ELSE 'in' END,
+      type: type(edge), properties: properties(edge),
+      related_labels: labels(related),
+      related_properties: properties(related)
+    } END) AS incident
+  }
+  RETURN collect(CASE WHEN revision IS NULL THEN null ELSE {
+    properties: properties(revision), incident: incident
+  } END) AS revision_closure
+}
+RETURN stub.id AS id, properties(stub) AS properties,
+       child_data, edge_kinds, dd_sources, incident_relationships,
+       source_closure, review_closure, revision_closure
+ORDER BY id
+"""
+
+
+def _canonicalize_lifecycleless_manifest_value(value: Any) -> Any:
+    """Canonicalize nested graph collections for stable authority hashes."""
+    normalized = _authority_json_value(value)
+    if isinstance(normalized, dict):
+        return {
+            key: _canonicalize_lifecycleless_manifest_value(item)
+            for key, item in sorted(normalized.items())
+        }
+    if isinstance(normalized, list):
+        items = [
+            _canonicalize_lifecycleless_manifest_value(item) for item in normalized
+        ]
+        return sorted(
+            items,
+            key=lambda item: json.dumps(
+                item, sort_keys=True, separators=(",", ":"), ensure_ascii=False
+            ),
+        )
+    return normalized
+
+
+def _derived_parent_unit_from_eligible_children(
+    parent_id: str, child_data: list[dict[str, Any]]
+) -> str | None:
+    """Apply the sanctioned binary and normalization unit exclusions."""
+    eligible = _eligible_derived_parent_unit_children(parent_id, child_data)
+    units = {str(child["unit"]) for child in eligible if child.get("unit")}
+    return next(iter(units)) if len(units) == 1 else None
+
+
+def _partition_lifecycleless_stub_rows(
+    rows: list[dict[str, Any]],
+    *,
+    admission_by_id: dict[str, Any] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Partition a fresh lifecycle-less cohort without inventing authority."""
+    partitions: dict[str, list[dict[str, Any]]] = {
+        "materialize-as-derived-parent": [],
+        "delete-as-dead-link-stub": [],
+        "rebind-source": [],
+        "refused": [],
+    }
+    for raw in rows:
+        row = _authority_json_value(dict(raw))
+        name_id = str(row.get("id") or "").strip()
+        children = [dict(child) for child in row.get("child_data") or []]
+        dd_sources = [dict(source) for source in row.get("dd_sources") or []]
+        row["id"] = name_id
+        if not name_id:
+            row["refusal_reason"] = "missing StandardName identity"
+            partitions["refused"].append(row)
+            continue
+        if dd_sources:
+            incomplete = [
+                source
+                for source in dd_sources
+                if not source.get("source_id")
+                or not source.get("expected_status")
+                or source.get("expected_scalar") != name_id
+                or sorted(source.get("expected_bindings") or []) != [name_id]
+                or not source.get("dd_path")
+                or not source.get("unit")
+            ]
+            if incomplete:
+                row["refusal_reason"] = "incomplete DD source or unit authority"
+                partitions["refused"].append(row)
+            elif (
+                children
+                and _derived_parent_unit_from_eligible_children(name_id, children)
+                is None
+            ):
+                row["refusal_reason"] = "no parent-owned unit authority"
+                partitions["refused"].append(row)
+            elif (
+                children
+                and admission_by_id is not None
+                and not admission_by_id[name_id].admit
+            ):
+                row["refusal_reason"] = (
+                    "structural parent admission refused: "
+                    f"{admission_by_id[name_id].reason}"
+                )
+                partitions["refused"].append(row)
+            else:
+                partitions["rebind-source"].append(row)
+            continue
+        if children:
+            authorized_unit = _derived_parent_unit_from_eligible_children(
+                name_id, children
+            )
+            if any(child.get("name_stage") is None for child in children):
+                row["refusal_reason"] = "incomplete child lifecycle or unit authority"
+                partitions["refused"].append(row)
+            elif authorized_unit is None:
+                row["refusal_reason"] = "no parent-owned unit authority"
+                partitions["refused"].append(row)
+            elif admission_by_id is not None and not admission_by_id[name_id].admit:
+                row["refusal_reason"] = (
+                    "structural parent admission refused: "
+                    f"{admission_by_id[name_id].reason}"
+                )
+                partitions["refused"].append(row)
+            else:
+                row["parent_id"] = name_id
+                row["bootstrap_edges"] = [
+                    {
+                        "from_name": child["id"],
+                        "to_name": name_id,
+                        "operator": child.get("operator"),
+                        "operator_kind": child.get("op_kind"),
+                        "role": child.get("role"),
+                        "separator": child.get("separator"),
+                        "axis": child.get("axis"),
+                        "shape": child.get("shape"),
+                        "expected_name_stage": child.get("name_stage"),
+                        "expected_unit": child.get("unit"),
+                        "expected_cocos": child.get("cocos"),
+                        "expected_physics_domain": child.get("physics_domain"),
+                        "expected_kind": child.get("kind"),
+                    }
+                    for child in children
+                ]
+                partitions["materialize-as-derived-parent"].append(row)
+            continue
+        partitions["delete-as-dead-link-stub"].append(row)
+    return partitions
+
+
+def _lifecycleless_stub_manifest(
+    partitions: dict[str, list[dict[str, Any]]],
+) -> dict[str, Any]:
+    return {
+        "schema": LIFECYCLELESS_STUB_MANIFEST_SCHEMA,
+        "operation": "reconcile_lifecycleless_standard_name_stubs",
+        "rows": {
+            action: _canonicalize_lifecycleless_manifest_value(items)
+            for action, items in sorted(partitions.items())
+        },
+    }
+
+
+def reconcile_lifecycleless_standard_name_stubs(
+    *,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Reconcile one hash-bound lifecycle-less StandardName cohort atomically.
+
+    Dry-run is the default and executes the same sanctioned materialization,
+    source-reset, deletion-ledger, and postflight operations as apply before
+    rolling the transaction back. Apply requires the exact SHA-256 emitted by
+    a fresh dry-run. A completed hash is replay-safe and returns without writes.
+    """
+    if apply and not manifest_sha256:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            adapter = _TransactionQuery(transaction)
+            try:
+                list(
+                    transaction.run(
+                        "MATCH (stub:StandardName) "
+                        "WHERE stub.name_stage IS NULL AND stub.status IS NULL "
+                        "AND stub.origin IS NULL "
+                        "SET stub._lifecycleless_reconcile_lock = true "
+                        "REMOVE stub._lifecycleless_reconcile_lock "
+                        "RETURN count(stub) AS locked"
+                    )
+                )
+                rows = [
+                    dict(record)
+                    for record in transaction.run(_READ_LIFECYCLELESS_STUBS_QUERY)
+                ]
+                from imas_codex.standard_names.parents import (
+                    is_admissible_parent_name,
+                )
+
+                admission_by_id = {
+                    str(row["id"]): is_admissible_parent_name(str(row["id"]), adapter)
+                    for row in rows
+                    if row.get("child_data")
+                }
+                partitions = _partition_lifecycleless_stub_rows(
+                    rows, admission_by_id=admission_by_id
+                )
+                manifest = _lifecycleless_stub_manifest(partitions)
+                computed_hash = _authority_payload_hash(manifest)
+                counts = {key: len(value) for key, value in partitions.items()}
+
+                if apply and not rows:
+                    replay = list(
+                        transaction.run(
+                            "MATCH (change:StandardNameChange "
+                            "{manifest_sha256: $manifest_sha256}) "
+                            "RETURN count(change) AS changes",
+                            manifest_sha256=manifest_sha256,
+                        )
+                    )
+                    if replay and int(replay[0]["changes"]) > 0:
+                        transaction.rollback()
+                        return {
+                            "schema": LIFECYCLELESS_STUB_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "counts": counts,
+                            "manifest": None,
+                            "manifest_sha256": manifest_sha256,
+                        }
+                if apply and manifest_sha256 != computed_hash:
+                    raise LifecyclelessStubConflict(
+                        "manifest SHA-256 does not match the fresh lifecycle-less cohort"
+                    )
+                if partitions["refused"]:
+                    reasons = "; ".join(
+                        f"{row['id']}: {row['refusal_reason']}"
+                        for row in partitions["refused"]
+                    )
+                    raise LifecyclelessStubConflict(
+                        f"lifecycle-less cohort has incomplete authority: {reasons}"
+                    )
+
+                reason = (
+                    "exact lifecycle-less StandardName stub reconciliation "
+                    f"[{computed_hash}]"
+                )
+                from imas_codex.standard_names.provenance_lifecycle import (
+                    reset_standard_name_sources,
+                )
+
+                reset_rows = [
+                    source
+                    for row in partitions["rebind-source"]
+                    for source in row["dd_sources"]
+                ]
+                reset_count = 0
+                if reset_rows:
+                    reset_result = reset_standard_name_sources(
+                        adapter,
+                        reset_rows,
+                        manifest_id=f"lifecycleless-stub:{computed_hash}",
+                        reason=reason,
+                        dry_run=False,
+                        _transactional=True,
+                    )
+                    reset_count = int(reset_result["applied"])
+
+                materialization_rows = [
+                    row
+                    for action in (
+                        "materialize-as-derived-parent",
+                        "rebind-source",
+                    )
+                    for row in partitions[action]
+                    if row.get("child_data")
+                ]
+                for row in materialization_rows:
+                    row["parent_id"] = row["id"]
+                    row["bootstrap_edges"] = [
+                        {
+                            "from_name": child["id"],
+                            "to_name": row["id"],
+                            "operator": child.get("operator"),
+                            "operator_kind": child.get("op_kind"),
+                            "role": child.get("role"),
+                            "separator": child.get("separator"),
+                            "axis": child.get("axis"),
+                            "shape": child.get("shape"),
+                            "expected_name_stage": child.get("name_stage"),
+                            "expected_unit": child.get("unit"),
+                            "expected_cocos": child.get("cocos"),
+                            "expected_physics_domain": child.get("physics_domain"),
+                            "expected_kind": child.get("kind"),
+                        }
+                        for child in row["child_data"]
+                    ]
+                materialization_events = [
+                    {
+                        "parent_id": row["id"],
+                        "event": {
+                            "id": f"sn-change:stub-materialize:{computed_hash}:{row['id']}",
+                            "from_name": row["id"],
+                            "to_name": row["id"],
+                            "operation": "materialize_derived_parent",
+                            "reason": reason,
+                            "origin": "pipeline_cleanup",
+                            "changed_at": datetime.now(UTC).isoformat(),
+                            "internal": True,
+                            "manifest_sha256": computed_hash,
+                        },
+                    }
+                    for row in materialization_rows
+                ]
+                materialized = _materialize_derived_parent_rows(
+                    adapter,
+                    materialization_rows,
+                    bootstrap_missing=True,
+                )
+                if materialized != len(materialization_events):
+                    raise LifecyclelessStubConflict(
+                        "derived-parent authority changed before materialization"
+                    )
+                if materialization_events:
+                    event_rows = list(
+                        transaction.run(
+                            "UNWIND $items AS item "
+                            "MATCH (parent:StandardName {id: item.parent_id}) "
+                            "CREATE (change:StandardNameChange) "
+                            "SET change = item.event "
+                            "CREATE (parent)-[:HAS_INTERNAL_CHANGE]->(change) "
+                            "RETURN count(change) AS changes",
+                            items=materialization_events,
+                        )
+                    )
+                    if not event_rows or int(event_rows[0]["changes"]) != materialized:
+                        raise LifecyclelessStubConflict(
+                            "materialization ledger cardinality changed"
+                        )
+
+                deleted_ids = [
+                    row["id"]
+                    for action in (
+                        "delete-as-dead-link-stub",
+                        "rebind-source",
+                    )
+                    for row in partitions[action]
+                    if not row.get("child_data")
+                ]
+                deleted = _delete_derived_parent_nodes(
+                    adapter,
+                    deleted_ids,
+                    manifest_sha256=computed_hash,
+                    reason=reason,
+                )
+                if deleted != len(deleted_ids):
+                    raise LifecyclelessStubConflict(
+                        "stub deletion cardinality changed before mutation"
+                    )
+                target_ids = [row["id"] for row in rows]
+                remaining = list(
+                    transaction.run(
+                        "MATCH (stub:StandardName) WHERE stub.id IN $ids "
+                        "AND stub.name_stage IS NULL AND stub.status IS NULL "
+                        "AND stub.origin IS NULL RETURN collect(stub.id) AS ids",
+                        ids=target_ids,
+                    )
+                )
+                if remaining and remaining[0]["ids"]:
+                    raise LifecyclelessStubConflict(
+                        "postflight found signed lifecycle-less rows still present"
+                    )
+
+                changed = materialized + deleted
+                if apply:
+                    transaction.commit()
+                else:
+                    transaction.rollback()
+                return {
+                    "schema": LIFECYCLELESS_STUB_RECEIPT_SCHEMA,
+                    "outcome": "applied" if apply else "would_apply",
+                    "dry_run": not apply,
+                    "changed": changed if apply else 0,
+                    "would_change": changed,
+                    "sources_reset": reset_count,
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "postflight_verified": True,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
 
 
 def write_standard_names(
