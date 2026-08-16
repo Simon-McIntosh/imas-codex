@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -306,6 +306,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-cli-review-block-20260816" data-who="reckon-ship" data-when="2026-08-16T19:22:00+00:00">
     <div class="r-comment-body"><p><strong>The approval lifecycle CLI is blocked by adversarial review — the authority path is not yet governed.</strong> Verdict BLOCK on <code>c0eaf0cb</code>: 1 critical, 1 high, 2 medium. CRITICAL: <code>approve</code> accepts caller-supplied digest-shaped observation ids and an evidence token as authority merely because the strings are unused locally — it never reads the exact graph DDGap, verifies path/kind/DD-version/observation-set, or recomputes the canonical evidence token, so fabricated well-shaped evidence could activate a record; the positive test even canonizes invented identities as its success fixture. HIGH: manifest mutation is read/check/build then <code>os.replace</code> with no expected-digest CAS or lock, so concurrent approve/approve or approve/revoke is last-writer-wins. MEDIUM: approval attribution keys on (path, dd_version, field) only, so approving O17 would make <code>show U19</code> report graph-conflicted paths as approved; adversarial refusal paths (stale/reused/fabricated evidence, collisions, concurrency, revocation parity) are unpinned. Useful surfaces confirmed: typed parsing, broad-hold and incomplete-cohort refusals, zero candidate-resource writes, record validation through the strict models. Corrective node redispatched to the authoring member on top of <code>c0eaf0cb</code>; integration only after re-review APPROVE.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-cli-repair-20260816" data-who="reckon-ship" data-when="2026-08-16T20:12:00+00:00">
+    <div class="r-comment-body"><p><strong>The approval-authority corrective is produced (worktree commit <code>f5a5e9d6</code> on <code>c0eaf0cb</code>; re-review dispatched).</strong> Approval now reads the exact current graph DDGap twice under the manifest mutation guard and recomputes the canonical evidence token from path, kind, DD version/value, timestamps, fact metadata, and the exact observation set, so fabricated, stale, mismatched, or mid-guard-changing evidence fails closed. Approval and revocation serialize through one exclusive lock plus a required expected-manifest-digest comparison with immediate pre-replace revalidation, refusing stale approve/approve and approve/revoke without lost updates. Receipts bind <code>source_row</code> plus the packaged candidate digest and attribution requires that binding, so approving O17 leaves the overlapping blocked U19 paths unapproved. Adversarial tests pin all the reviewer's named refusal paths; focused suites 75/75, ruff exit 0, both packaged YAML resources byte-identical. Merge follows a re-review APPROVE.</p></div>
 </div>
 </section>
 </main>
