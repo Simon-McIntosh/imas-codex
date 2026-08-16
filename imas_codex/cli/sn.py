@@ -6852,6 +6852,152 @@ def _echo_dd_gap_fact(fact: dict[str, object]) -> None:
                 click.echo(f"    {key}: {value}")
 
 
+@sn.group("ddres")
+def sn_ddres() -> None:
+    """Inspect and govern exact repo-local DD resolution authority."""
+
+
+@sn_ddres.command("list")
+def sn_ddres_list() -> None:
+    """List every packaged candidate and its active approval state."""
+    from imas_codex.standard_names import dd_resolutions
+
+    candidates = dd_resolutions.load_dd_resolution_candidates_for_review()
+    manifest = dd_resolutions.load_dd_resolution_manifest()
+    click.echo("CANDIDATE\tDISPOSITION\tPATHS\tAPPROVED_PATHS\tAPPROVED")
+    for candidate in candidates.candidates:
+        approved = dd_resolutions.approved_candidate_paths(candidate, manifest)
+        click.echo(
+            f"{candidate.source_row}\t{candidate.disposition.value}\t"
+            f"{len(candidate.exact_paths)}\t{len(approved)}\t"
+            f"{'yes' if approved else 'no'}"
+        )
+
+
+@sn_ddres.command("show")
+@click.argument("source_row")
+def sn_ddres_show(source_row: str) -> None:
+    """Show one exact packaged candidate and its current authority state."""
+    from imas_codex.standard_names import dd_resolutions
+
+    candidates = dd_resolutions.load_dd_resolution_candidates_for_review()
+    candidate = next(
+        (item for item in candidates.candidates if item.source_row == source_row),
+        None,
+    )
+    if candidate is None:
+        raise click.ClickException(
+            f"DD resolution candidate {source_row!r} was not found"
+        )
+    manifest = dd_resolutions.load_dd_resolution_manifest()
+    approved = dd_resolutions.approved_candidate_paths(candidate, manifest)
+    upstream = candidates.upstream_changes[candidate.upstream_change]
+    click.echo(f"candidate: {candidate.source_row}")
+    click.echo(f"disposition: {candidate.disposition.value}")
+    click.echo(f"dd_version: {candidate.dd_version}")
+    click.echo(f"field: {candidate.field.value}")
+    click.echo(f"source_release_match_count: {candidate.source_release_match_count}")
+    click.echo(f"approved: {'yes' if approved else 'no'}")
+    click.echo(f"upstream_url: {upstream.change_url}")
+    click.echo("solution_commits:")
+    for commit in upstream.solution_commits:
+        click.echo(f"  - {commit}")
+    click.echo("paths:")
+    for path in candidate.exact_paths:
+        marker = "approved" if path in approved else "not approved"
+        click.echo(f"  - path: {path}")
+        click.echo(f"    authority: {marker}")
+
+
+@sn_ddres.command("approve")
+@click.argument("source_row")
+@click.option("--path", required=True, help="One exact path declared by the candidate.")
+@click.option(
+    "--gap-kind",
+    required=True,
+    type=_DD_GAP_KIND_CHOICE,
+    help="Exact DDGap kind supporting the reviewed field correction.",
+)
+@click.option(
+    "--observation-id",
+    "observation_ids",
+    multiple=True,
+    required=True,
+    help="Content-addressed DDGap observation reviewed for this exact path.",
+)
+@click.option(
+    "--evidence-token",
+    required=True,
+    help="Fresh exact DDGap evidence-set token fenced by the approval.",
+)
+@click.option("--actor", required=True, help="Human approval authority.")
+@click.option("--reason", required=True, help="Governed approval decision reason.")
+@click.option(
+    "--revision",
+    required=True,
+    type=click.IntRange(min=1),
+    help="Positive review revision for this exact resolution key.",
+)
+def sn_ddres_approve(
+    source_row: str,
+    path: str,
+    gap_kind: str,
+    observation_ids: tuple[str, ...],
+    evidence_token: str,
+    actor: str,
+    reason: str,
+    revision: int,
+) -> None:
+    """Approve one exact candidate path with reviewed DDGap evidence."""
+    from pydantic import ValidationError
+
+    from imas_codex.standard_names import dd_resolutions
+
+    try:
+        record = dd_resolutions.approve_dd_resolution_candidate(
+            source_row,
+            path=path,
+            gap_kind=gap_kind,
+            observation_ids=observation_ids,
+            evidence_token=evidence_token,
+            actor=actor,
+            reason=reason,
+            revision=revision,
+        )
+    except (dd_resolutions.DDResolutionError, ValidationError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(
+        f"approved {source_row}: {record.path} revision={record.resolution_revision} "
+        f"id={record.id}"
+    )
+    click.echo(f"receipt: {record.approval_receipt}")
+
+
+@sn_ddres.command("revoke")
+@click.argument("resolution_id")
+@click.option("--actor", required=True, help="Human authority withdrawing approval.")
+@click.option("--reason", required=True, help="Evidence-backed withdrawal reason.")
+def sn_ddres_revoke(resolution_id: str, actor: str, reason: str) -> None:
+    """Withdraw effective authority and append an immutable history receipt."""
+    from pydantic import ValidationError
+
+    from imas_codex.standard_names import dd_resolutions
+
+    try:
+        receipt = dd_resolutions.revoke_dd_resolution(
+            resolution_id,
+            actor=actor,
+            reason=reason,
+        )
+    except (dd_resolutions.DDResolutionError, ValidationError, ValueError) as exc:
+        raise click.ClickException(str(exc)) from exc
+    click.echo(
+        f"revoked {receipt.from_resolution_id}: "
+        f"{receipt.from_status.value} -> {receipt.to_status.value}"
+    )
+    click.echo(f"receipt: {receipt.id}")
+
+
 @sn.command("ddgap")
 @click.argument("path", required=False)
 @click.option(
