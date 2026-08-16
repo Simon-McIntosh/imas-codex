@@ -9,15 +9,20 @@ staleness, or attempted cross-version reuse fails closed.
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
+import os
 import re
 from collections.abc import Mapping, Sequence
+from contextlib import contextmanager
 from datetime import UTC, datetime
 from enum import Enum, StrEnum
 from functools import lru_cache
 from importlib import resources
-from typing import Any, Self
+from pathlib import Path
+from tempfile import NamedTemporaryFile, gettempdir
+from typing import Any, Protocol, Self
 from urllib.parse import urlparse
 
 import yaml
@@ -52,6 +57,7 @@ _EXACT_VERSION_RE = re.compile(
 )
 _DIGEST_RE = re.compile(r"sha256:[0-9a-f]{64}\Z")
 _RESOLUTION_ID_RE = re.compile(r"dd_resolution:[0-9a-f]{64}\Z")
+_STATE_CHANGE_ID_RE = re.compile(r"dd-resolution-state-change:sha256:[0-9a-f]{64}\Z")
 _OBSERVATION_ID_RE = re.compile(r"dd_gap_observation:[0-9a-f]{64}\Z")
 _EVIDENCE_TOKEN_RE = re.compile(r"dd-gap-evidence:[0-9a-f]{64}\Z")
 _UPSTREAM_COMMIT_RE = re.compile(r"[0-9a-f]{40}\Z")
@@ -98,6 +104,32 @@ class DDResolutionEvidenceMismatch(DDResolutionError):
 
 class DDResolutionAmbiguity(DDResolutionError):
     """A deterministic resolution receipt cannot be selected."""
+
+
+class DDResolutionManifestConflict(DDResolutionError):
+    """The tracked authority changed after the operator reviewed it."""
+
+
+class DDResolutionGraphEvidenceMismatch(DDResolutionError):
+    """Current graph evidence does not match the reviewed approval input."""
+
+
+class DDResolutionGraphReader(Protocol):
+    """Typed read boundary for one exact current DDGap snapshot."""
+
+    def get_gap(self, gap_id: str) -> Mapping[str, Any] | None: ...
+
+
+class _LiveDDResolutionGraphReader:
+    def get_gap(self, gap_id: str) -> Mapping[str, Any] | None:
+        from imas_codex.standard_names.dd_gaps import get_dd_gap
+
+        return get_dd_gap(gap_id)
+
+
+def dd_resolution_graph_reader() -> DDResolutionGraphReader:
+    """Return the production exact-snapshot reader."""
+    return _LiveDDResolutionGraphReader()
 
 
 class DDResolutionCandidateDisposition(StrEnum):
@@ -477,6 +509,59 @@ class DDResolutionRecord(BaseModel):
         return self
 
 
+class DDResolutionStateChangeReceipt(BaseModel):
+    """Immutable local receipt preserving one authority-state transition."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True, str_strip_whitespace=True)
+
+    id: str
+    from_resolution_id: str
+    to_resolution_id: str
+    from_status: DDResolutionStatus
+    to_status: DDResolutionStatus
+    actor: str
+    reason: str
+    changed_at: datetime
+
+    @field_validator("actor", "reason")
+    @classmethod
+    def _required_text(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("state-change authority and reason cannot be empty")
+        return value
+
+    @field_validator("changed_at")
+    @classmethod
+    def _offset_aware_change(cls, value: datetime) -> datetime:
+        if value.tzinfo is None or value.utcoffset() is None:
+            raise ValueError("changed_at must include a UTC offset")
+        return value
+
+    @model_validator(mode="after")
+    def _validate_receipt(self) -> Self:
+        if not _RESOLUTION_ID_RE.fullmatch(
+            self.from_resolution_id
+        ) or not _RESOLUTION_ID_RE.fullmatch(self.to_resolution_id):
+            raise DDResolutionEvidenceMismatch(
+                "state-change receipt must bind exact resolution identities"
+            )
+        if self.from_resolution_id == self.to_resolution_id:
+            raise DDResolutionEvidenceMismatch(
+                "state-change receipt must bind distinct immutable records"
+            )
+        if self.from_status == self.to_status:
+            raise DDResolutionEvidenceMismatch(
+                "state-change receipt must change durable status"
+            )
+        payload = self.model_dump(mode="json", exclude={"id"})
+        expected = f"dd-resolution-state-change:{_canonical_digest(payload)}"
+        if not _STATE_CHANGE_ID_RE.fullmatch(self.id) or self.id != expected:
+            raise DDResolutionEvidenceMismatch(
+                f"state-change id is not the content address {expected!r}"
+            )
+        return self
+
+
 class DDResolutionManifest(BaseModel):
     """Complete validated package behavior authority."""
 
@@ -484,6 +569,7 @@ class DDResolutionManifest(BaseModel):
 
     schema_version: int
     resolutions: tuple[DDResolutionRecord, ...]
+    state_changes: tuple[DDResolutionStateChangeReceipt, ...] = ()
 
     @model_validator(mode="after")
     def _validate_manifest(self) -> Self:
@@ -492,15 +578,55 @@ class DDResolutionManifest(BaseModel):
                 f"unsupported DD resolution schema_version {self.schema_version!r}"
             )
         seen_ids: set[str] = set()
+        records_by_id: dict[str, DDResolutionRecord] = {}
+        for record in self.resolutions:
+            if record.id in seen_ids:
+                raise DDResolutionCollision(f"duplicate resolution id {record.id!r}")
+            seen_ids.add(record.id)
+            records_by_id[record.id] = record
+
+        seen_changes: set[str] = set()
+        transitioned_ids: set[str] = set()
+        for receipt in self.state_changes:
+            if receipt.id in seen_changes:
+                raise DDResolutionCollision(
+                    f"duplicate resolution state-change id {receipt.id!r}"
+                )
+            seen_changes.add(receipt.id)
+            if receipt.from_resolution_id in transitioned_ids:
+                raise DDResolutionCollision(
+                    f"resolution {receipt.from_resolution_id!r} has multiple transitions"
+                )
+            transitioned_ids.add(receipt.from_resolution_id)
+            before = records_by_id.get(receipt.from_resolution_id)
+            after = records_by_id.get(receipt.to_resolution_id)
+            if before is None or after is None:
+                raise DDResolutionEvidenceMismatch(
+                    "state-change receipt references resolution history absent from "
+                    "the manifest"
+                )
+            if before.state != receipt.from_status or after.state != receipt.to_status:
+                raise DDResolutionEvidenceMismatch(
+                    "state-change receipt statuses disagree with immutable records"
+                )
+            before_key = (before.path, before.dd_version, before.field)
+            after_key = (after.path, after.dd_version, after.field)
+            if before_key != after_key:
+                raise DDResolutionEvidenceMismatch(
+                    "state-change receipt crosses exact resolution keys"
+                )
+
+        revoked_ids = {
+            receipt.from_resolution_id
+            for receipt in self.state_changes
+            if receipt.to_status == DDResolutionStatus.withdrawn
+        }
         active_keys: dict[tuple[str, str, DDResolutionField], str] = {}
         observation_owners: dict[str, tuple[str, str, DDResolutionField]] = {}
         evidence_owners: dict[str, tuple[str, str, DDResolutionField]] = {}
         lifecycle_fields: dict[tuple[str, str], set[DDResolutionField]] = {}
         for record in self.resolutions:
-            if record.id in seen_ids:
-                raise DDResolutionCollision(f"duplicate resolution id {record.id!r}")
-            seen_ids.add(record.id)
-            if record.state != DDResolutionStatus.active:
+            if record.state != DDResolutionStatus.active or record.id in revoked_ids:
                 continue
             key = (record.path, record.dd_version, record.field)
             if key in active_keys:
@@ -546,6 +672,11 @@ class DDResolutionManifest(BaseModel):
                 for record in sorted(self.resolutions, key=lambda item: item.id)
             ],
         }
+        if self.state_changes:
+            payload["state_changes"] = [
+                _jsonable(receipt)
+                for receipt in sorted(self.state_changes, key=lambda item: item.id)
+            ]
         return _canonical_digest(payload)
 
 
@@ -942,9 +1073,7 @@ def _parse_manifest_content(content: str) -> DDResolutionManifest:
 
 def load_dd_resolution_manifest() -> DDResolutionManifest:
     """Load and validate the packaged manifest, cached by its exact content."""
-    reference = resources.files("imas_codex.standard_names.config").joinpath(
-        _MANIFEST_RESOURCE
-    )
+    reference = dd_resolution_manifest_path()
     try:
         content = reference.read_text(encoding="utf-8")
     except (FileNotFoundError, OSError) as exc:
@@ -952,6 +1081,14 @@ def load_dd_resolution_manifest() -> DDResolutionManifest:
             f"packaged DD resolution manifest {_MANIFEST_RESOURCE!r} is unavailable"
         ) from exc
     return _parse_manifest_content(content)
+
+
+def dd_resolution_manifest_path() -> Path:
+    """Return the tracked manifest path used by the human lifecycle CLI."""
+    reference = resources.files("imas_codex.standard_names.config").joinpath(
+        _MANIFEST_RESOURCE
+    )
+    return Path(str(reference))
 
 
 @lru_cache(maxsize=8)
@@ -987,6 +1124,426 @@ def load_dd_resolution_candidates_for_review() -> DDResolutionCandidateManifest:
             "is unavailable"
         ) from exc
     return _parse_candidate_content(content)
+
+
+def _load_manifest_from_path(path: Path) -> DDResolutionManifest:
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (FileNotFoundError, OSError) as exc:
+        raise DDResolutionManifestInvalid(
+            f"DD resolution manifest {str(path)!r} is unavailable"
+        ) from exc
+    return _parse_manifest_content(content)
+
+
+def _manifest_lock_path(path: Path) -> Path:
+    digest = hashlib.sha256(str(path.resolve()).encode()).hexdigest()
+    return Path(gettempdir()) / f"imas-codex-dd-resolution-{digest}.lock"
+
+
+@contextmanager
+def _locked_manifest(
+    path: Path,
+    *,
+    expected_digest: str,
+):
+    lock_path = _manifest_lock_path(path)
+    with lock_path.open("a+", encoding="utf-8") as lock:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX)
+        try:
+            manifest = _load_manifest_from_path(path)
+            if manifest.digest != expected_digest:
+                raise DDResolutionManifestConflict(
+                    "DD resolution manifest changed since review: "
+                    f"expected {expected_digest!r}, found {manifest.digest!r}"
+                )
+            yield manifest
+        finally:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+
+
+def _write_manifest(
+    path: Path,
+    manifest: DDResolutionManifest,
+    *,
+    expected_digest: str,
+) -> None:
+    current = _load_manifest_from_path(path)
+    if current.digest != expected_digest:
+        raise DDResolutionManifestConflict(
+            "DD resolution manifest changed during guarded mutation: "
+            f"expected {expected_digest!r}, found {current.digest!r}"
+        )
+    document: dict[str, Any] = {
+        "schema_version": manifest.schema_version,
+        "resolutions": [
+            record.model_dump(mode="json") for record in manifest.resolutions
+        ],
+    }
+    if manifest.state_changes:
+        document["state_changes"] = [
+            receipt.model_dump(mode="json") for receipt in manifest.state_changes
+        ]
+    content = yaml.safe_dump(document, sort_keys=False, allow_unicode=True)
+    temporary_path: Path | None = None
+    try:
+        with NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            dir=path.parent,
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+            delete=False,
+        ) as handle:
+            handle.write(content)
+            handle.flush()
+            os.fsync(handle.fileno())
+            temporary_path = Path(handle.name)
+        os.replace(temporary_path, path)
+    except OSError as exc:
+        raise DDResolutionManifestInvalid(
+            f"cannot atomically write DD resolution manifest {str(path)!r}: {exc}"
+        ) from exc
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
+
+
+def _effective_active_records(
+    manifest: DDResolutionManifest,
+) -> tuple[DDResolutionRecord, ...]:
+    withdrawn = {
+        receipt.from_resolution_id
+        for receipt in manifest.state_changes
+        if receipt.to_status == DDResolutionStatus.withdrawn
+    }
+    return tuple(
+        record
+        for record in manifest.resolutions
+        if record.state == DDResolutionStatus.active and record.id not in withdrawn
+    )
+
+
+def approved_candidate_paths(
+    candidate: DDResolutionCandidate,
+    manifest: DDResolutionManifest,
+    *,
+    candidate_digest: str,
+) -> tuple[str, ...]:
+    """Return exact candidate paths carrying effective active authority."""
+    receipt_prefix = (
+        f"dd-resolution-approval:{candidate.source_row}:{candidate_digest}:"
+    )
+    keys = {
+        (record.path, record.dd_version, record.field)
+        for record in _effective_active_records(manifest)
+        if record.approval_receipt.startswith(receipt_prefix)
+    }
+    return tuple(
+        path
+        for path in candidate.exact_paths
+        if (path, candidate.dd_version, candidate.field) in keys
+    )
+
+
+def _verify_graph_evidence(
+    snapshot: Mapping[str, Any] | None,
+    *,
+    gap_id: str,
+    candidate: DDResolutionCandidate,
+    expected_observation_ids: Sequence[str],
+    expected_evidence_token: str,
+) -> tuple[str, tuple[str, ...]]:
+    from imas_codex.standard_names.dd_gaps import _evidence_token
+
+    if snapshot is None:
+        raise DDResolutionGraphEvidenceMismatch(
+            f"current exact graph DDGap {gap_id!r} was not found"
+        )
+    exact_path = gap_id.removeprefix("dd_gap:").rsplit(":", 1)[0]
+    exact_kind = gap_id.rsplit(":", 1)[1]
+    if snapshot.get("id") != gap_id:
+        raise DDResolutionGraphEvidenceMismatch(
+            "current graph DDGap identity does not match the exact path and kind"
+        )
+    if snapshot.get("path") != exact_path:
+        raise DDResolutionGraphEvidenceMismatch(
+            "current graph DDGap path does not match the candidate path"
+        )
+    if snapshot.get("kind") != exact_kind:
+        raise DDResolutionGraphEvidenceMismatch(
+            "current graph DDGap kind does not match the reviewed kind"
+        )
+    if snapshot.get("observed_dd_version") != candidate.dd_version:
+        raise DDResolutionGraphEvidenceMismatch(
+            "current graph DDGap DD version does not match the candidate release"
+        )
+    if snapshot.get("observed_value") != candidate.observed.value:
+        raise DDResolutionGraphEvidenceMismatch(
+            "current graph DDGap observed value does not match the raw release fact"
+        )
+    observations = tuple(
+        sorted(str(item.get("id") or "") for item in snapshot.get("observations") or ())
+    )
+    if not observations or any(not item for item in observations):
+        raise DDResolutionGraphEvidenceMismatch(
+            "current graph DDGap has no exact observation set"
+        )
+    expected_observations = tuple(
+        sorted(str(item) for item in expected_observation_ids)
+    )
+    if observations != expected_observations:
+        raise DDResolutionGraphEvidenceMismatch(
+            "current graph DDGap observation set differs from the reviewed set"
+        )
+    canonical_token = _evidence_token(snapshot)
+    if snapshot.get("evidence_token") not in (None, canonical_token):
+        raise DDResolutionGraphEvidenceMismatch(
+            "graph DDGap carried a noncanonical evidence token"
+        )
+    if canonical_token != expected_evidence_token:
+        raise DDResolutionGraphEvidenceMismatch(
+            "expected token does not match the canonical graph evidence token"
+        )
+    for observation in snapshot.get("observations") or ():
+        source_path = observation.get("source_path")
+        if source_path is not None and source_path != exact_path:
+            raise DDResolutionGraphEvidenceMismatch(
+                "graph observation source path does not match the candidate path"
+            )
+        observed_version = observation.get("observed_dd_version")
+        if observed_version is not None and observed_version != candidate.dd_version:
+            raise DDResolutionGraphEvidenceMismatch(
+                "graph observation DD version does not match the candidate release"
+            )
+        observed_value = observation.get("observed_value")
+        if observed_value is not None and observed_value != candidate.observed.value:
+            raise DDResolutionGraphEvidenceMismatch(
+                "graph observation value does not match the raw release fact"
+            )
+    return canonical_token, observations
+
+
+def approve_dd_resolution_candidate(
+    source_row: str,
+    *,
+    path: str,
+    gap_kind: DDGapKind | str,
+    observation_ids: Sequence[str],
+    evidence_token: str,
+    actor: str,
+    reason: str,
+    revision: int,
+    expected_manifest_digest: str,
+    graph_reader: DDResolutionGraphReader | None = None,
+    approved_at: datetime | None = None,
+) -> DDResolutionRecord:
+    """Promote one exact reviewed candidate path into tracked authority."""
+    review_input = load_dd_resolution_candidates_for_review()
+    candidates = {
+        candidate.source_row: candidate for candidate in review_input.candidates
+    }
+    candidate = candidates.get(source_row)
+    if candidate is None:
+        raise DDResolutionEvidenceMismatch(
+            f"DD resolution candidate {source_row!r} was not found"
+        )
+    if candidate.disposition == DDResolutionCandidateDisposition.broad_scope_hold:
+        raise DDResolutionEvidenceMismatch(
+            f"candidate {source_row!r} is a broad-scope hold and cannot be approved"
+        )
+    if len(candidate.exact_paths) != candidate.source_release_match_count:
+        raise DDResolutionEvidenceMismatch(
+            f"candidate {source_row!r} has an unresolved graph conflict: "
+            f"{len(candidate.exact_paths)} exact reviewed paths for "
+            f"{candidate.source_release_match_count} release matches"
+        )
+    exact_path = _validate_exact_path(path)
+    if exact_path not in candidate.exact_paths:
+        raise DDResolutionEvidenceMismatch(
+            f"path {exact_path!r} is not an exact reviewed path for candidate "
+            f"{source_row!r}"
+        )
+    if isinstance(revision, bool) or revision < 1:
+        raise DDResolutionEvidenceMismatch("resolution revision must be positive")
+    if not actor.strip() or not reason.strip():
+        raise DDResolutionEvidenceMismatch(
+            "approval requires an explicit actor and governed decision reason"
+        )
+    upstream = review_input.upstream_changes.get(candidate.upstream_change)
+    if upstream is None or not upstream.change_url or not upstream.solution_commits:
+        raise DDResolutionEvidenceMismatch(
+            f"candidate {source_row!r} lacks an official upstream solution reference"
+        )
+
+    manifest_path = dd_resolution_manifest_path()
+    reader = graph_reader or dd_resolution_graph_reader()
+    gap_id = f"dd_gap:{exact_path}:{_enum_text(gap_kind)}"
+    with _locked_manifest(
+        manifest_path, expected_digest=expected_manifest_digest
+    ) as manifest:
+        graph_token, graph_observations = _verify_graph_evidence(
+            reader.get_gap(gap_id),
+            gap_id=gap_id,
+            candidate=candidate,
+            expected_observation_ids=observation_ids,
+            expected_evidence_token=evidence_token,
+        )
+        exact_key = (exact_path, candidate.dd_version, candidate.field)
+        if any(
+            (record.path, record.dd_version, record.field) == exact_key
+            for record in _effective_active_records(manifest)
+        ):
+            raise DDResolutionCollision(
+                f"an active DD resolution already claims exact key {exact_key!r}"
+            )
+        prior_revisions = [
+            record.resolution_revision
+            for record in manifest.resolutions
+            if (record.path, record.dd_version, record.field) == exact_key
+        ]
+        if prior_revisions and revision <= max(prior_revisions):
+            raise DDResolutionCollision(
+                f"revision {revision} must exceed prior revision "
+                f"{max(prior_revisions)} for exact key {exact_key!r}"
+            )
+        prior_observations = {
+            observation_id
+            for record in manifest.resolutions
+            for observation_id in record.observation_ids
+        }
+        repeated_observations = prior_observations.intersection(graph_observations)
+        if repeated_observations:
+            raise DDResolutionEvidenceMismatch(
+                "approval requires fresh DDGap observations; already used "
+                f"identities: {sorted(repeated_observations)!r}"
+            )
+        if graph_token in {record.evidence_token for record in manifest.resolutions}:
+            raise DDResolutionEvidenceMismatch(
+                "approval requires a fresh DDGap evidence token"
+            )
+
+        timestamp = approved_at or datetime.now(UTC)
+        receipt_payload = {
+            "source_row": source_row,
+            "path": exact_path,
+            "dd_version": candidate.dd_version,
+            "field": candidate.field,
+            "actor": actor,
+            "reason": reason,
+            "revision": revision,
+            "approved_at": timestamp,
+            "observation_ids": graph_observations,
+            "evidence_token": graph_token,
+            "candidate_digest": review_input.digest,
+        }
+        approval_receipt = (
+            f"dd-resolution-approval:{source_row}:{review_input.digest}:"
+            f"{_canonical_digest(receipt_payload)}"
+        )
+        record_payload: dict[str, Any] = {
+            "gap_id": gap_id,
+            "path": exact_path,
+            "dd_version": candidate.dd_version,
+            "field": candidate.field,
+            "observed": candidate.observed,
+            "observed_hash": dd_resolution_value_hash(candidate.observed),
+            "effective": candidate.proposed_effective,
+            "resolution_revision": revision,
+            "reason": reason,
+            "observation_ids": graph_observations,
+            "evidence_token": graph_token,
+            "approved_by": actor,
+            "approved_at": timestamp,
+            "approval_receipt": approval_receipt,
+            "upstream_url": upstream.change_url,
+            "upstream_ref": "commits:" + ",".join(upstream.solution_commits),
+            "state": DDResolutionStatus.active,
+        }
+        record_payload["id"] = content_addressed_resolution_id(record_payload)
+        record = DDResolutionRecord.model_validate(record_payload)
+        updated = DDResolutionManifest(
+            schema_version=manifest.schema_version,
+            resolutions=(*manifest.resolutions, record),
+            state_changes=manifest.state_changes,
+        )
+        try:
+            final_token, final_observations = _verify_graph_evidence(
+                reader.get_gap(gap_id),
+                gap_id=gap_id,
+                candidate=candidate,
+                expected_observation_ids=graph_observations,
+                expected_evidence_token=graph_token,
+            )
+        except DDResolutionGraphEvidenceMismatch as exc:
+            raise DDResolutionGraphEvidenceMismatch(
+                f"current DDGap evidence changed during approval: {exc}"
+            ) from exc
+        if (final_token, final_observations) != (graph_token, graph_observations):
+            raise DDResolutionGraphEvidenceMismatch(
+                "current DDGap evidence changed during approval"
+            )
+        _write_manifest(
+            manifest_path,
+            updated,
+            expected_digest=expected_manifest_digest,
+        )
+        return record
+
+
+def revoke_dd_resolution(
+    resolution_id: str,
+    *,
+    actor: str,
+    reason: str,
+    expected_manifest_digest: str,
+    changed_at: datetime | None = None,
+) -> DDResolutionStateChangeReceipt:
+    """Withdraw active authority while retaining both immutable record states."""
+    if not actor.strip() or not reason.strip():
+        raise DDResolutionEvidenceMismatch(
+            "revocation requires an explicit actor and reason"
+        )
+    manifest_path = dd_resolution_manifest_path()
+    with _locked_manifest(
+        manifest_path, expected_digest=expected_manifest_digest
+    ) as manifest:
+        active = {record.id: record for record in _effective_active_records(manifest)}
+        record = active.get(resolution_id)
+        if record is None:
+            raise DDResolutionEvidenceMismatch(
+                f"resolution {resolution_id!r} is not effective active authority"
+            )
+
+        withdrawn_payload = record.model_dump(mode="json", exclude={"id", "state"})
+        withdrawn_payload["state"] = DDResolutionStatus.withdrawn
+        withdrawn_payload["id"] = content_addressed_resolution_id(withdrawn_payload)
+        withdrawn = DDResolutionRecord.model_validate(withdrawn_payload)
+        timestamp = changed_at or datetime.now(UTC)
+        receipt_payload: dict[str, Any] = {
+            "from_resolution_id": record.id,
+            "to_resolution_id": withdrawn.id,
+            "from_status": record.state,
+            "to_status": withdrawn.state,
+            "actor": actor,
+            "reason": reason,
+            "changed_at": timestamp,
+        }
+        receipt_payload["id"] = (
+            f"dd-resolution-state-change:{_canonical_digest(receipt_payload)}"
+        )
+        receipt = DDResolutionStateChangeReceipt.model_validate(receipt_payload)
+        updated = DDResolutionManifest(
+            schema_version=manifest.schema_version,
+            resolutions=(*manifest.resolutions, withdrawn),
+            state_changes=(*manifest.state_changes, receipt),
+        )
+        _write_manifest(
+            manifest_path,
+            updated,
+            expected_digest=expected_manifest_digest,
+        )
+        return receipt
 
 
 def _same_value(left: DDResolutionValue, right: DDResolutionValue) -> bool:
@@ -1029,10 +1586,8 @@ def resolve_dd_field(
     authority = manifest or load_dd_resolution_manifest()
     active = tuple(
         record
-        for record in authority.resolutions
-        if record.state == DDResolutionStatus.active
-        and record.path == exact_path
-        and record.field == field
+        for record in _effective_active_records(authority)
+        if record.path == exact_path and record.field == field
     )
     exact = tuple(record for record in active if record.dd_version == exact_version)
     if len(exact) > 1:
@@ -1237,12 +1792,16 @@ __all__ = [
     "DDResolutionError",
     "DDResolutionEvidenceMismatch",
     "DDResolutionField",
+    "DDResolutionGraphEvidenceMismatch",
+    "DDResolutionGraphReader",
     "DDResolutionManifest",
+    "DDResolutionManifestConflict",
     "DDResolutionManifestInvalid",
     "DDResolutionRecord",
     "DDResolutionStale",
     "DDResolutionState",
     "DDResolutionStatus",
+    "DDResolutionStateChangeReceipt",
     "DDResolutionValue",
     "DDResolutionVersionMismatch",
     "DDResolutionUpstreamStatus",
@@ -1251,9 +1810,14 @@ __all__ = [
     "ResolvedDDField",
     "content_addressed_resolution_id",
     "dd_resolution_value_hash",
+    "dd_resolution_graph_reader",
+    "dd_resolution_manifest_path",
+    "approved_candidate_paths",
+    "approve_dd_resolution_candidate",
     "load_dd_resolution_candidates_for_review",
     "load_dd_resolution_manifest",
     "resolve_dd_context",
     "resolve_dd_field",
     "resolve_dd_rows",
+    "revoke_dd_resolution",
 ]
