@@ -212,7 +212,6 @@ class PoolHealth:
     last_progress_at: float = field(default_factory=time.time)
     pending_count: int = 0
     in_flight: int = 0
-    oldest_in_flight_at: float | None = None
     error_count: int = 0
     last_error: str | None = None
     consecutive_empty_claims: int = 0
@@ -220,21 +219,29 @@ class PoolHealth:
     _last_pending_count: int = 0
     _completion_epoch: int = 0
     _pending_observation_epoch: int | None = None
+    _active_batch_started_at: dict[int, float] = field(default_factory=dict)
+    _next_batch_id: int = 0
+
+    @property
+    def oldest_in_flight_at(self) -> float | None:
+        """Return the oldest start time among batches that are still active."""
+        return min(self._active_batch_started_at.values(), default=None)
 
     def mark_progress(self) -> None:
         self.last_progress_at = time.time()
 
-    def mark_batch_started(self) -> None:
-        """Record one claimed batch and retain the oldest active start time."""
-        if self.in_flight == 0:
-            self.oldest_in_flight_at = time.time()
-        self.in_flight += 1
+    def mark_batch_started(self) -> int:
+        """Record one claimed batch and return its completion identity."""
+        batch_id = self._next_batch_id
+        self._next_batch_id += 1
+        self._active_batch_started_at[batch_id] = time.time()
+        self.in_flight = len(self._active_batch_started_at)
+        return batch_id
 
-    def mark_batch_finished(self) -> None:
-        """Release one claimed batch and clear its age once the pool drains."""
-        self.in_flight = max(0, self.in_flight - 1)
-        if self.in_flight == 0:
-            self.oldest_in_flight_at = None
+    def mark_batch_finished(self, batch_id: int) -> None:
+        """Release the active batch identified when its claim started."""
+        del self._active_batch_started_at[batch_id]
+        self.in_flight = len(self._active_batch_started_at)
 
     def is_wedged(self, *, poll_interval: float, now: float | None = None) -> bool:
         """A pool is wedged when it has pending work but hasn't progressed
@@ -386,7 +393,7 @@ async def pool_loop(
         # Reset backoff and empty-claim counter after a successful claim.
         backoff.reset()
         spec.health.consecutive_empty_claims = 0
-        spec.health.mark_batch_started()
+        batch_id = spec.health.mark_batch_started()
 
         # ── Process ───────────────────────────────────────────────
         try:
@@ -445,7 +452,7 @@ async def pool_loop(
                         rel_exc,
                     )
         finally:
-            spec.health.mark_batch_finished()
+            spec.health.mark_batch_finished(batch_id)
             # A pending-count snapshot taken before this batch completed or
             # released cannot prove quiescence: the batch may have created
             # downstream work or made its own claim eligible again.
