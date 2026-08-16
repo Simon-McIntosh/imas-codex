@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T21:43:01",
+  "updated": "2026-08-16T21:59:26",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1151,9 +1151,57 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T194352307355-stub-operator-repair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-operator-repair",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T19:43:54Z",
+        "completed_at": "2026-08-16T19:59:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 919,
+        "time_budget": "25m",
+        "base_sha": "8ae129f252fd09405fc5a0a9dd0541cb662a495e",
+        "commits": [
+          "7a265795ba00c12ab570195d38659fe105b0fbfd"
+        ],
+        "changed_lines": null,
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "Corrective 7a265795 on 8ae129f2: parent unit via the sanctioned eligible-child helper (binary/normalization excluded), is_admissible_parent_name gate before materialization, complete incident-closure projection with cohort locking, recursive canonicalization; 12/12 incl. five new disposable-Neo4j regressions; awaiting re-review",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-operator-repair-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 51306752,
+            "input_tokens": 52508118,
+            "output_tokens": 112008,
+            "reasoning_output_tokens": 33589
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 43
+    "_version": 44
   }
 }
