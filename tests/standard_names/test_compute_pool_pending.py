@@ -2,7 +2,7 @@
 
 ``_compute_pool_pending`` must mirror the ``claim_*_batch`` predicates exactly.
 A drift between the watchdog query and the claim queries causes either
-premature exit (undercount) or a stuck-idle watchdog (overcount — the smoke #2 bug).
+premature exit (undercount) or a stuck-idle watchdog (overcount).
 
 The function signature is:
 
@@ -168,6 +168,11 @@ class TestQueryStructure:
         _compute_pool_pending(gc, domains=domains, rotation_cap=3, min_score=0.75)
         return gc.query.call_args.args[0]
 
+    @staticmethod
+    def _pending_clause(query: str, pool: str) -> str:
+        """Return the CALL body that computes one pending pool count."""
+        return query.split(f"RETURN count(sn) AS {pool}", 1)[0].rsplit("CALL {", 1)[1]
+
     def test_query_contains_all_pool_returns(self) -> None:
         q = self._get_query_string()
         for key in _ALL_POOL_KEYS:
@@ -182,3 +187,14 @@ class TestQueryStructure:
         # The filter placeholder should NOT appear because it's only rendered
         # when domains is truthy
         assert "IN $domains" not in q
+
+    def test_review_name_pending_matches_claim_validity_gate(self) -> None:
+        clause = self._pending_clause(self._get_query_string(), "review_name")
+
+        assert "AND sn.validation_status = 'valid'" in clause
+
+    def test_refine_docs_pending_matches_claim_review_authority_gates(self) -> None:
+        clause = self._pending_clause(self._get_query_string(), "refine_docs")
+
+        assert "AND sn.docs_review_resolution_method IS NOT NULL" in clause
+        assert "AND sn.docs_review_quorum_shortfall IS NULL" in clause

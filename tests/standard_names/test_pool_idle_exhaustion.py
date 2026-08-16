@@ -203,6 +203,44 @@ class TestIdleExhaustionWatchdog:
         assert not idle_exhausted.is_set()
 
     @pytest.mark.asyncio
+    async def test_pending_stall_waits_for_in_flight_batch(self) -> None:
+        """A live batch may still turn a pending backlog into progress."""
+        from imas_codex.standard_names.pools import _idle_exhaustion_watchdog
+
+        stop_event = asyncio.Event()
+        idle_exhausted = asyncio.Event()
+        stalled = asyncio.Event()
+        spec = _make_idle_spec("review_name", pending=4)
+        spec.health.in_flight = 1
+
+        watchdog = asyncio.create_task(
+            _idle_exhaustion_watchdog(
+                [spec],
+                stop_event,
+                idle_exhausted,
+                stalled,
+                poll=0.01,
+                idle_polls=3,
+                stall_seconds=0.03,
+            )
+        )
+        try:
+            await asyncio.sleep(0.08)
+            assert not stop_event.is_set()
+            assert not stalled.is_set()
+
+            spec.health.in_flight = 0
+            await asyncio.wait_for(watchdog, timeout=1.0)
+        finally:
+            if not watchdog.done():
+                stop_event.set()
+                await asyncio.gather(watchdog, return_exceptions=True)
+
+        assert stop_event.is_set()
+        assert stalled.is_set()
+        assert not idle_exhausted.is_set()
+
+    @pytest.mark.asyncio
     async def test_idle_watchdog_does_not_fire_with_pending_work(self) -> None:
         """Pools with pending_count > 0 must NOT be considered idle —
         external stop_event is the only exit path here."""

@@ -665,6 +665,7 @@ async def _idle_exhaustion_watchdog(
             last_progress_ts = time.time()
         elif (
             any(p.health.pending_count > 0 for p in pools)
+            and all(p.health.in_flight == 0 for p in pools)
             and (time.time() - last_progress_ts) >= stall_seconds
         ):
             logger.warning(
