@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="144">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-version" content="145">
+<meta name="plan-impl" content="0.78">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1374,6 +1374,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stall-fix-approved" data-who="reckon-ship" data-when="2026-08-16T20:35:00+00:00">
     <div class="r-comment-body"><p><strong>The stall-watchdog fix is independently APPROVED after two corrective rounds and is being integrated.</strong> Third-round review of <code>c87483fc</code> found zero remaining findings: per-active-batch completion identity removes the stale-timestamp defect, the out-of-order two-replica regression pins the younger batch's full age window, and the reviewer's own reproduction probe now reports the younger batch surviving 0.2076 s against the 0.200 s bound (previously cancelled at 0.077 s). The chain <code>136524e9</code> → <code>ab242998</code> → <code>c87483fc</code> merges to main gated on the full-suite test node before push. f-stall-fix-landing then needs its final measure: a scoped sn run reaching a genuine terminal state (no_eligible_work or budget) instead of stalled — funded by the USD 150 authorization.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-fixes-integrated" data-who="reckon-ship" data-when="2026-08-16T20:55:00+00:00">
+    <div class="r-comment-body"><p><strong>The stall-watchdog fix is LANDED on main and gate-proven; the stub-reconcile operator is implemented and in review.</strong> Merge <code>f378f4ed</code> integrates the approved chain <code>136524e9</code> → <code>ab242998</code> → <code>c87483fc</code>; the post-merge gate passed the full Standard Names suite at <strong>6526 passed / 10 skipped / 0 failed</strong> plus the stall focus 32/32 (logs sha-pinned in the crew ledger). f-stall-fix-landing now needs only its live measure: a scoped funded sn run reaching a genuine terminal state (no_eligible_work or budget) instead of stalled — dispatched under the USD 150 authorization. For f-stub-reconcile, worktree commit <code>8ae129f2</code> implements <code>reconcile_lifecycleless_standard_name_stubs</code>: fresh-cohort partition into materialize-as-derived-parent / delete-as-dead-link-stub / rebind-source inside one caller-owned transaction, incomplete-authority refusal, SHA-256-bound explicit apply, one manifest-stamped StandardNameChange per name, idempotent replay; 6/6 tests including a disposable-Neo4j atomic apply/replay, zero live-graph contact. Independent review dispatched; CLI wiring plus the quiet-window production apply follow approval.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

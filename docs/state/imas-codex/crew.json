@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T21:21:11",
+  "updated": "2026-08-16T21:34:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -917,9 +917,151 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T192212928673-fixes-integration-tests",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "fixes-integration-tests",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T19:22:16Z",
+        "completed_at": "2026-08-16T19:33:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 649,
+        "time_budget": "20m",
+        "base_sha": "22e892158a7850f16ebccdf50739f7fc0b824ff0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Post-merge gate for the stall-watchdog fix and ddres approval CLI on main 22e89215: full SN suite 6526/10/0, stall focus 32/32, ddres focus 75/75; main pushed",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/fixes-integration-tests-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 15364608,
+            "input_tokens": 15624920,
+            "output_tokens": 22399,
+            "reasoning_output_tokens": 8009
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T192238465794-ddres-lock-contention-test",
+        "plan": "sn-dd-gaps",
+        "section": "",
+        "node": "ddres-lock-contention-test",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T19:22:41Z",
+        "completed_at": "2026-08-16T19:31:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 524,
+        "time_budget": "15m",
+        "base_sha": "22e892158a7850f16ebccdf50739f7fc0b824ff0",
+        "commits": [
+          "59d6fe1a46d45bdda40afa62c26967982b5a8257"
+        ],
+        "changed_lines": null,
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "Two-contender flock regression landed test-only (21/21 with the new test; red proof recorded with flock neutralized); closes the re-review's non-blocking medium",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/ddres-lock-contention-test-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 16764672,
+            "input_tokens": 17233188,
+            "output_tokens": 64365,
+            "reasoning_output_tokens": 21098
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T190915504883-stub-reconcile-operator",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-reconcile-operator",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T19:09:18Z",
+        "completed_at": "2026-08-16T19:25:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 991,
+        "time_budget": "25m",
+        "base_sha": "56067529f6bcbd08daee62e9469d4efbb1774000",
+        "commits": [
+          "8ae129f252fd09405fc5a0a9dd0541cb662a495e"
+        ],
+        "changed_lines": null,
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "reconcile_lifecycleless_standard_name_stubs implemented in worktree commit 8ae129f2: fresh-cohort partition (materialize/delete/rebind), authority refusals, hash-bound explicit apply, per-name StandardNameChange, idempotent replay; 6/6 incl. disposable-Neo4j; zero live graph contact; awaiting review",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-reconcile-operator-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 41463040,
+            "input_tokens": 42480055,
+            "output_tokens": 89253,
+            "reasoning_output_tokens": 27243
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 38
+    "_version": 41
   }
 }

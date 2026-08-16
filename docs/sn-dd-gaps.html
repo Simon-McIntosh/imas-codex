@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="22">
+<meta name="plan-version" content="23">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
-<meta name="plan-impl" content="0.74">
+<meta name="plan-impl" content="0.8">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="sn-pipeline-hardening,sn-graph-wide-integrity">
 </head>
@@ -312,6 +312,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-cli-approved-20260816" data-who="reckon-ship" data-when="2026-08-16T20:37:00+00:00">
     <div class="r-comment-body"><p><strong>The governed approval lifecycle CLI is independently APPROVED and is being integrated.</strong> Re-review of <code>f5a5e9d6</code>: 0 critical, 0 high, 1 non-blocking medium. The prior critical graph-evidence bypass is resolved (approval reads the exact graph DDGap twice under the manifest mutation lock, recomputes the canonical evidence token, and persists graph-derived values, never caller strings), the lost-update defect is resolved (stable exclusive flock plus required expected-digest CAS with pre-replace revalidation on both approve and revoke), and O17/U19 attribution is bound to source_row plus candidate digest. Independent exact-commit verification passed 75/75. The chain <code>c0eaf0cb</code> → <code>f5a5e9d6</code> merges to main gated on the full-suite test node before push. Folded follow-on: one deterministic two-contender lock test so flock removal cannot regress silently (non-blocking, dispatching to the authoring member). After integration the lead can mint per-record approvals with <code>sn ddres approve</code>; per-record activation authority remains the lead's alone.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-cli-landed-20260816" data-who="reckon-ship" data-when="2026-08-16T20:57:00+00:00">
+    <div class="r-comment-body"><p><strong>The governed approval lifecycle CLI is LANDED on main and gate-proven.</strong> Merge <code>22e89215</code> integrates the approved chain <code>c0eaf0cb</code> → <code>f5a5e9d6</code>; the post-merge gate passed the full Standard Names suite at 6526/10/0 with the ddres focus 75/75, and merge <code>19592556</code> adds the two-contender flock regression (red proof recorded with the lock neutralized), closing the re-review's only remaining finding. The lead can now mint per-record activation with <code>sn ddres approve</code> — each approval requires actor, reason, positive revision, and graph-verified DDGap evidence, with broad holds and graph-conflicted candidates refused. Zero records are active today. Remaining work in f-ddg-local-resolution is authority-gated: per-record approvals are the lead's own act, and the consumer cutover / raw-DD restoration stays held until approved records exist to replace the legacy overrides they retire.</p></div>
 </div>
 </section>
 </main>
