@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="137">
+<meta name="plan-version" content="138">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1350,6 +1350,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stub-prevention-prototype" data-who="reckon-ship" data-when="2026-08-16T19:30:00+00:00">
     <div class="r-comment-body"><p><strong>Stub-prevention prototype demonstrated (gate passed; NOT merged — prototyping-only session).</strong> Worktree commit <code>6aae3d04</code> (graph_ops.py +293, test_graph_edge_writers.py +195): <code>_write_standard_name_edges</code> discovers the authorized identity set first; HAS_PARENT/HAS_ERROR/HAS_LOCUS/predecessor/successor and cluster/domain writers are MATCH-only with zero StandardName endpoint MERGE; missing admitted parents bootstrap solely through <code>_materialize_derived_parent_rows(..., bootstrap_missing=True)</code> with full lifecycle/source/unit authority in one transaction; closure locus rows filter after admission; <code>rederive_structural_edges</code> excludes name_stage IS NULL roots. TDD evidence: 4 targeted failures before, 25/25 focused and 113/113 adjacent regressions after (logs sha-pinned in the run record). No live-graph mutation; the 297-stub cleanup operator remains f-stub-reconcile's later authorized node. Patch preserved at receipts/standard-names/portfolio-census-2026-08-16/0001-fix-standard-names-prevent-partial-edge-endpoints.patch.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-prototype-reviews-block" data-who="reckon-ship" data-when="2026-08-16T18:30:00+00:00">
+    <div class="r-comment-body"><p><strong>Both prototype fixes were independently reviewed and BLOCKED before merge; corrective nodes dispatched.</strong> The stall-fix commit <code>136524e9</code> (f-stall-fix-landing) drew 1 high + 1 medium finding: the unconditional zero-in-flight guard at <code>pools.py:668</code> can suppress stall classification indefinitely for a permanently hung batch because <code>spec.process(batch)</code> has no mandatory timeout, and the parity tests pin literal strings rather than the canonical <code>graph_ops.py</code> claim predicates. The three pending-count predicate clauses themselves were verified textually identical to the claim side, and the reviewer independently reran the focused suites (30/30 pass). The stub-prevention commit <code>6aae3d04</code> (f-stub-reconcile) drew 2 high + 2 medium findings: an existing lifecycle-less parent is excluded from both bootstrap and the reconcile keep-set so rederive would delete its child closure (the evidence that distinguishes the 57 materialize-as-derived-parent rows from dead stubs), and bootstrap authority reads run in separate autocommit sessions with a final CAS that re-checks only existence/cardinality, not lifecycle/unit/kind/domain; the MATCH-only endpoint writers and materializer delegation were confirmed present. Review manifests are promoted in the crew ledger (runs <code>r-…-stall-fix-review</code>, <code>r-…-stub-prevention-review</code>). Corrective commits go back to the authoring roster members on top of the prototype worktree commits, then re-review by the same reviewers.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

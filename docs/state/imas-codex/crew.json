@@ -1,9 +1,16 @@
 {
-  "updated": "2026-08-16T19:22:14",
+  "updated": "2026-08-16T20:30:56",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "impl-ddres",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-16"
+      },
       {
         "id": "impl-stall",
         "harness": "codex",
@@ -37,6 +44,20 @@
         "harness": "codex",
         "role": "investigate",
         "session_id": "01a00b77-49b1-7230-8705-4f587cc2d769",
+        "created": "2026-08-16"
+      },
+      {
+        "id": "rev-a",
+        "harness": "codex",
+        "role": "review",
+        "session_id": "01a00bd1-09b3-7041-89d4-9b5b05470d2a",
+        "created": "2026-08-16"
+      },
+      {
+        "id": "rev-b",
+        "harness": "codex",
+        "role": "review",
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
         "created": "2026-08-16"
       }
     ],
@@ -274,9 +295,101 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T182401624386-stall-fix-review",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stall-fix-review",
+        "role": "review",
+        "member": "rev-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T18:24:03Z",
+        "completed_at": "2026-08-16T18:29:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 311,
+        "time_budget": "20m",
+        "base_sha": "a6125d44298b1b71dd5b14f554306f84888f514b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Independent review of 136524e9 delivered: verdict BLOCK (1 high pools.py:668 unbounded in-flight suppression, 1 medium literal-only parity tests); predicate clauses verified identical to graph_ops.py claim predicates; reviewer ran focused suites 30/30 pass",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stall-fix-review-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-09b3-7041-89d4-9b5b05470d2a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 1698048,
+            "input_tokens": 1810300,
+            "output_tokens": 11747,
+            "reasoning_output_tokens": 5434
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T182408513070-stub-prevention-review",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-prevention-review",
+        "role": "review",
+        "member": "rev-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T18:24:10Z",
+        "completed_at": "2026-08-16T18:29:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 322,
+        "time_budget": "20m",
+        "base_sha": "a6125d44298b1b71dd5b14f554306f84888f514b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Independent review of 6aae3d04 delivered: verdict BLOCK (2 high: null-stage-parent closure deletion via rederive keep-set, non-transactional bootstrap authority CAS; 2 medium test gaps); MATCH-only endpoint writers and materializer delegation confirmed present",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-prevention-review-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 2357504,
+            "input_tokens": 2534392,
+            "output_tokens": 14417,
+            "reasoning_output_tokens": 8045
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 14
+    "_version": 21
   }
 }
