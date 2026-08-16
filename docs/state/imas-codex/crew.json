@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:18:12",
+  "updated": "2026-08-16T22:25:46",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1417,9 +1417,55 @@
           "tokens": null,
           "utilisation_pct": null
         }
+      },
+      {
+        "run_id": "r-20260816T201926574481-stub-reconcile-apply",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-reconcile-apply",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T20:19:31Z",
+        "completed_at": "2026-08-16T20:25:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 338,
+        "time_budget": "20m",
+        "base_sha": "3858adae82bf4e66072f27bc833e02b7476de1bd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Apply blocked fail-closed as designed: fresh cohort 286 partitioned 0/284/0 with 2 refused rows (critical_alpha_parameter empty unit authority; fast_neutral_beam_motional_stark_wavelength null scalar + two live bindings); operator raises on any refusal so no mutation ran; collateral hashes flat; the historical 57/237/3 is superseded",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-reconcile-apply-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 54204160,
+            "input_tokens": 55530628,
+            "output_tokens": 123946,
+            "reasoning_output_tokens": 38881
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 49
+    "_version": 50
   }
 }
