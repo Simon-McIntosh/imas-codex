@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T20:52:17",
+  "updated": "2026-08-16T20:53:48",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -630,9 +630,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T185035596877-stub-prevention-rereview",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-prevention-rereview",
+        "role": "review",
+        "member": "rev-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T18:50:37Z",
+        "completed_at": "2026-08-16T18:53:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 160,
+        "time_budget": "15m",
+        "base_sha": "69a840f15371426d40aa9f785c1a3bf20b9032c1",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Re-review of 484d9829: APPROVE with zero findings \u2014 all 4 prior findings resolved (null-stage parent bootstrap-before-reconcile with keep-set survival, full child-authority CAS with zero-row refusal, executable Neo4j rollback proof, seven-writer endpoint scan); log SHA-256s independently matched",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-prevention-rereview-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 3934208,
+            "input_tokens": 4326732,
+            "output_tokens": 21383,
+            "reasoning_output_tokens": 11576
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 30
+    "_version": 31
   }
 }

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="141">
+<meta name="plan-version" content="142">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1362,6 +1362,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stall-fix-rereview-block" data-who="reckon-ship" data-when="2026-08-16T19:20:00+00:00">
     <div class="r-comment-body"><p><strong>Stall-fix re-review: both prior findings resolved, but merge stays blocked on a new reproduced HIGH.</strong> In commit <code>ab242998</code> the shared <code>PoolHealth</code> lifecycle records one timestamp per pool: <code>mark_batch_started()</code> stamps only on the 0→1 transition and <code>mark_batch_finished()</code> retains the stamp until 1→0, so once the first-started replica batch completes while a younger replica batch is live, the watchdog ages the younger batch from the completed batch's timestamp. The reviewer independently reproduced premature typed-stall cancellation of a 0.077 s-old live batch under a 0.200 s bound (two-replica probe, log sha-pinned in the re-review manifest). Required repair: per-active-batch (or per-replica) start identity with the minimum still-active timestamp, plus an out-of-order two-replica regression in which the older batch finishes with zero processed while the younger batch keeps its full age window. Corrective node redispatched to the authoring member on top of <code>ab242998</code>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stub-prevention-approved" data-who="reckon-ship" data-when="2026-08-16T19:35:00+00:00">
+    <div class="r-comment-body"><p><strong>Stub prevention is independently APPROVED with zero findings and is being integrated.</strong> Re-review of corrective commit <code>484d9829</code> confirmed all four prior findings resolved: an existing admitted null-stage parent bootstraps through the sanctioned materializer before reconciliation and survives in its child's keep set, the single bootstrap mutation CAS-rechecks child id, cardinality, name_stage, unit, kind, physics domain, and COCOS null-safely with zero-row refusal, the executable disposable-Neo4j test proves whole-transaction rollback after a late failure, and the endpoint scan requires all seven secondary writers. The reviewer independently matched all six declared log SHA-256 values. The prevention half of f-stub-reconcile merges to main now (chain <code>6aae3d04</code> → <code>484d9829</code>), gated on a post-merge focused test node before push. The 297-stub exact-manifest reconcile operator remains the followup's next node.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
