@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T21:59:26",
+  "updated": "2026-08-16T22:03:44",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1199,9 +1199,101 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T194438356910-west-blocking-worklist",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "west-blocking-worklist",
+        "role": "investigate",
+        "member": "inv-west",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T19:44:40Z",
+        "completed_at": "2026-08-16T20:01:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1006,
+        "time_budget": "20m",
+        "base_sha": "aa5f9fa46bb99b468a239390b4b24038f147cfb3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked on sandbox: read-only investigate tier denies sockets to bolt 7687 and the repl was unavailable; delivered the static halves (exact source parity at aa5f9fa4, 46-path line-of-sight cohort, 9-path gm cohort, persist_refined_name guard verified at graph_ops.py:15842 so class-5 count is 0); four live counts redispatched under a network-capable role",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/west-blocking-worklist-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b77-49b1-7230-8705-4f587cc2d769",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 10061824,
+            "input_tokens": 10632919,
+            "output_tokens": 49088,
+            "reasoning_output_tokens": 17025
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T200002220276-stub-operator-rereview",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-operator-rereview",
+        "role": "review",
+        "member": "rev-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T20:00:04Z",
+        "completed_at": "2026-08-16T20:03:25Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 201,
+        "time_budget": "15m",
+        "base_sha": "387dc7205649168156dfecb60d2dd0db17843be9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Re-review of 7a265795: APPROVE (0 critical/high/medium, 1 low \u2014 optional normalization-peel regression); all five prior findings resolved with line-cited verification; author logs SHA-256-matched",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-operator-rereview-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 6618368,
+            "input_tokens": 7183525,
+            "output_tokens": 43518,
+            "reasoning_output_tokens": 24202
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 44
+    "_version": 46
   }
 }
