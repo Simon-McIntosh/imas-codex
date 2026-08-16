@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="28">
+<meta name="plan-version" content="30">
 <meta name="plan-impl" content="0.65">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -2230,10 +2230,11 @@ Done-when
     <div class="r-fu-body"><p>At the closed pre-WEST baseline, freeze the exact current WEST cohort and expose every name, description, source path, score, DD-resolution dependency, semantic signature, and advisory/hosted review finding for human disposition.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
     </article>
-<article class="r-fu" data-id="f-west-residual-14" data-status="open" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-west-review-rehearsal" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-west-residual-14" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-verification="strict" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-west-review-rehearsal" data-resolved-at="2026-08-16T16:56:50+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Reinstate and close the 14-source residual to the RC cut</h4>
     <div class="r-fu-body"><p>Restores the concrete worklist that superseded followup f-swrr-020 carried before the 2026-08-10 restructure discarded it in favor of a full cohort rebuild: three sources need only a compose claim, four need only a review, the remainder need a fresh name, and gm1/gm5/gm6 sit at the attempt cap awaiting a retry instrument (the standing recovery rule is <code>sn rescore</code> — a fresh quorum draw on the same name, never a hand-accept). Its closing note read "gates hold; the trigger is the lead's." Work it with existing pools against the intact 355-source manifest (<code>sn run --batch west_task_2e</code> is live). Done when the residual is empty or every remaining source has a recorded, reviewed refusal — at which point the reviewer-packet followup takes over.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-west-review-rehearsal</pre>
+    <p class="r-fu-outcome">Superseded by measurement: the 2026-08-16 gate manifest (receipts/standard-names/portfolio-census-2026-08-16/west-gate-manifest.json, sha a613ecb7) proves gm1/gm5/gm6 are composed onto accepted, docs-accepted, valid names and the 14-source residual no longer exists as claimed. The live residual is the 49-row worklist: 21 non-docs rows executed under sn-graph-wide-integrity f-sgwi-west-blocking, 28 docs drains folded into the S9 WEST docs refresh (sn-quality-parity f-west-docs-refresh). The standing policy holds: sanctioned instruments only, sn rescore for exhausted names, never a hand-accept.</p>
     </article>
 </section>
 
@@ -2249,6 +2250,9 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-west-gate-census" data-who="reckon-ship" data-when="2026-08-16T16:45:00+00:00">
     <div class="r-comment-body"><p><strong>Live WEST gate census (2026-08-16), read-only.</strong> All 355 manifest sources present: 343 producing (180 composed + 163 attached), 2 extracted (need compose), 10 skipped, 0 failed. 231 produced names: 198 fully clean (accepted/accepted/valid); release-gating residual = 7 accepted-but-quarantined names (radial_outline_of_plasma_boundary, line_integrated_electron_number_density, vertical_coordinate_of_line_of_sight, volume_integrated_total_electron_density, toroidal_coordinate_of_detector_pixel, radial_outline_of_wall, energy_confinement_enhancement_factor), 19 docs-pending + 8 docs-reviewed + 1 docs-exhausted accepted names, 2 drafted (both quarantined), 2 exhausted (normalized_toroidal_hard_xray_peak_lower_bound_width, plasma_breakdown_time), 1 reviewed (normalized_poloidal_flux_coordinate), 2 dual-bound sources, 1 source with only a superseded target, 1 accepted doc with a broken name: link. This supersedes the numeric claims in f-west-residual-14 (pre-recovery); an exact per-row disposition manifest is being produced by a dispatched census worker.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-gate-manifest-landed" data-who="reckon-ship" data-when="2026-08-16T17:36:00+00:00">
+    <div class="r-comment-body"><p><strong>Exact release-gate disposition manifest landed (read-only node, gate passed).</strong> All 586 rows (355 sources + 231 names) classified, zero unclassified: <strong>49 rows block the RC cut</strong> — 2 compose claims (dd:hard_x_rays/emissivity_profile_1d/half_width_external, dd:camera_x_rays/camera/camera_dimensions), 2 dual-binding repairs (half_width_internal, summary/time_breakdown/value), 5 skipped sources with NO recorded refusal reason, 28 docs drains (19 pending incl. the one dead-link doc, 8 reviewed, 1 exhausted), 9 sn-edit repairs (7 accepted-quarantined: canonical_locus _of_ to _at_ rewrites, cumulative integrated_ prefix, outline-entity and energy-unit issues; 2 drafted-quarantined), 2 sn rescore, 1 quorum review (normalized_poloidal_flux_coordinate). gm1/gm5/gm6 are composed onto accepted docs-accepted names — no longer at the attempt cap. Fully clean names: 191 (the census 198 included the 7 quarantined). Execution split: the 21 non-docs rows are S8 work under sn-graph-wide-integrity f-sgwi-west-blocking; the 28 docs drains fold into the S9 WEST docs refresh (sn-quality-parity f-west-docs-refresh) so the packet carries the new docs standard. Manifest: ~/.local/share/imas-codex/receipts/standard-names/portfolio-census-2026-08-16/west-gate-manifest.json (sha a613ecb7). Re-extract before any RC decision.</p></div>
 </div>
 </section>
 </main>
