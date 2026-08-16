@@ -419,6 +419,7 @@ def _compute_pool_progress(
       WHERE (sn.name_stage = 'drafted' OR
              ($drain_scope_id IS NOT NULL AND sn.name_stage = 'reviewed'
               AND sn.reviewer_score_name >= $min_score))
+        AND sn.validation_status = 'valid'
         AND sn.description IS NOT NULL
         AND sn.description <> $parent_desc_placeholder
         AND coalesce(sn.origin, '') <> 'derived'
@@ -467,6 +468,8 @@ def _compute_pool_progress(
         AND sn.reviewer_score_docs < $min_score
         AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
         AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
+        AND sn.docs_review_resolution_method IS NOT NULL
+        AND sn.docs_review_quorum_shortfall IS NULL
         {docs_score_gate}
         {domain_filter_sn}
         {pending_filter_sn}

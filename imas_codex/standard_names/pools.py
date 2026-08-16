@@ -219,9 +219,29 @@ class PoolHealth:
     _last_pending_count: int = 0
     _completion_epoch: int = 0
     _pending_observation_epoch: int | None = None
+    _active_batch_started_at: dict[int, float] = field(default_factory=dict)
+    _next_batch_id: int = 0
+
+    @property
+    def oldest_in_flight_at(self) -> float | None:
+        """Return the oldest start time among batches that are still active."""
+        return min(self._active_batch_started_at.values(), default=None)
 
     def mark_progress(self) -> None:
         self.last_progress_at = time.time()
+
+    def mark_batch_started(self) -> int:
+        """Record one claimed batch and return its completion identity."""
+        batch_id = self._next_batch_id
+        self._next_batch_id += 1
+        self._active_batch_started_at[batch_id] = time.time()
+        self.in_flight = len(self._active_batch_started_at)
+        return batch_id
+
+    def mark_batch_finished(self, batch_id: int) -> None:
+        """Release the active batch identified when its claim started."""
+        del self._active_batch_started_at[batch_id]
+        self.in_flight = len(self._active_batch_started_at)
 
     def is_wedged(self, *, poll_interval: float, now: float | None = None) -> bool:
         """A pool is wedged when it has pending work but hasn't progressed
@@ -373,7 +393,7 @@ async def pool_loop(
         # Reset backoff and empty-claim counter after a successful claim.
         backoff.reset()
         spec.health.consecutive_empty_claims = 0
-        spec.health.in_flight += 1
+        batch_id = spec.health.mark_batch_started()
 
         # ── Process ───────────────────────────────────────────────
         try:
@@ -432,7 +452,7 @@ async def pool_loop(
                         rel_exc,
                     )
         finally:
-            spec.health.in_flight = max(0, spec.health.in_flight - 1)
+            spec.health.mark_batch_finished(batch_id)
             # A pending-count snapshot taken before this batch completed or
             # released cannot prove quiescence: the batch may have created
             # downstream work or made its own claim eligible again.
@@ -578,6 +598,7 @@ async def _idle_exhaustion_watchdog(
     poll: float = 1.0,
     idle_polls: int = 30,
     stall_seconds: float = 600.0,
+    in_flight_stall_seconds: float | None = None,
     require_pending_observation: bool = False,
 ) -> None:
     """Set ``stop_event`` after sustained genuine idleness across all pools.
@@ -610,7 +631,9 @@ async def _idle_exhaustion_watchdog(
 
     Counter resets on any forward progress so the watchdog does not
     misfire during a transient lull (e.g. a slow generate batch
-    feeding the review pool).
+    feeding the review pool). A claimed batch suppresses stall detection only
+    until *in_flight_stall_seconds* (default: *stall_seconds*) has elapsed, so
+    a processor that never returns cannot disable terminal stall signalling.
     """
     snapshots: dict[str, int] = {p.name: p.health.total_processed for p in pools}
     consecutive_idle = 0
@@ -622,6 +645,9 @@ async def _idle_exhaustion_watchdog(
     # items) until killed, leaving the SNRun un-finalised.
     last_total = sum(snapshots.values())
     last_progress_ts = time.time()
+    in_flight_age_limit = (
+        stall_seconds if in_flight_stall_seconds is None else in_flight_stall_seconds
+    )
     while not stop_event.is_set():
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=poll)
@@ -663,15 +689,35 @@ async def _idle_exhaustion_watchdog(
         if current_total > last_total:
             last_total = current_total
             last_progress_ts = time.time()
-        elif (
-            any(p.health.pending_count > 0 for p in pools)
-            and (time.time() - last_progress_ts) >= stall_seconds
-        ):
+        else:
+            now = time.time()
+            overdue_in_flight: dict[str, float] = {}
+            for p in pools:
+                if p.health.in_flight <= 0:
+                    continue
+                started_at = (
+                    p.health.oldest_in_flight_at
+                    if p.health.oldest_in_flight_at is not None
+                    else p.health.last_progress_at
+                )
+                age = now - started_at
+                if age >= in_flight_age_limit:
+                    overdue_in_flight[p.name] = age
+            no_in_flight = all(p.health.in_flight == 0 for p in pools)
+            should_stall = (
+                any(p.health.pending_count > 0 for p in pools)
+                and (no_in_flight or bool(overdue_in_flight))
+                and (now - last_progress_ts) >= stall_seconds
+            )
+            if not should_stall:
+                continue
             logger.warning(
                 "run_pools: no forward progress for ~%.0fs despite pending work "
-                "(pending=%s) — wedged residue; signalling graceful shutdown",
+                "(pending=%s, overdue_in_flight=%s) — wedged residue; "
+                "signalling graceful shutdown",
                 stall_seconds,
                 {p.name: p.health.pending_count for p in pools},
+                {name: round(age, 1) for name, age in overdue_in_flight.items()},
             )
             stalled_event.set()
             stop_event.set()
@@ -772,6 +818,7 @@ async def run_pools(
     idle_exhaustion_poll: float = 1.0,
     idle_exhaustion_polls: int = 30,
     stall_seconds: float = 600.0,
+    in_flight_stall_seconds: float | None = None,
     free_pool_set: set[str] | None = None,
 ) -> dict[str, PoolHealth]:
     """Run all pool loops concurrently and orchestrate cooperative shutdown.
@@ -925,6 +972,7 @@ async def run_pools(
             idle_polls=idle_exhaustion_polls,
             require_pending_observation=pending_fn is not None,
             stall_seconds=stall_seconds,
+            in_flight_stall_seconds=in_flight_stall_seconds,
         ),
         name="idle_exhaustion_watchdog",
     )

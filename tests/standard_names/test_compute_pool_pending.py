@@ -2,7 +2,7 @@
 
 ``_compute_pool_pending`` must mirror the ``claim_*_batch`` predicates exactly.
 A drift between the watchdog query and the claim queries causes either
-premature exit (undercount) or a stuck-idle watchdog (overcount — the smoke #2 bug).
+premature exit (undercount) or a stuck-idle watchdog (overcount).
 
 The function signature is:
 
@@ -19,6 +19,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from imas_codex.cli.sn import _compute_pool_pending
+from imas_codex.standard_names import graph_ops
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -163,10 +164,28 @@ class TestQueryStructure:
     and RETURN statement.  A broken edit to the query body would immediately
     surface here without needing a live Neo4j instance."""
 
-    def _get_query_string(self, domains=None) -> str:
+    def _get_query_string(
+        self, domains: list[str] | None = None, *, scope_run_id: str | None = None
+    ) -> str:
         gc = _make_gc(dict.fromkeys(_ALL_POOL_KEYS, 0))
-        _compute_pool_pending(gc, domains=domains, rotation_cap=3, min_score=0.75)
+        _compute_pool_pending(
+            gc,
+            domains=domains,
+            rotation_cap=3,
+            min_score=0.75,
+            scope_run_id=scope_run_id,
+        )
         return gc.query.call_args.args[0]
+
+    @staticmethod
+    def _pending_clause(query: str, pool: str) -> str:
+        """Return the CALL body that computes one pending pool count."""
+        return query.split(f"RETURN count(sn) AS {pool}", 1)[0].rsplit("CALL {", 1)[1]
+
+    @staticmethod
+    def _normalized_cypher(text: str) -> str:
+        """Collapse formatting so canonical and observer predicates compare."""
+        return " ".join(text.split())
 
     def test_query_contains_all_pool_returns(self) -> None:
         q = self._get_query_string()
@@ -182,3 +201,38 @@ class TestQueryStructure:
         # The filter placeholder should NOT appear because it's only rendered
         # when domains is truthy
         assert "IN $domains" not in q
+
+    def test_review_name_pending_matches_canonical_claim_predicate(self) -> None:
+        pending = self._normalized_cypher(
+            self._pending_clause(self._get_query_string(), "review_name")
+        )
+        canonical = graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE.replace(
+            " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])",
+            "",
+        ).replace(" AND ($facility IS NULL OR sn.facility = $facility)", "")
+
+        assert self._normalized_cypher(canonical) in pending
+
+    def test_refine_docs_pending_matches_canonical_claim_predicate(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        captured: dict[str, str] = {}
+
+        def capture_claim(**kwargs: object) -> list[dict]:
+            captured["eligibility_where"] = str(kwargs["eligibility_where"])
+            return []
+
+        monkeypatch.setattr(graph_ops, "_claim_sn_atomic", capture_claim)
+        monkeypatch.setattr(
+            graph_ops,
+            "_verify_docs_claim_winners",
+            lambda items, *, eligible_stage: items,
+        )
+        graph_ops.claim_refine_docs_batch(scope_run_id="exact-scope")
+        pending = self._normalized_cypher(
+            self._pending_clause(
+                self._get_query_string(scope_run_id="exact-scope"), "refine_docs"
+            )
+        )
+
+        assert self._normalized_cypher(captured["eligibility_where"]) in pending
