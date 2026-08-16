@@ -4570,12 +4570,19 @@ CALL (stub) {
   WHERE source.source_type = 'dd' OR EXISTS { (source)-[:FROM_DD_PATH]->(:IMASNode) }
   OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
   OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
-  WITH source, dd, collect(DISTINCT bound.id) AS bindings
+  WITH source, dd, collect(DISTINCT {
+    id: bound.id,
+    name_stage: bound.name_stage,
+    validation_status: bound.validation_status
+  }) AS binding_targets
   RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
     source_id: source.id,
     expected_status: source.status,
     expected_scalar: source.produced_sn_id,
-    expected_bindings: bindings,
+    expected_bindings: [target IN binding_targets WHERE target.id IS NOT NULL |
+                        target.id],
+    binding_targets: [target IN binding_targets WHERE target.id IS NOT NULL |
+                      target],
     dd_path: dd.id,
     unit: coalesce(dd.units, dd.unit, source.unit)
   } END) AS dd_sources
@@ -4665,6 +4672,48 @@ def _derived_parent_unit_from_eligible_children(
     return next(iter(units)) if len(units) == 1 else None
 
 
+def _spurious_stub_binding_authority(
+    name_id: str, dd_sources: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Return exact accepted-sibling authority for every producing source."""
+    authorities: list[dict[str, Any]] = []
+    for source in dd_sources:
+        bindings = sorted(set(source.get("expected_bindings") or ()))
+        targets = [dict(target) for target in source.get("binding_targets") or ()]
+        accepted_siblings = [
+            target
+            for target in targets
+            if target.get("id") != name_id
+            and target.get("name_stage") == "accepted"
+            and target.get("validation_status") == "valid"
+        ]
+        if (
+            not source.get("source_id")
+            or not source.get("expected_status")
+            or not source.get("dd_path")
+            or not source.get("unit")
+            or len(bindings) != 2
+            or name_id not in bindings
+            or sorted(target.get("id") for target in targets) != bindings
+            or len(accepted_siblings) != 1
+            or source.get("expected_scalar") not in (None, accepted_siblings[0]["id"])
+        ):
+            return []
+        sibling = accepted_siblings[0]
+        authorities.append(
+            {
+                "source_id": source["source_id"],
+                "expected_status": source["expected_status"],
+                "expected_scalar": source.get("expected_scalar"),
+                "expected_bindings": bindings,
+                "authoritative_target_id": sibling["id"],
+                "authoritative_name_stage": sibling["name_stage"],
+                "authoritative_validation_status": sibling["validation_status"],
+            }
+        )
+    return authorities if len(authorities) == len(dd_sources) else []
+
+
 def _partition_lifecycleless_stub_rows(
     rows: list[dict[str, Any]],
     *,
@@ -4688,6 +4737,15 @@ def _partition_lifecycleless_stub_rows(
             partitions["refused"].append(row)
             continue
         if dd_sources:
+            spurious_authority = (
+                _spurious_stub_binding_authority(name_id, dd_sources)
+                if not children
+                else []
+            )
+            if spurious_authority:
+                row["spurious_binding_authority"] = spurious_authority
+                partitions["delete-as-dead-link-stub"].append(row)
+                continue
             incomplete = [
                 source
                 for source in dd_sources
@@ -4774,6 +4832,62 @@ def _lifecycleless_stub_manifest(
             for action, items in sorted(partitions.items())
         },
     }
+
+
+def _reconcile_spurious_stub_source_scalars(
+    transaction: Any, partitions: dict[str, list[dict[str, Any]]]
+) -> int:
+    """CAS null source mirrors to the accepted sibling signed by the manifest."""
+    repairs = [
+        {"stub_id": row["id"], **authority}
+        for row in partitions["delete-as-dead-link-stub"]
+        for authority in row.get("spurious_binding_authority") or ()
+    ]
+    if not repairs:
+        return 0
+    rows = list(
+        transaction.run(
+            """
+            UNWIND $repairs AS repair
+            MATCH (source:StandardNameSource {id: repair.source_id})
+            MATCH (stub:StandardName {id: repair.stub_id})
+            MATCH (accepted:StandardName {id: repair.authoritative_target_id})
+            WHERE source.status = repair.expected_status
+              AND source.claimed_at IS NULL
+              AND source.claim_token IS NULL
+              AND ((repair.expected_scalar IS NULL
+                    AND source.produced_sn_id IS NULL)
+                   OR source.produced_sn_id = repair.expected_scalar)
+              AND stub.name_stage IS NULL
+              AND stub.status IS NULL
+              AND stub.origin IS NULL
+              AND accepted.name_stage = repair.authoritative_name_stage
+              AND accepted.validation_status =
+                  repair.authoritative_validation_status
+              AND EXISTS { (source)-[:PRODUCED_NAME]->(stub) }
+              AND EXISTS { (source)-[:PRODUCED_NAME]->(accepted) }
+            CALL (source) {
+              MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+              RETURN collect(DISTINCT bound.id) AS current_bindings
+            }
+            WITH repair, source, accepted, current_bindings
+            WHERE size(current_bindings) = size(repair.expected_bindings)
+              AND all(id IN current_bindings WHERE id IN repair.expected_bindings)
+              AND all(id IN repair.expected_bindings WHERE id IN current_bindings)
+            SET source.produced_sn_id = accepted.id
+            RETURN count(*) AS repairs,
+                   count(DISTINCT CASE WHEN repair.expected_scalar IS NULL
+                                      THEN source END) AS sources
+            """,
+            repairs=repairs,
+        )
+    )
+    repaired = int(rows[0].get("repairs", 0)) if rows else 0
+    if repaired != len(repairs):
+        raise LifecyclelessStubConflict(
+            "accepted sibling authority changed before stub deletion"
+        )
+    return int(rows[0].get("sources", 0))
 
 
 def reconcile_lifecycleless_standard_name_stubs(
@@ -4870,6 +4984,10 @@ def reconcile_lifecycleless_standard_name_stubs(
                 )
                 from imas_codex.standard_names.provenance_lifecycle import (
                     reset_standard_name_sources,
+                )
+
+                reconciled_sources = _reconcile_spurious_stub_source_scalars(
+                    transaction, partitions
                 )
 
                 reset_rows = [
@@ -5006,6 +5124,7 @@ def reconcile_lifecycleless_standard_name_stubs(
                     "changed": changed if apply else 0,
                     "would_change": changed,
                     "sources_reset": reset_count,
+                    "sources_reconciled": reconciled_sources,
                     "counts": counts,
                     "manifest": manifest,
                     "manifest_sha256": computed_hash,
