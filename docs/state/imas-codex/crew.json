@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:30:53",
+  "updated": "2026-08-16T22:44:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1509,9 +1509,57 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T203136019298-stub-operator-spurious-edge",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stub-operator-spurious-edge",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T20:31:38Z",
+        "completed_at": "2026-08-16T20:43:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 733,
+        "time_budget": "25m",
+        "base_sha": "1c06c5540ab724cd6f3ecbb01506a3023a70d6e0",
+        "commits": [
+          "67170f5317339668317d934cbd4abb7314488f90"
+        ],
+        "changed_lines": null,
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "Operator extension 67170f53: spurious-edge stub class deletes only with exactly-two signed bindings and an accepted+valid sibling, CAS-rechecked in-transaction with scalar reconcile; 16/16 tests incl. 2 disposable-Neo4j regressions; awaiting review",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stub-operator-spurious-edge-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 65335296,
+            "input_tokens": 66935670,
+            "output_tokens": 151497,
+            "reasoning_output_tokens": 47349
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 51
+    "_version": 52
   }
 }

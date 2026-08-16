@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="153">
+<meta name="plan-version" content="154">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1402,6 +1402,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stub-detach-instrument-gap" data-who="reckon-ship" data-when="2026-08-17T00:05:00+00:00">
     <div class="r-comment-body"><p><strong>The two refused stub rows exposed an instrument gap; a targeted operator extension is dispatched.</strong> Row-2 adjudication proved the source's second target authoritative (<code>difference_of_fast_neutral_beam_motional_stark_wavelength_and_…</code>: accepted/accepted, valid, score 1.0, catalog_edit), so the locked disposition is stub-side detach only — but <code>detach_one_attachment</code>'s would-orphan guard refuses any single-attachment name and directs to <code>sn edit --rename</code>, advice that cannot apply to a lifecycle-less stub already signed for deletion. Resetting the whole source is out: it would detach the accepted target too. Fix: extend <code>reconcile_lifecycleless_standard_name_stubs</code> so a stub whose producing source also carries an authoritative accepted binding is classified delete-as-dead-link-stub — deleting the stub with its spurious edge and reconciling the source scalar to the surviving accepted target — with a disposable-Neo4j regression, ordinary review, then the rerun (row-1 source reset via the already-sanctioned <code>reset_standard_name_sources</code>, fresh cohort, zero-refusal apply). Zero mutations have occurred; every refusal is receipted.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-spurious-edge-extension" data-who="reckon-ship" data-when="2026-08-17T00:30:00+00:00">
+    <div class="r-comment-body"><p><strong>The spurious-edge stub classification is implemented (worktree commit <code>67170f53</code>; review dispatched).</strong> A childless lifecycle-less StandardName is now deletable only when every producing DD source has exactly two signed bindings — the stub plus exactly one sibling with name_stage accepted and validation_status valid — with the sibling identity recorded in the signed manifest as the authority basis, a caller-owned-transaction CAS recheck before deletion, and the null source scalar reconciled to the accepted sibling in the same transaction. Every other shape keeps the existing refusal. 16/16 operator tests pass including the real-shaped regression (the motional-Stark row) and a drafted-sibling refusal, both on disposable Neo4j. After review and merge, the final node resets row 1's source via <code>reset_standard_name_sources</code>, regenerates the fresh cohort expecting zero refusals, and runs the hash-bound apply.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
