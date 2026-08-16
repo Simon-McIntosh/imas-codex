@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:12:12",
+  "updated": "2026-08-16T22:13:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1331,9 +1331,55 @@
           "tokens": null,
           "utilisation_pct": null
         }
+      },
+      {
+        "run_id": "r-20260816T200418819140-operator-integration-tests",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "operator-integration-tests",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T20:04:21Z",
+        "completed_at": "2026-08-16T20:13:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 547,
+        "time_budget": "20m",
+        "base_sha": "fb821176422f4702e8ad86c8cf0d38a35ebb57fa",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Post-merge gate for the stub-reconcile operator on main fb821176: full SN suite 6533/10/0; graph-marked operator cases covered by the author's disposable-Neo4j run (12/12, hash-verified in review), auto-skipped here without a server \u2014 honestly qualified",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/operator-integration-tests-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 20444416,
+            "input_tokens": 20884128,
+            "output_tokens": 30585,
+            "reasoning_output_tokens": 10629
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 47
+    "_version": 48
   }
 }

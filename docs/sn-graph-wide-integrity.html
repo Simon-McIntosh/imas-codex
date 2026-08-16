@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="149">
+<meta name="plan-version" content="150">
 <meta name="plan-impl" content="0.83">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1390,6 +1390,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-west-blocking-census" data-who="reckon-ship" data-when="2026-08-16T22:45:00+00:00">
     <div class="r-comment-body"><p><strong>The WEST-blocking subset is re-measured live: 3 / 4 / 12 / 0 / 0, superseding the historic 6 / 48 / 46 / 9 / missing-gate partition.</strong> Read-only census at source parity <code>387dc720</code> (read-only proven by zero-delta LLMCost/SNRun/StandardNameChange counters). Class 1 — three accepted names fail the attachment predicate: <code>atomic_count_of_ion_state</code>, <code>equilibrium_weight_of_interferometer_beam</code>, <code>frequency_of_diagnostic_antenna</code>; repair via reviewed <code>sn edit --rename</code> plus ordinary quorum. Class 2 — four WEST sources carry a null <code>produced_sn_id</code> scalar while edge and projection agree (three equilibrium profiles_1d paths plus one summary heating path); repair via the exact <code>repair_semantic_source_invariants</code> allowlist instrument. Class 3 — twelve of the 46 line-of-sight cohort rows remain bound to <code>toroidal_angle_of_measurement_position</code> instead of the locked <code>toroidal_coordinate_of_line_of_sight</code> identity (all <code>/phi</code> leaves; 34 rows already resolved); one fold-adjudication node. Class 4 — CLEAR: all nine gm1–gm9 paths have accepted valid names with DD units (gm3's docs sit at reviewed — a docs-drain item, not a name defect). Class 5 — CLEAR: <code>guard_source_pairings</code> is inside the <code>persist_refined_name</code> transaction (current <code>graph_ops.py:16373-16389</code>). Exact members: scratchpad <code>west-blocking-members.json</code> (session-local; identities quoted in the crew ledger record). Execution order: scalar-mirror repair, stub-reconcile quiet-window apply, the three reviewed renames, the twelve-path fold adjudication — mutations strictly sequenced, census re-run after each.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-operator-integrated" data-who="reckon-ship" data-when="2026-08-16T23:00:00+00:00">
+    <div class="r-comment-body"><p><strong>The stub-reconcile operator is integrated on main (merge <code>fb821176</code>) and gate-proven.</strong> Full Standard Names suite 6533 passed / 10 skipped / 0 failed on the merged HEAD; the operator's six graph-marked transactional cases were executed green against disposable Neo4j 2026.01.4 in the corrective run (12/12, logs SHA-256-verified during re-review) and auto-skipped in the merge gate without a server — an honestly qualified pass. f-stub-reconcile now has both its prevention (landed <code>60f5777a</code>) and its operator (landed <code>fb821176</code>); what remains is the quiet-window production apply with a fresh closure, sequenced after the running WEST scalar-mirror repair so each mutation sees a stable graph.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
