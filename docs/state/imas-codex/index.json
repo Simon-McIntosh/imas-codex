@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-12T06:28:43",
+  "updated": "2026-08-16T19:01:15",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -328,9 +328,14 @@
         "when": "2026-08-12",
         "who": "Simon McIntosh",
         "what": "Sprint order revised at the lead's direction: quality lands before the WEST human review (S9 = docs quality + benchmark/census, S10 = WEST review + release, S11 = MAST breadth). Graph-wide docs regeneration is locked out as too expensive \u2014 the scoped-only decision on sn-quality-parity authorizes exactly the WEST-cohort refresh plus census-flagged holdout failures."
+      },
+      {
+        "when": "2026-08-16",
+        "who": "reckon-ship",
+        "what": "Portfolio deep-scan ahead of the WEST RC. Fresh live census recorded in both S8 gate plans: the WEST residual is 49 exact RC-blocking rows (not the stale 14-source claim; gm1/gm5/gm6 already accepted). Codex investigation workers root-caused the 2026-08-11 run stalls (pending-counter predicate drift plus an in-flight watchdog gap), diagnosed the 297 lifecycle-less name stubs (bare-endpoint MERGE in the edge writers; 57 materialize / 237 delete / 3 rebind disposition), and produced the 586-row WEST gate manifest. Codex prototype workers demonstrated the stall and stub fixes with TDD evidence in isolated worktrees; landing stays with S8 execution. plan-lifecycle-hygiene archived; f-west-residual-14 resolved as superseded; the 28-row WEST docs drain folded into the S9 refresh."
       }
     ],
     "blockers": [],
-    "_version": 35
+    "_version": 36
   }
 }
