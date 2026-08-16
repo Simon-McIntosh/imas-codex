@@ -2719,6 +2719,7 @@ def _bootstrap_missing_derived_parent_targets(
                 MATCH (child:StandardName {id: pair.child_id})
                 RETURN pair.parent_id AS parent_id,
                        child.id AS id,
+                       child.name_stage AS name_stage,
                        child.unit AS unit,
                        child.cocos_transformation_type AS cocos,
                        child.physics_domain AS physics_domain,
@@ -2748,6 +2749,20 @@ def _bootstrap_missing_derived_parent_targets(
             authorized_unit = (
                 next(iter(inherited_units)) if len(inherited_units) == 1 else None
             )
+            child_by_id = {str(child["id"]): child for child in child_data}
+            bootstrap_edges = []
+            for edge in edges_by_parent.get(parent_id, []):
+                child = child_by_id[edge["from_name"]]
+                bootstrap_edges.append(
+                    {
+                        **edge,
+                        "expected_name_stage": child.get("name_stage"),
+                        "expected_unit": child.get("unit"),
+                        "expected_cocos": child.get("cocos"),
+                        "expected_physics_domain": child.get("physics_domain"),
+                        "expected_kind": child.get("kind"),
+                    }
+                )
             seeded = _materialize_derived_parent_rows(
                 gc,
                 [
@@ -2759,7 +2774,7 @@ def _bootstrap_missing_derived_parent_targets(
                             for edge in edges_by_parent.get(parent_id, [])
                         ],
                         "authorized_unit": authorized_unit,
-                        "bootstrap_edges": edges_by_parent.get(parent_id, []),
+                        "bootstrap_edges": bootstrap_edges,
                     }
                 ],
                 bootstrap_missing=True,
@@ -2920,23 +2935,21 @@ def _write_standard_name_edges(
         # doubles). Keep those adapters read-only: MATCH-only writers may
         # attempt the relationships, but no endpoint is bootstrapped without
         # an explicit missing-node projection and child authority.
-        existing_ids = set(endpoint_ids)
         lifecycle_ids = set(endpoint_ids)
     else:
-        existing_ids = {str(row["id"]) for row in discovered if row.get("id")}
         lifecycle_ids = {
             str(row["id"])
             for row in discovered
             if row.get("id")
             and ("name_stage" not in row or row.get("name_stage") is not None)
         }
-    missing_parent_ids = {
-        row["to_name"] for row in co_batch if row["to_name"] not in existing_ids
+    unmaterialized_parent_ids = {
+        row["to_name"] for row in co_batch if row["to_name"] not in lifecycle_ids
     }
     materialized_ids = _bootstrap_missing_derived_parent_targets(
         gc,
         co_batch,
-        missing_parent_ids,
+        unmaterialized_parent_ids,
     )
     authorized_ids = explicit_ids | lifecycle_ids | materialized_ids
     admitted_parent_ids = {row["to_name"] for row in co_batch}
@@ -3738,6 +3751,23 @@ def _materialize_derived_parent_rows(
         parent_match = (
             "UNWIND $bootstrap_edges AS authorized_edge "
             "MATCH (authorized_child:StandardName {id: authorized_edge.from_name}) "
+            "WHERE ((authorized_child.name_stage IS NULL AND "
+            "authorized_edge.expected_name_stage IS NULL) OR "
+            "authorized_child.name_stage = authorized_edge.expected_name_stage) "
+            "AND ((authorized_child.unit IS NULL AND "
+            "authorized_edge.expected_unit IS NULL) OR "
+            "authorized_child.unit = authorized_edge.expected_unit) "
+            "AND ((authorized_child.kind IS NULL AND "
+            "authorized_edge.expected_kind IS NULL) OR "
+            "authorized_child.kind = authorized_edge.expected_kind) "
+            "AND ((authorized_child.physics_domain IS NULL AND "
+            "authorized_edge.expected_physics_domain IS NULL) OR "
+            "authorized_child.physics_domain = "
+            "authorized_edge.expected_physics_domain) "
+            "AND ((authorized_child.cocos_transformation_type IS NULL "
+            "AND authorized_edge.expected_cocos IS NULL) OR "
+            "authorized_child.cocos_transformation_type = "
+            "authorized_edge.expected_cocos) "
             "WITH collect({child: authorized_child, edge: authorized_edge}) "
             "AS authorized_children "
             "WHERE size(authorized_children) = size($bootstrap_edges) "
@@ -3860,8 +3890,18 @@ def _materialize_derived_parent_rows(
                 relation.separator = edge.separator,
                 relation.axis = edge.axis,
                 relation.shape = edge.shape
+            RETURN parent.id AS parent_id
             """
-        gc.query(materialize_cypher, **props)
+        result = list(gc.query(materialize_cypher, **props))
+
+        if bootstrap_missing and not any(
+            returned.get("parent_id") == parent_id for returned in result
+        ):
+            logger.warning(
+                "Parent %s bootstrap authority changed before persistence — refusing",
+                parent_id,
+            )
+            continue
 
         if unit and not bootstrap_missing:
             # Self-heal: drop any pre-existing HAS_UNIT edge (possibly to a
