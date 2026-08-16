@@ -3486,6 +3486,7 @@ def _delete_derived_parent_nodes(
     *,
     manifest_sha256: str | None = None,
     reason: str | None = None,
+    expected_producer_ids_by_parent: dict[str, list[str]] | None = None,
 ) -> int:
     """Delete derived-parent nodes and their review/derived-source scaffolding."""
     deleted = 0
@@ -3496,10 +3497,24 @@ def _delete_derived_parent_nodes(
         or "structural derived parent no longer satisfies lifecycle admission",
     )
     for parent_id in parent_ids:
+        expected_producer_ids = (
+            sorted(set(expected_producer_ids_by_parent[parent_id]))
+            if expected_producer_ids_by_parent is not None
+            and parent_id in expected_producer_ids_by_parent
+            else None
+        )
         rows = list(
             gc.query(
                 f"""
                 MATCH (sn:StandardName {{id: $parent_id}})
+                CALL (sn) {{
+                  OPTIONAL MATCH (producer:StandardNameSource)
+                  WHERE producer.produced_sn_id = sn.id
+                     OR EXISTS {{ (producer)-[:PRODUCED_NAME]->(sn) }}
+                     OR (producer.source_type = 'derived'
+                         AND producer.source_id = sn.id)
+                  RETURN collect(DISTINCT producer.id) AS current_producer_ids
+                }}
                 OPTIONAL MATCH (derived_source:StandardNameSource
                   {{source_type: 'derived', source_id: $parent_id}})
                 OPTIONAL MATCH (mirror_source:StandardNameSource)
@@ -3507,10 +3522,17 @@ def _delete_derived_parent_nodes(
                 OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(rv:StandardNameReview)
                 OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(dr:DocsRevision)
                 WITH sn,
+                     current_producer_ids,
                      collect(DISTINCT derived_source) AS derived_sources,
                      collect(DISTINCT mirror_source) AS mirror_sources,
                      collect(DISTINCT rv) AS reviews,
                      collect(DISTINCT dr) AS revisions
+                WHERE $expected_producer_ids IS NULL
+                   OR (size(current_producer_ids) = size($expected_producer_ids)
+                       AND all(id IN current_producer_ids
+                               WHERE id IN $expected_producer_ids)
+                       AND all(id IN $expected_producer_ids
+                               WHERE id IN current_producer_ids))
                 {deletion_clause}
                 SET change.manifest_sha256 = $stub_manifest_sha256
                 FOREACH (source IN mirror_sources |
@@ -3522,6 +3544,7 @@ def _delete_derived_parent_nodes(
                 RETURN 1 AS deleted
                 """,
                 parent_id=parent_id,
+                expected_producer_ids=expected_producer_ids,
                 stub_manifest_sha256=manifest_sha256,
                 **deletion_params,
             )
@@ -4570,12 +4593,19 @@ CALL (stub) {
   WHERE source.source_type = 'dd' OR EXISTS { (source)-[:FROM_DD_PATH]->(:IMASNode) }
   OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
   OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
-  WITH source, dd, collect(DISTINCT bound.id) AS bindings
+  WITH source, dd, collect(DISTINCT {
+    id: bound.id,
+    name_stage: bound.name_stage,
+    validation_status: bound.validation_status
+  }) AS binding_targets
   RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
     source_id: source.id,
     expected_status: source.status,
     expected_scalar: source.produced_sn_id,
-    expected_bindings: bindings,
+    expected_bindings: [target IN binding_targets WHERE target.id IS NOT NULL |
+                        target.id],
+    binding_targets: [target IN binding_targets WHERE target.id IS NOT NULL |
+                      target],
     dd_path: dd.id,
     unit: coalesce(dd.units, dd.unit, source.unit)
   } END) AS dd_sources
@@ -4596,7 +4626,8 @@ CALL (stub) {
   }
   RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
     properties: properties(source), incident: incident
-  } END) AS source_closure
+  } END) AS source_closure,
+  collect(DISTINCT source.id) AS producer_ids
 }
 CALL (stub) {
   OPTIONAL MATCH (stub)-[:HAS_REVIEW]->(review:StandardNameReview)
@@ -4630,7 +4661,7 @@ CALL (stub) {
 }
 RETURN stub.id AS id, properties(stub) AS properties,
        child_data, edge_kinds, dd_sources, incident_relationships,
-       source_closure, review_closure, revision_closure
+       source_closure, producer_ids, review_closure, revision_closure
 ORDER BY id
 """
 
@@ -4665,6 +4696,62 @@ def _derived_parent_unit_from_eligible_children(
     return next(iter(units)) if len(units) == 1 else None
 
 
+def _spurious_stub_binding_authority(
+    name_id: str,
+    dd_sources: list[dict[str, Any]],
+    producer_ids: list[str],
+) -> list[dict[str, Any]]:
+    """Return accepted-sibling authority only for the complete producer set."""
+    authorities: list[dict[str, Any]] = []
+    for source in dd_sources:
+        bindings = sorted(set(source.get("expected_bindings") or ()))
+        targets = [dict(target) for target in source.get("binding_targets") or ()]
+        accepted_siblings = [
+            target
+            for target in targets
+            if target.get("id") != name_id
+            and target.get("name_stage") == "accepted"
+            and target.get("validation_status") == "valid"
+        ]
+        if (
+            not source.get("source_id")
+            or not source.get("expected_status")
+            or not source.get("dd_path")
+            or not source.get("unit")
+            or len(bindings) != 2
+            or name_id not in bindings
+            or sorted(target.get("id") for target in targets) != bindings
+            or len(accepted_siblings) != 1
+            or source.get("expected_scalar") not in (None, accepted_siblings[0]["id"])
+        ):
+            return []
+        sibling = accepted_siblings[0]
+        authorities.append(
+            {
+                "source_id": source["source_id"],
+                "expected_status": source["expected_status"],
+                "expected_scalar": source.get("expected_scalar"),
+                "expected_bindings": bindings,
+                "authoritative_target_id": sibling["id"],
+                "authoritative_name_stage": sibling["name_stage"],
+                "authoritative_validation_status": sibling["validation_status"],
+            }
+        )
+    expected_producer_ids = sorted(set(producer_ids))
+    qualifying_source_ids = sorted(
+        {str(authority["source_id"]) for authority in authorities}
+    )
+    if (
+        len(authorities) != len(dd_sources)
+        or len(authorities) != len(qualifying_source_ids)
+        or qualifying_source_ids != expected_producer_ids
+    ):
+        return []
+    for authority in authorities:
+        authority["expected_producer_ids"] = expected_producer_ids
+    return authorities
+
+
 def _partition_lifecycleless_stub_rows(
     rows: list[dict[str, Any]],
     *,
@@ -4682,12 +4769,22 @@ def _partition_lifecycleless_stub_rows(
         name_id = str(row.get("id") or "").strip()
         children = [dict(child) for child in row.get("child_data") or []]
         dd_sources = [dict(source) for source in row.get("dd_sources") or []]
+        producer_ids = sorted(set(row.get("producer_ids") or ()))
         row["id"] = name_id
         if not name_id:
             row["refusal_reason"] = "missing StandardName identity"
             partitions["refused"].append(row)
             continue
         if dd_sources:
+            spurious_authority = (
+                _spurious_stub_binding_authority(name_id, dd_sources, producer_ids)
+                if not children
+                else []
+            )
+            if spurious_authority:
+                row["spurious_binding_authority"] = spurious_authority
+                partitions["delete-as-dead-link-stub"].append(row)
+                continue
             incomplete = [
                 source
                 for source in dd_sources
@@ -4774,6 +4871,76 @@ def _lifecycleless_stub_manifest(
             for action, items in sorted(partitions.items())
         },
     }
+
+
+def _reconcile_spurious_stub_source_scalars(
+    transaction: Any, partitions: dict[str, list[dict[str, Any]]]
+) -> int:
+    """CAS null source mirrors to the accepted sibling signed by the manifest."""
+    repairs = [
+        {"stub_id": row["id"], **authority}
+        for row in partitions["delete-as-dead-link-stub"]
+        for authority in row.get("spurious_binding_authority") or ()
+    ]
+    if not repairs:
+        return 0
+    rows = list(
+        transaction.run(
+            """
+            UNWIND $repairs AS repair
+            MATCH (source:StandardNameSource {id: repair.source_id})
+            MATCH (stub:StandardName {id: repair.stub_id})
+            MATCH (accepted:StandardName {id: repair.authoritative_target_id})
+            WHERE source.status = repair.expected_status
+              AND source.claimed_at IS NULL
+              AND source.claim_token IS NULL
+              AND ((repair.expected_scalar IS NULL
+                    AND source.produced_sn_id IS NULL)
+                   OR source.produced_sn_id = repair.expected_scalar)
+              AND stub.name_stage IS NULL
+              AND stub.status IS NULL
+              AND stub.origin IS NULL
+              AND accepted.name_stage = repair.authoritative_name_stage
+              AND accepted.validation_status =
+                  repair.authoritative_validation_status
+              AND EXISTS { (source)-[:PRODUCED_NAME]->(stub) }
+              AND EXISTS { (source)-[:PRODUCED_NAME]->(accepted) }
+            CALL (stub) {
+              OPTIONAL MATCH (producer:StandardNameSource)
+              WHERE producer.produced_sn_id = stub.id
+                 OR EXISTS { (producer)-[:PRODUCED_NAME]->(stub) }
+                 OR (producer.source_type = 'derived'
+                     AND producer.source_id = stub.id)
+              RETURN collect(DISTINCT producer.id) AS current_producer_ids
+            }
+            CALL (source) {
+              MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+              RETURN collect(DISTINCT bound.id) AS current_bindings
+            }
+            WITH repair, source, accepted, current_bindings,
+                 current_producer_ids
+            WHERE size(current_producer_ids) = size(repair.expected_producer_ids)
+              AND all(id IN current_producer_ids
+                      WHERE id IN repair.expected_producer_ids)
+              AND all(id IN repair.expected_producer_ids
+                      WHERE id IN current_producer_ids)
+              AND size(current_bindings) = size(repair.expected_bindings)
+              AND all(id IN current_bindings WHERE id IN repair.expected_bindings)
+              AND all(id IN repair.expected_bindings WHERE id IN current_bindings)
+            SET source.produced_sn_id = accepted.id
+            RETURN count(*) AS repairs,
+                   count(DISTINCT CASE WHEN repair.expected_scalar IS NULL
+                                      THEN source END) AS sources
+            """,
+            repairs=repairs,
+        )
+    )
+    repaired = int(rows[0].get("repairs", 0)) if rows else 0
+    if repaired != len(repairs):
+        raise LifecyclelessStubConflict(
+            "accepted sibling authority changed before stub deletion"
+        )
+    return int(rows[0].get("sources", 0))
 
 
 def reconcile_lifecycleless_standard_name_stubs(
@@ -4872,6 +5039,10 @@ def reconcile_lifecycleless_standard_name_stubs(
                     reset_standard_name_sources,
                 )
 
+                reconciled_sources = _reconcile_spurious_stub_source_scalars(
+                    transaction, partitions
+                )
+
                 reset_rows = [
                     source
                     for row in partitions["rebind-source"]
@@ -4961,8 +5132,8 @@ def reconcile_lifecycleless_standard_name_stubs(
                             "materialization ledger cardinality changed"
                         )
 
-                deleted_ids = [
-                    row["id"]
+                deletion_rows = [
+                    (action, row)
                     for action in (
                         "delete-as-dead-link-stub",
                         "rebind-source",
@@ -4970,11 +5141,21 @@ def reconcile_lifecycleless_standard_name_stubs(
                     for row in partitions[action]
                     if not row.get("child_data")
                 ]
+                deleted_ids = [row["id"] for _, row in deletion_rows]
+                deletion_producer_ids = {
+                    row["id"]: (
+                        []
+                        if action == "rebind-source"
+                        else list(row.get("producer_ids") or ())
+                    )
+                    for action, row in deletion_rows
+                }
                 deleted = _delete_derived_parent_nodes(
                     adapter,
                     deleted_ids,
                     manifest_sha256=computed_hash,
                     reason=reason,
+                    expected_producer_ids_by_parent=deletion_producer_ids,
                 )
                 if deleted != len(deleted_ids):
                     raise LifecyclelessStubConflict(
@@ -5006,6 +5187,7 @@ def reconcile_lifecycleless_standard_name_stubs(
                     "changed": changed if apply else 0,
                     "would_change": changed,
                     "sources_reset": reset_count,
+                    "sources_reconciled": reconciled_sources,
                     "counts": counts,
                     "manifest": manifest,
                     "manifest_sha256": computed_hash,

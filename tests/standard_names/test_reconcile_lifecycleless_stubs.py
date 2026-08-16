@@ -15,8 +15,10 @@ from imas_codex.graph.client import GraphClient as RealGraphClient
 from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.graph_ops import (
     LifecyclelessStubConflict,
+    _delete_derived_parent_nodes,
     _lifecycleless_stub_manifest,
     _partition_lifecycleless_stub_rows,
+    _reconcile_spurious_stub_source_scalars,
     reconcile_lifecycleless_standard_name_stubs,
 )
 
@@ -66,6 +68,45 @@ def _authority_rows() -> list[dict]:
     ]
 
 
+def _spurious_binding_row(
+    *, sibling_stage: str = "accepted", sibling_validation: str = "valid"
+) -> dict:
+    stub_id = "fast_neutral_beam_motional_stark_wavelength"
+    sibling_id = (
+        "difference_of_fast_neutral_beam_motional_stark_wavelength_and_"
+        "fast_neutral_beam_reference_wavelength_of_spectral_line"
+    )
+    return {
+        "id": stub_id,
+        "properties": {"id": stub_id},
+        "child_data": [],
+        "edge_kinds": [],
+        "producer_ids": ["dd:charge_exchange/channel/bes/lorentz_shift"],
+        "dd_sources": [
+            {
+                "source_id": "dd:charge_exchange/channel/bes/lorentz_shift",
+                "expected_status": "composed",
+                "expected_scalar": None,
+                "expected_bindings": [stub_id, sibling_id],
+                "binding_targets": [
+                    {
+                        "id": stub_id,
+                        "name_stage": None,
+                        "validation_status": None,
+                    },
+                    {
+                        "id": sibling_id,
+                        "name_stage": sibling_stage,
+                        "validation_status": sibling_validation,
+                    },
+                ],
+                "dd_path": "charge_exchange/channel/bes/lorentz_shift",
+                "unit": "m",
+            }
+        ],
+    }
+
+
 def test_fresh_cohort_partitions_all_three_dispositions() -> None:
     partitions = _partition_lifecycleless_stub_rows(_authority_rows())
 
@@ -77,6 +118,79 @@ def test_fresh_cohort_partitions_all_three_dispositions() -> None:
     ]
     assert [row["id"] for row in partitions["rebind-source"]] == ["dd_backed_endpoint"]
     assert partitions["refused"] == []
+
+
+def test_accepted_valid_sibling_authorizes_spurious_stub_deletion() -> None:
+    row = _spurious_binding_row()
+
+    partitions = _partition_lifecycleless_stub_rows([row])
+
+    assert partitions["refused"] == []
+    deleted = partitions["delete-as-dead-link-stub"]
+    assert [item["id"] for item in deleted] == [row["id"]]
+    assert deleted[0]["spurious_binding_authority"] == [
+        {
+            "source_id": "dd:charge_exchange/channel/bes/lorentz_shift",
+            "expected_status": "composed",
+            "expected_scalar": None,
+            "expected_bindings": [
+                "difference_of_fast_neutral_beam_motional_stark_wavelength_and_"
+                "fast_neutral_beam_reference_wavelength_of_spectral_line",
+                "fast_neutral_beam_motional_stark_wavelength",
+            ],
+            "authoritative_target_id": (
+                "difference_of_fast_neutral_beam_motional_stark_wavelength_and_"
+                "fast_neutral_beam_reference_wavelength_of_spectral_line"
+            ),
+            "authoritative_name_stage": "accepted",
+            "authoritative_validation_status": "valid",
+            "expected_producer_ids": ["dd:charge_exchange/channel/bes/lorentz_shift"],
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    "authority_change",
+    ["nonaccepted", "nonvalid", "third-binding", "outside-scalar"],
+)
+def test_incomplete_sibling_authority_refuses_spurious_stub_deletion(
+    authority_change: str,
+) -> None:
+    row = _spurious_binding_row(
+        sibling_stage="drafted" if authority_change == "nonaccepted" else "accepted",
+        sibling_validation="pending" if authority_change == "nonvalid" else "valid",
+    )
+    source = row["dd_sources"][0]
+    if authority_change == "third-binding":
+        source["expected_bindings"].append("unrelated_standard_name")
+        source["binding_targets"].append(
+            {
+                "id": "unrelated_standard_name",
+                "name_stage": "accepted",
+                "validation_status": "valid",
+            }
+        )
+    elif authority_change == "outside-scalar":
+        source["expected_scalar"] = "unrelated_standard_name"
+
+    partitions = _partition_lifecycleless_stub_rows([row])
+
+    assert partitions["delete-as-dead-link-stub"] == []
+    assert partitions["refused"][0]["refusal_reason"] == (
+        "incomplete DD source or unit authority"
+    )
+
+
+def test_extra_non_dd_producer_refuses_spurious_stub_deletion() -> None:
+    row = _spurious_binding_row()
+    row["producer_ids"].append("signals:iter:lorentz-shift")
+
+    partitions = _partition_lifecycleless_stub_rows([row])
+
+    assert partitions["delete-as-dead-link-stub"] == []
+    assert partitions["refused"][0]["refusal_reason"] == (
+        "incomplete DD source or unit authority"
+    )
 
 
 @pytest.mark.parametrize("missing", ["unit", "dd_path", "expected_status"])
@@ -488,4 +602,364 @@ def test_late_failure_rolls_back_materialized_parent(
         client.query(
             "MATCH (node) WHERE node.id IN $ids DETACH DELETE node",
             ids=[parent_id, child_id, dead_id, f"derived:{parent_id}"],
+        )
+
+
+@pytest.mark.graph
+def test_authoritative_sibling_deletes_spurious_stub_and_repairs_scalar(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    stub_id = "fast_neutral_beam_motional_stark_wavelength"
+    accepted_id = (
+        "difference_of_fast_neutral_beam_motional_stark_wavelength_and_"
+        "fast_neutral_beam_reference_wavelength_of_spectral_line"
+    )
+    dd_path = "charge_exchange/channel/bes/lorentz_shift"
+    source_id = f"dd:{dd_path}"
+    client = _disposable_client(disposable_neo4j, "spurious-stub-binding")
+    try:
+        client.query(
+            "CREATE (stub:StandardName {id: $stub}) "
+            "CREATE (accepted:StandardName {id: $accepted, name_stage: 'accepted', "
+            "docs_stage: 'accepted', status: 'draft', origin: 'catalog_edit', "
+            "validation_status: 'valid', reviewer_score_name: 1.0, "
+            "description: 'Accepted wavelength difference.'}) "
+            "CREATE (dd:IMASNode {id: $dd_path, units: 'm'}) "
+            "CREATE (source:StandardNameSource {id: $source, source_type: 'dd', "
+            "source_id: $dd_path, status: 'composed', produced_sn_id: null}) "
+            "CREATE (source)-[:FROM_DD_PATH]->(dd) "
+            "CREATE (source)-[:PRODUCED_NAME]->(stub) "
+            "CREATE (source)-[:PRODUCED_NAME]->(accepted)",
+            stub=stub_id,
+            accepted=accepted_id,
+            dd_path=dd_path,
+            source=source_id,
+        )
+
+        preview = reconcile_lifecycleless_standard_name_stubs(gc=client)
+        assert preview["counts"] == {
+            "materialize-as-derived-parent": 0,
+            "delete-as-dead-link-stub": 1,
+            "rebind-source": 0,
+            "refused": 0,
+        }
+        signed_row = preview["manifest"]["rows"]["delete-as-dead-link-stub"][0]
+        assert (
+            signed_row["spurious_binding_authority"][0]["authoritative_target_id"]
+            == accepted_id
+        )
+
+        applied = reconcile_lifecycleless_standard_name_stubs(
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+
+        assert applied["changed"] == 1
+        assert applied["sources_reconciled"] == 1
+        state = client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "MATCH (accepted:StandardName {id: $accepted}) "
+            "OPTIONAL MATCH (stub:StandardName {id: $stub}) "
+            "RETURN stub IS NULL AS stub_deleted, "
+            "source.produced_sn_id AS produced, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(accepted) } AS accepted_edges, "
+            "accepted.name_stage AS accepted_stage, "
+            "accepted.validation_status AS accepted_validation, "
+            "accepted.description AS accepted_description",
+            source=source_id,
+            accepted=accepted_id,
+            stub=stub_id,
+        )[0]
+        assert state == {
+            "stub_deleted": True,
+            "produced": accepted_id,
+            "accepted_edges": 1,
+            "accepted_stage": "accepted",
+            "accepted_validation": "valid",
+            "accepted_description": "Accepted wavelength difference.",
+        }
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id IN $ids "
+            "OR node.manifest_sha256 = $manifest_sha256 DETACH DELETE node",
+            ids=[stub_id, accepted_id, dd_path, source_id],
+            manifest_sha256=locals().get("preview", {}).get("manifest_sha256"),
+        )
+
+
+@pytest.mark.graph
+def test_nonaccepted_sibling_refuses_spurious_stub_deletion(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    stub_id = "fast_neutral_beam_motional_stark_wavelength"
+    sibling_id = "fast_neutral_beam_reference_wavelength_of_spectral_line"
+    dd_path = "charge_exchange/channel/bes/lorentz_shift"
+    source_id = f"dd:{dd_path}"
+    client = _disposable_client(disposable_neo4j, "spurious-stub-refusal")
+    try:
+        client.query(
+            "CREATE (stub:StandardName {id: $stub}) "
+            "CREATE (sibling:StandardName {id: $sibling, name_stage: 'drafted', "
+            "status: 'draft', origin: 'pipeline', validation_status: 'valid'}) "
+            "CREATE (dd:IMASNode {id: $dd_path, units: 'm'}) "
+            "CREATE (source:StandardNameSource {id: $source, source_type: 'dd', "
+            "source_id: $dd_path, status: 'composed', produced_sn_id: null}) "
+            "CREATE (source)-[:FROM_DD_PATH]->(dd) "
+            "CREATE (source)-[:PRODUCED_NAME]->(stub) "
+            "CREATE (source)-[:PRODUCED_NAME]->(sibling)",
+            stub=stub_id,
+            sibling=sibling_id,
+            dd_path=dd_path,
+            source=source_id,
+        )
+
+        with pytest.raises(
+            LifecyclelessStubConflict, match="incomplete DD source or unit authority"
+        ):
+            reconcile_lifecycleless_standard_name_stubs(gc=client)
+
+        state = client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "MATCH (stub:StandardName {id: $stub}) "
+            "RETURN source.produced_sn_id AS produced, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } AS bindings, "
+            "stub.name_stage AS stub_stage",
+            source=source_id,
+            stub=stub_id,
+        )[0]
+        assert state == {"produced": None, "bindings": 2, "stub_stage": None}
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id IN $ids DETACH DELETE node",
+            ids=[stub_id, sibling_id, dd_path, source_id],
+        )
+
+
+@pytest.mark.graph
+def test_extra_non_dd_producer_refuses_spurious_stub_deletion_in_graph(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    stub_id = "fast_neutral_beam_motional_stark_wavelength"
+    accepted_id = "fast_neutral_beam_reference_wavelength_of_spectral_line"
+    dd_path = "charge_exchange/channel/bes/lorentz_shift"
+    dd_source_id = f"dd:{dd_path}"
+    signal_source_id = "signals:iter:lorentz-shift"
+    client = _disposable_client(disposable_neo4j, "mixed-producer-refusal")
+    try:
+        client.query(
+            "CREATE (stub:StandardName {id: $stub}) "
+            "CREATE (accepted:StandardName {id: $accepted, "
+            "name_stage: 'accepted', status: 'draft', origin: 'catalog_edit', "
+            "validation_status: 'valid'}) "
+            "CREATE (dd:IMASNode {id: $dd_path, units: 'm'}) "
+            "CREATE (dd_source:StandardNameSource {id: $dd_source, "
+            "source_type: 'dd', source_id: $dd_path, status: 'composed', "
+            "produced_sn_id: null}) "
+            "CREATE (signal_source:StandardNameSource {id: $signal_source, "
+            "source_type: 'signal', source_id: 'iter:lorentz-shift', "
+            "status: 'attached', produced_sn_id: null}) "
+            "CREATE (dd_source)-[:FROM_DD_PATH]->(dd) "
+            "CREATE (dd_source)-[:PRODUCED_NAME]->(stub) "
+            "CREATE (dd_source)-[:PRODUCED_NAME]->(accepted) "
+            "CREATE (signal_source)-[:PRODUCED_NAME]->(stub)",
+            stub=stub_id,
+            accepted=accepted_id,
+            dd_path=dd_path,
+            dd_source=dd_source_id,
+            signal_source=signal_source_id,
+        )
+
+        with pytest.raises(
+            LifecyclelessStubConflict, match="incomplete DD source or unit authority"
+        ):
+            reconcile_lifecycleless_standard_name_stubs(gc=client)
+
+        assert client.query(
+            "MATCH (stub:StandardName {id: $stub}) "
+            "MATCH (signal_source:StandardNameSource {id: $signal_source}) "
+            "RETURN stub.name_stage AS stub_stage, "
+            "COUNT { (signal_source)-[:PRODUCED_NAME]->(stub) } AS signal_edges",
+            stub=stub_id,
+            signal_source=signal_source_id,
+        ) == [{"stub_stage": None, "signal_edges": 1}]
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id IN $ids DETACH DELETE node",
+            ids=[stub_id, accepted_id, dd_path, dd_source_id, signal_source_id],
+        )
+
+
+@pytest.mark.graph
+def test_binding_change_between_manifest_and_cas_rolls_back(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    stub_id = "fast_neutral_beam_motional_stark_wavelength"
+    accepted_id = "fast_neutral_beam_reference_wavelength_of_spectral_line"
+    added_id = "unrelated_standard_name"
+    dd_path = "charge_exchange/channel/bes/lorentz_shift"
+    source_id = f"dd:{dd_path}"
+    client = _disposable_client(disposable_neo4j, "binding-change-refusal")
+    try:
+        client.query(
+            "CREATE (stub:StandardName {id: $stub}) "
+            "CREATE (accepted:StandardName {id: $accepted, "
+            "name_stage: 'accepted', status: 'draft', origin: 'catalog_edit', "
+            "validation_status: 'valid'}) "
+            "CREATE (:StandardName {id: $added, name_stage: 'accepted', "
+            "status: 'draft', origin: 'catalog_edit', validation_status: 'valid'}) "
+            "CREATE (dd:IMASNode {id: $dd_path, units: 'm'}) "
+            "CREATE (source:StandardNameSource {id: $source, source_type: 'dd', "
+            "source_id: $dd_path, status: 'composed', produced_sn_id: null}) "
+            "CREATE (source)-[:FROM_DD_PATH]->(dd) "
+            "CREATE (source)-[:PRODUCED_NAME]->(stub) "
+            "CREATE (source)-[:PRODUCED_NAME]->(accepted)",
+            stub=stub_id,
+            accepted=accepted_id,
+            added=added_id,
+            dd_path=dd_path,
+            source=source_id,
+        )
+        preview = reconcile_lifecycleless_standard_name_stubs(gc=client)
+
+        def add_binding_then_reconcile(transaction: object, partitions: dict) -> int:
+            client.query(
+                "MATCH (source:StandardNameSource {id: $source}) "
+                "MATCH (added:StandardName {id: $added}) "
+                "CREATE (source)-[:PRODUCED_NAME]->(added)",
+                source=source_id,
+                added=added_id,
+            )
+            return _reconcile_spurious_stub_source_scalars(transaction, partitions)
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops."
+                "_reconcile_spurious_stub_source_scalars",
+                side_effect=add_binding_then_reconcile,
+            ),
+            pytest.raises(
+                LifecyclelessStubConflict,
+                match="accepted sibling authority changed before stub deletion",
+            ),
+        ):
+            reconcile_lifecycleless_standard_name_stubs(
+                apply=True,
+                manifest_sha256=preview["manifest_sha256"],
+                gc=client,
+            )
+
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "MATCH (stub:StandardName {id: $stub}) "
+            "RETURN source.produced_sn_id AS produced, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } AS bindings, "
+            "stub.name_stage AS stub_stage",
+            source=source_id,
+            stub=stub_id,
+        ) == [{"produced": None, "bindings": 3, "stub_stage": None}]
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id IN $ids "
+            "OR node.manifest_sha256 = $manifest_sha256 DETACH DELETE node",
+            ids=[stub_id, accepted_id, added_id, dd_path, source_id],
+            manifest_sha256=locals().get("preview", {}).get("manifest_sha256"),
+        )
+
+
+@pytest.mark.graph
+def test_new_producer_between_scalar_cas_and_deletion_rolls_back(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    stub_id = "fast_neutral_beam_motional_stark_wavelength"
+    accepted_id = "fast_neutral_beam_reference_wavelength_of_spectral_line"
+    dd_path = "charge_exchange/channel/bes/lorentz_shift"
+    source_id = f"dd:{dd_path}"
+    added_source_id = "signals:iter:late-lorentz-shift"
+    client = _disposable_client(disposable_neo4j, "producer-gap-refusal")
+    try:
+        client.query(
+            "CREATE (stub:StandardName {id: $stub}) "
+            "CREATE (accepted:StandardName {id: $accepted, "
+            "name_stage: 'accepted', status: 'draft', origin: 'catalog_edit', "
+            "validation_status: 'valid'}) "
+            "CREATE (dd:IMASNode {id: $dd_path, units: 'm'}) "
+            "CREATE (source:StandardNameSource {id: $source, source_type: 'dd', "
+            "source_id: $dd_path, status: 'composed', produced_sn_id: null}) "
+            "CREATE (:StandardNameSource {id: $added_source, "
+            "source_type: 'signal', source_id: 'iter:late-lorentz-shift', "
+            "status: 'attached', produced_sn_id: null}) "
+            "CREATE (source)-[:FROM_DD_PATH]->(dd) "
+            "CREATE (source)-[:PRODUCED_NAME]->(stub) "
+            "CREATE (source)-[:PRODUCED_NAME]->(accepted)",
+            stub=stub_id,
+            accepted=accepted_id,
+            dd_path=dd_path,
+            source=source_id,
+            added_source=added_source_id,
+        )
+        preview = reconcile_lifecycleless_standard_name_stubs(gc=client)
+
+        def inject_producer_then_delete(
+            transaction_client: object,
+            parent_ids: list[str],
+            **kwargs: object,
+        ) -> int:
+            transaction_client.query(
+                "MATCH (source:StandardNameSource {id: $source}) "
+                "SET source.produced_sn_id = $stub",
+                source=added_source_id,
+                stub=stub_id,
+            )
+            return _delete_derived_parent_nodes(
+                transaction_client, parent_ids, **kwargs
+            )
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+                side_effect=inject_producer_then_delete,
+            ),
+            pytest.raises(
+                LifecyclelessStubConflict,
+                match="stub deletion cardinality changed before mutation",
+            ),
+        ):
+            reconcile_lifecycleless_standard_name_stubs(
+                apply=True,
+                manifest_sha256=preview["manifest_sha256"],
+                gc=client,
+            )
+
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "MATCH (added:StandardNameSource {id: $added_source}) "
+            "MATCH (stub:StandardName {id: $stub}) "
+            "MATCH (accepted:StandardName {id: $accepted}) "
+            "RETURN source.produced_sn_id AS source_scalar, "
+            "added.produced_sn_id AS added_scalar, "
+            "stub.name_stage AS stub_stage, "
+            "accepted.name_stage AS accepted_stage, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(stub) } AS stub_edges, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(accepted) } AS accepted_edges",
+            source=source_id,
+            added_source=added_source_id,
+            stub=stub_id,
+            accepted=accepted_id,
+        ) == [
+            {
+                "source_scalar": None,
+                "added_scalar": None,
+                "stub_stage": None,
+                "accepted_stage": "accepted",
+                "stub_edges": 1,
+                "accepted_edges": 1,
+            }
+        ]
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id IN $ids "
+            "OR node.manifest_sha256 = $manifest_sha256 DETACH DELETE node",
+            ids=[stub_id, accepted_id, dd_path, source_id, added_source_id],
+            manifest_sha256=locals().get("preview", {}).get("manifest_sha256"),
         )
