@@ -4603,7 +4603,8 @@ CALL (stub) {
   }
   RETURN collect(CASE WHEN source IS NULL THEN null ELSE {
     properties: properties(source), incident: incident
-  } END) AS source_closure
+  } END) AS source_closure,
+  collect(DISTINCT source.id) AS producer_ids
 }
 CALL (stub) {
   OPTIONAL MATCH (stub)-[:HAS_REVIEW]->(review:StandardNameReview)
@@ -4637,7 +4638,7 @@ CALL (stub) {
 }
 RETURN stub.id AS id, properties(stub) AS properties,
        child_data, edge_kinds, dd_sources, incident_relationships,
-       source_closure, review_closure, revision_closure
+       source_closure, producer_ids, review_closure, revision_closure
 ORDER BY id
 """
 
@@ -4673,9 +4674,11 @@ def _derived_parent_unit_from_eligible_children(
 
 
 def _spurious_stub_binding_authority(
-    name_id: str, dd_sources: list[dict[str, Any]]
+    name_id: str,
+    dd_sources: list[dict[str, Any]],
+    producer_ids: list[str],
 ) -> list[dict[str, Any]]:
-    """Return exact accepted-sibling authority for every producing source."""
+    """Return accepted-sibling authority only for the complete producer set."""
     authorities: list[dict[str, Any]] = []
     for source in dd_sources:
         bindings = sorted(set(source.get("expected_bindings") or ()))
@@ -4711,7 +4714,19 @@ def _spurious_stub_binding_authority(
                 "authoritative_validation_status": sibling["validation_status"],
             }
         )
-    return authorities if len(authorities) == len(dd_sources) else []
+    expected_producer_ids = sorted(set(producer_ids))
+    qualifying_source_ids = sorted(
+        {str(authority["source_id"]) for authority in authorities}
+    )
+    if (
+        len(authorities) != len(dd_sources)
+        or len(authorities) != len(qualifying_source_ids)
+        or qualifying_source_ids != expected_producer_ids
+    ):
+        return []
+    for authority in authorities:
+        authority["expected_producer_ids"] = expected_producer_ids
+    return authorities
 
 
 def _partition_lifecycleless_stub_rows(
@@ -4731,6 +4746,7 @@ def _partition_lifecycleless_stub_rows(
         name_id = str(row.get("id") or "").strip()
         children = [dict(child) for child in row.get("child_data") or []]
         dd_sources = [dict(source) for source in row.get("dd_sources") or []]
+        producer_ids = sorted(set(row.get("producer_ids") or ()))
         row["id"] = name_id
         if not name_id:
             row["refusal_reason"] = "missing StandardName identity"
@@ -4738,7 +4754,7 @@ def _partition_lifecycleless_stub_rows(
             continue
         if dd_sources:
             spurious_authority = (
-                _spurious_stub_binding_authority(name_id, dd_sources)
+                _spurious_stub_binding_authority(name_id, dd_sources, producer_ids)
                 if not children
                 else []
             )
@@ -4866,12 +4882,26 @@ def _reconcile_spurious_stub_source_scalars(
                   repair.authoritative_validation_status
               AND EXISTS { (source)-[:PRODUCED_NAME]->(stub) }
               AND EXISTS { (source)-[:PRODUCED_NAME]->(accepted) }
+            CALL (stub) {
+              OPTIONAL MATCH (producer:StandardNameSource)
+              WHERE producer.produced_sn_id = stub.id
+                 OR EXISTS { (producer)-[:PRODUCED_NAME]->(stub) }
+                 OR (producer.source_type = 'derived'
+                     AND producer.source_id = stub.id)
+              RETURN collect(DISTINCT producer.id) AS current_producer_ids
+            }
             CALL (source) {
               MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
               RETURN collect(DISTINCT bound.id) AS current_bindings
             }
-            WITH repair, source, accepted, current_bindings
-            WHERE size(current_bindings) = size(repair.expected_bindings)
+            WITH repair, source, accepted, current_bindings,
+                 current_producer_ids
+            WHERE size(current_producer_ids) = size(repair.expected_producer_ids)
+              AND all(id IN current_producer_ids
+                      WHERE id IN repair.expected_producer_ids)
+              AND all(id IN repair.expected_producer_ids
+                      WHERE id IN current_producer_ids)
+              AND size(current_bindings) = size(repair.expected_bindings)
               AND all(id IN current_bindings WHERE id IN repair.expected_bindings)
               AND all(id IN repair.expected_bindings WHERE id IN current_bindings)
             SET source.produced_sn_id = accepted.id
