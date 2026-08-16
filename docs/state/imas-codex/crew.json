@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T22:48:17",
+  "updated": "2026-08-16T23:01:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1603,9 +1603,57 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T204850156128-spurious-edge-repair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "spurious-edge-repair",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T20:48:52Z",
+        "completed_at": "2026-08-16T21:00:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 713,
+        "time_budget": "25m",
+        "base_sha": "67170f5317339668317d934cbd4abb7314488f90",
+        "commits": [
+          "c65b071a70b3f3feebfbf8667d868c024b79f2f9"
+        ],
+        "changed_lines": null,
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "Corrective c65b071a on 67170f53: complete producer identity set signed and required to exactly equal the qualifying DD set, re-derived and compared inside the CAS; mixed-producer refusal and binding-change rollback proven on disposable Neo4j; 22/22 tests; awaiting re-review",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/spurious-edge-repair-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 70703360,
+            "input_tokens": 72469868,
+            "output_tokens": 168663,
+            "reasoning_output_tokens": 51825
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 53
+    "_version": 54
   }
 }
