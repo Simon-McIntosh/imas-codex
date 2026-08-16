@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="133">
+<meta name="plan-version" content="135">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -943,6 +943,16 @@ Done-when (ordered)
 <article class="r-fu" data-id="f-sgwi-dual-binding" data-status="open" data-written-by="portfolio-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Resolve the 362 dual-bound sources and the parked attachment worklist</h4>
     <div class="r-fu-body">Measured 2026-08-11 during the recovery follow-on: 362 StandardNameSource nodes are bound to more than one live StandardName — the mechanism behind the fold pairs (atomic_count_of_ion_state shares 39 of 76 sources with the accepted atomic_count) and behind blocked renames (the retarget compare-and-set requires exactly one binding). Establish one-live-name-per-source, then: (a) the include_accepted detach pass for the 41 gated inconsistent attachments plus the proven mis-attachments (faraday_angle weight belongs on a new polarimeter name; wavelength_bragg stale duplicate edge; the electron source path on the renamed particle source); (b) retry the correct-but-blocked rename voltage_of_diagnostic_antenna → voltage_of_ece_channel; (c) review the deferred stricter locus rule per family (ISN entity typing measured 189 flags vs the shipped 17 — it would refuse ~172 live pairings, so adopt per family or not at all); (d) the electron_source_rate stale unit scalar and its contradicting docs; (e) the synthetic score=0.0 'skipped reviewer LLM call' defect. Evidence: sn-pipeline-recovery-landed §follow-on and the rename-worklist manifest.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    </article>
+<article class="r-fu" data-id="f-stub-reconcile" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the stub prevention fix and reconcile the 297 lifecycle-less names through an exact-manifest operator</h4>
+    <div class="r-fu-body">Two halves, prevention first. (1) Land the prototyped endpoint-writer fix (secondary edge writers MATCH against an authorized identity set, never MERGE bare StandardName endpoints; admitted missing HAS_PARENT targets bootstrap through the full derived-parent materializer or refuse) — a codex prototype with TDD evidence exists in the ship-sn-portfolio-20260816 worktree set, recorded in comment c-20260816-stall-and-stub-diagnosis. (2) Implement reconcile_lifecycleless_standard_name_stubs beside normalize_derived_parent_lifecycle: partition the fresh live cohort into materialize-as-derived-parent / delete-as-dead-link-stub / rebind-source (the 2026-08-16 manifest counted 57/237/3, sha fafba986 — evidence, not apply authority), delegate to the existing materialize/delete/source-reset primitives, refuse incomplete unit/source authority, and expose dry-run/hash/apply/replay. Apply only in a quiet window with a fresh closure; verify zero lifecycle-less StandardName nodes and unchanged collateral afterwards.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    </article>
+<article class="r-fu" data-id="f-stall-fix-landing" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Land the prototyped stall-watchdog predicate fix before any further paid drain</h4>
+    <div class="r-fu-body">The three 2026-08-11 stalled runs are root-caused (comment c-20260816-stall-and-stub-diagnosis): pending-counter predicate drift in cli/sn.py versus the graph_ops.py claim predicates creates phantom backlog that trips the 600 s watchdog, and the watchdog can fire with an LLM call still in flight. A codex prototype with failing-then-passing parity tests exists in the ship-sn-portfolio-20260816 worktree set. Land it through ordinary review (three predicate clauses in cli/sn.py, the zero-in-flight guard in pools.py, the parity and in-flight watchdog tests) and prove a scoped sn run reaches a genuine terminal state (no_eligible_work or budget) instead of stalled. This gates every subsequent drain: the 21-row WEST-blocking execution and the S9 docs refresh both assume a pipeline that converges.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
     </article>
 </section>

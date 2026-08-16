@@ -1,9 +1,23 @@
 {
-  "updated": "2026-08-16T18:55:27",
+  "updated": "2026-08-16T18:57:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "impl-stall",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-16"
+      },
+      {
+        "id": "impl-stubs",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-16"
+      },
       {
         "id": "inv-stall",
         "harness": "codex",
@@ -167,6 +181,6 @@
       }
     ],
     "holds": [],
-    "_version": 9
+    "_version": 11
   }
 }
