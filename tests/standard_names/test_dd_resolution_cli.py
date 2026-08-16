@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
+from threading import Event, Lock, Thread
 from typing import Any
 
 import pytest
@@ -409,6 +411,87 @@ def test_stale_revoke_digest_cannot_overwrite_approval(tmp_path, monkeypatch) ->
     assert revoked.exit_code != 0
     assert "manifest changed" in revoked.output
     assert len(load_dd_resolution_manifest().resolutions) == 1
+
+
+def test_manifest_lock_serializes_contending_revocations(tmp_path, monkeypatch) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot, snapshot)
+    approved = CliRunner().invoke(
+        sn, _approval_args(_APPROVABLE_ROW, snapshot=snapshot)
+    )
+    assert approved.exit_code == 0, approved.output
+    authority = load_dd_resolution_manifest()
+    predecessor_digest = authority.digest
+    resolution_id = authority.resolutions[0].id
+
+    first_at_write = Event()
+    second_at_write = Event()
+    release_first = Event()
+    write_count_lock = Lock()
+    outcome_lock = Lock()
+    outcomes: dict[str, object] = {}
+    write_count = 0
+    original_write = dd_resolution_module._write_manifest
+
+    def pause_first_write(*args, **kwargs) -> None:
+        nonlocal write_count
+        with write_count_lock:
+            write_count += 1
+            call_number = write_count
+        if call_number == 1:
+            first_at_write.set()
+            if not release_first.wait(timeout=5):
+                raise TimeoutError("manifest lock contention release timed out")
+        else:
+            second_at_write.set()
+        original_write(*args, **kwargs)
+
+    def revoke(name: str, changed_at: datetime) -> None:
+        try:
+            outcome: object = dd_resolution_module.revoke_dd_resolution(
+                resolution_id,
+                actor=name,
+                reason="Concurrent evidence withdrawal test.",
+                expected_manifest_digest=predecessor_digest,
+                changed_at=changed_at,
+            )
+        except Exception as exc:  # noqa: BLE001 - the exact loser is asserted below
+            outcome = exc
+        with outcome_lock:
+            outcomes[name] = outcome
+
+    monkeypatch.setattr(dd_resolution_module, "_write_manifest", pause_first_write)
+    first = Thread(
+        target=revoke,
+        args=("first-contender", datetime(2026, 8, 16, 12, tzinfo=UTC)),
+    )
+    second = Thread(
+        target=revoke,
+        args=("second-contender", datetime(2026, 8, 16, 13, tzinfo=UTC)),
+    )
+    first.start()
+    assert first_at_write.wait(timeout=5)
+    second.start()
+    second_reached_write_while_locked = second_at_write.wait(timeout=0.25)
+    release_first.set()
+    first.join(timeout=5)
+    second.join(timeout=5)
+
+    assert not first.is_alive()
+    assert not second.is_alive()
+    assert second_reached_write_while_locked is False
+    assert write_count == 1
+    assert not isinstance(outcomes["first-contender"], Exception)
+    assert isinstance(
+        outcomes["second-contender"],
+        dd_resolution_module.DDResolutionManifestConflict,
+    )
+    final = load_dd_resolution_manifest()
+    assert len(final.resolutions) == 2
+    assert len(final.state_changes) == 1
+    assert final.state_changes[0].from_resolution_id == resolution_id
+    assert final.state_changes[0].actor == "first-contender"
 
 
 def test_active_key_collision_is_refused(tmp_path, monkeypatch) -> None:
