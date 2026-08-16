@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="135">
+<meta name="plan-version" content="136">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1344,6 +1344,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stall-and-stub-diagnosis" data-who="reckon-ship" data-when="2026-08-16T17:35:00+00:00">
     <div class="r-comment-body"><p><strong>Two investigation nodes landed (read-only, gate passed).</strong> (1) <em>Stall root cause:</em> the three 2026-08-11 stalled runs were driven first by paid successor-collision claim-release churn (already terminalized by e02a261f — do not re-fix) and now by <strong>predicate drift</strong>: the pending counters in <code>cli/sn.py</code> omit <code>validation_status=valid</code> from review_name and the docs-review resolution/non-shortfall gates from refine_docs, while the <code>graph_ops.py</code> claim predicates require them — phantom backlog keeps <code>total_processed</code> flat for 600 s and the watchdog (<code>pools.py:666-678</code>) declares a stall that <code>loop.py:2125-2128</code> persists; it also fired once with an LLM call still in flight. Minimal fix: the three predicate clauses, a zero-in-flight stall guard, and pending/claim parity tests. (2) <em>Lifecycle-less stubs:</em> the 297 NULL-stage StandardName nodes are minted by relationship writers in <code>_write_standard_name_edges</code> (<code>graph_ops.py:2685-2967</code>) that MERGE bare endpoints (HAS_PARENT ON CREATE sets only origin/name_stage; HAS_LOCUS/HAS_ERROR/predecessor/successor create bare nodes). Disposition manifest (sha fafba986, all 297 classified): 57 materialize-as-derived-parent (childful, via the sanctioned materializer), 237 delete-as-dead-link-stub, 3 rebind-source (DD-backed — reset_standard_name_sources then ordinary compose, never hand-retarget). Prevention: secondary writers MATCH against an authorized identity set instead of MERGE, plus a new exact-manifest <code>reconcile_lifecycleless_standard_name_stubs</code> operator. Both fix nodes dispatched. Evidence: ~/.local/share/imas-codex/receipts/standard-names/portfolio-census-2026-08-16/ (stall-rootcause-evidence.md, stub-names-cleanup.json).</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stall-fix-prototype" data-who="reckon-ship" data-when="2026-08-16T19:10:00+00:00">
+    <div class="r-comment-body"><p><strong>Stall-fix prototype demonstrated (gate passed; NOT merged — prototyping-only session).</strong> Worktree commit <code>136524e9</code> (4 scoped files, 59 insertions): review_name pending now requires <code>validation_status='valid'</code>, refine_docs pending requires a non-null docs_review_resolution_method and null quorum shortfall, and stall classification waits for every pool to reach in_flight=0. TDD evidence: 3 targeted failures before the repair, 30 passed after (11.03 s); the positive-pending zero-in-flight stall regression stays green so genuine non-progress still terminalizes. The collision terminalization from e02a261f is untouched. Patch preserved at receipts/standard-names/portfolio-census-2026-08-16/0001-fix-sn-align-pending-counts-with-claim-eligibility.patch; landing is owned by f-stall-fix-landing through ordinary review.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

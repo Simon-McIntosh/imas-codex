@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T18:57:15",
+  "updated": "2026-08-16T19:12:19",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -15,7 +15,7 @@
         "id": "impl-stubs",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
         "created": "2026-08-16"
       },
       {
@@ -178,9 +178,57 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T165806716727-stall-predicate-fix",
+        "plan": "sn-graph-wide-integrity",
+        "section": "s6",
+        "node": "stall-predicate-fix",
+        "role": "implement",
+        "member": "impl-stall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T16:58:08Z",
+        "completed_at": "2026-08-16T17:07:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 540,
+        "time_budget": "25m",
+        "base_sha": "235eb4b91a1e4be98ba0f675c4883a1e89d1fabb",
+        "commits": [
+          "136524e99c9f45c7807af3b1cafff23914805227"
+        ],
+        "changed_lines": null,
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Prototype in worktree (not merged, session policy): pending/claim predicate parity + zero-in-flight stall guard; TDD red 3 failures then 30 passed; patch exported to receipts",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/9680a90e-7dac-496b-886b-756fa081daa7/scratchpad/stall-predicate-fix-manifest.md",
+        "scope_changed": false,
+        "session_id": null,
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 5422336,
+            "input_tokens": 5596482,
+            "output_tokens": 12777,
+            "reasoning_output_tokens": 4463
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 11
+    "_version": 13
   }
 }
