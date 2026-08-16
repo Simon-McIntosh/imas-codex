@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="143">
+<meta name="plan-version" content="144">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1371,6 +1371,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-sn-run-spend-authority" data-who="Simon McIntosh" data-when="2026-08-16T19:50:00+00:00">
     <div class="r-comment-body"><p><strong>USD 150 of pipeline spend is authorized for any sn runs this execution needs</strong> (lead's live instruction, 2026-08-16: authorization for a 150 USD pipeline spend for any sn runs needed). This funds the drain-dependent work in this plan, the WEST-blocking subset execution and any scoped convergence proof runs, once the stall-watchdog fix lands, which remains the gate every paid drain waits on. Guarded-cohort discipline from the prior authorization carries over: bounded scoped runs, honest stop reasons, spend recorded per run.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stall-fix-approved" data-who="reckon-ship" data-when="2026-08-16T20:35:00+00:00">
+    <div class="r-comment-body"><p><strong>The stall-watchdog fix is independently APPROVED after two corrective rounds and is being integrated.</strong> Third-round review of <code>c87483fc</code> found zero remaining findings: per-active-batch completion identity removes the stale-timestamp defect, the out-of-order two-replica regression pins the younger batch's full age window, and the reviewer's own reproduction probe now reports the younger batch surviving 0.2076 s against the 0.200 s bound (previously cancelled at 0.077 s). The chain <code>136524e9</code> → <code>ab242998</code> → <code>c87483fc</code> merges to main gated on the full-suite test node before push. f-stall-fix-landing then needs its final measure: a scoped sn run reaching a genuine terminal state (no_eligible_work or budget) instead of stalled — funded by the USD 150 authorization.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

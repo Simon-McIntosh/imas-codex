@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="21">
+<meta name="plan-version" content="22">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -309,6 +309,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-cli-repair-20260816" data-who="reckon-ship" data-when="2026-08-16T20:12:00+00:00">
     <div class="r-comment-body"><p><strong>The approval-authority corrective is produced (worktree commit <code>f5a5e9d6</code> on <code>c0eaf0cb</code>; re-review dispatched).</strong> Approval now reads the exact current graph DDGap twice under the manifest mutation guard and recomputes the canonical evidence token from path, kind, DD version/value, timestamps, fact metadata, and the exact observation set, so fabricated, stale, mismatched, or mid-guard-changing evidence fails closed. Approval and revocation serialize through one exclusive lock plus a required expected-manifest-digest comparison with immediate pre-replace revalidation, refusing stale approve/approve and approve/revoke without lost updates. Receipts bind <code>source_row</code> plus the packaged candidate digest and attribution requires that binding, so approving O17 leaves the overlapping blocked U19 paths unapproved. Adversarial tests pin all the reviewer's named refusal paths; focused suites 75/75, ruff exit 0, both packaged YAML resources byte-identical. Merge follows a re-review APPROVE.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-cli-approved-20260816" data-who="reckon-ship" data-when="2026-08-16T20:37:00+00:00">
+    <div class="r-comment-body"><p><strong>The governed approval lifecycle CLI is independently APPROVED and is being integrated.</strong> Re-review of <code>f5a5e9d6</code>: 0 critical, 0 high, 1 non-blocking medium. The prior critical graph-evidence bypass is resolved (approval reads the exact graph DDGap twice under the manifest mutation lock, recomputes the canonical evidence token, and persists graph-derived values, never caller strings), the lost-update defect is resolved (stable exclusive flock plus required expected-digest CAS with pre-replace revalidation on both approve and revoke), and O17/U19 attribution is bound to source_row plus candidate digest. Independent exact-commit verification passed 75/75. The chain <code>c0eaf0cb</code> → <code>f5a5e9d6</code> merges to main gated on the full-suite test node before push. Folded follow-on: one deterministic two-contender lock test so flock removal cannot regress silently (non-blocking, dispatching to the authoring member). After integration the lead can mint per-record approvals with <code>sn ddres approve</code>; per-record activation authority remains the lead's alone.</p></div>
 </div>
 </section>
 </main>

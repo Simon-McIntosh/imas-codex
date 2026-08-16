@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T21:09:43",
+  "updated": "2026-08-16T21:21:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -825,9 +825,101 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T190828850680-stall-fix-rereview-2",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stall-fix-rereview-2",
+        "role": "review",
+        "member": "rev-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T19:08:31Z",
+        "completed_at": "2026-08-16T19:13:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 269,
+        "time_budget": "15m",
+        "base_sha": "56067529f6bcbd08daee62e9469d4efbb1774000",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Third-round review of c87483fc: APPROVE, zero findings; independent probe replay reversed the replica-age defect quantitatively (younger batch survived 0.2076s vs 0.2s bound); all retained regressions and parity coverage preserved",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stall-fix-rereview-2-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-09b3-7041-89d4-9b5b05470d2a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 7042048,
+            "input_tokens": 7341631,
+            "output_tokens": 29600,
+            "reasoning_output_tokens": 10898
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T191015599174-ddres-cli-rereview",
+        "plan": "sn-dd-gaps",
+        "section": "",
+        "node": "ddres-cli-rereview",
+        "role": "review",
+        "member": "rev-c",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T19:10:18Z",
+        "completed_at": "2026-08-16T19:16:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 365,
+        "time_budget": "20m",
+        "base_sha": "ec5e32945d615e0a78db190726a148700d3d3999",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Re-review of f5a5e9d6: APPROVE (0 critical, 0 high, 1 non-blocking medium \u2014 missing true lock-contention test); graph-evidence verification, digest CAS, and candidate-digest attribution all confirmed; independent exact-commit 75/75",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/ddres-cli-rereview-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00be4-ae97-7ab2-be65-54e8e3b29ec5",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 6590208,
+            "input_tokens": 6818083,
+            "output_tokens": 29783,
+            "reasoning_output_tokens": 15568
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 36
+    "_version": 38
   }
 }
