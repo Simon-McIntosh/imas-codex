@@ -1,0 +1,33 @@
+{
+  "updated": "2026-08-16T18:39:40",
+  "project": "imas-codex",
+  "doc": "crew",
+  "data": {
+    "members": [
+      {
+        "id": "inv-stall",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-16"
+      },
+      {
+        "id": "inv-stubs",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-16"
+      },
+      {
+        "id": "inv-west",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-16"
+      }
+    ],
+    "runs": [],
+    "holds": [],
+    "_version": 3
+  }
+}
