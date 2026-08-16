@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T23:01:11",
+  "updated": "2026-08-16T23:05:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1651,9 +1651,55 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T210115903148-spurious-edge-rereview",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "spurious-edge-rereview",
+        "role": "review",
+        "member": "rev-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T21:01:19Z",
+        "completed_at": "2026-08-16T21:04:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 214,
+        "time_budget": "15m",
+        "base_sha": "7eab25959ca46629c0966761f95ec28d8031567a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Re-review of c65b071a: BLOCK narrowed to one high \u2014 the producer-set CAS ends before the separate deletion Cypher, so a source acquiring the stub's identity in the gap gets mutated unsigned; complete-producer equality and all requested regressions otherwise RESOLVED",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/spurious-edge-rereview-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 9175808,
+            "input_tokens": 9866613,
+            "output_tokens": 58546,
+            "reasoning_output_tokens": 30604
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 54
+    "_version": 55
   }
 }

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="155">
+<meta name="plan-version" content="156">
 <meta name="plan-impl" content="0.85">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1408,6 +1408,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-spurious-edge-review-block" data-who="reckon-ship" data-when="2026-08-17T01:00:00+00:00">
     <div class="r-comment-body"><p><strong>The spurious-edge classification is blocked on one high finding; corrective dispatched.</strong> Review of <code>67170f53</code>: the qualifying-sibling proof runs over DD producers only while the signed closure deliberately includes every producer, so a stub with one sanctioned DD source plus an extra non-DD producer would still enter deletion, and the deletion CAS would not cover that extra producer. Required repair: quantify the authority over the complete producer identity set (refusing any extra producer) and extend the CAS accordingly, plus a mixed-producer disposable-Neo4j regression and parameterized invalid-sibling / third-binding / wrong-scalar refusal cases. The DD-cohort semantics themselves were confirmed sound (exact two-binding shape, accepted+valid sibling, in-transaction CAS, scalar reconcile).</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260817-spurious-edge-race" data-who="reckon-ship" data-when="2026-08-17T01:40:00+00:00">
+    <div class="r-comment-body"><p><strong>The spurious-edge corrective narrowed the block to one transaction-race finding.</strong> Complete-producer-set equality is signed, classified, and CAS-compared, and all requested adversarial regressions passed — but the scalar CAS ends before the separate deletion Cypher, so under read-committed locking a source can acquire the stub's <code>produced_sn_id</code> or derived identity in the gap and be mutated unsigned. Final corrective dispatched: fuse the producer-set recheck into the deletion mutation (or lock plus recheck every mutated source at deletion). In parallel, the WEST class-1 rename node starts: the three defective names route through <code>sn edit --rename</code> with reasons and ordinary funded quorum, with the dual-bound <code>atomic_count_of_ion_state</code> allowed to end as a recorded reviewed refusal if its multi-binding blocks the retarget compare-and-set.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
