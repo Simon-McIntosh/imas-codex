@@ -15,6 +15,7 @@ from imas_codex.graph.client import GraphClient as RealGraphClient
 from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.graph_ops import (
     LifecyclelessStubConflict,
+    _delete_derived_parent_nodes,
     _lifecycleless_stub_manifest,
     _partition_lifecycleless_stub_rows,
     _reconcile_spurious_stub_source_scalars,
@@ -862,5 +863,103 @@ def test_binding_change_between_manifest_and_cas_rolls_back(
             "MATCH (node) WHERE node.id IN $ids "
             "OR node.manifest_sha256 = $manifest_sha256 DETACH DELETE node",
             ids=[stub_id, accepted_id, added_id, dd_path, source_id],
+            manifest_sha256=locals().get("preview", {}).get("manifest_sha256"),
+        )
+
+
+@pytest.mark.graph
+def test_new_producer_between_scalar_cas_and_deletion_rolls_back(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    stub_id = "fast_neutral_beam_motional_stark_wavelength"
+    accepted_id = "fast_neutral_beam_reference_wavelength_of_spectral_line"
+    dd_path = "charge_exchange/channel/bes/lorentz_shift"
+    source_id = f"dd:{dd_path}"
+    added_source_id = "signals:iter:late-lorentz-shift"
+    client = _disposable_client(disposable_neo4j, "producer-gap-refusal")
+    try:
+        client.query(
+            "CREATE (stub:StandardName {id: $stub}) "
+            "CREATE (accepted:StandardName {id: $accepted, "
+            "name_stage: 'accepted', status: 'draft', origin: 'catalog_edit', "
+            "validation_status: 'valid'}) "
+            "CREATE (dd:IMASNode {id: $dd_path, units: 'm'}) "
+            "CREATE (source:StandardNameSource {id: $source, source_type: 'dd', "
+            "source_id: $dd_path, status: 'composed', produced_sn_id: null}) "
+            "CREATE (:StandardNameSource {id: $added_source, "
+            "source_type: 'signal', source_id: 'iter:late-lorentz-shift', "
+            "status: 'attached', produced_sn_id: null}) "
+            "CREATE (source)-[:FROM_DD_PATH]->(dd) "
+            "CREATE (source)-[:PRODUCED_NAME]->(stub) "
+            "CREATE (source)-[:PRODUCED_NAME]->(accepted)",
+            stub=stub_id,
+            accepted=accepted_id,
+            dd_path=dd_path,
+            source=source_id,
+            added_source=added_source_id,
+        )
+        preview = reconcile_lifecycleless_standard_name_stubs(gc=client)
+
+        def inject_producer_then_delete(
+            transaction_client: object,
+            parent_ids: list[str],
+            **kwargs: object,
+        ) -> int:
+            transaction_client.query(
+                "MATCH (source:StandardNameSource {id: $source}) "
+                "SET source.produced_sn_id = $stub",
+                source=added_source_id,
+                stub=stub_id,
+            )
+            return _delete_derived_parent_nodes(
+                transaction_client, parent_ids, **kwargs
+            )
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops._delete_derived_parent_nodes",
+                side_effect=inject_producer_then_delete,
+            ),
+            pytest.raises(
+                LifecyclelessStubConflict,
+                match="stub deletion cardinality changed before mutation",
+            ),
+        ):
+            reconcile_lifecycleless_standard_name_stubs(
+                apply=True,
+                manifest_sha256=preview["manifest_sha256"],
+                gc=client,
+            )
+
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "MATCH (added:StandardNameSource {id: $added_source}) "
+            "MATCH (stub:StandardName {id: $stub}) "
+            "MATCH (accepted:StandardName {id: $accepted}) "
+            "RETURN source.produced_sn_id AS source_scalar, "
+            "added.produced_sn_id AS added_scalar, "
+            "stub.name_stage AS stub_stage, "
+            "accepted.name_stage AS accepted_stage, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(stub) } AS stub_edges, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(accepted) } AS accepted_edges",
+            source=source_id,
+            added_source=added_source_id,
+            stub=stub_id,
+            accepted=accepted_id,
+        ) == [
+            {
+                "source_scalar": None,
+                "added_scalar": None,
+                "stub_stage": None,
+                "accepted_stage": "accepted",
+                "stub_edges": 1,
+                "accepted_edges": 1,
+            }
+        ]
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id IN $ids "
+            "OR node.manifest_sha256 = $manifest_sha256 DETACH DELETE node",
+            ids=[stub_id, accepted_id, dd_path, source_id, added_source_id],
             manifest_sha256=locals().get("preview", {}).get("manifest_sha256"),
         )

@@ -3486,6 +3486,7 @@ def _delete_derived_parent_nodes(
     *,
     manifest_sha256: str | None = None,
     reason: str | None = None,
+    expected_producer_ids_by_parent: dict[str, list[str]] | None = None,
 ) -> int:
     """Delete derived-parent nodes and their review/derived-source scaffolding."""
     deleted = 0
@@ -3496,10 +3497,24 @@ def _delete_derived_parent_nodes(
         or "structural derived parent no longer satisfies lifecycle admission",
     )
     for parent_id in parent_ids:
+        expected_producer_ids = (
+            sorted(set(expected_producer_ids_by_parent[parent_id]))
+            if expected_producer_ids_by_parent is not None
+            and parent_id in expected_producer_ids_by_parent
+            else None
+        )
         rows = list(
             gc.query(
                 f"""
                 MATCH (sn:StandardName {{id: $parent_id}})
+                CALL (sn) {{
+                  OPTIONAL MATCH (producer:StandardNameSource)
+                  WHERE producer.produced_sn_id = sn.id
+                     OR EXISTS {{ (producer)-[:PRODUCED_NAME]->(sn) }}
+                     OR (producer.source_type = 'derived'
+                         AND producer.source_id = sn.id)
+                  RETURN collect(DISTINCT producer.id) AS current_producer_ids
+                }}
                 OPTIONAL MATCH (derived_source:StandardNameSource
                   {{source_type: 'derived', source_id: $parent_id}})
                 OPTIONAL MATCH (mirror_source:StandardNameSource)
@@ -3507,10 +3522,17 @@ def _delete_derived_parent_nodes(
                 OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(rv:StandardNameReview)
                 OPTIONAL MATCH (sn)-[:DOCS_REVISION_OF]->(dr:DocsRevision)
                 WITH sn,
+                     current_producer_ids,
                      collect(DISTINCT derived_source) AS derived_sources,
                      collect(DISTINCT mirror_source) AS mirror_sources,
                      collect(DISTINCT rv) AS reviews,
                      collect(DISTINCT dr) AS revisions
+                WHERE $expected_producer_ids IS NULL
+                   OR (size(current_producer_ids) = size($expected_producer_ids)
+                       AND all(id IN current_producer_ids
+                               WHERE id IN $expected_producer_ids)
+                       AND all(id IN $expected_producer_ids
+                               WHERE id IN current_producer_ids))
                 {deletion_clause}
                 SET change.manifest_sha256 = $stub_manifest_sha256
                 FOREACH (source IN mirror_sources |
@@ -3522,6 +3544,7 @@ def _delete_derived_parent_nodes(
                 RETURN 1 AS deleted
                 """,
                 parent_id=parent_id,
+                expected_producer_ids=expected_producer_ids,
                 stub_manifest_sha256=manifest_sha256,
                 **deletion_params,
             )
@@ -5109,8 +5132,8 @@ def reconcile_lifecycleless_standard_name_stubs(
                             "materialization ledger cardinality changed"
                         )
 
-                deleted_ids = [
-                    row["id"]
+                deletion_rows = [
+                    (action, row)
                     for action in (
                         "delete-as-dead-link-stub",
                         "rebind-source",
@@ -5118,11 +5141,21 @@ def reconcile_lifecycleless_standard_name_stubs(
                     for row in partitions[action]
                     if not row.get("child_data")
                 ]
+                deleted_ids = [row["id"] for _, row in deletion_rows]
+                deletion_producer_ids = {
+                    row["id"]: (
+                        []
+                        if action == "rebind-source"
+                        else list(row.get("producer_ids") or ())
+                    )
+                    for action, row in deletion_rows
+                }
                 deleted = _delete_derived_parent_nodes(
                     adapter,
                     deleted_ids,
                     manifest_sha256=computed_hash,
                     reason=reason,
+                    expected_producer_ids_by_parent=deletion_producer_ids,
                 )
                 if deleted != len(deleted_ids):
                     raise LifecyclelessStubConflict(
