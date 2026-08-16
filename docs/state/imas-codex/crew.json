@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T19:12:19",
+  "updated": "2026-08-16T19:22:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -226,9 +226,57 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T165828076192-stub-prevention",
+        "plan": "sn-graph-wide-integrity",
+        "section": "s4",
+        "node": "stub-prevention",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T16:58:30Z",
+        "completed_at": "2026-08-16T17:22:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1422,
+        "time_budget": "25m",
+        "base_sha": "235eb4b91a1e4be98ba0f675c4883a1e89d1fabb",
+        "commits": [
+          "6aae3d04c442854a40b104a82a0e274805ec5862"
+        ],
+        "changed_lines": null,
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "Prototype in worktree (not merged, session policy): MATCH-only secondary edge writers + materializer bootstrap for admitted parents + rederive root filter; TDD red 4 then 25/25 focused and 113/113 adjacent; patch exported to receipts",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/9680a90e-7dac-496b-886b-756fa081daa7/scratchpad/stub-prevention-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 13254144,
+            "input_tokens": 13768865,
+            "output_tokens": 37072,
+            "reasoning_output_tokens": 13723
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 13
+    "_version": 14
   }
 }
