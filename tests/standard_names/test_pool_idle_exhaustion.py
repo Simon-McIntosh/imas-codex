@@ -222,6 +222,7 @@ class TestIdleExhaustionWatchdog:
                 poll=0.01,
                 idle_polls=3,
                 stall_seconds=0.03,
+                in_flight_stall_seconds=0.2,
             )
         )
         try:
@@ -239,6 +240,64 @@ class TestIdleExhaustionWatchdog:
         assert stop_event.is_set()
         assert stalled.is_set()
         assert not idle_exhausted.is_set()
+
+    @pytest.mark.asyncio
+    async def test_stuck_in_flight_batch_is_terminalized_after_age_bound(
+        self,
+    ) -> None:
+        """A processor that never returns cannot suppress a typed stall forever."""
+        mgr = BudgetManager(total_budget=5.0)
+        stop_event = asyncio.Event()
+        idle_exhausted = asyncio.Event()
+        stalled = asyncio.Event()
+        entered_process = asyncio.Event()
+        process_cancelled = asyncio.Event()
+        claimed = False
+
+        async def claim() -> dict[str, str] | None:
+            nonlocal claimed
+            if claimed:
+                return None
+            claimed = True
+            return {"id": "stuck-candidate"}
+
+        async def process(batch: dict[str, str]) -> int:
+            entered_process.set()
+            try:
+                await asyncio.Event().wait()
+            finally:
+                process_cancelled.set()
+            return 0
+
+        spec = PoolSpec(name="review_name", claim=claim, process=process)
+
+        await asyncio.wait_for(
+            run_pools(
+                [spec],
+                mgr,
+                stop_event,
+                pending_fn=lambda: {"review_name": 1},
+                pending_poll_interval=0.01,
+                grace_period=0.01,
+                weights={"review_name": 1.0},
+                idle_exhausted_event=idle_exhausted,
+                stalled_event=stalled,
+                idle_exhaustion_poll=0.01,
+                idle_exhaustion_polls=3,
+                stall_seconds=0.03,
+                in_flight_stall_seconds=0.04,
+                free_pool_set={"review_name"},
+            ),
+            timeout=1.0,
+        )
+
+        assert entered_process.is_set()
+        assert process_cancelled.is_set()
+        assert stop_event.is_set()
+        assert stalled.is_set()
+        assert not idle_exhausted.is_set()
+        assert spec.health.in_flight == 0
+        assert spec.health.oldest_in_flight_at is None
 
     @pytest.mark.asyncio
     async def test_idle_watchdog_does_not_fire_with_pending_work(self) -> None:
