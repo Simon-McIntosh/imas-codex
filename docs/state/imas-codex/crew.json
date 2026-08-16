@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T23:35:24",
+  "updated": "2026-08-16T23:52:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1883,9 +1883,62 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T213622932786-atomic-count-fold",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "atomic-count-fold",
+        "role": "implement",
+        "member": "inv-west",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T21:36:25Z",
+        "completed_at": "2026-08-16T21:51:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "wall_seconds": 894,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "eee94baa83d5f2c3b3f675b078142cd995f32a88",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Fold refused fail-closed: atomic_count_of_ion_state already descends from atomic_count via a seven-identity REFINED_FROM chain, so the fold would close a directed cycle; full participant closure (188 elements) and bounded collateral proofs captured, zero mutations; lineage adjudication commissioned as the reviewed route",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/atomic-count-fold-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b77-49b1-7230-8705-4f587cc2d769",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 21317888,
+            "cached_input_tokens_cumulative": 21317888,
+            "input_tokens": 22794678,
+            "input_tokens_cumulative": 22794678,
+            "output_tokens": 112168,
+            "output_tokens_cumulative": 112168,
+            "reasoning_output_tokens": 37652,
+            "reasoning_output_tokens_cumulative": 37652
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 59
+    "_version": 60
   }
 }
