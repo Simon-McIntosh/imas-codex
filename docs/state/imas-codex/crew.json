@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T23:18:57",
+  "updated": "2026-08-16T23:26:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1745,9 +1745,101 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T210655225758-west-name-repairs",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "west-name-repairs",
+        "role": "implement",
+        "member": "impl-stall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T21:06:57Z",
+        "completed_at": "2026-08-16T21:26:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1143,
+        "time_budget": "25m",
+        "base_sha": "a59e6c3700b7960f9fded36a4486fb68a6ab9683",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Class-1 outcomes receipted: atomic_count_of_ion_state rename refused on existing accepted target (fold operator is the route); Faraday weight source split-reset to extracted (manifest 63636a45, polarimeter identity to ordinary compose); interferometer rename and receiver-channel identity both grammar-blocked = recorded ISN vocab-gap refusals; funded drain terminal no_eligible_work at USD 0.00 of 150",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/west-name-repairs-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd9-04e9-71b1-b0eb-c4e7f232e794",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 18620928,
+            "input_tokens": 19582073,
+            "output_tokens": 58845,
+            "reasoning_output_tokens": 21332
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T211901770021-spurious-edge-final-review",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "spurious-edge-final-review",
+        "role": "review",
+        "member": "rev-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-16T21:19:05Z",
+        "completed_at": "2026-08-16T21:21:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 146,
+        "time_budget": "15m",
+        "base_sha": "a7744b3c0ba3fcadb9391eacfae8906741279100",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Final review of 2b44ac67: APPROVE with zero findings \u2014 producer-set equality enforced inside the deletion statement itself; extension chain 67170f53..2b44ac67 mergeable",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/spurious-edge-final-review-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-25a0-7322-8fdb-2382c01eeb0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 9757440,
+            "input_tokens": 10491517,
+            "output_tokens": 65230,
+            "reasoning_output_tokens": 33513
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 56
+    "_version": 58
   }
 }
