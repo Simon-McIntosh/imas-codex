@@ -16,8 +16,8 @@
   <title>DD gaps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-10">
-<meta name="plan-version" content="18">
+<meta name="plan-modified" content="2026-08-16">
+<meta name="plan-version" content="19">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -300,6 +300,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="dd-candidate-intake-landed-20260810" data-who="reckon-ship" data-when="2026-08-10T19:35:00+02:00">
     <div class="r-comment-body"><p><strong>Strict review-only DD candidate intake landed on main at <code>fc23f8cf</code>.</strong> The resource preserves 21 official-upstream mappings as 16 exact bounded candidates and five broad-scope holds, including the six-path <code>U19</code> split. Recursive YAML duplicate-key rejection and strict authority integers cleared independent review with zero findings; one-shot SLURM validation passed generation, 60 focused tests, Ruff, and adversarial runtime-non-consumption probes. Candidate SHA-256 remains <code>c6ee52aedd65cad1fa42c539661a127fffaa6bb2d25e87808f5fda9db35cd4b1</code>; empty active-manifest SHA-256 remains <code>64c20eb0405022f33265e4bc222919c25f51b1c98b00b6e473ff615c963b33cf</code>. This is review evidence only: zero resolutions are active and governed approval, fresh evidence, positive revisions, consumer cutover, and any graph mirror remain open.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="dd-resolution-lifecycle-cli-20260816" data-who="reckon-ship" data-when="2026-08-16T18:58:00+00:00">
+    <div class="r-comment-body"><p><strong>The governed approval lifecycle instrument is implemented in worktree commit <code>c0eaf0cb</code> (not yet merged; independent review dispatched).</strong> <code>sn ddres list|show|approve|revoke</code> operates over the packaged candidate resource and the active authority manifest. Approval selects one exact path from one named candidate and requires actor, reason, positive revision, exact DDGap kind, content-addressed observation identities, and a fresh evidence token, minting a content-addressed approval receipt plus a strict <code>DDResolutionRecord</code> from the candidate's exact DD version, raw value, effective value, and official upstream provenance. Broad holds, incomplete release cohorts, unlisted paths, malformed or reused evidence, non-increasing revisions, and active-key collisions fail closed before write. Revocation appends a withdrawn successor and immutable state-change receipt without deleting history. TDD evidence: 7 red before implementation, 63/63 tests green after. The CLI transcript shows 21 candidates / 0 approved, a refused broad-scope hold (<code>O20</code>) and a refused graph-conflict candidate (<code>U19</code>). Both YAML resources remained byte-identical (active manifest SHA-256 <code>64c20eb0…</code>, candidates <code>c6ee52ae…</code>): zero approvals were fabricated. Per-record activation remains held on the lead's own approval receipts, exactly as the transition hold requires.</p></div>
 </div>
 </section>
 </main>

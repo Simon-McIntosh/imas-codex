@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="138">
+<meta name="plan-version" content="139">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1353,6 +1353,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-prototype-reviews-block" data-who="reckon-ship" data-when="2026-08-16T18:30:00+00:00">
     <div class="r-comment-body"><p><strong>Both prototype fixes were independently reviewed and BLOCKED before merge; corrective nodes dispatched.</strong> The stall-fix commit <code>136524e9</code> (f-stall-fix-landing) drew 1 high + 1 medium finding: the unconditional zero-in-flight guard at <code>pools.py:668</code> can suppress stall classification indefinitely for a permanently hung batch because <code>spec.process(batch)</code> has no mandatory timeout, and the parity tests pin literal strings rather than the canonical <code>graph_ops.py</code> claim predicates. The three pending-count predicate clauses themselves were verified textually identical to the claim side, and the reviewer independently reran the focused suites (30/30 pass). The stub-prevention commit <code>6aae3d04</code> (f-stub-reconcile) drew 2 high + 2 medium findings: an existing lifecycle-less parent is excluded from both bootstrap and the reconcile keep-set so rederive would delete its child closure (the evidence that distinguishes the 57 materialize-as-derived-parent rows from dead stubs), and bootstrap authority reads run in separate autocommit sessions with a final CAS that re-checks only existence/cardinality, not lifecycle/unit/kind/domain; the MATCH-only endpoint writers and materializer delegation were confirmed present. Review manifests are promoted in the crew ledger (runs <code>r-…-stall-fix-review</code>, <code>r-…-stub-prevention-review</code>). Corrective commits go back to the authoring roster members on top of the prototype worktree commits, then re-review by the same reviewers.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stall-fix-repair" data-who="reckon-ship" data-when="2026-08-16T18:55:00+00:00">
+    <div class="r-comment-body"><p><strong>Stall-fix corrective commit produced (f-stall-fix-landing; not yet merged).</strong> Commit <code>ab242998</code>, a direct child of prototype <code>136524e9</code>, resolves both review findings: <code>PoolHealth</code> now tracks the oldest active batch per pool and the watchdog terminalizes an overdue in-flight processor as a typed stall (default bound = the existing 600 s limit) while preserving the live-batch grace, and the parity tests normalize against the canonical <code>graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE</code> and the actual <code>claim_refine_docs_batch</code> eligibility instead of local literals. Focused suites 31/31 pass, ruff check/format exit 0, pre-stage naming scan reviewed (3 false positives on the ordinary verb). Re-review dispatched to the original reviewer session; merge follows an APPROVE verdict.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

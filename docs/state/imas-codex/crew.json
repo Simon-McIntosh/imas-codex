@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T20:30:56",
+  "updated": "2026-08-16T20:44:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -8,14 +8,14 @@
         "id": "impl-ddres",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
         "created": "2026-08-16"
       },
       {
         "id": "impl-stall",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a00bd9-04e9-71b1-b0eb-c4e7f232e794",
         "created": "2026-08-16"
       },
       {
@@ -387,9 +387,105 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T183244202432-stall-fix-repair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stall-fix-repair",
+        "role": "implement",
+        "member": "impl-stall",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T18:32:46Z",
+        "completed_at": "2026-08-16T18:42:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 589,
+        "time_budget": "25m",
+        "base_sha": "136524e99c9f45c7807af3b1cafff23914805227",
+        "commits": [
+          "ab24299868b909906205751b991d8f60a12c13d0"
+        ],
+        "changed_lines": null,
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "Corrective commit ab242998 on top of 136524e9: oldest-active-batch age bound restores the typed-stall path for hung processors, canonical predicate parity via graph_ops.REVIEW_NAME_ELIGIBILITY_WHERE; 31/31 focused tests, ruff clean; awaiting re-review by rev-a",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/stall-fix-repair-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd9-04e9-71b1-b0eb-c4e7f232e794",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 6292224,
+            "input_tokens": 6494998,
+            "output_tokens": 18960,
+            "reasoning_output_tokens": 7493
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
+      },
+      {
+        "run_id": "r-20260816T182707941899-ddres-lifecycle-cli",
+        "plan": "sn-dd-gaps",
+        "section": "",
+        "node": "ddres-lifecycle-cli",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T18:27:10Z",
+        "completed_at": "2026-08-16T18:41:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 889,
+        "time_budget": "25m",
+        "base_sha": "a6125d44298b1b71dd5b14f554306f84888f514b",
+        "commits": [
+          "c0eaf0cbb3a0e7a21ff6ccefa21737797c2ae2fc"
+        ],
+        "changed_lines": null,
+        "tests_added": 7,
+        "gate": "passed",
+        "outcome": "sn ddres list/show/approve/revoke lifecycle CLI landed in worktree commit c0eaf0cb: fail-closed approval minting content-addressed receipts for the strict resolver; 63/63 tests, TDD red log preserved; both YAML resources byte-identical (0 approvals fabricated); awaiting independent review",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/ddres-lifecycle-cli-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 6321152,
+            "input_tokens": 6508152,
+            "output_tokens": 27405,
+            "reasoning_output_tokens": 9617
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 21
+    "_version": 25
   }
 }
