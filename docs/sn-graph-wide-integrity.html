@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="140">
+<meta name="plan-version" content="141">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1359,6 +1359,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-stub-prevention-repair" data-who="reckon-ship" data-when="2026-08-16T19:05:00+00:00">
     <div class="r-comment-body"><p><strong>Stub-prevention corrective commit produced (f-stub-reconcile prevention half; not yet merged).</strong> Commit <code>484d9829</code>, a direct child of prototype <code>6aae3d04</code>, resolves both HIGH review findings: an admitted HAS_PARENT target absent from <code>lifecycle_ids</code> — including an already-existing null-stage node — is now a bootstrap candidate that fully materializes before reconciliation and remains in its child's exact keep set, and the single bootstrap mutation carries final-query CAS predicates over child id, name_stage, unit, kind, physics domain, and COCOS (null-safe) with zero-row refusal. The regression uses the same existing-null-parent-plus-authoritative-child shape as the 57 materialize-as-derived-parent rows in receipt <code>fafba986</code>. An executable disposable-Neo4j 2026.01.4 test injects a late relationship-property error and proves whole-transaction rollback (parent stays lifecycle-null, zero derived source, zero edge). Focused suite 25/25 + 1/1 graph-marked, ruff exit 0, endpoint scan widened to all seven secondary writers. Re-review dispatched to the original reviewer session; merge follows an APPROVE verdict. The 297-stub cleanup operator remains this followup's next node.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-stall-fix-rereview-block" data-who="reckon-ship" data-when="2026-08-16T19:20:00+00:00">
+    <div class="r-comment-body"><p><strong>Stall-fix re-review: both prior findings resolved, but merge stays blocked on a new reproduced HIGH.</strong> In commit <code>ab242998</code> the shared <code>PoolHealth</code> lifecycle records one timestamp per pool: <code>mark_batch_started()</code> stamps only on the 0→1 transition and <code>mark_batch_finished()</code> retains the stamp until 1→0, so once the first-started replica batch completes while a younger replica batch is live, the watchdog ages the younger batch from the completed batch's timestamp. The reviewer independently reproduced premature typed-stall cancellation of a 0.077 s-old live batch under a 0.200 s bound (two-replica probe, log sha-pinned in the re-review manifest). Required repair: per-active-batch (or per-replica) start identity with the minimum still-active timestamp, plus an out-of-order two-replica regression in which the older batch finishes with zero processed while the younger batch keeps its full age window. Corrective node redispatched to the authoring member on top of <code>ab242998</code>.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

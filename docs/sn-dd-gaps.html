@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -303,6 +303,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="dd-resolution-lifecycle-cli-20260816" data-who="reckon-ship" data-when="2026-08-16T18:58:00+00:00">
     <div class="r-comment-body"><p><strong>The governed approval lifecycle instrument is implemented in worktree commit <code>c0eaf0cb</code> (not yet merged; independent review dispatched).</strong> <code>sn ddres list|show|approve|revoke</code> operates over the packaged candidate resource and the active authority manifest. Approval selects one exact path from one named candidate and requires actor, reason, positive revision, exact DDGap kind, content-addressed observation identities, and a fresh evidence token, minting a content-addressed approval receipt plus a strict <code>DDResolutionRecord</code> from the candidate's exact DD version, raw value, effective value, and official upstream provenance. Broad holds, incomplete release cohorts, unlisted paths, malformed or reused evidence, non-increasing revisions, and active-key collisions fail closed before write. Revocation appends a withdrawn successor and immutable state-change receipt without deleting history. TDD evidence: 7 red before implementation, 63/63 tests green after. The CLI transcript shows 21 candidates / 0 approved, a refused broad-scope hold (<code>O20</code>) and a refused graph-conflict candidate (<code>U19</code>). Both YAML resources remained byte-identical (active manifest SHA-256 <code>64c20eb0…</code>, candidates <code>c6ee52ae…</code>): zero approvals were fabricated. Per-record activation remains held on the lead's own approval receipts, exactly as the transition hold requires.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-cli-review-block-20260816" data-who="reckon-ship" data-when="2026-08-16T19:22:00+00:00">
+    <div class="r-comment-body"><p><strong>The approval lifecycle CLI is blocked by adversarial review — the authority path is not yet governed.</strong> Verdict BLOCK on <code>c0eaf0cb</code>: 1 critical, 1 high, 2 medium. CRITICAL: <code>approve</code> accepts caller-supplied digest-shaped observation ids and an evidence token as authority merely because the strings are unused locally — it never reads the exact graph DDGap, verifies path/kind/DD-version/observation-set, or recomputes the canonical evidence token, so fabricated well-shaped evidence could activate a record; the positive test even canonizes invented identities as its success fixture. HIGH: manifest mutation is read/check/build then <code>os.replace</code> with no expected-digest CAS or lock, so concurrent approve/approve or approve/revoke is last-writer-wins. MEDIUM: approval attribution keys on (path, dd_version, field) only, so approving O17 would make <code>show U19</code> report graph-conflicted paths as approved; adversarial refusal paths (stale/reused/fabricated evidence, collisions, concurrency, revocation parity) are unpinned. Useful surfaces confirmed: typed parsing, broad-hold and incomplete-cohort refusals, zero candidate-resource writes, record validation through the strict models. Corrective node redispatched to the authoring member on top of <code>c0eaf0cb</code>; integration only after re-review APPROVE.</p></div>
 </div>
 </section>
 </main>
