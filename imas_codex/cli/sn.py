@@ -6866,7 +6866,11 @@ def sn_ddres_list() -> None:
     manifest = dd_resolutions.load_dd_resolution_manifest()
     click.echo("CANDIDATE\tDISPOSITION\tPATHS\tAPPROVED_PATHS\tAPPROVED")
     for candidate in candidates.candidates:
-        approved = dd_resolutions.approved_candidate_paths(candidate, manifest)
+        approved = dd_resolutions.approved_candidate_paths(
+            candidate,
+            manifest,
+            candidate_digest=candidates.digest,
+        )
         click.echo(
             f"{candidate.source_row}\t{candidate.disposition.value}\t"
             f"{len(candidate.exact_paths)}\t{len(approved)}\t"
@@ -6890,7 +6894,11 @@ def sn_ddres_show(source_row: str) -> None:
             f"DD resolution candidate {source_row!r} was not found"
         )
     manifest = dd_resolutions.load_dd_resolution_manifest()
-    approved = dd_resolutions.approved_candidate_paths(candidate, manifest)
+    approved = dd_resolutions.approved_candidate_paths(
+        candidate,
+        manifest,
+        candidate_digest=candidates.digest,
+    )
     upstream = candidates.upstream_changes[candidate.upstream_change]
     click.echo(f"candidate: {candidate.source_row}")
     click.echo(f"disposition: {candidate.disposition.value}")
@@ -6930,6 +6938,11 @@ def sn_ddres_show(source_row: str) -> None:
     required=True,
     help="Fresh exact DDGap evidence-set token fenced by the approval.",
 )
+@click.option(
+    "--expected-manifest-digest",
+    required=True,
+    help="Exact authority digest reviewed before this compare-and-set mutation.",
+)
 @click.option("--actor", required=True, help="Human approval authority.")
 @click.option("--reason", required=True, help="Governed approval decision reason.")
 @click.option(
@@ -6944,6 +6957,7 @@ def sn_ddres_approve(
     gap_kind: str,
     observation_ids: tuple[str, ...],
     evidence_token: str,
+    expected_manifest_digest: str,
     actor: str,
     reason: str,
     revision: int,
@@ -6960,6 +6974,7 @@ def sn_ddres_approve(
             gap_kind=gap_kind,
             observation_ids=observation_ids,
             evidence_token=evidence_token,
+            expected_manifest_digest=expected_manifest_digest,
             actor=actor,
             reason=reason,
             revision=revision,
@@ -6977,7 +6992,17 @@ def sn_ddres_approve(
 @click.argument("resolution_id")
 @click.option("--actor", required=True, help="Human authority withdrawing approval.")
 @click.option("--reason", required=True, help="Evidence-backed withdrawal reason.")
-def sn_ddres_revoke(resolution_id: str, actor: str, reason: str) -> None:
+@click.option(
+    "--expected-manifest-digest",
+    required=True,
+    help="Exact authority digest reviewed before this compare-and-set mutation.",
+)
+def sn_ddres_revoke(
+    resolution_id: str,
+    actor: str,
+    reason: str,
+    expected_manifest_digest: str,
+) -> None:
     """Withdraw effective authority and append an immutable history receipt."""
     from pydantic import ValidationError
 
@@ -6988,6 +7013,7 @@ def sn_ddres_revoke(resolution_id: str, actor: str, reason: str) -> None:
             resolution_id,
             actor=actor,
             reason=reason,
+            expected_manifest_digest=expected_manifest_digest,
         )
     except (dd_resolutions.DDResolutionError, ValidationError, ValueError) as exc:
         raise click.ClickException(str(exc)) from exc

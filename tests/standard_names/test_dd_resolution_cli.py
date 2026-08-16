@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
+import pytest
 import yaml
 from click.testing import CliRunner
 
 from imas_codex.cli.sn import sn
 from imas_codex.graph.models import DDResolutionField, DDResolutionStatus
 from imas_codex.standard_names import dd_resolutions as dd_resolution_module
+from imas_codex.standard_names.dd_gaps import _evidence_token
 from imas_codex.standard_names.dd_resolutions import (
     DDResolutionValue,
     load_dd_resolution_manifest,
@@ -24,7 +27,52 @@ _ACTIVE_RESOURCE = (
 _APPROVABLE_ROW = "U25"
 _APPROVABLE_PATH = "equilibrium/time_slice/constraints/pressure/reconstructed"
 _OBSERVATION_ID = f"dd_gap_observation:{'a' * 64}"
-_EVIDENCE_TOKEN = f"dd-gap-evidence:{'b' * 64}"
+
+
+def _snapshot(**overrides: object) -> dict[str, Any]:
+    fact: dict[str, Any] = {
+        "id": f"dd_gap:{_APPROVABLE_PATH}:unit_defect",
+        "path": _APPROVABLE_PATH,
+        "kind": "unit_defect",
+        "status": "upstream_issue",
+        "example_count": 1,
+        "first_seen_at": "2026-08-16T08:00:00Z",
+        "last_seen_at": "2026-08-16T08:00:00Z",
+        "observed_dd_version": "4.1.1",
+        "observed_value": "1",
+        "expected_value": "Pa",
+        "evidence_rule": "unit_equals_expected",
+        "reference_path": None,
+        "reference_value": None,
+        "registry_backend": None,
+        "source_paths": [_APPROVABLE_PATH],
+        "observations": [{"id": _OBSERVATION_ID}],
+    }
+    fact.update(overrides)
+    fact["evidence_token"] = _evidence_token(fact)
+    return fact
+
+
+class _FakeGapReader:
+    def __init__(self, *snapshots: dict[str, Any] | None) -> None:
+        self.snapshots = list(snapshots)
+        self.calls = 0
+
+    def get_gap(self, gap_id: str) -> dict[str, Any] | None:
+        index = min(self.calls, len(self.snapshots) - 1)
+        self.calls += 1
+        snapshot = self.snapshots[index]
+        return dict(snapshot) if snapshot is not None else None
+
+
+def _install_reader(monkeypatch, *snapshots: dict[str, Any] | None) -> _FakeGapReader:
+    reader = _FakeGapReader(*snapshots)
+    monkeypatch.setattr(
+        dd_resolution_module,
+        "dd_resolution_graph_reader",
+        lambda: reader,
+    )
+    return reader
 
 
 def _temporary_manifest(tmp_path: Path, monkeypatch) -> Path:
@@ -38,7 +86,15 @@ def _temporary_manifest(tmp_path: Path, monkeypatch) -> Path:
     return manifest_path
 
 
-def _approval_args(row: str, *, path: str = _APPROVABLE_PATH) -> list[str]:
+def _approval_args(
+    row: str,
+    *,
+    path: str = _APPROVABLE_PATH,
+    snapshot: dict[str, Any] | None = None,
+    expected_digest: str | None = None,
+    revision: int = 1,
+) -> list[str]:
+    evidence = snapshot or _snapshot()
     return [
         "ddres",
         "approve",
@@ -48,15 +104,17 @@ def _approval_args(row: str, *, path: str = _APPROVABLE_PATH) -> list[str]:
         "--gap-kind",
         "unit_defect",
         "--observation-id",
-        _OBSERVATION_ID,
+        evidence["observations"][0]["id"],
         "--evidence-token",
-        _EVIDENCE_TOKEN,
+        evidence["evidence_token"],
+        "--expected-manifest-digest",
+        expected_digest or load_dd_resolution_manifest().digest,
         "--actor",
         "catalog-review-board",
         "--reason",
         "Reviewed raw release fact and exact DDGap evidence support the correction.",
         "--revision",
-        "1",
+        str(revision),
     ]
 
 
@@ -115,7 +173,7 @@ def test_approve_refuses_candidate_with_unresolved_release_conflict() -> None:
 
 def test_approve_requires_positive_revision() -> None:
     args = _approval_args(_APPROVABLE_ROW)
-    args[args.index("1")] = "0"
+    args[-1] = "0"
 
     result = CliRunner().invoke(sn, args)
 
@@ -123,14 +181,15 @@ def test_approve_requires_positive_revision() -> None:
     assert "0 is not in the range" in result.output
 
 
-def test_approve_refuses_malformed_ddgap_evidence() -> None:
+def test_approve_refuses_malformed_ddgap_evidence(monkeypatch) -> None:
+    _install_reader(monkeypatch, _snapshot())
     args = _approval_args(_APPROVABLE_ROW)
     args[args.index(_OBSERVATION_ID)] = "not-an-observation"
 
     result = CliRunner().invoke(sn, args)
 
     assert result.exit_code != 0
-    assert "content-addressed DDGap observation" in result.output
+    assert "observation set differs from the reviewed set" in result.output
 
 
 def test_approve_promotes_one_exact_path_with_strict_receipt(
@@ -138,8 +197,10 @@ def test_approve_promotes_one_exact_path_with_strict_receipt(
     monkeypatch,
 ) -> None:
     manifest_path = _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    reader = _install_reader(monkeypatch, snapshot, snapshot)
 
-    result = CliRunner().invoke(sn, _approval_args(_APPROVABLE_ROW))
+    result = CliRunner().invoke(sn, _approval_args(_APPROVABLE_ROW, snapshot=snapshot))
 
     assert result.exit_code == 0, result.output
     assert "approved U25" in result.output
@@ -150,8 +211,9 @@ def test_approve_promotes_one_exact_path_with_strict_receipt(
     assert record["approved_by"] == "catalog-review-board"
     assert record["reason"].startswith("Reviewed raw release fact")
     assert record["resolution_revision"] == 1
-    assert record["approval_receipt"].startswith("dd-resolution-approval:sha256:")
+    assert record["approval_receipt"].startswith("dd-resolution-approval:U25:sha256:")
     assert record["state"] == "active"
+    assert reader.calls == 2
 
     manifest = load_dd_resolution_manifest()
     resolved = resolve_dd_field(
@@ -170,6 +232,8 @@ def test_revoke_appends_receipt_and_preserves_resolution_history(
     monkeypatch,
 ) -> None:
     manifest_path = _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot, snapshot)
     runner = CliRunner()
     approved = runner.invoke(sn, _approval_args(_APPROVABLE_ROW))
     assert approved.exit_code == 0, approved.output
@@ -186,6 +250,8 @@ def test_revoke_appends_receipt_and_preserves_resolution_history(
             "catalog-review-board",
             "--reason",
             "New contradictory evidence requires withdrawal pending review.",
+            "--expected-manifest-digest",
+            load_dd_resolution_manifest().digest,
         ],
     )
 
@@ -217,3 +283,267 @@ def test_revoke_appends_receipt_and_preserves_resolution_history(
     assert any(
         record.state == DDResolutionStatus.withdrawn for record in manifest.resolutions
     )
+    original, successor = manifest.resolutions
+    original_payload = original.model_dump(mode="json", exclude={"id", "state"})
+    successor_payload = successor.model_dump(mode="json", exclude={"id", "state"})
+    assert successor_payload == original_payload
+
+
+def test_fabricated_digest_shaped_evidence_is_refused(tmp_path, monkeypatch) -> None:
+    manifest_path = _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot)
+    args = _approval_args(_APPROVABLE_ROW, snapshot=snapshot)
+    args[args.index(snapshot["evidence_token"])] = f"dd-gap-evidence:{'b' * 64}"
+
+    result = CliRunner().invoke(sn, args)
+
+    assert result.exit_code != 0
+    assert "canonical graph evidence token" in result.output
+    assert manifest_path.read_bytes() == _ACTIVE_RESOURCE.read_bytes()
+
+
+@pytest.mark.parametrize(
+    ("override", "message"),
+    [
+        ({"path": "equilibrium/other"}, "path"),
+        ({"kind": "self_contradiction"}, "kind"),
+        ({"observed_dd_version": "4.0.0"}, "DD version"),
+        ({"observed_value": "Pa"}, "observed value"),
+    ],
+)
+def test_graph_snapshot_must_match_candidate_exactly(
+    tmp_path, monkeypatch, override, message
+) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot(**override)
+    _install_reader(monkeypatch, snapshot)
+
+    result = CliRunner().invoke(sn, _approval_args(_APPROVABLE_ROW, snapshot=snapshot))
+
+    assert result.exit_code != 0
+    assert message in result.output
+
+
+def test_graph_change_after_guard_refuses_mutation(tmp_path, monkeypatch) -> None:
+    manifest_path = _temporary_manifest(tmp_path, monkeypatch)
+    reviewed = _snapshot()
+    changed = _snapshot(
+        observations=[
+            {"id": _OBSERVATION_ID},
+            {"id": f"dd_gap_observation:{'c' * 64}"},
+        ],
+        example_count=2,
+        last_seen_at="2026-08-16T09:00:00Z",
+    )
+    _install_reader(monkeypatch, reviewed, changed)
+
+    result = CliRunner().invoke(sn, _approval_args(_APPROVABLE_ROW, snapshot=reviewed))
+
+    assert result.exit_code != 0
+    assert "changed during approval" in result.output
+    assert manifest_path.read_bytes() == _ACTIVE_RESOURCE.read_bytes()
+
+
+def test_stale_manifest_digest_refuses_lost_update(tmp_path, monkeypatch) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot, snapshot)
+    stale_digest = load_dd_resolution_manifest().digest
+    first = CliRunner().invoke(
+        sn,
+        _approval_args(
+            _APPROVABLE_ROW,
+            snapshot=snapshot,
+            expected_digest=stale_digest,
+        ),
+    )
+    assert first.exit_code == 0, first.output
+
+    second = CliRunner().invoke(
+        sn,
+        _approval_args(
+            _APPROVABLE_ROW,
+            snapshot=snapshot,
+            expected_digest=stale_digest,
+            revision=2,
+        ),
+    )
+
+    assert second.exit_code != 0
+    assert "manifest changed" in second.output
+    assert len(load_dd_resolution_manifest().resolutions) == 1
+
+
+def test_stale_revoke_digest_cannot_overwrite_approval(tmp_path, monkeypatch) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot, snapshot)
+    stale_digest = load_dd_resolution_manifest().digest
+    approved = CliRunner().invoke(
+        sn,
+        _approval_args(
+            _APPROVABLE_ROW,
+            snapshot=snapshot,
+            expected_digest=stale_digest,
+        ),
+    )
+    assert approved.exit_code == 0, approved.output
+    resolution_id = load_dd_resolution_manifest().resolutions[0].id
+
+    revoked = CliRunner().invoke(
+        sn,
+        [
+            "ddres",
+            "revoke",
+            resolution_id,
+            "--actor",
+            "catalog-review-board",
+            "--reason",
+            "Contradictory evidence requires withdrawal.",
+            "--expected-manifest-digest",
+            stale_digest,
+        ],
+    )
+
+    assert revoked.exit_code != 0
+    assert "manifest changed" in revoked.output
+    assert len(load_dd_resolution_manifest().resolutions) == 1
+
+
+def test_active_key_collision_is_refused(tmp_path, monkeypatch) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot, snapshot)
+    first = CliRunner().invoke(sn, _approval_args(_APPROVABLE_ROW, snapshot=snapshot))
+    assert first.exit_code == 0, first.output
+
+    fresh = _snapshot(
+        observations=[{"id": f"dd_gap_observation:{'d' * 64}"}],
+        last_seen_at="2026-08-16T10:00:00Z",
+    )
+    _install_reader(monkeypatch, fresh, fresh)
+    second = CliRunner().invoke(
+        sn,
+        _approval_args(
+            _APPROVABLE_ROW,
+            snapshot=fresh,
+            expected_digest=load_dd_resolution_manifest().digest,
+            revision=2,
+        ),
+    )
+
+    assert second.exit_code != 0
+    assert "active DD resolution" in second.output
+
+
+def test_reused_evidence_and_non_increasing_revision_are_refused(
+    tmp_path, monkeypatch
+) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot, snapshot)
+    runner = CliRunner()
+    approved = runner.invoke(sn, _approval_args(_APPROVABLE_ROW, snapshot=snapshot))
+    assert approved.exit_code == 0, approved.output
+    resolution_id = load_dd_resolution_manifest().resolutions[0].id
+    revoked = runner.invoke(
+        sn,
+        [
+            "ddres",
+            "revoke",
+            resolution_id,
+            "--actor",
+            "catalog-review-board",
+            "--reason",
+            "Evidence no longer supports local authority.",
+            "--expected-manifest-digest",
+            load_dd_resolution_manifest().digest,
+        ],
+    )
+    assert revoked.exit_code == 0, revoked.output
+
+    _install_reader(monkeypatch, snapshot, snapshot)
+    reused = runner.invoke(
+        sn,
+        _approval_args(
+            _APPROVABLE_ROW,
+            snapshot=snapshot,
+            expected_digest=load_dd_resolution_manifest().digest,
+            revision=2,
+        ),
+    )
+    assert reused.exit_code != 0
+    assert "already used" in reused.output
+
+    fresh = _snapshot(
+        observations=[{"id": f"dd_gap_observation:{'e' * 64}"}],
+        last_seen_at="2026-08-16T11:00:00Z",
+    )
+    _install_reader(monkeypatch, fresh, fresh)
+    stale_revision = runner.invoke(
+        sn,
+        _approval_args(
+            _APPROVABLE_ROW,
+            snapshot=fresh,
+            expected_digest=load_dd_resolution_manifest().digest,
+            revision=1,
+        ),
+    )
+    assert stale_revision.exit_code != 0
+    assert "must exceed prior revision" in stale_revision.output
+
+
+def test_blocked_overlap_does_not_inherit_other_candidate_approval(
+    tmp_path, monkeypatch
+) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    path = "edge_profiles/ggd/ion/state/ionisation_potential"
+    snapshot = _snapshot(
+        id=f"dd_gap:{path}:unit_defect",
+        path=path,
+        observed_value="e",
+        expected_value="eV",
+        source_paths=[path],
+    )
+    _install_reader(monkeypatch, snapshot, snapshot)
+    approved = CliRunner().invoke(
+        sn,
+        _approval_args("O17", path=path, snapshot=snapshot),
+    )
+    assert approved.exit_code == 0, approved.output
+
+    blocked = CliRunner().invoke(sn, ["ddres", "show", "U19"])
+
+    assert blocked.exit_code == 0
+    assert "approved: no" in blocked.output
+
+
+def test_second_revocation_is_refused(tmp_path, monkeypatch) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
+    snapshot = _snapshot()
+    _install_reader(monkeypatch, snapshot, snapshot)
+    runner = CliRunner()
+    approved = runner.invoke(sn, _approval_args(_APPROVABLE_ROW, snapshot=snapshot))
+    assert approved.exit_code == 0, approved.output
+    resolution_id = load_dd_resolution_manifest().resolutions[0].id
+    digest = load_dd_resolution_manifest().digest
+    args = [
+        "ddres",
+        "revoke",
+        resolution_id,
+        "--actor",
+        "catalog-review-board",
+        "--reason",
+        "Evidence no longer supports local authority.",
+        "--expected-manifest-digest",
+        digest,
+    ]
+    first = runner.invoke(sn, args)
+    assert first.exit_code == 0, first.output
+
+    args[-1] = load_dd_resolution_manifest().digest
+    second = runner.invoke(sn, args)
+
+    assert second.exit_code != 0
+    assert "not effective active authority" in second.output
