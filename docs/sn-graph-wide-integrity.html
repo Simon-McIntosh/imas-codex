@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="160">
-<meta name="plan-impl" content="0.92">
+<meta name="plan-version" content="162">
+<meta name="plan-impl" content="0.93">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html,docs/archive/sn-graph-wide-integrity-guards-landed.html,docs/archive/sn-gas-unit-cache-repair-landed.html">
+<meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html,docs/archive/sn-graph-wide-integrity-guards-landed.html,docs/archive/sn-gas-unit-cache-repair-landed.html,docs/archive/sn-graph-wide-integrity-watchdog-stubs-west-landed.html">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
 </head>
 <body>
@@ -958,6 +958,11 @@ Done-when (ordered)
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
     <p class="r-fu-outcome">Landed end-to-end. The prototyped predicate fix went through two independent review rounds: the first corrective (ab242998) bounded in-flight suppression but reviewers reproduced a replica-age defect (a finished older batch's stale timestamp cancelled a 0.077s-old younger batch under a 0.2s bound); the second corrective (c87483fc) introduced per-active-batch completion identity with the minimum still-active timestamp and was APPROVED with zero findings, the reviewer's own probe replay showing the younger batch surviving its full window (0.2076s vs 0.2s bound). Merged at f378f4ed; post-merge gate 6526 passed / 10 skipped / 0 failed plus stall focus 32/32. Live convergence measure PASS: SNRun b5ab4a40 (sn run --only review_name --cost-limit 10 -t 15) ended completed/no_eligible_work in 162.7s with 64 replicas at in_flight=0 and error_count=0, spending $0.00 of the authorized $150 — the watchdog never persisted stalled. Drains are unblocked; the WEST-blocking subset (f-sgwi-west-blocking) proceeds next.</p>
     </article>
+<article class="r-fu" data-id="f-isn-vocab-rotation-los" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">ISN vocabulary rotation: receiver-channel locus and line-integrated density-constraint identity</h4>
+    <div class="r-fu-body"><p>Two grammar-blocked repairs recorded on 2026-08-16 need ISN vocabulary before they can be retried: a shared wave-diagnostic receiver-channel locus (so the ECE, reflectometer, and refractometer frequency sources can carry one non-lossy identity replacing frequency_of_diagnostic_antenna) and a spelling for the line-integrated electron-density equilibrium-constraint weight (the interferometer half of the executed Faraday split). Follow the standard vocab rotation: add tokens on the ISN fork, cut an RC, bump the pinned dependency in both pyproject declarations, then retry both staged renames through ordinary review.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -1419,6 +1424,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260817-atomic-fold-lineage-cycle" data-who="reckon-ship" data-when="2026-08-17T03:10:00+00:00">
     <div class="r-comment-body"><p><strong>The atomic-count fold refused fail-closed on a REFINED_FROM lineage cycle — recorded as class 1's reviewed refusal.</strong> The instrument found <code>atomic_count_of_ion_state</code> already descends from <code>atomic_count</code> through the seven-identity chain <code>particle_atomic_count → ratio_of_atomic_count_to_molecular_neutral_species_count → atomic_multiplicity → molecular_atomic_multiplicity → molecular_atomic_count → atomic_count</code>, so the fold's reverse edge would close a directed cycle. Full 188-participant closure and receipt hashes captured, bounded collateral proofs flat (355-path WEST hashes, both audits, all counters), zero mutations. With this, every class-1 name carries a receipted outcome. The lineage adjudication (valid history vs stale edges vs fold-into-ancestor) routes to f-sgwi-dual-binding, whose lead pair this is. The class-3 twelve-path fold adjudication — the last WEST-blocking class without a disposition — dispatches now.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260817-los-closure-and-lineage-verdict" data-who="reckon-ship" data-when="2026-08-17T04:20:00+00:00">
+    <div class="r-comment-body"><p><strong>The 31 same-rule non-WEST line-of-sight rows are repaired, and the atomic-count lineage is adjudicated.</strong> The exact 31-row retarget applied (payload hash <code>5cb308d3</code>, moved=31, replay 0): <code>toroidal_coordinate_of_line_of_sight</code> now carries 46 attachments with zero audit rejections while <code>toroidal_angle_of_measurement_position</code> keeps its 72 legitimate bindings, out-of-allowlist closure hash identical. 43 of the 115-binding closure's line-of-sight mispairings are repaired in total. The read-only lineage adjudication found all six REFINED_FROM hops genuine (five with exact directed change records) with the verdict: preserve history and fold <code>atomic_count_of_ion_state</code> into its existing ancestor <code>atomic_count</code> WITHOUT a reverse lineage edge, which needs a reviewed <code>supersede_into_ancestor</code> instrument variant. That implement-review-apply loop is f-sgwi-dual-binding's next node. The 49 owner/geometry rows and 23 confirmed-genuine measurement positions from the closure remain queued under f-graph-semantic-recovery.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
