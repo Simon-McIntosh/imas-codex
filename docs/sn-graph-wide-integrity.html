@@ -16,8 +16,8 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-11">
-<meta name="plan-version" content="131">
+<meta name="plan-modified" content="2026-08-16">
+<meta name="plan-version" content="132">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1328,6 +1328,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="wave-review-repoint-20260811" data-who="session-review-2026-08-11" data-when="2026-08-11">
     <div class="r-comment-body"><p><strong>Dependency repoint after the wave audit</strong> (<a href="/imas-codex/sn-wave-review-2026-08.html">sn-wave-review-2026-08</a>). The 2026-08-10 restructure (<code>86a389f2</code>) gated this plan behind sn-pipeline-hardening and sn-benchmark-evolution and wrote its implementation down 0.98→0.75 without citing a measurement — inverting this plan's own §1, which states the split from the WEST path was made by measurement. Both gates are cut; the sole prerequisite is now sn-pipeline-recovery (a runnable pipeline). Two hygiene notes: the §6 embed-dimension item (384-dim server vs 256-dim indexes) is stale — <code>embed status</code> now reports 256; and the <code>get_dd_version_context</code> drift §6 carries as a minor finding is a live red test on main, tracked for repair in sn-pipeline-recovery §2.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260816-fresh-census" data-who="reckon-ship" data-when="2026-08-16T16:45:00+00:00">
+    <div class="r-comment-body"><p><strong>Fresh live census (2026-08-16), read-only.</strong> Dual-bound sources 360 (was 362; 2 in the WEST manifest). No-live-target sources down to 22 (was 596). Quarantined live names: 50 accepted (7 WEST), 46 exhausted, 16 drafted. 297 lifecycle-less StandardName stubs (NULL name_stage/status/origin; 283 HAS_PARENT targets, 24 receiving PRODUCED_NAME from derived:* sources) — a schema-compliance defect with no owning followup yet. 261 failed sources (201 at the compose claim-attempt cap, zero WEST). The last three sn run invocations (2026-08-11, ids 976d7f97/612dba4a/ebf89db5) ended stop_reason=stalled — root-cause investigation dispatched. Accepted-docs link integrity: 176 docs carry a dead (name:...) target (169 superseded, 18 stubs, 5 absent); zero bare brackets. Full census artifact: scratchpad sn-census-2026-08-16.md (session-local).</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
