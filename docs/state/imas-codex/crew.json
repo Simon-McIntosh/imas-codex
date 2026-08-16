@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T23:05:29",
+  "updated": "2026-08-16T23:18:57",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1697,9 +1697,57 @@
           "cost_usd": null,
           "detail": "backend reports token usage but no headroom"
         }
+      },
+      {
+        "run_id": "r-20260816T210605064323-spurious-edge-race-fix",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "spurious-edge-race-fix",
+        "role": "implement",
+        "member": "impl-stubs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-16T21:06:08Z",
+        "completed_at": "2026-08-16T21:18:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 744,
+        "time_budget": "25m",
+        "base_sha": "c65b071a70b3f3feebfbf8667d868c024b79f2f9",
+        "commits": [
+          "2b44ac67e980c97d762017590d64569b1932cce3"
+        ],
+        "changed_lines": null,
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "Race fix 2b44ac67: deletion re-derives the complete producer set and requires exact signed equality in the same Cypher statement as the delete; red-then-green producer-injection rollback regression; 23/23 tests; awaiting final re-review",
+        "manifest_path": "/run/user/39486/claude-39486/-home-ITER-mcintos-Code-imas-codex/8947e522-1cea-46a0-989d-45f5ed895707/scratchpad/spurious-edge-race-fix-manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cached_input_tokens": 82146304,
+            "input_tokens": 84048694,
+            "output_tokens": 186262,
+            "reasoning_output_tokens": 57100
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        }
       }
     ],
     "holds": [],
-    "_version": 55
+    "_version": 56
   }
 }
