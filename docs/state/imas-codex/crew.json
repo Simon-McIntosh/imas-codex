@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T19:18:55",
+  "updated": "2026-08-17T19:57:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3003,9 +3003,257 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T164349284030-ddres-provenance-schema",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-provenance-schema",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:43:52Z",
+        "completed_at": "2026-08-17T16:57:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 809,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 809,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "76074f6b368f603681c0ad9622916f3376526941",
+        "commits": [
+          "4ae7c24fcbd6f7fc61982d88e2a0626dbd916f93"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Declared all six typed source-provenance slots on StandardName, made drift detection compare raw context plus applied/converged ids plus manifest digest (raw m->1 with unchanged effective 1 now re-stamps once, zero documentation steering), and refused root-marked effective objects at the raw release boundary; 3 red proofs then green, 107/107 focused, build-models clean with no generated products staged; cleared the chain to APPROVE and merged as a8fc9765",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T164349284030-ddres-provenance-schema/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8341760,
+            "cached_input_tokens_cumulative": 69253376,
+            "input_tokens": 8535922,
+            "input_tokens_cumulative": 72012619,
+            "output_tokens": 20861,
+            "output_tokens_cumulative": 236082,
+            "reasoning_output_tokens": 5790,
+            "reasoning_output_tokens_cumulative": 69848
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T172408251703-ddres-legacy-retirement",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-legacy-retirement",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T17:24:10Z",
+        "completed_at": "2026-08-17T17:48:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1449,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1449,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c2a3197db6ce22a4c0eeff1edc8d2245babda837",
+        "commits": [
+          "9d0f5ee60ea36b9a7d830ac5203b22bb9fb954e4"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 5,
+        "gate": "failed",
+        "outcome": "Retirement itself sound and independently reproduced: 66 exact path-to-rule bindings retired across 21 legacy rows from the strict active manifest at runtime, 41 of 62 rows untouched, both YAML carriers byte-identical, 5 red proofs then 6592 passed. Review BLOCK on 1 high: find_shadow_authorities audits only rows preclassified as retirements, so a legacy skip/suppress/correction rule whose result disagrees with the active effective value stays executable while zero-shadow still passes",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T172408251703-ddres-legacy-retirement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12165120,
+            "cached_input_tokens_cumulative": 81418496,
+            "input_tokens": 12503272,
+            "input_tokens_cumulative": 84515891,
+            "output_tokens": 38230,
+            "output_tokens_cumulative": 274312,
+            "reasoning_output_tokens": 12984,
+            "reasoning_output_tokens_cumulative": 82832
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T174831832962-ddres-retirement-review",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-retirement-review",
+        "role": "review",
+        "member": "rev-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-17T17:48:34Z",
+        "completed_at": "2026-08-17T17:56:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 481,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 481,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "9d0f5ee60ea36b9a7d830ac5203b22bb9fb954e4",
+        "commits": [
+          "9d0f5ee60ea36b9a7d830ac5203b22bb9fb954e4"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Review BLOCK: 0 critical / 1 high / 0 medium; 5 of 6 attack surfaces PASS (non-active parity, runtime manifest derivation, exact path/version/field matching, strict-load fail-closure, stale-observed protection). Independently reproduced the 66/21/41 census; the zero-residual-shadow claim is NOT reproducible - a static probe shows overlapping extraction-skip and suppress rows execute at runtime while the audit does not inspect them",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T174831832962-ddres-retirement-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-09b3-7041-89d4-9b5b05470d2a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2195456,
+            "cached_input_tokens_cumulative": 17285120,
+            "input_tokens": 2574583,
+            "input_tokens_cumulative": 18413399,
+            "output_tokens": 16246,
+            "output_tokens_cumulative": 76367,
+            "reasoning_output_tokens": 5377,
+            "reasoning_output_tokens_cumulative": 26064
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T174848735302-sn-suite-gate-retirement",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "sn-suite-gate-retirement",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T17:48:50Z",
+        "completed_at": "2026-08-17T17:57:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 508,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 508,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "9d0f5ee60ea36b9a7d830ac5203b22bb9fb954e4",
+        "commits": [
+          "9d0f5ee60ea36b9a7d830ac5203b22bb9fb954e4"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Combined Standard Names + units suites at 9d0f5ee6: 6590 passed, 10 skipped, 0 failed, 0 errors, exit 0; log sha256 8bfdb073",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T174848735302-sn-suite-gate-retirement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4754688,
+            "cached_input_tokens_cumulative": 46450432,
+            "input_tokens": 4838013,
+            "input_tokens_cumulative": 47783231,
+            "output_tokens": 8661,
+            "output_tokens_cumulative": 77284,
+            "reasoning_output_tokens": 3220,
+            "reasoning_output_tokens_cumulative": 26459
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 82
+    "_version": 86
   }
 }
