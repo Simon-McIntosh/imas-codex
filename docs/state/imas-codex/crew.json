@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T20:20:28",
+  "updated": "2026-08-17T20:43:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3437,9 +3437,195 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T182051007185-ddres-audit-precision",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-audit-precision",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T18:20:53Z",
+        "completed_at": "2026-08-17T18:33:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 731,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 731,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "2f65f4b3e13c12a3530c413d0459c2e3453f898c",
+        "commits": [
+          "413b7c0ec1087eb832021c674d78fedb0e560f4a"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 4,
+        "gate": "failed",
+        "outcome": "Value-level precision correct: numeric residuals suppressed whenever the typed effective unit is non-null, so observed-null to 1 and to Pa both report nothing while a reachable fallback still reports; 4 red proofs, 6598 passed, shipped residuals zero. Review escalated to HIGH: NumericSourceApplicability is an optional arbitrary Callable no production caller supplies, so the class is false-negative when omitted and false-positive under lambda True, and its tests pass unchecked lambdas instead of deriving exact DD facts",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T182051007185-ddres-audit-precision/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6362368,
+            "cached_input_tokens_cumulative": 102639360,
+            "input_tokens": 6546973,
+            "input_tokens_cumulative": 106056756,
+            "output_tokens": 14920,
+            "output_tokens_cumulative": 303279,
+            "reasoning_output_tokens": 4072,
+            "reasoning_output_tokens_cumulative": 89673
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T183345744534-ddres-audit-precision-review",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-audit-precision-review",
+        "role": "review",
+        "member": "rev-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-17T18:33:48Z",
+        "completed_at": "2026-08-17T18:39:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 360,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 360,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c7cf9bfdf161a7726cd4662adaaf6863eaab4962",
+        "commits": [
+          "413b7c0ec1087eb832021c674d78fedb0e560f4a"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Chain review BLOCK: 0 critical / 1 high / 0 medium; the reviewer's own probe reproduced both vacuity directions (omitted-callback false negative, unchecked-true false positive) while confirming value-level precision, four conflicting-carrier detections, duplicate-active detection, and shipped residuals zero across six classes with zero active effective-none records",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T183345744534-ddres-audit-precision-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-09b3-7041-89d4-9b5b05470d2a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2110208,
+            "cached_input_tokens_cumulative": 22652416,
+            "input_tokens": 2652614,
+            "input_tokens_cumulative": 24392249,
+            "output_tokens": 12769,
+            "output_tokens_cumulative": 108147,
+            "reasoning_output_tokens": 3703,
+            "reasoning_output_tokens_cumulative": 38218
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T183403146324-sn-suite-gate-final",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "sn-suite-gate-final",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T18:34:05Z",
+        "completed_at": "2026-08-17T18:43:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 570,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 570,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "c7cf9bfdf161a7726cd4662adaaf6863eaab4962",
+        "commits": [
+          "c7cf9bfdf161a7726cd4662adaaf6863eaab4962"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Independent combined gate at integration base c7cf9bfd (carries all three retirement commits): 6598 passed, 10 skipped, 0 failed, 0 errors, exit 0; log sha256 e90295d0; five more passes than the prior 6593 base",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T183403146324-sn-suite-gate-final/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3483136,
+            "cached_input_tokens_cumulative": 56531200,
+            "input_tokens": 3629126,
+            "input_tokens_cumulative": 58099264,
+            "output_tokens": 8216,
+            "output_tokens_cumulative": 91469,
+            "reasoning_output_tokens": 2251,
+            "reasoning_output_tokens_cumulative": 29504
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 89
+    "_version": 92
   }
 }
