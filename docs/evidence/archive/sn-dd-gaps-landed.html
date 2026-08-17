@@ -148,10 +148,52 @@
   2026-07-31 to 2026-08-16, plus 27 <code>StandardNameSource</code> nodes with null
   <code>source_id</code> and one <code>Unit</code> with null <code>symbol</code>. Both are routed
   to their owning plan rather than folded here.</p>
-  <p>Still deliberately unchanged: the legacy <code>dd_unit_exceptions</code> and
+  <p>Still deliberately unchanged at this point: the legacy <code>dd_unit_exceptions</code> and
   <code>unit_overrides</code> carriers, raw DD graph restoration, the zero-shadow-authority
   guard, and the numeric no-unit fallback. Until those land the resolved rows carry double
   authority, which the resolver certifies as convergence rather than misreporting.</p>
+
+  <h2 id="legacy-retirement">Legacy authority retirement and the singular-authority audit</h2>
+  <p><strong>Landed 2026-08-17</strong> — chain <code>9d0f5ee6</code> → <code>b1411210</code> →
+  <code>413b7c0e</code> → <code>5c4c09e1</code> → <code>bd132793</code>, merge <code>d82764dd</code>.
+  Legacy DD unit correction is now inert for exactly the paths carrying effective active authority,
+  derived from the strict manifest at runtime with no literal path list: <strong>66 exact
+  path-to-rule bindings retired across 21 legacy rows, 41 of 62 rows untouched</strong>, and both
+  YAML carriers byte-identical (<code>unit_overrides</code> <code>13310c50…</code>,
+  <code>dd_unit_exceptions</code> <code>81dcd027…</code>). New module
+  <code>imas_codex/standard_names/legacy_authority.py</code>.</p>
+  <p>Post-merge gate: <strong>6595 passed / 10 skipped / 0 failed</strong> at <code>d82764dd</code>.
+  Shipped audit coverage:</p>
+  <table>
+    <thead><tr><th>Carrier class</th><th>Status</th><th>Residuals</th></tr></thead>
+    <tbody>
+      <tr><td><code>active_manifest</code> (duplicate active authority)</td><td>audited</td><td>0</td></tr>
+      <tr><td><code>unit_overrides.override</code></td><td>audited</td><td>0</td></tr>
+      <tr><td><code>unit_overrides.skip</code></td><td>audited</td><td>0</td></tr>
+      <tr><td><code>dd_unit_exceptions.suppress</code></td><td>audited</td><td>0</td></tr>
+      <tr><td><code>dd_unit_exceptions.correct_in_graph</code></td><td>audited</td><td>0</td></tr>
+      <tr><td><code>numeric_missing_unit_fallback</code></td><td><strong>not audited</strong></td><td>none — deferred to its own policy, with the reason stated in the result</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Four review cycles, and the product was right after the first one.</strong> Cycle 1
+  validated the retirement itself — the reviewer reproduced the 66/21/41 census with its own script
+  and passed five of six attack surfaces (non-resolved parity, runtime manifest derivation, exact
+  key matching, strict-load fail-closure, stale-observed protection). Every later cycle concerned
+  the <em>guard</em>, and each found a real but progressively narrower defect: an audit that
+  enumerated only rows the classifier had already accepted, so the dangerous disagreeing-result case
+  was never inspected; a precision fix that then routed the audit's evidence through an optional
+  caller-supplied callable no production code passes, making the class false-negative when omitted
+  and false-positive under <code>lambda: True</code>; and finally a public assertion that discarded
+  per-carrier coverage and returned <code>None</code> on success, so a caller could read a clean
+  verdict without learning coverage was partial. The last was closed by naming the audited scope in
+  the function itself (<code>assert_zero_audited_shadow_authorities</code>) and returning the
+  complete <code>ShadowAuthorityAudit</code>.</p>
+  <p><strong>Recorded honestly because it is the transferable lesson:</strong> all five blocks across
+  this plan's execution sat behind a fully green suite (6547–6598 passing), and the two implementation
+  runs that were blocked are recorded in the ledger with gate <code>failed</code> rather than folded
+  into a single success. The guard cycles were also past the point of good return — the retirement had
+  zero live residuals throughout, and the coordinator should have scoped the guard as non-blocking
+  rather than gating integration on it.</p>
 </main>
 </body>
 </html>

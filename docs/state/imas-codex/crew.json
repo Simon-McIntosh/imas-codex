@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T21:06:15",
+  "updated": "2026-08-17T21:27:41",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3809,9 +3809,122 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T190654962579-ddres-audit-assertion",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-audit-assertion",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T19:06:57Z",
+        "completed_at": "2026-08-17T19:18:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 705,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 705,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "5990bfd00a0c22d78fe1f76fc08d3b163f8563e6",
+        "commits": [
+          "bd13279335b5aa6d6efdaec6ec52f5c0a51486ee"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Renamed the public assertion to assert_zero_audited_shadow_authorities so its claim is scoped in its own name, and it now returns the complete ShadowAuthorityAudit instead of None, so a caller necessarily receives numeric_missing_unit_fallback=not_audited beside the five audited classes at zero; duplicate-active still raises with its resolution id, all four conflicting-carrier ids preserved, repo-wide grep for the old name returns no matches; 3 red proofs then 6595 passed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T190654962579-ddres-audit-assertion/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5725184,
+            "cached_input_tokens_cumulative": 119599616,
+            "input_tokens": 5901853,
+            "input_tokens_cumulative": 123309016,
+            "output_tokens": 11143,
+            "output_tokens_cumulative": 330494,
+            "reasoning_output_tokens": 1967,
+            "reasoning_output_tokens_cumulative": 94471
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T191943742371-sn-suite-gate-merge",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "sn-suite-gate-merge",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T19:19:45Z",
+        "completed_at": "2026-08-17T19:27:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 451,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 451,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "d82764ddbf563dc426ab1b00c0130277d4bc937c",
+        "commits": [
+          "d82764dd"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Post-merge gate at the integrated commit d82764dd: 6595 passed, 10 skipped, 0 failed, 0 errors, exit 0; single execution; ancestry confirmed all five retirement-chain commits",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T191943742371-sn-suite-gate-merge/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 95
+    "_version": 97
   }
 }

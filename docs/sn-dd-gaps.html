@@ -17,22 +17,85 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="34">
+<meta name="plan-version" content="36">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf,6a32165d,212465f5,2f2c801d,76074f6b,4ae7c24f,a8fc9765">
+<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf,6a32165d,212465f5,2f2c801d,76074f6b,4ae7c24f,a8fc9765,9d0f5ee6,b1411210,413b7c0e,5c4c09e1,bd132793,d82764dd">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html,docs/evidence/archive/sn-dd-gaps-landed.html">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="sn-pipeline-hardening,sn-graph-wide-integrity">
 </head>
 <body>
   <main class="plan-doc">
-    <section class="callout" id="current-scope">
-      <h2>Current scope: reviewed local DD resolutions</h2>
-      <p>The evidence-only DDGap foundation is landed. This reopened scope adds typed, exact, version-bound local resolution authority so known defects with upstream pull-request solutions can be consumed now without rewriting raw DD provenance or waiting for publication.</p>
-      <p><strong>Primary consumers:</strong> source interpretation, context rendering, semantic signatures, attachment audits, manifests, release caveats and DD-release reconciliation.</p>
+    <section class="callout section-landed" id="current-scope">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-17</span>
+      <h2>Reviewed local DD resolutions — landed and effective at runtime</h2></header>
+      <p class="landed-summary">Typed, exact, version-bound local DD resolution authority is live: <strong>37 active records</strong>
+      approved under the lead's delegation, consumed by <strong>14 Standard Names consumer sites</strong> through
+      <code>resolve_dd_field</code>/<code>ResolvedDDContext</code> with raw provenance preserved, and the legacy
+      correction now inert for exactly those paths (<strong>66 bindings across 21 legacy rows, 41 of 62 untouched</strong>).
+      Merges <code>212465f5</code> (approvals), <code>a8fc9765</code> (consumer cutover), <code>d82764dd</code> (legacy retirement).
+      Full record: <a href="/imas-codex/evidence/archive/sn-dd-gaps-landed">sn-dd-gaps landed evidence</a>.</p>
+    </section>
+
+    <h2 id="s5">§5 — Remaining: restore raw DD values for the retired paths</h2>
+    <p><strong>Authority-gated: needs explicit approval for live DD graph writes.</strong> The 66 retired bindings
+    currently leave the graph holding the legacy-corrected value while the typed authority supplies the effective
+    value, so the resolver certifies convergence rather than misreporting — correct but not final. The retirement
+    checklist requires restoring the exact raw DD 4.1.1 values and <code>HAS_UNIT</code> edges for those paths so raw
+    provenance and effective projection are separately observable in the graph, then proving raw/effective separation
+    on a sample per upstream family. Deterministic graph writes, no LLM involvement, no new manifest machinery.
+    Do this only after the graph-schema baseline in <code>sn-graph-wide-integrity</code> is clean, or the verifying
+    gate cannot produce a usable signal.</p>
+
+    <h2 id="s6">§6 — Remaining: the U19 ionisation-potential cohort</h2>
+    <p><strong>Authority-gated: needs a renewed lead delegation on a changed candidate digest.</strong> The packaged
+    six-path U19 split is <em>incomplete</em>. PR 280 (<code>30a5ddd4</code>) corrects the generic-grid declaration
+    <code>e → eV</code>, and because <code>generic_grid_scalar</code> gives <code>values</code>/<code>coefficients</code>
+    units <code>as_parent</code> while the official XSL copies those onto the generated error fields, the exact governed
+    cohort is <strong>14 paths</strong> (6 primary + 8 inherited error-bar). Excluded with citation: 8 unitless integer
+    index paths, 4 absent error-index claims, and the 8 adjacent <code>z_min</code>/<code>z_max</code>/<code>z_average</code>/<code>z_square_average</code>
+    charge-number paths PR 280 explicitly retains in <code>e</code>. A live MATCH-only read on 2026-08-17 returned 22
+    nodes and confirmed zero drift against that disposition. Clearing it requires, in order: candidate expansion 6 → 14
+    (which changes the packaged digest and therefore needs independent review), 14 exact per-path DDGap facts through
+    the sanctioned evidence writers, a renewed lead delegation naming the <em>new</em> digest, and 14 per-path approvals.
+    The existing delegation covers digest <code>c6ee52ae…</code> only and does not extend to the expanded set.</p>
+
+    <h2 id="s7">§7 — Remaining: audited-absence policy for the numeric missing-unit fallback</h2>
+    <p>The singular-authority audit deliberately reports <code>numeric_missing_unit_fallback</code> as
+    <strong>not-audited</strong> with no residual count and a stated reason, rather than as a zero it cannot justify.
+    That deferral was independently endorsed as honest and sufficient — shipped active effective-none records are zero,
+    so it is not a current double-authority risk — but the fallback still injects unit <code>1</code> for numeric DD rows
+    with no unit relationship, outside every manifest. The policy owed here is a decision plus its instrument: either
+    prove numeric applicability and runtime reachability from exact DD facts (path, version, raw unit, data type, unit
+    relation) so the class can be audited for real, or retire the blanket fallback and require audited absence. Do not
+    reintroduce a caller-supplied applicability flag: an audit whose verdict depends on an unchecked argument is not
+    evidence, which is what blocked the first attempt.</p>
+
+    <h2 id="s8">§8 — Carried forward: the 41 legacy rows with no candidate</h2>
+    <p>Of the 62 legacy <code>dd_unit_exceptions</code> rows, 21 are now retired against active authority and
+    <strong>41 have no candidate at all</strong> — no exact upstream solution reference, so no path to a governed
+    approval receipt. They keep byte-identical legacy behaviour and are correct to leave alone. Promoting any of them
+    needs upstream provenance first (a merged or open DD change covering the exact path), then the same evidence →
+    delegation → approval sequence. Treat this as an upstream-tracking task, not repo work.</p>
+
+    <section class="callout" id="execution-notes">
+      <h2>Execution notes for the next session</h2>
+      <p><strong>A green suite is not evidence of a safe seam on this surface.</strong> Every one of the five review
+      blocks in this plan's execution sat behind a fully green Standard Names suite (6547–6598 passing): a dropped-field
+      regression on every pass-through extraction row, six graph properties written but never declared, an audit that
+      reported zero while never inspecting the dangerous case, a guard whose evidence came from an unchecked caller
+      argument, and an assertion that returned success while hiding partial coverage. Keep an adversarial review node in
+      the loop for any change to unit enforcement, graph writes, or schema declarations; the suite alone will pass them.</p>
+      <p><strong>Cost model for campaign planning.</strong> The free local model covers <em>name generation only</em>.
+      Review, refine, docs generation and docs review all bill paid providers to hold quality, so any rescore/refine/docs
+      drain must be budgeted as paid work rather than treated as free capacity.</p>
+      <p><strong>Graph-marked tests auto-skip in worker worktrees.</strong> <code>.env</code> is gitignored, so a
+      <code>-m graph</code> run in a dispatched worktree skips every test and still exits 0. Copy the canonical
+      <code>.env</code> in before the run, remove it after, never stage it, and require executed-versus-skipped counts in
+      the manifest. A skipped graph run is <em>not-run</em>, never a pass.</p>
     </section>
 
     <h2 id="s1">§1 — Why: the pipeline meets DD defects with no first-class channel</h2>
@@ -254,10 +317,11 @@ CONSTRAINTS
   TDD; generated enums only; no hardcoded DD facility data in Python; pre-stage naming checks; no AI attribution; record every landing in the plan immediately.</pre>
     <p class="r-fu-outcome">Storage authority was locked to graph lifecycle facts plus the curated YAML enforcement backend. Typed automated evidence writers, compare-and-set human triage, DD-release reconciliation, deterministic release caveats, and a fail-closed identity migration are integrated. The live registry converged once to 35 facts and 451 owned observations with one audited gas-fact identity change; a second dry-run found zero creates, reclassifications, or manual items. Flags remain warning-only and cannot change eligibility, scoring, stage, acceptance, units, or release blocking.</p>
     </article>
-<article class="r-fu" data-id="f-ddg-local-resolution" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ddg-local-resolution" data-status="resolved" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="2026-08-17T19:28:46+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Make reviewed local DD resolutions first-class pipeline authority</h4>
     <div class="r-fu-body"><p>Add the typed resolution layer above immutable DDGap observations and route every Standard Names context/parser through it. The graph must preserve both observed DD truth and the reviewed effective value, with exact applicability and upstream provenance.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
+    <p class="r-fu-outcome">Landed. The typed resolution layer sits above immutable DDGap observations and every Standard Names DD-value consumer now routes through it: 37 active records approved under delegated authority (merge 212465f5), 14 consumer sites reading effective values through resolve_dd_field/ResolvedDDContext with raw_dd_context, applied/converged resolution ids and manifest digest preserved (merge a8fc9765, chain review APPROVE with zero findings, SN suite 6560 green, six new StandardName provenance slots proven declared against the live graph schema tests), and the legacy correction retired for exactly those paths with a singular-authority audit (merge d82764dd, 66 bindings across 21 rows, 41 untouched, post-merge gate 6595 green). The graph preserves both observed DD truth and the reviewed effective value with exact applicability and upstream provenance, as required. Authority-gated remainders are authored as plan sections 5 through 8 rather than left implicit: raw DD graph restoration, the U19 14-path cohort under a renewed delegation, the numeric missing-unit fallback policy, and the 41 no-candidate legacy rows.</p>
     </article>
 <article class="r-fu" data-id="f-dd-candidate-parser" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-10T19:15:00+02:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="2026-08-10T17:24:31+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Make review-only DD candidate intake duplicate-safe and scalar-strict</h4>
@@ -269,6 +333,11 @@ CONSTRAINTS
     <h4 class="r-fu-title">Repair the pre-existing graph schema non-compliance the credentialed gate exposed</h4>
     <div class="r-fu-body"><p>The DD-resolution consumer gate ran <code>tests/graph/test_schema_compliance.py</code> against the live graph and found a baseline defect unrelated to DD resolution: <code>StandardNameSourceRetry</code> persists six properties (<code>before_closure_hash</code>, <code>manifest_hash</code>, <code>preserved_state_hash</code>, <code>run_id</code>, <code>terminal_sn_id</code>, <code>terminal_stage</code>) that its LinkML class does not declare, across 28 nodes stamped 2026-07-31 to 2026-08-16, and required fields are null on 27 <code>StandardNameSource</code> nodes (<code>source_id</code>) plus one <code>Unit</code> (<code>symbol</code>, id <code>as_parent_level_2</code>). Either declare or stop writing those properties, repair the null required values, and re-run the graph gate. Also worth fixing at source: a graph-marked suite dispatched into a worktree auto-skips every test because <code>.env</code> is gitignored, so the run exits 0 and reads as a pass.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    </article>
+<article class="r-fu" data-id="f-ddg-authority-gated-remainder" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-17T19:45:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Clear the authority-gated remainder: raw DD restoration, the U19 cohort, and the numeric fallback policy</h4>
+    <div class="r-fu-body"><p>Plan sections 5 through 8 hold the remaining work, each needing an authority the session did not hold. §5 raw DD graph restoration for the 66 retired paths needs explicit approval for live DD graph writes, and should follow the graph-schema baseline repair in <code>sn-graph-wide-integrity</code> so its verifying gate produces a usable signal. §6 the U19 ionisation-potential cohort needs candidate expansion from 6 to 14 exact paths, which changes the packaged digest and therefore needs independent review plus a renewed lead delegation naming the new digest — the existing delegation covers <code>c6ee52ae…</code> only. §7 needs a decision on the numeric missing-unit fallback: prove numeric applicability and reachability from exact DD facts so the class can be audited, or retire the blanket fallback, and never via a caller-supplied flag. §8's 41 no-candidate rows need upstream provenance before any promotion. Read §8's execution notes first: a green suite passed all five review blocks in this plan's history.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
     </article>
 </section>
 
@@ -353,6 +422,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-audit-assertion-20260817" data-who="reckon-ship" data-when="2026-08-17T19:10:00+00:00">
     <div class="r-comment-body"><p><strong>The vacuity removal is confirmed and the deferral design was independently endorsed; one narrow boundary defect remains.</strong> Corrective <code>5c4c09e1</code> deletes the caller-supplied applicability callable outright — both public audit signatures now take only manifest and DD version, so there is no flag left to fake — and represents the numeric carrier honestly as <code>ShadowAuditStatus.not_audited</code> with <code>residual_count=None</code> and a stated separate-policy reason. The reviewer re-ran its own coverage probe: <strong>prior HIGH RESOLVED</strong>, five audited classes at zero on the shipped carriers, four conflicting legacy carriers and duplicate-active still firing with stable ids, and the exact-merge-base gate green at <strong>6595 passed / 10 skipped / 0 failed</strong> (log SHA-256 <code>5b6f8298…</code>; three fewer passes than the prior base, accounted for by the deliberate removal of the three caller-asserted cases rather than any skip). <strong>The reviewer was asked to rule on the coordinator's design choice and endorsed it:</strong> the not-audited deferral is honest and sufficient for this chain, since the inventory assigns the numeric fallback its own remove-or-prove policy and the shipped active effective-none count is zero, so the deferral is not itself a double-authority risk. The remaining HIGH is where that honesty stops short: <code>assert_zero_shadow_authority</code> discards <code>carrier_results</code> and returns <code>None</code> whenever audited residuals are empty, so a caller receives a clean verdict and never learns coverage was partial — honest reporting undone at the one boundary most code will actually call. Coordinator decision: take the reviewer's narrow-and-return option rather than fail-closed, because the numeric carrier is permanently not-audited pending that policy and a fail-closed assertion would raise unconditionally. The audited scope moves into the function's own name and the complete audit result becomes its return value, so the not-audited status arrives beside the zeros.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-retirement-landed-20260817" data-who="reckon-ship" data-when="2026-08-17T19:45:00+00:00">
+    <div class="r-comment-body"><p><strong>Legacy authority retirement is LANDED and gate-proven; the session closes here at a clean boundary.</strong> Merge <code>d82764dd</code> integrates the chain <code>9d0f5ee6</code> → <code>b1411210</code> → <code>413b7c0e</code> → <code>5c4c09e1</code> → <code>bd132793</code>. Legacy DD unit correction is inert for exactly the effective-active paths, derived from the strict manifest at runtime with no literal path list — 66 exact bindings across 21 legacy rows, 41 of 62 untouched, both YAML carriers byte-identical. The final corrective names the audited scope in the assertion itself (<code>assert_zero_audited_shadow_authorities</code>) and returns the complete <code>ShadowAuthorityAudit</code>, so a caller necessarily sees <code>numeric_missing_unit_fallback = not_audited</code> beside the five audited classes at zero. Post-merge gate at the integrated commit: <strong>6595 passed / 10 skipped / 0 failed</strong>. Record: <code>docs/evidence/archive/sn-dd-gaps-landed.html#legacy-retirement</code>.</p><p><strong>Remaining work is authored as §5–§8 in the evergreen and every item is authority-gated, not merely unfinished:</strong> raw DD graph restoration for the 66 retired paths needs explicit live-DD-write approval; the U19 14-path cohort needs a candidate expansion (6→14) whose digest change invalidates the current delegation, so it needs a renewed one; the numeric missing-unit fallback needs an audited-absence policy decision; and 41 legacy rows have no upstream candidate at all and are correct to leave alone. §8's execution notes carry three findings the next session should not rediscover: a green suite passed all five review blocks in this plan, so unit-enforcement/graph/schema changes need an adversarial review node; the free local model covers <em>name generation only</em>, so any rescore/refine/docs drain is paid work and must be budgeted as such; and graph-marked tests auto-skip in dispatched worktrees at exit 0 because <code>.env</code> is gitignored. The two graph-gate hazards are also written into <code>sn-graph-wide-integrity</code>, which owns the pre-existing schema baseline and is S8's critical path.</p></div>
 </div>
 </section>
 </main>
