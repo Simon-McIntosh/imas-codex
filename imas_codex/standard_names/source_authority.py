@@ -358,7 +358,7 @@ def authority_snapshot(
     coordinates = node.get("coordinates") or []
     unit = properties.get("unit") or (units[0].get("id") if units else None)
     parent = parents[0] if parents else None
-    return {
+    raw = {
         "dd_version": version["properties"].get("id"),
         "description": properties.get("documentation"),
         "physics_domain": properties.get("physics_domain"),
@@ -378,6 +378,34 @@ def authority_snapshot(
         "enhanced_description": properties.get("description"),
         "enhancement_kind": properties.get("enrichment_source"),
     }
+    from imas_codex.standard_names.dd_resolutions import resolve_dd_row
+
+    context = resolve_dd_row(
+        {
+            "path": path,
+            "unit": raw["dd_unit"],
+            "documentation": raw["dd_documentation"],
+            "data_type": raw["dd_data_type"],
+            "physics_domain": raw["physics_domain"],
+            "coordinates": raw["dd_coordinates"],
+            "lifecycle_status": raw["dd_lifecycle_status"],
+            "lifecycle_version": raw["dd_lifecycle_version"],
+        },
+        dd_version=raw["dd_version"],
+    )
+    effective = context.as_pipeline_item()
+    raw.update(
+        {
+            "dd_unit": effective["unit"],
+            "dd_documentation": effective["documentation"],
+            "dd_data_type": effective["data_type"],
+            "physics_domain": effective["physics_domain"],
+            "dd_coordinates": effective["coordinates"],
+            "dd_lifecycle_status": effective["lifecycle_status"],
+            "dd_lifecycle_version": effective["lifecycle_version"],
+        }
+    )
+    return raw
 
 
 def authority_payload(

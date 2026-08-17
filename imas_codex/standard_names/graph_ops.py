@@ -682,7 +682,13 @@ def get_extraction_candidates_dd(
             """,
             **params,
         )
-        return list(results)
+        from imas_codex.settings import get_dd_version
+        from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
+
+        return [
+            context.as_pipeline_item()
+            for context in resolve_dd_rows(results, dd_version=get_dd_version())
+        ]
 
 
 def get_extraction_candidates_signals(
@@ -1077,6 +1083,31 @@ ORDER BY path
 """
 
 
+def _resolved_manifest_drain_plan(
+    rows: list[dict[str, Any]], dd_version: str
+) -> list[dict[str, Any]]:
+    """Classify manifest rows only after resolving their DD node context."""
+    from imas_codex.standard_names.dd_resolutions import resolve_dd_row
+
+    resolved_rows = []
+    for raw_row in rows:
+        row = dict(raw_row)
+        if row.get("node"):
+            node = dict(row["node"])
+            context = resolve_dd_row(
+                {
+                    **node,
+                    "path": row["path"],
+                    "coordinates": node.get("coordinate_ids") or (),
+                },
+                dd_version=dd_version,
+            )
+            node.update(context.as_pipeline_item())
+            row["node"] = node
+        resolved_rows.append(row)
+    return [classify_manifest_drain_item(row) for row in resolved_rows]
+
+
 def build_manifest_drain_plan(
     paths: list[str],
     *,
@@ -1100,7 +1131,7 @@ def build_manifest_drain_plan(
             worker_cutoff=f"PT{worker_timeout_seconds}S",
             terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
         )
-        return [classify_manifest_drain_item(dict(row)) for row in rows]
+        return _resolved_manifest_drain_plan(rows, dd_version)
     finally:
         if own:
             client.close()
@@ -1182,7 +1213,7 @@ def claim_manifest_drain_scope(
                     worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
                     terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
                 )
-                plan = [classify_manifest_drain_item(dict(row)) for row in rows]
+                plan = _resolved_manifest_drain_plan(rows, dd_version)
                 initial_fingerprint = _manifest_plan_fingerprint(plan)
                 _lock_manifest_drain_authority(tx_gc, exact_paths)
                 locked_rows = tx_gc.query(
@@ -1194,7 +1225,7 @@ def claim_manifest_drain_scope(
                     worker_cutoff=f"PT{_CLAIM_TIMEOUT_SECONDS}S",
                     terminal_stages=sorted(_TERMINAL_BINDING_NAME_STAGES),
                 )
-                plan = [classify_manifest_drain_item(dict(row)) for row in locked_rows]
+                plan = _resolved_manifest_drain_plan(locked_rows, dd_version)
                 if _manifest_plan_fingerprint(plan) != initial_fingerprint:
                     raise ManifestDrainConflict(
                         "DD authority or binding state changed during manifest claim"
@@ -9463,7 +9494,42 @@ def _pin_dd_source_snapshots(
         )
     for source in prepared:
         if source.get("source_type") == "dd" and source["id"] in by_id:
-            source.update(by_id[source["id"]])
+            snapshot = by_id[source["id"]]
+            from imas_codex.standard_names.dd_resolutions import resolve_dd_row
+
+            context = resolve_dd_row(
+                {
+                    "path": source["dd_path"],
+                    "unit": snapshot.get("dd_unit"),
+                    "documentation": snapshot.get("dd_documentation"),
+                    "data_type": snapshot.get("dd_data_type"),
+                    "coordinates": snapshot.get("dd_coordinates") or (),
+                    "lifecycle_status": snapshot.get("dd_lifecycle_status"),
+                    "lifecycle_version": snapshot.get("dd_lifecycle_version"),
+                },
+                dd_version=snapshot["dd_version"],
+            )
+            effective = context.as_pipeline_item()
+            snapshot.update(
+                {
+                    "dd_unit": effective["unit"],
+                    "dd_documentation": effective["documentation"],
+                    "dd_data_type": effective["data_type"],
+                    "dd_coordinates": effective["coordinates"],
+                    "dd_lifecycle_status": effective["lifecycle_status"],
+                    "dd_lifecycle_version": effective["lifecycle_version"],
+                    "raw_dd_context": effective["raw_dd_context"],
+                    "dd_resolution_ids": effective["dd_resolution_ids"],
+                    "dd_resolution_converged_ids": effective[
+                        "dd_resolution_converged_ids"
+                    ],
+                    "dd_resolution_manifest_digest": effective[
+                        "dd_resolution_manifest_digest"
+                    ],
+                    "_dd_resolution_marker": effective["_dd_resolution_marker"],
+                }
+            )
+            source.update(snapshot)
     return prepared
 
 

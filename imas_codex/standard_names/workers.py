@@ -2169,6 +2169,30 @@ def _enrich_batch_items(items: list[dict]) -> None:
 
             row = rows[0]
 
+            from imas_codex.settings import get_dd_version
+            from imas_codex.standard_names.dd_resolutions import resolve_dd_row
+
+            prior_raw_context = item.get("raw_dd_context") or {}
+            raw_context = {
+                "path": path,
+                "unit": prior_raw_context.get("unit")
+                or item.get("unit")
+                or row.get("unit_from_rel")
+                or row.get("unit"),
+                "documentation": prior_raw_context.get("documentation")
+                or row.get("node_documentation"),
+                "data_type": row.get("data_type"),
+                "physics_domain": row.get("physics_domain"),
+                "cocos_transformation_type": row.get("cocos_label"),
+                "cocos_transformation_expression": row.get("cocos_expression"),
+                "lifecycle_status": row.get("lifecycle_status"),
+            }
+            resolved_context = resolve_dd_row(
+                raw_context,
+                dd_version=str(item.get("dd_version") or get_dd_version()),
+            )
+            item.update(resolved_context.as_pipeline_item())
+
             # Grounding text: prefer the rich LLM-enriched node description over
             # the terse source documentation (rich-first, terse-fallback — the
             # same precedence the DD-enrichment pipeline uses). Deterministic
@@ -2835,6 +2859,25 @@ def _is_attachment_consistent(
     # there is no second list here. A unit that is absent or that the canonical
     # parser cannot resolve on either side is a DD-completeness gap, not an
     # attachment defect: nothing to disagree with, so the pair is accepted.
+    if dd_unit:
+        from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
+        from imas_codex.settings import get_dd_version
+        from imas_codex.standard_names.dd_resolutions import (
+            DDResolutionValue,
+            resolve_dd_field,
+        )
+
+        resolved_unit = resolve_dd_field(
+            path=source_id,
+            dd_version=get_dd_version(),
+            field=DDResolutionField.unit,
+            raw_value=DDResolutionValue(
+                kind=DDResolutionValueKind.string,
+                value=dd_unit,
+            ),
+        )
+        dd_unit = resolved_unit.effective.value
+
     if dd_unit and sn_unit:
         from imas_codex.units.dd_unit_exceptions import canonical_or_none, units_agree
 
@@ -7250,12 +7293,27 @@ def _enrich_name_review_items(items: list[dict[str, Any]]) -> None:
                 binding.get("dd_path") or binding.get("source_id") or ""
             )
             pinned = binding.get("dd_snapshot_pinned") is True
-            unit = binding.get("dd_unit") or item.get("unit") or ""
+            dd_version = binding.get("dd_version") or ""
+            from imas_codex.standard_names.dd_resolutions import resolve_dd_row
+
+            context = resolve_dd_row(
+                {
+                    "path": source_id,
+                    "unit": binding.get("dd_unit") or item.get("unit") or None,
+                    "documentation": binding.get("dd_documentation"),
+                    "data_type": binding.get("dd_data_type"),
+                    "coordinates": binding.get("dd_coordinates") or (),
+                    "lifecycle_status": binding.get("dd_lifecycle_status"),
+                    "lifecycle_version": binding.get("dd_lifecycle_version"),
+                },
+                dd_version=dd_version,
+            )
+            binding.update(context.as_pipeline_item())
+            unit = context.unit or ""
             description = (
                 binding.get("enhanced_description") or binding.get("description") or ""
             )
-            documentation = binding.get("dd_documentation") or ""
-            dd_version = binding.get("dd_version") or ""
+            documentation = context.documentation or ""
             group_key = (
                 pinned,
                 dd_version,
@@ -7287,6 +7345,14 @@ def _enrich_name_review_items(items: list[dict[str, Any]]) -> None:
                 continue
             pinned = binding.get("dd_snapshot_pinned") is True
             dd_version = binding.get("dd_version") or ""
+            if parent_path:
+                from imas_codex.standard_names.dd_resolutions import resolve_dd_row
+
+                parent_context = resolve_dd_row(
+                    {"path": parent_path, "documentation": documentation},
+                    dd_version=dd_version,
+                )
+                documentation = parent_context.documentation or ""
             group_key = (pinned, dd_version, documentation)
             group = parent_groups.setdefault(
                 group_key,
@@ -8623,18 +8689,35 @@ def _enrich_for_docs_gen(
 
         dd_nodes = [n for n in (row.get("dd_nodes") or []) if n and n.get("id")]
         if dd_nodes:
+            from imas_codex.settings import get_dd_version
+            from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
+
+            contexts = resolve_dd_rows(
+                [
+                    {
+                        "path": node["id"],
+                        "unit": node.get("unit"),
+                        "documentation": node.get("documentation"),
+                    }
+                    for node in dd_nodes
+                ],
+                dd_version=get_dd_version(),
+            )
             item["dd_source_docs"] = [
                 {
                     "id": n["id"],
                     # Rich-first: the LLM-enriched description grounds the docs
                     # prompts; fall back to terse source documentation only when
                     # no enriched description exists.
-                    "documentation": (
-                        n.get("description") or n.get("documentation") or ""
-                    ),
-                    "unit": n.get("unit") or "",
+                    "documentation": n.get("description")
+                    or context.documentation
+                    or "",
+                    "unit": context.unit or "",
+                    "raw_dd_context": context.as_pipeline_item()["raw_dd_context"],
+                    "dd_resolution_ids": list(context.applied_resolution_ids),
+                    "dd_resolution_manifest_digest": context.manifest_digest,
                 }
-                for n in dd_nodes[:5]
+                for n, context in zip(dd_nodes[:5], contexts[:5], strict=True)
             ]
             aliases = [n["alias"] for n in dd_nodes if n.get("alias")]
             if aliases:
@@ -10130,7 +10213,15 @@ async def process_refine_docs_batch(
                     """,
                     sn_id=sn_id,
                 )
-                prompt_context["dd_paths"] = [dict(r) for r in dd_rows]
+                from imas_codex.settings import get_dd_version
+                from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
+
+                raw_rows = [dict(row) for row in dd_rows]
+                contexts = resolve_dd_rows(raw_rows, dd_version=get_dd_version())
+                prompt_context["dd_paths"] = [
+                    {**row, **context.as_pipeline_item()}
+                    for row, context in zip(raw_rows, contexts, strict=True)
+                ]
         except Exception:
             logger.debug("refine_docs: DD path enrichment failed for %s", sn_id)
 

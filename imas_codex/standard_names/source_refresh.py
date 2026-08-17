@@ -47,6 +47,19 @@ def _norm(v: Any) -> str:
     return (v or "").strip() if isinstance(v, str) else ("" if v is None else str(v))
 
 
+def _resolved_source_context(
+    path: str, unit: str | None, documentation: str | None
+) -> dict[str, Any]:
+    """Resolve source snapshot fields through the packaged DD authority."""
+    from imas_codex.settings import get_dd_version
+    from imas_codex.standard_names.dd_resolutions import resolve_dd_row
+
+    return resolve_dd_row(
+        {"path": path, "unit": unit, "documentation": documentation},
+        dd_version=get_dd_version(),
+    ).as_pipeline_item()
+
+
 def stamp_source_snapshots(
     sn_ids: list[str] | None = None,
     *,
@@ -77,14 +90,36 @@ def stamp_source_snapshots(
             MATCH (o:IMASNode {{id: src.source_id}})
             WHERE {where}
             {_RESOLVE_TERMINAL}
-            SET sn.source_unit = n.unit,
-                sn.source_documentation = n.documentation,
-                sn.source_path = n.id
-            RETURN count(sn) AS c
+            RETURN sn.id AS sn_id, n.id AS path, n.unit AS unit,
+                   n.documentation AS documentation
             """,
             sn_ids=sn_ids,
         )
-        n = rows[0]["c"] if rows else 0
+        updates = []
+        for row in rows:
+            resolved = _resolved_source_context(
+                row["path"], row.get("unit"), row.get("documentation")
+            )
+            updates.append(
+                {
+                    "sn_id": row["sn_id"],
+                    "path": row["path"],
+                    "unit": resolved["unit"],
+                    "documentation": resolved["documentation"],
+                }
+            )
+        if updates:
+            gc.query(
+                """
+                UNWIND $updates AS update
+                MATCH (sn:StandardName {id: update.sn_id})
+                SET sn.source_unit = update.unit,
+                    sn.source_documentation = update.documentation,
+                    sn.source_path = update.path
+                """,
+                updates=updates,
+            )
+        n = len(updates)
         logger.info(
             "stamp_source_snapshots: stamped %d name(s)%s",
             n,
@@ -121,9 +156,6 @@ def detect_source_drift(
             WHERE sn.name_stage <> 'superseded' {stage_filter}
               AND sn.source_path IS NOT NULL
             {_RESOLVE_TERMINAL}
-            WHERE coalesce(sn.source_unit,'') <> coalesce(n.unit,'')
-               OR coalesce(sn.source_documentation,'') <> coalesce(n.documentation,'')
-               OR coalesce(sn.source_path,'') <> coalesce(n.id,'')
             RETURN sn.id AS sn_id, sn.name_stage AS name_stage,
                    sn.docs_stage AS docs_stage,
                    sn.source_unit AS old_unit, n.unit AS new_unit,
@@ -134,6 +166,14 @@ def detect_source_drift(
         )
         drifted: list[dict[str, Any]] = []
         for r in rows:
+            resolved = _resolved_source_context(
+                r["new_path"], r.get("new_unit"), r.get("new_doc")
+            )
+            r = {
+                **r,
+                "new_unit": resolved["unit"],
+                "new_doc": resolved["documentation"],
+            }
             deltas = []
             if _norm(r["old_path"]) != _norm(r["new_path"]):
                 deltas.append(

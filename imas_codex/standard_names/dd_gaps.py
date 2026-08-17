@@ -23,6 +23,8 @@ from imas_codex.graph.models import (
     DDGapEvidenceRule,
     DDGapKind,
     DDGapStatus,
+    DDResolutionField,
+    DDResolutionValueKind,
 )
 from imas_codex.units.dd_unit_exceptions import canonical_or_none, load_exceptions
 
@@ -2082,9 +2084,31 @@ def reconcile_dd_gaps(
                 missing_path = path
                 break
             if isinstance(fact, Mapping):
-                actual_values.append(fact.get(fact_field))
+                actual = fact.get(fact_field)
             else:
-                actual_values.append(fact)
+                actual = fact
+            if fact_field == "unit":
+                from imas_codex.standard_names.dd_resolutions import (
+                    DDResolutionValue,
+                    resolve_dd_field,
+                )
+
+                raw = DDResolutionValue(
+                    kind=(
+                        DDResolutionValueKind.null
+                        if actual is None
+                        else DDResolutionValueKind.string
+                    ),
+                    value=actual,
+                )
+                resolved = resolve_dd_field(
+                    path=path,
+                    dd_version=dd_version,
+                    field=DDResolutionField.unit,
+                    raw_value=raw,
+                )
+                actual = resolved.raw.value
+            actual_values.append(actual)
         if missing_path:
             manual_required.append(
                 {

@@ -31,7 +31,16 @@ class _CaptureGC:
 
     def query(self, cypher, **kw):
         self.calls.append((cypher, kw))
-        return [{"c": 1}]
+        if "RETURN sn.id AS sn_id" in cypher:
+            return [
+                {
+                    "sn_id": "gas_flow",
+                    "path": "gas_injection/pipe/flow_rate",
+                    "unit": "s^-1",
+                    "documentation": "Particle flow rate.",
+                }
+            ]
+        return []
 
 
 def test_norm_collapses_none_and_strips():
@@ -135,10 +144,17 @@ def test_stamp_source_snapshot_targets_only_gas_flow_cache():
     stamped = sr.stamp_source_snapshots(["gas_flow"], gc=gc)
 
     assert stamped == 1
-    assert len(gc.calls) == 1
+    assert len(gc.calls) == 2
     cypher, params = gc.calls[0]
     assert "sn.id IN $sn_ids" in cypher
     assert params["sn_ids"] == ["gas_flow"]
-    set_clause = cypher.split("SET", 1)[1].split("RETURN", 1)[0]
-    assert "sn.source_unit = n.unit" in set_clause
-    assert "sn.unit" not in set_clause
+    write, write_params = gc.calls[1]
+    assert "sn.source_unit = update.unit" in write
+    assert write_params["updates"] == [
+        {
+            "sn_id": "gas_flow",
+            "path": "gas_injection/pipe/flow_rate",
+            "unit": "s^-1",
+            "documentation": "Particle flow rate.",
+        }
+    ]

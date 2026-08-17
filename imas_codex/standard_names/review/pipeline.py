@@ -691,12 +691,29 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
                 """,
                 paths=list(all_paths),
             )
-            for r in rows or []:
-                path_docs[r["id"]] = {
-                    "id": r["id"],
-                    "unit": r.get("unit", ""),
-                    "description": r.get("description", ""),
-                    "documentation": r.get("documentation", ""),
+            from imas_codex.settings import get_dd_version
+            from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
+
+            contexts = resolve_dd_rows(
+                [
+                    {
+                        "path": row["id"],
+                        "unit": row.get("unit"),
+                        "documentation": row.get("documentation"),
+                    }
+                    for row in rows or []
+                ],
+                dd_version=get_dd_version(),
+            )
+            for row, context in zip(rows or [], contexts, strict=True):
+                path_docs[row["id"]] = {
+                    "id": row["id"],
+                    "unit": context.unit or "",
+                    "description": row.get("description", ""),
+                    "documentation": context.documentation or "",
+                    "raw_dd_context": context.as_pipeline_item()["raw_dd_context"],
+                    "dd_resolution_ids": list(context.applied_resolution_ids),
+                    "dd_resolution_manifest_digest": context.manifest_digest,
                 }
         except Exception:
             logger.debug("Review DD source fetch failed", exc_info=True)
