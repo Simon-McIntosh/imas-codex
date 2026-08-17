@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf">
+<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf,6a32165d,212465f5">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html,docs/evidence/archive/sn-dd-gaps-landed.html">
-<meta name="plan-impl" content="0.89">
+<meta name="plan-impl" content="0.93">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="sn-pipeline-hardening,sn-graph-wide-integrity">
 </head>
@@ -324,6 +324,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddgap-wave1-20260817" data-who="reckon-ship" data-when="2026-08-17T14:45:00+00:00">
     <div class="r-comment-body"><p><strong>Wave 1 landed: per-path evidence materialized, U19 dispositioned, and the full DD-override inventory produced.</strong> (1) All 32 approval-blocked paths now carry exact live <code>(path, kind)</code> DDGap facts with owned observations, minted only through <code>write_dd_gaps</code> — 27 U11–U16 paths citing merged PR 242 <code>cb0d86de</code>, 3 wall energy-flux paths citing open PR 273 <code>f34c85d3</code>, 2 O17 parents citing PR 280 <code>30a5ddd4</code>; the approval gate's no-write evidence probe succeeded 10/10 candidate rows and both packaged YAMLs stayed byte-identical (graph-only effect, receipt SHA-256 <code>3231a7ac…</code>). (2) The U19 conflict is resolved analytically: the packaged six-path split is <em>incomplete</em> — the exact governed cohort is 14 paths (6 primary + 8 XSL-inherited error-bar fields, all <code>e→eV</code> under PR 280), excluding 8 unitless index paths and the 8 charge-number paths PR 280 retains in <code>e</code>; a fresh orchestrator-run MATCH-only live read (22 nodes) confirmed zero drift. Clearing U19 requires candidate expansion 6→14 (digest change → independent review), 14 per-path facts, renewed lead delegation on the new digest, and 14 approvals — the delegation renewal is the lead's own act. (3) The override inventory (lead's request this session): 62 legacy rules = 34 DD-bug rows + 28 extraction rules (23 suppress, 11 correct_in_graph, 24 replacements, 4 skips), 21 candidates, 5 active resolutions, plus a 28-row unit_overrides registry and assorted normalizers/skip lists; <em>no other per-path unit-correction registry exists</em>, and the 5 active records have zero production resolver consumers — they stay shadowed by correct_in_graph until the cutover wires <code>ResolvedDDContext</code>. Cumulative record: <code>docs/evidence/archive/sn-dd-gaps-landed.html</code>. Next: the delegated approval pass for the 32 now-evidenced paths (within the c6ee52ae delegation), then the consumer cutover.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-approvals-32-20260817" data-who="reckon-ship" data-when="2026-08-17T14:55:00+00:00">
+    <div class="r-comment-body"><p><strong>The 32 delegated approvals are ACTIVE: the packaged authority now holds 37 records, all fail-closed gates intact.</strong> Under the lead's delegation (candidates at <code>c6ee52ae…</code>), <code>sn ddres approve</code> executed 32/32 with zero refusals — U11–U16 (27 paths, merged PR 242 <code>cb0d86de</code>), U21/U22/U32 (3 paths, open PR 273 <code>f34c85d3</code>), and O17's two ionisation-potential parents (PR 280 <code>30a5ddd4</code>) — each approval refreshing its live DDGap fact and letting the CLI recompute the canonical evidence token under the manifest lock, actor <code>reckon-ship (lead-delegated 2026-08-17)</code>. The active manifest advanced <code>f8718114 → 8b124a8f</code> (5→37 records, strict load green); the candidate resource is byte-identical, and U19/O20–O24 were never invoked. Scope was extended mid-flight (recorded at promotion): 15 tests asserting an empty packaged authority were repaired to isolated temporary authorities plus governed-state assertions. Landed as commit <code>6a32165d</code> / merge <code>212465f5</code>, gate-proven by the full Standard Names suite at 6539/10/0. Decision table: <code>/tmp/reckon-s8-evidence/ddres-approvals-2/decisions.md</code> (SHA-256 <code>372f856b…</code>); cumulative record: <code>docs/evidence/archive/sn-dd-gaps-landed.html#delegated-approvals-32</code>. The 37 records remain stored authority only — the consumer cutover (wire <code>ResolvedDDContext</code> through the Standard Names consumers, disable the legacy corrections for resolved rows, restore raw DD 4.1.1 values/edges, prove raw/effective provenance) is now the sole remaining executable node besides the authority-gated U19 chain.</p></div>
 </div>
 </section>
 </main>

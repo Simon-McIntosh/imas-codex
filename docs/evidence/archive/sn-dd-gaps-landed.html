@@ -85,6 +85,27 @@
   those five rows, restores raw DD 4.1.1 values/edges, and proves raw/effective provenance.
   Report: <code>/tmp/reckon-s8-evidence/dd-override-inventory/report.md</code>
   SHA-256 <code>30932d25…</code>.</p>
+
+  <h2 id="delegated-approvals-32">Delegated approval pass — 32 activations</h2>
+  <p><strong>Landed 2026-08-17</strong> (run <code>r-…-ddres-approvals-32</code>, commit
+  <code>6a32165d</code>, merge <code>212465f5</code>). Under the lead's delegation
+  (candidate digest <code>c6ee52ae…</code>), <code>sn ddres approve</code> executed for all
+  32 wave-1-evidenced paths: <strong>32/32 approved, 0 refusals</strong> — U11–U16 (27
+  paths, PR 242), U21/U22/U32 (3 paths, PR 273), O17 (2 paths, PR 280). Every approval
+  refreshed its live DDGap fact, supplied exact owned observation identities, and let the
+  CLI recompute the canonical evidence token under the manifest lock; actor
+  <code>reckon-ship (lead-delegated 2026-08-17)</code>, each reason citing the delegation
+  and the row's upstream solution. U19 and the broad holds O20–O24 were never invoked.</p>
+  <p>The active authority manifest advanced <code>f8718114… → 8b124a8f…</code>
+  (5 → <strong>37 records</strong>, strict load green, 0 state changes); the candidate
+  resource stayed byte-identical. Scope was extended mid-flight (recorded at promotion):
+  15 tests asserting the packaged authority was empty were repaired to build explicitly
+  empty temporary authorities for mutation tests and to assert the governed packaged state.
+  Gate evidence: focused suite 76/76; full Standard Names suite at the merge —
+  <strong>6539 passed / 10 skipped / 0 failed</strong>. Decision table:
+  <code>/tmp/reckon-s8-evidence/ddres-approvals-2/decisions.md</code> SHA-256
+  <code>372f856b…</code>. Consumers are not yet cut over: the 37 records remain stored
+  authority until the cutover node routes the pipeline through the resolver.</p>
 </main>
 </body>
 </html>
