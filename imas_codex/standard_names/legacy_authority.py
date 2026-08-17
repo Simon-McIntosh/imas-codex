@@ -224,19 +224,19 @@ def find_shadow_authorities(
     )
 
 
-def assert_zero_shadow_authority(
+def assert_zero_audited_shadow_authorities(
     *,
     manifest: DDResolutionManifest | None = None,
     dd_version: str | None = None,
-) -> None:
-    """Refuse when any legacy or duplicate carrier shadows active authority."""
+) -> ShadowAuthorityAudit:
+    """Return covered-carrier results or refuse on any audited residual."""
     audit = find_shadow_authorities(
         manifest=manifest,
         dd_version=dd_version,
     )
     shadows = audit.residuals
     if not shadows:
-        return
+        return audit
     details = "; ".join(
         f"carrier={item.carrier} row_id={item.row_id} "
         f"resolution_id={item.resolution_id} path={item.path}"

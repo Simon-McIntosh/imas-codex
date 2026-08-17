@@ -30,7 +30,7 @@ def _replace_legacy_carriers(
 def test_shipped_carriers_have_zero_shadow_authority() -> None:
     authority = import_module("imas_codex.standard_names.legacy_authority")
 
-    audit = authority.find_shadow_authorities()
+    audit = authority.assert_zero_audited_shadow_authorities()
 
     assert audit.residuals == ()
     assert {
@@ -65,10 +65,9 @@ def test_public_shadow_audit_has_no_applicability_flag() -> None:
         "manifest",
         "dd_version",
     }
-    assert set(signature(authority.assert_zero_shadow_authority).parameters) == {
-        "manifest",
-        "dd_version",
-    }
+    assert set(
+        signature(authority.assert_zero_audited_shadow_authorities).parameters
+    ) == {"manifest", "dd_version"}
 
 
 def test_shadow_guard_names_residual_carrier_and_row() -> None:
@@ -86,7 +85,7 @@ def test_shadow_guard_names_residual_carrier_and_row() -> None:
         ("active_manifest", duplicate.id)
     ]
     with pytest.raises(authority.DDResolutionShadowAuthority, match=duplicate.id):
-        authority.assert_zero_shadow_authority(manifest=double_authority)
+        authority.assert_zero_audited_shadow_authorities(manifest=double_authority)
 
 
 def test_shadow_audit_flags_disagreeing_extraction_skip(
