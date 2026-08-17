@@ -91,11 +91,16 @@ def _manifest(*records: DDResolutionRecord) -> DDResolutionManifest:
     return DDResolutionManifest(schema_version=1, resolutions=records)
 
 
-def test_packaged_manifest_is_reviewed_empty_authority() -> None:
+def test_packaged_manifest_is_strict_active_authority() -> None:
     manifest = load_dd_resolution_manifest()
 
     assert manifest.schema_version == 1
-    assert manifest.resolutions == ()
+    assert len(manifest.resolutions) == 37
+    assert manifest.state_changes == ()
+    assert all(
+        resolution.state == DDResolutionStatus.active
+        for resolution in manifest.resolutions
+    )
     assert manifest.digest.startswith("sha256:")
 
 
@@ -107,7 +112,7 @@ def test_packaged_candidates_are_separate_review_only_input() -> None:
     assert review_input.authority == "review_input_only"
     assert len(review_input.candidates) == 21
     assert active_after is active_before
-    assert active_after.resolutions == ()
+    assert len(active_after.resolutions) == 37
     assert active_after.digest == active_before.digest
     for candidate in review_input.candidates:
         with pytest.raises(ValidationError):
@@ -359,7 +364,16 @@ def test_broad_candidate_cannot_silently_gain_exact_paths() -> None:
         DDResolutionCandidate.model_validate(payload)
 
 
-def test_runtime_resolvers_never_consult_candidate_resource(monkeypatch) -> None:
+def test_runtime_resolvers_never_consult_candidate_resource(
+    tmp_path: Path, monkeypatch
+) -> None:
+    manifest_path = tmp_path / "dd_resolutions.yaml"
+    manifest_path.write_text("schema_version: 1\nresolutions: []\n")
+    monkeypatch.setattr(
+        dd_resolution_module,
+        "dd_resolution_manifest_path",
+        lambda: manifest_path,
+    )
     active_digest = load_dd_resolution_manifest().digest
 
     def _candidate_access_is_forbidden() -> None:
