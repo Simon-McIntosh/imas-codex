@@ -12,12 +12,10 @@ from imas_codex.standard_names.dd_resolutions import (
     DDResolutionRecord,
     effective_active_dd_resolutions,
 )
-from imas_codex.standard_names.unit_overrides import _load_rules, resolve_unit
+from imas_codex.standard_names.unit_overrides import _load_rules
 from imas_codex.units.dd_unit_exceptions import (
     canonical_or_none,
-    graph_unit_correction,
     load_exceptions,
-    units_agree,
 )
 
 
@@ -123,43 +121,43 @@ def find_shadow_authorities(
         else:
             seen[key] = record
 
-    if shadows:
-        return tuple(shadows)
-
-    for retirement in legacy_authority_retirements(
-        manifest=manifest, dd_version=version
-    ):
-        record = next(item for item in records if item.id == retirement.resolution_id)
-        if retirement.carrier == "dd_unit_exceptions":
-            correction = graph_unit_correction(
-                record.path,
-                record.observed.value,
-                dd_version=version,
-                manifest=manifest,
+    exceptions = load_exceptions()["dd_unit_bugs"]
+    overrides = _load_rules()
+    for record in records:
+        observed = canonical_or_none(record.observed.value)
+        effective = canonical_or_none(record.effective.value)
+        for index, entry in enumerate(exceptions, start=1):
+            if not fnmatch.fnmatchcase(record.path, str(entry["path"])):
+                continue
+            if canonical_or_none(str(entry["dd_unit"])) != observed:
+                continue
+            if canonical_or_none(str(entry["correct_unit"])) == effective:
+                continue
+            carrier = (
+                "dd_unit_exceptions.correct_in_graph"
+                if entry.get("correct_in_graph")
+                else "dd_unit_exceptions.suppress"
             )
-            suppressed = units_agree(
-                record.effective.value,
-                record.observed.value,
-                record.path,
-                dd_version=version,
-                manifest=manifest,
-            )
-            residual = correction is not None or suppressed
-        else:
-            _, metadata = resolve_unit(
-                record.path,
-                record.observed.value,
-                dd_version=version,
-                manifest=manifest,
-            )
-            residual = metadata is not None
-        if residual:
             shadows.append(
                 ShadowAuthority(
-                    carrier=retirement.carrier,
-                    row_id=retirement.row_id,
-                    resolution_id=retirement.resolution_id,
-                    path=retirement.path,
+                    carrier=carrier,
+                    row_id=f"dd-unit-exception:{index}",
+                    resolution_id=record.id,
+                    path=record.path,
+                )
+            )
+        for index, rule in enumerate(overrides, start=1):
+            if not rule.matches(record.path, record.observed.value):
+                continue
+            result = rule.override_unit if rule.strategy == "override" else None
+            if record.effective.value == result:
+                continue
+            shadows.append(
+                ShadowAuthority(
+                    carrier=f"unit_overrides.{rule.strategy}",
+                    row_id=f"unit-override:{index}",
+                    resolution_id=record.id,
+                    path=record.path,
                 )
             )
 
