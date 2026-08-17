@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T18:43:28",
+  "updated": "2026-08-17T19:18:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -2822,9 +2822,190 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T165827385159-ddres-provenance-review",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-provenance-review",
+        "role": "review",
+        "member": "rev-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-17T16:58:30Z",
+        "completed_at": "2026-08-17T17:01:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 157,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 157,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "81fe20e9b942fa6bfffe9296120ba8687acfa647",
+        "commits": [
+          "4ae7c24fcbd6f7fc61982d88e2a0626dbd916f93"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Chain review APPROVE for 2f2c801d + 76074f6b + 4ae7c24f: 0 critical / 0 high / 0 medium / 0 low, all 3 previously open findings resolved - six provenance slots declared with matching shapes, raw/identity/digest-only drift re-stamps once without documentation steering, root typed marker rejected before object iteration, coverage table asserts 8 boundaries and explicitly defers 7",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T165827385159-ddres-provenance-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-09b3-7041-89d4-9b5b05470d2a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2168832,
+            "cached_input_tokens_cumulative": 15089664,
+            "input_tokens": 2218145,
+            "input_tokens_cumulative": 15838816,
+            "output_tokens": 6424,
+            "output_tokens_cumulative": 60121,
+            "reasoning_output_tokens": 1749,
+            "reasoning_output_tokens_cumulative": 20687
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T165847353936-sn-suite-gate-provenance",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "sn-suite-gate-provenance",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T16:58:50Z",
+        "completed_at": "2026-08-17T17:08:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 554,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 554,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "81fe20e9b942fa6bfffe9296120ba8687acfa647",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Standard Names suite green at integration base 81fe20e9 (6560 passed, 10 skipped, 0 failed; log sha256 08458d5e) but the schema-compliance half is UNPROVEN: all 9 graph tests auto-skipped because the worktree carries no Neo4j credential (.env is gitignored and absent from worktrees); a credentialed re-gate is required",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T165847353936-sn-suite-gate-provenance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6182400,
+            "cached_input_tokens_cumulative": 39205120,
+            "input_tokens": 6268234,
+            "input_tokens_cumulative": 40329345,
+            "output_tokens": 8982,
+            "output_tokens_cumulative": 58361,
+            "reasoning_output_tokens": 2959,
+            "reasoning_output_tokens_cumulative": 19388
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T170840604021-schema-compliance-gate",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "schema-compliance-gate",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T17:08:43Z",
+        "completed_at": "2026-08-17T17:17:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 550,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 550,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "81fe20e9b942fa6bfffe9296120ba8687acfa647",
+        "commits": [
+          "4ae7c24fcbd6f7fc61982d88e2a0626dbd916f93"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Graph schema gate executed 9/9 (7 passed, 2 failed, exit 1). CHAIN SCOPE PASSED: all six typed StandardName source-provenance slots are declared and absent from the undeclared-property failure. The two failures are a pre-existing baseline defect the chain never touches - StandardNameSourceRetry carries 6 undeclared properties on 28 nodes stamped 2026-07-31 to 2026-08-16, plus 27 null StandardNameSource.source_id and 1 null Unit.symbol; routed to sn-graph-wide-integrity",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T170840604021-schema-compliance-gate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2490624,
+            "cached_input_tokens_cumulative": 41695744,
+            "input_tokens": 2615873,
+            "input_tokens_cumulative": 42945218,
+            "output_tokens": 10262,
+            "output_tokens_cumulative": 68623,
+            "reasoning_output_tokens": 3851,
+            "reasoning_output_tokens_cumulative": 23239
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 79
+    "_version": 82
   }
 }

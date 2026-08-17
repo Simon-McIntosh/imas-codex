@@ -106,6 +106,52 @@
   <code>/tmp/reckon-s8-evidence/ddres-approvals-2/decisions.md</code> SHA-256
   <code>372f856b…</code>. Consumers are not yet cut over: the 37 records remain stored
   authority until the cutover node routes the pipeline through the resolver.</p>
+
+  <h2 id="consumer-cutover">Consumer cutover — the authority becomes effective at runtime</h2>
+  <p><strong>Landed 2026-08-17</strong> — chain <code>2f2c801d</code> → <code>76074f6b</code> →
+  <code>4ae7c24f</code>, merge <code>a8fc9765</code>. The Standard Names pipeline now reads
+  effective DD values through <code>resolve_dd_field</code>/<code>ResolvedDDContext</code>
+  across 14 consumer sites (bulk and targeted extraction, worker unit re-injection, compose
+  context, name-review source and parent context, documentation member context, semantic
+  source snapshots, drain manifests, attachment audit and write/integrity guards, release
+  caveats, source refresh and drift, DD-release reconciliation, review batch context).
+  Exact resolver coverage proves raw/effective pairs for PR 242 camera direction
+  <code>m→1</code>, PR 273 wall energy flux <code>m^-2.s^-1→W.m^-2</code>, O17 ionisation
+  potential <code>e→eV</code>, and the reconstructed pressure <code>1→Pa</code>.</p>
+  <p><strong>It took two review cycles, and both blocks were invisible to a green suite</strong>
+  — the record matters more than the outcome:</p>
+  <table>
+    <thead><tr><th>Cycle</th><th>Suite at that commit</th><th>Review verdict</th><th>What the suite could not see</th></tr></thead>
+    <tbody>
+      <tr><td>1 · <code>2f2c801d</code></td><td>6547 / 10 / 0</td><td>BLOCK — 5 high, 1 medium</td><td><code>get_extraction_candidates_dd</code> returned only the typed projection, dropping <code>description</code>, <code>ids_name</code> and <code>cluster_label</code> from every pass-through row; two <code>DDResolutionError</code> paths swallowed by broad handlers; snapshots erasing raw provenance; effective values accepted as raw release evidence</td></tr>
+      <tr><td>2 · <code>76074f6b</code></td><td>6558 / 10 / 0</td><td>BLOCK — 1 high, 2 medium (3 prior resolved)</td><td>provenance persisted to six <code>StandardName</code> properties the LinkML class never declared, and never read back during drift detection, so an upstream raw <code>m→1</code> release with an unchanged effective <code>1</code> produced no drift row</td></tr>
+      <tr><td>3 · <code>4ae7c24f</code></td><td>6560 / 10 / 0</td><td><strong>APPROVE — 0 findings</strong></td><td>—</td></tr>
+    </tbody>
+  </table>
+  <p>Gate evidence at the approved chain: chain review APPROVE (0 critical / 0 high / 0 medium /
+  0 low, all prior findings resolved); Standard Names suite <strong>6560 passed / 10 skipped /
+  0 failed</strong> (log SHA-256 <code>08458d5e…</code>); the live graph schema tests executed
+  9/9 with all six provenance slots (<code>source_raw_unit</code>,
+  <code>source_raw_documentation</code>, <code>source_dd_resolution_ids</code>,
+  <code>source_dd_resolution_converged_ids</code>,
+  <code>source_dd_resolution_manifest_digest</code>, <code>source_dd_resolution_marker</code>)
+  declared and absent from the undeclared-property failure. Coverage table:
+  <code>/tmp/reckon-s8-evidence/ddres-provenance-schema/consumer-coverage.md</code> — 8 boundaries
+  verified by asserting public-entry tests, 7 unsupported claims explicitly deferred rather than
+  quietly dropped.</p>
+  <p><strong>Two process findings recorded rather than smoothed over.</strong> First, the graph
+  schema gate initially reported exit 0 while auto-skipping all 9 tests, because
+  <code>.env</code> is gitignored and therefore absent from every worktree — a skipped graph run
+  reads as a pass to anything checking exit codes alone. Second, once credentialed, the run
+  exposed a <em>pre-existing</em> baseline non-compliance this chain never touches:
+  <code>StandardNameSourceRetry</code> carries six undeclared properties on 28 nodes stamped
+  2026-07-31 to 2026-08-16, plus 27 <code>StandardNameSource</code> nodes with null
+  <code>source_id</code> and one <code>Unit</code> with null <code>symbol</code>. Both are routed
+  to their owning plan rather than folded here.</p>
+  <p>Still deliberately unchanged: the legacy <code>dd_unit_exceptions</code> and
+  <code>unit_overrides</code> carriers, raw DD graph restoration, the zero-shadow-authority
+  guard, and the numeric no-unit fallback. Until those land the resolved rows carry double
+  authority, which the resolver certifies as convergence rather than misreporting.</p>
 </main>
 </body>
 </html>
