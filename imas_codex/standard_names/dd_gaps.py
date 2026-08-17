@@ -1932,6 +1932,10 @@ def load_raw_unit_release_facts(
     """Load raw published DD unit facts without accepting effective projections."""
     if isinstance(payload, list):
         return build_unit_release_facts(payload)
+    if payload.get("_dd_resolution_marker") is not None:
+        raise ValueError(
+            "effective DD context cannot serve as raw published release evidence"
+        )
 
     rows: list[Mapping[str, Any]] = []
     for raw_path, value in payload.items():

@@ -1344,6 +1344,39 @@ classes:
         description: >-
           Snapshot of the source DD/signal unit captured at refresh time
           (unit is DD-authoritative; mirrored here for display and validation).
+      source_raw_unit:
+        description: >-
+          Exact unit published by the DD source when the effective source
+          snapshot was resolved. Distinguishes upstream truth from a reviewed
+          local resolution.
+        range: string
+      source_raw_documentation:
+        description: >-
+          Exact documentation published by the DD source when the effective
+          source snapshot was resolved.
+        range: string
+      source_dd_resolution_ids:
+        description: >-
+          Resolution record identifiers applied to produce the effective
+          source snapshot.
+        multivalued: true
+        range: string
+      source_dd_resolution_converged_ids:
+        description: >-
+          Resolution record identifiers whose effective value already matches
+          the raw published DD value.
+        multivalued: true
+        range: string
+      source_dd_resolution_manifest_digest:
+        description: >-
+          Content digest of the strict DD resolution authority used to produce
+          the source snapshot.
+        range: string
+      source_dd_resolution_marker:
+        description: >-
+          Typed marker distinguishing an effective DD source snapshot from raw
+          published release evidence.
+        range: string
       superseded_from_stage:
         description: >-
           The name_stage this name held immediately before it was superseded,

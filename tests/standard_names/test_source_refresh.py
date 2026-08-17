@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import re
+from unittest.mock import MagicMock
+
+from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names import source_refresh as sr
 
 
@@ -71,6 +75,7 @@ def test_format_reason_truncates_long_documentation():
 def _row(
     old_unit, new_unit, old_doc="d", new_doc="d", old_path="wall/x", new_path="wall/x"
 ):
+    current = sr._resolved_source_context(new_path, new_unit, new_doc)
     return {
         "sn_id": "some_name",
         "name_stage": "accepted",
@@ -81,6 +86,12 @@ def _row(
         "new_doc": new_doc,
         "old_path": old_path,
         "new_path": new_path,
+        "old_raw_unit": current["raw_dd_context"]["unit"],
+        "old_raw_doc": current["raw_dd_context"]["documentation"],
+        "old_resolution_ids": current["dd_resolution_ids"],
+        "old_converged_ids": current["dd_resolution_converged_ids"],
+        "old_manifest_digest": current["dd_resolution_manifest_digest"],
+        "old_resolution_marker": current["_dd_resolution_marker"],
     }
 
 
@@ -163,3 +174,98 @@ def test_stamp_source_snapshot_targets_only_gas_flow_cache():
     assert snapshot["resolution_marker"] == "resolved-dd-context"
     assert "sn.source_raw_unit = update.raw_unit" in write
     assert "sn.source_dd_resolution_marker = update.resolution_marker" in write
+
+
+def test_stamped_source_provenance_is_declared_on_standard_name():
+    gc = _CaptureGC()
+
+    sr.stamp_source_snapshots(["gas_flow"], gc=gc)
+
+    write = gc.calls[1][0]
+    stamped_properties = set(re.findall(r"sn\.(source_[a-z_]+) =", write))
+    declared = set(
+        GraphSchema("imas_codex/schemas/standard_name.yaml")
+        .get_all_slots("StandardName")
+        .keys()
+    )
+    assert stamped_properties <= declared
+
+
+def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
+    resolution_id = "ddres:camera-direction-x"
+    current_context = {
+        "path": "camera_ir/channel/camera/direction/x",
+        "unit": "1",
+        "documentation": "Direction component.",
+        "raw_dd_context": {
+            "unit": "1",
+            "documentation": "Direction component.",
+        },
+        "dd_resolution_ids": [],
+        "dd_resolution_converged_ids": [resolution_id],
+        "dd_resolution_manifest_digest": "sha256:current",
+        "_dd_resolution_marker": "resolved-dd-context",
+    }
+    drift_row = {
+        "sn_id": "x_direction_unit_vector",
+        "name_stage": "accepted",
+        "docs_stage": "accepted",
+        "old_unit": "1",
+        "new_unit": "1",
+        "old_doc": "Direction component.",
+        "new_doc": "Direction component.",
+        "old_path": "camera_ir/channel/camera/direction/x",
+        "new_path": "camera_ir/channel/camera/direction/x",
+        "old_raw_unit": "m",
+        "old_raw_doc": "Direction component.",
+        "old_resolution_ids": [resolution_id],
+        "old_converged_ids": [],
+        "old_manifest_digest": "sha256:current",
+        "old_resolution_marker": "resolved-dd-context",
+    }
+
+    class RefreshGraph:
+        def __init__(self):
+            self.writes: list[tuple[str, dict]] = []
+
+        def query(self, query, **kwargs):
+            if "SET sn.source_unit" in query:
+                self.writes.append((query, kwargs))
+                return []
+            if "source_path IS NULL" in query:
+                return []
+            if "ORDER BY sn.id" in query:
+                return [drift_row]
+            if "sn.id IN $sn_ids" in query:
+                return [
+                    {
+                        "sn_id": "x_direction_unit_vector",
+                        "path": "camera_ir/channel/camera/direction/x",
+                        "unit": "1",
+                        "documentation": "Direction component.",
+                    }
+                ]
+            return []
+
+        def close(self):
+            pass
+
+    gc = RefreshGraph()
+    apply_edit = MagicMock(
+        side_effect=AssertionError("provenance drift must not steer")
+    )
+    monkeypatch.setattr(sr, "_resolved_source_context", lambda *_args: current_context)
+    monkeypatch.setattr("imas_codex.standard_names.edit.apply_edit", apply_edit)
+
+    summary = sr.refresh_drifted_sources(gc=gc)
+
+    assert summary["detected"] == 1
+    assert summary["restamped"] == 1
+    assert summary["steered"] == 0
+    assert summary["names"] == ["x_direction_unit_vector"]
+    apply_edit.assert_not_called()
+    assert len(gc.writes) == 1
+    [update] = gc.writes[0][1]["updates"]
+    assert update["raw_unit"] == "1"
+    assert update["resolution_ids"] == []
+    assert update["converged_ids"] == [resolution_id]

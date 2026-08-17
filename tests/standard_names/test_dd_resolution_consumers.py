@@ -376,6 +376,8 @@ def test_effective_context_is_rejected_as_raw_release_evidence() -> None:
         build_unit_release_facts([effective])
     with pytest.raises(ValueError, match="effective DD context"):
         load_raw_unit_release_facts({effective["path"]: effective})
+    with pytest.raises(ValueError, match="effective DD context"):
+        load_raw_unit_release_facts(effective)
 
 
 @pytest.mark.parametrize(
