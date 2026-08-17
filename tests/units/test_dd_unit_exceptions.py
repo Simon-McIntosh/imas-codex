@@ -1,5 +1,6 @@
 """Unit tests for the SN↔DD unit-mismatch exception loader (no graph)."""
 
+from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
 from imas_codex.units.dd_unit_exceptions import (
     canonical_or_none,
     dd_unit_bug_globs,
@@ -7,6 +8,17 @@ from imas_codex.units.dd_unit_exceptions import (
     load_exceptions,
     units_agree,
 )
+
+
+def _without_active_path(path: str):
+    manifest = load_dd_resolution_manifest()
+    return manifest.model_copy(
+        update={
+            "resolutions": tuple(
+                record for record in manifest.resolutions if record.path != path
+            )
+        }
+    )
 
 
 class TestCanonicalOrNone:
@@ -44,8 +56,14 @@ class TestUnitsAgree:
         assert units_agree("1", "e", "nbi/unit/species/z_n")
 
     def test_dd_side_bug_unit_vector(self):
-        assert units_agree("1", "m", "camera_ir/channel/camera/direction/x")
-        assert units_agree("1", "m", "spi/injector/shatter_cone/unit_vector_major/z")
+        camera_path = "camera_ir/channel/camera/direction/x"
+        assert units_agree(
+            "1", "m", camera_path, manifest=_without_active_path(camera_path)
+        )
+        vector_path = "spi/injector/shatter_cone/unit_vector_major/z"
+        assert units_agree(
+            "1", "m", vector_path, manifest=_without_active_path(vector_path)
+        )
 
     def test_dd_side_bug_requires_matching_units(self):
         # A matching path glob does NOT suppress an unrelated unit pair: the
@@ -106,27 +124,19 @@ class TestUnitsAgree:
 class TestGraphUnitCorrection:
     """Only self-contradicting DD declarations are rewritten at build time."""
 
-    def test_reconstructed_constraint_sentinels_are_rewritten(self):
+    def test_legacy_reconstructed_constraint_sentinels_are_rewritten(self):
         # Each constraint carries `measured` and `reconstructed` copies of ONE
         # quantity; the reconstructed twins declare a dimensionless sentinel.
-        assert (
-            graph_unit_correction(
-                "equilibrium/time_slice/constraints/pressure/reconstructed", "1"
-            )
-            == "Pa"
+        cases = (
+            ("equilibrium/time_slice/constraints/pressure/reconstructed", "Pa"),
+            ("equilibrium/time_slice/constraints/n_e/reconstructed", "m^-3"),
+            ("equilibrium/time_slice/constraints/j_phi/reconstructed", "A.m^-2"),
         )
-        assert (
-            graph_unit_correction(
-                "equilibrium/time_slice/constraints/n_e/reconstructed", "1"
+        for path, expected in cases:
+            assert (
+                graph_unit_correction(path, "1", manifest=_without_active_path(path))
+                == expected
             )
-            == "m^-3"
-        )
-        assert (
-            graph_unit_correction(
-                "equilibrium/time_slice/constraints/j_phi/reconstructed", "1"
-            )
-            == "A.m^-2"
-        )
 
     def test_measured_twin_is_left_alone(self):
         # The correctly-declared side never matches — its unit is not the
@@ -163,6 +173,31 @@ class TestGraphUnitCorrection:
         )
         assert (
             graph_unit_correction("camera_ir/channel/camera/direction/x", "m") is None
+        )
+
+    def test_active_manifest_retires_matching_graph_and_comparator_authority(self):
+        path = "equilibrium/time_slice/constraints/pressure/reconstructed"
+        active = load_dd_resolution_manifest()
+        inactive = _without_active_path(path)
+
+        assert (
+            graph_unit_correction(path, "1", dd_version="4.1.1", manifest=inactive)
+            == "Pa"
+        )
+        assert units_agree("Pa", "1", path, dd_version="4.1.1", manifest=inactive)
+        assert (
+            graph_unit_correction(path, "1", dd_version="4.1.1", manifest=active)
+            is None
+        )
+        assert not units_agree("Pa", "1", path, dd_version="4.1.1", manifest=active)
+
+    def test_nonresolved_legacy_rule_keeps_exact_behavior(self):
+        manifest = load_dd_resolution_manifest()
+        path = "gyrokinetics_local/linear/wavevector/eigenmode/angle_pol"
+
+        assert (
+            graph_unit_correction(path, "1", dd_version="4.1.1", manifest=manifest)
+            == "rad"
         )
 
 
