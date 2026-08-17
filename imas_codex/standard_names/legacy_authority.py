@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import fnmatch
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from imas_codex.settings import get_dd_version
@@ -41,6 +42,9 @@ class ShadowAuthority:
     row_id: str
     resolution_id: str
     path: str
+
+
+NumericSourceApplicability = Callable[[DDResolutionRecord], bool]
 
 
 def _unit_records(
@@ -101,8 +105,13 @@ def find_shadow_authorities(
     *,
     manifest: DDResolutionManifest | None = None,
     dd_version: str | None = None,
+    numeric_source_applicability: NumericSourceApplicability | None = None,
 ) -> tuple[ShadowAuthority, ...]:
-    """Find every shipped carrier still able to alter an active exact field."""
+    """Find every shipped carrier still able to alter an active exact field.
+
+    Numeric fallback authority requires source-type evidence from the caller.
+    It is reachable only when typed resolution leaves the effective unit empty.
+    """
     version = dd_version or get_dd_version()
     records = _unit_records(manifest, version)
     shadows: list[ShadowAuthority] = []
@@ -161,16 +170,17 @@ def find_shadow_authorities(
                 )
             )
 
-    for record in records:
-        if record.observed.value is None and record.effective.value == "1":
-            shadows.append(
-                ShadowAuthority(
-                    carrier="numeric_missing_unit_fallback",
-                    row_id="numeric-no-unit",
-                    resolution_id=record.id,
-                    path=record.path,
+    if numeric_source_applicability is not None:
+        for record in records:
+            if record.effective.value is None and numeric_source_applicability(record):
+                shadows.append(
+                    ShadowAuthority(
+                        carrier="numeric_missing_unit_fallback",
+                        row_id="numeric-no-unit",
+                        resolution_id=record.id,
+                        path=record.path,
+                    )
                 )
-            )
     return tuple(shadows)
 
 
@@ -178,9 +188,14 @@ def assert_zero_shadow_authority(
     *,
     manifest: DDResolutionManifest | None = None,
     dd_version: str | None = None,
+    numeric_source_applicability: NumericSourceApplicability | None = None,
 ) -> None:
     """Refuse when any legacy or duplicate carrier shadows active authority."""
-    shadows = find_shadow_authorities(manifest=manifest, dd_version=dd_version)
+    shadows = find_shadow_authorities(
+        manifest=manifest,
+        dd_version=dd_version,
+        numeric_source_applicability=numeric_source_applicability,
+    )
     if not shadows:
         return
     details = "; ".join(
