@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T19:57:35",
+  "updated": "2026-08-17T20:20:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -3251,9 +3251,195 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260817T175812579325-ddres-shadow-audit-repair",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-shadow-audit-repair",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T17:58:14Z",
+        "completed_at": "2026-08-17T18:11:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 793,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 793,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "9d0f5ee60ea36b9a7d830ac5203b22bb9fb954e4",
+        "commits": [
+          "b1411210933008f2b76b2dd6369e1e0eb56f37d2"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": 3,
+        "gate": "failed",
+        "outcome": "Resolved the prior HIGH: find_shadow_authorities now inspects every legacy rule matching an active exact key and observed value before classifying agreement, reporting disagreeing skip/override/suppress/correct_in_graph rows with stable ids; 3 injected-overlap regressions red against parent, 6593 passed, shipped residuals zero across 6 carrier classes. Re-review BLOCK on 1 remaining MEDIUM: the audit labels an active observed-None to effective-1 record a numeric-fallback residual without proving numeric applicability or reachability, and mislabels nonnumeric rows",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T175812579325-ddres-shadow-audit-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 14858496,
+            "cached_input_tokens_cumulative": 96276992,
+            "input_tokens": 14993892,
+            "input_tokens_cumulative": 99509783,
+            "output_tokens": 14047,
+            "output_tokens_cumulative": 288359,
+            "reasoning_output_tokens": 2769,
+            "reasoning_output_tokens_cumulative": 85601
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T181209022357-ddres-shadow-audit-review",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "ddres-shadow-audit-review",
+        "role": "review",
+        "member": "rev-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-17T18:12:11Z",
+        "completed_at": "2026-08-17T18:19:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 446,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 446,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "2f65f4b3e13c12a3530c413d0459c2e3453f898c",
+        "commits": [
+          "b1411210933008f2b76b2dd6369e1e0eb56f37d2"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Re-review BLOCK: 0 critical / 0 high / 1 medium; prior HIGH adjudicated RESOLVED by the reviewer's own independently re-run overlap probe (4 conflicting runtime carriers detected with stable ids, agreeing and unrelated rows ignored, duplicate active detected, all 6 shipped carrier classes residual=0). New medium is a false-residual class for observed-None to effective-1 records that the typed projection pre-empts",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T181209022357-ddres-shadow-audit-review/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd1-09b3-7041-89d4-9b5b05470d2a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3257088,
+            "cached_input_tokens_cumulative": 20542208,
+            "input_tokens": 3326236,
+            "input_tokens_cumulative": 21739635,
+            "output_tokens": 19011,
+            "output_tokens_cumulative": 95378,
+            "reasoning_output_tokens": 8451,
+            "reasoning_output_tokens_cumulative": 34515
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260817T181229815309-sn-suite-gate-shadow",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "sn-suite-gate-shadow",
+        "role": "implement",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-17T18:12:32Z",
+        "completed_at": "2026-08-17T18:19:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 435,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 435,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "2f65f4b3e13c12a3530c413d0459c2e3453f898c",
+        "commits": [
+          "2f65f4b3e13c12a3530c413d0459c2e3453f898c"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Independent combined Standard Names + units gate at integration base 2f65f4b3 (carries 9d0f5ee6 + b1411210): 6593 passed, 10 skipped, 0 failed, 0 errors, exit 0; log sha256 5c7af200; +3 passing versus the 6590 author gate, consistent with the overlap regressions",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260817T181229815309-sn-suite-gate-shadow/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6597632,
+            "cached_input_tokens_cumulative": 53048064,
+            "input_tokens": 6686907,
+            "input_tokens_cumulative": 54470138,
+            "output_tokens": 5969,
+            "output_tokens_cumulative": 83253,
+            "reasoning_output_tokens": 794,
+            "reasoning_output_tokens_cumulative": 27253
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 86
+    "_version": 89
   }
 }
