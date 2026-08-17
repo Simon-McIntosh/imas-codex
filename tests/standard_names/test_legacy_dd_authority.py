@@ -1,18 +1,12 @@
 """Regression coverage for singular DD correction authority."""
 
 from importlib import import_module
+from inspect import signature
 from types import SimpleNamespace
 
 import pytest
 
-from imas_codex.graph.models import DDResolutionValueKind
-from imas_codex.standard_names.dd_resolutions import (
-    DDResolutionRecord,
-    DDResolutionValue,
-    content_addressed_resolution_id,
-    dd_resolution_value_hash,
-    load_dd_resolution_manifest,
-)
+from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
 from imas_codex.standard_names.unit_overrides import OverrideRule
 
 _ACTIVE_DIRECTION_PATH = "camera_ir/channel/camera/direction/x"
@@ -33,42 +27,48 @@ def _replace_legacy_carriers(
     monkeypatch.setattr(authority, "_load_rules", lambda: overrides)
 
 
-def _manifest_with_unit_transition(
-    observed: str | None,
-    effective: str | None,
-) -> SimpleNamespace:
-    base = load_dd_resolution_manifest().resolutions[0]
-    observed_value = DDResolutionValue(
-        kind=(
-            DDResolutionValueKind.null
-            if observed is None
-            else DDResolutionValueKind.string
-        ),
-        value=observed,
-    )
-    effective_value = DDResolutionValue(
-        kind=(
-            DDResolutionValueKind.null
-            if effective is None
-            else DDResolutionValueKind.string
-        ),
-        value=effective,
-    )
-    payload = base.model_dump()
-    payload.update(
-        observed=observed_value,
-        observed_hash=dd_resolution_value_hash(observed_value),
-        effective=effective_value,
-    )
-    payload["id"] = content_addressed_resolution_id(payload)
-    record = DDResolutionRecord.model_validate(payload)
-    return SimpleNamespace(resolutions=(record,), state_changes=())
-
-
 def test_shipped_carriers_have_zero_shadow_authority() -> None:
     authority = import_module("imas_codex.standard_names.legacy_authority")
 
-    assert authority.find_shadow_authorities() == ()
+    audit = authority.find_shadow_authorities()
+
+    assert audit.residuals == ()
+    assert {
+        item.carrier: (item.status, item.residual_count)
+        for item in audit.carrier_results
+    } == {
+        "active_manifest": (authority.ShadowAuditStatus.audited, 0),
+        "unit_overrides.override": (authority.ShadowAuditStatus.audited, 0),
+        "unit_overrides.skip": (authority.ShadowAuditStatus.audited, 0),
+        "dd_unit_exceptions.suppress": (authority.ShadowAuditStatus.audited, 0),
+        "dd_unit_exceptions.correct_in_graph": (
+            authority.ShadowAuditStatus.audited,
+            0,
+        ),
+        "numeric_missing_unit_fallback": (
+            authority.ShadowAuditStatus.not_audited,
+            None,
+        ),
+    }
+    numeric = next(
+        item
+        for item in audit.carrier_results
+        if item.carrier == "numeric_missing_unit_fallback"
+    )
+    assert "separate audited-absence policy" in numeric.reason
+
+
+def test_public_shadow_audit_has_no_applicability_flag() -> None:
+    authority = import_module("imas_codex.standard_names.legacy_authority")
+
+    assert set(signature(authority.find_shadow_authorities).parameters) == {
+        "manifest",
+        "dd_version",
+    }
+    assert set(signature(authority.assert_zero_shadow_authority).parameters) == {
+        "manifest",
+        "dd_version",
+    }
 
 
 def test_shadow_guard_names_residual_carrier_and_row() -> None:
@@ -80,10 +80,12 @@ def test_shadow_guard_names_residual_carrier_and_row() -> None:
         state_changes=manifest.state_changes,
     )
 
-    with pytest.raises(
-        authority.DDResolutionShadowAuthority,
-        match=r"carrier=active_manifest row_id=dd_resolution:",
-    ):
+    audit = authority.find_shadow_authorities(manifest=double_authority)
+
+    assert [(item.carrier, item.row_id) for item in audit.residuals] == [
+        ("active_manifest", duplicate.id)
+    ]
+    with pytest.raises(authority.DDResolutionShadowAuthority, match=duplicate.id):
         authority.assert_zero_shadow_authority(manifest=double_authority)
 
 
@@ -106,9 +108,9 @@ def test_shadow_audit_flags_disagreeing_extraction_skip(
         ),
     )
 
-    shadows = authority.find_shadow_authorities()
+    audit = authority.find_shadow_authorities()
 
-    assert [(item.carrier, item.row_id) for item in shadows] == [
+    assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("unit_overrides.skip", "unit-override:1")
     ]
 
@@ -132,9 +134,9 @@ def test_shadow_audit_flags_disagreeing_extraction_override(
         ),
     )
 
-    shadows = authority.find_shadow_authorities()
+    audit = authority.find_shadow_authorities()
 
-    assert [(item.carrier, item.row_id) for item in shadows] == [
+    assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("unit_overrides.override", "unit-override:1")
     ]
 
@@ -156,9 +158,9 @@ def test_shadow_audit_flags_disagreeing_comparator_suppression(
         ),
     )
 
-    shadows = authority.find_shadow_authorities()
+    audit = authority.find_shadow_authorities()
 
-    assert [(item.carrier, item.row_id) for item in shadows] == [
+    assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("dd_unit_exceptions.suppress", "dd-unit-exception:1")
     ]
 
@@ -181,57 +183,8 @@ def test_shadow_audit_flags_disagreeing_graph_correction(
         ),
     )
 
-    shadows = authority.find_shadow_authorities()
+    audit = authority.find_shadow_authorities()
 
-    assert [(item.carrier, item.row_id) for item in shadows] == [
+    assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("dd_unit_exceptions.correct_in_graph", "dd-unit-exception:1")
-    ]
-
-
-@pytest.mark.parametrize("effective", ["1", "Pa"])
-def test_typed_unit_projection_preempts_numeric_fallback(
-    monkeypatch: pytest.MonkeyPatch,
-    effective: str,
-) -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
-    _replace_legacy_carriers(monkeypatch, authority)
-    manifest = _manifest_with_unit_transition(None, effective)
-
-    shadows = authority.find_shadow_authorities(
-        manifest=manifest,
-        numeric_source_applicability=lambda _record: True,
-    )
-
-    assert shadows == ()
-
-
-def test_nonnumeric_source_has_no_numeric_fallback_authority(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
-    _replace_legacy_carriers(monkeypatch, authority)
-    manifest = _manifest_with_unit_transition("m", None)
-
-    shadows = authority.find_shadow_authorities(
-        manifest=manifest,
-        numeric_source_applicability=lambda _record: False,
-    )
-
-    assert shadows == ()
-
-
-def test_reachable_numeric_fallback_is_reported(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    authority = import_module("imas_codex.standard_names.legacy_authority")
-    _replace_legacy_carriers(monkeypatch, authority)
-    manifest = _manifest_with_unit_transition("m", None)
-
-    shadows = authority.find_shadow_authorities(
-        manifest=manifest,
-        numeric_source_applicability=lambda _record: True,
-    )
-
-    assert [(item.carrier, item.row_id) for item in shadows] == [
-        ("numeric_missing_unit_fallback", "numeric-no-unit")
     ]

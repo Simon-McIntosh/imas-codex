@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import fnmatch
-from collections.abc import Callable
+from collections import Counter
 from dataclasses import dataclass
+from enum import StrEnum
 
 from imas_codex.settings import get_dd_version
 from imas_codex.standard_names.dd_resolutions import (
@@ -44,7 +45,42 @@ class ShadowAuthority:
     path: str
 
 
-NumericSourceApplicability = Callable[[DDResolutionRecord], bool]
+class ShadowAuditStatus(StrEnum):
+    """Whether one carrier class is covered by this audit."""
+
+    audited = "audited"
+    not_audited = "not_audited"
+
+
+@dataclass(frozen=True)
+class ShadowCarrierAudit:
+    """Coverage and residual count for one authority carrier class."""
+
+    carrier: str
+    status: ShadowAuditStatus
+    residual_count: int | None
+    reason: str | None = None
+
+
+@dataclass(frozen=True)
+class ShadowAuthorityAudit:
+    """Residual authorities plus explicit carrier coverage."""
+
+    residuals: tuple[ShadowAuthority, ...]
+    carrier_results: tuple[ShadowCarrierAudit, ...]
+
+
+_AUDITED_SHADOW_CARRIERS = (
+    "active_manifest",
+    "unit_overrides.override",
+    "unit_overrides.skip",
+    "dd_unit_exceptions.suppress",
+    "dd_unit_exceptions.correct_in_graph",
+)
+_NUMERIC_FALLBACK_REASON = (
+    "Deferred to a separate audited-absence policy because this audit has no "
+    "fact-derived numeric applicability boundary."
+)
 
 
 def _unit_records(
@@ -105,13 +141,8 @@ def find_shadow_authorities(
     *,
     manifest: DDResolutionManifest | None = None,
     dd_version: str | None = None,
-    numeric_source_applicability: NumericSourceApplicability | None = None,
-) -> tuple[ShadowAuthority, ...]:
-    """Find every shipped carrier still able to alter an active exact field.
-
-    Numeric fallback authority requires source-type evidence from the caller.
-    It is reachable only when typed resolution leaves the effective unit empty.
-    """
+) -> ShadowAuthorityAudit:
+    """Audit covered carriers able to alter an active exact field."""
     version = dd_version or get_dd_version()
     records = _unit_records(manifest, version)
     shadows: list[ShadowAuthority] = []
@@ -170,32 +201,40 @@ def find_shadow_authorities(
                 )
             )
 
-    if numeric_source_applicability is not None:
-        for record in records:
-            if record.effective.value is None and numeric_source_applicability(record):
-                shadows.append(
-                    ShadowAuthority(
-                        carrier="numeric_missing_unit_fallback",
-                        row_id="numeric-no-unit",
-                        resolution_id=record.id,
-                        path=record.path,
-                    )
-                )
-    return tuple(shadows)
+    residuals = tuple(shadows)
+    counts = Counter(item.carrier for item in residuals)
+    carrier_results = tuple(
+        ShadowCarrierAudit(
+            carrier=carrier,
+            status=ShadowAuditStatus.audited,
+            residual_count=counts[carrier],
+        )
+        for carrier in _AUDITED_SHADOW_CARRIERS
+    ) + (
+        ShadowCarrierAudit(
+            carrier="numeric_missing_unit_fallback",
+            status=ShadowAuditStatus.not_audited,
+            residual_count=None,
+            reason=_NUMERIC_FALLBACK_REASON,
+        ),
+    )
+    return ShadowAuthorityAudit(
+        residuals=residuals,
+        carrier_results=carrier_results,
+    )
 
 
 def assert_zero_shadow_authority(
     *,
     manifest: DDResolutionManifest | None = None,
     dd_version: str | None = None,
-    numeric_source_applicability: NumericSourceApplicability | None = None,
 ) -> None:
     """Refuse when any legacy or duplicate carrier shadows active authority."""
-    shadows = find_shadow_authorities(
+    audit = find_shadow_authorities(
         manifest=manifest,
         dd_version=dd_version,
-        numeric_source_applicability=numeric_source_applicability,
     )
+    shadows = audit.residuals
     if not shadows:
         return
     details = "; ".join(
