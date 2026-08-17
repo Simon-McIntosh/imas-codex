@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="24">
+<meta name="plan-version" content="25">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
-<meta name="plan-impl" content="0.8">
+<meta name="plan-impl" content="0.85">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="sn-pipeline-hardening,sn-graph-wide-integrity">
 </head>
@@ -318,6 +318,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-approval-delegation-20260817" data-who="Simon McIntosh" data-when="2026-08-17T08:30:00+00:00">
     <div class="r-comment-body"><p><strong>Per-record approval authority is delegated to the session for the current candidate set</strong> (lead's live instruction, 2026-08-17: the one-shot sn ddres approvals are authorized to run with all decisions clearly displayed). Scope of the delegation: the 21 packaged candidates at SHA-256 <code>c6ee52ae…</code> only. Conditions honored: every approval receipt records the delegated actor and cites this authorization, the fail-closed gates stay intact (broad holds, unresolved graph conflicts, and incomplete evidence refuse and are displayed as refusal decisions), the complete per-candidate decision table is reported back to the lead, and any approval remains revocable through <code>sn ddres revoke</code> with history preserved. Approvals populate authority only — no consumer is cut over yet, so runtime behavior does not change until the separately gated cutover node.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-first-approvals-20260817" data-who="reckon-ship" data-when="2026-08-17T09:15:00+00:00">
+    <div class="r-comment-body"><p><strong>The first five DD resolutions are ACTIVE under the lead's delegated authority; 43 of 48 path attempts refused fail-closed and every decision is displayed.</strong> Approved (all PR 281, commit <code>35c14603</code>, exact live DDGap evidence verified twice under the manifest lock): the five <code>equilibrium/time_slice/constraints/*/reconstructed</code> paths whose published unit <code>1</code> becomes <code>Pa</code> (pressure, pressure_rotational), <code>m^-3</code> (n_e), and <code>A.m^-2</code> (j_phi, j_parallel) — receipts <code>dd-resolution-approval:U25…U29</code>, actor <code>reckon-ship (lead-delegated 2026-08-17)</code>. Refusals: 32 paths (the PR-242 direction/unit-vector families U11–U16, the PR-273 wall energy-flux rows U21/U22/U32, and O17) refused because no <em>exact per-path</em> DDGap fact exists in the graph — the registry backfill deduplicated families onto shared facts, so the approval gate's per-path evidence requirement cannot be met until exact facts are materialized through the sanctioned evidence writers and reviewed; 6 U19 paths refused on the unresolved 6-reviewed-vs-14-release-match conflict; the 5 broad-scope holds (O20–O24) refused by design. Active manifest advanced <code>64c20eb0</code> → <code>f8718114</code> (+126 lines, strict load green, 5 resolutions, 0 state changes); the candidate resource is byte-identical. Consumers are not yet cut over, so runtime is unchanged until the cutover node; any approval is revocable via <code>sn ddres revoke</code>. Next executable work in f-ddg-local-resolution: materialize exact per-path DDGap facts for the 32 blocked paths (evidence-only writers), resolve U19's path-set conflict, then the consumer cutover against the now-nonempty authority.</p></div>
 </div>
 </section>
 </main>
