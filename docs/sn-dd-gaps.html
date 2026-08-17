@@ -16,8 +16,8 @@
   <title>DD gaps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="23">
+<meta name="plan-modified" content="2026-08-17">
+<meta name="plan-version" content="24">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -315,6 +315,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-cli-landed-20260816" data-who="reckon-ship" data-when="2026-08-16T20:57:00+00:00">
     <div class="r-comment-body"><p><strong>The governed approval lifecycle CLI is LANDED on main and gate-proven.</strong> Merge <code>22e89215</code> integrates the approved chain <code>c0eaf0cb</code> → <code>f5a5e9d6</code>; the post-merge gate passed the full Standard Names suite at 6526/10/0 with the ddres focus 75/75, and merge <code>19592556</code> adds the two-contender flock regression (red proof recorded with the lock neutralized), closing the re-review's only remaining finding. The lead can now mint per-record activation with <code>sn ddres approve</code> — each approval requires actor, reason, positive revision, and graph-verified DDGap evidence, with broad holds and graph-conflicted candidates refused. Zero records are active today. Remaining work in f-ddg-local-resolution is authority-gated: per-record approvals are the lead's own act, and the consumer cutover / raw-DD restoration stays held until approved records exist to replace the legacy overrides they retire.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-approval-delegation-20260817" data-who="Simon McIntosh" data-when="2026-08-17T08:30:00+00:00">
+    <div class="r-comment-body"><p><strong>Per-record approval authority is delegated to the session for the current candidate set</strong> (lead's live instruction, 2026-08-17: the one-shot sn ddres approvals are authorized to run with all decisions clearly displayed). Scope of the delegation: the 21 packaged candidates at SHA-256 <code>c6ee52ae…</code> only. Conditions honored: every approval receipt records the delegated actor and cites this authorization, the fail-closed gates stay intact (broad holds, unresolved graph conflicts, and incomplete evidence refuse and are displayed as refusal decisions), the complete per-candidate decision table is reported back to the lead, and any approval remains revocable through <code>sn ddres revoke</code> with history preserved. Approvals populate authority only — no consumer is cut over yet, so runtime behavior does not change until the separately gated cutover node.</p></div>
 </div>
 </section>
 </main>
