@@ -686,8 +686,12 @@ def get_extraction_candidates_dd(
         from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 
         return [
-            context.as_pipeline_item()
-            for context in resolve_dd_rows(results, dd_version=get_dd_version())
+            {**row, **context.as_pipeline_item()}
+            for row, context in zip(
+                results,
+                resolve_dd_rows(results, dd_version=get_dd_version()),
+                strict=True,
+            )
         ]
 
 

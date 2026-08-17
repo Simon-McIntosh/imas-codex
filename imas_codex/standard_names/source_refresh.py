@@ -106,6 +106,12 @@ def stamp_source_snapshots(
                     "path": row["path"],
                     "unit": resolved["unit"],
                     "documentation": resolved["documentation"],
+                    "raw_unit": resolved["raw_dd_context"]["unit"],
+                    "raw_documentation": resolved["raw_dd_context"]["documentation"],
+                    "resolution_ids": resolved["dd_resolution_ids"],
+                    "converged_ids": resolved["dd_resolution_converged_ids"],
+                    "manifest_digest": resolved["dd_resolution_manifest_digest"],
+                    "resolution_marker": resolved["_dd_resolution_marker"],
                 }
             )
         if updates:
@@ -115,7 +121,13 @@ def stamp_source_snapshots(
                 MATCH (sn:StandardName {id: update.sn_id})
                 SET sn.source_unit = update.unit,
                     sn.source_documentation = update.documentation,
-                    sn.source_path = update.path
+                    sn.source_path = update.path,
+                    sn.source_raw_unit = update.raw_unit,
+                    sn.source_raw_documentation = update.raw_documentation,
+                    sn.source_dd_resolution_ids = update.resolution_ids,
+                    sn.source_dd_resolution_converged_ids = update.converged_ids,
+                    sn.source_dd_resolution_manifest_digest = update.manifest_digest,
+                    sn.source_dd_resolution_marker = update.resolution_marker
                 """,
                 updates=updates,
             )
@@ -195,6 +207,7 @@ def detect_source_drift(
                     "name_stage": r["name_stage"],
                     "docs_stage": r["docs_stage"],
                     "new_path": r["new_path"],
+                    "resolved_dd_context": resolved,
                     "renamed": any(d["field"] == "source_path" for d in deltas),
                     "deltas": deltas,
                 }

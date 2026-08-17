@@ -679,6 +679,8 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
     with GraphClient() as gc:
         # Batch-fetch DD path docs
         path_docs: dict[str, dict] = {}
+        from imas_codex.standard_names.dd_resolutions import DDResolutionError
+
         try:
             rows = gc.query(
                 """
@@ -715,6 +717,8 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
                     "dd_resolution_ids": list(context.applied_resolution_ids),
                     "dd_resolution_manifest_digest": context.manifest_digest,
                 }
+        except DDResolutionError:
+            raise
         except Exception:
             logger.debug("Review DD source fetch failed", exc_info=True)
 
@@ -853,6 +857,8 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
     if stubs:
         try:
             _enrich_batch_items(stubs)
+        except DDResolutionError:
+            raise
         except Exception:
             logger.debug("Review compose-parity enrichment failed", exc_info=True)
 

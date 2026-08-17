@@ -150,11 +150,16 @@ def test_stamp_source_snapshot_targets_only_gas_flow_cache():
     assert params["sn_ids"] == ["gas_flow"]
     write, write_params = gc.calls[1]
     assert "sn.source_unit = update.unit" in write
-    assert write_params["updates"] == [
-        {
-            "sn_id": "gas_flow",
-            "path": "gas_injection/pipe/flow_rate",
-            "unit": "s^-1",
-            "documentation": "Particle flow rate.",
-        }
-    ]
+    [snapshot] = write_params["updates"]
+    assert snapshot["sn_id"] == "gas_flow"
+    assert snapshot["path"] == "gas_injection/pipe/flow_rate"
+    assert snapshot["unit"] == "s^-1"
+    assert snapshot["documentation"] == "Particle flow rate."
+    assert snapshot["raw_unit"] == "s^-1"
+    assert snapshot["raw_documentation"] == "Particle flow rate."
+    assert snapshot["resolution_ids"] == []
+    assert snapshot["converged_ids"] == []
+    assert snapshot["manifest_digest"].startswith("sha256:")
+    assert snapshot["resolution_marker"] == "resolved-dd-context"
+    assert "sn.source_raw_unit = update.raw_unit" in write
+    assert "sn.source_dd_resolution_marker = update.resolution_marker" in write

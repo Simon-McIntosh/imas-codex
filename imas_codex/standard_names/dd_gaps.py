@@ -1912,6 +1912,10 @@ def build_unit_release_facts(
     """Normalize raw DD parser rows into exact-path reconciliation facts."""
     facts: dict[str, dict[str, str]] = {}
     for row in rows:
+        if row.get("_dd_resolution_marker") is not None:
+            raise ValueError(
+                "effective DD context cannot serve as raw published release evidence"
+            )
         path = _optional_text(row.get("path") or row.get("id"))
         if not path:
             raise ValueError("DD unit release fact requires an exact path")
@@ -1920,6 +1924,34 @@ def build_unit_release_facts(
             raise ValueError(f"conflicting DD unit release facts for {path}")
         facts[path] = {"unit": unit or ""}
     return facts
+
+
+def load_raw_unit_release_facts(
+    payload: list[Mapping[str, Any]] | Mapping[str, Any],
+) -> dict[str, dict[str, str]]:
+    """Load raw published DD unit facts without accepting effective projections."""
+    if isinstance(payload, list):
+        return build_unit_release_facts(payload)
+
+    rows: list[Mapping[str, Any]] = []
+    for raw_path, value in payload.items():
+        path = _optional_text(raw_path)
+        if not path:
+            raise ValueError("DD unit release fact requires an exact path")
+        if isinstance(value, Mapping):
+            embedded_path = _optional_text(value.get("path") or value.get("id"))
+            if embedded_path and embedded_path != path:
+                raise ValueError(
+                    f"DD unit release fact path {embedded_path!r} does not match {path!r}"
+                )
+            rows.append({**value, "path": path})
+        elif isinstance(value, str):
+            rows.append({"path": path, "unit": value})
+        else:
+            raise ValueError(
+                f"DD unit release fact for {path!r} must be an object or string"
+            )
+    return build_unit_release_facts(rows)
 
 
 def _unit_matches_expected(actual: Any, expected: Any) -> bool:

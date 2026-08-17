@@ -6745,31 +6745,18 @@ def sn_vocab_adjudicate(
 def _load_dd_gap_release_facts(path: str) -> dict[str, object]:
     """Load exact raw DD declarations from one explicit JSON artifact."""
     import json
-    from collections.abc import Mapping
     from pathlib import Path
 
-    from imas_codex.standard_names.dd_gaps import build_unit_release_facts
+    from imas_codex.standard_names.dd_gaps import load_raw_unit_release_facts
 
     try:
         payload = json.loads(Path(path).read_text())
     except (OSError, json.JSONDecodeError) as exc:
         raise ValueError(f"cannot read DD release facts from {path!r}: {exc}") from exc
 
-    if isinstance(payload, list):
-        facts: dict[str, object] = build_unit_release_facts(payload)
-    elif isinstance(payload, dict):
-        facts = {}
-        for raw_path, value in payload.items():
-            exact_path = str(raw_path).strip()
-            if not exact_path or "*" in exact_path or "?" in exact_path:
-                raise ValueError("DD release facts require exact non-pattern paths")
-            if not isinstance(value, Mapping | str):
-                raise ValueError(
-                    f"DD release fact for {exact_path!r} must be an object or string"
-                )
-            facts[exact_path] = dict(value) if isinstance(value, Mapping) else value
-    else:
+    if not isinstance(payload, list | dict):
         raise ValueError("DD release facts must be a JSON object or list of rows")
+    facts: dict[str, object] = load_raw_unit_release_facts(payload)
 
     for exact_path in facts:
         if not exact_path or "*" in exact_path or "?" in exact_path:

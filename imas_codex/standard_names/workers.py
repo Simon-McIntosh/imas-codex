@@ -10197,6 +10197,8 @@ async def process_refine_docs_batch(
         }
 
         # Best-effort DD path enrichment
+        from imas_codex.standard_names.dd_resolutions import DDResolutionError
+
         try:
             from imas_codex.graph.client import GraphClient
 
@@ -10222,6 +10224,8 @@ async def process_refine_docs_batch(
                     {**row, **context.as_pipeline_item()}
                     for row, context in zip(raw_rows, contexts, strict=True)
                 ]
+        except DDResolutionError:
+            raise
         except Exception:
             logger.debug("refine_docs: DD path enrichment failed for %s", sn_id)
 
