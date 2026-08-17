@@ -311,6 +311,20 @@ def _apply_unit_overrides(
     return kept
 
 
+def _apply_typed_dd_resolutions(
+    results: list[dict], dd_version: str | None
+) -> list[dict]:
+    """Project immutable graph rows through the strict packaged authority."""
+    from imas_codex.settings import get_dd_version
+    from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
+
+    exact_version = dd_version or get_dd_version()
+    contexts = resolve_dd_rows(results, dd_version=exact_version)
+    for row, context in zip(results, contexts, strict=True):
+        row.update(context.as_pipeline_item())
+    return results
+
+
 # Enriched extraction query — single Cypher surfacing all context.
 # LIMIT is applied on DISTINCT (n, ids) pairs first, then clusters/coords
 # are joined.  This guarantees $limit unique paths regardless of how many
@@ -730,6 +744,8 @@ def extract_dd_candidates(
                 else row.get("unit_from_rel") or row.get("unit") or None
             )
 
+        results = _apply_typed_dd_resolutions(results, dd_version)
+
         # Apply DD unit override/skip config — fixes upstream defects and
         # records unresolvable paths as skipped StandardNameSource records.
         # This is data normalization: it both fixes units AND skips unparseable ones.
@@ -951,6 +967,8 @@ def extract_specific_paths(
             if len(row.get("unit_relationships") or []) > 1
             else row.get("unit_from_rel") or row.get("unit") or None
         )
+
+    results = _apply_typed_dd_resolutions(results, dd_version)
 
     results = _apply_unit_overrides(
         results, source_type="dd", write_skipped=write_side_effects

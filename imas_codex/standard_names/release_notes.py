@@ -157,6 +157,11 @@ def summarize_dd_gap_facts(facts: list[Mapping[str, Any]]) -> dict[str, Any]:
     graph access and no mutation path: a release report may expose authoritative
     DD defects, but it cannot turn observational evidence into an export gate.
     """
+    from imas_codex.standard_names.dd_resolutions import (
+        load_dd_resolution_manifest,
+    )
+
+    resolution_authority = load_dd_resolution_manifest()
     open_statuses = frozenset({DDGapStatus.flagged.value})
     triaged_statuses = frozenset(
         {
@@ -224,6 +229,8 @@ def summarize_dd_gap_facts(facts: list[Mapping[str, Any]]) -> dict[str, Any]:
         "stale_registry_facts": stale_registry,
         "warning_only": True,
         "blocks_release": False,
+        "dd_resolution_manifest_digest": resolution_authority.digest,
+        "dd_resolution_record_count": len(resolution_authority.resolutions),
     }
 
 

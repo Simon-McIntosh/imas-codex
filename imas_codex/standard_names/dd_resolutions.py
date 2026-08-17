@@ -1737,6 +1737,40 @@ def resolve_dd_context(
     )
 
 
+def resolve_dd_row(
+    row: Mapping[str, Any],
+    *,
+    dd_version: str,
+    manifest: DDResolutionManifest | None = None,
+) -> ResolvedDDContext:
+    """Resolve one raw graph projection while retaining exact provenance."""
+    exact_version = _validate_exact_version(dd_version)
+    row_version = row.get("dd_version")
+    if row_version is not None and str(row_version) != exact_version:
+        raise DDResolutionVersionMismatch(
+            f"DD row carries version {row_version!r}, expected {exact_version!r}"
+        )
+    if "path" not in row:
+        raise ValueError("DD row is missing exact path")
+    return resolve_dd_context(
+        RawDDContext(
+            path=row["path"],
+            dd_version=exact_version,
+            unit=row.get("unit"),
+            documentation=row.get("documentation"),
+            data_type=row.get("data_type"),
+            node_type=row.get("node_type"),
+            physics_domain=row.get("physics_domain"),
+            cocos_transformation_type=row.get("cocos_transformation_type"),
+            cocos_transformation_expression=row.get("cocos_transformation_expression"),
+            coordinates=tuple(row.get("coordinates") or ()),
+            lifecycle_status=row.get("lifecycle_status"),
+            lifecycle_version=row.get("lifecycle_version"),
+        ),
+        manifest=manifest,
+    )
+
+
 def resolve_dd_rows(
     rows: Sequence[Mapping[str, Any]],
     *,
@@ -1746,36 +1780,17 @@ def resolve_dd_rows(
     """Resolve an all-or-error batch of raw graph rows under one exact DD version."""
     exact_version = _validate_exact_version(dd_version)
     authority = manifest or load_dd_resolution_manifest()
-    raw_contexts: list[RawDDContext] = []
+    contexts: list[ResolvedDDContext] = []
     for index, row in enumerate(rows):
         if not isinstance(row, Mapping):
             raise TypeError(f"DD row {index} must be a mapping")
-        row_version = row.get("dd_version")
-        if row_version is not None and str(row_version) != exact_version:
-            raise DDResolutionVersionMismatch(
-                f"DD row {index} carries version {row_version!r}, expected {exact_version!r}"
+        try:
+            contexts.append(
+                resolve_dd_row(row, dd_version=exact_version, manifest=authority)
             )
-        if "path" not in row:
-            raise ValueError(f"DD row {index} is missing exact path")
-        raw_contexts.append(
-            RawDDContext(
-                path=row["path"],
-                dd_version=exact_version,
-                unit=row.get("unit"),
-                documentation=row.get("documentation"),
-                data_type=row.get("data_type"),
-                node_type=row.get("node_type"),
-                physics_domain=row.get("physics_domain"),
-                cocos_transformation_type=row.get("cocos_transformation_type"),
-                cocos_transformation_expression=row.get(
-                    "cocos_transformation_expression"
-                ),
-                coordinates=tuple(row.get("coordinates") or ()),
-                lifecycle_status=row.get("lifecycle_status"),
-                lifecycle_version=row.get("lifecycle_version"),
-            )
-        )
-    return [resolve_dd_context(raw, manifest=authority) for raw in raw_contexts]
+        except (ValueError, DDResolutionError) as exc:
+            raise type(exc)(f"DD row {index}: {exc}") from exc
+    return contexts
 
 
 # Alias exposes resolver terminology while the generated LinkML enum remains
@@ -1818,6 +1833,7 @@ __all__ = [
     "load_dd_resolution_manifest",
     "resolve_dd_context",
     "resolve_dd_field",
+    "resolve_dd_row",
     "resolve_dd_rows",
     "revoke_dd_resolution",
 ]
