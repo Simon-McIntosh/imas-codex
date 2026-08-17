@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-dd-gaps-landed">
+  <meta name="plan-title" content="sn-dd-gaps — local-resolution execution evidence">
+  <meta name="plan-evidence-for" content="sn-dd-gaps">
+  <title>sn-dd-gaps — local-resolution execution evidence</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>sn-dd-gaps — local-resolution execution evidence</h1>
+  <p>Cumulative record for the reopened local-resolution scope. Earlier phases
+  are archived separately: <a href="/imas-codex/archive/sn-dd-gaps-foundation-landed">foundation</a>
+  and <a href="/imas-codex/archive/sn-dd-gaps-policy-landed">policy</a>.</p>
+
+  <h2 id="perpath-evidence">Per-path DDGap evidence for the 32 approval-blocked paths</h2>
+  <p><strong>Landed 2026-08-17</strong> (run <code>r-…-ddgap-perpath-evidence</code>, graph-only —
+  no repo commit). The registry backfill had deduplicated defect families onto shared
+  facts, so the approval gate's per-path evidence requirement was unsatisfiable for 32
+  candidate paths. All 32 exact <code>(path, kind)</code> facts were minted through
+  <code>write_dd_gaps</code> only (raw Cypher: none), each with an owned observation and an
+  upstream-cited reason:</p>
+  <table>
+    <thead><tr><th>Candidate rows</th><th>Paths</th><th>Kind</th><th>Upstream citation</th></tr></thead>
+    <tbody>
+      <tr><td>U11–U16 (direction / unit-vector families)</td><td>27</td><td>unit_defect</td><td>merged PR 242, <code>cb0d86de</code></td></tr>
+      <tr><td>U21, U22, U32 (wall neutral energy-flux)</td><td>3</td><td>unit_defect</td><td>open PR 273, <code>f34c85d3</code></td></tr>
+      <tr><td>O17 (ionisation-potential parents)</td><td>2</td><td>self_contradiction</td><td>PR 280, <code>30a5ddd4</code></td></tr>
+    </tbody>
+  </table>
+  <p>Gate measure: dry-run admitted 32/32; apply persisted 32 facts, 32 owned observations,
+  32 IMASNode relationships; the read-only approval-gate probe
+  (<code>dd_resolutions._verify_graph_evidence</code>) succeeded for 10/10 candidate rows with
+  zero approvals executed. Both packaged YAML resources stayed byte-identical
+  (candidates <code>c6ee52ae…</code>, active manifest <code>f8718114…</code>).
+  Receipt: <code>/tmp/reckon-s8-evidence/ddgap-perpath/receipt.json</code>
+  SHA-256 <code>3231a7ac…</code>.</p>
+
+  <h2 id="u19-disposition">U19 path-set conflict — per-path disposition</h2>
+  <p><strong>Landed 2026-08-17</strong> (run <code>r-…-u19-conflict-brief</code>, read-only).
+  Verdict: the packaged six-path U19 split is <strong>incomplete</strong>. PR 280
+  (<code>30a5ddd4</code>) corrects the generic-grid ionisation-potential declaration
+  <code>e → eV</code>; <code>generic_grid_scalar</code> gives <code>values</code>/<code>coefficients</code>
+  units <code>as_parent</code>, and the official XSL copies those units onto the generated
+  error fields. The exact governed U19 cohort is therefore <strong>14 paths</strong>
+  (6 primary + 8 inherited error-bar fields), all <code>e → eV</code> under the same PR 280
+  provenance. Excluded with citation: 8 unitless integer index paths, 4 absent
+  error-index claims, and the 8 adjacent <code>z_min/z_max/z_average/z_square_average</code>
+  charge-number paths PR 280 explicitly retains in <code>e</code>.</p>
+  <p>The worker's fenced read-only worktree could not open a live graph session (two
+  environment fixes failed; node stop rule honored, zero mutations). The orchestrator ran
+  the brief's MATCH-only Cypher through the sanctioned MCP REPL: 22 live nodes returned,
+  matching the brief's projection exactly — the 14 governed paths carry graph unit
+  <code>eV</code> (the legacy <code>correct_in_graph</code> rewrite; raw DD 4.1.1 remains
+  <code>e</code>), and exact per-path facts exist only for the two O17 parents. No drift;
+  the disposition stands. Clearing U19 for approval requires: candidate expansion 6 → 14
+  (digest change → independent review), 14 exact per-path facts, renewed lead delegation
+  on the new digest, and 14 per-path approvals.
+  Brief: <code>/tmp/reckon-s8-evidence/u19-conflict/brief.md</code> SHA-256 <code>17d834d7…</code>.</p>
+
+  <h2 id="override-inventory">DD-override inventory — the cutover retirement checklist</h2>
+  <p><strong>Landed 2026-08-17</strong> (run <code>r-…-dd-override-inventory</code>, read-only).
+  Every mechanism that overrides, suppresses, corrects, or skips a DD-declared value:</p>
+  <table>
+    <thead><tr><th>Carrier</th><th>Entries</th><th>Semantics</th><th>Applies at</th></tr></thead>
+    <tbody>
+      <tr><td><code>imas_codex/units/dd_unit_exceptions.yaml</code></td><td>62 rules = 34 DD-bug rows + 28 extraction rules</td><td>23 suppress · 11 correct_in_graph · 24 extraction replacements · 4 extraction skips</td><td>DD graph build / startup reconcile</td></tr>
+      <tr><td><code>standard_names/config/dd_resolution_candidates.yaml</code></td><td>21 rows (16 exact + 5 broad holds)</td><td>review-only candidates</td><td>never (no runtime consumer)</td></tr>
+      <tr><td><code>standard_names/config/dd_resolutions.yaml</code></td><td>5 active records (U25–U29)</td><td>approved exact resolutions</td><td><strong>stored authority only — zero production resolver consumers</strong>; only the ddres CLI imports it</td></tr>
+      <tr><td>unit_overrides registry</td><td>28 rows</td><td>extraction-side unit replacement</td><td>extraction</td></tr>
+      <tr><td>other (normalizers, skips, qualifier rules)</td><td>—</td><td>path-independent unit normalizers · dynamic invalid-unit skips · 12 DD qualifier rules · 6-category nameability exclusion · 10 bare-name tokens · numeric no-unit fallback · DD-defect classifier regex · 2 path-domain overrides</td><td>various</td></tr>
+    </tbody>
+  </table>
+  <p>62-row legacy mapping to resolution authority: active=5, bounded-inactive=11,
+  broad-hold=5, no-candidate=41. No other per-path unit-correction registry exists in the
+  repository. Key cutover fact: the five active records are shadowed by the legacy
+  <code>correct_in_graph</code> rewrites until consumers route through
+  <code>ResolvedDDContext</code>; cutover then disables the legacy correction for exactly
+  those five rows, restores raw DD 4.1.1 values/edges, and proves raw/effective provenance.
+  Report: <code>/tmp/reckon-s8-evidence/dd-override-inventory/report.md</code>
+  SHA-256 <code>30932d25…</code>.</p>
+</main>
+</body>
+</html>

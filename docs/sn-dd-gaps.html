@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="26">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf">
-<meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html">
-<meta name="plan-impl" content="0.85">
+<meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html,docs/evidence/archive/sn-dd-gaps-landed.html">
+<meta name="plan-impl" content="0.89">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="sn-pipeline-hardening,sn-graph-wide-integrity">
 </head>
@@ -321,6 +321,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-first-approvals-20260817" data-who="reckon-ship" data-when="2026-08-17T09:15:00+00:00">
     <div class="r-comment-body"><p><strong>The first five DD resolutions are ACTIVE under the lead's delegated authority; 43 of 48 path attempts refused fail-closed and every decision is displayed.</strong> Approved (all PR 281, commit <code>35c14603</code>, exact live DDGap evidence verified twice under the manifest lock): the five <code>equilibrium/time_slice/constraints/*/reconstructed</code> paths whose published unit <code>1</code> becomes <code>Pa</code> (pressure, pressure_rotational), <code>m^-3</code> (n_e), and <code>A.m^-2</code> (j_phi, j_parallel) — receipts <code>dd-resolution-approval:U25…U29</code>, actor <code>reckon-ship (lead-delegated 2026-08-17)</code>. Refusals: 32 paths (the PR-242 direction/unit-vector families U11–U16, the PR-273 wall energy-flux rows U21/U22/U32, and O17) refused because no <em>exact per-path</em> DDGap fact exists in the graph — the registry backfill deduplicated families onto shared facts, so the approval gate's per-path evidence requirement cannot be met until exact facts are materialized through the sanctioned evidence writers and reviewed; 6 U19 paths refused on the unresolved 6-reviewed-vs-14-release-match conflict; the 5 broad-scope holds (O20–O24) refused by design. Active manifest advanced <code>64c20eb0</code> → <code>f8718114</code> (+126 lines, strict load green, 5 resolutions, 0 state changes); the candidate resource is byte-identical. Consumers are not yet cut over, so runtime is unchanged until the cutover node; any approval is revocable via <code>sn ddres revoke</code>. Next executable work in f-ddg-local-resolution: materialize exact per-path DDGap facts for the 32 blocked paths (evidence-only writers), resolve U19's path-set conflict, then the consumer cutover against the now-nonempty authority.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddgap-wave1-20260817" data-who="reckon-ship" data-when="2026-08-17T14:45:00+00:00">
+    <div class="r-comment-body"><p><strong>Wave 1 landed: per-path evidence materialized, U19 dispositioned, and the full DD-override inventory produced.</strong> (1) All 32 approval-blocked paths now carry exact live <code>(path, kind)</code> DDGap facts with owned observations, minted only through <code>write_dd_gaps</code> — 27 U11–U16 paths citing merged PR 242 <code>cb0d86de</code>, 3 wall energy-flux paths citing open PR 273 <code>f34c85d3</code>, 2 O17 parents citing PR 280 <code>30a5ddd4</code>; the approval gate's no-write evidence probe succeeded 10/10 candidate rows and both packaged YAMLs stayed byte-identical (graph-only effect, receipt SHA-256 <code>3231a7ac…</code>). (2) The U19 conflict is resolved analytically: the packaged six-path split is <em>incomplete</em> — the exact governed cohort is 14 paths (6 primary + 8 XSL-inherited error-bar fields, all <code>e→eV</code> under PR 280), excluding 8 unitless index paths and the 8 charge-number paths PR 280 retains in <code>e</code>; a fresh orchestrator-run MATCH-only live read (22 nodes) confirmed zero drift. Clearing U19 requires candidate expansion 6→14 (digest change → independent review), 14 per-path facts, renewed lead delegation on the new digest, and 14 approvals — the delegation renewal is the lead's own act. (3) The override inventory (lead's request this session): 62 legacy rules = 34 DD-bug rows + 28 extraction rules (23 suppress, 11 correct_in_graph, 24 replacements, 4 skips), 21 candidates, 5 active resolutions, plus a 28-row unit_overrides registry and assorted normalizers/skip lists; <em>no other per-path unit-correction registry exists</em>, and the 5 active records have zero production resolver consumers — they stay shadowed by correct_in_graph until the cutover wires <code>ResolvedDDContext</code>. Cumulative record: <code>docs/evidence/archive/sn-dd-gaps-landed.html</code>. Next: the delegated approval pass for the 32 now-evidenced paths (within the c6ee52ae delegation), then the consumer cutover.</p></div>
 </div>
 </section>
 </main>
