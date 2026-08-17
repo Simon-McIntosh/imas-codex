@@ -19,13 +19,7 @@ from imas_codex.standard_names.dd_resolutions import (
     resolve_dd_field,
 )
 
-_ACTIVE_RESOURCE = (
-    Path(__file__).parents[2]
-    / "imas_codex"
-    / "standard_names"
-    / "config"
-    / "dd_resolutions.yaml"
-)
+_EMPTY_AUTHORITY = b"schema_version: 1\nresolutions: []\n"
 _APPROVABLE_ROW = "U25"
 _APPROVABLE_PATH = "equilibrium/time_slice/constraints/pressure/reconstructed"
 _OBSERVATION_ID = f"dd_gap_observation:{'a' * 64}"
@@ -79,7 +73,7 @@ def _install_reader(monkeypatch, *snapshots: dict[str, Any] | None) -> _FakeGapR
 
 def _temporary_manifest(tmp_path: Path, monkeypatch) -> Path:
     manifest_path = tmp_path / "dd_resolutions.yaml"
-    manifest_path.write_bytes(_ACTIVE_RESOURCE.read_bytes())
+    manifest_path.write_bytes(_EMPTY_AUTHORITY)
     monkeypatch.setattr(
         dd_resolution_module,
         "dd_resolution_manifest_path",
@@ -120,16 +114,39 @@ def _approval_args(
     ]
 
 
-def test_list_reports_all_candidates_as_not_approved() -> None:
+def test_list_reports_governed_candidate_authority() -> None:
     result = CliRunner().invoke(sn, ["ddres", "list"])
 
     assert result.exit_code == 0, result.output
     rows = [line for line in result.output.splitlines() if line.startswith(("U", "O"))]
     assert len(rows) == 21
-    assert all(line.endswith("\tno") for line in rows)
+    statuses = {line.split("\t")[0]: line.split("\t")[-1] for line in rows}
+    assert statuses == {
+        "U11": "yes",
+        "U12": "yes",
+        "U13": "yes",
+        "U14": "yes",
+        "U15": "yes",
+        "U16": "yes",
+        "U19": "no",
+        "U21": "yes",
+        "U22": "yes",
+        "U25": "yes",
+        "U26": "yes",
+        "U27": "yes",
+        "U28": "yes",
+        "U29": "yes",
+        "U32": "yes",
+        "O17": "yes",
+        "O20": "no",
+        "O21": "no",
+        "O22": "no",
+        "O23": "no",
+        "O24": "no",
+    }
 
 
-def test_show_reports_candidate_and_upstream_solution() -> None:
+def test_show_reports_approved_candidate_and_upstream_solution() -> None:
     result = CliRunner().invoke(sn, ["ddres", "show", _APPROVABLE_ROW])
 
     assert result.exit_code == 0, result.output
@@ -139,11 +156,13 @@ def test_show_reports_candidate_and_upstream_solution() -> None:
         "upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/281"
         in result.output
     )
-    assert "approved: no" in result.output
+    assert "approved: yes" in result.output
 
 
-def test_approve_refuses_broad_scope_hold_without_writing() -> None:
-    before = _ACTIVE_RESOURCE.read_bytes()
+def test_approve_refuses_broad_scope_hold_without_writing(
+    tmp_path: Path, monkeypatch
+) -> None:
+    manifest_path = _temporary_manifest(tmp_path, monkeypatch)
 
     result = CliRunner().invoke(
         sn,
@@ -154,11 +173,13 @@ def test_approve_refuses_broad_scope_hold_without_writing() -> None:
 
     assert result.exit_code != 0
     assert "broad-scope hold" in result.output
-    assert _ACTIVE_RESOURCE.read_bytes() == before
+    assert manifest_path.read_bytes() == _EMPTY_AUTHORITY
 
 
-def test_approve_refuses_candidate_with_unresolved_release_conflict() -> None:
-    before = _ACTIVE_RESOURCE.read_bytes()
+def test_approve_refuses_candidate_with_unresolved_release_conflict(
+    tmp_path: Path, monkeypatch
+) -> None:
+    manifest_path = _temporary_manifest(tmp_path, monkeypatch)
 
     result = CliRunner().invoke(
         sn,
@@ -170,10 +191,11 @@ def test_approve_refuses_candidate_with_unresolved_release_conflict() -> None:
 
     assert result.exit_code != 0
     assert "unresolved graph conflict" in result.output
-    assert _ACTIVE_RESOURCE.read_bytes() == before
+    assert manifest_path.read_bytes() == _EMPTY_AUTHORITY
 
 
-def test_approve_requires_positive_revision() -> None:
+def test_approve_requires_positive_revision(tmp_path: Path, monkeypatch) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
     args = _approval_args(_APPROVABLE_ROW)
     args[-1] = "0"
 
@@ -183,7 +205,8 @@ def test_approve_requires_positive_revision() -> None:
     assert "0 is not in the range" in result.output
 
 
-def test_approve_refuses_malformed_ddgap_evidence(monkeypatch) -> None:
+def test_approve_refuses_malformed_ddgap_evidence(tmp_path: Path, monkeypatch) -> None:
+    _temporary_manifest(tmp_path, monkeypatch)
     _install_reader(monkeypatch, _snapshot())
     args = _approval_args(_APPROVABLE_ROW)
     args[args.index(_OBSERVATION_ID)] = "not-an-observation"
@@ -302,7 +325,7 @@ def test_fabricated_digest_shaped_evidence_is_refused(tmp_path, monkeypatch) -> 
 
     assert result.exit_code != 0
     assert "canonical graph evidence token" in result.output
-    assert manifest_path.read_bytes() == _ACTIVE_RESOURCE.read_bytes()
+    assert manifest_path.read_bytes() == _EMPTY_AUTHORITY
 
 
 @pytest.mark.parametrize(
@@ -344,7 +367,7 @@ def test_graph_change_after_guard_refuses_mutation(tmp_path, monkeypatch) -> Non
 
     assert result.exit_code != 0
     assert "changed during approval" in result.output
-    assert manifest_path.read_bytes() == _ACTIVE_RESOURCE.read_bytes()
+    assert manifest_path.read_bytes() == _EMPTY_AUTHORITY
 
 
 def test_stale_manifest_digest_refuses_lost_update(tmp_path, monkeypatch) -> None:

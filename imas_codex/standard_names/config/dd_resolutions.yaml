@@ -125,3 +125,835 @@ resolutions:
   upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/281
   upstream_ref: commits:35c146031bf98028911b8266d286dcdf6ee85e2e
   state: active
+- id: dd_resolution:eb259020e75189e8794b6eb692b7f396073571ae015aa2bb6fa1faab43acb419
+  gap_id: dd_gap:camera_ir/channel/camera/direction/x:unit_defect
+  path: camera_ir/channel/camera/direction/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:8265becb1ed61af054dc47ee79395a7c3e87975af45af57e842ac7ec0ae8588d
+  evidence_token: dd-gap-evidence:ad18d015c236d3476ab146634ab51072feb0d149ad363a93901c5c48069fd039
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:30.452490Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:83cd5677b3d304d92a8b72b830ff0bd3ee40b37f08e5e08f8081ba1c04cfdb76
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:49f024f16a75cf833349185ad246390c485921bc461eca2aaa266e73f3e955cd
+  gap_id: dd_gap:camera_ir/channel/camera/direction/y:unit_defect
+  path: camera_ir/channel/camera/direction/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:b41d89f6be8e99315750e586763a518462dbf09eabd22749d07f4056e6c2639a
+  evidence_token: dd-gap-evidence:51e899c67f40e7059af155ee3691bd9e261e1a59431c15313e354c482ecf35da
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:30.577479Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:31f53658d19f3e7c61591284afc4338c9fa888ff239a290b73b6e8461093e070
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:4383bb22d7d4aaf7462fa4f9de757444deb201e47d96296373034d8bc35916f5
+  gap_id: dd_gap:camera_ir/channel/camera/direction/z:unit_defect
+  path: camera_ir/channel/camera/direction/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:a015784c29a0f881ffeb9708a15f6be8fd96e41591782d95959d073486b3c87b
+  evidence_token: dd-gap-evidence:aadf3a62b7e60455d9896eb9bd1b04cd0d08fdf48969f02f5c2b30bc09d16ecd
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:30.704901Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:70094dbdcf2a6126e8fd0c53e9a2773add05d2f3c69e1704233bd42f1afffafe
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:39775eedd10a256a38a0b0ca19b0a20460fa390fa0278b05467f727dbe50ed6b
+  gap_id: dd_gap:ec_launchers/mirror/movement/direction/x:unit_defect
+  path: ec_launchers/mirror/movement/direction/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:4f473b644fe8e83170a3698751aa6cabf363c1c64305a72678dc76fc9d3ee8cf
+  evidence_token: dd-gap-evidence:ba80528319488396d5986aa157eca55232a854f381b09a3d07a142e4557d7eea
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:30.828754Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:3da4ac0d5ca1981b6cf0188ce7e39e2dee6a5c8fe387b78e89ea50fdb7260d16
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:3443082b5c6f18b73fd72d368f39521c7a7fa0d810b52a09c6409adc75e4350f
+  gap_id: dd_gap:ec_launchers/mirror/movement/direction/y:unit_defect
+  path: ec_launchers/mirror/movement/direction/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:5b145807faae476b0baa0bf866b9f868e6f59b9279c1ef802232b7db6eddd3c0
+  evidence_token: dd-gap-evidence:4d0cfb9c9535ee0138c58eec6b369894fae25205befb3160271e3e45a881a112
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:30.947263Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:0ae7e5a7a46700c5e13ae1d042bd5cf6bf4cf9d06d983520d998f17723c5e2a9
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:1816d7264a668649811089415d9d6b6ad367d1d850d2dc5a8c493f79a0f1b9fe
+  gap_id: dd_gap:ec_launchers/mirror/movement/direction/z:unit_defect
+  path: ec_launchers/mirror/movement/direction/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:f0ce1bc0fd6618478b2c18baedc54537ac8a9f7e7e745fe01e609f3731311e1c
+  evidence_token: dd-gap-evidence:ac0b6b753443af6ccc596324bae9515ef1ae2d010a2cceb6c0a5923cb88d6749
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:31.077246Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:866897e1bf9ccff377104225ca83e091910d38e7e992e8489ed71ae26d18df2a
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:c703bc6f7ff5516903ea754d2f08ae964e8f9ab9e9b76a9be5a4ebf428c8d532
+  gap_id: dd_gap:operational_instrumentation/sensor/direction/x:unit_defect
+  path: operational_instrumentation/sensor/direction/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:0dfa71d250a2df95423b7b6130ebc2b271dff307dac2584122d7772cdbc23215
+  evidence_token: dd-gap-evidence:a12cad7c86f0ea36fb3a1f617495d288d592be214bccc4ffc313a4f560722bd6
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:31.205864Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:ad1970992d5ff8b68ad093d59dcdfb3e726959a5ee9dbd0401ebe84bf89752f5
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:3e67db1fa1e25cbef6b05444bcad3b7ecdb19cbded19d821cb50df0189ce9e47
+  gap_id: dd_gap:operational_instrumentation/sensor/direction/y:unit_defect
+  path: operational_instrumentation/sensor/direction/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:07f58608f64ce3d67d7bd533b46adedc1be5dbc7850f48465ebc605187cdc656
+  evidence_token: dd-gap-evidence:b9e3fc8d1392fd6926ada49c20f3128590be6d01b28835fe3e14fec91bc876ed
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:31.337063Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:fe5f12d578e1e1b6e6c51e33d2686b36a042ed2f94d6b0428a5641d6bbfbb86e
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:030150d45656dd3ed5a67b17d4555f08bd5fd030e3a7bb2a9186a9414ad8e6ae
+  gap_id: dd_gap:operational_instrumentation/sensor/direction/z:unit_defect
+  path: operational_instrumentation/sensor/direction/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:eabd7f33d816740784df823eeeaf0c14cc42a05650fb322f131c8b72a4bb582a
+  evidence_token: dd-gap-evidence:322f21356deb14f1b1e032a4008acdc0913c7e846668662ee604378e262d6392
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:31.469415Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:f7454e6192f939d0cc9075098cd2810fd43948d7b5b5cb03f35ef922dd812028
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:d1074f9134522f47a9097351279e9340e71cc44ee73ddba6a75815e53524f171
+  gap_id: dd_gap:spi/injector/shatter_cone/direction/x:unit_defect
+  path: spi/injector/shatter_cone/direction/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:80e847982c3ea09ae7ced345e96c5ed759777ba5c50d6e021f806386f2b79eb8
+  evidence_token: dd-gap-evidence:56fc8b6613f4bd43cd06c8098e5c533b2d71eb29a88efe15ec77d4d7a3f028ac
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:31.607838Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:973fb76f57f7aabff89ec5ae71a1f1fd7b438668ad5bf930788290e3f58a672e
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:dfa5fe31791ca711d947089453e7984c72496af51f274763d32ac832498a9ca7
+  gap_id: dd_gap:spi/injector/shatter_cone/direction/y:unit_defect
+  path: spi/injector/shatter_cone/direction/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:c1062458227d5f8da903e06ea32c59c65f155a650ecbc72f85894edcd3eaadef
+  evidence_token: dd-gap-evidence:10502f98ff18214c0b953bf015879837ad59951c4cf21ebed13132f1a4365fac
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:31.741887Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:6d73262a42a22c2281b1954963efcf1fc4a41087db0e509b34171ec575c763ed
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:64501fc5f6afd50aeef7f20798021e18782459619fe36e66c4ee3aca6a337179
+  gap_id: dd_gap:spi/injector/shatter_cone/direction/z:unit_defect
+  path: spi/injector/shatter_cone/direction/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:7366882574ad55f6dd290b086dd888d08f41508651fcbb95f7a5674e1f535f40
+  evidence_token: dd-gap-evidence:5ee4edf527b3e8942f1f77636e5452302b784ebaf0eb38a4cac67cd785419717
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:31.880484Z'
+  approval_receipt: dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:f5753410f65fdc9cdf349ea49ffd21d8db64a734ff506e92e1e1fc62f26af591
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:d4337bafb172898b82b626dfe407cf0076a021028743982088857cc959db16d1
+  gap_id: dd_gap:operational_instrumentation/sensor/direction_second/x:unit_defect
+  path: operational_instrumentation/sensor/direction_second/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:d05f72f351d37b53fd43c5547b49fa013c303d34e3591af42c8f1c6c009c611f
+  evidence_token: dd-gap-evidence:60f3aeb9ce7adc5550ca64a8dca770441bdfcb7dd5b59e70322d39808aed4fd2
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:32.022741Z'
+  approval_receipt: dd-resolution-approval:U12:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:cdd19811b68fd5133c82e57bf7396285704e582e7d4a9fb9a09bce1edd181e2d
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:2d507068d386f87ac61cd5ab63138f7ac7fa19035c7f6385947c972cdbbd50a1
+  gap_id: dd_gap:operational_instrumentation/sensor/direction_second/y:unit_defect
+  path: operational_instrumentation/sensor/direction_second/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:5509028a754375dc18e7adf9ec73708ac9e654a128613a36c7bb6e8b672bb451
+  evidence_token: dd-gap-evidence:25971d39756b6346235f4ee9d9926fb68cc64e5b7e60647e20aba9487ead70dc
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:32.164015Z'
+  approval_receipt: dd-resolution-approval:U12:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:df8c70b3f4702a6c521f74806bae83fb2aa3df7768e0e2d3d02f83998f5a807e
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:54aacd1944f6f35f256f2442e90951fd3bfc4c9d5e6cf34a49835efdb723b52b
+  gap_id: dd_gap:operational_instrumentation/sensor/direction_second/z:unit_defect
+  path: operational_instrumentation/sensor/direction_second/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:65a479af6aa6cf0b67f854cc207939a4db6defa54beac8eb79972168b7d02a6d
+  evidence_token: dd-gap-evidence:2bfe8e180383b9a5e31e7eb6244b324ddc70e06d37dd988bd42b742b91251fac
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:32.306014Z'
+  approval_receipt: dd-resolution-approval:U12:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:78c5b5dcb324970c0eb0d89aa7e904bf242db9c7f1b36dae85480d546c669978
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:59ce8888badb59d0b9bb4b9d18c4741f641d002913877f37adf83d7cacf905bb
+  gap_id: dd_gap:camera_ir/channel/camera/up/x:unit_defect
+  path: camera_ir/channel/camera/up/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:ba102a404b86780d2394d08f6935e6b18a76fea7b137a1f9339e782f54720ddc
+  evidence_token: dd-gap-evidence:ea5094cb125c736bab8dad9a47c1f8f87d005b7d9a0fca717647d2164e6cdfd1
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:32.442006Z'
+  approval_receipt: dd-resolution-approval:U13:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:8707a40a7c46c09df4f1643cd8f6139dd34d511321380548a91340ba5b5c1f68
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:c311b6507a419bc5a2595674173b6024e1e2b2fad05fda29b64e736ef9ec2a8a
+  gap_id: dd_gap:camera_ir/channel/camera/up/y:unit_defect
+  path: camera_ir/channel/camera/up/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:4d03cb5d2f23e49ecc4fc13bd210f0e6babe3099e542db8303a8eabcac02225e
+  evidence_token: dd-gap-evidence:cb6ffba8be971bdd56d6ffc3780fa6dc99a1078339698e384c9d3554c04afadd
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:32.595952Z'
+  approval_receipt: dd-resolution-approval:U13:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:bb1877e15f5d960536278371e001885218fe8582a44705070bc149ba60f839c2
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:be297407af7607b1fd258e37809d67178f7446c665f10f6f0c079b2b52c29008
+  gap_id: dd_gap:camera_ir/channel/camera/up/z:unit_defect
+  path: camera_ir/channel/camera/up/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:6143adafd9d4f2610e9aa466ddc82989aa90167fb5942c333271a5061e23ca06
+  evidence_token: dd-gap-evidence:348a79cd210f8ddef28810a0f443d0e19f7025d4c8ced4c0a58c45cc66444312
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:32.746537Z'
+  approval_receipt: dd-resolution-approval:U13:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:ce8a04d72b4560d2b701dd369af05d34c3e13988ceccf8174e7a3f248cca4fb6
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:15b0d85478bdb59cc1d6c887bae817f0351d3ea4701df72943e912730e7dd34f
+  gap_id: dd_gap:spi/injector/injection_direction/x:unit_defect
+  path: spi/injector/injection_direction/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:bd62ad1952bbe0ed88f8626e0cb200ad09c3f8b708f1b12bc7148aa39192a2b5
+  evidence_token: dd-gap-evidence:52688aba26bfa7d00fa87ebcb080a7c926de6333b52e4562e5d666892cb52f35
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:33.004166Z'
+  approval_receipt: dd-resolution-approval:U14:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:06fe1a8bd7c9206f34bd5b3844e0ddfd591070536ba15ed5487ed02712ea14ca
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:c8199fdc390c501c723441a62c8e42f8fbd20166f379667cd731f0e59836d8e4
+  gap_id: dd_gap:spi/injector/injection_direction/y:unit_defect
+  path: spi/injector/injection_direction/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:3ce2fc685fb49eb676e59f255e76602a4d4e45820851c9df0611ae479383a2ed
+  evidence_token: dd-gap-evidence:f65e1e73914c450f7e3e7dee435fb03c760311c139e0fcc141b70d8d62d8505b
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:33.154196Z'
+  approval_receipt: dd-resolution-approval:U14:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:a8c514737aa1e14e7ae92566decf6f2f57ac3a1b4152e399b2240230e7740240
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:689d50d20fdea9943e054e4a0cf45f8c55f70e2e8f8750615c39b211dd186152
+  gap_id: dd_gap:spi/injector/injection_direction/z:unit_defect
+  path: spi/injector/injection_direction/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:1782ae17cd535aaf6c578bb219782dd40b1d1684f701a74341b3bfcf364cb918
+  evidence_token: dd-gap-evidence:4ab4310f1e6be32d8fb6b297bdaab4948d486f98a2ec8cb09b4f51cce64933b7
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:33.305907Z'
+  approval_receipt: dd-resolution-approval:U14:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:11ec9ea6bb548e89d925983b0e580690327ca30e2a72179353048dcb1da43f25
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:3edaac63e111cba71fd39dd939c5fc333757559f3d67ae6cef012077c779574d
+  gap_id: dd_gap:spi/injector/shatter_cone/unit_vector_major/x:unit_defect
+  path: spi/injector/shatter_cone/unit_vector_major/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:1340a259007274db69f69e6aed9e4ebd691663cb85acb09a969e699f88f53fec
+  evidence_token: dd-gap-evidence:49d280a76cfc1e85368b1a0ce1c4805ed184d17ef5fa8fb80784d0ff719569be
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:33.456391Z'
+  approval_receipt: dd-resolution-approval:U15:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:a3d4a083f947f8970e71077c965e010f4892f2cc4e85106ba31c5d1ec3bc8f23
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:6896f948961ed652f74061dfcb01c546e88d1a342d7b3f0a99efbf6431acda51
+  gap_id: dd_gap:spi/injector/shatter_cone/unit_vector_major/y:unit_defect
+  path: spi/injector/shatter_cone/unit_vector_major/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:89392d041689296c16a2aa7a4fffe5b6b2ae16aaf16a27afbec739b73dcc9dd9
+  evidence_token: dd-gap-evidence:dbd743de10264f255a582637f500dd02ec2165e70a195433253cef8bfa9d7d78
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:33.613708Z'
+  approval_receipt: dd-resolution-approval:U15:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:b6e491e63d4c93afff900c85ed782cc65b03e978f6dcdc29512fca987d9b8eaf
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:bebfe2e5a349f480b8b8e531fbcfd2dcbb2ee33a22a44cbf8bdb4386e37c7ba4
+  gap_id: dd_gap:spi/injector/shatter_cone/unit_vector_major/z:unit_defect
+  path: spi/injector/shatter_cone/unit_vector_major/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:7f4659ee267330cb23bcb7f98003e8d1e5bfa6c9845b0b008994cf6c8ea07549
+  evidence_token: dd-gap-evidence:686ef6a579537151c4a8d6405283f358040dcb3223a4a37773170ab152ac42ba
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:33.774659Z'
+  approval_receipt: dd-resolution-approval:U15:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:9af0c6f34cc0e161ec9184d81400dda763331bcf2592dcbc16a6d828a6a4fa2f
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:31fa04b8bea3e484b24b4e2e7e3b58140956015e1a9e0f330a09f8b5c6180b24
+  gap_id: dd_gap:spi/injector/shatter_cone/unit_vector_minor/x:unit_defect
+  path: spi/injector/shatter_cone/unit_vector_minor/x
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:e4894d6fcadd6db34f9f2ce2ceaa410374c65a35c2da9be98a9bf6095038415a
+  evidence_token: dd-gap-evidence:61cc5895957f3ca1fe0fa349baead4db0c41f3ff619e0b6921c2f7a357b17084
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:33.934464Z'
+  approval_receipt: dd-resolution-approval:U16:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:32d32d86449a70c46ffb69eebdf99091a16836fa96424bc17678be53d3cd3293
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:4f47cf395b97887982cbe5fb209d5aed761c81a986476d9bfb5a813a96d9e745
+  gap_id: dd_gap:spi/injector/shatter_cone/unit_vector_minor/y:unit_defect
+  path: spi/injector/shatter_cone/unit_vector_minor/y
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:9eacd432177dceefa17cf51827c5b43102d181aef00694fa15e9c18d722872c3
+  evidence_token: dd-gap-evidence:b9c8fd92517e6c4f0d921df95f900eba817e30bc9d4afd21a277fe76d40df4b5
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:34.097756Z'
+  approval_receipt: dd-resolution-approval:U16:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:a7f9cf9c2c1b385d1739bbdaf27a23f48d4c10d321eb603deb46c072e1c43519
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:bd684f97e3a526e09dbe53b29500caad74f5c01a70bff5a5bca83330e8e1c591
+  gap_id: dd_gap:spi/injector/shatter_cone/unit_vector_minor/z:unit_defect
+  path: spi/injector/shatter_cone/unit_vector_minor/z
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m
+  observed_hash: sha256:2dd7dab3a867b93ddef54165604cc41c51626a8ac83b8fe40d0803f596a5bfa6
+  effective:
+    kind: string
+    value: '1'
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+    commits fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e;
+    exact per-path DDGap evidence receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:1294f54dbd934a37e42fedc02c4377bc3f341531fb94bb7be34b9638b28de4b6
+  evidence_token: dd-gap-evidence:75253d9c194b19dce92ba5db7650220d115bac0d486341e87c33a11f971485b3
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:34.265070Z'
+  approval_receipt: dd-resolution-approval:U16:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:6fe072345d3286ecb5f9d49db8636e06b6357747a06a0e43df0c502de9e49588
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/242
+  upstream_ref: commits:fd0c145cb897770738c20de4a426c27b2d8d1a2d,721638233cd87f5ca3f9e71b36d66c46e146af2e
+  state: active
+- id: dd_resolution:5d981a385b0b3cee85129c4966ecf0af6f95c49d7a56aa5154f2018a90d808f2
+  gap_id: dd_gap:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values:unit_defect
+  path: wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m^-2.s^-1
+  observed_hash: sha256:121f2fb5b47d68d918af85da485b00d63cea849e063d90b5d20acb4ee96ba077
+  effective:
+    kind: string
+    value: W.m^-2
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/273
+    commits f34c85d33497f2bd777db7eaf0f6fb93fddc66f2; exact per-path DDGap evidence
+    receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:3997d7cac45ebba84c7e99f2424d0438c05c9b5df5cc084c27f6dbbe3a0fc113
+  evidence_token: dd-gap-evidence:54f66a931210d0075872a98068a9ca4a5a4d48b5bd4d02e4cd410727b68e89c7
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:34.424626Z'
+  approval_receipt: dd-resolution-approval:U21:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:3932c9f9f5f9864eee479ce670e8afe42f9ba5a942efb20e1a9e4f026d095e86
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/273
+  upstream_ref: commits:f34c85d33497f2bd777db7eaf0f6fb93fddc66f2
+  state: active
+- id: dd_resolution:039a8d4c40870fa131336670fc656736d8ceb52f00256c1c7563502a91874a47
+  gap_id: dd_gap:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values:unit_defect
+  path: wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m^-2.s^-1
+  observed_hash: sha256:121f2fb5b47d68d918af85da485b00d63cea849e063d90b5d20acb4ee96ba077
+  effective:
+    kind: string
+    value: W.m^-2
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/273
+    commits f34c85d33497f2bd777db7eaf0f6fb93fddc66f2; exact per-path DDGap evidence
+    receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:5811bc23bb0209562ecf69eb282b1b073e3dd33866fd7a0b1a7f5e1601bf7602
+  evidence_token: dd-gap-evidence:37e60eece31220e97b36e2757daf88a2a5902979b979b11e67b87150f166ab59
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:34.593342Z'
+  approval_receipt: dd-resolution-approval:U22:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:68da3aefe1615f231b716d544cd18ab905bdc064cac23c358f491f1a575c5cd8
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/273
+  upstream_ref: commits:f34c85d33497f2bd777db7eaf0f6fb93fddc66f2
+  state: active
+- id: dd_resolution:f001bf5683839443c8539f0cdc5e27a58679b8472946d059d81d36865eaa3d6c
+  gap_id: dd_gap:wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values:unit_defect
+  path: wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: m^-2.s^-1
+  observed_hash: sha256:121f2fb5b47d68d918af85da485b00d63cea849e063d90b5d20acb4ee96ba077
+  effective:
+    kind: string
+    value: W.m^-2
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/273
+    commits f34c85d33497f2bd777db7eaf0f6fb93fddc66f2; exact per-path DDGap evidence
+    receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:36f756ec77f058a28df59ab5bbd04c738974ecae1c44417576bf6c455489100b
+  evidence_token: dd-gap-evidence:022fef0a8eb5051e1be027094bbccdc7ae14d0a7542d8f1b618e77498b2cb7ef
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:34.764703Z'
+  approval_receipt: dd-resolution-approval:U32:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:189243e803c28fd02ac299de4ccff3e83bf6c7e882b141dcd0f0524a3d05fcd3
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/273
+  upstream_ref: commits:f34c85d33497f2bd777db7eaf0f6fb93fddc66f2
+  state: active
+- id: dd_resolution:779f9298789ebf4f8244441b2a7eb144f3c669bf5244cb8cb37efaca519b06a8
+  gap_id: dd_gap:edge_profiles/ggd/ion/state/ionisation_potential:self_contradiction
+  path: edge_profiles/ggd/ion/state/ionisation_potential
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: e
+  observed_hash: sha256:93edcbe173e1b7d1ef00ee77310b33af482d52e2dd61a512ba397f73bc6378dc
+  effective:
+    kind: string
+    value: eV
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280
+    commits 30a5ddd4b7037b9f93a8f00f7837809403349d99; exact per-path DDGap evidence
+    receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:39687441121bb9c996b438da28f65e6c1b3406cb07d32fd12bccc41c5b834cf8
+  evidence_token: dd-gap-evidence:757367fc97f319550721ae38df655690dd07e37670d4f90221cc80502c357575
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:34.931962Z'
+  approval_receipt: dd-resolution-approval:O17:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:21fa72a4617c0ace091935e6a5233094e59e6834c5bb0fe99dc9ba4a8d45fe04
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280
+  upstream_ref: commits:30a5ddd4b7037b9f93a8f00f7837809403349d99
+  state: active
+- id: dd_resolution:068ceb8a7d2552c0e70986e50d68c3c23bc8d5caa751bad80a1d1b0085999187
+  gap_id: dd_gap:plasma_profiles/ggd/ion/state/ionisation_potential:self_contradiction
+  path: plasma_profiles/ggd/ion/state/ionisation_potential
+  dd_version: 4.1.1
+  field: unit
+  observed:
+    kind: string
+    value: e
+  observed_hash: sha256:93edcbe173e1b7d1ef00ee77310b33af482d52e2dd61a512ba397f73bc6378dc
+  effective:
+    kind: string
+    value: eV
+  resolution_revision: 1
+  reason: Lead-delegated approval under ddres-approval-delegation-20260817; official
+    upstream solution https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280
+    commits 30a5ddd4b7037b9f93a8f00f7837809403349d99; exact per-path DDGap evidence
+    receipt sha256:3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573.
+  observation_ids:
+  - dd_gap_observation:b0897ac0dc23ffaa0458c0f03f86b34162e80779e043aaba6e544e314f486971
+  evidence_token: dd-gap-evidence:9dac577375cae15e7a58a897908cc2b9183bf0dc9c6c52315bcc550091eee389
+  approved_by: reckon-ship (lead-delegated 2026-08-17)
+  approved_at: '2026-08-17T14:18:35.100928Z'
+  approval_receipt: dd-resolution-approval:O17:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:87294b91cb2f326b74fb0c7d936198b47ca0efd5bfcab37ff850b929b15028f2
+  upstream_url: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280
+  upstream_ref: commits:30a5ddd4b7037b9f93a8f00f7837809403349d99
+  state: active
