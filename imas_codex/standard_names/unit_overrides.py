@@ -26,8 +26,12 @@ import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import yaml
+
+if TYPE_CHECKING:
+    from imas_codex.standard_names.dd_resolutions import DDResolutionManifest
 
 _CONFIG = Path(__file__).parent / "config" / "unit_overrides.yaml"
 
@@ -115,7 +119,40 @@ def _load_rules() -> tuple[OverrideRule, ...]:
     return tuple(rules)
 
 
-def resolve_unit(path: str, dd_unit: str | None) -> tuple[str | None, dict | None]:
+def _active_resolution_retires_rule(
+    path: str,
+    rule: OverrideRule,
+    *,
+    dd_version: str | None,
+    manifest: DDResolutionManifest | None,
+) -> bool:
+    from imas_codex.settings import get_dd_version
+    from imas_codex.standard_names.dd_resolutions import (
+        DDResolutionField,
+        active_dd_resolution,
+    )
+
+    record = active_dd_resolution(
+        path=path,
+        dd_version=dd_version or get_dd_version(),
+        field=DDResolutionField.unit,
+        manifest=manifest,
+    )
+    expected = rule.override_unit if rule.strategy == "override" else None
+    return bool(
+        record
+        and record.observed.value == rule.dd_unit
+        and record.effective.value == expected
+    )
+
+
+def resolve_unit(
+    path: str,
+    dd_unit: str | None,
+    *,
+    dd_version: str | None = None,
+    manifest: DDResolutionManifest | None = None,
+) -> tuple[str | None, dict | None]:
     """Return ``(effective_unit, metadata)`` for a (path, unit) pair.
 
     - If no rule matches: returns ``(dd_unit, None)`` — pass-through.
@@ -129,6 +166,10 @@ def resolve_unit(path: str, dd_unit: str | None) -> tuple[str | None, dict | Non
         return None, None
     for rule in _load_rules():
         if rule.matches(path, dd_unit):
+            if _active_resolution_retires_rule(
+                path, rule, dd_version=dd_version, manifest=manifest
+            ):
+                continue
             if rule.strategy == "override":
                 return rule.override_unit, {
                     "rule": "override",

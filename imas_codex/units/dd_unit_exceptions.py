@@ -23,10 +23,13 @@ from __future__ import annotations
 import fnmatch
 import importlib.resources
 from functools import lru_cache
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 from imas_standard_names import canonical_unit
+
+if TYPE_CHECKING:
+    from imas_codex.standard_names.dd_resolutions import DDResolutionManifest
 
 __all__ = [
     "canonical_or_none",
@@ -80,7 +83,41 @@ def _is_equivalent(a: str, b: str) -> bool:
     return any(pair <= eq for eq in load_exceptions()["unit_equivalences"])
 
 
-def _is_known_dd_bug(dd_path: str, sn_canon: str | None, dd_canon: str | None) -> bool:
+def _active_resolution_retires_pair(
+    dd_path: str,
+    dd_canon: str | None,
+    correct_canon: str | None,
+    *,
+    dd_version: str | None,
+    manifest: DDResolutionManifest | None,
+) -> bool:
+    from imas_codex.settings import get_dd_version
+    from imas_codex.standard_names.dd_resolutions import (
+        DDResolutionField,
+        active_dd_resolution,
+    )
+
+    record = active_dd_resolution(
+        path=dd_path,
+        dd_version=dd_version or get_dd_version(),
+        field=DDResolutionField.unit,
+        manifest=manifest,
+    )
+    return bool(
+        record
+        and canonical_or_none(record.observed.value) == dd_canon
+        and canonical_or_none(record.effective.value) == correct_canon
+    )
+
+
+def _is_known_dd_bug(
+    dd_path: str,
+    sn_canon: str | None,
+    dd_canon: str | None,
+    *,
+    dd_version: str | None,
+    manifest: DDResolutionManifest | None,
+) -> bool:
     """True if (dd_path, dd_canon, sn_canon) matches a recorded DD-side bug.
 
     The DD path must match the entry's glob, the DD unit must canonicalise to
@@ -95,11 +132,25 @@ def _is_known_dd_bug(dd_path: str, sn_canon: str | None, dd_canon: str | None) -
             continue
         if canonical_or_none(str(entry["correct_unit"])) != sn_canon:
             continue
+        if _active_resolution_retires_pair(
+            dd_path,
+            dd_canon,
+            sn_canon,
+            dd_version=dd_version,
+            manifest=manifest,
+        ):
+            continue
         return True
     return False
 
 
-def graph_unit_correction(dd_path: str, dd_unit: str | None) -> str | None:
+def graph_unit_correction(
+    dd_path: str,
+    dd_unit: str | None,
+    *,
+    dd_version: str | None = None,
+    manifest: DDResolutionManifest | None = None,
+) -> str | None:
     """Return the unit to STORE for *dd_path*, when the DD declaration is wrong.
 
     Most recorded DD unit bugs are only *suppressed* on the mismatch axis: the
@@ -124,11 +175,27 @@ def graph_unit_correction(dd_path: str, dd_unit: str | None) -> str | None:
             continue
         if canonical_or_none(str(entry["dd_unit"])) != dd_canon:
             continue
+        correct_canon = canonical_or_none(str(entry["correct_unit"]))
+        if _active_resolution_retires_pair(
+            dd_path,
+            dd_canon,
+            correct_canon,
+            dd_version=dd_version,
+            manifest=manifest,
+        ):
+            continue
         return str(entry["correct_unit"])
     return None
 
 
-def units_agree(sn_unit: str | None, dd_unit: str | None, dd_path: str) -> bool:
+def units_agree(
+    sn_unit: str | None,
+    dd_unit: str | None,
+    dd_path: str,
+    *,
+    dd_version: str | None = None,
+    manifest: DDResolutionManifest | None = None,
+) -> bool:
     """Return True if an SN unit and a DD-path unit should be treated as agreeing.
 
     Agreement holds when, after canonicalisation, the two forms are equal, are a
@@ -144,4 +211,10 @@ def units_agree(sn_unit: str | None, dd_unit: str | None, dd_path: str) -> bool:
         return True
     if _is_equivalent(sn_c, dd_c):
         return True
-    return _is_known_dd_bug(dd_path, sn_c, dd_c)
+    return _is_known_dd_bug(
+        dd_path,
+        sn_c,
+        dd_c,
+        dd_version=dd_version,
+        manifest=manifest,
+    )

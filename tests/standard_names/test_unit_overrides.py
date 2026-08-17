@@ -8,10 +8,22 @@ from __future__ import annotations
 
 import pytest
 
+from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
 from imas_codex.standard_names.unit_overrides import (
     _glob_match,
     resolve_unit,
 )
+
+
+def _without_active_path(path: str):
+    manifest = load_dd_resolution_manifest()
+    return manifest.model_copy(
+        update={
+            "resolutions": tuple(
+                record for record in manifest.resolutions if record.path != path
+            )
+        }
+    )
 
 
 class TestGlobMatch:
@@ -119,9 +131,8 @@ class TestResolveUnitOverrides:
         assert meta["rule"] == "override"
 
     def test_e_on_ionisation_potential_becomes_ev(self) -> None:
-        unit, meta = resolve_unit(
-            "edge_profiles/ggd/ion/state/ionisation_potential", "e"
-        )
+        path = "edge_profiles/ggd/ion/state/ionisation_potential"
+        unit, meta = resolve_unit(path, "e", manifest=_without_active_path(path))
         assert unit == "eV"
 
     @pytest.mark.parametrize(
@@ -137,7 +148,7 @@ class TestResolveUnitOverrides:
     def test_unit_vector_m_overridden_to_dimensionless(self, path: str) -> None:
         """Unit vector components are dimensionless direction cosines, not
         spatial coordinates. The DD incorrectly tags them as meters."""
-        unit, meta = resolve_unit(path, "m")
+        unit, meta = resolve_unit(path, "m", manifest=_without_active_path(path))
         assert unit == "1", f"unit_vector path {path} should override 'm' to '1'"
         assert meta is not None
         assert meta["rule"] == "override"
@@ -165,7 +176,7 @@ class TestResolveUnitOverrides:
     )
     def test_direction_vector_m_overridden_to_dimensionless(self, path: str) -> None:
         """Direction, up, and injection_direction vectors are dimensionless."""
-        unit, meta = resolve_unit(path, "m")
+        unit, meta = resolve_unit(path, "m", manifest=_without_active_path(path))
         assert unit == "1", f"direction path {path} should override 'm' to '1'"
         assert meta is not None
         assert meta["rule"] == "override"
@@ -179,6 +190,26 @@ class TestResolveUnitOverrides:
     def test_position_pinhole_m_passes_through(self) -> None:
         """Genuine position elements (pinhole, target_surface_center) keep meters."""
         unit, meta = resolve_unit("camera_ir/channel/camera/pinhole/x", "m")
+        assert unit == "m"
+        assert meta is None
+
+    def test_active_manifest_controls_exact_rule_retirement(self) -> None:
+        path = "camera_ir/channel/camera/direction/x"
+        active = load_dd_resolution_manifest()
+        inactive = active.model_copy(
+            update={
+                "resolutions": tuple(
+                    record for record in active.resolutions if record.path != path
+                )
+            }
+        )
+
+        unit, meta = resolve_unit(path, "m", dd_version="4.1.1", manifest=inactive)
+        assert unit == "1"
+        assert meta is not None
+        assert meta["rule"] == "override"
+
+        unit, meta = resolve_unit(path, "m", dd_version="4.1.1", manifest=active)
         assert unit == "m"
         assert meta is None
 

@@ -1224,6 +1224,38 @@ def _effective_active_records(
     )
 
 
+def effective_active_dd_resolutions(
+    manifest: DDResolutionManifest | None = None,
+) -> tuple[DDResolutionRecord, ...]:
+    """Return the effective active records from a strict authority manifest."""
+    return _effective_active_records(manifest or load_dd_resolution_manifest())
+
+
+def active_dd_resolution(
+    *,
+    path: str,
+    dd_version: str,
+    field: DDResolutionField,
+    manifest: DDResolutionManifest | None = None,
+) -> DDResolutionRecord | None:
+    """Return the single effective active record for an exact authority key."""
+    exact_path = _validate_exact_path(path)
+    exact_version = _validate_exact_version(dd_version)
+    matches = tuple(
+        record
+        for record in effective_active_dd_resolutions(manifest)
+        if record.path == exact_path
+        and record.dd_version == exact_version
+        and record.field == field
+    )
+    if len(matches) > 1:
+        raise DDResolutionCollision(
+            f"multiple active resolutions claim "
+            f"{(exact_path, exact_version, field.value)!r}"
+        )
+    return matches[0] if matches else None
+
+
 def approved_candidate_paths(
     candidate: DDResolutionCandidate,
     manifest: DDResolutionManifest,
