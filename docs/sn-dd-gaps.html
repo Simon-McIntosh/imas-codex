@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="36">
+<meta name="plan-version" content="37">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -40,15 +40,28 @@
       Full record: <a href="/imas-codex/evidence/archive/sn-dd-gaps-landed">sn-dd-gaps landed evidence</a>.</p>
     </section>
 
-    <h2 id="s5">§5 — Remaining: restore raw DD values for the retired paths</h2>
-    <p><strong>Authority-gated: needs explicit approval for live DD graph writes.</strong> The 66 retired bindings
-    currently leave the graph holding the legacy-corrected value while the typed authority supplies the effective
-    value, so the resolver certifies convergence rather than misreporting — correct but not final. The retirement
-    checklist requires restoring the exact raw DD 4.1.1 values and <code>HAS_UNIT</code> edges for those paths so raw
-    provenance and effective projection are separately observable in the graph, then proving raw/effective separation
-    on a sample per upstream family. Deterministic graph writes, no LLM involvement, no new manifest machinery.
-    Do this only after the graph-schema baseline in <code>sn-graph-wide-integrity</code> is clean, or the verifying
-    gate cannot produce a usable signal.</p>
+    <h2 id="s5">§5 — Remaining: stop the DD graph carrying corrected values</h2>
+    <p><strong>The DD graph must hold what the DD publishes. Nothing here mutates DD nodes.</strong>
+    Lead direction 2026-08-17: codex records DD defects so they can be fixed in upstream pull requests, and works
+    around them with its own temporary interpretation layer until those land — it does not rewrite the DD.
+    The typed resolution layer already satisfies that: an approved record is a read-time overlay in
+    <code>dd_resolutions.yaml</code> carrying <code>observed</code> (what DD 4.1.1 publishes) beside
+    <code>effective</code> (what codex interprets), bound to the upstream PR and retired when the DD catches up.</p>
+    <p>The residue is the <em>legacy</em> mechanism, which does the thing we do not want: the 11
+    <code>correct_in_graph</code> rules in <code>units/dd_unit_exceptions.yaml</code> write corrected units into the
+    DD graph at build time. Measured 2026-08-17, the graph therefore disagrees with published DD on exactly the paths
+    the new layer now covers — the five <code>equilibrium/time_slice/constraints/*/reconstructed</code> paths hold
+    <code>Pa</code>, <code>m^-3</code> and <code>A.m^-2</code> where DD 4.1.1 publishes <code>1</code>, and the
+    ionisation-potential paths hold <code>eV</code> where it publishes <code>e</code>. Those writes predate this
+    plan and are now redundant, since the read-time layer supplies the same effective values with provenance.</p>
+    <p><strong>The fix is a re-derivation, not a repair.</strong> Per this repo's standing practice — fix data by
+    reset-and-regenerate through the backing code, never by in-place Cypher patching — re-extract the DD graph with
+    <code>correct_in_graph</code> disabled so every node carries its published declaration. Unit extraction is the
+    cheapest faithful regeneration path and preserves enrichment. Done-when: for the 66 retired paths the graph unit
+    equals the published DD unit, the effective value is observable only through <code>ResolvedDDContext</code>, and a
+    sample per upstream family shows raw and effective side by side. No in-place DD mutation, and therefore no
+    DD-write approval to grant. Sequence it after the graph-schema baseline in
+    <code>sn-graph-wide-integrity</code> is clean, or the verifying gate cannot produce a usable signal.</p>
 
     <h2 id="s6">§6 — Remaining: the U19 ionisation-potential cohort</h2>
     <p><strong>Authority-gated: needs a renewed lead delegation on a changed candidate digest.</strong> The packaged
