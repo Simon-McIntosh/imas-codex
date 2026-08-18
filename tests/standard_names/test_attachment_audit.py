@@ -41,6 +41,16 @@ from imas_codex.standard_names.attachment_audit import (
 )
 
 _FIXTURE_ID_STEM = "test_attach_audit__"
+_TERMINAL_RETRY_METADATA = frozenset(
+    {
+        "before_closure_hash",
+        "manifest_hash",
+        "preserved_state_hash",
+        "run_id",
+        "terminal_sn_id",
+        "terminal_stage",
+    }
+)
 
 
 # ---------------------------------------------------------------------------
@@ -1210,17 +1220,72 @@ def test_terminal_recovery_retry_metadata_is_declared() -> None:
 
     schema = GraphSchema(schema_path="imas_codex/schemas/standard_name.yaml")
     slots = schema.get_all_slots("StandardNameSourceRetry")
-    terminal_metadata = {
-        "before_closure_hash",
-        "manifest_hash",
-        "preserved_state_hash",
-        "run_id",
-        "terminal_sn_id",
-        "terminal_stage",
-    }
 
-    assert terminal_metadata <= slots.keys()
-    assert all(not slots[field].get("required") for field in terminal_metadata)
+    assert _TERMINAL_RETRY_METADATA <= slots.keys()
+    assert all(not slots[field].get("required") for field in _TERMINAL_RETRY_METADATA)
+
+
+class _OrdinaryRetryPersistenceClient:
+    """Persist the retry fields explicitly written by the ordinary operator."""
+
+    def __init__(self) -> None:
+        self.retry_node: dict[str, Any] | None = None
+
+    def query(self, query: str, **params: Any) -> list[dict[str, Any]]:
+        if "RETURN sns.id AS id" in query:
+            return [
+                {
+                    "id": "dd:spectrometer/channel/intensity",
+                    "source_path": "spectrometer/channel/intensity",
+                    "status": "failed",
+                    "attempt_count": 5,
+                    "last_error": "composition attempt was exhausted",
+                }
+            ]
+
+        assert "CREATE (event:StandardNameSourceRetry" in query
+        item = params["items"][0]
+        values = {
+            "source_id": item["source_id"],
+            "previous_status": item["previous_status"],
+            "previous_attempt_count": item["previous_attempt_count"],
+            "previous_error": item["previous_error"],
+            "reason": params["reason"],
+            "retried_at": "written-by-datetime",
+        }
+        self.retry_node = {"id": item["event_id"]}
+        for field, value in values.items():
+            if f"event.{field} =" in query:
+                self.retry_node[field] = value
+        for field in _TERMINAL_RETRY_METADATA:
+            if field in item or f"event.{field} =" in query:
+                self.retry_node[field] = item.get(field, "written-by-query")
+        return [{"source_id": item["source_id"], "event_id": item["event_id"]}]
+
+
+def test_ordinary_retry_omits_terminal_recovery_metadata() -> None:
+    from imas_codex.standard_names.graph_ops import retry_failed_sources
+
+    client = _OrdinaryRetryPersistenceClient()
+
+    result = retry_failed_sources(
+        ["spectrometer/channel/intensity"],
+        reason="retry after the source became nameable",
+        gc=client,
+    )
+
+    assert result["retried"] == 1
+    assert client.retry_node is not None
+    assert client.retry_node.keys() == {
+        "id",
+        "source_id",
+        "previous_status",
+        "previous_attempt_count",
+        "previous_error",
+        "reason",
+        "retried_at",
+    }
+    assert _TERMINAL_RETRY_METADATA.isdisjoint(client.retry_node)
 
 
 def test_terminal_recovery_exception_rolls_back_edges_and_events() -> None:
@@ -2166,7 +2231,11 @@ class _BatchRecoveryTransaction:
                 for path in name["properties"]["source_paths"]
                 if path not in {item["source_id"], item["dd_path"]}
             ]
-            retry = deepcopy(item["retry_event"])
+            retry = (
+                deepcopy(item["retry_event"])
+                if "SET retry = item.retry_event" in query
+                else {"id": item["retry_event"]["id"]}
+            )
             retry.update(
                 {
                     "previous_status": previous["status"],
@@ -2269,6 +2338,46 @@ class _BatchRecoveryClient:
 
     def session(self) -> _BatchRecoverySession:
         return _BatchRecoverySession(self)
+
+
+def test_terminal_recovery_persists_complete_retry_authority(tmp_path: Path) -> None:
+    from imas_codex.standard_names.attachment_audit import (
+        recover_terminal_attachments,
+    )
+
+    rows = [_terminal_recovery_closure_row(*_TERMINAL_RECOVERY_FIXTURES[0])]
+    manifest = tmp_path / "terminal-recovery.json"
+    manifest_hash = _write_terminal_recovery_manifest(manifest, rows)
+    client = _BatchRecoveryClient(rows)
+    run_id = "terminal-recovery-persistence"
+
+    receipt = recover_terminal_attachments(
+        manifest,
+        reason="recover the exact terminal source binding",
+        apply=True,
+        expected_manifest_hash=manifest_hash,
+        run_id=run_id,
+        gc=client,
+    )
+
+    assert receipt["mode"] == "applied"
+    source = client.rows[0]["sources"][0]
+    retry_links = [
+        relationship
+        for relationship in source["relationships"]
+        if relationship["type"] == "HAS_RETRY_EVENT"
+    ]
+    assert len(retry_links) == 1
+    retry = retry_links[0]["other_properties"]
+    manifest_row = json.loads(manifest.read_text(encoding="utf-8"))["rows"][0]
+    assert {field: retry.get(field) for field in _TERMINAL_RETRY_METADATA} == {
+        "before_closure_hash": manifest_row["expected_closure_hash"],
+        "manifest_hash": manifest_hash,
+        "preserved_state_hash": manifest_row["expected_preserved_state_hash"],
+        "run_id": f"{run_id}:manifest:{manifest_hash}",
+        "terminal_sn_id": client.rows[0]["sn_id"],
+        "terminal_stage": manifest_row["expected_name_stage"],
+    }
 
 
 def test_terminal_recovery_manifest_covers_exact_fixture_cohort(
