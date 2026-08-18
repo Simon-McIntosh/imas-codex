@@ -188,19 +188,24 @@ class TestDdUnitDefectCuration:
     legitimately carry ``e`` and must be untouched.
     """
 
-    def test_active_resolution_retires_legacy_graph_correction(self):
+    def test_exact_resolution_cohort_retires_legacy_graph_correction(self, monkeypatch):
+        from imas_codex.standard_names import dd_resolutions
+        from imas_codex.standard_names.dd_resolutions import (
+            IONISATION_POTENTIAL_RESOLUTION_PATHS,
+        )
         from imas_codex.units import resolve_dd_unit
 
-        for path in (
-            "edge_profiles/ggd/ion/state/ionisation_potential",
-            "plasma_profiles/ggd/ion/state/ionisation_potential",
-        ):
+        manifest = dd_resolutions.load_dd_resolution_manifest()
+        monkeypatch.setattr(
+            dd_resolutions, "load_dd_resolution_manifest", lambda: manifest
+        )
+        for path in IONISATION_POTENTIAL_RESOLUTION_PATHS:
             assert resolve_dd_unit(path, "e") == "e", path
 
-    def test_unresolved_descendant_keeps_legacy_graph_correction(self):
+    def test_noncohort_descendant_keeps_legacy_graph_correction(self):
         from imas_codex.units import resolve_dd_unit
 
-        path = "plasma_profiles/ggd/ion/state/ionisation_potential/values"
+        path = "plasma_profiles/ggd/ion/state/ionisation_potential/uncertainty_index"
         assert resolve_dd_unit(path, "e") == "eV"
 
     def test_scalar_sibling_declaration_is_unchanged(self):
