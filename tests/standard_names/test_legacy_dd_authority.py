@@ -46,8 +46,8 @@ def test_shipped_carriers_have_zero_shadow_authority() -> None:
             0,
         ),
         "numeric_missing_unit_fallback": (
-            authority.ShadowAuditStatus.not_audited,
-            None,
+            authority.ShadowAuditStatus.audited,
+            0,
         ),
     }
     numeric = next(
@@ -55,7 +55,7 @@ def test_shipped_carriers_have_zero_shadow_authority() -> None:
         for item in audit.carrier_results
         if item.carrier == "numeric_missing_unit_fallback"
     )
-    assert "separate audited-absence policy" in numeric.reason
+    assert numeric.reason is None
 
 
 def test_public_shadow_audit_has_no_applicability_flag() -> None:

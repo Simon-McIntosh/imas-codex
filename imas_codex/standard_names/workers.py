@@ -1698,13 +1698,14 @@ def _search_nearby_names(query: str, k: int = 5) -> list[dict]:
 
 _DD_CONTEXT_QUERY = """
 MATCH (n:IMASNode {id: $path})
+MATCH (current_dd_version:DDVersion {is_current: true})
 OPTIONAL MATCH (n)-[:HAS_IDENTIFIER_SCHEMA]->(ident:IdentifierSchema)
-OPTIONAL MATCH (n)-[:HAS_UNIT]->(u:Unit)
 OPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)
 OPTIONAL MATCH (parent)-[:HAS_CHILD]->(sibling:IMASNode)
 WHERE sibling.id <> $path
   AND NOT (sibling.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])
-WITH n, ident, u, parent,
+WITH n, current_dd_version, ident, parent,
+     [(n)-[:HAS_UNIT]->(unit:Unit) | unit.id] AS unit_relations,
      collect(DISTINCT {
          path: sibling.id,
          description: sibling.description,
@@ -1723,7 +1724,11 @@ RETURN n.coordinate1_same_as AS coordinate1,
        ident.name AS identifier_schema_name,
        ident.documentation AS identifier_schema_doc,
        ident.options AS identifier_options,
-       u.id AS unit_from_rel,
+       current_dd_version.id AS dd_version,
+       n.unit AS raw_unit,
+       unit_relations,
+       CASE WHEN size(unit_relations) = 1
+            THEN head(unit_relations) ELSE null END AS unit_from_rel,
        parent.id AS parent_path,
        parent.description AS parent_description,
        n.enrichment_source AS enrichment_source,
@@ -2173,12 +2178,14 @@ def _enrich_batch_items(items: list[dict]) -> None:
             from imas_codex.standard_names.dd_resolutions import resolve_dd_row
 
             prior_raw_context = item.get("raw_dd_context") or {}
+            unit_from_rel = row.get("unit_from_rel")
+            if "unit" in prior_raw_context:
+                raw_unit = prior_raw_context["unit"]
+            else:
+                raw_unit = unit_from_rel or row.get("raw_unit") or item.get("unit")
             raw_context = {
                 "path": path,
-                "unit": prior_raw_context.get("unit")
-                or item.get("unit")
-                or row.get("unit_from_rel")
-                or row.get("unit"),
+                "unit": raw_unit,
                 "documentation": prior_raw_context.get("documentation")
                 or row.get("node_documentation"),
                 "data_type": row.get("data_type"),
@@ -2189,7 +2196,9 @@ def _enrich_batch_items(items: list[dict]) -> None:
             }
             resolved_context = resolve_dd_row(
                 raw_context,
-                dd_version=str(item.get("dd_version") or get_dd_version()),
+                dd_version=str(
+                    row.get("dd_version") or item.get("dd_version") or get_dd_version()
+                ),
             )
             item.update(resolved_context.as_pipeline_item())
 
@@ -2253,33 +2262,6 @@ def _enrich_batch_items(items: list[dict]) -> None:
                         break
                 if lineage:
                     item["ancestor_context"] = lineage
-
-            # Propagate the authoritative DD unit from HAS_UNIT into
-            # the batch item so compose_batch's unit-safety skip and the
-            # downstream persist see the real DD unit (Pa, m, m^-2.W, …)
-            # rather than None.  StandardNameSource does not (yet) carry a
-            # ``unit`` property in the schema, so we re-derive it from the
-            # IMASNode at enrich time.  When HAS_UNIT is absent AND the
-            # data type is numeric, set unit to "1" (ISN dimensionless
-            # convention) — safety factor q, beta, mode numbers, etc.
-            if not item.get("unit"):
-                unit_from_rel = row.get("unit_from_rel")
-                if unit_from_rel:
-                    item["unit"] = unit_from_rel
-                else:
-                    # Dimensionless: numeric DD paths with no HAS_UNIT
-                    # relationship are genuinely dimensionless (q, beta,
-                    # mode numbers, efficiencies, fractions, etc.).
-                    data_type = row.get("data_type", "")
-                    _NUMERIC_PREFIXES = (
-                        "FLT_",
-                        "INT_",
-                        "CPX_",
-                    )
-                    if data_type and any(
-                        data_type.startswith(p) for p in _NUMERIC_PREFIXES
-                    ):
-                        item["unit"] = "1"
 
             # Apply unit overrides AFTER re-injecting the DD unit.
             # The override engine corrects upstream DD defects (e.g.,
