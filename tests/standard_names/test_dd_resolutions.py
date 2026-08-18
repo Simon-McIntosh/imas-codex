@@ -179,6 +179,24 @@ def test_duplicate_exact_key_is_refused() -> None:
         )
 
 
+def test_inactive_history_before_active_replacement_is_valid() -> None:
+    inactive = _record(state="withdrawn")
+    active = _record(id="dd_resolution:" + "b" * 64)
+
+    manifest = DDResolutionManifest(resolutions=(inactive, active))
+
+    assert manifest.resolutions == (inactive, active)
+
+
+def test_active_replacement_before_inactive_history_is_valid() -> None:
+    active = _record()
+    inactive = _record(id="dd_resolution:" + "b" * 64, state="withdrawn")
+
+    manifest = DDResolutionManifest(resolutions=(active, inactive))
+
+    assert manifest.resolutions == (active, inactive)
+
+
 def test_nested_context_retains_raw_and_graph_snapshot_marker() -> None:
     manifest = DDResolutionManifest(resolutions=(_record(),))
     result = resolve_dd_context(

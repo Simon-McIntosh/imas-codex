@@ -228,8 +228,10 @@ class DDResolutionManifest(BaseModel):
             if record.id in ids:
                 raise DDResolutionCollision(f"duplicate resolution id {record.id!r}")
             ids.add(record.id)
+            if record.state != DDResolutionStatus.active:
+                continue
             key = (record.path, record.dd_version, record.field)
-            if record.state == DDResolutionStatus.active and key in keys:
+            if key in keys:
                 raise DDResolutionCollision(
                     f"multiple active resolutions claim {key!r}"
                 )
