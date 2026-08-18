@@ -2504,24 +2504,21 @@ classes:
 
   DDResolution:
     description: >-
-      Graph mirror of one reviewed, exact-path, exact-DD-version local resolution.
-      The tracked packaged manifest is the sole runtime behavior authority. This
-      node preserves lifecycle and provenance for traversal and makes mirror
-      drift explicit through manifest_digest; workers must never read this node
-      as a fallback behavior registry.
+      One exact, version-bound bridge from a corrected IMASNode declaration to
+      the DDGap fact that proves the published declaration is defective. The
+      corrected graph value remains directly usable while this node preserves
+      the published value, effective value, upstream disposition, retirement
+      boundary, and plain human audit trail.
 
       Example Cypher:
-        MATCH (g:DDGap)-[:HAS_RESOLUTION]->(r:DDResolution)
-        RETURN r.path, r.dd_version, r.field, r.status, r.manifest_digest
+        MATCH (n:IMASNode)-[:BRIDGED_BY]->(r:DDResolution)-[:EVIDENCED_BY]->(g:DDGap)
+        RETURN n.id, r.published_value, r.effective_value, r.dd_version, g.id
     class_uri: sn:DDResolution
     attributes:
       id:
         identifier: true
         required: true
         description: "Content-addressed identity: dd_resolution:{sha256}"
-      gap_id:
-        required: true
-        description: Exact DDGap identity supporting the reviewed resolution.
       path:
         required: true
         description: Exact IDS-prefixed DD path; patterns and aliases are forbidden.
@@ -2531,79 +2528,63 @@ classes:
       field:
         required: true
         range: DDResolutionField
-      observed_kind:
+      published_kind:
         required: true
         range: DDResolutionValueKind
-      observed_value:
+      published_value:
         required: true
-        description: Canonical JSON for the immutable raw typed value.
-      observed_hash:
-        required: true
-        description: SHA-256 digest of the canonical observed typed value.
+        description: Canonical JSON for the value published by this DD release.
       effective_kind:
         required: true
         range: DDResolutionValueKind
       effective_value:
         required: true
         description: Canonical JSON for the separately reviewed effective typed value.
-      resolution_revision:
-        required: true
-        range: integer
-        description: Positive review revision scoped to this exact resolution key.
       reason:
         required: true
-        description: Mechanism-level justification for the local interpretation.
-      observation_ids:
+        description: Physics or schema justification for bridging the declaration.
+      recorded_by:
         required: true
-        multivalued: true
-        description: Sorted immutable DDGapObservation identities reviewed as evidence.
-      evidence_token:
-        required: true
-        description: Exact DDGap evidence-set token reviewed for this record.
-      approved_by:
-        required: true
-        description: Human or governed review authority that approved the record.
-      approved_at:
+        description: Human authority that recorded the reviewed bridge.
+      recorded_at:
         required: true
         range: datetime
-      approval_receipt:
+      upstream_reference:
         required: true
-        description: Durable review reference proving approval.
-      upstream_url:
+        description: >-
+          Official upstream change reference, or the literal none-yet marker
+          when no upstream filing exists.
+      upstream_commit_reference:
         required: true
-        description: Absolute HTTPS URL for the corresponding upstream correction.
-      upstream_ref:
+        description: Exact upstream commit reference, or the literal none-yet marker.
+      retiring_release:
         required: true
-        description: Exact upstream change, commit, or pull-request identity.
-      manifest_digest:
+        description: DD release expected to retire the bridge, or none-yet.
+      source_manifest_digest:
         required: true
-        description: Digest of the packaged manifest this graph mirror represents.
+        description: Digest of the packaged source used for this one-time port.
       status:
         required: true
         range: DDResolutionStatus
-      mirrored_at:
+      corrected_node:
         required: true
-        range: datetime
-        description: When this exact packaged record was mirrored into the graph.
-      reconciled_at:
-        range: datetime
-        description: When graph state was last compared with the packaged authority.
+        range: string
+        description: Exact corrected IMASNode identity carrying this bridge.
+        annotations:
+          relationship_type: BRIDGED_BY
+          target_label: IMASNode
+      evidence:
+        required: true
+        range: DDGap
+        description: Exact DDGap fact proving the published declaration is defective.
+        annotations:
+          relationship_type: EVIDENCED_BY
       for_dd_version:
         required: true
-        range: DDVersion
+        range: string
         annotations:
           relationship_type: FOR_DD_VERSION
-      observations:
-        required: true
-        multivalued: true
-        range: DDGapObservation
-        annotations:
-          relationship_type: SUPPORTED_BY_OBSERVATION
-      state_changes:
-        multivalued: true
-        range: DDResolutionStateChange
-        annotations:
-          relationship_type: HAS_STATE_CHANGE
+          target_label: DDVersion
 
   DDGap:
     description: >-
@@ -2699,16 +2680,6 @@ classes:
         range: DDGapIdentityChange
         annotations:
           relationship_type: HAS_IDENTITY_CHANGE
-      resolutions:
-        description: >-
-          Reviewed local interpretations supported by this immutable defect fact.
-          The related graph nodes mirror packaged behavior authority; the edge
-          does not make a DDGap behavioral by itself.
-        multivalued: true
-        range: DDResolution
-        annotations:
-          relationship_type: HAS_RESOLUTION
-
   StandardNameSource:
     description: >-
       Tracks an individual source entity (DD path or facility signal) through
