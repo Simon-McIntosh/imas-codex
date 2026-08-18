@@ -16,14 +16,15 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="163">
-<meta name="plan-impl" content="0.93">
+<meta name="plan-modified" content="2026-08-18">
+<meta name="plan-version" content="164">
+<meta name="plan-impl" content="0.94">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-artifacts" content="docs/archive/sn-graph-provenance-ledger-landed.html,docs/archive/sn-derived-parent-unit-authority-landed.html,docs/archive/sn-graph-wide-integrity-guards-landed.html,docs/archive/sn-gas-unit-cache-repair-landed.html,docs/archive/sn-graph-wide-integrity-watchdog-stubs-west-landed.html">
+<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
+<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4">
 </head>
 <body>
   <main class="plan-doc">
@@ -1430,6 +1431,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="graph-gate-hazards-from-dd-gaps-20260817" data-who="reckon-ship" data-when="2026-08-17T19:35:00+00:00">
     <div class="r-comment-body"><p><strong>Two findings handed over from the sn-dd-gaps execution that bear directly on this plan's remaining graph work (2026-08-17).</strong></p><p><strong>1. A graph-marked test suite dispatched into a worktree silently auto-skips and still exits 0.</strong> <code>.env</code> is gitignored, so no worker worktree carries a Neo4j credential and <code>tests/conftest.py</code> skips every <code>graph</code>-marked test; a gate node reported <em>exit code 0 with all 9 schema-compliance tests skipped</em>, which reads as a pass to anything checking exit status alone. This will silently void any graph gate this plan relies on. Mitigation used: copy the canonical <code>.env</code> into the worktree before the run and remove it afterwards, never staging it, and require the manifest to state executed-versus-skipped counts rather than just an exit code. Treat a skipped graph run as <em>not-run</em>, never as evidence.</p><p><strong>2. The live graph carries pre-existing schema non-compliance this plan owns.</strong> Once credentialed, <code>tests/graph/test_schema_compliance.py</code> executed 9/9 and failed 2: <code>StandardNameSourceRetry</code> persists six properties its LinkML class does not declare (<code>before_closure_hash</code>, <code>manifest_hash</code>, <code>preserved_state_hash</code>, <code>run_id</code>, <code>terminal_sn_id</code>, <code>terminal_stage</code>) across 28 nodes stamped 2026-07-31 to 2026-08-16, and required fields are null on 27 <code>StandardNameSource</code> nodes (<code>source_id</code>) plus one <code>Unit</code> (<code>symbol</code>, id <code>as_parent_level_2</code>). Verified chain-independent: the DD-resolution commits never write those properties, and the node timestamps predate them. Either declare or stop writing those six properties, repair the null required values, and re-run the graph gate. Until then <em>any</em> graph-schema gate in this plan fails for reasons unrelated to the change under test, so establish this baseline first or the signal is unusable.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260818-graph-gate-failclosed" data-who="reckon-ship" data-when="2026-08-18T20:45:00+00:00">
+    <div class="r-comment-body"><p><strong>The graph-gate skip hazard is closed at source: an explicit <code>-m graph</code> selection without Neo4j credentials now fails closed as not-run (exit 5) instead of exiting 0 with everything skipped.</strong> Commit <code>249f00b4</code>, merge <code>a84c8af4</code>. Default credential-less selections keep their skip behaviour (11,706 passed / 237 skipped / 626 deselected, unchanged) and a credentialed <code>-m graph</code> run follows the prior no-skip path; gate is a 3-test subprocess regression in <code>tests/test_graph_marker_gate.py</code>. This retires the first half of the 2026-08-17 hand-over from sn-dd-gaps. Side finding routed to its own node: <code>tests/core/test_dd_unit_resolution.py::TestDdUnitDefectCuration::test_ionisation_potential_resolves_to_energy</code> fails pre-existing at the base, outside this node's fence. Record: <a href="/imas-codex/evidence/archive/sn-graph-wide-integrity-landed#graph-gate-skip-hazard">landed evidence</a>.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

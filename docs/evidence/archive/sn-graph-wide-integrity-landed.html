@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-evidence-for" content="sn-graph-wide-integrity">
+  <title>sn-graph-wide-integrity landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>sn-graph-wide-integrity — cumulative execution evidence</h1>
+  <p>One anchor per material landing. Earlier landings for this plan are recorded in the
+  plan's own comment ledger and in <code>docs/archive/sn-graph-wide-integrity-*-landed.html</code>;
+  this record starts at the S8 closure wave (2026-08-18).</p>
+
+  <section id="graph-gate-skip-hazard">
+    <h2>Graph-marked test selection fails closed when Neo4j is unreachable</h2>
+    <p><strong>Landed 2026-08-18</strong> — commit <code>249f00b4</code>, merge <code>a84c8af4</code>.
+    An explicit <code>pytest -m graph</code> selection with no graph credential previously exited 0 with
+    every test skipped, so worktree gate nodes read surrender as a pass (the hazard recorded 2026-08-17
+    from the sn-dd-gaps consumer-cutover gate). The selection now reports itself <em>not-run</em>:
+    exit 5 with the message <code>Graph-marked test selection was not run: No Neo4j credential is
+    configured…</code>. Default credential-less selections keep their skip behaviour
+    (11,706 passed / 237 skipped / 626 deselected, unchanged), and a credentialed
+    <code>-m graph</code> run follows the prior no-skip path. Gate: 3-test subprocess regression
+    (<code>tests/test_graph_marker_gate.py</code>) green; the sole default-suite failure at the base
+    (<code>tests/core/test_dd_unit_resolution.py::TestDdUnitDefectCuration::test_ionisation_potential_resolves_to_energy</code>)
+    is pre-existing, outside the fence, and routed to its own node.</p>
+  </section>
+</main>
+</body>
+</html>
