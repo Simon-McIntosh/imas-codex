@@ -11,9 +11,40 @@ reverse-reachable. The landed strict operator admitted only one unique fold,
 covering one census row. It refused the other five unique folds, covering nine
 census rows, before producing apply authority.
 
-No apply was attempted. `StandardNameChange` remained **7,152 → 7,152**;
-`LLMCost` remained **27,467 → 27,467**; and `SNRun` remained **489 → 489**.
-Provider calls were **0**.
+During this preview pass, no apply was attempted. `StandardNameChange` remained
+**7,152 → 7,152**; `LLMCost` remained **27,467 → 27,467**; and `SNRun`
+remained **489 → 489**. Provider calls were **0**.
+
+## Applied camera-direction fold
+
+The one eligible fold was applied live on 2026-08-19 through
+`supersede_into_ancestor`. The immediately regenerated preview hash was
+`fc12f9ff4e51ac4658d8a3aa68576661f41e30b4fb99bbb3f259624ae5d83d17`,
+exactly matching the previously reviewed hash. The applied receipt carried the
+same hash and reported **1 source = 0 retarget + 1 deduplicate + 0 stale detach
++ 0 stale refusal**.
+
+The ledger receipt is
+`sn-change:ancestor-supersession:fc12f9ff4e51ac4658d8a3aa68576661f41e30b4fb99bbb3f259624ae5d83d17`.
+An exact-hash replay returned `already_applied` with `changed=0`. Global graph
+counters and a canonical snapshot of both names, their source and backing
+projection closure, lineage edges, and change receipt were byte-identical
+before and after replay, proving **persistent writes = 0**.
+
+The post-apply read-only census found:
+
+- `x_image_up_unit_vector_of_camera` is `superseded / superseded`, retains its
+  one-hop `REFINED_FROM` path, and has **0** live `PRODUCED_NAME` bindings.
+- `x_direction_unit_vector_of_camera` remains `accepted / valid` and has
+  **1** producing source.
+- `dd:camera_ir/channel/camera/direction/x` has exactly one live binding, to
+  `x_direction_unit_vector_of_camera`; its `produced_sn_id` scalar remains
+  `x_direction_unit_vector_of_camera`.
+
+The complete apply, replay, manifest, receipt, snapshots, and census are in
+`r-20260818T235309620138-apply-camera-fold/live-apply.log` (SHA-256
+`15aaddfc45747953ac875003a51d75dd133acfbff53c8555c0e1ecf5fa8f04e7`, exit
+0). Provider calls were **0**.
 
 The input was the exact `fold_into_ancestor_candidate_pairs` class in
 `dual-binding-census.json`, whose SHA-256 is
