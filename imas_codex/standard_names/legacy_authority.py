@@ -76,10 +76,7 @@ _AUDITED_SHADOW_CARRIERS = (
     "unit_overrides.skip",
     "dd_unit_exceptions.suppress",
     "dd_unit_exceptions.correct_in_graph",
-)
-_NUMERIC_FALLBACK_REASON = (
-    "Deferred to a separate audited-absence policy because this audit has no "
-    "fact-derived numeric applicability boundary."
+    "numeric_missing_unit_fallback",
 )
 
 
@@ -210,13 +207,6 @@ def find_shadow_authorities(
             residual_count=counts[carrier],
         )
         for carrier in _AUDITED_SHADOW_CARRIERS
-    ) + (
-        ShadowCarrierAudit(
-            carrier="numeric_missing_unit_fallback",
-            status=ShadowAuditStatus.not_audited,
-            residual_count=None,
-            reason=_NUMERIC_FALLBACK_REASON,
-        ),
     )
     return ShadowAuthorityAudit(
         residuals=residuals,

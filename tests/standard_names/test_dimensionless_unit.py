@@ -1,9 +1,7 @@
-"""Tests for dimensionless quantity handling in the SN pipeline.
+"""Tests for declared and missing units in the SN pipeline.
 
-Verifies that DD paths with no HAS_UNIT relationship (dimensionless
-quantities like safety factor q, beta, mode numbers) are correctly
-assigned unit="1" (ISN convention) rather than being skipped as
-unresolvable.
+An absent HAS_UNIT relationship is missing authority, even for numeric data.
+Only an explicit DD dimensionless declaration may become unit ``"1"``.
 """
 
 from __future__ import annotations
@@ -53,17 +51,34 @@ def _run_enrich(items, row):
         _enrich_batch_items(items)
 
 
+def _assert_numeric_fallback_audited_absent() -> None:
+    from imas_codex.standard_names.legacy_authority import (
+        ShadowAuditStatus,
+        find_shadow_authorities,
+    )
+
+    audit = find_shadow_authorities()
+    numeric = next(
+        result
+        for result in audit.carrier_results
+        if result.carrier == "numeric_missing_unit_fallback"
+    )
+    assert numeric.status is ShadowAuditStatus.audited
+    assert numeric.residual_count == 0
+
+
 # ── Enrichment tests ──────────────────────────────────────────────────
 
 
-class TestDimensionlessEnrichment:
-    """Enrichment assigns unit='1' to numeric DD paths without HAS_UNIT."""
+class TestMissingUnitEnrichment:
+    """Enrichment preserves missing unit authority as unresolved."""
 
-    def test_numeric_path_gets_dimensionless_unit(self) -> None:
-        """FLT_1D path with no unit_from_rel → unit='1'."""
+    def test_numeric_path_without_unit_stays_unresolved(self) -> None:
+        """A floating-point path cannot manufacture dimensionless authority."""
         items = [{"path": "equilibrium/time_slice/profiles_1d/q"}]
         _run_enrich(items, _make_row(unit_from_rel=None, data_type="FLT_1D"))
-        assert items[0]["unit"] == "1"
+        assert items[0].get("unit") is None
+        _assert_numeric_fallback_audited_absent()
 
     def test_structure_path_stays_none(self) -> None:
         """STRUCTURE path with no unit → unit stays unset."""
@@ -77,17 +92,19 @@ class TestDimensionlessEnrichment:
         _run_enrich(items, _make_row(unit_from_rel="Pa", data_type="FLT_1D"))
         assert items[0]["unit"] == "Pa"
 
-    def test_int_0d_gets_dimensionless(self) -> None:
-        """INT_0D path (mode number, count) → unit='1'."""
+    def test_integer_path_without_unit_stays_unresolved(self) -> None:
+        """An integer path cannot manufacture dimensionless authority."""
         items = [{"path": "mhd/time_slice/toroidal_mode/n"}]
         _run_enrich(items, _make_row(unit_from_rel=None, data_type="INT_0D"))
-        assert items[0]["unit"] == "1"
+        assert items[0].get("unit") is None
+        _assert_numeric_fallback_audited_absent()
 
-    def test_cpx_0d_gets_dimensionless(self) -> None:
-        """CPX_0D (rare complex dimensionless) → unit='1'."""
+    def test_complex_path_without_unit_stays_unresolved(self) -> None:
+        """A complex path cannot manufacture dimensionless authority."""
         items = [{"path": "some/complex/path"}]
         _run_enrich(items, _make_row(unit_from_rel=None, data_type="CPX_0D"))
-        assert items[0]["unit"] == "1"
+        assert items[0].get("unit") is None
+        _assert_numeric_fallback_audited_absent()
 
     def test_str_0d_no_unit(self) -> None:
         """STR_0D path without unit → unit stays None (strings aren't numeric)."""
