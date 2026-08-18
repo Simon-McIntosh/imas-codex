@@ -254,6 +254,21 @@
     <strong>APPROVE</strong> (0/0/1/0 — the MEDIUM is a conservative order-dependent active-key
     over-rejection for future mixed-status history, routed to its own node).</p>
   </section>
+
+  <section id="ddres-overlay-simplification">
+    <h2>§5 part 3 — The read-time overlay is provenance-only</h2>
+    <p><strong>Landed 2026-08-19</strong> — chain <code>07898d27</code> → <code>db1ecad8</code>,
+    merge <code>3b0288ae</code>. All 14 consumer sites read corrected DD values directly from graph
+    snapshots (identity proven 37/37 pre-change); the resolution bridges supply published values and
+    upstream provenance only. A graph row carrying the published rather than effective value fails
+    closed with <code>DDResolutionStale</code>, including at attachment validation through a
+    non-substituting guard; source refresh persists <code>published_dd_context</code>; applied bridge
+    identities are distinct from prior-version convergence in all four custom projections;
+    <code>resolve_dd_field</code> survives only for release-fact comparison. Review: BLOCK
+    (2 HIGH — stale-refusal bypass at attachment, provenance destruction in refresh) then final
+    <strong>APPROVE with 14/14 sites passing and zero findings</strong> after one corrective. Full
+    suite <strong>6508 passed / 8 skipped / 0 failed</strong>.</p>
+  </section>
 </main>
 </body>
 </html>
