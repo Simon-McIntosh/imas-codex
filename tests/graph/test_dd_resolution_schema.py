@@ -44,54 +44,57 @@ def test_resolution_schema_has_typed_lifecycle_and_immutable_receipt() -> None:
     assert receipt["graph_snapshot_token"]["required"] is True
 
 
-def test_resolution_graph_mirror_carries_exact_authority_and_drift_digest() -> None:
+def test_resolution_graph_record_carries_bridge_provenance() -> None:
     schema = _schema("standard_name.yaml")
     attributes = schema["classes"]["DDResolution"]["attributes"]
 
     for field in (
         "id",
-        "gap_id",
         "path",
         "dd_version",
         "field",
-        "observed_kind",
-        "observed_value",
-        "observed_hash",
+        "published_kind",
+        "published_value",
         "effective_kind",
         "effective_value",
-        "observation_ids",
-        "evidence_token",
-        "approved_by",
-        "approved_at",
-        "approval_receipt",
-        "upstream_url",
-        "upstream_ref",
-        "manifest_digest",
+        "reason",
+        "recorded_by",
+        "recorded_at",
+        "upstream_reference",
+        "upstream_commit_reference",
+        "retiring_release",
+        "source_manifest_digest",
         "status",
+        "corrected_node",
+        "evidence",
+        "for_dd_version",
     ):
         assert attributes[field]["required"] is True
-    assert attributes["for_dd_version"]["range"] == "DDVersion"
+    assert attributes["for_dd_version"]["range"] == "string"
     assert (
         attributes["for_dd_version"]["annotations"]["relationship_type"]
         == "FOR_DD_VERSION"
     )
-    assert (
-        attributes["observations"]["annotations"]["relationship_type"]
-        == "SUPPORTED_BY_OBSERVATION"
-    )
+    assert attributes["for_dd_version"]["annotations"]["target_label"] == "DDVersion"
 
 
-def test_gap_and_raw_dd_node_link_to_resolution_mirror() -> None:
+def test_raw_dd_node_and_resolution_declare_bridge_chain() -> None:
     standard_name = _schema("standard_name.yaml")
     imas_dd = _schema("imas_dd.yaml")
 
-    gap_slot = standard_name["classes"]["DDGap"]["attributes"]["resolutions"]
-    assert gap_slot["range"] == "DDResolution"
-    assert gap_slot["annotations"]["relationship_type"] == "HAS_RESOLUTION"
-
     node_slot = imas_dd["classes"]["IMASNode"]["attributes"]["dd_resolutions"]
-    assert node_slot["range"] == "DDResolution"
-    assert node_slot["annotations"]["relationship_type"] == "HAS_DD_RESOLUTION"
+    assert node_slot["range"] == "string"
+    assert node_slot["annotations"] == {
+        "relationship_type": "BRIDGED_BY",
+        "target_label": "DDResolution",
+    }
+
+    evidence_slot = standard_name["classes"]["DDResolution"]["attributes"]["evidence"]
+    assert evidence_slot["range"] == "string"
+    assert evidence_slot["annotations"] == {
+        "relationship_type": "EVIDENCED_BY",
+        "target_label": "DDGap",
+    }
 
 
 def test_raw_dd_node_has_no_hidden_effective_resolution_fields() -> None:
