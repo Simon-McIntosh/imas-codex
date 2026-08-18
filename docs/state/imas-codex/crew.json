@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-18T20:43:14",
+  "updated": "2026-08-18T21:50:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -4176,9 +4176,71 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260818T190940893036-evidence-relocation",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "evidence-relocation",
+        "role": "implement",
+        "member": "impl-envfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-18T19:09:45Z",
+        "completed_at": "2026-08-18T19:15:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 355,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 355,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c253ec3f2d27b6f8e307aa81a14815c423acdfbb",
+        "commits": [
+          "15713ed6aeee079625b19f57f91d7424ea57858d"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "13 of 14 cited /tmp artifacts preserved under docs/evidence/sn-dd-gaps/ (273 KB): 12 byte-for-byte with matching source and destination SHA-256, plus a 400-line excerpt of an 8.77 MB export with the full-file hash recorded. One citation had no surviving source and is annotated in place. No sn-suite-gate cache subtree was copied. Orchestrator then repointed 15 citations across the plan and evidence HTML and merged as 8fe3ed65",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T190940893036-evidence-relocation/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01647-998a-71c2-a834-1c7b71089f6d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2046208,
+            "cached_input_tokens_cumulative": 2046208,
+            "input_tokens": 2190162,
+            "input_tokens_cumulative": 2190162,
+            "output_tokens": 16310,
+            "output_tokens_cumulative": 16310,
+            "reasoning_output_tokens": 5883,
+            "reasoning_output_tokens_cumulative": 5883
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 104
+    "_version": 105
   }
 }
