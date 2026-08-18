@@ -16,15 +16,15 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="166">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-modified" content="2026-08-19">
+<meta name="plan-version" content="167">
+<meta name="plan-impl" content="0.965">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
-<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a">
+<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef">
 </head>
 <body>
   <main class="plan-doc">
@@ -1440,6 +1440,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260818-supersede-instrument-landed" data-who="reckon-ship" data-when="2026-08-18T21:50:00+00:00">
     <div class="r-comment-body"><p><strong>The ancestor-fold instrument f-sgwi-dual-binding needed is landed and independently APPROVED with zero findings after two corrective rounds.</strong> Chain <code>761afff4</code> → <code>be2e4ae9</code> → <code>8ceea23a</code>, merge <code>c2aaf946</code>. <code>supersede_into_ancestor</code> folds into an existing REFINED_FROM ancestor with no reverse edge; strict ancestry refuses self and cycle targets; apply locks and exact-hash-rechecks the complete signed closure (real second-session drift regression proves zero change rows on invalidation); replay is measured write-free; disposable-Neo4j suite 9/9. The live dry-run for <code>atomic_count_of_ion_state</code> → <code>atomic_count</code> is signed (hash <code>e51c191e…</code>, 37 retarget + 39 dedup over 76 sources, 6 lineage edges preserved). Next node: the exact-hash live apply plus replay and census. Record: <a href="/imas-codex/evidence/archive/sn-graph-wide-integrity-landed#supersede-into-ancestor">landed evidence</a>.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260818-stale-detach-contract" data-who="reckon-ship" data-when="2026-08-18T22:40:00+00:00">
+    <div class="r-comment-body"><p><strong>The fold instrument's stale-source lifecycle contract is repaired and APPROVED with zero findings; the atomic-count apply's fail-closed refusal is receipted and the fresh preview is signed.</strong> The first live apply refused atomically on a stale signed source (receipt <code>8f08af48</code>, ledgered gate <code>failed</code> honestly). Chain <code>b9e8387c</code> → <code>c52524ef</code> (merge <code>0e24f2bd</code>): stale-detach admission now binds to the same static-Cypher upstream-presence predicate reconciliation uses — a present-upstream stale mirror is a signed refusal, only absent-or-removed-upstream rows detach, and a regression proves post-detach reconciliation revives nothing (stale_marked=0, revived=0, relinked=0). Review found and drove closed one HIGH (revival hazard). Fresh signed preview <code>50f3c01c…</code>: 76 sources = 36 retarget / 39 dedup / 1 stale detach, 0 refused. Next node: regenerate the preview post-merge and apply the matching hash.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
