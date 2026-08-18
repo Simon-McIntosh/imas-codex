@@ -39,7 +39,7 @@
   (<code>dd_resolutions._verify_graph_evidence</code>) succeeded for 10/10 candidate rows with
   zero approvals executed. Both packaged YAML resources stayed byte-identical
   (candidates <code>c6ee52ae…</code>, active manifest <code>f8718114…</code>).
-  Receipt: <code>/tmp/reckon-s8-evidence/ddgap-perpath/receipt.json</code>
+  Receipt: <code>docs/evidence/sn-dd-gaps/receipt.json</code>
   SHA-256 <code>3231a7ac…</code>.</p>
 
   <h2 id="u19-disposition">U19 path-set conflict — per-path disposition</h2>
@@ -62,7 +62,7 @@
   the disposition stands. Clearing U19 for approval requires: candidate expansion 6 → 14
   (digest change → independent review), 14 exact per-path facts, renewed lead delegation
   on the new digest, and 14 per-path approvals.
-  Brief: <code>/tmp/reckon-s8-evidence/u19-conflict/brief.md</code> SHA-256 <code>17d834d7…</code>.</p>
+  Brief: <code>docs/evidence/sn-dd-gaps/brief.md</code> SHA-256 <code>17d834d7…</code>.</p>
 
   <h2 id="override-inventory">DD-override inventory — the cutover retirement checklist</h2>
   <p><strong>Landed 2026-08-17</strong> (run <code>r-…-dd-override-inventory</code>, read-only).
@@ -83,7 +83,7 @@
   <code>correct_in_graph</code> rewrites until consumers route through
   <code>ResolvedDDContext</code>; cutover then disables the legacy correction for exactly
   those five rows, restores raw DD 4.1.1 values/edges, and proves raw/effective provenance.
-  Report: <code>/tmp/reckon-s8-evidence/dd-override-inventory/report.md</code>
+  Report: <code>docs/evidence/sn-dd-gaps/report.md</code>
   SHA-256 <code>30932d25…</code>.</p>
 
   <h2 id="delegated-approvals-32">Delegated approval pass — 32 activations</h2>
@@ -103,7 +103,7 @@
   empty temporary authorities for mutation tests and to assert the governed packaged state.
   Gate evidence: focused suite 76/76; full Standard Names suite at the merge —
   <strong>6539 passed / 10 skipped / 0 failed</strong>. Decision table:
-  <code>/tmp/reckon-s8-evidence/ddres-approvals-2/decisions.md</code> SHA-256
+  <code>docs/evidence/sn-dd-gaps/decisions.md</code> SHA-256
   <code>372f856b…</code>. Consumers are not yet cut over: the 37 records remain stored
   authority until the cutover node routes the pipeline through the resolver.</p>
 
@@ -136,7 +136,7 @@
   <code>source_dd_resolution_converged_ids</code>,
   <code>source_dd_resolution_manifest_digest</code>, <code>source_dd_resolution_marker</code>)
   declared and absent from the undeclared-property failure. Coverage table:
-  <code>/tmp/reckon-s8-evidence/ddres-provenance-schema/consumer-coverage.md</code> — 8 boundaries
+  <code>docs/evidence/sn-dd-gaps/consumer-coverage.md</code> — 8 boundaries
   verified by asserting public-entry tests, 7 unsupported claims explicitly deferred rather than
   quietly dropped.</p>
   <p><strong>Two process findings recorded rather than smoothed over.</strong> First, the graph
