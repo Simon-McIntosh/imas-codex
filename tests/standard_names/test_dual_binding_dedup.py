@@ -184,6 +184,149 @@ def test_scalar_disagreement_is_signed_refusal(
 
 
 @pytest.mark.graph
+def test_missing_backing_projection_is_signed_refusal(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "missing-projection-refusal")
+    ids = _seed(client, "missingprojection")
+    try:
+        client.query(
+            "MATCH (backing:IMASNode {id: $path})"
+            "-[projection:HAS_STANDARD_NAME]->"
+            "(:StandardName {id: $remove}) DELETE projection",
+            **ids,
+        )
+        preview = deduplicate_scalar_selected_sources(
+            [ids["source"]], reason="every deletion needs backing authority", gc=client
+        )
+        assert preview["outcome"] == "refused"
+        assert preview["refusals"] == [
+            {
+                "source_id": ids["source"],
+                "reason": "non-selected binding has no signed backing projection",
+            }
+        ]
+        assert client.query(
+            "MATCH (:StandardNameSource {id: $source})"
+            "-[binding:PRODUCED_NAME]->(:StandardName) "
+            "RETURN count(binding) AS bindings",
+            **ids,
+        ) == [{"bindings": 2}]
+    finally:
+        _cleanup(client, ids)
+
+
+@pytest.mark.graph
+def test_duplicate_backing_projection_is_signed_refusal(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "duplicate-projection-refusal")
+    ids = _seed(client, "duplicateprojection")
+    try:
+        client.query(
+            "MATCH (backing:IMASNode {id: $path}), "
+            "(remove:StandardName {id: $remove}) "
+            "CREATE (backing)-[:HAS_STANDARD_NAME]->(remove)",
+            **ids,
+        )
+        preview = deduplicate_scalar_selected_sources(
+            [ids["source"]], reason="backing authority must be unique", gc=client
+        )
+        assert preview["outcome"] == "refused"
+        assert preview["refusals"] == [
+            {
+                "source_id": ids["source"],
+                "reason": (
+                    "non-selected binding has duplicate signed backing projections"
+                ),
+            }
+        ]
+        assert client.query(
+            "MATCH (:IMASNode {id: $path})"
+            "-[projection:HAS_STANDARD_NAME]->"
+            "(:StandardName {id: $remove}) "
+            "RETURN count(projection) AS projections",
+            **ids,
+        ) == [{"projections": 2}]
+    finally:
+        _cleanup(client, ids)
+
+
+@pytest.mark.graph
+def test_signed_zero_projection_exclusion_allows_exact_cohort_apply(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "signed-projection-exclusion")
+    admitted = _seed(client, "admittedsource")
+    excluded = _seed(client, "excludedsource")
+    preview = None
+    exclusion_reason = "backing projection authority is absent; preserve this row"
+    try:
+        client.query(
+            "MATCH (backing:IMASNode {id: $path})"
+            "-[projection:HAS_STANDARD_NAME]->"
+            "(:StandardName {id: $remove}) DELETE projection",
+            **excluded,
+        )
+        source_ids = [admitted["source"], excluded["source"]]
+        exclusions = {excluded["source"]: exclusion_reason}
+        preview = deduplicate_scalar_selected_sources(
+            source_ids,
+            reason="deduplicate only rows with complete backing authority",
+            excluded_source_reasons=exclusions,
+            gc=client,
+        )
+        assert preview["outcome"] == "would_apply"
+        assert preview["counts"]["admitted"] == 1
+        assert preview["counts"]["refused"] == 1
+        assert preview["refusals"] == [
+            {
+                "source_id": excluded["source"],
+                "reason": exclusion_reason,
+                "classification": "explicit_exclusion",
+                "authority_reason": (
+                    "non-selected binding has no signed backing projection"
+                ),
+            }
+        ]
+
+        applied = deduplicate_scalar_selected_sources(
+            source_ids,
+            reason="deduplicate only rows with complete backing authority",
+            excluded_source_reasons=exclusions,
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+        assert applied["outcome"] == "applied"
+        assert applied["sources_deduplicated"] == 1
+        assert client.query(
+            "UNWIND $ids AS source_id "
+            "MATCH (source:StandardNameSource {id: source_id}) "
+            "RETURN source_id, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } AS bindings "
+            "ORDER BY source_id",
+            ids=source_ids,
+        ) == [
+            {"source_id": admitted["source"], "bindings": 1},
+            {"source_id": excluded["source"], "bindings": 2},
+        ]
+        replay = deduplicate_scalar_selected_sources(
+            source_ids,
+            reason="deduplicate only rows with complete backing authority",
+            excluded_source_reasons=exclusions,
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+        assert replay["outcome"] == "already_applied"
+        assert replay["changed"] == 0
+    finally:
+        _cleanup(client, admitted, (preview or {}).get("manifest_sha256"))
+        _cleanup(client, excluded)
+
+
+@pytest.mark.graph
 def test_replay_is_measured_write_free(disposable_neo4j: tuple[str, str]) -> None:
     client = _client(disposable_neo4j, "source-dedup-replay")
     ids = _seed(client, "dedupreplay")
