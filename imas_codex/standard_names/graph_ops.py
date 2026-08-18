@@ -11450,6 +11450,24 @@ def promote_stranded_reviewed(
     return promoted
 
 
+def _standard_name_source_upstream_present_cypher(source_variable: str) -> str:
+    """Return the reconciliation predicate for a source's live upstream entity."""
+    if source_variable not in {"sns", "source"}:
+        raise ValueError("unsupported StandardNameSource Cypher variable")
+    return """
+        CASE
+          WHEN __SOURCE__.source_type = 'dd' THEN EXISTS {
+            MATCH (upstream:IMASNode {id: __SOURCE__.source_id})
+            WHERE coalesce(upstream.lifecycle_status, '') <> 'removed'
+          }
+          WHEN __SOURCE__.source_type = 'signals' THEN EXISTS {
+            MATCH (:FacilitySignal {id: __SOURCE__.source_id})
+          }
+          ELSE false
+        END
+        """.replace("__SOURCE__", source_variable)
+
+
 def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
     """Post-rebuild reconciliation of StandardNameSource nodes.
 
@@ -11459,6 +11477,7 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
 
     Returns dict with counts: {relinked, stale_marked, revived}.
     """
+    upstream_present = _standard_name_source_upstream_present_cypher("sns")
     with GraphClient() as gc:
         if source_type == "dd":
             # Find stale: sources whose DD path no longer exists, or whose
@@ -11470,8 +11489,11 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
                     MATCH (sns:StandardNameSource {source_type: 'dd'})
                     WHERE (
                         NOT (sns)-[:FROM_DD_PATH]->(:IMASNode)
-                        OR EXISTS { MATCH (l:IMASNode {id: sns.source_id})
-                                    WHERE l.lifecycle_status = 'removed' }
+                        OR NOT (
+                    """
+                    + upstream_present
+                    + """
+                        )
                     )
                     AND NOT (sns.status = 'stale')
                     RETURN sns.id AS id
@@ -11484,7 +11506,12 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
             # Revive: stale sources whose DD path now exists again
             revived = gc.query(
                 """
-                MATCH (sns:StandardNameSource {source_type: 'dd', status: 'stale'})
+                MATCH (sns:StandardNameSource
+                       {source_type: 'dd', status: 'stale'})
+                WHERE
+                """
+                + upstream_present
+                + """
                 MATCH (imas:IMASNode {id: sns.source_id})
                 WHERE coalesce(imas.lifecycle_status, '') <> 'removed'
                 SET sns.status = 'extracted',
@@ -11514,7 +11541,12 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
                 gc.query(
                     """
                     MATCH (sns:StandardNameSource {source_type: 'signals'})
-                    WHERE NOT (sns)-[:FROM_SIGNAL]->(:FacilitySignal)
+                    WHERE (NOT (sns)-[:FROM_SIGNAL]->(:FacilitySignal)
+                           OR NOT (
+                    """
+                    + upstream_present
+                    + """
+                           ))
                     AND NOT (sns.status = 'stale')
                     RETURN sns.id AS id
                     """
@@ -11525,7 +11557,12 @@ def reconcile_standard_name_sources(source_type: str = "dd") -> dict:
 
             revived = gc.query(
                 """
-                MATCH (sns:StandardNameSource {source_type: 'signals', status: 'stale'})
+                MATCH (sns:StandardNameSource
+                       {source_type: 'signals', status: 'stale'})
+                WHERE
+                """
+                + upstream_present
+                + """
                 MATCH (sig:FacilitySignal {id: sns.source_id})
                 SET sns.status = 'extracted',
                     sns.claimed_at = null,
@@ -17552,7 +17589,7 @@ def _ancestor_supersession_authority(
     old_id: str,
     ancestor_id: str,
     reason: str,
-) -> tuple[dict[str, Any], list[str], list[str], list[str]]:
+) -> tuple[dict[str, Any], list[str], list[str], list[str], list[str]]:
     rows = query_handle.query(
         """
         OPTIONAL MATCH (old:StandardName {id: $old_id})
@@ -17597,12 +17634,16 @@ def _ancestor_supersession_authority(
             f"name {old_id!r} is already superseded by a different manifest"
         )
 
+    upstream_present = _standard_name_source_upstream_present_cypher("source")
     source_rows = query_handle.query(
         """
         MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->
               (:StandardName {id: $old_id})
         RETURN source.id AS id,
                properties(source) AS properties,
+        """
+        + upstream_present
+        + """ AS upstream_present,
                [(source)-[:PRODUCED_NAME]->(bound:StandardName) | bound.id]
                  AS bindings,
                [(source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing) |
@@ -17621,6 +17662,7 @@ def _ancestor_supersession_authority(
     retarget_ids: list[str] = []
     deduplicate_ids: list[str] = []
     stale_detach_ids: list[str] = []
+    stale_refusal_ids: list[str] = []
     for raw in source_rows:
         source = dict(raw)
         source["bindings"] = sorted(set(source.get("bindings") or []))
@@ -17642,16 +17684,19 @@ def _ancestor_supersession_authority(
         properties = source.get("properties") or {}
         scalar = properties.get("produced_sn_id")
         if properties.get("status") == "stale":
-            allowed_targets = {old_id, ancestor_id}
-            if not set(source["bindings"]).issubset(allowed_targets) or (
-                scalar is not None and scalar not in allowed_targets
-            ):
-                raise SupersedeIntoAncestorConflict(
-                    "stale source set cannot be detached exactly: "
-                    f"{source_id!r} has bindings={source['bindings']!r}, "
-                    f"scalar={scalar!r}"
-                )
-            stale_detach_ids.append(source_id)
+            if source.get("upstream_present"):
+                stale_refusal_ids.append(source_id)
+            else:
+                allowed_targets = {old_id, ancestor_id}
+                if not set(source["bindings"]).issubset(allowed_targets) or (
+                    scalar is not None and scalar not in allowed_targets
+                ):
+                    raise SupersedeIntoAncestorConflict(
+                        "stale source set cannot be detached exactly: "
+                        f"{source_id!r} has bindings={source['bindings']!r}, "
+                        f"scalar={scalar!r}"
+                    )
+                stale_detach_ids.append(source_id)
         elif source["bindings"] == [old_id] and scalar == old_id:
             retarget_ids.append(source_id)
         elif (
@@ -17701,9 +17746,16 @@ def _ancestor_supersession_authority(
             "retarget_source_ids": retarget_ids,
             "deduplicate_source_ids": deduplicate_ids,
             "detach_stale_source_ids": stale_detach_ids,
+            "refuse_present_upstream_stale_source_ids": stale_refusal_ids,
         },
     }
-    return manifest, retarget_ids, deduplicate_ids, stale_detach_ids
+    return (
+        manifest,
+        retarget_ids,
+        deduplicate_ids,
+        stale_detach_ids,
+        stale_refusal_ids,
+    )
 
 
 def _lock_ancestor_supersession_authority(
@@ -17949,16 +18001,54 @@ def supersede_into_ancestor(
                         ancestor_id=ancestor_id,
                     )
 
-                manifest, retarget_ids, deduplicate_ids, stale_detach_ids = (
-                    _ancestor_supersession_authority(
-                        query_handle, old_id, ancestor_id, reason
-                    )
+                (
+                    manifest,
+                    retarget_ids,
+                    deduplicate_ids,
+                    stale_detach_ids,
+                    stale_refusal_ids,
+                ) = _ancestor_supersession_authority(
+                    query_handle, old_id, ancestor_id, reason
                 )
                 computed_hash = _authority_payload_hash(manifest)
                 if apply and manifest_sha256 != computed_hash:
                     raise SupersedeIntoAncestorConflict(
                         "fresh ancestor supersession manifest does not match signed hash"
                     )
+                all_source_ids = (
+                    retarget_ids
+                    + deduplicate_ids
+                    + stale_detach_ids
+                    + stale_refusal_ids
+                )
+                counts = {
+                    "sources": len(all_source_ids),
+                    "retarget": len(retarget_ids),
+                    "deduplicate": len(deduplicate_ids),
+                    "stale_detach": len(stale_detach_ids),
+                    "stale_refused": len(stale_refusal_ids),
+                }
+                if stale_refusal_ids:
+                    transaction.rollback()
+                    return {
+                        "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": [
+                            {
+                                "source_id": source_id,
+                                "reason": (
+                                    "stale source has a present upstream entity"
+                                ),
+                            }
+                            for source_id in stale_refusal_ids
+                        ],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
                 if apply:
                     _lock_ancestor_supersession_authority(query_handle, manifest)
                     try:
@@ -17967,6 +18057,7 @@ def supersede_into_ancestor(
                             locked_retarget,
                             locked_deduplicate,
                             locked_stale_detach,
+                            locked_stale_refusal,
                         ) = _ancestor_supersession_authority(
                             query_handle, old_id, ancestor_id, reason
                         )
@@ -17982,9 +18073,9 @@ def supersede_into_ancestor(
                     retarget_ids = locked_retarget
                     deduplicate_ids = locked_deduplicate
                     stale_detach_ids = locked_stale_detach
+                    stale_refusal_ids = locked_stale_refusal
 
                 live_source_ids = retarget_ids + deduplicate_ids
-                source_ids = live_source_ids + stale_detach_ids
                 if live_source_ids:
                     from imas_codex.standard_names.attachment_audit import (
                         guard_source_pairings,
@@ -18015,12 +18106,7 @@ def supersede_into_ancestor(
                         "dry_run": True,
                         "changed": 0,
                         "would_change": 1,
-                        "counts": {
-                            "sources": len(source_ids),
-                            "retarget": len(retarget_ids),
-                            "deduplicate": len(deduplicate_ids),
-                            "stale_detach": len(stale_detach_ids),
-                        },
+                        "counts": counts,
                         "manifest": manifest,
                         "manifest_sha256": computed_hash,
                     }
@@ -18213,12 +18299,7 @@ def supersede_into_ancestor(
                     "sources_retargeted": len(retarget_ids),
                     "sources_deduplicated": len(deduplicate_ids),
                     "sources_stale_detached": stale_detached,
-                    "counts": {
-                        "sources": len(source_ids),
-                        "retarget": len(retarget_ids),
-                        "deduplicate": len(deduplicate_ids),
-                        "stale_detach": len(stale_detach_ids),
-                    },
+                    "counts": counts,
                     "manifest": manifest,
                     "manifest_sha256": computed_hash,
                     "change_id": finalized[0]["change_id"],

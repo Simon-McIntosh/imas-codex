@@ -16,15 +16,19 @@ Sources bound only to the descendant are re-validated against the ancestor and
 moved by `retarget_standard_name_sources`. Sources already bound to both names
 with their scalar selecting the ancestor are re-validated and lose only the
 redundant descendant binding under an exact compare-and-set. Other source
-shapes are refused. A source whose upstream entity is absent has status `stale`
-and is not a live producer: preview signs it under `detach_stale_source_ids`
-rather than migration or deduplication. Apply keeps that lifecycle status while
-atomically removing its live-name bindings, scalar mirror, and the matching
-signed backing projections. Stale sources are therefore excluded from ancestor
-attachment re-validation. Apply requires the preview digest; a deterministic
-ledger record makes replay return `already_applied` with zero writes. Before
-apply, the transaction locks every signed source, backing node, and projection
-relationship and then recomputes the complete authority hash under those locks.
+shapes are refused. Stale status alone is not detach authority: source
+reconciliation revives a stale row when its source-type-specific DD or signal
+entity is present. Both reconciliation and ancestor supersession therefore use
+one shared upstream-presence predicate. A present-upstream stale row is recorded
+under `refuse_present_upstream_stale_source_ids` in a hash-bearing refusal. Only
+a stale row whose upstream entity is absent or removed enters
+`detach_stale_source_ids`. Apply keeps that lifecycle status while atomically
+removing its live-name bindings, scalar mirror, and matching signed backing
+projections. Stale sources are excluded from ancestor attachment re-validation.
+Apply requires the preview digest; a deterministic ledger record makes replay
+return `already_applied` with zero writes. Before apply, the transaction locks
+every signed source, backing node, and projection relationship and then
+recomputes the complete authority hash under those locks.
 
 ## Transactional regression evidence
 
@@ -87,24 +91,32 @@ envelope:
 
 The live apply attempt exposed one source that preview had silently counted as
 a retarget even though the sanctioned retarget primitive refuses stale status:
-`dd:waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity`. Source
-reconciliation defines stale as an absent or removed upstream entity and
-explicitly excludes that state from live-binding realignment. The appropriate
-fold disposition is therefore signed detachment, not migration to another live
-name and not revival.
+`dd:waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity`. The
+follow-up review identified that stale is also a recoverable mirror state: when
+the upstream entity is present, reconciliation revives the row to `extracted`.
+Detachment is therefore authorized only by absent-or-removed upstream evidence,
+not by the lifecycle status alone.
 
 The disposable-Neo4j red proof failed on the missing action class. With the
 contract implemented, the complete file reports:
 
 ```text
-..........                                                               [100%]
-10 passed in 6.66s
+...........                                                              [100%]
+11 passed in 6.86s
 ```
+
+The two stale-source regressions prove both sides of that predicate. A
+present-upstream stale row produces a signed refusal and remains unchanged. A
+genuinely absent-upstream row detaches; subsequent source reconciliation on the
+same disposable graph reports `revived=0`, leaves exactly one stale source row,
+and creates no live binding.
 
 The regenerated production dry-run remained read-only: the
 `StandardNameChange` census stayed 7,149 before and after. Its fresh manifest is
-`dea05f02eec2255c397c2f34ee8b3c891e5e3a6904e97b729820c36e86c57cbb` and
-partitions the 76 signed sources as 36 retarget, 39 deduplicate, and one stale
-detach. The stale class contains exactly
+`50f3c01c8dbc6ee6a1da2f58544d78a773b93c4a4a05fa9032f00865936198f8` and
+partitions the 76 signed sources as 36 retarget, 39 deduplicate, one stale
+detach, and zero stale refusals. The live stale row is therefore adjudicated as
+genuinely absent-or-removed upstream and remains the sole member of
+`detach_stale_source_ids`:
 `dd:waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity`. No live
 apply was invoked.
