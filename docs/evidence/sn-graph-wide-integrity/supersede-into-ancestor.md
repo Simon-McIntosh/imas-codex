@@ -16,9 +16,14 @@ Sources bound only to the descendant are re-validated against the ancestor and
 moved by `retarget_standard_name_sources`. Sources already bound to both names
 with their scalar selecting the ancestor are re-validated and lose only the
 redundant descendant binding under an exact compare-and-set. Other source
-shapes are refused. Apply requires the preview digest; a deterministic ledger
-record makes replay return `already_applied` with zero writes. Before apply,
-the transaction locks every signed source, backing node, and projection
+shapes are refused. A source whose upstream entity is absent has status `stale`
+and is not a live producer: preview signs it under `detach_stale_source_ids`
+rather than migration or deduplication. Apply keeps that lifecycle status while
+atomically removing its live-name bindings, scalar mirror, and the matching
+signed backing projections. Stale sources are therefore excluded from ancestor
+attachment re-validation. Apply requires the preview digest; a deterministic
+ledger record makes replay return `already_applied` with zero writes. Before
+apply, the transaction locks every signed source, backing node, and projection
 relationship and then recomputes the complete authority hash under those locks.
 
 ## Transactional regression evidence
@@ -32,13 +37,13 @@ type did not yet exist. The final run used an isolated, auth-disabled Neo4j
 9 passed in 6.90s
 ```
 
-The nine tests cover a direct ancestor, a multi-hop ancestor with zero-write
-idempotent replay, non-ancestor refusal, self-target refusal, directed-cycle
-refusal, attachment re-validation refusal with rollback, scalar-disagreement
-refusal, exact deduplication of a source already bound to both names, and a
-concurrent source-scalar plus backing-projection drift between hash computation
-and locking. The direct and multi-hop assertions prove the original lineage
-remains and no reverse edge is created.
+The original nine tests cover a direct ancestor, a multi-hop ancestor with
+zero-write idempotent replay, non-ancestor refusal, self-target refusal,
+directed-cycle refusal, attachment re-validation refusal with rollback,
+scalar-disagreement refusal, exact deduplication of a source already bound to
+both names, and concurrent source-scalar plus backing-projection drift between
+hash computation and locking. The direct and multi-hop assertions prove the
+original lineage remains and no reverse edge is created.
 
 Replay is proven write-free by canonical byte equality over every participant
 node's labels and properties and every incident relationship's identity, type,
@@ -77,3 +82,29 @@ envelope:
 - `corrective-red.log`
 - `corrective-final-test.log`
 - `live-dry-run-corrective.log`
+
+## Stale-source lifecycle contract
+
+The live apply attempt exposed one source that preview had silently counted as
+a retarget even though the sanctioned retarget primitive refuses stale status:
+`dd:waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity`. Source
+reconciliation defines stale as an absent or removed upstream entity and
+explicitly excludes that state from live-binding realignment. The appropriate
+fold disposition is therefore signed detachment, not migration to another live
+name and not revival.
+
+The disposable-Neo4j red proof failed on the missing action class. With the
+contract implemented, the complete file reports:
+
+```text
+..........                                                               [100%]
+10 passed in 6.66s
+```
+
+The regenerated production dry-run remained read-only: the
+`StandardNameChange` census stayed 7,149 before and after. Its fresh manifest is
+`dea05f02eec2255c397c2f34ee8b3c891e5e3a6904e97b729820c36e86c57cbb` and
+partitions the 76 signed sources as 36 retarget, 39 deduplicate, and one stale
+detach. The stale class contains exactly
+`dd:waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity`. No live
+apply was invoked.

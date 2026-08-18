@@ -17552,7 +17552,7 @@ def _ancestor_supersession_authority(
     old_id: str,
     ancestor_id: str,
     reason: str,
-) -> tuple[dict[str, Any], list[str], list[str]]:
+) -> tuple[dict[str, Any], list[str], list[str], list[str]]:
     rows = query_handle.query(
         """
         OPTIONAL MATCH (old:StandardName {id: $old_id})
@@ -17620,6 +17620,7 @@ def _ancestor_supersession_authority(
     sources: list[dict[str, Any]] = []
     retarget_ids: list[str] = []
     deduplicate_ids: list[str] = []
+    stale_detach_ids: list[str] = []
     for raw in source_rows:
         source = dict(raw)
         source["bindings"] = sorted(set(source.get("bindings") or []))
@@ -17638,8 +17639,20 @@ def _ancestor_supersession_authority(
             key=lambda backing: backing["element_id"],
         )
         source_id = source["id"]
-        scalar = (source.get("properties") or {}).get("produced_sn_id")
-        if source["bindings"] == [old_id] and scalar == old_id:
+        properties = source.get("properties") or {}
+        scalar = properties.get("produced_sn_id")
+        if properties.get("status") == "stale":
+            allowed_targets = {old_id, ancestor_id}
+            if not set(source["bindings"]).issubset(allowed_targets) or (
+                scalar is not None and scalar not in allowed_targets
+            ):
+                raise SupersedeIntoAncestorConflict(
+                    "stale source set cannot be detached exactly: "
+                    f"{source_id!r} has bindings={source['bindings']!r}, "
+                    f"scalar={scalar!r}"
+                )
+            stale_detach_ids.append(source_id)
+        elif source["bindings"] == [old_id] and scalar == old_id:
             retarget_ids.append(source_id)
         elif (
             source["bindings"] == sorted([old_id, ancestor_id])
@@ -17687,9 +17700,10 @@ def _ancestor_supersession_authority(
         "actions": {
             "retarget_source_ids": retarget_ids,
             "deduplicate_source_ids": deduplicate_ids,
+            "detach_stale_source_ids": stale_detach_ids,
         },
     }
-    return manifest, retarget_ids, deduplicate_ids
+    return manifest, retarget_ids, deduplicate_ids, stale_detach_ids
 
 
 def _lock_ancestor_supersession_authority(
@@ -17761,6 +17775,82 @@ def _lock_ancestor_supersession_authority(
                 "signed backing projection set changed while acquiring "
                 "participant locks"
             )
+
+
+def _detach_stale_ancestor_sources(
+    query_handle: _TransactionQuery,
+    manifest: dict[str, Any],
+    stale_detach_ids: list[str],
+) -> int:
+    """Remove live-name bindings from signed upstream-stale sources."""
+    if not stale_detach_ids:
+        return 0
+    stale_id_set = set(stale_detach_ids)
+    rows = [
+        {
+            "source_id": source["id"],
+            "expected_bindings": source["bindings"],
+            "expected_scalar": (source.get("properties") or {}).get("produced_sn_id"),
+            "projection_element_ids": sorted(
+                projection["element_id"]
+                for backing in source["backings"]
+                for projection in backing["projections"]
+                if projection["target_id"] in source["bindings"]
+            ),
+        }
+        for source in manifest["participants"]["sources"]
+        if source["id"] in stale_id_set
+    ]
+    detached = query_handle.query(
+        """
+        UNWIND $rows AS expected
+        MATCH (source:StandardNameSource {id: expected.source_id})
+        WHERE source.status = 'stale'
+          AND source.claimed_at IS NULL
+          AND source.claim_token IS NULL
+          AND ((expected.expected_scalar IS NULL
+                AND source.produced_sn_id IS NULL)
+               OR source.produced_sn_id = expected.expected_scalar)
+        MATCH (source)-[binding:PRODUCED_NAME]->(bound:StandardName)
+        WITH expected, source, collect(binding) AS bindings,
+             collect(DISTINCT bound.id) AS bound_ids
+        WHERE size(bound_ids) = size(expected.expected_bindings)
+          AND all(id IN bound_ids WHERE id IN expected.expected_bindings)
+          AND all(id IN expected.expected_bindings WHERE id IN bound_ids)
+        FOREACH (binding IN bindings | DELETE binding)
+        SET source.produced_sn_id = null
+        RETURN collect(DISTINCT source.id) AS source_ids
+        """,
+        rows=rows,
+    )
+    actual_ids = sorted(set(detached[0].get("source_ids") or []) if detached else set())
+    if actual_ids != stale_detach_ids:
+        raise SupersedeIntoAncestorConflict(
+            "stale source binding set changed during ancestor fold"
+        )
+
+    projection_ids = sorted(
+        projection_id for row in rows for projection_id in row["projection_element_ids"]
+    )
+    if projection_ids:
+        deleted = query_handle.query(
+            """
+            UNWIND $projection_ids AS projection_id
+            MATCH ()-[projection:HAS_STANDARD_NAME]->()
+            WHERE elementId(projection) = projection_id
+            DELETE projection
+            RETURN collect(projection_id) AS projection_ids
+            """,
+            projection_ids=projection_ids,
+        )
+        actual_projection_ids = sorted(
+            set(deleted[0].get("projection_ids") or []) if deleted else set()
+        )
+        if actual_projection_ids != projection_ids:
+            raise SupersedeIntoAncestorConflict(
+                "stale source projection set changed during ancestor fold"
+            )
+    return len(actual_ids)
 
 
 @retry_on_deadlock()
@@ -17859,7 +17949,7 @@ def supersede_into_ancestor(
                         ancestor_id=ancestor_id,
                     )
 
-                manifest, retarget_ids, deduplicate_ids = (
+                manifest, retarget_ids, deduplicate_ids, stale_detach_ids = (
                     _ancestor_supersession_authority(
                         query_handle, old_id, ancestor_id, reason
                     )
@@ -17872,10 +17962,13 @@ def supersede_into_ancestor(
                 if apply:
                     _lock_ancestor_supersession_authority(query_handle, manifest)
                     try:
-                        locked_manifest, locked_retarget, locked_deduplicate = (
-                            _ancestor_supersession_authority(
-                                query_handle, old_id, ancestor_id, reason
-                            )
+                        (
+                            locked_manifest,
+                            locked_retarget,
+                            locked_deduplicate,
+                            locked_stale_detach,
+                        ) = _ancestor_supersession_authority(
+                            query_handle, old_id, ancestor_id, reason
                         )
                     except SupersedeIntoAncestorConflict as exc:
                         raise SupersedeIntoAncestorConflict(
@@ -17888,18 +17981,20 @@ def supersede_into_ancestor(
                     manifest = locked_manifest
                     retarget_ids = locked_retarget
                     deduplicate_ids = locked_deduplicate
+                    stale_detach_ids = locked_stale_detach
 
-                source_ids = retarget_ids + deduplicate_ids
-                if source_ids:
+                live_source_ids = retarget_ids + deduplicate_ids
+                source_ids = live_source_ids + stale_detach_ids
+                if live_source_ids:
                     from imas_codex.standard_names.attachment_audit import (
                         guard_source_pairings,
                     )
 
                     guarded = guard_source_pairings(
-                        query_handle, ancestor_id, source_ids
+                        query_handle, ancestor_id, live_source_ids
                     )
                     if guarded.rejected or set(guarded.accepted_source_ids) != set(
-                        source_ids
+                        live_source_ids
                     ):
                         details = (
                             ", ".join(
@@ -17924,10 +18019,15 @@ def supersede_into_ancestor(
                             "sources": len(source_ids),
                             "retarget": len(retarget_ids),
                             "deduplicate": len(deduplicate_ids),
+                            "stale_detach": len(stale_detach_ids),
                         },
                         "manifest": manifest,
                         "manifest_sha256": computed_hash,
                     }
+
+                stale_detached = _detach_stale_ancestor_sources(
+                    query_handle, manifest, stale_detach_ids
+                )
 
                 if retarget_ids:
                     from imas_codex.standard_names.provenance_lifecycle import (
@@ -18112,10 +18212,12 @@ def supersede_into_ancestor(
                     "changed": 1,
                     "sources_retargeted": len(retarget_ids),
                     "sources_deduplicated": len(deduplicate_ids),
+                    "sources_stale_detached": stale_detached,
                     "counts": {
                         "sources": len(source_ids),
                         "retarget": len(retarget_ids),
                         "deduplicate": len(deduplicate_ids),
+                        "stale_detach": len(stale_detach_ids),
                     },
                     "manifest": manifest,
                     "manifest_sha256": computed_hash,

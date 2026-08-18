@@ -143,7 +143,12 @@ def test_direct_ancestor_fold_preserves_lineage_and_retargets_source(
             ids["old"], ids["ancestor"], reason="same physical quantity", gc=client
         )
         assert preview["changed"] == 0
-        assert preview["counts"] == {"sources": 1, "retarget": 1, "deduplicate": 0}
+        assert preview["counts"] == {
+            "sources": 1,
+            "retarget": 1,
+            "deduplicate": 0,
+            "stale_detach": 0,
+        }
 
         applied = supersede_into_ancestor(
             ids["old"],
@@ -169,6 +174,70 @@ def test_direct_ancestor_fold_preserves_lineage_and_retargets_source(
                 "old_paths": [],
                 "ancestor_paths": [f"dd:{ids['path']}"],
                 "reverse": 0,
+            }
+        ]
+    finally:
+        _cleanup(client, ids, (preview or {}).get("manifest_sha256"))
+
+
+@pytest.mark.graph
+def test_stale_source_is_signed_and_detached_without_migration(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "stale-source-detachment")
+    ids = _seed(client, "stalesource")
+    preview = None
+    try:
+        client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "SET source.status = 'stale'",
+            **ids,
+        )
+        preview = supersede_into_ancestor(
+            ids["old"], ids["ancestor"], reason="same physical quantity", gc=client
+        )
+        assert preview["manifest"]["actions"] == {
+            "retarget_source_ids": [],
+            "deduplicate_source_ids": [],
+            "detach_stale_source_ids": [ids["source"]],
+        }
+        assert preview["counts"] == {
+            "sources": 1,
+            "retarget": 0,
+            "deduplicate": 0,
+            "stale_detach": 1,
+        }
+
+        applied = supersede_into_ancestor(
+            ids["old"],
+            ids["ancestor"],
+            reason="same physical quantity",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+
+        assert applied["sources_stale_detached"] == 1
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source}), "
+            "(old:StandardName {id: $old}), "
+            "(ancestor:StandardName {id: $ancestor}), "
+            "(dd:IMASNode {id: $path}) "
+            "RETURN source.status AS status, source.produced_sn_id AS scalar, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } AS bindings, "
+            "COUNT { (dd)-[:HAS_STANDARD_NAME]->(:StandardName) } AS projections, "
+            "old.name_stage AS old_stage, old.source_paths AS old_paths, "
+            "ancestor.source_paths AS ancestor_paths",
+            **ids,
+        ) == [
+            {
+                "status": "stale",
+                "scalar": None,
+                "bindings": 0,
+                "projections": 0,
+                "old_stage": "superseded",
+                "old_paths": [],
+                "ancestor_paths": [],
             }
         ]
     finally:
@@ -426,7 +495,12 @@ def test_dual_binding_is_deduplicated_without_reversing_lineage(
         preview = supersede_into_ancestor(
             ids["old"], ids["ancestor"], reason="same physical quantity", gc=client
         )
-        assert preview["counts"] == {"sources": 1, "retarget": 0, "deduplicate": 1}
+        assert preview["counts"] == {
+            "sources": 1,
+            "retarget": 0,
+            "deduplicate": 1,
+            "stale_detach": 0,
+        }
         supersede_into_ancestor(
             ids["old"],
             ids["ancestor"],
