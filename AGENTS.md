@@ -860,12 +860,54 @@ rg "ERROR|WARNING" ~/.local/share/imas-codex/logs/     # Find errors
 ## Testing
 
 ```bash
-uv sync --extra test          # Required in worktrees
+uv sync --extra test          # Required in worktrees — but see the inode warning below
 uv run pytest                 # Default markers: excludes slow, graph
 uv run pytest tests/standard_names/ -q  # SN tests (~3300 tests, ~90s)
 uv run pytest tests/path/to/test.py::test_function  # Specific test
 uv run pytest --cov=imas_codex  # With coverage
 ```
+
+### Never let a worktree build its own environment (measured incident)
+
+**A per-worktree Python environment costs 69,826 filesystem entries and 1.76 GiB
+on GPFS.** `uv sync` and a bare `uv run` both materialize the project
+environment at `<worktree>/.venv` when `UV_PROJECT_ENVIRONMENT` is unset, and an
+inherited `VIRTUAL_ENV` does NOT prevent it — uv warns that it does not match the
+project environment path and ignores it. One copy is ~39% of a 180,186-file
+storage alert; two independent copies are ~78%.
+
+Incident 2026-08-17: a fleet of full-suite gate workers each ran with a private
+`UV_PROJECT_ENVIRONMENT` + `UV_CACHE_DIR`, producing four ~58,937-inode bundles.
+Three of them account for 176,811 of a 180,186-file creation alert (98.1%).
+The SN pipeline itself was not involved: 6 dated CLI log files, zero LLM calls.
+
+Run project Python in a worktree through **one shared, lock-keyed dependency
+environment**, never a per-worktree copy:
+
+```bash
+# once per (uv.lock, python, platform) identity — not per worktree
+export UV_PROJECT_ENVIRONMENT=~/.cache/imas-codex-envs/<lock-key>
+uv sync --no-install-project --extra test
+
+# in every worker/worktree: reuse it, never re-sync
+UV_PROJECT_ENVIRONMENT=~/.cache/imas-codex-envs/<lock-key> \
+  PYTHONPATH="$PWD" uv run --no-sync pytest tests/standard_names/ -q
+```
+
+Never run concurrent `uv sync` against one shared editable install. `UV_CACHE_DIR`
+and `TMPDIR` are **not** substitutes — the first moves only the download/build
+cache (already shared at `~/.cache/uv`), the second moves conventional temp files;
+neither changes where the project environment lands.
+
+Redirect the incremental caches too, since each is retained until the whole
+worktree is removed: `MYPY_CACHE_DIR` (≥16,721 entries — 9% of that alert on its
+own), `RUFF_CACHE_DIR`, `PYTHONPYCACHEPREFIX` (or `PYTHONDONTWRITEBYTECODE=1`),
+and pytest via `-p no:cacheprovider` or `-o cache_dir=…`. Point them at
+node-local `/tmp`, never GPFS.
+
+Two retention chores this also surfaced: `~/.local/share/imas-codex/logs` has no
+directory-wide age cleanup (per-stem rotation only), and reckon run envelopes need
+a scheduled `crew gc --retention-days 30 --apply`.
 
 ### Test Tiers and Markers
 
