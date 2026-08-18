@@ -16,8 +16,8 @@
   <title>DD gaps | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-17">
-<meta name="plan-version" content="37">
+<meta name="plan-modified" content="2026-08-18">
+<meta name="plan-version" content="39">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -40,20 +40,26 @@
       Full record: <a href="/imas-codex/evidence/archive/sn-dd-gaps-landed">sn-dd-gaps landed evidence</a>.</p>
     </section>
 
-    <h2 id="s5">§5 — Remaining: stop the DD graph carrying corrected values</h2>
-    <p><strong>The DD graph must hold what the DD publishes. Nothing here mutates DD nodes.</strong>
-    Lead direction 2026-08-17: codex records DD defects so they can be fixed in upstream pull requests, and works
-    around them with its own temporary interpretation layer until those land — it does not rewrite the DD.
-    The typed resolution layer already satisfies that: an approved record is a read-time overlay in
-    <code>dd_resolutions.yaml</code> carrying <code>observed</code> (what DD 4.1.1 publishes) beside
-    <code>effective</code> (what codex interprets), bound to the upstream PR and retired when the DD catches up.</p>
-    <p>The residue is the <em>legacy</em> mechanism, which does the thing we do not want: the 11
-    <code>correct_in_graph</code> rules in <code>units/dd_unit_exceptions.yaml</code> write corrected units into the
-    DD graph at build time. Measured 2026-08-17, the graph therefore disagrees with published DD on exactly the paths
-    the new layer now covers — the five <code>equilibrium/time_slice/constraints/*/reconstructed</code> paths hold
-    <code>Pa</code>, <code>m^-3</code> and <code>A.m^-2</code> where DD 4.1.1 publishes <code>1</code>, and the
-    ionisation-potential paths hold <code>eV</code> where it publishes <code>e</code>. Those writes predate this
-    plan and are now redundant, since the read-time layer supplies the same effective values with provenance.</p>
+    <h2 id="s5">§5 — Remaining: the DD graph holds the correct value and links to what it bridges</h2>
+    <p><strong>Lead direction 2026-08-18, superseding the previous reading of this section.</strong> The DD graph
+    entries <em>should</em> carry the corrected values, so every consumer reading the graph gets usable physics without
+    an overlay. What each corrected node then owes is a link to a resolution node that records the defect it is
+    bridging: what the DD publishes, why that is wrong, and how it should be fixed upstream. Correctness in the graph,
+    provenance beside it — not raw-in-graph with correctness computed at read time.</p>
+    <p>Measured 2026-08-17, the graph already holds the corrected values for the covered paths: the five
+    <code>equilibrium/time_slice/constraints/*/reconstructed</code> paths hold <code>Pa</code>, <code>m^-3</code> and
+    <code>A.m^-2</code> where DD 4.1.1 publishes <code>1</code>, and the ionisation-potential paths hold
+    <code>eV</code> where it publishes <code>e</code>. That state is what we want; the 11 <code>correct_in_graph</code>
+    rules that produce it are the right behaviour rather than a defect to undo. What is missing is the link: nothing on
+    those DD nodes says a bridge is in force, which defect it covers, or which upstream change retires it. A reader of
+    the graph cannot currently tell a corrected node from an uncorrected one.</p>
+    <p><strong>The work is therefore additive provenance, not value repair.</strong> Give each corrected DD node an
+    explicit edge to a resolution node — the defect, the published value, the corrected value, the upstream reference,
+    and the DD version at which the bridge retires. Done-when: every corrected DD path is reachable from its resolution
+    node and vice versa, a reader can enumerate every bridge in force with one query, the published value is recoverable
+    from the resolution rather than lost, and a DD release that lands the upstream fix is detectable by comparison so the
+    bridge can retire. Sequence it after the storage decision in the open decision below, since that decides whether
+    resolutions live as graph nodes rather than as packaged files.</p>
     <p><strong>The fix is a re-derivation, not a repair.</strong> Per this repo's standing practice — fix data by
     reset-and-regenerate through the backing code, never by in-place Cypher patching — re-extract the DD graph with
     <code>correct_in_graph</code> disabled so every node carries its published declaration. Unit extraction is the
@@ -256,6 +262,16 @@
       </p>
     <p class="r-dec-rat">Locked by the lead as 2A/3A: do not hold the pipeline for upstream DD PRs. Reuse and extend the graph-owned DDGap mechanism so approved local resolutions are explicit, typed, exact, version-bound, traceable to the upstream solution, and retired when the DD catches up.</p>
     </div>
+<div class="r-dec" data-key="ddres-storage-and-gates" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">D-ddres-storage-and-gates — where do DD resolutions live, and which gates on them actually earn their cost?</p>
+    <p class="r-dec-ctx">The shipped design keeps DD defect facts in the graph but DD resolutions in a packaged YAML behind a governed approval ceremony: content-addressed approval receipts, recomputed evidence tokens, monotonic revisions, an expected-manifest-digest compare-and-set, an exclusive flock, and a per-candidate-digest lead delegation. The lead&#x27;s challenge (2026-08-18): a resolution record is reversible and recording a DD defect is routine engineering, so most of that ceremony looks like unnecessary authority, and the truth should live in the graph rather than across many files.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="graph-nodes-minimal-gates">Move resolutions into the graph as nodes linked to the corrected DD node and its defect fact, and reduce the gates to two: an edge to the DDGap observation proving the defect is real, plus an upstream reference or an explicit none-yet marker. Keep a plain who/when/why audit trail. Drop receipts, evidence tokens, revisions, digest CAS, flock, and per-digest delegation. (Recommended)</button>
+      <button class="r-opt" data-value="keep-file-and-ceremony">Keep the packaged YAML manifest and the full approval ceremony as shipped.</button>
+      <button class="r-opt" data-value="graph-nodes-keep-ceremony">Move to graph nodes but reproduce the receipt, token and revision ceremony on them.</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
 </section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -438,6 +454,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-retirement-landed-20260817" data-who="reckon-ship" data-when="2026-08-17T19:45:00+00:00">
     <div class="r-comment-body"><p><strong>Legacy authority retirement is LANDED and gate-proven; the session closes here at a clean boundary.</strong> Merge <code>d82764dd</code> integrates the chain <code>9d0f5ee6</code> → <code>b1411210</code> → <code>413b7c0e</code> → <code>5c4c09e1</code> → <code>bd132793</code>. Legacy DD unit correction is inert for exactly the effective-active paths, derived from the strict manifest at runtime with no literal path list — 66 exact bindings across 21 legacy rows, 41 of 62 untouched, both YAML carriers byte-identical. The final corrective names the audited scope in the assertion itself (<code>assert_zero_audited_shadow_authorities</code>) and returns the complete <code>ShadowAuthorityAudit</code>, so a caller necessarily sees <code>numeric_missing_unit_fallback = not_audited</code> beside the five audited classes at zero. Post-merge gate at the integrated commit: <strong>6595 passed / 10 skipped / 0 failed</strong>. Record: <code>docs/evidence/archive/sn-dd-gaps-landed.html#legacy-retirement</code>.</p><p><strong>Remaining work is authored as §5–§8 in the evergreen and every item is authority-gated, not merely unfinished:</strong> raw DD graph restoration for the 66 retired paths needs explicit live-DD-write approval; the U19 14-path cohort needs a candidate expansion (6→14) whose digest change invalidates the current delegation, so it needs a renewed one; the numeric missing-unit fallback needs an audited-absence policy decision; and 41 legacy rows have no upstream candidate at all and are correct to leave alone. §8's execution notes carry three findings the next session should not rediscover: a green suite passed all five review blocks in this plan, so unit-enforcement/graph/schema changes need an adversarial review node; the free local model covers <em>name generation only</em>, so any rescore/refine/docs drain is paid work and must be budgeted as such; and graph-marked tests auto-skip in dispatched worktrees at exit 0 because <code>.env</code> is gitignored. The two graph-gate hazards are also written into <code>sn-graph-wide-integrity</code>, which owns the pre-existing schema baseline and is S8's critical path.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="ddres-gate-review-20260818" data-who="reckon-ship" data-when="2026-08-18T16:30:00+00:00">
+    <div class="r-comment-body"><p><strong>Authority-gate review requested by the lead 2026-08-18, recorded so the next session inherits the assessment rather than the ceremony.</strong> The question was why a reversible repo-file record needs an approval at all. Verdict: two gates do real work, the rest is ceremony this project has retired before.</p><p><strong>Earns its cost — evidence binding.</strong> A resolution must point at a real observed DD defect, otherwise anyone can assert a correction for a path that is not broken. That is the one control preventing invented physics. But the binding does not need a recomputed content-addressed token: in the graph it is a relationship to the <code>DDGap</code> fact, which cannot be forged because it either exists or it does not.</p><p><strong>Earns its cost — upstream reference.</strong> Naming the PR or issue that fixes the defect is what makes a record a temporary bridge rather than a permanent private fork of the DD, and it is what lets the bridge retire when a release lands. Keep it, with an explicit none-yet marker so a defect with no upstream filing is visible rather than unrecordable.</p><p><strong>Does not earn its cost — everything else.</strong> Content-addressed approval receipts, recomputed evidence tokens, monotonic revisions, expected-manifest-digest compare-and-set, the exclusive flock, and the per-candidate-digest lead delegation all exist to make an <em>irreversible</em> authority grant auditable. A reversible record with an ordinary audit trail needs none of them, and three of them (digest CAS, flock, revision) exist only because the store is a mutable tracked file that concurrent workers must not clobber — a problem that disappears once the record is a node in a transactional graph. The real risk in a DD resolution is a wrong physics claim, and a cryptographic receipt does nothing about that.</p><p><strong>Measured cost of the ceremony on this plan:</strong> the approval CLI needed an adversarial block plus a corrective before it was sound, and the audit guarding it took four review cycles. None of that protected a physics claim.</p><p>One consequence to weigh when locking: under the lead's revised §5 direction the graph already carries corrected values, so the read-time overlay landed in <code>a8fc9765</code> across 14 consumer sites is largely redundant for correctness and reduces to provenance reporting. That overlay followed my earlier misreading of the design; simplifying it is the honest follow-through rather than keeping it to justify the work already done.</p></div>
 </div>
 </section>
 </main>
