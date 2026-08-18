@@ -17589,7 +17589,8 @@ def _scalar_selected_dedup_authority(
     query_handle: _TransactionQuery,
     source_ids: list[str],
     reason: str,
-) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    excluded_source_reasons: dict[str, str],
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
     rows = query_handle.query(
         """
         UNWIND $source_ids AS requested_id
@@ -17625,7 +17626,7 @@ def _scalar_selected_dedup_authority(
     )
     participants: list[dict[str, Any]] = []
     actions: list[dict[str, Any]] = []
-    refusals: list[dict[str, str]] = []
+    refusals: list[dict[str, Any]] = []
     for raw in rows:
         row = dict(raw)
         bindings = sorted(
@@ -17702,14 +17703,38 @@ def _scalar_selected_dedup_authority(
         if refusal is None:
             for binding in remove_bindings:
                 matches = projection_by_target.get(binding["target_id"], [])
-                if len(matches) != 1:
+                if not matches:
+                    refusal = "non-selected binding has no signed backing projection"
+                    break
+                if len(matches) > 1:
                     refusal = (
-                        "non-selected binding does not have exactly one signed "
-                        "backing projection"
+                        "non-selected binding has duplicate signed backing projections"
                     )
                     break
                 remove_projections.append(matches[0])
 
+        exclusion_reason = excluded_source_reasons.get(row["requested_id"])
+        if exclusion_reason is not None:
+            if refusal == "non-selected binding has no signed backing projection":
+                refusals.append(
+                    {
+                        "source_id": row["requested_id"],
+                        "reason": exclusion_reason,
+                        "classification": "explicit_exclusion",
+                        "authority_reason": refusal,
+                    }
+                )
+            else:
+                refusals.append(
+                    {
+                        "source_id": row["requested_id"],
+                        "reason": (
+                            refusal
+                            or "explicit exclusion no longer matches a zero-projection row"
+                        ),
+                    }
+                )
+            continue
         if refusal is not None:
             refusals.append({"source_id": row["requested_id"], "reason": refusal})
             continue
@@ -17743,6 +17768,7 @@ def _scalar_selected_dedup_authority(
         "operation": "deduplicate_scalar_selected_sources",
         "reason": reason,
         "source_ids": source_ids,
+        "excluded_source_reasons": excluded_source_reasons,
         "participants": participants,
         "actions": actions,
         "refusals": refusals,
@@ -17833,7 +17859,7 @@ def _lock_scalar_selected_dedup_authority(
 def _scalar_selected_dedup_counts(
     source_ids: list[str],
     actions: list[dict[str, Any]],
-    refusals: list[dict[str, str]],
+    refusals: list[dict[str, Any]],
 ) -> dict[str, int]:
     return {
         "requested": len(source_ids),
@@ -17849,6 +17875,7 @@ def deduplicate_scalar_selected_sources(
     source_ids: list[str],
     *,
     reason: str,
+    excluded_source_reasons: dict[str, str] | None = None,
     apply: bool = False,
     manifest_sha256: str | None = None,
     run_id: str | None = None,
@@ -17862,6 +17889,11 @@ def deduplicate_scalar_selected_sources(
         raise ValueError("source deduplication requires unique source ids")
     if not reason.strip():
         raise ValueError("source deduplication requires a non-empty reason")
+    exclusions = dict(sorted((excluded_source_reasons or {}).items()))
+    if not set(exclusions).issubset(requested):
+        raise ValueError("excluded source ids must belong to the requested cohort")
+    if any(not exclusion_reason.strip() for exclusion_reason in exclusions.values()):
+        raise ValueError("every excluded source requires a non-empty reason")
     if apply and manifest_sha256 is None:
         raise ValueError("apply requires manifest_sha256")
     if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
@@ -17896,6 +17928,11 @@ def deduplicate_scalar_selected_sources(
                             raise ScalarSelectedDedupConflict(
                                 "recorded deduplication covers a different source set"
                             )
+                        admitted_ids = sorted(
+                            source_id
+                            for source_id, target_id in dispositions.items()
+                            if target_id is not None
+                        )
                         postcondition = query_handle.query(
                             """
                             UNWIND $source_ids AS source_id
@@ -17907,17 +17944,43 @@ def deduplicate_scalar_selected_sources(
                             RETURN collect({source_id: source_id,
                               scalar: source.produced_sn_id, ids: ids}) AS rows
                             """,
-                            source_ids=requested,
+                            source_ids=admitted_ids,
                         )
                         current = postcondition[0].get("rows") if postcondition else []
                         if any(
                             row["ids"] != [row["scalar"]]
                             or dispositions.get(row["source_id"]) != row["scalar"]
                             for row in current
-                        ) or len(current) != len(requested):
+                        ) or len(current) != len(admitted_ids):
                             raise ScalarSelectedDedupConflict(
                                 "recorded deduplication has lost its postcondition"
                             )
+                        excluded_ids = sorted(set(requested) - set(admitted_ids))
+                        if excluded_ids:
+                            if excluded_ids != sorted(exclusions):
+                                raise ScalarSelectedDedupConflict(
+                                    "replay requires the signed exclusion reasons"
+                                )
+                            (
+                                _,
+                                excluded_actions,
+                                excluded_refusals,
+                            ) = _scalar_selected_dedup_authority(
+                                query_handle,
+                                excluded_ids,
+                                reason,
+                                {
+                                    source_id: exclusions[source_id]
+                                    for source_id in excluded_ids
+                                },
+                            )
+                            if excluded_actions or any(
+                                refusal.get("classification") != "explicit_exclusion"
+                                for refusal in excluded_refusals
+                            ):
+                                raise ScalarSelectedDedupConflict(
+                                    "recorded exclusions have lost their authority"
+                                )
                         transaction.rollback()
                         return {
                             "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
@@ -17928,7 +17991,7 @@ def deduplicate_scalar_selected_sources(
                         }
 
                 manifest, actions, refusals = _scalar_selected_dedup_authority(
-                    query_handle, requested, reason
+                    query_handle, requested, reason, exclusions
                 )
                 computed_hash = _authority_payload_hash(manifest)
                 counts = _scalar_selected_dedup_counts(requested, actions, refusals)
@@ -17936,7 +17999,12 @@ def deduplicate_scalar_selected_sources(
                     raise ScalarSelectedDedupConflict(
                         "fresh source deduplication manifest does not match signed hash"
                     )
-                if refusals:
+                blocking_refusals = [
+                    refusal
+                    for refusal in refusals
+                    if refusal.get("classification") != "explicit_exclusion"
+                ]
+                if blocking_refusals:
                     transaction.rollback()
                     return {
                         "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
@@ -17958,17 +18026,22 @@ def deduplicate_scalar_selected_sources(
                         "changed": 0,
                         "would_change": 1,
                         "counts": counts,
-                        "refusals": [],
+                        "refusals": refusals,
                         "manifest": manifest,
                         "manifest_sha256": computed_hash,
                     }
 
                 _lock_scalar_selected_dedup_authority(query_handle, manifest)
                 locked_manifest, locked_actions, locked_refusals = (
-                    _scalar_selected_dedup_authority(query_handle, requested, reason)
+                    _scalar_selected_dedup_authority(
+                        query_handle, requested, reason, exclusions
+                    )
                 )
                 if (
-                    locked_refusals
+                    any(
+                        refusal.get("classification") != "explicit_exclusion"
+                        for refusal in locked_refusals
+                    )
                     or _authority_payload_hash(locked_manifest) != computed_hash
                 ):
                     raise ScalarSelectedDedupConflict(
@@ -18048,6 +18121,7 @@ def deduplicate_scalar_selected_sources(
                 dispositions = {
                     action["source_id"]: action["keep_target_id"] for action in actions
                 }
+                dispositions.update(dict.fromkeys(exclusions))
                 change_rows = query_handle.query(
                     """
                     MERGE (change:StandardNameChange {id: $event_id})
@@ -18084,7 +18158,11 @@ def deduplicate_scalar_selected_sources(
                     reason=reason,
                     run_id=run_id,
                     manifest_sha256=computed_hash,
-                    keep_target_ids=sorted(set(dispositions.values())),
+                    keep_target_ids=sorted(
+                        target_id
+                        for target_id in set(dispositions.values())
+                        if target_id is not None
+                    ),
                 )
                 if len(change_rows) != 1:
                     raise ScalarSelectedDedupConflict(
@@ -18100,6 +18178,7 @@ def deduplicate_scalar_selected_sources(
                     "bindings_removed": len(mutation_rows),
                     "projections_removed": len(mutation_rows),
                     "counts": counts,
+                    "refusals": refusals,
                     "manifest": manifest,
                     "manifest_sha256": computed_hash,
                     "change_id": change_rows[0]["change_id"],
