@@ -17,14 +17,14 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="164">
-<meta name="plan-impl" content="0.94">
+<meta name="plan-version" content="165">
+<meta name="plan-impl" content="0.95">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
-<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4">
+<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150">
 </head>
 <body>
   <main class="plan-doc">
@@ -1434,6 +1434,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260818-graph-gate-failclosed" data-who="reckon-ship" data-when="2026-08-18T20:45:00+00:00">
     <div class="r-comment-body"><p><strong>The graph-gate skip hazard is closed at source: an explicit <code>-m graph</code> selection without Neo4j credentials now fails closed as not-run (exit 5) instead of exiting 0 with everything skipped.</strong> Commit <code>249f00b4</code>, merge <code>a84c8af4</code>. Default credential-less selections keep their skip behaviour (11,706 passed / 237 skipped / 626 deselected, unchanged) and a credentialed <code>-m graph</code> run follows the prior no-skip path; gate is a 3-test subprocess regression in <code>tests/test_graph_marker_gate.py</code>. This retires the first half of the 2026-08-17 hand-over from sn-dd-gaps. Side finding routed to its own node: <code>tests/core/test_dd_unit_resolution.py::TestDdUnitDefectCuration::test_ionisation_potential_resolves_to_energy</code> fails pre-existing at the base, outside this node's fence. Record: <a href="/imas-codex/evidence/archive/sn-graph-wide-integrity-landed#graph-gate-skip-hazard">landed evidence</a>.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260818-schema-baseline-repaired" data-who="reckon-ship" data-when="2026-08-18T21:20:00+00:00">
+    <div class="r-comment-body"><p><strong>The pre-existing graph schema baseline is repaired at root cause and the schema gate signal is usable again: executed 9/9, 0 skipped, 0 failed (was 2 failed).</strong> Chain <code>fdd871f5</code> → <code>bf03f150</code>, merge <code>e7b927b1</code>. The six StandardNameSourceRetry terminal-recovery properties are declared optional in LinkML (the terminal batch persists them; ordinary retries never do — both directions now pinned by regressions, focused file 76/76); the 27 null <code>source_id</code> values were set under exact per-row CAS; the isolated non-physical <code>Unit as_parent_level_2</code> was deleted with zero surviving references. Review APPROVE with zero findings after one corrective; coordinator censuses prove zero introduced source_id collisions. With the fail-closed graph-marker gate landed earlier today, both 2026-08-17 hand-over hazards from sn-dd-gaps are closed — sn-dd-gaps §5's sequencing constraint is now satisfied. New node routed: 16 of the 27 repaired rows are stale test-fixture sources (<code>dd:__minttest__/*</code>, <code>dd:test_focus_scope__*</code>) whose cleanup gap in <code>test_minting.py</code>/<code>test_focus_scope.py</code> leaves durable graph residue. Record: <a href="/imas-codex/evidence/archive/sn-graph-wide-integrity-landed#schema-baseline">landed evidence</a>.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

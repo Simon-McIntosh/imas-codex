@@ -31,6 +31,29 @@
     (<code>tests/core/test_dd_unit_resolution.py::TestDdUnitDefectCuration::test_ionisation_potential_resolves_to_energy</code>)
     is pre-existing, outside the fence, and routed to its own node.</p>
   </section>
+
+  <section id="schema-baseline">
+    <h2>The live-graph schema-compliance baseline is repaired</h2>
+    <p><strong>Landed 2026-08-18</strong> — chain <code>fdd871f5</code> → <code>bf03f150</code>,
+    merge <code>e7b927b1</code>. The three baseline defects the credentialed 2026-08-17 gate exposed are
+    repaired at root cause: the six terminal-recovery receipt properties on
+    <code>StandardNameSourceRetry</code> are declared optional in LinkML (three ordinary writers omit
+    them; the manifest-driven terminal batch in <code>attachment_audit.py</code> persists them, so
+    stop-writing would have destroyed replay authority) — 9 nodes carrying them, 9 → 0 undeclared;
+    the 27 null <code>StandardNameSource.source_id</code> values were set to the deterministic bare DD
+    path in one transaction under exact per-row CAS, 27 → 0; and <code>Unit as_parent_level_2</code>
+    (null symbol, zero relationships, non-physical id) was deleted, 1 → 0. Gate:
+    <code>tests/graph/test_schema_compliance.py</code> credentialed before-run executed 9 / failed 2,
+    after-run executed 9 / skipped 0 / <strong>failed 0</strong>. Review: BLOCK then
+    <strong>APPROVE with zero findings</strong> after a corrective pinned writer persistence in both
+    directions (terminal recovery asserts all six values persist; ordinary retry asserts all six
+    absent; focused file 76/76). Coordinator censuses: zero surviving references to the deleted Unit;
+    the bare-suffix rule introduced zero <code>source_id</code> collisions (5 duplicate groups exist,
+    all pre-existing DD-rename alias pairs outside the repaired 27). Follow-on routed: 16 of the 27
+    repaired rows are stale test-fixture sources (<code>dd:__minttest__/*</code>,
+    <code>dd:test_focus_scope__*</code>) from <code>test_minting.py</code> / <code>test_focus_scope.py</code>
+    cleanup gaps — removal is its own node.</p>
+  </section>
 </main>
 </body>
 </html>

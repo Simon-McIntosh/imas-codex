@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -361,10 +361,11 @@ CONSTRAINTS
     <pre class="r-fu-prompt">/reckon-ship sn-dd-gaps</pre>
     <p class="r-fu-outcome">Integrated on main in merge fc23f8cf after candidate commit 9b37dd6f and parser repair cc3f4278. Recursive duplicate-key rejection and StrictInt authority fields cleared independent review with 0 findings. One-shot SLURM validation passed model generation, 60 focused tests, Ruff, and adversarial non-consumption probes. The 21 records remain review-only, the active authority manifest remains empty, and no runtime, graph, pipeline, catalog, provider, or release behavior changed.</p>
     </article>
-<article class="r-fu" data-id="f-ddg-baseline-schema" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-17T17:25:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ddg-baseline-schema" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-17T17:25:00+00:00" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-18T20:50:42+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Repair the pre-existing graph schema non-compliance the credentialed gate exposed</h4>
     <div class="r-fu-body"><p>The DD-resolution consumer gate ran <code>tests/graph/test_schema_compliance.py</code> against the live graph and found a baseline defect unrelated to DD resolution: <code>StandardNameSourceRetry</code> persists six properties (<code>before_closure_hash</code>, <code>manifest_hash</code>, <code>preserved_state_hash</code>, <code>run_id</code>, <code>terminal_sn_id</code>, <code>terminal_stage</code>) that its LinkML class does not declare, across 28 nodes stamped 2026-07-31 to 2026-08-16, and required fields are null on 27 <code>StandardNameSource</code> nodes (<code>source_id</code>) plus one <code>Unit</code> (<code>symbol</code>, id <code>as_parent_level_2</code>). Either declare or stop writing those properties, repair the null required values, and re-run the graph gate. Also worth fixing at source: a graph-marked suite dispatched into a worktree auto-skips every test because <code>.env</code> is gitignored, so the run exits 0 and reads as a pass.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    <p class="r-fu-outcome">Both halves are landed in sn-graph-wide-integrity on 2026-08-18. Baseline: chain fdd871f5 → bf03f150 (merge e7b927b1) declares the six StandardNameSourceRetry terminal-recovery properties as optional (the terminal batch persists them, ordinary retries never do — both directions regression-pinned), sets the 27 null source_id values under exact CAS, and deletes the isolated Unit as_parent_level_2; the schema gate now executes 9/9 with 0 failures, review APPROVE with zero findings. Skip-hazard fixed at source: commit 249f00b4 (merge a84c8af4) makes a credential-less explicit -m graph selection exit 5 as not-run instead of a silent 0. §5's sequencing constraint is satisfied.</p>
     </article>
 <article class="r-fu" data-id="f-ddg-authority-gated-remainder" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-17T19:45:00+00:00" data-recommends-skill="/reckon-ship sn-dd-gaps" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Clear the authority-gated remainder: raw DD restoration, the U19 cohort, and the numeric fallback policy</h4>
