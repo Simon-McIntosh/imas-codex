@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import os
 from collections.abc import Iterator
 from types import SimpleNamespace
@@ -101,6 +102,35 @@ def _cleanup(
     )
 
 
+def _participant_snapshot_bytes(
+    client: GraphClient, participant_ids: list[str]
+) -> bytes:
+    nodes = client.query(
+        "MATCH (node) WHERE node.id IN $participant_ids "
+        "RETURN elementId(node) AS element_id, labels(node) AS labels, "
+        "properties(node) AS properties ORDER BY element_id",
+        participant_ids=participant_ids,
+    )
+    relationships = client.query(
+        "MATCH (start)-[relationship]->(end) "
+        "WHERE start.id IN $participant_ids OR end.id IN $participant_ids "
+        "RETURN elementId(relationship) AS element_id, "
+        "type(relationship) AS relationship_type, "
+        "properties(relationship) AS properties, "
+        "elementId(start) AS start_element_id, labels(start) AS start_labels, "
+        "properties(start) AS start_properties, "
+        "elementId(end) AS end_element_id, labels(end) AS end_labels, "
+        "properties(end) AS end_properties ORDER BY element_id",
+        participant_ids=participant_ids,
+    )
+    return json.dumps(
+        {"nodes": nodes, "relationships": relationships},
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode()
+
+
 @pytest.mark.graph
 def test_direct_ancestor_fold_preserves_lineage_and_retargets_source(
     disposable_neo4j: tuple[str, str],
@@ -164,9 +194,7 @@ def test_multi_hop_ancestor_fold_and_replay_are_idempotent(
             manifest_sha256=preview["manifest_sha256"],
             gc=client,
         )
-        changes_before_replay = client.query(
-            "MATCH (change:StandardNameChange) RETURN count(change) AS count"
-        )[0]["count"]
+        snapshot_before_replay = _participant_snapshot_bytes(client, list(ids.values()))
         replay = supersede_into_ancestor(
             ids["old"],
             ids["ancestor"],
@@ -175,13 +203,11 @@ def test_multi_hop_ancestor_fold_and_replay_are_idempotent(
             manifest_sha256=preview["manifest_sha256"],
             gc=client,
         )
-        changes_after_replay = client.query(
-            "MATCH (change:StandardNameChange) RETURN count(change) AS count"
-        )[0]["count"]
+        snapshot_after_replay = _participant_snapshot_bytes(client, list(ids.values()))
         assert applied["changed"] == 1
         assert replay["outcome"] == "already_applied"
         assert replay["changed"] == 0
-        assert changes_after_replay == changes_before_replay
+        assert snapshot_after_replay == snapshot_before_replay
         assert client.query(
             "MATCH (:StandardName {id: $old})-[first:REFINED_FROM]->"
             "(:StandardName {id: $middle})-[second:REFINED_FROM]->"

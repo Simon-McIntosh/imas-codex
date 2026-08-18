@@ -29,7 +29,7 @@ type did not yet exist. The final run used an isolated, auth-disabled Neo4j
 
 ```text
 .........                                                                [100%]
-9 passed in 6.65s
+9 passed in 6.90s
 ```
 
 The nine tests cover a direct ancestor, a multi-hop ancestor with zero-write
@@ -39,6 +39,12 @@ refusal, exact deduplication of a source already bound to both names, and a
 concurrent source-scalar plus backing-projection drift between hash computation
 and locking. The direct and multi-hop assertions prove the original lineage
 remains and no reverse edge is created.
+
+Replay is proven write-free by canonical byte equality over every participant
+node's labels and properties and every incident relationship's identity, type,
+properties, and complete endpoint labels and properties. This includes the
+signed names, source, backing node, lineage, source binding, backing projection,
+and ledger-link closure; it is not inferred from a change-row count.
 
 ## Live preview
 
