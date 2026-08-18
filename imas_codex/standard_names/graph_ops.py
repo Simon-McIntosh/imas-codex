@@ -17572,6 +17572,546 @@ def tombstone_supersede_into(
     return result
 
 
+SCALAR_SELECTED_DEDUP_MANIFEST_SCHEMA = (
+    "imas-codex.standard-name-source-dedup-manifest.v1"
+)
+SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA = (
+    "imas-codex.standard-name-source-dedup-receipt.v1"
+)
+
+
+class ScalarSelectedDedupConflict(RuntimeError):
+    """The signed source-binding closure no longer matches graph authority."""
+
+
+def _scalar_selected_dedup_authority(
+    query_handle: _TransactionQuery,
+    source_ids: list[str],
+    reason: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    rows = query_handle.query(
+        """
+        UNWIND $source_ids AS requested_id
+        OPTIONAL MATCH (source:StandardNameSource {id: requested_id})
+        RETURN requested_id AS requested_id,
+               properties(source) AS source_properties,
+               CASE WHEN source IS NULL THEN [] ELSE
+                 [(source)-[binding:PRODUCED_NAME]->(target:StandardName) |
+                   {element_id: elementId(binding),
+                    properties: properties(binding),
+                    target_element_id: elementId(target),
+                    target_id: target.id,
+                    target_properties: properties(target)}]
+               END AS bindings,
+               CASE WHEN source IS NULL THEN [] ELSE
+                 [(source)-[origin:FROM_DD_PATH|FROM_SIGNAL]->(backing) |
+                   {element_id: elementId(backing),
+                    labels: labels(backing),
+                    properties: properties(backing),
+                    origin_element_id: elementId(origin),
+                    origin_type: type(origin),
+                    origin_properties: properties(origin),
+                    projections: [(backing)-[projection:HAS_STANDARD_NAME]->
+                      (projected:StandardName) |
+                      {element_id: elementId(projection),
+                       properties: properties(projection),
+                       target_id: projected.id,
+                       target_properties: properties(projected)}]}]
+               END AS backings
+        ORDER BY requested_id
+        """,
+        source_ids=source_ids,
+    )
+    participants: list[dict[str, Any]] = []
+    actions: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for raw in rows:
+        row = dict(raw)
+        bindings = sorted(
+            (dict(binding) for binding in row.get("bindings") or []),
+            key=lambda binding: (binding["target_id"], binding["element_id"]),
+        )
+        backings = sorted(
+            (
+                {
+                    **dict(backing),
+                    "labels": sorted(backing.get("labels") or []),
+                    "projections": sorted(
+                        (
+                            dict(projection)
+                            for projection in backing.get("projections") or []
+                        ),
+                        key=lambda projection: (
+                            projection["target_id"],
+                            projection["element_id"],
+                        ),
+                    ),
+                }
+                for backing in row.get("backings") or []
+            ),
+            key=lambda backing: backing["element_id"],
+        )
+        participant = {
+            "source_id": row["requested_id"],
+            "source_properties": row.get("source_properties"),
+            "bindings": bindings,
+            "backings": backings,
+        }
+        participants.append(participant)
+        properties = row.get("source_properties")
+        refusal: str | None = None
+        if properties is None:
+            refusal = "source does not exist"
+        elif (
+            properties.get("claimed_at") is not None
+            or properties.get("claim_token") is not None
+        ):
+            refusal = "source has an active claim"
+        elif properties.get("status") == "stale":
+            refusal = "stale source is not deduplication authority"
+
+        live_bindings = [
+            binding
+            for binding in bindings
+            if (binding.get("target_properties") or {}).get("name_stage")
+            not in ("superseded", "exhausted")
+        ]
+        live_target_ids = [binding["target_id"] for binding in live_bindings]
+        scalar = properties.get("produced_sn_id") if properties else None
+        if refusal is None and (
+            len(live_bindings) < 2
+            or len(set(live_target_ids)) != len(live_target_ids)
+            or live_target_ids.count(scalar) != 1
+        ):
+            refusal = "produced_sn_id does not select exactly one live binding"
+
+        remove_bindings = [
+            binding for binding in live_bindings if binding["target_id"] != scalar
+        ]
+        projection_by_target: dict[str, list[dict[str, Any]]] = {}
+        for backing in backings:
+            for projection in backing["projections"]:
+                projection_by_target.setdefault(projection["target_id"], []).append(
+                    {
+                        **projection,
+                        "backing_element_id": backing["element_id"],
+                    }
+                )
+        remove_projections: list[dict[str, Any]] = []
+        if refusal is None:
+            for binding in remove_bindings:
+                matches = projection_by_target.get(binding["target_id"], [])
+                if len(matches) != 1:
+                    refusal = (
+                        "non-selected binding does not have exactly one signed "
+                        "backing projection"
+                    )
+                    break
+                remove_projections.append(matches[0])
+
+        if refusal is not None:
+            refusals.append({"source_id": row["requested_id"], "reason": refusal})
+            continue
+        removals = sorted(
+            (
+                {
+                    "target_id": binding["target_id"],
+                    "binding_element_id": binding["element_id"],
+                    "projection_element_id": projection["element_id"],
+                    "backing_element_id": projection["backing_element_id"],
+                }
+                for binding, projection in zip(
+                    remove_bindings, remove_projections, strict=True
+                )
+            ),
+            key=lambda removal: (
+                removal["target_id"],
+                removal["binding_element_id"],
+            ),
+        )
+        actions.append(
+            {
+                "source_id": row["requested_id"],
+                "keep_target_id": scalar,
+                "removals": removals,
+            }
+        )
+
+    manifest = {
+        "schema": SCALAR_SELECTED_DEDUP_MANIFEST_SCHEMA,
+        "operation": "deduplicate_scalar_selected_sources",
+        "reason": reason,
+        "source_ids": source_ids,
+        "participants": participants,
+        "actions": actions,
+        "refusals": refusals,
+    }
+    return manifest, actions, refusals
+
+
+def _lock_scalar_selected_dedup_authority(
+    query_handle: _TransactionQuery, manifest: dict[str, Any]
+) -> None:
+    participants = manifest["participants"]
+    source_ids = [row["source_id"] for row in participants]
+    node_element_ids = sorted(
+        {
+            element_id
+            for row in participants
+            for element_id in [
+                *(backing["element_id"] for backing in row["backings"]),
+                *(binding["target_element_id"] for binding in row["bindings"]),
+            ]
+        }
+    )
+    relationship_element_ids = sorted(
+        {
+            element_id
+            for row in participants
+            for element_id in [
+                *(binding["element_id"] for binding in row["bindings"]),
+                *(backing["origin_element_id"] for backing in row["backings"]),
+                *(
+                    projection["element_id"]
+                    for backing in row["backings"]
+                    for projection in backing["projections"]
+                ),
+            ]
+        }
+    )
+    locked_sources = query_handle.query(
+        """
+        UNWIND $source_ids AS source_id
+        MATCH (source:StandardNameSource {id: source_id})
+        SET source.produced_sn_id = source.produced_sn_id
+        RETURN collect(source.id) AS ids
+        """,
+        source_ids=source_ids,
+    )
+    actual_sources = (
+        sorted(locked_sources[0].get("ids") or []) if locked_sources else []
+    )
+    if actual_sources != source_ids:
+        raise ScalarSelectedDedupConflict("signed source set changed while locking")
+    if node_element_ids:
+        locked_nodes = query_handle.query(
+            """
+            UNWIND $element_ids AS expected
+            MATCH (node) WHERE elementId(node) = expected
+            SET node += {}
+            RETURN collect(elementId(node)) AS ids
+            """,
+            element_ids=node_element_ids,
+        )
+        actual_nodes = sorted(locked_nodes[0].get("ids") or []) if locked_nodes else []
+        if actual_nodes != node_element_ids:
+            raise ScalarSelectedDedupConflict(
+                "signed backing set changed while locking"
+            )
+    if relationship_element_ids:
+        locked_relationships = query_handle.query(
+            """
+            UNWIND $element_ids AS expected
+            MATCH ()-[relationship]->() WHERE elementId(relationship) = expected
+            SET relationship += {}
+            RETURN collect(elementId(relationship)) AS ids
+            """,
+            element_ids=relationship_element_ids,
+        )
+        actual_relationships = (
+            sorted(locked_relationships[0].get("ids") or [])
+            if locked_relationships
+            else []
+        )
+        if actual_relationships != relationship_element_ids:
+            raise ScalarSelectedDedupConflict(
+                "signed relationship set changed while locking"
+            )
+
+
+def _scalar_selected_dedup_counts(
+    source_ids: list[str],
+    actions: list[dict[str, Any]],
+    refusals: list[dict[str, str]],
+) -> dict[str, int]:
+    return {
+        "requested": len(source_ids),
+        "admitted": len(actions),
+        "refused": len(refusals),
+        "bindings_to_remove": sum(len(action["removals"]) for action in actions),
+        "projections_to_remove": sum(len(action["removals"]) for action in actions),
+    }
+
+
+@retry_on_deadlock()
+def deduplicate_scalar_selected_sources(
+    source_ids: list[str],
+    *,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Remove non-scalar live bindings through a signed exact manifest."""
+    requested = sorted(set(source_ids))
+    if not requested:
+        raise ValueError("source deduplication requires at least one source id")
+    if len(requested) != len(source_ids):
+        raise ValueError("source deduplication requires unique source ids")
+    if not reason.strip():
+        raise ValueError("source deduplication requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    own = gc is None
+    client: Any = GraphClient() if own else gc
+    event_id = (
+        f"sn-change:scalar-selected-dedup:{manifest_sha256}"
+        if manifest_sha256
+        else None
+    )
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query_handle.query(
+                        """
+                        OPTIONAL MATCH (change:StandardNameChange {id: $event_id})
+                        RETURN change.to_name AS disposition_json
+                        """,
+                        event_id=event_id,
+                    )
+                    disposition_json = (
+                        replay_rows[0].get("disposition_json") if replay_rows else None
+                    )
+                    if disposition_json is not None:
+                        dispositions = json.loads(disposition_json)
+                        if sorted(dispositions) != requested:
+                            raise ScalarSelectedDedupConflict(
+                                "recorded deduplication covers a different source set"
+                            )
+                        postcondition = query_handle.query(
+                            """
+                            UNWIND $source_ids AS source_id
+                            MATCH (source:StandardNameSource {id: source_id})
+                            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName)
+                            WHERE NOT coalesce(name.name_stage, '') IN
+                              ['superseded', 'exhausted']
+                            WITH source_id, source, collect(DISTINCT name.id) AS ids
+                            RETURN collect({source_id: source_id,
+                              scalar: source.produced_sn_id, ids: ids}) AS rows
+                            """,
+                            source_ids=requested,
+                        )
+                        current = postcondition[0].get("rows") if postcondition else []
+                        if any(
+                            row["ids"] != [row["scalar"]]
+                            or dispositions.get(row["source_id"]) != row["scalar"]
+                            for row in current
+                        ) or len(current) != len(requested):
+                            raise ScalarSelectedDedupConflict(
+                                "recorded deduplication has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "manifest_sha256": manifest_sha256,
+                        }
+
+                manifest, actions, refusals = _scalar_selected_dedup_authority(
+                    query_handle, requested, reason
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = _scalar_selected_dedup_counts(requested, actions, refusals)
+                if apply and computed_hash != manifest_sha256:
+                    raise ScalarSelectedDedupConflict(
+                        "fresh source deduplication manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": 1,
+                        "counts": counts,
+                        "refusals": [],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                _lock_scalar_selected_dedup_authority(query_handle, manifest)
+                locked_manifest, locked_actions, locked_refusals = (
+                    _scalar_selected_dedup_authority(query_handle, requested, reason)
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise ScalarSelectedDedupConflict(
+                        "source authority changed while acquiring participant locks"
+                    )
+                actions = locked_actions
+                mutation_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        "keep_target_id": action["keep_target_id"],
+                        "remove_target_id": removal["target_id"],
+                        "binding_element_id": removal["binding_element_id"],
+                        "projection_element_id": removal["projection_element_id"],
+                        "backing_element_id": removal["backing_element_id"],
+                    }
+                    for action in actions
+                    for removal in action["removals"]
+                ]
+                mutated = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (source:StandardNameSource {id: expected.source_id})
+                    MATCH (source)-[binding:PRODUCED_NAME]->
+                          (removed:StandardName {id: expected.remove_target_id})
+                    WHERE elementId(binding) = expected.binding_element_id
+                      AND source.produced_sn_id = expected.keep_target_id
+                      AND source.claimed_at IS NULL
+                      AND source.claim_token IS NULL
+                      AND EXISTS {
+                        (source)-[:PRODUCED_NAME]->
+                          (:StandardName {id: expected.keep_target_id})
+                      }
+                    MATCH (backing)-[projection:HAS_STANDARD_NAME]->(removed)
+                    WHERE elementId(backing) = expected.backing_element_id
+                      AND elementId(projection) = expected.projection_element_id
+                    DELETE binding, projection
+                    RETURN collect({source_id: expected.source_id,
+                      binding_element_id: expected.binding_element_id,
+                      projection_element_id: expected.projection_element_id}) AS rows
+                    """,
+                    rows=mutation_rows,
+                )
+                actual_mutations = mutated[0].get("rows") if mutated else []
+                if len(actual_mutations) != len(mutation_rows):
+                    raise ScalarSelectedDedupConflict(
+                        "signed binding closure changed during deletion"
+                    )
+
+                target_ids = sorted(
+                    {
+                        target_id
+                        for action in actions
+                        for target_id in [
+                            action["keep_target_id"],
+                            *(removal["target_id"] for removal in action["removals"]),
+                        ]
+                    }
+                )
+                query_handle.query(
+                    """
+                    UNWIND $target_ids AS target_id
+                    MATCH (target:StandardName {id: target_id})
+                    OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                    OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+                    OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+                    WITH target, collect(DISTINCT CASE
+                      WHEN source IS NULL THEN null
+                      WHEN dd IS NOT NULL THEN 'dd:' + dd.id
+                      WHEN signal IS NOT NULL THEN signal.id
+                      WHEN source.source_type = 'derived'
+                        AND source.source_id STARTS WITH 'derived:'
+                      THEN source.source_id ELSE source.id END) AS paths
+                    SET target.source_paths = [path IN paths WHERE path IS NOT NULL]
+                    """,
+                    target_ids=target_ids,
+                )
+                dispositions = {
+                    action["source_id"]: action["keep_target_id"] for action in actions
+                }
+                change_rows = query_handle.query(
+                    """
+                    MERGE (change:StandardNameChange {id: $event_id})
+                    ON CREATE SET change.from_name = $removed_json,
+                                  change.to_name = $disposition_json,
+                                  change.operation =
+                                    'deduplicate_scalar_selected_sources',
+                                  change.reason = $reason,
+                                  change.origin = 'semantic_source_reconciliation',
+                                  change.run_id = $run_id,
+                                  change.changed_at = datetime(),
+                                  change.internal = true,
+                                  change.manifest_sha256 = $manifest_sha256
+                    WITH change
+                    UNWIND $keep_target_ids AS keep_target_id
+                    MATCH (kept:StandardName {id: keep_target_id})
+                    MERGE (kept)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN DISTINCT change.id AS change_id
+                    """,
+                    event_id=f"sn-change:scalar-selected-dedup:{computed_hash}",
+                    removed_json=json.dumps(
+                        {
+                            action["source_id"]: [
+                                removal["target_id"] for removal in action["removals"]
+                            ]
+                            for action in actions
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    disposition_json=json.dumps(
+                        dispositions, sort_keys=True, separators=(",", ":")
+                    ),
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                    keep_target_ids=sorted(set(dispositions.values())),
+                )
+                if len(change_rows) != 1:
+                    raise ScalarSelectedDedupConflict(
+                        "deduplication change receipt was not written exactly once"
+                    )
+                transaction.commit()
+                return {
+                    "schema": SCALAR_SELECTED_DEDUP_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": 1,
+                    "sources_deduplicated": len(actions),
+                    "bindings_removed": len(mutation_rows),
+                    "projections_removed": len(mutation_rows),
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_id": change_rows[0]["change_id"],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA = (
     "imas-codex.standard-name-ancestor-supersession-manifest.v1"
 )
