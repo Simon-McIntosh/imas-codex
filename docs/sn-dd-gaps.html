@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="40">
+<meta name="plan-version" content="41">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -60,13 +60,16 @@
     from the resolution rather than lost, and a DD release that lands the upstream fix is detectable by comparison so the
     bridge can retire. Sequence it after the storage decision in the open decision below, since that decides whether
     resolutions live as graph nodes rather than as packaged files.</p>
-    <p><strong>The fix is a re-derivation, not a repair.</strong> Per this repo's standing practice — fix data by
-    reset-and-regenerate through the backing code, never by in-place Cypher patching — re-extract the DD graph with
-    <code>correct_in_graph</code> disabled so every node carries its published declaration. Unit extraction is the
-    cheapest faithful regeneration path and preserves enrichment. Done-when: for the 66 retired paths the graph unit
-    equals the published DD unit, the effective value is observable only through <code>ResolvedDDContext</code>, and a
-    sample per upstream family shows raw and effective side by side. No in-place DD mutation, and therefore no
-    DD-write approval to grant. Sequence it after the graph-schema baseline in
+    <p><strong>Shape after the locked storage decision (D-ddres-storage-and-gates, 2026-08-18):</strong> a corrected
+    <code>IMASNode</code> carries a <code>BRIDGED_BY</code> edge to a <code>DDResolution</code> node holding the
+    published value, the effective value, the DD version, the upstream reference, and the retiring release; the
+    resolution carries an <code>EVIDENCED_BY</code> edge to the <code>DDGap</code> fact. Two gates only — the DDGap
+    edge, and an upstream reference or explicit none-yet marker — with a plain who/when/why trail. The migration is
+    part of this section: port the 37 active packaged records into graph nodes, delete the approval machinery and the
+    packaged manifest, and simplify the 14-site read-time overlay to provenance reporting, since the graph is the
+    correct-value source. An earlier paragraph here directed a raw-in-graph re-derivation with
+    <code>correct_in_graph</code> disabled; that reading is superseded by the lead's 2026-08-18 direction and the
+    locked decision. The sequencing constraint survives: run this after the graph-schema baseline in
     <code>sn-graph-wide-integrity</code> is clean, or the verifying gate cannot produce a usable signal.</p>
 
     <h2 id="s6">§6 — Remaining: the U19 ionisation-potential cohort</h2>
