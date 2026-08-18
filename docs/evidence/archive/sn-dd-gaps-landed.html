@@ -236,6 +236,24 @@
     delete the approval ceremony plus packaged manifest, simplify the 14-site read-time overlay to
     provenance reporting.</p>
   </section>
+
+  <section id="ddres-ceremony-retirement">
+    <h2>§5 part 2 — The approval ceremony is retired and the graph is the sole resolution store</h2>
+    <p><strong>Landed 2026-08-19</strong> — commit <code>1edaa0de</code>, merge <code>96010042</code>
+    (net −4,722 lines). <code>load_dd_resolution_manifest</code> now reads DDResolution bridges from the
+    live graph, fail-closed on every surviving gate: the bridge edge, the <code>EVIDENCED_BY</code>
+    DDGap edge, the exact DD-version edge, an upstream reference or none-yet marker, non-empty
+    who/when/why, and unique active exact keys. Deleted outright: both packaged YAML resources, the
+    approve/revoke CLI (now read-only list/show), content-addressed receipts, evidence tokens,
+    monotonic revisions, digest CAS, the flock, and the <code>DDResolutionStateChange</code> schema
+    class (0 live nodes verified before deletion). Cutover equivalence proven pre-deletion: 37 packaged
+    / 37 graph / 37 exact on (path, DD version, field, published, effective). Default-tier tests stay
+    service-free via a deliberately synthetic fixture production never imports; graph-marked tests use
+    the live reader. Gates: full SN suite <strong>6502 passed / 8 skipped / 0 failed</strong>
+    credential-less; credentialed consumer probe 6/6; no-dangling-symbol grep clean; review
+    <strong>APPROVE</strong> (0/0/1/0 — the MEDIUM is a conservative order-dependent active-key
+    over-rejection for future mixed-status history, routed to its own node).</p>
+  </section>
 </main>
 </body>
 </html>
