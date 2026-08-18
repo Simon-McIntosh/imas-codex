@@ -8,9 +8,11 @@ from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
 from imas_codex.standard_names import dd_resolutions
 from imas_codex.standard_names.dd_resolutions import (
     DDResolutionManifestInvalid,
+    DDResolutionStale,
     DDResolutionValue,
     load_dd_resolution_manifest,
     resolve_dd_field,
+    resolve_dd_row,
 )
 
 
@@ -49,6 +51,41 @@ def test_live_graph_authority_is_complete() -> None:
     )
 
 
+def test_graph_context_reads_effective_value_and_reports_published_provenance() -> None:
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    manifest = load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    context = resolve_dd_row(
+        {"path": "camera_ir/channel/camera/direction/x", "unit": "1"},
+        dd_version="4.1.1",
+        manifest=manifest,
+    )
+
+    assert context.unit == "1"
+    assert context.graph.unit == "1"
+    assert context.raw.unit == "1"
+    assert context.published.unit == "m"
+    assert context.as_pipeline_item()["published_dd_context"]["unit"] == "m"
+    assert context.applied_resolution_ids == (
+        "dd_resolution:synthetic-active-direction",
+    )
+    assert context.converged_resolution_ids == (
+        "dd_resolution:synthetic-active-direction",
+    )
+    assert context.resolution_provenance[0].observed.value == "m"
+    assert context.resolution_provenance[0].upstream_reference == "none-yet"
+
+    with pytest.raises(DDResolutionStale, match="graph value"):
+        resolve_dd_row(
+            {"path": "camera_ir/channel/camera/direction/x", "unit": "m"},
+            dd_version="4.1.1",
+            manifest=manifest,
+        )
+
+
 @pytest.mark.graph
 def test_consumer_boundaries_call_typed_authority(monkeypatch) -> None:
     from imas_codex.standard_names import release_notes, source_refresh
@@ -58,7 +95,6 @@ def test_consumer_boundaries_call_typed_authority(monkeypatch) -> None:
     calls: list[str] = []
     original_rows: Callable = dd_resolutions.resolve_dd_rows
     original_row: Callable = dd_resolutions.resolve_dd_row
-    original_field: Callable = dd_resolutions.resolve_dd_field
     original_load: Callable = dd_resolutions.load_dd_resolution_manifest
 
     def rows(*args, **kwargs):
@@ -69,17 +105,12 @@ def test_consumer_boundaries_call_typed_authority(monkeypatch) -> None:
         calls.append("source-refresh")
         return original_row(*args, **kwargs)
 
-    def field(*args, **kwargs):
-        calls.append("attachment")
-        return original_field(*args, **kwargs)
-
     def load(*args, **kwargs):
         calls.append("release-caveat")
         return original_load(*args, **kwargs)
 
     monkeypatch.setattr(dd_resolutions, "resolve_dd_rows", rows)
     monkeypatch.setattr(dd_resolutions, "resolve_dd_row", row)
-    monkeypatch.setattr(dd_resolutions, "resolve_dd_field", field)
     monkeypatch.setattr(dd_resolutions, "load_dd_resolution_manifest", load)
 
     values = [{"path": "camera_ir/channel/camera/direction/x", "unit": "1"}]
@@ -87,7 +118,7 @@ def test_consumer_boundaries_call_typed_authority(monkeypatch) -> None:
     source_refresh._resolved_source_context(
         "edge_profiles/ggd/ion/state/ionisation_potential", "eV", "Ion energy."
     )
-    release_notes.summarize_dd_gap_facts([])
+    release_summary = release_notes.summarize_dd_gap_facts([])
     accepted, reason = _is_attachment_consistent(
         "camera_ir/channel/camera/direction/x",
         "x_direction_unit_vector",
@@ -95,10 +126,17 @@ def test_consumer_boundaries_call_typed_authority(monkeypatch) -> None:
         sn_unit="1",
     )
     assert accepted, reason
+    direction_bridge = next(
+        bridge
+        for bridge in release_summary["dd_resolution_bridges"]
+        if bridge["path"] == "camera_ir/channel/camera/direction/x"
+    )
+    assert direction_bridge["published"] == {"kind": "string", "value": "m"}
+    assert direction_bridge["effective"] == {"kind": "string", "value": "1"}
+    assert direction_bridge["upstream_reference"]
     assert set(calls) >= {
         "extraction",
         "source-refresh",
-        "attachment",
         "release-caveat",
     }
 

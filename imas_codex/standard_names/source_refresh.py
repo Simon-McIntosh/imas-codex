@@ -58,7 +58,7 @@ def _norm_ids(value: Any) -> tuple[str, ...]:
 def _resolved_source_context(
     path: str, unit: str | None, documentation: str | None
 ) -> dict[str, Any]:
-    """Resolve source snapshot fields through the packaged DD authority."""
+    """Read graph source fields with their typed DD-resolution provenance."""
     from imas_codex.settings import get_dd_version
     from imas_codex.standard_names.dd_resolutions import resolve_dd_row
 
