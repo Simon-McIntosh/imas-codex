@@ -16,10 +16,19 @@ Sources bound only to the descendant are re-validated against the ancestor and
 moved by `retarget_standard_name_sources`. Sources already bound to both names
 with their scalar selecting the ancestor are re-validated and lose only the
 redundant descendant binding under an exact compare-and-set. Other source
-shapes are refused. Apply requires the preview digest; a deterministic ledger
-record makes replay return `already_applied` with zero writes. Before apply,
-the transaction locks every signed source, backing node, and projection
-relationship and then recomputes the complete authority hash under those locks.
+shapes are refused. Stale status alone is not detach authority: source
+reconciliation revives a stale row when its source-type-specific DD or signal
+entity is present. Both reconciliation and ancestor supersession therefore use
+one shared upstream-presence predicate. A present-upstream stale row is recorded
+under `refuse_present_upstream_stale_source_ids` in a hash-bearing refusal. Only
+a stale row whose upstream entity is absent or removed enters
+`detach_stale_source_ids`. Apply keeps that lifecycle status while atomically
+removing its live-name bindings, scalar mirror, and matching signed backing
+projections. Stale sources are excluded from ancestor attachment re-validation.
+Apply requires the preview digest; a deterministic ledger record makes replay
+return `already_applied` with zero writes. Before apply, the transaction locks
+every signed source, backing node, and projection relationship and then
+recomputes the complete authority hash under those locks.
 
 ## Transactional regression evidence
 
@@ -32,13 +41,13 @@ type did not yet exist. The final run used an isolated, auth-disabled Neo4j
 9 passed in 6.90s
 ```
 
-The nine tests cover a direct ancestor, a multi-hop ancestor with zero-write
-idempotent replay, non-ancestor refusal, self-target refusal, directed-cycle
-refusal, attachment re-validation refusal with rollback, scalar-disagreement
-refusal, exact deduplication of a source already bound to both names, and a
-concurrent source-scalar plus backing-projection drift between hash computation
-and locking. The direct and multi-hop assertions prove the original lineage
-remains and no reverse edge is created.
+The original nine tests cover a direct ancestor, a multi-hop ancestor with
+zero-write idempotent replay, non-ancestor refusal, self-target refusal,
+directed-cycle refusal, attachment re-validation refusal with rollback,
+scalar-disagreement refusal, exact deduplication of a source already bound to
+both names, and concurrent source-scalar plus backing-projection drift between
+hash computation and locking. The direct and multi-hop assertions prove the
+original lineage remains and no reverse edge is created.
 
 Replay is proven write-free by canonical byte equality over every participant
 node's labels and properties and every incident relationship's identity, type,
@@ -77,3 +86,37 @@ envelope:
 - `corrective-red.log`
 - `corrective-final-test.log`
 - `live-dry-run-corrective.log`
+
+## Stale-source lifecycle contract
+
+The live apply attempt exposed one source that preview had silently counted as
+a retarget even though the sanctioned retarget primitive refuses stale status:
+`dd:waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity`. The
+follow-up review identified that stale is also a recoverable mirror state: when
+the upstream entity is present, reconciliation revives the row to `extracted`.
+Detachment is therefore authorized only by absent-or-removed upstream evidence,
+not by the lifecycle status alone.
+
+The disposable-Neo4j red proof failed on the missing action class. With the
+contract implemented, the complete file reports:
+
+```text
+...........                                                              [100%]
+11 passed in 6.86s
+```
+
+The two stale-source regressions prove both sides of that predicate. A
+present-upstream stale row produces a signed refusal and remains unchanged. A
+genuinely absent-upstream row detaches; subsequent source reconciliation on the
+same disposable graph reports `revived=0`, leaves exactly one stale source row,
+and creates no live binding.
+
+The regenerated production dry-run remained read-only: the
+`StandardNameChange` census stayed 7,149 before and after. Its fresh manifest is
+`50f3c01c8dbc6ee6a1da2f58544d78a773b93c4a4a05fa9032f00865936198f8` and
+partitions the 76 signed sources as 36 retarget, 39 deduplicate, one stale
+detach, and zero stale refusals. The live stale row is therefore adjudicated as
+genuinely absent-or-removed upstream and remains the sole member of
+`detach_stale_source_ids`:
+`dd:waves/coherent_wave/beam_tracing/beam/ion/element/multiplicity`. No live
+apply was invoked.
