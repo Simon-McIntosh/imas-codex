@@ -1,0 +1,41 @@
+# Delegated DD-resolution decisions
+
+Actor: `reckon-ship (lead-delegated 2026-08-17)`  
+Candidate digest: `sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4`  
+Evidence receipt: `/tmp/reckon-s8-evidence/ddgap-perpath/receipt.json` (`3231a7ac333484a95e282bbe86058324f36422baa58c9cf1d5ab32782dc6f573`)  
+Attempts: 32; approved: 32; refused: 0.
+
+| Candidate | Exact path | Outcome | Receipt or displayed gate reason |
+|---|---|---|---|
+| U11 | `camera_ir/channel/camera/direction/x` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:83cd5677b3d304d92a8b72b830ff0bd3ee40b37f08e5e08f8081ba1c04cfdb76` |
+| U11 | `camera_ir/channel/camera/direction/y` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:31f53658d19f3e7c61591284afc4338c9fa888ff239a290b73b6e8461093e070` |
+| U11 | `camera_ir/channel/camera/direction/z` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:70094dbdcf2a6126e8fd0c53e9a2773add05d2f3c69e1704233bd42f1afffafe` |
+| U11 | `ec_launchers/mirror/movement/direction/x` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:3da4ac0d5ca1981b6cf0188ce7e39e2dee6a5c8fe387b78e89ea50fdb7260d16` |
+| U11 | `ec_launchers/mirror/movement/direction/y` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:0ae7e5a7a46700c5e13ae1d042bd5cf6bf4cf9d06d983520d998f17723c5e2a9` |
+| U11 | `ec_launchers/mirror/movement/direction/z` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:866897e1bf9ccff377104225ca83e091910d38e7e992e8489ed71ae26d18df2a` |
+| U11 | `operational_instrumentation/sensor/direction/x` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:ad1970992d5ff8b68ad093d59dcdfb3e726959a5ee9dbd0401ebe84bf89752f5` |
+| U11 | `operational_instrumentation/sensor/direction/y` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:fe5f12d578e1e1b6e6c51e33d2686b36a042ed2f94d6b0428a5641d6bbfbb86e` |
+| U11 | `operational_instrumentation/sensor/direction/z` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:f7454e6192f939d0cc9075098cd2810fd43948d7b5b5cb03f35ef922dd812028` |
+| U11 | `spi/injector/shatter_cone/direction/x` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:973fb76f57f7aabff89ec5ae71a1f1fd7b438668ad5bf930788290e3f58a672e` |
+| U11 | `spi/injector/shatter_cone/direction/y` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:6d73262a42a22c2281b1954963efcf1fc4a41087db0e509b34171ec575c763ed` |
+| U11 | `spi/injector/shatter_cone/direction/z` | APPROVED | `dd-resolution-approval:U11:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:f5753410f65fdc9cdf349ea49ffd21d8db64a734ff506e92e1e1fc62f26af591` |
+| U12 | `operational_instrumentation/sensor/direction_second/x` | APPROVED | `dd-resolution-approval:U12:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:cdd19811b68fd5133c82e57bf7396285704e582e7d4a9fb9a09bce1edd181e2d` |
+| U12 | `operational_instrumentation/sensor/direction_second/y` | APPROVED | `dd-resolution-approval:U12:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:df8c70b3f4702a6c521f74806bae83fb2aa3df7768e0e2d3d02f83998f5a807e` |
+| U12 | `operational_instrumentation/sensor/direction_second/z` | APPROVED | `dd-resolution-approval:U12:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:78c5b5dcb324970c0eb0d89aa7e904bf242db9c7f1b36dae85480d546c669978` |
+| U13 | `camera_ir/channel/camera/up/x` | APPROVED | `dd-resolution-approval:U13:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:8707a40a7c46c09df4f1643cd8f6139dd34d511321380548a91340ba5b5c1f68` |
+| U13 | `camera_ir/channel/camera/up/y` | APPROVED | `dd-resolution-approval:U13:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:bb1877e15f5d960536278371e001885218fe8582a44705070bc149ba60f839c2` |
+| U13 | `camera_ir/channel/camera/up/z` | APPROVED | `dd-resolution-approval:U13:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:ce8a04d72b4560d2b701dd369af05d34c3e13988ceccf8174e7a3f248cca4fb6` |
+| U14 | `spi/injector/injection_direction/x` | APPROVED | `dd-resolution-approval:U14:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:06fe1a8bd7c9206f34bd5b3844e0ddfd591070536ba15ed5487ed02712ea14ca` |
+| U14 | `spi/injector/injection_direction/y` | APPROVED | `dd-resolution-approval:U14:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:a8c514737aa1e14e7ae92566decf6f2f57ac3a1b4152e399b2240230e7740240` |
+| U14 | `spi/injector/injection_direction/z` | APPROVED | `dd-resolution-approval:U14:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:11ec9ea6bb548e89d925983b0e580690327ca30e2a72179353048dcb1da43f25` |
+| U15 | `spi/injector/shatter_cone/unit_vector_major/x` | APPROVED | `dd-resolution-approval:U15:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:a3d4a083f947f8970e71077c965e010f4892f2cc4e85106ba31c5d1ec3bc8f23` |
+| U15 | `spi/injector/shatter_cone/unit_vector_major/y` | APPROVED | `dd-resolution-approval:U15:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:b6e491e63d4c93afff900c85ed782cc65b03e978f6dcdc29512fca987d9b8eaf` |
+| U15 | `spi/injector/shatter_cone/unit_vector_major/z` | APPROVED | `dd-resolution-approval:U15:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:9af0c6f34cc0e161ec9184d81400dda763331bcf2592dcbc16a6d828a6a4fa2f` |
+| U16 | `spi/injector/shatter_cone/unit_vector_minor/x` | APPROVED | `dd-resolution-approval:U16:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:32d32d86449a70c46ffb69eebdf99091a16836fa96424bc17678be53d3cd3293` |
+| U16 | `spi/injector/shatter_cone/unit_vector_minor/y` | APPROVED | `dd-resolution-approval:U16:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:a7f9cf9c2c1b385d1739bbdaf27a23f48d4c10d321eb603deb46c072e1c43519` |
+| U16 | `spi/injector/shatter_cone/unit_vector_minor/z` | APPROVED | `dd-resolution-approval:U16:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:6fe072345d3286ecb5f9d49db8636e06b6357747a06a0e43df0c502de9e49588` |
+| U21 | `wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values` | APPROVED | `dd-resolution-approval:U21:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:3932c9f9f5f9864eee479ce670e8afe42f9ba5a942efb20e1a9e4f026d095e86` |
+| U22 | `wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values` | APPROVED | `dd-resolution-approval:U22:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:68da3aefe1615f231b716d544cd18ab905bdc064cac23c358f491f1a575c5cd8` |
+| U32 | `wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values` | APPROVED | `dd-resolution-approval:U32:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:189243e803c28fd02ac299de4ccff3e83bf6c7e882b141dcd0f0524a3d05fcd3` |
+| O17 | `edge_profiles/ggd/ion/state/ionisation_potential` | APPROVED | `dd-resolution-approval:O17:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:21fa72a4617c0ace091935e6a5233094e59e6834c5bb0fe99dc9ba4a8d45fe04` |
+| O17 | `plasma_profiles/ggd/ion/state/ionisation_potential` | APPROVED | `dd-resolution-approval:O17:sha256:945c87d26ad84bd9f97ec2570c4fc5550708e14d70e1c0e7e8d3b918fdb9fec4:sha256:87294b91cb2f326b74fb0c7d936198b47ca0efd5bfcab37ff850b929b15028f2` |

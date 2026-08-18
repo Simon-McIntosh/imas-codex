@@ -1,0 +1,781 @@
+{
+  "active_manifest_sha256": "f8718114b8872a0a90886a955363c7778671123537b9fc1a4d67c7490ca38edc",
+  "approval_executed": false,
+  "candidate_resource_sha256": "c6ee52aedd65cad1fa42c539661a127fffaa6bb2d25e87808f5fda9db35cd4b1",
+  "candidate_rows": [
+    "U11",
+    "U12",
+    "U13",
+    "U14",
+    "U15",
+    "U16",
+    "U21",
+    "U22",
+    "U32",
+    "O17"
+  ],
+  "fact_count": 32,
+  "facts": [
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:ad18d015c236d3476ab146634ab51072feb0d149ad363a93901c5c48069fd039",
+      "expected_value": "1",
+      "fact_id": "dd_gap:camera_ir/channel/camera/direction/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:8265becb1ed61af054dc47ee79395a7c3e87975af45af57e842ac7ec0ae8588d"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "camera_ir/channel/camera/direction/x",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "camera_ir/channel/camera/direction/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:51e899c67f40e7059af155ee3691bd9e261e1a59431c15313e354c482ecf35da",
+      "expected_value": "1",
+      "fact_id": "dd_gap:camera_ir/channel/camera/direction/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:b41d89f6be8e99315750e586763a518462dbf09eabd22749d07f4056e6c2639a"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "camera_ir/channel/camera/direction/y",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "camera_ir/channel/camera/direction/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:aadf3a62b7e60455d9896eb9bd1b04cd0d08fdf48969f02f5c2b30bc09d16ecd",
+      "expected_value": "1",
+      "fact_id": "dd_gap:camera_ir/channel/camera/direction/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:a015784c29a0f881ffeb9708a15f6be8fd96e41591782d95959d073486b3c87b"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "camera_ir/channel/camera/direction/z",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "camera_ir/channel/camera/direction/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:ba80528319488396d5986aa157eca55232a854f381b09a3d07a142e4557d7eea",
+      "expected_value": "1",
+      "fact_id": "dd_gap:ec_launchers/mirror/movement/direction/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:4f473b644fe8e83170a3698751aa6cabf363c1c64305a72678dc76fc9d3ee8cf"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "ec_launchers/mirror/movement/direction/x",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "ec_launchers/mirror/movement/direction/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:4d0cfb9c9535ee0138c58eec6b369894fae25205befb3160271e3e45a881a112",
+      "expected_value": "1",
+      "fact_id": "dd_gap:ec_launchers/mirror/movement/direction/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:5b145807faae476b0baa0bf866b9f868e6f59b9279c1ef802232b7db6eddd3c0"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "ec_launchers/mirror/movement/direction/y",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "ec_launchers/mirror/movement/direction/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:ac0b6b753443af6ccc596324bae9515ef1ae2d010a2cceb6c0a5923cb88d6749",
+      "expected_value": "1",
+      "fact_id": "dd_gap:ec_launchers/mirror/movement/direction/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:f0ce1bc0fd6618478b2c18baedc54537ac8a9f7e7e745fe01e609f3731311e1c"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "ec_launchers/mirror/movement/direction/z",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "ec_launchers/mirror/movement/direction/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:a12cad7c86f0ea36fb3a1f617495d288d592be214bccc4ffc313a4f560722bd6",
+      "expected_value": "1",
+      "fact_id": "dd_gap:operational_instrumentation/sensor/direction/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:0dfa71d250a2df95423b7b6130ebc2b271dff307dac2584122d7772cdbc23215"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "operational_instrumentation/sensor/direction/x",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "operational_instrumentation/sensor/direction/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:b9e3fc8d1392fd6926ada49c20f3128590be6d01b28835fe3e14fec91bc876ed",
+      "expected_value": "1",
+      "fact_id": "dd_gap:operational_instrumentation/sensor/direction/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:07f58608f64ce3d67d7bd533b46adedc1be5dbc7850f48465ebc605187cdc656"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "operational_instrumentation/sensor/direction/y",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "operational_instrumentation/sensor/direction/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:322f21356deb14f1b1e032a4008acdc0913c7e846668662ee604378e262d6392",
+      "expected_value": "1",
+      "fact_id": "dd_gap:operational_instrumentation/sensor/direction/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:eabd7f33d816740784df823eeeaf0c14cc42a05650fb322f131c8b72a4bb582a"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "operational_instrumentation/sensor/direction/z",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "operational_instrumentation/sensor/direction/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:56fc8b6613f4bd43cd06c8098e5c533b2d71eb29a88efe15ec77d4d7a3f028ac",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/direction/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:80e847982c3ea09ae7ced345e96c5ed759777ba5c50d6e021f806386f2b79eb8"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/direction/x",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/direction/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:10502f98ff18214c0b953bf015879837ad59951c4cf21ebed13132f1a4365fac",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/direction/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:c1062458227d5f8da903e06ea32c59c65f155a650ecbc72f85894edcd3eaadef"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/direction/y",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/direction/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U11",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:5ee4edf527b3e8942f1f77636e5452302b784ebaf0eb38a4cac67cd785419717",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/direction/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:7366882574ad55f6dd290b086dd888d08f41508651fcbb95f7a5674e1f535f40"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/direction/z",
+      "reason": "Exact per-path evidence for candidate U11; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/direction/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U12",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:60f3aeb9ce7adc5550ca64a8dca770441bdfcb7dd5b59e70322d39808aed4fd2",
+      "expected_value": "1",
+      "fact_id": "dd_gap:operational_instrumentation/sensor/direction_second/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:d05f72f351d37b53fd43c5547b49fa013c303d34e3591af42c8f1c6c009c611f"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "operational_instrumentation/sensor/direction_second/x",
+      "reason": "Exact per-path evidence for candidate U12; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "operational_instrumentation/sensor/direction_second/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U12",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:25971d39756b6346235f4ee9d9926fb68cc64e5b7e60647e20aba9487ead70dc",
+      "expected_value": "1",
+      "fact_id": "dd_gap:operational_instrumentation/sensor/direction_second/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:5509028a754375dc18e7adf9ec73708ac9e654a128613a36c7bb6e8b672bb451"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "operational_instrumentation/sensor/direction_second/y",
+      "reason": "Exact per-path evidence for candidate U12; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "operational_instrumentation/sensor/direction_second/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U12",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:2bfe8e180383b9a5e31e7eb6244b324ddc70e06d37dd988bd42b742b91251fac",
+      "expected_value": "1",
+      "fact_id": "dd_gap:operational_instrumentation/sensor/direction_second/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:65a479af6aa6cf0b67f854cc207939a4db6defa54beac8eb79972168b7d02a6d"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "operational_instrumentation/sensor/direction_second/z",
+      "reason": "Exact per-path evidence for candidate U12; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "operational_instrumentation/sensor/direction_second/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U13",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:ea5094cb125c736bab8dad9a47c1f8f87d005b7d9a0fca717647d2164e6cdfd1",
+      "expected_value": "1",
+      "fact_id": "dd_gap:camera_ir/channel/camera/up/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:ba102a404b86780d2394d08f6935e6b18a76fea7b137a1f9339e782f54720ddc"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "camera_ir/channel/camera/up/x",
+      "reason": "Exact per-path evidence for candidate U13; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "camera_ir/channel/camera/up/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U13",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:cb6ffba8be971bdd56d6ffc3780fa6dc99a1078339698e384c9d3554c04afadd",
+      "expected_value": "1",
+      "fact_id": "dd_gap:camera_ir/channel/camera/up/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:4d03cb5d2f23e49ecc4fc13bd210f0e6babe3099e542db8303a8eabcac02225e"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "camera_ir/channel/camera/up/y",
+      "reason": "Exact per-path evidence for candidate U13; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "camera_ir/channel/camera/up/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U13",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:348a79cd210f8ddef28810a0f443d0e19f7025d4c8ced4c0a58c45cc66444312",
+      "expected_value": "1",
+      "fact_id": "dd_gap:camera_ir/channel/camera/up/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:6143adafd9d4f2610e9aa466ddc82989aa90167fb5942c333271a5061e23ca06"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "camera_ir/channel/camera/up/z",
+      "reason": "Exact per-path evidence for candidate U13; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "camera_ir/channel/camera/up/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U14",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:52688aba26bfa7d00fa87ebcb080a7c926de6333b52e4562e5d666892cb52f35",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/injection_direction/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:bd62ad1952bbe0ed88f8626e0cb200ad09c3f8b708f1b12bc7148aa39192a2b5"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/injection_direction/x",
+      "reason": "Exact per-path evidence for candidate U14; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/injection_direction/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U14",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:f65e1e73914c450f7e3e7dee435fb03c760311c139e0fcc141b70d8d62d8505b",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/injection_direction/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:3ce2fc685fb49eb676e59f255e76602a4d4e45820851c9df0611ae479383a2ed"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/injection_direction/y",
+      "reason": "Exact per-path evidence for candidate U14; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/injection_direction/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U14",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:4ab4310f1e6be32d8fb6b297bdaab4948d486f98a2ec8cb09b4f51cce64933b7",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/injection_direction/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:1782ae17cd535aaf6c578bb219782dd40b1d1684f701a74341b3bfcf364cb918"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/injection_direction/z",
+      "reason": "Exact per-path evidence for candidate U14; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/injection_direction/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U15",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:49d280a76cfc1e85368b1a0ce1c4805ed184d17ef5fa8fb80784d0ff719569be",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_major/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:1340a259007274db69f69e6aed9e4ebd691663cb85acb09a969e699f88f53fec"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/unit_vector_major/x",
+      "reason": "Exact per-path evidence for candidate U15; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/unit_vector_major/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U15",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:dbd743de10264f255a582637f500dd02ec2165e70a195433253cef8bfa9d7d78",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_major/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:89392d041689296c16a2aa7a4fffe5b6b2ae16aaf16a27afbec739b73dcc9dd9"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/unit_vector_major/y",
+      "reason": "Exact per-path evidence for candidate U15; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/unit_vector_major/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U15",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:686ef6a579537151c4a8d6405283f358040dcb3223a4a37773170ab152ac42ba",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_major/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:7f4659ee267330cb23bcb7f98003e8d1e5bfa6c9845b0b008994cf6c8ea07549"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/unit_vector_major/z",
+      "reason": "Exact per-path evidence for candidate U15; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/unit_vector_major/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U16",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:61cc5895957f3ca1fe0fa349baead4db0c41f3ff619e0b6921c2f7a357b17084",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_minor/x:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:e4894d6fcadd6db34f9f2ce2ceaa410374c65a35c2da9be98a9bf6095038415a"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/unit_vector_minor/x",
+      "reason": "Exact per-path evidence for candidate U16; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/unit_vector_minor/x"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U16",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:b9c8fd92517e6c4f0d921df95f900eba817e30bc9d4afd21a277fe76d40df4b5",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_minor/y:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:9eacd432177dceefa17cf51827c5b43102d181aef00694fa15e9c18d722872c3"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/unit_vector_minor/y",
+      "reason": "Exact per-path evidence for candidate U16; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/unit_vector_minor/y"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U16",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:75253d9c194b19dce92ba5db7650220d115bac0d486341e87c33a11f971485b3",
+      "expected_value": "1",
+      "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_minor/z:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:1294f54dbd934a37e42fedc02c4377bc3f341531fb94bb7be34b9638b28de4b6"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m",
+      "path": "spi/injector/shatter_cone/unit_vector_minor/z",
+      "reason": "Exact per-path evidence for candidate U16; official upstream solution: merged IMAS Data Dictionary PR 242, merge commit cb0d86de388dbbdf62acca36de7b7f8c62bb9889.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "spi/injector/shatter_cone/unit_vector_minor/z"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U21",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:54f66a931210d0075872a98068a9ca4a5a4d48b5bd4d02e4cd410727b68e89c7",
+      "expected_value": "W.m^-2",
+      "fact_id": "dd_gap:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:3997d7cac45ebba84c7e99f2424d0438c05c9b5df5cc084c27f6dbbe3a0fc113"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m^-2.s^-1",
+      "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values",
+      "reason": "Exact per-path evidence for candidate U21; official upstream solution: open IMAS Data Dictionary PR 273, solution commit f34c85d33497f2bd777db7eaf0f6fb93fddc66f2.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U22",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:37e60eece31220e97b36e2757daf88a2a5902979b979b11e67b87150f166ab59",
+      "expected_value": "W.m^-2",
+      "fact_id": "dd_gap:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:5811bc23bb0209562ecf69eb282b1b073e3dd33866fd7a0b1a7f5e1601bf7602"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m^-2.s^-1",
+      "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values",
+      "reason": "Exact per-path evidence for candidate U22; official upstream solution: open IMAS Data Dictionary PR 273, solution commit f34c85d33497f2bd777db7eaf0f6fb93fddc66f2.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "U32",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:022fef0a8eb5051e1be027094bbccdc7ae14d0a7542d8f1b618e77498b2cb7ef",
+      "expected_value": "W.m^-2",
+      "fact_id": "dd_gap:wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values:unit_defect",
+      "kind": "unit_defect",
+      "observation_ids": [
+        "dd_gap_observation:36f756ec77f058a28df59ab5bbd04c738974ecae1c44417576bf6c455489100b"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "m^-2.s^-1",
+      "path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+      "reason": "Exact per-path evidence for candidate U32; official upstream solution: open IMAS Data Dictionary PR 273, solution commit f34c85d33497f2bd777db7eaf0f6fb93fddc66f2.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "O17",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:757367fc97f319550721ae38df655690dd07e37670d4f90221cc80502c357575",
+      "expected_value": "eV",
+      "fact_id": "dd_gap:edge_profiles/ggd/ion/state/ionisation_potential:self_contradiction",
+      "kind": "self_contradiction",
+      "observation_ids": [
+        "dd_gap_observation:39687441121bb9c996b438da28f65e6c1b3406cb07d32fd12bccc41c5b834cf8"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "e",
+      "path": "edge_profiles/ggd/ion/state/ionisation_potential",
+      "reason": "Exact per-path evidence for candidate O17; official upstream solution: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280, solution commits 30a5ddd4b7037b9f93a8f00f7837809403349d99.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "edge_profiles/ggd/ion/state/ionisation_potential"
+      ],
+      "status": "flagged"
+    },
+    {
+      "candidate_row": "O17",
+      "evidence_rule": "unit_equals_expected",
+      "evidence_token": "dd-gap-evidence:9dac577375cae15e7a58a897908cc2b9183bf0dc9c6c52315bcc550091eee389",
+      "expected_value": "eV",
+      "fact_id": "dd_gap:plasma_profiles/ggd/ion/state/ionisation_potential:self_contradiction",
+      "kind": "self_contradiction",
+      "observation_ids": [
+        "dd_gap_observation:b0897ac0dc23ffaa0458c0f03f86b34162e80779e043aaba6e544e314f486971"
+      ],
+      "observed_dd_version": "4.1.1",
+      "observed_value": "e",
+      "path": "plasma_profiles/ggd/ion/state/ionisation_potential",
+      "reason": "Exact per-path evidence for candidate O17; official upstream solution: https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280, solution commits 30a5ddd4b7037b9f93a8f00f7837809403349d99.",
+      "reporter": "dd-resolution-evidence",
+      "source_paths": [
+        "plasma_profiles/ggd/ion/state/ionisation_potential"
+      ],
+      "status": "flagged"
+    }
+  ],
+  "generated_at": "2026-08-17T14:04:04.186168+00:00",
+  "lifecycle_states": [
+    "flagged"
+  ],
+  "manifest_entry_written": false,
+  "no_write_probe": {
+    "all_succeeded": true,
+    "approval_executed": false,
+    "candidate_row_count": 10,
+    "graph_writes": 0,
+    "method": "dd_resolutions._verify_graph_evidence over get_dd_gap snapshots",
+    "results": [
+      {
+        "candidate_row": "U11",
+        "fact_id": "dd_gap:camera_ir/channel/camera/direction/x:unit_defect",
+        "path": "camera_ir/channel/camera/direction/x",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:ad18d015c236d3476ab146634ab51072feb0d149ad363a93901c5c48069fd039",
+        "verified_observation_ids": [
+          "dd_gap_observation:8265becb1ed61af054dc47ee79395a7c3e87975af45af57e842ac7ec0ae8588d"
+        ]
+      },
+      {
+        "candidate_row": "U12",
+        "fact_id": "dd_gap:operational_instrumentation/sensor/direction_second/x:unit_defect",
+        "path": "operational_instrumentation/sensor/direction_second/x",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:60f3aeb9ce7adc5550ca64a8dca770441bdfcb7dd5b59e70322d39808aed4fd2",
+        "verified_observation_ids": [
+          "dd_gap_observation:d05f72f351d37b53fd43c5547b49fa013c303d34e3591af42c8f1c6c009c611f"
+        ]
+      },
+      {
+        "candidate_row": "U13",
+        "fact_id": "dd_gap:camera_ir/channel/camera/up/x:unit_defect",
+        "path": "camera_ir/channel/camera/up/x",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:ea5094cb125c736bab8dad9a47c1f8f87d005b7d9a0fca717647d2164e6cdfd1",
+        "verified_observation_ids": [
+          "dd_gap_observation:ba102a404b86780d2394d08f6935e6b18a76fea7b137a1f9339e782f54720ddc"
+        ]
+      },
+      {
+        "candidate_row": "U14",
+        "fact_id": "dd_gap:spi/injector/injection_direction/x:unit_defect",
+        "path": "spi/injector/injection_direction/x",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:52688aba26bfa7d00fa87ebcb080a7c926de6333b52e4562e5d666892cb52f35",
+        "verified_observation_ids": [
+          "dd_gap_observation:bd62ad1952bbe0ed88f8626e0cb200ad09c3f8b708f1b12bc7148aa39192a2b5"
+        ]
+      },
+      {
+        "candidate_row": "U15",
+        "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_major/x:unit_defect",
+        "path": "spi/injector/shatter_cone/unit_vector_major/x",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:49d280a76cfc1e85368b1a0ce1c4805ed184d17ef5fa8fb80784d0ff719569be",
+        "verified_observation_ids": [
+          "dd_gap_observation:1340a259007274db69f69e6aed9e4ebd691663cb85acb09a969e699f88f53fec"
+        ]
+      },
+      {
+        "candidate_row": "U16",
+        "fact_id": "dd_gap:spi/injector/shatter_cone/unit_vector_minor/x:unit_defect",
+        "path": "spi/injector/shatter_cone/unit_vector_minor/x",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:61cc5895957f3ca1fe0fa349baead4db0c41f3ff619e0b6921c2f7a357b17084",
+        "verified_observation_ids": [
+          "dd_gap_observation:e4894d6fcadd6db34f9f2ce2ceaa410374c65a35c2da9be98a9bf6095038415a"
+        ]
+      },
+      {
+        "candidate_row": "U21",
+        "fact_id": "dd_gap:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values:unit_defect",
+        "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/state/incident/values",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:54f66a931210d0075872a98068a9ca4a5a4d48b5bd4d02e4cd410727b68e89c7",
+        "verified_observation_ids": [
+          "dd_gap_observation:3997d7cac45ebba84c7e99f2424d0438c05c9b5df5cc084c27f6dbbe3a0fc113"
+        ]
+      },
+      {
+        "candidate_row": "U22",
+        "fact_id": "dd_gap:wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values:unit_defect",
+        "path": "wall/description_ggd/ggd/energy_fluxes/kinetic/neutral/incident/values",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:37e60eece31220e97b36e2757daf88a2a5902979b979b11e67b87150f166ab59",
+        "verified_observation_ids": [
+          "dd_gap_observation:5811bc23bb0209562ecf69eb282b1b073e3dd33866fd7a0b1a7f5e1601bf7602"
+        ]
+      },
+      {
+        "candidate_row": "U32",
+        "fact_id": "dd_gap:wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values:unit_defect",
+        "path": "wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:022fef0a8eb5051e1be027094bbccdc7ae14d0a7542d8f1b618e77498b2cb7ef",
+        "verified_observation_ids": [
+          "dd_gap_observation:36f756ec77f058a28df59ab5bbd04c738974ecae1c44417576bf6c455489100b"
+        ]
+      },
+      {
+        "candidate_row": "O17",
+        "fact_id": "dd_gap:edge_profiles/ggd/ion/state/ionisation_potential:self_contradiction",
+        "path": "edge_profiles/ggd/ion/state/ionisation_potential",
+        "success": true,
+        "verified_evidence_token": "dd-gap-evidence:757367fc97f319550721ae38df655690dd07e37670d4f90221cc80502c357575",
+        "verified_observation_ids": [
+          "dd_gap_observation:39687441121bb9c996b438da28f65e6c1b3406cb07d32fd12bccc41c5b834cf8"
+        ]
+      }
+    ]
+  },
+  "node": "ddgap-perpath-evidence",
+  "owned_observation_count": 32,
+  "provider_calls": 0,
+  "raw_cypher_used": false,
+  "sanctioned_instrument": "imas_codex.standard_names.dd_gaps.write_dd_gaps",
+  "unit_enforcement_changed": false
+}
+
