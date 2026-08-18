@@ -54,6 +54,23 @@
     <code>dd:test_focus_scope__*</code>) from <code>test_minting.py</code> / <code>test_focus_scope.py</code>
     cleanup gaps — removal is its own node.</p>
   </section>
+
+  <section id="supersede-into-ancestor">
+    <h2>The ancestor-fold supersession instrument is landed</h2>
+    <p><strong>Landed 2026-08-18</strong> — chain <code>761afff4</code> → <code>be2e4ae9</code> →
+    <code>8ceea23a</code>, merge <code>c2aaf946</code>. <code>supersede_into_ancestor</code> executes the
+    2026-08-17 lineage adjudication's verdict shape: fold a name into an existing
+    <code>REFINED_FROM</code> ancestor with NO reverse lineage edge. Strict ancestry refuses self and
+    reverse-reachable (cycle) targets; apply locks and exact-hash-rechecks the complete signed closure
+    (both names, 76 sources, 76 backing nodes, 115 projection relationships in the live pair) inside
+    the caller-owned transaction before any mutation — a real second-session drift test invalidates
+    authority with zero change rows; replay is measured write-free. Two adversarial rounds (2 HIGH +
+    1 MEDIUM found, all resolved) ended <strong>APPROVE with zero findings</strong>; disposable-Neo4j
+    suite 9/9. The live dry-run for <code>atomic_count_of_ion_state</code> →
+    <code>atomic_count</code> is signed at hash <code>e51c191e…</code> (37 retarget + 39 dedup, 6
+    lineage edges preserved, changed=0). The exact-hash live apply is the next, separately gated node
+    of f-sgwi-dual-binding.</p>
+  </section>
 </main>
 </body>
 </html>
