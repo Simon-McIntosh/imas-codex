@@ -194,6 +194,26 @@
   into a single success. The guard cycles were also past the point of good return — the retirement had
   zero live residuals throughout, and the coordinator should have scoped the guard as non-blocking
   rather than gating integration on it.</p>
+
+  <section id="numeric-fallback-retired">
+    <h2>§7 — The numeric missing-unit fallback is retired with audited absence</h2>
+    <p><strong>Landed 2026-08-18</strong> — chain <code>54aad0e7</code> → <code>8282e3d1</code>,
+    merge <code>82c5ba7c</code>; verification record <code>4dd5422f</code>
+    (<code>docs/evidence/sn-dd-gaps/numeric-fallback-gate.md</code>). Adjudication: RETIRE — an absent
+    raw unit plus an absent <code>HAS_UNIT</code> relation is missing authority, not evidence of
+    dimensionlessness; <code>workers.py</code> already refuses unresolved units at compose time and the
+    audits forbid coercing a missing unit to <code>1</code>. The single fabrication site
+    (<code>_enrich_batch_items</code>, formerly workers.py:2265-2282) is removed; the enrichment
+    boundary now carries the exact DD facts (path, DD version, raw unit scalar, data type, complete
+    unit-relation set), and <code>equilibrium/time_slice/profiles_1d/q</code> (DD 4.1.1, FLT_1D, no
+    unit relation) stays unit-null while a relationship-backed <code>Pa</code> stays <code>Pa</code>.
+    The singular-authority audit now reports <code>numeric_missing_unit_fallback</code>
+    <strong>audited / residual 0</strong> — proven by runtime regressions, with no public audit
+    signature accepting caller-supplied applicability. Gates: adversarial review APPROVE with
+    <strong>zero findings</strong> (three named checks traced to file:line); full Standard Names suite
+    <strong>6575 passed / 8 skipped / 0 failed</strong> at the tested HEAD, log SHA-256
+    <code>11a66008…</code>.</p>
+  </section>
 </main>
 </body>
 </html>

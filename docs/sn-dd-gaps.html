@@ -17,11 +17,11 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="41">
+<meta name="plan-version" content="43">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf,6a32165d,212465f5,2f2c801d,76074f6b,4ae7c24f,a8fc9765,9d0f5ee6,b1411210,413b7c0e,5c4c09e1,bd132793,d82764dd">
+<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf,6a32165d,212465f5,2f2c801d,76074f6b,4ae7c24f,a8fc9765,9d0f5ee6,b1411210,413b7c0e,5c4c09e1,bd132793,d82764dd,54aad0e7,8282e3d1,4dd5422f">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html,docs/evidence/archive/sn-dd-gaps-landed.html,docs/evidence/sn-dd-gaps/">
 <meta name="plan-impl" content="0.98">
 <meta name="plan-depends-on" content="">
@@ -85,16 +85,16 @@
     the sanctioned evidence writers, a renewed lead delegation naming the <em>new</em> digest, and 14 per-path approvals.
     The existing delegation covers digest <code>c6ee52ae…</code> only and does not extend to the expanded set.</p>
 
-    <h2 id="s7">§7 — Remaining: audited-absence policy for the numeric missing-unit fallback</h2>
-    <p>The singular-authority audit deliberately reports <code>numeric_missing_unit_fallback</code> as
-    <strong>not-audited</strong> with no residual count and a stated reason, rather than as a zero it cannot justify.
-    That deferral was independently endorsed as honest and sufficient — shipped active effective-none records are zero,
-    so it is not a current double-authority risk — but the fallback still injects unit <code>1</code> for numeric DD rows
-    with no unit relationship, outside every manifest. The policy owed here is a decision plus its instrument: either
-    prove numeric applicability and runtime reachability from exact DD facts (path, version, raw unit, data type, unit
-    relation) so the class can be audited for real, or retire the blanket fallback and require audited absence. Do not
-    reintroduce a caller-supplied applicability flag: an audit whose verdict depends on an unchecked argument is not
-    evidence, which is what blocked the first attempt.</p>
+    <section id="s7" class="section-landed">
+      <header><span class="badge badge-shipped">✓ landed 2026-08-18</span>
+      <h2>§7 — Audited-absence policy for the numeric missing-unit fallback</h2></header>
+      <p class="landed-summary">Adjudicated RETIRE and landed: the single unit-<code>1</code> fabrication site for
+      numeric no-unit DD rows is removed, the enrichment boundary carries exact DD facts, and the audit reports the
+      carrier <strong>audited / residual 0</strong> via runtime regressions — no caller-supplied applicability anywhere.
+      Review APPROVE, zero findings; SN suite <strong>6575 / 8 / 0</strong>. Chain <code>54aad0e7</code> →
+      <code>8282e3d1</code>, merge <code>82c5ba7c</code>. Full record:
+      <a href="/imas-codex/evidence/archive/sn-dd-gaps-landed#numeric-fallback-retired">§7 landed</a>.</p>
+    </section>
 
     <h2 id="s8">§8 — Carried forward: the 41 legacy rows with no candidate</h2>
     <p>Of the 62 legacy <code>dd_unit_exceptions</code> rows, 21 are now retired against active authority and
@@ -463,6 +463,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="_top" data-id="ddres-decision-locked-20260818" data-who="reckon-ship" data-when="2026-08-18T19:20:00+00:00">
     <div class="r-comment-body"><p><strong>D-ddres-storage-and-gates is LOCKED to graph nodes with two gates, and the plan's remaining scope changes shape accordingly.</strong> Resolutions move out of the packaged YAML into the graph: a corrected <code>IMASNode</code> carries a <code>BRIDGED_BY</code> edge to a <code>DDResolution</code> node holding the published value, the effective value, the DD version, the upstream reference, and the retiring release, and that resolution carries an <code>EVIDENCED_BY</code> edge to the <code>DDGap</code> fact. Surviving gates: the DDGap edge, plus an upstream reference or an explicit none-yet marker. Removed: approval receipts, evidence tokens, monotonic revisions, manifest-digest compare-and-set, the flock, and per-digest lead delegation.</p><p><strong>What this changes in the remaining sections.</strong> §5 is now a straightforward additive-provenance job rather than an authority-gated one, since no live-DD-write approval is needed and the storage question is settled. §6's U19 cohort no longer needs a renewed per-digest delegation — that gate is gone — leaving only the substantive work of expanding the cohort from 6 to 14 exact paths with its per-path evidence. §7's numeric-fallback policy is unchanged. The migration itself is new work: port the 37 active records into graph nodes, delete the approval machinery and the packaged manifest, and simplify the 14-site read-time overlay to provenance reporting now that the graph is the correct-value source.</p><p><strong>Evidence relocated out of <code>/tmp</code>.</strong> Commit <code>15713ed6</code> preserves all 13 surviving cited artifacts under <code>docs/evidence/sn-dd-gaps/</code> (273 KB; 12 byte-for-byte copies verified by matching SHA-256, plus one 400-line excerpt of an 8.77 MB export whose full-file hash is recorded). One citation, <code>/tmp/s7_ddgap_identity_reclassification.json</code> (source no longer on disk; not recoverable at relocation time 2026-08-18) at <code>docs/sn-dd-gaps.html:387</code>, had no surviving source and is annotated rather than silently dropped. The four stale <code>sn-suite-gate</code> cache bundles in <code>/tmp</code> — 235,750 of 242,341 inodes, pure uv caches and virtualenvs from the test gates — are authorized for deletion by the lead and hold no cited evidence.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-20260818-numeric-fallback-retired" data-who="reckon-ship" data-when="2026-08-18T20:55:00+00:00">
+    <div class="r-comment-body"><p><strong>§7 is closed: the numeric missing-unit fallback is RETIRED with audited absence.</strong> Chain <code>54aad0e7</code> → <code>8282e3d1</code>, merge <code>82c5ba7c</code>. The one fabrication site (<code>_enrich_batch_items</code>) is gone, the enrichment boundary now carries exact DD facts, and <code>numeric_missing_unit_fallback</code> reports audited/0 grounded in runtime regressions — no public audit signature accepts caller-supplied applicability. Gate evidence: adversarial review APPROVE with zero findings (every check traced to file:line by the reviewer's own probes), full SN suite 6575 passed / 8 skipped / 0 failed at the tested HEAD (record <code>4dd5422f</code>, <code>docs/evidence/sn-dd-gaps/numeric-fallback-gate.md</code>). Implementation fraction is deliberately held at 0.98: §7 closed, but the locked storage decision added the §5 migration and overlay-simplification scope, so the executable denominator grew by about as much as this landing completed.</p></div>
 </div>
 </section>
 </main>
