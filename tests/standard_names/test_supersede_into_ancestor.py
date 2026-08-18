@@ -12,6 +12,7 @@ from neo4j import GraphDatabase
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.settings import get_graph_uri
+from imas_codex.standard_names import graph_ops
 from imas_codex.standard_names.graph_ops import (
     SupersedeIntoAncestorConflict,
     supersede_into_ancestor,
@@ -163,6 +164,9 @@ def test_multi_hop_ancestor_fold_and_replay_are_idempotent(
             manifest_sha256=preview["manifest_sha256"],
             gc=client,
         )
+        changes_before_replay = client.query(
+            "MATCH (change:StandardNameChange) RETURN count(change) AS count"
+        )[0]["count"]
         replay = supersede_into_ancestor(
             ids["old"],
             ids["ancestor"],
@@ -171,9 +175,13 @@ def test_multi_hop_ancestor_fold_and_replay_are_idempotent(
             manifest_sha256=preview["manifest_sha256"],
             gc=client,
         )
+        changes_after_replay = client.query(
+            "MATCH (change:StandardNameChange) RETURN count(change) AS count"
+        )[0]["count"]
         assert applied["changed"] == 1
         assert replay["outcome"] == "already_applied"
         assert replay["changed"] == 0
+        assert changes_after_replay == changes_before_replay
         assert client.query(
             "MATCH (:StandardName {id: $old})-[first:REFINED_FROM]->"
             "(:StandardName {id: $middle})-[second:REFINED_FROM]->"
@@ -201,6 +209,38 @@ def test_non_ancestor_target_is_refused(disposable_neo4j: tuple[str, str]) -> No
             )
     finally:
         ids["outsider"] = outsider
+        _cleanup(client, ids)
+
+
+@pytest.mark.graph
+def test_self_target_is_refused(disposable_neo4j: tuple[str, str]) -> None:
+    client = _client(disposable_neo4j, "self-target-refusal")
+    ids = _seed(client, "selftarget")
+    try:
+        with pytest.raises(SupersedeIntoAncestorConflict, match="distinct names"):
+            supersede_into_ancestor(
+                ids["old"], ids["old"], reason="invalid target", gc=client
+            )
+    finally:
+        _cleanup(client, ids)
+
+
+@pytest.mark.graph
+def test_cycle_target_is_refused(disposable_neo4j: tuple[str, str]) -> None:
+    client = _client(disposable_neo4j, "cycle-target-refusal")
+    ids = _seed(client, "cycletarget")
+    try:
+        client.query(
+            "MATCH (old:StandardName {id: $old}), "
+            "(ancestor:StandardName {id: $ancestor}) "
+            "CREATE (ancestor)-[:REFINED_FROM]->(old)",
+            **ids,
+        )
+        with pytest.raises(SupersedeIntoAncestorConflict, match="directed cycle"):
+            supersede_into_ancestor(
+                ids["old"], ids["ancestor"], reason="invalid target", gc=client
+            )
+    finally:
         _cleanup(client, ids)
 
 
@@ -235,6 +275,110 @@ def test_source_revalidation_refusal_rolls_back(
         ) == [{"stage": "accepted", "scalar": ids["old"]}]
     finally:
         _cleanup(client, ids)
+
+
+@pytest.mark.graph
+def test_scalar_disagreement_is_refused(disposable_neo4j: tuple[str, str]) -> None:
+    client = _client(disposable_neo4j, "scalar-disagreement-refusal")
+    ids = _seed(client, "scalardisagreement")
+    try:
+        client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "SET source.produced_sn_id = $ancestor",
+            **ids,
+        )
+        with pytest.raises(
+            SupersedeIntoAncestorConflict, match="cannot be migrated exactly"
+        ):
+            supersede_into_ancestor(
+                ids["old"],
+                ids["ancestor"],
+                reason="same physical quantity",
+                gc=client,
+            )
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source})-[:PRODUCED_NAME]->"
+            "(old:StandardName {id: $old}) RETURN old.name_stage AS stage, "
+            "source.produced_sn_id AS scalar",
+            **ids,
+        ) == [{"stage": "accepted", "scalar": ids["ancestor"]}]
+    finally:
+        _cleanup(client, ids)
+
+
+@pytest.mark.graph
+def test_concurrent_authority_drift_invalidates_apply(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "concurrent-authority-drift")
+    concurrent = _client(disposable_neo4j, "concurrent-authority-writer")
+    ids = _seed(client, "authoritydrift")
+    outsider = "authoritydrift_outsider"
+    preview = None
+    try:
+        client.query(
+            "CREATE (:StandardName {id: $id, name_stage: 'accepted', "
+            "validation_status: 'valid'})",
+            id=outsider,
+        )
+        preview = supersede_into_ancestor(
+            ids["old"],
+            ids["ancestor"],
+            reason="same physical quantity",
+            gc=client,
+        )
+        original_lock = graph_ops._lock_ancestor_supersession_authority
+
+        def drift_then_lock(query_handle, manifest):
+            concurrent.query(
+                "MATCH (source:StandardNameSource {id: $source}), "
+                "(dd:IMASNode {id: $path}), "
+                "(outsider:StandardName {id: $outsider}) "
+                "SET source.produced_sn_id = $outsider "
+                "CREATE (dd)-[:HAS_STANDARD_NAME]->(outsider)",
+                outsider=outsider,
+                **ids,
+            )
+            return original_lock(query_handle, manifest)
+
+        with (
+            patch(
+                "imas_codex.standard_names.graph_ops."
+                "_lock_ancestor_supersession_authority",
+                side_effect=drift_then_lock,
+            ),
+            pytest.raises(
+                SupersedeIntoAncestorConflict,
+                match="authority changed while acquiring participant locks",
+            ),
+        ):
+            supersede_into_ancestor(
+                ids["old"],
+                ids["ancestor"],
+                reason="same physical quantity",
+                apply=True,
+                manifest_sha256=preview["manifest_sha256"],
+                gc=client,
+            )
+
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source}), "
+            "(old:StandardName {id: $old}), "
+            "(dd:IMASNode {id: $path})-[projection:HAS_STANDARD_NAME]->"
+            "(:StandardName {id: $outsider}) "
+            "RETURN old.name_stage AS stage, source.produced_sn_id AS scalar, "
+            "count(projection) AS projections",
+            outsider=outsider,
+            **ids,
+        ) == [{"stage": "accepted", "scalar": outsider, "projections": 1}]
+        assert client.query(
+            "MATCH (change:StandardNameChange {manifest_sha256: $manifest}) "
+            "RETURN count(change) AS count",
+            manifest=preview["manifest_sha256"],
+        ) == [{"count": 0}]
+    finally:
+        ids["outsider"] = outsider
+        _cleanup(client, ids, (preview or {}).get("manifest_sha256"))
 
 
 @pytest.mark.graph

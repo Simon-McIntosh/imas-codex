@@ -17561,7 +17561,10 @@ def _ancestor_supersession_authority(
                properties(ancestor) AS ancestor_properties,
                CASE WHEN old IS NULL OR ancestor IS NULL THEN false ELSE
                  EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(ancestor) }
-               END AS is_ancestor
+               END AS is_ancestor,
+               CASE WHEN old IS NULL OR ancestor IS NULL THEN false ELSE
+                 EXISTS { MATCH (ancestor)-[:REFINED_FROM*1..]->(old) }
+               END AS reverse_reachable
         """,
         old_id=old_id,
         ancestor_id=ancestor_id,
@@ -17576,6 +17579,10 @@ def _ancestor_supersession_authority(
     if not row.get("is_ancestor"):
         raise SupersedeIntoAncestorConflict(
             f"target {ancestor_id!r} is not an ancestor of {old_id!r}"
+        )
+    if row.get("reverse_reachable"):
+        raise SupersedeIntoAncestorConflict(
+            f"target {ancestor_id!r} participates in a directed cycle with {old_id!r}"
         )
     if ancestor_properties.get("name_stage") not in ("accepted", "approved"):
         raise SupersedeIntoAncestorConflict(
@@ -17601,8 +17608,11 @@ def _ancestor_supersession_authority(
                [(source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing) |
                  {element_id: elementId(backing), labels: labels(backing),
                   properties: properties(backing),
-                  projections: [(backing)-[:HAS_STANDARD_NAME]->(projected) |
-                    projected.id]}] AS backings
+                  projections: [(backing)-[projection:HAS_STANDARD_NAME]->
+                    (projected) |
+                    {element_id: elementId(projection),
+                     target_id: projected.id,
+                     properties: properties(projection)}]}] AS backings
         ORDER BY source.id
         """,
         old_id=old_id,
@@ -17618,7 +17628,10 @@ def _ancestor_supersession_authority(
                 {
                     **dict(backing),
                     "labels": sorted(backing.get("labels") or []),
-                    "projections": sorted(set(backing.get("projections") or [])),
+                    "projections": sorted(
+                        (dict(item) for item in backing.get("projections") or []),
+                        key=lambda item: (item["target_id"], item["element_id"]),
+                    ),
                 }
                 for backing in source.get("backings") or []
             ),
@@ -17679,6 +17692,77 @@ def _ancestor_supersession_authority(
     return manifest, retarget_ids, deduplicate_ids
 
 
+def _lock_ancestor_supersession_authority(
+    query_handle: _TransactionQuery,
+    manifest: dict[str, Any],
+) -> None:
+    """Lock every signed source, backing node, and backing projection."""
+    sources = manifest["participants"]["sources"]
+    source_ids = sorted(source["id"] for source in sources)
+    backing_element_ids = sorted(
+        {backing["element_id"] for source in sources for backing in source["backings"]}
+    )
+    projection_element_ids = sorted(
+        {
+            projection["element_id"]
+            for source in sources
+            for backing in source["backings"]
+            for projection in backing["projections"]
+        }
+    )
+
+    if source_ids:
+        rows = query_handle.query(
+            """
+            UNWIND $source_ids AS source_id
+            MATCH (source:StandardNameSource {id: source_id})
+            SET source.produced_sn_id = source.produced_sn_id
+            RETURN collect(source.id) AS locked_ids
+            """,
+            source_ids=source_ids,
+        )
+        locked = sorted(set(rows[0].get("locked_ids") or [])) if rows else []
+        if locked != source_ids:
+            raise SupersedeIntoAncestorConflict(
+                "signed source set changed while acquiring participant locks"
+            )
+
+    if backing_element_ids:
+        rows = query_handle.query(
+            """
+            UNWIND $element_ids AS expected_element_id
+            MATCH (backing)
+            WHERE elementId(backing) = expected_element_id
+            SET backing.id = backing.id
+            RETURN collect(elementId(backing)) AS locked_ids
+            """,
+            element_ids=backing_element_ids,
+        )
+        locked = sorted(set(rows[0].get("locked_ids") or [])) if rows else []
+        if locked != backing_element_ids:
+            raise SupersedeIntoAncestorConflict(
+                "signed backing set changed while acquiring participant locks"
+            )
+
+    if projection_element_ids:
+        rows = query_handle.query(
+            """
+            UNWIND $element_ids AS expected_element_id
+            MATCH ()-[projection:HAS_STANDARD_NAME]->()
+            WHERE elementId(projection) = expected_element_id
+            SET projection += {}
+            RETURN collect(elementId(projection)) AS locked_ids
+            """,
+            element_ids=projection_element_ids,
+        )
+        locked = sorted(set(rows[0].get("locked_ids") or [])) if rows else []
+        if locked != projection_element_ids:
+            raise SupersedeIntoAncestorConflict(
+                "signed backing projection set changed while acquiring "
+                "participant locks"
+            )
+
+
 @retry_on_deadlock()
 def supersede_into_ancestor(
     old_id: str,
@@ -17699,7 +17783,9 @@ def supersede_into_ancestor(
     descendant edge. No ``REFINED_FROM`` relationship is created or deleted.
     """
     if old_id == ancestor_id:
-        raise ValueError("ancestor supersession requires two distinct names")
+        raise SupersedeIntoAncestorConflict(
+            "ancestor supersession requires two distinct names"
+        )
     if not reason.strip():
         raise ValueError("ancestor supersession requires a non-empty reason")
     if apply and not manifest_sha256:
@@ -17730,6 +17816,9 @@ def supersede_into_ancestor(
                                CASE WHEN old IS NULL OR ancestor IS NULL THEN false ELSE
                                  EXISTS {
                                    MATCH (old)-[:REFINED_FROM*1..]->(ancestor)
+                                 }
+                                 AND NOT EXISTS {
+                                   MATCH (ancestor)-[:REFINED_FROM*1..]->(old)
                                  }
                                END AS lineage_preserved,
                                CASE WHEN old IS NULL THEN 0 ELSE
@@ -17780,6 +17869,25 @@ def supersede_into_ancestor(
                     raise SupersedeIntoAncestorConflict(
                         "fresh ancestor supersession manifest does not match signed hash"
                     )
+                if apply:
+                    _lock_ancestor_supersession_authority(query_handle, manifest)
+                    try:
+                        locked_manifest, locked_retarget, locked_deduplicate = (
+                            _ancestor_supersession_authority(
+                                query_handle, old_id, ancestor_id, reason
+                            )
+                        )
+                    except SupersedeIntoAncestorConflict as exc:
+                        raise SupersedeIntoAncestorConflict(
+                            "authority changed while acquiring participant locks"
+                        ) from exc
+                    if _authority_payload_hash(locked_manifest) != computed_hash:
+                        raise SupersedeIntoAncestorConflict(
+                            "authority changed while acquiring participant locks"
+                        )
+                    manifest = locked_manifest
+                    retarget_ids = locked_retarget
+                    deduplicate_ids = locked_deduplicate
 
                 source_ids = retarget_ids + deduplicate_ids
                 if source_ids:
@@ -17929,6 +18037,9 @@ def supersede_into_ancestor(
                     MATCH (old:StandardName {id: $old_id}),
                           (ancestor:StandardName {id: $ancestor_id})
                     WHERE EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(ancestor) }
+                      AND NOT EXISTS {
+                        MATCH (ancestor)-[:REFINED_FROM*1..]->(old)
+                      }
                       AND ancestor.name_stage IN ['accepted', 'approved']
                       AND ancestor.validation_status = 'valid'
                       AND NOT EXISTS {
