@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-17T21:27:41",
+  "updated": "2026-08-18T20:43:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -10,6 +10,13 @@
         "role": "implement",
         "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
         "created": "2026-08-16"
+      },
+      {
+        "id": "impl-envfix",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-18"
       },
       {
         "id": "impl-stall",
@@ -45,6 +52,20 @@
         "role": "investigate",
         "session_id": "01a00b74-928f-7052-86f9-2c4d25160e6e",
         "created": "2026-08-16"
+      },
+      {
+        "id": "inv-storage-a",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-18"
+      },
+      {
+        "id": "inv-storage-b",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-18"
       },
       {
         "id": "inv-stubs",
@@ -3922,9 +3943,242 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260818T162055556854-storage-growth-attribution",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "storage-growth-attribution",
+        "role": "investigate",
+        "member": "inv-storage-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-18T16:20:57Z",
+        "completed_at": "2026-08-18T16:35:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 869,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 869,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "df0009cf309a297356aa4dde220cb67d02214081",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Root cause: imas-codex full-suite gate workers, each assigned a private UV_CACHE_DIR + UV_PROJECT_ENVIRONMENT under /tmp/reckon-s8-evidence. Three completed bundles x 58,937 unique inodes = 176,811 = 98.13% of the 180,186 alert, residual 3,375; a fourth near-identical bundle survives so this is a lower bound. Reckon records show 30 distinct imas-codex worktree paths on 2026-08-17. NOT the pipeline: 6 dated CLI log files, no matching SLURM outputs. GPFS exposes no birth time, so exact inode identity needs the monitor's own ledger. Report sha256 ed3441af",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T162055556854-storage-growth-attribution/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a015ad-0f2a-7a02-8003-3681730981a1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5674496,
+            "cached_input_tokens_cumulative": 5674496,
+            "input_tokens": 5869425,
+            "input_tokens_cumulative": 5869425,
+            "output_tokens": 33738,
+            "output_tokens_cumulative": 33738,
+            "reasoning_output_tokens": 13406,
+            "reasoning_output_tokens_cumulative": 13406
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260818T162119516394-storage-growth-amplifier",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "storage-growth-amplifier",
+        "role": "investigate",
+        "member": "inv-storage-b",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-18T16:21:21Z",
+        "completed_at": "2026-08-18T16:39:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1100,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1100,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "df0009cf309a297356aa4dde220cb67d02214081",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Ranked 11 amplifiers. #1 is a worktree-local project env: 69,826 entries / 1.76 GiB measured, one copy = 38.75% of the alert, caused by AGENTS.md mandating 'uv sync --extra test' + 'uv run' in worktrees while no UV_PROJECT_ENVIRONMENT is set (an inherited VIRTUAL_ENV is explicitly ignored by uv). #2 mypy cache >=16,721 entries (9.3%) from an incomplete cold probe. #5 hatch hook DD resources ~697 entries but 1.77 GB. Highest-effect fix: one immutable lock-keyed shared dependency env via UV_PROJECT_ENVIRONMENT + uv sync --no-install-project, workers using uv run --no-sync + PYTHONPATH. UV_CACHE_DIR and TMPDIR are NOT substitutes. SLURM scripts do not export TMPDIR despite repo guidance. Nothing is still growing",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T162119516394-storage-growth-amplifier/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a015ad-6c8a-7990-8dcb-86bc2c4baa12",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7319552,
+            "cached_input_tokens_cumulative": 7319552,
+            "input_tokens": 7701781,
+            "input_tokens_cumulative": 7701781,
+            "output_tokens": 37630,
+            "output_tokens_cumulative": 37630,
+            "reasoning_output_tokens": 11035,
+            "reasoning_output_tokens_cumulative": 11035
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260818T181106149038-venv-instruction-survey",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "venv-instruction-survey",
+        "role": "investigate",
+        "member": "inv-storage-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-18T18:11:09Z",
+        "completed_at": "2026-08-18T18:28:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1070,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1070,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "7ac7f3b86100b42148a1a372142552cc1f135e18",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "59 repos scanned: 15 affected, 44 unaffected, 21 carry a root .venv. 107 verified hits (46 offending, 61 acceptable) across 62 agent-facing files, reduced to 28 grouped edit targets. Affected: fusion-codex, helix, idstools, imas-ambix, imas-codex, imas-efit, imas-ink, imas-standard-names, imas-standard-names-catalog, labels, nova, nova-fieldnull-repair-VQje3Q, nucleai, rabbitpy, tessera. Also found two /tmp/vv CI paths needing trap-cleaned unique temp dirs. All 107 TSV rows validated against exact source lines; zero repo paths modified. The manifest's blocked status reflects an orchestrator authoring error (a done-when demanding clean git status across 25 repos with pre-existing dirty trees), not a survey failure. Report sha256 4a182e26",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T181106149038-venv-instruction-survey/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01611-f3ee-78d3-b264-945a7a56b436",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6982400,
+            "cached_input_tokens_cumulative": 6982400,
+            "input_tokens": 7207396,
+            "input_tokens_cumulative": 7207396,
+            "output_tokens": 41850,
+            "output_tokens_cumulative": 41850,
+            "reasoning_output_tokens": 17135,
+            "reasoning_output_tokens_cumulative": 17135
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260818T183113641796-venv-instruction-fix",
+        "plan": "sn-dd-gaps",
+        "section": "current-scope",
+        "node": "venv-instruction-fix",
+        "role": "implement",
+        "member": "impl-envfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-18T18:31:18Z",
+        "completed_at": "2026-08-18T18:42:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 673,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 673,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "036d017a413a77c29723e4ec37fd71ebb8b92abb",
+        "commits": [
+          "c901d6ef0675b661a8b3712c5c9c220cb1b2f3cb"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "diff_unavailable"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "19/19 queued sites corrected across 17 files in 13 repositories, 13 local pathspec-scoped commits, zero pushes. Verification re-ran the survey patterns over just those files: no offending provisioning instruction remains, 7 descriptive/prohibitive hits classified acceptable. Commit-scope audit 13/13 exact path sets, 13/13 bodies present, 13/13 attribution-clean. Nova and the nova-fieldnull-repair stray copy untouched by design. Branch/primary mismatches needing a decision: fusion-codex master vs main, idstools release/2.0.0 vs main, labels master vs main, rabbitpy feature/imas-actor vs main. Four target files were already dirty (fusion-codex and labels AGENTS.md untracked, nucleai and rabbitpy AGENTS.md modified), so those commits necessarily carry pre-existing file content",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260818T183113641796-venv-instruction-fix/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01624-66cc-70a1-9603-021000eb29e0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4234240,
+            "cached_input_tokens_cumulative": 4234240,
+            "input_tokens": 4429220,
+            "input_tokens_cumulative": 4429220,
+            "output_tokens": 29681,
+            "output_tokens_cumulative": 29681,
+            "reasoning_output_tokens": 10130,
+            "reasoning_output_tokens_cumulative": 10130
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 97
+    "_version": 104
   }
 }
