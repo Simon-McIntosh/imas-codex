@@ -17535,6 +17535,601 @@ def tombstone_supersede_into(
     return result
 
 
+ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA = (
+    "imas-codex.standard-name-ancestor-supersession-manifest.v1"
+)
+ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA = (
+    "imas-codex.standard-name-ancestor-supersession-receipt.v1"
+)
+
+
+class SupersedeIntoAncestorConflict(RuntimeError):
+    """The signed ancestor fold no longer matches its graph authority."""
+
+
+def _ancestor_supersession_authority(
+    query_handle: _TransactionQuery,
+    old_id: str,
+    ancestor_id: str,
+    reason: str,
+) -> tuple[dict[str, Any], list[str], list[str]]:
+    rows = query_handle.query(
+        """
+        OPTIONAL MATCH (old:StandardName {id: $old_id})
+        OPTIONAL MATCH (ancestor:StandardName {id: $ancestor_id})
+        RETURN properties(old) AS old_properties,
+               properties(ancestor) AS ancestor_properties,
+               CASE WHEN old IS NULL OR ancestor IS NULL THEN false ELSE
+                 EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(ancestor) }
+               END AS is_ancestor,
+               CASE WHEN old IS NULL OR ancestor IS NULL THEN false ELSE
+                 EXISTS { MATCH (ancestor)-[:REFINED_FROM*1..]->(old) }
+               END AS reverse_reachable
+        """,
+        old_id=old_id,
+        ancestor_id=ancestor_id,
+    )
+    row = rows[0] if rows else {}
+    old_properties = row.get("old_properties")
+    ancestor_properties = row.get("ancestor_properties")
+    if old_properties is None:
+        raise SupersedeIntoAncestorConflict(f"name {old_id!r} not found")
+    if ancestor_properties is None:
+        raise SupersedeIntoAncestorConflict(f"target {ancestor_id!r} not found")
+    if not row.get("is_ancestor"):
+        raise SupersedeIntoAncestorConflict(
+            f"target {ancestor_id!r} is not an ancestor of {old_id!r}"
+        )
+    if row.get("reverse_reachable"):
+        raise SupersedeIntoAncestorConflict(
+            f"target {ancestor_id!r} participates in a directed cycle with {old_id!r}"
+        )
+    if ancestor_properties.get("name_stage") not in ("accepted", "approved"):
+        raise SupersedeIntoAncestorConflict(
+            f"ancestor {ancestor_id!r} is not an accepted live name"
+        )
+    if ancestor_properties.get("validation_status") != "valid":
+        raise SupersedeIntoAncestorConflict(
+            f"ancestor {ancestor_id!r} is not validation_status='valid'"
+        )
+    if old_properties.get("name_stage") == "superseded":
+        raise SupersedeIntoAncestorConflict(
+            f"name {old_id!r} is already superseded by a different manifest"
+        )
+
+    source_rows = query_handle.query(
+        """
+        MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->
+              (:StandardName {id: $old_id})
+        RETURN source.id AS id,
+               properties(source) AS properties,
+               [(source)-[:PRODUCED_NAME]->(bound:StandardName) | bound.id]
+                 AS bindings,
+               [(source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing) |
+                 {element_id: elementId(backing), labels: labels(backing),
+                  properties: properties(backing),
+                  projections: [(backing)-[projection:HAS_STANDARD_NAME]->
+                    (projected) |
+                    {element_id: elementId(projection),
+                     target_id: projected.id,
+                     properties: properties(projection)}]}] AS backings
+        ORDER BY source.id
+        """,
+        old_id=old_id,
+    )
+    sources: list[dict[str, Any]] = []
+    retarget_ids: list[str] = []
+    deduplicate_ids: list[str] = []
+    for raw in source_rows:
+        source = dict(raw)
+        source["bindings"] = sorted(set(source.get("bindings") or []))
+        source["backings"] = sorted(
+            (
+                {
+                    **dict(backing),
+                    "labels": sorted(backing.get("labels") or []),
+                    "projections": sorted(
+                        (dict(item) for item in backing.get("projections") or []),
+                        key=lambda item: (item["target_id"], item["element_id"]),
+                    ),
+                }
+                for backing in source.get("backings") or []
+            ),
+            key=lambda backing: backing["element_id"],
+        )
+        source_id = source["id"]
+        scalar = (source.get("properties") or {}).get("produced_sn_id")
+        if source["bindings"] == [old_id] and scalar == old_id:
+            retarget_ids.append(source_id)
+        elif (
+            source["bindings"] == sorted([old_id, ancestor_id])
+            and scalar == ancestor_id
+        ):
+            deduplicate_ids.append(source_id)
+        else:
+            raise SupersedeIntoAncestorConflict(
+                "source set cannot be migrated exactly: "
+                f"{source_id!r} has bindings={source['bindings']!r}, scalar={scalar!r}"
+            )
+        sources.append(source)
+
+    lineage_rows = query_handle.query(
+        """
+        MATCH (old:StandardName {id: $old_id})
+        MATCH (member:StandardName)
+        WHERE member = old OR EXISTS {
+          MATCH (old)-[:REFINED_FROM*1..]-(member)
+        }
+        WITH collect(DISTINCT member.id) AS member_ids
+        MATCH (successor:StandardName)-[edge:REFINED_FROM]->
+              (predecessor:StandardName)
+        WHERE successor.id IN member_ids AND predecessor.id IN member_ids
+        RETURN elementId(edge) AS element_id,
+               successor.id AS successor_id,
+               predecessor.id AS predecessor_id,
+               properties(edge) AS properties
+        ORDER BY successor_id, predecessor_id, element_id
+        """,
+        old_id=old_id,
+    )
+    manifest = {
+        "schema": ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA,
+        "operation": "supersede_into_ancestor",
+        "old_id": old_id,
+        "ancestor_id": ancestor_id,
+        "reason": reason,
+        "participants": {
+            "old_properties": old_properties,
+            "ancestor_properties": ancestor_properties,
+            "sources": sources,
+            "lineage_edges": [dict(item) for item in lineage_rows],
+        },
+        "actions": {
+            "retarget_source_ids": retarget_ids,
+            "deduplicate_source_ids": deduplicate_ids,
+        },
+    }
+    return manifest, retarget_ids, deduplicate_ids
+
+
+def _lock_ancestor_supersession_authority(
+    query_handle: _TransactionQuery,
+    manifest: dict[str, Any],
+) -> None:
+    """Lock every signed source, backing node, and backing projection."""
+    sources = manifest["participants"]["sources"]
+    source_ids = sorted(source["id"] for source in sources)
+    backing_element_ids = sorted(
+        {backing["element_id"] for source in sources for backing in source["backings"]}
+    )
+    projection_element_ids = sorted(
+        {
+            projection["element_id"]
+            for source in sources
+            for backing in source["backings"]
+            for projection in backing["projections"]
+        }
+    )
+
+    if source_ids:
+        rows = query_handle.query(
+            """
+            UNWIND $source_ids AS source_id
+            MATCH (source:StandardNameSource {id: source_id})
+            SET source.produced_sn_id = source.produced_sn_id
+            RETURN collect(source.id) AS locked_ids
+            """,
+            source_ids=source_ids,
+        )
+        locked = sorted(set(rows[0].get("locked_ids") or [])) if rows else []
+        if locked != source_ids:
+            raise SupersedeIntoAncestorConflict(
+                "signed source set changed while acquiring participant locks"
+            )
+
+    if backing_element_ids:
+        rows = query_handle.query(
+            """
+            UNWIND $element_ids AS expected_element_id
+            MATCH (backing)
+            WHERE elementId(backing) = expected_element_id
+            SET backing.id = backing.id
+            RETURN collect(elementId(backing)) AS locked_ids
+            """,
+            element_ids=backing_element_ids,
+        )
+        locked = sorted(set(rows[0].get("locked_ids") or [])) if rows else []
+        if locked != backing_element_ids:
+            raise SupersedeIntoAncestorConflict(
+                "signed backing set changed while acquiring participant locks"
+            )
+
+    if projection_element_ids:
+        rows = query_handle.query(
+            """
+            UNWIND $element_ids AS expected_element_id
+            MATCH ()-[projection:HAS_STANDARD_NAME]->()
+            WHERE elementId(projection) = expected_element_id
+            SET projection += {}
+            RETURN collect(elementId(projection)) AS locked_ids
+            """,
+            element_ids=projection_element_ids,
+        )
+        locked = sorted(set(rows[0].get("locked_ids") or [])) if rows else []
+        if locked != projection_element_ids:
+            raise SupersedeIntoAncestorConflict(
+                "signed backing projection set changed while acquiring "
+                "participant locks"
+            )
+
+
+@retry_on_deadlock()
+def supersede_into_ancestor(
+    old_id: str,
+    ancestor_id: str,
+    *,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Fold a name into its accepted lineage ancestor without rewriting history.
+
+    The preview signs the complete name, source, backing-projection, and lineage
+    authority used by the fold. Apply is compare-and-set bound to that digest.
+    Singly bound sources pass the attachment guard and the standard retarget
+    primitive; sources already bound to the ancestor lose only their redundant
+    descendant edge. No ``REFINED_FROM`` relationship is created or deleted.
+    """
+    if old_id == ancestor_id:
+        raise SupersedeIntoAncestorConflict(
+            "ancestor supersession requires two distinct names"
+        )
+    if not reason.strip():
+        raise ValueError("ancestor supersession requires a non-empty reason")
+    if apply and not manifest_sha256:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    own = gc is None
+    client: Any = GraphClient() if own else gc
+    event_id = (
+        f"sn-change:ancestor-supersession:{manifest_sha256}"
+        if manifest_sha256
+        else None
+    )
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query_handle.query(
+                        """
+                        OPTIONAL MATCH (event:StandardNameChange {id: $event_id})
+                        OPTIONAL MATCH (old:StandardName {id: $old_id})
+                        OPTIONAL MATCH (ancestor:StandardName {id: $ancestor_id})
+                        RETURN event.id IS NOT NULL AS recorded,
+                               old.name_stage AS old_stage,
+                               CASE WHEN old IS NULL OR ancestor IS NULL THEN false ELSE
+                                 EXISTS {
+                                   MATCH (old)-[:REFINED_FROM*1..]->(ancestor)
+                                 }
+                                 AND NOT EXISTS {
+                                   MATCH (ancestor)-[:REFINED_FROM*1..]->(old)
+                                 }
+                               END AS lineage_preserved,
+                               CASE WHEN old IS NULL THEN 0 ELSE
+                                 COUNT { (:StandardNameSource)-[:PRODUCED_NAME]->(old) }
+                               END AS old_sources
+                        """,
+                        event_id=event_id,
+                        old_id=old_id,
+                        ancestor_id=ancestor_id,
+                    )
+                    replay = replay_rows[0] if replay_rows else {}
+                    if replay.get("recorded"):
+                        if not (
+                            replay.get("old_stage") == "superseded"
+                            and replay.get("lineage_preserved")
+                            and int(replay.get("old_sources") or 0) == 0
+                        ):
+                            raise SupersedeIntoAncestorConflict(
+                                "recorded ancestor supersession has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "manifest_sha256": manifest_sha256,
+                        }
+                    query_handle.query(
+                        """
+                        MATCH (old:StandardName {id: $old_id}),
+                              (ancestor:StandardName {id: $ancestor_id})
+                        SET old.claimed_at = old.claimed_at,
+                            ancestor.claimed_at = ancestor.claimed_at
+                        RETURN old.id AS old_id
+                        """,
+                        old_id=old_id,
+                        ancestor_id=ancestor_id,
+                    )
+
+                manifest, retarget_ids, deduplicate_ids = (
+                    _ancestor_supersession_authority(
+                        query_handle, old_id, ancestor_id, reason
+                    )
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                if apply and manifest_sha256 != computed_hash:
+                    raise SupersedeIntoAncestorConflict(
+                        "fresh ancestor supersession manifest does not match signed hash"
+                    )
+                if apply:
+                    _lock_ancestor_supersession_authority(query_handle, manifest)
+                    try:
+                        locked_manifest, locked_retarget, locked_deduplicate = (
+                            _ancestor_supersession_authority(
+                                query_handle, old_id, ancestor_id, reason
+                            )
+                        )
+                    except SupersedeIntoAncestorConflict as exc:
+                        raise SupersedeIntoAncestorConflict(
+                            "authority changed while acquiring participant locks"
+                        ) from exc
+                    if _authority_payload_hash(locked_manifest) != computed_hash:
+                        raise SupersedeIntoAncestorConflict(
+                            "authority changed while acquiring participant locks"
+                        )
+                    manifest = locked_manifest
+                    retarget_ids = locked_retarget
+                    deduplicate_ids = locked_deduplicate
+
+                source_ids = retarget_ids + deduplicate_ids
+                if source_ids:
+                    from imas_codex.standard_names.attachment_audit import (
+                        guard_source_pairings,
+                    )
+
+                    guarded = guard_source_pairings(
+                        query_handle, ancestor_id, source_ids
+                    )
+                    if guarded.rejected or set(guarded.accepted_source_ids) != set(
+                        source_ids
+                    ):
+                        details = (
+                            ", ".join(
+                                f"{item.source_node_id}: {item.reason}"
+                                for item in guarded.rejected
+                            )
+                            or "guard did not admit the exact source cohort"
+                        )
+                        raise SupersedeIntoAncestorConflict(
+                            f"source re-validation failed: {details}"
+                        )
+
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": 1,
+                        "counts": {
+                            "sources": len(source_ids),
+                            "retarget": len(retarget_ids),
+                            "deduplicate": len(deduplicate_ids),
+                        },
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                if retarget_ids:
+                    from imas_codex.standard_names.provenance_lifecycle import (
+                        retarget_standard_name_sources,
+                    )
+
+                    moved = retarget_standard_name_sources(
+                        query_handle,
+                        old_id,
+                        ancestor_id,
+                        operation="ancestor_fold",
+                        reason=reason,
+                        run_id=run_id,
+                        record_change=False,
+                        enforce_consistency=False,
+                        source_ids=retarget_ids,
+                        expected_current_bindings=dict.fromkeys(retarget_ids, old_id),
+                        _transactional=True,
+                    )
+                    if moved != len(retarget_ids):
+                        raise SupersedeIntoAncestorConflict(
+                            "retargeted source count changed during ancestor fold"
+                        )
+
+                if deduplicate_ids:
+                    deduplicated = query_handle.query(
+                        """
+                        UNWIND $source_ids AS source_id
+                        MATCH (source:StandardNameSource {id: source_id}),
+                              (old:StandardName {id: $old_id}),
+                              (ancestor:StandardName {id: $ancestor_id})
+                        WHERE source.produced_sn_id = $ancestor_id
+                          AND COUNT {
+                            (source)-[:PRODUCED_NAME]->(:StandardName)
+                          } = 2
+                          AND EXISTS { (source)-[:PRODUCED_NAME]->(old) }
+                          AND EXISTS { (source)-[:PRODUCED_NAME]->(ancestor) }
+                        MATCH (source)-[redundant:PRODUCED_NAME]->(old)
+                        DELETE redundant
+                        WITH source, old, ancestor
+                        OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+                        OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+                        OPTIONAL MATCH (dd)-[dd_projection:HAS_STANDARD_NAME]->(old)
+                        DELETE dd_projection
+                        WITH source, old, ancestor, signal
+                        OPTIONAL MATCH (signal)-[signal_projection:HAS_STANDARD_NAME]->(old)
+                        DELETE signal_projection
+                        RETURN collect(DISTINCT source.id) AS source_ids
+                        """,
+                        source_ids=deduplicate_ids,
+                        old_id=old_id,
+                        ancestor_id=ancestor_id,
+                    )
+                    actual = sorted(
+                        set(deduplicated[0].get("source_ids") or [])
+                        if deduplicated
+                        else set()
+                    )
+                    if actual != deduplicate_ids:
+                        raise SupersedeIntoAncestorConflict(
+                            "dual-bound source set changed during ancestor fold"
+                        )
+
+                query_handle.query(
+                    """
+                    MATCH (old:StandardName {id: $old_id}),
+                          (ancestor:StandardName {id: $ancestor_id})
+                    OPTIONAL MATCH (old_source:StandardNameSource)
+                      -[:PRODUCED_NAME]->(old)
+                    OPTIONAL MATCH (old_source)-[:FROM_DD_PATH]->(old_dd:IMASNode)
+                    OPTIONAL MATCH (old_source)-[:FROM_SIGNAL]->
+                      (old_signal:FacilitySignal)
+                    WITH old, ancestor,
+                         collect(DISTINCT CASE
+                           WHEN old_source IS NULL THEN null
+                           WHEN old_dd IS NOT NULL THEN 'dd:' + old_dd.id
+                           WHEN old_signal IS NOT NULL THEN old_signal.id
+                           WHEN old_source.source_type = 'derived'
+                             AND old_source.source_id STARTS WITH 'derived:'
+                           THEN old_source.source_id ELSE old_source.id END)
+                           AS old_paths
+                    OPTIONAL MATCH (ancestor_source:StandardNameSource)
+                      -[:PRODUCED_NAME]->(ancestor)
+                    OPTIONAL MATCH (ancestor_source)-[:FROM_DD_PATH]->
+                      (ancestor_dd:IMASNode)
+                    OPTIONAL MATCH (ancestor_source)-[:FROM_SIGNAL]->
+                      (ancestor_signal:FacilitySignal)
+                    WITH old, ancestor, old_paths,
+                         collect(DISTINCT CASE
+                           WHEN ancestor_source IS NULL THEN null
+                           WHEN ancestor_dd IS NOT NULL THEN 'dd:' + ancestor_dd.id
+                           WHEN ancestor_signal IS NOT NULL THEN ancestor_signal.id
+                           WHEN ancestor_source.source_type = 'derived'
+                             AND ancestor_source.source_id STARTS WITH 'derived:'
+                           THEN ancestor_source.source_id ELSE ancestor_source.id END)
+                           AS ancestor_paths
+                    SET old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
+                        ancestor.source_paths =
+                          [path IN ancestor_paths WHERE path IS NOT NULL]
+                    """,
+                    old_id=old_id,
+                    ancestor_id=ancestor_id,
+                )
+
+                finalized = query_handle.query(
+                    """
+                    MATCH (old:StandardName {id: $old_id}),
+                          (ancestor:StandardName {id: $ancestor_id})
+                    WHERE EXISTS { MATCH (old)-[:REFINED_FROM*1..]->(ancestor) }
+                      AND NOT EXISTS {
+                        MATCH (ancestor)-[:REFINED_FROM*1..]->(old)
+                      }
+                      AND ancestor.name_stage IN ['accepted', 'approved']
+                      AND ancestor.validation_status = 'valid'
+                      AND NOT EXISTS {
+                        MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(old)
+                      }
+                    SET old.name_stage = 'superseded',
+                        old.status = 'superseded',
+                        old.superseded_from_stage =
+                          coalesce(old.superseded_from_stage, 'accepted'),
+                        old.claim_token = null,
+                        old.claimed_at = null,
+                        old.edit_status = CASE
+                          WHEN coalesce(old.edit_status, '') = 'open'
+                          THEN 'applied' ELSE old.edit_status END
+                    MERGE (change:StandardNameChange {id: $event_id})
+                    ON CREATE SET change.from_name = old.id,
+                                  change.to_name = ancestor.id,
+                                  change.operation = 'supersede_into_ancestor',
+                                  change.reason = $reason,
+                                  change.origin = 'lineage_reconciliation',
+                                  change.run_id = $run_id,
+                                  change.changed_at = datetime(),
+                                  change.internal = true,
+                                  change.manifest_sha256 = $manifest_sha256
+                    MERGE (ancestor)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN old.id AS old_id, change.id AS change_id
+                    """,
+                    old_id=old_id,
+                    ancestor_id=ancestor_id,
+                    event_id=f"sn-change:ancestor-supersession:{computed_hash}",
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                )
+                if len(finalized) != 1:
+                    raise SupersedeIntoAncestorConflict(
+                        "ancestor fold lifecycle compare-and-set changed"
+                    )
+
+                post_lineage = query_handle.query(
+                    """
+                    MATCH (old:StandardName {id: $old_id})
+                    MATCH (member:StandardName)
+                    WHERE member = old OR EXISTS {
+                      MATCH (old)-[:REFINED_FROM*1..]-(member)
+                    }
+                    WITH collect(DISTINCT member.id) AS member_ids
+                    MATCH (successor:StandardName)-[edge:REFINED_FROM]->
+                          (predecessor:StandardName)
+                    WHERE successor.id IN member_ids AND predecessor.id IN member_ids
+                    RETURN elementId(edge) AS element_id,
+                           successor.id AS successor_id,
+                           predecessor.id AS predecessor_id,
+                           properties(edge) AS properties
+                    ORDER BY successor_id, predecessor_id, element_id
+                    """,
+                    old_id=old_id,
+                )
+                if [dict(item) for item in post_lineage] != manifest["participants"][
+                    "lineage_edges"
+                ]:
+                    raise SupersedeIntoAncestorConflict(
+                        "REFINED_FROM history changed during ancestor fold"
+                    )
+                transaction.commit()
+                return {
+                    "schema": ANCESTOR_SUPERSESSION_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": 1,
+                    "sources_retargeted": len(retarget_ids),
+                    "sources_deduplicated": len(deduplicate_ids),
+                    "counts": {
+                        "sources": len(source_ids),
+                        "retarget": len(retarget_ids),
+                        "deduplicate": len(deduplicate_ids),
+                    },
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_id": finalized[0]["change_id"],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 # =============================================================================
 # Release helpers — seed-and-expand pools
 # =============================================================================
