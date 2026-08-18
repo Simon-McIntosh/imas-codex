@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="169">
-<meta name="plan-impl" content="0.975">
+<meta name="plan-version" content="170">
+<meta name="plan-impl" content="0.98">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1449,6 +1449,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260819-dual-binding-census" data-who="reckon-ship" data-when="2026-08-19T00:55:00+00:00">
     <div class="r-comment-body"><p><strong>The dual-binding cohort is fully partitioned: 279 live dual-bound sources (was 362 at followup creation), every row in exactly one disposition class.</strong> Commit <code>f5049fd7</code>, merge <code>91588aa6</code>. Classes: <strong>51</strong> scalar-selected dedup (mechanical edge removal where the scalar already picks one live target), <strong>10</strong> fold-into-ancestor candidate pairs, <strong>1</strong> upstream-absent stale detach, <strong>216</strong> catalog_edit-involved rows requiring catalog-aware semantic adjudication (dominant family: <code>atomic_mass</code> + <code>neutral_species_atomic_mass</code>, 55 pairs), <strong>1</strong> genuinely ambiguous (<code>dd:waves/coherent_wave/global_quantities/ion/state/power_fast</code>). Read-only proven (change/cost counters flat). Machine receipt: <code>docs/evidence/sn-graph-wide-integrity/dual-binding-census.json</code> (SHA-256 <code>3e836563…</code>). Next rungs: signed dedup manifest for the 51, then the 10 fold pairs through the landed operator; the 216 catalog rows are a semantic-adjudication wave, not a mechanical one.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260819-dedup-instrument-landed" data-who="reckon-ship" data-when="2026-08-19T01:30:00+00:00">
+    <div class="r-comment-body"><p><strong>The scalar-selected dedup instrument is landed, review APPROVE for merge (0/0/1/1).</strong> Commit <code>fe00ec3e</code>, merge <code>1b90f9fe</code>. <code>deduplicate_scalar_selected_sources</code> signs the complete source/binding/origin/backing/projection closure, locks and exact-rehashes it, and deletes only signed element ids under scalar/claim CAS; 3/3 disposable-Neo4j regressions plus a signed live preview over the census's 51 rows: <strong>48 admitted / 3 fail-closed projection-authority refusals</strong> (<code>dd:distributions/distribution</code>, <code>dd:edge_transport/model/ggd</code>, <code>dd:gyrokinetics_local/non_linear</code>), 57 paired removals, hash <code>dc2bfa35…</code>, zero writes. The live apply is gated on: zero/duplicate-projection refusal regressions (reviewer MEDIUM), adjudicating the three refused rows' backing-projection authority, and a freshly regenerated signed manifest. Record: <code>docs/evidence/sn-graph-wide-integrity/dual-binding-dedup.md</code>.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
