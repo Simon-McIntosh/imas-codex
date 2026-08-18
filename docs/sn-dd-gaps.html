@@ -17,13 +17,13 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-18">
-<meta name="plan-version" content="45">
+<meta name="plan-version" content="46">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf,6a32165d,212465f5,2f2c801d,76074f6b,4ae7c24f,a8fc9765,9d0f5ee6,b1411210,413b7c0e,5c4c09e1,bd132793,d82764dd,54aad0e7,8282e3d1,4dd5422f">
+<meta name="plan-commits" content="c7c2d3d3,baeb7614,37242f3c,99cc1bb43e14242ee6c8aecf4c267527686b2b5d,9b37dd6f4d6cd57c1b943740be044a225596629b,cc3f427883dea31ddf49ac95a0a34828dcd92e7a,fc23f8cf,6a32165d,212465f5,2f2c801d,76074f6b,4ae7c24f,a8fc9765,9d0f5ee6,b1411210,413b7c0e,5c4c09e1,bd132793,d82764dd,54aad0e7,8282e3d1,4dd5422f,bb7f3a8e,fa184335,a2140011">
 <meta name="plan-artifacts" content="docs/archive/sn-dd-gaps-foundation-landed.html,docs/archive/sn-dd-gaps-policy-landed.html,docs/evidence/archive/sn-dd-gaps-landed.html,docs/evidence/sn-dd-gaps/">
-<meta name="plan-impl" content="0.98">
+<meta name="plan-impl" content="0.985">
 <meta name="plan-depends-on" content="">
 <meta name="plan-blocks" content="sn-pipeline-hardening,sn-graph-wide-integrity">
 </head>
@@ -470,6 +470,9 @@ CONSTRAINTS
 </div>
 <div class="r-comment" data-section="s6" data-id="c-20260818-ionisation-test-aligned" data-who="reckon-ship" data-when="2026-08-18T21:35:00+00:00">
     <div class="r-comment-body"><p><strong>The default suite is fully green again: the sole failing test asserted pre-retirement semantics and is replaced by two authority-boundary regressions.</strong> Commit <code>bb7f3a8e</code>, merge <code>5abed559</code>. Root cause with citations: exact active resolutions deliberately retire the matching legacy <code>correct_in_graph</code> rule (raw <code>e</code> at extraction; effective <code>eV</code> via <code>resolve_dd_field</code>), while the unresolved <code>/values</code> descendant — the incomplete §6 U19 cohort — correctly keeps its legacy correction. The new regressions pin both sides of that authority boundary and will flip when §6 expands the cohort to 14 paths, which is the intended signal. Full file 23/23. Record: <code>docs/evidence/sn-dd-gaps/ionisation-test-adjudication.md</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260818-ddres-graph-port" data-who="reckon-ship" data-when="2026-08-18T22:05:00+00:00">
+    <div class="r-comment-body"><p><strong>§5 part 1 is LANDED: the 37 resolutions are graph records and the graph is value-correct for every active path.</strong> Chain <code>fa184335</code> → <code>a2140011</code>, merge <code>36d5ff46</code>. The port surfaced a false premise in this section's prose — 'the graph already holds the corrected values' was true only for the 7 <code>correct_in_graph</code> nodes; the 30 suppress-mode rows still held published wrong units. Under the locked decision's own direction (correctness in the graph, provenance beside it) the 30 were corrected (27× <code>m→1</code>, 3× <code>m^-2.s^-1→W.m^-2</code>) with an observed-value CAS in the same transaction as their bridge edges. Gates: zero-write replay, credentialed schema compliance 9/9, review APPROVE zero findings after a LinkML direction corrective, coordinator live census 37/37/37 edges and 37/37 effective units. Remaining §5 parts, now dispatchable: (2) delete the approval ceremony and packaged manifest, keeping the two surviving gates; (3) simplify the 14-site read-time overlay to provenance reporting. Record: <a href="/imas-codex/evidence/archive/sn-dd-gaps-landed#ddres-graph-port">§5 part 1 landed</a>.</p></div>
 </div>
 </section>
 </main>

@@ -214,6 +214,28 @@
     <strong>6575 passed / 8 skipped / 0 failed</strong> at the tested HEAD, log SHA-256
     <code>11a66008…</code>.</p>
   </section>
+
+  <section id="ddres-graph-port">
+    <h2>§5 part 1 — DD resolutions are first-class graph records and the graph is value-correct</h2>
+    <p><strong>Landed 2026-08-18</strong> — chain <code>fa184335</code> → <code>a2140011</code>,
+    merge <code>36d5ff46</code>. The 37 active packaged resolutions now live in the graph per the
+    locked D-ddres-storage-and-gates shape:
+    <code>IMASNode -[:BRIDGED_BY]-&gt; DDResolution -[:EVIDENCED_BY]-&gt; DDGap</code> plus
+    <code>FOR_DD_VERSION</code>, each carrying published value, effective value, DD version, upstream
+    reference or explicit none-yet marker, and who/when/why. The port surfaced a false plan premise —
+    only the 7 <code>correct_in_graph</code> nodes were value-correct; the 30 suppress-mode rows still
+    held published wrong units — so under coordinator-widened authority inside the locked decision the
+    30 were corrected (27 unit-vector paths <code>m → 1</code>, 3 wall energy-flux
+    <code>m^-2.s^-1 → W.m^-2</code>) with an observed-value CAS in the same transaction as their
+    bridges. Gates: replay zero-write (receipt <code>29f4b1b5…</code>), credentialed schema compliance
+    9/9 executed 0 failed, focused suites 59/0, packaged YAMLs byte-identical. Review: BLOCK on a
+    LinkML direction inversion (<code>BRIDGED_BY</code> declared on the wrong class — live edges were
+    always correct), corrected with a GraphSchema-derived direction regression; final
+    <strong>APPROVE with zero findings</strong>. Coordinator live census: 37/37/37 edges, 0 reverse,
+    37/37 effective unit scalars and HAS_UNIT targets, 0 missing upstream gates. Remaining §5 parts:
+    delete the approval ceremony plus packaged manifest, simplify the 14-site read-time overlay to
+    provenance reporting.</p>
+  </section>
 </main>
 </body>
 </html>
