@@ -158,6 +158,17 @@ def _check_neo4j() -> bool:
     return _neo4j_available
 
 
+def _explicit_graph_marker_selection(config: pytest.Config | None) -> bool:
+    """Whether the invocation explicitly selected only graph-marked tests."""
+    if config is None:
+        return False
+    try:
+        marker_expression = config.getoption("markexpr", default="")
+    except (AttributeError, ValueError):
+        return False
+    return marker_expression.strip() == "graph"
+
+
 def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     """Auto-skip graph/integration-marked tests when Neo4j is unreachable."""
     graph_items = [
@@ -171,7 +182,13 @@ def pytest_collection_modifyitems(config, items):  # noqa: ARG001
     ]
     if not graph_items or _check_neo4j():
         return
-    skip_marker = pytest.mark.skip(reason=_neo4j_unavailable_reason())
+    unavailable_reason = _neo4j_unavailable_reason()
+    if _explicit_graph_marker_selection(config):
+        pytest.exit(
+            f"Graph-marked test selection was not run: {unavailable_reason}",
+            returncode=pytest.ExitCode.NO_TESTS_COLLECTED,
+        )
+    skip_marker = pytest.mark.skip(reason=unavailable_reason)
     for item in graph_items:
         item.add_marker(skip_marker)
 
