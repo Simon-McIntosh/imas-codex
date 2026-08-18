@@ -314,7 +314,7 @@ def _apply_unit_overrides(
 def _apply_typed_dd_resolutions(
     results: list[dict], dd_version: str | None
 ) -> list[dict]:
-    """Project immutable graph rows through the strict packaged authority."""
+    """Attach typed resolution provenance to immutable graph values."""
     from imas_codex.settings import get_dd_version
     from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 

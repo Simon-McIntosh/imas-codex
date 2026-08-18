@@ -449,10 +449,12 @@ class ResolvedDDField(BaseModel):
 
 
 class ResolvedDDContext(BaseModel):
-    """Raw provenance and effective projections under one graph snapshot."""
+    """Published provenance beside direct values from one graph snapshot."""
 
     model_config = ConfigDict(extra="forbid", frozen=True)
     raw: RawDDContext
+    graph: RawDDContext
+    published: RawDDContext
     unit: str | None
     documentation: str | None
     data_type: str | None
@@ -466,6 +468,7 @@ class ResolvedDDContext(BaseModel):
     resolved_fields: tuple[ResolvedDDField, ...]
     applied_resolution_ids: tuple[str, ...]
     converged_resolution_ids: tuple[str, ...]
+    resolution_provenance: tuple[DDResolutionRecord, ...]
     manifest_digest: str
     parents: tuple[ResolvedDDContext, ...] = ()
     members: tuple[ResolvedDDContext, ...] = ()
@@ -485,6 +488,7 @@ class ResolvedDDContext(BaseModel):
             "lifecycle_status": self.lifecycle_status,
             "lifecycle_version": self.lifecycle_version,
             "raw_dd_context": self.raw.model_dump(mode="json"),
+            "published_dd_context": self.published.model_dump(mode="json"),
             "dd_resolution_ids": list(self.applied_resolution_ids),
             "dd_resolution_converged_ids": list(self.converged_resolution_ids),
             "dd_resolution_manifest_digest": self.manifest_digest,
@@ -570,6 +574,81 @@ def resolve_dd_field(
     return _resolved_field(field, raw_value, raw_value)
 
 
+def _read_graph_field(
+    *,
+    path: str,
+    dd_version: str,
+    field: DDResolutionField,
+    graph_value: DDResolutionValue,
+    manifest: DDResolutionManifest,
+) -> ResolvedDDField:
+    """Attach bridge provenance without replacing the graph field value."""
+    active = tuple(
+        record
+        for record in effective_active_dd_resolutions(manifest)
+        if record.path == path and record.field == field
+    )
+    exact = tuple(record for record in active if record.dd_version == dd_version)
+    if len(exact) > 1:
+        raise DDResolutionCollision(
+            f"multiple active resolutions claim {(path, dd_version, field.value)!r}"
+        )
+    if exact:
+        record = exact[0]
+        if not _same_value(graph_value, record.effective):
+            raise DDResolutionStale(
+                f"graph value for {(path, dd_version, field.value)!r} does not "
+                "match the resolution's effective value"
+            )
+        return _resolved_field(
+            field,
+            record.observed,
+            graph_value,
+            record,
+            applied=True,
+        )
+    if active:
+        converged = tuple(
+            record for record in active if _same_value(graph_value, record.effective)
+        )
+        if len(converged) > 1:
+            raise DDResolutionAmbiguity(
+                "multiple prior-version records could certify convergence"
+            )
+        if converged:
+            return _resolved_field(
+                field,
+                converged[0].observed,
+                graph_value,
+                converged[0],
+                converged=True,
+            )
+        versions = sorted({record.dd_version for record in active})
+        raise DDResolutionVersionMismatch(
+            f"resolution for {(path, field.value)!r} was reviewed only for "
+            f"{versions!r}, not {dd_version!r}"
+        )
+    return _resolved_field(field, graph_value, graph_value)
+
+
+def read_graph_dd_field(
+    *,
+    path: str,
+    dd_version: str,
+    field: DDResolutionField,
+    graph_value: DDResolutionValue,
+    manifest: DDResolutionManifest | None = None,
+) -> ResolvedDDField:
+    """Validate one direct graph field and attach bridge provenance."""
+    return _read_graph_field(
+        path=_validate_exact_path(path),
+        dd_version=_validate_exact_version(dd_version),
+        field=field,
+        graph_value=graph_value,
+        manifest=manifest or load_dd_resolution_manifest(),
+    )
+
+
 _CONTEXT_FIELDS = tuple(DDResolutionField)
 
 
@@ -584,14 +663,14 @@ def _context_value(raw: RawDDContext, field: DDResolutionField) -> DDResolutionV
 def resolve_dd_context(
     raw: RawDDContext, *, manifest: DDResolutionManifest | None = None
 ) -> ResolvedDDContext:
-    """Resolve every DD context field under one graph snapshot."""
+    """Read graph values directly and attach their resolution provenance."""
     authority = manifest or load_dd_resolution_manifest()
     fields = tuple(
-        resolve_dd_field(
+        _read_graph_field(
             path=raw.path,
             dd_version=raw.dd_version,
             field=field,
-            raw_value=_context_value(raw, field),
+            graph_value=_context_value(raw, field),
             manifest=authority,
         )
         for field in _CONTEXT_FIELDS
@@ -602,8 +681,19 @@ def resolve_dd_context(
         raise DDResolutionEvidenceMismatch(
             "coordinates must remain an ordered string list"
         )
+    published = raw.model_copy(
+        update={item.field.value: item.raw.value for item in fields}
+    )
+    provenance = tuple(
+        sorted(
+            (item.provenance for item in fields if item.provenance is not None),
+            key=lambda record: record.id,
+        )
+    )
     return ResolvedDDContext(
         raw=raw,
+        graph=raw,
+        published=published,
         unit=values[DDResolutionField.unit],
         documentation=values[DDResolutionField.documentation],
         data_type=values[DDResolutionField.data_type],
@@ -623,6 +713,7 @@ def resolve_dd_context(
         converged_resolution_ids=tuple(
             sorted(item.resolution_id for item in fields if item.converged)
         ),
+        resolution_provenance=provenance,
         manifest_digest=authority.digest,
         parents=tuple(
             resolve_dd_context(item, manifest=authority) for item in raw.parents
@@ -703,6 +794,7 @@ __all__ = [
     "dd_resolution_graph_reader",
     "effective_active_dd_resolutions",
     "load_dd_resolution_manifest",
+    "read_graph_dd_field",
     "resolve_dd_context",
     "resolve_dd_field",
     "resolve_dd_row",

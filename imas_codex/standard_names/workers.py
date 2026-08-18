@@ -2846,19 +2846,19 @@ def _is_attachment_consistent(
         from imas_codex.settings import get_dd_version
         from imas_codex.standard_names.dd_resolutions import (
             DDResolutionValue,
-            resolve_dd_field,
+            read_graph_dd_field,
         )
 
-        resolved_unit = resolve_dd_field(
+        graph_unit = read_graph_dd_field(
             path=source_id,
             dd_version=get_dd_version(),
             field=DDResolutionField.unit,
-            raw_value=DDResolutionValue(
+            graph_value=DDResolutionValue(
                 kind=DDResolutionValueKind.string,
                 value=dd_unit,
             ),
         )
-        dd_unit = resolved_unit.effective.value
+        dd_unit = graph_unit.effective.value
 
     if dd_unit and sn_unit:
         from imas_codex.units.dd_unit_exceptions import canonical_or_none, units_agree
@@ -8696,7 +8696,13 @@ def _enrich_for_docs_gen(
                     or "",
                     "unit": context.unit or "",
                     "raw_dd_context": context.as_pipeline_item()["raw_dd_context"],
+                    "published_dd_context": context.as_pipeline_item()[
+                        "published_dd_context"
+                    ],
                     "dd_resolution_ids": list(context.applied_resolution_ids),
+                    "dd_resolution_converged_ids": list(
+                        context.converged_resolution_ids
+                    ),
                     "dd_resolution_manifest_digest": context.manifest_digest,
                 }
                 for n, context in zip(dd_nodes[:5], contexts[:5], strict=True)

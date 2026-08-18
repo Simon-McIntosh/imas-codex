@@ -9523,6 +9523,7 @@ def _pin_dd_source_snapshots(
                     "dd_lifecycle_status": effective["lifecycle_status"],
                     "dd_lifecycle_version": effective["lifecycle_version"],
                     "raw_dd_context": effective["raw_dd_context"],
+                    "published_dd_context": effective["published_dd_context"],
                     "dd_resolution_ids": effective["dd_resolution_ids"],
                     "dd_resolution_converged_ids": effective[
                         "dd_resolution_converged_ids"

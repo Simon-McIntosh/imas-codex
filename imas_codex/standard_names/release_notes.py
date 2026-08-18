@@ -231,6 +231,20 @@ def summarize_dd_gap_facts(facts: list[Mapping[str, Any]]) -> dict[str, Any]:
         "blocks_release": False,
         "dd_resolution_manifest_digest": resolution_authority.digest,
         "dd_resolution_record_count": len(resolution_authority.resolutions),
+        "dd_resolution_bridges": [
+            {
+                "id": record.id,
+                "path": record.path,
+                "field": record.field.value,
+                "published": record.observed.model_dump(mode="json"),
+                "effective": record.effective.model_dump(mode="json"),
+                "upstream_reference": record.upstream_reference,
+                "retiring_release": record.retiring_release,
+            }
+            for record in sorted(
+                resolution_authority.resolutions, key=lambda item: item.id
+            )
+        ],
     }
 
 
