@@ -194,8 +194,13 @@ class TestResolveUnitOverrides:
         assert meta is None
 
     def test_active_manifest_controls_exact_rule_retirement(self) -> None:
+        from tests.standard_names.dd_resolution_test_data import (
+            SYNTHETIC_ACTIVE_DIRECTION_ROW,
+            load_synthetic_resolution_authority,
+        )
+
         path = "camera_ir/channel/camera/direction/x"
-        active = load_dd_resolution_manifest()
+        active = load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
         inactive = active.model_copy(
             update={
                 "resolutions": tuple(

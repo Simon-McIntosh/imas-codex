@@ -76,7 +76,6 @@ def test_shadow_guard_names_residual_carrier_and_row() -> None:
     duplicate = manifest.resolutions[0]
     double_authority = SimpleNamespace(
         resolutions=(*manifest.resolutions, duplicate),
-        state_changes=manifest.state_changes,
     )
 
     audit = authority.find_shadow_authorities(manifest=double_authority)
@@ -107,7 +106,14 @@ def test_shadow_audit_flags_disagreeing_extraction_skip(
         ),
     )
 
-    audit = authority.find_shadow_authorities()
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    audit = authority.find_shadow_authorities(
+        manifest=load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    )
 
     assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("unit_overrides.skip", "unit-override:1")
@@ -133,7 +139,14 @@ def test_shadow_audit_flags_disagreeing_extraction_override(
         ),
     )
 
-    audit = authority.find_shadow_authorities()
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    audit = authority.find_shadow_authorities(
+        manifest=load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    )
 
     assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("unit_overrides.override", "unit-override:1")
@@ -157,7 +170,14 @@ def test_shadow_audit_flags_disagreeing_comparator_suppression(
         ),
     )
 
-    audit = authority.find_shadow_authorities()
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    audit = authority.find_shadow_authorities(
+        manifest=load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    )
 
     assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("dd_unit_exceptions.suppress", "dd-unit-exception:1")
@@ -182,7 +202,14 @@ def test_shadow_audit_flags_disagreeing_graph_correction(
         ),
     )
 
-    audit = authority.find_shadow_authorities()
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    audit = authority.find_shadow_authorities(
+        manifest=load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    )
 
     assert [(item.carrier, item.row_id) for item in audit.residuals] == [
         ("dd_unit_exceptions.correct_in_graph", "dd-unit-exception:1")

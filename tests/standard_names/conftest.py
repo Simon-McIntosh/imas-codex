@@ -68,8 +68,18 @@ def _bound_synthetic_model_exposure(monkeypatch):
     monkeypatch.setattr(dispatcher, "model_provider_exposure", _bounded)
 
 
+@pytest.fixture(scope="session")
+def _synthetic_dd_resolution_rows():
+    """Load the deliberately minimal mock-only authority once per session."""
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_GRAPH_RESOLUTION_ROWS,
+    )
+
+    return SYNTHETIC_GRAPH_RESOLUTION_ROWS
+
+
 @pytest.fixture(autouse=True)
-def _block_live_graph(request):
+def _block_live_graph(request, monkeypatch, _synthetic_dd_resolution_rows):
     """Raise RuntimeError if a default-tier test attempts to open a real
     Neo4j connection.
 
@@ -90,6 +100,17 @@ def _block_live_graph(request):
         return
 
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import dd_resolutions
+
+    class _SyntheticResolutionReader:
+        def read_resolutions(self):
+            return _synthetic_dd_resolution_rows
+
+    monkeypatch.setattr(
+        dd_resolutions,
+        "dd_resolution_graph_reader",
+        _SyntheticResolutionReader,
+    )
 
     def _blocked_post_init(self, *args, **kwargs):
         raise RuntimeError(
