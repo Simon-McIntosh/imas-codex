@@ -177,26 +177,31 @@ class TestCanonicalUnitOrdering:
 
 
 class TestDdUnitDefectCuration:
-    """A DD-declared unit that contradicts the quantity's dimensionality is not
-    propagated into a standard name.
+    """A DD-declared unit defect has exactly one effective correction authority.
 
     DD 4.1.1 declares ``ionisation_potential`` as ``eV`` under ``profiles_1d``
     but as ``e`` under ``ggd`` — the same quantity, one an energy and one a
-    charge. Blindly trusting the declaration types the GGD copy as a charge and
-    desyncs it from its own scalar sibling, so the curated resolver returns the
-    dimensionally-correct unit. Charge numbers (z_ion / z_min / z_max / z_n /
-    z_average / z_square_average) legitimately carry ``e`` and must be
-    untouched.
+    charge. The legacy graph correction remains the fallback for affected paths
+    without exact active resolution authority. An exact active resolution makes
+    that fallback inert so the raw declaration remains available to the active
+    resolver, which applies the effective unit with provenance. Charge numbers
+    legitimately carry ``e`` and must be untouched.
     """
 
-    def test_ionisation_potential_resolves_to_energy(self):
+    def test_active_resolution_retires_legacy_graph_correction(self):
         from imas_codex.units import resolve_dd_unit
 
         for path in (
             "edge_profiles/ggd/ion/state/ionisation_potential",
-            "plasma_profiles/ggd/ion/state/ionisation_potential/values",
+            "plasma_profiles/ggd/ion/state/ionisation_potential",
         ):
-            assert resolve_dd_unit(path, "e") == "eV", path
+            assert resolve_dd_unit(path, "e") == "e", path
+
+    def test_unresolved_descendant_keeps_legacy_graph_correction(self):
+        from imas_codex.units import resolve_dd_unit
+
+        path = "plasma_profiles/ggd/ion/state/ionisation_potential/values"
+        assert resolve_dd_unit(path, "e") == "eV"
 
     def test_scalar_sibling_declaration_is_unchanged(self):
         from imas_codex.units import resolve_dd_unit
