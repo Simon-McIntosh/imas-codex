@@ -2461,47 +2461,6 @@ classes:
         required: true
         description: Evidence-backed justification for the identity change.
 
-  DDResolutionStateChange:
-    description: >-
-      Immutable compare-and-set receipt for one lifecycle transition of a graph
-      DDResolution mirror. Runtime behavior remains controlled by the packaged
-      manifest and never by this event.
-    class_uri: sn:DDResolutionStateChange
-    attributes:
-      id:
-        identifier: true
-        required: true
-        description: "Content-addressed identity: dd_resolution_state_change:{sha256}"
-      dd_resolution_id:
-        required: true
-        description: Exact content-addressed resolution identity that changed state.
-      from_status:
-        required: true
-        range: DDResolutionStatus
-      to_status:
-        required: true
-        range: DDResolutionStatus
-      actor:
-        required: true
-        description: Human authority or governed reconciler applying the transition.
-      reason:
-        required: true
-        description: Evidence-backed reason for the transition.
-      changed_at:
-        required: true
-        range: datetime
-      expected_manifest_digest:
-        required: true
-        description: Packaged manifest digest required by the compare-and-set preflight.
-      expected_evidence_token:
-        required: true
-        description: DDGap evidence token required by the compare-and-set preflight.
-      graph_snapshot_token:
-        required: true
-        description: Exact graph snapshot token fenced by the successful apply.
-      resulting_manifest_digest:
-        description: Packaged manifest digest after the governed transition, if changed.
-
   DDResolution:
     description: >-
       One exact, version-bound bridge from a corrected IMASNode declaration to
