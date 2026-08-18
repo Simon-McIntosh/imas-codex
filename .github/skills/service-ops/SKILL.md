@@ -62,7 +62,7 @@ uv run imas-codex embed service install  # Install systemd service
 | `embed status` shows node draining | Ask admin to resume node |
 | Server healthy but no SLURM job | `imas-codex embed stop` kills rogues |
 | Embedding calls timeout | Check tunnel: `lsof -i :18765` |
-| Rapid FAILED jobs | Check `imas-codex embed logs`, run `uv sync` on node |
+| Rapid FAILED jobs | Check `imas-codex embed logs`; report a missing or stale node/root environment instead of rebuilding it |
 
 ## LLM Proxy (LiteLLM)
 

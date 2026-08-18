@@ -976,7 +976,7 @@ imas-codex embed logs            # View SLURM logs
 imas-codex embed service install # Install systemd service (login node only)
 ```
 
-Troubleshooting: `embed status` shows node state. Common: node draining → ask admin to RESUME; rogue process → `embed stop` kills it; package issue → check `embed logs` and `uv sync` on node; timeouts → check tunnel (`lsof -i :18765`).
+Troubleshooting: `embed status` shows node state. Common: node draining → ask admin to RESUME; rogue process → `embed stop` kills it; package issue → check `embed logs` and report the node/root environment as a blocker rather than rebuilding it; timeouts → check tunnel (`lsof -i :18765`).
 
 ### Neo4j connection
 

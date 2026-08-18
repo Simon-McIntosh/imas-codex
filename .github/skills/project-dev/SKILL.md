@@ -42,10 +42,13 @@ Never commit auto-generated files: `models.py`, `dd_models.py`, `physics_domain.
 
 ### Dependency Management
 
+Follow `~/.agents/AGENTS.md` "Development Environment". Agents use the
+user-provisioned repository-root environment; missing dependencies or extras
+are blockers. Detached worktrees reuse it explicitly:
+
 ```bash
-uv sync                  # Install all deps
-uv sync --extra test     # Include test deps (needed in worktrees)
-uv sync --extra gpu      # Include GPU deps (for embedding)
+UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv \
+  PYTHONPATH="$PWD" uv run --no-sync <command>
 ```
 
 ## Git Workflow
