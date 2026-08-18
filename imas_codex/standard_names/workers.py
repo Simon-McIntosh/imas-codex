@@ -2841,6 +2841,25 @@ def _is_attachment_consistent(
     # there is no second list here. A unit that is absent or that the canonical
     # parser cannot resolve on either side is a DD-completeness gap, not an
     # attachment defect: nothing to disagree with, so the pair is accepted.
+    if dd_unit:
+        from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
+        from imas_codex.settings import get_dd_version
+        from imas_codex.standard_names.dd_resolutions import (
+            DDResolutionValue,
+            read_graph_dd_field,
+        )
+
+        graph_unit = read_graph_dd_field(
+            path=source_id,
+            dd_version=get_dd_version(),
+            field=DDResolutionField.unit,
+            graph_value=DDResolutionValue(
+                kind=DDResolutionValueKind.string,
+                value=dd_unit,
+            ),
+        )
+        dd_unit = graph_unit.effective.value
+
     if dd_unit and sn_unit:
         from imas_codex.units.dd_unit_exceptions import canonical_or_none, units_agree
 
@@ -8677,7 +8696,13 @@ def _enrich_for_docs_gen(
                     or "",
                     "unit": context.unit or "",
                     "raw_dd_context": context.as_pipeline_item()["raw_dd_context"],
+                    "published_dd_context": context.as_pipeline_item()[
+                        "published_dd_context"
+                    ],
                     "dd_resolution_ids": list(context.applied_resolution_ids),
+                    "dd_resolution_converged_ids": list(
+                        context.converged_resolution_ids
+                    ),
                     "dd_resolution_manifest_digest": context.manifest_digest,
                 }
                 for n, context in zip(dd_nodes[:5], contexts[:5], strict=True)

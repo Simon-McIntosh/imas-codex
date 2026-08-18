@@ -108,14 +108,16 @@ def stamp_source_snapshots(
             resolved = _resolved_source_context(
                 row["path"], row.get("unit"), row.get("documentation")
             )
+            published = resolved["published_dd_context"]
             updates.append(
                 {
                     "sn_id": row["sn_id"],
                     "path": row["path"],
                     "unit": resolved["unit"],
                     "documentation": resolved["documentation"],
-                    "raw_unit": resolved["raw_dd_context"]["unit"],
-                    "raw_documentation": resolved["raw_dd_context"]["documentation"],
+                    "raw_unit": published["unit"],
+                    "raw_documentation": published["documentation"],
+                    "published_dd_context": published,
                     "resolution_ids": resolved["dd_resolution_ids"],
                     "converged_ids": resolved["dd_resolution_converged_ids"],
                     "manifest_digest": resolved["dd_resolution_manifest_digest"],
@@ -215,21 +217,21 @@ def detect_source_drift(
                 deltas.append(
                     {"field": "documentation", "old": r["old_doc"], "new": r["new_doc"]}
                 )
-            raw_context = resolved["raw_dd_context"]
-            if _norm(r.get("old_raw_unit")) != _norm(raw_context.get("unit")):
+            published = resolved["published_dd_context"]
+            if _norm(r.get("old_raw_unit")) != _norm(published.get("unit")):
                 deltas.append(
                     {
                         "field": "raw_unit",
                         "old": r.get("old_raw_unit"),
-                        "new": raw_context.get("unit"),
+                        "new": published.get("unit"),
                     }
                 )
-            if _norm(r.get("old_raw_doc")) != _norm(raw_context.get("documentation")):
+            if _norm(r.get("old_raw_doc")) != _norm(published.get("documentation")):
                 deltas.append(
                     {
                         "field": "raw_documentation",
                         "old": r.get("old_raw_doc"),
-                        "new": raw_context.get("documentation"),
+                        "new": published.get("documentation"),
                     }
                 )
             if _norm_ids(r.get("old_resolution_ids")) != _norm_ids(

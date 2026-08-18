@@ -25,32 +25,41 @@ provenance fields and additionally exposes:
   context.
 
 The field-level resolver remains available for release-fact comparison, where a
-published release value is intentionally compared with an effective bridge. It
-is no longer used by attachment validation; that path compares the graph unit
-directly.
+published release value is intentionally compared with an effective bridge.
+Attachment validation now calls the provenance-only graph-field reader. That
+reader never substitutes a value: it returns the graph value when it matches the
+effective bridge and raises `DDResolutionStale` when an active exact bridge sees
+the published or a third value.
+
+Exact-version bridge identities are reported as applied and not converged.
+Prior-version bridge identities are reported as converged and not applied when
+their effective value matches the graph. Source refresh persists the bridge's
+published context in the raw provenance fields, while its effective snapshot
+continues to carry the direct graph value.
 
 ## Simplified consumer sites
 
 Thirteen context sites inherit direct graph-value semantics through the one
-typed row boundary. The fourteenth, attachment validation, now reads its graph
-unit directly and contains no resolver call.
+typed row boundary. The fourteenth, attachment validation, validates its direct
+graph unit through the non-substituting field boundary. Every custom projection
+now retains `published_dd_context` beside the effective graph context.
 
-| Site | Location | Result |
-|---|---|---|
-| Bulk DD extraction | `sources/dd.py:322` | Direct row values plus bridge provenance |
-| Explicit-path seed | `pool_adapter.py:205` | Direct row values plus bridge provenance |
-| Source refresh | `source_refresh.py:65` | Direct row values; raw graph, bridge ids, digest, marker retained |
-| Source authority snapshot | `source_authority.py:383` | Direct row values plus bridge provenance |
-| Extraction candidates | `graph_ops.py:692` | Direct row values plus bridge provenance |
-| Manifest drain plan | `graph_ops.py:1101` | Direct row values plus bridge provenance |
-| Source snapshot pinning | `graph_ops.py:9504` | Direct row values plus bridge provenance |
-| Review context | `review/pipeline.py:699` | Direct row values plus bridge provenance |
-| Batch enrichment | `workers.py:2197` | Direct row values plus bridge provenance |
-| Attachment validation | `workers.py:2701` | Direct graph unit; substitution call removed |
-| Name-review member context | `workers.py:7262` | Direct row values plus bridge provenance |
-| Name-review parent context | `workers.py:7314` | Direct row values plus bridge provenance |
-| Documentation context | `workers.py:8658` | Direct row values plus bridge provenance |
-| Refine-documentation context | `workers.py:10185` | Direct row values plus bridge provenance |
+| Site | Location | Final contract | Covering regression |
+|---|---|---|---|
+| Bulk DD extraction | `sources/dd.py:322` | Direct row values plus published bridge provenance | `test_consumer_boundaries_call_typed_authority` |
+| Explicit-path seed | `pool_adapter.py:205` | Direct row values plus published bridge provenance | `test_graph_context_reads_effective_value_and_reports_published_provenance` and pool-adapter public tests |
+| Source refresh | `source_refresh.py:65` | Effective graph snapshot plus persisted published context and split identity sets | `test_source_refresh_persists_published_bridge_provenance` and `test_public_refresh_restamps_raw_convergence_without_steering` |
+| Source authority snapshot | `source_authority.py:383` | Direct row values plus published bridge provenance | source-authority public snapshot tests and complete suite |
+| Extraction candidates | `graph_ops.py:692` | Additive direct rows plus published bridge provenance | extraction-candidate public tests and complete suite |
+| Manifest drain plan | `graph_ops.py:1101` | Direct row values plus published bridge provenance | manifest-drain public tests |
+| Source snapshot pinning | `graph_ops.py:9504` | Direct row values plus published bridge provenance | focus-reseed and source-pinning public tests |
+| Review context | `review/pipeline.py:699` | Direct row values plus published context and applied/converged identity sets | prompt-context public tests |
+| Batch enrichment | `workers.py:2197` | Direct row values plus published bridge provenance | worker enrichment public tests |
+| Attachment validation | `workers.py:2701` | Direct graph unit validated without substitution; stale active rows refuse | `test_attachment_refuses_published_value_on_active_graph_bridge` |
+| Name-review member context | `workers.py:7281` | Direct row values plus published bridge provenance | name-review context public tests |
+| Name-review parent context | `workers.py:7333` | Direct row values plus published bridge provenance | parent-context public tests |
+| Documentation context | `workers.py:8677` | Direct row values plus published context and applied/converged identity sets | documentation-context public tests |
+| Refine-documentation context | `workers.py:10210` | Direct row values plus published bridge provenance | refine-documentation public tests |
 
 Release evidence now lists each bridge's id, path, field, published and effective
 typed values, upstream reference, and retiring release beside the authority
@@ -58,9 +67,12 @@ digest and record count.
 
 ## Verification
 
-- Red proof: the new public-boundary regression failed because the context had
-  no distinct graph and published surfaces.
-- Focused verification: 34 tests passed with no failures.
-- Credentialed graph consumer probe: 6 tests passed with no skips or failures.
-- Complete credential-less Standard Names suite: 6,505 passed, 8 skipped, 198
-  deselected, and zero failed.
+- Initial red proof: the public-boundary regression failed because the context
+  had no distinct graph and published surfaces.
+- Corrective public regressions: four passed, covering stale attachment,
+  published source-refresh persistence, exact applied identity, and prior-version
+  converged identity semantics.
+- Corrective focused verification: 102 passed, 7 deselected, and zero failed.
+- Credentialed graph consumer probe: 6 passed, 5 deselected, and zero failed.
+- Complete credential-less Standard Names suite: 6,508 passed, 8 skipped, 198
+  deselected, and zero failed in 180.78 seconds.

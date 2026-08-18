@@ -72,9 +72,7 @@ def test_graph_context_reads_effective_value_and_reports_published_provenance() 
     assert context.applied_resolution_ids == (
         "dd_resolution:synthetic-active-direction",
     )
-    assert context.converged_resolution_ids == (
-        "dd_resolution:synthetic-active-direction",
-    )
+    assert context.converged_resolution_ids == ()
     assert context.resolution_provenance[0].observed.value == "m"
     assert context.resolution_provenance[0].upstream_reference == "none-yet"
 
@@ -84,6 +82,105 @@ def test_graph_context_reads_effective_value_and_reports_published_provenance() 
             dd_version="4.1.1",
             manifest=manifest,
         )
+
+
+def test_prior_version_bridge_is_converged_without_being_applied() -> None:
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    manifest = load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    context = resolve_dd_row(
+        {"path": "camera_ir/channel/camera/direction/x", "unit": "1"},
+        dd_version="4.2.0",
+        manifest=manifest,
+    )
+
+    assert context.applied_resolution_ids == ()
+    assert context.converged_resolution_ids == (
+        "dd_resolution:synthetic-active-direction",
+    )
+
+
+def test_attachment_refuses_published_value_on_active_graph_bridge(monkeypatch) -> None:
+    from imas_codex.standard_names.workers import _is_attachment_consistent
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    manifest = load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    monkeypatch.setattr(dd_resolutions, "load_dd_resolution_manifest", lambda: manifest)
+
+    with pytest.raises(DDResolutionStale, match="graph value"):
+        _is_attachment_consistent(
+            "camera_ir/channel/camera/direction/x",
+            "x_direction_unit_vector",
+            dd_unit="m",
+            sn_unit="m",
+        )
+
+
+def test_source_refresh_persists_published_bridge_provenance(monkeypatch) -> None:
+    from imas_codex.standard_names.source_refresh import stamp_source_snapshots
+    from tests.standard_names.dd_resolution_test_data import (
+        SYNTHETIC_ACTIVE_DIRECTION_ROW,
+        load_synthetic_resolution_authority,
+    )
+
+    manifest = load_synthetic_resolution_authority(SYNTHETIC_ACTIVE_DIRECTION_ROW)
+    monkeypatch.setattr(dd_resolutions, "load_dd_resolution_manifest", lambda: manifest)
+
+    class SourceRefreshGraph:
+        def __init__(self) -> None:
+            self.updates: list[dict] = []
+
+        def query(self, query: str, **parameters):
+            if "RETURN sn.id AS sn_id" in query:
+                return [
+                    {
+                        "sn_id": "x_direction_unit_vector",
+                        "path": "camera_ir/channel/camera/direction/x",
+                        "unit": "1",
+                        "documentation": "Direction component.",
+                    }
+                ]
+            self.updates = parameters["updates"]
+            return []
+
+    graph = SourceRefreshGraph()
+    assert stamp_source_snapshots(gc=graph) == 1
+    assert graph.updates == [
+        {
+            "sn_id": "x_direction_unit_vector",
+            "path": "camera_ir/channel/camera/direction/x",
+            "unit": "1",
+            "documentation": "Direction component.",
+            "raw_unit": "m",
+            "raw_documentation": "Direction component.",
+            "published_dd_context": {
+                "path": "camera_ir/channel/camera/direction/x",
+                "dd_version": "4.1.1",
+                "unit": "m",
+                "documentation": "Direction component.",
+                "data_type": None,
+                "node_type": None,
+                "physics_domain": None,
+                "cocos_transformation_type": None,
+                "cocos_transformation_expression": None,
+                "coordinates": [],
+                "lifecycle_status": None,
+                "lifecycle_version": None,
+                "parents": [],
+                "members": [],
+            },
+            "resolution_ids": ["dd_resolution:synthetic-active-direction"],
+            "converged_ids": [],
+            "manifest_digest": manifest.digest,
+            "resolution_marker": "resolved-dd-context",
+        }
+    ]
 
 
 @pytest.mark.graph

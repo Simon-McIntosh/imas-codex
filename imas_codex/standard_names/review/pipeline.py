@@ -714,7 +714,13 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
                     "description": row.get("description", ""),
                     "documentation": context.documentation or "",
                     "raw_dd_context": context.as_pipeline_item()["raw_dd_context"],
+                    "published_dd_context": context.as_pipeline_item()[
+                        "published_dd_context"
+                    ],
                     "dd_resolution_ids": list(context.applied_resolution_ids),
+                    "dd_resolution_converged_ids": list(
+                        context.converged_resolution_ids
+                    ),
                     "dd_resolution_manifest_digest": context.manifest_digest,
                 }
         except DDResolutionError:

@@ -605,7 +605,7 @@ def _read_graph_field(
             record.observed,
             graph_value,
             record,
-            converged=True,
+            applied=True,
         )
     if active:
         converged = tuple(
@@ -629,6 +629,24 @@ def _read_graph_field(
             f"{versions!r}, not {dd_version!r}"
         )
     return _resolved_field(field, graph_value, graph_value)
+
+
+def read_graph_dd_field(
+    *,
+    path: str,
+    dd_version: str,
+    field: DDResolutionField,
+    graph_value: DDResolutionValue,
+    manifest: DDResolutionManifest | None = None,
+) -> ResolvedDDField:
+    """Validate one direct graph field and attach bridge provenance."""
+    return _read_graph_field(
+        path=_validate_exact_path(path),
+        dd_version=_validate_exact_version(dd_version),
+        field=field,
+        graph_value=graph_value,
+        manifest=manifest or load_dd_resolution_manifest(),
+    )
 
 
 _CONTEXT_FIELDS = tuple(DDResolutionField)
@@ -672,7 +690,6 @@ def resolve_dd_context(
             key=lambda record: record.id,
         )
     )
-    resolution_ids = tuple(record.id for record in provenance)
     return ResolvedDDContext(
         raw=raw,
         graph=raw,
@@ -690,8 +707,12 @@ def resolve_dd_context(
         lifecycle_status=values[DDResolutionField.lifecycle_status],
         lifecycle_version=values[DDResolutionField.lifecycle_version],
         resolved_fields=fields,
-        applied_resolution_ids=resolution_ids,
-        converged_resolution_ids=resolution_ids,
+        applied_resolution_ids=tuple(
+            sorted(item.resolution_id for item in fields if item.applied)
+        ),
+        converged_resolution_ids=tuple(
+            sorted(item.resolution_id for item in fields if item.converged)
+        ),
         resolution_provenance=provenance,
         manifest_digest=authority.digest,
         parents=tuple(
@@ -773,6 +794,7 @@ __all__ = [
     "dd_resolution_graph_reader",
     "effective_active_dd_resolutions",
     "load_dd_resolution_manifest",
+    "read_graph_dd_field",
     "resolve_dd_context",
     "resolve_dd_field",
     "resolve_dd_row",

@@ -201,6 +201,10 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
             "unit": "1",
             "documentation": "Direction component.",
         },
+        "published_dd_context": {
+            "unit": "m",
+            "documentation": "Direction component.",
+        },
         "dd_resolution_ids": [],
         "dd_resolution_converged_ids": [resolution_id],
         "dd_resolution_manifest_digest": "sha256:current",
@@ -266,6 +270,6 @@ def test_public_refresh_restamps_raw_convergence_without_steering(monkeypatch):
     apply_edit.assert_not_called()
     assert len(gc.writes) == 1
     [update] = gc.writes[0][1]["updates"]
-    assert update["raw_unit"] == "1"
+    assert update["raw_unit"] == "m"
     assert update["resolution_ids"] == []
     assert update["converged_ids"] == [resolution_id]
