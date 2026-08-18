@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="170">
-<meta name="plan-impl" content="0.98">
+<meta name="plan-version" content="171">
+<meta name="plan-impl" content="0.982">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1452,6 +1452,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260819-dedup-instrument-landed" data-who="reckon-ship" data-when="2026-08-19T01:30:00+00:00">
     <div class="r-comment-body"><p><strong>The scalar-selected dedup instrument is landed, review APPROVE for merge (0/0/1/1).</strong> Commit <code>fe00ec3e</code>, merge <code>1b90f9fe</code>. <code>deduplicate_scalar_selected_sources</code> signs the complete source/binding/origin/backing/projection closure, locks and exact-rehashes it, and deletes only signed element ids under scalar/claim CAS; 3/3 disposable-Neo4j regressions plus a signed live preview over the census's 51 rows: <strong>48 admitted / 3 fail-closed projection-authority refusals</strong> (<code>dd:distributions/distribution</code>, <code>dd:edge_transport/model/ggd</code>, <code>dd:gyrokinetics_local/non_linear</code>), 57 paired removals, hash <code>dc2bfa35…</code>, zero writes. The live apply is gated on: zero/duplicate-projection refusal regressions (reviewer MEDIUM), adjudicating the three refused rows' backing-projection authority, and a freshly regenerated signed manifest. Record: <code>docs/evidence/sn-graph-wide-integrity/dual-binding-dedup.md</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260819-dedup-applied" data-who="reckon-ship" data-when="2026-08-19T02:05:00+00:00">
+    <div class="r-comment-body"><p><strong>The scalar-selected dedup is APPLIED live: 48 of the 51 census rows now carry exactly one live binding matching their scalar.</strong> Commit <code>a5a83b20</code>, merge <code>f8b6766e</code>, final review APPROVE with zero findings (exclusion authority PASS, refusal regressions red-proofed, independent 8/8 live sample). Applied hash <code>0c9fe0fd…</code>, 57 redundant bindings + 57 matching projections removed, one receipt (<code>sn-change:scalar-selected-dedup:0c9fe0fd…</code>), write-free replay. Dual-bound cohort: 279 → 231. Remaining per the census: 10 fold-into-ancestor pairs, 3 signed exclusions awaiting backing-authority reconstruction (<code>dd:distributions/distribution</code>, <code>dd:edge_transport/model/ggd</code>, <code>dd:gyrokinetics_local/non_linear</code>), 216 catalog_edit rows for semantic adjudication, 1 ambiguous row.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
