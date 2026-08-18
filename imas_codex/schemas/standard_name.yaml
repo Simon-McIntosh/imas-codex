@@ -2570,15 +2570,13 @@ classes:
         required: true
         range: string
         description: Exact corrected IMASNode identity carrying this bridge.
-        annotations:
-          relationship_type: BRIDGED_BY
-          target_label: IMASNode
       evidence:
         required: true
-        range: DDGap
+        range: string
         description: Exact DDGap fact proving the published declaration is defective.
         annotations:
           relationship_type: EVIDENCED_BY
+          target_label: DDGap
       for_dd_version:
         required: true
         range: string

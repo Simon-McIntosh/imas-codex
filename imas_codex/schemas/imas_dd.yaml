@@ -943,13 +943,14 @@ classes:
           relationship_type: HAS_DD_GAP
       dd_resolutions:
         description: >-
-          Graph mirrors of separately reviewed, version-bound effective values
-          for this exact raw DD path. Runtime behavior reads the packaged
-          resolution manifest and treats mirror digest drift as an error.
+          Resolution bridges preserving the published declaration and reviewed
+          effective value for this corrected raw DD path. Values are exact
+          DDResolution identities paired with BRIDGED_BY relationships.
         multivalued: true
-        range: DDResolution
+        range: string
         annotations:
-          relationship_type: HAS_DD_RESOLUTION
+          relationship_type: BRIDGED_BY
+          target_label: DDResolution
       coordinates:
         description: >-
           Coordinate specifications for this path (axis definitions).

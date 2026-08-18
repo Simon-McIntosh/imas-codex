@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 import yaml
 
+from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names.dd_resolutions import (
     _GRAPH_PORT_CORRECT_QUERY,
     DDResolutionGraphPathAction,
@@ -87,16 +88,38 @@ def test_schema_declares_resolution_provenance_and_relationships() -> None:
         "evidence",
         "for_dd_version",
     } <= attributes.keys()
-    assert attributes["corrected_node"]["annotations"] == {
-        "relationship_type": "BRIDGED_BY",
-        "target_label": "IMASNode",
+    assert attributes["corrected_node"]["range"] == "string"
+    assert "annotations" not in attributes["corrected_node"]
+    assert attributes["evidence"]["range"] == "string"
+    assert attributes["evidence"]["annotations"] == {
+        "relationship_type": "EVIDENCED_BY",
+        "target_label": "DDGap",
     }
-    assert attributes["evidence"]["annotations"]["relationship_type"] == (
-        "EVIDENCED_BY"
-    )
     assert attributes["for_dd_version"]["annotations"]["relationship_type"] == (
         "FOR_DD_VERSION"
     )
+
+
+def test_graph_schema_derives_bridge_from_imas_node() -> None:
+    schema = GraphSchema("imas_codex/schemas/imas_dd.yaml")
+    bridges = [
+        relationship
+        for relationship in schema.relationships
+        if relationship.cypher_type == "BRIDGED_BY"
+    ]
+    evidence = [
+        relationship
+        for relationship in schema.relationships
+        if relationship.cypher_type == "EVIDENCED_BY"
+        and relationship.from_class == "DDResolution"
+    ]
+
+    assert [
+        (relationship.from_class, relationship.to_class) for relationship in bridges
+    ] == [("IMASNode", "DDResolution")]
+    assert [
+        (relationship.from_class, relationship.to_class) for relationship in evidence
+    ] == [("DDResolution", "DDGap")]
 
 
 def test_port_materializes_all_active_records_and_replays_without_writes() -> None:
