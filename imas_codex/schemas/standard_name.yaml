@@ -3260,6 +3260,27 @@ classes:
       reason:
         required: true
         description: Operator-supplied reason for granting another attempt.
+      terminal_sn_id:
+        description: >-
+          Terminal StandardName identity whose exact source binding was
+          released. Present only for terminal-attachment recovery events.
+      terminal_stage:
+        range: NameStage
+        description: >-
+          Lifecycle stage of the terminal target at the recovery boundary.
+      before_closure_hash:
+        description: >-
+          SHA-256 of the complete signed source, DD path, and terminal-target
+          closure before recovery.
+      preserved_state_hash:
+        description: >-
+          SHA-256 of the graph state that the terminal recovery must preserve.
+      manifest_hash:
+        description: >-
+          SHA-256 of the exact manifest authorizing terminal recovery.
+      run_id:
+        description: >-
+          Invocation identity shared by the terminal-recovery mutation events.
       retried_at:
         required: true
         range: datetime

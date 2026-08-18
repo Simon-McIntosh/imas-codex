@@ -1205,6 +1205,24 @@ def test_terminal_recovery_fails_closed_without_partial_events() -> None:
     assert tx.close.call_count == 0
 
 
+def test_terminal_recovery_retry_metadata_is_declared() -> None:
+    from imas_codex.graph.schema import GraphSchema
+
+    schema = GraphSchema(schema_path="imas_codex/schemas/standard_name.yaml")
+    slots = schema.get_all_slots("StandardNameSourceRetry")
+    terminal_metadata = {
+        "before_closure_hash",
+        "manifest_hash",
+        "preserved_state_hash",
+        "run_id",
+        "terminal_sn_id",
+        "terminal_stage",
+    }
+
+    assert terminal_metadata <= slots.keys()
+    assert all(not slots[field].get("required") for field in terminal_metadata)
+
+
 def test_terminal_recovery_exception_rolls_back_edges_and_events() -> None:
     from imas_codex.standard_names.attachment_audit import (
         recover_terminal_attachment,
