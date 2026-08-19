@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="171">
-<meta name="plan-impl" content="0.982">
+<meta name="plan-version" content="172">
+<meta name="plan-impl" content="0.985">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1455,6 +1455,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260819-dedup-applied" data-who="reckon-ship" data-when="2026-08-19T02:05:00+00:00">
     <div class="r-comment-body"><p><strong>The scalar-selected dedup is APPLIED live: 48 of the 51 census rows now carry exactly one live binding matching their scalar.</strong> Commit <code>a5a83b20</code>, merge <code>f8b6766e</code>, final review APPROVE with zero findings (exclusion authority PASS, refusal regressions red-proofed, independent 8/8 live sample). Applied hash <code>0c9fe0fd…</code>, 57 redundant bindings + 57 matching projections removed, one receipt (<code>sn-change:scalar-selected-dedup:0c9fe0fd…</code>), write-free replay. Dual-bound cohort: 279 → 231. Remaining per the census: 10 fold-into-ancestor pairs, 3 signed exclusions awaiting backing-authority reconstruction (<code>dd:distributions/distribution</code>, <code>dd:edge_transport/model/ggd</code>, <code>dd:gyrokinetics_local/non_linear</code>), 216 catalog_edit rows for semantic adjudication, 1 ambiguous row.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260819-wave-small-classes" data-who="reckon-ship" data-when="2026-08-19T03:00:00+00:00">
+    <div class="r-comment-body"><p><strong>Three more census classes are closed: the camera fold, the ambiguous row, and the fixture residue.</strong> (1) The one preview-eligible ancestor fold applied (x_image_up_unit_vector_of_camera into x_direction_unit_vector_of_camera, merge 469a00ff); the other nine pairs are recorded refusals — five on reviewed-not-accepted ancestors routed to ordinary lifecycle review, four on closure/scalar conflicts. (2) The ambiguous power_fast row is adjudicated: the specific fast-ion identity kept, the derived parent's direct binding removed, receipt sn-change:0542bd02, empty replay delta (merge 6394dc74). (3) The 16 stale test-fixture sources are deleted with zero collateral and both test files gain exception-safe namespace teardown proven by credentialed zero-residue censuses (merge e09df87b). Remaining dual-binding classes: the 3 ineligible structural sources (disposition node in flight), the 216 catalog_edit semantic wave, and the 5 reviewed ancestors' lifecycle reviews.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
