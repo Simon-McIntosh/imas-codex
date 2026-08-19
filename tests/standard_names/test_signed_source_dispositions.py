@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 from collections.abc import Iterator
@@ -42,14 +41,7 @@ def _client(endpoint: tuple[str, str], name: str) -> GraphClient:
 
 
 def _digest(value: object) -> str:
-    return hashlib.sha256(
-        json.dumps(
-            value,
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=False,
-        ).encode()
-    ).hexdigest()
+    return _catalog_edit_adjudication_signature_hash(value)
 
 
 def _seed(
@@ -57,11 +49,13 @@ def _seed(
     prefix: str,
     *,
     scalar: str | None,
+    preserve_removed_target: bool = True,
 ) -> dict[str, str]:
     ids = {
         "source": f"dd:{prefix}/value",
         "path": f"{prefix}/value",
         "catalog": f"{prefix}_catalog",
+        "catalog_anchor": f"dd:{prefix}/catalog_anchor",
         "semantic": f"{prefix}_semantic",
     }
     client.query(
@@ -82,6 +76,15 @@ def _seed(
         **ids,
         scalar=scalar,
     )
+    if preserve_removed_target:
+        client.query(
+            "MATCH (catalog:StandardName {id: $catalog}) "
+            "CREATE (anchor:StandardNameSource {id: $catalog_anchor, "
+            "source_type: 'dd', source_id: $catalog_anchor, status: 'attached', "
+            "produced_sn_id: $catalog}) "
+            "CREATE (anchor)-[:PRODUCED_NAME]->(catalog)",
+            **ids,
+        )
     return ids
 
 
@@ -345,6 +348,104 @@ def test_preview_refuses_incomplete_projection_without_writes(
         assert _snapshot(client, list(ids.values())) == before
     finally:
         _cleanup(client, [ids])
+
+
+@pytest.mark.graph
+def test_preview_refuses_removal_of_target_last_live_binding(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "source-disposition-last-binding-refusal")
+    ids = _seed(
+        client,
+        "dispositionlastbinding",
+        scalar=None,
+        preserve_removed_target=False,
+    )
+    adjudication = _adjudication([_row(ids, "select_missing_scalar", None)])
+    try:
+        ids["stale_anchor"] = f"dd:{ids['path']}/stale_anchor"
+        client.query(
+            "MATCH (catalog:StandardName {id: $catalog}) "
+            "CREATE (source:StandardNameSource {id: $stale_anchor, "
+            "source_type: 'dd', source_id: $stale_anchor, status: 'stale', "
+            "produced_sn_id: $catalog}) "
+            "CREATE (source)-[:PRODUCED_NAME]->(catalog)",
+            **ids,
+        )
+        before = _snapshot(client, list(ids.values()))
+        preview = apply_adjudicated_source_dispositions(
+            adjudication,
+            reason="preserve the final live source of every removed target",
+            gc=client,
+        )
+        assert preview["outcome"] == "refused"
+        assert preview["counts"] == {
+            "requested": 1,
+            "admitted": 0,
+            "refused": 1,
+            "bindings_to_remove": 0,
+            "projections_to_remove": 0,
+            "scalars_to_change": 0,
+        }
+        assert preview["refusals"] == [
+            {
+                "source_id": ids["source"],
+                "target_ids": [ids["catalog"]],
+                "reason": (
+                    "removal would leave target with zero live producing sources"
+                ),
+            }
+        ]
+        closure = preview["manifest"]["removed_target_closures"]
+        assert len(closure) == 1
+        assert closure[0]["target_id"] == ids["catalog"]
+        assert {
+            binding["source_id"] for binding in closure[0]["incoming_bindings"]
+        } == {ids["source"], ids["stale_anchor"]}
+        assert _snapshot(client, list(ids.values())) == before
+    finally:
+        _cleanup(client, [ids])
+
+
+@pytest.mark.graph
+def test_apply_refuses_global_incoming_binding_drift_after_preview(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "source-disposition-incoming-drift")
+    ids = _seed(client, "dispositionincomingdrift", scalar=None)
+    adjudication = _adjudication([_row(ids, "select_missing_scalar", None)])
+    preview = None
+    try:
+        preview = apply_adjudicated_source_dispositions(
+            adjudication,
+            reason="bind the signed global incoming source closure",
+            gc=client,
+        )
+        assert preview["outcome"] == "would_apply"
+        ids["late_anchor"] = f"dd:{ids['path']}/late_anchor"
+        client.query(
+            "MATCH (catalog:StandardName {id: $catalog}) "
+            "CREATE (source:StandardNameSource {id: $late_anchor, "
+            "source_type: 'dd', source_id: $late_anchor, status: 'attached', "
+            "produced_sn_id: $catalog}) "
+            "CREATE (source)-[:PRODUCED_NAME]->(catalog)",
+            **ids,
+        )
+        before = _snapshot(client, list(ids.values()))
+        with pytest.raises(
+            SignedSourceDispositionConflict,
+            match="fresh source-disposition manifest does not match signed hash",
+        ):
+            apply_adjudicated_source_dispositions(
+                adjudication,
+                reason="bind the signed global incoming source closure",
+                apply=True,
+                manifest_sha256=preview["manifest_sha256"],
+                gc=client,
+            )
+        assert _snapshot(client, list(ids.values())) == before
+    finally:
+        _cleanup(client, [ids], (preview or {}).get("manifest_sha256"))
 
 
 def test_tampered_adjudication_is_rejected_before_graph_access() -> None:

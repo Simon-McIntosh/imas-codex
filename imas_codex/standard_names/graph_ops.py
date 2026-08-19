@@ -18331,8 +18331,11 @@ def _signed_source_disposition_authority(
     adjudication_sha256: str,
     adjudication_row_set_sha256: str,
     reason: str,
-) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
     source_ids = [row["source_id"] for row in rows]
+    removed_target_ids = sorted(
+        {target_id for row in rows for target_id in row["removed_targets"]}
+    )
     graph_rows = query_handle.query(
         """
         UNWIND $source_ids AS requested_id
@@ -18368,10 +18371,45 @@ def _signed_source_disposition_authority(
         """,
         source_ids=source_ids,
     )
+    removed_target_rows = query_handle.query(
+        """
+        UNWIND $target_ids AS requested_id
+        OPTIONAL MATCH (target:StandardName {id: requested_id})
+        RETURN requested_id,
+               elementId(target) AS target_element_id,
+               properties(target) AS target_properties,
+               CASE WHEN target IS NULL THEN [] ELSE
+                 [(source:StandardNameSource)
+                    -[binding:PRODUCED_NAME]->(target) |
+                   {binding_element_id: elementId(binding),
+                    binding_properties: properties(binding),
+                    source_element_id: elementId(source),
+                    source_id: source.id,
+                    source_properties: properties(source)}]
+               END AS incoming_bindings
+        ORDER BY requested_id
+        """,
+        target_ids=removed_target_ids,
+    )
+    removed_target_closures = [
+        {
+            "target_id": raw["requested_id"],
+            "target_element_id": raw.get("target_element_id"),
+            "target_properties": raw.get("target_properties"),
+            "incoming_bindings": sorted(
+                (dict(binding) for binding in raw.get("incoming_bindings") or []),
+                key=lambda binding: (
+                    binding["source_id"],
+                    binding["binding_element_id"],
+                ),
+            ),
+        }
+        for raw in removed_target_rows
+    ]
     expected_by_source = {row["source_id"]: row for row in rows}
     participants: list[dict[str, Any]] = []
     actions: list[dict[str, Any]] = []
-    refusals: list[dict[str, str]] = []
+    refusals: list[dict[str, Any]] = []
     for raw in graph_rows:
         expected = expected_by_source[raw["requested_id"]]
         bindings = sorted(
@@ -18485,6 +18523,55 @@ def _signed_source_disposition_authority(
                 "removals": removals,
             }
         )
+
+    scheduled_bindings_by_target: dict[str, set[str]] = {}
+    for action in actions:
+        for removal in action["removals"]:
+            scheduled_bindings_by_target.setdefault(removal["target_id"], set()).add(
+                removal["binding_element_id"]
+            )
+    orphaning_targets = {
+        closure["target_id"]
+        for closure in removed_target_closures
+        if scheduled_bindings_by_target.get(closure["target_id"])
+        and not (
+            {
+                binding["binding_element_id"]
+                for binding in closure["incoming_bindings"]
+                if (binding.get("source_properties") or {}).get("status") != "stale"
+            }
+            - scheduled_bindings_by_target[closure["target_id"]]
+        )
+    }
+    if orphaning_targets:
+        admitted_actions: list[dict[str, Any]] = []
+        for action in actions:
+            orphaned_targets = sorted(
+                removal["target_id"]
+                for removal in action["removals"]
+                if removal["target_id"] in orphaning_targets
+            )
+            if orphaned_targets:
+                refusals.append(
+                    {
+                        "source_id": action["source_id"],
+                        "target_ids": orphaned_targets,
+                        "reason": (
+                            "removal would leave target with zero live producing sources"
+                        ),
+                    }
+                )
+            else:
+                admitted_actions.append(action)
+        actions = admitted_actions
+    refusals = sorted(
+        refusals,
+        key=lambda refusal: (
+            refusal["source_id"],
+            refusal["reason"],
+            refusal.get("target_ids") or [],
+        ),
+    )
     manifest = {
         "schema": SIGNED_SOURCE_DISPOSITION_MANIFEST_SCHEMA,
         "operation": "apply_adjudicated_source_dispositions",
@@ -18493,6 +18580,7 @@ def _signed_source_disposition_authority(
         "adjudication_row_set_sha256": adjudication_row_set_sha256,
         "source_ids": source_ids,
         "participants": participants,
+        "removed_target_closures": removed_target_closures,
         "actions": actions,
         "refusals": refusals,
     }
@@ -18503,7 +18591,15 @@ def _lock_signed_source_disposition_authority(
     query_handle: _TransactionQuery, manifest: dict[str, Any]
 ) -> None:
     participants = manifest["participants"]
-    source_element_ids = sorted(row["source_element_id"] for row in participants)
+    removed_target_closures = manifest["removed_target_closures"]
+    source_element_ids = sorted(
+        {row["source_element_id"] for row in participants}
+        | {
+            binding["source_element_id"]
+            for closure in removed_target_closures
+            for binding in closure["incoming_bindings"]
+        }
+    )
     node_element_ids = sorted(
         {
             element_id
@@ -18513,6 +18609,7 @@ def _lock_signed_source_disposition_authority(
                 *(binding["target_element_id"] for binding in row["bindings"]),
             ]
         }
+        | {closure["target_element_id"] for closure in removed_target_closures}
     )
     relationship_element_ids = sorted(
         {
@@ -18527,6 +18624,11 @@ def _lock_signed_source_disposition_authority(
                     for projection in backing["projections"]
                 ),
             ]
+        }
+        | {
+            binding["binding_element_id"]
+            for closure in removed_target_closures
+            for binding in closure["incoming_bindings"]
         }
     )
     locked_sources = query_handle.query(
@@ -18574,12 +18676,12 @@ def _lock_signed_source_disposition_authority(
 def _signed_source_disposition_counts(
     rows: list[dict[str, Any]],
     actions: list[dict[str, Any]],
-    refusals: list[dict[str, str]],
+    refusals: list[dict[str, Any]],
 ) -> dict[str, int]:
     return {
         "requested": len(rows),
         "admitted": len(actions),
-        "refused": len(refusals),
+        "refused": len({refusal["source_id"] for refusal in refusals}),
         "bindings_to_remove": sum(len(action["removals"]) for action in actions),
         "projections_to_remove": sum(len(action["removals"]) for action in actions),
         "scalars_to_change": sum(
@@ -18808,6 +18910,32 @@ def apply_adjudicated_source_dispositions(
                 if len(actual_mutations) != len(mutation_rows):
                     raise SignedSourceDispositionConflict(
                         "signed binding closure changed during deletion"
+                    )
+
+                removed_target_ids = sorted(
+                    {row["remove_target_id"] for row in mutation_rows}
+                )
+                remaining_bindings = query_handle.query(
+                    """
+                    UNWIND $target_ids AS target_id
+                    MATCH (target:StandardName {id: target_id})
+                    OPTIONAL MATCH (remaining:StandardNameSource)
+                      -[:PRODUCED_NAME]->(target)
+                    WHERE remaining.status <> 'stale'
+                    WITH target_id, count(remaining) AS incoming_bindings
+                    RETURN collect({target_id: target_id,
+                      incoming_bindings: incoming_bindings}) AS rows
+                    """,
+                    target_ids=removed_target_ids,
+                )
+                remaining_rows = (
+                    remaining_bindings[0].get("rows") if remaining_bindings else []
+                )
+                if len(remaining_rows) != len(removed_target_ids) or any(
+                    int(row["incoming_bindings"] or 0) == 0 for row in remaining_rows
+                ):
+                    raise SignedSourceDispositionConflict(
+                        "removed target lost its final producing source"
                     )
 
                 target_ids = sorted(
