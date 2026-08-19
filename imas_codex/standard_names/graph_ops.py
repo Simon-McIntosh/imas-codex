@@ -18192,6 +18192,536 @@ def deduplicate_scalar_selected_sources(
             client.close()
 
 
+INELIGIBLE_SOURCE_RETIREMENT_MANIFEST_SCHEMA = (
+    "imas-codex.ineligible-standard-name-source-retirement-manifest.v1"
+)
+INELIGIBLE_SOURCE_RETIREMENT_RECEIPT_SCHEMA = (
+    "imas-codex.ineligible-standard-name-source-retirement-receipt.v1"
+)
+
+
+class IneligibleSourceRetirementConflict(RuntimeError):
+    """The signed ineligible-source closure no longer matches graph authority."""
+
+
+def _ineligible_source_retirement_authority(
+    query_handle: _TransactionQuery,
+    source_ids: list[str],
+    reason: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    from imas_codex.core.node_categories import SN_SOURCE_CATEGORIES
+
+    rows = query_handle.query(
+        """
+        UNWIND $source_ids AS requested_id
+        OPTIONAL MATCH (source:StandardNameSource {id: requested_id})
+        RETURN requested_id,
+               elementId(source) AS source_element_id,
+               properties(source) AS source_properties,
+               CASE WHEN source IS NULL THEN [] ELSE
+                 [(source)-[binding:PRODUCED_NAME]->(target:StandardName) |
+                   {element_id: elementId(binding),
+                    properties: properties(binding),
+                    target_element_id: elementId(target),
+                    target_id: target.id,
+                    target_properties: properties(target)}]
+               END AS bindings,
+               CASE WHEN source IS NULL THEN [] ELSE
+                 [(source)-[origin:FROM_DD_PATH|FROM_SIGNAL]->(backing) |
+                   {element_id: elementId(backing),
+                    labels: labels(backing),
+                    properties: properties(backing),
+                    origin_element_id: elementId(origin),
+                    origin_type: type(origin),
+                    origin_properties: properties(origin),
+                    projections: [(backing)-[projection:HAS_STANDARD_NAME]->
+                      (projected:StandardName) |
+                      {element_id: elementId(projection),
+                       properties: properties(projection),
+                       target_id: projected.id,
+                       target_properties: properties(projected)}]}]
+               END AS backings
+        ORDER BY requested_id
+        """,
+        source_ids=source_ids,
+    )
+    eligible_categories = set(SN_SOURCE_CATEGORIES)
+    participants: list[dict[str, Any]] = []
+    actions: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for raw in rows:
+        row = dict(raw)
+        bindings = sorted(
+            (dict(binding) for binding in row.get("bindings") or []),
+            key=lambda binding: (binding["target_id"], binding["element_id"]),
+        )
+        backings = sorted(
+            (
+                {
+                    **dict(backing),
+                    "labels": sorted(backing.get("labels") or []),
+                    "projections": sorted(
+                        (dict(item) for item in backing.get("projections") or []),
+                        key=lambda item: (item["target_id"], item["element_id"]),
+                    ),
+                }
+                for backing in row.get("backings") or []
+            ),
+            key=lambda backing: backing["element_id"],
+        )
+        participant = {
+            "source_id": row["requested_id"],
+            "source_element_id": row.get("source_element_id"),
+            "source_properties": row.get("source_properties"),
+            "bindings": bindings,
+            "backings": backings,
+        }
+        participants.append(participant)
+        properties = row.get("source_properties")
+        refusal: str | None = None
+        if properties is None:
+            refusal = "source does not exist"
+        elif properties.get("source_type") != "dd":
+            refusal = "source is not DD-backed"
+        elif (
+            properties.get("claimed_at") is not None
+            or properties.get("claim_token") is not None
+        ):
+            refusal = "source has an active claim"
+        elif len(backings) != 1 or backings[0].get("labels") != ["IMASNode"]:
+            refusal = "source does not have exactly one DD backing node"
+        elif backings[0].get("properties", {}).get("node_category") is None:
+            refusal = "backing DD node has no node_category authority"
+        elif backings[0]["properties"]["node_category"] in eligible_categories:
+            category = backings[0]["properties"]["node_category"]
+            refusal = f"backing DD node category {category!r} is SN-eligible"
+        elif not bindings:
+            refusal = "source has no PRODUCED_NAME bindings to retire"
+        if refusal is not None:
+            refusals.append({"source_id": row["requested_id"], "reason": refusal})
+            continue
+
+        target_ids = {binding["target_id"] for binding in bindings}
+        projections = [
+            {
+                **projection,
+                "backing_element_id": backings[0]["element_id"],
+            }
+            for projection in backings[0]["projections"]
+            if projection["target_id"] in target_ids
+        ]
+        actions.append(
+            {
+                "source_id": row["requested_id"],
+                "backing_element_id": backings[0]["element_id"],
+                "backing_category": backings[0]["properties"]["node_category"],
+                "bindings": bindings,
+                "projections": projections,
+            }
+        )
+
+    manifest = {
+        "schema": INELIGIBLE_SOURCE_RETIREMENT_MANIFEST_SCHEMA,
+        "operation": "retire_ineligible_standard_name_sources",
+        "reason": reason,
+        "source_ids": source_ids,
+        "participants": participants,
+        "actions": actions,
+        "refusals": refusals,
+    }
+    return manifest, actions, refusals
+
+
+def _ineligible_source_retirement_counts(
+    source_ids: list[str],
+    actions: list[dict[str, Any]],
+    refusals: list[dict[str, str]],
+) -> dict[str, int]:
+    return {
+        "requested": len(source_ids),
+        "admitted": len(actions),
+        "refused": len(refusals),
+        "bindings_to_detach": sum(len(action["bindings"]) for action in actions),
+        "projections_to_detach": sum(len(action["projections"]) for action in actions),
+    }
+
+
+@retry_on_deadlock()
+def retire_ineligible_standard_name_sources(
+    source_ids: list[str],
+    *,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Retire DD sources whose backing category cannot realize a name.
+
+    Preview signs the complete source, binding, backing, and projection closure.
+    Apply detaches every signed name realization, clears the scalar mirror, and
+    parks the source as ``not_physical_quantity`` in one transaction. Names that
+    lose their final producing source are returned for the orphan workflow and
+    are never superseded here.
+    """
+    requested = sorted(set(source_ids))
+    if not requested:
+        raise ValueError("ineligible source retirement requires at least one source")
+    if len(requested) != len(source_ids):
+        raise ValueError("ineligible source retirement requires unique source ids")
+    if not reason.strip():
+        raise ValueError("ineligible source retirement requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    own = gc is None
+    client: Any = GraphClient() if own else gc
+    event_id = (
+        f"sn-change:ineligible-source-retirement:{manifest_sha256}"
+        if manifest_sha256
+        else None
+    )
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query_handle.query(
+                        """
+                        OPTIONAL MATCH (change:StandardNameChange {id: $event_id})
+                        RETURN change.to_name AS disposition_json
+                        """,
+                        event_id=event_id,
+                    )
+                    disposition_json = (
+                        replay_rows[0].get("disposition_json") if replay_rows else None
+                    )
+                    if disposition_json is not None:
+                        disposition = json.loads(disposition_json)
+                        if sorted(disposition.get("source_ids") or []) != requested:
+                            raise IneligibleSourceRetirementConflict(
+                                "recorded retirement covers a different source set"
+                            )
+                        postcondition = query_handle.query(
+                            """
+                            UNWIND $source_ids AS source_id
+                            MATCH (source:StandardNameSource {id: source_id})
+                            RETURN collect({source_id: source.id,
+                              status: source.status,
+                              scalar: source.produced_sn_id,
+                              bindings: COUNT {
+                                (source)-[:PRODUCED_NAME]->(:StandardName)
+                              }}) AS rows
+                            """,
+                            source_ids=requested,
+                        )
+                        current = postcondition[0].get("rows") if postcondition else []
+                        if len(current) != len(requested) or any(
+                            row["status"] != "not_physical_quantity"
+                            or row["scalar"] is not None
+                            or int(row["bindings"] or 0) != 0
+                            for row in current
+                        ):
+                            raise IneligibleSourceRetirementConflict(
+                                "recorded retirement has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": INELIGIBLE_SOURCE_RETIREMENT_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "manifest_sha256": manifest_sha256,
+                            "orphaned_names": sorted(
+                                disposition.get("orphaned_names") or []
+                            ),
+                        }
+
+                manifest, actions, refusals = _ineligible_source_retirement_authority(
+                    query_handle, requested, reason
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = _ineligible_source_retirement_counts(
+                    requested, actions, refusals
+                )
+                if apply and computed_hash != manifest_sha256:
+                    raise IneligibleSourceRetirementConflict(
+                        "fresh ineligible-source manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": INELIGIBLE_SOURCE_RETIREMENT_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": INELIGIBLE_SOURCE_RETIREMENT_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": 1,
+                        "counts": counts,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                _lock_scalar_selected_dedup_authority(query_handle, manifest)
+                locked_manifest, locked_actions, locked_refusals = (
+                    _ineligible_source_retirement_authority(
+                        query_handle, requested, reason
+                    )
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise IneligibleSourceRetirementConflict(
+                        "source authority changed while acquiring participant locks"
+                    )
+                actions = locked_actions
+                binding_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        "target_id": binding["target_id"],
+                        "element_id": binding["element_id"],
+                    }
+                    for action in actions
+                    for binding in action["bindings"]
+                ]
+                projection_rows = [
+                    {
+                        "backing_element_id": projection["backing_element_id"],
+                        "target_id": projection["target_id"],
+                        "element_id": projection["element_id"],
+                    }
+                    for action in actions
+                    for projection in action["projections"]
+                ]
+                deleted_bindings = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (source:StandardNameSource {id: expected.source_id})
+                          -[binding:PRODUCED_NAME]->
+                          (:StandardName {id: expected.target_id})
+                    WHERE elementId(binding) = expected.element_id
+                    DELETE binding
+                    RETURN collect(expected.element_id) AS ids
+                    """,
+                    rows=binding_rows,
+                )
+                actual_binding_ids = sorted(
+                    deleted_bindings[0].get("ids") or [] if deleted_bindings else []
+                )
+                if actual_binding_ids != sorted(
+                    row["element_id"] for row in binding_rows
+                ):
+                    raise IneligibleSourceRetirementConflict(
+                        "signed source binding set changed during retirement"
+                    )
+                if projection_rows:
+                    deleted_projections = query_handle.query(
+                        """
+                        UNWIND $rows AS expected
+                        MATCH (backing)-[projection:HAS_STANDARD_NAME]->
+                              (:StandardName {id: expected.target_id})
+                        WHERE elementId(backing) = expected.backing_element_id
+                          AND elementId(projection) = expected.element_id
+                        DELETE projection
+                        RETURN collect(expected.element_id) AS ids
+                        """,
+                        rows=projection_rows,
+                    )
+                    actual_projection_ids = sorted(
+                        deleted_projections[0].get("ids") or []
+                        if deleted_projections
+                        else []
+                    )
+                    if actual_projection_ids != sorted(
+                        row["element_id"] for row in projection_rows
+                    ):
+                        raise IneligibleSourceRetirementConflict(
+                            "signed backing projection set changed during retirement"
+                        )
+
+                participant_by_source = {
+                    row["source_id"]: row for row in manifest["participants"]
+                }
+                state_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        "source_element_id": participant_by_source[action["source_id"]][
+                            "source_element_id"
+                        ],
+                        "expected_status": participant_by_source[action["source_id"]][
+                            "source_properties"
+                        ].get("status"),
+                        "expected_scalar": participant_by_source[action["source_id"]][
+                            "source_properties"
+                        ].get("produced_sn_id"),
+                        "backing_element_id": action["backing_element_id"],
+                        "backing_category": action["backing_category"],
+                    }
+                    for action in actions
+                ]
+                retired = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (source:StandardNameSource {id: expected.source_id})
+                          -[:FROM_DD_PATH]->(backing:IMASNode)
+                    WHERE elementId(source) = expected.source_element_id
+                      AND elementId(backing) = expected.backing_element_id
+                      AND source.status = expected.expected_status
+                      AND source.produced_sn_id = expected.expected_scalar
+                      AND source.claimed_at IS NULL
+                      AND source.claim_token IS NULL
+                      AND backing.node_category = expected.backing_category
+                      AND COUNT {
+                        (source)-[:PRODUCED_NAME]->(:StandardName)
+                      } = 0
+                    SET source.status = 'not_physical_quantity',
+                        source.produced_sn_id = null,
+                        source.claimed_at = null,
+                        source.claim_token = null,
+                        source.skip_reason = 'dd_node_category_ineligible',
+                        source.skip_reason_detail =
+                          'Backing DD node category ' + expected.backing_category +
+                          ' cannot realize a StandardName'
+                    RETURN collect(source.id) AS ids
+                    """,
+                    rows=state_rows,
+                )
+                actual_retired = sorted(retired[0].get("ids") or []) if retired else []
+                if actual_retired != requested:
+                    raise IneligibleSourceRetirementConflict(
+                        "source lifecycle compare-and-set changed during retirement"
+                    )
+
+                target_ids = sorted(
+                    {
+                        binding["target_id"]
+                        for action in actions
+                        for binding in action["bindings"]
+                    }
+                )
+                query_handle.query(
+                    """
+                    UNWIND $target_ids AS target_id
+                    MATCH (target:StandardName {id: target_id})
+                    OPTIONAL MATCH (source:StandardNameSource)
+                      -[:PRODUCED_NAME]->(target)
+                    OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+                    OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+                    WITH target, collect(DISTINCT CASE
+                      WHEN source IS NULL THEN null
+                      WHEN dd IS NOT NULL THEN 'dd:' + dd.id
+                      WHEN signal IS NOT NULL THEN signal.id
+                      WHEN source.source_type = 'derived'
+                        AND source.source_id STARTS WITH 'derived:'
+                      THEN source.source_id ELSE source.id END) AS paths
+                    SET target.source_paths = [path IN paths WHERE path IS NOT NULL]
+                    """,
+                    target_ids=target_ids,
+                )
+                orphan_rows = query_handle.query(
+                    """
+                    UNWIND $target_ids AS target_id
+                    MATCH (target:StandardName {id: target_id})
+                    WHERE NOT coalesce(target.name_stage, '') IN
+                      ['superseded', 'exhausted']
+                      AND NOT EXISTS {
+                        (:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                      }
+                    RETURN target.id AS id ORDER BY id
+                    """,
+                    target_ids=target_ids,
+                )
+                orphaned_names = [row["id"] for row in orphan_rows]
+                disposition = {
+                    "source_ids": requested,
+                    "status": "not_physical_quantity",
+                    "orphaned_names": orphaned_names,
+                }
+                change_rows = query_handle.query(
+                    """
+                    MERGE (change:StandardNameChange {id: $event_id})
+                    ON CREATE SET change.from_name = $removed_json,
+                                  change.to_name = $disposition_json,
+                                  change.operation =
+                                    'retire_ineligible_standard_name_sources',
+                                  change.reason = $reason,
+                                  change.origin =
+                                    'semantic_source_reconciliation',
+                                  change.run_id = $run_id,
+                                  change.changed_at = datetime(),
+                                  change.internal = true,
+                                  change.manifest_sha256 = $manifest_sha256
+                    WITH change
+                    UNWIND $target_ids AS target_id
+                    MATCH (target:StandardName {id: target_id})
+                    MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN DISTINCT change.id AS change_id
+                    """,
+                    event_id=(
+                        f"sn-change:ineligible-source-retirement:{computed_hash}"
+                    ),
+                    removed_json=json.dumps(
+                        {
+                            action["source_id"]: [
+                                binding["target_id"] for binding in action["bindings"]
+                            ]
+                            for action in actions
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    disposition_json=json.dumps(
+                        disposition, sort_keys=True, separators=(",", ":")
+                    ),
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                    target_ids=target_ids,
+                )
+                if len(change_rows) != 1:
+                    raise IneligibleSourceRetirementConflict(
+                        "retirement change receipt was not written exactly once"
+                    )
+                transaction.commit()
+                return {
+                    "schema": INELIGIBLE_SOURCE_RETIREMENT_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": 1,
+                    "sources_retired": len(actions),
+                    "bindings_detached": len(binding_rows),
+                    "projections_detached": len(projection_rows),
+                    "orphaned_names": orphaned_names,
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_id": change_rows[0]["change_id"],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA = (
     "imas-codex.standard-name-ancestor-supersession-manifest.v1"
 )
