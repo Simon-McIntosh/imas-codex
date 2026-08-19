@@ -217,9 +217,13 @@ class TestDdUnitDefectCuration:
     def test_charge_numbers_keep_the_charge_unit(self):
         from imas_codex.units import resolve_dd_unit
 
-        for leaf in ("z_ion", "z_min", "z_max", "z_n", "z_average", "z_square_average"):
-            path = f"core_profiles/profiles_1d/ion/state/{leaf}"
-            assert resolve_dd_unit(path, "e") == "e", leaf
+        for parent in (
+            "edge_profiles/ggd/ion/state",
+            "plasma_profiles/ggd/ion/state",
+        ):
+            for leaf in ("z_min", "z_max", "z_average", "z_square_average"):
+                path = f"{parent}/{leaf}"
+                assert resolve_dd_unit(path, "e") == "e", path
 
     def test_uncurated_paths_fall_through_to_normalisation(self):
         from imas_codex.units import resolve_dd_unit

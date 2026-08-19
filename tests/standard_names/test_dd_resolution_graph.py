@@ -21,7 +21,29 @@ from imas_codex.standard_names.dd_resolutions import (
     DDResolutionRecord,
     DDResolutionValue,
     _classify_graph_port_preflight,
+    active_dd_resolution,
     ionisation_potential_resolution_records,
+    load_dd_resolution_manifest,
+)
+
+_IONISATION_POTENTIAL_PARENTS = (
+    "edge_profiles/ggd/ion/state/ionisation_potential",
+    "plasma_profiles/ggd/ion/state/ionisation_potential",
+)
+_PRESENT_UNITLESS_INDEX_PATHS = tuple(
+    parent + "/" + leaf
+    for parent in _IONISATION_POTENTIAL_PARENTS
+    for leaf in ("grid_index", "grid_subset_index")
+)
+_ABSENT_ERROR_INDEX_PATHS = tuple(
+    parent + "/" + leaf
+    for parent in _IONISATION_POTENTIAL_PARENTS
+    for leaf in ("coefficients_error_index", "values_error_index")
+)
+_RETAINED_CHARGE_PATHS = tuple(
+    parent + "/" + leaf
+    for parent in ("edge_profiles/ggd/ion/state", "plasma_profiles/ggd/ion/state")
+    for leaf in ("z_min", "z_max", "z_average", "z_square_average")
 )
 
 
@@ -104,6 +126,77 @@ def test_ionisation_potential_cohort_is_exact_and_excludes_indices_and_charge() 
     assert sum(path.endswith("error_upper") for path in paths) == 4
     assert not any("index" in path for path in paths)
     assert not any(path.rsplit("/", 1)[-1].startswith("z_") for path in paths)
+
+
+def test_exclusion_taxonomy_is_sixteen_distinct_paths() -> None:
+    categories = (
+        set(_PRESENT_UNITLESS_INDEX_PATHS),
+        set(_ABSENT_ERROR_INDEX_PATHS),
+        set(_RETAINED_CHARGE_PATHS),
+    )
+    assert tuple(len(category) for category in categories) == (4, 4, 8)
+    assert not (categories[0] & categories[1])
+    assert not (categories[0] & categories[2])
+    assert not (categories[1] & categories[2])
+    assert len(set().union(*categories)) == 16
+
+
+def test_exact_release_contains_only_the_four_unitless_indices() -> None:
+    from imas_codex.graph.dd_lifecycle import dd_path_index
+    from imas_codex.units import resolve_dd_unit
+
+    release_paths, _ = dd_path_index("4.1.1")
+    manifest = load_dd_resolution_manifest()
+    for path in _PRESENT_UNITLESS_INDEX_PATHS:
+        assert path in release_paths
+        assert resolve_dd_unit(path, "") is None
+        assert (
+            active_dd_resolution(
+                path=path,
+                dd_version="4.1.1",
+                field=DDResolutionField.unit,
+                manifest=manifest,
+            )
+            is None
+        )
+
+
+def test_exact_release_omits_all_four_error_index_claims() -> None:
+    from imas_codex.graph.dd_lifecycle import dd_path_index
+
+    release_paths, _ = dd_path_index("4.1.1")
+    manifest = load_dd_resolution_manifest()
+    for path in _ABSENT_ERROR_INDEX_PATHS:
+        assert path not in release_paths
+        assert (
+            active_dd_resolution(
+                path=path,
+                dd_version="4.1.1",
+                field=DDResolutionField.unit,
+                manifest=manifest,
+            )
+            is None
+        )
+
+
+def test_exact_release_retains_all_eight_charge_paths_without_resolution() -> None:
+    from imas_codex.graph.dd_lifecycle import dd_path_index
+    from imas_codex.units import resolve_dd_unit
+
+    release_paths, _ = dd_path_index("4.1.1")
+    manifest = load_dd_resolution_manifest()
+    for path in _RETAINED_CHARGE_PATHS:
+        assert path in release_paths
+        assert resolve_dd_unit(path, "e") == "e"
+        assert (
+            active_dd_resolution(
+                path=path,
+                dd_version="4.1.1",
+                field=DDResolutionField.unit,
+                manifest=manifest,
+            )
+            is None
+        )
 
 
 def test_cohort_builder_adds_only_twelve_uncovered_exact_paths() -> None:
@@ -225,3 +318,76 @@ def test_live_ionisation_potential_cohort_has_exact_edges_and_units() -> None:
             "https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280"
         ]
         assert row["commits"] == ["commits:30a5ddd4b7037b9f93a8f00f7837809403349d99"]
+
+
+@pytest.mark.graph
+def test_live_exclusion_census_is_read_only_and_matches_exact_release() -> None:
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.graph.dd_lifecycle import dd_path_index
+
+    all_paths = (
+        _PRESENT_UNITLESS_INDEX_PATHS
+        + _ABSENT_ERROR_INDEX_PATHS
+        + _RETAINED_CHARGE_PATHS
+    )
+    release_paths, _ = dd_path_index("4.1.1")
+    with GraphClient() as graph:
+        before = graph.query(
+            """
+            MATCH (resolution:DDResolution)
+            WITH count(resolution) AS resolutions
+            MATCH (gap:DDGap)
+            RETURN resolutions, count(gap) AS gaps
+            """
+        )[0]
+        rows = graph.query(
+            """
+            UNWIND $paths AS path
+            OPTIONAL MATCH (node:IMASNode {id: path})
+            CALL {
+                WITH node
+                OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+                RETURN [value IN collect(DISTINCT unit.id)
+                        WHERE value IS NOT NULL] AS unit_ids
+            }
+            CALL {
+                WITH node
+                OPTIONAL MATCH (node)-[:BRIDGED_BY]->(resolution:DDResolution)
+                RETURN [value IN collect(DISTINCT resolution.id)
+                        WHERE value IS NOT NULL] AS resolution_ids
+            }
+            RETURN path, count(node) AS shell_count,
+                   node.lifecycle_status AS lifecycle_status,
+                   node.unit AS unit, unit_ids, resolution_ids
+            ORDER BY path
+            """,
+            paths=list(all_paths),
+        )
+        after = graph.query(
+            """
+            MATCH (resolution:DDResolution)
+            WITH count(resolution) AS resolutions
+            MATCH (gap:DDGap)
+            RETURN resolutions, count(gap) AS gaps
+            """
+        )[0]
+    assert len(rows) == 16
+    by_path = {row["path"]: row for row in rows}
+    for path in _PRESENT_UNITLESS_INDEX_PATHS:
+        assert path in release_paths
+        assert by_path[path]["shell_count"] == 1
+        assert by_path[path]["unit"] == ""
+        assert by_path[path]["unit_ids"] == []
+        assert by_path[path]["resolution_ids"] == []
+    for path in _ABSENT_ERROR_INDEX_PATHS:
+        assert path not in release_paths
+        assert by_path[path]["shell_count"] == 1
+        assert by_path[path]["lifecycle_status"] == "removed"
+        assert by_path[path]["resolution_ids"] == []
+    for path in _RETAINED_CHARGE_PATHS:
+        assert path in release_paths
+        assert by_path[path]["shell_count"] == 1
+        assert by_path[path]["unit"] == "e"
+        assert by_path[path]["unit_ids"] == ["e"]
+        assert by_path[path]["resolution_ids"] == []
+    assert after == before

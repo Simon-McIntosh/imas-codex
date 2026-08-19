@@ -31,9 +31,43 @@ The pre-census showed that the broad build-time correction had already set all
 `attached`, not `corrected`. The write boundary nevertheless retains an exact
 published-value compare-and-set and refuses any scalar/relationship mismatch.
 
-Excluded from the cohort are index fields, absent error-index claims, and all
-charge-number fields. The upstream change intentionally retains charge-number
-units as `e`; none were included in the allowlist or touched.
+## Exact non-overlapping exclusions
+
+The exclusion taxonomy contains **16 distinct paths**, partitioned as 4 present
+unitless indices, 4 absent release claims, and 8 present charge-number paths.
+No path occurs in more than one category.
+
+Present in DD 4.1.1 with an empty unit, no `HAS_UNIT` edge, and no resolution:
+
+1. `edge_profiles/ggd/ion/state/ionisation_potential/grid_index`
+2. `edge_profiles/ggd/ion/state/ionisation_potential/grid_subset_index`
+3. `plasma_profiles/ggd/ion/state/ionisation_potential/grid_index`
+4. `plasma_profiles/ggd/ion/state/ionisation_potential/grid_subset_index`
+
+Absent from DD 4.1.1 and therefore ineligible for a resolution in that release:
+
+1. `edge_profiles/ggd/ion/state/ionisation_potential/coefficients_error_index`
+2. `edge_profiles/ggd/ion/state/ionisation_potential/values_error_index`
+3. `plasma_profiles/ggd/ion/state/ionisation_potential/coefficients_error_index`
+4. `plasma_profiles/ggd/ion/state/ionisation_potential/values_error_index`
+
+The global graph retains lifecycle-`removed` IMASNode shells for those four
+historical IDs. The exact-release index, rather than global node existence, is
+the authority for the absence claim; all four have no resolution.
+
+Present in DD 4.1.1 with scalar and relationship unit `e`, and no resolution:
+
+1. `edge_profiles/ggd/ion/state/z_min`
+2. `edge_profiles/ggd/ion/state/z_max`
+3. `edge_profiles/ggd/ion/state/z_average`
+4. `edge_profiles/ggd/ion/state/z_square_average`
+5. `plasma_profiles/ggd/ion/state/z_min`
+6. `plasma_profiles/ggd/ion/state/z_max`
+7. `plasma_profiles/ggd/ion/state/z_average`
+8. `plasma_profiles/ggd/ion/state/z_square_average`
+
+The upstream change intentionally retains these charge-number units as `e`;
+none of the 16 exclusions was included in the resolution allowlist or mutated.
 
 ## Receipts and verification
 
@@ -48,6 +82,11 @@ units as `e`; none were included in the allowlist or touched.
 - Post-census: `/tmp/reckon-u19-cohort/post-census.log` — 14/14 paths each have
   exactly one resolution, one `BRIDGED_BY`, one `EVIDENCED_BY`, one
   `FOR_DD_VERSION`, scalar unit `eV`, and one `HAS_UNIT→eV` edge.
+- Exclusion census: `/tmp/reckon-u19-cohort/exclusion-census.log` — 16 distinct
+  exclusions partitioned 4 present unitless / 4 absent from DD 4.1.1 / 8
+  present charge paths. The four absent-release claims have lifecycle-removed
+  global shells; all 16 have zero resolutions. Read-only before/after totals
+  remained 49 DDResolution and 79 DDGap nodes: additions 0 and 0.
 - CAS refusal proof: `/tmp/reckon-u19-cohort/red.log` records the initial missing
   instrument; the focused graph-port suite includes an adversarial `keV`
   scalar/edge mismatch and proves it raises `DDResolutionGraphPortConflict`.
