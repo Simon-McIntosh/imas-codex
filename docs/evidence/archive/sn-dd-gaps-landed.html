@@ -269,6 +269,22 @@
     <strong>APPROVE with 14/14 sites passing and zero findings</strong> after one corrective. Full
     suite <strong>6508 passed / 8 skipped / 0 failed</strong>.</p>
   </section>
+
+  <section id="u19-cohort">
+    <h2>§6 — The ionisation-potential cohort is fully governed</h2>
+    <p><strong>Landed 2026-08-19</strong> — chain <code>04ea8dfe</code> → <code>1123910d</code>,
+    merge <code>e3133089</code>. The exact 14-path cohort (edge_profiles and plasma_profiles
+    <code>ggd/ion/state/ionisation_potential</code> parents plus <code>coefficients</code>,
+    <code>values</code>, and their four error fields) carries per-path DDGap facts and DDResolution
+    records: published <code>e</code>, effective <code>eV</code>, DD 4.1.1, upstream PR 280
+    (<code>30a5ddd4</code>), retirement boundary 4.2.0. Live resolutions 37 → 49; all 14 nodes hold
+    <code>eV</code> as scalar and HAS_UNIT target; replay zero-write (receipts <code>648e5b53…</code>,
+    <code>560a1a9b…</code>). The independent membership review confirmed 14/14 inclusions and refuted
+    the plan's exclusion count — corrected to <strong>sixteen non-overlapping exclusions</strong>
+    (4 present unitless indices, 4 absent error-index claims, 8 charge paths retained in
+    <code>e</code>) with enumeration regressions and a 0/0-additions census. Final verdicts:
+    membership APPROVE, corrective APPROVE 0/0/0/0.</p>
+  </section>
 </main>
 </body>
 </html>
