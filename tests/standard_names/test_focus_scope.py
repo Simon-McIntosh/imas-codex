@@ -15,6 +15,7 @@ import uuid
 import pytest
 
 _PREFIX = "test_focus_scope__"
+_SOURCE_PREFIX = f"dd:{_PREFIX}"
 
 
 @pytest.fixture()
@@ -30,21 +31,24 @@ def _gc():
     client.close()
 
 
+def _wipe_fixture_nodes(gc) -> None:
+    gc.query(
+        "MATCH (n:StandardName) WHERE n.id STARTS WITH $p DETACH DELETE n",
+        p=_PREFIX,
+    )
+    gc.query(
+        "MATCH (n:StandardNameSource) WHERE n.id STARTS WITH $p DETACH DELETE n",
+        p=_SOURCE_PREFIX,
+    )
+
+
 @pytest.fixture()
 def _clean(_gc):
-    def _wipe() -> None:
-        _gc.query(
-            "MATCH (n:StandardName) WHERE n.id STARTS WITH $p DETACH DELETE n",
-            p=_PREFIX,
-        )
-        _gc.query(
-            "MATCH (n:StandardNameSource) WHERE n.id STARTS WITH $p DETACH DELETE n",
-            p=_PREFIX,
-        )
-
-    _wipe()
-    yield
-    _wipe()
+    _wipe_fixture_nodes(_gc)
+    try:
+        yield
+    finally:
+        _wipe_fixture_nodes(_gc)
 
 
 def _uid(tag: str) -> str:
@@ -55,7 +59,8 @@ def _seed(gc, src: str, name: str, *, stage: str, score: float) -> None:
     gc.query(
         """
         MERGE (sns:StandardNameSource {id: $src})
-        SET sns.status = 'composed', sns.source_type = 'dd'
+        SET sns.source_id = substring($src, 3), sns.status = 'composed',
+            sns.source_type = 'dd'
         MERGE (sn:StandardName {id: $name})
         SET sn.name_stage = $stage, sn.docs_stage = 'drafted',
             sn.reviewer_score_name = $score, sn.origin = 'pipeline',
@@ -75,6 +80,27 @@ def _read(gc, name: str) -> dict:
         "sn.reviewer_score_name AS score, sn.run_id AS run_id",
         n=name,
     )[0]
+
+
+@pytest.mark.graph
+def test_cleanup_removes_fixture_names_and_sources(_gc):
+    src, name = f"dd:{_uid('cleanup_s')}", _uid("cleanup_nm")
+    try:
+        _seed(_gc, src, name, stage="reviewed", score=0.7)
+        _wipe_fixture_nodes(_gc)
+        counts = _gc.query(
+            """
+            MATCH (n)
+            WHERE (n:StandardName AND n.id STARTS WITH $name_prefix)
+               OR (n:StandardNameSource AND n.id STARTS WITH $source_prefix)
+            RETURN count(n) AS count
+            """,
+            name_prefix=_PREFIX,
+            source_prefix=_SOURCE_PREFIX,
+        )[0]
+        assert counts["count"] == 0
+    finally:
+        _wipe_fixture_nodes(_gc)
 
 
 @pytest.mark.graph
