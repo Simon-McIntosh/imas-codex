@@ -448,6 +448,99 @@ def test_apply_refuses_global_incoming_binding_drift_after_preview(
         _cleanup(client, [ids], (preview or {}).get("manifest_sha256"))
 
 
+@pytest.mark.graph
+def test_admitted_subset_applies_only_safe_rows_and_replays_without_writes(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "source-disposition-admitted-subset")
+    safe = _seed(client, "dispositionsubsetsafe", scalar=None)
+    protected = _seed(
+        client,
+        "dispositionsubsetprotected",
+        scalar=None,
+        preserve_removed_target=False,
+    )
+    adjudication = _adjudication(
+        [
+            _row(safe, "select_missing_scalar", None),
+            _row(protected, "select_missing_scalar", None),
+        ]
+    )
+    preview = None
+    try:
+        protected_before = _snapshot(client, list(protected.values()))
+        preview = apply_adjudicated_source_dispositions(
+            adjudication,
+            reason="apply only rows admitted by complete signed authority",
+            admitted_subset=True,
+            gc=client,
+        )
+        assert preview["outcome"] == "would_apply"
+        assert preview["counts"] == {
+            "requested": 1,
+            "admitted": 1,
+            "refused": 0,
+            "bindings_to_remove": 1,
+            "projections_to_remove": 1,
+            "scalars_to_change": 1,
+        }
+        selection = preview["manifest"]["subset_selection"]
+        assert selection["parent_counts"] == {
+            "requested": 2,
+            "admitted": 1,
+            "refused": 1,
+            "bindings_to_remove": 1,
+            "projections_to_remove": 1,
+            "scalars_to_change": 1,
+        }
+        assert selection["selected_source_ids"] == [safe["source"]]
+        assert selection["excluded_source_ids"] == [protected["source"]]
+        assert selection["excluded_refusals"] == [
+            {
+                "source_id": protected["source"],
+                "target_ids": [protected["catalog"]],
+                "reason": (
+                    "removal would leave target with zero live producing sources"
+                ),
+            }
+        ]
+        assert _snapshot(client, list(protected.values())) == protected_before
+
+        applied = apply_adjudicated_source_dispositions(
+            adjudication,
+            reason="apply only rows admitted by complete signed authority",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            admitted_subset=True,
+            gc=client,
+        )
+        assert applied["outcome"] == "applied"
+        assert applied["sources_reconciled"] == 1
+        assert applied["bindings_removed"] == 1
+        assert applied["projections_removed"] == 1
+        assert _snapshot(client, list(protected.values())) == protected_before
+
+        replay_before = _snapshot(
+            client, list(safe.values()) + list(protected.values())
+        )
+        replay = apply_adjudicated_source_dispositions(
+            adjudication,
+            reason="apply only rows admitted by complete signed authority",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            admitted_subset=True,
+            gc=client,
+        )
+        assert replay["outcome"] == "already_applied"
+        assert replay["changed"] == 0
+        assert (
+            _snapshot(client, list(safe.values()) + list(protected.values()))
+            == replay_before
+        )
+    finally:
+        _cleanup(client, [safe, protected], (preview or {}).get("manifest_sha256"))
+
+
 def test_tampered_adjudication_is_rejected_before_graph_access() -> None:
     ids = {
         "source": "dd:tampered/value",

@@ -18691,6 +18691,65 @@ def _signed_source_disposition_counts(
     }
 
 
+def _signed_source_disposition_execution_authority(
+    query_handle: _TransactionQuery,
+    rows: list[dict[str, Any]],
+    adjudication_sha256: str,
+    adjudication_row_set_sha256: str,
+    reason: str,
+    *,
+    admitted_subset: bool,
+) -> tuple[
+    list[dict[str, Any]],
+    dict[str, Any],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
+    if not admitted_subset:
+        manifest, actions, refusals = _signed_source_disposition_authority(
+            query_handle,
+            rows,
+            adjudication_sha256,
+            adjudication_row_set_sha256,
+            reason,
+        )
+        return rows, manifest, actions, refusals
+
+    parent_manifest, parent_actions, parent_refusals = (
+        _signed_source_disposition_authority(
+            query_handle,
+            rows,
+            adjudication_sha256,
+            adjudication_row_set_sha256,
+            reason,
+        )
+    )
+    admitted_source_ids = {action["source_id"] for action in parent_actions}
+    selected_rows = [row for row in rows if row["source_id"] in admitted_source_ids]
+    manifest, actions, refusals = _signed_source_disposition_authority(
+        query_handle,
+        selected_rows,
+        adjudication_sha256,
+        adjudication_row_set_sha256,
+        reason,
+    )
+    excluded_source_ids = sorted(
+        {row["source_id"] for row in rows} - admitted_source_ids
+    )
+    manifest["subset_selection"] = {
+        "strategy": "admitted_rows_from_complete_signed_adjudication",
+        "parent_manifest_sha256": _authority_payload_hash(parent_manifest),
+        "parent_counts": _signed_source_disposition_counts(
+            rows, parent_actions, parent_refusals
+        ),
+        "adjudication_source_ids": [row["source_id"] for row in rows],
+        "selected_source_ids": sorted(admitted_source_ids),
+        "excluded_source_ids": excluded_source_ids,
+        "excluded_refusals": parent_refusals,
+    }
+    return selected_rows, manifest, actions, refusals
+
+
 @retry_on_deadlock()
 def apply_adjudicated_source_dispositions(
     adjudication: dict[str, Any],
@@ -18699,6 +18758,7 @@ def apply_adjudicated_source_dispositions(
     apply: bool = False,
     manifest_sha256: str | None = None,
     run_id: str | None = None,
+    admitted_subset: bool = False,
     gc: Any | None = None,
 ) -> dict[str, Any]:
     """Apply signed one-survivor source dispositions under exact graph CAS."""
@@ -18708,10 +18768,13 @@ def apply_adjudicated_source_dispositions(
         raise ValueError("apply requires manifest_sha256")
     if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
         raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
-    adjudication_sha256, adjudication_row_set_sha256, rows = (
+    adjudication_sha256, adjudication_row_set_sha256, adjudication_rows = (
         _validate_signed_source_adjudication(adjudication)
     )
-    expected_dispositions = {row["source_id"]: row["surviving_target"] for row in rows}
+    adjudicated_dispositions = {
+        row["source_id"]: row["surviving_target"] for row in adjudication_rows
+    }
+    expected_dispositions = adjudicated_dispositions
     event_id = (
         f"sn-change:signed-source-disposition:{manifest_sha256}"
         if manifest_sha256
@@ -18737,10 +18800,23 @@ def apply_adjudicated_source_dispositions(
                         replay_rows[0].get("disposition_json") if replay_rows else None
                     )
                     if disposition_json is not None:
-                        if json.loads(disposition_json) != expected_dispositions:
+                        recorded_dispositions = json.loads(disposition_json)
+                        if admitted_subset:
+                            recorded_matches_adjudication = bool(
+                                recorded_dispositions
+                            ) and all(
+                                adjudicated_dispositions.get(source_id) == target_id
+                                for source_id, target_id in recorded_dispositions.items()
+                            )
+                        else:
+                            recorded_matches_adjudication = (
+                                recorded_dispositions == adjudicated_dispositions
+                            )
+                        if not recorded_matches_adjudication:
                             raise SignedSourceDispositionConflict(
                                 "recorded disposition covers a different source set"
                             )
+                        expected_dispositions = recorded_dispositions
                         current_rows = query_handle.query(
                             """
                             UNWIND $rows AS expected
@@ -18765,7 +18841,7 @@ def apply_adjudicated_source_dispositions(
                             ],
                         )
                         current = current_rows[0].get("rows") if current_rows else []
-                        if len(current) != len(rows) or any(
+                        if len(current) != len(expected_dispositions) or any(
                             row["scalar"] != row["expected_target"]
                             or row["target_ids"] != [row["expected_target"]]
                             for row in current
@@ -18782,13 +18858,19 @@ def apply_adjudicated_source_dispositions(
                             "manifest_sha256": manifest_sha256,
                         }
 
-                manifest, actions, refusals = _signed_source_disposition_authority(
-                    query_handle,
-                    rows,
-                    adjudication_sha256,
-                    adjudication_row_set_sha256,
-                    reason,
+                rows, manifest, actions, refusals = (
+                    _signed_source_disposition_execution_authority(
+                        query_handle,
+                        adjudication_rows,
+                        adjudication_sha256,
+                        adjudication_row_set_sha256,
+                        reason,
+                        admitted_subset=admitted_subset,
+                    )
                 )
+                expected_dispositions = {
+                    row["source_id"]: row["surviving_target"] for row in rows
+                }
                 computed_hash = _authority_payload_hash(manifest)
                 counts = _signed_source_disposition_counts(rows, actions, refusals)
                 if apply and computed_hash != manifest_sha256:
@@ -18823,17 +18905,23 @@ def apply_adjudicated_source_dispositions(
                     }
 
                 _lock_signed_source_disposition_authority(query_handle, manifest)
-                locked_manifest, locked_actions, locked_refusals = (
-                    _signed_source_disposition_authority(
-                        query_handle,
-                        rows,
-                        adjudication_sha256,
-                        adjudication_row_set_sha256,
-                        reason,
-                    )
+                (
+                    locked_rows,
+                    locked_manifest,
+                    locked_actions,
+                    locked_refusals,
+                ) = _signed_source_disposition_execution_authority(
+                    query_handle,
+                    adjudication_rows,
+                    adjudication_sha256,
+                    adjudication_row_set_sha256,
+                    reason,
+                    admitted_subset=admitted_subset,
                 )
                 if (
-                    locked_refusals
+                    [row["source_id"] for row in locked_rows]
+                    != [row["source_id"] for row in rows]
+                    or locked_refusals
                     or _authority_payload_hash(locked_manifest) != computed_hash
                 ):
                     raise SignedSourceDispositionConflict(
