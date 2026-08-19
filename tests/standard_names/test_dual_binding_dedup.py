@@ -13,6 +13,7 @@ from imas_codex.graph.client import GraphClient
 from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.graph_ops import (
     deduplicate_scalar_selected_sources,
+    retire_ineligible_standard_name_sources,
 )
 
 
@@ -100,6 +101,16 @@ def _snapshot_bytes(client: GraphClient, ids: list[str]) -> bytes:
         separators=(",", ":"),
         default=str,
     ).encode()
+
+
+def _mark_backing_category(
+    client: GraphClient, ids: dict[str, str], category: str
+) -> None:
+    client.query(
+        "MATCH (backing:IMASNode {id: $path}) SET backing.node_category = $category",
+        path=ids["path"],
+        category=category,
+    )
 
 
 @pytest.mark.graph
@@ -368,5 +379,130 @@ def test_replay_is_measured_write_free(disposable_neo4j: tuple[str, str]) -> Non
         assert replay["changed"] == 0
         assert after == before
         assert changes_after == changes_before == [{"changes": 1}]
+    finally:
+        _cleanup(client, ids, (preview or {}).get("manifest_sha256"))
+
+
+@pytest.mark.graph
+def test_ineligible_source_retirement_surfaces_orphaned_names(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "ineligible-source-retirement")
+    ids = _seed(client, "structuralcontainer")
+    _mark_backing_category(client, ids, "structural")
+    preview = None
+    try:
+        preview = retire_ineligible_standard_name_sources(
+            [ids["source"]],
+            reason="container nodes cannot realize quantity names",
+            gc=client,
+        )
+        assert preview["outcome"] == "would_apply"
+        assert preview["counts"] == {
+            "requested": 1,
+            "admitted": 1,
+            "refused": 0,
+            "bindings_to_detach": 2,
+            "projections_to_detach": 2,
+        }
+
+        applied = retire_ineligible_standard_name_sources(
+            [ids["source"]],
+            reason="container nodes cannot realize quantity names",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+        assert applied["outcome"] == "applied"
+        assert applied["sources_retired"] == 1
+        assert applied["orphaned_names"] == sorted([ids["keep"], ids["remove"]])
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source}), "
+            "(backing:IMASNode {id: $path}), "
+            "(keep:StandardName {id: $keep}), "
+            "(remove:StandardName {id: $remove}) "
+            "RETURN source.status AS status, source.produced_sn_id AS scalar, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } AS bindings, "
+            "COUNT { (backing)-[:HAS_STANDARD_NAME]->(:StandardName) } AS projections, "
+            "keep.name_stage AS keep_stage, remove.name_stage AS remove_stage",
+            **ids,
+        ) == [
+            {
+                "status": "not_physical_quantity",
+                "scalar": None,
+                "bindings": 0,
+                "projections": 0,
+                "keep_stage": "accepted",
+                "remove_stage": "accepted",
+            }
+        ]
+    finally:
+        _cleanup(client, ids, (preview or {}).get("manifest_sha256"))
+
+
+@pytest.mark.graph
+def test_ineligible_source_retirement_refuses_eligible_backing(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "eligible-source-retirement-refusal")
+    ids = _seed(client, "quantitysource")
+    _mark_backing_category(client, ids, "quantity")
+    try:
+        preview = retire_ineligible_standard_name_sources(
+            [ids["source"]],
+            reason="only ineligible backing categories may retire",
+            gc=client,
+        )
+        assert preview["outcome"] == "refused"
+        assert preview["refusals"] == [
+            {
+                "source_id": ids["source"],
+                "reason": "backing DD node category 'quantity' is SN-eligible",
+            }
+        ]
+        assert client.query(
+            "MATCH (source:StandardNameSource {id: $source}) "
+            "RETURN source.status AS status, source.produced_sn_id AS scalar, "
+            "COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } AS bindings",
+            **ids,
+        ) == [{"status": "attached", "scalar": ids["keep"], "bindings": 2}]
+    finally:
+        _cleanup(client, ids)
+
+
+@pytest.mark.graph
+def test_ineligible_source_retirement_replay_is_write_free(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "ineligible-source-retirement-replay")
+    ids = _seed(client, "retirementreplay")
+    _mark_backing_category(client, ids, "representation")
+    preview = None
+    try:
+        preview = retire_ineligible_standard_name_sources(
+            [ids["source"]],
+            reason="container nodes cannot realize quantity names",
+            gc=client,
+        )
+        retire_ineligible_standard_name_sources(
+            [ids["source"]],
+            reason="container nodes cannot realize quantity names",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+        participant_ids = [*ids.values(), preview["manifest_sha256"]]
+        before = _snapshot_bytes(client, participant_ids)
+        replay = retire_ineligible_standard_name_sources(
+            [ids["source"]],
+            reason="container nodes cannot realize quantity names",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+        after = _snapshot_bytes(client, participant_ids)
+        assert replay["outcome"] == "already_applied"
+        assert replay["changed"] == 0
+        assert after == before
     finally:
         _cleanup(client, ids, (preview or {}).get("manifest_sha256"))
