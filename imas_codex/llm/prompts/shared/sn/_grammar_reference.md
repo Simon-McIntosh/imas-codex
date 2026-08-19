@@ -231,8 +231,9 @@ IR segment fields before emitting:
    empty: `safety_factor`, `loop_voltage`, `internal_inductance`. A spelling
    the parser splits into a qualifier plus a base stays decomposable however
    lexicalised it reads — `minor_radius` is `minor` + `radius`,
-   `cross_sectional_area` is `cross_sectional` + `area`, `polarization_angle`
-   is `polarization` + `angle` — so put the qualifier in its own IR field.
+   `poloidal_plane_cross_sectional_area` is section plane `poloidal` +
+   `cross_sectional` + `area`, and `polarization_angle` is `polarization` +
+   `angle` — so put each qualifier or section plane in its own IR field.
    `poloidal_flux` and `ellipticity_angle` are not names at all and must never
    be emitted or endorsed: a generic base (`flux`) needs a qualifying segment
    and a component like `poloidal` does not supply one (use

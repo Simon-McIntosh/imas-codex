@@ -119,27 +119,6 @@ _EVALUATED_QUANTITY_FIELDS = ("subject", "population", "orbit")
 #: structure only when it projects the quantity itself.
 _AXIS_FIELDS = ("component", "coordinate")
 
-#: Qualifier tokens under which an axis token names the plane a geometric
-#: extent is sectioned in rather than a vector component of the quantity.  A
-#: poloidal cross-sectional area is a scalar extent of the surface bounding it,
-#: so it keeps the intrinsic-geometry relation ``_of_`` exactly as the swept
-#: ``surface_area_of_flux_surface`` does.
-_SECTIONING_QUALIFIER_TOKENS = frozenset({"cross_sectional"})
-
-
-def _sections_a_geometric_extent(name: str) -> bool:
-    """Return whether an axis token names a sectioning plane, not a projection."""
-    try:
-        from imas_standard_names import parse
-
-        qualifiers = parse(name, strict=True).ir.qualifiers
-    except Exception:
-        return False
-    return any(
-        getattr(qualifier, "token", None) in _SECTIONING_QUALIFIER_TOKENS
-        for qualifier in qualifiers
-    )
-
 
 def _has_field_evaluation_structure(name: str) -> bool:
     """Return whether public parse fields prove a quantity is field-like.
@@ -152,11 +131,11 @@ def _has_field_evaluation_structure(name: str) -> bool:
     deterministic gate without copying either the physical-base or qualifier
     vocabularies into codex.
 
-    An axis token does not always project the quantity.  Under a sectioning
-    qualifier it names the plane a scalar geometric extent is taken in, which
-    is an intrinsic property of the object that bounds it — the same reading
-    already applied to an entity locus, where
-    ``poloidal_cross_sectional_area_of_rogowski_coil`` passes unflagged.
+    A section-plane token does not project the quantity.  It names the plane a
+    scalar geometric extent is taken in, which is an intrinsic property of the
+    object that bounds it — the same reading already applied to an entity locus,
+    where ``poloidal_plane_cross_sectional_area_of_rogowski_coil`` passes
+    unflagged.
     """
     try:
         from imas_standard_names.grammar import parse_standard_name
@@ -168,7 +147,7 @@ def _has_field_evaluation_structure(name: str) -> bool:
         getattr(parsed, field, None) is not None for field in _EVALUATED_QUANTITY_FIELDS
     ):
         return True
-    if _sections_a_geometric_extent(name):
+    if getattr(parsed, "section_plane", None) is not None:
         return False
     return any(getattr(parsed, field, None) is not None for field in _AXIS_FIELDS)
 

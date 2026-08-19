@@ -76,7 +76,7 @@ Do not choose, infer, or change a COCOS transformation label. `psi_like` and
 `ip_like` remain downstream catalog labels, not composer output.
 
 Flux-surface area is not one generic family: DD `area` is
-`poloidal_cross_sectional_area_of_flux_surface`, while DD `surface` is
+`poloidal_plane_cross_sectional_area_of_flux_surface`, while DD `surface` is
 `surface_area_of_flux_surface`. Never emit or attach either source family to
 the ambiguous umbrella `area_of_flux_surface`.
 
@@ -164,7 +164,7 @@ path measures the same quantity — do not invent a synonym.
 | `current_from_passive_loop` | `passive_loop_current` | No `_from_` causation |
 | `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Processing method is metadata |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking in |
-| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `cross_sectional_area_of_rogowski_coil`) |
+| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop instrument prefix for generic physics observables (keep only when the quantity is intrinsic to the hardware, e.g. `poloidal_plane_cross_sectional_area_of_rogowski_coil`) |
 | `power_of_bolometer` | `radiated_power` | **Observable vs hardware** — a diagnostic MEASURES a physical observable; name the observable, not the device. A bolometer measures the radiated power reaching it (not "power of the bolometer"), an interferometer the line-integrated density (not "phase of the interferometer"). BUT a *geometric/hardware* property genuinely OF the instrument keeps the instrument locus: `vertical_coordinate_of_bolometer` (where the detector is), `lower_bound_wavelength_of_visible_camera` (the camera's spectral range), `radial_coordinate_of_detector_pixel`. Test: is it the physics being probed (drop the device) or a fact about the device itself (keep it)? |
 | `halo_region_parallel_energy_due_to_heat_flux` | `parallel_halo_energy` | **Suffix-form for component** — component/transformation tokens come BEFORE the base as a leading qualifier prefix — never as suffixes |
 | `z_coordinate_of_sensor_direction_unit_vector` | `z_direction_unit_vector_of_camera` | **Compound hardware identifiers** — drop stacked intermediate hardware tokens but retain the source-stated owning device as the `_of_<device>` locus; a unit-vector field's Z is a projection, not a coordinate |
