@@ -1,0 +1,2409 @@
+{
+  "schema": "imas-codex.unsourced-standard-name-adjudication.v1",
+  "generated_at": "2026-08-19",
+  "authority": {
+    "plan": "imas-codex:sn-graph-wide-integrity",
+    "section": "3",
+    "plan_version": 174,
+    "graph_scope": "live StandardName nodes without incoming StandardNameSource PRODUCED_NAME",
+    "operation": "read-only adjudication; no graph mutation and no LLM invocation"
+  },
+  "source_census": {
+    "path": "docs/evidence/sn-graph-wide-integrity/remaining-integrity-census.json",
+    "sha256": "6d05b06021f3653bebc0b50846b10b966f0445c2cff0627fe51a1ca923e4d632",
+    "total": 85,
+    "name_stage_counts": {
+      "accepted": 69,
+      "reviewed": 4,
+      "drafted": 4,
+      "pending": 8
+    }
+  },
+  "summary": {
+    "total": 85,
+    "name_stage_counts": {
+      "accepted": 69,
+      "reviewed": 4,
+      "drafted": 4,
+      "pending": 8
+    },
+    "disposition_counts": {
+      "re_sourceable_from_existing_dd_path": 32,
+      "structurally_legitimate_without_producing_source": 42,
+      "retirement_candidate": 11
+    },
+    "exactly_one_disposition_per_row": true,
+    "accepted_rows_individually_evidenced": true,
+    "graph_mutation_guard": {
+      "StandardNameChange": {
+        "before": 7451,
+        "after": 7451
+      },
+      "LLMCost": {
+        "before": 27467,
+        "after": 27467
+      }
+    }
+  },
+  "integrity_signature": {
+    "scheme": "sha256",
+    "signed_payload": "the complete JSON file; digest is recorded in the companion Markdown evidence after final serialization",
+    "authenticity_note": "This is an integrity digest, not a private-key identity signature."
+  },
+  "rows": [
+    {
+      "name": "capacitance_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "origin": "catalog_edit",
+      "status": "draft",
+      "validation_status": "valid",
+      "unit": "F",
+      "reviewer_score_name": 0.96875,
+      "description": "Capacitance of an ion cyclotron heating antenna is the non-negative charge-to-voltage proportionality of a specified lumped impedance-matching element in the antenna RF circuit.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path ic_antennas/antenna/module/matching_element/capacitance records \"Capacitance of the macthing element\" with unit F. Current live target(s): capacitance[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "ic_antennas/antenna/module/matching_element/capacitance",
+        "dd_documentation": "Capacitance of the macthing element",
+        "dd_unit": "F",
+        "source_status": "composed",
+        "current_live_targets": [
+          "capacitance[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:ic_antennas/antenna/module/matching_element/capacitance",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "co_passing_fast_current_density",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "A.m^-2",
+      "reviewer_score_name": null,
+      "description": "Co-passing fast-particle current density is the signed conventional electric-charge flux per unit area carried by fast particles on co-passing, untrapped guiding-center orbits. It is a vector orbit-class contribution and excludes compensating electron and thermal-ion return currents.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_co_passing_fast_current_density (accepted, valid, 4 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_co_passing_fast_current_density",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 4,
+            "unit": "A.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_co_passing_fast_current_density)-[:HAS_PARENT]->(co_passing_fast_current_density)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 0.95,
+      "description": "Torque density vector giving the angular-momentum source per unit volume deposited by Coulomb collisions on co-passing fast ions in a specified charge state.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions (accepted, valid, 3 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 3,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions)-[:HAS_PARENT]->(co_passing_fast_ion_charge_state_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "co_passing_fast_ion_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Collisional co-passing torque density for fast ions is the local vector rate of angular-momentum transfer to or from the co-passing fast-ion population caused by Coulomb collisions with background plasma species.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_co_passing_fast_ion_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_co_passing_fast_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(co_passing_fast_ion_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 0.9437500000000001,
+      "description": "Co-passing collisional torque density is the vector rate of angular-momentum transfer per plasma volume to a specified thermal ion charge state from Coulomb collisions with co-passing particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions)-[:HAS_PARENT]->(co_passing_thermal_ion_charge_state_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "co_passing_thermal_ion_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Local vector rate of angular-momentum transfer to the thermal-ion population per unit volume caused by Coulomb collisions, restricted to co-passing orbit-class contributions and without restricting spatial direction.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_co_passing_thermal_ion_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_co_passing_thermal_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(co_passing_thermal_ion_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "co_passing_torque_density_due_to_j_cross_b_force",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Co-passing torque density due to j cross b force is the vector density of angular-momentum transfer produced by the Lorentz force acting on the co-passing plasma population. It is the parent concept for co-passing directionally projected forms.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_co_passing_torque_density_due_to_j_cross_b_force (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_co_passing_torque_density_due_to_j_cross_b_force)-[:HAS_PARENT]->(co_passing_torque_density_due_to_j_cross_b_force)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "coefficient_of_spectrometer_channel",
+      "name_stage": "pending",
+      "origin": "derived",
+      "status": null,
+      "validation_status": null,
+      "unit": null,
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: coefficient_of_spectrometer_channel. Intended alternative: a coefficient name that states the calibrated quantity and role, such as an instrument-function intensity scale. The DD channel contains several unrelated coefficients and calibration factors; bare coefficient does not identify which physical or mathematical quantity is meant.",
+        "rejected_identity": "coefficient_of_spectrometer_channel",
+        "accepted_or_intended_alternative": "a coefficient name that states the calibrated quantity and role, such as an instrument-function intensity scale",
+        "semantic_distinction": "The DD channel contains several unrelated coefficients and calibration factors; bare coefficient does not identify which physical or mathematical quantity is meant.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_current_density",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "A.m^-2",
+      "reviewer_score_name": null,
+      "description": "Current density is the vector flux density of conventional electric charge, equal to electric current per unit area normal to the flow.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_current_density (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_current_density",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "A.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_current_density)-[:HAS_PARENT]->(counter_passing_current_density)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_fast_current_density",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "A.m^-2",
+      "reviewer_score_name": null,
+      "description": "Electric current density contributed by counter-passing fast particles on guiding-center orbits, excluding thermal and compensating return-current contributions.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_fast_current_density (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_fast_current_density",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "A.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_fast_current_density)-[:HAS_PARENT]->(counter_passing_fast_current_density)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_fast_electron_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Volumetric counter-passing torque density deposited in the fast-electron population through Coulomb collisions, the local vector rate of angular-momentum transfer per unit volume.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_fast_electron_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_fast_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(counter_passing_fast_electron_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 0.98125,
+      "description": "Collisional torque-density vector transferred to counter-passing fast ions in a specified charge state by Coulomb collisions with background plasma particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions (accepted, valid, 3 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 3,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions)-[:HAS_PARENT]->(counter_passing_fast_ion_charge_state_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_fast_ion_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Collisional counter-passing torque density for fast ions is the local vector rate of angular-momentum transfer per unit volume caused by Coulomb collisions.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_fast_ion_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_fast_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(counter_passing_fast_ion_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_thermal_electron_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Counter-passing thermal electron torque density due to collisions is the local angular-momentum transfer rate to bulk thermal electrons from Coulomb collisions with counter-passing fast particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(counter_passing_thermal_electron_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 0.9312499999999999,
+      "description": "Counter-passing collisional torque density is the vector angular-momentum transfer rate per plasma volume delivered to a specified thermal ion charge state from Coulomb collisions with counter-passing particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions)-[:HAS_PARENT]->(counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "counter_passing_torque_density_due_to_j_cross_b_force",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Angular-momentum source per unit volume generated by the Lorentz force, averaged over a magnetic flux surface for counter-passing particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_counter_passing_torque_density_due_to_j_cross_b_force (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_counter_passing_torque_density_due_to_j_cross_b_force)-[:HAS_PARENT]->(counter_passing_torque_density_due_to_j_cross_b_force)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "cross_section_of_flux_surface",
+      "name_stage": "pending",
+      "origin": null,
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "m^2",
+      "reviewer_score_name": null,
+      "description": "Poloidal cross‑sectional area of a magnetic flux surface",
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: cross_section_of_flux_surface. Intended alternative: poloidal_cross_sectional_area_of_flux_surface. The generic spelling omits that this is a poloidal cross-sectional area and cannot distinguish it from a toroidally swept surface; the precise alternative is already accepted and bound to the DD area paths.",
+        "rejected_identity": "cross_section_of_flux_surface",
+        "accepted_or_intended_alternative": "poloidal_cross_sectional_area_of_flux_surface",
+        "semantic_distinction": "The generic spelling omits that this is a poloidal cross-sectional area and cannot distinguish it from a toroidally swept surface; the precise alternative is already accepted and bound to the DD area paths.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "current_density_due_to_fast_ion",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "A.m^-2",
+      "reviewer_score_name": null,
+      "description": "Vector density of electric current carried by a specified charged-particle contribution, obtained from its signed charge-weighted particle flux.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_current_density_due_to_fast_ion (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_current_density_due_to_fast_ion",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "A.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_current_density_due_to_fast_ion)-[:HAS_PARENT]->(current_density_due_to_fast_ion)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "electron_particle_convection_velocity",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m.s^-1",
+      "reviewer_score_name": null,
+      "description": "Effective velocity multiplying electron particle density in the density-proportional convective part of electron particle transport.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by parallel_electron_particle_convection_velocity (accepted, valid, 3 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "parallel_electron_particle_convection_velocity",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "m.s^-1",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(parallel_electron_particle_convection_velocity)-[:HAS_PARENT]->(electron_particle_convection_velocity)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "energy_due_to_ohmic_dissipation",
+      "name_stage": "pending",
+      "origin": "derived",
+      "status": null,
+      "validation_status": null,
+      "unit": null,
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path disruption/global_quantities/energy_ohm records \"Total ohmic cumulated energy (integral of the power over the disruption duration)\" with unit J. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "disruption/global_quantities/energy_ohm",
+        "dd_documentation": "Total ohmic cumulated energy (integral of the power over the disruption duration)",
+        "dd_unit": "J",
+        "source_status": "extracted",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:disruption/global_quantities/energy_ohm",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "energy_flux_at_limiter",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "W.m^-2",
+      "reviewer_score_name": null,
+      "description": "Peak plasma energy deposition per unit surface area, defined as the spatial maximum of the corresponding energy flux over a plasma-facing surface.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by maximum_of_energy_flux_at_limiter (accepted, valid, 1 producing source). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "maximum_of_energy_flux_at_limiter",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 1,
+            "unit": "W.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(maximum_of_energy_flux_at_limiter)-[:HAS_PARENT]->(energy_flux_at_limiter)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "energy_of_plasma_facing_component",
+      "name_stage": "pending",
+      "origin": "derived",
+      "status": null,
+      "validation_status": null,
+      "unit": null,
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: energy_of_plasma_facing_component. Intended alternative: incident_energy_flux_at_plasma_facing_component. The DD exposes incident energy flux or deposited power per area at plasma-facing surfaces, not stored energy of the component.",
+        "rejected_identity": "energy_of_plasma_facing_component",
+        "accepted_or_intended_alternative": "incident_energy_flux_at_plasma_facing_component",
+        "semantic_distinction": "The DD exposes incident energy flux or deposited power per area at plasma-facing surfaces, not stored energy of the component.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "fast_electron_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Fast-electron collisional torque density is the local angular-momentum transfer rate per unit volume delivered to fast electrons through Coulomb collisions.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_fast_electron_torque_density_due_to_collisions (accepted, valid, 3 producing sources); co_passing_fast_electron_torque_density_due_to_collisions (accepted, valid, 1 producing source); counter_passing_fast_electron_torque_density_due_to_collisions (accepted, valid, 0 producing sources); trapped_fast_electron_torque_density_due_to_collisions (accepted, valid, 0 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_fast_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "co_passing_fast_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 1,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "counter_passing_fast_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "trapped_fast_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_fast_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_electron_torque_density_due_to_collisions)",
+          "live-graph:(co_passing_fast_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_electron_torque_density_due_to_collisions)",
+          "live-graph:(counter_passing_fast_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_electron_torque_density_due_to_collisions)",
+          "live-graph:(trapped_fast_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_electron_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "fast_ion_charge_state_power_at_inside_flux_surface",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "W",
+      "reviewer_score_name": 0.8875,
+      "description": "Cumulative wave power absorbed by a specified fast (non-thermal) ion charge state within the plasma volume enclosed by a selected magnetic flux surface.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path waves/coherent_wave/profiles_1d/ion/state/power_inside_fast records \"Absorbed wave power on thermal species inside a flux surface (cumulative volume integral of the absorbed power density)\" with unit W. Current live target(s): ion_charge_state_power_at_inside_flux_surface[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "waves/coherent_wave/profiles_1d/ion/state/power_inside_fast",
+        "dd_documentation": "Absorbed wave power on thermal species inside a flux surface (cumulative volume integral of the absorbed power density)",
+        "dd_unit": "W",
+        "source_status": "composed",
+        "current_live_targets": [
+          "ion_charge_state_power_at_inside_flux_surface[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:waves/coherent_wave/profiles_1d/ion/state/power_inside_fast",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "fast_ion_charge_state_power_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "W.m^-3",
+      "reviewer_score_name": null,
+      "description": "Volumetric rate of Coulomb-collisional kinetic-energy transfer to fast ions of a specified charge state, aggregated over co-passing, counter-passing, and trapped orbit classes.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by trapped_fast_ion_charge_state_power_density_due_to_collisions (accepted, valid, 2 producing sources); co_passing_fast_ion_charge_state_power_density_due_to_collisions (accepted, valid, 2 producing sources); counter_passing_fast_ion_charge_state_power_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "trapped_fast_ion_charge_state_power_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "W.m^-3",
+            "validation_status": "valid"
+          },
+          {
+            "id": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "W.m^-3",
+            "validation_status": "valid"
+          },
+          {
+            "id": "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "W.m^-3",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(trapped_fast_ion_charge_state_power_density_due_to_collisions)-[:HAS_PARENT]->(fast_ion_charge_state_power_density_due_to_collisions)",
+          "live-graph:(co_passing_fast_ion_charge_state_power_density_due_to_collisions)-[:HAS_PARENT]->(fast_ion_charge_state_power_density_due_to_collisions)",
+          "live-graph:(counter_passing_fast_ion_charge_state_power_density_due_to_collisions)-[:HAS_PARENT]->(fast_ion_charge_state_power_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "fast_ion_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Fast-ion collisional torque density is the local vector rate of angular-momentum transfer to fast ions per unit plasma volume caused by Coulomb collisions with background plasma species.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by counter_passing_fast_ion_torque_density_due_to_collisions (accepted, valid, 0 producing sources); toroidal_fast_ion_torque_density_due_to_collisions (accepted, valid, 3 producing sources); co_passing_fast_ion_torque_density_due_to_collisions (accepted, valid, 0 producing sources); trapped_fast_ion_torque_density_due_to_collisions (accepted, valid, 1 producing source). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "counter_passing_fast_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "toroidal_fast_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "co_passing_fast_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "trapped_fast_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 1,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(counter_passing_fast_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_ion_torque_density_due_to_collisions)",
+          "live-graph:(toroidal_fast_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_ion_torque_density_due_to_collisions)",
+          "live-graph:(co_passing_fast_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_ion_torque_density_due_to_collisions)",
+          "live-graph:(trapped_fast_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(fast_ion_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "1",
+      "reviewer_score_name": 0.8812500000000001,
+      "description": "Flux-surface averaged toroidal flux coordinate gradient magnitude is the flux-surface average of the magnitude of the spatial gradient of the toroidal flux coordinate. It is the metric factor for how rapidly that coordinate label changes across neighboring flux surfaces.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path equilibrium/time_slice/profiles_1d/gm7 records \"Flux surface averaged grad_rho\" with unit unspecified. Current live target(s): toroidal_flux_coordinate_gradient_magnitude[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "equilibrium/time_slice/profiles_1d/gm7",
+        "dd_documentation": "Flux surface averaged grad_rho",
+        "dd_unit": null,
+        "source_status": "composed",
+        "current_live_targets": [
+          "toroidal_flux_coordinate_gradient_magnitude[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:equilibrium/time_slice/profiles_1d/gm7",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "rad",
+      "reviewer_score_name": 0.9125,
+      "description": "Forward wave phase of an ion-cyclotron-heating antenna is the phase of the forward RF power-wave phasor for one antenna module, referenced to the first module to define toroidal phasing; positive phase advances toward increasing toroidal angle φ in the right-handed cylindrical (R, φ, Z) frame.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path ic_antennas/antenna/module/phase_forward records \"Phase of the forward power with respect to the first module\" with unit rad. Current live target(s): wave_phase_of_ion_cyclotron_heating_antenna[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "ic_antennas/antenna/module/phase_forward",
+        "dd_documentation": "Phase of the forward power with respect to the first module",
+        "dd_unit": "rad",
+        "source_status": "composed",
+        "current_live_targets": [
+          "wave_phase_of_ion_cyclotron_heating_antenna[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:ic_antennas/antenna/module/phase_forward",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "fraction_of_beamlet_group",
+      "name_stage": "pending",
+      "origin": "derived",
+      "status": null,
+      "validation_status": null,
+      "unit": null,
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: fraction_of_beamlet_group. Intended alternative: power_fraction_of_neutral_beam_beamlet. The DD array is the contribution of each individual beamlet to group power; it is not a fraction whose subject is the beamlet group itself.",
+        "rejected_identity": "fraction_of_beamlet_group",
+        "accepted_or_intended_alternative": "power_fraction_of_neutral_beam_beamlet",
+        "semantic_distinction": "The DD array is the contribution of each individual beamlet to group power; it is not a fraction whose subject is the beamlet group itself.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "impurity_ion_photon_radiance_of_spectral_line_due_to_charge_exchange",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^-2.s^-1.sr^-1",
+      "reviewer_score_name": 0.94375,
+      "description": "Photon-number radiance from an impurity-ion spectral line produced by charge exchange, integrated over the selected line and viewing direction.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path charge_exchange/channel/spectrum/processed_line/radiance records \"Calibrated, background subtracted radiance (integrated over the spectrum for this line)\" with unit m^-2.s^-1.sr^-1. Current live target(s): photon_radiance_at_spectral_line[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "charge_exchange/channel/spectrum/processed_line/radiance",
+        "dd_documentation": "Calibrated, background subtracted radiance (integrated over the spectrum for this line)",
+        "dd_unit": "m^-2.s^-1.sr^-1",
+        "source_status": "attached",
+        "current_live_targets": [
+          "photon_radiance_at_spectral_line[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:charge_exchange/channel/spectrum/processed_line/radiance",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "ion_charge_state_power",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "W",
+      "reviewer_score_name": null,
+      "description": "Volume-integrated power transferred from a coherent electromagnetic wave to an ion population, with population resolution and mode aggregation defined by each specific instance.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by thermal_ion_charge_state_power (accepted, valid, 1 producing source). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "thermal_ion_charge_state_power",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 1,
+            "unit": "W",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(thermal_ion_charge_state_power)-[:HAS_PARENT]->(ion_charge_state_power)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "ion_heat_convection_velocity",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m.s^-1",
+      "reviewer_score_name": null,
+      "description": "Ion heat convection velocity is the effective vector velocity whose product with ion thermal-energy density gives the convective flux of ion thermal energy. As a species-level intensive quantity, it is the density-weighted mean over all ion charge states and is not assumed to equal the bulk ion flow velocity.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by parallel_ion_heat_convection_velocity (accepted, valid, 3 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "parallel_ion_heat_convection_velocity",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "m.s^-1",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(parallel_ion_heat_convection_velocity)-[:HAS_PARENT]->(ion_heat_convection_velocity)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "ion_torque_density_due_to_thermalization",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Angular-momentum transfer rate per unit volume delivered to a thermal plasma population when fast or nonthermal particles undergo thermalization.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by thermal_ion_torque_density_due_to_thermalization (accepted, valid, 0 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "thermal_ion_torque_density_due_to_thermalization",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(thermal_ion_torque_density_due_to_thermalization)-[:HAS_PARENT]->(ion_torque_density_due_to_thermalization)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "line_integrated_electron_density",
+      "name_stage": "drafted",
+      "origin": null,
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "m^-2",
+      "reviewer_score_name": null,
+      "description": "Line-integrated electron density measured along a diagnostic line-of-sight.",
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: line_integrated_electron_density. Intended alternative: line_integrated_electron_number_density. The accepted alternative states the counted quantity explicitly and already owns the interferometer and refractometer line-integral paths.",
+        "rejected_identity": "line_integrated_electron_density",
+        "accepted_or_intended_alternative": "line_integrated_electron_number_density",
+        "semantic_distinction": "The accepted alternative states the counted quantity explicitly and already owns the interferometer and refractometer line-integral paths.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "line_integrated_impurity_ion_velocity",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "m.s^-1",
+      "reviewer_score_name": null,
+      "description": "Line-of-sight-integrated bulk velocity of impurity ions, with components describing their plasma flow rather than a locally resolved velocity.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_line_integrated_impurity_ion_velocity (drafted, quarantined, 0 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_line_integrated_impurity_ion_velocity",
+            "name_stage": "drafted",
+            "origin": null,
+            "producing_sources": 0,
+            "unit": "m.s^-1",
+            "validation_status": "quarantined"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_line_integrated_impurity_ion_velocity)-[:HAS_PARENT]->(line_integrated_impurity_ion_velocity)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "magnetic_field_at_pedestal_top_low_field_side_magnitude",
+      "name_stage": "drafted",
+      "origin": null,
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "T",
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs records \"Total magnetic field calculated at the position of the pressure pedestal top (as determined by the fit) on the low field side\" with unit T. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs",
+        "dd_documentation": "Total magnetic field calculated at the position of the pressure pedestal top (as determined by the fit) on the low field side",
+        "dd_unit": "T",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:summary/pedestal_fits/mtanh/b_field_pedestal_top_lfs",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "minimum_magnetic_field_magnitude",
+      "name_stage": "accepted",
+      "origin": "catalog_edit",
+      "status": "draft",
+      "validation_status": "valid",
+      "unit": "T",
+      "reviewer_score_name": null,
+      "description": "Smallest value of total magnetic field magnitude on each nested toroidal flux surface, used in determining the magnetic trapping condition for charged particles in bounce motion.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path equilibrium/time_slice/profiles_1d/b_field_min records \"Minimum(modulus(B)) on the flux surface (always positive, irrespective of the sign convention for the B-field direction)\" with unit T. Current live target(s): minimum_magnetic_field[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "equilibrium/time_slice/profiles_1d/b_field_min",
+        "dd_documentation": "Minimum(modulus(B)) on the flux surface (always positive, irrespective of the sign convention for the B-field direction)",
+        "dd_unit": "T",
+        "source_status": "composed",
+        "current_live_targets": [
+          "minimum_magnetic_field[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:equilibrium/time_slice/profiles_1d/b_field_min",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "minimum_of_safety_factor",
+      "name_stage": "reviewed",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "1",
+      "reviewer_score_name": 0.725,
+      "description": "Minimum value of the safety factor profile, indicating the location of the most rational flux surface.",
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: minimum_of_safety_factor. Intended alternative: minimum_safety_factor. These are semantically identical; the accepted alternative is shorter without losing meaning and already owns the DD minimum-q value.",
+        "rejected_identity": "minimum_of_safety_factor",
+        "accepted_or_intended_alternative": "minimum_safety_factor",
+        "semantic_distinction": "These are semantically identical; the accepted alternative is shorter without losing meaning and already owns the DD minimum-q value.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "momentum_source_due_to_diamagnetic_drift",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "kg.m^-1.s^-2",
+      "reviewer_score_name": 0.875,
+      "description": "Diamagnetic-drift contribution to an area-normalized momentum-balance source, representing pressure-gradient-driven transport of a specified projected linear momentum.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by ion_momentum_source_due_to_diamagnetic_drift (accepted, valid, 1 producing source). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "ion_momentum_source_due_to_diamagnetic_drift",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 1,
+            "unit": "kg.m^-1.s^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(ion_momentum_source_due_to_diamagnetic_drift)-[:HAS_PARENT]->(momentum_source_due_to_diamagnetic_drift)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "neutral_species_particle_diffusivity",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^2.s^-1",
+      "reviewer_score_name": null,
+      "description": "Effective Fickian transport coefficient relating neutral-species particle flux to neutral-species number-density gradients, with directional components represented by more specific quantities.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by parallel_neutral_species_particle_diffusivity (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "parallel_neutral_species_particle_diffusivity",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "m^2.s^-1",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(parallel_neutral_species_particle_diffusivity)-[:HAS_PARENT]->(neutral_species_particle_diffusivity)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "neutral_state_power_density",
+      "name_stage": "reviewed",
+      "origin": "catalog_edit",
+      "status": "draft",
+      "validation_status": "valid",
+      "unit": "W.m^-3",
+      "reviewer_score_name": 0.83125,
+      "description": "Volumetric rate at which energy density is added to or removed from a specific neutral species quantum state by atomic and collisional processes. It is the state-resolved neutral energy source term, with positive values denoting net energy gain by that state.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path plasma_sources/source/profiles_1d/neutral/state/energy records \"Source terms for the state energy transport equation\" with unit W.m^-3. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "plasma_sources/source/profiles_1d/neutral/state/energy",
+        "dd_documentation": "Source terms for the state energy transport equation",
+        "dd_unit": "W.m^-3",
+        "source_status": "extracted",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:plasma_sources/source/profiles_1d/neutral/state/energy",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "neutron_flux_due_to_fusion",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "Hz",
+      "reviewer_score_name": 0.8625,
+      "description": "Volume-integrated rate of neutron production from fusion reactions in the plasma, summed over all neutron-producing reaction channels and all reacting-population classes, including thermonuclear, beam-thermal, and beam-beam contributions.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path summary/fusion/neutron_fluxes/total records \"Total neutron flux from all reactions\" with unit Hz. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "summary/fusion/neutron_fluxes/total",
+        "dd_documentation": "Total neutron flux from all reactions",
+        "dd_unit": "Hz",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:summary/fusion/neutron_fluxes/total",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "normalized_momentum_flux_due_to_e_cross_b_drift",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "1",
+      "reviewer_score_name": null,
+      "description": "Normalized momentum flux due to E cross B drift is the dimensionless vector form of toroidal-momentum transport in the right-handed cylindrical (R, φ, Z) frame carried by electrostatic E cross B motion after division by a reference momentum-flux scale. It does not imply a particular projection relative to the magnetic field.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by perpendicular_normalized_momentum_flux_due_to_e_cross_b_drift (accepted, valid, 3 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "perpendicular_normalized_momentum_flux_due_to_e_cross_b_drift",
+            "name_stage": "accepted",
+            "origin": null,
+            "producing_sources": 3,
+            "unit": "1",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(perpendicular_normalized_momentum_flux_due_to_e_cross_b_drift)-[:HAS_PARENT]->(normalized_momentum_flux_due_to_e_cross_b_drift)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "normalized_perturbed_magnetic_field",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "1",
+      "reviewer_score_name": null,
+      "description": "Dimensionless vector describing magnetic-field perturbations relative to a positive reference magnetic-field scale.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by parallel_normalized_perturbed_magnetic_field (accepted, valid, 3 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "parallel_normalized_perturbed_magnetic_field",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "1",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(parallel_normalized_perturbed_magnetic_field)-[:HAS_PARENT]->(normalized_perturbed_magnetic_field)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "parallel_current_density_due_to_ohmic_current_drive",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "A.m^-2",
+      "reviewer_score_name": 1,
+      "description": "Flux-surface-averaged current density carried parallel to the magnetic field by the inductive ohmic-drive contribution.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path core_profiles/profiles_1d/j_ohmic records \"Ohmic parallel current density = average(J_Ohmic.B) / B0, where B0 = Core_Profiles/Vacuum_Toroidal_Field/ B0\" with unit A.m^-2. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "core_profiles/profiles_1d/j_ohmic",
+        "dd_documentation": "Ohmic parallel current density = average(J_Ohmic.B) / B0, where B0 = Core_Profiles/Vacuum_Toroidal_Field/ B0",
+        "dd_unit": "A.m^-2",
+        "source_status": "failed",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:core_profiles/profiles_1d/j_ohmic",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "parallel_effective_neutral_internal_state_velocity_due_to_diamagnetic_drift",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m.s^-1",
+      "reviewer_score_name": 0.95,
+      "description": "Field-aligned projection of the effective neutral population velocity in a specified internal quantum state, retaining only its diamagnetic-drift contribution.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path edge_profiles/ggd/neutral/state/velocity_diamagnetic/parallel records \"Parallel component, one scalar value is provided per element in the grid subset.\" with unit m.s^-1. Current live target(s): parallel_neutral_state_velocity_due_to_diamagnetic_drift[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "edge_profiles/ggd/neutral/state/velocity_diamagnetic/parallel",
+        "dd_documentation": "Parallel component, one scalar value is provided per element in the grid subset.",
+        "dd_unit": "m.s^-1",
+        "source_status": "composed",
+        "current_live_targets": [
+          "parallel_neutral_state_velocity_due_to_diamagnetic_drift[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:edge_profiles/ggd/neutral/state/velocity_diamagnetic/parallel",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "parallel_mach_number",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "1",
+      "reviewer_score_name": 0.99375,
+      "description": "Signed ratio of the plasma flow component along the local magnetic-field direction to the local plasma sound speed.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path langmuir_probes/reciprocating/plunge/mach_number_parallel records \"Parallel Mach number\" with unit 1. Current live target(s): mach_number[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "langmuir_probes/reciprocating/plunge/mach_number_parallel",
+        "dd_documentation": "Parallel Mach number",
+        "dd_unit": "1",
+        "source_status": "composed",
+        "current_live_targets": [
+          "mach_number[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:langmuir_probes/reciprocating/plunge/mach_number_parallel",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "parallel_neutral_momentum_diffusion_coefficient",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^2.s^-1",
+      "reviewer_score_name": 0.98125,
+      "description": "Effective parallel diffusivity for transporting momentum by the aggregate neutral population along magnetic-field lines.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path edge_transport/model/ggd/neutral/state/momentum/d_parallel records \"Momentum effective diffusivity (in the parallel direction), on various grid subsets\" with unit m^2.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "edge_transport/model/ggd/neutral/state/momentum/d_parallel",
+        "dd_documentation": "Momentum effective diffusivity (in the parallel direction), on various grid subsets",
+        "dd_unit": "m^2.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:edge_transport/model/ggd/neutral/state/momentum/d_parallel",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "parameter_at_pedestal",
+      "name_stage": "pending",
+      "origin": "derived",
+      "status": null,
+      "validation_status": null,
+      "unit": null,
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: parameter_at_pedestal. Intended alternative: a quantity-specific pedestal identity, for example magnetic_field_at_pedestal_top_low_field_side_magnitude. Parameter is a placeholder category, not a physical quantity; DD pedestal records must name the fitted quantity, location, and side.",
+        "rejected_identity": "parameter_at_pedestal",
+        "accepted_or_intended_alternative": "a quantity-specific pedestal identity, for example magnetic_field_at_pedestal_top_low_field_side_magnitude",
+        "semantic_distinction": "Parameter is a placeholder category, not a physical quantity; DD pedestal records must name the fitted quantity, location, and side.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "peak_half_width",
+      "name_stage": "pending",
+      "origin": "derived",
+      "status": null,
+      "validation_status": null,
+      "unit": null,
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: peak_half_width. Intended alternative: half_width_of_internal_hard_x_ray_emissivity_peak or half_width_of_external_hard_x_ray_emissivity_peak. The DD distinguishes internal and external emissivity peaks; the generic name loses both the measured quantity and which peak.",
+        "rejected_identity": "peak_half_width",
+        "accepted_or_intended_alternative": "half_width_of_internal_hard_x_ray_emissivity_peak or half_width_of_external_hard_x_ray_emissivity_peak",
+        "semantic_distinction": "The DD distinguishes internal and external emissivity peaks; the generic name loses both the measured quantity and which peak.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "poloidal_neutral_internal_state_convection_velocity",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m.s^-1",
+      "reviewer_score_name": 0.975,
+      "description": "Poloidal component of the effective convection velocity for particle transport of a specified neutral internal state, serving as the advective coefficient multiplying the state number density in the poloidal direction of flux coordinates (ρ, θ, φ).",
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: poloidal_neutral_internal_state_convection_velocity. Intended alternative: poloidal_neutral_state_particle_convection_velocity or poloidal_neutral_internal_state_momentum_convected_velocity. The DD has separate particle-transport and momentum-transport convection terms; the generic name does not say which transport equation it parameterizes.",
+        "rejected_identity": "poloidal_neutral_internal_state_convection_velocity",
+        "accepted_or_intended_alternative": "poloidal_neutral_state_particle_convection_velocity or poloidal_neutral_internal_state_momentum_convected_velocity",
+        "semantic_distinction": "The DD has separate particle-transport and momentum-transport convection terms; the generic name does not say which transport equation it parameterizes.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "poloidal_neutral_internal_state_momentum_convected_velocity",
+      "name_stage": "reviewed",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m.s^-1",
+      "reviewer_score_name": 0.56875,
+      "description": "Poloidal convective velocity for neutral state momentum transport",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path plasma_transport/model/profiles_1d/neutral/state/momentum/v_pol records \"Momentum effective convection (in the poloidal direction), on various grid subsets\" with unit m.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "plasma_transport/model/profiles_1d/neutral/state/momentum/v_pol",
+        "dd_documentation": "Momentum effective convection (in the poloidal direction), on various grid subsets",
+        "dd_unit": "m.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:plasma_transport/model/profiles_1d/neutral/state/momentum/v_pol",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "poloidal_neutral_state_particle_convection_velocity",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m.s^-1",
+      "reviewer_score_name": 0.99375,
+      "description": "Signed effective velocity governing the poloidal convective transport of particle density associated with a specified neutral internal state in the edge plasma.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path edge_transport/model/ggd/neutral/state/particles/v_pol records \"Effective convection (in the poloidal direction), on various grid subsets\" with unit m.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "edge_transport/model/ggd/neutral/state/particles/v_pol",
+        "dd_documentation": "Effective convection (in the poloidal direction), on various grid subsets",
+        "dd_unit": "m.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:edge_transport/model/ggd/neutral/state/particles/v_pol",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "poloidal_straight_field_line_angle",
+      "name_stage": "drafted",
+      "origin": null,
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "rad",
+      "reviewer_score_name": null,
+      "description": "Straight field line poloidal angle coordinate on the 2D wave propagation grid",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path waves/coherent_wave/profiles_2d/grid/theta_straight records \"Straight field line poloidal angle\" with unit rad. Current live target(s): straight_field_line_angle[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "waves/coherent_wave/profiles_2d/grid/theta_straight",
+        "dd_documentation": "Straight field line poloidal angle",
+        "dd_unit": "rad",
+        "source_status": "composed",
+        "current_live_targets": [
+          "straight_field_line_angle[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:waves/coherent_wave/profiles_2d/grid/theta_straight",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "radial_effective_electron_diffusivity",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^2.s^-1",
+      "reviewer_score_name": 1,
+      "description": "Effective coefficient relating the radial diffusive flux of electron particles to the radial gradient of electron number density in magnetized-plasma transport.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path plasma_transport/model/ggd/electrons/particles/d_radial records \"Effective diffusivity (in the radial direction), on various grid subsets\" with unit m^2.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "plasma_transport/model/ggd/electrons/particles/d_radial",
+        "dd_documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+        "dd_unit": "m^2.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:plasma_transport/model/ggd/electrons/particles/d_radial",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "radial_effective_ion_diffusivity",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^2.s^-1",
+      "reviewer_score_name": 1,
+      "description": "Effective Fickian coefficient relating the outward radial diffusive flux of charge-state-summed ions to the gradient of their total particle density.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path plasma_transport/model/ggd/ion/particles/d_radial records \"Effective diffusivity (in the radial direction), on various grid subsets\" with unit m^2.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "plasma_transport/model/ggd/ion/particles/d_radial",
+        "dd_documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+        "dd_unit": "m^2.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:plasma_transport/model/ggd/ion/particles/d_radial",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "radial_effective_neutral_diffusivity",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^2.s^-1",
+      "reviewer_score_name": 0.9625,
+      "description": "Effective coefficient relating neutral-particle diffusive flux to the radial gradient of neutral number density, with outward transport directed toward the last closed flux surface.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path edge_transport/model/ggd/neutral/particles/d_radial records \"Effective diffusivity (in the radial direction), on various grid subsets\" with unit m^2.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "edge_transport/model/ggd/neutral/particles/d_radial",
+        "dd_documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+        "dd_unit": "m^2.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:edge_transport/model/ggd/neutral/particles/d_radial",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "radial_thermal_ion_charge_state_energy_diffusion_coefficient",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^2.s^-1",
+      "reviewer_score_name": 0.9125,
+      "description": "Radial Fickian diffusion coefficient governing cross-field transport of thermal energy carried by a specified ion charge state.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path edge_transport/model/ggd/ion/state/energy/d_radial records \"Effective diffusivity (in the radial direction), on various grid subsets\" with unit m^2.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "edge_transport/model/ggd/ion/state/energy/d_radial",
+        "dd_documentation": "Effective diffusivity (in the radial direction), on various grid subsets",
+        "dd_unit": "m^2.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:edge_transport/model/ggd/ion/state/energy/d_radial",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "stray_breakdown_magnetic_field",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "T",
+      "reviewer_score_name": null,
+      "description": "Residual magnetic-field strength at the plasma position during initiation, produced by imperfect cancelation of external coil fields and capable of inhibiting electron-avalanche breakdown.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by stray_breakdown_magnetic_field_magnitude (accepted, valid, 1 producing source). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "stray_breakdown_magnetic_field_magnitude",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 1,
+            "unit": "T",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(stray_breakdown_magnetic_field_magnitude)-[:HAS_PARENT]->(stray_breakdown_magnetic_field)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "tendency_of_total_thermal_plasma_internal_energy",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "W",
+      "reviewer_score_name": 0.89375,
+      "description": "Time rate of change of the total volume-integrated thermal internal energy of the plasma, representing the net power surplus or deficit in the global thermal energy balance.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path summary/global_quantities/denergy_thermal_dt records \"Time derivative of the thermal plasma energy content\" with unit W. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "summary/global_quantities/denergy_thermal_dt",
+        "dd_documentation": "Time derivative of the thermal plasma energy content",
+        "dd_unit": "W",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:summary/global_quantities/denergy_thermal_dt",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "thermal_electron_absorbed_wave_power",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "W",
+      "reviewer_score_name": 0.95625,
+      "description": "Thermal electron absorbed wave power is the total coherent-wave power absorbed by the bulk thermal electron population, integrated over the plasma volume.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by per_toroidal_mode_thermal_electron_absorbed_wave_power (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "per_toroidal_mode_thermal_electron_absorbed_wave_power",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "W",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(per_toroidal_mode_thermal_electron_absorbed_wave_power)-[:HAS_PARENT]->(thermal_electron_absorbed_wave_power)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "thermal_electron_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Thermal electron torque density due to collisions is the local angular-momentum transfer rate per volume delivered to thermal electrons by Coulomb collisions with fast particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by co_passing_thermal_electron_torque_density_due_to_collisions (accepted, valid, 1 producing source); counter_passing_thermal_electron_torque_density_due_to_collisions (accepted, valid, 0 producing sources); toroidal_thermal_electron_torque_density_due_to_collisions (accepted, valid, 3 producing sources); trapped_thermal_electron_torque_density_due_to_collisions (accepted, valid, 1 producing source). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "co_passing_thermal_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 1,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "counter_passing_thermal_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "toroidal_thermal_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "trapped_thermal_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 1,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(co_passing_thermal_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_electron_torque_density_due_to_collisions)",
+          "live-graph:(counter_passing_thermal_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_electron_torque_density_due_to_collisions)",
+          "live-graph:(toroidal_thermal_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_electron_torque_density_due_to_collisions)",
+          "live-graph:(trapped_thermal_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_electron_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "thermal_ion_charge_state_power_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "W.m^-3",
+      "reviewer_score_name": null,
+      "description": "Volumetric rate of Coulomb-collisional kinetic-energy transfer to thermal ions of a specified charge state from non-Maxwellian source populations, aggregated over all guiding-center orbit classes of the source particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by trapped_thermal_ion_charge_state_power_density_due_to_collisions (accepted, valid, 2 producing sources); co_passing_thermal_ion_charge_state_power_density_due_to_collisions (accepted, valid, 2 producing sources); counter_passing_thermal_ion_charge_state_power_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "W.m^-3",
+            "validation_status": "valid"
+          },
+          {
+            "id": "co_passing_thermal_ion_charge_state_power_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "W.m^-3",
+            "validation_status": "valid"
+          },
+          {
+            "id": "counter_passing_thermal_ion_charge_state_power_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 2,
+            "unit": "W.m^-3",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(trapped_thermal_ion_charge_state_power_density_due_to_collisions)-[:HAS_PARENT]->(thermal_ion_charge_state_power_density_due_to_collisions)",
+          "live-graph:(co_passing_thermal_ion_charge_state_power_density_due_to_collisions)-[:HAS_PARENT]->(thermal_ion_charge_state_power_density_due_to_collisions)",
+          "live-graph:(counter_passing_thermal_ion_charge_state_power_density_due_to_collisions)-[:HAS_PARENT]->(thermal_ion_charge_state_power_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "thermal_ion_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Local vector rate of angular-momentum transfer to the thermal-ion population per unit volume caused by Coulomb collisions, without restricting orbit class or spatial direction.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by co_passing_thermal_ion_torque_density_due_to_collisions (accepted, valid, 0 producing sources); toroidal_thermal_ion_torque_density_due_to_collisions (accepted, valid, 3 producing sources); counter_passing_thermal_ion_torque_density_due_to_collisions (accepted, valid, 1 producing source); trapped_thermal_ion_torque_density_due_to_collisions (accepted, valid, 0 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "co_passing_thermal_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "toroidal_thermal_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "counter_passing_thermal_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 1,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          },
+          {
+            "id": "trapped_thermal_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(co_passing_thermal_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_ion_torque_density_due_to_collisions)",
+          "live-graph:(toroidal_thermal_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_ion_torque_density_due_to_collisions)",
+          "live-graph:(counter_passing_thermal_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_ion_torque_density_due_to_collisions)",
+          "live-graph:(trapped_thermal_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(thermal_ion_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "thermal_ion_torque_density_due_to_thermalization",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Angular-momentum transfer rate per unit volume deposited in thermal ions when fast particles undergo thermalization.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_thermal_ion_torque_density_due_to_thermalization (accepted, valid, 0 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_thermal_ion_torque_density_due_to_thermalization",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 0,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_thermal_ion_torque_density_due_to_thermalization)-[:HAS_PARENT]->(thermal_ion_torque_density_due_to_thermalization)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "thermal_plasma_internal_energy",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "W",
+      "reviewer_score_name": null,
+      "description": "Thermal plasma internal energy rate is the signed time derivative of the plasma’s stored thermal internal energy. It is positive during net thermal-energy accumulation and negative during net thermal-energy loss.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by total_thermal_plasma_internal_energy (accepted, quarantined, 0 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "total_thermal_plasma_internal_energy",
+            "name_stage": "accepted",
+            "origin": "derived",
+            "producing_sources": 0,
+            "unit": "W",
+            "validation_status": "quarantined"
+          }
+        ],
+        "citations": [
+          "live-graph:(total_thermal_plasma_internal_energy)-[:HAS_PARENT]->(thermal_plasma_internal_energy)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "tilt_angle_of_neutral_beam_injector",
+      "name_stage": "pending",
+      "origin": "derived",
+      "status": null,
+      "validation_status": null,
+      "unit": null,
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: tilt_angle_of_neutral_beam_injector. Intended alternative: inclination_angle_of_neutral_beam_beamlet_group. The DD angle belongs to the central beamlet of a beamlet group relative to the horizontal plane, not to the injector as a whole.",
+        "rejected_identity": "tilt_angle_of_neutral_beam_injector",
+        "accepted_or_intended_alternative": "inclination_angle_of_neutral_beam_beamlet_group",
+        "semantic_distinction": "The DD angle belongs to the central beamlet of a beamlet group relative to the horizontal plane, not to the injector as a whole.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+      "name_stage": "reviewed",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 0.83125,
+      "description": "Toroidal torque density transferred to the thermal particle population from Coulomb collisions with electrons, evaluated using the co-passing part of the distribution function.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_thermal_phi records \"Collisional toroidal torque density to the thermal particle population\" with unit N.m^-2. Current live target(s): co_passing_thermal_electron_torque_density_due_to_collisions[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_thermal_phi",
+        "dd_documentation": "Collisional toroidal torque density to the thermal particle population",
+        "dd_unit": "N.m^-2",
+        "source_status": "composed",
+        "current_live_targets": [
+          "co_passing_thermal_electron_torque_density_due_to_collisions[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:distributions/distribution/profiles_1d/co_passing/collisions/electrons/torque_thermal_phi",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_ion_charge_state_torque_density",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "kg.m^-1.s^-2",
+      "reviewer_score_name": 0.94375,
+      "description": "Toroidal component of the net angular-momentum source density acting on a specified ion charge state.",
+      "disposition": "retirement_candidate",
+      "evidence": {
+        "basis": "Rejected: toroidal_ion_charge_state_torque_density. Intended alternative: a mechanism- and population-specific identity such as toroidal_thermal_ion_charge_state_torque_density_due_to_collisions. Charge-state DD torque-density paths distinguish thermal versus fast populations, collision mechanism, and often orbit class; the only generic source path lacks charge-state ownership.",
+        "rejected_identity": "toroidal_ion_charge_state_torque_density",
+        "accepted_or_intended_alternative": "a mechanism- and population-specific identity such as toroidal_thermal_ion_charge_state_torque_density_due_to_collisions",
+        "semantic_distinction": "Charge-state DD torque-density paths distinguish thermal versus fast populations, collision mechanism, and often orbit class; the only generic source path lacks charge-state ownership.",
+        "citations": [
+          "live-dd-4.1.1:semantic candidate inspection",
+          "live-graph:accepted-alternative and source-binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_line_integrated_impurity_ion_velocity",
+      "name_stage": "drafted",
+      "origin": null,
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "m.s^-1",
+      "reviewer_score_name": null,
+      "description": null,
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor records \"Toroidal velocity (estimated from a spectral fit directly on the output line-integrated signal, without tomographic inversion)\" with unit m.s^-1. Current live target(s): impurity_ion_velocity[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor",
+        "dd_documentation": "Toroidal velocity (estimated from a spectral fit directly on the output line-integrated signal, without tomographic inversion)",
+        "dd_unit": "m.s^-1",
+        "source_status": "composed",
+        "current_live_targets": [
+          "impurity_ion_velocity[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_neutral_state_momentum_diffusivity",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m^2.s^-1",
+      "reviewer_score_name": 0.8625,
+      "description": "State-resolved diffusivity governing down-gradient transport of neutral-particle momentum along the toroidal direction in the right-handed cylindrical (R, φ, Z) frame.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path edge_transport/model/ggd/neutral/state/momentum/d/toroidal records \"Toroidal component, one scalar value is provided per element in the grid subset.\" with unit m^2.s^-1. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "edge_transport/model/ggd/neutral/state/momentum/d/toroidal",
+        "dd_documentation": "Toroidal component, one scalar value is provided per element in the grid subset.",
+        "dd_unit": "m^2.s^-1",
+        "source_status": null,
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:edge_transport/model/ggd/neutral/state/momentum/d/toroidal",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_thermal_ion_charge_state_torque_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m",
+      "reviewer_score_name": 0.93125,
+      "description": "Toroidal component of the volume-integrated Coulomb-collisional torque on thermal ions of a selected charge state, giving the net rate of toroidal angular momentum transfer to that ion population by collisions.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path distributions/distribution/global_quantities/collisions/ion/state/torque_thermal_tor records \"Collisional toroidal torque to the thermal particle population\" with unit N.m. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "distributions/distribution/global_quantities/collisions/ion/state/torque_thermal_tor",
+        "dd_documentation": "Collisional toroidal torque to the thermal particle population",
+        "dd_unit": "N.m",
+        "source_status": "stale",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:distributions/distribution/global_quantities/collisions/ion/state/torque_thermal_tor",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_thermal_ion_torque_density_due_to_thermalization",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 0.93125,
+      "description": "Toroidal thermal-ion torque density due to thermalization is the flux-surface-averaged transfer rate per unit volume of toroidal angular momentum to thermal ions due to fast-particle thermalization. The toroidal direction is the increasing-φ direction of the right-handed cylindrical (R, φ, Z) frame.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path distributions/distribution/profiles_2d/collisions/ion/torque_thermal_tor records \"Collisional toroidal torque density to the thermal particle population\" with unit N.m^-2. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "distributions/distribution/profiles_2d/collisions/ion/torque_thermal_tor",
+        "dd_documentation": "Collisional toroidal torque density to the thermal particle population",
+        "dd_unit": "N.m^-2",
+        "source_status": "stale",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:distributions/distribution/profiles_2d/collisions/ion/torque_thermal_tor",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 0.9875,
+      "description": "Toroidal angular-momentum transfer rate per unit volume delivered by Coulomb collisions to trapped fast ions interacting with a specified ion charge state.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path distributions/distribution/profiles_2d/trapped/collisions/ion/state/torque_fast_tor records \"Collisional toroidal torque density to the fast particle population\" with unit N.m^-2. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "distributions/distribution/profiles_2d/trapped/collisions/ion/state/torque_fast_tor",
+        "dd_documentation": "Collisional toroidal torque density to the fast particle population",
+        "dd_unit": "N.m^-2",
+        "source_status": "failed",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:distributions/distribution/profiles_2d/trapped/collisions/ion/state/torque_fast_tor",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": 1,
+      "description": "Toroidal angular-momentum transfer per unit plasma volume from Coulomb collisions to trapped thermal ions in a specified charge state, projected in the right-handed cylindrical (R, φ, Z) frame.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path distributions/distribution/profiles_2d/trapped/collisions/ion/state/torque_thermal_tor records \"Collisional toroidal torque density to the thermal particle population\" with unit N.m^-2. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "distributions/distribution/profiles_2d/trapped/collisions/ion/state/torque_thermal_tor",
+        "dd_documentation": "Collisional toroidal torque density to the thermal particle population",
+        "dd_unit": "N.m^-2",
+        "source_status": "stale",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:distributions/distribution/profiles_2d/trapped/collisions/ion/state/torque_thermal_tor",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "total_momentum_convection_velocity",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m.s^-1",
+      "reviewer_score_name": null,
+      "description": "Effective velocity coefficient for advective, non-diffusive transport of total plasma momentum, distinct from the plasma bulk flow velocity.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by parallel_total_momentum_convection_velocity (accepted, valid, 3 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "parallel_total_momentum_convection_velocity",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 3,
+            "unit": "m.s^-1",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(parallel_total_momentum_convection_velocity)-[:HAS_PARENT]->(total_momentum_convection_velocity)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "total_thermal_plasma_internal_energy",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "quarantined",
+      "unit": "W",
+      "reviewer_score_name": null,
+      "description": "Total thermal plasma internal energy is the internal energy stored in the thermal motion of the plasma's thermal particle populations, integrated over the plasma volume. It is the global stored thermal energy reservoir of the plasma; its time rate of change is a separate tendency quantity, distinct from any individual heating, transport, or radiation channel.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by tendency_of_total_thermal_plasma_internal_energy (accepted, quarantined, 0 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "tendency_of_total_thermal_plasma_internal_energy",
+            "name_stage": "accepted",
+            "origin": "pipeline",
+            "producing_sources": 0,
+            "unit": "W",
+            "validation_status": "quarantined"
+          }
+        ],
+        "citations": [
+          "live-graph:(tendency_of_total_thermal_plasma_internal_energy)-[:HAS_PARENT]->(total_thermal_plasma_internal_energy)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "trapped_current_density",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "A.m^-2",
+      "reviewer_score_name": null,
+      "description": "Trapped current density is the vector density of conventional electric charge flux associated with trapped-particle transport, including its collisional drag back-current.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_trapped_current_density (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_trapped_current_density",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "A.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_trapped_current_density)-[:HAS_PARENT]->(trapped_current_density)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "trapped_fast_current_density",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "A.m^-2",
+      "reviewer_score_name": null,
+      "description": "Trapped fast-particle current density is the vector electric current density carried by fast particles on magnetically trapped orbits, excluding compensating electron and thermal-ion return currents.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_trapped_fast_current_density (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_trapped_fast_current_density",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "A.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_trapped_fast_current_density)-[:HAS_PARENT]->(trapped_fast_current_density)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "trapped_fast_electron_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Trapped fast-electron collisional torque density is the local angular-momentum transfer rate per unit volume delivered to the trapped fast-electron population through Coulomb collisions.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_trapped_fast_electron_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_trapped_fast_electron_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_trapped_fast_electron_torque_density_due_to_collisions)-[:HAS_PARENT]->(trapped_fast_electron_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "trapped_thermal_ion_torque_density_due_to_collisions",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Local vector rate of angular-momentum transfer to the thermal-ion population per unit volume caused by Coulomb collisions, restricted to trapped-orbit contributions and without restricting spatial direction.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_trapped_thermal_ion_torque_density_due_to_collisions (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_trapped_thermal_ion_torque_density_due_to_collisions",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_trapped_thermal_ion_torque_density_due_to_collisions)-[:HAS_PARENT]->(trapped_thermal_ion_torque_density_due_to_collisions)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "trapped_torque_density_due_to_j_cross_b_force",
+      "name_stage": "accepted",
+      "origin": "derived",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "N.m^-2",
+      "reviewer_score_name": null,
+      "description": "Angular-momentum source per unit volume generated by the Lorentz force, averaged over a magnetic flux surface for trapped particles.",
+      "disposition": "structurally_legitimate_without_producing_source",
+      "evidence": {
+        "basis": "The live HAS_PARENT relation is grounded by toroidal_trapped_torque_density_due_to_j_cross_b_force (accepted, valid, 2 producing sources). This row is retained as the exact structural abstraction of those named child identities; its legitimacy is established per child, not from origin or name_stage alone.",
+        "structural_children": [
+          {
+            "id": "toroidal_trapped_torque_density_due_to_j_cross_b_force",
+            "name_stage": "accepted",
+            "origin": "catalog_edit",
+            "producing_sources": 2,
+            "unit": "N.m^-2",
+            "validation_status": "valid"
+          }
+        ],
+        "citations": [
+          "live-graph:(toroidal_trapped_torque_density_due_to_j_cross_b_force)-[:HAS_PARENT]->(trapped_torque_density_due_to_j_cross_b_force)"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "variation_of_length_of_interferometer_beam",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "m",
+      "reviewer_score_name": 0.86875,
+      "description": "Variation of length of an interferometer beam is the signed plasma-induced optical path length difference relative to the no-plasma reference for the same beam path.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path interferometer/channel/path_length_variation records \"Optical path length variation due to the plasma\" with unit m. Current live target(s): length_of_interferometer_beam[accepted]; any rebinding must preserve the one-scalar-target invariant.",
+        "dd_path": "interferometer/channel/path_length_variation",
+        "dd_documentation": "Optical path length variation due to the plasma",
+        "dd_unit": "m",
+        "source_status": "composed",
+        "current_live_targets": [
+          "length_of_interferometer_beam[accepted]"
+        ],
+        "citations": [
+          "live-dd-4.1.1:interferometer/channel/path_length_variation",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "x_direction_unit_vector_of_sensor",
+      "name_stage": "accepted",
+      "origin": null,
+      "status": null,
+      "validation_status": "valid",
+      "unit": "1",
+      "reviewer_score_name": 1,
+      "description": "Signed direction cosine of a sensor’s oriented measurement direction projected onto the x axis of the right-handed Cartesian (x, y, z) frame.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path spectrometer_x_ray_crystal/channel/camera/x1_unit_vector/x records \"Component along X axis\" with unit m. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "spectrometer_x_ray_crystal/channel/camera/x1_unit_vector/x",
+        "dd_documentation": "Component along X axis",
+        "dd_unit": "m",
+        "source_status": "skipped",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:spectrometer_x_ray_crystal/channel/camera/x1_unit_vector/x",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    },
+    {
+      "name": "z_direction_unit_vector_of_sensor",
+      "name_stage": "accepted",
+      "origin": "pipeline",
+      "status": null,
+      "validation_status": "valid",
+      "unit": "1",
+      "reviewer_score_name": 0.95,
+      "description": "Signed direction cosine of a sensor’s oriented measurement direction along the z axis in the right-handed Cartesian (x, y, z) frame.",
+      "disposition": "re_sourceable_from_existing_dd_path",
+      "evidence": {
+        "basis": "DD 4.1.1 path spectrometer_uv/channel/grating/x3_unit_vector/z records \"Component along Z axis\" with unit m. The leaf is presently unbound, failed, stale, extracted, or skipped rather than producing this identity.",
+        "dd_path": "spectrometer_uv/channel/grating/x3_unit_vector/z",
+        "dd_documentation": "Component along Z axis",
+        "dd_unit": "m",
+        "source_status": "skipped",
+        "current_live_targets": [],
+        "citations": [
+          "live-dd-4.1.1:spectrometer_uv/channel/grating/x3_unit_vector/z",
+          "live-graph:StandardNameSource binding inspection"
+        ]
+      },
+      "mutation_authority": "classification_only"
+    }
+  ]
+}
