@@ -13,9 +13,11 @@ from neo4j import GraphDatabase
 from imas_codex.graph.client import GraphClient
 from imas_codex.settings import get_graph_uri
 from imas_codex.standard_names.graph_ops import (
+    SemanticMirrorRepairConflict,
     SignedSourceDispositionConflict,
     _catalog_edit_adjudication_signature_hash,
     apply_adjudicated_source_dispositions,
+    repair_scalar_projection_mismatches,
 )
 
 
@@ -104,6 +106,39 @@ def _row(ids: dict[str, str], disposition: str, prior: str | None) -> dict[str, 
     }
     row["row_signature_sha256"] = _digest(row)
     return row
+
+
+def _seed_mirror_mismatch(
+    client: GraphClient,
+    prefix: str,
+    *,
+    scalar_matches: bool,
+    projection_present: bool,
+) -> dict[str, str]:
+    ids = {
+        "source": f"dd:{prefix}/value",
+        "path": f"{prefix}/value",
+        "target": f"{prefix}_target",
+        "prior": f"{prefix}_prior",
+    }
+    client.query(
+        "CREATE (target:StandardName {id: $target, name_stage: 'accepted', "
+        "validation_status: 'valid', origin: 'pipeline'}) "
+        "CREATE (prior:StandardName {id: $prior, name_stage: 'accepted', "
+        "validation_status: 'valid', origin: 'pipeline'}) "
+        "CREATE (backing:IMASNode {id: $path}) "
+        "CREATE (source:StandardNameSource {id: $source, source_type: 'dd', "
+        "source_id: $path, status: 'attached', produced_sn_id: CASE "
+        "WHEN $scalar_matches THEN $target ELSE $prior END}) "
+        "CREATE (source)-[:FROM_DD_PATH]->(backing) "
+        "CREATE (source)-[:PRODUCED_NAME]->(target) "
+        "FOREACH (_ IN CASE WHEN $projection_present THEN [1] ELSE [] END | "
+        "CREATE (backing)-[:HAS_STANDARD_NAME]->(target))",
+        **ids,
+        scalar_matches=scalar_matches,
+        projection_present=projection_present,
+    )
+    return ids
 
 
 def _adjudication(rows: list[dict[str, object]]) -> dict[str, object]:
@@ -539,6 +574,215 @@ def test_admitted_subset_applies_only_safe_rows_and_replays_without_writes(
         )
     finally:
         _cleanup(client, [safe, protected], (preview or {}).get("manifest_sha256"))
+
+
+@pytest.mark.graph
+def test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "semantic-mirror-repair")
+    scalar = _seed_mirror_mismatch(
+        client,
+        "mirrorscalar",
+        scalar_matches=False,
+        projection_present=True,
+    )
+    projection = _seed_mirror_mismatch(
+        client,
+        "mirrorprojection",
+        scalar_matches=True,
+        projection_present=False,
+    )
+    both = _seed_mirror_mismatch(
+        client,
+        "mirrorboth",
+        scalar_matches=False,
+        projection_present=False,
+    )
+    outside = _seed_mirror_mismatch(
+        client,
+        "mirroroutside",
+        scalar_matches=True,
+        projection_present=True,
+    )
+    preview = None
+    selected = sorted([scalar["source"], projection["source"], both["source"]])
+    try:
+        outside_before = _snapshot(client, list(outside.values()))
+        unsourced_before = client.query(
+            "MATCH (name:StandardName) "
+            "WHERE NOT coalesce(name.name_stage, '') IN "
+            "['superseded', 'exhausted', 'contested'] "
+            "AND NOT EXISTS { "
+            "MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(name) } "
+            "RETURN count(name) AS count"
+        )[0]["count"]
+        preview = repair_scalar_projection_mismatches(
+            selected,
+            reason="restore sole-live-target scalar and upstream projection parity",
+            gc=client,
+        )
+        assert preview["outcome"] == "would_apply"
+        assert preview["counts"] == {
+            "requested": 3,
+            "admitted": 3,
+            "refused": 0,
+            "already_clean": 0,
+            "scalars_to_change": 2,
+            "projections_to_add": 2,
+        }
+        assert _snapshot(client, list(outside.values())) == outside_before
+
+        applied = repair_scalar_projection_mismatches(
+            selected,
+            reason="restore sole-live-target scalar and upstream projection parity",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+        assert applied["outcome"] == "applied"
+        assert applied["sources_reconciled"] == 3
+        assert applied["scalars_changed"] == 2
+        assert applied["projections_added"] == 2
+        assert applied["change_id"] == (
+            "sn-change:semantic-mirror-repair:" + preview["manifest_sha256"]
+        )
+        assert client.query(
+            "UNWIND $source_ids AS source_id "
+            "MATCH (source:StandardNameSource {id: source_id}) "
+            "MATCH (source)-[:PRODUCED_NAME]->(target:StandardName) "
+            "MATCH (source)-[:FROM_DD_PATH]->(backing:IMASNode) "
+            "RETURN source.id AS source_id, source.produced_sn_id AS scalar, "
+            "collect(DISTINCT target.id) AS targets, "
+            "COUNT { (backing)-[:HAS_STANDARD_NAME]->(target) } AS projections "
+            "ORDER BY source_id",
+            source_ids=selected,
+        ) == [
+            {
+                "source_id": item["source"],
+                "scalar": item["target"],
+                "targets": [item["target"]],
+                "projections": 1,
+            }
+            for item in sorted(
+                [both, projection, scalar], key=lambda item: item["source"]
+            )
+        ]
+        assert _snapshot(client, list(outside.values())) == outside_before
+        assert (
+            client.query(
+                "MATCH (name:StandardName) "
+                "WHERE NOT coalesce(name.name_stage, '') IN "
+                "['superseded', 'exhausted', 'contested'] "
+                "AND NOT EXISTS { "
+                "MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(name) } "
+                "RETURN count(name) AS count"
+            )[0]["count"]
+            == unsourced_before
+        )
+
+        replay_before = _snapshot(
+            client,
+            [
+                value
+                for item in [scalar, projection, both, outside]
+                for value in item.values()
+            ],
+        )
+        replay = repair_scalar_projection_mismatches(
+            selected,
+            reason="restore sole-live-target scalar and upstream projection parity",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            gc=client,
+        )
+        assert replay["outcome"] == "already_applied"
+        assert replay["changed"] == 0
+        assert (
+            _snapshot(
+                client,
+                [
+                    value
+                    for item in [scalar, projection, both, outside]
+                    for value in item.values()
+                ],
+            )
+            == replay_before
+        )
+    finally:
+        _cleanup(
+            client,
+            [scalar, projection, both, outside],
+            (preview or {}).get("manifest_sha256"),
+        )
+
+
+@pytest.mark.graph
+def test_signed_mirror_repair_refuses_non_unique_live_target_without_writes(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "semantic-mirror-ambiguity-refusal")
+    ids = _seed(client, "mirrorambiguous", scalar="mirrorambiguous_semantic")
+    try:
+        before = _snapshot(client, list(ids.values()))
+        preview = repair_scalar_projection_mismatches(
+            [ids["source"]],
+            reason="refuse mirror authority until one live target remains",
+            gc=client,
+        )
+        assert preview["outcome"] == "refused"
+        assert preview["counts"]["admitted"] == 0
+        assert preview["counts"]["refused"] == 1
+        assert preview["refusals"] == [
+            {
+                "source_id": ids["source"],
+                "reason": "source does not have exactly one live target",
+            }
+        ]
+        assert _snapshot(client, list(ids.values())) == before
+    finally:
+        _cleanup(client, [ids])
+
+
+@pytest.mark.graph
+def test_signed_mirror_repair_refuses_projection_drift_after_preview(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "semantic-mirror-projection-drift")
+    ids = _seed_mirror_mismatch(
+        client,
+        "mirrorprojectiondrift",
+        scalar_matches=True,
+        projection_present=False,
+    )
+    preview = None
+    try:
+        preview = repair_scalar_projection_mismatches(
+            [ids["source"]],
+            reason="bind the exact missing upstream projection",
+            gc=client,
+        )
+        client.query(
+            "MATCH (backing:IMASNode {id: $path}), "
+            "(target:StandardName {id: $target}) "
+            "CREATE (backing)-[:HAS_STANDARD_NAME]->(target)",
+            **ids,
+        )
+        before = _snapshot(client, list(ids.values()))
+        with pytest.raises(
+            SemanticMirrorRepairConflict,
+            match="fresh semantic-mirror manifest does not match signed hash",
+        ):
+            repair_scalar_projection_mismatches(
+                [ids["source"]],
+                reason="bind the exact missing upstream projection",
+                apply=True,
+                manifest_sha256=preview["manifest_sha256"],
+                gc=client,
+            )
+        assert _snapshot(client, list(ids.values())) == before
+    finally:
+        _cleanup(client, [ids], (preview or {}).get("manifest_sha256"))
 
 
 def test_tampered_adjudication_is_rejected_before_graph_access() -> None:
