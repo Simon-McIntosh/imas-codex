@@ -170,3 +170,52 @@ the row as `already_clean`, with no planned mutation.
 The earlier sandbox read failure is superseded by the coordinator-supplied live
 evidence above. This node performed only repository/code inspection and wrote
 only its run-directory evidence and manifest.
+
+## Applied repair
+
+The adjudicated repair was applied live on 2026-08-19 with the exact source,
+target, reason, origin, null run id, and authority override specified above.
+
+The dry-run inspected one source and returned exactly **1 planned**, **0
+ambiguous**, and **0 already-clean** rows. Its signed closure selected
+`fast_ion_charge_state_absorbed_wave_power` through
+`explicit_authority_override`, removed only `ion_charge_state_power`, and
+projected the chosen identity as the sole live target, scalar value, and DD
+backing projection. Full label and relationship counters had zero delta during
+the preview.
+
+The identical apply repaired exactly **1 row** and created StandardNameChange
+`sn-change:0542bd02-d603-4aea-a68c-150095365bdd` with operation
+`repair_semantic_source_binding`. The complete observed graph-count delta was:
+
+- labels: `StandardNameChange +1`;
+- relationships: `HAS_INTERNAL_CHANGE +1`, `HAS_STANDARD_NAME -1`, and
+  `PRODUCED_NAME -1`;
+- every other node label and relationship type was flat, including all source,
+  name, graph-authority, cost, run, and review populations.
+
+The identical transactional replay returned exactly **1 already-clean**, **0
+planned**, **0 repaired**, and **0 ambiguous** rows. Its full label and
+relationship delta was empty, proving zero replay writes.
+
+Final census:
+
+- source live bindings: exactly
+  `fast_ion_charge_state_absorbed_wave_power` (**1 of 1**);
+- source `produced_sn_id`:
+  `fast_ion_charge_state_absorbed_wave_power`;
+- backing `HAS_STANDARD_NAME` projections: exactly
+  `fast_ion_charge_state_absorbed_wave_power` (**1 of 1**);
+- `ion_charge_state_power`: still live as `accepted`, `valid`, `derived`;
+- surviving `HAS_PARENT` children of `ion_charge_state_power`: exactly
+  `thermal_ion_charge_state_power` (**1 other child retained**).
+
+The mutation driver itself exited non-zero only after all preview, apply, and
+write-free replay assertions had passed: its final census over-constrained the
+chosen leaf to be a direct `HAS_PARENT` child. The adjudication requires the
+parent identity and its other hierarchy children to survive, not creation of a
+new hierarchy edge. A postflight-only census corrected that assertion and
+passed without repeating the mutation. Durable records:
+
+- `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T003144095938-apply-power-fast-repair/apply-power-fast.log`
+- `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T003144095938-apply-power-fast-repair/postflight-power-fast.log`
