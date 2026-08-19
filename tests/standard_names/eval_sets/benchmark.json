@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "v1",
-    "purpose": "Plan 34 — curated SN quality benchmark (DD path → expected standard name + anti-pattern negatives)",
+    "purpose": "Curated SN quality benchmark (DD path → expected standard name + anti-pattern negatives)",
     "target_size": {
       "positives": 50,
       "negatives": 20
@@ -28,7 +28,7 @@
       "positives_mean_reviewer_score": 0.75,
       "negatives_rejection_rate": 0.9
     },
-    "notes": "Positives sourced from ISN published catalog + high-scoring graph names. Negatives sourced from graph-quarantined low-score names + hand-synthesised classics. Expansion to 50+20 pending future cycles (see plan 34 §3). | 2026-06-09: dropped 2 arguable negatives (outline_point qualifier, electrostatic_potential transformation) that all strong reviewers judged valid; added 12 unambiguous grammar-violation negatives anchored on verified real DD paths to reach 20 (reviewer-discrimination hardening)."
+    "notes": "Positives sourced from the published ISN catalog and high-scoring graph names. Negatives sourced from graph-quarantined low-score names and hand-synthesized classics. Expansion to 50+20 remains pending until the remaining domain stubs are replaced by reviewer-vetted DD bindings. | 2026-06-09: dropped 2 arguable negatives (outline_point qualifier, electrostatic_potential transformation) that all strong reviewers judged valid; added 12 unambiguous grammar-violation negatives anchored on verified real DD paths to reach 20 (reviewer-discrimination hardening)."
   },
   "positives": [
     {
@@ -197,7 +197,7 @@
       "expected_name": "TODO",
       "expected_unit": "TODO",
       "source": "todo",
-      "rationale": "Stub — needs ISN rc16 object vocab before filling (plan 33 §4)."
+      "rationale": "Stub — requires the missing ISN object vocabulary before a reviewer-vetted DD binding can be added."
     },
     {
       "dd_path": "TODO",

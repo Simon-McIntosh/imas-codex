@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "purpose": "Plan 32 Phase 2 — stratified 20-path eval set for A/B/C prompt bake-off",
+    "purpose": "Stratified 20-path evaluation set for the A/B/C prompt comparison",
     "stratification": "5 physics_domains × 4 path-kinds = 20 items",
     "physics_domains": ["equilibrium", "magnetics", "transport", "heating", "diagnostics"],
     "path_kinds": ["dynamic_scalar", "dynamic_profile", "geometry", "constant"],

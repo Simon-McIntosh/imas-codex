@@ -1,4 +1,4 @@
-"""Plan 32 Phase 2 — A/B/C compose prompt bake-off harness (implementation).
+"""A/B/C compose prompt comparison harness.
 
 See ``scripts/prompt_ab.py`` for the original scaffold.  This script is
 the focused, budget-capped runner that:
@@ -11,16 +11,16 @@ the focused, budget-capped runner that:
      rendered as-is; tool-calling is declared in the prompt but *not*
      wired (the loop is out of scope here and the quality signal of
      the prompt design itself is what we measure).
-3. Calls ``anthropic/claude-opus-4.6`` once per variant (all 20 paths
+3. Calls the configured benchmark reviewer once per variant (all 20 paths
    batched in a single request) via ``call_llm_structured``.
-4. Runs a review pass with ``sn/review_name_only.md`` content
-   (embedded) over all 60 names, also in one opus call per variant.
+4. Runs an embedded name-only review rubric over all 60 names, also in one
+   reviewer call per variant.
 5. Writes per-variant JSONL + aggregate CSV + summary markdown.
 
 Output files::
 
-    plans/research/data/prompt-ab-v1.{A,B,C}.jsonl
-    plans/research/data/prompt-ab-v1.csv
+    plans/research/data/prompt-ab-results.{A,B,C}.jsonl
+    plans/research/data/prompt-ab-results.csv
     plans/research/prompt-ab-results.md
 """
 
@@ -90,7 +90,7 @@ Grammar:
 - Geometric coordinates of named entities use the pattern
   <entity>_<axis>_coordinate (e.g. plasma_boundary_r_coordinate,
   magnetics_probe_r_coordinate).
-- Constant/metadata fields (pulse numbers, toroidal reference radius R0,
+- Constant/metadata fields (pulse numbers, toroidal reference major radius,
   code version) should be named descriptively
   (e.g. reference_major_radius for vacuum_toroidal_field/r0).
 """
@@ -272,7 +272,7 @@ def main() -> int:
     ap.add_argument(
         "--eval-set",
         type=Path,
-        default=Path("tests/standard_names/eval_sets/prompt_ab_v1.json"),
+        default=Path("tests/standard_names/eval_sets/prompt_ab.json"),
     )
     ap.add_argument(
         "--output",
@@ -288,10 +288,10 @@ def main() -> int:
         help="Comma-separated subset of variants to run (e.g. 'A,C'). Default: A,B,C",
     )
     ap.add_argument(
-        "--output-suffix",
+        "--output-label",
         type=str,
-        default="v1",
-        help="Suffix for output filenames (e.g. 'v1', 'retest-cache'). Default: v1",
+        default="results",
+        help="Mechanism-oriented label for output filenames. Default: results",
     )
     args = ap.parse_args()
 
@@ -299,7 +299,7 @@ def main() -> int:
     model = args.model or get_sn_benchmark_reviewer_model()
     args.output.mkdir(parents=True, exist_ok=True)
     variants_to_run = [v.strip().upper() for v in args.variants.split(",")]
-    suffix = args.output_suffix
+    output_label = args.output_label
 
     # 1. Load + enrich
     eval_data = json.loads(args.eval_set.read_text())
@@ -327,7 +327,7 @@ def main() -> int:
         ]
         # Explicitly inject cache_control so the openrouter/ path preserves
         # the breakpoint header; call_llm_structured will also do this internally,
-        # but explicit injection here ensures the harness matches production behaviour.
+        # but explicit injection here ensures the harness matches production behavior.
         messages = inject_cache_control(messages)
         t0 = time.time()
         llm_result = call_llm_structured(
@@ -414,7 +414,7 @@ def main() -> int:
     csv_rows: list[dict] = []
     for variant, res in results.items():
         by_path = {s.path: s for s in res.get("scores", [])}
-        out_jsonl = args.output / f"prompt-ab-{suffix}.{variant}.jsonl"
+        out_jsonl = args.output / f"prompt-ab-{output_label}.{variant}.jsonl"
         with out_jsonl.open("w") as f:
             for c in res["candidates"]:
                 s = by_path.get(c.path)
@@ -430,7 +430,7 @@ def main() -> int:
                 f.write(json.dumps(row) + "\n")
                 csv_rows.append(row)
 
-    csv_path = args.output / f"prompt-ab-{suffix}.csv"
+    csv_path = args.output / f"prompt-ab-{output_label}.csv"
     with csv_path.open("w", newline="") as f:
         fieldnames = [
             "variant",
@@ -450,7 +450,7 @@ def main() -> int:
         "model": model,
         "total_cost_usd": round(total_cost, 4),
         "variants_run": variants_to_run,
-        "output_suffix": suffix,
+        "output_label": output_label,
         "per_variant": {},
     }
     for variant, res in results.items():
@@ -482,7 +482,7 @@ def main() -> int:
             "review_cache_creation_tokens": res.get("review_cache_creation", 0),
             "n_candidates": len(res["candidates"]),
         }
-    summary_path = args.output / f"prompt-ab-{suffix}.summary.json"
+    summary_path = args.output / f"prompt-ab-{output_label}.summary.json"
     summary_path.write_text(json.dumps(summary, indent=2))
     logger.info("Summary: %s", json.dumps(summary["per_variant"], indent=2))
     logger.info("Total cost: $%.4f", total_cost)
