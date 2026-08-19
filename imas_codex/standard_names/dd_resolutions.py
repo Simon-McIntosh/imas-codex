@@ -13,8 +13,8 @@ import hashlib
 import json
 import re
 from collections.abc import Mapping, Sequence
-from datetime import datetime
-from enum import Enum
+from datetime import UTC, datetime
+from enum import Enum, StrEnum
 from typing import Any, Protocol, Self
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
@@ -36,6 +36,29 @@ _EXACT_VERSION_RE = re.compile(
 )
 _PATTERN_CHARACTERS = frozenset("*?[]{}\\^$|")
 _NONE_YET = "none-yet"
+
+_IONISATION_POTENTIAL_PARENTS = (
+    "edge_profiles/ggd/ion/state/ionisation_potential",
+    "plasma_profiles/ggd/ion/state/ionisation_potential",
+)
+_IONISATION_POTENTIAL_LEAVES = (
+    "",
+    "/coefficients",
+    "/coefficients_error_lower",
+    "/coefficients_error_upper",
+    "/values",
+    "/values_error_lower",
+    "/values_error_upper",
+)
+IONISATION_POTENTIAL_RESOLUTION_PATHS = tuple(
+    parent + leaf
+    for parent in _IONISATION_POTENTIAL_PARENTS
+    for leaf in _IONISATION_POTENTIAL_LEAVES
+)
+_IONISATION_POTENTIAL_UPSTREAM = (
+    "https://github.com/iterorganization/IMAS-Data-Dictionary/pull/280"
+)
+_IONISATION_POTENTIAL_COMMIT = "commits:30a5ddd4b7037b9f93a8f00f7837809403349d99"
 
 
 class DDResolutionError(RuntimeError):
@@ -64,6 +87,55 @@ class DDResolutionEvidenceMismatch(DDResolutionError):
 
 class DDResolutionAmbiguity(DDResolutionError):
     """More than one prior record could certify convergence."""
+
+
+class DDResolutionGraphPortConflict(DDResolutionError):
+    """The graph cannot accept an exact resolution batch atomically."""
+
+
+class DDResolutionGraphPathAction(StrEnum):
+    """Mutation performed for one exact graph path."""
+
+    corrected = "corrected"
+    attached = "attached"
+    unchanged = "unchanged"
+
+
+class DDResolutionGraphPathReceipt(BaseModel):
+    """Disposition of one exact path in a graph write batch."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    resolution_id: str
+    path: str
+    action: DDResolutionGraphPathAction
+
+
+class DDResolutionGraphPortReceipt(BaseModel):
+    """Aggregate receipt for an atomic graph write batch."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    expected: int
+    writes: int
+    nodes: int
+    bridged_edges: int
+    evidenced_edges: int
+    version_edges: int
+    path_receipts: tuple[DDResolutionGraphPathReceipt, ...]
+    replay: bool
+    receipt_hash: str
+
+
+class DDResolutionCohortReceipt(BaseModel):
+    """Evidence and graph receipts for the exact ionisation-potential cohort."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    evidence: Mapping[str, Any]
+    graph: DDResolutionGraphPortReceipt
+    existing: int
+    added: int
 
 
 def _enum_text(value: Any) -> str:
@@ -249,6 +321,470 @@ class DDResolutionManifest(BaseModel):
         )
 
 
+def _canonical_datetime(value: datetime) -> str:
+    if value.tzinfo is None or value.utcoffset() is None:
+        raise ValueError("resolution timestamp must include a UTC offset")
+    return value.astimezone(UTC).isoformat().replace("+00:00", "Z")
+
+
+def _graph_record(record: DDResolutionRecord) -> dict[str, Any]:
+    return {
+        "id": record.id,
+        "path": record.path,
+        "dd_version": record.dd_version,
+        "field": record.field.value,
+        "published_kind": record.observed.kind.value,
+        "published_value": _canonical_json(record.observed.value),
+        "effective_kind": record.effective.kind.value,
+        "effective_value": _canonical_json(record.effective.value),
+        "reason": record.reason,
+        "recorded_by": record.recorded_by,
+        "recorded_at": _canonical_datetime(record.recorded_at),
+        "upstream_reference": record.upstream_reference,
+        "upstream_commit_reference": record.upstream_commit_reference,
+        "retiring_release": record.retiring_release,
+        "source_manifest_digest": "graph-native",
+        "status": record.state.value,
+        "corrected_node": record.path,
+        "evidence": record.gap_id,
+        "for_dd_version": record.dd_version,
+    }
+
+
+def _resolution_id(path: str) -> str:
+    digest = hashlib.sha256(
+        _canonical_json(
+            {
+                "path": path,
+                "dd_version": "4.1.1",
+                "field": DDResolutionField.unit.value,
+                "published": "e",
+                "effective": "eV",
+            }
+        ).encode()
+    ).hexdigest()
+    return f"dd_resolution:{digest}"
+
+
+def ionisation_potential_resolution_records(
+    *,
+    manifest: DDResolutionManifest,
+    recorded_by: str,
+    recorded_at: datetime,
+    reason: str,
+) -> tuple[dict[str, Any], ...]:
+    """Build graph records for cohort paths without active exact authority."""
+    existing = {
+        record.path: record
+        for record in manifest.resolutions
+        if record.state == DDResolutionStatus.active
+        and record.dd_version == "4.1.1"
+        and record.field == DDResolutionField.unit
+        and record.path in IONISATION_POTENTIAL_RESOLUTION_PATHS
+    }
+    invalid = [
+        path
+        for path, record in existing.items()
+        if record.observed
+        != DDResolutionValue(kind=DDResolutionValueKind.string, value="e")
+        or record.effective
+        != DDResolutionValue(kind=DDResolutionValueKind.string, value="eV")
+        or record.upstream_reference != _IONISATION_POTENTIAL_UPSTREAM
+        or record.upstream_commit_reference != _IONISATION_POTENTIAL_COMMIT
+    ]
+    if invalid:
+        raise DDResolutionGraphPortConflict(
+            "existing ionisation-potential authority disagrees on exact paths: "
+            + ", ".join(sorted(invalid))
+        )
+    records = []
+    for path in IONISATION_POTENTIAL_RESOLUTION_PATHS:
+        if path in existing:
+            continue
+        record = DDResolutionRecord(
+            id=_resolution_id(path),
+            gap_id=f"dd_gap:{path}:self_contradiction",
+            path=path,
+            dd_version="4.1.1",
+            field=DDResolutionField.unit,
+            observed=DDResolutionValue(kind=DDResolutionValueKind.string, value="e"),
+            effective=DDResolutionValue(kind=DDResolutionValueKind.string, value="eV"),
+            reason=reason,
+            recorded_by=recorded_by,
+            recorded_at=recorded_at,
+            upstream_reference=_IONISATION_POTENTIAL_UPSTREAM,
+            upstream_commit_reference=_IONISATION_POTENTIAL_COMMIT,
+            retiring_release="4.2.0",
+            state=DDResolutionStatus.active,
+        )
+        records.append(_graph_record(record))
+    return tuple(records)
+
+
+class DDResolutionGraphPort(Protocol):
+    """Typed boundary for one atomic graph materialization."""
+
+    def apply(self, records: tuple[dict[str, Any], ...]) -> Mapping[str, Any]: ...
+
+
+_GRAPH_PORT_PREFLIGHT_QUERY = """
+UNWIND $records AS b
+OPTIONAL MATCH (node:IMASNode {id: b.properties.corrected_node})
+OPTIONAL MATCH (gap:DDGap {id: b.properties.evidence})
+OPTIONAL MATCH (version:DDVersion {id: b.properties.for_dd_version})
+OPTIONAL MATCH (effective_unit:Unit {id: b.effective_graph_value})
+CALL {
+    WITH node
+    OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+    RETURN [value IN collect(DISTINCT unit.id) WHERE value IS NOT NULL] AS unit_ids
+}
+CALL {
+    WITH node, b
+    OPTIONAL MATCH (node)-[:BRIDGED_BY]->(claim:DDResolution)
+    WHERE claim.dd_version = b.properties.dd_version
+      AND claim.field = b.properties.field
+    RETURN [value IN collect(DISTINCT claim.id) WHERE value IS NOT NULL] AS claim_ids
+}
+OPTIONAL MATCH (resolution:DDResolution {id: b.properties.id})
+CALL {
+    WITH resolution
+    OPTIONAL MATCH (source:IMASNode)-[:BRIDGED_BY]->(resolution)
+    RETURN [value IN collect(DISTINCT source.id) WHERE value IS NOT NULL]
+           AS corrected_nodes
+}
+CALL {
+    WITH resolution
+    OPTIONAL MATCH (resolution)-[:EVIDENCED_BY]->(linked_gap:DDGap)
+    RETURN [value IN collect(DISTINCT linked_gap.id) WHERE value IS NOT NULL]
+           AS evidence
+}
+CALL {
+    WITH resolution
+    OPTIONAL MATCH (resolution)-[:FOR_DD_VERSION]->(linked_version:DDVersion)
+    RETURN [value IN collect(DISTINCT linked_version.id) WHERE value IS NOT NULL]
+           AS dd_versions
+}
+RETURN b.properties.id AS id,
+       count(DISTINCT node) AS node_count,
+       count(DISTINCT gap) AS gap_count,
+       count(DISTINCT version) AS version_count,
+       count(DISTINCT effective_unit) AS effective_unit_count,
+       collect(DISTINCT gap.path) AS gap_paths,
+       collect(DISTINCT gap.kind) AS gap_kinds,
+       collect(DISTINCT gap.observed_dd_version) AS gap_versions,
+       collect(DISTINCT gap.observed_value) AS gap_observed_values,
+       collect(DISTINCT gap.expected_value) AS gap_expected_values,
+       node.unit AS graph_value, unit_ids, claim_ids,
+       CASE WHEN resolution IS NULL THEN null
+            ELSE resolution{.*, recorded_at: toString(resolution.recorded_at)} END
+            AS properties,
+       corrected_nodes, evidence, dd_versions
+ORDER BY id
+"""
+
+_GRAPH_PORT_CORRECT_QUERY = """
+UNWIND $records AS b
+MATCH (node:IMASNode {id: b.properties.corrected_node})
+CALL {
+    WITH node
+    OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+    RETURN [value IN collect(DISTINCT unit.id) WHERE value IS NOT NULL] AS unit_ids
+}
+WITH node, b, unit_ids
+WHERE node.unit = b.published_graph_value
+  AND unit_ids = [b.published_graph_value]
+MATCH (effective_unit:Unit {id: b.effective_graph_value})
+OPTIONAL MATCH (node)-[old_unit:HAS_UNIT]->(:Unit)
+WITH node, b, effective_unit, collect(old_unit) AS old_units
+FOREACH (edge IN old_units | DELETE edge)
+SET node.unit = b.effective_graph_value
+MERGE (node)-[:HAS_UNIT]->(effective_unit)
+RETURN node.id AS path
+ORDER BY path
+"""
+
+_GRAPH_PORT_WRITE_QUERY = """
+UNWIND $records AS b
+MATCH (node:IMASNode {id: b.properties.corrected_node})
+MATCH (gap:DDGap {id: b.properties.evidence})
+MATCH (version:DDVersion {id: b.properties.for_dd_version})
+CREATE (resolution:DDResolution)
+SET resolution = b.properties,
+    resolution.recorded_at = datetime(b.properties.recorded_at)
+CREATE (node)-[:BRIDGED_BY]->(resolution)
+CREATE (resolution)-[:EVIDENCED_BY]->(gap)
+CREATE (resolution)-[:FOR_DD_VERSION]->(version)
+RETURN count(resolution) AS written
+"""
+
+_GRAPH_PORT_COUNTS_QUERY = """
+UNWIND $ids AS id
+MATCH (resolution:DDResolution {id: id})
+CALL {
+    WITH resolution
+    OPTIONAL MATCH (:IMASNode)-[bridge:BRIDGED_BY]->(resolution)
+    RETURN count(bridge) AS bridged
+}
+CALL {
+    WITH resolution
+    OPTIONAL MATCH (resolution)-[evidence:EVIDENCED_BY]->(:DDGap)
+    RETURN count(evidence) AS evidenced
+}
+CALL {
+    WITH resolution
+    OPTIONAL MATCH (resolution)-[version:FOR_DD_VERSION]->(:DDVersion)
+    RETURN count(version) AS versioned
+}
+RETURN count(resolution) AS nodes, sum(bridged) AS bridged_edges,
+       sum(evidenced) AS evidenced_edges, sum(versioned) AS version_edges
+"""
+
+
+def _graph_port_record_matches(
+    current: Mapping[str, Any], expected: Mapping[str, Any]
+) -> bool:
+    properties = current.get("properties")
+    if not isinstance(properties, Mapping):
+        return False
+    normalized = dict(properties)
+    if normalized.get("recorded_at") is not None:
+        try:
+            normalized["recorded_at"] = _canonical_datetime(
+                datetime.fromisoformat(
+                    str(normalized["recorded_at"]).replace("Z", "+00:00")
+                )
+            )
+        except ValueError:
+            return False
+    return (
+        all(normalized.get(key) == value for key, value in expected.items())
+        and current.get("corrected_nodes") == [expected["corrected_node"]]
+        and current.get("evidence") == [expected["evidence"]]
+        and current.get("dd_versions") == [expected["for_dd_version"]]
+    )
+
+
+def _classify_graph_port_preflight(
+    rows: Sequence[Mapping[str, Any]],
+    expected_by_id: Mapping[str, Mapping[str, Any]],
+) -> dict[str, DDResolutionGraphPathAction]:
+    """Classify exact graph state or refuse all mismatching paths together."""
+    actions: dict[str, DDResolutionGraphPathAction] = {}
+    invalid: list[str] = []
+    returned_ids: set[str] = set()
+    for row in rows:
+        resolution_id = str(row.get("id"))
+        returned_ids.add(resolution_id)
+        expected = expected_by_id.get(resolution_id)
+        if expected is None:
+            invalid.append(f"unknown resolution {resolution_id!r}")
+            continue
+        path = str(expected["path"])
+        published = json.loads(str(expected["published_value"]))
+        effective = json.loads(str(expected["effective_value"]))
+        existing_matches = _graph_port_record_matches(row, expected)
+        claim_ids = list(row.get("claim_ids") or [])
+        cardinality_matches = (
+            int(row.get("node_count") or 0) == 1
+            and int(row.get("gap_count") or 0) == 1
+            and int(row.get("version_count") or 0) == 1
+            and int(row.get("effective_unit_count") or 0) == 1
+            and row.get("gap_paths") == [path]
+            and row.get("gap_kinds") == ["self_contradiction"]
+            and row.get("gap_versions") == [expected["dd_version"]]
+            and row.get("gap_observed_values") == [published]
+            and row.get("gap_expected_values") == [effective]
+            and all(claim == resolution_id for claim in claim_ids)
+        )
+        if not cardinality_matches:
+            invalid.append(f"{path} (incomplete evidence or conflicting authority)")
+            continue
+        if row.get("properties") is not None and not existing_matches:
+            invalid.append(f"{path} (resolution id already has different content)")
+            continue
+        graph_value = row.get("graph_value")
+        unit_ids = list(row.get("unit_ids") or [])
+        if existing_matches and graph_value == effective and unit_ids == [effective]:
+            actions[resolution_id] = DDResolutionGraphPathAction.unchanged
+        elif graph_value == effective and unit_ids == [effective]:
+            actions[resolution_id] = DDResolutionGraphPathAction.attached
+        elif (
+            row.get("properties") is None
+            and graph_value == published
+            and unit_ids == [published]
+        ):
+            actions[resolution_id] = DDResolutionGraphPathAction.corrected
+        else:
+            invalid.append(
+                f"{path} (published={published!r}, effective={effective!r}, "
+                f"observed={graph_value!r}, HAS_UNIT={unit_ids!r})"
+            )
+    if len(rows) != len(expected_by_id):
+        invalid.extend(
+            f"{record['path']} (missing preflight row)"
+            for resolution_id, record in expected_by_id.items()
+            if resolution_id not in returned_ids
+        )
+    if invalid:
+        raise DDResolutionGraphPortConflict(
+            "resolution graph port preflight refused exact paths: " + "; ".join(invalid)
+        )
+    return actions
+
+
+class _LiveDDResolutionGraphPort:
+    """Neo4j transaction boundary for an additive exact resolution batch."""
+
+    def apply(self, records: tuple[dict[str, Any], ...]) -> Mapping[str, Any]:
+        from imas_codex.graph.client import GraphClient
+
+        parameters = tuple(
+            {
+                "properties": record,
+                "published_graph_value": json.loads(record["published_value"]),
+                "effective_graph_value": json.loads(record["effective_value"]),
+            }
+            for record in records
+        )
+        expected_by_id = {record["id"]: record for record in records}
+        with GraphClient() as graph, graph.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _GRAPH_PORT_PREFLIGHT_QUERY, records=parameters
+                    )
+                ]
+                actions = _classify_graph_port_preflight(rows, expected_by_id)
+                correction_records = tuple(
+                    parameter
+                    for parameter in parameters
+                    if actions[parameter["properties"]["id"]]
+                    == DDResolutionGraphPathAction.corrected
+                )
+                if correction_records:
+                    corrected = {
+                        str(row["path"])
+                        for row in transaction.run(
+                            _GRAPH_PORT_CORRECT_QUERY, records=correction_records
+                        )
+                    }
+                    expected_paths = {
+                        str(item["properties"]["path"]) for item in correction_records
+                    }
+                    if corrected != expected_paths:
+                        raise DDResolutionGraphPortConflict(
+                            "resolution graph correction compare-and-set failed for "
+                            + ", ".join(sorted(expected_paths - corrected))
+                        )
+                new_records = tuple(
+                    parameter
+                    for parameter in parameters
+                    if actions[parameter["properties"]["id"]]
+                    != DDResolutionGraphPathAction.unchanged
+                )
+                if new_records:
+                    transaction.run(
+                        _GRAPH_PORT_WRITE_QUERY, records=new_records
+                    ).consume()
+                verified_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _GRAPH_PORT_PREFLIGHT_QUERY, records=parameters
+                    )
+                ]
+                verified = _classify_graph_port_preflight(verified_rows, expected_by_id)
+                if any(
+                    action != DDResolutionGraphPathAction.unchanged
+                    for action in verified.values()
+                ):
+                    raise DDResolutionGraphPortConflict(
+                        "resolution graph port postcondition left an incomplete path"
+                    )
+                count_rows = [
+                    dict(row)
+                    for row in transaction.run(
+                        _GRAPH_PORT_COUNTS_QUERY, ids=sorted(expected_by_id)
+                    )
+                ]
+                if len(count_rows) != 1:
+                    raise DDResolutionGraphPortConflict(
+                        "resolution graph port count verification failed"
+                    )
+                metrics = count_rows[0]
+                if any(
+                    int(metrics.get(key) or 0) != len(records)
+                    for key in (
+                        "nodes",
+                        "bridged_edges",
+                        "evidenced_edges",
+                        "version_edges",
+                    )
+                ):
+                    raise DDResolutionGraphPortConflict(
+                        "resolution graph port did not produce exact scoped counts"
+                    )
+                transaction.commit()
+            except Exception:
+                transaction.rollback()
+                raise
+        receipts = tuple(
+            {
+                "resolution_id": record["id"],
+                "path": record["path"],
+                "action": actions[record["id"]],
+            }
+            for record in records
+        )
+        writes = sum(
+            action != DDResolutionGraphPathAction.unchanged
+            for action in actions.values()
+        )
+        payload = {
+            "expected": len(records),
+            "writes": writes,
+            "nodes": int(metrics["nodes"]),
+            "bridged_edges": int(metrics["bridged_edges"]),
+            "evidenced_edges": int(metrics["evidenced_edges"]),
+            "version_edges": int(metrics["version_edges"]),
+            "path_receipts": receipts,
+            "replay": writes == 0,
+        }
+        return {**payload, "receipt_hash": _canonical_digest(payload)}
+
+
+def port_dd_resolution_records(
+    records: Sequence[Mapping[str, Any]],
+    *,
+    graph_port: DDResolutionGraphPort | None = None,
+) -> DDResolutionGraphPortReceipt:
+    """Atomically add exact resolution records and correct published graph values."""
+    normalized = tuple(dict(record) for record in records)
+    if not normalized:
+        payload = {
+            "expected": 0,
+            "writes": 0,
+            "nodes": 0,
+            "bridged_edges": 0,
+            "evidenced_edges": 0,
+            "version_edges": 0,
+            "path_receipts": (),
+            "replay": True,
+        }
+        return DDResolutionGraphPortReceipt(
+            **payload, receipt_hash=_canonical_digest(payload)
+        )
+    ids = [str(record.get("id")) for record in normalized]
+    paths = [str(record.get("path")) for record in normalized]
+    if len(set(ids)) != len(ids) or len(set(paths)) != len(paths):
+        raise DDResolutionGraphPortConflict(
+            "resolution graph batch contains duplicate ids or paths"
+        )
+    result = (graph_port or _LiveDDResolutionGraphPort()).apply(normalized)
+    return DDResolutionGraphPortReceipt.model_validate(result)
+
+
 class DDResolutionGraphReader(Protocol):
     """Typed boundary for a complete graph resolution snapshot."""
 
@@ -372,6 +908,50 @@ def load_dd_resolution_manifest(
         raise DDResolutionManifestInvalid("DD resolution graph authority is empty")
     return DDResolutionManifest(
         resolutions=tuple(_record_from_graph(row) for row in rows)
+    )
+
+
+def expand_ionisation_potential_resolution_cohort(
+    *,
+    recorded_by: str,
+    reason: str,
+    recorded_at: datetime | None = None,
+    manifest: DDResolutionManifest | None = None,
+    graph_port: DDResolutionGraphPort | None = None,
+) -> DDResolutionCohortReceipt:
+    """Materialize missing exact evidence and resolution bridges for the cohort."""
+    authority = manifest or load_dd_resolution_manifest()
+    timestamp = recorded_at or datetime.now(UTC)
+    records = ionisation_potential_resolution_records(
+        manifest=authority,
+        recorded_by=recorded_by,
+        recorded_at=timestamp,
+        reason=reason,
+    )
+    from imas_codex.standard_names.dd_gaps import write_dd_gaps
+
+    reports = [
+        {
+            "path": record["path"],
+            "source_path": record["path"],
+            "kind": "self_contradiction",
+            "reason": reason,
+            "reporter": recorded_by,
+            "observed_at": _canonical_datetime(timestamp),
+            "observed_dd_version": record["dd_version"],
+            "observed_value": json.loads(record["published_value"]),
+            "expected_value": json.loads(record["effective_value"]),
+            "evidence_rule": "unit_equals_expected",
+        }
+        for record in records
+    ]
+    evidence = write_dd_gaps(reports)
+    graph = port_dd_resolution_records(records, graph_port=graph_port)
+    return DDResolutionCohortReceipt(
+        evidence=evidence,
+        graph=graph,
+        existing=len(IONISATION_POTENTIAL_RESOLUTION_PATHS) - len(records),
+        added=len(records),
     )
 
 
