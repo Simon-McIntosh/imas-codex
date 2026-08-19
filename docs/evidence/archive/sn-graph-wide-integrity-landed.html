@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-graph-wide-integrity-landed">
+  <meta name="plan-title" content="sn-graph-wide-integrity — cumulative execution evidence">
   <meta name="plan-evidence-for" content="sn-graph-wide-integrity">
   <title>sn-graph-wide-integrity landed evidence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
@@ -70,6 +72,26 @@
     <code>atomic_count</code> is signed at hash <code>e51c191e…</code> (37 retarget + 39 dedup, 6
     lineage edges preserved, changed=0). The exact-hash live apply is the next, separately gated node
     of f-sgwi-dual-binding.</p>
+  </section>
+
+  <section id="dual-binding-and-orphans">
+    <h2>The dual-binding mechanical classes and the exhausted-orphan pool are cleared</h2>
+    <p><strong>Landed 2026-08-18/19</strong> — one execution wave, every mutation exact-hash signed with
+    a receipt and a write-free replay, every operator adversarially reviewed to APPROVE. The census
+    (<code>f5049fd7</code>) partitioned 279 dual-bound sources into five exclusive classes; the wave then
+    cleared the mechanical ones: <strong>48</strong> scalar-selected dedups applied
+    (<code>a5a83b20</code>, 57+57 removals); the <strong>3</strong> projection-less rows adjudicated as
+    ineligible structural/representation sources and retired to <code>not_physical_quantity</code> with
+    all 32 spurious bindings detached (<code>07c33345</code>); the <strong>1</strong> eligible ancestor
+    fold applied (camera x-direction, <code>aba3ce7b</code>) with 9 recorded refusals; the
+    <strong>1</strong> ambiguous row adjudicated and repaired (power_fast keeps its specific fast-ion
+    identity, <code>25d8dd37</code>); and the <strong>16</strong> stale test-fixture sources deleted with
+    teardown fixed at source (<code>77bc45c2</code>). Finally the locked D-orphans bulk half executed:
+    <strong>296</strong> non-derived exhausted orphans superseded with one ledger row each
+    (<code>e7aa5872</code>, hash <code>a9743fc5…</code>, 9/9 cross-origin live sample) — post-apply
+    non-derived exhausted orphans: <strong>0</strong>. Remaining in the dual-binding family: the 216
+    catalog_edit rows (semantic wave), 5 reviewed-not-accepted fold ancestors (lifecycle review), and
+    the accepted/reviewed orphan pools (individual adjudication).</p>
   </section>
 </main>
 </body>

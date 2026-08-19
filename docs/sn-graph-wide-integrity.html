@@ -17,14 +17,14 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="172">
-<meta name="plan-impl" content="0.985">
+<meta name="plan-version" content="173">
+<meta name="plan-impl" content="0.99">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
-<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966">
+<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966,fe00ec3e,a5a83b20,df48be0f,aba3ce7b,25d8dd37,77bc45c2,07c33345,e7aa5872">
 </head>
 <body>
   <main class="plan-doc">
@@ -984,6 +984,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s3" data-id="c-sgwi-provenance-closure-live" data-who="Codex" data-when="2026-07-30" data-quote="The reopened provenance invariant is closed on the live graph.">
     <div class="r-comment-body"><p>Final cascading-parent code at <code>8e5969e3</code> was exercised through maintenance-only run <code>81f22918</code> on the live graph. The run completed in 566.00 s at <strong>$0.0000</strong>, deleted 11 orphaned derived-parent sources, reaped two additional childless derived parents after structural rederivation, and seeded 17 legitimate missing parent sources. Two independent post-run calls to <code>find_provenance_orphans()</code> both returned <strong>0</strong>. This closes the S6 provenance-repair slice; the fan-out, embedding, supersede-retarget, scalar-disagreement, and write-path work in <code>f-sgwi-001</code> remains later graph-wide scope and was not pulled into this sprint.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260819-exhausted-orphans-superseded" data-who="reckon-ship" data-when="2026-08-19T03:45:00+00:00">
+    <div class="r-comment-body"><p><strong>§3's exhausted class is CLOSED: every non-derived exhausted orphan is superseded with a ledger row.</strong> Commit <code>e7aa5872</code>, merge <code>aef79c10</code>, review APPROVE with zero findings. The signed apply covered 296 names (96 catalog_edit, 96 pipeline, 104 null-origin legacy — the plan's historic 114/192 counts used a null-hostile origin filter), hash <code>a9743fc5…</code>, one StandardNameChange per name (7155 → 7451), write-free replay, and a coordinator cross-origin 9/9 live sample. Post-apply: 0 non-derived exhausted orphans; the accepted/reviewed/pending orphan pools are untouched and remain the individual-adjudication half of the locked D-orphans split. Also closed this wave: the three ineligible structural sources retired to <code>not_physical_quantity</code> with 32 spurious bindings detached (merge <code>98e33ce6</code>, APPROVE 0/0/0/0), whose 32 surfaced names joined this supersede's cohort where exhausted.</p></div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-slice-closure-20260801" data-who="reckon-ship" data-when="2026-08-01T12:10:00+02:00">
     <div class="r-comment-body"><p><strong>The sprint-scoped correctness slice is closed.</strong> Unit authority and deletion-ledger work remain resolved. The exact WEST semantic-source repair changed 38 sources transactionally, wrote 38 audit rows, left zero WEST invariant violations or duplicate accepted identities, and reduced the global violation count from 999 to 961. Every remaining violation is outside WEST and stays with <code>f-sgwi-001</code>. The 15 older graph-wide strict-parser/stamp residues are likewise deferred here; accepted WEST is strict-lossless with zero drift. This deferral is explicit scope, not a failed stability gate.</p></div>
