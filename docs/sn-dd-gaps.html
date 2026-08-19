@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -61,10 +61,12 @@
     cohort is <strong>14 paths</strong> (6 primary + 8 inherited error-bar). Excluded with citation: 8 unitless integer
     index paths, 4 absent error-index claims, and the 8 adjacent <code>z_min</code>/<code>z_max</code>/<code>z_average</code>/<code>z_square_average</code>
     charge-number paths PR 280 explicitly retains in <code>e</code>. A live MATCH-only read on 2026-08-17 returned 22
-    nodes and confirmed zero drift against that disposition. Clearing it requires, in order: candidate expansion 6 → 14
-    (which changes the packaged digest and therefore needs independent review), 14 exact per-path DDGap facts through
-    the sanctioned evidence writers, a renewed lead delegation naming the <em>new</em> digest, and 14 per-path approvals.
-    The existing delegation covers digest <code>c6ee52ae…</code> only and does not extend to the expanded set.</p>
+    nodes and confirmed zero drift against that disposition. <strong>Exclusion taxonomy corrected by independent review
+    2026-08-19:</strong> DD 4.1.1 contains four <em>present</em> unitless indices (edge/plasma <code>grid_index</code>
+    and <code>grid_subset_index</code>), four <em>absent</em> error-index claims (the earlier "8 unitless" figure
+    double-counted these), and the eight adjacent charge-number paths retained in <code>e</code> — sixteen distinct
+    non-overlapping exclusions. The packaged-digest and delegation gates named below were removed by
+    D-ddres-storage-and-gates; the cohort landed as graph records under review instead.</p>
 
     <section id="s7" class="section-landed">
       <header><span class="badge badge-shipped">✓ landed 2026-08-18</span>
