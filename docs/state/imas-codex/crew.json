@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-19T09:49:00",
+  "updated": "2026-08-19T22:31:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -40,6 +40,13 @@
         "created": "2026-08-18"
       },
       {
+        "id": "impl-isnvocab",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-19"
+      },
+      {
         "id": "impl-lastbind",
         "harness": "codex",
         "role": "implement",
@@ -72,6 +79,20 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a01880-7fdf-7852-a159-c51e790fa1d4",
+        "created": "2026-08-19"
+      },
+      {
+        "id": "impl-scalar",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-19"
+      },
+      {
+        "id": "impl-sectionplane",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-19"
       },
       {
@@ -7584,9 +7605,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260819T193934640772-scalar-projection-mismatch-repair",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a74",
+        "node": "scalar-projection-mismatch-repair",
+        "role": "implement",
+        "member": "impl-scalar",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T19:39:37Z",
+        "completed_at": "2026-08-19T19:59:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1170,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1170,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "c61acbf17299e57a0956809456f4c971c00e77ef",
+        "commits": [
+          "5d9c9e1bb681800138fddab226117121ed563263"
+        ],
+        "changed_lines": {
+          "added": 930,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T193934640772-scalar-projection-mismatch-repair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01b89-592b-7352-9522-e7761da6d976",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10649600,
+            "cached_input_tokens_cumulative": 10649600,
+            "input_tokens": 10919480,
+            "input_tokens_cumulative": 10919480,
+            "output_tokens": 42093,
+            "output_tokens_cumulative": 42093,
+            "reasoning_output_tokens": 13368,
+            "reasoning_output_tokens_cumulative": 13368
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260819T200753374035-section-plane-spelling-alignment",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a76",
+        "node": "section-plane-spelling-alignment",
+        "role": "implement",
+        "member": "impl-sectionplane",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T20:07:56Z",
+        "completed_at": "2026-08-19T20:31:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1405,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1405,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "5557b3e7df82d6d76ed98309cd37b1e9a236f39e",
+        "commits": [
+          "543ae8f798c4222eb11fea367ba2fe817073c419"
+        ],
+        "changed_lines": {
+          "added": 60,
+          "removed": 70,
+          "files": 15
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T200753374035-section-plane-spelling-alignment/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01ba3-3a7d-77d0-8ddc-12e641930c05",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18651392,
+            "cached_input_tokens_cumulative": 18651392,
+            "input_tokens": 19096524,
+            "input_tokens_cumulative": 19096524,
+            "output_tokens": 34029,
+            "output_tokens_cumulative": 34029,
+            "reasoning_output_tokens": 11001,
+            "reasoning_output_tokens_cumulative": 11001
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 173
+    "_version": 178
   }
 }
