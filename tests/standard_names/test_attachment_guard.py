@@ -495,7 +495,7 @@ def test_locus_device_hardware_property_accepted() -> None:
     """The intrinsic-property case (`area_of_rogowski_coil`) shares `coil`."""
     ok, reason = _is_attachment_consistent(
         "magnetics/rogowski_coil/area",
-        "cross_sectional_area_of_rogowski_coil",
+        "poloidal_plane_cross_sectional_area_of_rogowski_coil",
     )
     assert ok, reason
 

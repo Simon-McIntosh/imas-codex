@@ -368,9 +368,9 @@ common_issues:
         - name: "normalized_poloidal_magnetic_flux"
           hit: "normalized_poloidal (projection axis)"
           correction: "projection=normalized_poloidal + base=magnetic_flux"
-        - name: "cross_sectional_area"
-          hit: "cross_sectional (qualifier)"
-          correction: "qualifier=cross_sectional + base=area"
+        - name: "poloidal_plane_cross_sectional_area"
+          hit: "poloidal (section plane), cross_sectional (qualifier)"
+          correction: "section_plane=poloidal + qualifier=cross_sectional + base=area"
       examples_allowed:
         - "safety_factor (one registered physical_base, no qualifier)"
         - "loop_voltage (one registered physical_base, no qualifier)"

@@ -33,7 +33,7 @@ ask the model to choose, infer, or change a COCOS transformation label.
 `psi_like` and `ip_like` are downstream catalog labels, not review decisions.
 
 For flux-surface area, DD `area` requires
-`poloidal_cross_sectional_area_of_flux_surface`, while DD `surface` requires
+`poloidal_plane_cross_sectional_area_of_flux_surface`, while DD `surface` requires
 `surface_area_of_flux_surface`. These denote different observables. The bare
 `area_of_flux_surface` is an ambiguous umbrella and must receive Semantic
 Accuracy **≤ 5/20** for either source family.
@@ -124,7 +124,7 @@ grammar and convention scores.
   decomposition error**:
     - `toroidal_torque` → projection=`toroidal` + base=`torque`
     - `volume_averaged_electron_temperature` → operator=`volume_averaged` + qualifier=`electron` + base=`temperature`
-    - `poloidal_cross_sectional_area_of_flux_surface` → projection=`poloidal` + qualifier=`cross_sectional` + base=`area` + locus=`flux_surface`
+    - `poloidal_plane_cross_sectional_area_of_flux_surface` → section_plane=`poloidal` + qualifier=`cross_sectional` + base=`area` + locus=`flux_surface`
   Allow genuine lexicalised atomic terms (`minor_radius`, `safety_factor`).
   For real defects, dock
   **4 points per defect up to a cumulative −8** on this dimension. Record

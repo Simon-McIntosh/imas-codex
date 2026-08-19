@@ -127,7 +127,7 @@ def test_name_review_prompts_enforce_complete_source_axis_contract(
     assert "semantic accuracy" in rendered
     assert "5/20" in rendered
     assert "vocab_gap" in rendered
-    assert "poloidal_cross_sectional_area_of_flux_surface" in rendered
+    assert "poloidal_plane_cross_sectional_area_of_flux_surface" in rendered
     assert "surface_area_of_flux_surface" in rendered
     assert "area_of_flux_surface" in rendered
     assert "ambiguous umbrella" in rendered
@@ -206,11 +206,12 @@ def test_name_review_prompts_use_public_flux_area_decomposition(
         },
     )
 
-    assert "projection=`poloidal` + qualifier=`cross_sectional` + base=`area`" in source
+    assert (
+        "section_plane=`poloidal` + qualifier=`cross_sectional` + base=`area`" in source
+    )
     assert "`poloidal_flux` is a lexicalised atomic term" not in source
     assert "Allow lexicalised atomic compounds (`poloidal_flux`" not in source
     assert "Compound `physical_base` tokens like `poloidal_flux`" not in source
-    assert "`cross_sectional_area`, `safety_factor`" not in source
 
 
 def test_review_claim_projects_exact_pinned_source_bindings() -> None:

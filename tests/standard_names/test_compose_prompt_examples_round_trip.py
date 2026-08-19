@@ -198,7 +198,7 @@ def test_nc_rule_bad_example_has_declared_public_oracle_disposition(
 
 def test_flux_surface_area_forms_round_trip_without_semantic_collapse() -> None:
     """The public grammar preserves cross-sectional and swept-surface forms."""
-    cross_section = "poloidal_cross_sectional_area_of_flux_surface"
+    cross_section = "poloidal_plane_cross_sectional_area_of_flux_surface"
     swept_surface = "surface_area_of_flux_surface"
 
     cross_ir = parse(cross_section, strict=True).ir
@@ -207,9 +207,13 @@ def test_flux_surface_area_forms_round_trip_without_semantic_collapse() -> None:
     assert compose(cross_ir) == cross_section
     assert compose(surface_ir) == swept_surface
     assert cross_ir != surface_ir
-    assert cross_ir.projection is not None
-    assert cross_ir.projection.axis == "poloidal"
-    assert {qualifier.token for qualifier in cross_ir.qualifiers} == {"cross_sectional"}
+    assert cross_ir.projection is None
+    assert {
+        (qualifier.category, qualifier.token) for qualifier in cross_ir.qualifiers
+    } == {
+        ("section_plane", "poloidal"),
+        ("geometry", "cross_sectional"),
+    }
     assert surface_ir.projection is None
     assert {qualifier.token for qualifier in surface_ir.qualifiers} == {"surface"}
 
@@ -266,7 +270,8 @@ def test_consistency_rule_forbids_generic_flux_surface_area_umbrella() -> None:
 
     assert synonym_rule["severity"] == "hard"
     assert (
-        "poloidal_cross_sectional_area_of_flux_surface" in synonym_rule["examples_good"]
+        "poloidal_plane_cross_sectional_area_of_flux_surface"
+        in synonym_rule["examples_good"]
     )
     assert "surface_area_of_flux_surface" in synonym_rule["examples_good"]
     assert "area_of_flux_surface" in synonym_rule["examples_bad"]
@@ -314,25 +319,29 @@ def test_atomic_compound_is_one_registered_base_without_qualifiers(name: str) ->
 
 
 @pytest.mark.parametrize(
-    "name,base,qualifier",
+    "name,base,qualifiers",
     (
-        ("minor_radius", "radius", "minor"),
-        ("major_radius", "radius", "major"),
-        ("cross_sectional_area", "area", "cross_sectional"),
-        ("surface_area", "area", "surface"),
-        ("polarization_angle", "angle", "polarization"),
+        ("minor_radius", "radius", {"minor"}),
+        ("major_radius", "radius", {"major"}),
+        (
+            "poloidal_plane_cross_sectional_area",
+            "area",
+            {"poloidal", "cross_sectional"},
+        ),
+        ("surface_area", "area", {"surface"}),
+        ("polarization_angle", "angle", {"polarization"}),
     ),
 )
 def test_qualifier_bearing_compound_is_not_atomic(
     name: str,
     base: str,
-    qualifier: str,
+    qualifiers: set[str],
 ) -> None:
     """The IR splits these, so no rubric may exempt them from the audit."""
     ir = parse(name, strict=True).ir
 
     assert ir.base.token == base
-    assert {token.token for token in ir.qualifiers} == {qualifier}
+    assert {token.token for token in ir.qualifiers} == qualifiers
     assert not _is_lexicalised_atomic(name)
 
 

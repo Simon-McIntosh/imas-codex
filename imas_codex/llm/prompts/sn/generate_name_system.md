@@ -35,7 +35,7 @@ are downstream catalog labels, not decisions made by the composer.
 
 **Flux-surface area is the canonical test.** DD `area` means the poloidal
 cross-sectional area enclosed by the surface: ✓
-`poloidal_cross_sectional_area_of_flux_surface`. DD `surface` means the swept
+`poloidal_plane_cross_sectional_area_of_flux_surface`. DD `surface` means the swept
 toroidal surface: ✓ `surface_area_of_flux_surface`. They are different
 observables. The bare `area_of_flux_surface` is an ambiguous umbrella and must
 not be emitted or used as an attachment target for either family.

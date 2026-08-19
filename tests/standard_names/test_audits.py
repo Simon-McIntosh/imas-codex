@@ -2744,8 +2744,8 @@ class TestCanonicalLocusCheck:
     @pytest.mark.parametrize(
         "name",
         [
-            "poloidal_cross_sectional_area_of_flux_surface",
-            "poloidal_cross_sectional_area_of_plasma_boundary",
+            "poloidal_plane_cross_sectional_area_of_flux_surface",
+            "poloidal_plane_cross_sectional_area_of_plasma_boundary",
         ],
     )
     def test_sectioned_geometric_extent_keeps_the_intrinsic_relation(self, name):
@@ -2775,10 +2775,10 @@ class TestCanonicalLocusCheck:
         from imas_codex.standard_names.audits import canonical_locus_check
 
         entity = canonical_locus_check(
-            {"id": "poloidal_cross_sectional_area_of_rogowski_coil"}
+            {"id": "poloidal_plane_cross_sectional_area_of_rogowski_coil"}
         )
         position = canonical_locus_check(
-            {"id": "poloidal_cross_sectional_area_of_flux_surface"}
+            {"id": "poloidal_plane_cross_sectional_area_of_flux_surface"}
         )
 
         assert entity == position == []

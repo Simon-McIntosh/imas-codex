@@ -46,7 +46,7 @@ Do not choose, infer, or change a COCOS transformation label. `psi_like` and
 `ip_like` remain downstream catalog labels, not composer output.
 
 Flux-surface area is not one generic family: DD `area` is
-`poloidal_cross_sectional_area_of_flux_surface`, while DD `surface` is
+`poloidal_plane_cross_sectional_area_of_flux_surface`, while DD `surface` is
 `surface_area_of_flux_surface`. Never emit or attach either source family to
 the ambiguous umbrella `area_of_flux_surface`.
 
@@ -86,14 +86,14 @@ defect.**
 | `plasma_current_IP` | `plasma_current` | No symbol suffixes |
 | `current_from_passive_loop` | `passive_loop_current` | `_from_` implies causation — use device prefix for signals |
 | `poloidal_flux` | `poloidal_magnetic_flux` | Use controlled vocabulary term; no synonymous short forms |
-| `area_of_flux_surface` for DD area or DD surface | `poloidal_cross_sectional_area_of_flux_surface` for DD area; `surface_area_of_flux_surface` for DD surface | Surface kind is load-bearing: poloidal enclosed cross-section and swept toroidal surface are different observables |
+| `area_of_flux_surface` for DD area or DD surface | `poloidal_plane_cross_sectional_area_of_flux_surface` for DD area; `surface_area_of_flux_surface` for DD surface | Surface kind is load-bearing: poloidal enclosed cross-section and swept toroidal surface are different observables |
 | `reconstructed_faraday_rotation_angle` | `faraday_polarization_angle` | Drop provenance; use the registered Faraday-polarization quantity |
 | `geometric_minor_radius` | `minor_radius` | DD section prefix leaking into standard name |
 | `flux_surface_averaged_elongation` | `elongation` | Elongation is a geometric property of a contour, not a flux-surface average |
 | `energy_due_to_recombination_at_ion_state` | `energy_due_to_recombination` | Process tokens are bare vocabulary entries — never append `_at_X` / `_in_X` / `_on_X` qualifiers |
 | `energy_due_to_impurity_radiation_in_halo_region` | `radiated_energy_over_halo_region_due_to_impurity_radiation` | A region is a postfix `_over_` locus before the process suffix |
 | `vertical_coordinate_of_outline_point` | owner-qualified vertical outline, or vocab gap | Omit the ordinal vertex label, retain the owning object and axis, and never merge outlines belonging to different objects |
-| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `cross_sectional_area_of_rogowski_coil`) |
+| `x_ray_crystal_spectrometer_pixel_photon_energy_lower_bound` | `lower_bound_photon_energy` | **Instrument-prefix carry-over** — drop the instrument when the leaf is a generic physics observable. Keep as `_of_<instrument>` ONLY when the quantity is intrinsic to the hardware (e.g. `poloidal_plane_cross_sectional_area_of_rogowski_coil`) |
 | `x1_coordinate_of_neutron_detector_geometry_outline` | `first_local_tangential_coordinate_of_neutron_detector` | **Local tangent axes are DISTINCT semantic directions, not storage labels** — map source-local X1/X2 to the REGISTERED carriers `first_local_tangential_coordinate` / `second_local_tangential_coordinate` (`base_kind=geometry`), retain the intrinsic owning object, and never emit `x1_coordinate` / `x2_coordinate` |
 | `vertical_front_surface_radius_of_optical_element` for reflector X2 curvature | `second_local_tangential_radius_of_reflector` | X2 is an object-local surface tangent, not machine vertical. Keep `reflector`, drop the redundant `front_surface` wording, omit diagnostic/channel provenance, and do not claim a principal-curvature direction without source evidence |
 | `radial_wave_electric_field` for `e_field/normal` | `flux_surface_normal_wave_electric_field` | The DD parent explicitly defines a projection normal to the magnetic flux surface. `radial` is reserved for cylindrical $R$; `perpendicular` would incorrectly imply the magnetic-field-relative plane |

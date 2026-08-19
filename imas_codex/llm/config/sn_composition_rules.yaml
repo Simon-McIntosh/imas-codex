@@ -24,13 +24,13 @@ composition_rules:
 
       Flux-surface area has two distinct canonical quantities. DD `area` is the
       poloidal cross-sectional area enclosed by the flux surface, named
-      `poloidal_cross_sectional_area_of_flux_surface`. DD `surface` is the swept
+      `poloidal_plane_cross_sectional_area_of_flux_surface`. DD `surface` is the swept
       toroidal surface area, named `surface_area_of_flux_surface`. The bare
       `area_of_flux_surface` is an ambiguous umbrella and must not represent
       either source family.
     examples_good:
       - "poloidal_magnetic_flux"
-      - "poloidal_cross_sectional_area_of_flux_surface"
+      - "poloidal_plane_cross_sectional_area_of_flux_surface"
       - "surface_area_of_flux_surface"
     examples_bad:
       - "poloidal_flux"
