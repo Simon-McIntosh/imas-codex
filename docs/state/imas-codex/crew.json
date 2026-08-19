@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-19T08:28:45",
+  "updated": "2026-08-19T08:39:13",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -150,6 +150,13 @@
         "role": "review",
         "session_id": "01a00be4-ae97-7ab2-be65-54e8e3b29ec5",
         "created": "2026-08-16"
+      },
+      {
+        "id": "rev-disp",
+        "harness": "codex",
+        "role": "review",
+        "session_id": null,
+        "created": "2026-08-19"
       },
       {
         "id": "verify-a",
@@ -7140,9 +7147,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260819T060926254275-catalog-edit-disposition-instrument",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a74",
+        "node": "catalog-edit-disposition-instrument",
+        "role": "implement",
+        "member": "impl-catapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T06:09:28Z",
+        "completed_at": "2026-08-19T06:38:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1760,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1760,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "811a18118d975a858bd84495d384d9ee6ea84491",
+        "commits": [
+          "590fee6132a0d25eb57077fd7e7490f228fad851"
+        ],
+        "changed_lines": {
+          "added": 1194,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T060926254275-catalog-edit-disposition-instrument/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a018a3-977a-7290-a6a3-1168a0a84cb1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8660736,
+            "cached_input_tokens_cumulative": 8660736,
+            "input_tokens": 8892257,
+            "input_tokens_cumulative": 8892257,
+            "output_tokens": 35522,
+            "output_tokens_cumulative": 35522,
+            "reasoning_output_tokens": 9769,
+            "reasoning_output_tokens_cumulative": 9769
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 163
+    "_version": 165
   }
 }
