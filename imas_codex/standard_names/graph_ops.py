@@ -18192,6 +18192,718 @@ def deduplicate_scalar_selected_sources(
             client.close()
 
 
+SIGNED_SOURCE_DISPOSITION_ADJUDICATION_SCHEMA = (
+    "imas-codex.catalog-edit-dual-binding-adjudication.v1"
+)
+SIGNED_SOURCE_DISPOSITION_MANIFEST_SCHEMA = (
+    "imas-codex.signed-source-disposition-manifest.v1"
+)
+SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA = (
+    "imas-codex.signed-source-disposition-receipt.v1"
+)
+_SIGNED_SOURCE_DISPOSITIONS = frozenset(
+    {
+        "retain_scalar_target",
+        "retarget_scalar_target",
+        "select_missing_scalar",
+    }
+)
+
+
+class SignedSourceDispositionConflict(RuntimeError):
+    """The adjudicated source closure no longer matches graph authority."""
+
+
+def _catalog_edit_adjudication_signature_hash(value: Any) -> str:
+    # ASCII-escaped JSON is required because signed rows carry non-ASCII characters.
+    payload = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _validate_signed_source_adjudication(
+    adjudication: dict[str, Any],
+) -> tuple[str, str, list[dict[str, Any]]]:
+    if adjudication.get("schema") != SIGNED_SOURCE_DISPOSITION_ADJUDICATION_SCHEMA:
+        raise ValueError("unsupported source-disposition adjudication schema")
+    signature = adjudication.get("signature")
+    if not isinstance(signature, dict) or signature.get("algorithm") != "sha256":
+        raise ValueError("source-disposition adjudication requires a SHA-256 signature")
+    declared_hash = signature.get("payload_sha256")
+    if not isinstance(declared_hash, str) or not _SHA256_RE.fullmatch(declared_hash):
+        raise ValueError(
+            "adjudication payload_sha256 must be a lowercase SHA-256 digest"
+        )
+    payload = {key: value for key, value in adjudication.items() if key != "signature"}
+    if _catalog_edit_adjudication_signature_hash(payload) != declared_hash:
+        raise ValueError("source-disposition adjudication signature does not match")
+    raw_rows = adjudication.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise ValueError("source-disposition adjudication requires at least one row")
+    rows: list[dict[str, Any]] = []
+    seen_sources: set[str] = set()
+    for raw_row in raw_rows:
+        if not isinstance(raw_row, dict):
+            raise ValueError("every source disposition must be an object")
+        row = dict(raw_row)
+        row_signature = row.get("row_signature_sha256")
+        if not isinstance(row_signature, str) or not _SHA256_RE.fullmatch(
+            row_signature
+        ):
+            raise ValueError("every source disposition requires a row SHA-256")
+        unsigned_row = {
+            key: value for key, value in row.items() if key != "row_signature_sha256"
+        }
+        if _catalog_edit_adjudication_signature_hash(unsigned_row) != row_signature:
+            raise ValueError("source disposition row signature does not match")
+        source_id = row.get("source_id")
+        if not isinstance(source_id, str) or not source_id.startswith("dd:"):
+            raise ValueError("source dispositions require exact DD source ids")
+        if source_id in seen_sources:
+            raise ValueError("source disposition ids must be unique")
+        seen_sources.add(source_id)
+        disposition = row.get("disposition")
+        if disposition not in _SIGNED_SOURCE_DISPOSITIONS:
+            raise ValueError("source disposition is outside the closed set")
+        candidates = row.get("candidate_live_targets")
+        removed = row.get("removed_targets")
+        survivor = row.get("surviving_target")
+        prior_scalar = row.get("prior_scalar_target")
+        if (
+            not isinstance(candidates, list)
+            or not candidates
+            or any(
+                not isinstance(candidate, str) or not candidate
+                for candidate in candidates
+            )
+            or len(candidates) != len(set(candidates))
+            or candidates != sorted(candidates)
+        ):
+            raise ValueError("candidate live targets must be unique and sorted")
+        if not isinstance(survivor, str) or survivor not in candidates:
+            raise ValueError("surviving target must belong to the candidate set")
+        expected_removed = sorted(set(candidates) - {survivor})
+        if removed != expected_removed or not expected_removed:
+            raise ValueError(
+                "removed targets must be the exact non-surviving candidates"
+            )
+        if disposition == "retain_scalar_target" and prior_scalar != survivor:
+            raise ValueError("retain disposition must preserve the prior scalar")
+        if disposition == "retarget_scalar_target" and (
+            prior_scalar is None or prior_scalar == survivor
+        ):
+            raise ValueError("retarget disposition must replace a different scalar")
+        if disposition == "select_missing_scalar" and prior_scalar is not None:
+            raise ValueError("missing-scalar disposition requires a null prior scalar")
+        rows.append(row)
+    rows = sorted(rows, key=lambda row: row["source_id"])
+    summary = adjudication.get("summary")
+    if summary is not None:
+        disposition_counts = {
+            disposition: sum(row["disposition"] == disposition for row in rows)
+            for disposition in sorted(_SIGNED_SOURCE_DISPOSITIONS)
+        }
+        if (
+            not isinstance(summary, dict)
+            or summary.get("adjudicated_rows") != len(rows)
+            or summary.get("unique_source_rows") != len(rows)
+            or summary.get("single_survivor_rows") != len(rows)
+            or summary.get("disposition_sum") != len(rows)
+            or summary.get("disposition_counts") != disposition_counts
+        ):
+            raise ValueError("source-disposition summary does not match signed rows")
+    row_set_sha256 = _catalog_edit_adjudication_signature_hash(
+        {
+            "schema": adjudication["schema"],
+            "rows": rows,
+        }
+    )
+    return declared_hash, row_set_sha256, rows
+
+
+def _signed_source_disposition_authority(
+    query_handle: _TransactionQuery,
+    rows: list[dict[str, Any]],
+    adjudication_sha256: str,
+    adjudication_row_set_sha256: str,
+    reason: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    source_ids = [row["source_id"] for row in rows]
+    graph_rows = query_handle.query(
+        """
+        UNWIND $source_ids AS requested_id
+        OPTIONAL MATCH (source:StandardNameSource {id: requested_id})
+        RETURN requested_id,
+               elementId(source) AS source_element_id,
+               properties(source) AS source_properties,
+               CASE WHEN source IS NULL THEN [] ELSE
+                 [(source)-[binding:PRODUCED_NAME]->(target:StandardName) |
+                   {element_id: elementId(binding),
+                    properties: properties(binding),
+                    target_element_id: elementId(target),
+                    target_id: target.id,
+                    target_properties: properties(target)}]
+               END AS bindings,
+               CASE WHEN source IS NULL THEN [] ELSE
+                 [(source)-[origin:FROM_DD_PATH|FROM_SIGNAL]->(backing) |
+                   {element_id: elementId(backing),
+                    labels: labels(backing),
+                    properties: properties(backing),
+                    origin_element_id: elementId(origin),
+                    origin_type: type(origin),
+                    origin_properties: properties(origin),
+                    projections: [(backing)-[projection:HAS_STANDARD_NAME]->
+                      (projected:StandardName) |
+                      {element_id: elementId(projection),
+                       properties: properties(projection),
+                       target_element_id: elementId(projected),
+                       target_id: projected.id,
+                       target_properties: properties(projected)}]}]
+               END AS backings
+        ORDER BY requested_id
+        """,
+        source_ids=source_ids,
+    )
+    expected_by_source = {row["source_id"]: row for row in rows}
+    participants: list[dict[str, Any]] = []
+    actions: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for raw in graph_rows:
+        expected = expected_by_source[raw["requested_id"]]
+        bindings = sorted(
+            (dict(binding) for binding in raw.get("bindings") or []),
+            key=lambda binding: (binding["target_id"], binding["element_id"]),
+        )
+        backings = sorted(
+            (
+                {
+                    **dict(backing),
+                    "labels": sorted(backing.get("labels") or []),
+                    "projections": sorted(
+                        (dict(item) for item in backing.get("projections") or []),
+                        key=lambda item: (item["target_id"], item["element_id"]),
+                    ),
+                }
+                for backing in raw.get("backings") or []
+            ),
+            key=lambda backing: backing["element_id"],
+        )
+        participant = {
+            "source_id": expected["source_id"],
+            "adjudication_row_sha256": expected["row_signature_sha256"],
+            "source_element_id": raw.get("source_element_id"),
+            "source_properties": raw.get("source_properties"),
+            "bindings": bindings,
+            "backings": backings,
+        }
+        participants.append(participant)
+        properties = raw.get("source_properties")
+        refusal: str | None = None
+        if properties is None:
+            refusal = "source does not exist"
+        elif (
+            properties.get("claimed_at") is not None
+            or properties.get("claim_token") is not None
+        ):
+            refusal = "source has an active claim"
+        elif properties.get("status") == "stale":
+            refusal = "stale source is not disposition authority"
+        elif properties.get("produced_sn_id") != expected["prior_scalar_target"]:
+            refusal = "source scalar changed from the adjudicated value"
+
+        live_bindings = [
+            binding
+            for binding in bindings
+            if (binding.get("target_properties") or {}).get("name_stage")
+            not in _TERMINAL_BINDING_NAME_STAGES
+        ]
+        live_target_ids = [binding["target_id"] for binding in live_bindings]
+        expected_targets = expected["candidate_live_targets"]
+        if refusal is None and (
+            live_target_ids != expected_targets
+            or len(live_target_ids) != len(set(live_target_ids))
+        ):
+            refusal = "live binding set changed from the adjudicated candidates"
+        if refusal is None and not any(
+            (binding.get("target_properties") or {}).get("origin") == "catalog_edit"
+            for binding in live_bindings
+        ):
+            refusal = "catalog-edit participant is no longer present"
+        if refusal is None and (
+            len(backings) != 1
+            or backings[0]["origin_type"] != "FROM_DD_PATH"
+            or backings[0]["properties"].get("id") != expected["source_id"][3:]
+        ):
+            refusal = "source does not have one exact DD backing"
+
+        projection_by_target: dict[str, list[dict[str, Any]]] = {}
+        for backing in backings:
+            for projection in backing["projections"]:
+                if (projection.get("target_properties") or {}).get(
+                    "name_stage"
+                ) not in _TERMINAL_BINDING_NAME_STAGES:
+                    projection_by_target.setdefault(projection["target_id"], []).append(
+                        {**projection, "backing_element_id": backing["element_id"]}
+                    )
+        if refusal is None:
+            projected_targets = sorted(
+                target_id
+                for target_id, projections in projection_by_target.items()
+                for _ in projections
+            )
+            if projected_targets != expected_targets:
+                refusal = "live backing projection set changed from adjudication"
+
+        if refusal is not None:
+            refusals.append({"source_id": expected["source_id"], "reason": refusal})
+            continue
+        binding_by_target = {item["target_id"]: item for item in live_bindings}
+        removals = [
+            {
+                "target_id": target_id,
+                "binding_element_id": binding_by_target[target_id]["element_id"],
+                "projection_element_id": projection_by_target[target_id][0][
+                    "element_id"
+                ],
+                "backing_element_id": projection_by_target[target_id][0][
+                    "backing_element_id"
+                ],
+            }
+            for target_id in expected["removed_targets"]
+        ]
+        actions.append(
+            {
+                "source_id": expected["source_id"],
+                "source_element_id": raw["source_element_id"],
+                "prior_scalar_target": expected["prior_scalar_target"],
+                "keep_target_id": expected["surviving_target"],
+                "disposition": expected["disposition"],
+                "removals": removals,
+            }
+        )
+    manifest = {
+        "schema": SIGNED_SOURCE_DISPOSITION_MANIFEST_SCHEMA,
+        "operation": "apply_adjudicated_source_dispositions",
+        "reason": reason,
+        "adjudication_sha256": adjudication_sha256,
+        "adjudication_row_set_sha256": adjudication_row_set_sha256,
+        "source_ids": source_ids,
+        "participants": participants,
+        "actions": actions,
+        "refusals": refusals,
+    }
+    return manifest, actions, refusals
+
+
+def _lock_signed_source_disposition_authority(
+    query_handle: _TransactionQuery, manifest: dict[str, Any]
+) -> None:
+    participants = manifest["participants"]
+    source_element_ids = sorted(row["source_element_id"] for row in participants)
+    node_element_ids = sorted(
+        {
+            element_id
+            for row in participants
+            for element_id in [
+                *(backing["element_id"] for backing in row["backings"]),
+                *(binding["target_element_id"] for binding in row["bindings"]),
+            ]
+        }
+    )
+    relationship_element_ids = sorted(
+        {
+            element_id
+            for row in participants
+            for element_id in [
+                *(binding["element_id"] for binding in row["bindings"]),
+                *(backing["origin_element_id"] for backing in row["backings"]),
+                *(
+                    projection["element_id"]
+                    for backing in row["backings"]
+                    for projection in backing["projections"]
+                ),
+            ]
+        }
+    )
+    locked_sources = query_handle.query(
+        """
+        UNWIND $element_ids AS expected
+        MATCH (source:StandardNameSource) WHERE elementId(source) = expected
+        SET source.produced_sn_id = source.produced_sn_id
+        RETURN collect(elementId(source)) AS ids
+        """,
+        element_ids=source_element_ids,
+    )
+    actual_sources = sorted(locked_sources[0].get("ids") or [])
+    if actual_sources != source_element_ids:
+        raise SignedSourceDispositionConflict("signed source set changed while locking")
+    if node_element_ids:
+        locked_nodes = query_handle.query(
+            """
+            UNWIND $element_ids AS expected
+            MATCH (node) WHERE elementId(node) = expected
+            SET node += {}
+            RETURN collect(elementId(node)) AS ids
+            """,
+            element_ids=node_element_ids,
+        )
+        if sorted(locked_nodes[0].get("ids") or []) != node_element_ids:
+            raise SignedSourceDispositionConflict(
+                "signed participant nodes changed while locking"
+            )
+    if relationship_element_ids:
+        locked_relationships = query_handle.query(
+            """
+            UNWIND $element_ids AS expected
+            MATCH ()-[relationship]->() WHERE elementId(relationship) = expected
+            SET relationship += {}
+            RETURN collect(elementId(relationship)) AS ids
+            """,
+            element_ids=relationship_element_ids,
+        )
+        if sorted(locked_relationships[0].get("ids") or []) != relationship_element_ids:
+            raise SignedSourceDispositionConflict(
+                "signed participant relationships changed while locking"
+            )
+
+
+def _signed_source_disposition_counts(
+    rows: list[dict[str, Any]],
+    actions: list[dict[str, Any]],
+    refusals: list[dict[str, str]],
+) -> dict[str, int]:
+    return {
+        "requested": len(rows),
+        "admitted": len(actions),
+        "refused": len(refusals),
+        "bindings_to_remove": sum(len(action["removals"]) for action in actions),
+        "projections_to_remove": sum(len(action["removals"]) for action in actions),
+        "scalars_to_change": sum(
+            action["prior_scalar_target"] != action["keep_target_id"]
+            for action in actions
+        ),
+    }
+
+
+@retry_on_deadlock()
+def apply_adjudicated_source_dispositions(
+    adjudication: dict[str, Any],
+    *,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Apply signed one-survivor source dispositions under exact graph CAS."""
+    if not reason.strip():
+        raise ValueError("source disposition requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+    adjudication_sha256, adjudication_row_set_sha256, rows = (
+        _validate_signed_source_adjudication(adjudication)
+    )
+    expected_dispositions = {row["source_id"]: row["surviving_target"] for row in rows}
+    event_id = (
+        f"sn-change:signed-source-disposition:{manifest_sha256}"
+        if manifest_sha256
+        else None
+    )
+
+    own = gc is None
+    client: Any = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query_handle.query(
+                        """
+                        OPTIONAL MATCH (change:StandardNameChange {id: $event_id})
+                        RETURN change.to_name AS disposition_json
+                        """,
+                        event_id=event_id,
+                    )
+                    disposition_json = (
+                        replay_rows[0].get("disposition_json") if replay_rows else None
+                    )
+                    if disposition_json is not None:
+                        if json.loads(disposition_json) != expected_dispositions:
+                            raise SignedSourceDispositionConflict(
+                                "recorded disposition covers a different source set"
+                            )
+                        current_rows = query_handle.query(
+                            """
+                            UNWIND $rows AS expected
+                            MATCH (source:StandardNameSource {id: expected.source_id})
+                            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->
+                              (target:StandardName)
+                            WHERE NOT coalesce(target.name_stage, '') IN
+                              ['superseded', 'exhausted', 'contested']
+                            WITH expected, source,
+                                 collect(DISTINCT target.id) AS target_ids
+                            RETURN collect({source_id: expected.source_id,
+                              scalar: source.produced_sn_id,
+                              target_ids: target_ids,
+                              expected_target: expected.keep_target_id}) AS rows
+                            """,
+                            rows=[
+                                {
+                                    "source_id": source_id,
+                                    "keep_target_id": target_id,
+                                }
+                                for source_id, target_id in expected_dispositions.items()
+                            ],
+                        )
+                        current = current_rows[0].get("rows") if current_rows else []
+                        if len(current) != len(rows) or any(
+                            row["scalar"] != row["expected_target"]
+                            or row["target_ids"] != [row["expected_target"]]
+                            for row in current
+                        ):
+                            raise SignedSourceDispositionConflict(
+                                "recorded disposition has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "manifest_sha256": manifest_sha256,
+                        }
+
+                manifest, actions, refusals = _signed_source_disposition_authority(
+                    query_handle,
+                    rows,
+                    adjudication_sha256,
+                    adjudication_row_set_sha256,
+                    reason,
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = _signed_source_disposition_counts(rows, actions, refusals)
+                if apply and computed_hash != manifest_sha256:
+                    raise SignedSourceDispositionConflict(
+                        "fresh source-disposition manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": 1,
+                        "counts": counts,
+                        "refusals": [],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                _lock_signed_source_disposition_authority(query_handle, manifest)
+                locked_manifest, locked_actions, locked_refusals = (
+                    _signed_source_disposition_authority(
+                        query_handle,
+                        rows,
+                        adjudication_sha256,
+                        adjudication_row_set_sha256,
+                        reason,
+                    )
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise SignedSourceDispositionConflict(
+                        "source disposition authority changed while acquiring locks"
+                    )
+                actions = locked_actions
+                scalar_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        "source_element_id": action["source_element_id"],
+                        "prior_scalar_target": action["prior_scalar_target"],
+                        "keep_target_id": action["keep_target_id"],
+                    }
+                    for action in actions
+                ]
+                scalar_updates = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (source:StandardNameSource {id: expected.source_id})
+                    WHERE elementId(source) = expected.source_element_id
+                      AND ((source.produced_sn_id IS NULL
+                            AND expected.prior_scalar_target IS NULL)
+                           OR source.produced_sn_id = expected.prior_scalar_target)
+                      AND source.claimed_at IS NULL
+                      AND source.claim_token IS NULL
+                    SET source.produced_sn_id = expected.keep_target_id
+                    RETURN collect(source.id) AS ids
+                    """,
+                    rows=scalar_rows,
+                )
+                updated_ids = sorted(scalar_updates[0].get("ids") or [])
+                if updated_ids != sorted(expected_dispositions):
+                    raise SignedSourceDispositionConflict(
+                        "source scalar or claim compare-and-set changed"
+                    )
+
+                mutation_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        "keep_target_id": action["keep_target_id"],
+                        "remove_target_id": removal["target_id"],
+                        "binding_element_id": removal["binding_element_id"],
+                        "projection_element_id": removal["projection_element_id"],
+                        "backing_element_id": removal["backing_element_id"],
+                    }
+                    for action in actions
+                    for removal in action["removals"]
+                ]
+                mutated = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (source:StandardNameSource {id: expected.source_id})
+                    MATCH (source)-[binding:PRODUCED_NAME]->
+                      (removed:StandardName {id: expected.remove_target_id})
+                    WHERE elementId(binding) = expected.binding_element_id
+                      AND source.produced_sn_id = expected.keep_target_id
+                      AND source.claimed_at IS NULL
+                      AND source.claim_token IS NULL
+                      AND EXISTS {
+                        (source)-[:PRODUCED_NAME]->
+                          (:StandardName {id: expected.keep_target_id})
+                      }
+                    MATCH (backing)-[projection:HAS_STANDARD_NAME]->(removed)
+                    WHERE elementId(backing) = expected.backing_element_id
+                      AND elementId(projection) = expected.projection_element_id
+                    DELETE binding, projection
+                    RETURN collect({source_id: expected.source_id,
+                      binding_element_id: expected.binding_element_id,
+                      projection_element_id: expected.projection_element_id}) AS rows
+                    """,
+                    rows=mutation_rows,
+                )
+                actual_mutations = mutated[0].get("rows") if mutated else []
+                if len(actual_mutations) != len(mutation_rows):
+                    raise SignedSourceDispositionConflict(
+                        "signed binding closure changed during deletion"
+                    )
+
+                target_ids = sorted(
+                    {
+                        target_id
+                        for action in actions
+                        for target_id in [
+                            action["keep_target_id"],
+                            *(item["target_id"] for item in action["removals"]),
+                        ]
+                    }
+                )
+                query_handle.query(
+                    """
+                    UNWIND $target_ids AS target_id
+                    MATCH (target:StandardName {id: target_id})
+                    OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                    OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
+                    OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
+                    WITH target, collect(DISTINCT CASE
+                      WHEN source IS NULL THEN null
+                      WHEN dd IS NOT NULL THEN 'dd:' + dd.id
+                      WHEN signal IS NOT NULL THEN signal.id
+                      WHEN source.source_type = 'derived'
+                        AND source.source_id STARTS WITH 'derived:'
+                      THEN source.source_id ELSE source.id END) AS paths
+                    SET target.source_paths = [path IN paths WHERE path IS NOT NULL]
+                    """,
+                    target_ids=target_ids,
+                )
+                change_rows = query_handle.query(
+                    """
+                    MERGE (change:StandardNameChange {id: $event_id})
+                    ON CREATE SET change.from_name = $removed_json,
+                                  change.to_name = $disposition_json,
+                                  change.operation =
+                                    'apply_adjudicated_source_dispositions',
+                                  change.reason = $reason,
+                                  change.origin = 'semantic_source_reconciliation',
+                                  change.run_id = $run_id,
+                                  change.changed_at = datetime(),
+                                  change.internal = true,
+                                  change.manifest_sha256 = $manifest_sha256
+                    WITH change
+                    UNWIND $keep_target_ids AS keep_target_id
+                    MATCH (kept:StandardName {id: keep_target_id})
+                    MERGE (kept)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN DISTINCT change.id AS change_id
+                    """,
+                    event_id=f"sn-change:signed-source-disposition:{computed_hash}",
+                    removed_json=json.dumps(
+                        {
+                            action["source_id"]: [
+                                item["target_id"] for item in action["removals"]
+                            ]
+                            for action in actions
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    disposition_json=json.dumps(
+                        expected_dispositions, sort_keys=True, separators=(",", ":")
+                    ),
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                    keep_target_ids=sorted(set(expected_dispositions.values())),
+                )
+                if len(change_rows) != 1:
+                    raise SignedSourceDispositionConflict(
+                        "source disposition receipt was not written exactly once"
+                    )
+                transaction.commit()
+                return {
+                    "schema": SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": 1,
+                    "sources_reconciled": len(actions),
+                    "bindings_removed": len(mutation_rows),
+                    "projections_removed": len(mutation_rows),
+                    "counts": counts,
+                    "refusals": [],
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_id": change_rows[0]["change_id"],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 INELIGIBLE_SOURCE_RETIREMENT_MANIFEST_SCHEMA = (
     "imas-codex.ineligible-standard-name-source-retirement-manifest.v1"
 )
