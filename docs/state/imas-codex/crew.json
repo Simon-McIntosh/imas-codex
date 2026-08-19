@@ -1,9 +1,23 @@
 {
-  "updated": "2026-08-19T03:17:55",
+  "updated": "2026-08-19T07:46:50",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "impl-catalog",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-19"
+      },
+      {
+        "id": "impl-census",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01880-5c67-70c3-bef4-e30cb2267b48",
+        "created": "2026-08-19"
+      },
       {
         "id": "impl-ddres",
         "harness": "codex",
@@ -17,6 +31,27 @@
         "role": "implement",
         "session_id": "01a0167e-a37f-7aa1-b70b-9400fad4ddf2",
         "created": "2026-08-18"
+      },
+      {
+        "id": "impl-orphan",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-19"
+      },
+      {
+        "id": "impl-owner",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-19"
+      },
+      {
+        "id": "impl-residue",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a01880-7fdf-7852-a159-c51e790fa1d4",
+        "created": "2026-08-19"
       },
       {
         "id": "impl-stall",
@@ -6713,9 +6748,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260819T053106532934-eval-set-label-residue",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a76",
+        "node": "eval-set-label-residue",
+        "role": "implement",
+        "member": "impl-residue",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T05:31:09Z",
+        "completed_at": "2026-08-19T05:41:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 601,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 601,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "2a48233cd7ad155ca847d7673d903bca89fce75a",
+        "commits": [
+          "7cee20c7b7336e1d7f834e8e6baab9872f3aab94"
+        ],
+        "changed_lines": {
+          "added": 32,
+          "removed": 34,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T053106532934-eval-set-label-residue/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01880-7fdf-7852-a159-c51e790fa1d4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4948992,
+            "cached_input_tokens_cumulative": 4948992,
+            "input_tokens": 5100478,
+            "input_tokens_cumulative": 5100478,
+            "output_tokens": 17535,
+            "output_tokens_cumulative": 17535,
+            "reasoning_output_tokens": 7392,
+            "reasoning_output_tokens_cumulative": 7392
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260819T053057370828-remaining-integrity-census",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a74",
+        "node": "remaining-integrity-census",
+        "role": "implement",
+        "member": "impl-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-19T05:30:59Z",
+        "completed_at": "2026-08-19T05:44:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 808,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 808,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "2a48233cd7ad155ca847d7673d903bca89fce75a",
+        "commits": [
+          "ef517bd481dbcc146c9b5f477ad477cdb42c889d"
+        ],
+        "changed_lines": {
+          "added": 18641,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260819T053057370828-remaining-integrity-census/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01880-5c67-70c3-bef4-e30cb2267b48",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7830784,
+            "cached_input_tokens_cumulative": 7830784,
+            "input_tokens": 8143588,
+            "input_tokens_cumulative": 8143588,
+            "output_tokens": 31071,
+            "output_tokens_cumulative": 31071,
+            "reasoning_output_tokens": 8365,
+            "reasoning_output_tokens_cumulative": 8365
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 147
+    "_version": 156
   }
 }
