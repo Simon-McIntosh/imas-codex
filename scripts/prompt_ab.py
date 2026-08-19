@@ -1,17 +1,15 @@
-"""Plan 32 Phase 2 — prompt A/B/C research harness.
+"""Prompt A/B/C research harness.
 
 Runs the 20-path eval set from
-``tests/standard_names/eval_sets/prompt_ab_v1.json`` through three
+``tests/standard_names/eval_sets/prompt_ab.json`` through three
 compose prompt variants and writes a comparison report.
 
 Variants:
-- **A (baseline):** production ``sn/compose_dd`` prompt (full context
-  front-loaded: cluster siblings, exemplars, review feedback).
-- **B (name-only):** production ``sn/compose_dd_name_only`` prompt (lean
-  per-batch, no context front-loaded).
-- **C (tool-calling):** ``sn/compose_dd_tool_calling`` prompt + tool
-  defs from ``imas_codex.standard_names.prompt_tools``; LLM fetches
-  context on-demand.
+- **A (baseline):** full context front-loaded with cluster siblings,
+  exemplars, and review feedback.
+- **B (name-only):** lean per-batch context without front-loaded examples.
+- **C (tool-calling):** lean prompt plus tool definitions from
+  ``imas_codex.standard_names.prompt_tools`` for on-demand context.
 
 The harness uses :func:`imas_codex.discovery.base.llm.call_llm_structured`
 with the model from ``get_model('sn-generate')``. Output is one JSON
@@ -20,7 +18,7 @@ file per variant plus a summary diff table.
 Run::
 
     uv run python scripts/prompt_ab.py \\
-        --eval-set tests/standard_names/eval_sets/prompt_ab_v1.json \\
+        --eval-set tests/standard_names/eval_sets/prompt_ab.json \\
         --output plans/research/standard-names/prompt_ab_results/ \\
         --cost-limit 2.0
 
@@ -65,7 +63,7 @@ def main() -> int:
     parser.add_argument(
         "--eval-set",
         type=Path,
-        default=Path("tests/standard_names/eval_sets/prompt_ab_v1.json"),
+        default=Path("tests/standard_names/eval_sets/prompt_ab.json"),
     )
     parser.add_argument(
         "--output",
@@ -143,7 +141,7 @@ def main() -> int:
     #       )
 
     logger.warning(
-        "Variant runners not implemented yet (plan 32 Phase 2 scaffold). "
+        "Variant runners are not implemented yet. "
         "Wire up using the runner skeleton in scripts/prompt_ab.py."
     )
     return 0
