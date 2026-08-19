@@ -1,0 +1,1357 @@
+{
+  "schema": "imas-codex.locus-rule-family-adjudication.v1",
+  "generated_at": "2026-08-19T06:19:16.671658+00:00",
+  "semantic_authority": {
+    "plan": "sn-graph-wide-integrity",
+    "plan_section": "5",
+    "plan_version_read": 175,
+    "decision_boundary": "Adopt the stricter ISN entity-typed zero-overlap trigger only per locus family; a decline retains the shipped trigger and routes known bad rows to semantic repair."
+  },
+  "trigger_definitions": {
+    "shared_mismatch": "The parsed trailing locus and expanded DD path share no content token.",
+    "shipped": "Shared mismatch AND locus contains a configured hardware word AND ISN does not type the locus as a place.",
+    "strict": "Shared mismatch AND ISN types the complete locus token as entity.",
+    "family_key": "Complete parsed ISN locus token."
+  },
+  "measurements": {
+    "attachment_rows_read": 5515,
+    "historical_baseline": {
+      "shipped_trigger_flags": 17,
+      "strict_trigger_flags": 189,
+      "newly_refused_delta": 172
+    },
+    "current": {
+      "shipped_trigger_flags": 16,
+      "strict_trigger_flags": 150,
+      "newly_refused_delta": 134,
+      "families": 12
+    },
+    "change_from_historical": {
+      "shipped_trigger_flags": -1,
+      "strict_trigger_flags": -39,
+      "newly_refused_delta": -38
+    },
+    "family_verdict_counts": {
+      "adopt": 3,
+      "decline": 9
+    },
+    "pairing_verdict_counts": {
+      "adopt": 6,
+      "decline": 128
+    },
+    "family_count_identity": "3 adopt + 9 decline = 12",
+    "pairing_count_identity": "6 adopt + 128 decline = 134"
+  },
+  "read_only_proof": {
+    "StandardNameChange": {
+      "before": 7451,
+      "after": 7451,
+      "delta": 0
+    },
+    "LLMCost": {
+      "before": 27467,
+      "after": 27467,
+      "delta": 0
+    },
+    "graph_writes": 0,
+    "provider_calls": 0
+  },
+  "recommendation": {
+    "global_verdict": "decline_global_adoption",
+    "adopt_families": [
+      "aperture",
+      "bragg_crystal",
+      "passive_structure"
+    ],
+    "decline_families": [
+      "conductor_cross_section",
+      "coordinate_system",
+      "diagnostic_aperture",
+      "iron_core_segment",
+      "optical_element",
+      "pellet",
+      "plasma_facing_component",
+      "vacuum_vessel",
+      "wave_beam"
+    ],
+    "implementation_boundary": "If implemented later, add only the adopted locus tokens as codex policy derived against the live ISN locus universe; do not replace the shipped hardware trigger with an all-entity trigger."
+  },
+  "signature": {
+    "algorithm": "sha256",
+    "canonicalization": "Python json.dumps({measurements,families}, sort_keys=True, separators=(',', ':'), ensure_ascii=True), UTF-8, no trailing newline",
+    "scope": "measurements_and_families",
+    "digest": "9c95341f47a9c4ca6a4ffef2043272a8f329ad44686e53fb4ff9ca4b8f46b574"
+  },
+  "families": [
+    {
+      "family": "aperture",
+      "isn_locus_type": "entity",
+      "verdict": "adopt",
+      "new_pairing_count": 4,
+      "name_stage_counts": {
+        "accepted": 3,
+        "reviewed": 1
+      },
+      "rationale": "All four pairings name a different immediate DD owner: detector, active spatial-resolution zone, optical element, or camera. The owner/geometry authority record already rejects the detector-centre aperture competitor and refuses aperture as a substitute for the missing active-spatial-resolution locus. No pairing in this family corroborates an aperture owner.",
+      "evidence_pairings": [
+        "spectrometer_uv/channel/detector/centre/phi -> toroidal_coordinate_of_aperture",
+        "spectrometer_visible/channel/active_spatial_resolution/centre/r -> radial_coordinate_of_aperture",
+        "spectrometer_visible/channel/optical_element/geometry/radius -> radius_of_aperture",
+        "spectrometer_x_ray_crystal/camera/centre/phi -> toroidal_coordinate_of_aperture"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/detector/centre/phi",
+          "dd_path": "spectrometer_uv/channel/detector/centre/phi",
+          "standard_name": "toroidal_coordinate_of_aperture",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/active_spatial_resolution/centre/r",
+          "dd_path": "spectrometer_visible/channel/active_spatial_resolution/centre/r",
+          "standard_name": "radial_coordinate_of_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/optical_element/geometry/radius",
+          "dd_path": "spectrometer_visible/channel/optical_element/geometry/radius",
+          "standard_name": "radius_of_aperture",
+          "name_stage": "reviewed",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/camera/centre/phi",
+          "dd_path": "spectrometer_x_ray_crystal/camera/centre/phi",
+          "standard_name": "toroidal_coordinate_of_aperture",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "bragg_crystal",
+      "isn_locus_type": "entity",
+      "verdict": "adopt",
+      "new_pairing_count": 1,
+      "name_stage_counts": {
+        "accepted": 1
+      },
+      "rationale": "The sole path is under grating/summit; live DD parent documentation identifies a grating summit and the leaf as its height. It does not identify a Bragg crystal, so the entity locus is unsupported rather than merely implicit.",
+      "evidence_pairings": [
+        "spectrometer_uv/channel/grating/summit/z -> vertical_coordinate_of_bragg_crystal"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/grating/summit/z",
+          "dd_path": "spectrometer_uv/channel/grating/summit/z",
+          "standard_name": "vertical_coordinate_of_bragg_crystal",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "conductor_cross_section",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 10,
+      "name_stage_counts": {
+        "accepted": 9,
+        "reviewed": 1
+      },
+      "rationale": "The DD spells the same concept structurally through conductor or hardware geometry followed by rectangle or oblique parameters. Literal locus overlap is not expected; a family-wide entity trigger would reject legitimate cross-section coordinates and dimensions.",
+      "evidence_pairings": [
+        "pf_active/coil/element/geometry/rectangle/r -> radial_coordinate_of_conductor_cross_section",
+        "pf_active/coil/geometry/oblique/length_beta -> minor_length_of_conductor_cross_section"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:ferritic/object/axisymmetric/rectangle/z",
+          "dd_path": "ferritic/object/axisymmetric/rectangle/z",
+          "standard_name": "vertical_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:ic_antennas/antenna/module/strap/geometry/rectangle/r",
+          "dd_path": "ic_antennas/antenna/module/strap/geometry/rectangle/r",
+          "standard_name": "radial_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_active/coil/element/geometry/rectangle/r",
+          "dd_path": "pf_active/coil/element/geometry/rectangle/r",
+          "standard_name": "radial_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_active/coil/element/geometry/rectangle/z",
+          "dd_path": "pf_active/coil/element/geometry/rectangle/z",
+          "standard_name": "vertical_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_active/coil/geometry/oblique/length_beta",
+          "dd_path": "pf_active/coil/geometry/oblique/length_beta",
+          "standard_name": "minor_length_of_conductor_cross_section",
+          "name_stage": "reviewed",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_active/coil/geometry/rectangle/r",
+          "dd_path": "pf_active/coil/geometry/rectangle/r",
+          "standard_name": "radial_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_active/coil/geometry/rectangle/z",
+          "dd_path": "pf_active/coil/geometry/rectangle/z",
+          "standard_name": "vertical_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_passive/loop/element/geometry/rectangle/r",
+          "dd_path": "pf_passive/loop/element/geometry/rectangle/r",
+          "standard_name": "radial_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_passive/loop/element/geometry/rectangle/z",
+          "dd_path": "pf_passive/loop/element/geometry/rectangle/z",
+          "standard_name": "vertical_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:pf_plasma/element/geometry/rectangle/r",
+          "dd_path": "pf_plasma/element/geometry/rectangle/r",
+          "standard_name": "radial_coordinate_of_conductor_cross_section",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "coordinate_system",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 1,
+      "name_stage_counts": {
+        "superseded": 1
+      },
+      "rationale": "The sole measured pairing is historical: the Standard Name is superseded. Its DD path is a profiles_2d grid major-radius coordinate, where coordinate-system ownership is structural and need not be repeated lexically. There is no live write-boundary benefit to a family trigger.",
+      "evidence_pairings": [
+        "distributions/distribution/profiles_2d/grid/r -> major_radius_of_coordinate_system"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:distributions/distribution/profiles_2d/grid/r",
+          "dd_path": "distributions/distribution/profiles_2d/grid/r",
+          "standard_name": "major_radius_of_coordinate_system",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        }
+      ]
+    },
+    {
+      "family": "diagnostic_aperture",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 50,
+      "name_stage_counts": {
+        "accepted": 36,
+        "reviewed": 6,
+        "superseded": 8
+      },
+      "rationale": "The 50 paths use concrete aperture realizations such as pinholes, detector openings, antenna openings, fibre bundles, filter windows, gratings, and polarizers. The generic diagnostic-aperture locus is intentionally not repeated in those DD structures, so zero lexical overlap is not a sound rejection criterion for this family.",
+      "evidence_pairings": [
+        "camera_ir/channel/camera/pinhole/x -> x_coordinate_of_diagnostic_aperture",
+        "bolometer/channel/detector/surface -> area_of_diagnostic_aperture",
+        "reflectometer_profile/channel/antenna_detection/radius -> radius_of_diagnostic_aperture"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:bolometer/camera/channel/detector/outline/x2",
+          "dd_path": "bolometer/camera/channel/detector/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:bolometer/camera/channel/detector/surface",
+          "dd_path": "bolometer/camera/channel/detector/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:bolometer/camera/channel/detector/x1_width",
+          "dd_path": "bolometer/camera/channel/detector/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:bolometer/channel/detector/outline/x1",
+          "dd_path": "bolometer/channel/detector/outline/x1",
+          "standard_name": "x1_coordinate_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:bolometer/channel/detector/surface",
+          "dd_path": "bolometer/channel/detector/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:bolometer/channel/detector/x2_width",
+          "dd_path": "bolometer/channel/detector/x2_width",
+          "standard_name": "height_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:camera_ir/channel/camera/pinhole/x",
+          "dd_path": "camera_ir/channel/camera/pinhole/x",
+          "standard_name": "x_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/channel/camera/pinhole/y",
+          "dd_path": "camera_ir/channel/camera/pinhole/y",
+          "standard_name": "y_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/channel/camera/pinhole/z",
+          "dd_path": "camera_ir/channel/camera/pinhole/z",
+          "standard_name": "vertical_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/fibre_bundle/geometry/outline/x2",
+          "dd_path": "camera_ir/fibre_bundle/geometry/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/fibre_bundle/geometry/x1_width",
+          "dd_path": "camera_ir/fibre_bundle/geometry/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/fibre_bundle/geometry/x2_width",
+          "dd_path": "camera_ir/fibre_bundle/geometry/x2_width",
+          "standard_name": "height_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:camera_ir/optical_element/geometry/centre/z",
+          "dd_path": "camera_ir/optical_element/geometry/centre/z",
+          "standard_name": "vertical_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/optical_element/geometry/x1_width",
+          "dd_path": "camera_ir/optical_element/geometry/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/optical_element/geometry/x2_width",
+          "dd_path": "camera_ir/optical_element/geometry/x2_width",
+          "standard_name": "height_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:camera_visible/channel/fibre_bundle/geometry/x1_width",
+          "dd_path": "camera_visible/channel/fibre_bundle/geometry/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_visible/channel/fibre_bundle/geometry/x2_width",
+          "dd_path": "camera_visible/channel/fibre_bundle/geometry/x2_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_visible/channel/optical_element/geometry/x1_width",
+          "dd_path": "camera_visible/channel/optical_element/geometry/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:charge_exchange/channel/cone_diameter",
+          "dd_path": "charge_exchange/channel/cone_diameter",
+          "standard_name": "diameter_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:hard_x_rays/channel/detector/radius",
+          "dd_path": "hard_x_rays/channel/detector/radius",
+          "standard_name": "radius_of_diagnostic_aperture",
+          "name_stage": "reviewed",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:hard_x_rays/channel/detector/surface",
+          "dd_path": "hard_x_rays/channel/detector/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:mse/channel/detector/outline/x2",
+          "dd_path": "mse/channel/detector/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:mse/channel/detector/x1_width",
+          "dd_path": "mse/channel/detector/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_fluctuation/channel/antenna_detection_static/outline/x1",
+          "dd_path": "reflectometer_fluctuation/channel/antenna_detection_static/outline/x1",
+          "standard_name": "x1_coordinate_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:reflectometer_fluctuation/channel/antenna_detection_static/radius",
+          "dd_path": "reflectometer_fluctuation/channel/antenna_detection_static/radius",
+          "standard_name": "radius_of_diagnostic_aperture",
+          "name_stage": "reviewed",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_fluctuation/channel/antenna_detection_static/surface",
+          "dd_path": "reflectometer_fluctuation/channel/antenna_detection_static/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_fluctuation/channel/antenna_emission_static/outline/x1",
+          "dd_path": "reflectometer_fluctuation/channel/antenna_emission_static/outline/x1",
+          "standard_name": "x1_coordinate_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:reflectometer_fluctuation/channel/antenna_emission_static/outline/x2",
+          "dd_path": "reflectometer_fluctuation/channel/antenna_emission_static/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_fluctuation/channel/antenna_emission_static/radius",
+          "dd_path": "reflectometer_fluctuation/channel/antenna_emission_static/radius",
+          "standard_name": "radius_of_diagnostic_aperture",
+          "name_stage": "reviewed",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_fluctuation/channel/antenna_emission_static/surface",
+          "dd_path": "reflectometer_fluctuation/channel/antenna_emission_static/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_profile/channel/antenna_detection/radius",
+          "dd_path": "reflectometer_profile/channel/antenna_detection/radius",
+          "standard_name": "radius_of_diagnostic_aperture",
+          "name_stage": "reviewed",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_profile/channel/antenna_detection/surface",
+          "dd_path": "reflectometer_profile/channel/antenna_detection/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_profile/channel/antenna_emission/radius",
+          "dd_path": "reflectometer_profile/channel/antenna_emission/radius",
+          "standard_name": "radius_of_diagnostic_aperture",
+          "name_stage": "reviewed",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:reflectometer_profile/channel/antenna_emission/surface",
+          "dd_path": "reflectometer_profile/channel/antenna_emission/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:soft_x_rays/channel/detector/surface",
+          "dd_path": "soft_x_rays/channel/detector/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:soft_x_rays/channel/detector/x1_width",
+          "dd_path": "soft_x_rays/channel/detector/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:soft_x_rays/channel/filter_window/outline/x1",
+          "dd_path": "soft_x_rays/channel/filter_window/outline/x1",
+          "standard_name": "x1_coordinate_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/detector/outline/x1",
+          "dd_path": "spectrometer_uv/channel/detector/outline/x1",
+          "standard_name": "x1_coordinate_of_diagnostic_aperture",
+          "name_stage": "superseded",
+          "name_origin": null,
+          "historical_name_stage": true
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/detector/surface",
+          "dd_path": "spectrometer_uv/channel/detector/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/grating/centre/z",
+          "dd_path": "spectrometer_uv/channel/grating/centre/z",
+          "standard_name": "vertical_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/detector/centre/z",
+          "dd_path": "spectrometer_visible/channel/detector/centre/z",
+          "standard_name": "vertical_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/detector/outline/x2",
+          "dd_path": "spectrometer_visible/channel/detector/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/detector/radius",
+          "dd_path": "spectrometer_visible/channel/detector/radius",
+          "standard_name": "radius_of_diagnostic_aperture",
+          "name_stage": "reviewed",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/detector/surface",
+          "dd_path": "spectrometer_visible/channel/detector/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/detector/x1_width",
+          "dd_path": "spectrometer_visible/channel/detector/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/fibre_bundle/geometry/x1_width",
+          "dd_path": "spectrometer_visible/channel/fibre_bundle/geometry/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/grating_spectrometer/slit_width",
+          "dd_path": "spectrometer_visible/channel/grating_spectrometer/slit_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/polarizer/outline/x2",
+          "dd_path": "spectrometer_visible/channel/polarizer/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/polarizer/x1_width",
+          "dd_path": "spectrometer_visible/channel/polarizer/x1_width",
+          "standard_name": "width_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/reflector/surface",
+          "dd_path": "spectrometer_x_ray_crystal/channel/reflector/surface",
+          "standard_name": "area_of_diagnostic_aperture",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "iron_core_segment",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 3,
+      "name_stage_counts": {
+        "accepted": 3
+      },
+      "rationale": "This family is mixed. Two equilibrium separatrix outlines are plainly wrong, but ferritic/object/axisymmetric documentation explicitly says the representation is used for each iron-core segment, making height_of_iron_core_segment a supported zero-overlap pairing. A family-wide trigger would therefore destroy a valid attachment; repair the two separatrix rows semantically instead.",
+      "evidence_pairings": [
+        "equilibrium/time_slice/boundary_separatrix/outline/r -> radial_outline_of_iron_core_segment",
+        "ferritic/object/axisymmetric/rectangle/height -> height_of_iron_core_segment"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:equilibrium/time_slice/boundary_secondary_separatrix/outline/r",
+          "dd_path": "equilibrium/time_slice/boundary_secondary_separatrix/outline/r",
+          "standard_name": "radial_outline_of_iron_core_segment",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:equilibrium/time_slice/boundary_separatrix/outline/r",
+          "dd_path": "equilibrium/time_slice/boundary_separatrix/outline/r",
+          "standard_name": "radial_outline_of_iron_core_segment",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:ferritic/object/axisymmetric/rectangle/height",
+          "dd_path": "ferritic/object/axisymmetric/rectangle/height",
+          "standard_name": "height_of_iron_core_segment",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "optical_element",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 44,
+      "name_stage_counts": {
+        "accepted": 44
+      },
+      "rationale": "The 44 paths name concrete optical-element subclasses or realizations: filters, apertures, fibre bundles, gratings, polarizers, mirrors, crystals, reflectors, and detector windows. The entity superclass is semantically carried by those components even though the literal words optical_element are absent.",
+      "evidence_pairings": [
+        "ec_launchers/mirror/geometry/surface -> surface_area_of_optical_element",
+        "spectrometer_x_ray_crystal/channel/crystal/surface -> surface_area_of_optical_element",
+        "spectrometer_visible/channel/polarizer/surface -> surface_area_of_optical_element"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:bremsstrahlung_visible/channel/filter/wavelengths",
+          "dd_path": "bremsstrahlung_visible/channel/filter/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/fibre_bundle/fibre_positions/x2",
+          "dd_path": "camera_ir/fibre_bundle/fibre_positions/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/fibre_bundle/geometry/centre/z",
+          "dd_path": "camera_ir/fibre_bundle/geometry/centre/z",
+          "standard_name": "vertical_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_ir/fibre_bundle/geometry/surface",
+          "dd_path": "camera_ir/fibre_bundle/geometry/surface",
+          "standard_name": "surface_area_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_visible/channel/aperture/x1_width",
+          "dd_path": "camera_visible/channel/aperture/x1_width",
+          "standard_name": "width_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_visible/channel/fibre_bundle/fibre_positions/x2",
+          "dd_path": "camera_visible/channel/fibre_bundle/fibre_positions/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_visible/channel/fibre_bundle/geometry/outline/x2",
+          "dd_path": "camera_visible/channel/fibre_bundle/geometry/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_visible/channel/fibre_bundle/geometry/surface",
+          "dd_path": "camera_visible/channel/fibre_bundle/geometry/surface",
+          "standard_name": "surface_area_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:camera_x_rays/filter_window/wavelengths",
+          "dd_path": "camera_x_rays/filter_window/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:charge_exchange/aperture/x1_width",
+          "dd_path": "charge_exchange/aperture/x1_width",
+          "standard_name": "width_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:charge_exchange/channel/aperture/x1_width",
+          "dd_path": "charge_exchange/channel/aperture/x1_width",
+          "standard_name": "width_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:charge_exchange/channel/spectrum/wavelengths",
+          "dd_path": "charge_exchange/channel/spectrum/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:ec_launchers/mirror/geometry/surface",
+          "dd_path": "ec_launchers/mirror/geometry/surface",
+          "standard_name": "surface_area_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:ece/polarizer/polarization_angle",
+          "dd_path": "ece/polarizer/polarization_angle",
+          "standard_name": "calibration_polarization_angle_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:ece/polarizer/radius",
+          "dd_path": "ece/polarizer/radius",
+          "standard_name": "radius_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:hard_x_rays/channel/filter_window/wavelengths",
+          "dd_path": "hard_x_rays/channel/filter_window/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:neutron_diagnostic/detector/geometry/surface",
+          "dd_path": "neutron_diagnostic/detector/geometry/surface",
+          "standard_name": "surface_area_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:soft_x_rays/channel/filter_window/wavelengths",
+          "dd_path": "soft_x_rays/channel/filter_window/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/aperture/x1_width",
+          "dd_path": "spectrometer_uv/channel/aperture/x1_width",
+          "standard_name": "width_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/aperture/x2_width",
+          "dd_path": "spectrometer_uv/channel/aperture/x2_width",
+          "standard_name": "width_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/detector/outline/x1",
+          "dd_path": "spectrometer_uv/channel/detector/outline/x1",
+          "standard_name": "first_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/detector/outline/x2",
+          "dd_path": "spectrometer_uv/channel/detector/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/detector/x1_width",
+          "dd_path": "spectrometer_uv/channel/detector/x1_width",
+          "standard_name": "width_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/detector/x2_width",
+          "dd_path": "spectrometer_uv/channel/detector/x2_width",
+          "standard_name": "width_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/grating/centre/phi",
+          "dd_path": "spectrometer_uv/channel/grating/centre/phi",
+          "standard_name": "toroidal_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": null,
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/grating/curvature_radius",
+          "dd_path": "spectrometer_uv/channel/grating/curvature_radius",
+          "standard_name": "curvature_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/grating/outline/x1",
+          "dd_path": "spectrometer_uv/channel/grating/outline/x1",
+          "standard_name": "first_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/grating/outline/x2",
+          "dd_path": "spectrometer_uv/channel/grating/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_uv/channel/wavelengths",
+          "dd_path": "spectrometer_uv/channel/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/fibre_bundle/fibre_positions/x2",
+          "dd_path": "spectrometer_visible/channel/fibre_bundle/fibre_positions/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/fibre_bundle/geometry/outline/x2",
+          "dd_path": "spectrometer_visible/channel/fibre_bundle/geometry/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/fibre_bundle/geometry/surface",
+          "dd_path": "spectrometer_visible/channel/fibre_bundle/geometry/surface",
+          "standard_name": "surface_area_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/filter_spectrometer/wavelengths",
+          "dd_path": "spectrometer_visible/channel/filter_spectrometer/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/grating_spectrometer/wavelengths",
+          "dd_path": "spectrometer_visible/channel/grating_spectrometer/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_visible/channel/polarizer/surface",
+          "dd_path": "spectrometer_visible/channel/polarizer/surface",
+          "standard_name": "surface_area_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/bin/instrument_function/wavelengths",
+          "dd_path": "spectrometer_x_ray_crystal/channel/bin/instrument_function/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/bin/wavelength",
+          "dd_path": "spectrometer_x_ray_crystal/channel/bin/wavelength",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/crystal/surface",
+          "dd_path": "spectrometer_x_ray_crystal/channel/crystal/surface",
+          "standard_name": "surface_area_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/filter_window/wavelengths",
+          "dd_path": "spectrometer_x_ray_crystal/channel/filter_window/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/instrument_function/wavelengths",
+          "dd_path": "spectrometer_x_ray_crystal/channel/instrument_function/wavelengths",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/reflector/outline/x2",
+          "dd_path": "spectrometer_x_ray_crystal/channel/reflector/outline/x2",
+          "standard_name": "second_local_tangential_coordinate_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/reflector/x2_curvature",
+          "dd_path": "spectrometer_x_ray_crystal/channel/reflector/x2_curvature",
+          "standard_name": "vertical_front_surface_radius_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/reflector/x2_width",
+          "dd_path": "spectrometer_x_ray_crystal/channel/reflector/x2_width",
+          "standard_name": "height_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spectrometer_x_ray_crystal/channel/wavelength_frames",
+          "dd_path": "spectrometer_x_ray_crystal/channel/wavelength_frames",
+          "standard_name": "spectral_wavelength_of_optical_element",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "passive_structure",
+      "isn_locus_type": "entity",
+      "verdict": "adopt",
+      "new_pairing_count": 1,
+      "name_stage_counts": {
+        "accepted": 1
+      },
+      "rationale": "The sole schema path says only length measured by a displacement sensor. The IDS documents sensors on various device parts and carries runtime attachment URIs to identify what a sensor is attached to; the DD schema path itself does not assert a passive structure. The current entity locus is therefore an unsupported owner claim at write time.",
+      "evidence_pairings": [
+        "operational_instrumentation/sensor/length -> displacement_of_passive_structure"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:operational_instrumentation/sensor/length",
+          "dd_path": "operational_instrumentation/sensor/length",
+          "standard_name": "displacement_of_passive_structure",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "pellet",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 8,
+      "name_stage_counts": {
+        "accepted": 8
+      },
+      "rationale": "This family is mixed. Six fragment and mass-centre velocity paths are legitimate pellet-kinematics evidence without the literal pellet token, while two gas-atom paths are suspicious. A family-wide trigger would reject the six supported pairings; adjudicate the two gas rows separately.",
+      "evidence_pairings": [
+        "spi/injector/fragment/velocity_r -> radial_velocity_of_pellet",
+        "spi/injector/fragmentation_gas/atoms_n -> normalized_atomic_count_of_pellet"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:spi/injector/fragment/velocity_phi",
+          "dd_path": "spi/injector/fragment/velocity_phi",
+          "standard_name": "toroidal_velocity_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spi/injector/fragment/velocity_r",
+          "dd_path": "spi/injector/fragment/velocity_r",
+          "standard_name": "radial_velocity_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spi/injector/fragment/velocity_z",
+          "dd_path": "spi/injector/fragment/velocity_z",
+          "standard_name": "vertical_velocity_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spi/injector/fragmentation_gas/atoms_n",
+          "dd_path": "spi/injector/fragmentation_gas/atoms_n",
+          "standard_name": "normalized_atomic_count_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spi/injector/propellant_gas/atoms_n",
+          "dd_path": "spi/injector/propellant_gas/atoms_n",
+          "standard_name": "normalized_atomic_count_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spi/injector/velocity_mass_centre_fragments_phi",
+          "dd_path": "spi/injector/velocity_mass_centre_fragments_phi",
+          "standard_name": "toroidal_velocity_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spi/injector/velocity_mass_centre_fragments_r",
+          "dd_path": "spi/injector/velocity_mass_centre_fragments_r",
+          "standard_name": "radial_velocity_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:spi/injector/velocity_mass_centre_fragments_z",
+          "dd_path": "spi/injector/velocity_mass_centre_fragments_z",
+          "standard_name": "vertical_velocity_of_pellet",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "plasma_facing_component",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 3,
+      "name_stage_counts": {
+        "accepted": 3
+      },
+      "rationale": "The limiter and mobile-unit rows live under the wall IDS; at least the limiter is directly a plasma-facing component. Wall topology supplies the entity class without repeating its Standard Name locus, so the family cannot safely use lexical zero-overlap as a refusal.",
+      "evidence_pairings": [
+        "wall/description_2d/limiter/unit/midplane_thickness -> thickness_of_plasma_facing_component",
+        "wall/description_2d/mobile/unit/resistivity -> resistivity_of_plasma_facing_component"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:wall/description_2d/limiter/unit/midplane_thickness",
+          "dd_path": "wall/description_2d/limiter/unit/midplane_thickness",
+          "standard_name": "thickness_of_plasma_facing_component",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:wall/description_2d/limiter/unit/resistivity",
+          "dd_path": "wall/description_2d/limiter/unit/resistivity",
+          "standard_name": "resistivity_of_plasma_facing_component",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:wall/description_2d/mobile/unit/resistivity",
+          "dd_path": "wall/description_2d/mobile/unit/resistivity",
+          "standard_name": "resistivity_of_plasma_facing_component",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "vacuum_vessel",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 2,
+      "name_stage_counts": {
+        "accepted": 2
+      },
+      "rationale": "Live DD documentation for wall/global_quantities/current_phi explicitly says toroidal current flowing in the vacuum vessel, and the lower gas-injection summary denotes injection into the lower vessel region. Both are supported implicit-owner pairings despite zero literal overlap.",
+      "evidence_pairings": [
+        "wall/global_quantities/current_phi -> toroidal_current_of_vacuum_vessel",
+        "summary/gas_injection_rates/bottom/value -> total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:summary/gas_injection_rates/bottom/value",
+          "dd_path": "summary/gas_injection_rates/bottom/value",
+          "standard_name": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:wall/global_quantities/current_phi",
+          "dd_path": "wall/global_quantities/current_phi",
+          "standard_name": "toroidal_current_of_vacuum_vessel",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    },
+    {
+      "family": "wave_beam",
+      "isn_locus_type": "entity",
+      "verdict": "decline",
+      "new_pairing_count": 7,
+      "name_stage_counts": {
+        "accepted": 7
+      },
+      "rationale": "Diagnostic channel wavelength, frequency, and phase paths plus the Thomson laser area/wavelength paths describe the propagating beam even when the DD uses the instrument or laser owner. The seven pairings are normal implicit beam context, not evidence for a device mismatch.",
+      "evidence_pairings": [
+        "interferometer/channel/wavelength/value -> wavelength_of_wave_beam",
+        "refractometer/channel/bandwidth/phase -> wave_phase_of_wave_beam",
+        "thomson_scattering/laser/wavelength -> wavelength_of_wave_beam"
+      ],
+      "pairings": [
+        {
+          "source_node_id": "dd:interferometer/channel/wavelength/phase_corrected",
+          "dd_path": "interferometer/channel/wavelength/phase_corrected",
+          "standard_name": "wave_phase_of_wave_beam",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:interferometer/channel/wavelength/value",
+          "dd_path": "interferometer/channel/wavelength/value",
+          "standard_name": "wavelength_of_wave_beam",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:polarimeter/channel/wavelength",
+          "dd_path": "polarimeter/channel/wavelength",
+          "standard_name": "wavelength_of_wave_beam",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:refractometer/channel/bandwidth/frequency_main",
+          "dd_path": "refractometer/channel/bandwidth/frequency_main",
+          "standard_name": "reference_frequency_of_wave_beam",
+          "name_stage": "accepted",
+          "name_origin": "pipeline",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:refractometer/channel/bandwidth/phase",
+          "dd_path": "refractometer/channel/bandwidth/phase",
+          "standard_name": "wave_phase_of_wave_beam",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:thomson_scattering/laser/area",
+          "dd_path": "thomson_scattering/laser/area",
+          "standard_name": "width_of_wave_beam",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        },
+        {
+          "source_node_id": "dd:thomson_scattering/laser/wavelength",
+          "dd_path": "thomson_scattering/laser/wavelength",
+          "standard_name": "wavelength_of_wave_beam",
+          "name_stage": "accepted",
+          "name_origin": "catalog_edit",
+          "historical_name_stage": false
+        }
+      ]
+    }
+  ]
+}
