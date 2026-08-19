@@ -18722,6 +18722,336 @@ def retire_ineligible_standard_name_sources(
             client.close()
 
 
+EXHAUSTED_ORPHAN_SUPERSESSION_MANIFEST_SCHEMA = (
+    "imas-codex.exhausted-orphan-supersession-manifest.v1"
+)
+EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA = (
+    "imas-codex.exhausted-orphan-supersession-receipt.v1"
+)
+
+
+class ExhaustedOrphanSupersessionConflict(RuntimeError):
+    """The signed exhausted-orphan cohort no longer matches graph authority."""
+
+
+def _exhausted_orphan_supersession_authority(
+    query_handle: _TransactionQuery,
+    name_ids: list[str],
+    reason: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    rows = query_handle.query(
+        """
+        UNWIND $name_ids AS requested_id
+        OPTIONAL MATCH (name:StandardName {id: requested_id})
+        OPTIONAL MATCH (source:StandardNameSource)-[binding:PRODUCED_NAME]->(name)
+        WITH requested_id, name,
+             [producer IN collect(CASE WHEN source IS NULL THEN null ELSE
+               {source_element_id: elementId(source),
+                source_properties: properties(source),
+                binding_element_id: elementId(binding),
+                binding_properties: properties(binding)} END)
+              WHERE producer IS NOT NULL] AS producers
+        RETURN requested_id,
+               elementId(name) AS name_element_id,
+               properties(name) AS name_properties,
+               producers
+        ORDER BY requested_id
+        """,
+        name_ids=name_ids,
+    )
+    participants: list[dict[str, Any]] = []
+    actions: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for raw in rows:
+        participant = dict(raw)
+        participant["producers"] = sorted(
+            (dict(producer) for producer in participant.get("producers") or []),
+            key=lambda producer: (
+                producer["source_properties"].get("id", ""),
+                producer["binding_element_id"],
+            ),
+        )
+        participants.append(participant)
+        properties = participant.get("name_properties")
+        refusal: str | None = None
+        if properties is None:
+            refusal = "name does not exist"
+        elif properties.get("name_stage") != "exhausted":
+            refusal = f"name_stage is {properties.get('name_stage')!r}, not 'exhausted'"
+        elif properties.get("origin") == "derived":
+            refusal = "origin is derived"
+        elif participant["producers"]:
+            refusal = "name has a live producing source"
+        if refusal is not None:
+            refusals.append({"name_id": raw["requested_id"], "reason": refusal})
+            continue
+        actions.append(
+            {
+                "name_id": raw["requested_id"],
+                "name_element_id": participant["name_element_id"],
+                "expected_properties": properties,
+            }
+        )
+
+    manifest = {
+        "schema": EXHAUSTED_ORPHAN_SUPERSESSION_MANIFEST_SCHEMA,
+        "operation": "supersede_exhausted_standard_name_orphans",
+        "reason": reason,
+        "name_ids": name_ids,
+        "participants": participants,
+        "actions": actions,
+        "refusals": refusals,
+    }
+    return manifest, actions, refusals
+
+
+def _exhausted_orphan_change_id(manifest_sha256: str, name_id: str) -> str:
+    name_digest = hashlib.sha256(name_id.encode("utf-8")).hexdigest()[:20]
+    return f"sn-change:exhausted-orphan:{manifest_sha256}:{name_digest}"
+
+
+@retry_on_deadlock()
+def supersede_exhausted_standard_name_orphans(
+    name_ids: list[str] | None = None,
+    *,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Supersede a signed cohort of non-derived exhausted source-less names.
+
+    Omitting ``name_ids`` computes the fresh complete eligible cohort. Explicit
+    ids retain refusal evidence for names outside that cohort. Apply requires
+    the exact preview hash and writes one durable change row for every name.
+    """
+    if not reason.strip():
+        raise ValueError("exhausted orphan supersession requires a non-empty reason")
+    if name_ids is not None and len(set(name_ids)) != len(name_ids):
+        raise ValueError("exhausted orphan supersession requires unique name ids")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+
+    own = gc is None
+    client: Any = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                requested = (
+                    sorted(name_ids)
+                    if name_ids is not None
+                    else [
+                        row["id"]
+                        for row in query_handle.query(
+                            """
+                            MATCH (name:StandardName)
+                            WHERE name.name_stage = 'exhausted'
+                              AND coalesce(name.origin, '') <> 'derived'
+                              AND NOT EXISTS {
+                                (:StandardNameSource)-[:PRODUCED_NAME]->(name)
+                              }
+                            RETURN name.id AS id ORDER BY id
+                            """
+                        )
+                    ]
+                )
+                if apply and requested:
+                    expected_event_ids = [
+                        _exhausted_orphan_change_id(manifest_sha256, name_id)
+                        for name_id in requested
+                    ]
+                    replay = query_handle.query(
+                        """
+                        UNWIND $rows AS expected
+                        OPTIONAL MATCH (name:StandardName {id: expected.name_id})
+                        OPTIONAL MATCH (change:StandardNameChange {
+                          id: expected.event_id,
+                          operation: 'supersede_exhausted_orphan',
+                          manifest_sha256: $manifest_sha256
+                        })
+                        RETURN collect({name_id: expected.name_id,
+                          stage: name.name_stage, status: name.status,
+                          live_sources: COUNT {
+                            (:StandardNameSource)-[:PRODUCED_NAME]->(name)
+                          }, change_id: change.id}) AS rows
+                        """,
+                        rows=[
+                            {"name_id": name_id, "event_id": event_id}
+                            for name_id, event_id in zip(
+                                requested, expected_event_ids, strict=True
+                            )
+                        ],
+                        manifest_sha256=manifest_sha256,
+                    )
+                    replay_rows = replay[0].get("rows") if replay else []
+                    present_events = [
+                        row for row in replay_rows if row.get("change_id") is not None
+                    ]
+                    if present_events:
+                        if len(present_events) != len(requested) or any(
+                            row.get("stage") != "superseded"
+                            or row.get("status") != "superseded"
+                            or int(row.get("live_sources") or 0) != 0
+                            for row in replay_rows
+                        ):
+                            raise ExhaustedOrphanSupersessionConflict(
+                                "recorded orphan supersession has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "persistent_writes": 0,
+                            "superseded": len(requested),
+                            "ledger_rows": len(present_events),
+                            "manifest_sha256": manifest_sha256,
+                            "change_ids": sorted(expected_event_ids),
+                        }
+
+                manifest, actions, refusals = _exhausted_orphan_supersession_authority(
+                    query_handle, requested, reason
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = {
+                    "requested": len(requested),
+                    "admitted": len(actions),
+                    "refused": len(refusals),
+                }
+                if apply and computed_hash != manifest_sha256:
+                    raise ExhaustedOrphanSupersessionConflict(
+                        "fresh exhausted-orphan manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                        "outcome": "would_apply" if actions else "already_clean",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": len(actions),
+                        "counts": counts,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                locked = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (name:StandardName {id: expected.name_id})
+                    WHERE elementId(name) = expected.name_element_id
+                    SET name.name_stage = name.name_stage
+                    RETURN collect(name.id) AS ids
+                    """,
+                    rows=actions,
+                )
+                locked_ids = sorted(locked[0].get("ids") or []) if locked else []
+                if locked_ids != requested:
+                    raise ExhaustedOrphanSupersessionConflict(
+                        "orphan participant set changed while acquiring locks"
+                    )
+                locked_manifest, locked_actions, locked_refusals = (
+                    _exhausted_orphan_supersession_authority(
+                        query_handle, requested, reason
+                    )
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise ExhaustedOrphanSupersessionConflict(
+                        "orphan authority changed while acquiring participant locks"
+                    )
+                mutation_rows = [
+                    {
+                        **action,
+                        "event_id": _exhausted_orphan_change_id(
+                            computed_hash, action["name_id"]
+                        ),
+                    }
+                    for action in locked_actions
+                ]
+                changed_rows = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (name:StandardName {id: expected.name_id})
+                    WHERE elementId(name) = expected.name_element_id
+                      AND name.name_stage = 'exhausted'
+                      AND coalesce(name.origin, '') <> 'derived'
+                      AND NOT EXISTS {
+                        (:StandardNameSource)-[:PRODUCED_NAME]->(name)
+                      }
+                    SET name.name_stage = 'superseded',
+                        name.status = 'superseded',
+                        name.claimed_at = null,
+                        name.claim_token = null
+                    CREATE (change:StandardNameChange {
+                      id: expected.event_id,
+                      from_name: expected.name_id,
+                      to_name: expected.name_id,
+                      operation: 'supersede_exhausted_orphan',
+                      reason: $reason,
+                      origin: 'orphan_reconciliation',
+                      run_id: $run_id,
+                      changed_at: datetime(),
+                      internal: true,
+                      manifest_sha256: $manifest_sha256
+                    })
+                    CREATE (name)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN name.id AS name_id, change.id AS change_id
+                    ORDER BY name_id
+                    """,
+                    rows=mutation_rows,
+                    reason=reason,
+                    run_id=run_id,
+                    manifest_sha256=computed_hash,
+                )
+                if [row["name_id"] for row in changed_rows] != requested:
+                    raise ExhaustedOrphanSupersessionConflict(
+                        "orphan lifecycle compare-and-set changed during supersession"
+                    )
+                transaction.commit()
+                return {
+                    "schema": EXHAUSTED_ORPHAN_SUPERSESSION_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": len(changed_rows),
+                    "persistent_writes": len(changed_rows) * 4,
+                    "superseded": len(changed_rows),
+                    "ledger_rows": len(changed_rows),
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_ids": [row["change_id"] for row in changed_rows],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 ANCESTOR_SUPERSESSION_MANIFEST_SCHEMA = (
     "imas-codex.standard-name-ancestor-supersession-manifest.v1"
 )
