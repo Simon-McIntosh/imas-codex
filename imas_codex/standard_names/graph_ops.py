@@ -20477,6 +20477,496 @@ def retire_ineligible_standard_name_sources(
             client.close()
 
 
+SIGNED_ORPHAN_RETIREMENT_MANIFEST_SCHEMA = (
+    "imas-codex.signed-provenance-orphan-retirement-manifest.v1"
+)
+SIGNED_ORPHAN_RETIREMENT_RECEIPT_SCHEMA = (
+    "imas-codex.signed-provenance-orphan-retirement-receipt.v1"
+)
+_SIGNED_ORPHAN_RETIREMENT_DISPOSITION = "retire_under_orphan_policy"
+
+
+class SignedOrphanRetirementConflict(RuntimeError):
+    """The signed orphan-retirement closure no longer matches graph authority."""
+
+
+def _validate_signed_orphan_retirement_authority(
+    authority: dict[str, Any], authority_sha256: str
+) -> list[dict[str, Any]]:
+    if not _SHA256_RE.fullmatch(authority_sha256):
+        raise ValueError("orphan authority SHA-256 must be a lowercase digest")
+    if _catalog_edit_adjudication_signature_hash(authority) != authority_sha256:
+        raise ValueError("orphan retirement authority signature does not match")
+    if authority.get("schema") != _STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA:
+        raise ValueError("unsupported orphan retirement authority schema")
+    if authority.get("read_only") is not True:
+        raise ValueError("orphan retirement authority must be read-only evidence")
+
+    raw_rows = authority.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise ValueError("orphan retirement authority requires target rows")
+    if any(
+        not isinstance(row, dict) or row.get("disposition") not in _ORPHAN_DISPOSITIONS
+        for row in raw_rows
+    ):
+        raise ValueError("orphan retirement authority has an unknown disposition")
+    names = [row.get("name") for row in raw_rows]
+    if any(not isinstance(name, str) or not name for name in names):
+        raise ValueError("every orphan disposition requires an exact name")
+    if len(names) != len(set(names)):
+        raise ValueError("orphan disposition names must be unique")
+
+    disposition_counts = {
+        disposition: sum(row["disposition"] == disposition for row in raw_rows)
+        for disposition in sorted(_ORPHAN_DISPOSITIONS)
+    }
+    summary = authority.get("summary")
+    if (
+        not isinstance(summary, dict)
+        or summary.get("targets") != len(raw_rows)
+        or summary.get("disposition_sum") != len(raw_rows)
+        or summary.get("disposition_counts") != disposition_counts
+    ):
+        raise ValueError("orphan retirement authority summary does not match rows")
+
+    retirements: list[dict[str, Any]] = []
+    for raw_row in raw_rows:
+        if raw_row["disposition"] != _SIGNED_ORPHAN_RETIREMENT_DISPOSITION:
+            continue
+        row = dict(raw_row)
+        if row.get("mutation_authority") != "classification_only":
+            raise ValueError(
+                "signed orphan evidence cannot directly grant source mutation"
+            )
+        if row.get("name_stage") not in {"accepted", "reviewed", "drafted", "pending"}:
+            raise ValueError("signed orphan target requires a live lifecycle stage")
+        closure = row.get("structural_closure")
+        if (
+            not isinstance(closure, dict)
+            or closure.get("classification") != "no_live_structural_descendant"
+            or closure.get("has_live_has_parent_child") is not False
+            or closure.get("has_live_refined_from_descendant") is not False
+            or closure.get("live_has_parent_children") != []
+            or closure.get("live_refined_from_descendants") != []
+        ):
+            raise ValueError(
+                "signed orphan retirement requires an empty structural closure"
+            )
+        removed_bindings = row.get("current_removed_bindings")
+        if not isinstance(removed_bindings, list) or not removed_bindings:
+            raise ValueError(
+                "signed orphan retirement requires name-specific binding evidence"
+            )
+        retirements.append(
+            {
+                **row,
+                "authority_row_sha256": _catalog_edit_adjudication_signature_hash(row),
+            }
+        )
+    retirements.sort(key=lambda row: row["name"])
+    if not retirements:
+        raise ValueError("orphan authority contains no retirement dispositions")
+    if summary.get("remaining_retirements") != len(retirements) or summary.get(
+        "retirements_with_name_specific_evidence"
+    ) != len(retirements):
+        raise ValueError("orphan retirement summary does not match signed targets")
+    return retirements
+
+
+def _signed_orphan_retirement_authority(
+    query_handle: _TransactionQuery,
+    retirement_rows: list[dict[str, Any]],
+    authority_sha256: str,
+    reason: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    name_ids = [row["name"] for row in retirement_rows]
+    graph_rows = query_handle.query(
+        """
+        UNWIND $name_ids AS requested_id
+        OPTIONAL MATCH (name:StandardName {id: requested_id})
+        RETURN requested_id,
+               elementId(name) AS name_element_id,
+               properties(name) AS name_properties,
+               CASE WHEN name IS NULL THEN [] ELSE
+                 [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(name) |
+                   {source_element_id: elementId(source),
+                    source_properties: properties(source),
+                    binding_element_id: elementId(binding),
+                    binding_properties: properties(binding)}]
+               END AS producers,
+               CASE WHEN name IS NULL THEN [] ELSE
+                 [(child:StandardName)-[relationship:HAS_PARENT]->(name) |
+                   {child_element_id: elementId(child),
+                    child_properties: properties(child),
+                    relationship_element_id: elementId(relationship),
+                    relationship_properties: properties(relationship)}]
+               END AS structural_children
+        ORDER BY requested_id
+        """,
+        name_ids=name_ids,
+    )
+    signed_by_name = {row["name"]: row for row in retirement_rows}
+    participants: list[dict[str, Any]] = []
+    actions: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for raw in graph_rows:
+        signed = signed_by_name[raw["requested_id"]]
+        producers = sorted(
+            (dict(producer) for producer in raw.get("producers") or []),
+            key=lambda producer: (
+                (producer.get("source_properties") or {}).get("id", ""),
+                producer["binding_element_id"],
+            ),
+        )
+        structural_children = sorted(
+            (dict(child) for child in raw.get("structural_children") or []),
+            key=lambda child: (
+                (child.get("child_properties") or {}).get("id", ""),
+                child["relationship_element_id"],
+            ),
+        )
+        participant = {
+            "name_id": signed["name"],
+            "authority_row_sha256": signed["authority_row_sha256"],
+            "signed_name_stage": signed["name_stage"],
+            "name_element_id": raw.get("name_element_id"),
+            "name_properties": raw.get("name_properties"),
+            "producers": producers,
+            "structural_children": structural_children,
+        }
+        participants.append(participant)
+        properties = raw.get("name_properties")
+        refusal: str | None = None
+        if properties is None:
+            refusal = "name does not exist"
+        elif properties.get("name_stage") != signed["name_stage"]:
+            refusal = "name lifecycle stage changed from signed authority"
+        elif (
+            properties.get("claimed_at") is not None
+            or properties.get("claim_token") is not None
+        ):
+            refusal = "name has an active claim"
+        elif any(
+            (producer.get("source_properties") or {}).get("status") != "stale"
+            for producer in producers
+        ):
+            refusal = "name has a live producing source"
+        elif any(_is_live_structural_child(child) for child in structural_children):
+            refusal = "name has a live HAS_PARENT child"
+        if refusal is not None:
+            refusals.append({"name_id": signed["name"], "reason": refusal})
+            continue
+        actions.append(
+            {
+                "name_id": signed["name"],
+                "name_element_id": raw["name_element_id"],
+                "prior_name_stage": signed["name_stage"],
+            }
+        )
+
+    manifest = {
+        "schema": SIGNED_ORPHAN_RETIREMENT_MANIFEST_SCHEMA,
+        "operation": "retire_signed_provenance_orphans",
+        "reason": reason,
+        "authority": {
+            "schema": _STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA,
+            "payload_sha256": authority_sha256,
+            "disposition": _SIGNED_ORPHAN_RETIREMENT_DISPOSITION,
+            "target_ids": name_ids,
+        },
+        "participants": participants,
+        "actions": actions,
+        "refusals": refusals,
+    }
+    return manifest, actions, refusals
+
+
+def _signed_orphan_retirement_change_id(manifest_sha256: str, name_id: str) -> str:
+    name_digest = hashlib.sha256(name_id.encode("utf-8")).hexdigest()[:20]
+    return f"sn-change:signed-orphan-retirement:{manifest_sha256}:{name_digest}"
+
+
+@retry_on_deadlock()
+def retire_signed_provenance_orphans(
+    authority: dict[str, Any],
+    *,
+    authority_sha256: str,
+    reason: str,
+    name_ids: list[str] | None = None,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Supersede the exact signed cohort with one lifecycle row per identity."""
+    if not reason.strip():
+        raise ValueError("signed orphan retirement requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None and not _SHA256_RE.fullmatch(manifest_sha256):
+        raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
+    retirements = _validate_signed_orphan_retirement_authority(
+        authority, authority_sha256
+    )
+    signed_ids = [row["name"] for row in retirements]
+    requested = signed_ids if name_ids is None else sorted(name_ids)
+    if len(requested) != len(set(requested)):
+        raise ValueError("signed orphan retirement requires unique name ids")
+    outside = sorted(set(requested) - set(signed_ids))
+    omitted = sorted(set(signed_ids) - set(requested))
+    if outside or omitted:
+        refusals = [
+            {
+                "name_id": name_id,
+                "reason": "target is outside signed retirement authority",
+            }
+            for name_id in outside
+        ] + [
+            {
+                "name_id": name_id,
+                "reason": "signed retirement target was omitted",
+            }
+            for name_id in omitted
+        ]
+        return {
+            "schema": SIGNED_ORPHAN_RETIREMENT_RECEIPT_SCHEMA,
+            "outcome": "refused",
+            "dry_run": not apply,
+            "changed": 0,
+            "would_change": 0,
+            "counts": {
+                "requested": len(requested),
+                "admitted": 0,
+                "refused": len(refusals),
+            },
+            "refusals": refusals,
+            "authority_sha256": authority_sha256,
+        }
+
+    own = gc is None
+    client: Any = GraphClient() if own else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query_handle = _TransactionQuery(transaction)
+            try:
+                expected_event_ids = (
+                    [
+                        _signed_orphan_retirement_change_id(manifest_sha256, name_id)
+                        for name_id in signed_ids
+                    ]
+                    if manifest_sha256 is not None
+                    else []
+                )
+                if apply:
+                    replay = query_handle.query(
+                        """
+                        UNWIND $rows AS expected
+                        OPTIONAL MATCH (name:StandardName {id: expected.name_id})
+                        OPTIONAL MATCH (name)-[:HAS_INTERNAL_CHANGE]->
+                          (change:StandardNameChange {
+                            id: expected.event_id,
+                            operation: 'retire_signed_provenance_orphan',
+                            manifest_sha256: $manifest_sha256
+                          })
+                        RETURN collect({name_id: expected.name_id,
+                          stage: name.name_stage,
+                          status: name.status,
+                          live_sources: COUNT {
+                            (source:StandardNameSource)-[:PRODUCED_NAME]->(name)
+                            WHERE coalesce(source.status, '') <> 'stale'
+                          },
+                          live_children: COUNT {
+                            (child:StandardName)-[:HAS_PARENT]->(name)
+                            WHERE child.name_stage <> 'superseded'
+                              AND NOT (coalesce(child.status, '') IN
+                                ['deprecated', 'superseded'])
+                          }, change_id: change.id}) AS rows
+                        """,
+                        rows=[
+                            {"name_id": name_id, "event_id": event_id}
+                            for name_id, event_id in zip(
+                                signed_ids, expected_event_ids, strict=True
+                            )
+                        ],
+                        manifest_sha256=manifest_sha256,
+                    )
+                    replay_rows = replay[0].get("rows") if replay else []
+                    present_events = [
+                        row for row in replay_rows if row.get("change_id") is not None
+                    ]
+                    if present_events:
+                        if len(present_events) != len(signed_ids) or any(
+                            row.get("stage") != "superseded"
+                            or row.get("status") != "superseded"
+                            or int(row.get("live_sources") or 0) != 0
+                            or int(row.get("live_children") or 0) != 0
+                            for row in replay_rows
+                        ):
+                            raise SignedOrphanRetirementConflict(
+                                "recorded orphan retirement has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": SIGNED_ORPHAN_RETIREMENT_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "persistent_writes": 0,
+                            "superseded": len(signed_ids),
+                            "ledger_rows": len(present_events),
+                            "manifest_sha256": manifest_sha256,
+                            "change_ids": sorted(expected_event_ids),
+                        }
+
+                manifest, actions, refusals = _signed_orphan_retirement_authority(
+                    query_handle, retirements, authority_sha256, reason
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = {
+                    "requested": len(signed_ids),
+                    "admitted": len(actions),
+                    "refused": len(refusals),
+                }
+                if apply and computed_hash != manifest_sha256:
+                    raise SignedOrphanRetirementConflict(
+                        "fresh orphan-retirement manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_ORPHAN_RETIREMENT_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_ORPHAN_RETIREMENT_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": len(actions),
+                        "counts": counts,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                locked = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (name:StandardName {id: expected.name_id})
+                    WHERE elementId(name) = expected.name_element_id
+                    SET name.name_stage = name.name_stage
+                    RETURN collect(name.id) AS ids
+                    """,
+                    rows=actions,
+                )
+                if sorted(locked[0].get("ids") or []) != signed_ids:
+                    raise SignedOrphanRetirementConflict(
+                        "orphan target set changed while acquiring locks"
+                    )
+                locked_manifest, locked_actions, locked_refusals = (
+                    _signed_orphan_retirement_authority(
+                        query_handle, retirements, authority_sha256, reason
+                    )
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise SignedOrphanRetirementConflict(
+                        "orphan authority changed while acquiring target locks"
+                    )
+                mutation_rows = [
+                    {
+                        **action,
+                        "event_id": _signed_orphan_retirement_change_id(
+                            computed_hash, action["name_id"]
+                        ),
+                    }
+                    for action in locked_actions
+                ]
+                changed_rows = query_handle.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (name:StandardName {id: expected.name_id})
+                    WHERE elementId(name) = expected.name_element_id
+                      AND name.name_stage = expected.prior_name_stage
+                      AND name.claimed_at IS NULL
+                      AND name.claim_token IS NULL
+                      AND NOT EXISTS {
+                        (source:StandardNameSource)-[:PRODUCED_NAME]->(name)
+                        WHERE coalesce(source.status, '') <> 'stale'
+                      }
+                      AND NOT EXISTS {
+                        (child:StandardName)-[:HAS_PARENT]->(name)
+                        WHERE child.name_stage <> 'superseded'
+                          AND NOT (coalesce(child.status, '') IN
+                            ['deprecated', 'superseded'])
+                      }
+                    SET name.superseded_from_stage = coalesce(
+                          name.superseded_from_stage, name.name_stage),
+                        name.name_stage = 'superseded',
+                        name.status = 'superseded',
+                        name.claimed_at = null,
+                        name.claim_token = null
+                    CREATE (change:StandardNameChange {
+                      id: expected.event_id,
+                      from_name: expected.name_id,
+                      to_name: expected.name_id,
+                      operation: 'retire_signed_provenance_orphan',
+                      reason: $reason,
+                      origin: 'orphan_reconciliation',
+                      run_id: $run_id,
+                      changed_at: datetime(),
+                      internal: true,
+                      authority_sha256: $authority_sha256,
+                      manifest_sha256: $manifest_sha256
+                    })
+                    CREATE (name)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN name.id AS name_id, change.id AS change_id
+                    ORDER BY name_id
+                    """,
+                    rows=mutation_rows,
+                    reason=reason,
+                    run_id=run_id,
+                    authority_sha256=authority_sha256,
+                    manifest_sha256=computed_hash,
+                )
+                if [row["name_id"] for row in changed_rows] != signed_ids:
+                    raise SignedOrphanRetirementConflict(
+                        "orphan lifecycle compare-and-set changed during retirement"
+                    )
+                transaction.commit()
+                return {
+                    "schema": SIGNED_ORPHAN_RETIREMENT_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": len(changed_rows),
+                    "persistent_writes": len(changed_rows) * 4,
+                    "superseded": len(changed_rows),
+                    "ledger_rows": len(changed_rows),
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_ids": [row["change_id"] for row in changed_rows],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own:
+            client.close()
+
+
 EXHAUSTED_ORPHAN_SUPERSESSION_MANIFEST_SCHEMA = (
     "imas-codex.exhausted-orphan-supersession-manifest.v1"
 )
