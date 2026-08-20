@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T14:57:11",
+  "updated": "2026-08-20T15:25:31",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -71,7 +71,7 @@
         "id": "impl-owner",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a01f42-e893-7fd3-a5e7-ffcd943f5d3b",
         "created": "2026-08-19"
       },
       {
@@ -8298,9 +8298,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T125834362599-sgwi-retire-dual-authority-operator",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-retire-dual-authority-operator",
+        "role": "implement",
+        "member": "impl-residue",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:59:04Z",
+        "completed_at": "2026-08-20T13:21:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1333,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1333,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9030de03e5820bfb393920b0b45d49f66ab08196",
+        "commits": [
+          "d493e7f8"
+        ],
+        "changed_lines": {
+          "added": 1130,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T125834362599-sgwi-retire-dual-authority-operator/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01880-7fdf-7852-a159-c51e790fa1d4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10373376,
+            "cached_input_tokens_cumulative": 15322368,
+            "input_tokens": 10759374,
+            "input_tokens_cumulative": 15859852,
+            "output_tokens": 35841,
+            "output_tokens_cumulative": 53376,
+            "reasoning_output_tokens": 8389,
+            "reasoning_output_tokens_cumulative": 15781
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 188
+    "_version": 190
   }
 }
