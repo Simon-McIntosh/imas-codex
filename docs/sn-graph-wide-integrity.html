@@ -16,9 +16,9 @@
   <title>Graph-wide name integrity | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-19">
-<meta name="plan-version" content="181">
-<meta name="plan-impl" content="0.995">
+<meta name="plan-modified" content="2026-08-20">
+<meta name="plan-version" content="185">
+<meta name="plan-impl" content="0.94">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -35,15 +35,46 @@
     </section>
 
     <section id="current-bounded-closure">
-      <h2>Current bounded closure</h2>
+      <h2>Current state — measured 2026-08-20</h2>
       <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
-        <p><strong>The safety machinery is landed; live protected mutations are
-        still held.</strong> Exact authority, dry-run, transactional apply,
-        idempotent replay, and one-query release census are available through
-        <code>sn reconcile-protected-structure</code>. The latest aggregate graph
-        read classifies 491 semantic findings and 68 orphans but finds
-        <strong>zero signed mutation-ready actions</strong>. No protected fold or
-        retirement has been applied.</p>
+        <p><strong>Three of the six tracked defect classes are closed at zero and
+        the remainder has collapsed into one coupled interlock.</strong> Every
+        number below is a live graph measurement taken on 2026-08-20, not a
+        carried-forward estimate. Earlier counts in the sections below are the
+        historical record of how each class was found and must not be read as
+        current.</p>
+        <table>
+          <caption>Tracked defect classes, first measurement versus today</caption>
+          <thead><tr><th>Class</th><th>As found</th><th>2026-08-20</th><th>State</th></tr></thead>
+          <tbody>
+            <tr><td>Semantic sources with no live target</td><td>596</td><td><strong>0</strong></td><td>closed</td></tr>
+            <tr><td>Scalar mirror mismatches</td><td>144</td><td><strong>0</strong></td><td>closed</td></tr>
+            <tr><td>DD projection mismatches</td><td>2</td><td><strong>0</strong></td><td>closed</td></tr>
+            <tr><td>Dual-bound semantic sources</td><td>226</td><td><strong>87</strong></td><td>open — interlocked</td></tr>
+            <tr><td>Live names with no producing source</td><td>85</td><td><strong>36</strong></td><td>open — interlocked</td></tr>
+            <tr><td>Owner/geometry authority rows</td><td>49</td><td><strong>49</strong></td><td>adjudicated, unapplied</td></tr>
+            <tr><td>Accepted names failing the pinned grammar</td><td>2</td><td><strong>0</strong></td><td>closed</td></tr>
+          </tbody>
+        </table>
+        <p><strong>The remaining three rows are one problem, not three.</strong> A
+        dual binding cannot be cut until it is known whether the losing name keeps
+        a producing source; that is the last-binding closure guard refusing to
+        create orphans. So the 87 dual-bound sources, the 36 unsourced names and
+        the owner/geometry applies all resolve through a single question — which
+        identity survives, and what sources it retains. Resolve the orphan
+        disposition and the other two largely fall out.</p>
+        <p><strong>Prevention is landed and enforced at the write boundary.</strong>
+        The signed disposition instrument signs and compare-and-set locks each
+        removed target's complete global incoming <code>PRODUCED_NAME</code>
+        closure, re-hashes after locking, and fails closed on any removal that
+        would strip a name's final producing source. Stale sources are signed into
+        the closure but never counted as live producers.</p>
+        <p><strong>Grammar is current.</strong> The pinned dependency is ISN
+        <code>v0.8.0rc66</code>, which admits the <code>polarizer</code>,
+        <code>pellet_fragment</code>, <code>wave_diagnostic_channel</code> and
+        <code>active_spatial_resolution_zone</code> loci and refuses
+        <code>field_map_grid</code> as a discretization artifact. All 2,543
+        accepted names parse strictly under it.</p>
         <figure>
           <img src="/imas-codex/figures/sn-graph-wide-integrity/bounded-reconciliation.svg"
                alt="Bounded reconciliation flow from one aggregate graph read through signed authority, dry-run, explicit apply, and one-query release census">
@@ -51,6 +82,62 @@
           manifest can cross the write boundary; ambiguous, stale, protected, and
           open-lifecycle rows remain visible non-actions.</figcaption>
         </figure>
+      </div>
+    </section>
+
+    <section id="remaining-work">
+      <h2>Remaining executable work</h2>
+      <div class="card" style="border-left:4px solid #c80; padding-left:12px;">
+        <p>Roughly four to six serialized nodes. Applies must serialize: two
+        concurrent mutators invalidate each other's out-of-allowlist immutability
+        proofs, which is the evidence every repair in this plan rests on.</p>
+        <ol>
+          <li><strong>Orphan disposition (36 names)</strong> — 27 accepted, 4
+          drafted, 4 reviewed, 1 pending; zero derived-origin remain. The signed
+          adjudication in <code>refused-target-orphan-adjudication.json</code>
+          covers the protected subset as 16 retire, 1 re-source, 3 retain and 69
+          structural. Needs a ledgered lifecycle instrument; never a bulk rule on
+          an accepted name.</li>
+          <li><strong>Dual-bound residue (87 sources)</strong> — the 78 rows the
+          closure guard refused plus residue. Unblocks as orphan dispositions land.</li>
+          <li><strong>Owner/geometry apply (49 rows)</strong> — signed mapping is
+          complete: 21 rows point at accepted-valid targets and are ready; 20 point
+          at absent identities needing ordinary lifecycle review first; 6 were
+          vocabulary-blocked and 5 of those are now unblocked by rc66; 2 are stale
+          sources needing detach or versioned migration.</li>
+          <li><strong>Ancestor folds (9 + 1 stale detach)</strong> — gated on three
+          reviewed-not-accepted ancestors (<code>radial_ion_momentum</code>,
+          <code>radial_momentum_flux</code>,
+          <code>poloidal_neutral_state_momentum_flux</code>) reaching accepted
+          through ordinary review, plus two complete-source/scalar conflicts.</li>
+          <li><strong>Stale-source lifecycle</strong> — blocks the
+          <code>frequency_of_diagnostic_antenna</code> →
+          <code>frequency_of_wave_diagnostic_channel</code> rename, which failed
+          closed on <code>dd:refractometer/channel/frequencies</code> at
+          <code>status='stale'</code>, and the same two owner/geometry rows.</li>
+          <li><strong>Two carried single-name repairs</strong> — the
+          correct-but-blocked rename <code>voltage_of_diagnostic_antenna</code> →
+          <code>voltage_of_ece_channel</code> (still one accepted name on one
+          source; the <code>ece_channel</code> locus already exists, so this needs
+          no vocabulary), and <code>electron_source_rate</code>, which sits at
+          <code>name_stage='reviewed'</code> with unit <code>s^-1</code> and needs
+          its unit-versus-documentation contradiction settled through ordinary
+          review. Both were carried from the retired dual-binding followup.</li>
+        </ol>
+        <p><strong>Measured closed since that followup was written, so do not
+        re-open them:</strong> the stricter ISN-entity locus rule is adjudicated
+        (3 families adopt, 9 decline, from a remeasured 134-pairing delta); the
+        synthetic <code>score=0.0</code> reviewer defect measures <strong>0</strong>
+        rows; and the <code>wavelength_bragg</code> duplicate edge measures a single
+        clean binding.</p>
+        <p><strong>Spend:</strong> $0.34 of the authorized $200 consumed. The ~23
+        identities needing ordinary review are the only material remaining cost.</p>
+        <p><strong>Closing with recorded refusals is legitimate.</strong> One
+        owner/geometry row stays on its old target because
+        <code>field_map_grid</code> is a policy refusal, not a gap to fill. Some
+        childless structural parents are legitimately unscoped. A close that
+        records these as fail-closed refusals with evidence is correct; fabricating
+        sources or substituting nearest-object identities is not.</p>
       </div>
     </section>
 
@@ -942,10 +1029,11 @@ Done-when (ordered)
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
     <p class="r-fu-outcome">Every WEST-blocking class has a recorded repair or a recorded, reviewed refusal, measured live rather than from the stale partition. The 2026-08-16 census superseded the historic 6/48/46/9/missing-gate with 3/4/12/0/0. Class 5 (persist_refined_name gate): CLEAR, guard_source_pairings verified inside the transaction. Class 4 (gm1-gm9): CLEAR, all nine accepted/valid with DD units (gm3 docs at reviewed is a docs-drain item for the release manifest). Class 2 (null scalar mirrors): REPAIRED 4 to 0 via the exact allowlist instrument (hash fec5658e, replay already_clean, out-of-allowlist immutability proven over 14k rows). Class 3 (line-of-sight /phi folds): REPAIRED 12 to 0 via retarget_standard_name_sources (event sn-change:source-migration:cc5712b4, all 12 verified with one live edge + scalar to the accepted toroidal_coordinate_of_line_of_sight; the 115-binding closure adjudication proved a global fold would corrupt 23 genuine measurement-position rows). Class 1 (three defective names): RECEIPTED — atomic_count_of_ion_state's fold into atomic_count refused fail-closed on a seven-identity REFINED_FROM lineage cycle (adjudication routed to f-sgwi-dual-binding, whose lead pair it is); the interferometer/Faraday split executed with the Faraday source reset for polarimeter compose; the interferometer-scoped and receiver-channel identities are recorded ISN vocabulary-gap refusals for the cross-repo rotation. Funded drains stayed at USD 0.00 of the authorized 150. sn-west-review-rehearsal's gate on this subset is open; the 31 same-rule non-WEST line-of-sight rows and 49 owner/geometry rows discovered in the closure are queued under f-graph-semantic-recovery.</p>
     </article>
-<article class="r-fu" data-id="f-sgwi-dual-binding" data-status="open" data-written-by="portfolio-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sgwi-dual-binding" data-status="resolved" data-written-by="portfolio-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-20T08:44:27+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Resolve the 362 dual-bound sources and the parked attachment worklist</h4>
     <div class="r-fu-body">Measured 2026-08-11 during the recovery follow-on: 362 StandardNameSource nodes are bound to more than one live StandardName — the mechanism behind the fold pairs (atomic_count_of_ion_state shares 39 of 76 sources with the accepted atomic_count) and behind blocked renames (the retarget compare-and-set requires exactly one binding). Establish one-live-name-per-source, then: (a) the include_accepted detach pass for the 41 gated inconsistent attachments plus the proven mis-attachments (faraday_angle weight belongs on a new polarimeter name; wavelength_bragg stale duplicate edge; the electron source path on the renamed particle source); (b) retry the correct-but-blocked rename voltage_of_diagnostic_antenna → voltage_of_ece_channel; (c) review the deferred stricter locus rule per family (ISN entity typing measured 189 flags vs the shipped 17 — it would refuse ~172 live pairings, so adopt per family or not at all); (d) the electron_source_rate stale unit scalar and its contradicting docs; (e) the synthetic score=0.0 'skipped reviewer LLM call' defect. Evidence: sn-pipeline-recovery-landed §follow-on and the rename-worklist manifest.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    <p class="r-fu-outcome">Retired because its numbers and worklist are superseded by measurement; remaining items are carried as plan sections, not as this followup. Dual-bound sources are 87, not the 362 recorded here: the scalar-selected dedup removed 57 bindings, the atomic_count ancestor fold covered its 76-source cohort, and the signed catalog-edit disposition applied 138 of 216 adjudicated rows with 78 refused by the last-binding closure guard. Of the five sub-items, three are measured closed - the stricter ISN-entity locus rule is adjudicated per family (3 adopt, 9 decline, remeasured 134-pairing delta versus the historic 172), the synthetic score=0.0 reviewer defect measures 0 rows, and wavelength_bragg carries a single clean binding. Two are carried forward into Remaining executable work: the voltage_of_diagnostic_antenna to voltage_of_ece_channel rename and the electron_source_rate unit-versus-documentation contradiction. The 87 residue is interlocked with the 36-name orphan disposition and resolves through it.</p>
     </article>
 <article class="r-fu" data-id="f-stub-reconcile" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-16" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-16T21:35:39+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Land the stub prevention fix and reconcile the 297 lifecycle-less names through an exact-manifest operator</h4>
@@ -959,10 +1047,11 @@ Done-when (ordered)
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
     <p class="r-fu-outcome">Landed end-to-end. The prototyped predicate fix went through two independent review rounds: the first corrective (ab242998) bounded in-flight suppression but reviewers reproduced a replica-age defect (a finished older batch's stale timestamp cancelled a 0.077s-old younger batch under a 0.2s bound); the second corrective (c87483fc) introduced per-active-batch completion identity with the minimum still-active timestamp and was APPROVED with zero findings, the reviewer's own probe replay showing the younger batch surviving its full window (0.2076s vs 0.2s bound). Merged at f378f4ed; post-merge gate 6526 passed / 10 skipped / 0 failed plus stall focus 32/32. Live convergence measure PASS: SNRun b5ab4a40 (sn run --only review_name --cost-limit 10 -t 15) ended completed/no_eligible_work in 162.7s with 64 replicas at in_flight=0 and error_count=0, spending $0.00 of the authorized $150 — the watchdog never persisted stalled. Drains are unblocked; the WEST-blocking subset (f-sgwi-west-blocking) proceeds next.</p>
     </article>
-<article class="r-fu" data-id="f-isn-vocab-rotation-los" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-17" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-isn-vocab-rotation-los" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-17" data-recommends-skill="" data-resolved-at="2026-08-20T08:44:27+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">ISN vocabulary rotation: receiver-channel locus and line-integrated density-constraint identity</h4>
     <div class="r-fu-body"><p>Two grammar-blocked repairs recorded on 2026-08-16 need ISN vocabulary before they can be retried: a shared wave-diagnostic receiver-channel locus (so the ECE, reflectometer, and refractometer frequency sources can carry one non-lossy identity replacing frequency_of_diagnostic_antenna) and a spelling for the line-integrated electron-density equilibrium-constraint weight (the interferometer half of the executed Faraday split). Follow the standard vocab rotation: add tokens on the ISN fork, cut an RC, bump the pinned dependency in both pyproject declarations, then retry both staged renames through ordinary review.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    <p class="r-fu-outcome">Rotation complete under lead authorization. ISN v0.8.0rc66 (6dd6eae) admits wave_diagnostic_channel, polarizer, pellet_fragment and active_spatial_resolution_zone, and refuses field_map_grid as a discretization artifact per the registry curation policy; ISN suite 1,996 passed / 0 failed; both codex pyproject declarations and uv.lock bumped and verified live at 0.8.0rc66. The second half needed no vocabulary at all: the line-integrated electron-density constraint weight already exists as the accepted, valid equilibrium_weight_of_interferometer_beam, resolved by ordinary compose after this followup was written. The receiver-channel rename is unblocked grammatically but failed closed on dd:refractometer/channel/frequencies at status='stale'; that retry is carried in the plan's Remaining executable work under stale-source lifecycle, not here. The rotation also exposed that the codex pin was several ISN commits stale, so seven prompts plus sn_review_criteria.yaml and sn_composition_rules.yaml were teaching a cross-sectional identity the grammar rejects; 15 files corrected and both affected accepted names renamed through ordinary review at score 1.00.</p>
     </article>
 </section>
 
@@ -1450,6 +1539,9 @@ Done-when (ordered)
 <div class="r-comment" data-section="_top" data-id="c-20260818-schema-baseline-repaired" data-who="reckon-ship" data-when="2026-08-18T21:20:00+00:00">
     <div class="r-comment-body"><p><strong>The pre-existing graph schema baseline is repaired at root cause and the schema gate signal is usable again: executed 9/9, 0 skipped, 0 failed (was 2 failed).</strong> Chain <code>fdd871f5</code> → <code>bf03f150</code>, merge <code>e7b927b1</code>. The six StandardNameSourceRetry terminal-recovery properties are declared optional in LinkML (the terminal batch persists them; ordinary retries never do — both directions now pinned by regressions, focused file 76/76); the 27 null <code>source_id</code> values were set under exact per-row CAS; the isolated non-physical <code>Unit as_parent_level_2</code> was deleted with zero surviving references. Review APPROVE with zero findings after one corrective; coordinator censuses prove zero introduced source_id collisions. With the fail-closed graph-marker gate landed earlier today, both 2026-08-17 hand-over hazards from sn-dd-gaps are closed — sn-dd-gaps §5's sequencing constraint is now satisfied. New node routed: 16 of the 27 repaired rows are stale test-fixture sources (<code>dd:__minttest__/*</code>, <code>dd:test_focus_scope__*</code>) whose cleanup gap in <code>test_minting.py</code>/<code>test_focus_scope.py</code> leaves durable graph residue. Record: <a href="/imas-codex/evidence/archive/sn-graph-wide-integrity-landed#schema-baseline">landed evidence</a>.</p></div>
 </div>
+<div class="r-comment" data-section="_top" data-id="c-20260820-state-restatement" data-who="reckon-ship" data-when="2026-08-20T06:30:00+00:00">
+    <div class="r-comment-body"><p><strong>Plan state restated against a live 2026-08-20 measurement, and <code>impl</code> corrected downward from 0.995 to 0.94 with its basis cited.</strong> The 0.995 figure was written by this session and was indefensible: it implied completion while 87 dual-bound sources, 36 unsourced names and 49 unapplied owner/geometry rows were open. The correction is deliberately non-monotonic because plan state must reflect reality; the basis is measured class closure, not judgement — 3 of 6 tracked defect classes at zero (no-live-target 596→0, scalar 144→0, projection 2→0), dual-bound reduced 226→87, unsourced 85→36, owner/geometry fully adjudicated but 0 of 49 applied, accepted-name grammar conformance 2 failures→0, and roughly four to six serialized executable nodes remaining.</p><p>The stale header card was replaced. It had claimed “491 semantic findings and 68 orphans” with “zero signed mutation-ready actions” and “no protected fold or retirement has been applied” — all false as of today, and it was the first thing a fresh session would read. Earlier per-section counts are retained as the historical record of how each class was found, now explicitly labelled as not current. A new <code>Remaining executable work</code> section states the five remaining nodes, the serialization constraint, the $0.34-of-$200 spend position, and which refusals are legitimate to close on.</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-20260818-supersede-instrument-landed" data-who="reckon-ship" data-when="2026-08-18T21:50:00+00:00">
     <div class="r-comment-body"><p><strong>The ancestor-fold instrument f-sgwi-dual-binding needed is landed and independently APPROVED with zero findings after two corrective rounds.</strong> Chain <code>761afff4</code> → <code>be2e4ae9</code> → <code>8ceea23a</code>, merge <code>c2aaf946</code>. <code>supersede_into_ancestor</code> folds into an existing REFINED_FROM ancestor with no reverse edge; strict ancestry refuses self and cycle targets; apply locks and exact-hash-rechecks the complete signed closure (real second-session drift regression proves zero change rows on invalidation); replay is measured write-free; disposable-Neo4j suite 9/9. The live dry-run for <code>atomic_count_of_ion_state</code> → <code>atomic_count</code> is signed (hash <code>e51c191e…</code>, 37 retarget + 39 dedup over 76 sources, 6 lineage edges preserved). Next node: the exact-hash live apply plus replay and census. Record: <a href="/imas-codex/evidence/archive/sn-graph-wide-integrity-landed#supersede-into-ancestor">landed evidence</a>.</p></div>
 </div>
@@ -1503,6 +1595,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260819-isn-rotation" data-who="reckon-ship" data-when="2026-08-19T20:40:00+00:00">
     <div class="r-comment-body"><p><strong>The ISN vocabulary rotation is complete end to end under lead authorization, and it exposed a live generation-quality defect.</strong> ISN <code>v0.8.0rc66</code> (<code>6dd6eae</code>) admits four loci — <code>polarizer</code> and <code>pellet_fragment</code> as entities beside their optical-element and pellet neighbours, <code>wave_diagnostic_channel</code> so a wave diagnostic's receiver channel carries its own tuned-frequency identity instead of borrowing the antenna, and <code>active_spatial_resolution_zone</code> as the geometry a channel collects signal over. <code>field_map_grid</code> is <strong>refused</strong>: a field-map grid node is a discretization artifact and the registry curation policy admits physics-meaningful loci only. ISN suite 1,996 passed / 0 failed; both codex pin declarations bumped (<code>898cc64b</code> lineage) and verified live at <code>0.8.0rc66</code>.</p><p><strong>Two of the six recorded gaps were stale.</strong> The line-integrated electron-density constraint needed no vocabulary at all — <code>equilibrium_weight_of_interferometer_beam</code> is already accepted and valid at unit 1, resolved by ordinary compose after the refusal was written. And <code>weight_at_constraint_position</code> parses today but was rejected as a lossy substitute: it does not say which constraint, and the locked rule forbids nearest-object substitution for an unavailable identity.</p><p><strong>The bump revealed the codex pin was several ISN commits stale</strong>, so it pulled in the geometry-identity work that implements the locked flux-surface-area decision as a <code>section_plane</code> requirement. Measured blast radius: only <strong>2 of 2,544</strong> accepted names failed strict parse, but <strong>15 files</strong> still taught the pre-section-plane spelling — including seven prompts, <code>sn_composition_rules.yaml</code> and <code>sn_review_criteria.yaml</code>. Compose would have generated names the grammar rejects while review scored them against equally stale criteria. Aligned in <code>543ae8f7</code> (merge <code>898cc64b</code>), full SN suite exit 0 with all five baseline failures green. The two live names were corrected through <code>sn edit --rename</code> and ordinary review, both <strong>accepted at score 1.00</strong> for <strong>$0.34 total</strong>; <strong>0 of 2,543 accepted names now fail strict parse</strong>.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260820-receiver-rename-blocked" data-who="reckon-ship" data-when="2026-08-20T06:20:00+00:00">
+    <div class="r-comment-body"><p><strong>The receiver-channel rename failed closed on a stale source, with no partial state.</strong> <code>frequency_of_diagnostic_antenna</code> → <code>frequency_of_wave_diagnostic_channel</code> was attempted through <code>sn edit --rename</code> now that rc66 admits the locus. The retarget compare-and-set refused: <code>dd:refractometer/channel/frequencies</code> is <code>status='stale'</code>. Post-failure verification confirms a clean rollback — the successor identity was never created, and <code>frequency_of_diagnostic_antenna</code> remains accepted/valid with all four sources intact (ECE, refractometer, and both reflectometers).</p><p>This is the guard behaving correctly, not a defect: an exclusive rebind onto a new identity is a fresh claim about every source moved, and a stale source cannot support that claim. The rename is therefore blocked on the same <strong>stale-source lifecycle</strong> work that blocks two owner/geometry rows, and is folded into that node rather than retried. The ISN half of the vocabulary rotation is complete and independent of this block.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
