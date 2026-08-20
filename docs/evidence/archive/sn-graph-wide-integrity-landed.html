@@ -160,6 +160,81 @@
     unblocks the <code>frequency_of_diagnostic_antenna</code> →
     <code>frequency_of_wave_diagnostic_channel</code> rename that had failed closed.</p>
   </section>
+
+  <section id="interlock-broken-2026-08-20">
+    <h2>The dual-binding interlock is broken: 87 sources to 23</h2>
+    <p><strong>Landed 2026-08-20</strong> — four serialized production transactions, every one
+    exact-hash signed with a replay proof, and no repair costing a single provider call.</p>
+    <p>The <strong>structural release</strong> (<code>2821d795</code>) was the central unlock. Releasing a
+    target's final producing source is now bound to the hash-pinned structural disposition set rather than
+    to any test computed at apply time — a distinction earned when the worker's first preview admitted
+    52 rows and it rejected its own result because 3 admitted targets fell outside the signed 69. A live
+    child test over-admits by construction: the adjudication found <strong>71</strong> structurally
+    legitimate targets while only <strong>69</strong> carry the preserve disposition. Under the corrected
+    filter the partition is <strong>78 = 49 admitted + 29 refused</strong>, and the apply removed
+    <strong>63 bindings and 63 projections across 61 targets</strong> with 43 scalar changes, all 9,490
+    out-of-allowlist closures digest-identical.</p>
+    <p>The <strong>16 retirements</strong> (<code>0a9e66d7</code>) needed a new instrument, because two
+    individually correct guards had made the locked policy unreachable: retirement demands zero live
+    producers, while the final-source guard bars releasing a last producer unless the target is
+    structural — and these 16 are by definition the non-structural residue, holding 20 live bindings
+    between them. The resolution weakens neither guard. The final-source invariant protects <em>live</em>
+    names, so a target retired in the same transaction that releases its bindings satisfies it. One
+    atomic transaction released 20 bindings and 20 projections and superseded 16 identities with a ledger
+    row each; <code>StandardNameChange</code> 7501 to 7517, exactly +16.</p>
+    <p><strong>Owner/geometry</strong> (<code>fbf5a3b1</code>) rebound 11 rows in 5 receipt groups, taking
+    rows still selecting the old measurement-position target from <strong>38 to 27</strong> and that
+    target's producers from <strong>61 to 50</strong>. The twelfth row is a recorded refusal, not a
+    silent drop: <code>reflector/centre</code> and <code>reflector/sphere_centre</code> are the reflecting
+    surface's centre and the sphere's centre of curvature — two distinct points of one owner, so folding
+    them would repeat the error the flux-surface-area decision already rejected. The
+    <strong>stale-source detach</strong> (<code>e60707c4</code>) cleared the three plan-named blocking rows
+    with the in-transaction minimum producer count at 3, creating no orphan.</p>
+    <p>Verified together rather than only in isolation: roughly 2,100 new lines reached
+    <code>graph_ops.py</code> and <code>provenance_lifecycle.py</code> from six workers, and the full
+    standard-names suite at the merged base returns <strong>6,528 passed, 8 skipped, 0 failed, 0
+    errors</strong> (<code>587a61f6</code>).</p>
+  </section>
+
+  <section id="transient-unsourced-structural">
+    <h2>Unsourced-structural is a transient state, and one metric had to be corrected</h2>
+    <p><strong>Measured 2026-08-20</strong> — the session first recorded 61 structural names left
+    unsourced by the release and read that as an end state. It is not. A live check of the 69 signed
+    preserve-as-structural targets finds all 68 survivors at <code>accepted</code>, each holding exactly
+    one producing source and a live child: <strong>61 synthetic <code>derived:</code> provenance sources
+    plus 7 ordinary <code>dd</code> sources</strong>, none of them the catalog-edit bindings the release
+    removed. The reconcile restored nothing; it minted proper derived provenance for parents that had just
+    become bare. The durable state is therefore better than what was first written down —
+    <strong>36 unsourced names, all genuine orphans</strong>, zero bare structural names, dual-bound
+    sources <strong>23</strong>. A census taken mid-reconcile reports a structural backlog the pipeline is
+    in the act of clearing, so this class must be measured after the reconcile settles.</p>
+    <p><strong>A latent inconsistency in the signed adjudication, found by following one reaped name.</strong>
+    <code>plasma_momentum_source</code> is absent, reaped as a childless derived parent. Its adjudication
+    row records exactly one structural child, <code>radial_plasma_momentum_source</code> — and that name is
+    itself one of the 16 retirements in the same artifact. So the structural-closure test classified a
+    parent as legitimate on the strength of a child the same document scheduled for retirement. The reap
+    was a correct cascade, not a breach; the lesson is that a structural-legitimacy test must exclude
+    children already dispositioned to retire.</p>
+    <p><strong>Three refusals produced findings no successful apply would have.</strong> A manifest hash
+    computed before an intervening authorized mutation; a ledger baseline stale by 53
+    <code>remove_derived_parent</code> rows, all attributable to an authorized reconcile window; and a
+    detach operator that can manifest only <strong>36 of 52</strong> admissible rows, rejecting 5 DD
+    scalar shapes and all 11 derived-source rows. Each withheld mutation entirely.</p>
+  </section>
+
+  <section id="ancestor-quorum-draws">
+    <h2>One fold ancestor cleared quorum; two did not, and were not made to</h2>
+    <p><strong>Measured 2026-08-20</strong> — the only paid work of the day, <strong>$0.857</strong> across
+    3 fresh review groups, 11 reviewer cycles and 12 cost rows.
+    <code>radial_momentum_flux</code> went reviewed 0.93125 to <strong>accepted 0.95625</strong> by quorum
+    consensus. <code>radial_ion_momentum</code> scored <em>lower</em> than before, 0.675 to
+    <strong>0.5875</strong>, and <code>poloidal_neutral_state_momentum_flux</code> reached
+    <strong>0.825</strong>; both remain reviewed. Neither was retried, reworded, or escalated, because a
+    name reaches accepted only through a fresh quorum score. The 9 ancestor folds were gated on all three,
+    so only the <code>radial_momentum_flux</code> subset is executable and the rest is a recorded gate
+    rather than an omission. Whether two sub-threshold draws reflect weak identities or quorum composition
+    belongs to the benchmark plan, not to a lowered bar here.</p>
+  </section>
 </main>
 </body>
 </html>

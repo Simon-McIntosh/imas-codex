@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T17:22:20",
+  "updated": "2026-08-20T17:31:43",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -8722,9 +8722,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T152326931473-sgwi-stale-detach-remainder-apply",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-stale-detach-remainder-apply",
+        "role": "implement",
+        "member": "impl-scalar",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:23:29Z",
+        "completed_at": "2026-08-20T15:31:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 475,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 475,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "18a5a8e54dc3c3affa9c696adcb9fd1167eaa0c6",
+        "commits": [
+          "6ccd0fd7"
+        ],
+        "changed_lines": {
+          "added": 97,
+          "removed": 47,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Withheld mutation on a genuine operator coverage gap, correctly refusing to widen its own scope. The signed 58-row authority partitions as 3 already detached, 52 topology admissions and 3 last-producer refusals naming voltage_of_diagnostic_antenna, flux_surface_average_magnetic_field_magnitude and neutral_state_energy_convection_velocity, but detach_signed_stale_source_bindings can manifest only 36 of the 52: it rejects 5 admitted DD scalar or target shapes and all 11 admitted derived-source rows. Write-free manifest 3def413c over a 9563-row closure; StandardNameChange and LLMCost unchanged at 7570 and 27489; no apply, replay or census exists. Remaining work is to widen the operator to signed derived sources, multi-binding DD sources and signed scalar/binding mismatches under one atomic manifest with the last-producer guard and disposable-graph validation, then re-run this serialized apply.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T152326931473-sgwi-stale-detach-remainder-apply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01fc5-2a0d-7ba3-9cb3-c3665ecb3f1f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6513408,
+            "cached_input_tokens_cumulative": 6513408,
+            "input_tokens": 6741140,
+            "input_tokens_cumulative": 6741140,
+            "output_tokens": 17718,
+            "output_tokens_cumulative": 17718,
+            "reasoning_output_tokens": 5395,
+            "reasoning_output_tokens_cumulative": 5395
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 196
+    "_version": 197
   }
 }
