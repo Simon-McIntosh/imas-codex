@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T17:07:03",
+  "updated": "2026-08-20T17:22:20",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -8613,9 +8613,118 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T150909247668-sgwi-carried-name-repairs",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-carried-name-repairs",
+        "role": "implement",
+        "member": "impl-sectionplane",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:09:19Z",
+        "completed_at": "2026-08-20T15:09:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 12,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 12,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "7aafa58685d75e9178cbd03217d632c3e9536654",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Stopped by the coordinator 15 seconds after launch, before it emitted any event, because dispatching it alongside the stale-detach remainder would have put two production mutators in flight at once and broken that node's out-of-allowlist closure-immutability proof. Coordinator sequencing error, not a worker fault: no graph write, no provider call, no commit. Re-dispatch after the detach lands; the successor node's own gate asserts LLMCost still 27489, which independently confirms this run wrote nothing.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T150909247668-sgwi-carried-name-repairs/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01fb8-314d-7e42-ac4f-f5ec6deccca7",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T150833249115-sgwi-stale-detach-remainder",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-stale-detach-remainder",
+        "role": "implement",
+        "member": "impl-scalar",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:08:45Z",
+        "completed_at": "2026-08-20T15:18:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 586,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 586,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "7aafa58685d75e9178cbd03217d632c3e9536654",
+        "commits": [
+          "4dd90939"
+        ],
+        "changed_lines": {
+          "added": 66,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Withheld mutation because the declared StandardNameChange baseline of 7517 was stale: the live ledger stood at 7570 before this node touched anything. Coordinator error in the node contract, not a worker fault, and the refusal was correct. Coordinator attribution found all 53 intervening rows are remove_derived_parent stamped 14:16:29 to 15:00:35, entirely inside the authorized ancestor-rescore window, so they are that node's post-drain reconcile and no unauthorized writer exists. The refusal also surfaced a real finding: the reconcile minted derived-provenance sources for the structural parents released earlier today, so unsourced-structural is a transient state rather than a durable one. Read-only preflight partitioned all 58 signed rows as 3 already detached, 52 candidate admissions and 3 last-producing-binding refusals naming voltage_of_diagnostic_antenna, flux_surface_average_magnetic_field_magnitude and neutral_state_energy_convection_velocity. Zero graph writes, zero provider calls, LLMCost unchanged at 27489. Re-dispatch with a 7570 baseline.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T150833249115-sgwi-stale-detach-remainder/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01fb7-abc7-7ee3-b1aa-86358a25741a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4284672,
+            "cached_input_tokens_cumulative": 4284672,
+            "input_tokens": 4472877,
+            "input_tokens_cumulative": 4472877,
+            "output_tokens": 20399,
+            "output_tokens_cumulative": 20399,
+            "reasoning_output_tokens": 8625,
+            "reasoning_output_tokens_cumulative": 8625
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 194
+    "_version": 196
   }
 }
