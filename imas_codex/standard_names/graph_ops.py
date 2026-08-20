@@ -6302,16 +6302,20 @@ def _resolve_grammar_token_version(gc: GraphClient, isn_version: str) -> str | N
     if rows:
         return isn_version
 
-    # Fallback: latest available version
+    # Fallback: graph authority first, semantic package-version order second.
+    from imas_codex.standard_names.grammar_query import select_grammar_version
+
     rows = list(
         gc.query(
             "MATCH (t:GrammarToken) "
-            "RETURN DISTINCT t.version AS v ORDER BY v DESC LIMIT 1"
+            "WITH DISTINCT t.version AS version "
+            "OPTIONAL MATCH (v:ISNGrammarVersion {version: version}) "
+            "RETURN version, coalesce(v.active, false) AS active"
         )
         or []
     )
-    if rows:
-        fallback = rows[0]["v"]
+    fallback = select_grammar_version(rows)
+    if fallback is not None:
         logger.warning(
             "No GrammarToken nodes for ISN %s — falling back to %s. "
             "`sn run` auto-syncs the grammar at startup; re-run to update.",

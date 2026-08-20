@@ -67,6 +67,45 @@ _FINALISE_STATEMENTS: tuple[tuple[str, str], ...] = (
     ),
 )
 
+_MERGE_CONTEXT_TOKENS = """
+UNWIND $rows AS row
+MATCH (s:GrammarSegment {name: row.segment, version: $version})
+MERGE (t:GrammarToken {
+    value: row.value,
+    segment: row.segment,
+    version: $version
+})
+ON CREATE SET t.aliases = []
+MERGE (s)-[:HAS_TOKEN]->(t)
+"""
+
+
+def _grammar_context_token_rows(context: dict[str, Any]) -> list[dict[str, str]]:
+    """Flatten the public ISN vocabulary sections into graph token rows."""
+    declared_segments = set(context["segment_descriptions"])
+    return [
+        {"segment": str(section["segment"]), "value": str(token)}
+        for section in context["vocabulary_sections"]
+        if section["segment"] in declared_segments
+        for token in section["tokens"]
+    ]
+
+
+def _sync_context_tokens(
+    gc: GraphClient,
+    *,
+    version: str,
+    rows: list[dict[str, str]],
+    dry_run: bool,
+) -> dict[str, Any]:
+    """Ensure the graph mirrors every token exposed by the public context."""
+    report: dict[str, Any] = {"rows": len(rows), "applied": not dry_run}
+    if dry_run:
+        report["planned_statement"] = _MERGE_CONTEXT_TOKENS
+        return report
+    gc.query(_MERGE_CONTEXT_TOKENS, version=version, rows=rows)
+    return report
+
 
 @dataclass
 class GrammarSyncReport:
@@ -131,7 +170,7 @@ def sync_isn_grammar_to_graph(
         If the ISN package is not installed or the sync fails.
     """
     try:
-        from imas_standard_names import __version__ as isn_version
+        from imas_standard_names import __version__ as isn_version, get_grammar_context
         from imas_standard_names.graph.spec import get_grammar_graph_spec
         from imas_standard_names.graph.sync import sync_grammar
     except ImportError as exc:
@@ -143,6 +182,7 @@ def sync_isn_grammar_to_graph(
     spec_version = spec.get("version", "unknown")
     segments = len(spec["segments"])
     templates = len(spec["templates"])
+    context_token_rows = _grammar_context_token_rows(get_grammar_context())
 
     logger.info(
         "Sync ISN grammar: isn=%s spec=%s segments=%d templates=%d dry_run=%s",
@@ -165,9 +205,16 @@ def sync_isn_grammar_to_graph(
             gc_local = gc
 
         report = sync_grammar(gc_local, active_version=isn_version, dry_run=dry_run)
+        context_report = _sync_context_tokens(
+            gc_local,
+            version=isn_version,
+            rows=context_token_rows,
+            dry_run=dry_run,
+        )
         finalise_report = _finalise_active_version(
             gc_local, version=isn_version, dry_run=dry_run
         )
+        finalise_report["public context tokens"] = context_report
     except Exception as exc:  # noqa: BLE001 — surface as RuntimeError
         raise RuntimeError(f"Failed to sync grammar to Neo4j: {exc}") from exc
     finally:
