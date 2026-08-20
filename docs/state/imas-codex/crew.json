@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T19:37:56",
+  "updated": "2026-08-20T20:13:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9100,9 +9100,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T173937650741-sgwi-owner-geometry-identities-remainder",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-owner-geometry-identities-remainder",
+        "role": "implement",
+        "member": "impl-owner",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T17:39:48Z",
+        "completed_at": "2026-08-20T18:09:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1773,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1773,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "26bae668c1d6ed7c8b56923a744219b704c18bb4",
+        "commits": [
+          "571de6828ed555f43367703a470abc6de1e98bbb"
+        ],
+        "changed_lines": {
+          "added": 136,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Measure met. All six spellings pass canonical_locus_check under the installed 0.8.0rc66, the interrupted shatter-cone claim was released only by the ordinary 1800s orphan timeout at age 1894s, and non-accepted identities are named rather than retried. toroidal_coordinate_of_pellet_fragment accepted at 1.0; three position identities reviewed below threshold at 0.7625, 0.8375 and 0.8250 under their adopted _at_ spellings; reflectometer_antenna and shatter_cone remain absent after one sanctioned compose batch. Cost $0.481852 across 10 rows, session $1.869714 of $150. toroidal_angle_of_measurement_position holds accepted at 0.95625 with live producers down to 28. The run surfaced a project-wide defect since verified by the coordinator: graph ISNGrammarVersion selection is lexicographic, so max(v.version) returns 0.8.0rc9 rather than the newest snapshot, and no rc66 node exists at all despite the pinned dependency.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T173937650741-sgwi-owner-geometry-identities-remainder/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f42-e893-7fd3-a5e7-ffcd943f5d3b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19010048,
+            "cached_input_tokens_cumulative": 56873984,
+            "input_tokens": 19319745,
+            "input_tokens_cumulative": 58276165,
+            "output_tokens": 34490,
+            "output_tokens_cumulative": 149086,
+            "reasoning_output_tokens": 6579,
+            "reasoning_output_tokens_cumulative": 43372
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 202
+    "_version": 203
   }
 }
