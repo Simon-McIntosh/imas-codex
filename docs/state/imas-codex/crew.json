@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T14:37:28",
+  "updated": "2026-08-20T14:57:11",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -8235,9 +8235,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T123938946491-sgwi-retire-16-apply",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-retire-16-apply",
+        "role": "implement",
+        "member": "impl-catalog",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:39:42Z",
+        "completed_at": "2026-08-20T12:51:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 714,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 714,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ec5969dd478d5cb87caca6ea32b49f956bec473a",
+        "commits": [
+          "47d98c1b9836a312d390c5a71ed8c3a353e09d52"
+        ],
+        "changed_lines": {
+          "added": 107,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Fail-closed before mutation on a real ordering deadlock, not a defect. The proven retirement operator requires zero live producers per target, but all 16 signed retire targets still carry live bindings (20 bindings from 19 sources, coordinator-verified independently, and 0 of the 16 has a live HAS_PARENT child). Releasing those last bindings is barred by the signed final-source guard because none of the 16 is structurally legitimate. Preview returned requested=16 admitted=0 refused=16 changed=0; production untouched at StandardNameChange 7496 and LLMCost 27477. Resolution authorized: an atomic dual-authority operator releasing the exact 20 bindings and superseding the 16 targets in one transaction, split into a disposable-graph proof node and a production apply node.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T123938946491-sgwi-retire-16-apply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f2f-37d4-7a92-9c1a-2e701963ee67",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4901632,
+            "cached_input_tokens_cumulative": 4901632,
+            "input_tokens": 5102686,
+            "input_tokens_cumulative": 5102686,
+            "output_tokens": 26171,
+            "output_tokens_cumulative": 26171,
+            "reasoning_output_tokens": 9412,
+            "reasoning_output_tokens_cumulative": 9412
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 187
+    "_version": 188
   }
 }
