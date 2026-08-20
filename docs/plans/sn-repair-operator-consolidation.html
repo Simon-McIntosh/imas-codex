@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-repair-operator-consolidation">
+  <meta name="plan-title" content="One Signed Repair Operator Instead of Twenty-Two">
+  <meta name="plan-summary" content="Collapse the per-defect-class signed repair operators in graph_ops.py behind one generic manifest-driven operator, so a new Standard Name integrity class costs an authority artifact rather than ~500 lines of bespoke code plus its own disposable-graph suite.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="mid">
+  <meta name="plan-effort-hours" content="10.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-informs" content="sn-graph-wide-integrity">
+  <title>One Signed Repair Operator | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-20">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — Why this plan exists</h2>
+    <p>
+      Standard Name integrity repair works. It is also the slowest thing in the
+      project, and the cost is structural rather than incidental: <strong>every
+      defect class gets its own bespoke signed operator.</strong> On
+      2026-08-20 a single execution session against
+      <a href="/imas-codex/sn-graph-wide-integrity">sn-graph-wide-integrity</a>
+      added <strong>2,102 lines of production code and 1,006 lines of tests</strong>
+      to repair roughly <strong>194 graph relationships</strong> and retire 16
+      names — about eleven lines of production code per repaired edge. A further
+      5,236 lines were prose describing the work, so 63% of the session's output
+      was documentation rather than mechanism.
+    </p>
+    <p>
+      The result of repeating that pattern is visible in one file.
+      <code>imas_codex/standard_names/graph_ops.py</code> is <strong>25,908
+      lines</strong> and now holds <strong>22</strong> distinct
+      <code>apply_*</code> / <code>repair_*</code> / <code>retire_*</code> /
+      <code>reconcile_*</code> operators. Three of them were added in that one
+      session — against a plan whose own §7 states <em>"no new manifest
+      machinery"</em>. The machinery grows by accretion because there is no
+      generic path, so every new class is a new function.
+    </p>
+    <p>
+      This plan does not question the safety discipline. That discipline is
+      earning its keep: in the same programme the guards refused a proposed bulk
+      retirement of 85 accepted names justified by identical boilerplate
+      reasoning, refused a manifest whose admitted set had drifted outside its
+      signed authority, refused a retirement that would have stripped live
+      producers, and refused a geometry fold that would have collapsed a
+      reflecting surface's centre onto a sphere's centre of curvature. Each
+      refusal prevented real damage. <strong>The argument here is that one
+      operator can enforce all of it, and twenty-two need not.</strong>
+    </p>
+
+    <h2 id="s2">§2 — What every one of the twenty-two already shares</h2>
+    <p>
+      The operators differ in which rows they select and what they mutate. They
+      are near-identical in everything that makes them <em>safe</em>, and that
+      shared part is the whole of the ceremony:
+    </p>
+    <ol>
+      <li>verify a committed authority artifact by file digest and by canonical
+        signed-payload digest;</li>
+      <li>derive the executable row set from that artifact rather than from any
+        caller-supplied list;</li>
+      <li>capture a preview closure over sources, bindings, projections, targets
+        and structural children, and emit a <code>would_apply</code> manifest;</li>
+      <li>compare-and-set lock every participating node and relationship, then
+        re-hash after locking;</li>
+      <li>enforce guards — last-producing-source, structural legitimacy,
+        out-of-allowlist immutability;</li>
+      <li>write one receipt row per logical change;</li>
+      <li>replay the exact manifest and require
+        <code>already_applied</code> with <code>changed=0</code>;</li>
+      <li>prove collateral immutability by per-row digests over the untouched
+        closure.</li>
+    </ol>
+    <p>
+      Steps 1 and 3–8 carry no class-specific content whatsoever. Only step 2,
+      the selection predicate, and the specific mutation in step 6 are genuinely
+      per-class — and both are expressible as data in the authority artifact that
+      already exists for every class.
+    </p>
+
+    <figure>
+      <svg viewBox="0 0 720 260" width="100%" role="img"
+           aria-label="Twenty-two operators each repeating the same eight-step safety envelope, versus one generic operator reading per-class authority artifacts">
+        <text x="8" y="16" font-family="system-ui" font-size="14" font-weight="600" fill="#111">Today — envelope duplicated per class</text>
+        <g font-family="system-ui" font-size="13" fill="#111">
+          <rect x="8" y="30" width="150" height="52" fill="#fff" stroke="#bbb" stroke-width="1"/>
+          <text x="18" y="50">retire_signed_…</text>
+          <text x="18" y="70" fill="#666">+ own envelope</text>
+          <rect x="8" y="90" width="150" height="52" fill="#fff" stroke="#bbb" stroke-width="1"/>
+          <text x="18" y="110">apply_adjudicated…</text>
+          <text x="18" y="130" fill="#666">+ own envelope</text>
+          <rect x="8" y="150" width="150" height="52" fill="#fff" stroke="#bbb" stroke-width="1"/>
+          <text x="18" y="170">detach_signed_…</text>
+          <text x="18" y="190" fill="#666">+ own envelope</text>
+          <text x="18" y="222" fill="#666">… 19 more, each ~500 LOC</text>
+        </g>
+        <line x1="300" y1="24" x2="300" y2="240" stroke="#ddd" stroke-width="1"/>
+        <text x="330" y="16" font-family="system-ui" font-size="14" font-weight="600" fill="#111">Proposed — envelope once, class as data</text>
+        <g font-family="system-ui" font-size="13" fill="#111">
+          <rect x="330" y="30" width="120" height="40" fill="#fff" stroke="#bbb" stroke-width="1"/>
+          <text x="340" y="55">authority.json</text>
+          <rect x="330" y="80" width="120" height="40" fill="#fff" stroke="#bbb" stroke-width="1"/>
+          <text x="340" y="105">authority.json</text>
+          <rect x="330" y="130" width="120" height="40" fill="#fff" stroke="#bbb" stroke-width="1"/>
+          <text x="340" y="155">authority.json</text>
+          <text x="340" y="195" fill="#666">one artifact per class</text>
+          <path d="M455 50 L520 100" stroke="#888" stroke-width="1" fill="none"/>
+          <path d="M455 100 L520 103" stroke="#888" stroke-width="1" fill="none"/>
+          <path d="M455 150 L520 106" stroke="#888" stroke-width="1" fill="none"/>
+          <rect x="525" y="70" width="180" height="70" fill="#fff" stroke="#0a7" stroke-width="2"/>
+          <text x="537" y="95" font-weight="600">apply_signed_manifest</text>
+          <text x="537" y="115" fill="#666">the eight safety steps,</text>
+          <text x="537" y="132" fill="#666">written and tested once</text>
+        </g>
+      </svg>
+      <figcaption>
+        The eight-step safety envelope is identical across all twenty-two
+        operators; only row selection and the mutation differ, and both are
+        already data in each class's committed authority artifact.
+      </figcaption>
+    </figure>
+
+    <h2 id="s3">§3 — A second cost: the authorities staleness-break each other</h2>
+    <p>
+      Because each operator signs a closure computed at its own preview time, any
+      committed transaction invalidates every other operator's pending manifest
+      and ledger baseline. This is not hypothetical: in one session it produced
+      two separate fail-closed refusals. A signed manifest was refused because an
+      intervening authorized detach moved its <code>parent_manifest_sha256</code>
+      even though the drift lay entirely outside its selected rows, and a second
+      node refused because its <code>StandardNameChange</code> baseline was stale
+      by 53 rows written by an authorized reconcile.
+    </p>
+    <p>
+      Both refusals were correct, and both were pure friction: the underlying
+      repairs were sound and were applied unchanged once re-authorized. A single
+      operator that regenerates its preview and re-reads its counters inside the
+      applying invocation removes this class of stall entirely, because there is
+      no cross-operator authority to go stale.
+    </p>
+
+    <h2 id="s4">§4 — Scope</h2>
+    <ol>
+      <li><strong>Characterise the twenty-two.</strong> For each operator record
+        its authority artifact shape, selection predicate, mutation set, guards,
+        receipt operation name, and test location. The output is a table, and it
+        is also the specification for the generic operator: anything it cannot
+        express is a genuine extension point rather than an accident.</li>
+      <li><strong>Define one authority schema.</strong> A LinkML-declared
+        artifact carrying the row set, per-row signatures, the selection
+        predicate, the mutation kind, and the guard set each row must satisfy.
+        Existing committed artifacts must be readable under it or convertible
+        without re-signing, since re-signing would discard adjudication
+        provenance.</li>
+      <li><strong>Implement <code>apply_signed_manifest</code>.</strong> One
+        operator implementing the eight-step envelope, parameterised by mutation
+        kind and guard set, with the preview and the counter baselines both read
+        inside the applying invocation.</li>
+      <li><strong>Migrate class by class, newest first.</strong> Each migration
+        must reproduce its predecessor's behaviour on a disposable graph before
+        the bespoke function is deleted — including its refusal cases, which are
+        the part that matters.</li>
+      <li><strong>Delete the bespoke operators.</strong> The plan is not done
+        while both paths exist; a parallel generic-plus-bespoke surface is worse
+        than either alone.</li>
+    </ol>
+
+    <h2 id="s5">§5 — Test strategy</h2>
+    <p>
+      The migration is only safe if the guards are proven equivalent, so
+      behavioural equivalence is the gate, not code coverage. For each migrated
+      class, the existing disposable-Neo4j suite runs unchanged against the
+      generic operator and must produce identical admitted sets, identical
+      refusal sets <em>with identical reasons</em>, identical receipt-row counts,
+      and identical replay outcomes. A migration that changes which rows are
+      refused has changed physics semantics and must be rejected regardless of
+      how much code it removes.
+    </p>
+    <p>
+      One extra property is worth proving that no current operator proves: that
+      two generic invocations over disjoint row sets cannot corrupt each other's
+      collateral proof. That would retire the plan-wide serialization constraint
+      which currently caps repair throughput at one transaction at a time.
+    </p>
+
+    <h2 id="s6">§6 — Non-goals</h2>
+    <ul>
+      <li><strong>Not a relaxation of any guard.</strong> The last-producing-source
+        rule, structural-legitimacy authority, and out-of-allowlist immutability
+        proof all survive verbatim. If consolidation requires weakening one, the
+        consolidation is wrong.</li>
+      <li><strong>Not the CLI surface.</strong> The archived
+        <a href="/imas-codex/33-cli-harmonization">33-cli-harmonization</a>
+        proposes one manifest/apply/receipt contract across eight typed CLI
+        intents. That is the same idea one layer up and is complementary; this
+        plan is strictly about the operator layer beneath it.</li>
+      <li><strong>Not the <code>reconcile_*</code> self-heal family, initially.</strong>
+        Those run automatically post-drain rather than from a signed artifact, so
+        they share only part of the envelope. Characterise them in §4 item 1, but
+        migrate the signed-artifact operators first.</li>
+      <li><strong>Not a rewrite of <code>graph_ops.py</code>.</strong> Shrinking a
+        25,908-line module is a welcome side effect, not the objective.</li>
+    </ul>
+
+    <h2 id="s7">§7 — Sequencing and why this is backlog</h2>
+    <p>
+      This work is deliberately <strong>not scheduled into a sprint yet</strong>.
+      It is not on the WEST release path: it makes future integrity classes
+      cheaper without repairing any current defect, so scheduling it ahead of the
+      catalog release would delay the release to speed up work that follows it.
+      The natural trigger is the next SN integrity class that would otherwise
+      need a twenty-third operator, or the WEST catalog release landing —
+      whichever comes first.
+    </p>
+    <p>
+      One caution on timing. §4 item 4 requires reproducing each operator's
+      refusal behaviour exactly, and those refusal cases are best understood
+      while the repair programme that produced them is still fresh. Waiting until
+      the knowledge has decayed raises the cost of the safest part of the work.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="authority-artifact-compatibility" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">May the generic operator require re-signed authority artifacts, or must it read the existing committed ones as they stand?</p>
+    <p class="r-dec-ctx">Committed artifacts such as refused-target-orphan-adjudication.json and owner-geometry-rc66-partition.json carry adjudication provenance and per-row signatures produced by independent review. Re-signing them under a new schema would produce identical rows with new digests and no review lineage.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="read-existing">Read existing artifacts unchanged; the generic operator adapts to their shapes (Recommended — preserves adjudication provenance, which is the expensive part)</button>
+      <button class="r-opt" data-value="convert-losslessly">Convert to one schema with a recorded, reversible mapping that retains the original digests as provenance</button>
+      <button class="r-opt" data-value="re-sign">Re-sign under the new schema and accept the loss of prior signature lineage</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="serialization-retirement" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should the generic operator aim to retire the one-mutator-at-a-time constraint?</p>
+    <p class="r-dec-ctx">Repair throughput is currently capped by the rule that concurrent mutators invalidate each other&#x27;s out-of-allowlist immutability proofs. A per-row-scoped collateral proof could permit disjoint concurrent applies, but it weakens the strongest evidence the programme relies on.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="keep-serial">Keep strict serialization; consolidation targets code volume only</button>
+      <button class="r-opt" data-value="prove-disjoint">Prove disjoint-row-set concurrency safe and lift the constraint</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sroc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship sn-repair-operator-consolidation §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Characterise the twenty-two signed repair operators before writing any generic one</h4>
+    <div class="r-fu-body"><p>Start at section 4 item 1, because it is both the cheapest step and the specification for everything after it. For each of the 22 <code>apply_*</code>, <code>repair_*</code>, <code>retire_*</code> and <code>reconcile_*</code> operators in <code>graph_ops.py</code>, record its authority artifact shape, selection predicate, mutation set, guard set, receipt operation name and test location. Anything the emerging schema cannot express is a real extension point rather than an oversight, so record those explicitly instead of smoothing them over. Do not write the generic operator in this pass and do not delete anything: the characterisation is what makes the migration safe, and it is worth doing while the refusal cases from the 2026-08-20 repair wave are still fresh.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-repair-operator-consolidation §4</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>
