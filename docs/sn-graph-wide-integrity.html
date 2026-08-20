@@ -17,14 +17,14 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="197">
-<meta name="plan-impl" content="0.99">
+<meta name="plan-version" content="198">
+<meta name="plan-impl" content="0.985">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html,docs/evidence/sn-graph-wide-integrity/owner-geometry-rc66-partition.json,docs/evidence/sn-graph-wide-integrity/review-cohort-manifest.json,docs/evidence/sn-graph-wide-integrity/stale-source-lifecycle.json,docs/evidence/sn-graph-wide-integrity/structural-exemption-preview.md,docs/evidence/sn-graph-wide-integrity/stale-detach-apply.md,docs/evidence/sn-graph-wide-integrity/structural-release-apply.md,docs/evidence/sn-graph-wide-integrity/retire-16-apply.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-ready-apply.md,docs/evidence/sn-graph-wide-integrity/dual-authority-retire-apply.md,docs/evidence/sn-graph-wide-integrity/merged-suite-verification.md,docs/evidence/sn-graph-wide-integrity/ancestor-rescore.md">
+<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html,docs/evidence/sn-graph-wide-integrity/owner-geometry-rc66-partition.json,docs/evidence/sn-graph-wide-integrity/review-cohort-manifest.json,docs/evidence/sn-graph-wide-integrity/stale-source-lifecycle.json,docs/evidence/sn-graph-wide-integrity/structural-exemption-preview.md,docs/evidence/sn-graph-wide-integrity/stale-detach-apply.md,docs/evidence/sn-graph-wide-integrity/structural-release-apply.md,docs/evidence/sn-graph-wide-integrity/retire-16-apply.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-ready-apply.md,docs/evidence/sn-graph-wide-integrity/dual-authority-retire-apply.md,docs/evidence/sn-graph-wide-integrity/merged-suite-verification.md,docs/evidence/sn-graph-wide-integrity/ancestor-rescore.md,docs/evidence/sn-graph-wide-integrity/stale-detach-remainder.md,docs/evidence/sn-graph-wide-integrity/carried-name-repairs.md">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
-<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966,fe00ec3e,a5a83b20,df48be0f,aba3ce7b,25d8dd37,77bc45c2,07c33345,e7aa5872,cdb0c870,5c4a5c0f,714d49a6,46bb0c12,e60707c4,166ce552,153e7e00,2821d795,47d98c1b,d493e7f8,fbf5a3b1,0a9e66d7,587a61f6,283e0f52,4dd90939">
+<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966,fe00ec3e,a5a83b20,df48be0f,aba3ce7b,25d8dd37,77bc45c2,07c33345,e7aa5872,cdb0c870,5c4a5c0f,714d49a6,46bb0c12,e60707c4,166ce552,153e7e00,2821d795,47d98c1b,d493e7f8,fbf5a3b1,0a9e66d7,587a61f6,283e0f52,4dd90939,6ccd0fd7,1ea2a645">
 <meta name="plan-effort-hours" content="16.0">
 </head>
 <body>
@@ -87,58 +87,87 @@
     </section>
 
     <section id="remaining-work">
-      <h2>Remaining executable work</h2>
+      <h2>Remaining executable work — restated 2026-08-20 after the integrity wave</h2>
       <div class="card" style="border-left:4px solid #c80; padding-left:12px;">
-        <p>Roughly four to six serialized nodes. Applies must serialize: two
-        concurrent mutators invalidate each other's out-of-allowlist immutability
-        proofs, which is the evidence every repair in this plan rests on.</p>
+        <p><strong>The dual-binding interlock is broken and the remainder is five
+        nodes, three of them blocked on a named precondition rather than on
+        effort.</strong> Applies must serialize: two concurrent mutators invalidate
+        each other's out-of-allowlist immutability proofs, which is the evidence
+        every repair here rests on. A hash or ledger baseline computed in an
+        earlier node is stale the moment any authorized transaction commits, so an
+        apply node must regenerate its own preview and re-read its own counters
+        inside the invocation that applies.</p>
+        <table>
+          <caption>Tracked defect classes, as found versus after the wave</caption>
+          <thead><tr><th>Class</th><th>As found</th><th>Start of 2026-08-20</th><th>Now</th></tr></thead>
+          <tbody>
+            <tr><td>Dual-bound semantic sources</td><td>226</td><td>87</td><td><strong>23</strong></td></tr>
+            <tr><td>Genuine orphans (unsourced, no live child)</td><td>85</td><td>36</td><td><strong>36</strong></td></tr>
+            <tr><td>Structural names left bare</td><td>—</td><td>—</td><td><strong>0</strong></td></tr>
+            <tr><td>Owner/geometry rows on the old target</td><td>49</td><td>49</td><td><strong>27</strong></td></tr>
+            <tr><td>Signed retirements outstanding</td><td>16</td><td>16</td><td><strong>0</strong></td></tr>
+          </tbody>
+        </table>
         <ol>
-          <li><strong>Orphan disposition (36 names)</strong> — 27 accepted, 4
-          drafted, 4 reviewed, 1 pending; zero derived-origin remain. The signed
-          adjudication in <code>refused-target-orphan-adjudication.json</code>
-          covers the protected subset as 16 retire, 1 re-source, 3 retain and 69
-          structural. Needs a ledgered lifecycle instrument; never a bulk rule on
-          an accepted name.</li>
-          <li><strong>Dual-bound residue (87 sources)</strong> — the 78 rows the
-          closure guard refused plus residue. Unblocks as orphan dispositions land.</li>
-          <li><strong>Owner/geometry apply (49 rows)</strong> — signed mapping is
-          complete: 21 rows point at accepted-valid targets and are ready; 20 point
-          at absent identities needing ordinary lifecycle review first; 6 were
-          vocabulary-blocked and 5 of those are now unblocked by rc66; 2 are stale
-          sources needing detach or versioned migration.</li>
-          <li><strong>Ancestor folds (9 + 1 stale detach)</strong> — gated on three
-          reviewed-not-accepted ancestors (<code>radial_ion_momentum</code>,
-          <code>radial_momentum_flux</code>,
-          <code>poloidal_neutral_state_momentum_flux</code>) reaching accepted
-          through ordinary review, plus two complete-source/scalar conflicts.</li>
-          <li><strong>Stale-source lifecycle</strong> — blocks the
-          <code>frequency_of_diagnostic_antenna</code> →
-          <code>frequency_of_wave_diagnostic_channel</code> rename, which failed
-          closed on <code>dd:refractometer/channel/frequencies</code> at
-          <code>status='stale'</code>, and the same two owner/geometry rows.</li>
-          <li><strong>Two carried single-name repairs</strong> — the
-          correct-but-blocked rename <code>voltage_of_diagnostic_antenna</code> →
-          <code>voltage_of_ece_channel</code> (still one accepted name on one
-          source; the <code>ece_channel</code> locus already exists, so this needs
-          no vocabulary), and <code>electron_source_rate</code>, which sits at
-          <code>name_stage='reviewed'</code> with unit <code>s^-1</code> and needs
-          its unit-versus-documentation contradiction settled through ordinary
-          review. Both were carried from the retired dual-binding followup.</li>
+          <li><strong>Widen the stale-detach operator, then apply (52 rows).</strong>
+          The signed 58-row authority partitions as 3 already detached, 52
+          admissible and 3 last-producer refusals, but
+          <code>detach_signed_stale_source_bindings</code> can manifest only
+          <strong>36 of 52</strong>: it rejects 5 DD scalar-or-target shapes and all
+          11 derived-source rows. Needs signed-derived support, multi-binding DD
+          sources and signed scalar/binding mismatches under one atomic manifest
+          with the last-producer guard, proven on a disposable graph, then a
+          serialized apply.</li>
+          <li><strong>The voltage rename is circular and needs a decision, not a
+          retry.</strong> <code>voltage_of_diagnostic_antenna</code>'s only producer
+          <code>dd:ece/channel/t_e_voltage</code> is stale, so migration to
+          <code>voltage_of_ece_channel</code> fails compare-and-set, while
+          detaching that source would strip its last producer. It needs either a
+          sanctioned source-less rename transition or an authoritative live
+          producer. The same name is one of the three detach refusals, so the two
+          are one problem.</li>
+          <li><strong><code>electron_source_rate</code> is blocked on the local
+          compose endpoint.</strong> The configured <code>sn-compose</code> seat
+          <code>hosted_vllm/deepseek-v4-flash</code> was unreachable, which is the
+          locked <em>local-compose-readiness</em> precondition going unmet. Its two
+          sources were left at <code>status='failed'</code> with
+          <code>attempt_count=5</code> and must be reset before any retry. Verify
+          the imas-ambix DSv4 service first; spend was exactly $0.</li>
+          <li><strong>Owner/geometry identity-absent rows (25 rows, 16 identities).</strong>
+          These need their identities composed and carried through ordinary review
+          before the rows can bind. Priced at $2.36 mean to $6.96 at observed
+          maxima, and dependent on the same local compose endpoint as item 3. The
+          shared <code>toroidal_angle_of_measurement_position</code> identity must
+          not be reseeded.</li>
+          <li><strong>Reflector centre-of-curvature identity, and the fold subset.</strong>
+          <code>reflector/centre</code> and <code>reflector/sphere_centre</code> are
+          distinct points — the reflecting surface's centre and the sphere's centre
+          of curvature — so the twelfth owner/geometry row stands as a recorded
+          refusal until <code>sphere_centre</code> gets its own reviewed identity,
+          which may need vocabulary. Neither reflector DD path exists as an
+          <code>IMASNode</code>, so this is plausibly a stale-path question too.
+          Separately, only the <code>radial_momentum_flux</code> subset of the 9
+          ancestor folds is executable; the other two ancestors did not clear a
+          fresh quorum draw and their folds stay gated.</li>
         </ol>
-        <p><strong>Measured closed since that followup was written, so do not
-        re-open them:</strong> the stricter ISN-entity locus rule is adjudicated
-        (3 families adopt, 9 decline, from a remeasured 134-pairing delta); the
-        synthetic <code>score=0.0</code> reviewer defect measures <strong>0</strong>
-        rows; and the <code>wavelength_bragg</code> duplicate edge measures a single
-        clean binding.</p>
-        <p><strong>Spend:</strong> $0.34 of the authorized $200 consumed. The ~23
-        identities needing ordinary review are the only material remaining cost.</p>
-        <p><strong>Closing with recorded refusals is legitimate.</strong> One
-        owner/geometry row stays on its old target because
-        <code>field_map_grid</code> is a policy refusal, not a gap to fill. Some
-        childless structural parents are legitimately unscoped. A close that
-        records these as fail-closed refusals with evidence is correct; fabricating
-        sources or substituting nearest-object identities is not.</p>
+        <p><strong>Two measurement rules learned here, binding on any future census.</strong>
+        Unsourced-structural is <em>transient</em>: the reconcile mints
+        <code>derived:</code> provenance for parents the release leaves bare, so this
+        class must be measured after the reconcile settles or it reports a backlog
+        the pipeline is already clearing. And a structural-legitimacy test must
+        exclude children that are themselves dispositioned to retire — the signed
+        adjudication classified <code>plasma_momentum_source</code> as structural on
+        the strength of <code>radial_plasma_momentum_source</code>, a child the same
+        artifact scheduled for retirement, and the parent was correctly reaped once
+        that child was superseded.</p>
+        <p><strong>Spend:</strong> $0.857 of the authorized $150 consumed, all of it
+        on the three ancestor quorum draws. Every other repair in this wave was
+        deterministic and cost nothing. Items 3 and 4 are the only material
+        remaining cost.</p>
+        <p><strong>Closing with recorded refusals remains legitimate.</strong> The
+        <code>field_map_grid</code> row is a policy refusal, not a gap to fill; two
+        ancestors below threshold are a result, not a bar to lower; and a name is
+        never accepted by any route other than a fresh quorum score.</p>
       </div>
     </section>
 
@@ -1632,6 +1661,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="remaining-work" data-id="c-20260820-transient-unsourced-finding" data-who="reckon-ship" data-when="2026-08-20T15:35:00+00:00">
     <div class="r-comment-body"><p><strong>A fail-closed refusal surfaced the most useful finding of the day, and it corrects a metric this session itself reported.</strong> The stale-detach remainder node withheld all mutation because its declared <code>StandardNameChange</code> baseline of 7517 was stale: the ledger stood at <strong>7570</strong> before it touched anything. That was a coordinator error in the node contract, and the refusal was right.</p><p><strong>The 53 intervening rows are fully attributed and no unauthorized writer exists.</strong> All 53 are <code>remove_derived_parent</code>, stamped 14:16:29 through 15:00:35, entirely inside the authorized ancestor-rescore window, so they are that node's post-drain reconcile. <code>LLMCost</code> was unchanged across the preflight, confirming no provider path was involved.</p><p><strong>The correction that matters: unsourced-structural is a transient state, not a durable one.</strong> This session recorded 61 structural names left unsourced by the structural release, and treated that as the end state. It is not. A live check of the 69 signed preserve-as-structural targets now finds all 68 survivors at <code>accepted</code>, each with exactly one producing source, and every one of them holding a live child. Their producers are <strong>61 synthetic <code>derived:</code> provenance sources of <code>source_type='derived'</code> plus 7 ordinary <code>dd</code> sources</strong> — not the catalog-edit DD bindings the release removed. The reconcile did not restore anything; it minted proper derived provenance for parents that had just become bare. The release therefore did what it was supposed to, and the pipeline then finished the job.</p><p><strong>So the durable graph state is better than what was recorded earlier today, not worse:</strong> unsourced names <strong>36 in total, all of them genuine orphans</strong> with the stage split still 27 accepted, 4 reviewed, 4 drafted and 1 pending; zero structural names left bare; dual-bound sources <strong>23</strong>; accepted names 2,527. Any future census of this class should be taken after the reconcile settles, because a snapshot taken mid-reconcile reports a structural backlog that the pipeline is in the act of clearing.</p><p><strong>One signed structural target was legitimately reaped.</strong> <code>plasma_momentum_source</code> is absent, its single change row being <code>remove_derived_parent</code> at 14:16:29, after the 16 retirements committed. The coherent reading is a correct cascade rather than a breach of the signed adjudication: it was classified structural because it had a live child, one of the retired identities was that child, and a childless derived parent is legitimately reaped. Worth confirming the child link before the plan closes.</p><p>The preflight also partitioned the 58 signed stale rows as 3 already detached, 52 candidate admissions, and <strong>3 last-producing-binding refusals</strong> naming <code>voltage_of_diagnostic_antenna</code>, <code>flux_surface_average_magnetic_field_magnitude</code> and <code>neutral_state_energy_convection_velocity</code>. The first of those is itself one of the two carried single-name repairs, so its detach and its rename to <code>voltage_of_ece_channel</code> are coupled and must be ordered, not run independently.</p></div>
+</div>
+<div class="r-comment" data-section="remaining-work" data-id="c-20260820-carried-repairs-blocked" data-who="reckon-ship" data-when="2026-08-20T16:00:00+00:00">
+    <div class="r-comment-body"><p><strong>Both carried single-name repairs are blocked, each on a named precondition, with zero mutation and exactly $0 spend.</strong> Commit <code>1ea2a645</code>, gate FAILED. No Cypher SET, no direct text edit, no direct acceptance was used anywhere.</p><p><strong>The voltage rename is circular, so it needs a decision rather than a retry.</strong> <code>voltage_of_diagnostic_antenna</code>'s only producer <code>dd:ece/channel/t_e_voltage</code> is stale, so the source-migration compare-and-set refused with exists=true and status=stale; but detaching that stale source would strip the name's last producer, which is one of the three refusals the detach preflight already recorded against it. Rename and detach are therefore one problem, not two, and closing it needs either a sanctioned source-less rename transition or an authoritative live producer. The previously recorded detach refusal is not cleared.</p><p><strong><code>electron_source_rate</code> hit the locked local-compose precondition.</strong> The configured <code>sn-compose</code> seat is <code>hosted_vllm/deepseek-v4-flash</code>, the imas-ambix local DSv4 service, and both scoped submissions exited on connection retries with names_composed=0, names_reviewed=0 and cost_spent=0 exact. This is the <em>local-compose-readiness</em> decision going unmet rather than a pipeline defect. The name remains reviewed at 0.68125 from its 2026-08-11 quorum, which is not a fresh score. One side effect to clear before any retry: its two sources were left at <code>status='failed'</code> with <code>attempt_count=5</code>.</p><p>Read-only postflight confirmed 0 new review rows and global cost unchanged at 27,489 calls and $1,362.806839, so session spend stands at <strong>$0.857 of $150</strong>. The remaining-work section above is restated against this measured state, including the two measurement rules this wave established: unsourced-structural is transient because the reconcile mints derived provenance, and a structural-legitimacy test must exclude children that are themselves dispositioned to retire.</p></div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

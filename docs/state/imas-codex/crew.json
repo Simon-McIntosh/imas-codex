@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T17:31:43",
+  "updated": "2026-08-20T17:57:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -8785,9 +8785,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T153201609374-sgwi-carried-repairs-apply",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-carried-repairs-apply",
+        "role": "implement",
+        "member": "impl-sectionplane",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T15:32:05Z",
+        "completed_at": "2026-08-20T15:56:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1489,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1489,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "29b4eaefb117bd59b6323e780c385ae25c5681e8",
+        "commits": [
+          "1ea2a6450092275b3428b614848308d820bc61da"
+        ],
+        "changed_lines": {
+          "added": 48,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Both carried repairs blocked with zero mutation and exactly $0 spend; no Cypher SET, direct text edit, or direct acceptance was used. The voltage rename hit a circular dependency: voltage_of_diagnostic_antenna's only producer dd:ece/channel/t_e_voltage is stale, so the source-migration compare-and-set refused, while detaching that stale source would strip its last producer. It needs either a sanctioned source-less rename transition or an authoritative live producer, and the previously recorded detach refusal against it is therefore not cleared. The electron_source_rate submission failed on the configured local compose endpoint hosted_vllm/deepseek-v4-flash being unreachable, which is the locked local-compose-readiness precondition going unmet; both its sources are now left at status=failed with attempt_count=5 and must be reset before a retry. Read-only postflight confirmed 0 new review rows and global cost unchanged at 27489 calls and $1362.806839.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T153201609374-sgwi-carried-repairs-apply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01fcd-09f6-74b1-ae80-93e54f907d6b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15047168,
+            "cached_input_tokens_cumulative": 15047168,
+            "input_tokens": 15385574,
+            "input_tokens_cumulative": 15385574,
+            "output_tokens": 27556,
+            "output_tokens_cumulative": 27556,
+            "reasoning_output_tokens": 10058,
+            "reasoning_output_tokens_cumulative": 10058
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 197
+    "_version": 198
   }
 }
