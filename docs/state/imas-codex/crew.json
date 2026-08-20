@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-19T22:31:37",
+  "updated": "2026-08-20T13:36:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -50,7 +50,7 @@
         "id": "impl-lastbind",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a01ee6-4099-71c0-991b-4ea213ed0d53",
         "created": "2026-08-19"
       },
       {
@@ -7731,9 +7731,198 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T112006184280-sgwi-owner-geometry-partition",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-owner-geometry-partition",
+        "role": "implement",
+        "member": "impl-owner",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T11:20:08Z",
+        "completed_at": "2026-08-20T11:29:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 565,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 565,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c7693ecc0305827e8e6c7565cde78f12476d2581",
+        "commits": [
+          "cdb0c870d0b2197a1b75ec52fb2a7754ccef895e"
+        ],
+        "changed_lines": {
+          "added": 1887,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T112006184280-sgwi-owner-geometry-partition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01ee6-5fd0-7b40-ae05-7977cf011f3d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4504576,
+            "cached_input_tokens_cumulative": 4504576,
+            "input_tokens": 4674365,
+            "input_tokens_cumulative": 4674365,
+            "output_tokens": 24366,
+            "output_tokens_cumulative": 24366,
+            "reasoning_output_tokens": 9316,
+            "reasoning_output_tokens_cumulative": 9316
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T112030631881-sgwi-review-cohort",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-review-cohort",
+        "role": "implement",
+        "member": "impl-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T11:20:33Z",
+        "completed_at": "2026-08-20T11:31:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 659,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 659,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c7693ecc0305827e8e6c7565cde78f12476d2581",
+        "commits": [
+          "5c4a5c0f2bf9258c9723cad537750479b791ef67"
+        ],
+        "changed_lines": {
+          "added": 719,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T112030631881-sgwi-review-cohort/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01880-5c67-70c3-bef4-e30cb2267b48",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7085568,
+            "cached_input_tokens_cumulative": 14916352,
+            "input_tokens": 7330646,
+            "input_tokens_cumulative": 15474234,
+            "output_tokens": 24811,
+            "output_tokens_cumulative": 55882,
+            "reasoning_output_tokens": 8544,
+            "reasoning_output_tokens_cumulative": 16909
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T112038874628-sgwi-stale-source-contract",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-stale-source-contract",
+        "role": "implement",
+        "member": "impl-scalar",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T11:20:41Z",
+        "completed_at": "2026-08-20T11:30:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 608,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 608,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c7693ecc0305827e8e6c7565cde78f12476d2581",
+        "commits": [
+          "714d49a677604bbc1804a824e7d1f62e50969e5a"
+        ],
+        "changed_lines": {
+          "added": 208,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T112038874628-sgwi-stale-source-contract/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01ee6-df6e-71d3-96dc-928e6ac9d609",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5858048,
+            "cached_input_tokens_cumulative": 5858048,
+            "input_tokens": 6064272,
+            "input_tokens_cumulative": 6064272,
+            "output_tokens": 25377,
+            "output_tokens_cumulative": 25377,
+            "reasoning_output_tokens": 7310,
+            "reasoning_output_tokens_cumulative": 7310
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 178
+    "_version": 182
   }
 }

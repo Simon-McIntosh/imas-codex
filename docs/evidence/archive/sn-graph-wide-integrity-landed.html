@@ -93,6 +93,73 @@
     catalog_edit rows (semantic wave), 5 reviewed-not-accepted fold ancestors (lifecycle review), and
     the accepted/reviewed orphan pools (individual adjudication).</p>
   </section>
+
+  <section id="closure-guard-and-safe-subset">
+    <h2>The last-binding closure guard is landed and the safe 138-row subset is applied</h2>
+    <p><strong>Landed 2026-08-19</strong> — the guard now signs each removed target's complete global
+    incoming <code>PRODUCED_NAME</code> closure (676 relationships over 151 removed-target closures),
+    compare-and-set locks every closure source node, target node and relationship, re-hashes after
+    locking, and enforces a non-stale post-delete producer invariant; stale sources are signed into the
+    closure but never counted as live producers. It partitions the 216-row signed catalog-edit
+    adjudication as <strong>138 admitted + 78 refused</strong>, and the refused set names exactly the 89
+    protected targets an independent coordinator census had identified — two derivations agreeing to the
+    name. Applying the 138 removed <strong>138 bindings and 138 matching projections across 59 removed
+    targets</strong>, changed 51 scalars, wrote one receipt, and replayed <code>already_applied</code>
+    with <code>changed=0</code>; the 89 excluded targets' closure hash was identical before and after.
+    A first adjudication of those 89 had dispositioned 85 of 86 accepted names to retirement on
+    identical reasoning — a bulk rule wearing per-row evidence. It was caught and reversed: the
+    re-adjudication found <strong>71 structurally legitimate targets carrying 87 live child edges</strong>,
+    leaving only <strong>16</strong> non-structural retirement candidates, each with name-specific
+    evidence. The superseded run is retained with a failed gate rather than deleted.</p>
+  </section>
+
+  <section id="mirror-classes-and-grammar-rotation">
+    <h2>Both mirror classes reach zero and the grammar rotates to rc66</h2>
+    <p><strong>Landed 2026-08-19</strong> — the scalar and projection mirror repair applied 146 admitted
+    rows (144 scalars changed, 2 projections added, 0 refusals), taking scalar mismatch
+    <strong>144 → 0</strong> and projection mismatch <strong>2 → 0</strong>, and semantic-source
+    invariant violations <strong>371 → 87</strong>; all 9,352 out-of-allowlist closures stayed
+    hash-identical. The ISN rotation to <code>v0.8.0rc66</code> admits the <code>polarizer</code>,
+    <code>pellet_fragment</code>, <code>wave_diagnostic_channel</code> and
+    <code>active_spatial_resolution_zone</code> loci and refuses <code>field_map_grid</code> as a
+    discretization artifact. The bump exposed a live quality defect worth more than the vocabulary: only
+    2 of 2,544 accepted names failed strict parse, but <strong>15 files still taught the
+    pre-section-plane spelling</strong> — seven prompts plus the composition and review criteria — so
+    compose would have generated names the grammar rejects while review scored them against stale
+    criteria. Both live names were corrected through ordinary <code>sn edit --rename</code> and review at
+    score 1.00 for <strong>$0.34</strong>; 0 of 2,543 accepted names now fail strict parse. The edit-path
+    reconcile separately reaped 25 genuinely childless derived parents — a set disjoint from the 89
+    protected targets, all of which were verified still present — dropping live unsourced names
+    <strong>85 → 36</strong>.</p>
+  </section>
+
+  <section id="signed-authorities-2026-08-20">
+    <h2>Three signed authorities bound the remaining worklist, write-free</h2>
+    <p><strong>Landed 2026-08-20</strong> — three concurrent producers each proved themselves
+    non-mutating by measuring <code>StandardNameChange</code> at <strong>7,492 before and after</strong>
+    with zero provider calls and $0.00 spend, and each corrected the worklist the plan card carried that
+    morning.</p>
+    <p>The <strong>owner/geometry partition</strong> (<code>cdb0c870</code>, rows
+    <code>4de9c2df…</code>) resolves the 49 authority rows as ready 21 + identity-absent 25 +
+    vocabulary-refused 1 + stale-source 2, superseding the earlier 21/20/6/2 split: rc66 moved 5 of the 6
+    vocabulary-refused rows into identity-absent, leaving <code>field_map_grid</code> as the only
+    standing policy refusal. Of the 21 ready rows, <strong>9 already select their accepted-valid target
+    exclusively and need no write at all</strong> — only 12 require a signed apply.</p>
+    <p>The <strong>review cohort</strong> (<code>5c4a5c0f</code>) is <strong>19 identities, not the
+    ~23 estimated</strong>: 3 reviewed fold ancestors plus 16 unique absent owner/geometry targets, the
+    25 identity-absent rows collapsing onto 16 identities. Priced from the measured review-seat
+    distribution the cohort costs <strong>$2.36 mean, $4.55 p95, $6.96 at observed maxima</strong> —
+    two orders of magnitude inside the $150 authorization, so cost does not constrain this plan's
+    closure.</p>
+    <p>The <strong>stale-source disposition</strong> (<code>714d49a6</code>, rows
+    <code>316d95c3…</code>) finds the stale cohort far larger than the three rows previously named:
+    <strong>58 stale sources still hold 59 live <code>PRODUCED_NAME</code> bindings</strong>. All 58
+    disposition to detach and none to versioned migration, because under the configured DD 4.1.1 46 rows
+    are absent or removed and the remaining 12 are derived with no DD backing — there is nothing to
+    migrate onto. <code>dd:refractometer/channel/frequencies</code> is confirmed removed, so detaching it
+    unblocks the <code>frequency_of_diagnostic_antenna</code> →
+    <code>frequency_of_wave_diagnostic_channel</code> rename that had failed closed.</p>
+  </section>
 </main>
 </body>
 </html>
