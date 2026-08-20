@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T20:13:05",
+  "updated": "2026-08-20T20:33:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9163,9 +9163,129 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T181455307179-sgwi-grammar-snapshot-sync",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-grammar-snapshot-sync",
+        "role": "implement",
+        "member": "impl-isnvocab",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T18:14:57Z",
+        "completed_at": "2026-08-20T18:17:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 149,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 149,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3ace94596a3de857ac67b9bcf0323353644c1891",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Stopped before any edit because the one unsafe call site lies outside the assigned write paths, which was a coordinator scoping error rather than a worker fault. No commits, no changes, nothing to unwind. It delivered the precise diagnosis instead: the unsafe fallback is imas_codex/standard_names/graph_ops.py:6305-6312, a raw descending string sort over GrammarToken.version reached exactly when no tokens exist for the pinned version, and the correct active-flag resolver already exists at imas_codex/cli/sn.py:1110. Coordinator verification confirms the chain end to end: rc66 was pinned without a graph sync, so the fallback fires and the string sort returns 0.8.0rc9. Re-dispatched with graph_ops.py added to scope.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T181455307179-sgwi-grammar-snapshot-sync/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02062-25d1-77f2-8429-d06aa9771a6c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1204224,
+            "cached_input_tokens_cumulative": 1204224,
+            "input_tokens": 1322858,
+            "input_tokens_cumulative": 1322858,
+            "output_tokens": 5410,
+            "output_tokens_cumulative": 5410,
+            "reasoning_output_tokens": 2113,
+            "reasoning_output_tokens_cumulative": 2113
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T181814690694-sgwi-grammar-sync-and-ordering",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-grammar-sync-and-ordering",
+        "role": "implement",
+        "member": "impl-isnvocab",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T18:18:18Z",
+        "completed_at": "2026-08-20T18:33:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 911,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 911,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "3ace94596a3de857ac67b9bcf0323353644c1891",
+        "commits": [
+          "59e08949b7b6813a2e82076b85915318a80e2f6c"
+        ],
+        "changed_lines": {
+          "added": 226,
+          "removed": 6,
+          "files": 5
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T181814690694-sgwi-grammar-sync-and-ordering/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02065-351f-7713-81df-9e10705bda8a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11151616,
+            "cached_input_tokens_cumulative": 11151616,
+            "input_tokens": 11373484,
+            "input_tokens_cumulative": 11373484,
+            "output_tokens": 26058,
+            "output_tokens_cumulative": 26058,
+            "reasoning_output_tokens": 7732,
+            "reasoning_output_tokens_cumulative": 7732
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 203
+    "_version": 205
   }
 }
