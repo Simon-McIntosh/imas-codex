@@ -235,6 +235,57 @@
     rather than an omission. Whether two sub-threshold draws reflect weak identities or quorum composition
     belongs to the benchmark plan, not to a lowered bar here.</p>
   </section>
+
+  <section id="grammar-snapshot-stale-and-fixed">
+    <h2>The graph was serving compose a stale grammar, and a version comparator ranked rc9 above rc65</h2>
+    <p><strong>Found and fixed 2026-08-20</strong> — the most consequential defect this
+    programme surfaced, and it was invisible until a node had to justify a sub-threshold
+    score. <code>graph_ops.py</code> resolved "latest grammar" with a raw
+    <code>ORDER BY v DESC</code> over <code>GrammarToken.version</code>, reached exactly
+    when no tokens exist for the pinned version. Because ISN <code>0.8.0rc66</code> had
+    been pinned as a dependency without ever being synced into the graph, that fallback
+    fired on every compose and the string sort returned <strong><code>0.8.0rc9</code></strong>
+    — '9' sorts above '6', so rc9 outranked rc65. It logged a warning each time, so the
+    evidence had been in the logs all along.</p>
+    <p>A second, larger gap emerged during the fix: the native ISN graph spec supplies only
+    <strong>781</strong> tokens and omits all <strong>175 public <code>physical_base</code>
+    tokens</strong> — the closed segment carrying the core quantity vocabulary. A correctly
+    run sync would still have served an incomplete vocabulary missing its most important
+    token class.</p>
+    <p>After the fix the graph carries a <code>0.8.0rc66</code> snapshot as its sole active
+    version with all <strong>956</strong> public-context tokens across 22 of 22 declared
+    segments, zero missing segments and zero count mismatches. Resolution order is exact
+    runtime tokens, then the single active version, then PEP 440 ordering. The regression
+    proves rc66 &gt; rc65 &gt; rc9 and <em>fails</em> when mutated back to a plain
+    descending string sort, so it cannot pass vacuously; a grep shows zero remaining
+    <code>max</code> or raw-descending grammar resolutions. Suite: 6,533 passed, 8 skipped,
+    0 failed. Consequence worth carrying forward: every name composed or scored before this
+    fix was judged against rc9's vocabulary, which plausibly depressed the three
+    sub-threshold position identities and the two fold ancestors that failed their draws.</p>
+  </section>
+
+  <section id="session-close-2026-08-20">
+    <h2>Where the integrity programme stands</h2>
+    <p><strong>Measured at close 2026-08-20.</strong> Dual-bound semantic sources
+    <strong>226 → 23</strong>. Stale sources holding a live binding <strong>58 → 3</strong>,
+    all three named refusals protecting a last producer or a changed closure. Signed
+    retirements outstanding <strong>16 → 0</strong>. Owner/geometry rows still on the generic
+    measurement-position target <strong>49 → 27</strong>, and that identity's live producers
+    <strong>61 → 28</strong> — the generic-identity collapse this cohort exists to undo is
+    over half reversed, with each displaced producer bound to an identity naming its real
+    owner. Eleven new identities accepted through fresh quorum. Structural names left bare:
+    <strong>0</strong>.</p>
+    <p><strong>The number that did not move is the honest headline: genuine orphans stayed
+    at 36</strong> (27 accepted, 4 reviewed, 4 drafted, 1 pending) all day, and correctly so
+    — §3 forbids bulk action and requires individual judgment on each. That queue is the
+    remaining WEST blocker and no instrument will move it.</p>
+    <p><strong>Cost discipline.</strong> Total spend $1.87 of an authorized $150. Every
+    mechanical repair was deterministic and cost nothing; compose ran free on the local
+    seat; only review consumed budget. Eleven nodes landed with passing gates and seven
+    withheld mutation entirely — the refusals produced the stale-grammar find, the
+    retirement ordering deadlock, and the reflector geometry distinction, none of which a
+    successful apply would have surfaced.</p>
+  </section>
 </main>
 </body>
 </html>
