@@ -11,7 +11,10 @@ documents the eligibility rules.
 from __future__ import annotations
 
 import re
-from typing import Final
+from collections.abc import Iterable, Mapping
+from typing import Any, Final
+
+from packaging.version import Version
 
 # ---------------------------------------------------------------------------
 # Tokeniser
@@ -25,6 +28,50 @@ STOPWORDS: Final[frozenset[str]] = frozenset(
 
 
 _SPLIT_RE = re.compile(r"[^a-z0-9]+")
+
+
+def order_grammar_versions(versions: Iterable[str]) -> list[str]:
+    """Return unique PEP 440 grammar versions from newest to oldest.
+
+    Grammar snapshots use package versions, so string ordering is not valid:
+    lexicographically, ``0.8.0rc9`` sorts after ``0.8.0rc66``.  Parsing with
+    :class:`packaging.version.Version` preserves release-candidate, development,
+    and local-version ordering.
+    """
+    return sorted(set(versions), key=Version, reverse=True)
+
+
+def select_grammar_version(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    preferred_version: str | None = None,
+) -> str | None:
+    """Select a token snapshot using runtime, active, then semantic ordering.
+
+    An exact runtime snapshot is strongest because it is the installed grammar
+    contract.  Otherwise the graph's single active version is authoritative.
+    Semantic version ordering is only a recovery fallback for graphs without an
+    active flag.
+    """
+    candidates = [
+        (str(row.get("version") or row["v"]), bool(row.get("active", False)))
+        for row in rows
+        if row.get("version") or row.get("v")
+    ]
+    available = {version for version, _active in candidates}
+    if preferred_version in available:
+        return preferred_version
+
+    active_versions = {version for version, active in candidates if active}
+    if len(active_versions) > 1:
+        raise ValueError(
+            "multiple active grammar versions have token snapshots: "
+            + ", ".join(order_grammar_versions(active_versions))
+        )
+    if active_versions:
+        return next(iter(active_versions))
+    ordered = order_grammar_versions(available)
+    return ordered[0] if ordered else None
 
 
 def tokenise_query(query: str) -> list[str]:
