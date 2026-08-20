@@ -944,24 +944,50 @@ def _load_signed_stale_source_rows(
         raise ValueError("stale-source detach source is outside signed authority")
     selected = [dict(by_source[source_id]) for source_id in requested]
     for row in selected:
+        source_id = row.get("source_id")
+        source_type = row.get("source_type")
+        live_target_ids = row.get("live_target_ids")
+        scalar_target = row.get("scalar_target")
+        source_shape_is_signed = (
+            isinstance(source_id, str)
+            and source_type in {"dd", "derived"}
+            and isinstance(live_target_ids, list)
+            and bool(live_target_ids)
+            and all(isinstance(target_id, str) for target_id in live_target_ids)
+            and len(set(live_target_ids)) == len(live_target_ids)
+            and isinstance(scalar_target, str)
+            and bool(scalar_target)
+        )
+        dd_shape_is_signed = source_type == "dd" and (
+            source_id.startswith("dd:")
+            and isinstance(row.get("source_dd_version"), str)
+            and row.get("backing_lifecycle_status") == "removed"
+        )
+        derived_shape_is_signed = source_type == "derived" and (
+            source_id.startswith("derived:")
+            and row.get("source_dd_version") is None
+            and row.get("backing_lifecycle_status") is None
+        )
         if (
-            row.get("source_type") != "dd"
+            not source_shape_is_signed
+            or not (dd_shape_is_signed or derived_shape_is_signed)
             or row.get("disposition") != "detach"
             or row.get("configured_path_present") is not False
-            or row.get("backing_lifecycle_status") != "removed"
-            or not isinstance(row.get("live_target_ids"), list)
-            or len(row["live_target_ids"]) != 1
-            or row.get("scalar_target") != row["live_target_ids"][0]
         ):
-            raise ValueError(
-                "selected stale-source row lacks exact DD detach authority"
-            )
+            raise ValueError("selected stale-source row lacks exact detach authority")
     return sha256(raw).hexdigest(), declared_digest, selected
+
+
+def _signed_stale_source_target_ids(row: dict[str, Any]) -> list[str]:
+    """Return every target identity whose removal shape is signed by a row."""
+    return sorted({*row["live_target_ids"], row["scalar_target"]})
 
 
 def _stale_source_detach_closure(gc: Any, rows: list[dict[str, Any]]) -> dict[str, Any]:
     source_ids = [row["source_id"] for row in rows]
-    target_ids = sorted({target for row in rows for target in row["live_target_ids"]})
+    target_ids = sorted(
+        {target for row in rows for target in _signed_stale_source_target_ids(row)}
+    )
     participants = [
         dict(row)
         for row in gc.query(
@@ -1035,6 +1061,15 @@ def _stale_source_detach_closure(gc: Any, rows: list[dict[str, Any]]) -> dict[st
                         binding_element_id: elementId(binding),
                         binding_properties: properties(binding)}]
                    END AS incoming_bindings
+                   ,CASE WHEN target IS NULL THEN [] ELSE
+                     [(child:StandardName)-[parent:HAS_PARENT]->(target)
+                       WHERE coalesce(child.name_stage, '') <> 'superseded'
+                         AND coalesce(child.status, '') <> 'superseded' |
+                       {child_element_id: elementId(child),
+                        child_properties: properties(child),
+                        parent_element_id: elementId(parent),
+                        parent_properties: properties(parent)}]
+                   END AS live_children
             ORDER BY requested_id
             """,
             target_ids=target_ids,
@@ -1046,6 +1081,13 @@ def _stale_source_detach_closure(gc: Any, rows: list[dict[str, Any]]) -> dict[st
             key=lambda item: (
                 (item.get("source_properties") or {}).get("id", ""),
                 item["binding_element_id"],
+            ),
+        )
+        row["live_children"] = sorted(
+            (dict(item) for item in row.get("live_children") or []),
+            key=lambda item: (
+                (item.get("child_properties") or {}).get("id", ""),
+                item["parent_element_id"],
             ),
         )
     versions = list(
@@ -1070,6 +1112,7 @@ def _validate_stale_source_detach_closure(
     signed_rows: list[dict[str, Any]], closure: dict[str, Any]
 ) -> list[dict[str, Any]]:
     expected = {row["source_id"]: row for row in signed_rows}
+    selected_ids = set(expected)
     targets = {row["requested_id"]: row for row in closure["targets"]}
     versions = closure["current_versions"]
     if (
@@ -1084,14 +1127,14 @@ def _validate_stale_source_detach_closure(
         properties = participant.get("source_properties") or {}
         bindings = participant.get("bindings") or []
         backings = participant.get("backings") or []
-        expected_targets = signed["live_target_ids"]
-        projected = [
-            projection
-            for backing in backings
-            for projection in backing["projections"]
-            if projection["target_id"] in expected_targets
+        signed_targets = sorted(signed["live_target_ids"])
+        authorized_targets = _signed_stale_source_target_ids(signed)
+        binding_targets = [binding["target_id"] for binding in bindings]
+        projections = [
+            projection for backing in backings for projection in backing["projections"]
         ]
-        if (
+        projection_targets = [projection["target_id"] for projection in projections]
+        common_shape_changed = (
             participant.get("source_element_id") is None
             or properties.get("status") != "stale"
             or properties.get("source_type") != signed["source_type"]
@@ -1099,39 +1142,50 @@ def _validate_stale_source_detach_closure(
             or properties.get("produced_sn_id") != signed["scalar_target"]
             or properties.get("claimed_at") is not None
             or properties.get("claim_token") is not None
-            or [binding["target_id"] for binding in bindings] != expected_targets
-            or len(bindings) != 1
-            or len(backings) != 1
+            or not set(signed_targets).issubset(binding_targets)
+            or not set(binding_targets).issubset(authorized_targets)
+            or len(binding_targets) != len(set(binding_targets))
+        )
+        dd_shape_changed = signed["source_type"] == "dd" and (
+            len(backings) != 1
             or (backings[0].get("properties") or {}).get("id")
             != signed["source_id"][3:]
             or (backings[0].get("properties") or {}).get("lifecycle_status")
             != signed["backing_lifecycle_status"]
-            or len(projected) != 1
-        ):
+            or sorted(projection_targets) != sorted(binding_targets)
+            or len(projection_targets) != len(set(projection_targets))
+        )
+        derived_shape_changed = signed["source_type"] == "derived" and bool(backings)
+        if common_shape_changed or dd_shape_changed or derived_shape_changed:
             raise StaleSourceDetachConflict(
                 f"signed source closure changed for {signed['source_id']}"
             )
-        target = targets.get(expected_targets[0]) or {}
-        live_remaining = [
-            incoming
-            for incoming in target.get("incoming_bindings") or []
-            if (incoming.get("source_properties") or {}).get("status") != "stale"
-            and (incoming.get("source_properties") or {}).get("id")
-            != signed["source_id"]
-        ]
-        if not live_remaining:
-            raise StaleSourceDetachConflict(
-                f"detach would orphan target {expected_targets[0]}"
-            )
+        for target_id in binding_targets:
+            target = targets.get(target_id) or {}
+            live_remaining = [
+                incoming
+                for incoming in target.get("incoming_bindings") or []
+                if (incoming.get("source_properties") or {}).get("status") != "stale"
+                and (incoming.get("source_properties") or {}).get("id")
+                not in selected_ids
+            ]
+            if not live_remaining and not target.get("live_children"):
+                raise StaleSourceDetachConflict(
+                    f"detach would orphan target {target_id}"
+                )
         actions.append(
             {
                 "source_id": signed["source_id"],
                 "source_element_id": participant["source_element_id"],
-                "target_id": expected_targets[0],
-                "target_element_id": bindings[0]["target_element_id"],
-                "binding_element_id": bindings[0]["element_id"],
-                "backing_element_id": backings[0]["element_id"],
-                "projection_element_id": projected[0]["element_id"],
+                "target_ids": binding_targets,
+                "target_element_ids": [
+                    binding["target_element_id"] for binding in bindings
+                ],
+                "binding_element_ids": [binding["element_id"] for binding in bindings],
+                "backing_element_ids": [backing["element_id"] for backing in backings],
+                "projection_element_ids": [
+                    projection["element_id"] for projection in projections
+                ],
                 "scalar_target": signed["scalar_target"],
                 "unblocks": signed["unblocks"],
             }
@@ -1252,22 +1306,24 @@ def detach_signed_stale_source_bindings(
             OPTIONAL MATCH (event:StandardNameChange {id: expected.event_id})
             OPTIONAL MATCH (source:StandardNameSource {id: expected.source_id})
             OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+            WITH expected, event, source,
+                 collect(DISTINCT target.id) AS targets
             OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(backing:IMASNode)
             OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(projected:StandardName)
-            WHERE projected.id = expected.target_id
+            WHERE projected.id IN expected.target_ids
             RETURN expected.source_id AS source_id,
                    event.id IS NOT NULL AS event_exists,
                    event.manifest_sha256 AS event_manifest_sha256,
                    event.authority_rows_sha256 AS event_authority_rows_sha256,
                    source.produced_sn_id AS scalar,
-                   collect(DISTINCT target.id) AS targets,
+                   targets,
                    collect(DISTINCT projected.id) AS projections
             ORDER BY source_id
             """,
             rows=[
                 {
                     "source_id": row["source_id"],
-                    "target_id": row["live_target_ids"][0],
+                    "target_ids": _signed_stale_source_target_ids(row),
                     "event_id": event_ids[row["source_id"]],
                 }
                 for row in signed_rows
@@ -1322,8 +1378,12 @@ def detach_signed_stale_source_bindings(
             "changed": 0,
             "would_change": len(actions),
             "receipt_rows": len(actions),
-            "bindings_to_remove": len(actions),
-            "projections_to_remove": len(actions),
+            "bindings_to_remove": sum(
+                len(action["binding_element_ids"]) for action in actions
+            ),
+            "projections_to_remove": sum(
+                len(action["projection_element_ids"]) for action in actions
+            ),
             "authority_file_sha256": authority_file_sha256,
             "authority_rows_sha256": authority_rows_sha256,
             "manifest_sha256": computed_manifest_sha256,
@@ -1337,7 +1397,11 @@ def detach_signed_stale_source_bindings(
             for participant in closure["participants"]
             for backing in participant["backings"]
         }
-        | {target["target_element_id"] for target in closure["targets"]}
+        | {
+            target["target_element_id"]
+            for target in closure["targets"]
+            if target.get("target_element_id") is not None
+        }
         | {
             incoming["source_element_id"]
             for target in closure["targets"]
@@ -1380,21 +1444,31 @@ def detach_signed_stale_source_bindings(
           AND source.produced_sn_id = expected.scalar_target
           AND source.claimed_at IS NULL
           AND source.claim_token IS NULL
-        MATCH (source)-[binding:PRODUCED_NAME]->
-              (target:StandardName {id: expected.target_id})
-        WHERE elementId(binding) = expected.binding_element_id
-          AND elementId(target) = expected.target_element_id
-        MATCH (backing:IMASNode)-[projection:HAS_STANDARD_NAME]->(target)
-        WHERE elementId(backing) = expected.backing_element_id
-          AND elementId(projection) = expected.projection_element_id
-        DELETE binding, projection
-        SET source.produced_sn_id = null,
-            target.source_paths = [path IN coalesce(target.source_paths, [])
-              WHERE NOT (path = source.id OR path = source.source_id
-                         OR path = 'dd:' + source.source_id)]
+        MATCH (source)-[binding:PRODUCED_NAME]->(target:StandardName)
+        WHERE elementId(binding) IN expected.binding_element_ids
+          AND elementId(target) IN expected.target_element_ids
+        WITH expected, source,
+             collect(binding) AS bindings, collect(target) AS targets
+        WHERE size(bindings) = size(expected.binding_element_ids)
+          AND size(targets) = size(expected.target_element_ids)
+        OPTIONAL MATCH (backing:IMASNode)-[projection:HAS_STANDARD_NAME]->
+          (projected:StandardName)
+        WHERE elementId(backing) IN expected.backing_element_ids
+          AND elementId(projection) IN expected.projection_element_ids
+          AND elementId(projected) IN expected.target_element_ids
+        WITH expected, source, bindings, targets,
+             collect(projection) AS projections
+        WHERE size(projections) = size(expected.projection_element_ids)
+        FOREACH (binding IN bindings | DELETE binding)
+        FOREACH (projection IN projections | DELETE projection)
+        SET source.produced_sn_id = null
+        FOREACH (target IN targets |
+          SET target.source_paths = [path IN coalesce(target.source_paths, [])
+            WHERE NOT (path = source.id OR path = source.source_id
+                       OR path = 'dd:' + source.source_id)])
         CREATE (change:StandardNameChange {id: expected.event_id})
-        SET change.from_name = expected.target_id,
-            change.to_name = expected.target_id,
+        SET change.from_name = expected.scalar_target,
+            change.to_name = expected.scalar_target,
             change.operation = 'detach_stale_source_binding',
             change.reason = expected.unblocks,
             change.origin = 'stale_source_lifecycle',
@@ -1402,11 +1476,15 @@ def detach_signed_stale_source_bindings(
             change.changed_at = datetime(),
             change.internal = true,
             change.source_id = expected.source_id,
+            change.detached_target_ids = expected.target_ids,
             change.manifest_sha256 = $manifest_sha256,
             change.authority_rows_sha256 = $authority_rows_sha256
-        MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+        FOREACH (target IN targets |
+          MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change))
         RETURN collect(source.id) AS source_ids,
-               collect(change.id) AS change_ids
+               collect(change.id) AS change_ids,
+               sum(size(bindings)) AS bindings_removed,
+               sum(size(projections)) AS projections_removed
         """,
         rows=mutation_rows,
         run_id=run_id,
@@ -1415,6 +1493,10 @@ def detach_signed_stale_source_bindings(
     )
     changed_ids = sorted(changed[0].get("source_ids") or []) if changed else []
     change_ids = sorted(changed[0].get("change_ids") or []) if changed else []
+    bindings_removed = int(changed[0].get("bindings_removed") or 0) if changed else 0
+    projections_removed = (
+        int(changed[0].get("projections_removed") or 0) if changed else 0
+    )
     if changed_ids != selected_ids or len(change_ids) != len(signed_rows):
         raise StaleSourceDetachConflict("stale-source compare-and-set changed")
 
@@ -1422,35 +1504,56 @@ def detach_signed_stale_source_bindings(
         """
         UNWIND $rows AS expected
         MATCH (source:StandardNameSource {id: expected.source_id})
-        MATCH (target:StandardName {id: expected.target_id})
         OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+        WITH expected, source, collect(DISTINCT bound.id) AS bindings
         OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(backing:IMASNode)
         OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(projected:StandardName)
-        WHERE projected.id = expected.target_id
-        WITH expected, source, target,
-             collect(DISTINCT bound.id) AS bindings,
-             collect(DISTINCT projected.id) AS projections
-        OPTIONAL MATCH (live:StandardNameSource)-[:PRODUCED_NAME]->(target)
-        WHERE live.status <> 'stale'
+        WHERE projected.id IN expected.target_ids
         RETURN expected.source_id AS source_id,
                source.produced_sn_id AS scalar,
-               bindings, projections,
-               count(DISTINCT live) AS live_producers
+               bindings,
+             collect(DISTINCT projected.id) AS projections
         ORDER BY source_id
         """,
         rows=[
-            {"source_id": row["source_id"], "target_id": row["live_target_ids"][0]}
+            {
+                "source_id": row["source_id"],
+                "target_ids": _signed_stale_source_target_ids(row),
+            }
             for row in signed_rows
         ],
     )
     if len(post) != len(signed_rows) or any(
-        row.get("scalar") is not None
-        or row.get("bindings")
-        or row.get("projections")
-        or int(row.get("live_producers") or 0) < 1
+        row.get("scalar") is not None or row.get("bindings") or row.get("projections")
         for row in post
     ):
         raise StaleSourceDetachConflict("stale-source detach postcondition failed")
+    target_post = list(
+        gc.query(
+            """
+            UNWIND $target_ids AS target_id
+            MATCH (target:StandardName {id: target_id})
+            OPTIONAL MATCH (live:StandardNameSource)-[:PRODUCED_NAME]->(target)
+            WHERE live.status <> 'stale'
+            WITH target_id, target, count(DISTINCT live) AS live_producers
+            OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(target)
+            WHERE coalesce(child.name_stage, '') <> 'superseded'
+              AND coalesce(child.status, '') <> 'superseded'
+            RETURN target_id, live_producers,
+                   count(DISTINCT child) AS live_children
+            ORDER BY target_id
+            """,
+            target_ids=sorted(
+                {target_id for action in actions for target_id in action["target_ids"]}
+            ),
+        )
+    )
+    if any(
+        int(row.get("live_producers") or 0) < 1
+        and int(row.get("live_children") or 0) < 1
+        for row in target_post
+    ):
+        raise StaleSourceDetachConflict("stale-source target authority was stripped")
     out_count_after, out_hash_after = _out_of_allowlist_source_hash(gc, selected_ids)
     if out_count_after != out_count or out_hash_after != out_hash:
         raise StaleSourceDetachConflict("out-of-allowlist source closure changed")
@@ -1473,9 +1576,14 @@ def detach_signed_stale_source_bindings(
         "changed": len(signed_rows),
         "receipt_rows": len(change_ids),
         "change_ids": change_ids,
-        "bindings_removed": len(actions),
-        "projections_removed": len(actions),
-        "minimum_live_producers_after": min(int(row["live_producers"]) for row in post),
+        "bindings_removed": bindings_removed,
+        "projections_removed": projections_removed,
+        "minimum_live_producers_after": min(
+            int(row["live_producers"]) for row in target_post
+        ),
+        "minimum_live_children_after": min(
+            int(row["live_children"]) for row in target_post
+        ),
         "StandardNameChange": {
             "before": int(counts_before["changes"]),
             "after": int(counts_after["changes"]),
