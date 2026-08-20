@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T20:33:37",
+  "updated": "2026-08-20T23:20:03",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9283,9 +9283,186 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T201252345408-sgwi-orphan-evidence-partition",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-orphan-evidence-partition",
+        "role": "implement",
+        "member": "impl-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T20:13:13Z",
+        "completed_at": "2026-08-20T20:18:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 337,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 337,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "75ed6b3450a68741815539332bbde727f98c0ff9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "No graph read completed, so no partition was produced and nothing was written. Not a service failure: Neo4j is running and a coordinator connect-plus-query succeeded immediately afterwards but took 46.7 seconds, consistent with a cold SLURM-discovery and GPFS connect rather than query slowness, which is what the worker's wrapper timed out on. The worker was right to refuse promoting the plan's stated 36-row split as fresh evidence when it could not verify it. Re-dispatched after the coordinator warmed the connection, with explicit guidance that a first GraphClient connect can take minutes on this filesystem.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T201252345408-sgwi-orphan-evidence-partition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01880-5c67-70c3-bef4-e30cb2267b48",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1311488,
+            "cached_input_tokens_cumulative": 16227840,
+            "input_tokens": 1677017,
+            "input_tokens_cumulative": 17151251,
+            "output_tokens": 7062,
+            "output_tokens_cumulative": 62944,
+            "reasoning_output_tokens": 2261,
+            "reasoning_output_tokens_cumulative": 19170
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T202243350344-sgwi-integrity-invariant-ratchets",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-integrity-invariant-ratchets",
+        "role": "implement",
+        "member": "impl-envfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T20:22:59Z",
+        "completed_at": "2026-08-20T21:04:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2461,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2461,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "75ed6b3450a68741815539332bbde727f98c0ff9",
+        "commits": [
+          "3e9a1cdcf94dda63b9e0c574f8abaec22cd30441"
+        ],
+        "changed_lines": {
+          "added": 247,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "Ratchet module is 4 of 4 green against the live graph. The two standard-names suite failures the worker reported are environmental and unrelated to this change, classified by coordinator audit rather than assumed: re-running them isolated reproduces a 30-second pytest-timeout during test SETUP inside litellm's module-level import chain, at JSONProviderRegistry.load performing json.load on a provider file, so a third-party import is stalling on filesystem reads. Measured alongside: import 15.6s, GraphClient connect 54.8s, query 0.1s, with connect fluctuating 46.7 to 196.9 to 54.8 seconds across the hour while the Neo4j node sits idle at load 0.00, 1.2 percent CPU and 158 GB free. The same suite ran 6533 passed 0 failed at base 60d9258f earlier today on this code path. No regression, no service fault, no restart warranted.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T202243350344-sgwi-integrity-invariant-ratchets/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0167e-a37f-7aa1-b70b-9400fad4ddf2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 25417728,
+            "cached_input_tokens_cumulative": 43429120,
+            "input_tokens": 25910594,
+            "input_tokens_cumulative": 44485218,
+            "output_tokens": 38848,
+            "output_tokens_cumulative": 86307,
+            "reasoning_output_tokens": 9396,
+            "reasoning_output_tokens_cumulative": 25590
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T202056850411-sgwi-orphan-partition-retry",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-orphan-partition-retry",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T20:21:15Z",
+        "completed_at": "2026-08-20T20:28:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 432,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 432,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "75ed6b3450a68741815539332bbde727f98c0ff9",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "No graph read completed and nothing was written; both bounded probes exited 124, including one using an explicit bolt override to the discovered host. Cause is now measured rather than guessed: GraphClient connect alone costs 54.8 seconds and peaked at 196.9 seconds within the hour, while Neo4j itself is idle and answers queries in 0.1 seconds once connected. The worker was correct both to refuse the plan's stated 36-row split as fresh evidence and to give up rather than widen its timeout unilaterally. Re-dispatch when connect latency recovers, with a graph probe timeout of at least 120 seconds.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T202056850411-sgwi-orphan-partition-retry/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3060992,
+            "cached_input_tokens_cumulative": 208618496,
+            "input_tokens": 3429097,
+            "input_tokens_cumulative": 216039850,
+            "output_tokens": 9014,
+            "output_tokens_cumulative": 601017,
+            "reasoning_output_tokens": 2288,
+            "reasoning_output_tokens_cumulative": 169135
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 205
+    "_version": 208
   }
 }
