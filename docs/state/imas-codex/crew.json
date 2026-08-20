@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T14:08:07",
+  "updated": "2026-08-20T14:37:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -8109,9 +8109,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T115236350868-sgwi-structural-release-apply",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-structural-release-apply",
+        "role": "implement",
+        "member": "impl-lastbind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T11:52:40Z",
+        "completed_at": "2026-08-20T12:19:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1629,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1629,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "dd8931a1b74f348d691b9e24f75b6d49ceb7f9d7",
+        "commits": [
+          "153e7e00cba351a21a7935a5aae528eba76f4a7c"
+        ],
+        "changed_lines": {
+          "added": 85,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Fail-closed twice before any mutation and reshaped rather than retried. Attempt one refused stale manifest b7daac18 after an intervening authorized detach moved the complete-parent digest; attempt two passed all 15 semantic authority gates on refreshed manifest 0e270a2b but stopped on a mechanical defect in its own auxiliary verifier, comparing live neo4j temporal objects to byte-equivalent JSON with Python object equality. Production untouched throughout: StandardNameChange 7495, LLMCost 27477, authorized receipt rows 0. Node reshaped as sgwi-structural-release-canonical with the drift-gate comparison primitive specified.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T115236350868-sgwi-structural-release-apply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01ee6-4099-71c0-991b-4ea213ed0d53",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8702464,
+            "cached_input_tokens_cumulative": 23796736,
+            "input_tokens": 9184896,
+            "input_tokens_cumulative": 24889578,
+            "output_tokens": 49463,
+            "output_tokens_cumulative": 97969,
+            "reasoning_output_tokens": 15666,
+            "reasoning_output_tokens_cumulative": 32467
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260820T122120984631-sgwi-structural-release-canonical",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-structural-release-canonical",
+        "role": "implement",
+        "member": "impl-catapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T12:21:25Z",
+        "completed_at": "2026-08-20T12:35:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 858,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 858,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "73be7f8d7678fd8c577252301e47ee0ce898d09c",
+        "commits": [
+          "2821d7955fa04b0dcdb0cf80570a71e7b3ab2b5e"
+        ],
+        "changed_lines": {
+          "added": 218,
+          "removed": 70,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T122120984631-sgwi-structural-release-canonical/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a018a3-977a-7290-a6a3-1168a0a84cb1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7774464,
+            "cached_input_tokens_cumulative": 51852800,
+            "input_tokens": 8320671,
+            "input_tokens_cumulative": 53496922,
+            "output_tokens": 29020,
+            "output_tokens_cumulative": 158747,
+            "reasoning_output_tokens": 5979,
+            "reasoning_output_tokens_cumulative": 43837
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 185
+    "_version": 187
   }
 }
