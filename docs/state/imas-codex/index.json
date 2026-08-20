@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-16T19:01:15",
+  "updated": "2026-08-20T10:47:23",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -174,7 +174,7 @@
         "starts": "2026-08-10",
         "ends": "2026-09-25",
         "description": "Finish the work that makes the pipeline trustworthy: complete the local DD-resolution channel, then repair the measured semantic-integrity worklist (the WEST-blocking subset first, then the dual-bound sources and gated detaches). The pipeline itself was restored and instrumented under sn-pipeline-recovery: attempt-budgeted refinement, write-boundary attachment guards, ISN locus typing, and typical-bill cost admission are live.",
-        "summary": "Recovery shipped 2026-08-11 ($240 of drain tranches: edits 255\u2192142 open, docs-accepted 2,238\u21922,772; the 837-call refine churn now completes in 23 calls with recorded stop reasons). The 2026-08-10 typed-authority framing was retired in the same-day portfolio review: llm-context-integrity and the sn-pipeline-hardening overlay are archived; prevention landed by narrower, measured means. Remaining: sn-dd-gaps (74%) and sn-graph-wide-integrity (75%).",
+        "summary": "Two of three plans shipped: sn-pipeline-recovery (2026-08-11) and sn-dd-gaps. sn-graph-wide-integrity is the sole open item at 94%, and its remaining work has collapsed into one coupled interlock rather than several independent backlogs. Measured live 2026-08-20: three of six tracked defect classes closed at zero (no-live-target 596 to 0, scalar mirror mismatches 144 to 0, DD projection mismatches 2 to 0), dual-bound sources 226 to 87, live names with no producing source 85 to 36, and all 2,543 accepted names parse strictly under the pinned grammar. Prevention is enforced at the write boundary: the signed disposition instrument compare-and-set locks each removed target's complete global incoming binding closure and fails closed on any removal that would strip a name's last producing source. That guard caught a proposed apply which would have orphaned 86 accepted names, and a separate structural-closure check reversed a proposed bulk retirement of 69 accepted parents with live children. ISN v0.8.0rc66 is pinned, admitting four new loci and refusing field_map_grid as a discretization artifact; the bump also exposed seven prompts plus the review criteria and composition rules teaching an identity the grammar rejects, now corrected. Remaining: the 36-name orphan disposition, which unblocks the 87 dual-bound residue and the 49 adjudicated owner/geometry rows, plus nine ancestor folds gated on three ancestors reaching accepted through ordinary review and one stale-source lifecycle repair. Roughly four to six serialized nodes; applies cannot parallelize without invalidating each other's immutability proofs. Spend is $0.34 of the authorized $200; measured effort is 13.9 worker-hours across 75 runs against a declared 4-hour estimate, now recalibrated to 16.",
         "items": [
           {
             "slug": "sn-pipeline-recovery",
@@ -183,13 +183,13 @@
           },
           {
             "slug": "sn-dd-gaps",
-            "why_now": "Known DD defects need reviewed repo-local resolutions so names stay properly sourced while upstream DD pull requests are pending.",
-            "done_when": "Approved exact path/version resolutions flow through every Standard Names consumer, fail closed on ambiguity, and retire automatically when upstream DD converges."
+            "why_now": "Shipped: known DD defects needed reviewed repo-local resolutions so names stay properly sourced while upstream DD pull requests are pending.",
+            "done_when": "Done \u2014 approved exact path/version resolutions flow through every Standard Names consumer, fail closed on ambiguity, and retire automatically when upstream DD converges."
           },
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "The measured semantic worklist is the honest release gate: the WEST-blocking subset first, then the 362 dual-bound sources, gated detaches, and proven mis-attachments.",
-            "done_when": "Every WEST-blocking class has a recorded repair or reviewed refusal; one live name per source is established; the parked attachment worklist is dispositioned."
+            "why_now": "Sole open item at 94%. The WEST-blocking subset closed 2026-08-16/17; what remains is one coupled interlock \u2014 a dual binding cannot be cut until it is known whether the losing name keeps a producing source, so the 87 dual-bound sources, the 36 unsourced names and the 49 adjudicated owner/geometry rows all resolve through the orphan disposition.",
+            "done_when": "The 36-name orphan disposition is applied through a ledgered lifecycle instrument with no bulk rule on an accepted name; the dual-bound residue and the owner/geometry mapping are applied or carry recorded fail-closed refusals; the nine ancestor folds are applied or their three gating ancestors are accepted through ordinary review; and the stale-source lifecycle repair unblocks the two owner/geometry rows and the receiver-channel rename. Closing on recorded refusals is legitimate where a policy refusal or genuinely unscoped structural parent is the correct answer."
           }
         ]
       },
@@ -336,6 +336,6 @@
       }
     ],
     "blockers": [],
-    "_version": 36
+    "_version": 38
   }
 }
