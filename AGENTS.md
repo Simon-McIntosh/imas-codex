@@ -866,16 +866,21 @@ uv run pytest tests/path/to/test.py::test_function  # Specific test
 uv run pytest --cov=imas_codex  # With coverage
 ```
 
-### Use the repo's one `.venv` — never build another
+### Use the repo's one `.venv` — sync it, never duplicate it
 
 Environment policy is user-global and binding: see **Development Environment**
 in `~/.agents/AGENTS.md`. The repo-specific facts:
 
-- `/home/ITER/mcintos/Code/imas-codex/.venv` is the project environment. Use it.
-  Do **not** run `uv sync` — this repo's environment is already provisioned, and
-  a rebuild is pure waste.
+- `/home/ITER/mcintos/Code/imas-codex/.venv` is the project environment. Use it
+  and keep it current: `uv sync`, or a plain `uv run <cmd>` in the main checkout,
+  is normal workflow. The hatch build hook runs on sync, so syncing is also how
+  the generated models and `agents/schema-reference.md` get rebuilt. Declare
+  dependency changes with `uv add` / `uv remove` and commit `pyproject.toml`
+  together with `uv.lock`; never `pip install` into `.venv`.
 - In a detached worktree, reuse the main checkout's environment rather than
-  materializing one locally:
+  materializing one locally, and leave it unsynced there — that environment is
+  shared with the main checkout and any concurrent workers, so an incidental
+  sync mutates a resource under peers who did not ask for it:
 
   ```bash
   UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv \
@@ -886,12 +891,16 @@ in `~/.agents/AGENTS.md`. The repo-specific facts:
   worker fleet building its own produced a 180,186-file storage alert on
   2026-08-17, 98% of it from three copies. The SN pipeline was not involved.
 - Generated models live in the environment's installed package, so a worktree
-  reusing the main `.venv` inherits them — one more reason not to re-sync.
+  reusing the main `.venv` inherits them with no sync of its own. When a
+  worktree's work genuinely changes dependencies, land them in `pyproject.toml`
+  first, then drop `--no-sync` deliberately and say so, so an orchestrator can
+  serialize it against the other workers.
 - One-shot worker checks should disable incremental caches (`ruff --no-cache`,
   `pytest -p no:cacheprovider`, `mypy --no-incremental`) rather than write
   `.mypy_cache` / `.ruff_cache` trees into a throwaway worktree.
-- If `.venv` is missing or broken, that is a blocker to report, not to fix by
-  building one.
+- If `.venv` is absent, stale, or broken, run `uv sync` in the main checkout to
+  bring it up to date — that is the fix, not a blocker to hand back. Report only
+  if the sync itself fails, with what it printed.
 
 Two retention chores this also surfaced: `~/.local/share/imas-codex/logs` has no
 directory-wide age cleanup (per-stem rotation only), and reckon run envelopes need
