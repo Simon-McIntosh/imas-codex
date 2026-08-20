@@ -18196,7 +18196,7 @@ SIGNED_SOURCE_DISPOSITION_ADJUDICATION_SCHEMA = (
     "imas-codex.catalog-edit-dual-binding-adjudication.v1"
 )
 SIGNED_SOURCE_DISPOSITION_MANIFEST_SCHEMA = (
-    "imas-codex.signed-source-disposition-manifest.v1"
+    "imas-codex.signed-source-disposition-manifest.v2"
 )
 SIGNED_SOURCE_DISPOSITION_RECEIPT_SCHEMA = (
     "imas-codex.signed-source-disposition-receipt.v1"
@@ -18206,6 +18206,18 @@ _SIGNED_SOURCE_DISPOSITIONS = frozenset(
         "retain_scalar_target",
         "retarget_scalar_target",
         "select_missing_scalar",
+    }
+)
+_STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA = (
+    "imas-codex.refused-target-orphan-adjudication.v2"
+)
+_STRUCTURAL_LEGITIMACY_DISPOSITION = "preserve_as_structural_identity"
+_ORPHAN_DISPOSITIONS = frozenset(
+    {
+        _STRUCTURAL_LEGITIMACY_DISPOSITION,
+        "re_source_from_existing_dd_path",
+        "retain_competing_binding",
+        "retire_under_orphan_policy",
     }
 )
 
@@ -18325,12 +18337,130 @@ def _validate_signed_source_adjudication(
     return declared_hash, row_set_sha256, rows
 
 
+def _validate_structural_legitimacy_authority(
+    authority: dict[str, Any] | None,
+    authority_sha256: str | None,
+    adjudication_rows: list[dict[str, Any]],
+) -> tuple[str | None, frozenset[str]]:
+    if authority is None and authority_sha256 is None:
+        return None, frozenset()
+    if authority is None or authority_sha256 is None:
+        raise ValueError(
+            "structural legitimacy authority and its SHA-256 are both required"
+        )
+    if not _SHA256_RE.fullmatch(authority_sha256):
+        raise ValueError(
+            "structural legitimacy authority SHA-256 must be a lowercase digest"
+        )
+    if _catalog_edit_adjudication_signature_hash(authority) != authority_sha256:
+        raise ValueError("structural legitimacy authority signature does not match")
+    if authority.get("schema") != _STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA:
+        raise ValueError("unsupported structural legitimacy authority schema")
+    if authority.get("read_only") is not True:
+        raise ValueError("structural legitimacy authority must be read-only evidence")
+
+    raw_rows = authority.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise ValueError("structural legitimacy authority requires target rows")
+    adjudication_by_source = {row["source_id"]: row for row in adjudication_rows}
+    disposition_counts = {
+        disposition: sum(
+            isinstance(row, dict) and row.get("disposition") == disposition
+            for row in raw_rows
+        )
+        for disposition in sorted(_ORPHAN_DISPOSITIONS)
+    }
+    if any(
+        not isinstance(row, dict) or row.get("disposition") not in _ORPHAN_DISPOSITIONS
+        for row in raw_rows
+    ):
+        raise ValueError("structural legitimacy authority has an unknown disposition")
+    summary = authority.get("summary")
+    if (
+        not isinstance(summary, dict)
+        or summary.get("targets") != len(raw_rows)
+        or summary.get("disposition_sum") != len(raw_rows)
+        or summary.get("disposition_counts") != disposition_counts
+    ):
+        raise ValueError("structural legitimacy authority summary does not match rows")
+
+    structural_targets: set[str] = set()
+    for row in raw_rows:
+        if row["disposition"] != _STRUCTURAL_LEGITIMACY_DISPOSITION:
+            continue
+        target_id = row.get("name")
+        if not isinstance(target_id, str) or not target_id:
+            raise ValueError("structural legitimacy target requires an exact name")
+        if target_id in structural_targets:
+            raise ValueError("structural legitimacy targets must be unique")
+        if row.get("mutation_authority") != "classification_only":
+            raise ValueError(
+                "structural legitimacy evidence cannot grant lifecycle authority"
+            )
+        closure = row.get("structural_closure")
+        signed_children = (
+            closure.get("live_has_parent_children")
+            if isinstance(closure, dict)
+            else None
+        )
+        if (
+            not isinstance(closure, dict)
+            or closure.get("classification")
+            != "structurally_legitimate_without_producing_source"
+            or closure.get("has_live_has_parent_child") is not True
+            or not isinstance(signed_children, list)
+            or not signed_children
+            or any(
+                not isinstance(child, dict)
+                or not isinstance(child.get("name"), str)
+                or not child.get("name")
+                or not isinstance(child.get("relationship_id"), str)
+                or not child.get("relationship_id")
+                for child in signed_children
+            )
+        ):
+            raise ValueError(
+                "structural legitimacy target requires a signed direct child"
+            )
+        removed_bindings = row.get("current_removed_bindings")
+        if not isinstance(removed_bindings, list) or not removed_bindings:
+            raise ValueError(
+                "structural legitimacy target requires signed removed bindings"
+            )
+        for binding in removed_bindings:
+            if not isinstance(binding, dict):
+                raise ValueError("structural removed binding must be an object")
+            signed_row = adjudication_by_source.get(binding.get("source_id"))
+            if (
+                signed_row is None
+                or binding.get("signed_row_sha256")
+                != signed_row["row_signature_sha256"]
+                or binding.get("signed_surviving_target")
+                != signed_row["surviving_target"]
+                or target_id not in signed_row["removed_targets"]
+            ):
+                raise ValueError(
+                    "structural target is not bound to its signed source disposition"
+                )
+        structural_targets.add(target_id)
+    return authority_sha256, frozenset(structural_targets)
+
+
+def _is_live_structural_child(child: dict[str, Any]) -> bool:
+    properties = child.get("child_properties") or {}
+    return properties.get("name_stage") != "superseded" and properties.get(
+        "status"
+    ) not in {"deprecated", "superseded"}
+
+
 def _signed_source_disposition_authority(
     query_handle: _TransactionQuery,
     rows: list[dict[str, Any]],
     adjudication_sha256: str,
     adjudication_row_set_sha256: str,
     reason: str,
+    structural_authority_sha256: str | None,
+    structural_target_ids: frozenset[str],
 ) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
     source_ids = [row["source_id"] for row in rows]
     removed_target_ids = sorted(
@@ -18387,6 +18517,14 @@ def _signed_source_disposition_authority(
                     source_id: source.id,
                     source_properties: properties(source)}]
                END AS incoming_bindings
+               ,CASE WHEN target IS NULL THEN [] ELSE
+                 [(child:StandardName)-[relationship:HAS_PARENT]->(target) |
+                   {relationship_element_id: elementId(relationship),
+                    relationship_properties: properties(relationship),
+                    child_element_id: elementId(child),
+                    child_id: child.id,
+                    child_properties: properties(child)}]
+               END AS structural_children
         ORDER BY requested_id
         """,
         target_ids=removed_target_ids,
@@ -18401,6 +18539,13 @@ def _signed_source_disposition_authority(
                 key=lambda binding: (
                     binding["source_id"],
                     binding["binding_element_id"],
+                ),
+            ),
+            "structural_children": sorted(
+                (dict(child) for child in raw.get("structural_children") or []),
+                key=lambda child: (
+                    child["child_id"],
+                    child["relationship_element_id"],
                 ),
             ),
         }
@@ -18524,25 +18669,63 @@ def _signed_source_disposition_authority(
             }
         )
 
+    if structural_authority_sha256 is not None:
+        structurally_authorized_actions: list[dict[str, Any]] = []
+        for action in actions:
+            unauthorized_targets = sorted(
+                removal["target_id"]
+                for removal in action["removals"]
+                if removal["target_id"] not in structural_target_ids
+            )
+            if unauthorized_targets:
+                refusals.append(
+                    {
+                        "source_id": action["source_id"],
+                        "target_ids": unauthorized_targets,
+                        "reason": (
+                            "removed target is outside signed structural "
+                            "legitimacy authority"
+                        ),
+                    }
+                )
+            else:
+                structurally_authorized_actions.append(action)
+        actions = structurally_authorized_actions
+
     scheduled_bindings_by_target: dict[str, set[str]] = {}
     for action in actions:
         for removal in action["removals"]:
             scheduled_bindings_by_target.setdefault(removal["target_id"], set()).add(
                 removal["binding_element_id"]
             )
-    orphaning_targets = {
-        closure["target_id"]
-        for closure in removed_target_closures
-        if scheduled_bindings_by_target.get(closure["target_id"])
-        and not (
-            {
-                binding["binding_element_id"]
-                for binding in closure["incoming_bindings"]
-                if (binding.get("source_properties") or {}).get("status") != "stale"
-            }
-            - scheduled_bindings_by_target[closure["target_id"]]
-        )
-    }
+    structural_exemptions: list[dict[str, Any]] = []
+    orphaning_targets: set[str] = set()
+    for closure in removed_target_closures:
+        target_id = closure["target_id"]
+        scheduled_bindings = scheduled_bindings_by_target.get(target_id)
+        if not scheduled_bindings:
+            continue
+        remaining_live_bindings = {
+            binding["binding_element_id"]
+            for binding in closure["incoming_bindings"]
+            if (binding.get("source_properties") or {}).get("status") != "stale"
+        } - scheduled_bindings
+        if remaining_live_bindings:
+            continue
+        live_children = [
+            child
+            for child in closure["structural_children"]
+            if _is_live_structural_child(child)
+        ]
+        if target_id in structural_target_ids and live_children:
+            structural_exemptions.append(
+                {
+                    "target_id": target_id,
+                    "live_direct_children": live_children,
+                }
+            )
+        else:
+            orphaning_targets.add(target_id)
     if orphaning_targets:
         admitted_actions: list[dict[str, Any]] = []
         for action in actions:
@@ -18581,9 +18764,18 @@ def _signed_source_disposition_authority(
         "source_ids": source_ids,
         "participants": participants,
         "removed_target_closures": removed_target_closures,
+        "structural_exemptions": sorted(
+            structural_exemptions, key=lambda exemption: exemption["target_id"]
+        ),
         "actions": actions,
         "refusals": refusals,
     }
+    if structural_authority_sha256 is not None:
+        manifest["structural_legitimacy_authority"] = {
+            "schema": _STRUCTURAL_LEGITIMACY_AUTHORITY_SCHEMA,
+            "payload_sha256": structural_authority_sha256,
+            "target_ids": sorted(structural_target_ids),
+        }
     return manifest, actions, refusals
 
 
@@ -18610,6 +18802,11 @@ def _lock_signed_source_disposition_authority(
             ]
         }
         | {closure["target_element_id"] for closure in removed_target_closures}
+        | {
+            child["child_element_id"]
+            for closure in removed_target_closures
+            for child in closure["structural_children"]
+        }
     )
     relationship_element_ids = sorted(
         {
@@ -18629,6 +18826,11 @@ def _lock_signed_source_disposition_authority(
             binding["binding_element_id"]
             for closure in removed_target_closures
             for binding in closure["incoming_bindings"]
+        }
+        | {
+            child["relationship_element_id"]
+            for closure in removed_target_closures
+            for child in closure["structural_children"]
         }
     )
     locked_sources = query_handle.query(
@@ -18699,6 +18901,8 @@ def _signed_source_disposition_execution_authority(
     reason: str,
     *,
     admitted_subset: bool,
+    structural_authority_sha256: str | None,
+    structural_target_ids: frozenset[str],
 ) -> tuple[
     list[dict[str, Any]],
     dict[str, Any],
@@ -18712,6 +18916,8 @@ def _signed_source_disposition_execution_authority(
             adjudication_sha256,
             adjudication_row_set_sha256,
             reason,
+            structural_authority_sha256,
+            structural_target_ids,
         )
         return rows, manifest, actions, refusals
 
@@ -18722,6 +18928,8 @@ def _signed_source_disposition_execution_authority(
             adjudication_sha256,
             adjudication_row_set_sha256,
             reason,
+            structural_authority_sha256,
+            structural_target_ids,
         )
     )
     admitted_source_ids = {action["source_id"] for action in parent_actions}
@@ -18732,6 +18940,8 @@ def _signed_source_disposition_execution_authority(
         adjudication_sha256,
         adjudication_row_set_sha256,
         reason,
+        structural_authority_sha256,
+        structural_target_ids,
     )
     excluded_source_ids = sorted(
         {row["source_id"] for row in rows} - admitted_source_ids
@@ -18759,6 +18969,8 @@ def apply_adjudicated_source_dispositions(
     manifest_sha256: str | None = None,
     run_id: str | None = None,
     admitted_subset: bool = False,
+    structural_authority: dict[str, Any] | None = None,
+    structural_authority_sha256: str | None = None,
     gc: Any | None = None,
 ) -> dict[str, Any]:
     """Apply signed one-survivor source dispositions under exact graph CAS."""
@@ -18770,6 +18982,13 @@ def apply_adjudicated_source_dispositions(
         raise ValueError("manifest_sha256 must be a lowercase SHA-256 digest")
     adjudication_sha256, adjudication_row_set_sha256, adjudication_rows = (
         _validate_signed_source_adjudication(adjudication)
+    )
+    structural_authority_sha256, structural_target_ids = (
+        _validate_structural_legitimacy_authority(
+            structural_authority,
+            structural_authority_sha256,
+            adjudication_rows,
+        )
     )
     adjudicated_dispositions = {
         row["source_id"]: row["surviving_target"] for row in adjudication_rows
@@ -18866,6 +19085,8 @@ def apply_adjudicated_source_dispositions(
                         adjudication_row_set_sha256,
                         reason,
                         admitted_subset=admitted_subset,
+                        structural_authority_sha256=structural_authority_sha256,
+                        structural_target_ids=structural_target_ids,
                     )
                 )
                 expected_dispositions = {
@@ -18917,6 +19138,8 @@ def apply_adjudicated_source_dispositions(
                     adjudication_row_set_sha256,
                     reason,
                     admitted_subset=admitted_subset,
+                    structural_authority_sha256=structural_authority_sha256,
+                    structural_target_ids=structural_target_ids,
                 )
                 if (
                     [row["source_id"] for row in locked_rows]
@@ -19010,20 +19233,35 @@ def apply_adjudicated_source_dispositions(
                     OPTIONAL MATCH (remaining:StandardNameSource)
                       -[:PRODUCED_NAME]->(target)
                     WHERE remaining.status <> 'stale'
-                    WITH target_id, count(remaining) AS incoming_bindings
+                    WITH target_id, target, count(remaining) AS incoming_bindings
+                    OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(target)
+                    WHERE child.name_stage <> 'superseded'
+                      AND NOT (coalesce(child.status, '') IN
+                        ['deprecated', 'superseded'])
+                    WITH target_id, incoming_bindings,
+                         count(child) AS live_direct_children
                     RETURN collect({target_id: target_id,
-                      incoming_bindings: incoming_bindings}) AS rows
+                      incoming_bindings: incoming_bindings,
+                      live_direct_children: live_direct_children}) AS rows
                     """,
                     target_ids=removed_target_ids,
                 )
                 remaining_rows = (
                     remaining_bindings[0].get("rows") if remaining_bindings else []
                 )
+                structurally_exempt_targets = {
+                    row["target_id"] for row in manifest["structural_exemptions"]
+                }
                 if len(remaining_rows) != len(removed_target_ids) or any(
-                    int(row["incoming_bindings"] or 0) == 0 for row in remaining_rows
+                    int(row["incoming_bindings"] or 0) == 0
+                    and (
+                        row["target_id"] not in structurally_exempt_targets
+                        or int(row["live_direct_children"] or 0) == 0
+                    )
+                    for row in remaining_rows
                 ):
                     raise SignedSourceDispositionConflict(
-                        "removed target lost its final producing source"
+                        "removed target lost its final live authority"
                     )
 
                 target_ids = sorted(

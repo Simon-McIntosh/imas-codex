@@ -155,6 +155,59 @@ def _adjudication(rows: list[dict[str, object]]) -> dict[str, object]:
     }
 
 
+def _structural_authority(
+    ids: dict[str, str],
+    signed_row: dict[str, object],
+    *,
+    disposition: str,
+    child_id: str | None = None,
+    relationship_id: str | None = None,
+) -> tuple[dict[str, object], str]:
+    disposition_counts = {
+        "preserve_as_structural_identity": 0,
+        "re_source_from_existing_dd_path": 0,
+        "retain_competing_binding": 0,
+        "retire_under_orphan_policy": 0,
+    }
+    disposition_counts[disposition] = 1
+    row: dict[str, object] = {
+        "name": ids["catalog"],
+        "disposition": disposition,
+        "mutation_authority": "classification_only",
+        "current_removed_bindings": [
+            {
+                "source_id": ids["source"],
+                "signed_row_sha256": signed_row["row_signature_sha256"],
+                "signed_surviving_target": signed_row["surviving_target"],
+            }
+        ],
+        "structural_closure": {
+            "classification": (
+                "structurally_legitimate_without_producing_source"
+                if disposition == "preserve_as_structural_identity"
+                else "no_live_structural_descendant"
+            ),
+            "has_live_has_parent_child": child_id is not None,
+            "live_has_parent_children": (
+                [{"name": child_id, "relationship_id": relationship_id}]
+                if child_id is not None
+                else []
+            ),
+        },
+    }
+    authority: dict[str, object] = {
+        "schema": "imas-codex.refused-target-orphan-adjudication.v2",
+        "read_only": True,
+        "rows": [row],
+        "summary": {
+            "targets": 1,
+            "disposition_counts": disposition_counts,
+            "disposition_sum": 1,
+        },
+    }
+    return authority, _digest(authority)
+
+
 def _cleanup(
     client: GraphClient,
     ids: list[dict[str, str]],
@@ -437,6 +490,135 @@ def test_preview_refuses_removal_of_target_last_live_binding(
         assert {
             binding["source_id"] for binding in closure[0]["incoming_bindings"]
         } == {ids["source"], ids["stale_anchor"]}
+        assert _snapshot(client, list(ids.values())) == before
+    finally:
+        _cleanup(client, [ids])
+
+
+@pytest.mark.graph
+def test_signed_structural_authority_admits_last_binding_removal(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "source-disposition-structural-authority")
+    ids = _seed(
+        client,
+        "dispositionstructural",
+        scalar=None,
+        preserve_removed_target=False,
+    )
+    signed_row = _row(ids, "select_missing_scalar", None)
+    ids["child"] = f"{ids['catalog']}_child"
+    preview = None
+    try:
+        relationship = client.query(
+            "MATCH (target:StandardName {id: $catalog}) "
+            "CREATE (child:StandardName {id: $child, name_stage: 'accepted', "
+            "validation_status: 'valid', origin: 'derived'}) "
+            "CREATE (child)-[relationship:HAS_PARENT]->(target) "
+            "RETURN elementId(relationship) AS relationship_id",
+            **ids,
+        )[0]
+        authority, authority_sha256 = _structural_authority(
+            ids,
+            signed_row,
+            disposition="preserve_as_structural_identity",
+            child_id=ids["child"],
+            relationship_id=relationship["relationship_id"],
+        )
+        adjudication = _adjudication([signed_row])
+        preview = apply_adjudicated_source_dispositions(
+            adjudication,
+            reason="preserve signed direct-child authority after source repair",
+            structural_authority=authority,
+            structural_authority_sha256=authority_sha256,
+            gc=client,
+        )
+        assert preview["outcome"] == "would_apply"
+        assert preview["counts"] == {
+            "requested": 1,
+            "admitted": 1,
+            "refused": 0,
+            "bindings_to_remove": 1,
+            "projections_to_remove": 1,
+            "scalars_to_change": 1,
+        }
+        assert preview["manifest"]["structural_legitimacy_authority"] == {
+            "schema": "imas-codex.refused-target-orphan-adjudication.v2",
+            "payload_sha256": authority_sha256,
+            "target_ids": [ids["catalog"]],
+        }
+        assert [
+            exemption["target_id"]
+            for exemption in preview["manifest"]["structural_exemptions"]
+        ] == [ids["catalog"]]
+        assert (
+            preview["manifest"]["structural_exemptions"][0]["live_direct_children"][0][
+                "child_id"
+            ]
+            == ids["child"]
+        )
+
+        applied = apply_adjudicated_source_dispositions(
+            adjudication,
+            reason="preserve signed direct-child authority after source repair",
+            apply=True,
+            manifest_sha256=preview["manifest_sha256"],
+            structural_authority=authority,
+            structural_authority_sha256=authority_sha256,
+            gc=client,
+        )
+        assert applied["outcome"] == "applied"
+        assert client.query(
+            "MATCH (target:StandardName {id: $catalog}) "
+            "RETURN COUNT { (:StandardNameSource)-[:PRODUCED_NAME]->(target) } "
+            "AS producers, "
+            "COUNT { (:StandardName {id: $child})-[:HAS_PARENT]->(target) } "
+            "AS direct_children",
+            **ids,
+        ) == [{"producers": 0, "direct_children": 1}]
+    finally:
+        _cleanup(client, [ids], (preview or {}).get("manifest_sha256"))
+
+
+@pytest.mark.graph
+def test_signed_nonstructural_authority_still_refuses_last_binding_removal(
+    disposable_neo4j: tuple[str, str],
+) -> None:
+    client = _client(disposable_neo4j, "source-disposition-nonstructural-refusal")
+    ids = _seed(
+        client,
+        "dispositionnonstructural",
+        scalar=None,
+        preserve_removed_target=False,
+    )
+    signed_row = _row(ids, "select_missing_scalar", None)
+    authority, authority_sha256 = _structural_authority(
+        ids,
+        signed_row,
+        disposition="retire_under_orphan_policy",
+    )
+    try:
+        before = _snapshot(client, list(ids.values()))
+        preview = apply_adjudicated_source_dispositions(
+            _adjudication([signed_row]),
+            reason="refuse lifecycle authority in a source disposition",
+            structural_authority=authority,
+            structural_authority_sha256=authority_sha256,
+            gc=client,
+        )
+        assert preview["outcome"] == "refused"
+        assert preview["counts"]["admitted"] == 0
+        assert preview["counts"]["refused"] == 1
+        assert preview["manifest"]["structural_exemptions"] == []
+        assert preview["refusals"] == [
+            {
+                "source_id": ids["source"],
+                "target_ids": [ids["catalog"]],
+                "reason": (
+                    "removed target is outside signed structural legitimacy authority"
+                ),
+            }
+        ]
         assert _snapshot(client, list(ids.values())) == before
     finally:
         _cleanup(client, [ids])
