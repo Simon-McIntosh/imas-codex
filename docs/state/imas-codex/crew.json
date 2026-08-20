@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T13:52:25",
+  "updated": "2026-08-20T14:08:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -8046,9 +8046,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T114938791914-sgwi-retire-lifecycle-operator",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-retire-lifecycle-operator",
+        "role": "implement",
+        "member": "impl-catalog",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T11:49:43Z",
+        "completed_at": "2026-08-20T12:05:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 954,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 954,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "23ea1e2f8eccc7b991899021ebf0024395ac1587",
+        "commits": [
+          "166ce552a3bc6040b7ed2993039121c308a6f6da"
+        ],
+        "changed_lines": {
+          "added": 795,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T114938791914-sgwi-retire-lifecycle-operator/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f01-7970-7a53-b291-9b4392c6d384",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10631680,
+            "cached_input_tokens_cumulative": 10631680,
+            "input_tokens": 10876320,
+            "input_tokens_cumulative": 10876320,
+            "output_tokens": 33244,
+            "output_tokens_cumulative": 33244,
+            "reasoning_output_tokens": 11226,
+            "reasoning_output_tokens_cumulative": 11226
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 184
+    "_version": 185
   }
 }
