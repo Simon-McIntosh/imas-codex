@@ -1,0 +1,1712 @@
+{
+  "schema": "imas-codex.owner-geometry-rc66-partition.v1",
+  "generated_at": "2026-08-20",
+  "semantic_authority": {
+    "plan": "sn-graph-wide-integrity",
+    "plan_section": "remaining-work",
+    "plan_version_read": 186,
+    "locked_decisions": [
+      "geometry-cardinality-rule",
+      "standard-name-ordinality"
+    ],
+    "predecessor_mapping": "docs/evidence/sn-graph-wide-integrity/owner-geometry-authority-mapping.json",
+    "predecessor_rows_signature": "64c868b668d392572c59704dc0e1891130f1a8bd8dce1bbe948dbab78af134ec"
+  },
+  "grammar_authority": {
+    "package": "imas-standard-names",
+    "version": "0.8.0rc66",
+    "validation_method": "public parse(strict=True) followed by compose exact round trip",
+    "unique_candidate_identities": 23,
+    "parse_round_trip_pass": 22,
+    "parse_round_trip_refused": 1,
+    "newly_admitted_locus_tokens": [
+      "active_spatial_resolution_zone",
+      "pellet_fragment",
+      "polarizer"
+    ],
+    "policy_refused_locus_tokens": [
+      "field_map_grid"
+    ]
+  },
+  "old_target_id": "toroidal_angle_of_measurement_position",
+  "counts": {
+    "rows": 49,
+    "ready": 21,
+    "identity_absent": 25,
+    "vocabulary_refused": 1,
+    "stale_source": 2,
+    "class_sum": 49,
+    "ready_already_selected": 9,
+    "ready_requires_signed_apply": 12,
+    "previously_vocabulary_refused": 6,
+    "previously_vocabulary_refused_now_admitted_by_rc66": 5
+  },
+  "rc66_admissions": {
+    "admitted_row_count": 5,
+    "admitted_source_ids": [
+      "dd:ece/polarizer/centre/phi",
+      "dd:mse/channel/active_spatial_resolution/centre/phi",
+      "dd:spectrometer_visible/channel/active_spatial_resolution/centre/phi",
+      "dd:spectrometer_visible/channel/polarizer/centre/phi",
+      "dd:spi/injector/fragment/position/phi"
+    ],
+    "admitted_target_ids": [
+      "toroidal_coordinate_of_active_spatial_resolution_zone",
+      "toroidal_coordinate_of_pellet_fragment",
+      "toroidal_coordinate_of_polarizer"
+    ],
+    "admitted_locus_tokens": [
+      "active_spatial_resolution_zone",
+      "pellet_fragment",
+      "polarizer"
+    ],
+    "remaining_policy_refusal_source_ids": [
+      "dd:b_field_non_axisymmetric/time_slice/field_map/grid/phi"
+    ]
+  },
+  "read_only_proof": {
+    "StandardNameChange": {
+      "before": 7492,
+      "after": 7492,
+      "delta": 0
+    },
+    "graph_writes": 0,
+    "provider_calls": 0
+  },
+  "rows": [
+    {
+      "ordinal": 1,
+      "source_id": "dd:b_field_non_axisymmetric/time_slice/field_map/grid/phi",
+      "dd_path": "b_field_non_axisymmetric/time_slice/field_map/grid/phi",
+      "classification": "vocabulary-refused",
+      "action_state": "policy-refusal",
+      "source_status": "composed",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_field_map_grid",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": false,
+        "round_trip": false,
+        "rendered": null,
+        "error": "ParseError: residue 'toroidal_coordinate_of_field_map_grid' does not match any physical_base or geometry_carrier; nearest candidates: ['toroidal_flux_coordinate_gradient', 'toroidal_flux_coordinate']"
+      },
+      "previously_vocabulary_refused": true,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": "field_map_grid",
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies a FLT_1D toroidal coordinate of a three-dimensional field-map grid; the grammar has no field-map-grid locus, so no nearest owner is substituted."
+    },
+    {
+      "ordinal": 2,
+      "source_id": "dd:bolometer/camera/channel/aperture/centre/phi",
+      "dd_path": "bolometer/camera/channel/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_coordinate_of_aperture",
+      "current_live_target_ids": [
+        "toroidal_coordinate_of_aperture"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_coordinate_of_aperture"
+      ],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "DD centre geometry is the named reference point of the collimating aperture; the existing competitor is the exact owner-qualified identity."
+    },
+    {
+      "ordinal": 3,
+      "source_id": "dd:bolometer/camera/channel/detector/centre/phi",
+      "dd_path": "bolometer/camera/channel/detector/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_detector",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_detector",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD places the centre under detector geometry, so the named point belongs to the detector rather than a generic measurement position."
+    },
+    {
+      "ordinal": 4,
+      "source_id": "dd:camera_visible/channel/aperture/centre/phi",
+      "dd_path": "camera_visible/channel/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD describes the centre or local-frame origin of a diagnostic aperture."
+    },
+    {
+      "ordinal": 5,
+      "source_id": "dd:camera_visible/channel/optical_element/geometry/centre/phi",
+      "dd_path": "camera_visible/channel/optical_element/geometry/centre/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_coordinate_of_optical_element",
+      "current_live_target_ids": [
+        "toroidal_coordinate_of_optical_element"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_coordinate_of_optical_element"
+      ],
+      "authority_target_id": "toroidal_coordinate_of_optical_element",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_optical_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_optical_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "DD places the named centre inside optical-element geometry; the existing competitor preserves that owner."
+    },
+    {
+      "ordinal": 6,
+      "source_id": "dd:camera_x_rays/aperture/centre/phi",
+      "dd_path": "camera_x_rays/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "composed",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the centre of the diagnostic's collimating aperture."
+    },
+    {
+      "ordinal": 7,
+      "source_id": "dd:camera_x_rays/camera/centre/phi",
+      "dd_path": "camera_x_rays/camera/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_camera",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_camera",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD explicitly describes the camera centre."
+    },
+    {
+      "ordinal": 8,
+      "source_id": "dd:coils_non_axisymmetric/coil/conductor/elements/end_points/phi",
+      "dd_path": "coils_non_axisymmetric/coil/conductor/elements/end_points/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_coil_conductor_element",
+      "current_live_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "authority_target_id": "toroidal_angle_of_coil_conductor_element",
+      "accepted_and_valid_target_id": "toroidal_angle_of_coil_conductor_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": "draft"
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_angle_of_coil_conductor_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "FLT_1D values give one end-point angle per conductor element; endpoint ordinality is provenance and the existing competitor names the array owner."
+    },
+    {
+      "ordinal": 9,
+      "source_id": "dd:coils_non_axisymmetric/coil/conductor/elements/start_points/phi",
+      "dd_path": "coils_non_axisymmetric/coil/conductor/elements/start_points/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_coil_conductor_element",
+      "current_live_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "authority_target_id": "toroidal_angle_of_coil_conductor_element",
+      "accepted_and_valid_target_id": "toroidal_angle_of_coil_conductor_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": "draft"
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_angle_of_coil_conductor_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "FLT_1D values give one start-point angle per conductor element; endpoint ordinality is provenance and the existing competitor names the array owner."
+    },
+    {
+      "ordinal": 10,
+      "source_id": "dd:ece/channel/beam_tracing/beam/position/phi",
+      "dd_path": "ece/channel/beam_tracing/beam/position/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_beam_tracing_point",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_beam_tracing_point",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD describes sampled positions along each traced ray or beam; each value is a beam-tracing point, not an unspecified measurement position."
+    },
+    {
+      "ordinal": 11,
+      "source_id": "dd:ece/polarizer/centre/phi",
+      "dd_path": "ece/polarizer/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_polarizer",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_polarizer",
+        "error": null
+      },
+      "previously_vocabulary_refused": true,
+      "rc66_admits_previous_refusal": true,
+      "required_locus_token": "polarizer",
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the polarizer centre, but polarizer is absent from the closed locus vocabulary; optical_element is not substituted."
+    },
+    {
+      "ordinal": 12,
+      "source_id": "dd:hard_x_rays/channel/aperture/centre/phi",
+      "dd_path": "hard_x_rays/channel/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "composed",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD describes the centre or local-frame origin of a collimating aperture."
+    },
+    {
+      "ordinal": 13,
+      "source_id": "dd:hard_x_rays/channel/filter_window/centre/phi",
+      "dd_path": "hard_x_rays/channel/filter_window/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_filter_window",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_filter_window",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_filter_window",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the middle point or local-frame origin of the filter window."
+    },
+    {
+      "ordinal": 14,
+      "source_id": "dd:interferometer/channel/n_e/positions/phi",
+      "dd_path": "interferometer/channel/n_e/positions/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_line_of_sight",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_line_of_sight",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_line_of_sight",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD parent documentation explicitly defines these as positions along the channel line of sight."
+    },
+    {
+      "ordinal": 15,
+      "source_id": "dd:langmuir_probes/reciprocating/plunge/position_average/phi",
+      "dd_path": "langmuir_probes/reciprocating/plunge/position_average/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_reciprocating_probe",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_reciprocating_probe",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD defines the averaged position from collectors on the reciprocating probe during a plunge; plunge ordering is not identity."
+    },
+    {
+      "ordinal": 16,
+      "source_id": "dd:mse/channel/active_spatial_resolution/centre/phi",
+      "dd_path": "mse/channel/active_spatial_resolution/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_active_spatial_resolution_zone",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_active_spatial_resolution_zone",
+        "error": null
+      },
+      "previously_vocabulary_refused": true,
+      "rc66_admits_previous_refusal": true,
+      "required_locus_token": "active_spatial_resolution_zone",
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD says this is the centre of the spatially resolved measurement zone; neither that zone nor active_spatial_resolution is in the closed locus vocabulary."
+    },
+    {
+      "ordinal": 17,
+      "source_id": "dd:mse/channel/aperture/centre/phi",
+      "dd_path": "mse/channel/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "composed",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD describes the centre or local-frame origin of a collimating aperture."
+    },
+    {
+      "ordinal": 18,
+      "source_id": "dd:mse/channel/detector/centre/phi",
+      "dd_path": "mse/channel/detector/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_detector",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_detector",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD places the named centre under detector geometry."
+    },
+    {
+      "ordinal": 19,
+      "source_id": "dd:neutron_diagnostic/detector/aperture/centre/phi",
+      "dd_path": "neutron_diagnostic/detector/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_coordinate_of_aperture",
+      "current_live_target_ids": [
+        "toroidal_coordinate_of_aperture"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_coordinate_of_aperture"
+      ],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "DD identifies the centre of a neutron detector's collimating aperture; the existing competitor preserves the immediate owner."
+    },
+    {
+      "ordinal": 20,
+      "source_id": "dd:neutron_diagnostic/detector/geometry/centre/phi",
+      "dd_path": "neutron_diagnostic/detector/geometry/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_neutron_detector",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_neutron_detector",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD places the centre inside the geometry of a neutron detection system."
+    },
+    {
+      "ordinal": 21,
+      "source_id": "dd:neutron_diagnostic/detectors/aperture/centre/phi",
+      "dd_path": "neutron_diagnostic/detectors/aperture/centre/phi",
+      "classification": "stale-source",
+      "action_state": "await-stale-source-lifecycle",
+      "source_status": "stale",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": null,
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": null,
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": null,
+        "round_trip": null,
+        "rendered": null,
+        "error": "not applicable until stale-source lifecycle is resolved"
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "The StandardNameSource is stale and its plural detectors branch is not current DD authority; detach or versioned migration must precede any semantic rewiring."
+    },
+    {
+      "ordinal": 22,
+      "source_id": "dd:neutron_diagnostic/detectors/detector/centre/phi",
+      "dd_path": "neutron_diagnostic/detectors/detector/centre/phi",
+      "classification": "stale-source",
+      "action_state": "await-stale-source-lifecycle",
+      "source_status": "stale",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": null,
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": null,
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": null,
+        "round_trip": null,
+        "rendered": null,
+        "error": "not applicable until stale-source lifecycle is resolved"
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "The StandardNameSource is stale and its plural detectors branch is not current DD authority; detach or versioned migration must precede any semantic rewiring."
+    },
+    {
+      "ordinal": 23,
+      "source_id": "dd:pellets/time_slice/pellet/path_geometry/first_point/phi",
+      "dd_path": "pellets/time_slice/pellet/path_geometry/first_point/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_along_pellet_path",
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_angle_of_along_pellet_path"
+      ],
+      "authority_target_id": "toroidal_coordinate_of_pellet_path_point",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_pellet_path_point",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies a point on pellet path geometry; first is dropped as ordinal provenance while pellet_path_point remains the locus."
+    },
+    {
+      "ordinal": 24,
+      "source_id": "dd:reflectometer_fluctuation/channel/antenna_detection_static/centre/phi",
+      "dd_path": "reflectometer_fluctuation/channel/antenna_detection_static/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_reflectometer_antenna",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_reflectometer_antenna",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the static detection-antenna centre; detection versus emission is channel provenance, not a different antenna object class."
+    },
+    {
+      "ordinal": 25,
+      "source_id": "dd:reflectometer_fluctuation/channel/antenna_emission_static/centre/phi",
+      "dd_path": "reflectometer_fluctuation/channel/antenna_emission_static/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_reflectometer_antenna",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_reflectometer_antenna",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the static emission-antenna centre; detection versus emission is channel provenance, not a different antenna object class."
+    },
+    {
+      "ordinal": 26,
+      "source_id": "dd:reflectometer_profile/channel/antenna_detection/centre/phi",
+      "dd_path": "reflectometer_profile/channel/antenna_detection/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_reflectometer_antenna",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_reflectometer_antenna",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the detection-antenna centre; detection versus emission is channel provenance, not a different antenna object class."
+    },
+    {
+      "ordinal": 27,
+      "source_id": "dd:reflectometer_profile/channel/antenna_emission/centre/phi",
+      "dd_path": "reflectometer_profile/channel/antenna_emission/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_reflectometer_antenna",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_reflectometer_antenna",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the emission-antenna centre; detection versus emission is channel provenance, not a different antenna object class."
+    },
+    {
+      "ordinal": 28,
+      "source_id": "dd:soft_x_rays/channel/detector/centre/phi",
+      "dd_path": "soft_x_rays/channel/detector/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_soft_xray_detector",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_soft_xray_detector",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD places the centre under the soft-X-ray channel detector and the grammar provides that exact detector class."
+    },
+    {
+      "ordinal": 29,
+      "source_id": "dd:soft_x_rays/channel/filter_window/centre/phi",
+      "dd_path": "soft_x_rays/channel/filter_window/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_filter_window",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_filter_window",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_filter_window",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the middle point or local-frame origin of the filter window."
+    },
+    {
+      "ordinal": 30,
+      "source_id": "dd:spectrometer_uv/channel/aperture/centre/phi",
+      "dd_path": "spectrometer_uv/channel/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_coordinate_of_aperture",
+      "current_live_target_ids": [
+        "toroidal_coordinate_of_aperture"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_coordinate_of_aperture"
+      ],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "DD identifies the channel's collimating-aperture centre; the existing competitor is exact."
+    },
+    {
+      "ordinal": 31,
+      "source_id": "dd:spectrometer_uv/channel/detector/centre/phi",
+      "dd_path": "spectrometer_uv/channel/detector/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_detector",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_detector",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "DD identifies the detector front face; the current aperture competitor names the wrong owner and cannot be retained as the successor."
+    },
+    {
+      "ordinal": 32,
+      "source_id": "dd:spectrometer_visible/channel/active_spatial_resolution/centre/phi",
+      "dd_path": "spectrometer_visible/channel/active_spatial_resolution/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_active_spatial_resolution_zone",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_active_spatial_resolution_zone",
+        "error": null
+      },
+      "previously_vocabulary_refused": true,
+      "rc66_admits_previous_refusal": true,
+      "required_locus_token": "active_spatial_resolution_zone",
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD says this is the centre of the active-spectroscopy spatial-resolution zone; the closed grammar has no exact locus and aperture is not substituted."
+    },
+    {
+      "ordinal": 33,
+      "source_id": "dd:spectrometer_visible/channel/detector/centre/phi",
+      "dd_path": "spectrometer_visible/channel/detector/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_detector",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_detector",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD places the named centre under channel detector geometry."
+    },
+    {
+      "ordinal": 34,
+      "source_id": "dd:spectrometer_visible/channel/optical_element/geometry/centre/phi",
+      "dd_path": "spectrometer_visible/channel/optical_element/geometry/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_optical_element",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_optical_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_optical_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD places the named centre inside optical-element geometry."
+    },
+    {
+      "ordinal": 35,
+      "source_id": "dd:spectrometer_visible/channel/polarizer/centre/phi",
+      "dd_path": "spectrometer_visible/channel/polarizer/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_polarizer",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_polarizer",
+        "error": null
+      },
+      "previously_vocabulary_refused": true,
+      "rc66_admits_previous_refusal": true,
+      "required_locus_token": "polarizer",
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the polarizer centre, but polarizer is absent from the closed locus vocabulary; optical_element is not substituted."
+    },
+    {
+      "ordinal": 36,
+      "source_id": "dd:spectrometer_x_ray_crystal/channel/aperture/centre/phi",
+      "dd_path": "spectrometer_x_ray_crystal/channel/aperture/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_aperture",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_aperture",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_aperture",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the collimating-aperture centre."
+    },
+    {
+      "ordinal": 37,
+      "source_id": "dd:spectrometer_x_ray_crystal/channel/camera/centre/phi",
+      "dd_path": "spectrometer_x_ray_crystal/channel/camera/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_camera",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_camera",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD explicitly describes the camera centre."
+    },
+    {
+      "ordinal": 38,
+      "source_id": "dd:spectrometer_x_ray_crystal/channel/crystal/centre/phi",
+      "dd_path": "spectrometer_x_ray_crystal/channel/crystal/centre/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_bragg_crystal",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_bragg_crystal",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "In an X-ray crystal spectrometer the DD crystal is the Bragg crystal, for which the grammar provides the exact optical owner."
+    },
+    {
+      "ordinal": 39,
+      "source_id": "dd:spectrometer_x_ray_crystal/channel/filter_window/centre/phi",
+      "dd_path": "spectrometer_x_ray_crystal/channel/filter_window/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_filter_window",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_filter_window",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_filter_window",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the middle point or local-frame origin of the filter window."
+    },
+    {
+      "ordinal": 40,
+      "source_id": "dd:spectrometer_x_ray_crystal/channel/reflector/centre/phi",
+      "dd_path": "spectrometer_x_ray_crystal/channel/reflector/centre/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_reflector",
+      "accepted_and_valid_target_id": "toroidal_coordinate_of_reflector",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_reflector",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD places the centre inside the optional reflector geometry."
+    },
+    {
+      "ordinal": 41,
+      "source_id": "dd:spi/injector/fragment/position/phi",
+      "dd_path": "spi/injector/fragment/position/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_pellet_fragment",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_pellet_fragment",
+        "error": null
+      },
+      "previously_vocabulary_refused": true,
+      "rc66_admits_previous_refusal": true,
+      "required_locus_token": "pellet_fragment",
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the centre of mass of each shattered pellet fragment; pellet and pellet_path_point would both erase fragment identity."
+    },
+    {
+      "ordinal": 42,
+      "source_id": "dd:spi/injector/pellet/position/phi",
+      "dd_path": "spi/injector/pellet/position/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_pellet",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_pellet",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies the position of the pellet centre of mass."
+    },
+    {
+      "ordinal": 43,
+      "source_id": "dd:spi/injector/shatter_cone/origin/phi",
+      "dd_path": "spi/injector/shatter_cone/origin/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_shatter_cone",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_shatter_cone",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD defines the named origin of the shatter cone; origin is a geometry reference point and does not replace the owner."
+    },
+    {
+      "ordinal": 44,
+      "source_id": "dd:spi/injector/shattering_position/phi",
+      "dd_path": "spi/injector/shattering_position/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_shattering_position",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_shattering_position",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD explicitly identifies the position where the pellet intersects the shattering element."
+    },
+    {
+      "ordinal": 45,
+      "source_id": "dd:tf/coil/conductor/elements/centres/phi",
+      "dd_path": "tf/coil/conductor/elements/centres/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_coil_conductor_element",
+      "current_live_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "authority_target_id": "toroidal_angle_of_coil_conductor_element",
+      "accepted_and_valid_target_id": "toroidal_angle_of_coil_conductor_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": "draft"
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_angle_of_coil_conductor_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "FLT_1D values give the arc-centre angle for each conductor element; the existing competitor names the array owner."
+    },
+    {
+      "ordinal": 46,
+      "source_id": "dd:tf/coil/conductor/elements/end_points/phi",
+      "dd_path": "tf/coil/conductor/elements/end_points/phi",
+      "classification": "ready",
+      "action_state": "ready-for-signed-apply",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_angle_of_coil_conductor_element",
+      "accepted_and_valid_target_id": "toroidal_angle_of_coil_conductor_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": "draft"
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_angle_of_coil_conductor_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "FLT_1D values give one end-point angle per conductor element; endpoint ordinality is provenance."
+    },
+    {
+      "ordinal": 47,
+      "source_id": "dd:tf/coil/conductor/elements/intermediate_points/phi",
+      "dd_path": "tf/coil/conductor/elements/intermediate_points/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_coil_conductor_element",
+      "current_live_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "authority_target_id": "toroidal_angle_of_coil_conductor_element",
+      "accepted_and_valid_target_id": "toroidal_angle_of_coil_conductor_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": "draft"
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_angle_of_coil_conductor_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "FLT_1D values give one arc-orientation intermediate-point angle per conductor element; point order is provenance."
+    },
+    {
+      "ordinal": 48,
+      "source_id": "dd:tf/coil/conductor/elements/start_points/phi",
+      "dd_path": "tf/coil/conductor/elements/start_points/phi",
+      "classification": "ready",
+      "action_state": "already-selected",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_coil_conductor_element",
+      "current_live_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "live_competing_target_ids": [
+        "toroidal_angle_of_coil_conductor_element"
+      ],
+      "authority_target_id": "toroidal_angle_of_coil_conductor_element",
+      "accepted_and_valid_target_id": "toroidal_angle_of_coil_conductor_element",
+      "authority_target_graph_state": {
+        "exists": true,
+        "name_stage": "accepted",
+        "validation_status": "valid",
+        "catalog_status": "draft"
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_angle_of_coil_conductor_element",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_with_competitor",
+      "authority_reason": "FLT_1D values give one start-point angle per conductor element; endpoint ordinality is provenance."
+    },
+    {
+      "ordinal": 49,
+      "source_id": "dd:thomson_scattering/laser/end_point/phi",
+      "dd_path": "thomson_scattering/laser/end_point/phi",
+      "classification": "identity-absent",
+      "action_state": "await-ordinary-lifecycle",
+      "source_status": "attached",
+      "current_scalar_selection": "toroidal_angle_of_measurement_position",
+      "current_live_target_ids": [
+        "toroidal_angle_of_measurement_position"
+      ],
+      "live_competing_target_ids": [],
+      "authority_target_id": "toroidal_coordinate_of_thomson_scattering_laser",
+      "accepted_and_valid_target_id": null,
+      "authority_target_graph_state": {
+        "exists": false,
+        "name_stage": null,
+        "validation_status": null,
+        "catalog_status": null
+      },
+      "grammar_validation": {
+        "package_version": "0.8.0rc66",
+        "parse": true,
+        "round_trip": true,
+        "rendered": "toroidal_coordinate_of_thomson_scattering_laser",
+        "error": null
+      },
+      "previously_vocabulary_refused": false,
+      "rc66_admits_previous_refusal": false,
+      "required_locus_token": null,
+      "prior_census_partition": "old_target_only",
+      "authority_reason": "DD identifies an endpoint of the probing laser; end is ordinal provenance and the laser remains the owner."
+    }
+  ],
+  "signature": {
+    "algorithm": "sha256",
+    "canonicalization": "jq -cS '.rows'",
+    "scope": "rows",
+    "digest": "4de9c2df481180931a47b7a8bcc76cb69253e23d96e2dfa151bd86edcb76c8cd"
+  }
+}
