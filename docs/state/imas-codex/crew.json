@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T19:05:22",
+  "updated": "2026-08-20T19:37:56",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9037,9 +9037,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260820T170716004861-sgwi-owner-geometry-identities",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-owner-geometry-identities",
+        "role": "implement",
+        "member": "impl-owner",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-20T17:07:18Z",
+        "completed_at": "2026-08-20T17:37:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1794,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1794,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "8f22d9bda9c0b721c1fba24d5799f7a86799d2b2",
+        "commits": [
+          "a9ad85b1d1541024a753bee31c2be9f793e36d7f"
+        ],
+        "changed_lines": {
+          "added": 192,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Declared measure met: all 16 identities reported with resulting stage, score and apportioned cost, and the six that did not reach accepted are named rather than retried. 10 accepted through fresh quorum_consensus at 0.99375-1.0, each with exactly two fresh Review rows and no other route; 3 drafted/quarantined; 3 absent. 19 local compose calls cost $0.00 on the newly served DSv4; review cost $0.530862 across 39 LLMCost rows, taking session spend to $1.387862 of $150. StandardNameChange 7650 to 7676. toroidal_angle_of_measurement_position was not reseeded and holds at accepted 0.95625 with its live producers down to 32. Three remaining items need separate authorization rather than a retry: ordinary adjudication of three committed _of_ identities that canonical_locus_check rejects in favour of _at_, a sanctioned compose attempt for pellet_fragment, reflectometer_antenna and shatter_cone, and recovery of one interrupted shatter-cone source claim through the ordinary claim-timeout path.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T170716004861-sgwi-owner-geometry-identities/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01f42-e893-7fd3-a5e7-ffcd943f5d3b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 22624000,
+            "cached_input_tokens_cumulative": 37863936,
+            "input_tokens": 23162894,
+            "input_tokens_cumulative": 38956420,
+            "output_tokens": 52931,
+            "output_tokens_cumulative": 114596,
+            "reasoning_output_tokens": 18161,
+            "reasoning_output_tokens_cumulative": 36793
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 201
+    "_version": 202
   }
 }
