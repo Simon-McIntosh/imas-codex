@@ -1,0 +1,567 @@
+{
+  "schema": "imas-codex.standard-name-review-cohort.v1",
+  "generated_at": "2026-08-20T11:24:57Z",
+  "source_commit": "c7693ecc0305827e8e6c7565cde78f12476d2581",
+  "source_plan": {
+    "slug": "sn-graph-wide-integrity",
+    "section": "remaining-work",
+    "version": 186
+  },
+  "authority_inputs": [
+    {
+      "path": "docs/evidence/sn-graph-wide-integrity/owner-geometry-authority-mapping.json",
+      "sha256": "438392909410ad85499057247133dca13bb8567581030ce59520e7b079beac03"
+    },
+    {
+      "path": "docs/evidence/sn-graph-wide-integrity/fold-pairs-preview.md",
+      "sha256": "52547c38e4070c4aa3bda64e896db6ee2e19d63a16763b6eb46c6b41b0799ab1"
+    },
+    {
+      "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260820T112030631881-sgwi-review-cohort/cohort-query.json",
+      "sha256": "283d00abc71a087da2fd74d393078e9fd636ad3c68d09ffadc87d3afdda3bcec"
+    }
+  ],
+  "selection": {
+    "ancestor_folds": "the three identities named by the live remaining-work section",
+    "owner_geometry": "unique absent replacement identities plus rc66-unblocked polarizer, pellet_fragment and active_spatial_resolution_zone identities; field_map_grid remains a policy refusal and the two stale-source rows remain outside ordinary review",
+    "exclusion_note": "accepted-valid owner targets, the refused field_map_grid identity, stale sources, scalar conflicts and unrelated carried single-name repairs are not members"
+  },
+  "counts": {
+    "total_identities": 19,
+    "ancestor_fold_identities": 3,
+    "owner_geometry_identities": 16,
+    "graph_present_reviewed": 3,
+    "graph_absent": 16
+  },
+  "current_review_seats": {
+    "profile": "default",
+    "measured_distribution": "positive llm_cost rows with pool=review_name and phase=review_name for the three currently configured seats",
+    "seats": [
+      {
+        "model": "openrouter/x-ai/grok-4.5",
+        "calls": 943,
+        "min_cost_usd": 0.008459,
+        "mean_cost_usd": 0.043238308589607664,
+        "median_cost_usd": 0.041864,
+        "p95_cost_usd": 0.073792,
+        "observed_max_cost_usd": 0.119404
+      },
+      {
+        "model": "openrouter/openai/gpt-5.6-luna",
+        "calls": 719,
+        "min_cost_usd": 0.000451,
+        "mean_cost_usd": 0.007067746870653677,
+        "median_cost_usd": 0.002531,
+        "p95_cost_usd": 0.02893,
+        "observed_max_cost_usd": 0.056614
+      },
+      {
+        "model": "openrouter/anthropic/claude-sonnet-5",
+        "calls": 594,
+        "min_cost_usd": 0.017349,
+        "mean_cost_usd": 0.07385373063973064,
+        "median_cost_usd": 0.069079,
+        "p95_cost_usd": 0.136568,
+        "observed_max_cost_usd": 0.190173
+      }
+    ],
+    "per_identity_usd": {
+      "mean": 0.124159786099992,
+      "summed_seat_p95": 0.23929,
+      "summed_observed_seat_maxima": 0.36619100000000004
+    },
+    "authorization_usd": 150.0,
+    "cohort_total_usd": {
+      "mean": 2.359035935899848,
+      "summed_seat_p95": 4.54651,
+      "summed_observed_seat_maxima": 6.957629000000001
+    },
+    "observed_max_headroom_usd": 143.042371,
+    "below_authorization": true,
+    "actual_spend_usd": 0.0,
+    "caveat": "Review-seat pricing assumes one three-seat ordinary name-review quorum per identity. It excludes composition, refinement, retry and docs-review calls; those require separate admission if the lifecycle run reaches them."
+  },
+  "identities": [
+    {
+      "identity": "radial_ion_momentum",
+      "blocking_class": "ancestor_fold",
+      "dd_paths": [
+        "edge_sources/source/ggd/ion/momentum/r",
+        "plasma_sources/source/ggd/ion/momentum/radial",
+        "plasma_sources/source/profiles_1d/ion/momentum/radial"
+      ],
+      "graph_present": true,
+      "name_stage": "reviewed",
+      "docs_stage": "pending",
+      "reviewer_score_name": 0.675,
+      "refine_attempts": null,
+      "validation_status": "valid",
+      "description": "Radial component of momentum flux of ions, summed over charge states.",
+      "unit": "kg.m^-1.s^-2",
+      "origin": null,
+      "reviewer_model_name": "openrouter/x-ai/grok-4.5",
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn rescore radial_ion_momentum --cost-limit 1.0",
+      "invocation_precondition": null
+    },
+    {
+      "identity": "radial_momentum_flux",
+      "blocking_class": "ancestor_fold",
+      "dd_paths": [
+        "plasma_transport/model/ggd/momentum/flux/radial"
+      ],
+      "graph_present": true,
+      "name_stage": "reviewed",
+      "docs_stage": "pending",
+      "reviewer_score_name": 0.93125,
+      "refine_attempts": null,
+      "validation_status": "valid",
+      "description": "Radial momentum flux across GGD grid facets for all species",
+      "unit": "kg.m^-1.s^-2",
+      "origin": null,
+      "reviewer_model_name": "openrouter/x-ai/grok-4.5",
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn rescore radial_momentum_flux --cost-limit 1.0",
+      "invocation_precondition": null
+    },
+    {
+      "identity": "poloidal_neutral_state_momentum_flux",
+      "blocking_class": "ancestor_fold",
+      "dd_paths": [
+        "plasma_transport/model/ggd/neutral/state/momentum/flux/poloidal",
+        "plasma_transport/model/profiles_1d/neutral/state/momentum/flux/poloidal"
+      ],
+      "graph_present": true,
+      "name_stage": "reviewed",
+      "docs_stage": "pending",
+      "reviewer_score_name": 0.9,
+      "refine_attempts": null,
+      "validation_status": "valid",
+      "description": "Poloidal neutral-state momentum flux is the transport-surface-normal flux density of poloidal linear momentum carried by neutral particles in a specified atomic, molecular, charge, or excitation state. In flux-surface coordinates (ρ, θ, φ), the transported momentum is along increasing θ and the flux direction is the positive normal to a constant-ρ surface.",
+      "unit": "kg.m^-1.s^-2",
+      "origin": "catalog_edit",
+      "reviewer_model_name": "openrouter/x-ai/grok-4.5",
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn rescore poloidal_neutral_state_momentum_flux --cost-limit 1.0",
+      "invocation_precondition": null
+    },
+    {
+      "identity": "toroidal_coordinate_of_active_spatial_resolution_zone",
+      "blocking_class": "owner_geometry_vocab_unblocked",
+      "dd_paths": [
+        "mse/channel/active_spatial_resolution/centre/phi",
+        "spectrometer_visible/channel/active_spatial_resolution/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_active_spatial_resolution_zone --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_beam_tracing_point",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "ece/channel/beam_tracing/beam/position/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_beam_tracing_point --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_bragg_crystal",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "spectrometer_x_ray_crystal/channel/crystal/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_bragg_crystal --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_camera",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "camera_x_rays/camera/centre/phi",
+        "spectrometer_x_ray_crystal/channel/camera/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_camera --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_detector",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "bolometer/camera/channel/detector/centre/phi",
+        "mse/channel/detector/centre/phi",
+        "spectrometer_uv/channel/detector/centre/phi",
+        "spectrometer_visible/channel/detector/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_detector --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_neutron_detector",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "neutron_diagnostic/detector/geometry/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_neutron_detector --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_pellet",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "spi/injector/pellet/position/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_pellet --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_pellet_fragment",
+      "blocking_class": "owner_geometry_vocab_unblocked",
+      "dd_paths": [
+        "spi/injector/fragment/position/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_pellet_fragment --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_pellet_path_point",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "pellets/time_slice/pellet/path_geometry/first_point/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_pellet_path_point --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_polarizer",
+      "blocking_class": "owner_geometry_vocab_unblocked",
+      "dd_paths": [
+        "ece/polarizer/centre/phi",
+        "spectrometer_visible/channel/polarizer/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_polarizer --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_reciprocating_probe",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "langmuir_probes/reciprocating/plunge/position_average/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_reciprocating_probe --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_reflectometer_antenna",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "reflectometer_fluctuation/channel/antenna_detection_static/centre/phi",
+        "reflectometer_fluctuation/channel/antenna_emission_static/centre/phi",
+        "reflectometer_profile/channel/antenna_detection/centre/phi",
+        "reflectometer_profile/channel/antenna_emission/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_reflectometer_antenna --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_shatter_cone",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "spi/injector/shatter_cone/origin/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_shatter_cone --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_shattering_position",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "spi/injector/shattering_position/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_shattering_position --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_soft_xray_detector",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "soft_x_rays/channel/detector/centre/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_soft_xray_detector --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    },
+    {
+      "identity": "toroidal_coordinate_of_thomson_scattering_laser",
+      "blocking_class": "owner_geometry_absent_replacement",
+      "dd_paths": [
+        "thomson_scattering/laser/end_point/phi"
+      ],
+      "graph_present": false,
+      "name_stage": null,
+      "docs_stage": null,
+      "reviewer_score_name": null,
+      "refine_attempts": null,
+      "validation_status": null,
+      "description": null,
+      "unit": null,
+      "origin": null,
+      "reviewer_model_name": null,
+      "review_price_usd": {
+        "mean": 0.124159786099992,
+        "summed_seat_p95": 0.23929,
+        "summed_observed_seat_maxima": 0.36619100000000004
+      },
+      "scoped_cli_invocation": "uv run imas-codex sn run --name toroidal_coordinate_of_thomson_scattering_laser --only review_name --names-only --skip-global-maintenance --cost-limit 1.0",
+      "invocation_precondition": "The exact owner-geometry staging instrument must first create this identity at drafted stage. The name-scoped review command intentionally does not mint an absent identity or reset the shared measurement-position name."
+    }
+  ],
+  "standard_name_change": {
+    "before": 7492,
+    "after": 7492,
+    "before_bytes": "7492",
+    "after_bytes": "7492",
+    "byte_identical": true,
+    "expected_value": 7492
+  },
+  "write_free_proof": {
+    "standard_name_change_matches_expected": true,
+    "provider_calls": 0,
+    "graph_writes": 0
+  }
+}
