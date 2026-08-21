@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c,c9460262,ca993b9e,0baf8d09,bd34e963">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py,tests/standard_names/test_error_sibling_reconcile_graph.py">
 <meta name="plan-impl" content="0.95">
@@ -306,10 +306,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sroc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship sn-repair-operator-consolidation §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sroc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-20" data-recommends-skill="/reckon-ship sn-repair-operator-consolidation §4" data-resolved-at="2026-08-21T14:57:15+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Characterise the twenty-two signed repair operators before writing any generic one</h4>
     <div class="r-fu-body"><p>Start at section 4 item 1, because it is both the cheapest step and the specification for everything after it. For each of the 22 <code>apply_*</code>, <code>repair_*</code>, <code>retire_*</code> and <code>reconcile_*</code> operators in <code>graph_ops.py</code>, record its authority artifact shape, selection predicate, mutation set, guard set, receipt operation name and test location. Anything the emerging schema cannot express is a real extension point rather than an oversight, so record those explicitly instead of smoothing them over. Do not write the generic operator in this pass and do not delete anything: the characterisation is what makes the migration safe, and it is worth doing while the refusal cases from the 2026-08-20 repair wave are still fresh.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-repair-operator-consolidation §4</pre>
+    <p class="r-fu-outcome">Done. The characterisation landed as commit 42f56cd0 with all ten operators tabulated across authority shape, selection predicate, mutation set, guard set, receipt operation and test location, plus a separate expressivity audit recording 9 genuine extension points and 8 accidents. It corrected this plan's own premise - the ten do not share one signed-artifact contract, they partition into 4 external-authority-plus-preview, 3 preview-only and 3 deterministic self-heals - and it surfaced the missing-suite prerequisite that became section 8. Followup: f-sroc-002 now carries the chain, holding the peel-unit child-predicate adjudication that must settle before that operator migrates.</p>
     </article>
 <article class="r-fu" data-id="f-sroc-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship sn-repair-operator-consolidation §4" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">Adjudicate the peel-unit child predicate before migrating that operator</h4>
