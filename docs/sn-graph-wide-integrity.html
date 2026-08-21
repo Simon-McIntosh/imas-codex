@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-graph-wide-integrity">
   <meta name="plan-title" content="Graph-Wide Standard Name Semantic Integrity and Exact Recovery">
   <meta name="plan-summary" content="Repair the measured semantic-integrity worklist so every live name is fed only by sources that genuinely measure it: the WEST-blocking subset from §2 first, then the dual-bound sources, gated detaches, and proven mis-attachments surfaced by the 2026-08-11 recovery follow-on. Exact instruments, ordinary quorum, reversible transactions — no new manifest machinery.">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,12 +17,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="232">
+<meta name="plan-version" content="234">
 <meta name="plan-impl" content="0.999">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html,docs/evidence/sn-graph-wide-integrity/owner-geometry-rc66-partition.json,docs/evidence/sn-graph-wide-integrity/review-cohort-manifest.json,docs/evidence/sn-graph-wide-integrity/stale-source-lifecycle.json,docs/evidence/sn-graph-wide-integrity/structural-exemption-preview.md,docs/evidence/sn-graph-wide-integrity/stale-detach-apply.md,docs/evidence/sn-graph-wide-integrity/structural-release-apply.md,docs/evidence/sn-graph-wide-integrity/retire-16-apply.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-ready-apply.md,docs/evidence/sn-graph-wide-integrity/dual-authority-retire-apply.md,docs/evidence/sn-graph-wide-integrity/merged-suite-verification.md,docs/evidence/sn-graph-wide-integrity/ancestor-rescore.md,docs/evidence/sn-graph-wide-integrity/stale-detach-52-apply.md,docs/evidence/sn-graph-wide-integrity/carried-name-repairs.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-identities.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-identities-remainder.md,docs/evidence/sn-graph-wide-integrity/grammar-snapshot-sync.md,docs/evidence/sn-graph-wide-integrity/integrity-ratchets.md">
+<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html,docs/evidence/sn-graph-wide-integrity/orphan-release-partition.md,docs/evidence/sn-graph-wide-integrity/orphan-delete-adjudication.md,docs/evidence/sn-graph-wide-integrity/orphan-resourcing-search.md,docs/evidence/sn-graph-wide-integrity/orphan-uncertain-adjudication.md,docs/evidence/sn-graph-wide-integrity/orphan-negative-retention.md,docs/evidence/sn-graph-wide-integrity/orphan-attachment-candidates.md,docs/evidence/sn-graph-wide-integrity/orphan-attachment-apply.md,docs/evidence/sn-graph-wide-integrity/attachment-reuse-map.md,docs/evidence/sn-graph-wide-integrity/attachment-target-review.md,docs/evidence/sn-graph-wide-integrity/attachment-admission-defects.md,docs/evidence/sn-graph-wide-integrity/attachment-admission-staging.md,docs/evidence/sn-graph-wide-integrity/mach-number-axis-retarget.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-producer-search.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-disposition.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-rename.md,docs/evidence/sn-graph-wide-integrity/electron-source-rate-review.md,docs/evidence/sn-graph-wide-integrity/rc66-fresh-draw.md,docs/evidence/sn-graph-wide-integrity/closing-census.md,tests/graph/test_sn_integrity_ratchets.py">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
 <meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966,fe00ec3e,a5a83b20,df48be0f,aba3ce7b,25d8dd37,77bc45c2,07c33345,e7aa5872,cdb0c870,5c4a5c0f,714d49a6,46bb0c12,e60707c4,166ce552,153e7e00,2821d795,47d98c1b,d493e7f8,fbf5a3b1,0a9e66d7,587a61f6,283e0f52,4dd90939,6ccd0fd7,1ea2a645,2d000336,7a1ba143,bdd6a7a2,a9ad85b1,571de682,59e08949,3e9a1cdc,4187eeff">
 <meta name="plan-effort-hours" content="16.0">
@@ -329,6 +329,52 @@
     <p>
       Do not bulk-supersede the accepted 22. Do not fabricate a source for any of
       them.
+    </p>
+
+    <h2 id="s3d">§3d — The attachment chain, and the one link that is next</h2>
+    <p>
+      Measured 2026-08-21 at session close. Fifteen of the 31 attachable identities are
+      attached and the genuine-orphan census stands at 20. What blocks the rest is a
+      chain, not a queue, and it has one next link — each item below was surfaced by
+      the guard or refusal immediately above it.
+    </p>
+    <p>
+      <strong>The next link.</strong> The nine lifecycle-refused attachment targets are
+      staged to 9-of-9 admissible but <em>not persisted</em>. Persisting them needs a
+      sanctioned vehicle for two governed descriptions that preserves their existing
+      attached-source and last-producer closures — the read-only source-hint probe
+      correctly refused with <code>source_not_extracted</code> because both sources are
+      already attached elsewhere — plus a re-stamp of the three redirected targets from
+      the machine-readable staging block. Only then may the exact signed attachment
+      manifest be regenerated. Draw the nine <strong>once, as one cohort</strong>: four
+      are already valid, and drawing them early splits the cohort and forfeits their
+      single permitted draw.
+    </p>
+    <p>
+      <strong>Then, in the serialized mutation lane.</strong> 23 multiple-live-target
+      sources plus 1 scalar mismatch need exact per-source adjudication. Five
+      owner/geometry rows need three exact migrations and two owner semantic reviews.
+      Two structural names remain bare and need live cleanup.
+    </p>
+    <p>
+      <strong>Held, and correctly so.</strong> Four identities are held on named DD
+      defects rather than naming defects, so the fix is upstream clarification:
+      <code>power_inside_fast</code> is declared W but its prose says thermal while a
+      <code>power_inside_thermal</code> sibling exists; the species-resolved torque
+      candidates each omit essential semantics; and both sensor-direction identities are
+      correct at unit <code>1</code> for direction cosines while DD's unit-vector parent
+      conflicts with its own metre-valued children. One identity sits below threshold at
+      0.575 and two remain absent after their single draw — a compose-to-writer mismatch
+      classified a shatter-cone identity as a <code>physical_base</code> token miss while
+      strict parsing rejected its companion, which needs diagnosis rather than another
+      draw. The voltage identity is a standing recorded refusal; a future transition needs
+      sanctioned operator authority to exclude a stale producer while minting a reviewable
+      source-less successor, and that capability is worth exactly one name today.
+    </p>
+    <p>
+      <strong>Owned elsewhere.</strong> Preventing the two stale derived-source reseeds
+      belongs to <code>sn-pipeline-recovery</code>. The three stale-source refusals stay
+      fail-closed until their recorded authority conditions change.
     </p>
 
     <h2 id="s3c">§3c — The unsourced names are mostly recoverable, and the delete campaign was wrong</h2>
@@ -1908,6 +1954,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s3c" data-id="c-20260821-auditfix" data-who="reckon-ship" data-when="2026-08-21T15:35:00+00:00">
     <div class="r-comment-body">auditfix landed - commit c86b3ae4, merge into main, gate passed. Measure: the new regression observed red at 3 failed / 1 passed then green at 4 passed / 0 failed, focused audit compatibility 489 passed / 0 failed, full standard_names suite 6,551 passed / 8 skipped / 0 failed. This removes a false-positive validator defect whose reach went well past the five rows that exposed it, and the fix keeps each check sharp rather than loosening it - every one of the four still fails a genuine violation, pinned by test: cumulative_prefix_check now masks public registered integration compounds so line_integrated_electron_density, line_integrated_electron_number_density and toroidal_line_integrated_impurity_ion_velocity clear while integrated_electron_density still violates; implicit_field_check uses parsed non-base compounds so straight_field_line_angle, poloidal_straight_field_line_angle and magnetic_field_at_pedestal_top_low_field_side_magnitude clear while vacuum_toroidal_field still violates; repeated_token_check treats the parsed low-field-side locus atomically so the pedestal-top identity clears while magnetic_magnetic_field_strength still violates; and structural_dim_tag_check accepts the governed straight_field_line_angle description, still rejects storage-rank prose, and now evaluates each dimensional tag locally so a legitimate 3D equilibrium phrase can no longer hide a later 2D array tag - a second defect found while fixing the first. The public grammar stays authoritative and no ISN vocabulary was copied into codex.</div>
+</div>
+<div class="r-comment" data-section="s3d" data-id="c-20260821-admissionstage" data-who="reckon-ship" data-when="2026-08-21T16:00:00+00:00">
+    <div class="r-comment-body">admissionstage landed - commit c6acbfef, merge into main, gate passed. Measure: the nine attachment targets went from baseline_admissible=4/9 to staged_admissible=9/9 with 0 quarantined and 0 critical findings under the exact shared admission function, at 3 target redirects, 2 governed descriptions, 0 ordinary-review draws, 0 provider calls and USD 0.000000 of a USD 25 cap; LLMCost held at 27631 and StandardNameChange at 7754. Artifact: docs/evidence/sn-graph-wide-integrity/attachment-admission-staging.md at SHA-256 66b34ac9. The redirects are cross_section_of_flux_surface to poloidal_plane_cross_sectional_area_of_flux_surface, line_integrated_electron_density to line_integrated_electron_number_density, and poloidal_straight_field_line_angle to straight_field_line_angle; rows 21 and 29 keep their strict-valid spellings and carry staged description text. The honest limit is recorded rather than papered over: the read-only source-hint probes for those two refused with source_not_extracted because both sources are already attached to existing targets, so this node staged description authority without pretending it was persisted or weakening source closure. Persistence is the next link in the serialized mutation lane, and it must preserve the existing attached-source and last-producer closures.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
