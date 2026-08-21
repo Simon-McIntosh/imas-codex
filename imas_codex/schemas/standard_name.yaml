@@ -722,6 +722,144 @@ enums:
           descendant reachable via HAS_PARENT — the rename cascade follows
           the full subtree.
 
+  RepairAuthorityMode:
+    description: Source of authority for a graph repair operation.
+    permissible_values:
+      external_reviewed:
+        description: A committed independently reviewed artifact authorizes rows.
+      graph_preview:
+        description: A fresh graph-derived preview manifest authorizes rows.
+      deterministic_self_heal:
+        description: A closed code predicate over current graph state authorizes rows.
+
+  RepairSignatureProfile:
+    description: Canonicalization boundary covered by an authority digest.
+    permissible_values:
+      whole_artifact:
+        description: The digest covers the complete serialized artifact.
+      payload_without_signature:
+        description: The digest covers the artifact payload excluding its signature block.
+      each_row:
+        description: Each authority row carries its own digest.
+      rows_only:
+        description: The digest covers only the canonical row array.
+      raw_file:
+        description: The digest covers the original file bytes.
+      combined:
+        description: Multiple independently retained digest profiles apply.
+      none:
+        description: Deterministic self-heal authority has no signed artifact.
+
+  RepairRowIdentityKind:
+    description: Domain that supplies one repair row's stable identity.
+    permissible_values:
+      source:
+        description: The row is keyed by one StandardNameSource identity.
+      standard_name:
+        description: The row is keyed by one StandardName identity.
+      source_target_binding:
+        description: The row is keyed by a source and target relationship pair.
+
+  RepairParticipantKind:
+    description: Graph entity kind included in compare-and-set and collateral proofs.
+    permissible_values:
+      node:
+        description: A graph node participates in the repair closure.
+      relationship:
+        description: A graph relationship participates in the repair closure.
+
+  RepairSelectionMode:
+    description: Completeness contract for selecting executable repair rows.
+    permissible_values:
+      exact_caller_set:
+        description: The caller must name the complete exact row set.
+      complete_auto_discovered_cohort:
+        description: The operator discovers and requires the complete graph cohort.
+      exact_complete_signed_cohort:
+        description: The selected rows must equal the complete signed cohort.
+      signed_subset:
+        description: Any exact subset of signed rows may be selected.
+      admitted_subset_of_signed_parent:
+        description: >-
+          The selected set is the admitted projection of a complete signed parent,
+          retaining parent digest and excluded-refusal lineage.
+
+  RepairMutationKind:
+    description: Closed vocabulary of atomic graph-repair mutations.
+    permissible_values:
+      set_properties:
+        description: Compare-and-set one or more graph properties.
+      add_relationship:
+        description: Materialize a relationship and its canonical properties.
+      delete_relationship:
+        description: Delete one exact relationship.
+      recompute_projection:
+        description: Recompute a scalar or relationship projection from live authority.
+      clear_source_paths:
+        description: Recompute or clear affected StandardName source-path mirrors.
+      change_source_lifecycle:
+        description: Transition a StandardNameSource lifecycle and clear claims as declared.
+      materialize_derived_parent:
+        description: Create a derived structural parent and its canonical edges.
+      emit_retry:
+        description: Emit a source retry event instead of a StandardNameChange receipt.
+      delete:
+        description: Delete an admitted node and the explicitly owned scaffolding.
+      supersede:
+        description: Transition an admitted StandardName to superseded lifecycle.
+      detach:
+        description: Remove an admitted source-to-name binding and backing projection.
+
+  RepairGuardKind:
+    description: Closed categories implemented by named repair guard plug-ins.
+    permissible_values:
+      equality:
+        description: Require an exact signed scalar or collection value.
+      cardinality:
+        description: Require an exact node, relationship, mutation, or receipt count.
+      participant_lock:
+        description: Lock every declared closure participant before mutation.
+      closure_digest:
+        description: Re-hash the declared participant closure after locking.
+      authority_join:
+        description: Require exact relational coverage across signed authorities.
+      semantic_authority:
+        description: Invoke a named closed runtime semantic authority.
+      collateral_immutability:
+        description: Prove out-of-allowlist graph state stayed byte-equivalent.
+      replay_postcondition:
+        description: Prove the declared projection is already applied on replay.
+
+  RepairReceiptCardinality:
+    description: Logical key used to create durable repair receipts.
+    permissible_values:
+      none:
+        description: The operation has no durable receipt yet.
+      cohort:
+        description: One receipt records the complete applied cohort.
+      per_source:
+        description: One receipt records each changed source.
+      per_target:
+        description: One receipt records each changed StandardName target.
+
+  RepairOrphanPolicy:
+    description: Policy for a mutation that may remove a target's final producer.
+    permissible_values:
+      refuse:
+        description: Refuse any mutation that would leave a target producer-less.
+      require_structural_authority:
+        description: Permit the mutation only when live signed structural authority remains.
+      permit_handoff:
+        description: Permit and report the orphan for a separate governed workflow.
+
+  RepairAuthorityJoinCoverage:
+    description: Relational coverage required across independently signed authorities.
+    permissible_values:
+      exact_intersection:
+        description: Rows must equal the exact intersection of the joined authorities.
+      exact_coverage:
+        description: Every row in the declared authority side must be covered exactly once.
+
 # =============================================================================
 # Classes
 # =============================================================================
@@ -3633,3 +3771,276 @@ classes:
         inlined: false
         annotations:
           relationship_type: EVIDENCED_BY
+
+  RepairAuthorityValue:
+    description: >-
+      Lossless JSON value used only at the compatibility boundary for committed
+      authority artifacts whose original serialization and digest are immutable.
+    class_uri: linkml:Any
+
+  RepairAuthorityDigest:
+    description: One retained authority digest and its canonicalization contract.
+    class_uri: sn:RepairAuthorityDigest
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable digest role within the repair authority.
+      profile:
+        range: RepairSignatureProfile
+        required: true
+      sha256:
+        required: true
+        pattern: "^[0-9a-f]{64}$"
+        description: Original digest; adapters never replace or re-sign this value.
+      canonicalization:
+        required: true
+        description: Named deterministic byte or JSON canonicalization implementation.
+
+  RepairRowIdentity:
+    description: Typed identity of one executable repair row.
+    class_uri: sn:RepairRowIdentity
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable row key in the authority artifact.
+      kind:
+        range: RepairRowIdentityKind
+        required: true
+      source_id:
+        description: Exact StandardNameSource identity when the row owns a source.
+      target_id:
+        description: Exact StandardName identity when the row owns a target.
+
+  RepairParticipant:
+    description: Typed graph participant covered by locking and closure signatures.
+    class_uri: sn:RepairParticipant
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable node id or relationship element id.
+      kind:
+        range: RepairParticipantKind
+        required: true
+      graph_label:
+        required: true
+        description: Node label or relationship type used to resolve the participant.
+      signature_sha256:
+        pattern: "^[0-9a-f]{64}$"
+        description: Optional pre-mutation compare-and-set signature.
+
+  RepairAuthorityJoin:
+    description: Exact relational constraint across independently signed authorities.
+    class_uri: sn:RepairAuthorityJoin
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable name of the join implementation.
+      left_digest_id:
+        required: true
+      right_digest_id:
+        required: true
+      left_key:
+        required: true
+        description: Named row projection used on the left authority.
+      right_key:
+        required: true
+        description: Named row projection used on the right authority.
+      coverage:
+        range: RepairAuthorityJoinCoverage
+        required: true
+
+  RepairSelection:
+    description: Closed selection predicate and completeness contract.
+    class_uri: sn:RepairSelection
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable name of the registered selection implementation.
+      mode:
+        range: RepairSelectionMode
+        required: true
+      predicate:
+        required: true
+        description: Named closed predicate implementation; arbitrary Cypher is not authority.
+      parent_manifest_sha256:
+        pattern: "^[0-9a-f]{64}$"
+        description: Complete parent digest for admitted-subset selection.
+      excluded_refusal_sha256:
+        multivalued: true
+        description: Digests retaining the excluded refusal lineage.
+
+  RepairMutation:
+    description: One ordered atomic mutation in a repair row's branch program.
+    class_uri: sn:RepairMutation
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable mutation step identity within its row.
+      order:
+        range: integer
+        required: true
+        minimum_value: 0
+      kind:
+        range: RepairMutationKind
+        required: true
+      participant_id:
+        required: true
+        description: RepairParticipant identity mutated by this step.
+      arguments:
+        range: RepairAuthorityValue
+        description: Mutation-specific values interpreted by the closed mutation registry.
+
+  RepairGuard:
+    description: One named guard applied to a repair row and its participant closure.
+    class_uri: sn:RepairGuard
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable guard identity within its row.
+      kind:
+        range: RepairGuardKind
+        required: true
+      implementation:
+        required: true
+        description: Named closed guard implementation; arbitrary Cypher is not permitted.
+      participant_ids:
+        multivalued: true
+        description: Exact RepairParticipant identities covered by the guard.
+      expected:
+        range: RepairAuthorityValue
+        description: Signed expected value or cardinality used by the guard.
+
+  RepairReceiptPolicy:
+    description: Durable receipt cardinality and replay projection for one operation.
+    class_uri: sn:RepairReceiptPolicy
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable receipt policy identity.
+      operation:
+        required: true
+        description: Existing operation string retained for replay compatibility.
+      cardinality:
+        range: RepairReceiptCardinality
+        required: true
+      expected_count:
+        description: Named expression deriving the exact receipt count.
+      link_participant_kind:
+        range: RepairRowIdentityKind
+      replay_projection:
+        multivalued: true
+        required: true
+        description: Fields whose postcondition proves write-free already-applied replay.
+
+  RepairAuthorityRow:
+    description: >-
+      Canonical executable row carrying typed identity, retained signatures,
+      selection, ordered mutations, and the exact guard set required for apply.
+    class_uri: sn:RepairAuthorityRow
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Stable row identity.
+      identity:
+        range: RepairRowIdentity
+        required: true
+      signatures:
+        range: RepairAuthorityDigest
+        multivalued: true
+      participants:
+        range: RepairParticipant
+        multivalued: true
+        required: true
+      selection:
+        range: RepairSelection
+        required: true
+      mutations:
+        range: RepairMutation
+        multivalued: true
+        required: true
+      guards:
+        range: RepairGuard
+        multivalued: true
+        required: true
+      orphan_policy:
+        range: RepairOrphanPolicy
+        required: true
+
+  RepairAuthorityArtifact:
+    description: >-
+      Repair-authority envelope. The legacy slots admit committed artifacts
+      byte-for-byte through their existing schema identifiers; canonical repair
+      authorities additionally populate the typed operation, selection, row,
+      mutation, guard, receipt, and orphan-policy slots.
+    class_uri: sn:RepairAuthorityArtifact
+    attributes:
+      schema:
+        identifier: true
+        required: true
+        description: Existing versioned artifact schema id or canonical repair schema id.
+      generated_at:
+        description: Original generation timestamp retained without normalization.
+      rows:
+        range: RepairAuthorityValue
+        multivalued: true
+        required: true
+        description: Original committed row set retained unchanged for digest compatibility.
+      operation_id:
+        description: Stable generic repair operation identity.
+      authority_mode:
+        range: RepairAuthorityMode
+      authority_digests:
+        range: RepairAuthorityDigest
+        multivalued: true
+      selection:
+        range: RepairSelection
+      authority_joins:
+        range: RepairAuthorityJoin
+        multivalued: true
+      repair_rows:
+        range: RepairAuthorityRow
+        multivalued: true
+        description: Typed executable projection used by new canonical authorities.
+      receipt_policy:
+        range: RepairReceiptPolicy
+      orphan_policy:
+        range: RepairOrphanPolicy
+      families:
+        range: RepairAuthorityValue
+      policy:
+        range: RepairAuthorityValue
+      read_only:
+        range: boolean
+      read_only_proof:
+        range: RepairAuthorityValue
+      signature:
+        range: RepairAuthorityValue
+      source:
+        range: RepairAuthorityValue
+      summary:
+        range: RepairAuthorityValue
+      source_artifacts:
+        range: RepairAuthorityValue
+      structural_closure_test:
+        range: RepairAuthorityValue
+      semantic_authority:
+        range: RepairAuthorityValue
+      grammar_authority:
+        range: RepairAuthorityValue
+      old_target_id:
+        description: Legacy exact target identity retained for compatibility.
+      counts:
+        range: RepairAuthorityValue
+      rc66_admissions:
+        range: RepairAuthorityValue
+      dd_authority:
+        range: RepairAuthorityValue
