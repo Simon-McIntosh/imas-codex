@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="226">
+<meta name="plan-version" content="227">
 <meta name="plan-impl" content="0.999">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1884,6 +1884,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s3c" data-id="c-20260821-voltrename" data-who="reckon-ship" data-when="2026-08-21T14:37:00+00:00">
     <div class="r-comment-body">voltrename landed - commit 31a0ff1e, merge into main, gate passed on the plan-authorized fail-closed branch. This settles the voltage_of_diagnostic_antenna circularity as a STANDING RECORDED REFUSAL, which this plan states is a legitimate closure. Measure: 0 fresh quorum rows, 0 names accepted, 0 persistent graph writes, USD 0.00 of a USD 15 cap; the stale-source ledger stayed byte-identical at SHA-256 198a7cae and the three-identity family at 39fd8a93; StandardNameChange held at 7754 and LLMCost at 27619. The exact guard string is recorded: source migration compare-and-set failed: dd:ece/channel/t_e_voltage(exists=True, status='stale', claimed=False, bindings=['voltage_of_diagnostic_antenna'], scalar='voltage_of_diagnostic_antenna'). Both sanctioned routes are now closed by measurement rather than by argument - voltprod proved no authoritative live producer exists, and this node proved the public rename route cannot create a reviewable source-less successor without migrating the stale producer, which the guard correctly refuses. A future transition needs separately sanctioned operator authority to exclude a stale producer from migration while minting a reviewable source-less successor; the unchanged public rename route must not be retried. That capability is worth exactly one name today, which is why it is recorded rather than built.</div>
+</div>
+<div class="r-comment" data-section="s3c" data-id="c-20260821-closecensus" data-who="reckon-ship" data-when="2026-08-21T14:45:00+00:00">
+    <div class="r-comment-body">closecensus landed - commit 294f97f4, merge into main, gate passed. This is the session's closing measurement and it accounts for every remaining row. Measure: the four live-graph integrity ratchets at 4 passed / 0 failed; StandardNameChange 7754 to 7754 and LLMCost 27619 to 27619 proving the census itself mutated nothing; active grammar 0.8.0rc66 at 22 segments and 956 tokens; accepted grammar failures 0 of 2,532. Current live counts: genuine orphans 20 (as-found 85, prior close 36); multiple-live-target sources 23; stale sources holding a live binding 3; signed retirements outstanding 0 of 16; owner/geometry rows on the old target 5 of 49, with all 28 old-target producers accounted as 5 residue plus 23 authority-retained; structural bare 2; no-live-target 0; projection mismatch 0; scalar mismatch 1; explicit-axis generic-parent residue 0. Artifact: docs/evidence/sn-graph-wide-integrity/closing-census.md, with verbatim refusal strings preserved and an owning plan named for every unrefused row. Ownership as measured: this plan retains exact per-source adjudication for the 23 multiple-target rows and the 1 scalar mismatch, three owner/geometry migrations plus two owner semantic reviews, five orphan hold-or-retire actions, and live structural cleanup; sn-pipeline-recovery owns preventing the two stale derived-source reseeds; the three stale-source refusals stay fail-closed until their recorded authority conditions change.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
