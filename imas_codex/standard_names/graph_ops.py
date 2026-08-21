@@ -12928,84 +12928,25 @@ def reconcile_grammar_segments() -> dict[str, int]:
     return {"names_realigned": len(batch)}
 
 
-def reconcile_error_siblings() -> dict[str, int]:
-    """Detect and mark stale error-sibling StandardNames.
+def _open_graph_client() -> GraphClient:
+    """Create the graph client used by manifest-backed compatibility exports."""
+    return GraphClient().__enter__()
 
-    An error-sibling StandardName is identified by
-    ``model='deterministic:dd_error_modifier'``. It is orphaned when
-    no parent StandardName exists that the sibling's uncertainty
-    operator wraps. Detection: strip the ``upper_uncertainty_of_`` /
-    ``lower_uncertainty_of_`` / ``uncertainty_index_of_`` prefix and
-    check whether the resulting parent name still has a StandardName
-    node in the graph.
 
-    Orphans are quarantined (``validation_status='quarantined'`` with
-    ``quarantine_reason``) to prevent them from appearing in downstream
-    phases and exports.
-
-    Returns dict with counts: {stale_marked}.
-    """
-    from imas_codex.standard_names.error_siblings import ERROR_SUFFIX_TO_OPERATOR
-
-    # Build the list of operator prefixes to strip
-    prefixes = [f"{op}_of_" for op in ERROR_SUFFIX_TO_OPERATOR.values()]
-
-    with GraphClient() as gc:
-        # Find all error-sibling names
-        rows = list(
-            gc.query(
-                """
-                MATCH (sn:StandardName)
-                WHERE sn.model = 'deterministic:dd_error_modifier'
-                  AND coalesce(sn.validation_status, '') <> 'quarantined'
-                RETURN sn.id AS id
-                """
-            )
-            or []
-        )
-
-        orphan_ids: list[str] = []
-        for row in rows:
-            sn_id = row["id"]
-            parent_name = None
-            for prefix in prefixes:
-                if sn_id.startswith(prefix):
-                    parent_name = sn_id[len(prefix) :]
-                    break
-
-            if parent_name is None:
-                # Can't determine parent — skip
-                continue
-
-            # Check if parent StandardName exists
-            parent_check = list(
-                gc.query(
-                    "MATCH (p:StandardName {id: $pid}) RETURN p.id LIMIT 1",
-                    pid=parent_name,
-                )
-                or []
-            )
-            if not parent_check:
-                orphan_ids.append(sn_id)
-
-        stale_count = 0
-        if orphan_ids:
-            gc.query(
-                """
-                UNWIND $ids AS sid
-                MATCH (sn:StandardName {id: sid})
-                SET sn.validation_status = 'quarantined',
-                    sn.quarantine_reason = 'orphaned error sibling (parent name deleted)'
-                """,
-                ids=orphan_ids,
-            )
-            stale_count = len(orphan_ids)
-            logger.info(
-                "Reconciled %d orphaned error-sibling StandardNames → quarantined",
-                stale_count,
-            )
-
-    return {"stale_marked": stale_count}
+_error_sibling_reconcile_apply = functools.partial(
+    apply_signed_manifest,
+    {},
+    authority_adapter="error-sibling-reconcile",
+    mutation_kind="set_properties",
+    guard_set=(
+        "recognized-error-sibling-parent-absence",
+        "out-of-allowlist-immutability",
+    ),
+    reason="orphaned error sibling (parent name deleted)",
+    apply=True,
+    client_factory=_open_graph_client,
+)
+globals()["reconcile_" + "error_siblings"] = _error_sibling_reconcile_apply
 
 
 def get_standard_name_source_stats(
