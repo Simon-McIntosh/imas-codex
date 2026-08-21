@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="dd-version-resilient-resolution-landed">
+  <meta name="plan-title" content="dd-version-resilient-resolution &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="dd-version-resilient-resolution">
+  <meta name="plan-verifies" content="dd-version-resilient-resolution#s4">
+  <title>dd-version-resilient-resolution landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>dd-version-resilient-resolution &mdash; cumulative execution evidence</h1>
+  <p>One anchor per material landing.</p>
+
+  <section id="row-convergence">
+    <h2>A row is no longer refused for carrying an older dictionary stamp</h2>
+    <p><strong>Landed 2026-08-21</strong> &mdash; commit <code>3d68f699</code>. The
+    production change is <strong>four lines removed and nothing else</strong>: the
+    row-label equality refusal at the head of <code>resolve_dd_row</code> is gone, so a
+    row retains the requested authoritative version and routes through the
+    <code>_read_graph_field</code> observed/effective convergence test that was already
+    present in the same module. Version became provenance by deletion, not by new
+    machinery.</p>
+
+    <p>The invariant was established test-first. The no-op-bump property was written
+    before the fix and <em>observed failing</em> with the verbatim label-only
+    <code>DDResolutionVersionMismatch</code>, which is what makes the test meaningful
+    rather than tautological.</p>
+
+    <table>
+      <caption>Property tests over a ten-field synthetic source corpus</caption>
+      <thead><tr><th>Property</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>A no-op dictionary bump resolves the full corpus</td><td>10/10 fields resolve, nothing raised</td></tr>
+        <tr><td>A value matching neither the observed nor the effective side still refuses</td><td>raises on content, fail-closed intact</td></tr>
+        <tr><td>Label-drift count does not affect how many rows resolve</td><td>every mismatch count 0&ndash;10 resolves 10/10</td></tr>
+      </tbody>
+    </table>
+
+    <p>Suite state: focused module 3 passed / 0 failed; full
+    <code>tests/standard_names/</code> 6,536 passed, 8 skipped, 0 failed, 0 errors.
+    <code>resolve_dd_rows</code> was deliberately left untouched and no source or graph
+    <code>dd_version</code> was re-stamped anywhere, so the plan's rejection of a bulk
+    re-stamp holds. The corpus that motivated the work is unchanged and needs no
+    migration: 8,536 sources at 4.1.0, 385 at 4.1.1, 695 with none.</p>
+    <p>Artifact: <code>tests/standard_names/test_dd_version_resilience.py</code>.</p>
+  </section>
+</main>
+</body>
+</html>
