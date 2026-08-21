@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="216">
+<meta name="plan-version" content="218">
 <meta name="plan-impl" content="0.999">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -321,6 +321,56 @@
       Do not bulk-supersede the accepted 22. Do not fabricate a source for any of
       them.
     </p>
+
+    <h2 id="s3c">§3c — The unsourced names are mostly recoverable, and the delete campaign was wrong</h2>
+    <div class="card" style="border-left:4px solid #c33; padding-left:12px;">
+      <p>
+        <strong>Measured 2026-08-21: of the 36 unsourced names, 25 are RECOVERABLE,
+        3 have no measuring path, and 8 need physics judgement.</strong> The
+        all-delete partition this plan had reached would have destroyed 25 valuable
+        standard names that the data dictionary demonstrably measures.
+      </p>
+      <p>
+        <strong>Why the earlier conclusion was wrong, and it is a methodological
+        lesson rather than a bad measurement.</strong> The $1.60 experiment that
+        established that regeneration cannot fix the 36 orphans tested only the
+        <em>forward</em> direction: compose over 42 focus paths, which re-emits parent
+        names and never proposes the orphan children. That result was true and remains
+        true. But it was recorded as if it settled the general question, and it does
+        not — the <em>reverse</em> direction, name to path by semantic search, finds
+        sources for most of them immediately. <strong>A negative result in one
+        direction is not a negative result in every direction.</strong>
+      </p>
+      <table>
+        <caption>Representative recoveries — candidate path, search score, unit agreement</caption>
+        <thead><tr><th>Standard name</th><th>DD path</th><th>Score</th><th>Unit</th></tr></thead>
+        <tbody>
+          <tr><td><code>parallel_current_density_due_to_ohmic_current_drive</code></td><td><code>core_profiles/profiles_1d/j_ohmic</code></td><td>0.94</td><td>A.m^-2 ✓</td></tr>
+          <tr><td><code>cross_section_of_flux_surface</code></td><td><code>core_profiles/profiles_1d/grid/area</code></td><td>0.92</td><td>m^2 ✓</td></tr>
+          <tr><td><code>minimum_of_safety_factor</code></td><td><code>equilibrium/time_slice/global_quantities/q_min/value</code></td><td>0.89</td><td>dimensionless ✓</td></tr>
+          <tr><td><code>line_integrated_electron_density</code></td><td><code>interferometer/channel/n_e_line</code></td><td>0.54</td><td>m^-2 ✓</td></tr>
+          <tr><td><code>minimum_magnetic_field_magnitude</code></td><td><code>equilibrium/time_slice/profiles_1d/b_field_min</code></td><td>0.53</td><td>T ✓</td></tr>
+          <tr><td><code>capacitance_of_ion_cyclotron_heating_antenna</code></td><td><code>ic_antennas/antenna/module/matching_element/capacitance</code></td><td>0.55</td><td>F ✓</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>One adjudication is withdrawn.</strong>
+        <code>cross_section_of_flux_surface</code> was cleared for deletion on the
+        reasoning that its physical distinction was already carried by two accepted
+        identities. It is recoverable at 0.92 with a matching unit, so that reasoning
+        was right about the distinction and wrong about the disposal.
+      </p>
+      <p>
+        <strong>Remaining work, in order.</strong> Route the 25 recoverable candidates
+        through an authorized exact attachment workflow — a candidate path is evidence,
+        never attachment authority, and each attachment still owes the unit and
+        semantic guards. Adjudicate the 8 uncertain rows on physics, noting that the
+        two sensor-direction candidates disagree in unit (name <code>1</code> against
+        DD <code>m</code>). Only then decide retention for the 3 with a genuine
+        negative search, whose exact queries are recorded so the negative stays
+        auditable. Do not feed the superseded all-delete cohort to any mutator.
+      </p>
+    </div>
 
     <h2 id="s4">§4 — The provenance ledger, and one invariant question</h2>
     <p>
@@ -1198,6 +1248,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260821-orphan-redirect" data-who="reckon-ship" data-when="2026-08-21T11:58:00+00:00">
     <div class="r-comment-body">orphanapply gate NOT RUN - commit 1d932e48 records the preflight refusal; 0 of 35 deleted, 0 receipts, counters unmoved at StandardNameChange 7706 and LLMCost 27596, no authority signed. The node refused rather than forcing a cohort and surfaced two blockers, and the lead then raised a third that supersedes both. First blocker: 6 of the 35 carry validation_status=quarantined, which the locked delete-authority bound names as a must-never-trigger condition. Second: apply_signed_manifest's delete requires a disconnected target, and all 35 carry live edges - measured graph-wide as 187 HAS_REVIEW, 50 HAS_SEGMENT, 36 HAS_UNIT, 32 HAS_PARENT, 28 HAS_INTERNAL_CHANGE, 27 HAS_PHYSICS_DOMAIN, 20 REFINED_FROM, 17 IN_CLUSTER, 15 DOCS_REVISION_OF and further descriptive edges - so a closure delete would have destroyed review and chain history that this project holds permanent. Third and decisive: the lead asked whether these names can be re-sourced by dictionary semantic search, and whether they are valuable. They can, and several are. See the locked orphan-resourcing-before-deletion decision. The delete campaign is stopped and replaced by a re-sourcing campaign; the 35-row cohort is retained as evidence, not as an authority to apply. Nothing was deleted, so nothing needs undoing - the fail-closed preflight is why.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260821-resourcesearch" data-who="reckon-ship" data-when="2026-08-21T12:26:00+00:00">
+    <div class="r-comment-body">resourcesearch landed - commit fb460cf2, merge into main, gate passed. Measure: 36/36 identities searched in the reverse direction, physical meaning to DD path, partitioning as 25 RECOVERABLE + 3 NO-MEASURING-PATH + 8 UNCERTAIN = 36, every identity assigned exactly once. Read-only throughout: 72 path searches, 8 cluster searches, 13 related-path expansions, one 33-path detail fetch, no provider and no pipeline. THE ALL-DELETE PARTITION WOULD HAVE DESTROYED 25 VALUABLE NAMES THE DICTIONARY DEMONSTRABLY MEASURES. High-confidence recoveries with matching units: parallel_current_density_due_to_ohmic_current_drive to core_profiles/profiles_1d/j_ohmic at 0.94 in A.m^-2; cross_section_of_flux_surface to core_profiles/profiles_1d/grid/area at 0.92 in m^2; minimum_of_safety_factor to equilibrium/time_slice/global_quantities/q_min/value at 0.89; line_integrated_electron_density to interferometer/channel/n_e_line in m^-2; minimum_magnetic_field_magnitude to equilibrium/time_slice/profiles_1d/b_field_min in T; capacitance_of_ion_cyclotron_heating_antenna to ic_antennas/antenna/module/matching_element/capacitance in F; neutron_flux_due_to_fusion to neutron_diagnostic/neutron_flux_total. Note the direct reversal: cross_section_of_flux_surface had been adjudicated to DELETE on the reasoning that its distinction was carried elsewhere, and it is in fact recoverable at 0.92 with a matching unit - so that adjudication is withdrawn. Only 3 identities survive a genuine negative search, each with its six exact queries recorded so the negative is auditable: magnetic_field_at_pedestal_top_low_field_side_magnitude, tendency_of_total_thermal_plasma_internal_energy, toroidal_neutral_state_momentum_diffusivity. 8 need physics judgement, and the two sensor-direction rows carry a real unit disagreement, name 1 against DD m. Artifact SHA-256 4dea85aa.</div>
 </div>
 <div class="r-comment" data-section="_top" data-id="s6-slice-closure-20260801" data-who="reckon-ship" data-when="2026-08-01T12:10:00+02:00">
     <div class="r-comment-body"><p><strong>The sprint-scoped correctness slice is closed.</strong> Unit authority and deletion-ledger work remain resolved. The exact WEST semantic-source repair changed 38 sources transactionally, wrote 38 audit rows, left zero WEST invariant violations or duplicate accepted identities, and reduced the global violation count from 999 to 961. Every remaining violation is outside WEST and stays with <code>f-sgwi-001</code>. The 15 older graph-wide strict-parser/stamp residues are likewise deferred here; accepted WEST is strict-lossless with zero drift. This deferral is explicit scope, not a failed stability gate.</p></div>

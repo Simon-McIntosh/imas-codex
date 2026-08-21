@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T14:07:52",
+  "updated": "2026-08-21T14:26:17",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16,6 +16,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a023e9-6f08-7d40-9849-a57b7a59c6a2",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-canonform",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -57,7 +64,7 @@
         "id": "impl-esrate",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02428-2549-7000-b426-8034ffe598d0",
         "created": "2026-08-21"
       },
       {
@@ -136,6 +143,13 @@
         "role": "implement",
         "session_id": "01a01880-7fdf-7852-a159-c51e790fa1d4",
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-resource",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02439-ee5f-7833-af36-d9d7fbaeb353",
+        "created": "2026-08-21"
       },
       {
         "id": "impl-retiremigrate",
@@ -10667,9 +10681,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T115003549608-esrate",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "esrate",
+        "role": "implement",
+        "member": "impl-esrate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:50:05Z",
+        "completed_at": "2026-08-21T12:13:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1378,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1378,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "fa01c98c29cfea7c577a7642a1a28f927cc0c54c",
+        "commits": [
+          "049b67fdce4f5f00aff65f11ea3e78bc68e98b05"
+        ],
+        "changed_lines": {
+          "added": 50,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Both target graph tests still fail, 2 failed / 0 passed before and after, both selections executed with graph credentials and neither exited 5. Zero names accepted, zero fresh quorum rows, USD 0.0000 spent against the USD 15 cap. This is a recorded fail-closed refusal, not a silent stall, and it isolates a real pipeline defect rather than a data problem. DD evidence is unambiguous: both attached leaves are FLT_1D spatial electron-density-equation source terms carrying matching scalar and HAS_UNIT authority at m^-3.s^-1, while electron_source_rate declares s^-1 and documents a volume integral, so the name and its sources genuinely disagree. All three sanctioned routes failed closed. The direct rename to volumetric_electron_source_rate rolled back because successor unit inheritance retained the contradictory predecessor s^-1 instead of deriving from the DD cohort. The scoped hint run reset both sources but composition repeatedly emitted volumetric_electron_source_rate while the strict parser's canonical form is electron_volumetric_source_rate, so the generated segment order was rejected as non-canonical; both claims exhausted at attempt_count 5 with no surviving successor and no fresh review. A transient net_electron_source_rate source-closure compare-and-set refusal also occurred. Root cause is therefore a composer/parser canonicalization disagreement plus a rename path that inherits rather than derives its unit, both outside this node's evidence-file fence. No name was hand-accepted or hand-promoted and no unit or graph text was hand-edited.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T115003549608-esrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02428-2549-7000-b426-8034ffe598d0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 16705792,
+            "cached_input_tokens_cumulative": 16705792,
+            "input_tokens": 16970741,
+            "input_tokens_cumulative": 16970741,
+            "output_tokens": 26009,
+            "output_tokens_cumulative": 26009,
+            "reasoning_output_tokens": 8196,
+            "reasoning_output_tokens_cumulative": 8196
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T120924951772-resourcesearch",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "resourcesearch",
+        "role": "implement",
+        "member": "impl-resource",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T12:09:31Z",
+        "completed_at": "2026-08-21T12:26:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 989,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 989,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "e8244e7568893a01b947f5938dfc4df355c609df",
+        "commits": [
+          "fb460cf2749c8ba527e98c41a813bdd00cfb5ecb"
+        ],
+        "changed_lines": {
+          "added": 91,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T120924951772-resourcesearch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02439-ee5f-7833-af36-d9d7fbaeb353",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6318336,
+            "cached_input_tokens_cumulative": 6318336,
+            "input_tokens": 6540085,
+            "input_tokens_cumulative": 6540085,
+            "output_tokens": 27075,
+            "output_tokens_cumulative": 27075,
+            "reasoning_output_tokens": 10736,
+            "reasoning_output_tokens_cumulative": 10736
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 250
+    "_version": 256
   }
 }
