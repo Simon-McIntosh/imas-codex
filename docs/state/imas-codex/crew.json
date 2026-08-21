@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T13:01:17",
+  "updated": "2026-08-21T13:13:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -52,6 +52,13 @@
         "role": "implement",
         "session_id": "01a0167e-a37f-7aa1-b70b-9400fad4ddf2",
         "created": "2026-08-18"
+      },
+      {
+        "id": "impl-genericop",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "impl-isnvocab",
@@ -115,6 +122,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-stalebind",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a023fc-7a5e-7f72-8e4b-18d59ffe172f",
+        "created": "2026-08-21"
       },
       {
         "id": "impl-stall",
@@ -10044,9 +10058,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T110221158402-stalebind",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "stalebind",
+        "role": "implement",
+        "member": "impl-stalebind",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:02:23Z",
+        "completed_at": "2026-08-21T11:10:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 501,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 501,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f992afe4565addaddc86e7d4805cecd41f87ad37",
+        "commits": [
+          "2c6ad3e4b8b896d44a168078c31cbaa330be3a94"
+        ],
+        "changed_lines": {
+          "added": 128,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T110221158402-stalebind/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023fc-7a5e-7f72-8e4b-18d59ffe172f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3949568,
+            "cached_input_tokens_cumulative": 3949568,
+            "input_tokens": 4113234,
+            "input_tokens_cumulative": 4113234,
+            "output_tokens": 19611,
+            "output_tokens_cumulative": 19611,
+            "reasoning_output_tokens": 5342,
+            "reasoning_output_tokens_cumulative": 5342
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T105756125941-mergedverify",
+        "plan": "dd-version-resilient-resolution",
+        "section": "",
+        "node": "mergedverify",
+        "role": "test",
+        "member": "verify-a",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T10:57:58Z",
+        "completed_at": "2026-08-21T11:12:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 842,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 842,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "7400ea2ae36b29ec5c5ce889a0651ec78da04960",
+        "commits": [
+          "91dfa9c4c65acce9d3f639991e07d4ac92ef15db"
+        ],
+        "changed_lines": {
+          "added": 181,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Integrated main is green on model generation and on tests/standard_names/ at 6,542 passed / 8 skipped / 0 failed, which is the 6,536 baseline plus exactly the 6 new repair-authority schema tests with nothing removed or degraded, so the row-convergence and schema changes integrate cleanly. It is NOT green on two other gates. The credentialed graph suite exited 1 with 277 passed / 65 skipped / 1 xfailed / 10 failed; 5 of those 10 are this sprint's own open worklist - the two integrity ratchets at 27 over 23 and 9 over 3, the 28 semantic-mirror rows sharing the dual-bound root, and the two electron_source_rate unit disagreements already recorded as integrity remaining-work item 3. The other 5 are adjacent pre-existing findings outside these three plans: 10 SignalEpoch nodes with empty descriptions, HAS_SEGMENT positions disagreeing with current ISN indexes, StandardNameChange.manifest_sha256 present in the graph but undeclared in LinkML, 1 of 984 COCOS-dependent names missing both mirror and HAS_COCOS edge, and one IMASSemanticCluster with no members. Ruff exited 1 on both checks: one B017 in test_axis_catch_and_promote.py and 8 files unformatted, of which 4 are the gitignored generated models and 4 are real test files last touched between 2026-07-21 and 2026-08-11 - all pre-existing and untouched by this session. The node correctly fixed none of it.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T105756125941-mergedverify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bed-630f-7db2-8bae-94e435b3bfbe",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8411648,
+            "cached_input_tokens_cumulative": 97347840,
+            "input_tokens": 8616465,
+            "input_tokens_cumulative": 100115644,
+            "output_tokens": 21028,
+            "output_tokens_cumulative": 200161,
+            "reasoning_output_tokens": 7541,
+            "reasoning_output_tokens_cumulative": 65159
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 226
+    "_version": 231
   }
 }
