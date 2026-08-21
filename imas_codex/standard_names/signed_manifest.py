@@ -7,9 +7,10 @@ applying transaction, locked, and re-hashed before any mutation.
 
 Only closed registries are interpreted here.  Authority artifacts never carry
 Cypher.  The mutation registry contains ``set_properties``, ``delete``,
-``supersede``, ``detach``, and the closed ``delete_relationship`` source-target
-reconciliation program.  The semantic guard registry contains
-last-producing-source, structural-legitimacy, and
+``supersede``, ``detach``, and two closed relationship programs:
+``delete_relationship`` for source-target reconciliation and
+``add_relationship`` for structural-source revival.  The semantic guard
+registry contains last-producing-source, structural-legitimacy, and
 out-of-allowlist-immutability.
 """
 
@@ -57,6 +58,7 @@ _MUTATION_KINDS = frozenset(
         RepairMutationKind.delete_relationship.value,
     }
 )
+_GENERIC_MUTATION_KINDS = _MUTATION_KINDS | {RepairMutationKind.add_relationship.value}
 _LAST_PRODUCER = "last-producing-source"
 _STRUCTURAL_LEGITIMACY = "structural-legitimacy"
 _COLLATERAL_IMMUTABILITY = "out-of-allowlist-immutability"
@@ -241,6 +243,86 @@ def _validate_source_target_reconciliation_program(
         )
 
 
+def _validate_structural_source_revival_program(
+    row_id: str,
+    identity: dict[str, Any],
+    participants: list[dict[str, Any]],
+    mutations: list[dict[str, Any]],
+) -> None:
+    """Validate the sole closed program admitted for relationship creation."""
+    relationship_adds = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.add_relationship.value
+    ]
+    if not relationship_adds:
+        return
+
+    source_id = identity.get("source_id")
+    target_id = identity.get("target_id")
+    source_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardNameSource"
+    ]
+    name_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardName"
+    ]
+    parent_relationships = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.relationship.value
+        and participant["graph_label"] == "HAS_PARENT"
+    ]
+    property_updates = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.set_properties.value
+    ]
+    expected_properties = {
+        "status": "composed",
+        "source_type": "derived",
+        "source_id": target_id,
+        "batch_key": "derived_parent",
+        "produced_sn_id": target_id,
+        "claimed_at": None,
+        "claim_token": None,
+    }
+    expected_relationship = {
+        "relationship_type": "PRODUCED_NAME",
+        "start_id": source_id,
+        "end_id": target_id,
+    }
+    valid = (
+        identity.get("kind") == "source"
+        and isinstance(source_id, str)
+        and source_id == f"derived:{target_id}"
+        and isinstance(target_id, str)
+        and bool(target_id)
+        and len(source_nodes) == 1
+        and str(source_nodes[0]["id"]) == source_id
+        and target_id in {str(participant["id"]) for participant in name_nodes}
+        and len(name_nodes) >= 2
+        and len(parent_relationships) >= 1
+        and len(relationship_adds) == 1
+        and str(relationship_adds[0]["participant_id"]) == target_id
+        and relationship_adds[0].get("arguments") == expected_relationship
+        and len(property_updates) == 1
+        and str(property_updates[0]["participant_id"]) == source_id
+        and property_updates[0].get("arguments", {}).get("properties")
+        == expected_properties
+        and len(mutations) == 2
+    )
+    if not valid:
+        raise SignedManifestAuthorityError(
+            f"repair row {row_id!r} is not a closed structural-source revival program"
+        )
+
+
 def _canonical_bytes(value: object) -> bytes:
     return json.dumps(
         value,
@@ -389,7 +471,7 @@ def _load_authority(
                 raise SignedManifestAuthorityError("repair mutation must be an object")
             _validate_model(RepairMutation, mutation, "repair mutation")
             kind = str(mutation["kind"])
-            if kind not in _MUTATION_KINDS:
+            if kind not in _GENERIC_MUTATION_KINDS:
                 raise SignedManifestAuthorityError(
                     f"unsupported repair mutation kind: {kind}"
                 )
@@ -451,6 +533,9 @@ def _load_authority(
                 f"repair row {row_id!r} is missing guards: {', '.join(missing_guards)}"
             )
         _validate_source_target_reconciliation_program(
+            row_id, identity, participants, mutations
+        )
+        _validate_structural_source_revival_program(
             row_id, identity, participants, mutations
         )
 
@@ -1538,6 +1623,94 @@ def _source_target_reconciliation_refusal(
     return None
 
 
+def _structural_source_revival_refusal(
+    query: _Query, action: dict[str, Any]
+) -> str | None:
+    """Require the complete signed bare-parent closure for explicit revival."""
+    row: _LoadedRow = action["row"]
+    if not any(
+        mutation["kind"] == RepairMutationKind.add_relationship.value
+        for mutation in row.mutations
+    ):
+        return None
+    snapshots = action["participant_snapshots"]
+    source_id = str(row.identity["source_id"])
+    target_id = str(row.identity["target_id"])
+    source_snapshot = snapshots[source_id]
+    target_snapshot = snapshots[target_id]
+    if source_snapshot["properties"].get("status") != "stale":
+        return "structural source status changed from signed stale state"
+    if (
+        source_snapshot["properties"].get("produced_sn_id") is not None
+        or source_snapshot["properties"].get("claimed_at") is not None
+        or source_snapshot["properties"].get("claim_token") is not None
+        or source_snapshot["properties"].get("source_type") != "derived"
+        or source_snapshot["properties"].get("source_id") != target_id
+        or target_snapshot["properties"].get("name_stage") != "accepted"
+        or target_snapshot["properties"].get("status") in {"deprecated", "superseded"}
+    ):
+        return "signed structural source lifecycle does not match revival authority"
+
+    closure = query.query(
+        """
+        MATCH (source:StandardNameSource), (target:StandardName)
+        WHERE elementId(source) = $source_element_id
+          AND elementId(target) = $target_element_id
+        OPTIONAL MATCH (source)-[source_binding:PRODUCED_NAME]->(:StandardName)
+        WITH source, target,
+             [binding IN collect(source_binding)
+              WHERE binding IS NOT NULL | elementId(binding)] AS source_bindings
+        OPTIONAL MATCH (:StandardNameSource)-[producer:PRODUCED_NAME]->(target)
+        WITH source, target, source_bindings,
+             [binding IN collect(producer)
+              WHERE binding IS NOT NULL | elementId(binding)] AS target_producers
+        OPTIONAL MATCH (child:StandardName)-[parent:HAS_PARENT]->(target)
+        WHERE coalesce(child.name_stage, '') <> 'superseded'
+          AND NOT (coalesce(child.status, '') IN ['deprecated', 'superseded'])
+        RETURN source_bindings, target_producers,
+               [item IN collect(CASE WHEN parent IS NULL THEN null ELSE {
+                 relationship_id: elementId(parent),
+                 child_element_id: elementId(child),
+                 child_id: child.id,
+                 target_element_id: elementId(target)
+               } END) WHERE item IS NOT NULL] AS live_children
+        """,
+        source_element_id=source_snapshot["element_id"],
+        target_element_id=target_snapshot["element_id"],
+    )
+    state = closure[0] if closure else {}
+    declared_children = sorted(
+        (
+            str(snapshot["element_id"]),
+            str(snapshot["start_element_id"]),
+            str(snapshot["start_id"]),
+            str(snapshot["end_element_id"]),
+        )
+        for snapshot in snapshots.values()
+        if snapshot.get("relationship_type") == "HAS_PARENT"
+    )
+    current_children = sorted(
+        (
+            str(child["relationship_id"]),
+            str(child["child_element_id"]),
+            str(child["child_id"]),
+            str(child["target_element_id"]),
+        )
+        for child in state.get("live_children") or []
+    )
+    if (
+        state.get("source_bindings")
+        or state.get("target_producers")
+        or not current_children
+        or declared_children != current_children
+        or any(
+            child[3] != str(target_snapshot["element_id"]) for child in current_children
+        )
+    ):
+        return "signed structural source closure does not match bare childful target"
+    return None
+
+
 def _removed_binding_snapshots(action: dict[str, Any]) -> list[dict[str, Any]]:
     row: _LoadedRow = action["row"]
     removed_participant_ids = {
@@ -1862,6 +2035,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
             refusal = _orphan_guard_refusal(query, action)
         if refusal is None:
             refusal = _source_target_reconciliation_refusal(query, action)
+        if refusal is None:
+            refusal = _structural_source_revival_refusal(query, action)
         if refusal is None and _STRUCTURAL_LEGITIMACY in _guard_names(row):
             refusal = _structural_refusal(query, action)
         if refusal is not None:
@@ -2083,6 +2258,22 @@ def _verify_postconditions(
                     raise SignedManifestConflict(
                         "recorded signed-manifest repair lost its postcondition"
                     )
+            elif kind == RepairMutationKind.add_relationship.value:
+                arguments = dict(mutation.get("arguments") or {})
+                state = query.query(
+                    """
+                    MATCH (source:StandardNameSource {id: $source_id})
+                          -[binding:PRODUCED_NAME]->
+                          (target:StandardName {id: $target_id})
+                    RETURN count(binding) AS count
+                    """,
+                    source_id=arguments["start_id"],
+                    target_id=arguments["end_id"],
+                )
+                if not state or int(state[0].get("count") or 0) != 1:
+                    raise SignedManifestConflict(
+                        "recorded signed-manifest repair lost its postcondition"
+                    )
             elif kind == RepairMutationKind.delete.value:
                 present = query.query(
                     "MATCH (node) WHERE node.id = $id RETURN count(node) AS count",
@@ -2290,6 +2481,31 @@ def _lock_participants(query: _Query, preview: _Preview) -> None:
         )
 
 
+def _added_relationship_ids(query: _Query, actions: list[dict[str, Any]]) -> list[str]:
+    pairs = [
+        {
+            "source_id": mutation["arguments"]["start_id"],
+            "target_id": mutation["arguments"]["end_id"],
+        }
+        for action in actions
+        for mutation in action["row"].mutations
+        if mutation["kind"] == RepairMutationKind.add_relationship.value
+    ]
+    if not pairs:
+        return []
+    rows = query.query(
+        """
+        UNWIND $pairs AS pair
+        MATCH (:StandardNameSource {id: pair.source_id})
+              -[binding:PRODUCED_NAME]->
+              (:StandardName {id: pair.target_id})
+        RETURN collect(elementId(binding)) AS ids
+        """,
+        pairs=pairs,
+    )
+    return sorted(str(item) for item in (rows[0].get("ids") or []) if item)
+
+
 def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
     if "stale_action" in action:
         expected = action["stale_action"]
@@ -2355,6 +2571,34 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                 relationship_id=snapshot["element_id"],
                 start_id=snapshot["start_element_id"],
                 end_id=snapshot["end_element_id"],
+            )
+        elif kind == RepairMutationKind.add_relationship.value:
+            arguments = dict(mutation.get("arguments") or {})
+            source_snapshot = snapshots[str(arguments["start_id"])]
+            target_snapshot = snapshots[str(arguments["end_id"])]
+            result = query.query(
+                """
+                MATCH (source:StandardNameSource), (target:StandardName)
+                WHERE elementId(source) = $source_element_id
+                  AND elementId(target) = $target_element_id
+                  AND source.status = 'stale'
+                  AND source.produced_sn_id IS NULL
+                  AND source.claimed_at IS NULL
+                  AND source.claim_token IS NULL
+                  AND target.name_stage = 'accepted'
+                  AND NOT (coalesce(target.status, '') IN
+                    ['deprecated', 'superseded'])
+                  AND NOT EXISTS {
+                    MATCH (source)-[:PRODUCED_NAME]->(:StandardName)
+                  }
+                  AND NOT EXISTS {
+                    MATCH (:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                  }
+                CREATE (source)-[binding:PRODUCED_NAME]->(target)
+                RETURN count(binding) AS changed
+                """,
+                source_element_id=source_snapshot["element_id"],
+                target_element_id=target_snapshot["element_id"],
             )
         elif kind == RepairMutationKind.set_properties.value:
             properties = dict(mutation.get("arguments", {}).get("properties", {}))
@@ -2930,6 +3174,7 @@ def apply_signed_manifest(
                             for snapshot in action["participant_snapshots"].values()
                             if "relationship_type" in snapshot
                         }
+                        | set(_added_relationship_ids(query, locked_preview.admitted))
                     ),
                 )
                 if collateral_after != locked_preview.collateral:

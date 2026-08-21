@@ -270,9 +270,10 @@ def test_non_normalization_child_returns_exact_empty_result(
 
 
 @pytest.mark.graph
-def test_child_without_dimensionless_unit_returns_exact_empty_result(
+def test_null_unit_child_is_outside_unit_bearing_predicate(
     graph: GraphClient,
 ) -> None:
+    """A null-unit child cannot veto the unit-bearing-child predicate."""
     _seed_families(
         graph,
         [
@@ -282,10 +283,14 @@ def test_child_without_dimensionless_unit_returns_exact_empty_result(
             )
         ],
     )
-    before = _parent_states(graph)
 
-    assert repair_normalization_peel_parent_units(graph) == []
-    assert _parent_states(graph) == before
+    assert repair_normalization_peel_parent_units(graph) == ["particle_mass"]
+    assert _parent_states(graph)["particle_mass"] == {
+        "origin": "derived",
+        "unit": None,
+        "validation_issues": [_UNIT_FINDING],
+        "unit_edges": [],
+    }
 
 
 @pytest.mark.graph
