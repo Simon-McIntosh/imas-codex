@@ -1,0 +1,1111 @@
+"""Generic transaction envelope for typed, signed graph-repair authorities.
+
+The authority file chooses rows, mutations, and guards.  Callers supply only
+the file and its two independently trusted digests; they cannot narrow or
+expand the executable cohort.  The graph closure is derived again inside an
+applying transaction, locked, and re-hashed before any mutation.
+
+Only closed registries are interpreted here.  Authority artifacts never carry
+Cypher.  The current mutation registry contains ``delete``, ``supersede``, and
+``detach``.  The semantic guard registry contains last-producing-source,
+structural-legitimacy, and out-of-allowlist-immutability.
+"""
+
+from __future__ import annotations
+
+import hashlib
+import json
+import re
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Protocol
+
+from pydantic import ValidationError
+
+from imas_codex.discovery.base.claims import retry_on_deadlock
+from imas_codex.graph.client import GraphClient
+from imas_codex.graph.models import (
+    RepairAuthorityArtifact,
+    RepairAuthorityDigest,
+    RepairAuthorityRow,
+    RepairGuard,
+    RepairGuardKind,
+    RepairMutation,
+    RepairMutationKind,
+    RepairParticipant,
+    RepairParticipantKind,
+    RepairReceiptPolicy,
+    RepairRowIdentity,
+    RepairSelection,
+)
+
+SIGNED_MANIFEST_SCHEMA = "imas-codex.signed-repair-manifest.v1"
+SIGNED_MANIFEST_RECEIPT_SCHEMA = "imas-codex.signed-repair-receipt.v1"
+
+_SHA256_RE = re.compile(r"[0-9a-f]{64}")
+_NODE_LABELS = frozenset({"StandardName", "StandardNameSource"})
+_RELATIONSHIP_TYPES = frozenset({"PRODUCED_NAME", "HAS_PARENT"})
+_MUTATION_KINDS = frozenset(
+    {
+        RepairMutationKind.delete.value,
+        RepairMutationKind.supersede.value,
+        RepairMutationKind.detach.value,
+    }
+)
+_LAST_PRODUCER = "last-producing-source"
+_STRUCTURAL_LEGITIMACY = "structural-legitimacy"
+_COLLATERAL_IMMUTABILITY = "out-of-allowlist-immutability"
+_GUARD_KINDS = {
+    _LAST_PRODUCER: RepairGuardKind.semantic_authority.value,
+    _STRUCTURAL_LEGITIMACY: RepairGuardKind.semantic_authority.value,
+    _COLLATERAL_IMMUTABILITY: RepairGuardKind.collateral_immutability.value,
+}
+
+
+class SignedManifestAuthorityError(ValueError):
+    """The authority bytes or typed repair program are invalid."""
+
+
+class SignedManifestConflict(RuntimeError):
+    """Current graph authority does not match the authorized manifest."""
+
+
+class _Query(Protocol):
+    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]: ...
+
+
+class _TransactionQuery:
+    def __init__(self, transaction: Any) -> None:
+        self._transaction = transaction
+
+    def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+        return [dict(record) for record in self._transaction.run(cypher, **params)]
+
+
+@dataclass(frozen=True)
+class _LoadedRow:
+    id: str
+    identity: dict[str, Any]
+    participants: tuple[dict[str, Any], ...]
+    mutations: tuple[dict[str, Any], ...]
+    guards: tuple[dict[str, Any], ...]
+    orphan_policy: str
+
+
+@dataclass(frozen=True)
+class _Authority:
+    data: dict[str, Any]
+    operation_id: str
+    rows: tuple[_LoadedRow, ...]
+    receipt_policy: dict[str, Any]
+    file_sha256: str
+    payload_sha256: str
+
+
+@dataclass
+class _Preview:
+    manifest: dict[str, Any]
+    manifest_sha256: str
+    admitted: list[dict[str, Any]]
+    refusals: list[dict[str, str]]
+    collateral: list[dict[str, str]]
+
+
+def _canonical_bytes(value: object) -> bytes:
+    return json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+        default=str,
+    ).encode()
+
+
+def _digest(value: object) -> str:
+    return hashlib.sha256(_canonical_bytes(value)).hexdigest()
+
+
+def signed_payload_sha256(authority: dict[str, Any]) -> str:
+    """Return the canonical digest covered by the authority signature."""
+    payload = {key: value for key, value in authority.items() if key != "signature"}
+    return _digest(payload)
+
+
+def _require_sha256(value: str, role: str) -> None:
+    if _SHA256_RE.fullmatch(value) is None:
+        raise SignedManifestAuthorityError(f"{role} must be a lowercase SHA-256 digest")
+
+
+def _validate_model(model: type[Any], value: dict[str, Any], role: str) -> None:
+    try:
+        model.model_validate(value)
+    except ValidationError as exc:
+        raise SignedManifestAuthorityError(f"invalid {role}: {exc}") from exc
+
+
+def _load_authority(
+    path: str | Path,
+    *,
+    expected_file_sha256: str,
+    expected_payload_sha256: str,
+) -> _Authority:
+    _require_sha256(expected_file_sha256, "authority_file_sha256")
+    _require_sha256(expected_payload_sha256, "authority_payload_sha256")
+    raw = Path(path).read_bytes()
+    file_sha256 = hashlib.sha256(raw).hexdigest()
+    if file_sha256 != expected_file_sha256:
+        raise SignedManifestAuthorityError("authority file SHA-256 mismatch")
+    try:
+        data = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SignedManifestAuthorityError(
+            "authority file is not canonical JSON"
+        ) from exc
+    if not isinstance(data, dict):
+        raise SignedManifestAuthorityError("authority root must be an object")
+    payload_sha256 = signed_payload_sha256(data)
+    if payload_sha256 != expected_payload_sha256:
+        raise SignedManifestAuthorityError("canonical signed-payload SHA-256 mismatch")
+    signature = data.get("signature")
+    if not isinstance(signature, dict) or signature.get("sha256") != payload_sha256:
+        raise SignedManifestAuthorityError(
+            "authority signature does not match canonical signed payload"
+        )
+
+    raw_rows = data.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise SignedManifestAuthorityError("authority rows must be a non-empty array")
+    selection = data.get("selection")
+    if not isinstance(selection, dict):
+        raise SignedManifestAuthorityError("authority selection must be an object")
+    _validate_model(RepairSelection, selection, "authority selection")
+    if selection.get("predicate") != "artifact-rows":
+        raise SignedManifestAuthorityError(
+            "authority selection predicate must be 'artifact-rows'"
+        )
+
+    receipt_policy = data.get("receipt_policy")
+    if not isinstance(receipt_policy, dict):
+        raise SignedManifestAuthorityError("receipt_policy must be an object")
+    _validate_model(RepairReceiptPolicy, receipt_policy, "receipt policy")
+    if receipt_policy.get("expected_count") != "admitted_rows":
+        raise SignedManifestAuthorityError(
+            "receipt_policy expected_count must be 'admitted_rows'"
+        )
+
+    digest_rows = data.get("authority_digests") or []
+    if not isinstance(digest_rows, list):
+        raise SignedManifestAuthorityError("authority_digests must be an array")
+    for digest_row in digest_rows:
+        if not isinstance(digest_row, dict):
+            raise SignedManifestAuthorityError("authority digest must be an object")
+        _validate_model(RepairAuthorityDigest, digest_row, "authority digest")
+
+    loaded_rows: list[_LoadedRow] = []
+    seen_row_ids: set[str] = set()
+    mutated_participants: set[str] = set()
+    for raw_row in raw_rows:
+        if not isinstance(raw_row, dict):
+            raise SignedManifestAuthorityError("repair row must be an object")
+        identity = raw_row.get("identity")
+        participants = raw_row.get("participants")
+        mutations = raw_row.get("mutations")
+        guards = raw_row.get("guards")
+        row_selection = raw_row.get("selection")
+        if not isinstance(identity, dict):
+            raise SignedManifestAuthorityError("repair row identity must be an object")
+        if not isinstance(participants, list) or not participants:
+            raise SignedManifestAuthorityError(
+                "repair row participants must be a non-empty array"
+            )
+        if not isinstance(mutations, list) or not mutations:
+            raise SignedManifestAuthorityError(
+                "repair row mutations must be a non-empty array"
+            )
+        if not isinstance(guards, list) or not guards:
+            raise SignedManifestAuthorityError(
+                "repair row guards must be a non-empty array"
+            )
+        if not isinstance(row_selection, dict):
+            raise SignedManifestAuthorityError("repair row selection must be an object")
+
+        _validate_model(RepairRowIdentity, identity, "repair row identity")
+        _validate_model(RepairSelection, row_selection, "repair row selection")
+        if row_selection != selection:
+            raise SignedManifestAuthorityError(
+                "repair row selection must equal the artifact selection"
+            )
+        for participant in participants:
+            if not isinstance(participant, dict):
+                raise SignedManifestAuthorityError(
+                    "repair participant must be an object"
+                )
+            _validate_model(RepairParticipant, participant, "repair participant")
+            label = str(participant["graph_label"])
+            kind = str(participant["kind"])
+            if kind == RepairParticipantKind.node.value and label not in _NODE_LABELS:
+                raise SignedManifestAuthorityError(
+                    f"unsupported repair participant node label: {label}"
+                )
+            if (
+                kind == RepairParticipantKind.relationship.value
+                and label not in _RELATIONSHIP_TYPES
+            ):
+                raise SignedManifestAuthorityError(
+                    f"unsupported repair participant relationship type: {label}"
+                )
+        for mutation in mutations:
+            if not isinstance(mutation, dict):
+                raise SignedManifestAuthorityError("repair mutation must be an object")
+            _validate_model(RepairMutation, mutation, "repair mutation")
+            kind = str(mutation["kind"])
+            if kind not in _MUTATION_KINDS:
+                raise SignedManifestAuthorityError(
+                    f"unsupported repair mutation kind: {kind}"
+                )
+            participant_id = str(mutation["participant_id"])
+            if participant_id in mutated_participants:
+                raise SignedManifestAuthorityError(
+                    "repair rows target the same mutation participant"
+                )
+            mutated_participants.add(participant_id)
+        for guard in guards:
+            if not isinstance(guard, dict):
+                raise SignedManifestAuthorityError("repair guard must be an object")
+            _validate_model(RepairGuard, guard, "repair guard")
+            implementation = str(guard["implementation"])
+            expected_kind = _GUARD_KINDS.get(implementation)
+            if expected_kind is None:
+                raise SignedManifestAuthorityError(
+                    f"unsupported repair guard implementation: {implementation}"
+                )
+            if str(guard["kind"]) != expected_kind:
+                raise SignedManifestAuthorityError(
+                    f"repair guard kind does not match implementation: {implementation}"
+                )
+
+        row_id = str(raw_row.get("id", ""))
+        if not row_id or row_id in seen_row_ids:
+            raise SignedManifestAuthorityError(
+                "repair row ids must be unique and non-empty"
+            )
+        seen_row_ids.add(row_id)
+        participant_ids = {str(item["id"]) for item in participants}
+        if len(participant_ids) != len(participants):
+            raise SignedManifestAuthorityError(
+                f"repair row {row_id!r} has duplicate participant ids"
+            )
+        if any(
+            str(mutation["participant_id"]) not in participant_ids
+            for mutation in mutations
+        ):
+            raise SignedManifestAuthorityError(
+                f"repair row {row_id!r} mutates an undeclared participant"
+            )
+        mutation_kinds = {str(item["kind"]) for item in mutations}
+        guard_names = {str(item["implementation"]) for item in guards}
+        required_guards = {_COLLATERAL_IMMUTABILITY}
+        if RepairMutationKind.detach.value in mutation_kinds:
+            required_guards.add(_LAST_PRODUCER)
+        if mutation_kinds & {
+            RepairMutationKind.delete.value,
+            RepairMutationKind.supersede.value,
+        }:
+            required_guards.add(_STRUCTURAL_LEGITIMACY)
+        missing_guards = sorted(required_guards - guard_names)
+        if missing_guards:
+            raise SignedManifestAuthorityError(
+                f"repair row {row_id!r} is missing guards: {', '.join(missing_guards)}"
+            )
+
+        projection = {
+            **raw_row,
+            "identity": str(identity["id"]),
+            "participants": [str(item["id"]) for item in participants],
+            "selection": str(row_selection["id"]),
+            "mutations": [str(item["id"]) for item in mutations],
+            "guards": [str(item["id"]) for item in guards],
+        }
+        _validate_model(RepairAuthorityRow, projection, "repair authority row")
+        loaded_rows.append(
+            _LoadedRow(
+                id=row_id,
+                identity=dict(identity),
+                participants=tuple(dict(item) for item in participants),
+                mutations=tuple(
+                    sorted(
+                        (dict(item) for item in mutations),
+                        key=lambda item: (int(item["order"]), str(item["id"])),
+                    )
+                ),
+                guards=tuple(dict(item) for item in guards),
+                orphan_policy=str(raw_row["orphan_policy"]),
+            )
+        )
+
+    repair_rows = data.get("repair_rows")
+    if repair_rows is not None and sorted(repair_rows) != sorted(seen_row_ids):
+        raise SignedManifestAuthorityError(
+            "repair_rows projection does not match authority rows"
+        )
+    operation_id = data.get("operation_id")
+    if not isinstance(operation_id, str) or not operation_id.strip():
+        raise SignedManifestAuthorityError("operation_id must be non-empty")
+    artifact_projection = {
+        **data,
+        "authority_digests": [str(item["id"]) for item in digest_rows] or None,
+        "selection": str(selection["id"]),
+        "repair_rows": sorted(seen_row_ids),
+        "receipt_policy": str(receipt_policy["id"]),
+    }
+    _validate_model(RepairAuthorityArtifact, artifact_projection, "repair authority")
+    return _Authority(
+        data=data,
+        operation_id=operation_id,
+        rows=tuple(sorted(loaded_rows, key=lambda row: row.id)),
+        receipt_policy=dict(receipt_policy),
+        file_sha256=file_sha256,
+        payload_sha256=payload_sha256,
+    )
+
+
+def _participant_snapshot(
+    query: _Query, participant: dict[str, Any]
+) -> dict[str, Any] | None:
+    kind = str(participant["kind"])
+    participant_id = str(participant["id"])
+    graph_label = str(participant["graph_label"])
+    if kind == RepairParticipantKind.node.value:
+        rows = query.query(
+            """
+            MATCH (node)
+            WHERE node.id = $participant_id AND $graph_label IN labels(node)
+            RETURN elementId(node) AS element_id,
+                   labels(node) AS labels,
+                   properties(node) AS properties
+            """,
+            participant_id=participant_id,
+            graph_label=graph_label,
+        )
+    else:
+        rows = query.query(
+            """
+            MATCH (start)-[relationship]->(end)
+            WHERE elementId(relationship) = $participant_id
+              AND type(relationship) = $graph_label
+            RETURN elementId(relationship) AS element_id,
+                   type(relationship) AS relationship_type,
+                   properties(relationship) AS properties,
+                   elementId(start) AS start_element_id,
+                   labels(start) AS start_labels,
+                   start.id AS start_id,
+                   start.status AS start_status,
+                   elementId(end) AS end_element_id,
+                   labels(end) AS end_labels,
+                   end.id AS end_id
+            """,
+            participant_id=participant_id,
+            graph_label=graph_label,
+        )
+    if len(rows) != 1:
+        return None
+    return dict(rows[0])
+
+
+def _collateral_snapshot(
+    query: _Query,
+    *,
+    excluded_node_ids: list[str],
+    excluded_relationship_ids: list[str],
+) -> list[dict[str, str]]:
+    nodes = query.query(
+        """
+        MATCH (node)
+        WHERE any(label IN labels(node) WHERE label IN $labels)
+          AND NOT (elementId(node) IN $excluded_ids)
+        RETURN elementId(node) AS element_id,
+               labels(node) AS labels,
+               properties(node) AS properties
+        ORDER BY element_id
+        """,
+        labels=sorted(_NODE_LABELS),
+        excluded_ids=excluded_node_ids,
+    )
+    relationships = query.query(
+        """
+        MATCH (start)-[relationship]->(end)
+        WHERE type(relationship) IN $relationship_types
+          AND NOT (elementId(relationship) IN $excluded_ids)
+        RETURN elementId(relationship) AS element_id,
+               type(relationship) AS relationship_type,
+               properties(relationship) AS properties,
+               elementId(start) AS start_element_id,
+               elementId(end) AS end_element_id
+        ORDER BY element_id
+        """,
+        relationship_types=sorted(_RELATIONSHIP_TYPES),
+        excluded_ids=excluded_relationship_ids,
+    )
+    digests = [
+        {"key": f"node:{row['element_id']}", "sha256": _digest(row)} for row in nodes
+    ] + [
+        {"key": f"relationship:{row['element_id']}", "sha256": _digest(row)}
+        for row in relationships
+    ]
+    return sorted(digests, key=lambda row: row["key"])
+
+
+def _guard_names(row: _LoadedRow) -> set[str]:
+    return {str(guard["implementation"]) for guard in row.guards}
+
+
+def _target_snapshot(action: dict[str, Any]) -> dict[str, Any] | None:
+    relationship = next(
+        (
+            snapshot
+            for snapshot in action["participant_snapshots"].values()
+            if snapshot.get("relationship_type") == "PRODUCED_NAME"
+        ),
+        None,
+    )
+    if relationship is not None:
+        return {
+            "element_id": relationship["end_element_id"],
+            "id": relationship.get("end_id"),
+        }
+    mutation_ids = {
+        str(mutation["participant_id"]) for mutation in action["row"].mutations
+    }
+    return next(
+        (
+            {
+                "element_id": snapshot["element_id"],
+                "id": snapshot["properties"].get("id"),
+            }
+            for participant_id, snapshot in action["participant_snapshots"].items()
+            if participant_id in mutation_ids
+            and "StandardName" in snapshot.get("labels", [])
+        ),
+        None,
+    )
+
+
+def _structural_refusal(query: _Query, action: dict[str, Any]) -> str | None:
+    target = _target_snapshot(action)
+    if target is None:
+        return "structural target does not exist"
+    rows = query.query(
+        """
+        MATCH (target:StandardName)
+        WHERE elementId(target) = $target_element_id
+        RETURN COUNT {
+          (child:StandardName)-[:HAS_PARENT]->(target)
+          WHERE coalesce(child.name_stage, '') <> 'superseded'
+            AND coalesce(child.status, '') <> 'superseded'
+        } AS live_children
+        """,
+        target_element_id=target["element_id"],
+    )
+    if not rows or int(rows[0].get("live_children") or 0) > 0:
+        return "target has a live structural child"
+    return None
+
+
+def _producer_state(query: _Query, target_element_id: str) -> dict[str, Any]:
+    rows = query.query(
+        """
+        MATCH (target:StandardName)
+        WHERE elementId(target) = $target_element_id
+        OPTIONAL MATCH (source:StandardNameSource)-[binding:PRODUCED_NAME]->(target)
+        WITH target, source, binding
+        ORDER BY source.id, elementId(binding)
+        WITH target, collect(CASE WHEN binding IS NULL THEN null ELSE {
+          relationship_id: elementId(binding),
+          live: coalesce(source.status, '') <> 'stale'
+        } END) AS producers
+        RETURN [producer IN producers WHERE producer IS NOT NULL] AS producers,
+               COUNT {
+                 (child:StandardName)-[:HAS_PARENT]->(target)
+                 WHERE coalesce(child.name_stage, '') <> 'superseded'
+                   AND coalesce(child.status, '') <> 'superseded'
+               } AS live_children
+        """,
+        target_element_id=target_element_id,
+    )
+    return dict(rows[0]) if rows else {"producers": [], "live_children": 0}
+
+
+def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Preview:
+    candidates: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for row in authority.rows:
+        snapshots: dict[str, dict[str, Any]] = {}
+        refusal: str | None = None
+        for participant in row.participants:
+            participant_id = str(participant["id"])
+            snapshot = _participant_snapshot(query, participant)
+            if snapshot is None:
+                refusal = f"participant does not exist: {participant_id}"
+                break
+            signature = participant.get("signature_sha256")
+            if signature is not None and _digest(snapshot) != signature:
+                refusal = f"participant signature mismatch: {participant_id}"
+                break
+            snapshots[participant_id] = snapshot
+        action = {
+            "row": row,
+            "participant_snapshots": snapshots,
+            "participant_digests": [
+                {"participant_id": participant_id, "sha256": _digest(snapshot)}
+                for participant_id, snapshot in sorted(snapshots.items())
+            ],
+        }
+        if refusal is None and _STRUCTURAL_LEGITIMACY in _guard_names(row):
+            refusal = _structural_refusal(query, action)
+        if refusal is not None:
+            refusals.append({"row_id": row.id, "reason": refusal})
+        else:
+            candidates.append(action)
+
+    admitted: list[dict[str, Any]] = []
+    removed_relationship_ids: set[str] = set()
+    producer_cache: dict[str, dict[str, Any]] = {}
+    for action in candidates:
+        row = action["row"]
+        if _LAST_PRODUCER in _guard_names(row):
+            target = _target_snapshot(action)
+            relationship = next(
+                snapshot
+                for snapshot in action["participant_snapshots"].values()
+                if snapshot.get("relationship_type") == "PRODUCED_NAME"
+            )
+            target_element_id = str(target["element_id"])
+            producer_state = producer_cache.setdefault(
+                target_element_id, _producer_state(query, target_element_id)
+            )
+            candidate_relationship_id = str(relationship["element_id"])
+            remaining_live = [
+                producer
+                for producer in producer_state["producers"]
+                if producer.get("live")
+                and producer["relationship_id"] not in removed_relationship_ids
+                and producer["relationship_id"] != candidate_relationship_id
+            ]
+            if not remaining_live and int(producer_state.get("live_children") or 0) < 1:
+                refusals.append(
+                    {
+                        "row_id": row.id,
+                        "reason": "target would lose its last producing source",
+                    }
+                )
+                continue
+            removed_relationship_ids.add(candidate_relationship_id)
+        admitted.append(action)
+
+    admitted_node_ids = sorted(
+        {
+            snapshot["element_id"]
+            for action in admitted
+            for snapshot in action["participant_snapshots"].values()
+            if "labels" in snapshot
+        }
+    )
+    admitted_relationship_ids = sorted(
+        {
+            snapshot["element_id"]
+            for action in admitted
+            for snapshot in action["participant_snapshots"].values()
+            if "relationship_type" in snapshot
+        }
+    )
+    collateral = _collateral_snapshot(
+        query,
+        excluded_node_ids=admitted_node_ids,
+        excluded_relationship_ids=admitted_relationship_ids,
+    )
+    manifest_rows = [
+        {
+            "row_id": action["row"].id,
+            "identity": action["row"].identity,
+            "mutation_kinds": [
+                str(mutation["kind"]) for mutation in action["row"].mutations
+            ],
+            "participant_digests": action["participant_digests"],
+            "closure_sha256": _digest(action["participant_digests"]),
+        }
+        for action in admitted
+    ]
+    refusals.sort(key=lambda item: (item["row_id"], item["reason"]))
+    manifest = {
+        "schema": SIGNED_MANIFEST_SCHEMA,
+        "operation_id": authority.operation_id,
+        "reason": reason,
+        "authority_file_sha256": authority.file_sha256,
+        "authority_payload_sha256": authority.payload_sha256,
+        "rows": manifest_rows,
+        "admitted_row_ids": [action["row"].id for action in admitted],
+        "refusals": refusals,
+        "collateral_rows": collateral,
+        "collateral_sha256": _digest(collateral),
+    }
+    return _Preview(
+        manifest=manifest,
+        manifest_sha256=_digest(manifest),
+        admitted=admitted,
+        refusals=refusals,
+        collateral=collateral,
+    )
+
+
+def _change_id(manifest_sha256: str, row_id: str) -> str:
+    row_digest = hashlib.sha256(row_id.encode()).hexdigest()[:24]
+    return f"sn-change:signed-manifest:{manifest_sha256}:{row_digest}"
+
+
+def _receipt_rows(
+    query: _Query, operation: str, manifest_sha256: str
+) -> list[dict[str, Any]]:
+    return query.query(
+        """
+        MATCH (change:StandardNameChange {
+          operation: $operation,
+          manifest_sha256: $manifest_sha256
+        })
+        RETURN properties(change) AS properties
+        ORDER BY change.row_id
+        """,
+        operation=operation,
+        manifest_sha256=manifest_sha256,
+    )
+
+
+def _verify_postconditions(
+    query: _Query, authority: _Authority, row_ids: list[str]
+) -> None:
+    by_id = {row.id: row for row in authority.rows}
+    for row_id in row_ids:
+        row = by_id[row_id]
+        for mutation in row.mutations:
+            participant = next(
+                item
+                for item in row.participants
+                if item["id"] == mutation["participant_id"]
+            )
+            kind = str(mutation["kind"])
+            if kind == RepairMutationKind.detach.value:
+                present = query.query(
+                    """
+                    MATCH ()-[relationship]->()
+                    WHERE elementId(relationship) = $element_id
+                    RETURN count(relationship) AS count
+                    """,
+                    element_id=participant["id"],
+                )[0]["count"]
+                if int(present) != 0:
+                    raise SignedManifestConflict(
+                        "recorded signed-manifest repair lost its postcondition"
+                    )
+            elif kind == RepairMutationKind.delete.value:
+                present = query.query(
+                    "MATCH (node) WHERE node.id = $id RETURN count(node) AS count",
+                    id=participant["id"],
+                )[0]["count"]
+                if int(present) != 0:
+                    raise SignedManifestConflict(
+                        "recorded signed-manifest repair lost its postcondition"
+                    )
+            else:
+                state = query.query(
+                    """
+                    MATCH (node:StandardName {id: $id})
+                    RETURN node.name_stage AS name_stage, node.status AS status
+                    """,
+                    id=participant["id"],
+                )
+                if not state or state[0] != {
+                    "name_stage": "superseded",
+                    "status": "superseded",
+                }:
+                    raise SignedManifestConflict(
+                        "recorded signed-manifest repair lost its postcondition"
+                    )
+
+
+def _replay(
+    query: _Query, authority: _Authority, manifest_sha256: str
+) -> dict[str, Any] | None:
+    operation = str(authority.receipt_policy["operation"])
+    receipts = _receipt_rows(query, operation, manifest_sha256)
+    if not receipts:
+        return None
+    properties = [dict(row["properties"]) for row in receipts]
+    admitted_ids = sorted(properties[0].get("cohort_admitted_ids") or [])
+    expected_ids = sorted(item.get("row_id") for item in properties)
+    if (
+        not admitted_ids
+        or expected_ids != admitted_ids
+        or len(properties) != len(admitted_ids)
+        or any(
+            sorted(item.get("cohort_admitted_ids") or []) != admitted_ids
+            or item.get("authority_file_sha256") != authority.file_sha256
+            or item.get("authority_payload_sha256") != authority.payload_sha256
+            for item in properties
+        )
+    ):
+        raise SignedManifestConflict("signed-manifest receipt cohort is incomplete")
+    _verify_postconditions(query, authority, admitted_ids)
+    return {
+        "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
+        "outcome": "already_applied",
+        "changed": 0,
+        "persistent_writes": 0,
+        "receipt_rows": len(properties),
+        "manifest_sha256": manifest_sha256,
+        "admitted_row_ids": admitted_ids,
+    }
+
+
+def _lock_participants(query: _Query, preview: _Preview) -> None:
+    node_ids = sorted(
+        {
+            snapshot["element_id"]
+            for action in preview.admitted
+            for snapshot in action["participant_snapshots"].values()
+            if "labels" in snapshot
+        }
+    )
+    relationship_ids = sorted(
+        {
+            snapshot["element_id"]
+            for action in preview.admitted
+            for snapshot in action["participant_snapshots"].values()
+            if "relationship_type" in snapshot
+        }
+    )
+    locked_nodes = query.query(
+        """
+        UNWIND $element_ids AS expected_id
+        MATCH (node) WHERE elementId(node) = expected_id
+        SET node += {}
+        RETURN collect(elementId(node)) AS ids
+        """,
+        element_ids=node_ids,
+    )[0]["ids"]
+    locked_relationships = query.query(
+        """
+        UNWIND $element_ids AS expected_id
+        MATCH ()-[relationship]->()
+        WHERE elementId(relationship) = expected_id
+        SET relationship += {}
+        RETURN collect(elementId(relationship)) AS ids
+        """,
+        element_ids=relationship_ids,
+    )[0]["ids"]
+    if (
+        sorted(locked_nodes) != node_ids
+        or sorted(locked_relationships) != relationship_ids
+    ):
+        raise SignedManifestConflict(
+            "signed-manifest participants changed while locking"
+        )
+
+
+def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
+    changed = 0
+    row: _LoadedRow = action["row"]
+    snapshots = action["participant_snapshots"]
+    for mutation in row.mutations:
+        participant_id = str(mutation["participant_id"])
+        snapshot = snapshots[participant_id]
+        kind = str(mutation["kind"])
+        if kind == RepairMutationKind.detach.value:
+            result = query.query(
+                """
+                MATCH (start)-[relationship:PRODUCED_NAME]->(end)
+                WHERE elementId(relationship) = $relationship_id
+                  AND elementId(start) = $start_id
+                  AND elementId(end) = $end_id
+                DELETE relationship
+                RETURN count(*) AS changed
+                """,
+                relationship_id=snapshot["element_id"],
+                start_id=snapshot["start_element_id"],
+                end_id=snapshot["end_element_id"],
+            )
+        elif kind == RepairMutationKind.supersede.value:
+            result = query.query(
+                """
+                MATCH (target:StandardName)
+                WHERE elementId(target) = $element_id
+                SET target.superseded_from_stage = coalesce(
+                      target.superseded_from_stage, target.name_stage),
+                    target.name_stage = 'superseded',
+                    target.status = 'superseded',
+                    target.source_paths = [],
+                    target.claimed_at = null,
+                    target.claim_token = null
+                RETURN count(target) AS changed
+                """,
+                element_id=snapshot["element_id"],
+            )
+        else:
+            result = query.query(
+                """
+                MATCH (target)
+                WHERE elementId(target) = $element_id
+                  AND NOT (target)--()
+                DELETE target
+                RETURN count(*) AS changed
+                """,
+                element_id=snapshot["element_id"],
+            )
+        mutation_changed = int(result[0].get("changed") or 0) if result else 0
+        if mutation_changed != 1:
+            raise SignedManifestConflict(
+                f"signed-manifest compare-and-set changed for row {row.id}"
+            )
+        changed += mutation_changed
+    return changed
+
+
+def _write_receipts(
+    query: _Query,
+    authority: _Authority,
+    preview: _Preview,
+    *,
+    reason: str,
+    run_id: str | None,
+) -> list[str]:
+    admitted_ids = [action["row"].id for action in preview.admitted]
+    rows: list[dict[str, Any]] = []
+    for action in preview.admitted:
+        row: _LoadedRow = action["row"]
+        owner_element_id = next(
+            (
+                snapshot["element_id"]
+                for participant_id, snapshot in action["participant_snapshots"].items()
+                if "labels" in snapshot
+                and not any(
+                    mutation["participant_id"] == participant_id
+                    and mutation["kind"] == RepairMutationKind.delete.value
+                    for mutation in row.mutations
+                )
+            ),
+            None,
+        )
+        rows.append(
+            {
+                "change_id": _change_id(preview.manifest_sha256, row.id),
+                "row_id": row.id,
+                "from_name": row.identity.get("target_id")
+                or row.identity.get("source_id")
+                or row.id,
+                "owner_element_id": owner_element_id,
+                "mutation_kinds": [str(item["kind"]) for item in row.mutations],
+            }
+        )
+    receipts = query.query(
+        """
+        UNWIND $rows AS row
+        CREATE (change:StandardNameChange {
+          id: row.change_id,
+          from_name: row.from_name,
+          to_name: row.from_name,
+          operation: $operation,
+          reason: $reason,
+          origin: 'signed_manifest',
+          run_id: $run_id,
+          changed_at: datetime(),
+          internal: true,
+          row_id: row.row_id,
+          mutation_kinds: row.mutation_kinds,
+          manifest_sha256: $manifest_sha256,
+          authority_file_sha256: $authority_file_sha256,
+          authority_payload_sha256: $authority_payload_sha256,
+          cohort_admitted_ids: $admitted_ids
+        })
+        WITH row, change
+        OPTIONAL MATCH (owner)
+        WHERE elementId(owner) = row.owner_element_id
+        FOREACH (_ IN CASE WHEN owner IS NULL THEN [] ELSE [1] END |
+          MERGE (owner)-[:HAS_INTERNAL_CHANGE]->(change))
+        RETURN change.id AS change_id
+        ORDER BY change.row_id
+        """,
+        rows=rows,
+        operation=authority.receipt_policy["operation"],
+        reason=reason,
+        run_id=run_id,
+        manifest_sha256=preview.manifest_sha256,
+        authority_file_sha256=authority.file_sha256,
+        authority_payload_sha256=authority.payload_sha256,
+        admitted_ids=admitted_ids,
+    )
+    return [str(row["change_id"]) for row in receipts]
+
+
+@retry_on_deadlock()
+def apply_signed_manifest(
+    authority_path: str | Path,
+    *,
+    authority_file_sha256: str,
+    authority_payload_sha256: str,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Preview or atomically apply the complete row set in a signed authority.
+
+    ``manifest_sha256`` is the authorization returned by a prior preview.  It
+    authorizes only the hash: participant closure, collateral rows, and counter
+    baselines are always read again inside this invocation.
+    """
+    if not reason.strip():
+        raise ValueError("signed-manifest apply requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("signed-manifest apply requires manifest_sha256")
+    if manifest_sha256 is not None:
+        _require_sha256(manifest_sha256, "manifest_sha256")
+    authority = _load_authority(
+        authority_path,
+        expected_file_sha256=authority_file_sha256,
+        expected_payload_sha256=authority_payload_sha256,
+    )
+    own_client = gc is None
+    client: Any = GraphClient() if own_client else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay = _replay(query, authority, str(manifest_sha256))
+                    if replay is not None:
+                        transaction.rollback()
+                        return replay
+
+                preview = _build_preview(query, authority, reason)
+                counts = {
+                    "authority_rows": len(authority.rows),
+                    "admitted": len(preview.admitted),
+                    "refused": len(preview.refusals),
+                }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
+                        "outcome": "would_apply" if preview.admitted else "refused",
+                        "changed": 0,
+                        "would_change": len(preview.admitted),
+                        "counts": counts,
+                        "refusals": preview.refusals,
+                        "manifest": preview.manifest,
+                        "manifest_sha256": preview.manifest_sha256,
+                        "authority_file_sha256": authority.file_sha256,
+                        "authority_payload_sha256": authority.payload_sha256,
+                    }
+                if preview.manifest_sha256 != manifest_sha256:
+                    raise SignedManifestConflict(
+                        "fresh signed-manifest closure does not match authorized SHA-256"
+                    )
+                if not preview.admitted:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "changed": 0,
+                        "counts": counts,
+                        "refusals": preview.refusals,
+                        "manifest_sha256": preview.manifest_sha256,
+                    }
+
+                _lock_participants(query, preview)
+                locked_preview = _build_preview(query, authority, reason)
+                if locked_preview.manifest_sha256 != preview.manifest_sha256:
+                    raise SignedManifestConflict(
+                        "signed-manifest closure changed while locking"
+                    )
+                counters_before = query.query(
+                    """
+                    RETURN COUNT { (:StandardNameChange) } AS changes,
+                           COUNT { (:LLMCost) } AS llm_costs
+                    """
+                )[0]
+                mutation_count = sum(
+                    _apply_mutation(query, action) for action in locked_preview.admitted
+                )
+                change_ids = _write_receipts(
+                    query,
+                    authority,
+                    locked_preview,
+                    reason=reason,
+                    run_id=run_id,
+                )
+                if len(change_ids) != len(locked_preview.admitted):
+                    raise SignedManifestConflict(
+                        "signed-manifest receipt cardinality changed"
+                    )
+                _verify_postconditions(
+                    query,
+                    authority,
+                    [action["row"].id for action in locked_preview.admitted],
+                )
+                collateral_after = _collateral_snapshot(
+                    query,
+                    excluded_node_ids=sorted(
+                        {
+                            snapshot["element_id"]
+                            for action in locked_preview.admitted
+                            for snapshot in action["participant_snapshots"].values()
+                            if "labels" in snapshot
+                        }
+                    ),
+                    excluded_relationship_ids=sorted(
+                        {
+                            snapshot["element_id"]
+                            for action in locked_preview.admitted
+                            for snapshot in action["participant_snapshots"].values()
+                            if "relationship_type" in snapshot
+                        }
+                    ),
+                )
+                if collateral_after != locked_preview.collateral:
+                    raise SignedManifestConflict("out-of-allowlist closure changed")
+                counters_after = query.query(
+                    """
+                    RETURN COUNT { (:StandardNameChange) } AS changes,
+                           COUNT { (:LLMCost) } AS llm_costs
+                    """
+                )[0]
+                if (
+                    int(counters_after["changes"]) - int(counters_before["changes"])
+                    != len(change_ids)
+                    or counters_after["llm_costs"] != counters_before["llm_costs"]
+                ):
+                    raise SignedManifestConflict(
+                        "signed-manifest counter baseline changed unexpectedly"
+                    )
+                transaction.commit()
+                return {
+                    "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "changed": len(locked_preview.admitted),
+                    "mutations": mutation_count,
+                    "receipt_rows": len(change_ids),
+                    "persistent_writes": mutation_count + len(change_ids),
+                    "counts": counts,
+                    "refusals": locked_preview.refusals,
+                    "manifest_sha256": locked_preview.manifest_sha256,
+                    "authority_file_sha256": authority.file_sha256,
+                    "authority_payload_sha256": authority.payload_sha256,
+                    "change_ids": change_ids,
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own_client:
+            client.close()
