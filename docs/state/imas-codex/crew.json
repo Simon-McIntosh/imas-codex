@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T17:18:53",
+  "updated": "2026-08-21T17:35:23",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16,6 +16,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a024dd-bd26-7910-873f-2f35ae45ea34",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-admissionstage",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -36,7 +43,7 @@
         "id": "impl-auditfix",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a024e7-8cd6-7923-9c9a-517808ed65b8",
         "created": "2026-08-21"
       },
       {
@@ -12259,9 +12266,61 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T151906743136-auditfix",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "auditfix",
+        "role": "implement",
+        "member": "impl-auditfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:19:09Z",
+        "completed_at": "2026-08-21T15:34:55Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 946,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 946,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "bf400098edc5d4d2ffae72b1807b8f9ac9f3ea8c",
+        "commits": [
+          "c86b3ae4"
+        ],
+        "changed_lines": {
+          "added": 130,
+          "removed": 15,
+          "files": 2
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T151906743136-auditfix/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024e7-8cd6-7923-9c9a-517808ed65b8",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 317
+    "_version": 320
   }
 }
