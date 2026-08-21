@@ -685,13 +685,22 @@ def get_extraction_candidates_dd(
         from imas_codex.settings import get_dd_version
         from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 
-        return [
-            {**row, **context.as_pipeline_item()}
-            for row, context in zip(
-                results,
-                resolve_dd_rows(results, dd_version=get_dd_version()),
-                strict=True,
+        batch = resolve_dd_rows(results, dd_version=get_dd_version())
+        if batch.refusals:
+            logger.warning(
+                "Extraction candidates omitted %d changed DD fields: %s",
+                len(batch.refusals),
+                ", ".join(
+                    f"{refusal.path}:{refusal.field.value}"
+                    for refusal in batch.refusals
+                ),
             )
+        return [
+            {
+                **results[resolved.row_index],
+                **resolved.context.as_pipeline_item(),
+            }
+            for resolved in batch.resolved
         ]
 
 

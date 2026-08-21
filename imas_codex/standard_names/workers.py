@@ -8674,7 +8674,7 @@ def _enrich_for_docs_gen(
             from imas_codex.settings import get_dd_version
             from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 
-            contexts = resolve_dd_rows(
+            batch = resolve_dd_rows(
                 [
                     {
                         "path": node["id"],
@@ -8685,6 +8685,15 @@ def _enrich_for_docs_gen(
                 ],
                 dd_version=get_dd_version(),
             )
+            if batch.refusals:
+                logger.warning(
+                    "Documentation context omitted %d changed DD fields: %s",
+                    len(batch.refusals),
+                    ", ".join(
+                        f"{refusal.path}:{refusal.field.value}"
+                        for refusal in batch.refusals
+                    ),
+                )
             item["dd_source_docs"] = [
                 {
                     "id": n["id"],
@@ -8705,7 +8714,9 @@ def _enrich_for_docs_gen(
                     ),
                     "dd_resolution_manifest_digest": context.manifest_digest,
                 }
-                for n, context in zip(dd_nodes[:5], contexts[:5], strict=True)
+                for resolved in batch.resolved
+                if resolved.row_index < 5
+                for n, context in [(dd_nodes[resolved.row_index], resolved.context)]
             ]
             aliases = [n["alias"] for n in dd_nodes if n.get("alias")]
             if aliases:
@@ -10207,10 +10218,22 @@ async def process_refine_docs_batch(
                 from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 
                 raw_rows = [dict(row) for row in dd_rows]
-                contexts = resolve_dd_rows(raw_rows, dd_version=get_dd_version())
+                batch = resolve_dd_rows(raw_rows, dd_version=get_dd_version())
+                if batch.refusals:
+                    logger.warning(
+                        "Refine context omitted %d changed DD fields: %s",
+                        len(batch.refusals),
+                        ", ".join(
+                            f"{refusal.path}:{refusal.field.value}"
+                            for refusal in batch.refusals
+                        ),
+                    )
                 prompt_context["dd_paths"] = [
-                    {**row, **context.as_pipeline_item()}
-                    for row, context in zip(raw_rows, contexts, strict=True)
+                    {
+                        **raw_rows[resolved.row_index],
+                        **resolved.context.as_pipeline_item(),
+                    }
+                    for resolved in batch.resolved
                 ]
         except DDResolutionError:
             raise

@@ -202,14 +202,25 @@ async def _seed_explicit_paths(
 
     from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 
-    contexts = resolve_dd_rows(
+    batch = resolve_dd_rows(
         items,
         dd_version=str(dd_meta.get("dd_version") or dd_version),
     )
-    for item, context in zip(items, contexts, strict=True):
-        item.update(context.as_pipeline_item())
+    if batch.refusals:
+        logger.warning(
+            "Explicit source seeding omitted %d changed DD fields: %s",
+            len(batch.refusals),
+            ", ".join(
+                f"{refusal.path}:{refusal.field.value}" for refusal in batch.refusals
+            ),
+        )
+    resolved_items = []
+    for resolved in batch.resolved:
+        item = items[resolved.row_index]
+        item.update(resolved.context.as_pipeline_item())
+        resolved_items.append(item)
 
-    return items
+    return resolved_items
 
 
 async def _seed_from_source(state: Any) -> list[dict[str, Any]]:
