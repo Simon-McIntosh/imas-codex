@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T00:16:47",
+  "updated": "2026-08-22T00:26:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -13515,9 +13515,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T221709444947-dualapplyrun",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73d",
+        "node": "dualapplyrun",
+        "role": "implement",
+        "member": "impl-dualapplyrun",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T22:17:13Z",
+        "completed_at": "2026-08-21T22:25:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 511,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 511,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "bf19a91e97a80550c3f778cf1e447b54472031ef",
+        "commits": [
+          "764bb8ca"
+        ],
+        "changed_lines": {
+          "added": 107,
+          "removed": 48,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T221709444947-dualapplyrun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02666-516b-72c1-af44-634140698d50",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4519168,
+            "cached_input_tokens_cumulative": 4519168,
+            "input_tokens": 4693931,
+            "input_tokens_cumulative": 4693931,
+            "output_tokens": 18931,
+            "output_tokens_cumulative": 18931,
+            "reasoning_output_tokens": 6364,
+            "reasoning_output_tokens_cumulative": 6364
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 353
+    "_version": 354
   }
 }
