@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -137,22 +137,22 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="version-label-semantics" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="version-label-semantics" data-choice="provenance" data-by="reckon-ship" data-when="2026-08-21T10:25:00+00:00">
     <p class="r-dec-q">What does a recorded dictionary version on a source mean?</p>
     <p class="r-dec-ctx">94% of sources are labelled 4.1.0 while the graph serves 4.1.1. Either the label asserts validity, in which case almost every source is invalid, or it records extraction provenance, in which case validity must be decided by content.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="provenance">Extraction provenance; validity decided by content convergence (Recommended, and already how the working code path behaves)</button>
+      <button class="r-opt chosen" data-value="provenance">Extraction provenance; validity decided by content convergence (Recommended, and already how the working code path behaves)</button>
       <button class="r-opt" data-value="validity-claim">A validity claim, requiring a bulk re-stamp at every bump</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Recorded rather than freshly chosen: the plan already determines it, and a worker must dispatch against locked state. §3 item 1 states the design outright — a recorded dictionary version says when a source was extracted, not which versions it is valid for; §5 explicitly rejects the bulk re-stamp the validity-claim reading would demand; and the working code path already behaves this way. Confirmed against the tree on 2026-08-21: dd_resolutions.py:1157 _read_graph_field implements the observed/effective convergence test, while resolve_dd_row at line 1316 compares labels by equality with no content test at all.</p>
     </div>
-<div class="r-dec" data-key="refusal-granularity" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="refusal-granularity" data-choice="per-leaf" data-by="reckon-ship" data-when="2026-08-21T10:25:00+00:00">
     <p class="r-dec-q">When one leaf has genuinely changed, what should a scoped run do?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="per-leaf">Refuse that leaf, mark it for review, complete the rest of the run (Recommended)</button>
+      <button class="r-opt chosen" data-value="per-leaf">Refuse that leaf, mark it for review, complete the rest of the run (Recommended)</button>
       <button class="r-opt" data-value="abort-run">Abort the run, as today</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Recorded from §3 item 3 — refusal is scoped to the leaf that changed, never to the run — and from the sprint&#x27;s done_when for this item. The defect locus is confirmed in code: resolve_dd_rows at dd_resolutions.py:1340 is a list comprehension over resolve_dd_row, so the first raise aborts the entire batch, which is exactly how one stale label stopped a scoped run over 42 paths. Fail-closed behaviour for genuine content change is untouched; this narrows when it fires, never whether.</p>
     </div>
 </section>
 

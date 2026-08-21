@@ -22,8 +22,8 @@
   <title>One Signed Repair Operator | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-20">
-<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="3">
 </head>
 <body>
   <main class="plan-doc">
@@ -43,6 +43,7 @@
     </p>
     <p>
       The result of repeating that pattern is visible in one file.
+      <code>graph_ops.py</code> runs to <strong>25,912
       lines</strong> and holds 22 <code>apply_*</code> / <code>repair_*</code> /
       <code>retire_*</code> / <code>reconcile_*</code> functions, of which
       <strong>ten consume a signed authority artifact</strong> and are this plan's
@@ -250,15 +251,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="authority-artifact-compatibility" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="authority-artifact-compatibility" data-choice="read-existing" data-by="reckon-ship" data-when="2026-08-21T10:25:06+00:00">
     <p class="r-dec-q">May the generic operator require re-signed authority artifacts, or must it read the existing committed ones as they stand?</p>
     <p class="r-dec-ctx">Committed artifacts such as refused-target-orphan-adjudication.json and owner-geometry-rc66-partition.json carry adjudication provenance and per-row signatures produced by independent review. Re-signing them under a new schema would produce identical rows with new digests and no review lineage.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="read-existing">Read existing artifacts unchanged; the generic operator adapts to their shapes (Recommended — preserves adjudication provenance, which is the expensive part)</button>
+      <button class="r-opt chosen" data-value="read-existing">Read existing artifacts unchanged; the generic operator adapts to their shapes (Recommended — preserves adjudication provenance, which is the expensive part)</button>
       <button class="r-opt" data-value="convert-losslessly">Convert to one schema with a recorded, reversible mapping that retains the original digests as provenance</button>
       <button class="r-opt" data-value="re-sign">Re-sign under the new schema and accept the loss of prior signature lineage</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Recorded from the plan&#x27;s own constraint rather than chosen afresh: §4 item 2 already requires that existing committed artifacts be readable under the new schema or convertible without re-signing, because re-signing would produce identical rows with new digests and no review lineage. Adjudication provenance is the expensive part of every one of these artifacts, so the generic operator adapts to their shapes. Lossless conversion with retained original digests stays available as a fallback for a specific artifact that cannot be read in place; re-signing is rejected.</p>
     </div>
 <div class="r-dec" data-key="serialization-retirement" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Should the generic operator aim to retire the one-mutator-at-a-time constraint?</p>
