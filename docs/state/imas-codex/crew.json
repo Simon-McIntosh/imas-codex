@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:42:50",
+  "updated": "2026-08-21T15:44:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -85,7 +85,7 @@
         "id": "impl-errsibsuite",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02486-26ce-7782-92b4-b31c2ce45029",
         "created": "2026-08-21"
       },
       {
@@ -173,6 +173,13 @@
         "created": "2026-08-19"
       },
       {
+        "id": "impl-peelunitsuite",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "impl-reconcilefix",
         "harness": "codex",
         "role": "implement",
@@ -227,6 +234,13 @@
         "role": "implement",
         "session_id": "01a00bd9-04e9-71b1-b0eb-c4e7f232e794",
         "created": "2026-08-16"
+      },
+      {
+        "id": "impl-structedgesuite",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "impl-stubs",
@@ -11514,9 +11528,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T133243702280-errsibsuite",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a78",
+        "node": "errsibsuite",
+        "role": "implement",
+        "member": "impl-errsibsuite",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:32:46Z",
+        "completed_at": "2026-08-21T13:44:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 712,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 712,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "569efbe8511b529badfdf20f4a3ab47b0f63d9b7",
+        "commits": [
+          "c9460262"
+        ],
+        "changed_lines": {
+          "added": 332,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T133243702280-errsibsuite/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02486-26ce-7782-92b4-b31c2ce45029",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6743808,
+            "cached_input_tokens_cumulative": 6743808,
+            "input_tokens": 6918626,
+            "input_tokens_cumulative": 6918626,
+            "output_tokens": 18443,
+            "output_tokens_cumulative": 18443,
+            "reasoning_output_tokens": 6089,
+            "reasoning_output_tokens_cumulative": 6089
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 287
+    "_version": 291
   }
 }

@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="10">
-<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c">
-<meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py">
-<meta name="plan-impl" content="0.88">
+<meta name="plan-version" content="11">
+<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c,c9460262">
+<meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py,tests/standard_names/test_error_sibling_reconcile_graph.py">
+<meta name="plan-impl" content="0.9">
 </head>
 <body>
   <main class="plan-doc">
@@ -331,6 +331,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821-detachmigrate" data-who="reckon-ship" data-when="2026-08-21T14:05:00+00:00">
     <div class="r-comment-body">detachmigrate landed - commit 5e3d691c, merge into main, gate passed after a resume. Two of the ten signed-artifact operators are now migrated. Measure: the existing disposable-Neo4j suite tests/standard_names/test_stale_source_detach.py ran UNCHANGED - proven by git diff --exit-code on that path - at 8 passed / 5 deselected / 0 skipped / 0 failed, reproducing the identical 52-source admitted set from 58 signed rows after 3 already-detached and 3 last-producer rows, 52 receipt rows, 53 bindings removed, 42 projections removed, applied changed=52 and replay changed=0 with byte-identical graph counts. The 351-line bespoke public function body is deleted, the scoped diff is 969 insertions / 743 deletions across the two fenced files, and git grep -F over imas_codex returns zero production references with a 0-byte captured log. The legacy import now resolves to a functools.partial of apply_signed_manifest with mutation_kind detach and guards signed-lifecycle-and-claim, last-producing-source, out-of-allowlist-immutability. The section 5 gate that actually matters held verbatim: refusal strings detach would orphan target voltage_of_diagnostic_antenna, detach would orphan target flux_surface_average_magnetic_field_magnitude, detach would orphan target neutral_state_energy_convection_velocity, signed source closure changed for derived:electron_density, plus five authority and precondition strings, are all preserved character-for-character. Committed stale-source artifact bytes and digests are unchanged, which is the read-existing lock holding for a second operator. Disposable Neo4j on bolt 42687, Started then Stopped with both ports closed; no production endpoint touched. One honest report kept: the first graph invocation was collection-only because compatibility re-exports were missing, and the node recorded it as not-run rather than as a pass before adding explicit same-name aliases and re-running.</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260821-errsibsuite" data-who="reckon-ship" data-when="2026-08-21T14:15:00+00:00">
+    <div class="r-comment-body">errsibsuite landed - commit c9460262, merge into main, gate passed. One of the three absent suites this section names is now built, so reconcile_error_siblings becomes migratable under the section 5 equivalence rule; reconcile_structural_edges_for_standard_names and repair_normalization_peel_parent_units still have none. Measure: 7 disposable-Neo4j behavioural cases at 7 passed / 0 skipped / 0 failed, with the standard_names suite at 6,547 passed / 8 skipped / 0 failed. The suite was written against the LIVE code before any migration, which is the whole point of the ordering: a suite written afterwards would be written against the generic operator and would prove nothing. What it pins: a 7-row mixed cohort admits exactly lower_uncertainty_of_missing_temperature and uncertainty_index_of_missing_pressure for quarantine while an upper-uncertainty row with an existing parent, an unknown operator prefix, a non-error model and an already-quarantined sibling all remain untouched; two distinct orphan cases pin the verbatim live reason orphaned error sibling (parent name deleted); a quarantined parent identity blocks admission regardless of its own lifecycle state; an existing quarantine reason stays byte-for-byte unchanged; and replay returns stale_marked=0 with a byte-identical full graph snapshot. Disposable Neo4j 2026.01.4 on bolt 43687, Started then Stopped with both ports closed.</div>
 </div>
 </section>
 </main>
