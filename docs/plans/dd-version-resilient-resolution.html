@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="dd-version-resilient-resolution">
+  <meta name="plan-title" content="A Dictionary Bump Must Produce a Diff, Not a Wall">
+  <meta name="plan-summary" content="Make Standard Name resolution treat the recorded data-dictionary version as provenance rather than identity, so a dictionary bump refuses only the leaves whose content actually changed instead of aborting work on every source carrying an older label.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="6.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-informs" content="sn-graph-wide-integrity">
+  <title>Dictionary Bump Diff Not Wall | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-21">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&#167;1 &mdash; The failure this exists to prevent</h2>
+    <p>
+      On 2026-08-21 a scoped pipeline run over 42 data-dictionary paths aborted on a
+      deterministic <code>DDResolutionVersionMismatch</code>. One source carried a
+      recorded dictionary version older than the graph's authoritative snapshot, and
+      that single label disagreement stopped the whole run. The immediate unblock was
+      to move that one source forward, but the measurement underneath is the real
+      finding: <strong>8,537 of roughly 9,600 <code>StandardNameSource</code> nodes
+      &mdash; about 94% &mdash; carry <code>dd_version = '4.1.0'</code></strong> while
+      the graph serves 4.1.1, against only 384 at 4.1.1 and 695 with none. Moving one
+      source forward leaves 8,536 identical landmines.
+    </p>
+    <p>
+      Dictionary versions will keep moving. A pipeline that refuses work whenever a
+      recorded label differs from the current dictionary will, at every bump, stop on
+      almost every source it owns &mdash; and the stop is silent until something tries
+      to run.
+    </p>
+
+    <h2 id="s2">&#167;2 &mdash; The correct primitive already exists in this codebase</h2>
+    <p>
+      This is not a redesign. <code>_read_graph_field</code> in
+      <code>imas_codex/standard_names/dd_resolutions.py</code> already implements the
+      right test, and it should be the model for everything else. Given a resolution
+      recorded against some version, it compares the <em>value</em> rather than the
+      label:
+    </p>
+    <ul>
+      <li>if the raw value equals the record's <code>observed</code> value, the
+        recorded correction applies;</li>
+      <li>if the raw value equals the record's <code>effective</code> value, the field
+        has <strong>converged</strong> &mdash; the prior review still covers it, and it
+        resolves cleanly with <code>converged=True</code>;</li>
+      <li>only when the raw value matches <em>neither</em> side of any record does it
+        raise, because that is a genuine content change no human has reviewed.</li>
+    </ul>
+    <p>
+      That is exactly right, and it means a resolution reviewed at 4.1.0 legitimately
+      governs 4.1.1 whenever the underlying leaf did not change. The defect is that a
+      second entry point does not do this. <code>resolve_dd_row</code> compares labels
+      by equality with no convergence path and no content test, so it refuses a row
+      whose content is byte-identical to what was reviewed, purely because the stamp
+      differs.
+    </p>
+
+    <h2 id="s3">&#167;3 &mdash; Design: version is provenance, not identity</h2>
+    <ol>
+      <li><strong>A recorded dictionary version states when a source was extracted, not
+        which versions it is valid for.</strong> Treating it as an identity assertion
+        and comparing it by equality to the current dictionary is a category error, and
+        it is the whole of this bug.</li>
+      <li><strong>Validity is decided by content convergence.</strong> A source remains
+        valid under a new dictionary when its path is still present and its unit and
+        documentation are unchanged. Adopt the <code>_read_graph_field</code>
+        convergence test in <code>resolve_dd_row</code> and anywhere else a version is
+        compared.</li>
+      <li><strong>Refusal is scoped to the leaf that changed, never to the run.</strong>
+        Today one mismatched row aborts a scoped run over 42 paths. A changed leaf
+        should mark that leaf for review and let the remaining work proceed, because a
+        pipeline that stops entirely on one stale stamp cannot be run during a
+        migration &mdash; which is exactly when it is most needed.</li>
+      <li><strong>A bump emits a worklist.</strong> On a dictionary change, compute the
+        set of leaves whose path, unit or documentation actually moved. Only those need
+        fresh review; everything else converges silently. The dictionary graph already
+        carries version history and changelog tooling to compute this, so the input is
+        available rather than needing invention.</li>
+      <li><strong>Re-stamping is a migration, not a repair.</strong> Bulk-rewriting 8,537
+        labels to the current version would hide the provenance of when each source was
+        extracted and would need redoing at every bump. Prefer convergence at read time;
+        re-stamp only where a leaf genuinely changed and its review has landed.</li>
+    </ol>
+
+    <h2 id="s4">&#167;4 &mdash; Test strategy</h2>
+    <p>
+      The invariant is stated as a property, because a version-resilience claim that is
+      only tested against today's two versions will rot at the next bump:
+    </p>
+    <ul>
+      <li><strong>A no-op bump produces zero refusals.</strong> Synthesize a dictionary
+        version whose leaves are content-identical to the current one and assert that
+        resolution over the full source corpus raises nothing. This is the single most
+        valuable test in this plan and it would have caught the present defect.</li>
+      <li><strong>A changed leaf refuses exactly itself.</strong> Change one leaf's unit
+        in a synthetic bump and assert that resolution refuses that leaf and resolves
+        every other source in the same run.</li>
+      <li><strong>Convergence is not a bypass.</strong> Assert that a leaf whose value
+        matches neither the observed nor the effective side of any record still refuses,
+        so the fix cannot be mistaken for weakening review authority.</li>
+      <li><strong>The corpus check.</strong> Assert that the count of sources whose
+        recorded version differs from the authoritative one has no effect on how many
+        sources resolve successfully &mdash; the number that matters is content drift,
+        not label drift.</li>
+    </ul>
+
+    <h2 id="s5">&#167;5 &mdash; Non-goals</h2>
+    <ul>
+      <li><strong>Not a weakening of review authority.</strong> A genuine content change
+        must still fail closed and demand human review. This plan narrows <em>when</em>
+        that fires, never <em>whether</em> it fires.</li>
+      <li><strong>Not a bulk re-stamp.</strong> Rewriting every source's recorded version
+        is explicitly rejected in &#167;3 item 5.</li>
+      <li><strong>Not multi-version node storage.</strong> The graph holds one
+        authoritative dictionary snapshot with version nodes for history, and
+        <code>IMASNode</code> carries no per-version stamp. That is a reasonable model
+        and this plan does not change it.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="version-label-semantics" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What does a recorded dictionary version on a source mean?</p>
+    <p class="r-dec-ctx">94% of sources are labelled 4.1.0 while the graph serves 4.1.1. Either the label asserts validity, in which case almost every source is invalid, or it records extraction provenance, in which case validity must be decided by content.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="provenance">Extraction provenance; validity decided by content convergence (Recommended, and already how the working code path behaves)</button>
+      <button class="r-opt" data-value="validity-claim">A validity claim, requiring a bulk re-stamp at every bump</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="refusal-granularity" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">When one leaf has genuinely changed, what should a scoped run do?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="per-leaf">Refuse that leaf, mark it for review, complete the rest of the run (Recommended)</button>
+      <button class="r-opt" data-value="abort-run">Abort the run, as today</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-dvrr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dd-version-resilient-resolution §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Write the no-op-bump property test first, then adopt convergence in resolve_dd_row</h4>
+    <div class="r-fu-body"><p>Start with section 4's first test, because it is the one that would have caught this defect and it fails today: synthesize a dictionary version whose leaves are content-identical to the current one, then assert that resolution over the full source corpus raises nothing. With that test red, adopt the <code>_read_graph_field</code> convergence comparison inside <code>resolve_dd_row</code> so a byte-identical row is no longer refused for carrying an older stamp, and make refusal scoped to the changed leaf rather than fatal to the run. Do not bulk re-stamp the 8,537 sources carrying an older label; section 3 item 5 rejects that explicitly, and doing it would hide extraction provenance and need redoing at the next bump. Keep the fail-closed behaviour for genuine content changes intact and prove it with section 4's third test, so the change cannot be mistaken for weakening review authority.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship dd-version-resilient-resolution §4</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>

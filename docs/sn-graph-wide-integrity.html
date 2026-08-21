@@ -164,6 +164,75 @@
       </div>
     </section>
 
+    <section id="execution-doctrine">
+      <h2>How to execute this plan &mdash; doctrine learned the expensive way</h2>
+      <div class="card" style="border-left:4px solid #46c; padding-left:12px;">
+        <p><strong>Read this before dispatching anything.</strong> Across two sessions
+        this plan landed 14 nodes and withheld mutation on 9 more. Most of the withheld
+        work was stopped by a coordinator error rather than a data problem, and every
+        item below is a rule that would have prevented one.</p>
+
+        <h3>Derive authority inside the invocation that applies it</h3>
+        <p>A manifest hash or ledger baseline computed in an <em>earlier</em> node is
+        stale the moment any authorized transaction commits. Three fixed cohorts were
+        overtaken this way before the lesson stuck. An apply node must regenerate its
+        own preview and re-read its own counters inside the applying invocation, and
+        must derive the <em>maximal refusal-free subset</em> rather than a declared
+        count &mdash; when that was adopted, a row that had gained live children since
+        signing was admitted automatically, which the fixed cohort had refused.</p>
+
+        <h3>Compare manifests by canonical bytes, never by object identity</h3>
+        <p>One node burned its two-failure stop comparing live <code>neo4j.time</code>
+        temporals against byte-equivalent JSON with Python <code>==</code>. Canonical
+        JSON or SHA-256 only.</p>
+
+        <h3>Commit plan state before dispatching</h3>
+        <p>Dispatch reads the named section at the base revision, so a dirty plan file
+        is refused with <code>plan-unavailable</code>. Commit, then dispatch.</p>
+
+        <h3>Serialize mutators; parallelize authorities</h3>
+        <p>Two concurrent production mutators void each other's out-of-allowlist
+        immutability proofs. Parallel width comes from evidence-producing and
+        disposable-graph nodes, which cost nothing to run four abreast; the apply lane
+        is one deep. Attempting otherwise once required killing a worker 15 seconds in.</p>
+
+        <h3>Write done-when clauses the pipeline can actually satisfy</h3>
+        <p>A gate demanding that every acceptance carry a fresh quorum score is
+        <em>unsatisfiable</em> for derived parents, which are accepted by the sanctioned
+        structural-inheritance path with a null score. Check a proposed measure against
+        documented pipeline behaviour before making it a gate.</p>
+
+        <h3>Give graph work a generous connect budget</h3>
+        <p><code>GraphClient</code> connect alone has been measured at 54.8 s and peaked
+        at 196.9 s while Neo4j itself sat idle answering queries in 0.1 s; module import
+        costs ~15 s. Two nodes died on short probe timeouts. Allow at least 120 s, and
+        never read a slow connect as a service fault &mdash; check node load first.</p>
+
+        <h3>Measure classes with their partition, after the reconcile settles</h3>
+        <p>Unsourced-structural is a <em>transient</em> state: the reconcile mints
+        <code>derived:</code> provenance for parents a release leaves bare. A census
+        taken mid-reconcile reported a 61-name structural backlog the pipeline was in
+        the act of clearing. Always report the partition &mdash; live structural child
+        versus none &mdash; never the bare total.</p>
+
+        <h3>Prefer a cheap experiment to a long adjudication</h3>
+        <p>The strongest result in this plan cost <strong>$1.60</strong>: a single
+        scoped reset-and-rerun proved regeneration cannot fix the 36 orphans, because
+        compose re-emits the parent names and never proposes the orphan children.
+        That redirected the disposition from re-sourcing to retirement and retired a
+        forensic workstream. Run the cheap experiment first.</p>
+
+        <h3>The repairs are durable; do not over-defend them</h3>
+        <p>An overnight re-measurement found every applied repair intact &mdash; 16 of
+        16 retirements still superseded, stale sources still 3, dual-bound still 23,
+        the ledger unmoved. An earlier characterisation of this work as
+        <em>perishable</em> was wrong: what moved during execution was the pipeline
+        healing, not decay. The ratchet tests in
+        <code>tests/graph/test_sn_integrity_ratchets.py</code> are a regression
+        tripwire, not a dam against rot.</p>
+      </div>
+    </section>
+
     <h2 id="s1">§1 — Why this plan exists</h2>
     <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
       <p style="margin:0 0 6px;">
