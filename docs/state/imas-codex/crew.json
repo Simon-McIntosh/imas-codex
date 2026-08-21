@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T16:00:18",
+  "updated": "2026-08-21T16:26:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -80,6 +80,13 @@
         "role": "implement",
         "session_id": "01a0167e-a37f-7aa1-b70b-9400fad4ddf2",
         "created": "2026-08-18"
+      },
+      {
+        "id": "impl-errsibmigrate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a024a1-0052-7f20-8677-f6b3345f7d20",
+        "created": "2026-08-21"
       },
       {
         "id": "impl-errsibsuite",
@@ -282,6 +289,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02467-84a0-7f81-a1f2-1127f1fa2d7c",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-voltrename",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -11780,9 +11794,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T140135028608-esrate2",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "esrate2",
+        "role": "implement",
+        "member": "impl-esrate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:01:37Z",
+        "completed_at": "2026-08-21T14:20:20Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1123,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1123,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "806c214d4f52420297319bd67d14ca15077582d2",
+        "commits": [
+          "a43fee7d"
+        ],
+        "changed_lines": {
+          "added": 102,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T140135028608-esrate2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02428-2549-7000-b426-8034ffe598d0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9060864,
+            "cached_input_tokens_cumulative": 25766656,
+            "input_tokens": 9465194,
+            "input_tokens_cumulative": 26435935,
+            "output_tokens": 19881,
+            "output_tokens_cumulative": 45890,
+            "reasoning_output_tokens": 4303,
+            "reasoning_output_tokens_cumulative": 12499
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T140203145803-errsibmigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "errsibmigrate",
+        "role": "implement",
+        "member": "impl-errsibmigrate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:02:05Z",
+        "completed_at": "2026-08-21T14:22:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1197,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1197,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "806c214d4f52420297319bd67d14ca15077582d2",
+        "commits": [
+          "bd34e963"
+        ],
+        "changed_lines": {
+          "added": 247,
+          "removed": 11,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T140203145803-errsibmigrate/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a024a1-0052-7f20-8677-f6b3345f7d20",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11014656,
+            "cached_input_tokens_cumulative": 11014656,
+            "input_tokens": 11334370,
+            "input_tokens_cumulative": 11334370,
+            "output_tokens": 35315,
+            "output_tokens_cumulative": 35315,
+            "reasoning_output_tokens": 15091,
+            "reasoning_output_tokens_cumulative": 15091
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 297
+    "_version": 302
   }
 }
