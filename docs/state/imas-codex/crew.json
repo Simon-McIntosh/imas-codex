@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:31:25",
+  "updated": "2026-08-21T15:42:50",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9,6 +9,13 @@
         "harness": "codex",
         "role": "documentation",
         "session_id": "01a023dc-deff-70d2-8734-8a503c9c3d37",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-attachapply",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -73,6 +80,13 @@
         "role": "implement",
         "session_id": "01a0167e-a37f-7aa1-b70b-9400fad4ddf2",
         "created": "2026-08-18"
+      },
+      {
+        "id": "impl-errsibsuite",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "impl-esrate",
@@ -11437,9 +11451,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T130130767858-detachmigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "detachmigrate",
+        "role": "implement",
+        "member": "impl-detachmigrate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:01:32Z",
+        "completed_at": "2026-08-21T13:31:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1827,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1827,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "d00744813a781e7ddf1ee0d93359d26eb8a00b9d",
+        "commits": [
+          "5e3d691c"
+        ],
+        "changed_lines": {
+          "added": 969,
+          "removed": 743,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T130130767858-detachmigrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02469-90ac-74a1-a26d-73ae362946fb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19630080,
+            "cached_input_tokens_cumulative": 19630080,
+            "input_tokens": 20084683,
+            "input_tokens_cumulative": 20084683,
+            "output_tokens": 46449,
+            "output_tokens_cumulative": 46449,
+            "reasoning_output_tokens": 18014,
+            "reasoning_output_tokens_cumulative": 18014
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 284
+    "_version": 287
   }
 }
