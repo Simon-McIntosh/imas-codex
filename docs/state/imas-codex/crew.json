@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T17:08:12",
+  "updated": "2026-08-21T17:18:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -15,7 +15,7 @@
         "id": "impl-admissionadj",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a024dd-bd26-7910-873f-2f35ae45ea34",
         "created": "2026-08-21"
       },
       {
@@ -30,6 +30,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a0247a-b8a1-79c1-bcd5-ce93a4cc0f8a",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-auditfix",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -12200,9 +12207,61 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T150823557532-admissionadj",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "admissionadj",
+        "role": "implement",
+        "member": "impl-admissionadj",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T15:08:26Z",
+        "completed_at": "2026-08-21T15:18:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 621,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 621,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "dd5224b3b728f1b5570c2787334835a2e348a662",
+        "commits": [
+          "67de99bc"
+        ],
+        "changed_lines": {
+          "added": 42,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T150823557532-admissionadj/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024dd-bd26-7910-873f-2f35ae45ea34",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 314
+    "_version": 317
   }
 }
