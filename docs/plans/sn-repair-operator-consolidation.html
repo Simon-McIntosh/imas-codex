@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="4">
-<meta name="plan-commits" content="42f56cd0">
+<meta name="plan-version" content="6">
+<meta name="plan-commits" content="42f56cd0,30ee0249">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html">
-<meta name="plan-impl" content="0.25">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -252,6 +252,35 @@
       the knowledge has decayed raises the cost of the safest part of the work.
     </p>
 
+    <h2 id="s8">&#167;8 &mdash; Three operators have no suite for the equivalence gate to compare against</h2>
+    <p>
+      The 2026-08-21 census found this, and it is a prerequisite rather than an
+      exception. &#167;5 makes behavioural equivalence <em>the</em> gate: a migrated
+      operator must reproduce identical admitted sets, identical refusal sets with
+      identical reasons, identical receipt counts and identical replay outcomes on its
+      existing disposable-Neo4j suite. Seven of the ten have such a suite. Three do
+      not &mdash; <code>reconcile_structural_edges_for_standard_names</code>,
+      <code>repair_normalization_peel_parent_units</code> and
+      <code>reconcile_error_siblings</code> carry only mocked or source-inspection
+      coverage. For those three the gate has nothing to compare against, so migrating
+      them under the &#167;5 rule is not currently possible.
+    </p>
+    <p>
+      These are also exactly the three <em>deterministic self-heal</em> operators the
+      census identified: no committed authority artifact and no durable receipt. That
+      is not a coincidence &mdash; the absent suite and the absent artifact are the
+      same gap seen twice, which is why &#167;6 already defers this family. The
+      consequence is a sequencing rule, not a scope cut: <strong>build the
+      disposable-graph suite first, characterising each one's current refusal
+      behaviour from its live code, then migrate.</strong> A suite written after the
+      migration would be written against the generic operator and would prove
+      nothing.
+    </p>
+    <p>
+      The seven covered operators are unaffected, including the retirement operator
+      this sprint migrates first, so this does not gate the current wave.
+    </p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="authority-artifact-compatibility" data-choice="read-existing" data-by="reckon-ship" data-when="2026-08-21T10:25:06+00:00">
@@ -287,6 +316,9 @@
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="c-20260821-opchar" data-who="reckon-ship" data-when="2026-08-21T10:42:00+00:00">
     <div class="r-comment-body">opchar landed - commit 42f56cd0, merge into main, gate passed. Measure: 10/10 operators characterised in one table with all seven fields per row, plus a separate expressivity audit recording 9 genuine extension points and 8 accidents; every cited test file was confirmed to exist. Artifact: docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md. The finding corrects this plan's own premise and reshapes section 4 item 2: the ten do NOT share one signed-artifact contract today. They partition into 4 that consume a pre-existing external authority artifact plus a fresh preview manifest, 3 that authorize only a fresh preview manifest, and 3 deterministic self-heals with no manifest and no durable receipt. Test coverage is uneven on the same seam - 7 have disposable-graph hash/apply/refusal/replay suites, while reconcile_structural_edges_for_standard_names, repair_normalization_peel_parent_units and reconcile_error_siblings have only mocked or source-inspection coverage, so the behavioural-equivalence gate in section 5 has nothing to compare against for those three. Consequence for the schema: it must model authority provenance adapters, typed row and participant identities, selection completeness, joined authority, ordered compound mutations, named semantic guards, receipt cardinality with replay projection, and permitted orphan hand-off - and existing signature canonicalizations and receipt operation strings must stay readable, which is the read-existing lock in practice.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821-authschema" data-who="reckon-ship" data-when="2026-08-21T10:56:00+00:00">
+    <div class="r-comment-body">authschema landed - commit 30ee0249, merge into main, gate passed. Measure: 10 repair-authority enums and 10 classes declared in imas_codex/schemas/standard_name.yaml, and the new suite validates 4/4 committed authority artifacts and all 412 rows directly from their original bytes while pinning all four original SHA-256 file digests. That is the read-existing lock proven rather than asserted: catalog-edit-dual-binding-adjudication.json at 5ca7761a with 216 rows, refused-target-orphan-adjudication.json at 2c2d38f3 with 89 rows, owner-geometry-rc66-partition.json at dbb37f7b with 49 rows, and stale-source-lifecycle.json at f2da3ff7 with 58 rows, none edited and none re-signed. All 9 recorded extension points are covered, and the mutation-kind vocabulary requires delete alongside supersede and detach, which is what makes the orphan delete reachable as a parameter rather than an eleventh operator. uv run build-models --force exits 0, the focused module is 6/6, the full standard_names suite is clean, and the gitignored generated models were correctly left unstaged. One judgment call worth keeping: a legacy wire key named schema shadows BaseModel.schema and emits a non-failing Pydantic warning; the worker declined to rename it because doing so would break byte-compatible loading of the committed artifacts, which is the right trade.</div>
 </div>
 </section>
 </main>

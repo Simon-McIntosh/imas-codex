@@ -57,6 +57,49 @@
     practice.</p>
     <p>Artifact: <code>docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md</code>.</p>
   </section>
+
+  <section id="authority-schema">
+    <h2>One authority schema reads every committed artifact at its original digest</h2>
+    <p><strong>Landed 2026-08-21</strong> &mdash; commit <code>30ee0249</code>. Ten
+    repair-authority enums and ten classes are declared in
+    <code>imas_codex/schemas/standard_name.yaml</code>, carrying the row set, per-row
+    signatures, the selection predicate, the mutation kind and the per-row guard set,
+    plus the typed authority mode, digest profile, row and participant identity,
+    selection completeness, joined authority, ordered compound mutations, named
+    semantic guards, receipt and replay policy, and orphan hand-off policy.</p>
+
+    <p><strong>The read-existing lock is proven rather than asserted.</strong> The
+    suite loads each committed artifact <em>from its original bytes</em>, validates
+    every row, and pins the original file digest &mdash; so a future edit to either
+    the schema or an artifact fails loudly instead of silently re-signing away the
+    adjudication lineage.</p>
+
+    <table>
+      <caption>Committed authority artifacts validated unchanged</caption>
+      <thead><tr><th>Artifact</th><th>Rows</th><th>Pinned SHA-256 (head)</th></tr></thead>
+      <tbody>
+        <tr><td><code>catalog-edit-dual-binding-adjudication.json</code></td><td>216</td><td><code>5ca7761a</code></td></tr>
+        <tr><td><code>refused-target-orphan-adjudication.json</code></td><td>89</td><td><code>2c2d38f3</code></td></tr>
+        <tr><td><code>stale-source-lifecycle.json</code></td><td>58</td><td><code>f2da3ff7</code></td></tr>
+        <tr><td><code>owner-geometry-rc66-partition.json</code></td><td>49</td><td><code>dbb37f7b</code></td></tr>
+      </tbody>
+    </table>
+
+    <p>412 rows across 4/4 artifacts, none edited and none re-signed. All 9 recorded
+    extension points are covered, and the mutation-kind vocabulary requires
+    <code>delete</code> alongside <code>supersede</code> and <code>detach</code>
+    &mdash; which is what makes the orphan deletion reachable as a parameter instead
+    of an eleventh bespoke operator, the trigger this plan was scheduled on.</p>
+
+    <p><code>build-models --force</code> exits 0, the focused module is 6/6, the full
+    standard-names suite is clean, and the gitignored generated models were left
+    unstaged. One trade recorded deliberately: a legacy wire key named
+    <code>schema</code> shadows <code>BaseModel.schema</code> and emits a non-failing
+    Pydantic warning. Renaming it would break byte-compatible loading of the committed
+    artifacts, so the warning is kept and the compatibility is kept with it.</p>
+    <p>Artifacts: <code>imas_codex/schemas/standard_name.yaml</code>,
+    <code>tests/standard_names/test_repair_authority_schema.py</code>.</p>
+  </section>
 </main>
 </body>
 </html>
