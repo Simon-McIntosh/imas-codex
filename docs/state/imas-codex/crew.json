@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T11:11:40",
+  "updated": "2026-08-21T11:38:58",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9523,9 +9523,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T091742786524-sgwi-ne-source-snapshot-move",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-ne-source-snapshot-move",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T09:17:45Z",
+        "completed_at": "2026-08-21T09:31:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 814,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 814,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "4c09d5ec9fae7bf9ef0a1e2cda3431c689296e23",
+        "commits": [
+          "4748933837bf5d5b798f0287b473a70609cff82c"
+        ],
+        "changed_lines": {
+          "added": 79,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T091742786524-sgwi-ne-source-snapshot-move/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8079616,
+            "cached_input_tokens_cumulative": 216698112,
+            "input_tokens": 8493532,
+            "input_tokens_cumulative": 224533382,
+            "output_tokens": 29875,
+            "output_tokens_cumulative": 630892,
+            "reasoning_output_tokens": 7601,
+            "reasoning_output_tokens_cumulative": 176736
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 209
+    "_version": 210
   }
 }
