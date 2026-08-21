@@ -16,6 +16,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -82,6 +83,15 @@ _REFUSED_TARGET_ORPHAN_DISPOSITIONS = frozenset(
     }
 )
 
+_STALE_SOURCE_ADAPTER = "stale-source-lifecycle"
+_STALE_SOURCE_LIFECYCLE_SCHEMA = "imas-codex.stale-source-lifecycle-disposition.v1"
+_STALE_SOURCE_RECEIPT_SCHEMA = "imas-codex.signed-stale-source-detach-receipt.v1"
+_STALE_SOURCE_GUARDS = (
+    _SIGNED_LIFECYCLE,
+    _LAST_PRODUCER,
+    _COLLATERAL_IMMUTABILITY,
+)
+
 
 class SignedManifestAuthorityError(ValueError):
     """The authority bytes or typed repair program are invalid."""
@@ -89,6 +99,10 @@ class SignedManifestAuthorityError(ValueError):
 
 class SignedManifestConflict(RuntimeError):
     """Current graph authority does not match the authorized manifest."""
+
+
+class StaleSourceDetachConflict(SignedManifestConflict):
+    """The signed stale-source closure no longer matches live graph authority."""
 
 
 class _Query(Protocol):
@@ -566,6 +580,455 @@ def _load_refused_target_orphan_authority(
     )
 
 
+def _graph_json_value(value: Any) -> Any:
+    """Convert Neo4j values to a stable JSON representation."""
+    if isinstance(value, dict):
+        return {
+            str(key): _graph_json_value(item)
+            for key, item in sorted(value.items(), key=lambda pair: str(pair[0]))
+        }
+    if isinstance(value, list | tuple):
+        return [_graph_json_value(item) for item in value]
+    if hasattr(value, "iso_format"):
+        return value.iso_format()
+    if hasattr(value, "isoformat") and not isinstance(value, str):
+        return value.isoformat()
+    if value is None or isinstance(value, str | int | float | bool):
+        return value
+    return str(value)
+
+
+def _graph_payload_hash(value: Any) -> str:
+    payload = json.dumps(
+        _graph_json_value(value),
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    )
+    return hashlib.sha256(payload.encode()).hexdigest()
+
+
+def _load_signed_stale_source_rows(
+    authority_path: str | Path,
+    source_ids: Sequence[str],
+) -> tuple[str, str, list[dict[str, Any]]]:
+    path = Path(authority_path).expanduser().resolve()
+    raw = path.read_bytes()
+    try:
+        authority = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise ValueError("stale-source lifecycle authority is not valid JSON") from exc
+    if authority.get("schema") != _STALE_SOURCE_LIFECYCLE_SCHEMA:
+        raise ValueError("unsupported stale-source lifecycle authority schema")
+    signature = authority.get("signature")
+    if not isinstance(signature, dict) or signature != {
+        "algorithm": "sha256",
+        "canonicalization": "jq -cS '.rows'",
+        "scope": "rows",
+        "digest": signature.get("digest") if isinstance(signature, dict) else None,
+    }:
+        raise ValueError("stale-source lifecycle signature contract is unsupported")
+    declared_digest = signature.get("digest")
+    if not isinstance(declared_digest, str) or len(declared_digest) != 64:
+        raise ValueError("stale-source lifecycle signature requires a SHA-256 digest")
+    rows = authority.get("rows")
+    if not isinstance(rows, list) or not rows:
+        raise ValueError("stale-source lifecycle authority requires rows")
+    canonical_rows = (
+        json.dumps(rows, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        + "\n"
+    )
+    if hashlib.sha256(canonical_rows.encode()).hexdigest() != declared_digest:
+        raise ValueError("stale-source lifecycle rows signature does not match")
+
+    requested = sorted(set(source_ids))
+    if not requested or len(requested) != len(source_ids):
+        raise ValueError("stale-source detach requires unique non-empty source ids")
+    by_source = {row.get("source_id"): row for row in rows if isinstance(row, dict)}
+    if any(source_id not in by_source for source_id in requested):
+        raise ValueError("stale-source detach source is outside signed authority")
+    selected = [dict(by_source[source_id]) for source_id in requested]
+    for row in selected:
+        source_id = row.get("source_id")
+        source_type = row.get("source_type")
+        live_target_ids = row.get("live_target_ids")
+        scalar_target = row.get("scalar_target")
+        source_shape_is_signed = (
+            isinstance(source_id, str)
+            and source_type in {"dd", "derived"}
+            and isinstance(live_target_ids, list)
+            and bool(live_target_ids)
+            and all(isinstance(target_id, str) for target_id in live_target_ids)
+            and len(set(live_target_ids)) == len(live_target_ids)
+            and isinstance(scalar_target, str)
+            and bool(scalar_target)
+        )
+        dd_shape_is_signed = source_type == "dd" and (
+            source_id.startswith("dd:")
+            and isinstance(row.get("source_dd_version"), str)
+            and row.get("backing_lifecycle_status") == "removed"
+        )
+        derived_shape_is_signed = source_type == "derived" and (
+            source_id.startswith("derived:")
+            and row.get("source_dd_version") is None
+            and row.get("backing_lifecycle_status") is None
+        )
+        if (
+            not source_shape_is_signed
+            or not (dd_shape_is_signed or derived_shape_is_signed)
+            or row.get("disposition") != "detach"
+            or row.get("configured_path_present") is not False
+        ):
+            raise ValueError("selected stale-source row lacks exact detach authority")
+    return hashlib.sha256(raw).hexdigest(), declared_digest, selected
+
+
+def _signed_stale_source_target_ids(row: dict[str, Any]) -> list[str]:
+    """Return every target identity whose removal shape is signed by a row."""
+    return sorted({*row["live_target_ids"], row["scalar_target"]})
+
+
+def _stale_source_detach_closure(gc: Any, rows: list[dict[str, Any]]) -> dict[str, Any]:
+    source_ids = [row["source_id"] for row in rows]
+    target_ids = sorted(
+        {target for row in rows for target in _signed_stale_source_target_ids(row)}
+    )
+    participants = [
+        dict(row)
+        for row in gc.query(
+            """
+            // SIGNED_STALE_SOURCE_DETACH_CLOSURE
+            UNWIND $source_ids AS requested_id
+            OPTIONAL MATCH (source:StandardNameSource {id: requested_id})
+            RETURN requested_id,
+                   elementId(source) AS source_element_id,
+                   properties(source) AS source_properties,
+                   CASE WHEN source IS NULL THEN [] ELSE
+                     [(source)-[binding:PRODUCED_NAME]->(target:StandardName) |
+                       {element_id: elementId(binding), properties: properties(binding),
+                        target_element_id: elementId(target), target_id: target.id,
+                        target_properties: properties(target)}]
+                   END AS bindings,
+                   CASE WHEN source IS NULL THEN [] ELSE
+                     [(source)-[origin:FROM_DD_PATH]->(backing:IMASNode) |
+                       {element_id: elementId(backing), properties: properties(backing),
+                        origin_element_id: elementId(origin),
+                        origin_properties: properties(origin),
+                        projections: [(backing)-[projection:HAS_STANDARD_NAME]->
+                          (target:StandardName) |
+                          {element_id: elementId(projection),
+                           properties: properties(projection),
+                           target_element_id: elementId(target),
+                           target_id: target.id}]}]
+                   END AS backings
+            ORDER BY requested_id
+            """,
+            source_ids=source_ids,
+        )
+    ]
+    for row in participants:
+        row["bindings"] = sorted(
+            (dict(item) for item in row.get("bindings") or []),
+            key=lambda item: (item["target_id"], item["element_id"]),
+        )
+        row["backings"] = sorted(
+            (
+                {
+                    **dict(item),
+                    "projections": sorted(
+                        (
+                            dict(projection)
+                            for projection in item.get("projections") or []
+                        ),
+                        key=lambda projection: (
+                            projection["target_id"],
+                            projection["element_id"],
+                        ),
+                    ),
+                }
+                for item in row.get("backings") or []
+            ),
+            key=lambda item: item["element_id"],
+        )
+    target_closures = [
+        dict(row)
+        for row in gc.query(
+            """
+            UNWIND $target_ids AS requested_id
+            OPTIONAL MATCH (target:StandardName {id: requested_id})
+            RETURN requested_id,
+                   elementId(target) AS target_element_id,
+                   properties(target) AS target_properties,
+                   CASE WHEN target IS NULL THEN [] ELSE
+                     [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(target) |
+                       {source_element_id: elementId(source),
+                        source_properties: properties(source),
+                        binding_element_id: elementId(binding),
+                        binding_properties: properties(binding)}]
+                   END AS incoming_bindings
+                   ,CASE WHEN target IS NULL THEN [] ELSE
+                     [(child:StandardName)-[parent:HAS_PARENT]->(target)
+                       WHERE coalesce(child.name_stage, '') <> 'superseded'
+                         AND coalesce(child.status, '') <> 'superseded' |
+                       {child_element_id: elementId(child),
+                        child_properties: properties(child),
+                        parent_element_id: elementId(parent),
+                        parent_properties: properties(parent)}]
+                   END AS live_children
+            ORDER BY requested_id
+            """,
+            target_ids=target_ids,
+        )
+    ]
+    for row in target_closures:
+        row["incoming_bindings"] = sorted(
+            (dict(item) for item in row.get("incoming_bindings") or []),
+            key=lambda item: (
+                (item.get("source_properties") or {}).get("id", ""),
+                item["binding_element_id"],
+            ),
+        )
+        row["live_children"] = sorted(
+            (dict(item) for item in row.get("live_children") or []),
+            key=lambda item: (
+                (item.get("child_properties") or {}).get("id", ""),
+                item["parent_element_id"],
+            ),
+        )
+    versions = list(
+        gc.query(
+            """
+            MATCH (version:DDVersion)
+            WHERE version.is_current = true
+            RETURN elementId(version) AS element_id,
+                   properties(version) AS properties
+            ORDER BY version.id
+            """
+        )
+    )
+    return {
+        "participants": participants,
+        "targets": target_closures,
+        "current_versions": [dict(row) for row in versions],
+    }
+
+
+def _validate_stale_source_detach_closure(
+    signed_rows: list[dict[str, Any]], closure: dict[str, Any]
+) -> list[dict[str, Any]]:
+    expected = {row["source_id"]: row for row in signed_rows}
+    selected_ids = set(expected)
+    targets = {row["requested_id"]: row for row in closure["targets"]}
+    versions = closure["current_versions"]
+    if (
+        len(versions) != 1
+        or (versions[0].get("properties") or {}).get("id") != "4.1.1"
+        or (versions[0].get("properties") or {}).get("is_current") is not True
+    ):
+        raise StaleSourceDetachConflict("configured current DD authority changed")
+    actions: list[dict[str, Any]] = []
+    for participant in closure["participants"]:
+        signed = expected[participant["requested_id"]]
+        properties = participant.get("source_properties") or {}
+        bindings = participant.get("bindings") or []
+        backings = participant.get("backings") or []
+        signed_targets = sorted(signed["live_target_ids"])
+        authorized_targets = _signed_stale_source_target_ids(signed)
+        binding_targets = [binding["target_id"] for binding in bindings]
+        projections = [
+            projection for backing in backings for projection in backing["projections"]
+        ]
+        projection_targets = [projection["target_id"] for projection in projections]
+        common_shape_changed = (
+            participant.get("source_element_id") is None
+            or properties.get("status") != "stale"
+            or properties.get("source_type") != signed["source_type"]
+            or properties.get("dd_version") != signed["source_dd_version"]
+            or properties.get("produced_sn_id") != signed["scalar_target"]
+            or properties.get("claimed_at") is not None
+            or properties.get("claim_token") is not None
+            or not set(signed_targets).issubset(binding_targets)
+            or not set(binding_targets).issubset(authorized_targets)
+            or len(binding_targets) != len(set(binding_targets))
+        )
+        dd_shape_changed = signed["source_type"] == "dd" and (
+            len(backings) != 1
+            or (backings[0].get("properties") or {}).get("id")
+            != signed["source_id"][3:]
+            or (backings[0].get("properties") or {}).get("lifecycle_status")
+            != signed["backing_lifecycle_status"]
+            or sorted(projection_targets) != sorted(binding_targets)
+            or len(projection_targets) != len(set(projection_targets))
+        )
+        derived_shape_changed = signed["source_type"] == "derived" and bool(backings)
+        if common_shape_changed or dd_shape_changed or derived_shape_changed:
+            raise StaleSourceDetachConflict(
+                f"signed source closure changed for {signed['source_id']}"
+            )
+        for target_id in binding_targets:
+            target = targets.get(target_id) or {}
+            live_remaining = [
+                incoming
+                for incoming in target.get("incoming_bindings") or []
+                if (incoming.get("source_properties") or {}).get("status") != "stale"
+                and (incoming.get("source_properties") or {}).get("id")
+                not in selected_ids
+            ]
+            if not live_remaining and not target.get("live_children"):
+                raise StaleSourceDetachConflict(
+                    f"detach would orphan target {target_id}"
+                )
+        actions.append(
+            {
+                "source_id": signed["source_id"],
+                "source_element_id": participant["source_element_id"],
+                "target_ids": binding_targets,
+                "target_element_ids": [
+                    binding["target_element_id"] for binding in bindings
+                ],
+                "binding_element_ids": [binding["element_id"] for binding in bindings],
+                "backing_element_ids": [backing["element_id"] for backing in backings],
+                "projection_element_ids": [
+                    projection["element_id"] for projection in projections
+                ],
+                "scalar_target": signed["scalar_target"],
+                "unblocks": signed["unblocks"],
+            }
+        )
+    if len(actions) != len(signed_rows):
+        raise StaleSourceDetachConflict("signed source cohort is incomplete")
+    return actions
+
+
+def _out_of_allowlist_source_hash(gc: Any, source_ids: list[str]) -> tuple[int, str]:
+    rows = [
+        dict(row)
+        for row in gc.query(
+            """
+            MATCH (source:StandardNameSource)
+            WHERE NOT (source.id IN $source_ids)
+            RETURN source.id AS source_id,
+                   properties(source) AS source_properties,
+                   [(source)-[binding:PRODUCED_NAME]->(target:StandardName) |
+                     {element_id: elementId(binding), properties: properties(binding),
+                      target_id: target.id}] AS bindings,
+                   [(source)-[origin:FROM_DD_PATH|FROM_SIGNAL]->(backing) |
+                     {element_id: elementId(backing), origin_type: type(origin),
+                      origin_element_id: elementId(origin),
+                      origin_properties: properties(origin),
+                      projections: [(backing)-[projection:HAS_STANDARD_NAME]->
+                        (target:StandardName) |
+                        {element_id: elementId(projection),
+                         properties: properties(projection), target_id: target.id}]}]
+                     AS backings
+            ORDER BY source.id
+            """,
+            source_ids=source_ids,
+        )
+    ]
+    for row in rows:
+        row["bindings"] = sorted(
+            (dict(item) for item in row.get("bindings") or []),
+            key=lambda item: (item["target_id"], item["element_id"]),
+        )
+        row["backings"] = sorted(
+            (
+                {
+                    **dict(item),
+                    "projections": sorted(
+                        (
+                            dict(projection)
+                            for projection in item.get("projections") or []
+                        ),
+                        key=lambda projection: (
+                            projection["target_id"],
+                            projection["element_id"],
+                        ),
+                    ),
+                }
+                for item in row.get("backings") or []
+            ),
+            key=lambda item: (item["origin_type"], item["element_id"]),
+        )
+    return len(rows), _graph_payload_hash(rows)
+
+
+def _load_stale_source_authority(
+    source: str | Path,
+    source_ids: Sequence[str],
+    *,
+    mutation_kind: str | None,
+    guard_set: tuple[str, ...] | None,
+) -> _Authority:
+    if mutation_kind != RepairMutationKind.detach.value:
+        raise SignedManifestAuthorityError(
+            "stale-source repair requires the detach mutation kind"
+        )
+    if guard_set != _STALE_SOURCE_GUARDS:
+        raise SignedManifestAuthorityError(
+            "stale-source repair requires its exact signed guard set"
+        )
+    file_sha256, rows_sha256, signed_rows = _load_signed_stale_source_rows(
+        source, source_ids
+    )
+    loaded_rows = tuple(
+        _LoadedRow(
+            id=str(row["source_id"]),
+            identity={
+                "id": str(row["source_id"]),
+                "kind": "standard_name_source",
+                "source_id": str(row["source_id"]),
+                "target_id": str(row["scalar_target"]),
+            },
+            participants=(
+                {
+                    "id": str(row["source_id"]),
+                    "kind": RepairParticipantKind.node.value,
+                    "graph_label": "StandardNameSource",
+                },
+            ),
+            mutations=(
+                {
+                    "id": f"{row['source_id']}:detach",
+                    "order": 0,
+                    "kind": RepairMutationKind.detach.value,
+                    "participant_id": str(row["source_id"]),
+                    "arguments": {"implementation": _STALE_SOURCE_ADAPTER},
+                },
+            ),
+            guards=tuple(
+                {
+                    "id": implementation,
+                    "kind": _GUARD_KINDS[implementation],
+                    "implementation": implementation,
+                    "participant_ids": [str(row["source_id"])],
+                }
+                for implementation in _STALE_SOURCE_GUARDS
+            ),
+            orphan_policy="refuse",
+        )
+        for row in signed_rows
+    )
+    return _Authority(
+        data={
+            "adapter": _STALE_SOURCE_ADAPTER,
+            "all_or_nothing": True,
+            "signed_rows": signed_rows,
+            "authority_file_sha256": file_sha256,
+            "authority_rows_sha256": rows_sha256,
+        },
+        operation_id="signed-stale-source-detach",
+        rows=loaded_rows,
+        receipt_policy={
+            "operation": "detach_stale_source_binding",
+            "expected_count": "admitted_rows",
+        },
+        file_sha256=file_sha256,
+        payload_sha256=rows_sha256,
+    )
+
+
 def _scope_refusal(
     authority: _Authority,
     name_ids: list[str] | None,
@@ -829,7 +1292,154 @@ def _orphan_guard_refusal(query: _Query, action: dict[str, Any]) -> str | None:
     return None
 
 
+def _stale_source_participant_snapshots(
+    closure: dict[str, Any], action: dict[str, Any]
+) -> dict[str, dict[str, Any]]:
+    snapshots: dict[str, dict[str, Any]] = {}
+
+    def add_node(element_id: str | None, labels: list[str]) -> None:
+        if element_id is not None:
+            snapshots[f"node:{element_id}"] = {
+                "element_id": element_id,
+                "labels": labels,
+                "properties": {},
+            }
+
+    def add_relationship(
+        element_id: str | None,
+        relationship_type: str,
+        start_element_id: str | None,
+        end_element_id: str | None,
+    ) -> None:
+        if element_id is not None:
+            snapshots[f"relationship:{element_id}"] = {
+                "element_id": element_id,
+                "relationship_type": relationship_type,
+                "properties": {},
+                "start_element_id": start_element_id,
+                "end_element_id": end_element_id,
+            }
+
+    participant = next(
+        row
+        for row in closure["participants"]
+        if row["requested_id"] == action["source_id"]
+    )
+    add_node(participant.get("source_element_id"), ["StandardNameSource"])
+    for binding in participant.get("bindings") or []:
+        add_node(binding.get("target_element_id"), ["StandardName"])
+        add_relationship(
+            binding.get("element_id"),
+            "PRODUCED_NAME",
+            participant.get("source_element_id"),
+            binding.get("target_element_id"),
+        )
+    for backing in participant.get("backings") or []:
+        add_node(backing.get("element_id"), ["IMASNode"])
+        add_relationship(
+            backing.get("origin_element_id"),
+            "FROM_DD_PATH",
+            participant.get("source_element_id"),
+            backing.get("element_id"),
+        )
+        for projection in backing.get("projections") or []:
+            add_node(projection.get("target_element_id"), ["StandardName"])
+            add_relationship(
+                projection.get("element_id"),
+                "HAS_STANDARD_NAME",
+                backing.get("element_id"),
+                projection.get("target_element_id"),
+            )
+    target_ids = set(action["target_ids"])
+    for target in closure["targets"]:
+        if target["requested_id"] not in target_ids:
+            continue
+        add_node(target.get("target_element_id"), ["StandardName"])
+        for incoming in target.get("incoming_bindings") or []:
+            add_node(incoming.get("source_element_id"), ["StandardNameSource"])
+            add_relationship(
+                incoming.get("binding_element_id"),
+                "PRODUCED_NAME",
+                incoming.get("source_element_id"),
+                target.get("target_element_id"),
+            )
+        for child in target.get("live_children") or []:
+            add_node(child.get("child_element_id"), ["StandardName"])
+            add_relationship(
+                child.get("parent_element_id"),
+                "HAS_PARENT",
+                child.get("child_element_id"),
+                target.get("target_element_id"),
+            )
+    for version in closure["current_versions"]:
+        add_node(version.get("element_id"), ["DDVersion"])
+    return snapshots
+
+
+def _build_stale_source_preview(
+    query: _Query, authority: _Authority, reason: str
+) -> _Preview:
+    signed_rows = list(authority.data["signed_rows"])
+    closure = _stale_source_detach_closure(query, signed_rows)
+    actions = _validate_stale_source_detach_closure(signed_rows, closure)
+    selected_ids = [row["source_id"] for row in signed_rows]
+    out_count, out_hash = _out_of_allowlist_source_hash(query, selected_ids)
+    manifest = {
+        "operation": "detach_signed_" + "stale_source_bindings",
+        "reason": reason,
+        "authority_file_sha256": authority.file_sha256,
+        "authority_rows_sha256": authority.payload_sha256,
+        "signed_rows": signed_rows,
+        "closure": closure,
+        "actions": actions,
+        "out_of_allowlist": {"count": out_count, "sha256": out_hash},
+    }
+    rows_by_id = {row.id: row for row in authority.rows}
+    admitted = [
+        {
+            "row": rows_by_id[action["source_id"]],
+            "participant_snapshots": _stale_source_participant_snapshots(
+                closure, action
+            ),
+            "participant_digests": [],
+            "stale_action": action,
+        }
+        for action in actions
+    ]
+    node_ids = sorted(
+        {
+            snapshot["element_id"]
+            for item in admitted
+            for snapshot in item["participant_snapshots"].values()
+            if "labels" in snapshot
+        }
+    )
+    relationship_ids = sorted(
+        {
+            snapshot["element_id"]
+            for item in admitted
+            for snapshot in item["participant_snapshots"].values()
+            if "relationship_type" in snapshot
+        }
+    )
+    authority.data["stale_actions"] = actions
+    authority.data["out_of_allowlist"] = manifest["out_of_allowlist"]
+    return _Preview(
+        manifest=manifest,
+        manifest_sha256=_graph_payload_hash(manifest),
+        admitted=admitted,
+        refusals=[],
+        collateral=_collateral_snapshot(
+            query,
+            excluded_node_ids=node_ids,
+            excluded_relationship_ids=relationship_ids,
+        ),
+    )
+
+
 def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Preview:
+    if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
+        return _build_stale_source_preview(query, authority, reason)
     candidates: list[dict[str, Any]] = []
     refusals: list[dict[str, str]] = []
     for row in authority.rows:
@@ -978,6 +1588,74 @@ def _receipt_rows(
 def _verify_postconditions(
     query: _Query, authority: _Authority, row_ids: list[str]
 ) -> None:
+    if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
+        signed_rows = list(authority.data["signed_rows"])
+        post = query.query(
+            """
+            UNWIND $rows AS expected
+            MATCH (source:StandardNameSource {id: expected.source_id})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+            WITH expected, source, collect(DISTINCT bound.id) AS bindings
+            OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(backing:IMASNode)
+            OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(projected:StandardName)
+            WHERE projected.id IN expected.target_ids
+            RETURN expected.source_id AS source_id,
+                   source.produced_sn_id AS scalar,
+                   bindings,
+                   collect(DISTINCT projected.id) AS projections
+            ORDER BY source_id
+            """,
+            rows=[
+                {
+                    "source_id": row["source_id"],
+                    "target_ids": _signed_stale_source_target_ids(row),
+                }
+                for row in signed_rows
+            ],
+        )
+        if len(post) != len(signed_rows) or any(
+            row.get("scalar") is not None
+            or row.get("bindings")
+            or row.get("projections")
+            for row in post
+        ):
+            raise StaleSourceDetachConflict("stale-source detach postcondition failed")
+        actions = list(authority.data["stale_actions"])
+        target_post = query.query(
+            """
+            UNWIND $target_ids AS target_id
+            MATCH (target:StandardName {id: target_id})
+            OPTIONAL MATCH (live:StandardNameSource)-[:PRODUCED_NAME]->(target)
+            WHERE live.status <> 'stale'
+            WITH target_id, target, count(DISTINCT live) AS live_producers
+            OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(target)
+            WHERE coalesce(child.name_stage, '') <> 'superseded'
+              AND coalesce(child.status, '') <> 'superseded'
+            RETURN target_id, live_producers,
+                   count(DISTINCT child) AS live_children
+            ORDER BY target_id
+            """,
+            target_ids=sorted(
+                {target_id for action in actions for target_id in action["target_ids"]}
+            ),
+        )
+        if any(
+            int(row.get("live_producers") or 0) < 1
+            and int(row.get("live_children") or 0) < 1
+            for row in target_post
+        ):
+            raise StaleSourceDetachConflict(
+                "stale-source target authority was stripped"
+            )
+        out_count, out_hash = _out_of_allowlist_source_hash(
+            query, [row["source_id"] for row in signed_rows]
+        )
+        if {"count": out_count, "sha256": out_hash} != authority.data.get(
+            "out_of_allowlist"
+        ):
+            raise StaleSourceDetachConflict("out-of-allowlist source closure changed")
+        authority.data["target_post"] = target_post
+        return
     by_id = {row.id: row for row in authority.rows}
     for row_id in row_ids:
         row = by_id[row_id]
@@ -1060,6 +1738,65 @@ def _verify_postconditions(
 def _replay(
     query: _Query, authority: _Authority, manifest_sha256: str
 ) -> dict[str, Any] | None:
+    if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
+        signed_rows = list(authority.data["signed_rows"])
+        event_ids = {
+            row["source_id"]: "sn-change:stale-source-detach:"
+            + hashlib.sha256(
+                f"{authority.payload_sha256}\0{row['source_id']}".encode()
+            ).hexdigest()
+            for row in signed_rows
+        }
+        replay = query.query(
+            """
+            UNWIND $rows AS expected
+            OPTIONAL MATCH (event:StandardNameChange {id: expected.event_id})
+            OPTIONAL MATCH (source:StandardNameSource {id: expected.source_id})
+            OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(target:StandardName)
+            WITH expected, event, source,
+                 collect(DISTINCT target.id) AS targets
+            OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(backing:IMASNode)
+            OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(projected:StandardName)
+            WHERE projected.id IN expected.target_ids
+            RETURN expected.source_id AS source_id,
+                   event.id IS NOT NULL AS event_exists,
+                   event.manifest_sha256 AS event_manifest_sha256,
+                   event.authority_rows_sha256 AS event_authority_rows_sha256,
+                   source.produced_sn_id AS scalar,
+                   targets,
+                   collect(DISTINCT projected.id) AS projections
+            ORDER BY source_id
+            """,
+            rows=[
+                {
+                    "source_id": row["source_id"],
+                    "target_ids": _signed_stale_source_target_ids(row),
+                    "event_id": event_ids[row["source_id"]],
+                }
+                for row in signed_rows
+            ],
+        )
+        recorded = [row for row in replay if row.get("event_exists")]
+        if not recorded:
+            return None
+        if len(recorded) != len(signed_rows) or any(
+            row.get("event_manifest_sha256") != manifest_sha256
+            or row.get("event_authority_rows_sha256") != authority.payload_sha256
+            or row.get("scalar") is not None
+            or row.get("targets")
+            or row.get("projections")
+            for row in replay
+        ):
+            raise StaleSourceDetachConflict(
+                "recorded stale-source detach lost its exact postcondition"
+            )
+        return {
+            "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
+            "outcome": "already_applied",
+            "changed": 0,
+            "receipt_rows": len(recorded),
+            "manifest_sha256": manifest_sha256,
+        }
     operation = str(authority.receipt_policy["operation"])
     receipts = _receipt_rows(query, operation, manifest_sha256)
     if not receipts:
@@ -1137,6 +1874,47 @@ def _lock_participants(query: _Query, preview: _Preview) -> None:
 
 
 def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
+    if "stale_action" in action:
+        expected = action["stale_action"]
+        changed = query.query(
+            """
+            MATCH (source:StandardNameSource {id: $row.source_id})
+            WHERE elementId(source) = $row.source_element_id
+              AND source.status = 'stale'
+              AND source.produced_sn_id = $row.scalar_target
+              AND source.claimed_at IS NULL
+              AND source.claim_token IS NULL
+            MATCH (source)-[binding:PRODUCED_NAME]->(target:StandardName)
+            WHERE elementId(binding) IN $row.binding_element_ids
+              AND elementId(target) IN $row.target_element_ids
+            WITH source, collect(binding) AS bindings, collect(target) AS targets
+            WHERE size(bindings) = size($row.binding_element_ids)
+              AND size(targets) = size($row.target_element_ids)
+            OPTIONAL MATCH (backing:IMASNode)-[projection:HAS_STANDARD_NAME]->
+              (projected:StandardName)
+            WHERE elementId(backing) IN $row.backing_element_ids
+              AND elementId(projection) IN $row.projection_element_ids
+              AND elementId(projected) IN $row.target_element_ids
+            WITH source, bindings, targets, collect(projection) AS projections
+            WHERE size(projections) = size($row.projection_element_ids)
+            FOREACH (binding IN bindings | DELETE binding)
+            FOREACH (projection IN projections | DELETE projection)
+            SET source.produced_sn_id = null
+            FOREACH (target IN targets |
+              SET target.source_paths = [path IN coalesce(target.source_paths, [])
+                WHERE NOT (path = source.id OR path = source.source_id
+                           OR path = 'dd:' + source.source_id)])
+            RETURN source.id AS source_id,
+                   size(bindings) AS bindings_removed,
+                   size(projections) AS projections_removed
+            """,
+            row=expected,
+        )
+        if len(changed) != 1 or changed[0].get("source_id") != expected["source_id"]:
+            raise StaleSourceDetachConflict("stale-source compare-and-set changed")
+        action["bindings_removed"] = int(changed[0]["bindings_removed"])
+        action["projections_removed"] = int(changed[0]["projections_removed"])
+        return 1
     changed = 0
     row: _LoadedRow = action["row"]
     snapshots = action["participant_snapshots"]
@@ -1207,6 +1985,49 @@ def _write_receipts(
     reason: str,
     run_id: str | None,
 ) -> list[str]:
+    if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
+        rows = []
+        for action in preview.admitted:
+            expected = action["stale_action"]
+            source_id = expected["source_id"]
+            rows.append(
+                {
+                    "change_id": "sn-change:stale-source-detach:"
+                    + hashlib.sha256(
+                        f"{authority.payload_sha256}\0{source_id}".encode()
+                    ).hexdigest(),
+                    **expected,
+                }
+            )
+        receipts = query.query(
+            """
+            UNWIND $rows AS row
+            CREATE (change:StandardNameChange {id: row.change_id})
+            SET change.from_name = row.scalar_target,
+                change.to_name = row.scalar_target,
+                change.operation = 'detach_stale_source_binding',
+                change.reason = row.unblocks,
+                change.origin = 'stale_source_lifecycle',
+                change.run_id = $run_id,
+                change.changed_at = datetime(),
+                change.internal = true,
+                change.source_id = row.source_id,
+                change.detached_target_ids = row.target_ids,
+                change.manifest_sha256 = $manifest_sha256,
+                change.authority_rows_sha256 = $authority_rows_sha256
+            WITH row, change
+            UNWIND row.target_ids AS target_id
+            MATCH (target:StandardName {id: target_id})
+            MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+            RETURN DISTINCT change.id AS change_id
+            ORDER BY change_id
+            """,
+            rows=rows,
+            run_id=run_id,
+            manifest_sha256=preview.manifest_sha256,
+            authority_rows_sha256=authority.payload_sha256,
+        )
+        return [str(row["change_id"]) for row in receipts]
     admitted_ids = [action["row"].id for action in preview.admitted]
     rows: list[dict[str, Any]] = []
     for action in preview.admitted:
@@ -1311,10 +2132,82 @@ def _project_refused_target_orphan_receipt(
     return projected
 
 
+def _project_stale_source_receipt(
+    authority: _Authority, receipt: dict[str, Any]
+) -> dict[str, Any]:
+    if authority.data.get("adapter") != _STALE_SOURCE_ADAPTER:
+        return receipt
+    outcome = str(receipt["outcome"])
+    base = {
+        "schema": _STALE_SOURCE_RECEIPT_SCHEMA,
+        "outcome": outcome,
+        "changed": int(receipt.get("changed") or 0),
+        "receipt_rows": int(receipt.get("receipt_rows") or 0),
+        "authority_file_sha256": authority.file_sha256,
+        "authority_rows_sha256": authority.payload_sha256,
+        "manifest_sha256": receipt.get("manifest_sha256"),
+    }
+    if outcome == "would_apply":
+        actions = list(authority.data["stale_actions"])
+        return {
+            **base,
+            "would_change": len(actions),
+            "receipt_rows": len(actions),
+            "bindings_to_remove": sum(
+                len(action["binding_element_ids"]) for action in actions
+            ),
+            "projections_to_remove": sum(
+                len(action["projection_element_ids"]) for action in actions
+            ),
+            "out_of_allowlist": authority.data["out_of_allowlist"],
+        }
+    if outcome == "already_applied":
+        return base
+    actions = list(authority.data["stale_actions"])
+    counters_before = authority.data["counters_before"]
+    counters_after = authority.data["counters_after"]
+    target_post = list(authority.data["target_post"])
+    return {
+        **base,
+        "change_ids": list(receipt.get("change_ids") or []),
+        "bindings_removed": sum(
+            int(action.get("bindings_removed") or 0)
+            for action in receipt.get("admitted_actions") or []
+        ),
+        "projections_removed": sum(
+            int(action.get("projections_removed") or 0)
+            for action in receipt.get("admitted_actions") or []
+        ),
+        "minimum_live_producers_after": min(
+            int(row["live_producers"]) for row in target_post
+        ),
+        "minimum_live_children_after": min(
+            int(row["live_children"]) for row in target_post
+        ),
+        "StandardNameChange": {
+            "before": int(counters_before["changes"]),
+            "after": int(counters_after["changes"]),
+            "delta": len(actions),
+        },
+        "LLMCost": {
+            "before": int(counters_before["llm_costs"]),
+            "after": int(counters_after["llm_costs"]),
+            "delta": 0,
+        },
+        "out_of_allowlist": authority.data["out_of_allowlist"],
+    }
+
+
+def _project_receipt(authority: _Authority, receipt: dict[str, Any]) -> dict[str, Any]:
+    return _project_stale_source_receipt(
+        authority, _project_refused_target_orphan_receipt(authority, receipt)
+    )
+
+
 @retry_on_deadlock()
 def apply_signed_manifest(
     authority_path: str | Path | dict[str, Any],
-    *,
+    *legacy_args: Any,
     authority_file_sha256: str | None = None,
     authority_payload_sha256: str | None = None,
     authority_sha256: str | None = None,
@@ -1335,12 +2228,47 @@ def apply_signed_manifest(
     baselines are always read again inside this invocation.
     """
     if not reason.strip():
-        raise ValueError("signed-manifest apply requires a non-empty reason")
+        message = (
+            "stale-source detach requires a non-empty reason"
+            if authority_adapter == _STALE_SOURCE_ADAPTER
+            else "signed-manifest apply requires a non-empty reason"
+        )
+        raise ValueError(message)
     if apply and manifest_sha256 is None:
-        raise ValueError("signed-manifest apply requires manifest_sha256")
+        message = (
+            "stale-source detach apply requires manifest_sha256"
+            if authority_adapter == _STALE_SOURCE_ADAPTER
+            else "signed-manifest apply requires manifest_sha256"
+        )
+        raise ValueError(message)
     if manifest_sha256 is not None:
         _require_sha256(manifest_sha256, "manifest_sha256")
-    if authority_adapter == _REFUSED_TARGET_ORPHAN_ADAPTER:
+    if authority_adapter == _STALE_SOURCE_ADAPTER:
+        if len(legacy_args) != 2:
+            raise SignedManifestAuthorityError(
+                "stale-source repair requires graph client, authority path, and source ids"
+            )
+        if gc is not None:
+            raise SignedManifestAuthorityError(
+                "stale-source repair graph client was supplied twice"
+            )
+        gc = authority_path
+        stale_authority_path, source_ids = legacy_args
+        if not isinstance(source_ids, Sequence) or isinstance(source_ids, str | bytes):
+            raise SignedManifestAuthorityError(
+                "stale-source repair requires an exact source-id sequence"
+            )
+        authority = _load_stale_source_authority(
+            stale_authority_path,
+            source_ids,
+            mutation_kind=mutation_kind,
+            guard_set=guard_set,
+        )
+    elif authority_adapter == _REFUSED_TARGET_ORPHAN_ADAPTER:
+        if legacy_args:
+            raise SignedManifestAuthorityError(
+                "orphan retirement does not accept positional adapter arguments"
+            )
         if authority_sha256 is None:
             raise SignedManifestAuthorityError(
                 "orphan retirement requires authority_sha256"
@@ -1352,6 +2280,10 @@ def apply_signed_manifest(
             guard_set=guard_set,
         )
     else:
+        if legacy_args:
+            raise SignedManifestAuthorityError(
+                "generic signed authority does not accept positional adapter arguments"
+            )
         if authority_adapter is not None:
             raise SignedManifestAuthorityError(
                 f"unsupported signed authority adapter: {authority_adapter}"
@@ -1379,7 +2311,7 @@ def apply_signed_manifest(
                     replay = _replay(query, authority, str(manifest_sha256))
                     if replay is not None:
                         transaction.rollback()
-                        return _project_refused_target_orphan_receipt(authority, replay)
+                        return _project_receipt(authority, replay)
 
                 preview = _build_preview(query, authority, reason)
                 counts = {
@@ -1411,8 +2343,12 @@ def apply_signed_manifest(
                         "authority_file_sha256": authority.file_sha256,
                         "authority_payload_sha256": authority.payload_sha256,
                     }
-                    return _project_refused_target_orphan_receipt(authority, receipt)
+                    return _project_receipt(authority, receipt)
                 if preview.manifest_sha256 != manifest_sha256:
+                    if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
+                        raise StaleSourceDetachConflict(
+                            "fresh stale-source closure does not match manifest SHA-256"
+                        )
                     raise SignedManifestConflict(
                         "fresh signed-manifest closure does not match authorized SHA-256"
                     )
@@ -1426,10 +2362,10 @@ def apply_signed_manifest(
                         "refusals": preview.refusals,
                         "manifest_sha256": preview.manifest_sha256,
                     }
-                    return _project_refused_target_orphan_receipt(authority, receipt)
+                    return _project_receipt(authority, receipt)
                 if authority.data.get("all_or_nothing") and preview.refusals:
                     transaction.rollback()
-                    return _project_refused_target_orphan_receipt(
+                    return _project_receipt(
                         authority,
                         {
                             "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
@@ -1446,6 +2382,10 @@ def apply_signed_manifest(
                 _lock_participants(query, preview)
                 locked_preview = _build_preview(query, authority, reason)
                 if locked_preview.manifest_sha256 != preview.manifest_sha256:
+                    if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
+                        raise StaleSourceDetachConflict(
+                            "stale-source closure changed while locking"
+                        )
                     raise SignedManifestConflict(
                         "signed-manifest closure changed while locking"
                     )
@@ -1455,6 +2395,7 @@ def apply_signed_manifest(
                            COUNT { (:LLMCost) } AS llm_costs
                     """
                 )[0]
+                authority.data["counters_before"] = counters_before
                 mutation_count = sum(
                     _apply_mutation(query, action) for action in locked_preview.admitted
                 )
@@ -1501,6 +2442,7 @@ def apply_signed_manifest(
                            COUNT { (:LLMCost) } AS llm_costs
                     """
                 )[0]
+                authority.data["counters_after"] = counters_after
                 if (
                     int(counters_after["changes"]) - int(counters_before["changes"])
                     != len(change_ids)
@@ -1523,8 +2465,9 @@ def apply_signed_manifest(
                     "authority_file_sha256": authority.file_sha256,
                     "authority_payload_sha256": authority.payload_sha256,
                     "change_ids": change_ids,
+                    "admitted_actions": locked_preview.admitted,
                 }
-                return _project_refused_target_orphan_receipt(authority, receipt)
+                return _project_receipt(authority, receipt)
             except BaseException:
                 if not transaction.closed:
                     transaction.rollback()
