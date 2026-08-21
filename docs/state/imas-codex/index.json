@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T11:28:17",
+  "updated": "2026-08-21T11:39:47",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -188,8 +188,13 @@
           },
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "Sole open item at 99%, and its shape has changed. The interlock is broken: dual-bound sources are down to 23 and the 16 signed retirements are applied, so the remaining work is no longer coupled. A $1.60 regeneration experiment proved the 36 orphans cannot be re-sourced, which converts them from a coupled blocker into an independent retirement worklist the already-landed dual-authority operator can execute.",
-            "done_when": "The 36 genuine orphans are dispositioned through the landed dual-authority retirement operator with a per-identity ledger row and no bulk rule on an accepted name, on the evidence that a corpus-wide compose declines to emit them; the remaining 23 dual-bound sources and the owner/geometry residue are applied or carry recorded fail-closed refusals; the five sub-threshold or absent identities and the two fold ancestors get one fresh quorum draw each against the corrected rc66 grammar, since every prior draw was scored against rc9; electron_source_rate is reviewed after its two failed sources are reset; and the voltage_of_diagnostic_antenna rename is settled by deciding between a sanctioned source-less rename transition and an authoritative live producer, since its only producer is stale and detaching it would strip its last. Closing on recorded refusals remains legitimate where a policy refusal, a genuinely unrealized projection, or a below-threshold quorum result is the correct answer."
+            "why_now": "Sole open repair item at 99%, and its shape has changed twice. The interlock is broken: dual-bound sources are down to 23 and the 16 signed retirements are applied. A $1.60 regeneration experiment proved the 36 orphans cannot be re-sourced, and the lead then locked deletion rather than retirement for anything never released through a pull request, which turns a judgement queue into a mechanical worklist.",
+            "done_when": "The 36 genuine orphans are partitioned by catalog release provenance and dispositioned through the landed ledgered operator: deleted outright where never released through a pull request, superseded only where released, each with a per-identity receipt and the last-producing-source closure proof, and no bulk rule on a released name; the remaining 23 dual-bound sources and the owner/geometry residue are applied or carry recorded fail-closed refusals; the five sub-threshold or absent identities and the two fold ancestors get one fresh quorum draw each against the corrected rc66 grammar, since every prior draw was scored against rc9; electron_source_rate is reviewed after its two failed sources are reset; and the voltage_of_diagnostic_antenna rename is settled by deciding between a sanctioned source-less rename transition and an authoritative live producer. Closing on recorded refusals remains legitimate where a policy refusal, a genuinely unrealized projection, or a below-threshold quorum result is the correct answer."
+          },
+          {
+            "slug": "dd-version-resilient-resolution",
+            "why_now": "In-theme for this sprint and it already halted work here: a dictionary label mismatch aborted a scoped run over 42 paths, and 8,680 sources still carry a version label older than the graph's snapshot. Every future dictionary bump repeats that stop until resolution compares content instead of labels, so it belongs beside the integrity repair rather than behind it.",
+            "done_when": "resolve_dd_row adopts the content-convergence test that _read_graph_field already implements, so a byte-identical row is never refused for carrying an older stamp; refusal is scoped to the changed leaf rather than fatal to the run; a property test proves a no-op dictionary bump produces zero refusals over the full source corpus and fails against the current label-equality behaviour; a changed leaf still fails closed and demands review; and no bulk re-stamp of the 8,680 labels is performed."
           }
         ]
       },
@@ -338,9 +343,14 @@
         "when": "2026-08-21",
         "who": "reckon-ship",
         "what": "S8 restated against measurement after two execution sessions. Dual-bound 226 to 23, stale-with-binding 58 to 3, signed retirements 16 to 0, measurement-position producers 61 to 28, 11 identities accepted, spend $3.47 of $150. Regeneration was tried as the locked family-topology-repair decision prescribes and disproved for the orphans at a cost of $1.60: compose re-emits parents and never proposes the orphan children, so their disposition is retirement rather than re-sourcing. Root-caused and fixed a stale grammar snapshot serving rc9 under a string-ordered version fallback while rc66 was pinned, with ISN's graph spec omitting 175 public physical_base tokens. Landed live-graph ratchets for three previously unasserted invariant classes. Captured execution doctrine in the plan and raised sn-repair-operator-consolidation and dd-version-resilient-resolution as separate plans."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "Simon McIntosh",
+        "what": "Two authority decisions. Names never approved through a catalog pull request are DELETED rather than retired when they lose their home, since retirement exists to preserve a published identity and superseding an unreleased name leaves residue in a catalog it never entered; of the 36 orphans only 3 carry catalog-edit origin, so the great majority simply go. And dd-version-resilient-resolution joins S8 rather than sitting in backlog, because a dictionary label mismatch already halted a scoped run and 8,680 sources still carry an older label, so every future bump repeats the stop until resolution compares content instead of labels."
       }
     ],
     "blockers": [],
-    "_version": 39
+    "_version": 40
   }
 }
