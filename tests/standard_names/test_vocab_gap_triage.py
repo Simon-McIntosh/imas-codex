@@ -116,7 +116,7 @@ def test_write_stamps_every_node_with_its_bucket() -> None:
     gc = _client()
     triage_vocab_gaps(gc, stale_before=STALE_BEFORE, dry_run=False)
     assert gc.query.call_count == 2
-    (_, ), kwargs = gc.query.call_args
+    (_,), kwargs = gc.query.call_args
     items = {it["id"]: it["bucket"] for it in kwargs["items"]}
     assert items["vocab_gap:device:lower_hybrid_antenna_module"] == "reuse"
     assert items["vocab_gap:physical_base:orbit_integral"] == "retired_stale"

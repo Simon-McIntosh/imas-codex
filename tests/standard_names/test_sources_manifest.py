@@ -79,7 +79,9 @@ def test_is_sources_file(tmp_path):
 
 def test_expand_mixes_files_and_bare_paths(tmp_path):
     p = _write(tmp_path, VALID)
-    got = expand_focus_tokens(["core_profiles/profiles_1d/zeff", str(p), "magnetics/ip"])
+    got = expand_focus_tokens(
+        ["core_profiles/profiles_1d/zeff", str(p), "magnetics/ip"]
+    )
     assert got == [
         "core_profiles/profiles_1d/zeff",
         "magnetics/ip",
