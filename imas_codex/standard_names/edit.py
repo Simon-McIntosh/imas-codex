@@ -1259,6 +1259,74 @@ def _fold_unit_authority(
     return (str(edge or scalar) if edge or scalar else None), None
 
 
+def _derive_rename_unit(
+    gc: GraphClient, sn_id: str, predecessor_unit: str | None
+) -> str | None:
+    """Return unanimous DD unit authority for a renamed successor.
+
+    A rename changes the asserted quantity, so the predecessor's unit is not
+    successor authority. Every DD source migrated by the rename is resolved
+    through its backing node and cardinality-one ``HAS_UNIT`` edge. The rename
+    refuses incomplete or conflicting DD authority rather than selecting one
+    source arbitrarily. Names without DD sources retain their existing unit;
+    their signal-derived unit policy is outside this DD-specific boundary.
+    """
+    rows = gc.query(
+        """
+        // EDIT_DERIVE_RENAME_UNIT
+        MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->
+              (:StandardName {id: $id})
+        WHERE source.source_type = 'dd'
+        OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(node:IMASNode)
+        OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+        WITH source, node, collect(DISTINCT unit.id) AS relationship_units
+        RETURN source.id AS source_id,
+               node.id AS dd_path,
+               node.unit AS dd_unit,
+               relationship_units AS dd_relationship_units
+        ORDER BY source.id, node.id
+        """,
+        id=sn_id,
+    )
+    if not rows:
+        return predecessor_unit
+
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+    authorities: list[tuple[str, str]] = []
+    for row in rows:
+        source_id = str(row.get("source_id") or "<unknown>")
+        dd_path = row.get("dd_path")
+        if not dd_path:
+            raise ValueError(
+                f"rename unit derivation refused: DD source {source_id!r} "
+                "has no backing IMASNode"
+            )
+        unit, refusal = _fold_unit_authority(
+            {"unit": row.get("dd_unit")},
+            [{"unit_id": value} for value in (row.get("dd_relationship_units") or [])],
+            f"DD source {source_id!r}",
+        )
+        if refusal:
+            raise ValueError(f"rename unit derivation refused: {refusal}")
+        if unit is None:
+            raise ValueError(
+                f"rename unit derivation refused: DD source {source_id!r} "
+                "has no unit authority"
+            )
+        canonical = canonical_or_none(unit)
+        authorities.append((canonical or f"raw:{unit}", unit))
+
+    canonical_units = {canonical for canonical, _unit in authorities}
+    if len(canonical_units) != 1:
+        units = sorted({unit for _canonical, unit in authorities})
+        raise ValueError(
+            "rename unit derivation refused: DD source cohort disagrees on "
+            f"unit authority: {units}"
+        )
+    return authorities[0][1]
+
+
 def _fold_target_paths(
     snapshot: dict[str, Any],
     old_sources: list[dict[str, Any]],
@@ -2247,6 +2315,8 @@ def _apply_rename(
             r for r in plan_result.renamed if r["from"] != refine_root_old
         ]
 
+    successor_unit = _derive_rename_unit(gc, refine_root_old, root_row.get("unit"))
+
     if dry_run:
         actions.append(
             f"[dry-run] would rename {refine_root_old!r} → {refine_root_new!r}"
@@ -2274,7 +2344,7 @@ def _apply_rename(
         new_name=refine_root_new,
         description=root_row.get("description") or "",
         kind=root_row.get("kind") or "scalar",
-        unit=root_row.get("unit"),
+        unit=successor_unit,
         physics_domain=root_row.get("physics_domain"),
         tags=root_row.get("tags") or [],
         old_chain_length=root_row.get("chain_length") or 0,
@@ -2312,7 +2382,8 @@ def _apply_rename(
     # grammar-valid-but-semantically/structurally-invalid replacement is
     # quarantined here and can never reach 'accepted' (the review worker
     # persists a 0.0 review for quarantined names). No privileged path.
-    _stamp_successor_validation(gc, successor, root_row)
+    successor_row = {**root_row, "unit": successor_unit}
+    _stamp_successor_validation(gc, successor, successor_row)
 
     actions.append(
         f"renamed {refine_root_old!r} → {successor!r}, entering name review "
