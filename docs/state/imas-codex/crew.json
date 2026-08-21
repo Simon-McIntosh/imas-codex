@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-20T23:20:03",
+  "updated": "2026-08-21T11:11:40",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9460,9 +9460,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T085507035497-sgwi-orphan-regeneration",
+        "plan": "sn-graph-wide-integrity",
+        "section": "remaining-work",
+        "node": "sgwi-orphan-regeneration",
+        "role": "implement",
+        "member": "impl-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T08:55:10Z",
+        "completed_at": "2026-08-21T09:11:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 977,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 977,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "9e3837d34ffb1f60b4bdff89136af010625e5694",
+        "commits": [
+          "4187eeff4ccab9da6869adea8aa567d3d2759c4e"
+        ],
+        "changed_lines": {
+          "added": 163,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Valuable negative result for 1.60 dollars: regeneration does not fix the orphans. Genuine orphans measured 36 before and 36 after, with 0 of 36 gaining a producing source, because compose over the 42 focus paths under the active rc66 grammar re-emitted the PARENT names and never proposed the orphan children. Of 23 reset parents, 18 returned accepted, 3 drafted and 2 reviewed. Session spend 3.472392 of 150. Two things this exposes. First, my done-when demanded every acceptance carry a fresh quorum score, but 17 accepted derived parents legitimately used the sanctioned structural-inheritance path with a null score, so the gate was mis-specified against documented pipeline behaviour and only safety_factor could satisfy it, at 0.9625. Second, the run stopped on a deterministic DDResolutionVersionMismatch involving a DD 4.1.0 unit resolution and a reconstructed n_e source that is not on the authoritative snapshot; that needs an authority decision, not a retry. Strategic consequence: these orphans are over-created names rather than under-bound sources, so their disposition is retirement under the locked D-orphans policy where every authoritative source is absent, not re-sourcing.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T085507035497-sgwi-orphan-regeneration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01880-5c67-70c3-bef4-e30cb2267b48",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9870080,
+            "cached_input_tokens_cumulative": 26097920,
+            "input_tokens": 10247772,
+            "input_tokens_cumulative": 27399023,
+            "output_tokens": 25651,
+            "output_tokens_cumulative": 88595,
+            "reasoning_output_tokens": 9613,
+            "reasoning_output_tokens_cumulative": 28783
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 208
+    "_version": 209
   }
 }
