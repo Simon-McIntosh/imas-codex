@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="211">
-<meta name="plan-impl" content="0.998">
+<meta name="plan-version" content="212">
+<meta name="plan-impl" content="0.9985">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1773,6 +1773,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="remaining-work" data-id="c-20260821-ratchetdiag" data-who="reckon-ship" data-when="2026-08-21T10:42:00+00:00">
     <div class="r-comment-body">ratchetdiag landed - commit d373bdba, merge into main, gate passed. This answers a live regression the coordinator measured before dispatch: two of the four ratchets sit above their 2026-08-20 ceilings, dual-bound at 27 against 23 and stale-live at 9 against 3. Measure: all 36 rows across both classes are row-complete classified and sum exactly - 26 standing refusals, 8 transient reconcile artifacts, 2 genuine regrowth. The 27 dual-bound rows are the 23 exact baseline standing refusals plus 4 transient edges exposed while toroidal_momentum_flux sits drafted in an interrupted scoped run. The 9 stale-live rows are 3 exact baseline refusals, the same 4 transient bindings, and 2 genuine regrowth rows, derived:electron_diffusivity and derived:ion_diffusivity. Recommendation is HOLD both ceilings, not raise them, and no ceiling constant was edited. Root cause of the 2 genuine rows: reconcile_orphan_parent_sources recreated PRODUCED_NAME during an interrupted run while preserving stale status, so a stale derived source was rebound live with no lifecycle transition - after explicit stale-source-detach ledger changes had already removed it. That is a code defect, not decay, and it is dispatched as its own repair node. The second follow-on is to complete or deliberately recover the interrupted toroidal_momentum_flux regeneration, which clears the 4 transient rows in both classes. Artifacts: docs/evidence/sn-graph-wide-integrity/ratchet-regrowth-triage.md and a read-only live-census receipt, SHA-256 98725ae9.</div>
+</div>
+<div class="r-comment" data-section="remaining-work" data-id="c-20260821-reconcilefix" data-who="reckon-ship" data-when="2026-08-21T11:05:00+00:00">
+    <div class="r-comment-body">reconcilefix landed - commit 0c0684a5, merge into main, gate passed. Measure: a disposable-Neo4j regression using the two real production exemplar identities was observed RED before the change, asserting bindings 0 and measuring 1, and passes after; both reconcile paths were exercised, scalar and batched. Full standard_names suite 6,536 passed / 8 skipped / 246 deselected / 0 failed in 192.52s, the same baseline. The guard sits in three places so no route bypasses it: the scalar candidate selector excludes an existing derived source at status stale, the scalar write repeats the guard so a caller-supplied classification cannot override it, and the batched write counts stale members before writing so any stale member empties the pipeline and the existing exact-cardinality check raises - a mixed batch cannot partially revive live bindings. Missing and non-stale structural sources keep their established seed behaviour. The docstring now states the rule as mechanism: a stale structural source is a lifecycle tombstone and is never rebound implicitly. This unblocks the production-mutator lane, which was deliberately held shut all session because reconcile runs inside sn run and would have manufactured the same defect. Two notes. The already-live production bindings for derived:electron_diffusivity and derived:ion_diffusivity are untouched and need the separate authorized mutation node. And the manifest recorded a commit SHA that does not exist, 0c0684a5b162, because the worker amended after writing the line; the real commit is 0c0684a54255, verified by content on a clean worktree, and that is what was merged and promoted.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
