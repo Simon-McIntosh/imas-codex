@@ -51,6 +51,35 @@
     migration: 8,536 sources at 4.1.0, 385 at 4.1.1, 695 with none.</p>
     <p>Artifact: <code>tests/standard_names/test_dd_version_resilience.py</code>.</p>
   </section>
+
+  <section id="per-leaf-batch">
+    <h2>A changed leaf refuses itself, not the run</h2>
+    <p><strong>Landed 2026-08-21</strong> &mdash; commit <code>6be291be</code>, 7 files,
+    199 insertions, 37 deletions. <code>resolve_dd_rows</code> was an all-or-error list
+    comprehension, so the first raise ended the batch &mdash; which is how one stale
+    stamp stopped a scoped run over 42 paths. It now returns a typed
+    <code>DDResolutionBatchResult</code> of resolved rows beside refusal records, each
+    refusal carrying its exact path and <code>DDResolutionField</code>. The
+    changed-leaf property was observed failing first, then passes: 9 of 10 synthetic
+    rows resolve and exactly one refusal is returned, at
+    <code>synthetic_resilience/source_0/value:unit</code>.</p>
+
+    <p><strong>Every call site associates by row index, never by position.</strong> All
+    7 live production callers were converted. This mattered more than it looks: one
+    caller, <code>pool_adapter.py</code>, paired rows to results with
+    <code>zip(items, contexts, strict=True)</code>. Under a contract that can return
+    fewer results than inputs, a silent compatibility iterator there would have
+    misassociated a source row with another row's resolution &mdash; invisibly, which
+    is strictly worse than the abort it replaced.</p>
+
+    <p><strong>Narrowing refusal did not weaken authority.</strong> A structural
+    authority error that carries no leaf and no field still fails the entire batch
+    closed. Per-leaf scoping applies only to what is genuinely leaf-scoped.</p>
+
+    <p>Suite 6,543 passed / 8 skipped / 0 failed; ruff check and format both exit 0.
+    The scope of this node was extended mid-flight to add the seventh caller, so it is
+    excluded from effort calibration.</p>
+  </section>
 </main>
 </body>
 </html>

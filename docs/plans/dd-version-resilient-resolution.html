@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="dd-version-resilient-resolution">
   <meta name="plan-title" content="A Dictionary Bump Must Produce a Diff, Not a Wall">
   <meta name="plan-summary" content="Make Standard Name resolution treat the recorded data-dictionary version as provenance rather than identity, so a dictionary bump refuses only the leaves whose content actually changed instead of aborting work on every source carrying an older label.">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-sprint" content="S8">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="6.0">
@@ -23,13 +23,35 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="3">
-<meta name="plan-commits" content="3d68f699">
-<meta name="plan-artifacts" content="tests/standard_names/test_dd_version_resilience.py,docs/evidence/archive/dd-version-resilient-resolution-landed.html">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="5">
+<meta name="plan-commits" content="3d68f699,6be291be,91dfa9c4">
+<meta name="plan-artifacts" content="tests/standard_names/test_dd_version_resilience.py,docs/evidence/archive/dd-version-resilient-resolution-landed.html,docs/evidence/dd-version-resilient-resolution/merged-main-verification.md">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
+
+    <section class="section-landed" id="landed">
+      <header>
+        <span class="badge badge-shipped">&#10003; shipped 2026-08-21</span>
+        <h2>Landed &mdash; a dictionary bump now produces a diff</h2>
+      </header>
+      <p class="landed-summary">
+        Version became provenance by <strong>deleting four lines</strong>:
+        <code>resolve_dd_row</code>'s label-equality refusal is gone, so a row routes
+        through the <code>_read_graph_field</code> convergence test that was already in
+        the same module (<code>3d68f699</code>). Batch refusal is now per-leaf &mdash;
+        <code>resolve_dd_rows</code> returns a typed result of resolved rows plus
+        refusals carrying exact path and field, and all <strong>7</strong> production
+        call sites associate rows by index rather than position
+        (<code>6be291be</code>). All four &#167;4 properties pass, each written before
+        its fix and observed failing first; suite <strong>6,543 passed / 8 skipped /
+        0 failed</strong>. Fail-closed is intact: an unreviewed value still raises, and
+        a structural authority error with no leaf still fails the whole batch. No label
+        was re-stamped, so the 8,536 sources at 4.1.0 keep their extraction provenance.
+        Full record: <a href="/imas-codex/evidence/archive/dd-version-resilient-resolution-landed">landed evidence</a>.
+      </p>
+    </section>
 
     <h2 id="s1">&#167;1 &mdash; The failure this exists to prevent</h2>
     <p>
@@ -161,16 +183,20 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-dvrr-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dd-version-resilient-resolution §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-dvrr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship dd-version-resilient-resolution §4" data-resolved-at="2026-08-21T11:20:55+00:00" data-resolved-by="reckon-ship">
     <h4 class="r-fu-title">Write the no-op-bump property test first, then adopt convergence in resolve_dd_row</h4>
     <div class="r-fu-body"><p>Start with section 4's first test, because it is the one that would have caught this defect and it fails today: synthesize a dictionary version whose leaves are content-identical to the current one, then assert that resolution over the full source corpus raises nothing. With that test red, adopt the <code>_read_graph_field</code> convergence comparison inside <code>resolve_dd_row</code> so a byte-identical row is no longer refused for carrying an older stamp, and make refusal scoped to the changed leaf rather than fatal to the run. Do not bulk re-stamp the 8,537 sources carrying an older label; section 3 item 5 rejects that explicitly, and doing it would hide extraction provenance and need redoing at the next bump. Keep the fail-closed behaviour for genuine content changes intact and prove it with section 4's third test, so the change cannot be mistaken for weakening review authority.</p></div>
     <pre class="r-fu-prompt">/reckon-ship dd-version-resilient-resolution §4</pre>
+    <p class="r-fu-outcome">Done, and in the order the followup asked for. The no-op-bump property was written first and observed failing with the verbatim label-only DDResolutionVersionMismatch, then resolve_dd_row adopted the existing _read_graph_field convergence comparison by deleting its four-line label-equality guard, then refusal was scoped to the changed leaf via a typed batch result consumed by all 7 call sites. Fail-closed behaviour is intact and proven: an unreviewed value still raises, and a structural authority error with no leaf still fails the batch closed. No bulk re-stamp was performed, so the 8,536 sources at 4.1.0 keep their extraction provenance. All four section 4 tests exist and pass; suite 6,543 passed / 8 skipped / 0 failed. Plan complete - done, no followup. Verification of integrated main is recorded separately as a failed gate whose remaining findings belong to other plans, not to this one.</p>
     </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s4" data-id="c-20260821-ddconv" data-who="reckon-ship" data-when="2026-08-21T10:42:00+00:00">
     <div class="r-comment-body">ddconv landed - commit 3d68f699, merge into main, gate passed. Measure: the no-op-bump property test was written first and observed red, failing with the verbatim label-only DDResolutionVersionMismatch; after the fix the focused module is 3 passed / 0 failed and the full tests/standard_names/ suite is 6,536 passed / 8 skipped / 0 failed. The production change is four lines and nothing else - the row-label equality refusal at resolve_dd_row is gone, so a row now retains the requested authoritative version and routes through the existing _read_graph_field observed/effective convergence test. Properties proven: a no-op bump resolves 10/10 fields; a third value matching neither the observed nor the effective side still refuses on content; and every recorded-label mismatch count from 0 through 10 resolves 10/10 rows, which is the corpus check stated in section 4. resolve_dd_rows was left untouched and no dd_version label was re-stamped anywhere, so section 3 item 5 holds. Remaining: the per-leaf batch contract in resolve_dd_rows, dispatched as its own node because it changes the contract for roughly ten call sites.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821-ddbatch" data-who="reckon-ship" data-when="2026-08-21T11:20:00+00:00">
+    <div class="r-comment-body">ddbatch landed - commit 6be291be, merge into main, gate passed; scope was changed mid-node so this one is excluded from effort calibration. Measure: the changed-leaf property was observed red at 0 passed / 1 failed with the verbatim mismatch, and passes after; the batch resolves 9/10 synthetic rows and returns exactly 1 refusal at synthetic_resilience/source_0/value:unit. Full suite 6,543 passed / 8 skipped / 0 failed, ruff check and format both exit 0, naming checks clean. 7 files, 199 insertions, 37 deletions. resolve_dd_rows now returns a typed DDResolutionBatchResult of resolved rows and refusals, each refusal carrying its exact path and DDResolutionField, and all 7 live production call sites associate rows by row_index with no positional zip and no compatibility iterator. Two design points that matter more than the diff. A structural authority error that lacks a leaf and field still fails the whole batch closed, so per-leaf refusal narrows only what is genuinely leaf-scoped and does not weaken authority. And the fence caught a real hazard: my caller enumeration missed pool_adapter.py:205, whose zip(items, contexts, strict=True) pairs rows to results positionally; the worker stopped rather than write outside scope, and after the grant it converted that caller to row_index association. A silent compatibility iterator there would have misassociated rows invisibly, which is worse than the abort it replaced.</div>
 </div>
 </section>
 </main>

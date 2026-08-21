@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T13:13:10",
+  "updated": "2026-08-21T13:20:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -75,11 +75,25 @@
         "created": "2026-08-19"
       },
       {
+        "id": "impl-lintdebt",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "impl-locus",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-manifestdecl",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "impl-orphan",
@@ -143,6 +157,13 @@
         "role": "implement",
         "session_id": "01a00b82-b6c9-73e3-a7e6-cd5aa233c084",
         "created": "2026-08-16"
+      },
+      {
+        "id": "impl-torflux",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
       },
       {
         "id": "inv-ddover",
@@ -10184,9 +10205,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T110207059126-ddbatch",
+        "plan": "dd-version-resilient-resolution",
+        "section": "\u00a74",
+        "node": "ddbatch",
+        "role": "implement",
+        "member": "impl-ddres",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:02:10Z",
+        "completed_at": "2026-08-21T11:19:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1034,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1034,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f992afe4565addaddc86e7d4805cecd41f87ad37",
+        "commits": [
+          "6be291be76a5527f8b0f25176101131452dec12e"
+        ],
+        "changed_lines": {
+          "added": 184,
+          "removed": 33,
+          "files": 6
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T110207059126-ddbatch/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a00bd3-e27d-75f1-b16b-193c36ceda24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7990784,
+            "cached_input_tokens_cumulative": 233395200,
+            "input_tokens": 8331380,
+            "input_tokens_cumulative": 241832629,
+            "output_tokens": 24124,
+            "output_tokens_cumulative": 667286,
+            "reasoning_output_tokens": 8872,
+            "reasoning_output_tokens_cumulative": 188965
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 231
+    "_version": 235
   }
 }
