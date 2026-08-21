@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T16:26:16",
+  "updated": "2026-08-21T16:37:20",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -61,6 +61,13 @@
         "created": "2026-08-19"
       },
       {
+        "id": "impl-closecensus",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "impl-ddres",
         "harness": "codex",
         "role": "implement",
@@ -100,6 +107,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02428-2549-7000-b426-8034ffe598d0",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-freshdraw",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -295,7 +309,7 @@
         "id": "impl-voltrename",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a024b7-6391-74a1-a63b-8aff949d88c9",
         "created": "2026-08-21"
       },
       {
@@ -11920,9 +11934,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T142630253943-voltrename",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "voltrename",
+        "role": "implement",
+        "member": "impl-voltrename",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:26:33Z",
+        "completed_at": "2026-08-21T14:34:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 488,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 488,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "108687dd2a72d65553e2387f74afdc9bcc28cd8e",
+        "commits": [
+          "31a0ff1e"
+        ],
+        "changed_lines": {
+          "added": 91,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T142630253943-voltrename/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024b7-6391-74a1-a63b-8aff949d88c9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6452480,
+            "cached_input_tokens_cumulative": 6452480,
+            "input_tokens": 6659800,
+            "input_tokens_cumulative": 6659800,
+            "output_tokens": 17875,
+            "output_tokens_cumulative": 17875,
+            "reasoning_output_tokens": 5799,
+            "reasoning_output_tokens_cumulative": 5799
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 302
+    "_version": 306
   }
 }

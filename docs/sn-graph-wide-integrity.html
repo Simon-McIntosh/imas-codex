@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="225">
+<meta name="plan-version" content="226">
 <meta name="plan-impl" content="0.999">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1881,6 +1881,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s3c" data-id="c-20260821-esrate2" data-who="reckon-ship" data-when="2026-08-21T14:25:00+00:00">
     <div class="r-comment-body">esrate2 landed - commit a43fee7d, merge into main, gate passed, closing an item that had failed closed twice. Measure: two live graph integrity tests went from 2 failed / 0 passed to 2 passed / 0 failed - test_dd_attachment_unit_agrees_with_name and test_sn_unit_matches_linked_dd_path_unit - with 2 of 2 failed sources reset, 4 fresh quorum rows written, the successor accepted at canonical name score 0.94375, and spend USD 0.197112 of a USD 15 cap. The unit contradiction is gone by derivation, not by hand: both backing IMASNode scalar units and HAS_UNIT edges read m^-3.s^-1 while reviewed electron_source_rate declared s^-1, and the successor electron_volumetric_source_rate now carries m^-3.s^-1 exactly on both property and edge. This is the payoff of fixing causes rather than retrying: the earlier refusal isolated a composer/parser canonicalization disagreement and a rename path that inherited rather than derived its unit, canonform f9d8028b closed the first and unitderive e92bf42e the second, and the same work then went through on the ordinary route - sn retry --failed to reset 2 of 2, then sn edit --rename under review. Both sources moved exclusively to the successor at status attached with attempt_count 0, the predecessor superseded. No raw Cypher mutation, hand acceptance, hand promotion, unit edit or attachment edit was used anywhere.</div>
+</div>
+<div class="r-comment" data-section="s3c" data-id="c-20260821-voltrename" data-who="reckon-ship" data-when="2026-08-21T14:37:00+00:00">
+    <div class="r-comment-body">voltrename landed - commit 31a0ff1e, merge into main, gate passed on the plan-authorized fail-closed branch. This settles the voltage_of_diagnostic_antenna circularity as a STANDING RECORDED REFUSAL, which this plan states is a legitimate closure. Measure: 0 fresh quorum rows, 0 names accepted, 0 persistent graph writes, USD 0.00 of a USD 15 cap; the stale-source ledger stayed byte-identical at SHA-256 198a7cae and the three-identity family at 39fd8a93; StandardNameChange held at 7754 and LLMCost at 27619. The exact guard string is recorded: source migration compare-and-set failed: dd:ece/channel/t_e_voltage(exists=True, status='stale', claimed=False, bindings=['voltage_of_diagnostic_antenna'], scalar='voltage_of_diagnostic_antenna'). Both sanctioned routes are now closed by measurement rather than by argument - voltprod proved no authoritative live producer exists, and this node proved the public rename route cannot create a reviewable source-less successor without migrating the stale producer, which the guard correctly refuses. A future transition needs separately sanctioned operator authority to exclude a stale producer from migration while minting a reviewable source-less successor; the unchanged public rename route must not be retried. That capability is worth exactly one name today, which is why it is recorded rather than built.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
