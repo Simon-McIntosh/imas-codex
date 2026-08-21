@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:08:39",
+  "updated": "2026-08-21T15:11:03",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -110,10 +110,24 @@
         "created": "2026-08-19"
       },
       {
+        "id": "impl-machretarget",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "impl-manifestdecl",
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02407-7723-79e1-8140-131958616bc9",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-negative3",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -218,14 +232,14 @@
         "id": "impl-unitderive",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02467-9180-7bb3-9c5c-a01469229272",
         "created": "2026-08-21"
       },
       {
         "id": "impl-voltprod",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02467-84a0-7f81-a1f2-1127f1fa2d7c",
         "created": "2026-08-21"
       },
       {
@@ -11031,9 +11045,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T125916462014-voltprod",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "voltprod",
+        "role": "implement",
+        "member": "impl-voltprod",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T12:59:18Z",
+        "completed_at": "2026-08-21T13:09:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 600,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 600,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "d00744813a781e7ddf1ee0d93359d26eb8a00b9d",
+        "commits": [
+          "a4c7eea4"
+        ],
+        "changed_lines": {
+          "added": 556,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T125916462014-voltprod/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02467-84a0-7f81-a1f2-1127f1fa2d7c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6948096,
+            "cached_input_tokens_cumulative": 6948096,
+            "input_tokens": 7171422,
+            "input_tokens_cumulative": 7171422,
+            "output_tokens": 25089,
+            "output_tokens_cumulative": 25089,
+            "reasoning_output_tokens": 9710,
+            "reasoning_output_tokens_cumulative": 9710
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T125919857303-unitderive",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "unitderive",
+        "role": "implement",
+        "member": "impl-unitderive",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T12:59:22Z",
+        "completed_at": "2026-08-21T13:10:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 687,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 687,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "d00744813a781e7ddf1ee0d93359d26eb8a00b9d",
+        "commits": [
+          "e92bf42e"
+        ],
+        "changed_lines": {
+          "added": 147,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T125919857303-unitderive/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02467-9180-7bb3-9c5c-a01469229272",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6767360,
+            "cached_input_tokens_cumulative": 6767360,
+            "input_tokens": 6957410,
+            "input_tokens_cumulative": 6957410,
+            "output_tokens": 16334,
+            "output_tokens_cumulative": 16334,
+            "reasoning_output_tokens": 6826,
+            "reasoning_output_tokens_cumulative": 6826
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 267
+    "_version": 273
   }
 }
