@@ -2308,6 +2308,11 @@ classes:
         description: What initiated the change (pipeline phase, edit, cascade).
       run_id:
         description: The SNRun that produced the change, when applicable.
+      manifest_sha256:
+        pattern: "^[0-9a-f]{64}$"
+        description: >-
+          SHA-256 digest of the signed repair manifest whose authorized
+          mutation this change event records.
       changed_at:
         description: When the change was recorded.
         range: datetime
