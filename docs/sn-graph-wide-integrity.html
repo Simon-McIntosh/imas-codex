@@ -17,8 +17,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="214">
-<meta name="plan-impl" content="0.9985">
+<meta name="plan-version" content="215">
+<meta name="plan-impl" content="0.999">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
@@ -1785,6 +1785,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="remaining-work" data-id="c-20260821-lintdebt" data-who="reckon-ship" data-when="2026-08-21T11:23:00+00:00">
     <div class="r-comment-body">lintdebt landed - commit c6c25554, merge into main, gate passed. Measure: both ruff gates now exit 0 on integrated main, check reporting all checks passed and format reporting 1,104 files already formatted, verified again after the merge; suite 6,542 passed / 8 skipped / 0 failed. 5 tracked test files, 19 insertions, 6 deletions. The B017 finding was fixed properly rather than silenced: direct execution established that parse_standard_name('r_coordinate_of_flux_loop') raises UnknownBaseTokenError, and the bare pytest.raises(Exception) now names that type - imported from the public imas_standard_names.grammar surface rather than the private grammar.support module, which keeps the ISN import boundary intact. No noqa was added and no rule was loosened. The four generated files that also appeared in the format report - config/models.py, graph/dd_models.py, graph/models.py, graph/schema_context_data.py - are gitignored build products and were excluded rather than formatted, staged or committed. All five flagged files were last touched between 2026-07-05 and 2026-08-11 and none was touched by this session's work, so this was pre-existing debt cleared under the find-it-fix-it rule rather than fallout from any node here.</div>
+</div>
+<div class="r-comment" data-section="remaining-work" data-id="c-20260821-torflux" data-who="reckon-ship" data-when="2026-08-21T11:40:00+00:00">
+    <div class="r-comment-body">torflux landed - commit c5fedc78, merge into main, gate passed. Measure: ALL FOUR integrity ratchets now pass, 4 passed / 0 failed / 0 skipped, verified again by the coordinator on merged main at exit 0. Dual-bound sources 27 to 23 and stale-live bindings 7 to 3, both exactly at their frozen 2026-08-20 ceilings. Spend USD 0.660631 against the USD 20 cap, 5 LLM calls, StandardNameChange unchanged at 0. Route taken was ordinary-quorum completion, chosen from measured state: toroidal_momentum_flux was drafted, valid, unreviewed, unclaimed and successor-less. A fresh two-reviewer quorum scored the unchanged name 0.750 against the 0.85 threshold, then three charged refinement attempts each failed closed at compare-and-set source retargeting because the source closure held four stale and four dual-bound sources. The name reached the decided exhausted lifecycle with refine_attempts 3 and refine_stop_reason attempts_exhausted, no successor, no claim - a recorded refusal, which this plan holds legitimate. No hand acceptance, no hand promotion, no ceiling adjustment, no raw mutation. Coordinator verification of the one thing the ratchets cannot see: no ratchet covers semantic sources with no live target, the class this plan closed at zero, so exhausting a target could in principle have traded one defect for another. It did not. The four previously dual-bound sources each retain an accepted live target - toroidal_neutral_momentum_source, toroidal_ion_torque_density, toroidal_torque_density and toroidal_neutral_torque_density - so only the generic interpretation was retired and the specific one survived, which is the dual binding resolving the right way round. Measured graph-wide, 140 sources have no live target and ZERO of them carry a live status: 91 are stale tombstones, 46 are pre-composition extracted, 3 are the known failed sources. The class remains effectively closed.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">

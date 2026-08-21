@@ -100,6 +100,48 @@
     <p>Artifacts: <code>imas_codex/schemas/standard_name.yaml</code>,
     <code>tests/standard_names/test_repair_authority_schema.py</code>.</p>
   </section>
+
+  <section id="generic-operator">
+    <h2>One operator, eight steps, three mutation kinds, nine proofs</h2>
+    <p><strong>Landed 2026-08-21</strong> &mdash; commit <code>a17e6bbc</code>.
+    <code>apply_signed_manifest</code> implements the whole &#167;2 envelope once, in
+    1,111 lines, with a 593-line disposable-graph suite. <strong>9 of 9 graph cases
+    pass</strong>, one per envelope property rather than one per happy path.</p>
+
+    <table>
+      <caption>Envelope coverage &mdash; every case executed against a disposable Neo4j</caption>
+      <thead><tr><th>Property proven</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Preview closure emits a would-apply manifest</td><td>PASS</td></tr>
+        <tr><td><code>delete</code> apply &rarr; receipt &rarr; replay</td><td>PASS</td></tr>
+        <tr><td><code>supersede</code> apply &rarr; receipt &rarr; replay</td><td>PASS</td></tr>
+        <tr><td><code>detach</code> apply &rarr; receipt &rarr; replay</td><td>PASS</td></tr>
+        <tr><td>Maximal safe subset + last-producing-source refusal</td><td>PASS</td></tr>
+        <tr><td>Structural-legitimacy refusal</td><td>PASS</td></tr>
+        <tr><td>Collateral immutability refusal</td><td>PASS</td></tr>
+        <tr><td>Participant lock, re-hash, rollback</td><td>PASS</td></tr>
+        <tr><td>In-invocation receipt and provider counter baselines</td><td>PASS</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>The refusal reasons are asserted by exact string</strong>, because a
+    migration that changes <em>which</em> rows refuse has changed physics semantics
+    even when the counts match: <em>target would lose its last producing source</em>;
+    <em>target has a live structural child</em>; and <em>fresh signed-manifest closure
+    does not match authorized SHA-256 for untouched collateral drift</em>.</p>
+
+    <p><strong>The doctrine is built in rather than remembered.</strong> There is no
+    caller row list and no declared count anywhere in the operator: apply rebuilds its
+    own preview and re-reads its counter baselines inside one transaction, and a mixed
+    cohort applies the deterministic maximal refusal-free subset. Those are exactly the
+    three lessons that cost earlier sessions three overtaken cohorts.</p>
+
+    <p>Also recorded: the first attempt reported itself <strong>blocked</strong> rather
+    than passing, because all nine graph cases had skipped for want of an endpoint. A
+    skipped graph case is not-run, never a pass &mdash; the node was right to refuse,
+    and the fix was a provisioning recipe another node had already proven in the same
+    session, not a design change.</p>
+  </section>
 </main>
 </body>
 </html>

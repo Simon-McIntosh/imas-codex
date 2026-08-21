@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="7">
-<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f">
-<meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-version" content="8">
+<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc">
+<meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py">
+<meta name="plan-impl" content="0.75">
 </head>
 <body>
   <main class="plan-doc">
@@ -322,6 +322,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821-manifestdecl" data-who="reckon-ship" data-when="2026-08-21T11:27:00+00:00">
     <div class="r-comment-body">manifestdecl landed - commit 2bf92e4f, merge into main, gate passed. Measure: the live-graph compliance test went from 1 failure, reading exactly StandardNameChange: undeclared properties ['manifest_sha256'], to 1 passed; build-models --force exits 0 and the standard_names suite holds at 6,542 passed / 8 skipped / 0 failed. Five added lines in one file. The order matters and the node kept it: it first confirmed the writer at imas_codex/standard_names/graph_ops.py:18141, where the signed scalar-source repair receipt sets change.manifest_sha256 with the computed hash passed at line 18164, established that this is an intended capability rather than stray data, and only then declared the property - as a lowercase 64-character SHA-256 digest identifying the signed repair manifest whose authorized mutation the receipt records. A schema-compliance failure has three possible fixes and two of them are wrong here: no live value was deleted or rewritten, and the test was not weakened. Also worth keeping: the first focused invocation exited 5 with 1 deselected, and the node reported that as not-run rather than as a pass before re-running under -m graph. That is the graph-gate skip hazard behaving as designed.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821-genericop" data-who="reckon-ship" data-when="2026-08-21T11:40:00+00:00">
+    <div class="r-comment-body">genericop landed - commit a17e6bbc, merge into main, gate passed after a resume. Measure: 9 of 9 disposable-Neo4j cases pass, covering every part of the section 2 envelope - preview closure, delete apply-receipt-replay, supersede apply-receipt-replay, detach apply-receipt-replay, maximal subset with exact last-producing-source refusal, exact structural-legitimacy refusal, collateral immutability refusal, participant lock and re-hash rollback, and in-invocation receipt and provider counter baselines. 1,111 lines of operator and 593 of suite in the two fenced paths; three closed mutation kinds and three named guards. The three refusal strings are asserted exactly: target would lose its last producing source; target has a live structural child; and fresh signed-manifest closure does not match authorized SHA-256 for untouched collateral drift. Artifact bytes are checked against an out-of-band file digest and a canonical payload digest, there is no caller row list and no declared count anywhere, apply rebuilds its preview and reads its counter baselines inside one transaction, and a mixed cohort applies the deterministic maximal refusal-free subset - which is the doctrine this programme learned the expensive way, now built in rather than remembered. The disposable graph ran at bolt://127.0.0.1:39687, distinct from the project graph, and Neo4j logged Stopped with both ports closed. First attempt correctly reported itself BLOCKED rather than passing: all 9 graph cases had skipped for want of an endpoint, and a skipped graph case is not-run. The resume supplied the Apptainer recipe another node in the same session had already proven, so this was a provisioning gap and not a design problem.</div>
 </div>
 </section>
 </main>
