@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T15:18:46",
+  "updated": "2026-08-21T15:31:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -9,6 +9,13 @@
         "harness": "codex",
         "role": "documentation",
         "session_id": "01a023dc-deff-70d2-8734-8a503c9c3d37",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-attachmanifest",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0247a-b8a1-79c1-bcd5-ce93a4cc0f8a",
         "created": "2026-08-21"
       },
       {
@@ -113,7 +120,7 @@
         "id": "impl-machretarget",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02471-5511-7651-a0e0-734b97233055",
         "created": "2026-08-21"
       },
       {
@@ -11304,9 +11311,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T132014710375-attachmanifest",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "attachmanifest",
+        "role": "implement",
+        "member": "impl-attachmanifest",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:20:17Z",
+        "completed_at": "2026-08-21T13:28:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 520,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 520,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "81e635455486c8a73010c09103edaa7afebd5e2e",
+        "commits": [
+          "7de3bdde"
+        ],
+        "changed_lines": {
+          "added": 177,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T132014710375-attachmanifest/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0247a-b8a1-79c1-bcd5-ce93a4cc0f8a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3724544,
+            "cached_input_tokens_cumulative": 3724544,
+            "input_tokens": 3903036,
+            "input_tokens_cumulative": 3903036,
+            "output_tokens": 23509,
+            "output_tokens_cumulative": 23509,
+            "reasoning_output_tokens": 5783,
+            "reasoning_output_tokens_cumulative": 5783
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T130959992588-machretarget",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "machretarget",
+        "role": "implement",
+        "member": "impl-machretarget",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T13:10:01Z",
+        "completed_at": "2026-08-21T13:29:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1163,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1163,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "777210fe4890c4739bc0d012892b407dec25de29",
+        "commits": [
+          "6f9f5b3f"
+        ],
+        "changed_lines": {
+          "added": 118,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T130959992588-machretarget/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02471-5511-7651-a0e0-734b97233055",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9087232,
+            "cached_input_tokens_cumulative": 9087232,
+            "input_tokens": 9485079,
+            "input_tokens_cumulative": 9485079,
+            "output_tokens": 45816,
+            "output_tokens_cumulative": 45816,
+            "reasoning_output_tokens": 15283,
+            "reasoning_output_tokens_cumulative": 15283
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 279
+    "_version": 284
   }
 }
