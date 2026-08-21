@@ -55,11 +55,32 @@ _MUTATION_KINDS = frozenset(
 _LAST_PRODUCER = "last-producing-source"
 _STRUCTURAL_LEGITIMACY = "structural-legitimacy"
 _COLLATERAL_IMMUTABILITY = "out-of-allowlist-immutability"
+_SIGNED_LIFECYCLE = "signed-lifecycle-and-claim"
+_NO_LIVE_PRODUCER = "no-live-producing-source"
+_NO_LIVE_STRUCTURAL_CHILD = "no-live-structural-child"
 _GUARD_KINDS = {
     _LAST_PRODUCER: RepairGuardKind.semantic_authority.value,
     _STRUCTURAL_LEGITIMACY: RepairGuardKind.semantic_authority.value,
     _COLLATERAL_IMMUTABILITY: RepairGuardKind.collateral_immutability.value,
+    _SIGNED_LIFECYCLE: RepairGuardKind.semantic_authority.value,
+    _NO_LIVE_PRODUCER: RepairGuardKind.semantic_authority.value,
+    _NO_LIVE_STRUCTURAL_CHILD: RepairGuardKind.semantic_authority.value,
 }
+
+_REFUSED_TARGET_ORPHAN_ADAPTER = "refused-target-orphan"
+_REFUSED_TARGET_ORPHAN_SCHEMA = "imas-codex.refused-target-orphan-adjudication.v2"
+_REFUSED_TARGET_ORPHAN_DISPOSITION = "retire_under_orphan_policy"
+_REFUSED_TARGET_ORPHAN_RECEIPT_SCHEMA = (
+    "imas-codex.signed-provenance-orphan-retirement-receipt.v1"
+)
+_REFUSED_TARGET_ORPHAN_DISPOSITIONS = frozenset(
+    {
+        "preserve_as_structural_identity",
+        "re_source_from_existing_dd_path",
+        "retain_competing_binding",
+        _REFUSED_TARGET_ORPHAN_DISPOSITION,
+    }
+)
 
 
 class SignedManifestAuthorityError(ValueError):
@@ -369,6 +390,233 @@ def _load_authority(
     )
 
 
+def _load_refused_target_orphan_authority(
+    source: str | Path | dict[str, Any],
+    *,
+    expected_sha256: str,
+    mutation_kind: str | None,
+    guard_set: tuple[str, ...] | None,
+) -> _Authority:
+    """Adapt the committed orphan adjudication without changing its bytes."""
+    _require_sha256(expected_sha256, "authority_sha256")
+    if isinstance(source, dict):
+        data = source
+    else:
+        try:
+            data = json.loads(Path(source).read_bytes())
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise SignedManifestAuthorityError(
+                "orphan authority file is not valid JSON"
+            ) from exc
+    if not isinstance(data, dict) or _digest(data) != expected_sha256:
+        raise SignedManifestAuthorityError(
+            "orphan retirement authority signature does not match"
+        )
+    if data.get("schema") != _REFUSED_TARGET_ORPHAN_SCHEMA:
+        raise SignedManifestAuthorityError(
+            "unsupported orphan retirement authority schema"
+        )
+    if data.get("read_only") is not True:
+        raise SignedManifestAuthorityError(
+            "orphan retirement authority must be read-only evidence"
+        )
+    raw_rows = data.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise SignedManifestAuthorityError(
+            "orphan retirement authority requires target rows"
+        )
+    if any(
+        not isinstance(row, dict)
+        or row.get("disposition") not in _REFUSED_TARGET_ORPHAN_DISPOSITIONS
+        for row in raw_rows
+    ):
+        raise SignedManifestAuthorityError(
+            "orphan retirement authority has an unknown disposition"
+        )
+    names = [row.get("name") for row in raw_rows]
+    if any(not isinstance(name, str) or not name for name in names):
+        raise SignedManifestAuthorityError(
+            "every orphan disposition requires an exact name"
+        )
+    if len(names) != len(set(names)):
+        raise SignedManifestAuthorityError("orphan disposition names must be unique")
+    disposition_counts = {
+        disposition: sum(row["disposition"] == disposition for row in raw_rows)
+        for disposition in sorted(_REFUSED_TARGET_ORPHAN_DISPOSITIONS)
+    }
+    summary = data.get("summary")
+    if (
+        not isinstance(summary, dict)
+        or summary.get("targets") != len(raw_rows)
+        or summary.get("disposition_sum") != len(raw_rows)
+        or summary.get("disposition_counts") != disposition_counts
+    ):
+        raise SignedManifestAuthorityError(
+            "orphan retirement authority summary does not match rows"
+        )
+
+    expected_guards = (
+        _SIGNED_LIFECYCLE,
+        _NO_LIVE_PRODUCER,
+        _NO_LIVE_STRUCTURAL_CHILD,
+        _COLLATERAL_IMMUTABILITY,
+    )
+    if mutation_kind != RepairMutationKind.supersede.value:
+        raise SignedManifestAuthorityError(
+            "orphan retirement requires the supersede mutation kind"
+        )
+    if guard_set != expected_guards:
+        raise SignedManifestAuthorityError(
+            "orphan retirement requires its exact signed guard set"
+        )
+
+    loaded_rows: list[_LoadedRow] = []
+    for raw_row in raw_rows:
+        if raw_row["disposition"] != _REFUSED_TARGET_ORPHAN_DISPOSITION:
+            continue
+        if raw_row.get("mutation_authority") != "classification_only":
+            raise SignedManifestAuthorityError(
+                "signed orphan evidence cannot directly grant source mutation"
+            )
+        name_stage = raw_row.get("name_stage")
+        if name_stage not in {"accepted", "reviewed", "drafted", "pending"}:
+            raise SignedManifestAuthorityError(
+                "signed orphan target requires a live lifecycle stage"
+            )
+        closure = raw_row.get("structural_closure")
+        if (
+            not isinstance(closure, dict)
+            or closure.get("classification") != "no_live_structural_descendant"
+            or closure.get("has_live_has_parent_child") is not False
+            or closure.get("has_live_refined_from_descendant") is not False
+            or closure.get("live_has_parent_children") != []
+            or closure.get("live_refined_from_descendants") != []
+        ):
+            raise SignedManifestAuthorityError(
+                "signed orphan retirement requires an empty structural closure"
+            )
+        removed_bindings = raw_row.get("current_removed_bindings")
+        if not isinstance(removed_bindings, list) or not removed_bindings:
+            raise SignedManifestAuthorityError(
+                "signed orphan retirement requires name-specific binding evidence"
+            )
+        name_id = str(raw_row["name"])
+        participant = {
+            "id": name_id,
+            "kind": RepairParticipantKind.node.value,
+            "graph_label": "StandardName",
+            "expected_name_stage": name_stage,
+            "authority_row_sha256": _digest(raw_row),
+        }
+        mutation = {
+            "id": f"{name_id}:supersede",
+            "order": 0,
+            "kind": RepairMutationKind.supersede.value,
+            "participant_id": name_id,
+            "preserve_source_paths": True,
+        }
+        guards = tuple(
+            {
+                "id": implementation,
+                "kind": _GUARD_KINDS[implementation],
+                "implementation": implementation,
+                "participant_ids": [name_id],
+            }
+            for implementation in expected_guards
+        )
+        loaded_rows.append(
+            _LoadedRow(
+                id=name_id,
+                identity={
+                    "id": name_id,
+                    "kind": "standard_name",
+                    "target_id": name_id,
+                },
+                participants=(participant,),
+                mutations=(mutation,),
+                guards=guards,
+                orphan_policy="refuse",
+            )
+        )
+    loaded_rows.sort(key=lambda row: row.id)
+    if not loaded_rows:
+        raise SignedManifestAuthorityError(
+            "orphan authority contains no retirement dispositions"
+        )
+    if summary.get("remaining_retirements") != len(loaded_rows) or summary.get(
+        "retirements_with_name_specific_evidence"
+    ) != len(loaded_rows):
+        raise SignedManifestAuthorityError(
+            "orphan retirement summary does not match signed targets"
+        )
+    return _Authority(
+        data={
+            **data,
+            "adapter": _REFUSED_TARGET_ORPHAN_ADAPTER,
+            "all_or_nothing": True,
+        },
+        operation_id="signed-provenance-orphan-retirement",
+        rows=tuple(loaded_rows),
+        receipt_policy={
+            "operation": "retire_signed_provenance_orphan",
+            "expected_count": "admitted_rows",
+        },
+        file_sha256=expected_sha256,
+        payload_sha256=expected_sha256,
+    )
+
+
+def _scope_refusal(
+    authority: _Authority,
+    name_ids: list[str] | None,
+    *,
+    apply: bool,
+) -> dict[str, Any] | None:
+    if authority.data.get("adapter") != _REFUSED_TARGET_ORPHAN_ADAPTER:
+        if name_ids is not None:
+            raise SignedManifestAuthorityError(
+                "generic signed authorities do not accept a caller row list"
+            )
+        return None
+    signed_ids = [row.id for row in authority.rows]
+    requested = signed_ids if name_ids is None else sorted(name_ids)
+    if len(requested) != len(set(requested)):
+        raise SignedManifestAuthorityError(
+            "signed orphan retirement requires unique name ids"
+        )
+    outside = sorted(set(requested) - set(signed_ids))
+    omitted = sorted(set(signed_ids) - set(requested))
+    if not outside and not omitted:
+        return None
+    refusals = [
+        {
+            "name_id": name_id,
+            "reason": "target is outside signed retirement authority",
+        }
+        for name_id in outside
+    ] + [
+        {
+            "name_id": name_id,
+            "reason": "signed retirement target was omitted",
+        }
+        for name_id in omitted
+    ]
+    return {
+        "schema": _REFUSED_TARGET_ORPHAN_RECEIPT_SCHEMA,
+        "outcome": "refused",
+        "dry_run": not apply,
+        "changed": 0,
+        "would_change": 0,
+        "counts": {
+            "requested": len(requested),
+            "admitted": 0,
+            "refused": len(refusals),
+        },
+        "refusals": refusals,
+        "authority_sha256": authority.payload_sha256,
+    }
+
+
 def _participant_snapshot(
     query: _Query, participant: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -535,6 +783,52 @@ def _producer_state(query: _Query, target_element_id: str) -> dict[str, Any]:
     return dict(rows[0]) if rows else {"producers": [], "live_children": 0}
 
 
+def _orphan_guard_refusal(query: _Query, action: dict[str, Any]) -> str | None:
+    row: _LoadedRow = action["row"]
+    guard_names = _guard_names(row)
+    if not guard_names & {
+        _SIGNED_LIFECYCLE,
+        _NO_LIVE_PRODUCER,
+        _NO_LIVE_STRUCTURAL_CHILD,
+    }:
+        return None
+    target = _target_snapshot(action)
+    if target is None:
+        return "name does not exist"
+    participant = row.participants[0]
+    properties = action["participant_snapshots"][str(participant["id"])]["properties"]
+    if _SIGNED_LIFECYCLE in guard_names:
+        if properties.get("name_stage") != participant.get("expected_name_stage"):
+            return "name lifecycle stage changed from signed authority"
+        if (
+            properties.get("claimed_at") is not None
+            or properties.get("claim_token") is not None
+        ):
+            return "name has an active claim"
+    rows = query.query(
+        """
+        MATCH (target:StandardName)
+        WHERE elementId(target) = $target_element_id
+        RETURN COUNT {
+          (source:StandardNameSource)-[:PRODUCED_NAME]->(target)
+          WHERE coalesce(source.status, '') <> 'stale'
+        } AS live_producers,
+        COUNT {
+          (child:StandardName)-[:HAS_PARENT]->(target)
+          WHERE child.name_stage <> 'superseded'
+            AND NOT (coalesce(child.status, '') IN ['deprecated', 'superseded'])
+        } AS live_children
+        """,
+        target_element_id=target["element_id"],
+    )
+    state = rows[0] if rows else {"live_producers": 0, "live_children": 0}
+    if _NO_LIVE_PRODUCER in guard_names and int(state["live_producers"]) > 0:
+        return "name has a live producing source"
+    if _NO_LIVE_STRUCTURAL_CHILD in guard_names and int(state["live_children"]) > 0:
+        return "name has a live HAS_PARENT child"
+    return None
+
+
 def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Preview:
     candidates: list[dict[str, Any]] = []
     refusals: list[dict[str, str]] = []
@@ -560,6 +854,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
                 for participant_id, snapshot in sorted(snapshots.items())
             ],
         }
+        if refusal is None:
+            refusal = _orphan_guard_refusal(query, action)
         if refusal is None and _STRUCTURAL_LEGITIMACY in _guard_names(row):
             refusal = _structural_refusal(query, action)
         if refusal is not None:
@@ -729,6 +1025,36 @@ def _verify_postconditions(
                     raise SignedManifestConflict(
                         "recorded signed-manifest repair lost its postcondition"
                     )
+        guard_names = _guard_names(row)
+        if guard_names & {_NO_LIVE_PRODUCER, _NO_LIVE_STRUCTURAL_CHILD}:
+            target_id = str(row.identity.get("target_id") or row.id)
+            closure = query.query(
+                """
+                MATCH (target:StandardName {id: $target_id})
+                RETURN COUNT {
+                  (source:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                  WHERE coalesce(source.status, '') <> 'stale'
+                } AS live_producers,
+                COUNT {
+                  (child:StandardName)-[:HAS_PARENT]->(target)
+                  WHERE child.name_stage <> 'superseded'
+                    AND NOT (coalesce(child.status, '') IN
+                      ['deprecated', 'superseded'])
+                } AS live_children
+                """,
+                target_id=target_id,
+            )
+            state = closure[0] if closure else {}
+            if (
+                _NO_LIVE_PRODUCER in guard_names
+                and int(state.get("live_producers") or 0) != 0
+            ) or (
+                _NO_LIVE_STRUCTURAL_CHILD in guard_names
+                and int(state.get("live_children") or 0) != 0
+            ):
+                raise SignedManifestConflict(
+                    "recorded signed-manifest repair lost its postcondition"
+                )
 
 
 def _replay(
@@ -833,19 +1159,24 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                 end_id=snapshot["end_element_id"],
             )
         elif kind == RepairMutationKind.supersede.value:
+            source_path_update = (
+                ""
+                if mutation.get("preserve_source_paths")
+                else "target.source_paths = [],"
+            )
             result = query.query(
-                """
+                f"""
                 MATCH (target:StandardName)
                 WHERE elementId(target) = $element_id
                 SET target.superseded_from_stage = coalesce(
                       target.superseded_from_stage, target.name_stage),
                     target.name_stage = 'superseded',
                     target.status = 'superseded',
-                    target.source_paths = [],
+                    {source_path_update}
                     target.claimed_at = null,
                     target.claim_token = null
                 RETURN count(target) AS changed
-                """,
+                """,  # noqa: S608 - the inserted fragment is selected locally
                 element_id=snapshot["element_id"],
             )
         else:
@@ -944,12 +1275,53 @@ def _write_receipts(
     return [str(row["change_id"]) for row in receipts]
 
 
+def _project_refused_target_orphan_receipt(
+    authority: _Authority, receipt: dict[str, Any]
+) -> dict[str, Any]:
+    if authority.data.get("adapter") != _REFUSED_TARGET_ORPHAN_ADAPTER:
+        return receipt
+    counts = receipt.get("counts") or {}
+    projected = {
+        **receipt,
+        "schema": _REFUSED_TARGET_ORPHAN_RECEIPT_SCHEMA,
+        "counts": {
+            "requested": int(counts.get("authority_rows") or len(authority.rows)),
+            "admitted": int(counts.get("admitted") or 0),
+            "refused": int(counts.get("refused") or 0),
+        },
+        "refusals": [
+            {"name_id": row["row_id"], "reason": row["reason"]}
+            for row in receipt.get("refusals") or []
+        ],
+    }
+    outcome = receipt.get("outcome")
+    if outcome == "would_apply":
+        projected["dry_run"] = True
+    elif outcome in {"applied", "already_applied"}:
+        projected["dry_run"] = False
+        projected["superseded"] = (
+            len(authority.rows)
+            if outcome == "already_applied"
+            else int(receipt.get("changed") or 0)
+        )
+        projected["ledger_rows"] = int(receipt.get("receipt_rows") or 0)
+        projected["persistent_writes"] = (
+            0 if outcome == "already_applied" else int(receipt.get("changed") or 0) * 4
+        )
+    return projected
+
+
 @retry_on_deadlock()
 def apply_signed_manifest(
-    authority_path: str | Path,
+    authority_path: str | Path | dict[str, Any],
     *,
-    authority_file_sha256: str,
-    authority_payload_sha256: str,
+    authority_file_sha256: str | None = None,
+    authority_payload_sha256: str | None = None,
+    authority_sha256: str | None = None,
+    authority_adapter: str | None = None,
+    mutation_kind: str | None = None,
+    guard_set: tuple[str, ...] | None = None,
+    name_ids: list[str] | None = None,
     reason: str,
     apply: bool = False,
     manifest_sha256: str | None = None,
@@ -968,11 +1340,34 @@ def apply_signed_manifest(
         raise ValueError("signed-manifest apply requires manifest_sha256")
     if manifest_sha256 is not None:
         _require_sha256(manifest_sha256, "manifest_sha256")
-    authority = _load_authority(
-        authority_path,
-        expected_file_sha256=authority_file_sha256,
-        expected_payload_sha256=authority_payload_sha256,
-    )
+    if authority_adapter == _REFUSED_TARGET_ORPHAN_ADAPTER:
+        if authority_sha256 is None:
+            raise SignedManifestAuthorityError(
+                "orphan retirement requires authority_sha256"
+            )
+        authority = _load_refused_target_orphan_authority(
+            authority_path,
+            expected_sha256=authority_sha256,
+            mutation_kind=mutation_kind,
+            guard_set=guard_set,
+        )
+    else:
+        if authority_adapter is not None:
+            raise SignedManifestAuthorityError(
+                f"unsupported signed authority adapter: {authority_adapter}"
+            )
+        if authority_file_sha256 is None or authority_payload_sha256 is None:
+            raise SignedManifestAuthorityError(
+                "generic signed authority requires file and payload digests"
+            )
+        authority = _load_authority(
+            authority_path,
+            expected_file_sha256=authority_file_sha256,
+            expected_payload_sha256=authority_payload_sha256,
+        )
+    scope_refusal = _scope_refusal(authority, name_ids, apply=apply)
+    if scope_refusal is not None:
+        return scope_refusal
     own_client = gc is None
     client: Any = GraphClient() if own_client else gc
     try:
@@ -984,7 +1379,7 @@ def apply_signed_manifest(
                     replay = _replay(query, authority, str(manifest_sha256))
                     if replay is not None:
                         transaction.rollback()
-                        return replay
+                        return _project_refused_target_orphan_receipt(authority, replay)
 
                 preview = _build_preview(query, authority, reason)
                 counts = {
@@ -994,11 +1389,21 @@ def apply_signed_manifest(
                 }
                 if not apply:
                     transaction.rollback()
-                    return {
+                    receipt = {
                         "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
-                        "outcome": "would_apply" if preview.admitted else "refused",
+                        "outcome": (
+                            "refused"
+                            if authority.data.get("all_or_nothing") and preview.refusals
+                            else "would_apply"
+                            if preview.admitted
+                            else "refused"
+                        ),
                         "changed": 0,
-                        "would_change": len(preview.admitted),
+                        "would_change": (
+                            0
+                            if authority.data.get("all_or_nothing") and preview.refusals
+                            else len(preview.admitted)
+                        ),
                         "counts": counts,
                         "refusals": preview.refusals,
                         "manifest": preview.manifest,
@@ -1006,13 +1411,14 @@ def apply_signed_manifest(
                         "authority_file_sha256": authority.file_sha256,
                         "authority_payload_sha256": authority.payload_sha256,
                     }
+                    return _project_refused_target_orphan_receipt(authority, receipt)
                 if preview.manifest_sha256 != manifest_sha256:
                     raise SignedManifestConflict(
                         "fresh signed-manifest closure does not match authorized SHA-256"
                     )
                 if not preview.admitted:
                     transaction.rollback()
-                    return {
+                    receipt = {
                         "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
                         "outcome": "refused",
                         "changed": 0,
@@ -1020,6 +1426,22 @@ def apply_signed_manifest(
                         "refusals": preview.refusals,
                         "manifest_sha256": preview.manifest_sha256,
                     }
+                    return _project_refused_target_orphan_receipt(authority, receipt)
+                if authority.data.get("all_or_nothing") and preview.refusals:
+                    transaction.rollback()
+                    return _project_refused_target_orphan_receipt(
+                        authority,
+                        {
+                            "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
+                            "outcome": "refused",
+                            "changed": 0,
+                            "would_change": 0,
+                            "counts": counts,
+                            "refusals": preview.refusals,
+                            "manifest": preview.manifest,
+                            "manifest_sha256": preview.manifest_sha256,
+                        },
+                    )
 
                 _lock_participants(query, preview)
                 locked_preview = _build_preview(query, authority, reason)
@@ -1088,7 +1510,7 @@ def apply_signed_manifest(
                         "signed-manifest counter baseline changed unexpectedly"
                     )
                 transaction.commit()
-                return {
+                receipt = {
                     "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
                     "outcome": "applied",
                     "changed": len(locked_preview.admitted),
@@ -1102,6 +1524,7 @@ def apply_signed_manifest(
                     "authority_payload_sha256": authority.payload_sha256,
                     "change_ids": change_ids,
                 }
+                return _project_refused_target_orphan_receipt(authority, receipt)
             except BaseException:
                 if not transaction.closed:
                     transaction.rollback()
