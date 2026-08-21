@@ -1312,10 +1312,6 @@ def resolve_dd_row(
 ) -> ResolvedDDContext:
     """Resolve one raw graph projection while retaining exact provenance."""
     version = _validate_exact_version(dd_version)
-    if row.get("dd_version") is not None and str(row["dd_version"]) != version:
-        raise DDResolutionVersionMismatch(
-            f"DD row carries version {row['dd_version']!r}, expected {version!r}"
-        )
     if "path" not in row:
         raise ValueError("DD row is missing exact path")
     return resolve_dd_context(
