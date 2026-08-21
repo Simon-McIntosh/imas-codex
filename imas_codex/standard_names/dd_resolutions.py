@@ -64,6 +64,20 @@ _IONISATION_POTENTIAL_COMMIT = "commits:30a5ddd4b7037b9f93a8f00f7837809403349d99
 class DDResolutionError(RuntimeError):
     """Base class for fail-closed DD resolution errors."""
 
+    path: str | None
+    field: DDResolutionField | None
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        path: str | None = None,
+        field: DDResolutionField | None = None,
+    ) -> None:
+        super().__init__(message)
+        self.path = path
+        self.field = field
+
 
 class DDResolutionManifestInvalid(DDResolutionError):
     """The graph authority is unavailable or structurally invalid."""
@@ -1076,6 +1090,33 @@ class ResolvedDDContext(BaseModel):
         }
 
 
+class ResolvedDDRow(BaseModel):
+    """One successfully resolved member of an input batch."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    row_index: int
+    context: ResolvedDDContext
+
+
+class DDResolutionRowRefusal(BaseModel):
+    """One exact field whose graph value lacks applicable resolution authority."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    row_index: int
+    path: str
+    field: DDResolutionField
+    error_type: str
+    reason: str
+
+
+class DDResolutionBatchResult(BaseModel):
+    """Resolved batch members beside exact field-level refusals."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    resolved: tuple[ResolvedDDRow, ...]
+    refusals: tuple[DDResolutionRowRefusal, ...]
+
+
 def _same_value(left: DDResolutionValue, right: DDResolutionValue) -> bool:
     return _canonical_json(left) == _canonical_json(right)
 
@@ -1245,16 +1286,23 @@ def resolve_dd_context(
 ) -> ResolvedDDContext:
     """Read graph values directly and attach their resolution provenance."""
     authority = manifest or load_dd_resolution_manifest()
-    fields = tuple(
-        _read_graph_field(
-            path=raw.path,
-            dd_version=raw.dd_version,
-            field=field,
-            graph_value=_context_value(raw, field),
-            manifest=authority,
-        )
-        for field in _CONTEXT_FIELDS
-    )
+    resolved_fields = []
+    for field in _CONTEXT_FIELDS:
+        try:
+            resolved_fields.append(
+                _read_graph_field(
+                    path=raw.path,
+                    dd_version=raw.dd_version,
+                    field=field,
+                    graph_value=_context_value(raw, field),
+                    manifest=authority,
+                )
+            )
+        except DDResolutionError as exc:
+            exc.path = exc.path or raw.path
+            exc.field = exc.field or field
+            raise
+    fields = tuple(resolved_fields)
     values = {item.field: item.effective.value for item in fields}
     coordinates = values[DDResolutionField.coordinates]
     if not isinstance(coordinates, tuple):
@@ -1338,18 +1386,43 @@ def resolve_dd_rows(
     *,
     dd_version: str,
     manifest: DDResolutionManifest | None = None,
-) -> list[ResolvedDDContext]:
-    """Resolve an all-or-error batch under one exact DD version."""
+) -> DDResolutionBatchResult:
+    """Resolve independent rows while retaining exact field-level refusals."""
     authority = manifest or load_dd_resolution_manifest()
-    return [
-        resolve_dd_row(row, dd_version=dd_version, manifest=authority) for row in rows
-    ]
+    resolved = []
+    refusals = []
+    for row_index, row in enumerate(rows):
+        try:
+            context = resolve_dd_row(
+                row,
+                dd_version=dd_version,
+                manifest=authority,
+            )
+        except DDResolutionError as exc:
+            if exc.path is None or exc.field is None:
+                raise
+            refusals.append(
+                DDResolutionRowRefusal(
+                    row_index=row_index,
+                    path=exc.path,
+                    field=exc.field,
+                    error_type=type(exc).__name__,
+                    reason=str(exc),
+                )
+            )
+            continue
+        resolved.append(ResolvedDDRow(row_index=row_index, context=context))
+    return DDResolutionBatchResult(
+        resolved=tuple(resolved),
+        refusals=tuple(refusals),
+    )
 
 
 DDResolutionState = DDResolutionStatus
 
 __all__ = [
     "DDResolutionAmbiguity",
+    "DDResolutionBatchResult",
     "DDResolutionCollision",
     "DDResolutionError",
     "DDResolutionEvidenceMismatch",
@@ -1358,6 +1431,7 @@ __all__ = [
     "DDResolutionManifest",
     "DDResolutionManifestInvalid",
     "DDResolutionRecord",
+    "DDResolutionRowRefusal",
     "DDResolutionStale",
     "DDResolutionState",
     "DDResolutionStatus",
@@ -1366,6 +1440,7 @@ __all__ = [
     "RawDDContext",
     "ResolvedDDContext",
     "ResolvedDDField",
+    "ResolvedDDRow",
     "active_dd_resolution",
     "dd_resolution_graph_reader",
     "effective_active_dd_resolutions",

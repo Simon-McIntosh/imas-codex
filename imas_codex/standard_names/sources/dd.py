@@ -319,10 +319,21 @@ def _apply_typed_dd_resolutions(
     from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 
     exact_version = dd_version or get_dd_version()
-    contexts = resolve_dd_rows(results, dd_version=exact_version)
-    for row, context in zip(results, contexts, strict=True):
-        row.update(context.as_pipeline_item())
-    return results
+    batch = resolve_dd_rows(results, dd_version=exact_version)
+    if batch.refusals:
+        logger.warning(
+            "Refused %d changed DD fields during extraction: %s",
+            len(batch.refusals),
+            ", ".join(
+                f"{refusal.path}:{refusal.field.value}" for refusal in batch.refusals
+            ),
+        )
+    resolved = []
+    for item in batch.resolved:
+        row = results[item.row_index]
+        row.update(item.context.as_pipeline_item())
+        resolved.append(row)
+    return resolved
 
 
 # Enriched extraction query — single Cypher surfacing all context.

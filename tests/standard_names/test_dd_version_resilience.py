@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from imas_codex.graph.models import DDResolutionValueKind
+from imas_codex.graph.models import DDResolutionField, DDResolutionValueKind
 from imas_codex.standard_names.dd_resolutions import (
     DDResolutionManifest,
     DDResolutionRecord,
     DDResolutionValue,
     DDResolutionVersionMismatch,
     resolve_dd_row,
+    resolve_dd_rows,
 )
 
 _REVIEWED_VERSION = "4.1.1"
@@ -125,6 +126,27 @@ def test_unreviewed_content_still_refuses_after_a_dictionary_bump() -> None:
         assert "reviewed only" in str(exc)
     else:
         raise AssertionError("unreviewed content must refuse")
+
+
+def test_changed_leaf_is_the_only_batch_refusal() -> None:
+    manifest, rows = _corpus()
+    changed = ({**rows[0], "unit": "kg"}, *rows[1:])
+
+    result = resolve_dd_rows(
+        changed,
+        dd_version=_AUTHORITATIVE_VERSION,
+        manifest=manifest,
+    )
+
+    assert tuple(item.context.raw.path for item in result.resolved) == tuple(
+        row["path"] for row in rows[1:]
+    )
+    assert [item.row_index for item in result.resolved] == list(range(1, len(rows)))
+    assert [
+        (refusal.path, refusal.field, refusal.row_index) for refusal in result.refusals
+    ] == [(rows[0]["path"], DDResolutionField.unit, 0)]
+    assert result.refusals[0].error_type == "DDResolutionVersionMismatch"
+    assert "reviewed only" in result.refusals[0].reason
 
 
 def test_recorded_label_mismatch_count_does_not_change_resolution_count() -> None:

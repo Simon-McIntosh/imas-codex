@@ -696,7 +696,7 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
             from imas_codex.settings import get_dd_version
             from imas_codex.standard_names.dd_resolutions import resolve_dd_rows
 
-            contexts = resolve_dd_rows(
+            batch = resolve_dd_rows(
                 [
                     {
                         "path": row["id"],
@@ -707,7 +707,18 @@ def _fetch_review_dd_context(names: list[dict]) -> None:
                 ],
                 dd_version=get_dd_version(),
             )
-            for row, context in zip(rows or [], contexts, strict=True):
+            if batch.refusals:
+                logger.warning(
+                    "Review context omitted %d changed DD fields: %s",
+                    len(batch.refusals),
+                    ", ".join(
+                        f"{refusal.path}:{refusal.field.value}"
+                        for refusal in batch.refusals
+                    ),
+                )
+            for item in batch.resolved:
+                row = (rows or [])[item.row_index]
+                context = item.context
                 path_docs[row["id"]] = {
                     "id": row["id"],
                     "unit": context.unit or "",
