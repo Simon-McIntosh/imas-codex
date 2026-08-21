@@ -398,6 +398,65 @@ def test_mutation_kinds_write_one_receipt_and_exact_replay_is_write_free(
 
 
 @pytest.mark.graph
+def test_set_properties_accepts_temporal_bearing_target_snapshot(
+    client: GraphClient, tmp_path: Path
+) -> None:
+    client.query(
+        """
+        CREATE (:StandardName {
+          id: 'temporal-target',
+          name_stage: 'accepted',
+          status: 'draft',
+          source_paths: [],
+          created_at: datetime('2026-08-21T12:34:56.123456789Z'),
+          generated_at: datetime('2026-08-21T12:35:56.987654321Z')
+        })
+        """
+    )
+    row = _row(
+        "temporal-row",
+        kind="set_properties",
+        mutation_participant=_node_participant("temporal-target", "StandardName"),
+        target_id="temporal-target",
+    )
+    row["mutations"][0]["arguments"] = {
+        "properties": {"quarantine_reason": "orphaned temporal target"}
+    }
+    path = tmp_path / "temporal-authority.json"
+    file_sha256, payload_sha256 = _write_authority(path, [row])
+    preview = _preview(path, file_sha256, payload_sha256, client)
+
+    applied = _apply(
+        path,
+        file_sha256,
+        payload_sha256,
+        client,
+        preview["manifest_sha256"],
+    )
+
+    assert applied["outcome"] == "applied"
+    assert applied["changed"] == 1
+    assert client.query(
+        """
+        MATCH (target:StandardName {id: 'temporal-target'})
+        RETURN target.quarantine_reason AS quarantine_reason,
+               target.created_at AS created_at,
+               target.generated_at AS generated_at
+        """
+    ) == [
+        {
+            "quarantine_reason": "orphaned temporal target",
+            "created_at": client.query(
+                "RETURN datetime('2026-08-21T12:34:56.123456789Z') AS value"
+            )[0]["value"],
+            "generated_at": client.query(
+                "RETURN datetime('2026-08-21T12:35:56.987654321Z') AS value"
+            )[0]["value"],
+        }
+    ]
+
+
+@pytest.mark.graph
 def test_maximal_safe_subset_refuses_the_last_producer_with_exact_reason(
     client: GraphClient, tmp_path: Path
 ) -> None:

@@ -1248,7 +1248,7 @@ def _scope_refusal(
 
 def _participant_snapshot(
     query: _Query, participant: dict[str, Any]
-) -> dict[str, Any] | None:
+) -> tuple[dict[str, Any], list[dict[str, Any]] | None] | None:
     kind = str(participant["kind"])
     participant_id = str(participant["id"])
     graph_label = str(participant["graph_label"])
@@ -1257,9 +1257,36 @@ def _participant_snapshot(
             """
             MATCH (node)
             WHERE node.id = $participant_id AND $graph_label IN labels(node)
+            CALL {
+                WITH node
+                UNWIND keys(node) AS property_key
+                WITH node, property_key ORDER BY property_key
+                RETURN collect({
+                    key: property_key,
+                    type: valueType(node[property_key]),
+                    value: CASE
+                        WHEN valueType(node[property_key])
+                             STARTS WITH 'ZONED DATETIME'
+                        THEN toString(node[property_key].epochSeconds) + ':' +
+                             toString(node[property_key].nanosecond)
+                        WHEN valueType(node[property_key]) STARTS WITH 'LIST'
+                        THEN [item IN node[property_key] | {
+                            type: valueType(item),
+                            value: CASE
+                                WHEN valueType(item) STARTS WITH 'ZONED DATETIME'
+                                THEN toString(item.epochSeconds) + ':' +
+                                     toString(item.nanosecond)
+                                ELSE toString(item)
+                            END
+                        }]
+                        ELSE toString(node[property_key])
+                    END
+                }) AS property_fingerprint
+            }
             RETURN elementId(node) AS element_id,
                    labels(node) AS labels,
-                   properties(node) AS properties
+                   properties(node) AS properties,
+                   property_fingerprint
             """,
             participant_id=participant_id,
             graph_label=graph_label,
@@ -1286,7 +1313,9 @@ def _participant_snapshot(
         )
     if len(rows) != 1:
         return None
-    return dict(rows[0])
+    snapshot = dict(rows[0])
+    property_fingerprint = snapshot.pop("property_fingerprint", None)
+    return snapshot, property_fingerprint
 
 
 def _collateral_snapshot(
@@ -1612,21 +1641,26 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
     refusals: list[dict[str, str]] = []
     for row in _runtime_authority_rows(authority):
         snapshots: dict[str, dict[str, Any]] = {}
+        property_fingerprints: dict[str, list[dict[str, Any]]] = {}
         refusal: str | None = None
         for participant in row.participants:
             participant_id = str(participant["id"])
-            snapshot = _participant_snapshot(query, participant)
-            if snapshot is None:
+            participant_state = _participant_snapshot(query, participant)
+            if participant_state is None:
                 refusal = f"participant does not exist: {participant_id}"
                 break
+            snapshot, property_fingerprint = participant_state
             signature = participant.get("signature_sha256")
             if signature is not None and _digest(snapshot) != signature:
                 refusal = f"participant signature mismatch: {participant_id}"
                 break
             snapshots[participant_id] = snapshot
+            if property_fingerprint is not None:
+                property_fingerprints[participant_id] = property_fingerprint
         action = {
             "row": row,
             "participant_snapshots": snapshots,
+            "property_fingerprints": property_fingerprints,
             "participant_digests": [
                 {"participant_id": participant_id, "sha256": _digest(snapshot)}
                 for participant_id, snapshot in sorted(snapshots.items())
@@ -2123,12 +2157,42 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                 """
                 MATCH (target)
                 WHERE elementId(target) = $element_id
-                  AND properties(target) = $expected_properties
+                CALL {
+                    WITH target
+                    UNWIND keys(target) AS property_key
+                    WITH target, property_key ORDER BY property_key
+                    RETURN collect({
+                        key: property_key,
+                        type: valueType(target[property_key]),
+                        value: CASE
+                            WHEN valueType(target[property_key])
+                                 STARTS WITH 'ZONED DATETIME'
+                            THEN toString(target[property_key].epochSeconds) + ':' +
+                                 toString(target[property_key].nanosecond)
+                            WHEN valueType(target[property_key]) STARTS WITH 'LIST'
+                            THEN [item IN target[property_key] | {
+                                type: valueType(item),
+                                value: CASE
+                                    WHEN valueType(item)
+                                         STARTS WITH 'ZONED DATETIME'
+                                    THEN toString(item.epochSeconds) + ':' +
+                                         toString(item.nanosecond)
+                                    ELSE toString(item)
+                                END
+                            }]
+                            ELSE toString(target[property_key])
+                        END
+                    }) AS property_fingerprint
+                }
+                WITH target, property_fingerprint
+                WHERE property_fingerprint = $expected_property_fingerprint
                 SET target += $properties
                 RETURN count(target) AS changed
                 """,
                 element_id=snapshot["element_id"],
-                expected_properties=snapshot["properties"],
+                expected_property_fingerprint=action["property_fingerprints"][
+                    participant_id
+                ],
                 properties=properties,
             )
         elif kind == RepairMutationKind.supersede.value:
