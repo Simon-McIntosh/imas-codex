@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T16:47:41",
+  "updated": "2026-08-21T16:56:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -113,7 +113,7 @@
         "id": "impl-freshdraw",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a024c1-8295-7000-b553-2717286b1eaa",
         "created": "2026-08-21"
       },
       {
@@ -12060,9 +12060,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T143734253079-freshdraw",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "freshdraw",
+        "role": "implement",
+        "member": "impl-freshdraw",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T14:37:36Z",
+        "completed_at": "2026-08-21T14:56:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1108,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1108,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "ad7cb53e7ebeb6f353d6aa0648f35a31fdb3d0ed",
+        "commits": [
+          "bd289c62"
+        ],
+        "changed_lines": {
+          "added": 98,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T143734253079-freshdraw/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024c1-8295-7000-b553-2717286b1eaa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13204736,
+            "cached_input_tokens_cumulative": 13204736,
+            "input_tokens": 13443984,
+            "input_tokens_cumulative": 13443984,
+            "output_tokens": 26599,
+            "output_tokens_cumulative": 26599,
+            "reasoning_output_tokens": 7676,
+            "reasoning_output_tokens_cumulative": 7676
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 308
+    "_version": 310
   }
 }
