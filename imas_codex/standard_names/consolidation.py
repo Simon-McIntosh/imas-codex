@@ -123,6 +123,20 @@ def _merge_duplicates(group: list[dict]) -> dict:
     return merged
 
 
+def _normalize_parser_order(candidate: dict) -> dict:
+    """Copy a candidate with any parser-owned segment reordering applied."""
+    from imas_codex.standard_names.grammar_adapter import normalize_canonical_name
+
+    name = candidate["id"]
+    try:
+        canonical = normalize_canonical_name(name).name
+    except (TypeError, ValueError):
+        return dict(candidate)
+    normalized = dict(candidate)
+    normalized["id"] = canonical
+    return normalized
+
+
 # =============================================================================
 # Helpers
 # =============================================================================
@@ -189,6 +203,8 @@ def consolidate_candidates(
             "coverage_gaps": len(result.coverage_gaps),
         }
         return result
+
+    candidates = [_normalize_parser_order(candidate) for candidate in candidates]
 
     # ------------------------------------------------------------------
     # Group by standard_name (the "id" field)
