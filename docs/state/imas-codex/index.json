@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T12:02:07",
+  "updated": "2026-08-21T14:43:51",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -358,9 +358,14 @@
         "when": "2026-08-21",
         "who": "Simon McIntosh",
         "what": "Delete authority narrowly bounded after the lead flagged that the delete-not-retire wording read broadly enough to licence deleting most of the graph, since only a few hundred of 2,538 accepted names are released. Deletion now requires all four of no producing source, no live structural child, no catalog release provenance, and membership in an exact signed manifest whose row count the operator refuses on excess; and it may never be triggered by a parse failure, grammar mismatch, quarantine, validation error or resolution fault. The stale rc9 grammar defect is the cautionary case: had deletion been reachable from a parse failure, it would have manufactured justification for destroying correct names. Separately sn-repair-operator-consolidation moved from backlog into S8 after its own trigger fired via the delete mutation kind, and after correction showed the target is ten signed-artifact operators migrated one at a time rather than 22 behind an all-or-nothing switch."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 session landed 15 nodes with 3 fail-closed refusals and zero unintended writes. dd-version-resilient-resolution SHIPPED: the fix was deleting four lines, because the convergence primitive already sat in the same module behind a pre-emptive label guard, and the larger half made batch refusal per-leaf across all 7 call sites, one of which paired rows to results positionally and would have misassociated them silently. sn-repair-operator-consolidation met its done_when and stays active with 9 operators unmigrated: one authority schema validates all 4 committed artifacts from original bytes at pinned digests, apply_signed_manifest carries the eight-step envelope with 9 of 9 disposable-graph proofs and exact refusal strings, and the first bespoke operator is deleted with zero remaining references while its suite ran unchanged. All four sn-graph-wide-integrity ratchets now pass: reconciliation no longer rebinds stale sources, the 2 rebound edges were detached with 9,614 untouched-row digests unchanged, and the interrupted momentum-flux run reached a decided exhausted lifecycle for $0.66. But that plan's done_when is NOT met, because the lead overturned the orphan disposition: asked whether the 36 unsourced names could be re-sourced by reverse dictionary search before removal, the answer is 25 RECOVERABLE, 3 genuine negatives, 8 needing physics judgement, with j_ohmic 0.94, grid/area 0.92 and q_min/value 0.89 all unit-matching. The all-delete cohort would have destroyed 25 valuable names whose only defect was a lost binding. The earlier negative result had tested composition FORWARD only, where compose re-emits parents and never proposes these children; a negative in one direction was read as a negative in every direction. Nothing was deleted - three independent guards had already refused on quarantine, on relationship closure, and on review/chain-history permanence. Also landed: a composer that could not spell canonically now normalizes to the parser's canonical order, admitting 55 segment combinations beyond the one that surfaced it; the manifest digest the ledger already wrote is declared; pre-existing lint debt cleared. Spend $0.66 of $150."
       }
     ],
     "blockers": [],
-    "_version": 41
+    "_version": 42
   }
 }
