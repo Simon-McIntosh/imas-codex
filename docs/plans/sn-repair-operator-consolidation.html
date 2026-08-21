@@ -23,7 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
+<meta name="plan-commits" content="42f56cd0">
+<meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html">
+<meta name="plan-impl" content="0.25">
 </head>
 <body>
   <main class="plan-doc">
@@ -281,6 +284,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-20260821-opchar" data-who="reckon-ship" data-when="2026-08-21T10:42:00+00:00">
+    <div class="r-comment-body">opchar landed - commit 42f56cd0, merge into main, gate passed. Measure: 10/10 operators characterised in one table with all seven fields per row, plus a separate expressivity audit recording 9 genuine extension points and 8 accidents; every cited test file was confirmed to exist. Artifact: docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md. The finding corrects this plan's own premise and reshapes section 4 item 2: the ten do NOT share one signed-artifact contract today. They partition into 4 that consume a pre-existing external authority artifact plus a fresh preview manifest, 3 that authorize only a fresh preview manifest, and 3 deterministic self-heals with no manifest and no durable receipt. Test coverage is uneven on the same seam - 7 have disposable-graph hash/apply/refusal/replay suites, while reconcile_structural_edges_for_standard_names, repair_normalization_peel_parent_units and reconcile_error_siblings have only mocked or source-inspection coverage, so the behavioural-equivalence gate in section 5 has nothing to compare against for those three. Consequence for the schema: it must model authority provenance adapters, typed row and participant identities, selection completeness, joined authority, ordered compound mutations, named semantic guards, receipt cardinality with replay projection, and permitted orphan hand-off - and existing signature canonicalizations and receipt operation strings must stay readable, which is the read-existing lock in practice.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

@@ -23,7 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
+<meta name="plan-commits" content="3d68f699">
+<meta name="plan-artifacts" content="tests/standard_names/test_dd_version_resilience.py,docs/evidence/archive/dd-version-resilient-resolution-landed.html">
+<meta name="plan-impl" content="0.5">
 </head>
 <body>
   <main class="plan-doc">
@@ -165,6 +168,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s4" data-id="c-20260821-ddconv" data-who="reckon-ship" data-when="2026-08-21T10:42:00+00:00">
+    <div class="r-comment-body">ddconv landed - commit 3d68f699, merge into main, gate passed. Measure: the no-op-bump property test was written first and observed red, failing with the verbatim label-only DDResolutionVersionMismatch; after the fix the focused module is 3 passed / 0 failed and the full tests/standard_names/ suite is 6,536 passed / 8 skipped / 0 failed. The production change is four lines and nothing else - the row-label equality refusal at resolve_dd_row is gone, so a row now retains the requested authoritative version and routes through the existing _read_graph_field observed/effective convergence test. Properties proven: a no-op bump resolves 10/10 fields; a third value matching neither the observed nor the effective side still refuses on content; and every recorded-label mismatch count from 0 through 10 resolves 10/10 rows, which is the corpus check stated in section 4. resolve_dd_rows was left untouched and no dd_version label was re-stamped anywhere, so section 3 item 5 holds. Remaining: the per-leaf batch contract in resolve_dd_rows, dispatched as its own node because it changes the contract for roughly ten call sites.</div>
+</div>
+</section>
+</main>
 </body>
 </html>
