@@ -16,7 +16,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -48,6 +48,7 @@ _NODE_LABELS = frozenset({"StandardName", "StandardNameSource"})
 _RELATIONSHIP_TYPES = frozenset({"PRODUCED_NAME", "HAS_PARENT"})
 _MUTATION_KINDS = frozenset(
     {
+        RepairMutationKind.set_properties.value,
         RepairMutationKind.delete.value,
         RepairMutationKind.supersede.value,
         RepairMutationKind.detach.value,
@@ -59,6 +60,7 @@ _COLLATERAL_IMMUTABILITY = "out-of-allowlist-immutability"
 _SIGNED_LIFECYCLE = "signed-lifecycle-and-claim"
 _NO_LIVE_PRODUCER = "no-live-producing-source"
 _NO_LIVE_STRUCTURAL_CHILD = "no-live-structural-child"
+_ERROR_SIBLING_PARENT_ABSENCE = "recognized-error-sibling-parent-absence"
 _GUARD_KINDS = {
     _LAST_PRODUCER: RepairGuardKind.semantic_authority.value,
     _STRUCTURAL_LEGITIMACY: RepairGuardKind.semantic_authority.value,
@@ -66,6 +68,7 @@ _GUARD_KINDS = {
     _SIGNED_LIFECYCLE: RepairGuardKind.semantic_authority.value,
     _NO_LIVE_PRODUCER: RepairGuardKind.semantic_authority.value,
     _NO_LIVE_STRUCTURAL_CHILD: RepairGuardKind.semantic_authority.value,
+    _ERROR_SIBLING_PARENT_ABSENCE: RepairGuardKind.semantic_authority.value,
 }
 
 _REFUSED_TARGET_ORPHAN_ADAPTER = "refused-target-orphan"
@@ -89,6 +92,14 @@ _STALE_SOURCE_RECEIPT_SCHEMA = "imas-codex.signed-stale-source-detach-receipt.v1
 _STALE_SOURCE_GUARDS = (
     _SIGNED_LIFECYCLE,
     _LAST_PRODUCER,
+    _COLLATERAL_IMMUTABILITY,
+)
+
+_ERROR_SIBLING_ADAPTER = "error-sibling-reconcile"
+_ERROR_SIBLING_MODEL = "deterministic:dd_error_modifier"
+_ERROR_SIBLING_REASON = "orphaned error sibling (parent name deleted)"
+_ERROR_SIBLING_GUARDS = (
+    _ERROR_SIBLING_PARENT_ABSENCE,
     _COLLATERAL_IMMUTABILITY,
 )
 
@@ -1029,6 +1040,161 @@ def _load_stale_source_authority(
     )
 
 
+def _load_error_sibling_authority(
+    *,
+    mutation_kind: str | None,
+    guard_set: tuple[str, ...] | None,
+) -> _Authority:
+    """Create authority metadata for the deterministic orphan predicate."""
+    if mutation_kind != RepairMutationKind.set_properties.value:
+        raise SignedManifestAuthorityError(
+            "error-sibling reconcile requires the set-properties mutation kind"
+        )
+    if guard_set != _ERROR_SIBLING_GUARDS:
+        raise SignedManifestAuthorityError(
+            "error-sibling reconcile requires its exact deterministic guard set"
+        )
+    from imas_codex.standard_names.error_siblings import ERROR_SUFFIX_TO_OPERATOR
+
+    authority_descriptor = {
+        "adapter": _ERROR_SIBLING_ADAPTER,
+        "model": _ERROR_SIBLING_MODEL,
+        "operator_prefixes": sorted(
+            f"{operator}_of_" for operator in ERROR_SUFFIX_TO_OPERATOR.values()
+        ),
+        "mutation_kind": mutation_kind,
+        "guard_set": list(guard_set),
+        "quarantine_reason": _ERROR_SIBLING_REASON,
+    }
+    authority_sha256 = _digest(authority_descriptor)
+    return _Authority(
+        data={
+            **authority_descriptor,
+            "signature_profile": "none",
+            "all_or_nothing": False,
+        },
+        operation_id="deterministic-error-sibling-reconcile",
+        rows=(),
+        receipt_policy={
+            "operation": "quarantine_orphaned_error_sibling",
+            "expected_count": "admitted_rows",
+        },
+        file_sha256=authority_sha256,
+        payload_sha256=authority_sha256,
+    )
+
+
+def _error_sibling_rows(query: _Query, reason: str) -> tuple[_LoadedRow, ...]:
+    """Select the complete live cohort admitted by the orphan predicate."""
+    from imas_codex.standard_names.error_siblings import error_sibling_parent_name
+
+    candidates = query.query(
+        """
+        MATCH (name:StandardName)
+        WHERE name.model = $model
+          AND coalesce(name.validation_status, '') <> 'quarantined'
+        RETURN name.id AS id
+        ORDER BY name.id
+        """,
+        model=_ERROR_SIBLING_MODEL,
+    )
+    loaded_rows: list[_LoadedRow] = []
+    for candidate in candidates:
+        name_id = str(candidate["id"])
+        parent_id = error_sibling_parent_name(name_id)
+        if parent_id is None:
+            continue
+        parent = query.query(
+            "MATCH (parent:StandardName {id: $parent_id}) RETURN parent.id LIMIT 1",
+            parent_id=parent_id,
+        )
+        if parent:
+            continue
+        participant = {
+            "id": name_id,
+            "kind": RepairParticipantKind.node.value,
+            "graph_label": "StandardName",
+        }
+        loaded_rows.append(
+            _LoadedRow(
+                id=name_id,
+                identity={
+                    "id": name_id,
+                    "kind": "standard_name",
+                    "target_id": name_id,
+                },
+                participants=(participant,),
+                mutations=(
+                    {
+                        "id": f"{name_id}:quarantine",
+                        "order": 0,
+                        "kind": RepairMutationKind.set_properties.value,
+                        "participant_id": name_id,
+                        "arguments": {
+                            "properties": {
+                                "validation_status": "quarantined",
+                                "quarantine_reason": reason,
+                            }
+                        },
+                    },
+                ),
+                guards=tuple(
+                    {
+                        "id": implementation,
+                        "kind": _GUARD_KINDS[implementation],
+                        "implementation": implementation,
+                        "participant_ids": [name_id],
+                    }
+                    for implementation in _ERROR_SIBLING_GUARDS
+                ),
+                orphan_policy="refuse",
+            )
+        )
+    return tuple(loaded_rows)
+
+
+def _runtime_authority_rows(authority: _Authority) -> tuple[_LoadedRow, ...]:
+    rows = authority.data.get("runtime_rows")
+    return tuple(rows) if rows is not None else authority.rows
+
+
+def _apply_error_sibling_query_handle(query: _Query) -> dict[str, int]:
+    """Preserve the lightweight query-handle contract used by unit doubles."""
+    rows = query.query(
+        """
+        MATCH (sn:StandardName)
+        WHERE sn.model = 'deterministic:dd_error_modifier'
+          AND coalesce(sn.validation_status, '') <> 'quarantined'
+        RETURN sn.id AS id
+        """
+    )
+    from imas_codex.standard_names.error_siblings import error_sibling_parent_name
+
+    orphan_ids: list[str] = []
+    for row in rows or []:
+        name_id = str(row["id"])
+        parent_id = error_sibling_parent_name(name_id)
+        if parent_id is None:
+            continue
+        parent = query.query(
+            "MATCH (p:StandardName {id: $pid}) RETURN p.id LIMIT 1",
+            pid=parent_id,
+        )
+        if not parent:
+            orphan_ids.append(name_id)
+    if orphan_ids:
+        query.query(
+            """
+            UNWIND $ids AS sid
+            MATCH (sn:StandardName {id: sid})
+            SET sn.validation_status = 'quarantined',
+                sn.quarantine_reason = 'orphaned error sibling (parent name deleted)'
+            """,
+            ids=orphan_ids,
+        )
+    return {"stale_marked": len(orphan_ids)}
+
+
 def _scope_refusal(
     authority: _Authority,
     name_ids: list[str] | None,
@@ -1440,9 +1606,11 @@ def _build_stale_source_preview(
 def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Preview:
     if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
         return _build_stale_source_preview(query, authority, reason)
+    if authority.data.get("adapter") == _ERROR_SIBLING_ADAPTER:
+        authority.data["runtime_rows"] = _error_sibling_rows(query, reason)
     candidates: list[dict[str, Any]] = []
     refusals: list[dict[str, str]] = []
-    for row in authority.rows:
+    for row in _runtime_authority_rows(authority):
         snapshots: dict[str, dict[str, Any]] = {}
         refusal: str | None = None
         for participant in row.participants:
@@ -1656,7 +1824,7 @@ def _verify_postconditions(
             raise StaleSourceDetachConflict("out-of-allowlist source closure changed")
         authority.data["target_post"] = target_post
         return
-    by_id = {row.id: row for row in authority.rows}
+    by_id = {row.id: row for row in _runtime_authority_rows(authority)}
     for row_id in row_ids:
         row = by_id[row_id]
         for mutation in row.mutations:
@@ -1685,6 +1853,19 @@ def _verify_postconditions(
                     id=participant["id"],
                 )[0]["count"]
                 if int(present) != 0:
+                    raise SignedManifestConflict(
+                        "recorded signed-manifest repair lost its postcondition"
+                    )
+            elif kind == RepairMutationKind.set_properties.value:
+                expected = dict(mutation.get("arguments", {}).get("properties", {}))
+                state = query.query(
+                    "MATCH (node {id: $id}) RETURN properties(node) AS properties",
+                    id=participant["id"],
+                )
+                if not state or any(
+                    state[0]["properties"].get(key) != value
+                    for key, value in expected.items()
+                ):
                     raise SignedManifestConflict(
                         "recorded signed-manifest repair lost its postcondition"
                     )
@@ -1935,6 +2116,20 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                 relationship_id=snapshot["element_id"],
                 start_id=snapshot["start_element_id"],
                 end_id=snapshot["end_element_id"],
+            )
+        elif kind == RepairMutationKind.set_properties.value:
+            properties = dict(mutation.get("arguments", {}).get("properties", {}))
+            result = query.query(
+                """
+                MATCH (target)
+                WHERE elementId(target) = $element_id
+                  AND properties(target) = $expected_properties
+                SET target += $properties
+                RETURN count(target) AS changed
+                """,
+                element_id=snapshot["element_id"],
+                expected_properties=snapshot["properties"],
+                properties=properties,
             )
         elif kind == RepairMutationKind.supersede.value:
             source_path_update = (
@@ -2199,6 +2394,8 @@ def _project_stale_source_receipt(
 
 
 def _project_receipt(authority: _Authority, receipt: dict[str, Any]) -> dict[str, Any]:
+    if authority.data.get("adapter") == _ERROR_SIBLING_ADAPTER:
+        return {"stale_marked": int(receipt.get("changed") or 0)}
     return _project_stale_source_receipt(
         authority, _project_refused_target_orphan_receipt(authority, receipt)
     )
@@ -2220,6 +2417,7 @@ def apply_signed_manifest(
     manifest_sha256: str | None = None,
     run_id: str | None = None,
     gc: Any | None = None,
+    client_factory: Callable[[], Any] | None = None,
 ) -> dict[str, Any]:
     """Preview or atomically apply the complete row set in a signed authority.
 
@@ -2234,7 +2432,8 @@ def apply_signed_manifest(
             else "signed-manifest apply requires a non-empty reason"
         )
         raise ValueError(message)
-    if apply and manifest_sha256 is None:
+    deterministic_self_heal = authority_adapter == _ERROR_SIBLING_ADAPTER
+    if apply and manifest_sha256 is None and not deterministic_self_heal:
         message = (
             "stale-source detach apply requires manifest_sha256"
             if authority_adapter == _STALE_SOURCE_ADAPTER
@@ -2279,6 +2478,19 @@ def apply_signed_manifest(
             mutation_kind=mutation_kind,
             guard_set=guard_set,
         )
+    elif authority_adapter == _ERROR_SIBLING_ADAPTER:
+        if legacy_args or authority_path != {}:
+            raise SignedManifestAuthorityError(
+                "error-sibling reconcile does not accept an authority artifact"
+            )
+        if reason != _ERROR_SIBLING_REASON:
+            raise SignedManifestAuthorityError(
+                "error-sibling reconcile requires its exact quarantine reason"
+            )
+        authority = _load_error_sibling_authority(
+            mutation_kind=mutation_kind,
+            guard_set=guard_set,
+        )
     else:
         if legacy_args:
             raise SignedManifestAuthorityError(
@@ -2300,22 +2512,39 @@ def apply_signed_manifest(
     scope_refusal = _scope_refusal(authority, name_ids, apply=apply)
     if scope_refusal is not None:
         return scope_refusal
+    if gc is not None and client_factory is not None:
+        raise SignedManifestAuthorityError(
+            "signed-manifest graph client and client factory are mutually exclusive"
+        )
     own_client = gc is None
-    client: Any = GraphClient() if own_client else gc
+    client: Any = (
+        client_factory()
+        if client_factory is not None
+        else GraphClient()
+        if own_client
+        else gc
+    )
     try:
+        if deterministic_self_heal and getattr(type(client), "session", None) is None:
+            return _apply_error_sibling_query_handle(client)
         with client.session() as session:
             transaction = session.begin_transaction()
             query = _TransactionQuery(transaction)
             try:
-                if apply:
+                if apply and manifest_sha256 is not None:
                     replay = _replay(query, authority, str(manifest_sha256))
                     if replay is not None:
                         transaction.rollback()
                         return _project_receipt(authority, replay)
 
                 preview = _build_preview(query, authority, reason)
+                authorized_manifest_sha256 = (
+                    preview.manifest_sha256
+                    if deterministic_self_heal
+                    else manifest_sha256
+                )
                 counts = {
-                    "authority_rows": len(authority.rows),
+                    "authority_rows": len(_runtime_authority_rows(authority)),
                     "admitted": len(preview.admitted),
                     "refused": len(preview.refusals),
                 }
@@ -2344,7 +2573,7 @@ def apply_signed_manifest(
                         "authority_payload_sha256": authority.payload_sha256,
                     }
                     return _project_receipt(authority, receipt)
-                if preview.manifest_sha256 != manifest_sha256:
+                if preview.manifest_sha256 != authorized_manifest_sha256:
                     if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
                         raise StaleSourceDetachConflict(
                             "fresh stale-source closure does not match manifest SHA-256"

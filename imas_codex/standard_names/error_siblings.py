@@ -59,9 +59,7 @@ _CATEGORICAL_SUFFIXES: tuple[str, ...] = (
 # structure (e.g. "length_of_magnetic_field_probe",
 # "major_radius_of_magnetic_field_probe").  These are exact geometric
 # properties, not stochastic measurements, so an uncertainty_index sibling
-# is semantically invalid.  Added after ``length_of_*`` and
-# ``major_radius_of_*`` parents were observed slipping through the earlier
-# gate rules in production runs.
+# is semantically invalid.
 _GEOMETRY_DIMENSION_PREFIXES: tuple[str, ...] = (
     "length_of_",
     "major_radius_of_",
@@ -138,6 +136,15 @@ def _detect_error_suffix(error_node_id: str) -> str | None:
     for suffix in ERROR_SUFFIX_TO_OPERATOR:
         if error_node_id.endswith(suffix):
             return suffix
+    return None
+
+
+def error_sibling_parent_name(name_id: str) -> str | None:
+    """Return the wrapped parent identity for a recognized error sibling."""
+    for operator in ERROR_SUFFIX_TO_OPERATOR.values():
+        prefix = f"{operator}_of_"
+        if name_id.startswith(prefix):
+            return name_id[len(prefix) :]
     return None
 
 
