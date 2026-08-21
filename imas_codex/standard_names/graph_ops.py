@@ -25672,6 +25672,12 @@ def find_orphan_parent_source_candidates(
                 """
                 MATCH (parent:StandardName)
                 WHERE NOT ( (:StandardNameSource)-[:PRODUCED_NAME]->(parent) )
+                OPTIONAL MATCH (structural_source:StandardNameSource {
+                  id: 'derived:' + parent.id
+                })
+                WITH parent, structural_source
+                WHERE structural_source IS NULL
+                   OR structural_source.status <> 'stale'
                 MATCH (child)-[:HAS_PARENT]->(parent)
                 WITH parent,
                      count(child) AS total_children,
@@ -25767,11 +25773,13 @@ def reconcile_orphan_parent_sources(
     realization edge. It is origin-, stage-, and operator-kind-agnostic — the
     parent already exists and passed admission; this only records provenance and
     NEVER mutates the parent's ``name_stage`` / ``origin`` / ``description``.
-    Idempotent: a parent that gains a source drops out of the selector. Childless
-    sourceless names are not parents and are left untouched (a distinct
-    stranded-name concern). Every derived candidate is re-checked against the
-    current admission gate before seeding; an invalid scaffold remains source-less
-    for ledgered lifecycle retirement rather than being legitimized by synthetic
+    Idempotent: a parent that gains a source drops out of the selector. A stale
+    structural source is a lifecycle tombstone and is never rebound implicitly;
+    an explicit lifecycle transition must make it eligible first. Childless
+    sourceless names are not parents and are left untouched (a distinct stranded-
+    name concern). Every derived candidate is re-checked against the current
+    admission gate before seeding; an invalid scaffold remains source-less for
+    ledgered lifecycle retirement rather than being legitimized by synthetic
     provenance. Non-derived parents bypass structural admission and retain their
     origin-owned recovery path.
 
@@ -25797,9 +25805,15 @@ def reconcile_orphan_parent_sources(
         for r in rows:
             parent_id = r["parent_id"]
             meta = _derived_parent_source_metadata(parent_id)
-            client.query(
+            result = client.query(
                 """
                 MATCH (parent:StandardName {id: $parent_id})
+                OPTIONAL MATCH (existing_source:StandardNameSource {
+                  id: $source_node_id
+                })
+                WITH parent, existing_source
+                WHERE existing_source IS NULL
+                   OR existing_source.status <> 'stale'
                 MERGE (sns:StandardNameSource {id: $source_node_id})
                   ON CREATE SET sns.created_at = datetime(), sns.attempt_count = 0
                 SET sns.status = coalesce(sns.status, 'composed'),
@@ -25811,11 +25825,12 @@ def reconcile_orphan_parent_sources(
                     sns.claimed_at = null,
                     sns.claim_token = null
                 MERGE (sns)-[:PRODUCED_NAME]->(parent)
+                RETURN count(parent) AS seeded
                 """,
                 parent_id=parent_id,
                 **meta,
             )
-            seeded += 1
+            seeded += result[0]["seeded"] if result else 1
     finally:
         if own:
             client.close()
@@ -25849,7 +25864,15 @@ def reconcile_orphan_parent_sources_batched(
     result = gc.query(
         """
         // STRUCTURAL_CLOSURE_BATCH_SEED_SOURCES
-        UNWIND $items AS item
+        UNWIND $items AS requested_item
+        OPTIONAL MATCH (stale_source:StandardNameSource {
+          id: requested_item.source_node_id
+        })
+        WITH collect(requested_item) AS requested_items,
+             count(CASE WHEN stale_source.status = 'stale' THEN 1 END)
+               AS stale_source_count
+        WHERE stale_source_count = 0
+        UNWIND requested_items AS item
         MATCH (parent:StandardName {id: item.parent_id})
         WHERE parent.name_stage = 'accepted'
           AND NOT EXISTS {
