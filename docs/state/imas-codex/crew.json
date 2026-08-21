@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T13:22:53",
+  "updated": "2026-08-21T13:24:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -57,7 +57,7 @@
         "id": "impl-genericop",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a023fc-bd11-7662-88d5-7824aca67282",
         "created": "2026-08-21"
       },
       {
@@ -92,7 +92,7 @@
         "id": "impl-manifestdecl",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02407-7723-79e1-8140-131958616bc9",
         "created": "2026-08-21"
       },
       {
@@ -162,7 +162,7 @@
         "id": "impl-torflux",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02407-bebc-74d3-b4ae-2519a49e8249",
         "created": "2026-08-21"
       },
       {
@@ -10331,9 +10331,72 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T111420654331-manifestdecl",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "manifestdecl",
+        "role": "implement",
+        "member": "impl-manifestdecl",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:14:23Z",
+        "completed_at": "2026-08-21T11:24:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 594,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 594,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "6d4a16db80010a8bce27d9d78b309111063ccedc",
+        "commits": [
+          "2bf92e4ff18a68bad6ee3dbcdfb55d5569417532"
+        ],
+        "changed_lines": {
+          "added": 5,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T111420654331-manifestdecl/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02407-7723-79e1-8140-131958616bc9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4415744,
+            "cached_input_tokens_cumulative": 4415744,
+            "input_tokens": 4534043,
+            "input_tokens_cumulative": 4534043,
+            "output_tokens": 12431,
+            "output_tokens_cumulative": 12431,
+            "reasoning_output_tokens": 4524,
+            "reasoning_output_tokens_cumulative": 4524
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 237
+    "_version": 241
   }
 }

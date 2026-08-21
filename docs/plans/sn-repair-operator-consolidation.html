@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="6">
-<meta name="plan-commits" content="42f56cd0,30ee0249">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html">
 <meta name="plan-impl" content="0.5">
 </head>
@@ -319,6 +319,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821-authschema" data-who="reckon-ship" data-when="2026-08-21T10:56:00+00:00">
     <div class="r-comment-body">authschema landed - commit 30ee0249, merge into main, gate passed. Measure: 10 repair-authority enums and 10 classes declared in imas_codex/schemas/standard_name.yaml, and the new suite validates 4/4 committed authority artifacts and all 412 rows directly from their original bytes while pinning all four original SHA-256 file digests. That is the read-existing lock proven rather than asserted: catalog-edit-dual-binding-adjudication.json at 5ca7761a with 216 rows, refused-target-orphan-adjudication.json at 2c2d38f3 with 89 rows, owner-geometry-rc66-partition.json at dbb37f7b with 49 rows, and stale-source-lifecycle.json at f2da3ff7 with 58 rows, none edited and none re-signed. All 9 recorded extension points are covered, and the mutation-kind vocabulary requires delete alongside supersede and detach, which is what makes the orphan delete reachable as a parameter rather than an eleventh operator. uv run build-models --force exits 0, the focused module is 6/6, the full standard_names suite is clean, and the gitignored generated models were correctly left unstaged. One judgment call worth keeping: a legacy wire key named schema shadows BaseModel.schema and emits a non-failing Pydantic warning; the worker declined to rename it because doing so would break byte-compatible loading of the committed artifacts, which is the right trade.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821-manifestdecl" data-who="reckon-ship" data-when="2026-08-21T11:27:00+00:00">
+    <div class="r-comment-body">manifestdecl landed - commit 2bf92e4f, merge into main, gate passed. Measure: the live-graph compliance test went from 1 failure, reading exactly StandardNameChange: undeclared properties ['manifest_sha256'], to 1 passed; build-models --force exits 0 and the standard_names suite holds at 6,542 passed / 8 skipped / 0 failed. Five added lines in one file. The order matters and the node kept it: it first confirmed the writer at imas_codex/standard_names/graph_ops.py:18141, where the signed scalar-source repair receipt sets change.manifest_sha256 with the computed hash passed at line 18164, established that this is an intended capability rather than stray data, and only then declared the property - as a lowercase 64-character SHA-256 digest identifying the signed repair manifest whose authorized mutation the receipt records. A schema-compliance failure has three possible fixes and two of them are wrong here: no live value was deleted or rewritten, and the test was not weakened. Also worth keeping: the first focused invocation exited 5 with 1 deselected, and the node reported that as not-run rather than as a pass before re-running under -m graph. That is the graph-gate skip hazard behaving as designed.</div>
 </div>
 </section>
 </main>
