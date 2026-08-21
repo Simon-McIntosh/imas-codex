@@ -125,21 +125,27 @@ def parse_canonical_name(name: str) -> ParsedCanonicalName:
     return ParsedCanonicalName(name=name, ir=result.ir)
 
 
+def normalize_canonical_name(name: str) -> ParsedCanonicalName:
+    """Return the strict parser's canonical spelling for *name*.
+
+    Only the public parser may propose a reordered spelling.  Other grammar
+    failures remain failures: this helper never guesses segment classes or
+    duplicates their ordering in codex.
+    """
+    try:
+        return parse_canonical_name(name)
+    except ValueError as exc:
+        canonical = getattr(exc, "canonical_form", None)
+        if not canonical or canonical == name:
+            raise
+    return parse_canonical_name(canonical)
+
+
 def compose_canonical_ir(ir: StandardNameIR) -> str:
     """Compose *ir* and prove strict spelling and semantic IR preservation."""
     name = compose(ir)
-    try:
-        parsed = parse_canonical_name(name)
-    except ValueError as exc:
-        # The public strict parser can supply the unique canonical flat
-        # segment ordering for an otherwise structured IR (for example a
-        # projection combined with a bare-prefix transformation). Accept only
-        # that parser-owned spelling and prove it through the same strict gate.
-        canonical = getattr(exc, "canonical_form", None)
-        if not canonical:
-            raise
-        parsed = parse_canonical_name(canonical)
-        name = parsed.name
+    parsed = normalize_canonical_name(name)
+    name = parsed.name
     _require_semantic_ir(ir, parsed.ir, name=name)
     return name
 
