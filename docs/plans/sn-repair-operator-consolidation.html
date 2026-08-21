@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="11">
-<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c,c9460262">
+<meta name="plan-version" content="12">
+<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c,c9460262,ca993b9e,0baf8d09">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py,tests/standard_names/test_error_sibling_reconcile_graph.py">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-impl" content="0.93">
 </head>
 <body>
   <main class="plan-doc">
@@ -311,6 +311,11 @@
     <div class="r-fu-body"><p>Start at section 4 item 1, because it is both the cheapest step and the specification for everything after it. For each of the 22 <code>apply_*</code>, <code>repair_*</code>, <code>retire_*</code> and <code>reconcile_*</code> operators in <code>graph_ops.py</code>, record its authority artifact shape, selection predicate, mutation set, guard set, receipt operation name and test location. Anything the emerging schema cannot express is a real extension point rather than an oversight, so record those explicitly instead of smoothing them over. Do not write the generic operator in this pass and do not delete anything: the characterisation is what makes the migration safe, and it is worth doing while the refusal cases from the 2026-08-20 repair wave are still fresh.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-repair-operator-consolidation §4</pre>
     </article>
+<article class="r-fu" data-id="f-sroc-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship sn-repair-operator-consolidation §4" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adjudicate the peel-unit child predicate before migrating that operator</h4>
+    <div class="r-fu-body"><p>The behavioural suite for <code>repair_normalization_peel_parent_units</code> pins the live predicate, which examines <em>every</em> child, so a normalization child carrying a null unit is refused. The production docstring says <em>every unit-bearing child</em>, which would admit it. One of the two is wrong and the suite cannot tell you which: it records behaviour, not intent. Settle which reading is intended, correct the other, and only then migrate the operator onto the generic envelope - a migration that adopts the docstring's reading while the suite pins the code's would change which rows refuse, which section 5 rejects regardless of how much code it removes.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-repair-operator-consolidation §4</pre>
+    </article>
 </section>
 
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -334,6 +339,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-20260821-errsibsuite" data-who="reckon-ship" data-when="2026-08-21T14:15:00+00:00">
     <div class="r-comment-body">errsibsuite landed - commit c9460262, merge into main, gate passed. One of the three absent suites this section names is now built, so reconcile_error_siblings becomes migratable under the section 5 equivalence rule; reconcile_structural_edges_for_standard_names and repair_normalization_peel_parent_units still have none. Measure: 7 disposable-Neo4j behavioural cases at 7 passed / 0 skipped / 0 failed, with the standard_names suite at 6,547 passed / 8 skipped / 0 failed. The suite was written against the LIVE code before any migration, which is the whole point of the ordering: a suite written afterwards would be written against the generic operator and would prove nothing. What it pins: a 7-row mixed cohort admits exactly lower_uncertainty_of_missing_temperature and uncertainty_index_of_missing_pressure for quarantine while an upper-uncertainty row with an existing parent, an unknown operator prefix, a non-error model and an already-quarantined sibling all remain untouched; two distinct orphan cases pin the verbatim live reason orphaned error sibling (parent name deleted); a quarantined parent identity blocks admission regardless of its own lifecycle state; an existing quarantine reason stays byte-for-byte unchanged; and replay returns stale_marked=0 with a byte-identical full graph snapshot. Disposable Neo4j 2026.01.4 on bolt 43687, Started then Stopped with both ports closed.</div>
+</div>
+<div class="r-comment" data-section="s8" data-id="c-20260821-suites-complete" data-who="reckon-ship" data-when="2026-08-21T14:38:00+00:00">
+    <div class="r-comment-body">structedgesuite (commit ca993b9e) and peelunitsuite (commit 0baf8d09) landed, both merged, both gates passed. This section's prerequisite is now DISCHARGED: all three operators it named as having no suite for the equivalence gate to compare against now have one, written against the live code before any migration - 20 disposable-Neo4j behavioural cases across the three, with the standard_names suite at 6,547 passed / 0 failed. structedgesuite is 6 passed / 0 skipped / 0 failed and pins exact request scoping the mocked coverage could not: the reconciler removes a stale derived HAS_PARENT edge from the requested maximum_of_electron_temperature while PRESERVING the identical stale edge on the non-requested minimum_of_electron_temperature, duplicate requested ids reconcile once and return 1, an empty request returns 0 without touching state, and two refusal paths pin verbatim - name_ids must contain only non-empty StandardName ids, and cannot reconcile structural edges for missing StandardName ids with the exact quoted id list. peelunitsuite is 7 passed / 0 skipped / 0 failed, admitting exactly electric_current and particle_mass from a mixed 6-parent cohort across both normalized and normalised child tokens, with four distinct non-admission cases pinning the verbatim empty-list outcome and byte-identical parent state. Both suites prove byte-identical full-graph snapshots on replay. One discrepancy is now visible and must be adjudicated BEFORE that operator migrates: the production docstring says every unit-bearing child while the live predicate checks every child, so a normalization child with a null unit is refused. The suite deliberately pins the live behaviour, which means a migration cannot silently adopt the docstring's reading.</div>
 </div>
 </section>
 </main>

@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="223">
+<meta name="plan-version" content="224">
 <meta name="plan-impl" content="0.999">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
@@ -1875,6 +1875,9 @@ Done-when (ordered)
 </div>
 <div class="r-comment" data-section="s3c" data-id="c-20260821-attachmanifest" data-who="reckon-ship" data-when="2026-08-21T13:56:00+00:00">
     <div class="r-comment-body">attachmanifest landed - commit 7de3bdde, merge into main, gate passed. Measure: census_rows=36, holds=4, retirements=1, expected_candidates=31, candidate_rows=31, candidate_unique=31, paths_present=31, dd_units_present=31, unit_agree=31, unit_disagree=0, semantic_attach=31, with set_missing and set_extra both empty. Artifact: docs/evidence/sn-graph-wide-integrity/orphan-attachment-candidates.md. This closes the orphan partition arithmetic exactly: 36 minus 4 HOLD minus 1 RETIRE equals 31 attachment candidates, and every one of the 31 carries an exact DD path whose unit AGREES with the standard name's declared unit and whose semantic verdict is ATTACH - zero disagreements in the whole cohort. Three DD-unit fields are flagged as dimensionally derived because literal DD metadata is absent, which is a stated limitation rather than a silent inference. The artifact is candidate evidence and is explicitly not attachment authority: applying it still owes a freshly generated manifest under the closure, unit, semantic, drift and collateral guards, derived inside the applying invocation.</div>
+</div>
+<div class="r-comment" data-section="s3c" data-id="c-20260821-attachapply" data-who="reckon-ship" data-when="2026-08-21T14:35:00+00:00">
+    <div class="r-comment-body">attachapply landed - commit 69a31b28, merge into main, gate passed after a resume, and it is the result the resource-first decision was locked for. Measure: outcome=applied at changed=15, receipt_rows=15, refused=16 of 31 pinned rows, untouched_rows=9,607 at untouched_changed=0 with aggregate SHA-256 b17d61ce, replay already_applied at changed=0 with persistent_writes=0 and the same untouched digest, StandardNameChange 7721 to 7736, LLMCost unchanged at 27614. The live genuine-orphan census fell 35 to 20 - fifteen valuable standard names re-sourced rather than deleted, from a cohort the plan had previously cleared for wholesale deletion. Artifact: docs/evidence/sn-graph-wide-integrity/orphan-attachment-apply.md. The cohort was derived afresh inside the applying transaction, partitioned as 7 retarget, 2 attach-existing-unbound and 6 create-and-attach; candidate authority 6c2fa944, DD 4.1.1, resolution manifest 65a7ad8b. The refusal profile is the finding worth keeping: unit guards agreed on all 31, exactly as the candidate artifact predicted, yet 16 rows still refused on grounds the artifact never modelled - target lifecycle 9, predecessor last-source closure 3, already-applied 1, state-resolution semantic mismatch 1, quarantined validation 1, source fan-out 1. Unit agreement was never the binding constraint; target lifecycle was. All 16 verbatim guard reasons are recorded. Fenced-out recovery: nine non-accepted targets and one quarantined target need ordinary review before attachment, three predecessor closures need authority that does not create new orphans, attachment-12 needs a state-resolved identity rather than a species-level candidate, and attachment-31 needs explicit fan-out adjudication.</div>
 </div>
 </section>
 <section data-reckon="questions" id="questions" class="r-questions">
