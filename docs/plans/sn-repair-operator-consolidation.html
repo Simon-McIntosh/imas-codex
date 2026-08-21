@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-repair-operator-consolidation">
   <meta name="plan-title" content="One Signed Repair Operator Instead of Twenty-Two">
   <meta name="plan-summary" content="Collapse the ten signed-artifact repair operators behind one generic manifest-driven operator, migrating one operator at a time, so a new Standard Name integrity class or mutation kind costs an authority artifact rather than ~500 lines of bespoke code plus its own disposable-graph suite.">
-  <meta name="plan-status" content="pending">
+  <meta name="plan-status" content="active">
   <meta name="plan-sprint" content="S8">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="8.0">
@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-21">
-<meta name="plan-version" content="8">
-<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc">
+<meta name="plan-version" content="9">
+<meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py">
-<meta name="plan-impl" content="0.75">
+<meta name="plan-impl" content="0.85">
 </head>
 <body>
   <main class="plan-doc">
@@ -325,6 +325,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260821-genericop" data-who="reckon-ship" data-when="2026-08-21T11:40:00+00:00">
     <div class="r-comment-body">genericop landed - commit a17e6bbc, merge into main, gate passed after a resume. Measure: 9 of 9 disposable-Neo4j cases pass, covering every part of the section 2 envelope - preview closure, delete apply-receipt-replay, supersede apply-receipt-replay, detach apply-receipt-replay, maximal subset with exact last-producing-source refusal, exact structural-legitimacy refusal, collateral immutability refusal, participant lock and re-hash rollback, and in-invocation receipt and provider counter baselines. 1,111 lines of operator and 593 of suite in the two fenced paths; three closed mutation kinds and three named guards. The three refusal strings are asserted exactly: target would lose its last producing source; target has a live structural child; and fresh signed-manifest closure does not match authorized SHA-256 for untouched collateral drift. Artifact bytes are checked against an out-of-band file digest and a canonical payload digest, there is no caller row list and no declared count anywhere, apply rebuilds its preview and reads its counter baselines inside one transaction, and a mixed cohort applies the deterministic maximal refusal-free subset - which is the doctrine this programme learned the expensive way, now built in rather than remembered. The disposable graph ran at bolt://127.0.0.1:39687, distinct from the project graph, and Neo4j logged Stopped with both ports closed. First attempt correctly reported itself BLOCKED rather than passing: all 9 graph cases had skipped for want of an endpoint, and a skipped graph case is not-run. The resume supplied the Apptainer recipe another node in the same session had already proven, so this was a provisioning gap and not a design problem.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260821-retiremigrate" data-who="reckon-ship" data-when="2026-08-21T11:58:00+00:00">
+    <div class="r-comment-body">retiremigrate landed - commit 013e4033, merge into main, gate passed. This satisfies the sprint's done_when for this plan; the plan itself stays active because nine operators remain unmigrated. Measure: the 281-line bespoke retire_signed_provenance_orphans is deleted, graph_ops.py loses 417 lines for 13 gained, and git grep -F over imas_codex returns ZERO production references - the verbatim proof is a zero-byte log. Behaviour is served by apply_signed_manifest with mutation_kind supersede and four named guards: signed-lifecycle-and-claim, no-live-producing-source, no-live-structural-child, out-of-allowlist-immutability. Equivalence was proven the right way round: the existing disposable-Neo4j suite tests/standard_names/test_structural_orphan_retirement.py ran UNCHANGED at 4/4, keeping its legacy import and call spelling, which now resolves to a functools.partial of the generic operator - so the suite could not have been quietly edited to fit a new implementation. Identical outcomes across the board: the exact 16 admitted names, 16 receipt rows, 15/16 admitted with exactly 1 refused per acquired-authority case, replay already_applied at changed=0 with persistent_writes=0 and byte-identical graph snapshots. The refusal strings are unchanged verbatim - name has a live producing source, and name has a live HAS_PARENT child - which is the section 5 gate that matters, since a migration that changes which rows refuse has changed semantics even when the counts agree. Full suite 6,544 passed / 8 skipped / 0 failed. Disposable Neo4j at bolt://127.0.0.1:40687, distinct from the project graph, Started then Stopped with both ports closed; no production endpoint was touched.</div>
 </div>
 </section>
 </main>

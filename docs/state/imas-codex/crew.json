@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T13:37:36",
+  "updated": "2026-08-21T14:07:52",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -54,6 +54,13 @@
         "created": "2026-08-18"
       },
       {
+        "id": "impl-esrate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-21"
+      },
+      {
         "id": "impl-genericop",
         "harness": "codex",
         "role": "implement",
@@ -103,6 +110,13 @@
         "created": "2026-08-19"
       },
       {
+        "id": "impl-orphanapply",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0241f-9e66-76e2-8fd6-e6de72dee101",
+        "created": "2026-08-21"
+      },
+      {
         "id": "impl-owner",
         "harness": "codex",
         "role": "implement",
@@ -122,6 +136,13 @@
         "role": "implement",
         "session_id": "01a01880-7fdf-7852-a159-c51e790fa1d4",
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-retiremigrate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02420-b02e-7853-b142-0b54fd931105",
+        "created": "2026-08-21"
       },
       {
         "id": "impl-scalar",
@@ -10520,9 +10541,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T114044597343-orphanapply",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "orphanapply",
+        "role": "implement",
+        "member": "impl-orphanapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:40:46Z",
+        "completed_at": "2026-08-21T11:48:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 446,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 446,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "17bcc6211730c6705eb2d23ad824c01ab0ff4ea6",
+        "commits": [
+          "1d932e4870038017bfd1b62d83b7200e97caa725"
+        ],
+        "changed_lines": {
+          "added": 79,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Delete gate not run: 0 of 35 deleted, 0 receipts, counters unmoved at StandardNameChange 7706 and LLMCost 27596, no authority signed and no mutation attempted. The node refused at preflight and surfaced two genuine blockers rather than forcing a cohort. First, 6 of the 35 currently carry validation_status=quarantined - cross_section_of_flux_surface, line_integrated_electron_density, magnetic_field_at_pedestal_top_low_field_side_magnitude, poloidal_straight_field_line_angle, tendency_of_total_thermal_plasma_internal_energy and toroidal_line_integrated_impurity_ion_velocity - which the locked delete-authority bound names as a must-never-trigger condition, while the earlier adjudication had assigned at least cross_section_of_flux_surface to delete. Second and larger, apply_signed_manifest's delete mutation requires a fully disconnected target, and all 35 carry live relationships, so every compare-and-set would have rolled back. Coordinator measurement of that closure: 187 HAS_REVIEW, 50 HAS_SEGMENT, 36 HAS_UNIT, 32 HAS_PARENT, 28 HAS_INTERNAL_CHANGE, 27 HAS_PHYSICS_DOMAIN, 20 REFINED_FROM, 17 IN_CLUSTER, 15 DOCS_REVISION_OF and further descriptive edges. The four ratchets ran green at 4 passed during this node. Preflight probe confirmed the selection is exact: 35 rows, 0 producers, 0 live children, ordered SHA-256 038ac087, with the held parallel_mach_number correctly absent and the global predicate still reproducing the original 36.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T114044597343-orphanapply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0241f-9e66-76e2-8fd6-e6de72dee101",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4442112,
+            "cached_input_tokens_cumulative": 4442112,
+            "input_tokens": 4602639,
+            "input_tokens_cumulative": 4602639,
+            "output_tokens": 17080,
+            "output_tokens_cumulative": 17080,
+            "reasoning_output_tokens": 6997,
+            "reasoning_output_tokens_cumulative": 6997
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T114154469407-retiremigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "retiremigrate",
+        "role": "implement",
+        "member": "impl-retiremigrate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T11:41:56Z",
+        "completed_at": "2026-08-21T11:58:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1006,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1006,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "17bcc6211730c6705eb2d23ad824c01ab0ff4ea6",
+        "commits": [
+          "013e4033f69260b4e61d70f16ad30a0c77e00380"
+        ],
+        "changed_lines": {
+          "added": 453,
+          "removed": 421,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T114154469407-retiremigrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02420-b02e-7853-b142-0b54fd931105",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10703872,
+            "cached_input_tokens_cumulative": 10703872,
+            "input_tokens": 10918962,
+            "input_tokens_cumulative": 10918962,
+            "output_tokens": 32394,
+            "output_tokens_cumulative": 32394,
+            "reasoning_output_tokens": 12574,
+            "reasoning_output_tokens_cumulative": 12574
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 243
+    "_version": 250
   }
 }
