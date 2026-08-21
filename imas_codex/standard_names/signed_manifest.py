@@ -6,9 +6,11 @@ expand the executable cohort.  The graph closure is derived again inside an
 applying transaction, locked, and re-hashed before any mutation.
 
 Only closed registries are interpreted here.  Authority artifacts never carry
-Cypher.  The current mutation registry contains ``delete``, ``supersede``, and
-``detach``.  The semantic guard registry contains last-producing-source,
-structural-legitimacy, and out-of-allowlist-immutability.
+Cypher.  The mutation registry contains ``set_properties``, ``delete``,
+``supersede``, ``detach``, and the closed ``delete_relationship`` source-target
+reconciliation program.  The semantic guard registry contains
+last-producing-source, structural-legitimacy, and
+out-of-allowlist-immutability.
 """
 
 from __future__ import annotations
@@ -52,6 +54,7 @@ _MUTATION_KINDS = frozenset(
         RepairMutationKind.delete.value,
         RepairMutationKind.supersede.value,
         RepairMutationKind.detach.value,
+        RepairMutationKind.delete_relationship.value,
     }
 )
 _LAST_PRODUCER = "last-producing-source"
@@ -155,6 +158,87 @@ class _Preview:
     admitted: list[dict[str, Any]]
     refusals: list[dict[str, str]]
     collateral: list[dict[str, str]]
+
+
+def _validate_source_target_reconciliation_program(
+    row_id: str,
+    identity: dict[str, Any],
+    participants: list[dict[str, Any]],
+    mutations: list[dict[str, Any]],
+) -> None:
+    """Validate the sole closed program admitted for relationship deletion."""
+    relationship_deletes = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.delete_relationship.value
+    ]
+    if not relationship_deletes:
+        return
+
+    source_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardNameSource"
+    ]
+    target_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardName"
+    ]
+    bindings = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.relationship.value
+        and participant["graph_label"] == "PRODUCED_NAME"
+    ]
+    set_properties = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.set_properties.value
+    ]
+    other_mutations = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"]
+        not in {
+            RepairMutationKind.delete_relationship.value,
+            RepairMutationKind.set_properties.value,
+        }
+    ]
+    survivor_id = identity.get("target_id")
+    source_id = identity.get("source_id")
+    expected_properties = {"produced_sn_id": survivor_id}
+    deleted_participants = {
+        str(mutation["participant_id"]) for mutation in relationship_deletes
+    }
+    binding_ids = {str(participant["id"]) for participant in bindings}
+
+    valid = (
+        identity.get("kind") == "source"
+        and isinstance(source_id, str)
+        and bool(source_id)
+        and isinstance(survivor_id, str)
+        and bool(survivor_id)
+        and len(source_nodes) == 1
+        and str(source_nodes[0]["id"]) == source_id
+        and len(target_nodes) >= 2
+        and survivor_id in {str(participant["id"]) for participant in target_nodes}
+        and len(bindings) == len(target_nodes)
+        and len(relationship_deletes) == len(bindings) - 1
+        and deleted_participants < binding_ids
+        and len(set_properties) == 1
+        and str(set_properties[0]["participant_id"]) == source_id
+        and set_properties[0].get("arguments", {}).get("properties")
+        == expected_properties
+        and len(mutations) == len(bindings)
+        and not other_mutations
+    )
+    if not valid:
+        raise SignedManifestAuthorityError(
+            f"repair row {row_id!r} is not a closed source-target reconciliation program"
+        )
 
 
 def _canonical_bytes(value: object) -> bytes:
@@ -351,7 +435,10 @@ def _load_authority(
         mutation_kinds = {str(item["kind"]) for item in mutations}
         guard_names = {str(item["implementation"]) for item in guards}
         required_guards = {_COLLATERAL_IMMUTABILITY}
-        if RepairMutationKind.detach.value in mutation_kinds:
+        if mutation_kinds & {
+            RepairMutationKind.detach.value,
+            RepairMutationKind.delete_relationship.value,
+        }:
             required_guards.add(_LAST_PRODUCER)
         if mutation_kinds & {
             RepairMutationKind.delete.value,
@@ -363,6 +450,9 @@ def _load_authority(
             raise SignedManifestAuthorityError(
                 f"repair row {row_id!r} is missing guards: {', '.join(missing_guards)}"
             )
+        _validate_source_target_reconciliation_program(
+            row_id, identity, participants, mutations
+        )
 
         projection = {
             **raw_row,
@@ -1365,6 +1455,108 @@ def _guard_names(row: _LoadedRow) -> set[str]:
     return {str(guard["implementation"]) for guard in row.guards}
 
 
+def _source_target_reconciliation_refusal(
+    query: _Query, action: dict[str, Any]
+) -> str | None:
+    """Require one signed survivor over the complete live target closure."""
+    row: _LoadedRow = action["row"]
+    if not any(
+        mutation["kind"] == RepairMutationKind.delete_relationship.value
+        for mutation in row.mutations
+    ):
+        return None
+    snapshots = action["participant_snapshots"]
+    source_snapshot = next(
+        snapshot
+        for snapshot in snapshots.values()
+        if "StandardNameSource" in snapshot.get("labels", [])
+    )
+    binding_snapshots = [
+        snapshot
+        for snapshot in snapshots.values()
+        if snapshot.get("relationship_type") == "PRODUCED_NAME"
+    ]
+    survivor_id = str(row.identity["target_id"])
+    deleted_ids = {
+        str(mutation["participant_id"])
+        for mutation in row.mutations
+        if mutation["kind"] == RepairMutationKind.delete_relationship.value
+    }
+    survivor_bindings = [
+        snapshot
+        for participant_id, snapshot in snapshots.items()
+        if snapshot.get("relationship_type") == "PRODUCED_NAME"
+        and participant_id not in deleted_ids
+    ]
+    live_bindings = query.query(
+        """
+        MATCH (source:StandardNameSource)-[binding:PRODUCED_NAME]->
+              (target:StandardName)
+        WHERE elementId(source) = $source_element_id
+          AND coalesce(target.name_stage, '') <> 'superseded'
+          AND NOT (coalesce(target.status, '') IN ['deprecated', 'superseded'])
+        RETURN elementId(binding) AS relationship_id,
+               elementId(target) AS target_element_id,
+               target.id AS target_id
+        ORDER BY relationship_id
+        """,
+        source_element_id=source_snapshot["element_id"],
+    )
+    declared = sorted(
+        (
+            str(snapshot["element_id"]),
+            str(snapshot["end_element_id"]),
+            str(snapshot["end_id"]),
+        )
+        for snapshot in binding_snapshots
+    )
+    current = sorted(
+        (
+            str(binding["relationship_id"]),
+            str(binding["target_element_id"]),
+            str(binding["target_id"]),
+        )
+        for binding in live_bindings
+    )
+    declared_target_ids = {
+        str(snapshot["properties"]["id"])
+        for snapshot in snapshots.values()
+        if "StandardName" in snapshot.get("labels", [])
+    }
+    if (
+        source_snapshot["properties"].get("status") == "stale"
+        or declared != current
+        or declared_target_ids != {binding[2] for binding in current}
+        or len(survivor_bindings) != 1
+        or survivor_bindings[0].get("end_id") != survivor_id
+        or any(
+            snapshot.get("start_element_id") != source_snapshot["element_id"]
+            for snapshot in binding_snapshots
+        )
+    ):
+        return "signed source-target closure does not match complete live targets"
+    return None
+
+
+def _removed_binding_snapshots(action: dict[str, Any]) -> list[dict[str, Any]]:
+    row: _LoadedRow = action["row"]
+    removed_participant_ids = {
+        str(mutation["participant_id"])
+        for mutation in row.mutations
+        if mutation["kind"]
+        in {
+            RepairMutationKind.detach.value,
+            RepairMutationKind.delete_relationship.value,
+        }
+    }
+    return [
+        snapshot
+        for participant_id, snapshot in action["participant_snapshots"].items()
+        if participant_id in removed_participant_ids
+        and snapshot.get("relationship_type") == "PRODUCED_NAME"
+    ]
+
+
 def _target_snapshot(action: dict[str, Any]) -> dict[str, Any] | None:
     relationship = next(
         (
@@ -1668,6 +1860,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
         }
         if refusal is None:
             refusal = _orphan_guard_refusal(query, action)
+        if refusal is None:
+            refusal = _source_target_reconciliation_refusal(query, action)
         if refusal is None and _STRUCTURAL_LEGITIMACY in _guard_names(row):
             refusal = _structural_refusal(query, action)
         if refusal is not None:
@@ -1681,25 +1875,30 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
     for action in candidates:
         row = action["row"]
         if _LAST_PRODUCER in _guard_names(row):
-            target = _target_snapshot(action)
-            relationship = next(
-                snapshot
-                for snapshot in action["participant_snapshots"].values()
-                if snapshot.get("relationship_type") == "PRODUCED_NAME"
-            )
-            target_element_id = str(target["element_id"])
-            producer_state = producer_cache.setdefault(
-                target_element_id, _producer_state(query, target_element_id)
-            )
-            candidate_relationship_id = str(relationship["element_id"])
-            remaining_live = [
-                producer
-                for producer in producer_state["producers"]
-                if producer.get("live")
-                and producer["relationship_id"] not in removed_relationship_ids
-                and producer["relationship_id"] != candidate_relationship_id
-            ]
-            if not remaining_live and int(producer_state.get("live_children") or 0) < 1:
+            removed_bindings = _removed_binding_snapshots(action)
+            row_removed_ids = {
+                str(relationship["element_id"]) for relationship in removed_bindings
+            }
+            strips_last_producer = False
+            for relationship in removed_bindings:
+                target_element_id = str(relationship["end_element_id"])
+                producer_state = producer_cache.setdefault(
+                    target_element_id, _producer_state(query, target_element_id)
+                )
+                remaining_live = [
+                    producer
+                    for producer in producer_state["producers"]
+                    if producer.get("live")
+                    and producer["relationship_id"] not in removed_relationship_ids
+                    and producer["relationship_id"] not in row_removed_ids
+                ]
+                if (
+                    not remaining_live
+                    and int(producer_state.get("live_children") or 0) < 1
+                ):
+                    strips_last_producer = True
+                    break
+            if strips_last_producer:
                 refusals.append(
                     {
                         "row_id": row.id,
@@ -1707,7 +1906,7 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
                     }
                 )
                 continue
-            removed_relationship_ids.add(candidate_relationship_id)
+            removed_relationship_ids.update(row_removed_ids)
         admitted.append(action)
 
     admitted_node_ids = sorted(
@@ -1868,7 +2067,10 @@ def _verify_postconditions(
                 if item["id"] == mutation["participant_id"]
             )
             kind = str(mutation["kind"])
-            if kind == RepairMutationKind.detach.value:
+            if kind in {
+                RepairMutationKind.detach.value,
+                RepairMutationKind.delete_relationship.value,
+            }:
                 present = query.query(
                     """
                     MATCH ()-[relationship]->()
@@ -2137,7 +2339,10 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
         participant_id = str(mutation["participant_id"])
         snapshot = snapshots[participant_id]
         kind = str(mutation["kind"])
-        if kind == RepairMutationKind.detach.value:
+        if kind in {
+            RepairMutationKind.detach.value,
+            RepairMutationKind.delete_relationship.value,
+        }:
             result = query.query(
                 """
                 MATCH (start)-[relationship:PRODUCED_NAME]->(end)

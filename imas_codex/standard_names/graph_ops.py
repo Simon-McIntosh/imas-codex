@@ -212,11 +212,12 @@ def _segments_from_ir(ir: Any) -> dict[str, str | None]:
 
     base = getattr(primary, "base", None)
     base_token = _coerce_segment_value(getattr(base, "token", None))
-    base_kind = _coerce_segment_value(getattr(base, "kind", None))
+    base_kind = getattr(base, "kind", None)
     if base_token:
-        column = (
-            "geometric_base" if base_kind == "geometry_carrier" else "physical_base"
+        is_geometry = (
+            isinstance(base_kind, StrEnum) and base_kind is base_kind.__class__.GEOMETRY
         )
+        column = "geometric_base" if is_geometry else "physical_base"
         columns[column] = base_token
 
     projection = getattr(primary, "projection", None)
