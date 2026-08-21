@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 import re
 from collections.abc import Mapping
-from functools import lru_cache
+from functools import cache, lru_cache
 from typing import Any
 
 import numpy as np
@@ -262,6 +262,45 @@ def _parse_audit_ir(name: str) -> Any:
     from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
     return parse_canonical_name(name).ir
+
+
+@cache
+def _registered_compounds_containing(token: str) -> tuple[str, ...]:
+    """Return public grammar compounds containing one lexical token."""
+    from imas_codex.standard_names.segments import grammar_token_index
+
+    return tuple(
+        sorted(
+            (
+                compound
+                for compound in grammar_token_index()
+                if "_" in compound and token in compound.split("_")
+            ),
+            key=len,
+            reverse=True,
+        )
+    )
+
+
+def _without_compounds(name: str, compounds: tuple[str, ...]) -> str:
+    """Replace exact registered compounds with stable lexical atoms."""
+    working = f"_{name}_"
+    for index, compound in enumerate(compounds):
+        working = working.replace(f"_{compound}_", f"_registeredcompound{index}_")
+    return working.strip("_")
+
+
+def _nonbase_field_compounds(ir: Any) -> tuple[str, ...]:
+    """Return parsed qualifier and locus compounds that use ``field``."""
+    candidates = [
+        str(getattr(qualifier, "token", "") or "")
+        for qualifier in list(getattr(ir, "qualifiers", ()) or ())
+    ]
+    locus = getattr(ir, "locus", None)
+    candidates.append(str(getattr(locus, "token", "") or ""))
+    return tuple(
+        token for token in candidates if "_" in token and "field" in token.split("_")
+    )
 
 
 def _unit_dimensions(units: set[str]) -> set[str] | None:
@@ -918,15 +957,17 @@ def structural_dim_tag_check(candidate: dict[str, Any]) -> list[str]:
     """
     issues: list[str] = []
     description = str(candidate.get("description") or "")
-    match = _STRUCTURAL_DIM_RE.search(description)
-    if match:
-        # Check if the dimensionality tag appears in a valid physics context
-        if not _PHYSICS_DIM_CONTEXT_RE.search(description):
-            issues.append(
-                f"audit:structural_dim_tag_check: description contains "
-                f"storage-shape tag '{match.group(0)}' (remove or rephrase "
-                "in terms of the physical quantity)"
-            )
+    for match in _STRUCTURAL_DIM_RE.finditer(description):
+        # A physics phrase exempts only the dimensionality token that begins it.
+        # Another storage-rank token elsewhere in the description still fails.
+        if _PHYSICS_DIM_CONTEXT_RE.match(description, match.start()):
+            continue
+        issues.append(
+            f"audit:structural_dim_tag_check: description contains "
+            f"storage-shape tag '{match.group(0)}' (remove or rephrase "
+            "in terms of the physical quantity)"
+        )
+        break
     return issues
 
 
@@ -2042,7 +2083,16 @@ def implicit_field_check(candidate: dict[str, Any]) -> list[str]:
     # field.  Skip names containing this compound.
     if "field_of_view" in name:
         return []
-    tokens = name.split("_")
+    working_name = name
+    try:
+        working_name = _without_compounds(
+            name, _nonbase_field_compounds(_parse_audit_ir(name))
+        )
+    except (TypeError, ValueError):
+        # Invalid names retain the conservative lexical check. Parse failure
+        # must not become an audit bypass.
+        pass
+    tokens = working_name.split("_")
     issues: list[str] = []
     for i, tok in enumerate(tokens):
         if tok != "field":
@@ -2425,9 +2475,10 @@ def cumulative_prefix_check(candidate: dict[str, Any]) -> list[str]:
     if any(s in name for s in _META_SUFFIXES):
         return []
     bad_tokens = ("cumulative_", "integrated_", "running_")
-    tokens = name.split("_")
     for bad in bad_tokens:
         stem = bad.rstrip("_")
+        working_name = _without_compounds(name, _registered_compounds_containing(stem))
+        tokens = working_name.split("_")
         if stem in tokens:
             return [
                 f"audit:cumulative_prefix_check: name '{name}' contains "
@@ -2666,9 +2717,11 @@ def repeated_token_check(candidate: dict[str, Any]) -> list[str]:
     if not name:
         return []
 
-    def _repeated_token(working_name: str) -> str | None:
+    def _repeated_token(
+        working_name: str, protected_compounds: tuple[str, ...] = ()
+    ) -> str | None:
         """Return the first duplicate in one lexical expression scope."""
-        working = working_name
+        working = _without_compounds(working_name, protected_compounds)
         for pair in _COMPOUND_SUBJECT_PAIRS:
             working = working.replace(pair, f"_compound_{pair.replace('_', '')}_")
 
@@ -2701,7 +2754,7 @@ def repeated_token_check(candidate: dict[str, Any]) -> list[str]:
                 if duplicate is not None:
                     return duplicate
             return None
-        return _repeated_token(compose_canonical_ir(ir))
+        return _repeated_token(compose_canonical_ir(ir), _nonbase_field_compounds(ir))
 
     duplicate: str | None = None
     try:
