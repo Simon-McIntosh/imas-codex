@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T22:29:26",
+  "updated": "2026-08-21T22:41:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -471,6 +471,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a023e9-a537-7aa0-a603-2b8f7a9ea38d",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "test-mergeverify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
         "created": "2026-08-21"
       },
       {
@@ -13053,9 +13060,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T201039371873-scoreconsume",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73d",
+        "node": "scoreconsume",
+        "role": "implement",
+        "member": "impl-targetreview",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T20:10:42Z",
+        "completed_at": "2026-08-21T20:34:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1424,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1424,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "d17c5fc56c4c95855f1e965cc97290912c59a615",
+        "commits": [
+          "c7457d13"
+        ],
+        "changed_lines": {
+          "added": 125,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T201039371873-scoreconsume/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024d3-62d3-7ae1-ae00-ff1c4ee8599c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11053568,
+            "cached_input_tokens_cumulative": 29420800,
+            "input_tokens": 11535711,
+            "input_tokens_cumulative": 30708547,
+            "output_tokens": 38655,
+            "output_tokens_cumulative": 85485,
+            "reasoning_output_tokens": 11207,
+            "reasoning_output_tokens_cumulative": 26222
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T203051135237-mergeverify",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73d",
+        "node": "mergeverify",
+        "role": "test",
+        "member": "test-mergeverify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T20:30:53Z",
+        "completed_at": "2026-08-21T20:40:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 592,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 592,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "aca063a7bfbb093d9fd709ca19ba106cdc3de0f0",
+        "commits": [
+          "4f82f006"
+        ],
+        "changed_lines": {
+          "added": 55,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T203051135237-mergeverify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02604-f3dc-7ff2-be6c-aaea5cbc07f9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6086400,
+            "cached_input_tokens_cumulative": 6086400,
+            "input_tokens": 6259822,
+            "input_tokens_cumulative": 6259822,
+            "output_tokens": 14592,
+            "output_tokens_cumulative": 14592,
+            "reasoning_output_tokens": 5255,
+            "reasoning_output_tokens_cumulative": 5255
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 343
+    "_version": 346
   }
 }
