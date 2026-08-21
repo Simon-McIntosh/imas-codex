@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T17:49:21",
+  "updated": "2026-08-21T19:27:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16,6 +16,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a024dd-bd26-7910-873f-2f35ae45ea34",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-admissionpersist",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0251b-40d1-7891-8f17-7d566b3e2e96",
         "created": "2026-08-21"
       },
       {
@@ -296,6 +303,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a024d3-62d3-7ae1-ae00-ff1c4ee8599c",
+        "created": "2026-08-21"
+      },
+      {
+        "id": "impl-temporalcas",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0253d-b978-7f82-ae7e-e5da13869ab8",
         "created": "2026-08-21"
       },
       {
@@ -12381,9 +12395,135 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260821T165312434690-temporalcas",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "temporalcas",
+        "role": "implement",
+        "member": "impl-temporalcas",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T16:53:16Z",
+        "completed_at": "2026-08-21T17:08:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 895,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 895,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "d10546098b9c9b6650cb5476b4fbe58a364ed02f",
+        "commits": [
+          "eec3e20b"
+        ],
+        "changed_lines": {
+          "added": 130,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T165312434690-temporalcas/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0253d-b978-7f82-ae7e-e5da13869ab8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11490304,
+            "cached_input_tokens_cumulative": 11490304,
+            "input_tokens": 11717503,
+            "input_tokens_cumulative": 11717503,
+            "output_tokens": 22821,
+            "output_tokens_cumulative": 22821,
+            "reasoning_output_tokens": 8264,
+            "reasoning_output_tokens_cumulative": 8264
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260821T161535511578-admissionpersist",
+        "plan": "sn-graph-wide-integrity",
+        "section": "",
+        "node": "admissionpersist",
+        "role": "implement",
+        "member": "impl-admissionpersist",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-21T16:15:37Z",
+        "completed_at": "2026-08-21T17:24:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4145,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4145,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d10546098b9c9b6650cb5476b4fbe58a364ed02f",
+        "commits": [
+          "17a2f508"
+        ],
+        "changed_lines": {
+          "added": 168,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T161535511578-admissionpersist/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0251b-40d1-7891-8f17-7d566b3e2e96",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 25349120,
+            "cached_input_tokens_cumulative": 25349120,
+            "input_tokens": 26213154,
+            "input_tokens_cumulative": 26213154,
+            "output_tokens": 81117,
+            "output_tokens_cumulative": 81117,
+            "reasoning_output_tokens": 25254,
+            "reasoning_output_tokens_cumulative": 25254
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 322
+    "_version": 328
   }
 }
