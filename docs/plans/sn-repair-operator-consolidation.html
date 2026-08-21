@@ -7,10 +7,11 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-repair-operator-consolidation">
   <meta name="plan-title" content="One Signed Repair Operator Instead of Twenty-Two">
-  <meta name="plan-summary" content="Collapse the per-defect-class signed repair operators in graph_ops.py behind one generic manifest-driven operator, so a new Standard Name integrity class costs an authority artifact rather than ~500 lines of bespoke code plus its own disposable-graph suite.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-summary" content="Collapse the ten signed-artifact repair operators behind one generic manifest-driven operator, migrating one operator at a time, so a new Standard Name integrity class or mutation kind costs an authority artifact rather than ~500 lines of bespoke code plus its own disposable-graph suite.">
+  <meta name="plan-status" content="pending">
+  <meta name="plan-sprint" content="S8">
   <meta name="plan-roi" content="mid">
-  <meta name="plan-effort-hours" content="10.0">
+  <meta name="plan-effort-hours" content="8.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -42,13 +43,23 @@
     </p>
     <p>
       The result of repeating that pattern is visible in one file.
-      <code>imas_codex/standard_names/graph_ops.py</code> is <strong>25,908
-      lines</strong> and now holds <strong>22</strong> distinct
-      <code>apply_*</code> / <code>repair_*</code> / <code>retire_*</code> /
-      <code>reconcile_*</code> operators. Three of them were added in that one
-      session — against a plan whose own §7 states <em>"no new manifest
-      machinery"</em>. The machinery grows by accretion because there is no
-      generic path, so every new class is a new function.
+      lines</strong> and holds 22 <code>apply_*</code> / <code>repair_*</code> /
+      <code>retire_*</code> / <code>reconcile_*</code> functions, of which
+      <strong>ten consume a signed authority artifact</strong> and are this plan's
+      target: <code>apply_adjudicated_source_dispositions</code>,
+      <code>repair_scalar_projection_mismatches</code>,
+      <code>repair_normalization_peel_parent_units</code>,
+      <code>retire_signed_provenance_orphans</code>,
+      <code>retire_signed_dual_authority_targets</code>,
+      <code>retire_ineligible_standard_name_sources</code>,
+      <code>reconcile_error_siblings</code>,
+      <code>reconcile_lifecycleless_standard_name_stubs</code>,
+      <code>reconcile_structural_edges_for_standard_names</code>, and
+      <code>detach_signed_stale_source_bindings</code> in
+      <code>provenance_lifecycle.py</code>. Three were added in one session &mdash;
+      against a plan whose own &#167;7 states <em>"no new manifest machinery"</em>.
+      The machinery grows by accretion because there is no generic path, so every new
+      defect class, and every new <em>mutation kind</em>, is a new function.
     </p>
     <p>
       This plan does not question the safety discipline. That discipline is
@@ -174,9 +185,13 @@
         must reproduce its predecessor's behaviour on a disposable graph before
         the bespoke function is deleted — including its refusal cases, which are
         the part that matters.</li>
-      <li><strong>Delete the bespoke operators.</strong> The plan is not done
-        while both paths exist; a parallel generic-plus-bespoke surface is worse
-        than either alone.</li>
+      <li><strong>Delete each bespoke operator as its own migration lands, not at
+        the end.</strong> A parallel generic-plus-bespoke surface is worse than either
+        alone, so no operator counts as migrated until its bespoke function is gone
+        &mdash; but that is a per-operator gate, never a plan-wide one. Ten operators
+        behind one all-or-nothing switch would be a big-bang refactor of the safety
+        layer, which is exactly the risk profile this plan exists to reduce. Each
+        migration is independently landable, revertible, and valuable.</li>
     </ol>
 
     <h2 id="s5">§5 — Test strategy</h2>

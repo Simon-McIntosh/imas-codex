@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-21T11:39:47",
+  "updated": "2026-08-21T12:02:07",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -188,13 +188,18 @@
           },
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "Sole open repair item at 99%, and its shape has changed twice. The interlock is broken: dual-bound sources are down to 23 and the 16 signed retirements are applied. A $1.60 regeneration experiment proved the 36 orphans cannot be re-sourced, and the lead then locked deletion rather than retirement for anything never released through a pull request, which turns a judgement queue into a mechanical worklist.",
-            "done_when": "The 36 genuine orphans are partitioned by catalog release provenance and dispositioned through the landed ledgered operator: deleted outright where never released through a pull request, superseded only where released, each with a per-identity receipt and the last-producing-source closure proof, and no bulk rule on a released name; the remaining 23 dual-bound sources and the owner/geometry residue are applied or carry recorded fail-closed refusals; the five sub-threshold or absent identities and the two fold ancestors get one fresh quorum draw each against the corrected rc66 grammar, since every prior draw was scored against rc9; electron_source_rate is reviewed after its two failed sources are reset; and the voltage_of_diagnostic_antenna rename is settled by deciding between a sanctioned source-less rename transition and an authoritative live producer. Closing on recorded refusals remains legitimate where a policy refusal, a genuinely unrealized projection, or a below-threshold quorum result is the correct answer."
+            "why_now": "Sole open repair item at 99%. The interlock is broken: dual-bound sources are down to 23 and the 16 signed retirements applied. A $1.60 regeneration experiment proved the 36 orphans cannot be re-sourced, and the lead then locked deletion rather than retirement for unreleased names, turning a judgement queue into a mechanical worklist.",
+            "done_when": "The 36 genuine orphans are partitioned by catalog release provenance and dispositioned through the ledgered operator: deleted where unreleased, superseded only where released. Deletion requires ALL FOUR of no producing source, no live HAS_PARENT child, no catalog release provenance, and membership in an exact signed manifest whose row count the operator refuses on excess; and it may NEVER be triggered by a parse failure, grammar mismatch, quarantine, validation error, unit disagreement or resolution fault, which are regenerate-or-fix cases. The remaining 23 dual-bound sources and the owner/geometry residue are applied or carry recorded fail-closed refusals; the five sub-threshold or absent identities and the two fold ancestors get one fresh quorum draw each against the corrected rc66 grammar, since every prior draw was scored against rc9; electron_source_rate is reviewed after its two failed sources are reset; and the voltage_of_diagnostic_antenna rename is settled by choosing between a sanctioned source-less rename transition and an authoritative live producer. Closing on recorded refusals remains legitimate."
           },
           {
             "slug": "dd-version-resilient-resolution",
-            "why_now": "In-theme for this sprint and it already halted work here: a dictionary label mismatch aborted a scoped run over 42 paths, and 8,680 sources still carry a version label older than the graph's snapshot. Every future dictionary bump repeats that stop until resolution compares content instead of labels, so it belongs beside the integrity repair rather than behind it.",
+            "why_now": "In-theme and it already halted work here: a dictionary label mismatch aborted a scoped run over 42 paths, and 8,680 sources still carry a label older than the graph's snapshot. Every future dictionary bump repeats that stop until resolution compares content instead of labels.",
             "done_when": "resolve_dd_row adopts the content-convergence test that _read_graph_field already implements, so a byte-identical row is never refused for carrying an older stamp; refusal is scoped to the changed leaf rather than fatal to the run; a property test proves a no-op dictionary bump produces zero refusals over the full source corpus and fails against the current label-equality behaviour; a changed leaf still fails closed and demands review; and no bulk re-stamp of the 8,680 labels is performed."
+          },
+          {
+            "slug": "sn-repair-operator-consolidation",
+            "why_now": "Its own stated trigger has fired. The plan said to start when the next integrity class would otherwise need another bespoke operator, and the delete-not-retire decision needs exactly that: the landed retirement operator supersedes, so deletion is either an eleventh signed operator or a mutation-kind parameter on a generic one. Correcting the plan also removed the reason it was first filed as backlog \u2014 the target is ten signed-artifact operators, not the 22 the first draft implied, and migrations land one at a time rather than behind an all-or-nothing switch.",
+            "done_when": "The ten signed-artifact operators are characterised in one table covering authority shape, selection predicate, mutation set, guard set, receipt operation and test location; a generic signed-manifest operator implements the eight-step envelope parameterised by mutation kind and guard set, reading its preview and counters inside the applying invocation; at least the retirement operator is migrated onto it with the delete mutation kind available as a parameter, its disposable-graph suite reproducing identical admitted sets, identical refusals with identical reasons, identical receipt counts and identical replay outcomes; and each migrated operator's bespoke function is deleted as its own migration lands. A migration that changes which rows are refused is rejected regardless of how much code it removes."
           }
         ]
       },
@@ -348,9 +353,14 @@
         "when": "2026-08-21",
         "who": "Simon McIntosh",
         "what": "Two authority decisions. Names never approved through a catalog pull request are DELETED rather than retired when they lose their home, since retirement exists to preserve a published identity and superseding an unreleased name leaves residue in a catalog it never entered; of the 36 orphans only 3 carry catalog-edit origin, so the great majority simply go. And dd-version-resilient-resolution joins S8 rather than sitting in backlog, because a dictionary label mismatch already halted a scoped run and 8,680 sources still carry an older label, so every future bump repeats the stop until resolution compares content instead of labels."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "Simon McIntosh",
+        "what": "Delete authority narrowly bounded after the lead flagged that the delete-not-retire wording read broadly enough to licence deleting most of the graph, since only a few hundred of 2,538 accepted names are released. Deletion now requires all four of no producing source, no live structural child, no catalog release provenance, and membership in an exact signed manifest whose row count the operator refuses on excess; and it may never be triggered by a parse failure, grammar mismatch, quarantine, validation error or resolution fault. The stale rc9 grammar defect is the cautionary case: had deletion been reachable from a parse failure, it would have manufactured justification for destroying correct names. Separately sn-repair-operator-consolidation moved from backlog into S8 after its own trigger fired via the delete mutation kind, and after correction showed the target is ten signed-artifact operators migrated one at a time rather than 22 behind an all-or-nothing switch."
       }
     ],
     "blockers": [],
-    "_version": 40
+    "_version": 41
   }
 }
