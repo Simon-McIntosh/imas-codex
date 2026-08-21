@@ -192,7 +192,14 @@ class TestBatchTargetAuto:
         ):
             result = CliRunner().invoke(
                 sn,
-                ["release", "--batch", "west_production_dd_paths", "--isnc", "/tmp/x", *args],
+                [
+                    "release",
+                    "--batch",
+                    "west_production_dd_paths",
+                    "--isnc",
+                    "/tmp/x",
+                    *args,
+                ],
             )
         return result, captured
 

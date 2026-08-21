@@ -943,7 +943,11 @@ def test_facility_batch_backing_folds_like_any_other_path() -> None:
     """Facility batch ownership of a DD path does not withhold the fold."""
     from imas_codex.standard_names.sources_manifest import load_sources_file
 
-    manifest = pathlib.Path(edit.__file__).parent / "manifests" / "west_production_dd_paths.yaml"
+    manifest = (
+        pathlib.Path(edit.__file__).parent
+        / "manifests"
+        / "west_production_dd_paths.yaml"
+    )
     facility_path = sorted(load_sources_file(manifest))[0]
 
     assert _run(_Graph(_state(backing_id=facility_path)))["ok"] is True

@@ -50,11 +50,11 @@ def test_z_axis_is_not_coerced():
 def test_strict_parser_still_rejects_short_form_name():
     """The catcher promotes at generation time only — it must not create a
     second accepted spelling in the ISN parser itself."""
-    from imas_standard_names.grammar import parse_standard_name
+    from imas_standard_names.grammar import UnknownBaseTokenError, parse_standard_name
 
     # The canonical word form parses cleanly...
     parse_standard_name("radial_coordinate_of_flux_loop")
 
     # ...but the short-form spelling is still rejected outright.
-    with pytest.raises(Exception):
+    with pytest.raises(UnknownBaseTokenError):
         parse_standard_name("r_coordinate_of_flux_loop")
