@@ -2,23 +2,17 @@
 
 ## Outcome
 
-The governed descriptions are live, deterministically revalidated, receipted,
-and replay-safe. The identity lane remains **partially blocked**: the
-`poloidal_straight_field_line_angle` fold is fully admissible but was not
-applied because the companion `line_integrated_electron_density` fold refused
-on an existing distinct successor lineage. No fold was allowed to begin after
-the two-fold cohort failed its complete dry-run.
+The admissibility repair is complete under the amended zero-fold contract.
+Both governed descriptions are live, deterministically revalidated, receipted,
+and replay-safe; all four selected quarantines were restamped from the current
+deterministic audit. Folds are **0/0 required** and **0 applied**. The two folds
+examined during preflight are redundant-identity cleanup, not attachment
+admissibility work, and remain deferred for their own adjudication.
 
-The cross-section disposition is final and must not be re-derived by a later
-node. `cross_section_of_flux_surface` remains quarantined and unsourced, and its
-existing lineage to the derived umbrella `area_of_flux_surface` remains
-untouched. The later attachment manifest must change attachment row 02 directly
-to `poloidal_plane_cross_sectional_area_of_flux_surface`. It must **not** fold
-`cross_section_of_flux_surface`, fold `area_of_flux_surface`, or rewrite their
-lineage. The plain umbrella cannot distinguish poloidal cross-sectional area
-from swept flux-surface area; the accepted children
-`poloidal_plane_cross_sectional_area_of_flux_surface` and
-`surface_area_of_flux_surface` preserve that distinction.
+Attachment routing, not lineage rewriting, owns the three redirects. The later
+attachment manifest must point rows 02, 05, and 15 directly at their canonical
+identities. It must not derive any identity fold from those redirects. All
+three predecessor lineages remain exactly as found.
 
 ## Separate admissibility measures
 
@@ -30,24 +24,38 @@ restamping.
 | State | Measure A: stored lifecycle | Measure B: deterministic revalidation |
 |---|---:|---:|
 | Pre-node, whole nine identities | **4/9** | **5/9** |
+| Post-node, whole nine identities | **6/9** | **7/9** |
 | Pre-node, executable eight-row scope | **4/8** | **5/8** |
-| Current partial state, whole nine identities | **6/9** | **7/9** |
-| Current partial state, executable eight-row scope | **6/8** | **7/8** |
-| Contracted result after both folds | **8/9** | **8/9** |
-| Contracted result in executable scope | **8/8** | **8/8** |
+| Post-node, executable eight-row scope | **6/8** | **7/8** |
 
-The contracted 8/9 and 8/8 result is not yet live because the line-integrated
-identity fold refused. Nine of nine is unreachable by design in this node:
-`cross_section_of_flux_surface` is deliberately excluded and remains invalid.
-The prospective attachment manifest can still select the accepted canonical
-cross-sectional-area child directly; that future manifest selection is not a
-license to report the excluded identity as repaired here.
+The before-to-after transitions are therefore **4/9 to 6/9 stored** and
+**5/9 to 7/9 deterministic** for the whole cohort, and **4/8 to 6/8 stored**
+and **5/8 to 7/8 deterministic** for the executable scope. The executable
+scope excludes row 02's deliberately untouched `cross_section_of_flux_surface`
+identity. Nine of nine is not reachable by design in this node because the
+three redirects are later attachment-manifest routing decisions, not authority
+to rewrite their recorded identities.
 
 `line_integrated_electron_density` explains the original 4/9 versus 5/9 gap:
 the current compound-aware audit accepts it deterministically, while its stored
 lifecycle state retained an older quarantine. The restamp was intentionally
-limited to the four canonical targets used by the admitted description and fold
-routes; it did not wash the deliberately excluded predecessors to valid.
+limited to the four canonical targets used by the admitted description and
+direct attachment routes; it did not wash the deliberately excluded
+predecessors to valid.
+
+## Identities that remain inadmissible
+
+The remaining divergence is intentional and reported rather than hidden:
+
+| Attachment row | Recorded identity | Stored lifecycle | Current deterministic result | Reason and later route |
+|---:|---|---|---|---|
+| 02 | `cross_section_of_flux_surface` | Inadmissible | Inadmissible | Strict grammar round-trip failure. It remains quarantined and unsourced. Route directly to `poloidal_plane_cross_sectional_area_of_flux_surface`; do not collapse the derived `area_of_flux_surface` umbrella into either accepted child. |
+| 05 | `line_integrated_electron_density` | Inadmissible | **Admissible** | Its stored quarantine predates the compound-aware audit repair. The permanent successor history is untouched. Route directly to `line_integrated_electron_number_density`, which already retains five attached DD producers including `interferometer/channel/n_e_line`. |
+| 15 | `poloidal_straight_field_line_angle` | Inadmissible | Inadmissible | Its persisted description still contains a critical storage-shape claim (`2D`). Route directly to the valid `straight_field_line_angle`; do not infer a fold from the attachment redirect. |
+
+Thus Measure A excludes rows 02, 05, and 15, while Measure B excludes rows 02
+and 15. In the executable eight-row scope, Measure A excludes rows 05 and 15
+and Measure B excludes only row 15.
 
 ## Governed descriptions: live before and after
 
@@ -114,20 +122,24 @@ on `line_integrated_electron_number_density`, and two producers on
 `straight_field_line_angle` (one attached DD source and one composed derived
 source).
 
-## Identity-fold dry-run results
+## Deferred identity hygiene and direct routing
 
-No fold mutation or receipt was written.
+No fold mutation or receipt was written because folds are **0/0 required** for
+admissibility. The dry-run evidence is retained to prevent a later attachment
+node from re-deriving lineage changes from routing decisions.
 
 | Requested fold | Dry-run result | Disposition |
 |---|---|---|
-| `line_integrated_electron_density` → `line_integrated_electron_number_density` | **REFUSED**: `name 'line_integrated_electron_density' has another successor lineage; fold is ambiguous` | Stop. Existing successor `line_integrated_electron_density_of_interferometer_beam` is superseded and quarantined, but history is not disposable and the operator correctly refuses a second lineage without an explicit disposition. |
-| `poloidal_straight_field_line_angle` → `straight_field_line_angle` | **WOULD APPLY**: zero sources carried, zero projections carried, zero rejected attachments, zero detached attachments, zero sources stranded | Withheld because the complete two-fold cohort did not pass preflight; no partial fold lane was started. |
+| `line_integrated_electron_density` → `line_integrated_electron_number_density` | **REFUSED**: `name 'line_integrated_electron_density' has another successor lineage; fold is ambiguous` | Correct refusal. Existing successor `line_integrated_electron_density_of_interferometer_beam` remains superseded and quarantined, but chain history is permanent. Defer any redundant-identity cleanup for separate adjudication. |
+| `poloidal_straight_field_line_angle` → `straight_field_line_angle` | **WOULD APPLY**: zero sources carried, zero projections carried, zero rejected attachments, zero detached attachments, zero sources stranded | Deliberately unapplied. It buys no attachment admissibility and would leave the cohort inconsistently half-folded. Defer redundant-identity cleanup for separate adjudication. |
 
-The cross-section non-fold is separate and final:
+The attachment-manifest routing contract is explicit for all three redirects:
 
 | Attachment row | Recorded identity | Later manifest target | Identity mutation |
 |---:|---|---|---|
 | 02 | `cross_section_of_flux_surface` | `poloidal_plane_cross_sectional_area_of_flux_surface` | **None.** Preserve the existing `cross_section_of_flux_surface` ← `area_of_flux_surface` lineage and both accepted area children. |
+| 05 | `line_integrated_electron_density` | `line_integrated_electron_number_density` | **None.** Preserve the existing successor chain even though its surviving successor is itself superseded and quarantined. |
+| 15 | `poloidal_straight_field_line_angle` | `straight_field_line_angle` | **None.** Route the attachment directly; do not turn the redirect into a lineage fold. |
 
 ## Review, cost, and counter proof
 
@@ -142,12 +154,15 @@ The cross-section non-fold is separate and final:
 Ordinary-review draws for the nine-target cohort: **0**. Provider calls: **0**.
 Attributable spend: **USD 0.000000 of USD 25**.
 
-## Remaining exact blocker
+## Completion boundary
 
-Completion now requires an explicit disposition for the existing historical
-successor of `line_integrated_electron_density`. The fold operator must not be
-weakened, the lineage must not be deleted by hand, and a transitive fold must
-not be inferred. Until that disposition is separately authorized, the current
-honest live result remains whole-cohort stored 6/9 and deterministic 7/9,
-executable-scope stored 6/8 and deterministic 7/8. The two governed description
-mutations are complete and replay-safe; the identity lane is not.
+The node is complete: descriptions are **2/2 applied, 2/2 receipted, and 2/2
+replayed**; the exact restamp is **4/4 valid**; folds are **0/0 required** and
+**0 applied**. The honest live result is whole-cohort stored 6/9 and
+deterministic 7/9, with executable-scope stored 6/8 and deterministic 7/8.
+
+The later attachment-manifest node must route rows 02, 05, and 15 directly to
+the canonical targets recorded above while preserving the unchanged producer
+and exact-source closures. The two dry-run folds remain redundant-identity
+cleanup requiring separate adjudication. They are not blockers to this
+admissibility result, and neither may be inferred from the attachment routes.
