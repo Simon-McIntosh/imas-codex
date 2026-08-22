@@ -260,6 +260,35 @@
     inside the rolled-back preview transaction, so it is outside a program that requires
     an already-<code>extracted</code> source.</p>
   </section>
+
+  <section id="field-map-locus">
+    <h2>The field-map refusal is a vocabulary gap, and the measurement says close it</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>c3dd16b4</code>,
+    node <code>n-fieldmapvocab</code>, gate <strong>passed</strong>, 10 artifact
+    assertions and 0 naming-scan hits. Counter deltas
+    <code>StandardNameChange</code> 7,873 &rarr; 7,873 and <code>PRODUCED_NAME</code>
+    5,774 &rarr; 5,774, both <strong>0</strong>. Verdict: <strong>propose-token</strong>.</p>
+    <p>The plan withdrew this refusal's "permanent" label on the reasoning that a grammar
+    refusal is a prompt to consider a token. Measured against the live grammar, that
+    reading holds: installed and graph-active ISN <strong>0.8.0rc67</strong> carries
+    <strong>181 locus tokens</strong>, of which <strong>0 contain <code>grid</code></strong>
+    and <strong>0 contain <code>map</code></strong>. Strict public parsing rejects all
+    three candidate spellings &mdash; <code>major_radius_of_field_map_grid</code>,
+    <code>vertical_coordinate_of_field_map_grid</code>,
+    <code>toroidal_coordinate_of_field_map_grid</code>.</p>
+    <p><strong><code>coordinate_system</code> is not a substitute</strong>, and that is the
+    load-bearing distinction: it names the frame or basis a quantity is expressed in,
+    whereas the DD here declares one 3-D <em>sampled support</em> on which an error-field
+    map is discretized. Three current DD coordinate paths are blocked on the gap &mdash;
+    <code>b_field_non_axisymmetric/time_slice/field_map/grid/{r,z,phi}</code> &mdash;
+    carrying 3 live <code>StandardNameSource</code> rows (2 <code>extracted</code>,
+    1 <code>composed</code>). <code>phi</code> remains bound only to
+    <code>toroidal_angle_of_measurement_position</code>.</p>
+    <p>The recommendation is an entity locus <code>field_map_grid</code> with relation
+    <code>of</code>. Implementing it belongs to the <code>imas-standard-names</code>
+    repository and its governed release/pin/sync rotation, not here. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/field-map-locus-adjudication">field-map-locus-adjudication.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>
