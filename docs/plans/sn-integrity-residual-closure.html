@@ -1,0 +1,295 @@
+<!-- reckon plan -->
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="sn-integrity-residual-closure">
+<meta name="plan-title" content="Closing the Residual Standard Name Integrity Classes">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort" content="M">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-sprint" content="S8">
+<meta name="plan-informs" content="sn-graph-wide-integrity">
+<meta name="plan-informs" content="sn-west-review-rehearsal">
+<title>Residual Integrity Closure | imas-codex</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+
+<h1>Closing the Residual Standard Name Integrity Classes</h1>
+
+<section class="callout" id="scope">
+  <h2>Why this plan exists</h2>
+  <p>
+    <a href="/imas-codex/plans/sn-graph-wide-integrity">sn-graph-wide-integrity</a>
+    reached a measured close, was marked shipped, and then reopened when two
+    naming principles were made binding: <strong>a name must be self-describing,
+    and every Standard Name should have a source</strong>. Those principles turned
+    its closing disposition of 17 unsourced identities back into a live worklist,
+    because <code>attached</code> had been recorded as a <em>disposition</em>
+    rather than as a claim that each legacy identity gained a producer.
+  </p>
+  <p>
+    This plan carries the residue to zero or to named refusals. It is deliberately
+    a separate plan: the parent plan's own sections are a historical record of how
+    each class was found, and grafting a second closure pass onto them would make
+    that record unreadable.
+  </p>
+</section>
+
+<section id="state">
+  <h2>Measured state at hand-off</h2>
+  <p>
+    Every figure below is a live graph measurement, not carried forward. The
+    machinery column matters as much as the count: eight closed mutation
+    programs now exist under one signed envelope, so most remaining work is
+    application rather than construction.
+  </p>
+  <table>
+    <caption>Tracked classes: original, previous close, and now</caption>
+    <thead>
+      <tr><th>Class</th><th>As found</th><th>Previous close</th><th>Now</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Semantic sources with no live target</td><td>596</td><td>0</td><td>see §4</td></tr>
+      <tr><td>Scalar mirror mismatches</td><td>144</td><td>0</td><td>0</td></tr>
+      <tr><td>DD projection mismatches</td><td>2</td><td>0</td><td>0</td></tr>
+      <tr><td><code>source_paths</code> mirror desync</td><td>49</td><td>—</td><td>0</td></tr>
+      <tr><td>Dual-bound semantic sources</td><td>226</td><td>4</td><td><strong>3</strong></td></tr>
+      <tr><td>Live names with no producing source</td><td>85</td><td>17</td><td><strong>12</strong></td></tr>
+      <tr><td>Structurally bare names</td><td>—</td><td>17</td><td><strong>12</strong></td></tr>
+      <tr><td>Accepted names</td><td>—</td><td>2,539</td><td>2,538</td></tr>
+    </tbody>
+  </table>
+  <p>
+    Grammar is pinned and live at ISN <strong>v0.8.0rc67</strong>, whose
+    <code>minimum_safety_factor</code> locus now names the safety-factor
+    <em>magnitude</em> rather than deferring to "the selected measure". The graph
+    snapshot was advanced to rc67 by one unscoped flush at USD 12.34.
+  </p>
+</section>
+
+<h2 id="s1">§1 — Finish the flux-surface umbrella retirement</h2>
+<p>
+  <strong>Ready. Nothing blocks this.</strong> The umbrella
+  <code>area_of_flux_surface</code> is a taxonomy node masquerading as a
+  quantity: its only producer is the synthetic <code>derived:</code> row the
+  reconcile mints for bare parents, its description names a category rather
+  than a physical quantity, and its children span three different units
+  (m^2, Wb^-1.m^2, m) so no physical parent relation can hold.
+</p>
+<p>
+  One of three invocations has applied: both flux-coordinate derivative
+  children now sit under
+  <code>poloidal_plane_cross_sectional_area_of_flux_surface</code>, which is
+  where the DD derivative relationship already put them —
+  <code>darea_dpsi</code> and <code>darea_drho_tor</code> differentiate
+  <code>profiles_1d/area</code>, one of that identity's 21 producers.
+</p>
+<p>
+  Two invocations remain, each single-mutation-kind because the loader
+  deliberately refuses mixed programs:
+</p>
+<ol>
+  <li>
+    <strong>Release</strong> <code>surface_area_of_flux_surface</code> to no
+    parent through the parent-release program landed at <code>e64f8b0d</code>.
+    It must <em>not</em> be reparented onto the poloidal identity, whose
+    description explicitly excludes the swept toroidal surface. It carries 20
+    producers and its lifecycle, validation state and every producer must
+    survive untouched.
+  </li>
+  <li>
+    <strong>Supersede</strong> <code>area_of_flux_surface</code> into
+    <code>poloidal_plane_cross_sectional_area_of_flux_surface</code>, attempted
+    only once the umbrella's live child count reads 0.
+  </li>
+</ol>
+
+<h2 id="s2">§2 — Re-run integrated verification</h2>
+<p>
+  The last verification failed on exactly one gate: <code>ruff format
+  --check</code> on <code>signed_manifest.py</code>, a file owned at the time by
+  a concurrent node. Everything functional passed — 6,587 standard-name tests,
+  0 shadow warnings on a freshly generated model import, all four committed
+  authority digests intact, <code>ruff check</code> clean.
+</p>
+<p>
+  That file has since been formatted and the gate is clean locally, so this is a
+  re-run at the new HEAD rather than new work. It must confirm the same set plus
+  the parent-release suite.
+</p>
+
+<h2 id="s3">§3 — Attach the sixteen reverse-search candidates</h2>
+<p>
+  The reverse dictionary search found unit-agreeing exact DD paths for 16 of the
+  17 then-unsourced identities, across 51 distinct semantic queries and 577
+  inspected path and cluster groups. <strong>Nine are clean</strong> — the
+  candidate agrees on unit and no canonical identity already owns the path.
+  Seven need adjudication first, because attaching them would bind a second live
+  identity to a path a canonical name already holds, recreating the dual-bound
+  defect this programme spent 19 signed repairs removing.
+</p>
+<p>
+  Five of those seven were resolved as lineage supersedes and have landed. The
+  remainder are: <code>fast_ion_charge_state_power_at_inside_flux_surface</code>,
+  which must wait on the Data Dictionary issue in §6 because attaching it now
+  encodes a contradiction; and <code>neutron_flux_due_to_fusion</code>, whose
+  rank-1 candidate is unit <code>s^-1</code> against a name unit of
+  <code>Hz</code> — dimensionally identical and now correctly agreeing under the
+  dimensional adjudicator, so it is attachable.
+</p>
+<p>
+  The one identity with <strong>no</strong> candidate is
+  <code>toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions</code>,
+  and that negative is sound: every unit-agreeing torque path makes
+  <code>trapped</code> describe the source distribution and <code>thermal</code>
+  the recipient, while the name conflates both onto the recipient. Retired on
+  physics, not on a rank-limited miss.
+</p>
+
+<h2 id="s4">§4 — Census the extracted sources with no live target</h2>
+<p>
+  A live census found <strong>140</strong> sources whose every
+  <code>PRODUCED_NAME</code> target is superseded or exhausted, where the
+  previous close reported this class at 0. The partition is what makes it
+  actionable rather than alarming:
+</p>
+<table>
+  <caption>Sources whose every target is superseded or exhausted</caption>
+  <thead><tr><th>Source status</th><th>Count</th><th>Reading</th></tr></thead>
+  <tbody>
+    <tr><td><code>stale</code></td><td>91</td><td>Not live producers by policy; this plan's predecessor treats stale sources as non-producers throughout</td></tr>
+    <tr><td><code>failed</code></td><td>3</td><td>Failed extraction, separate lifecycle</td></tr>
+    <tr><td><code>extracted</code></td><td><strong>46</strong></td><td><strong>The real question</strong></td></tr>
+  </tbody>
+</table>
+<p>
+  The 46 need a read-only census before anyone acts. The open question is what an
+  <code>extracted</code>-status source is doing holding a
+  <code>PRODUCED_NAME</code> edge at all, given the declared lifecycle runs
+  <code>extracted → composed | attached | vocab_gap | failed | stale</code>.
+  <strong>The difference from the previous 0 is most likely definitional rather
+  than damage</strong> — the earlier census may have counted only
+  composed or attached sources — and that must be established before the number
+  is treated as a regression. Report the partition, never the bare total.
+</p>
+
+<h2 id="s5">§5 — Standing refusals, and what would lift each</h2>
+<p>
+  These are legitimate closures under the predecessor's own clause. Each is
+  listed with the external condition that would change it, so none is mistaken
+  for forgotten work.
+</p>
+<table>
+  <caption>Recorded refusals and their lifting conditions</caption>
+  <thead><tr><th>Item</th><th>Why it refuses</th><th>What would lift it</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>3 dual-bound sources</td>
+      <td>Each cut would strip its target's last producing source</td>
+      <td>An authoritative replacement producer, or a separately adjudicated identity disposition</td>
+    </tr>
+    <tr>
+      <td><code>field_map/grid/phi</code></td>
+      <td>The closed grammar rejects <code>field_map_grid</code> as a discretization artifact rather than a physics locus</td>
+      <td><strong>An ISN vocabulary decision, not a permanent verdict.</strong> Recorded as permanent on reasoning since withdrawn — grammar refusals are prompts to consider a token, since ISN and the names develop in lockstep</td>
+    </tr>
+    <tr>
+      <td><code>voltage_of_diagnostic_antenna</code></td>
+      <td>Its only producer is stale so the rename fails compare-and-set, and detaching that source would strip its last producer</td>
+      <td>A sanctioned source-less rename transition — an operator capability that would serve exactly one name today</td>
+    </tr>
+    <tr>
+      <td><code>reflector/centre/phi</code></td>
+      <td>DD 4.1.1 makes <code>centre</code> the local-frame origin while <code>sphere_centre</code> is the centre of curvature that already owns the accepted identity</td>
+      <td>A reviewed centre-of-curvature identity of its own</td>
+    </tr>
+    <tr>
+      <td>3 identities below the 0.85 threshold</td>
+      <td>Each had its one earned draw; a blind redraw violates the one-draw rule</td>
+      <td>Steering through <code>sn edit --hint</code>, which needs a producing source first — so this follows §3</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="s6">§6 — Upstream and cross-repository follow-through</h2>
+<p>
+  <strong>Data Dictionary.</strong> Of four measured contradictions, the
+  duplicate search reduced the worklist to one: the sensor direction X and Z
+  pair were already fixed by merged upstream PR 242, and the ion-state torque
+  path already exists on develop, making that one ours to remeasure rather than
+  theirs to fix. The genuine defect is filed as
+  <a href="https://github.com/iterorganization/IMAS-Data-Dictionary/issues/294">issue 294</a>
+  with
+  <a href="https://github.com/iterorganization/IMAS-Data-Dictionary/pull/295">PR 295</a>
+  closing it. The PR notes that the species-level
+  <code>waves_coherent_wave_profiles_1d_ion</code> pair carries the identical
+  wording and offers its inclusion; awaiting the maintainer's preference.
+</p>
+<p>
+  <strong>Naming, under the self-describing rule.</strong>
+  <code>mass_density</code> states neither subject nor aggregation in its name
+  while its description claims a charged-species sum, so it is a name question
+  for ordinary review rather than a docs edit. The catalog already carries the
+  three-rung ladder <code>mass_density</code> →
+  <code>plasma_mass_density</code> → <code>total_plasma_mass_density</code>, and
+  ISN carries <code>total</code> as one of two aggregation tokens, so the
+  vocabulary supports the distinction. This generalises: every short spelling
+  whose meaning lives only in prose is now suspect, which is a catalog-wide
+  audit belonging to the documentation-quality programme rather than to binding
+  repair.
+</p>
+<p>
+  <strong>Reckon tooling.</strong> Four tool defects and three documentation gaps
+  were measured while running this work. They belong to the reckon repository,
+  not here, and need their own authorization: cross-backend session reuse
+  silently attempts to resume a foreign thread and fails indistinguishably from
+  quota exhaustion; <code>crew resume</code> returns success when it did not
+  launch; <code>crew complete</code> cannot be amended once a live pointer is
+  gone; and the observe classifier could separate quota exhaustion from a
+  session collision, since only the stream distinguishes them.
+</p>
+
+<h2 id="s7">§7 — Execution notes learned the expensive way</h2>
+<p>
+  These cost real waves during the predecessor and are restated because they
+  will bite again.
+</p>
+<ul>
+  <li>
+    <strong>Prove a mutation absent by receipt <code>run_id</code> and manifest
+    digest, never by an operation-name query or a bare counter total.</strong> A
+    zero-write audit that counted receipts by operation name reported an
+    already-committed 19-row transaction as refused.
+  </li>
+  <li>
+    <strong>Every apply derives its own cohort and re-reads its counters inside
+    the applying invocation.</strong> Fixed cohorts computed in an earlier node
+    are stale the moment any authorized transaction commits.
+  </li>
+  <li>
+    <strong>One production mutator at a time.</strong> Two concurrent signed
+    applies void each other's out-of-allowlist immutability proofs. Parallel
+    width comes from evidence and disposable-graph nodes.
+  </li>
+  <li>
+    <strong>A supersede target must pass the naming principle before the batch
+    is authored.</strong> A target challenged after the apply has already
+    committed cannot be un-chosen.
+  </li>
+  <li>
+    <strong>Check that the machinery can produce the measure before making it a
+    gate.</strong> Three contracts in the predecessor demanded measures no code
+    path could emit: a suite-wide zero-failure with a known out-of-fence flake, a
+    single invocation spanning mutation kinds the loader refuses by design, and a
+    release program that did not exist.
+  </li>
+  <li>
+    <strong>Never background a test run and then poll it.</strong> Two nodes lost
+    their turns to exactly that pattern, finishing the work and delivering no
+    manifest. Redirect to a log ending with an exit marker and read it once.
+  </li>
+  <li>
+    <strong>Generated models are gitignored and regenerate per worktree.</strong>
+    A schema fix can read as still-broken in the main checkout until
+    <code>build-models --force</code> runs there.
+  </li>
+</ul>

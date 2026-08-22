@@ -1,11 +1,11 @@
 {
-  "updated": "2026-08-22T03:18:15",
+  "updated": "2026-08-22T21:35:11",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": "S9",
+    "active_sprint_id": "S8",
     "sprints": [
       {
         "id": "S1",
@@ -169,7 +169,7 @@
       },
       {
         "id": "S8",
-        "status": "done",
+        "status": "active",
         "theme": "Pipeline robustness and semantic integrity",
         "starts": "2026-08-10",
         "ends": "2026-09-25",
@@ -188,8 +188,8 @@
           },
           {
             "slug": "sn-graph-wide-integrity",
-            "why_now": "The sole open repair item. Its orphan disposition was overturned twice by measurement: forward regeneration genuinely cannot re-source the orphans, but reverse dictionary search recovers 31 of the 36 with agreeing units, so the disposition is resource-first and deletion is a last resort rather than the mechanical default.",
-            "done_when": "PREMISE CORRECTED 2026-08-21. The locked orphan-resourcing-before-deletion decision inverted the original all-delete wording of this clause, and reverse dictionary search then measured 31 of the 36 unsourced names as recoverable with agreeing units, so the earlier clause would have destroyed correct vocabulary. Deletion is now a last resort, reserved for a name that survives a genuine TWO-DIRECTIONAL search with no measuring path, and it still requires ALL FOUR of no producing source, no live HAS_PARENT child, no catalog release provenance, and membership in an exact signed manifest whose row count the operator refuses on excess; it may NEVER be triggered by a parse failure, grammar mismatch, quarantine, validation error, unit disagreement or resolution fault, which are regenerate-or-fix cases. Done when: every unsourced identity is dispositioned on reverse-search evidence as attached, held on a named DD defect, or retired on physics, with none deleted on no-measuring-path grounds unless a two-directional search proves it; the remaining dual-bound sources and the owner/geometry residue are applied or carry recorded fail-closed refusals; the five sub-threshold or absent identities and the two fold ancestors get one fresh quorum draw each against the corrected rc66 grammar; electron_source_rate is reviewed after its two failed sources are reset; and the voltage_of_diagnostic_antenna rename is settled by choosing between a sanctioned source-less rename transition and an authoritative live producer. Closing on recorded refusals remains legitimate."
+            "why_now": "The measured repair pass. Its orphan disposition was overturned twice by measurement, and the closing census was then reopened when the self-describing-name and universal-source principles were made binding.",
+            "done_when": "Substantially complete at 96.5 percent. Every mechanical class reads zero or carries a recorded fail-closed refusal, the unsourced cohort is dispositioned with none deleted on no-measuring-path grounds, and prevention is enforced at the write boundary. The residue it reopened is carried by sn-integrity-residual-closure rather than by further work here."
           },
           {
             "slug": "dd-version-resilient-resolution",
@@ -198,14 +198,19 @@
           },
           {
             "slug": "sn-repair-operator-consolidation",
-            "why_now": "Its own stated trigger fired: the landed retirement operator supersedes, so deletion was either an eleventh signed operator or a mutation-kind parameter on a generic one. Correcting the plan also removed the reason it was first filed as backlog \u2014 the target is ten signed-artifact operators, migrated one at a time rather than behind an all-or-nothing switch.",
-            "done_when": "Done \u2014 the ten signed-artifact operators are characterised in one table covering authority shape, selection predicate, mutation set, guard set, receipt operation and test location; a generic signed-manifest operator implements the eight-step envelope parameterised by mutation kind and guard set, reading its preview and counters inside the applying invocation; three operators are migrated onto it with the delete mutation kind available as a parameter, each unchanged disposable-graph suite reproducing identical admitted sets, identical refusals with identical reasons, identical receipt counts and identical replay outcomes; and each migrated operator's bespoke function is deleted as its own migration lands. The plan stays active because seven operators remain unmigrated."
+            "why_now": "Its own stated trigger fired: the landed retirement operator supersedes, so deletion was either an eleventh signed operator or a mutation-kind parameter on a generic one.",
+            "done_when": "Done for this sprint \u2014 the ten signed-artifact operators are characterised in one table, a generic signed-manifest operator implements the eight-step envelope reading its preview and counters inside the applying invocation, and the registry now admits eight closed mutation kinds after this session added source-target reconciliation, structural revival, ordinary-source migration, structural reparent and parent release. Each migrated operator's bespoke function was deleted as its migration landed. The plan returned to unscheduled backlog with seven operators unmigrated."
+          },
+          {
+            "slug": "sn-integrity-residual-closure",
+            "why_now": "sn-graph-wide-integrity reopened when the self-describing-name and universal-source principles were made binding, turning its closing disposition of 17 unsourced identities back into a live worklist. Eight closed mutation programs now exist under one signed envelope, including the parent-release program landed this session, so the residue is application rather than construction. The umbrella retirement is one invocation from done and nothing blocks it.",
+            "done_when": "The flux-surface umbrella is retired: surface_area_of_flux_surface released to no parent with all 20 producers and its lifecycle intact, then area_of_flux_surface superseded once its live child count reads 0. Integrated verification re-runs green at the new HEAD across the full standard_names suite, tests/units, the parent-release suite, zero shadow warnings on a freshly generated model import, all four committed authority digests, and both ruff gates. The nine clean reverse-search candidates are attached through exact signed manifests, with neutron_flux_due_to_fusion included now that dimensional agreement holds, and fast_ion_charge_state_power_at_inside_flux_surface held on its filed DD issue. The 46 extracted sources whose only targets are superseded or exhausted are censused read-only and partitioned, establishing whether the difference from the previous zero is definitional or real before any action. Every remaining item is either applied or carries a recorded refusal naming the external condition that would lift it: the 3 dual-bound last-producer holds, field_map_grid as an ISN vocabulary question rather than a permanent verdict, voltage_of_diagnostic_antenna pending a source-less rename capability, reflector/centre/phi pending a reviewed centre-of-curvature identity, and the 3 below-threshold identities pending a producing source before sn edit steering. Closing on recorded refusals remains legitimate."
           }
         ]
       },
       {
         "id": "S9",
-        "status": "active",
+        "status": "planned",
         "theme": "Quality before review",
         "starts": "2026-08-24",
         "ends": "2026-09-11",
@@ -371,6 +376,6 @@
       }
     ],
     "blockers": [],
-    "_version": 47
+    "_version": 49
   }
 }

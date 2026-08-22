@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T17:44:19",
+  "updated": "2026-08-22T21:35:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -19,10 +19,38 @@
         "created": "2026-08-22"
       },
       {
+        "id": "cl-release",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
         "id": "cl-umbrella",
         "harness": "claude",
         "role": "implement",
         "session_id": "bd23ace5-1494-4bf4-856a-108fb537eefb",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "cl-umbrella2",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "c4283d0f-4079-4b90-bea6-4d584a1301bd",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "cx-release",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02a5c-3067-7de0-90c5-7796b7ea5328",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "cx-verify",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
         "created": "2026-08-22"
       },
       {
@@ -211,7 +239,7 @@
         "id": "impl-fieldshadow",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02961-cb7d-75b1-b7d2-c375f6153399",
         "created": "2026-08-22"
       },
       {
@@ -15720,9 +15748,506 @@
           "cost_usd_cumulative": 0
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T154007503768-umbrellaretire2",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73c",
+        "node": "umbrellaretire2",
+        "role": "implement",
+        "spec_level": "",
+        "member": "cl-umbrella",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T15:40:10Z",
+        "completed_at": "2026-08-22T15:44:31.793Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 253,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 261,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f6297ccb261887fa72443780e72bfa71c0b01a0e",
+        "commits": [
+          "ea2e13c4"
+        ],
+        "changed_lines": {
+          "added": 115,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked on a coordinator contract error, no mutation attempted. The done-when demanded one signed invocation covering recompute_projection, delete_relationship and supersede as a single all-or-nothing cohort, but the loader at signed_manifest.py line 730-738 deterministically refuses any authority mixing mutation programs with the verbatim reason 'structural reparent authority cannot mix mutation programs'. That refusal is deliberate design, so no such authority can be constructed or signed. The node quoted the exact line rather than guessing, and declined both to widen scope into a file a concurrent node owned this session and to hack around a guard. The correct shape is three sequential single-kind invocations, each all-or-nothing within itself, with the supersede gated on the umbrella's live child count reaching zero - which needs no machinery change.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T154007503768-umbrellaretire2/manifest.md",
+        "scope_changed": false,
+        "session_id": "bd23ace5-1494-4bf4-856a-108fb537eefb",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 141722,
+            "cache_creation_input_tokens_cumulative": 141722,
+            "cache_read_input_tokens": 4463254,
+            "cache_read_input_tokens_cumulative": 4463254,
+            "inference_geo": "not_available",
+            "input_tokens": 66,
+            "input_tokens_cumulative": 66,
+            "output_tokens": 17876,
+            "output_tokens_cumulative": 17876,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6384307999999999,
+          "detail": "rate-limit event carried no numeric utilisation",
+          "cost_usd_cumulative": 1.6384307999999999
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T153832800067-fieldshadow4",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "fieldshadow4",
+        "role": "implement",
+        "spec_level": "",
+        "member": "cl-fieldshadow",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T15:38:35Z",
+        "completed_at": "2026-08-22T16:14:44.393Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 2161,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 2169,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f6297ccb261887fa72443780e72bfa71c0b01a0e",
+        "commits": [
+          "b2618269"
+        ],
+        "changed_lines": {
+          "added": 99,
+          "removed": 11,
+          "files": 6
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T153832800067-fieldshadow4/manifest.md",
+        "scope_changed": false,
+        "session_id": "73cb7fa2-e619-41af-84b0-493bcd0869a4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 152083,
+            "cache_creation_input_tokens_cumulative": 152083,
+            "cache_read_input_tokens": 4417176,
+            "cache_read_input_tokens_cumulative": 4417176,
+            "inference_geo": "not_available",
+            "input_tokens": 56,
+            "input_tokens_cumulative": 56,
+            "output_tokens": 13329,
+            "output_tokens_cumulative": 13329,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 1.6251692000000006,
+          "detail": "rate-limit event carried no numeric utilisation",
+          "cost_usd_cumulative": 1.6251692000000006
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T154018491780-ddresfix2",
+        "plan": "sn-dd-gaps",
+        "section": "\u00a71",
+        "node": "ddresfix2",
+        "role": "implement",
+        "spec_level": "",
+        "member": "cl-ddres",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T15:40:21Z",
+        "completed_at": "2026-08-22T16:44:12.115Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 3820,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 3831,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f6297ccb261887fa72443780e72bfa71c0b01a0e",
+        "commits": [
+          "e732f37d"
+        ],
+        "changed_lines": {
+          "added": 238,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T154018491780-ddresfix2/manifest.md",
+        "scope_changed": false,
+        "session_id": "a081b9bc-5730-4e84-a941-8c3f7dabbb15",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 225025,
+            "cache_creation_input_tokens_cumulative": 225025,
+            "cache_read_input_tokens": 5264596,
+            "cache_read_input_tokens_cumulative": 5264596,
+            "inference_geo": "not_available",
+            "input_tokens": 46,
+            "input_tokens_cumulative": 46,
+            "output_tokens": 13593,
+            "output_tokens_cumulative": 13593,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.0890411999999996,
+          "detail": "rate-limit event carried no numeric utilisation",
+          "cost_usd_cumulative": 2.0890411999999996
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T163234584968-releaseprog",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "releaseprog",
+        "role": "implement",
+        "spec_level": "",
+        "member": "cl-release",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T16:32:38Z",
+        "completed_at": "2026-08-22T16:44:11.638Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 687,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 693,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "d94b7a896e03d3ce3af78fa152971db2675162e3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Died at 3.27 MB of stream while its disposable Neo4j was starting, writing no manifest; partial work left uncommitted in the worktree (signed_manifest.py modified only). No production endpoint involved. This is the third consecutive claude-backend node in this session to die at large stream size, after two others at about 1.1 MB each, so it is treated as a backend characteristic in this setup rather than a node defect. Re-dispatched on codex with a fresh member, since a member holding a claude session cannot be reused on another backend.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T163234584968-releaseprog/manifest.md",
+        "scope_changed": false,
+        "session_id": "43ce69f5-0501-4bd3-b6b0-b09900b20902",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T155134633237-umbrellaseq",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73c",
+        "node": "umbrellaseq",
+        "role": "implement",
+        "spec_level": "",
+        "member": "cl-umbrella2",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T15:51:37Z",
+        "completed_at": "2026-08-22T16:02:56.347Z",
+        "completed_at_source": "terminal_event",
+        "worker_seconds": 667,
+        "worker_seconds_source": "stream_events",
+        "wall_seconds": 679,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d94b7a896e03d3ce3af78fa152971db2675162e3",
+        "commits": [
+          "d3b3d223"
+        ],
+        "changed_lines": {
+          "added": 146,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Partial success, one of three invocations applied. Invocation 1 committed a live mutation relocating both flux-coordinate derivative children onto poloidal_plane_cross_sectional_area_of_flux_surface; independently verified afterward, that parent now has exactly those 2 children and the umbrella is down to 1. Invocation 2 could not execute: two rejected live authority attempts proved no closed signed-manifest program admits releasing a HAS_PARENT edge with no replacement parent, so invocation 3 was correctly not attempted with the live child count at 1 rather than 0. The gap is a coordinator planning error, not a node failure: reparentprog built reparent, meaning move A to B, and the contract then asked for a release, meaning remove with no replacement, which nothing implements. The node quoted its refusals rather than forcing a parent it knew to be semantically wrong. Followed by node releaseprog2 building the missing program.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T155134633237-umbrellaseq/manifest.md",
+        "scope_changed": false,
+        "session_id": "c4283d0f-4079-4b90-bea6-4d584a1301bd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 155212,
+            "cache_creation_input_tokens_cumulative": 155212,
+            "cache_read_input_tokens": 7433012,
+            "cache_read_input_tokens_cumulative": 7433012,
+            "inference_geo": "not_available",
+            "input_tokens": 110,
+            "input_tokens_cumulative": 110,
+            "output_tokens": 36074,
+            "output_tokens_cumulative": 36074,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 2.4684104000000007,
+          "detail": "rate-limit event carried no numeric utilisation",
+          "cost_usd_cumulative": 2.4684104000000007
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T164448031713-verifywave",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a76b",
+        "node": "verifywave",
+        "role": "test",
+        "spec_level": "",
+        "member": "cx-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T16:44:50Z",
+        "completed_at": "2026-08-22T16:55:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 620,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 620,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "770b399859ba0ca8ecab1f385ecf35c079c0b649",
+        "commits": [
+          "637ed5f6"
+        ],
+        "changed_lines": {
+          "added": 103,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Functionally a pass, failed solely on a formatting gate for a file it did not own. Green: build-models --force exit 0; a freshly generated model import emits 0 shadow warnings; tests/standard_names 6587 passed / 0 failed / 0 errors; tests/units 27 passed; field-naming 3 passed; dd-window 7 passed; ruff check exit 0; all four committed authority artifacts matching their full pinned hashes; generated files left unstaged, proven by an empty cached diff after generation. Red: ruff format --check exits 1 because imas_codex/standard_names/signed_manifest.py would be reformatted, and that file is explicitly owned by concurrent node releaseprog2, so the node refused to format it rather than reach outside its fence and risk conflicting with in-flight edits. Also worth keeping, the census answer is a negative: at requested DD 4.1.1 there are 49 effective active resolution records with 0 mismatched-window records and 0 distinct paths besides equilibrium/time_slice/constraints/n_e/reconstructed, so the retiring_release fix corrected exactly one path rather than a broad class. Re-verification must rerun at the new HEAD once releaseprog2 lands and formats that file.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T164448031713-verifywave/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02a5c-5bfb-7c40-b6fa-56e7f79b3ba0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4460800,
+            "cached_input_tokens_cumulative": 4460800,
+            "input_tokens": 4631446,
+            "input_tokens_cumulative": 4631446,
+            "output_tokens": 18162,
+            "output_tokens_cumulative": 18162,
+            "reasoning_output_tokens": 7014,
+            "reasoning_output_tokens_cumulative": 7014
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T164436164451-releaseprog2",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "releaseprog2",
+        "role": "implement",
+        "spec_level": "",
+        "member": "cx-release",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T16:44:39Z",
+        "completed_at": "2026-08-22T17:05:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1249,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1249,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "770b399859ba0ca8ecab1f385ecf35c079c0b649",
+        "commits": [
+          "e64f8b0d"
+        ],
+        "changed_lines": {
+          "added": 819,
+          "removed": 9,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T164436164451-releaseprog2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02a5c-3067-7de0-90c5-7796b7ea5328",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15249920,
+            "cached_input_tokens_cumulative": 15249920,
+            "input_tokens": 15504341,
+            "input_tokens_cumulative": 15504341,
+            "output_tokens": 33773,
+            "output_tokens_cumulative": 33773,
+            "reasoning_output_tokens": 10489,
+            "reasoning_output_tokens_cumulative": 10489
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T121106484515-fieldshadow",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "fieldshadow",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-fieldshadow",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T12:11:09Z",
+        "completed_at": "2026-08-22T12:17:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 370,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 370,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "e4e78c7004637dff4405f6b412a4c0e81ba4b335",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Superseded and closed. This run blocked on a write fence that omitted signed_manifest.py, which it correctly identified as a mandatory adapter call site rather than reaching outside scope. The work was completed later by node fieldshadow4 at commit b2618269 with the extended fence, verified at 0 shadow warnings on a freshly generated model import and all four committed authority digests intact. Closing the stale live pointer so a fresh session does not read this as work in flight.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T121106484515-fieldshadow/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02961-cb7d-75b1-b7d2-c375f6153399",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2736640,
+            "cached_input_tokens_cumulative": 2736640,
+            "input_tokens": 2869553,
+            "input_tokens_cumulative": 2869553,
+            "output_tokens": 12148,
+            "output_tokens_cumulative": 12148,
+            "reasoning_output_tokens": 5551,
+            "reasoning_output_tokens_cumulative": 5551
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 425
+    "_version": 440
   }
 }
