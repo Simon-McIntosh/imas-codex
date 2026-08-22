@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T11:13:29",
+  "updated": "2026-08-22T11:31:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -198,6 +198,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
+        "id": "impl-isnqdef",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a028c3-afbf-7cf1-be2e-5922a73023cc",
         "created": "2026-08-22"
       },
       {
@@ -446,6 +453,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-umbrellamove",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
         "id": "impl-uncertain8",
         "harness": "codex",
         "role": "implement",
@@ -486,6 +500,13 @@
         "role": "implement",
         "session_id": "01a024b7-6391-74a1-a63b-8aff949d88c9",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-watchdogflake",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a028cd-119e-7e23-a72d-dd36ac452797",
+        "created": "2026-08-22"
       },
       {
         "id": "impl-wrapperfix",
@@ -14875,9 +14896,195 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T091158807458-schemashadow",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "schemashadow",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-schemashadow",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T09:12:02Z",
+        "completed_at": "2026-08-22T09:22:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 642,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 642,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "66f92c5f5c1ac8cb4bd44288c570ac7e2d72bbfb",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked before any change, with commits none and changed_paths none, on a verified generator constraint rather than a difficulty. The pinned LinkML 1.9.3 pydantic generator maps slot.alias to the Python attribute name and does not emit Field(alias=...), so a standard_name.yaml-only rename cannot keep the schema wire key while renaming the shadowing attribute. That makes the coordinator's done-when unsatisfiable inside the two-path fence: renaming removes the warning but rejects the unchanged schema key and breaks byte-compatible loading of all four committed artifacts. The node also found two out-of-fence assertions reading artifact.schema directly, in test_repair_authority_schema.py and test_repair_authority_builder.py, and independently confirmed the coordinator's suspicion that identifier true is wrong here since repo convention reserves it for a slot named id and this envelope has no graph-node identity. Pre-change measurement recorded exactly 1 matching UserWarning with import exit 0. Needs a design decision on scope: extend to the generation path plus the two assertions, upgrade LinkML and verify alias emission under the read-existing lock, document a suppression, or move this wire-format envelope out of the graph LinkML schema entirely.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T091158807458-schemashadow/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a028bd-cf3d-7423-982a-2b84d6356280",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5988608,
+            "cached_input_tokens_cumulative": 5988608,
+            "input_tokens": 6182737,
+            "input_tokens_cumulative": 6182737,
+            "output_tokens": 19691,
+            "output_tokens_cumulative": 19691,
+            "reasoning_output_tokens": 9624,
+            "reasoning_output_tokens_cumulative": 9624
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T091811642017-umbrellamove",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73c",
+        "node": "umbrellamove",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-umbrellamove",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T09:18:14Z",
+        "completed_at": "2026-08-22T09:27:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 583,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 583,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "c2f4184d96bf04b09591565abc38e22422025264",
+        "commits": [
+          "87e8df2f"
+        ],
+        "changed_lines": {
+          "added": 113,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked before mutation on two independent problems, and the second one challenges the instruction. Machinery: the signed-manifest relationship registry is closed to StandardNameSource PRODUCED_NAME reconciliation, revival and migration; it cannot create or delete StandardName HAS_PARENT edges, so relocating children needs a new closed reparent-and-supersede program, and raw Cypher would fail the signed receipt and replay contract. Semantics: the three live children are not the same kind of quantity. Two are flux-coordinate derivatives of the umbrella, but the third is surface_area_of_flux_surface with 20 producers, described as the total area obtained by revolving the poloidal contour through one full toroidal revolution. Reparenting that onto poloidal_plane_cross_sectional_area_of_flux_surface, which is explicitly described as excluding the swept toroidal surface, would place a swept-surface quantity under a parent that excludes swept surfaces. That is the exact distinction the locked flux-surface-area decision protects. The umbrella is therefore doing real work as a generic parent over two different area concepts, and its description says so. Recommend the umbrella survives, with the naming question being whether area_of_flux_surface is self-describing enough as a generic parent.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T091811642017-umbrellamove/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a028c3-7b63-7c70-82d6-df4799dc9a53",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7348480,
+            "cached_input_tokens_cumulative": 7348480,
+            "input_tokens": 7604985,
+            "input_tokens_cumulative": 7604985,
+            "output_tokens": 19796,
+            "output_tokens_cumulative": 19796,
+            "reasoning_output_tokens": 7736,
+            "reasoning_output_tokens_cumulative": 7736
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T091417199989-unitveto",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a76b",
+        "node": "unitveto",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-unitpint",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T09:14:19Z",
+        "completed_at": "2026-08-22T09:27:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 799,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 799,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "c2f4184d96bf04b09591565abc38e22422025264",
+        "commits": [
+          "92146b7e"
+        ],
+        "changed_lines": {
+          "added": 117,
+          "removed": 16,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Design work is complete and green; the gate is unmet only by an out-of-fence timing failure. Green: 5 of 5 focused regressions, tests/units 27 of 27, all 34 recorded DD-bug entries preserved, the old equivalence table reduced from 3 entries to 0 necessary entries under the veto design, ruff check and format both exit 0, and critically git diff --exit-code on tests/units/test_dd_unit_exceptions.py returned a zero-byte log, so the protected energy-versus-torque assertion passes UNCHANGED. Unmet: the full standard_names run reported 6575 passed with 1 failed, that failure being test_pool_idle_exhaustion.py TestIdleExhaustionWatchdog test_younger_replica_keeps_its_age_window_after_older_finishes, a watchdog timing case where stalled was set once the younger in-flight age reached about 0.3 seconds. Earlier full-suite runs today reported 0 failed at 6570, 6571 and 6575 passes, so this presents as flaky rather than a regression from this change. The node correctly refused to touch pools.py or that test to force its own gate green. Held unmerged pending a scoped stabilization of that watchdog case and one clean full-suite run.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T091417199989-unitveto/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a028bf-e57e-7c30-aced-03962d4c5190",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7137024,
+            "cached_input_tokens_cumulative": 7137024,
+            "input_tokens": 7324408,
+            "input_tokens_cumulative": 7324408,
+            "output_tokens": 19214,
+            "output_tokens_cumulative": 19214,
+            "reasoning_output_tokens": 8534,
+            "reasoning_output_tokens_cumulative": 8534
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 391
+    "_version": 399
   }
 }
