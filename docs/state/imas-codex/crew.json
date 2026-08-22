@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T23:10:11",
+  "updated": "2026-08-22T23:13:40",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16740,9 +16740,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T210116952076-n-residueadj",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a73",
+        "node": "n-residueadj",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "rev-orphanadj",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:01:19Z",
+        "completed_at": "2026-08-22T21:13:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 706,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 706,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "60a37785df823e526f92a7ea1bd880b0a0052249",
+        "commits": [
+          "478bcc858d7844011f031186b2a28ab1c53865c9"
+        ],
+        "changed_lines": {
+          "added": 79,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "7/7 identities adjudicated: 3 supersede-into-canonical-owner (cross_section_of_flux_surface, x_ and z_direction_unit_vector_of_sensor), 1 preserve-with-distinct-path (tendency_of_total_thermal_plasma_internal_energy), 3 standing-refusal with explicit lift conditions, 0 retire-on-physics; the three supersedes are executable through the existing closed signed program; counter deltas 0/0",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T210116952076-n-residueadj/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023e9-a537-7aa0-a603-2b8f7a9ea38d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11659776,
+            "cached_input_tokens_cumulative": 11659776,
+            "input_tokens": 12318685,
+            "input_tokens_cumulative": 12318685,
+            "output_tokens": 49454,
+            "output_tokens_cumulative": 49454,
+            "reasoning_output_tokens": 21552,
+            "reasoning_output_tokens_cumulative": 21552
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 451
+    "_version": 452
   }
 }

@@ -289,6 +289,37 @@
     repository and its governed release/pin/sync rotation, not here. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/field-map-locus-adjudication">field-map-locus-adjudication.md</a>.</p>
   </section>
+
+  <section id="residue-adjudication">
+    <h2>Every unattachable identity has a disposition, and none is retired on physics</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>478bcc85</code>,
+    node <code>n-residueadj</code>, gate <strong>passed</strong>, 7/7 identities with
+    3/3 lift conditions explicit. Artifact SHA-256 <code>131efd84&hellip;</code>. Counter
+    deltas <code>StandardNameChange</code> 7,874 &rarr; 7,874 and
+    <code>PRODUCED_NAME</code> 5,774 &rarr; 5,774, both <strong>0</strong>.</p>
+    <table>
+      <caption>Disposition of the five collisions and two preview refusals</caption>
+      <thead><tr><th>Identity</th><th>Disposition</th><th>Reason, or the condition that lifts it</th></tr></thead>
+      <tbody>
+        <tr><td><code>cross_section_of_flux_surface</code></td><td>supersede into canonical owner</td><td>&rarr; <code>poloidal_plane_cross_sectional_area_of_flux_surface</code></td></tr>
+        <tr><td><code>x_direction_unit_vector_of_sensor</code></td><td>supersede into canonical owner</td><td>&rarr; <code>x_first_measurement_direction_unit_vector_of_strain_gauge</code></td></tr>
+        <tr><td><code>z_direction_unit_vector_of_sensor</code></td><td>supersede into canonical owner</td><td>&rarr; <code>z_first_measurement_direction_unit_vector_of_strain_gauge</code></td></tr>
+        <tr><td><code>tendency_of_total_thermal_plasma_internal_energy</code></td><td>preserve with a distinct path</td><td>folding an explicit derivative identity into the quarantined <code>plasma_internal_energy</code> would violate self-description; needs a reviewed unowned path and revalidation</td></tr>
+        <tr><td><code>fast_ion_charge_state_power_at_inside_flux_surface</code></td><td>standing refusal</td><td>the fast-versus-thermal DD recipient contradiction, open as issue 294 with PR 295 unmerged</td></tr>
+        <tr><td><code>neutron_flux_due_to_fusion</code></td><td>standing refusal</td><td>until its source is no longer the exhausted power target's last producer</td></tr>
+        <tr><td><code>poloidal_neutral_internal_state_momentum_convected_velocity</code></td><td>standing refusal</td><td>until a governed source-bootstrap or steering transition earns an accepted-valid result</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Zero identities earn <code>retire-on-physics</code>.</strong> That matters
+    for what the &#167;3 negative means: the one identity this programme did retire on
+    physics &mdash;
+    <code>toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions</code>
+    &mdash; sits in the <em>no-candidate</em> bucket, retired because every unit-agreeing
+    torque path makes <code>trapped</code> describe the source distribution while the name
+    conflates it onto the recipient. It was not a rank-limited miss, and nothing in the
+    collision set resembles it. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/attachment-residue-adjudication">attachment-residue-adjudication.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>
