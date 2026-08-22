@@ -1,7 +1,7 @@
-<meta name="plan-version" content="9">
-<meta name="plan-impl" content="0.7">
-<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,tests/standard_names/test_unbound_source_attachment.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
-<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e">
+<meta name="plan-version" content="10">
+<meta name="plan-impl" content="0.8">
+<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,docs/evidence/sn-integrity-residual-closure/umbrella-supersede-apply.md,docs/evidence/sn-integrity-residual-closure/attachment-apply.md,tests/standard_names/test_unbound_source_attachment.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
+<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e,471e6717483a3edf65030d313cba43fb9934a3d2">
 <meta name="plan-modified" content="2026-08-22">
 <!-- reckon plan -->
 <meta name="docs-project" content="imas-codex">
@@ -123,33 +123,22 @@
   the parent-release suite.
 </p>
 
-<h2 id="s3">§3 — Attach the sixteen reverse-search candidates</h2>
-<p>
-  The reverse dictionary search found unit-agreeing exact DD paths for 16 of the
-  17 then-unsourced identities, across 51 distinct semantic queries and 577
-  inspected path and cluster groups. <strong>Nine are clean</strong> — the
-  candidate agrees on unit and no canonical identity already owns the path.
-  Seven need adjudication first, because attaching them would bind a second live
-  identity to a path a canonical name already holds, recreating the dual-bound
-  defect this programme spent 19 signed repairs removing.
-</p>
-<p>
-  Five of those seven were resolved as lineage supersedes and have landed. The
-  remainder are: <code>fast_ion_charge_state_power_at_inside_flux_surface</code>,
-  which must wait on the Data Dictionary issue in §6 because attaching it now
-  encodes a contradiction; and <code>neutron_flux_due_to_fusion</code>, whose
-  rank-1 candidate is unit <code>s^-1</code> against a name unit of
-  <code>Hz</code> — dimensionally identical and now correctly agreeing under the
-  dimensional adjudicator, so it is attachable.
-</p>
-<p>
-  The one identity with <strong>no</strong> candidate is
-  <code>toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions</code>,
-  and that negative is sound: every unit-agreeing torque path makes
-  <code>trapped</code> describe the source distribution and <code>thermal</code>
-  the recipient, while the name conflates both onto the recipient. Retired on
-  physics, not on a rank-limited miss.
-</p>
+<section id="s3" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-22</span>
+    <h2>&#167;3 &mdash; Attach the reverse-search candidates</h2></header>
+  <p class="landed-summary">
+    Cohort re-derived in-invocation at 12: <strong>3 attached</strong> through a new
+    closed signed program, 5 path collisions and 1 no-candidate dispositioned, 3 held as
+    standing refusals with explicit lifting conditions, <strong>0 retired on physics</strong>.
+    Apply <code>changed=3 receipt_rows=3</code>, replay <code>persistent_writes=0</code>,
+    <code>PRODUCED_NAME</code> 5,774&rarr;5,777, <strong>genuine orphans 12&rarr;9</strong>.
+    The signed envelope gained its sixth program (8/8 disposable-graph cases) because
+    <code>persist_claimed_attachments</code> is claim-fenced pipeline persistence, not
+    standalone authority. Full record:
+    <a href="/imas-codex/evidence/archive/sn-integrity-residual-closure-landed#attachment-apply">&#167;3 landed</a>
+    (commits <code>6f2de78c</code>, <code>98a79710</code>, <code>478bcc85</code>, <code>471e6717</code>).
+  </p>
+</section>
 
 <section id="s4" class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-08-22</span>
@@ -315,5 +304,8 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822-residueadj" data-who="reckon-ship" data-when="2026-08-22T21:25:00Z">
     <div class="r-comment-body">n-residueadj landed - commit 478bcc85; gate evidence-validation passed; measure 7/7 identities adjudicated with partition 3 supersede-into-canonical-owner + 0 retire-on-physics + 1 preserve-with-distinct-path + 3 standing-refusal, and 3/3 standing-refusal lift conditions explicit; artifact SHA-256 131efd84; nonmutation proof StandardNameChange 7874-&gt;7874 and PRODUCED_NAME 5774-&gt;5774. Immediately executable through the existing closed signed supersede program: cross_section_of_flux_surface -&gt; poloidal_plane_cross_sectional_area_of_flux_surface, x_direction_unit_vector_of_sensor -&gt; x_first_measurement_direction_unit_vector_of_strain_gauge, z_direction_unit_vector_of_sensor -&gt; z_first_measurement_direction_unit_vector_of_strain_gauge. tendency_of_total_thermal_plasma_internal_energy is PRESERVED because folding an explicit derivative identity into the quarantined plasma_internal_energy would violate self-description; it needs a reviewed unowned path and revalidation. Zero identities earn retire-on-physics, which keeps the one genuine physics retirement (toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions) distinct in the no-candidate bucket where it belongs.</div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260822-attachapply" data-who="reckon-ship" data-when="2026-08-22T21:30:00Z">
+    <div class="r-comment-body">n-attachapply landed - commit 471e6717; gate signed-apply passed; measure preview outcome=would_apply authority_rows=3 admitted=3 refused=0, apply outcome=applied changed=3 receipt_rows=3 under manifest 08b5da22 with the exact run-id + manifest + operation receipt query returning 3 rows, replay already_applied with changed=0 and persistent_writes=0, every target reread holding one PRODUCED_NAME plus one backing HAS_STANDARD_NAME plus the attached scalar plus one source_paths occurrence; StandardNameChange 7875->7878, PRODUCED_NAME 5774->5777, GENUINE ORPHANS 12->9. Attached: capacitance_of_ion_cyclotron_heating_antenna <- dd:ic_antennas/antenna/module/matching_element/capacitance; toroidal_ion_charge_state_torque_density <- dd:plasma_sources/source/ggd/ion/state/momentum/phi; toroidal_line_averaged_plasma_velocity <- dd:spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor. Deriving the cohort in-invocation changed the answer: the earlier preview admitted 4, the applying invocation admitted 3, because parallel_neutral_momentum_diffusion_coefficient's StandardNameSource only ever existed inside the rolled-back preview transaction. A carried cohort would have tried to attach a source that does not exist.</div>
 </div>
 </section>

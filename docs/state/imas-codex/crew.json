@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T23:18:21",
+  "updated": "2026-08-22T23:28:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16868,9 +16868,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T211919039495-n-attachapply",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a73",
+        "node": "n-attachapply",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-attachapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:19:21Z",
+        "completed_at": "2026-08-22T21:28:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 560,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 560,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "d53fa7c5ddb6da0f0ba1b437be88597f90a0f8b4",
+        "commits": [
+          "471e6717483a3edf65030d313cba43fb9934a3d2"
+        ],
+        "changed_lines": {
+          "added": 112,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "3 attachments applied through the closed signed program: preview would_apply authority_rows=3 admitted=3 refused=0; apply outcome=applied changed=3 receipt_rows=3 under manifest 08b5da22; replay already_applied changed=0 persistent_writes=0; every target reread with one PRODUCED_NAME, one backing HAS_STANDARD_NAME, attached scalar and one source_paths occurrence; StandardNameChange 7875->7878, PRODUCED_NAME 5774->5777, genuine orphans 12->9",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T211919039495-n-attachapply/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02485-ee50-72c3-9f2f-a3e723ebe135",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3436032,
+            "cached_input_tokens_cumulative": 24114944,
+            "input_tokens": 3783033,
+            "input_tokens_cumulative": 25332978,
+            "output_tokens": 21798,
+            "output_tokens_cumulative": 107695,
+            "reasoning_output_tokens": 5457,
+            "reasoning_output_tokens_cumulative": 32144
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 453
+    "_version": 454
   }
 }

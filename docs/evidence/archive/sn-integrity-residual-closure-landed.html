@@ -358,6 +358,45 @@
     failure. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/umbrella-supersede-apply">umbrella-supersede-apply.md</a>.</p>
   </section>
+
+  <section id="attachment-apply">
+    <h2>Three legacy identities gain a producing source &mdash; orphans 12 &rarr; 9</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>471e6717</code>,
+    node <code>n-attachapply</code>, gate <strong>passed</strong>. Authority file SHA-256
+    <code>4c77ea17&hellip;</code>, payload <code>71a4cb6e&hellip;</code>, manifest
+    <code>08b5da22&hellip;</code>.</p>
+    <table>
+      <caption>Signed attachments applied</caption>
+      <thead><tr><th>Identity</th><th>Producing source</th></tr></thead>
+      <tbody>
+        <tr><td><code>capacitance_of_ion_cyclotron_heating_antenna</code></td><td><code>dd:ic_antennas/antenna/module/matching_element/capacitance</code></td></tr>
+        <tr><td><code>toroidal_ion_charge_state_torque_density</code></td><td><code>dd:plasma_sources/source/ggd/ion/state/momentum/phi</code></td></tr>
+        <tr><td><code>toroidal_line_averaged_plasma_velocity</code></td><td><code>dd:spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor</code></td></tr>
+      </tbody>
+    </table>
+    <table>
+      <caption>Apply measures</caption>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Preview</td><td><code>would_apply</code>, authority_rows 3, admitted 3, refused 0</td></tr>
+        <tr><td>Apply</td><td><code>applied</code>, changed 3, receipt_rows 3; the exact run-id + manifest + operation receipt query returns 3 rows</td></tr>
+        <tr><td>Replay</td><td><code>already_applied</code>, changed 0, persistent_writes 0</td></tr>
+        <tr><td>Four-mirror postcondition</td><td>every target reread with one <code>PRODUCED_NAME</code>, one backing <code>HAS_STANDARD_NAME</code>, the attached scalar, and one <code>source_paths</code> occurrence</td></tr>
+        <tr><td>Counters</td><td><code>StandardNameChange</code> 7,875 &rarr; 7,878; <code>PRODUCED_NAME</code> 5,774 &rarr; 5,777</td></tr>
+        <tr><td><strong>Genuine orphans</strong></td><td><strong>12 &rarr; 9</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>Deriving the cohort in-invocation changed the answer, and that is the
+    point.</strong> The earlier preview admitted 4; the applying invocation re-derived and
+    admitted 3 &mdash; its fresh partition reads 3 signed-existing-unbound-source, 5
+    adjudicate-collision, <strong>1 source-already-bound</strong>, <strong>2
+    no-existing-source</strong>, 1 no-candidate. The row that dropped out is
+    <code>parallel_neutral_momentum_diffusion_coefficient</code>, whose
+    <code>StandardNameSource</code> only ever existed inside the rolled-back preview
+    transaction, exactly as the attachment-program landing predicted. A carried cohort
+    would have tried to attach a source that does not exist. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/attachment-apply">attachment-apply.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>
