@@ -484,6 +484,39 @@
     contains only its assigned path. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/integrated-verification">integrated-verification.md</a>.</p>
   </section>
+
+  <section id="neutral-velocity">
+    <h2>The last below-threshold identity is lifted by review, not by assertion</h2>
+    <p><strong>Landed 2026-08-23</strong> &mdash; commit <code>64317bdd</code>,
+    node <code>n-neutralvel</code>, gate <strong>passed</strong>, 29 live assertions.
+    Exact run cost <strong>USD 0.252514</strong> of a 1.00 cap over 5 LLMCost events,
+    <code>cost_is_exact=true</code>.</p>
+    <p>The deadlock was real: <code>poloidal_neutral_internal_state_momentum_convected_velocity</code>
+    sat at <code>reviewed</code> with <code>reviewer_score_name</code> <strong>0.3625</strong>,
+    <strong>0</strong> producing sources and <strong>0</strong> refine attempts &mdash;
+    attachment refuses a non-accepted target, and hint steering needs a producing source.
+    The sanctioned exit is <code>sn edit --rename</code>, which reaches review without one.</p>
+    <table>
+      <caption>Replacement identity, graded by the ordinary review pool</caption>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Successor</td><td><code>poloidal_neutral_internal_state_momentum_convection_velocity</code></td></tr>
+        <tr><td><code>reviewer_score_name</code></td><td><strong>0.9625</strong> against the 0.85 threshold</td></tr>
+        <tr><td>Blind seats</td><td>0.9375 and 0.9875; <code>resolution=quorum_consensus</code>, shortfall null</td></tr>
+        <tr><td>Docs axis</td><td>accepted at 0.875</td></tr>
+        <tr><td>Predecessor</td><td><code>superseded</code></td></tr>
+        <tr><td>Live unsourced count</td><td>6 before, 6 after &mdash; membership changed one-for-one</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Nothing here was direct-accepted.</strong> The replacement went through
+    <code>REVIEW_NAME</code> like any other name and could have been rejected; it scored
+    0.9625 on its own. <code>convected</code> &rarr; <code>convection</code> is the whole
+    change &mdash; the quantity is the velocity <em>of</em> the convective transport, not a
+    velocity that has been convected. The successor is now <code>accepted</code> and
+    <code>valid</code>, which reopens the signed attachment route its predecessor was
+    refused. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/neutral-velocity-disposition">neutral-velocity-disposition.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T00:00:02",
+  "updated": "2026-08-23T00:05:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -17124,9 +17124,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T214556705661-n-neutralvel",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a75",
+        "node": "n-neutralvel",
+        "role": "implement",
+        "spec_level": "open",
+        "member": "impl-hintdraw",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:45:59Z",
+        "completed_at": "2026-08-22T22:04:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1117,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1117,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "cd6b6e26e82a4c1f40c12ce302a7b93054b5b1df",
+        "commits": [
+          "64317bddec20fc83417df77aba7893049f739696"
+        ],
+        "changed_lines": {
+          "added": 143,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Predecessor poloidal_neutral_internal_state_momentum_convected_velocity (reviewed/valid, 0.3625, 0 sources, 0 refine attempts) superseded by poloidal_neutral_internal_state_momentum_convection_velocity, ACCEPTED through the ordinary review pool at reviewer_score_name=0.9625 against the 0.85 threshold, blind seats 0.9375 and 0.9875, resolution=quorum_consensus, docs accepted at 0.875; 29 live assertions passed; SNRun cost exact at USD 0.252514 of a 1.00 cap over 5 LLMCost events; live unsourced count 6 before and after with one-for-one membership change",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T214556705661-n-neutralvel/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02b3b-cd3a-7a72-b7dd-12e88ea5801b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8356608,
+            "cached_input_tokens_cumulative": 12856832,
+            "input_tokens": 8709547,
+            "input_tokens_cumulative": 13381206,
+            "output_tokens": 22310,
+            "output_tokens_cumulative": 41161,
+            "reasoning_output_tokens": 7386,
+            "reasoning_output_tokens_cumulative": 14538
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 457
+    "_version": 458
   }
 }
