@@ -1,9 +1,30 @@
 {
-  "updated": "2026-08-22T12:06:51",
+  "updated": "2026-08-22T17:44:19",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
     "members": [
+      {
+        "id": "cl-ddres",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "a081b9bc-5730-4e84-a941-8c3f7dabbb15",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "cl-fieldshadow",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "73cb7fa2-e619-41af-84b0-493bcd0869a4",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "cl-umbrella",
+        "harness": "claude",
+        "role": "implement",
+        "session_id": "bd23ace5-1494-4bf4-856a-108fb537eefb",
+        "created": "2026-08-22"
+      },
       {
         "id": "doc-opchar",
         "harness": "codex",
@@ -124,6 +145,20 @@
         "created": "2026-08-16"
       },
       {
+        "id": "impl-ddresfix",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a029c0-17e9-7223-a921-5f06dbd06113",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "impl-ddsubmit",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
         "id": "impl-detachmigrate",
         "harness": "codex",
         "role": "implement",
@@ -171,6 +206,27 @@
         "role": "implement",
         "session_id": "01a02428-2549-7000-b426-8034ffe598d0",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-fieldshadow",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
+        "id": "impl-fieldshadow2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a029bf-e648-7c62-97e7-efcd177fee51",
+        "created": "2026-08-22"
+      },
+      {
+        "id": "impl-flushrun",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
       },
       {
         "id": "impl-freshdraw",
@@ -320,6 +376,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-reparentprog",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
         "id": "impl-residue",
         "harness": "codex",
         "role": "implement",
@@ -457,6 +520,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
+        "id": "impl-umbrellaretire",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a029bf-b257-7cb0-9af8-0f1c9eb41f94",
         "created": "2026-08-22"
       },
       {
@@ -15274,9 +15344,385 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T121040183395-flushrun",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a76b",
+        "node": "flushrun",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-flushrun",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T12:10:45Z",
+        "completed_at": "2026-08-22T12:41:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1823,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1823,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "e4e78c7004637dff4405f6b412a4c0e81ba4b335",
+        "commits": [
+          "be5df7b4"
+        ],
+        "changed_lines": {
+          "added": 119,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T121040183395-flushrun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02961-6c73-71d2-a0a1-788da306878e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 17028864,
+            "cached_input_tokens_cumulative": 17028864,
+            "input_tokens": 17298358,
+            "input_tokens_cumulative": 17298358,
+            "output_tokens": 27053,
+            "output_tokens_cumulative": 27053,
+            "reasoning_output_tokens": 7311,
+            "reasoning_output_tokens_cumulative": 7311
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T121117824405-reparentprog",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "reparentprog",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-reparentprog",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T12:11:21Z",
+        "completed_at": "2026-08-22T12:35:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1427,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1427,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "e4e78c7004637dff4405f6b412a4c0e81ba4b335",
+        "commits": [
+          "638fb1c6"
+        ],
+        "changed_lines": {
+          "added": 816,
+          "removed": 20,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T121117824405-reparentprog/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02961-f941-7dd1-a6ad-4124b22895ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18444544,
+            "cached_input_tokens_cumulative": 18444544,
+            "input_tokens": 18746666,
+            "input_tokens_cumulative": 18746666,
+            "output_tokens": 35476,
+            "output_tokens_cumulative": 35476,
+            "reasoning_output_tokens": 11914,
+            "reasoning_output_tokens_cumulative": 11914
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T121053382467-ddsubmit",
+        "plan": "dd-defect-upstreaming",
+        "section": "\u00a72",
+        "node": "ddsubmit",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-ddsubmit",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T12:10:56Z",
+        "completed_at": "2026-08-22T12:17:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 367,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 367,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "e4e78c7004637dff4405f6b412a4c0e81ba4b335",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Superseded by direct coordinator handling at the user's instruction, and stopped mid-flight. It had already created issue 294 with the verbose drafted body about three minutes before the instruction arrived; no pull request and no upstream branch existed at stop time. The coordinator then rewrote 294 twice, first to a trimmed three-section form and then to light prose at the user's request, and opened PR 295 from Simon-McIntosh:fix-waves-fast-power-recipient against develop with Closes 294. Scope verified by enclosing complexType rather than line proximity: power_inside_fast appears four times, at 967 and 980 in waves_coherent_wave_profiles_1d_ion_state and at 1128 and 1141 in waves_coherent_wave_profiles_1d_ion. Only the ion_state pair was changed, 2 lines in 1 file, XSD parsing clean, thermal siblings untouched. The species-level pair carries the identical defect and was deliberately left out so the PR matches the issue, with a one-line offer to include it. Attribution and standard-name-noise scans clean on both bodies and the commit.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T121053382467-ddsubmit/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02961-9896-7de0-83e1-68141588055d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "no events yet",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T135340332169-umbrellaretire",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73c",
+        "node": "umbrellaretire",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-umbrellaretire",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T13:53:43Z",
+        "completed_at": "2026-08-22T13:53:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "f6297ccb261887fa72443780e72bfa71c0b01a0e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Backend quota exhaustion, no work attempted. The codex backend returned 'You've hit your usage limit ... try again at Aug 27th, 2026 1:09 PM' at turn.started, so the node consumed zero tokens, made zero writes, mutated no worktree and wrote no manifest. The ~6100s elapsed is wall-clock until the process was reaped, not effort. This is the codex subscription quota and not the authorized USD 200 spend ceiling, of which only USD 12.34 has been used. Preflight could not have prevented it: codex publishes token usage but no headroom signal, so it reported unknown, and the budget fence correctly treats unknown as clear rather than held. Node contract is unchanged and re-dispatchable as-is once quota resets or on a different backend.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T135340332169-umbrellaretire/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a029bf-b257-7cb0-9af8-0f1c9eb41f94",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": null,
+          "cost_usd": null,
+          "detail": ""
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T135354339554-fieldshadow2",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "fieldshadow2",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-fieldshadow2",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T13:53:56Z",
+        "completed_at": "2026-08-22T13:54:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 4,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 4,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f6297ccb261887fa72443780e72bfa71c0b01a0e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Backend quota exhaustion, no work attempted. The codex backend returned 'You've hit your usage limit ... try again at Aug 27th, 2026 1:09 PM' at turn.started, so the node consumed zero tokens, made zero writes, mutated no worktree and wrote no manifest. The ~6100s elapsed is wall-clock until the process was reaped, not effort. This is the codex subscription quota and not the authorized USD 200 spend ceiling, of which only USD 12.34 has been used. Preflight could not have prevented it: codex publishes token usage but no headroom signal, so it reported unknown, and the budget fence correctly treats unknown as clear rather than held. Node contract is unchanged and re-dispatchable as-is once quota resets or on a different backend.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T135354339554-fieldshadow2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a029bf-e648-7c62-97e7-efcd177fee51",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": null,
+          "cost_usd": null,
+          "detail": ""
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T135407159328-ddresfix",
+        "plan": "sn-dd-gaps",
+        "section": "\u00a71",
+        "node": "ddresfix",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-ddresfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T13:54:09Z",
+        "completed_at": "2026-08-22T13:54:12Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "f6297ccb261887fa72443780e72bfa71c0b01a0e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Backend quota exhaustion, no work attempted. The codex backend returned 'You've hit your usage limit ... try again at Aug 27th, 2026 1:09 PM' at turn.started, so the node consumed zero tokens, made zero writes, mutated no worktree and wrote no manifest. The ~6100s elapsed is wall-clock until the process was reaped, not effort. This is the codex subscription quota and not the authorized USD 200 spend ceiling, of which only USD 12.34 has been used. Preflight could not have prevented it: codex publishes token usage but no headroom signal, so it reported unknown, and the budget fence correctly treats unknown as clear rather than held. Node contract is unchanged and re-dispatchable as-is once quota resets or on a different backend.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T135407159328-ddresfix/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a029c0-17e9-7223-a921-5f06dbd06113",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": null,
+          "cost_usd": null,
+          "detail": ""
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T153638822157-fieldshadow3",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "fieldshadow3",
+        "role": "implement",
+        "spec_level": "",
+        "member": "impl-fieldshadow2",
+        "backend": "claude",
+        "agent": {
+          "backend": "claude",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "claude-sonnet-5",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T15:36:41Z",
+        "completed_at": "2026-08-22T15:36:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f6297ccb261887fa72443780e72bfa71c0b01a0e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Cross-backend session collision, no work attempted. The run failed at error_during_execution with 0 turns, 0 tokens and USD 0. Root cause: member impl-fieldshadow2 had captured session 01a029bf-e648-7c62-97e7-efcd177fee51 from its earlier codex attempt, and with session_reuse enabled the claude backend tried to resume a codex thread id, which fails immediately. This is not a second quota exhaustion and not a node-contract defect. A member that captured a session on one backend cannot be reused on another; repointing across backends requires a fresh member.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T153638822157-fieldshadow3/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a029bf-e648-7c62-97e7-efcd177fee51",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_creation_input_tokens": 0,
+            "cache_creation_input_tokens_cumulative": 0,
+            "cache_read_input_tokens": 0,
+            "cache_read_input_tokens_cumulative": 0,
+            "inference_geo": "",
+            "input_tokens": 0,
+            "input_tokens_cumulative": 0,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 0,
+            "service_tier": "standard",
+            "speed": "standard"
+          },
+          "cost_usd": 0.0,
+          "detail": "no rate-limit event in the stream yet",
+          "cost_usd_cumulative": 0
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 402
+    "_version": 425
   }
 }
