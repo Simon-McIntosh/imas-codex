@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T03:12:52",
+  "updated": "2026-08-22T07:48:52",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -187,6 +187,20 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-hintdraw",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
+        "id": "impl-identitybatch",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
         "id": "impl-isnvocab",
         "harness": "codex",
         "role": "implement",
@@ -227,6 +241,13 @@
         "role": "implement",
         "session_id": "01a02407-7723-79e1-8140-131958616bc9",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-massdensity",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
       },
       {
         "id": "impl-negative3",
@@ -444,6 +465,13 @@
         "role": "investigate",
         "session_id": "01a01005-b980-77b2-8e16-6855122d2119",
         "created": "2026-08-17"
+      },
+      {
+        "id": "inv-ddreports",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
       },
       {
         "id": "inv-ddres",
@@ -14255,9 +14283,261 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T053317889668-massdensity",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73d",
+        "node": "massdensity",
+        "role": "implement",
+        "member": "impl-massdensity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T05:33:20Z",
+        "completed_at": "2026-08-22T05:43:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 596,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 596,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "066fcd17a8c930aa723a4c8b980a38ab44b698ad",
+        "commits": [
+          "747345ce"
+        ],
+        "changed_lines": {
+          "added": 166,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T053317889668-massdensity/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a027f5-9476-7b33-9570-d99a9f3cb255",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5138688,
+            "cached_input_tokens_cumulative": 5138688,
+            "input_tokens": 5472888,
+            "input_tokens_cumulative": 5472888,
+            "output_tokens": 23087,
+            "output_tokens_cumulative": 23087,
+            "reasoning_output_tokens": 7403,
+            "reasoning_output_tokens_cumulative": 7403
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T053342961252-ddreports",
+        "plan": "dd-defect-upstreaming",
+        "section": "\u00a72",
+        "node": "ddreports",
+        "role": "implement",
+        "member": "inv-ddreports",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T05:33:45Z",
+        "completed_at": "2026-08-22T05:46:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 783,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 783,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "066fcd17a8c930aa723a4c8b980a38ab44b698ad",
+        "commits": [
+          "cfaf808e"
+        ],
+        "changed_lines": {
+          "added": 625,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T053342961252-ddreports/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a027f5-f54e-7fe0-a8e8-d92c4dcea573",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6351104,
+            "cached_input_tokens_cumulative": 6351104,
+            "input_tokens": 6554509,
+            "input_tokens_cumulative": 6554509,
+            "output_tokens": 30623,
+            "output_tokens_cumulative": 30623,
+            "reasoning_output_tokens": 12350,
+            "reasoning_output_tokens_cumulative": 12350
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T053323420721-identitybatch",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73c",
+        "node": "identitybatch",
+        "role": "implement",
+        "member": "impl-identitybatch",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T05:33:25Z",
+        "completed_at": "2026-08-22T05:47:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 834,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 834,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "066fcd17a8c930aa723a4c8b980a38ab44b698ad",
+        "commits": [
+          "4a0b8b69"
+        ],
+        "changed_lines": {
+          "added": 81,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked before reporting on an observability defect, not a naming problem. A compose call completed but its structured response body is absent from the run log, the LiteLLM service log, Langfuse observations and local application logs, so four proposed spellings and all five score verdicts cannot be reported. LLMCost held at 27631 and StandardNameReview at 20777 with zero surviving claims, so nothing was billed or persisted. The node correctly refused a second compose attempt under the exactly-one-draw fence rather than silently redrawing. Needs authority for one replacement call plus a runtime wrapper fix that serializes the raw response before candidate rendering.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T053323420721-identitybatch/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a027f5-a955-74c3-a618-7ee23d68506a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11200768,
+            "cached_input_tokens_cumulative": 11200768,
+            "input_tokens": 11468859,
+            "input_tokens_cumulative": 11468859,
+            "output_tokens": 27170,
+            "output_tokens_cumulative": 27170,
+            "reasoning_output_tokens": 10397,
+            "reasoning_output_tokens_cumulative": 10397
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T053432636094-hintdraw",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73c",
+        "node": "hintdraw",
+        "role": "implement",
+        "member": "impl-hintdraw",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T05:34:35Z",
+        "completed_at": "2026-08-22T05:42:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 487,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 487,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "066fcd17a8c930aa723a4c8b980a38ab44b698ad",
+        "commits": [
+          "c2b88ca8"
+        ],
+        "changed_lines": {
+          "added": 106,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Blocked on a real capability gap. All three sn edit --hint --axis name --scope self dry runs exited 2 with the expected fail-closed no-producing-source refusal: the sanctioned name-axis hint path requires at least one producing StandardNameSource, and all three below-threshold targets have zero because they are themselves unsourced identities. Live postflight confirmed the graph unchanged. The same gap blocks voltage_of_diagnostic_antenna, so one source-less transition capability would serve four names. Needs authority to choose between a source-less DD-context-bearing hint transition, a complete-replacement rename, or a pre-acceptance producer-admission contract.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T053432636094-hintdraw/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a027f6-b7a2-7d03-9dec-9ead5d489f02",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4300288,
+            "cached_input_tokens_cumulative": 4300288,
+            "input_tokens": 4482240,
+            "input_tokens_cumulative": 4482240,
+            "output_tokens": 17227,
+            "output_tokens_cumulative": 17227,
+            "reasoning_output_tokens": 6787,
+            "reasoning_output_tokens_cumulative": 6787
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 371
+    "_version": 379
   }
 }
