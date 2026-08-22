@@ -3988,10 +3988,13 @@ classes:
       mutation, guard, receipt, and orphan-policy slots.
     class_uri: sn:RepairAuthorityArtifact
     attributes:
-      schema:
-        identifier: true
+      schema_id:
         required: true
-        description: Existing versioned artifact schema id or canonical repair schema id.
+        description: >-
+          Existing versioned artifact schema id or canonical repair schema
+          id. Carried on the wire (JSON files, loader dicts) under the key
+          "schema" — every loader and builder call site adapts between the
+          wire key and this field name at the boundary.
       generated_at:
         description: Original generation timestamp retained without normalization.
       rows:

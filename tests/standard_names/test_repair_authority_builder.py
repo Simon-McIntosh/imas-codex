@@ -232,7 +232,7 @@ def test_builder_emits_loadable_authority_for_registered_mutation(
         expected_payload_sha256=built.payload_sha256,
     )
 
-    assert built.artifact.schema == "imas-codex.repair-authority.v1"
+    assert built.artifact.schema_id == "imas-codex.repair-authority.v1"
     assert loaded.rows[0].id == data["rows"][0]["id"]
     assert data["selection"]["id"] == ARTIFACT_ROWS_SELECTION
     assert data["selection"]["predicate"] == ARTIFACT_ROWS_SELECTION
@@ -287,8 +287,11 @@ def test_committed_authority_remains_loadable_without_resigning(
     data = json.loads(original)
     signature = data.get("signature")
 
-    RepairAuthorityArtifact.model_validate(data)
+    validated = RepairAuthorityArtifact.model_validate(
+        operator.authority_artifact_wire_projection(data)
+    )
 
+    assert validated.schema_id == data["schema"]
     assert path.read_bytes() == original
     assert hashlib.sha256(original).hexdigest() == expected_file_sha256
     assert json.loads(path.read_bytes()).get("signature") == signature

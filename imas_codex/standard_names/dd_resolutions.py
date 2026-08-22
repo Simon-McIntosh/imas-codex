@@ -17,6 +17,7 @@ from datetime import UTC, datetime
 from enum import Enum, StrEnum
 from typing import Any, Protocol, Self
 
+from packaging.version import InvalidVersion, Version
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from imas_codex.core.physics_domain import PhysicsDomain
@@ -1121,6 +1122,24 @@ def _same_value(left: DDResolutionValue, right: DDResolutionValue) -> bool:
     return _canonical_json(left) == _canonical_json(right)
 
 
+def _within_resolution_window(exact_version: str, retiring_release: str) -> bool:
+    """True while *exact_version* falls inside a resolution's retirement window.
+
+    ``retiring_release`` records the DD version at which the upstream defect
+    is expected to be fixed, or the ``"none-yet"`` sentinel while it remains
+    open. The bridge a resolution documents applies for as long as the
+    underlying DD declaration is unchanged — that is the whole window up to
+    (but excluding) retirement — not only for the exact version label the
+    review happened to be recorded under.
+    """
+    if retiring_release == _NONE_YET:
+        return True
+    try:
+        return Version(exact_version) < Version(retiring_release)
+    except InvalidVersion:
+        return False
+
+
 def _resolved_field(
     field: DDResolutionField,
     raw: DDResolutionValue,
@@ -1188,6 +1207,21 @@ def resolve_dd_field(
             return _resolved_field(
                 field, raw_value, raw_value, converged[0], converged=True
             )
+        windowed = tuple(
+            record
+            for record in active
+            if _same_value(raw_value, record.observed)
+            and _within_resolution_window(exact_version, record.retiring_release)
+        )
+        if len(windowed) > 1:
+            raise DDResolutionAmbiguity(
+                "multiple active resolutions could apply within the retirement window"
+            )
+        if windowed:
+            record = windowed[0]
+            return _resolved_field(
+                field, raw_value, record.effective, record, applied=True
+            )
         versions = sorted({record.dd_version for record in active})
         raise DDResolutionVersionMismatch(
             f"resolution for {(exact_path, field.value)!r} was reviewed only for {versions!r}, not {exact_version!r}"
@@ -1243,6 +1277,21 @@ def _read_graph_field(
                 graph_value,
                 converged[0],
                 converged=True,
+            )
+        windowed = tuple(
+            record
+            for record in active
+            if _same_value(graph_value, record.observed)
+            and _within_resolution_window(dd_version, record.retiring_release)
+        )
+        if len(windowed) > 1:
+            raise DDResolutionAmbiguity(
+                "multiple active resolutions could apply within the retirement window"
+            )
+        if windowed:
+            record = windowed[0]
+            return _resolved_field(
+                field, graph_value, record.effective, record, applied=True
             )
         versions = sorted({record.dd_version for record in active})
         raise DDResolutionVersionMismatch(
