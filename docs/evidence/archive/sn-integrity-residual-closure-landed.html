@@ -196,6 +196,34 @@
     encoded by a second binding. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/attachment-preview">attachment-preview.md</a>.</p>
   </section>
+
+  <section id="parent-release">
+    <h2>The umbrella is childless &mdash; the release the predecessor could not run</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>fb9b8bb4</code>,
+    node <code>n-release</code>, gate <strong>passed</strong>. Authority file SHA-256
+    <code>f897885c&hellip;</code>, payload <code>c06d6097&hellip;</code>, manifest
+    <code>8ceb6bfb&hellip;</code>.</p>
+    <p>This is the invocation the predecessor recorded as <em>blocked &mdash; no closed
+    program exists</em>. The fifth program landed at <code>e64f8b0d</code>, and it applies
+    cleanly on the first attempt.</p>
+    <table>
+      <caption>Signed release measures</caption>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Preview</td><td><code>would_apply</code>, admitted 1, refused 0, would_change 1</td></tr>
+        <tr><td>Apply</td><td><code>applied</code>, changed 1, mutations 1, receipt_rows 1, persistent_writes 2</td></tr>
+        <tr><td>Replay, same manifest hash</td><td><code>already_applied</code>, changed 0, <strong>persistent_writes 0</strong></td></tr>
+        <tr><td><code>surface_area_of_flux_surface</code> after</td><td><code>accepted</code> / <code>valid</code>, <strong>20 producers</strong>, <strong>HAS_PARENT 0</strong></td></tr>
+        <tr><td><code>area_of_flux_surface</code> after</td><td><strong>live child count 0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The child-plus-producer authority digest
+    <code>ad9382c7&hellip;</code> is <em>unchanged</em> across the apply, which is the
+    measure that matters: the release moved exactly one edge and touched neither the
+    child's lifecycle nor any of its twenty producing sources. The umbrella is now
+    eligible for the supersede its live child count previously refused. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/parent-release-apply">parent-release-apply.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>
