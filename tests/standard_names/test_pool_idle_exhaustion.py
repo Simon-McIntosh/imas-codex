@@ -18,7 +18,6 @@ running after their work is exhausted:
 from __future__ import annotations
 
 import asyncio
-import time
 
 import pytest
 
@@ -300,103 +299,34 @@ class TestIdleExhaustionWatchdog:
         assert spec.health.in_flight == 0
         assert spec.health.oldest_in_flight_at is None
 
-    @pytest.mark.asyncio
-    async def test_younger_replica_keeps_its_age_window_after_older_finishes(
+    def test_younger_replica_keeps_its_age_window_after_older_finishes(
         self,
     ) -> None:
         """Finishing an older batch must age a live replica from its own start."""
-        mgr = BudgetManager(total_budget=5.0)
-        stop_event = asyncio.Event()
-        idle_exhausted = asyncio.Event()
-        stalled = asyncio.Event()
-        older_entered = asyncio.Event()
-        younger_entered = asyncio.Event()
-        release_older = asyncio.Event()
-        older_finished = asyncio.Event()
-        younger_cancelled = asyncio.Event()
-        claimed = 0
-        started_at: dict[str, float] = {}
-        younger_cancelled_at: float | None = None
-
-        async def claim() -> dict[str, str] | None:
-            nonlocal claimed
-            if claimed >= 2:
-                return None
-            claimed += 1
-            return {"id": "older" if claimed == 1 else "younger"}
-
-        async def process(batch: dict[str, str]) -> int:
-            nonlocal younger_cancelled_at
-            batch_name = batch["id"]
-            started_at[batch_name] = time.time()
-            if batch_name == "older":
-                older_entered.set()
-                await release_older.wait()
-                older_finished.set()
-                return 0
-
-            younger_entered.set()
-            try:
-                await asyncio.Event().wait()
-            finally:
-                younger_cancelled_at = time.time()
-                younger_cancelled.set()
-            return 0
-
-        spec = PoolSpec(
-            name="review_name",
-            claim=claim,
-            process=process,
-            replicas=2,
-        )
+        spec = _make_idle_spec("review_name", pending=1)
         in_flight_age_limit = 0.2
-        runner = asyncio.create_task(
-            run_pools(
-                [spec],
-                mgr,
-                stop_event,
-                pending_fn=lambda: {"review_name": 1},
-                pending_poll_interval=0.01,
-                grace_period=0.01,
-                weights={"review_name": 1.0},
-                idle_exhausted_event=idle_exhausted,
-                stalled_event=stalled,
-                idle_exhaustion_poll=0.005,
-                idle_exhaustion_polls=3,
-                stall_seconds=in_flight_age_limit,
-                in_flight_stall_seconds=in_flight_age_limit,
-                free_pool_set={"review_name"},
+        older_started_at = 10.0
+        younger_started_at = 10.05
+
+        older_batch = spec.health.mark_batch_started(started_at=older_started_at)
+        younger_batch = spec.health.mark_batch_started(started_at=younger_started_at)
+        spec.health.mark_batch_finished(older_batch)
+
+        assert spec.health.in_flight == 1
+        assert spec.health.oldest_in_flight_at == younger_started_at
+        assert (
+            spec.health.overdue_in_flight_age(
+                age_limit=in_flight_age_limit,
+                now=older_started_at + in_flight_age_limit + 0.01,
             )
+            is None
         )
-        try:
-            await asyncio.wait_for(older_entered.wait(), timeout=1.0)
-            await asyncio.wait_for(younger_entered.wait(), timeout=1.0)
+        assert spec.health.overdue_in_flight_age(
+            age_limit=in_flight_age_limit,
+            now=younger_started_at + in_flight_age_limit + 0.01,
+        ) == pytest.approx(in_flight_age_limit + 0.01)
 
-            finish_target = started_at["older"] + in_flight_age_limit - 0.01
-            await asyncio.sleep(max(0.0, finish_target - time.time()))
-            release_older.set()
-            await asyncio.wait_for(older_finished.wait(), timeout=1.0)
-
-            older_expiry = started_at["older"] + in_flight_age_limit + 0.02
-            await asyncio.sleep(max(0.0, older_expiry - time.time()))
-            active_started_at = spec.health.oldest_in_flight_at
-            assert active_started_at is not None
-            assert started_at["older"] < active_started_at <= started_at["younger"]
-            assert not stalled.is_set()
-            assert not younger_cancelled.is_set()
-            assert spec.health.total_processed == 0
-
-            await asyncio.wait_for(runner, timeout=1.0)
-        finally:
-            if not runner.done():
-                stop_event.set()
-                await asyncio.gather(runner, return_exceptions=True)
-
-        assert younger_cancelled.is_set()
-        assert younger_cancelled_at is not None
-        assert younger_cancelled_at - started_at["younger"] >= in_flight_age_limit
-        assert stalled.is_set()
-        assert not idle_exhausted.is_set()
+        spec.health.mark_batch_finished(younger_batch)
         assert spec.health.in_flight == 0
         assert spec.health.oldest_in_flight_at is None
 

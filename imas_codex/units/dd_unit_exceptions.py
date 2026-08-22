@@ -3,19 +3,18 @@
 The mismatch axis compares a standard name's declared unit against the unit its
 Data-Dictionary source path declares, normalising both through the single
 canonical authority (:func:`imas_standard_names.canonical_unit`). Ordering-only
-and spelling-only differences collapse there. The residual disagreements are
-either genuine defects or one of two curated exception classes recorded in
-``dd_unit_exceptions.yaml``:
+differences collapse there, while Pint establishes dimensional equality for
+different spellings. The residual disagreements are either genuine defects or
+a curated DD-side exception recorded in ``dd_unit_exceptions.yaml``:
 
 * **DD-side unit bugs** — the DD path declares a physically-wrong unit and the
   SN correctly overrides it (e.g. a charge NUMBER tagged with elementary-charge
   ``e``, a direction unit-vector component tagged with metre ``m``).
-* **Unit equivalences** — two canonical forms that are the same physical unit
-  but which the formatter keeps distinct (``Hz`` vs ``s^-1``; ``N.m`` vs
-  ``kg.m^2.s^-2``).
-
 ``units_agree()`` is the single entry point the mismatch axis calls: it returns
 ``True`` when an SN unit and a DD-path unit should be treated as agreeing.
+Named units that share dimensions but assert different physical meanings are
+declared in a distinctness registry, so energy remains distinct from torque,
+frequency from radioactivity, and absorbed dose from equivalent dose.
 """
 
 from __future__ import annotations
@@ -28,6 +27,8 @@ from typing import TYPE_CHECKING, Any
 import yaml
 from imas_standard_names import canonical_unit
 
+from imas_codex.units import unit_registry
+
 if TYPE_CHECKING:
     from imas_codex.standard_names.dd_resolutions import DDResolutionManifest
 
@@ -37,6 +38,23 @@ __all__ = [
     "load_exceptions",
     "dd_unit_bug_globs",
 ]
+
+
+# Pint deliberately reduces units to dimensions. These named groups preserve
+# physical distinctions that dimensionality alone cannot express. An unnamed
+# base-unit expression remains generic and may agree with a named unit; entries
+# are needed only where repository unit conventions assign that expression to a
+# specific physical kind (the torque and torque-density spellings below).
+_SAME_DIMENSION_DISTINCTNESS_REGISTRY = {
+    "energy": frozenset({"J"}),
+    "torque": frozenset({"N.m", "kg.m^2.s^-2"}),
+    "pressure": frozenset({"Pa"}),
+    "torque_density": frozenset({"N.m^-2", "kg.m^-1.s^-2"}),
+    "frequency": frozenset({"Hz"}),
+    "radioactivity": frozenset({"Bq"}),
+    "absorbed_dose": frozenset({"Gy"}),
+    "equivalent_dose": frozenset({"Sv"}),
+}
 
 
 def canonical_or_none(unit: str | None) -> str | None:
@@ -77,10 +95,29 @@ def dd_unit_bug_globs() -> list[str]:
     return [str(e["path"]) for e in load_exceptions()["dd_unit_bugs"]]
 
 
-def _is_equivalent(a: str, b: str) -> bool:
-    """True if two canonical unit forms are a recorded physical equivalence."""
-    pair = {a, b}
-    return any(pair <= eq for eq in load_exceptions()["unit_equivalences"])
+@lru_cache(maxsize=512)
+def _unit_dimensionality(unit: str) -> Any | None:
+    """Return Pint dimensionality for one canonical unit, or None on failure."""
+    try:
+        return unit_registry.parse_expression(unit).dimensionality
+    except Exception:
+        return None
+
+
+def _declared_distinct(a: str, b: str) -> bool:
+    """Return whether same-dimension spellings assert different unit kinds."""
+    kinds = {
+        unit: next(
+            (
+                kind
+                for kind, spellings in _SAME_DIMENSION_DISTINCTNESS_REGISTRY.items()
+                if unit in spellings
+            ),
+            None,
+        )
+        for unit in (a, b)
+    }
+    return bool(kinds[a] is not None and kinds[b] is not None and kinds[a] != kinds[b])
 
 
 def _active_resolution_retires_pair(
@@ -198,10 +235,12 @@ def units_agree(
 ) -> bool:
     """Return True if an SN unit and a DD-path unit should be treated as agreeing.
 
-    Agreement holds when, after canonicalisation, the two forms are equal, are a
-    recorded physical equivalence, or the disagreement is a recorded DD-side
-    unit bug on ``dd_path``. A DD unit the canonical parser cannot resolve
-    (``None``) never agrees — it is a DD-data problem the axis should surface.
+    Agreement holds when, after canonicalisation, the two forms are equal or
+    Pint gives them equal dimensionality and the distinctness registry does not
+    assign them different physical meanings. A recorded DD-side unit bug on
+    ``dd_path`` is the sole exception to dimensional equality. A unit the
+    canonical parser cannot resolve (``None``) never agrees — it is a DD-data
+    problem the axis should surface.
     """
     sn_c = canonical_or_none(sn_unit)
     dd_c = canonical_or_none(dd_unit)
@@ -209,7 +248,13 @@ def units_agree(
         return False
     if sn_c == dd_c:
         return True
-    if _is_equivalent(sn_c, dd_c):
+    sn_dimensions = _unit_dimensionality(sn_c)
+    dd_dimensions = _unit_dimensionality(dd_c)
+    if (
+        sn_dimensions is not None
+        and sn_dimensions == dd_dimensions
+        and not _declared_distinct(sn_c, dd_c)
+    ):
         return True
     return _is_known_dd_bug(
         dd_path,
