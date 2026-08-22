@@ -9,10 +9,11 @@ Only closed registries are interpreted here.  Authority artifacts never carry
 Cypher.  The mutation registry contains ``set_properties``, ``delete``,
 ``supersede``, ``detach``, and two closed relationship programs:
 ``delete_relationship`` for source-target reconciliation,
-``add_relationship`` for structural-source revival, their exact delete/add/set
-combination for ordinary-source migration, and ``recompute_projection`` for an
-exact structural reparent or parent release.  The semantic guard registry contains
-last-producing-source, structural-legitimacy, and out-of-allowlist-immutability.
+``add_relationship`` for structural-source revival or one unbound ordinary-source
+attachment, their exact delete/add/set combination for ordinary-source migration,
+and ``recompute_projection`` for an exact structural reparent or parent release.
+The semantic guard registry contains last-producing-source,
+structural-legitimacy, and out-of-allowlist-immutability.
 """
 
 from __future__ import annotations
@@ -269,6 +270,9 @@ def _validate_structural_source_revival_program(
 
     source_id = identity.get("source_id")
     target_id = identity.get("target_id")
+    if source_id != f"derived:{target_id}":
+        return
+
     source_nodes = [
         participant
         for participant in participants
@@ -329,6 +333,90 @@ def _validate_structural_source_revival_program(
     if not valid:
         raise SignedManifestAuthorityError(
             f"repair row {row_id!r} is not a closed structural-source revival program"
+        )
+
+
+def _validate_unbound_source_attachment_program(
+    row_id: str,
+    identity: dict[str, Any],
+    participants: list[dict[str, Any]],
+    mutations: list[dict[str, Any]],
+) -> None:
+    """Validate one exact ordinary DD-source attachment program."""
+    relationship_adds = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.add_relationship.value
+    ]
+    if not relationship_adds or any(
+        mutation["kind"] == RepairMutationKind.delete_relationship.value
+        for mutation in mutations
+    ):
+        return
+
+    source_id = identity.get("source_id")
+    target_id = identity.get("target_id")
+    if source_id == f"derived:{target_id}":
+        return
+    source_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardNameSource"
+    ]
+    name_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardName"
+    ]
+    relationship_participants = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.relationship.value
+    ]
+    property_updates = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.set_properties.value
+    ]
+    expected_relationship = {
+        "relationship_type": "PRODUCED_NAME",
+        "start_id": source_id,
+        "end_id": target_id,
+    }
+    expected_properties = {
+        "status": "attached",
+        "produced_sn_id": target_id,
+        "claimed_at": None,
+        "claim_token": None,
+        "last_error": None,
+    }
+    valid = (
+        identity.get("kind") == "source"
+        and isinstance(source_id, str)
+        and source_id.startswith("dd:")
+        and len(source_id) > 3
+        and isinstance(target_id, str)
+        and bool(target_id)
+        and len(source_nodes) == 1
+        and str(source_nodes[0]["id"]) == source_id
+        and len(name_nodes) == 1
+        and str(name_nodes[0]["id"]) == target_id
+        and not relationship_participants
+        and len(relationship_adds) == 1
+        and str(relationship_adds[0]["participant_id"]) == target_id
+        and relationship_adds[0].get("arguments") == expected_relationship
+        and len(property_updates) == 1
+        and str(property_updates[0]["participant_id"]) == source_id
+        and property_updates[0].get("arguments", {}).get("properties")
+        == expected_properties
+        and len(mutations) == 2
+        and [int(mutation["order"]) for mutation in mutations] == [1, 2]
+    )
+    if not valid:
+        raise SignedManifestAuthorityError(
+            f"repair row {row_id!r} is not a closed unbound ordinary-source attachment program"
         )
 
 
@@ -788,6 +876,9 @@ def _load_authority(
             row_id, identity, participants, mutations
         )
         _validate_structural_source_revival_program(
+            row_id, identity, participants, mutations
+        )
+        _validate_unbound_source_attachment_program(
             row_id, identity, participants, mutations
         )
         _validate_ordinary_source_migration_program(
@@ -1859,6 +1950,14 @@ def _is_ordinary_source_migration(row: _LoadedRow) -> bool:
     } <= kinds
 
 
+def _is_unbound_source_attachment(row: _LoadedRow) -> bool:
+    kinds = [str(mutation["kind"]) for mutation in row.mutations]
+    return kinds == [
+        RepairMutationKind.add_relationship.value,
+        RepairMutationKind.set_properties.value,
+    ] and str(row.identity.get("source_id") or "").startswith("dd:")
+
+
 def _structural_reparent_refusal(query: _Query, action: dict[str, Any]) -> str | None:
     """Require one exact live parent edge and preserve the child's authority."""
     row: _LoadedRow = action["row"]
@@ -2157,6 +2256,123 @@ def _ordinary_source_migration_refusal(
     return None
 
 
+def _unbound_source_attachment_refusal(
+    query: _Query, action: dict[str, Any]
+) -> str | None:
+    """Admit one unbound DD source against its complete projection closure."""
+    row: _LoadedRow = action["row"]
+    if not _is_unbound_source_attachment(row):
+        return None
+    snapshots = action["participant_snapshots"]
+    source_id = str(row.identity["source_id"])
+    target_id = str(row.identity["target_id"])
+    source_snapshot = snapshots[source_id]
+    target_snapshot = snapshots[target_id]
+    source_properties = source_snapshot["properties"]
+    target_properties = target_snapshot["properties"]
+    binding_count = query.query(
+        """
+        MATCH (:StandardNameSource {id: $source_id})-[:PRODUCED_NAME]->(:StandardName)
+        RETURN count(*) AS bindings
+        """,
+        source_id=source_id,
+    )[0]["bindings"]
+    if int(binding_count):
+        return "ordinary source is already bound"
+    if (
+        source_properties.get("status") != "extracted"
+        or source_properties.get("source_type") != "dd"
+        or source_properties.get("produced_sn_id") is not None
+    ):
+        return "signed ordinary source lifecycle does not match attachment authority"
+    if (
+        source_properties.get("claimed_at") is not None
+        or source_properties.get("claim_token") is not None
+    ):
+        return "ordinary source has an active claim"
+    if (
+        target_properties.get("name_stage") != "accepted"
+        or target_properties.get("validation_status") != "valid"
+        or target_properties.get("status") in {"deprecated", "superseded"}
+    ):
+        return "signed attachment target is not an accepted live name"
+
+    closure_rows = query.query(
+        """
+        MATCH (source:StandardNameSource), (target:StandardName)
+        WHERE elementId(source) = $source_element_id
+          AND elementId(target) = $target_element_id
+        OPTIONAL MATCH (source)-[origin:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+        WITH source, target,
+             [item IN collect(CASE WHEN origin IS NULL THEN null ELSE {
+               origin_id: elementId(origin),
+               origin_type: type(origin),
+               backing_element_id: elementId(backing),
+               backing_id: backing.id,
+               backing_labels: labels(backing)
+             } END) WHERE item IS NOT NULL] AS backings
+        OPTIONAL MATCH (backing_node)-[projection:HAS_STANDARD_NAME]->
+                       (projected:StandardName)
+        WHERE elementId(backing_node) IN
+              [item IN backings | item.backing_element_id]
+        RETURN backings,
+               [item IN collect(CASE WHEN projection IS NULL THEN null ELSE {
+                 projection_id: elementId(projection),
+                 backing_element_id: elementId(backing_node),
+                 target_element_id: elementId(projected),
+                 target_id: projected.id
+               } END) WHERE item IS NOT NULL] AS projections,
+               target.source_paths AS target_source_paths
+        """,
+        source_element_id=source_snapshot["element_id"],
+        target_element_id=target_snapshot["element_id"],
+    )
+    closure = dict(closure_rows[0]) if closure_rows else {}
+    backings = sorted(
+        (dict(item) for item in closure.get("backings") or []),
+        key=lambda item: (str(item["backing_id"]), str(item["origin_id"])),
+    )
+    projections = sorted(
+        (dict(item) for item in closure.get("projections") or []),
+        key=lambda item: (str(item["target_id"]), str(item["projection_id"])),
+    )
+    dd_path = str(source_properties.get("source_id") or "")
+    if (
+        source_id != f"dd:{dd_path}"
+        or len(backings) != 1
+        or backings[0]["origin_type"] != "FROM_DD_PATH"
+        or "IMASNode" not in backings[0]["backing_labels"]
+        or backings[0]["backing_id"] != dd_path
+        or projections
+    ):
+        return "signed unbound ordinary source closure is not projection-free"
+
+    from imas_codex.standard_names.attachment_audit import guard_source_pairings
+
+    guarded = guard_source_pairings(query, target_id, [source_id])
+    if guarded.rejected or guarded.accepted_source_ids != (source_id,):
+        detail = (
+            ", ".join(
+                f"{item.source_node_id}: {item.reason}" for item in guarded.rejected
+            )
+            or "pairing guard did not admit the exact source cohort"
+        )
+        return f"source attachment rejected: {detail}"
+    closure = {
+        "backings": backings,
+        "projections": projections,
+        "target_source_paths": list(closure.get("target_source_paths") or []),
+    }
+    action["participant_digests"].append(
+        {
+            "participant_id": "unbound-ordinary-source-closure",
+            "sha256": _digest(closure),
+        }
+    )
+    action["unbound_source_attachment_closure"] = closure
+    return None
+
+
 def _source_target_reconciliation_refusal(
     query: _Query, action: dict[str, Any]
 ) -> str | None:
@@ -2247,7 +2463,7 @@ def _structural_source_revival_refusal(
 ) -> str | None:
     """Require the complete signed bare-parent closure for explicit revival."""
     row: _LoadedRow = action["row"]
-    if _is_ordinary_source_migration(row):
+    if _is_ordinary_source_migration(row) or _is_unbound_source_attachment(row):
         return None
     if not any(
         mutation["kind"] == RepairMutationKind.add_relationship.value
@@ -2661,6 +2877,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
         if refusal is None:
             refusal = _ordinary_source_migration_refusal(query, action)
         if refusal is None:
+            refusal = _unbound_source_attachment_refusal(query, action)
+        if refusal is None:
             refusal = _source_target_reconciliation_refusal(query, action)
         if refusal is None:
             refusal = _structural_source_revival_refusal(query, action)
@@ -2972,6 +3190,58 @@ def _verify_ordinary_source_migration_postcondition(
         )
 
 
+def _verify_unbound_source_attachment_postcondition(
+    query: _Query,
+    row: _LoadedRow,
+    action: dict[str, Any] | None,
+) -> None:
+    source_id = str(row.identity["source_id"])
+    target_id = str(row.identity["target_id"])
+    state_rows = query.query(
+        """
+        MATCH (source:StandardNameSource {id: $source_id}),
+              (target:StandardName {id: $target_id})
+        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+        WITH source, target, collect(DISTINCT bound.id) AS bindings
+        OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(backing:IMASNode)
+        OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(projected:StandardName)
+        RETURN source.status AS status,
+               source.produced_sn_id AS scalar,
+               source.source_id AS dd_path,
+               bindings,
+               collect(DISTINCT backing.id) AS backing_ids,
+               collect(DISTINCT projected.id) AS projected_ids,
+               target.source_paths AS target_source_paths
+        """,
+        source_id=source_id,
+        target_id=target_id,
+    )
+    state = dict(state_rows[0]) if state_rows else {}
+    dd_path = str(state.get("dd_path") or "")
+    expected_uri = f"dd:{dd_path}"
+    if (
+        state.get("status") != "attached"
+        or state.get("scalar") != target_id
+        or state.get("bindings") != [target_id]
+        or state.get("backing_ids") != [dd_path]
+        or state.get("projected_ids") != [target_id]
+        or expected_uri not in (state.get("target_source_paths") or [])
+    ):
+        raise SignedManifestConflict(
+            "recorded unbound source attachment lost its exact four-mirror postcondition"
+        )
+    if action is None:
+        return
+    prior_paths = action["unbound_source_attachment_closure"]["target_source_paths"]
+    expected_paths = (
+        prior_paths if expected_uri in prior_paths else [*prior_paths, expected_uri]
+    )
+    if state.get("target_source_paths") != expected_paths:
+        raise SignedManifestConflict(
+            "unbound source attachment changed the target source-path mirror unexpectedly"
+        )
+
+
 def _verify_postconditions(
     query: _Query,
     authority: _Authority,
@@ -3066,6 +3336,11 @@ def _verify_postconditions(
                 query,
                 row,
                 action["participant_snapshots"] if action is not None else None,
+            )
+            continue
+        if _is_unbound_source_attachment(row):
+            _verify_unbound_source_attachment_postcondition(
+                query, row, actions_by_id.get(row_id)
             )
             continue
         for mutation in row.mutations:
@@ -3526,6 +3801,67 @@ def _apply_ordinary_source_migration(query: _Query, action: dict[str, Any]) -> i
     return len(row.mutations)
 
 
+def _apply_unbound_source_attachment(query: _Query, action: dict[str, Any]) -> int:
+    """Atomically write the source lifecycle, edge, projection, and path mirrors."""
+    row: _LoadedRow = action["row"]
+    snapshots = action["participant_snapshots"]
+    source_id = str(row.identity["source_id"])
+    target_id = str(row.identity["target_id"])
+    source_snapshot = snapshots[source_id]
+    target_snapshot = snapshots[target_id]
+    closure = action["unbound_source_attachment_closure"]
+    backing = closure["backings"][0]
+    expected_paths = closure["target_source_paths"]
+    result = query.query(
+        """
+        MATCH (source:StandardNameSource), (target:StandardName), (backing:IMASNode)
+        WHERE elementId(source) = $source_element_id
+          AND elementId(target) = $target_element_id
+          AND elementId(backing) = $backing_element_id
+          AND source.id = $source_id
+          AND source.source_type = 'dd'
+          AND source.source_id = $dd_path
+          AND source.status = 'extracted'
+          AND source.produced_sn_id IS NULL
+          AND source.claimed_at IS NULL
+          AND source.claim_token IS NULL
+          AND target.name_stage = 'accepted'
+          AND target.validation_status = 'valid'
+          AND NOT (coalesce(target.status, '') IN ['deprecated', 'superseded'])
+          AND coalesce(target.source_paths, []) = $expected_paths
+          AND COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } = 0
+          AND COUNT { (backing)-[:HAS_STANDARD_NAME]->(:StandardName) } = 0
+        MATCH (source)-[origin:FROM_DD_PATH]->(backing)
+        WHERE elementId(origin) = $origin_element_id
+        CREATE (source)-[:PRODUCED_NAME]->(target)
+        CREATE (backing)-[:HAS_STANDARD_NAME]->(target)
+        SET source.status = 'attached',
+            source.composed_at = datetime(),
+            source.claimed_at = null,
+            source.claim_token = null,
+            source.produced_sn_id = target.id,
+            source.last_error = null,
+            target.source_paths = CASE
+              WHEN $source_id IN coalesce(target.source_paths, [])
+              THEN target.source_paths
+              ELSE coalesce(target.source_paths, []) + $source_id END
+        RETURN source.id AS source_id
+        """,
+        source_element_id=source_snapshot["element_id"],
+        target_element_id=target_snapshot["element_id"],
+        backing_element_id=backing["backing_element_id"],
+        origin_element_id=backing["origin_id"],
+        source_id=source_id,
+        dd_path=backing["backing_id"],
+        expected_paths=expected_paths,
+    )
+    if len(result) != 1 or result[0].get("source_id") != source_id:
+        raise SignedManifestConflict(
+            f"unbound source attachment compare-and-set changed for row {row.id}"
+        )
+    return len(row.mutations)
+
+
 def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
     if "stale_action" in action:
         expected = action["stale_action"]
@@ -3576,6 +3912,8 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
         return _apply_structural_reparent(query, action)
     if _is_ordinary_source_migration(row):
         return _apply_ordinary_source_migration(query, action)
+    if _is_unbound_source_attachment(row):
+        return _apply_unbound_source_attachment(query, action)
     snapshots = action["participant_snapshots"]
     for mutation in row.mutations:
         participant_id = str(mutation["participant_id"])
