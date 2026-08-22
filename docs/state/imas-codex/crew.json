@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T23:03:36",
+  "updated": "2026-08-22T23:07:46",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16565,9 +16565,120 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T210449426111-n-supersede",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a71",
+        "node": "n-supersede",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "cl-umbrella2",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:04:51Z",
+        "completed_at": "2026-08-22T21:04:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 0,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 0,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c4f00f4a26cb9186c31e6b0102ac5cb7db17268f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Launch failure, no manifest: cross-backend session reuse - member cl-umbrella2 is registered harness=claude but the run resolved to codex, which rejected the claude session id with 'thread/resume failed: no rollout found for thread id c4283d0f-4079-4b90-bea6-4d584a1301bd (code -32600)'. This is the exact defect this plan's section 6 records against the reckon repository. Redispatched to a codex member holding a codex session.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T210449426111-n-supersede/manifest.md",
+        "scope_changed": true,
+        "session_id": "c4283d0f-4079-4b90-bea6-4d584a1301bd",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260822T205341934016-n-attachprog",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a73",
+        "node": "n-attachprog",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-genericop",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T20:53:44Z",
+        "completed_at": "2026-08-22T21:06:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 741,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 741,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "fb592f5fa313b3e042978af051d857a08c862c3e",
+        "commits": [
+          "6f2de78ce92bf1774cc186b6698c13b94f8a6fa2"
+        ],
+        "changed_lines": {
+          "added": 753,
+          "removed": 5,
+          "files": 2
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "Closed unbound ordinary-source attachment program registered: 8 passed / 0 failed / 0 skipped on a disposable graph covering would_apply=1, applied changed=1, receipt_rows=1, replay already_applied with persistent_writes=0, and exact already-bound / compare-and-set-drift / unit-dimensionality refusals; ruff check 0 findings, format 2/2 clean; 753 insertions across 2 scoped paths",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T205341934016-n-attachprog/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023fc-bd11-7662-88d5-7824aca67282",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7619840,
+            "cached_input_tokens_cumulative": 21732096,
+            "input_tokens": 8030641,
+            "input_tokens_cumulative": 22555969,
+            "output_tokens": 26376,
+            "output_tokens_cumulative": 84501,
+            "reasoning_output_tokens": 5454,
+            "reasoning_output_tokens_cumulative": 28194
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 448
+    "_version": 450
   }
 }

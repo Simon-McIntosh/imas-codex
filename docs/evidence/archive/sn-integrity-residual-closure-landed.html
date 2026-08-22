@@ -224,6 +224,42 @@
     eligible for the supersede its live child count previously refused. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/parent-release-apply">parent-release-apply.md</a>.</p>
   </section>
+
+  <section id="attachment-program">
+    <h2>A sixth closed program &mdash; signed attachment for an unbound source</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>6f2de78c</code>,
+    node <code>n-attachprog</code>, gate <strong>passed</strong>.
+    <strong>8 passed / 0 failed / 0 skipped</strong> on a disposable Neo4j 2026.01.4
+    bound only to <code>127.0.0.1</code>; <code>ruff check</code> 0 findings,
+    <code>ruff format --check</code> 2/2 clean; 753 insertions across the two declared
+    paths and nothing else.</p>
+    <p>The registry now admits one, and only one, projection-free <code>dd:</code>
+    source-attachment row, shaped as <code>add_relationship</code> plus
+    <code>set_properties</code>. Apply requires the source at <code>extracted</code> with
+    no claim, no scalar, no <code>PRODUCED_NAME</code> and no
+    <code>HAS_STANDARD_NAME</code> projection, and requires an accepted, valid, live
+    target. It reuses <code>guard_source_pairings</code>, then writes the four mirrors
+    atomically: source lifecycle and scalar, exactly one <code>PRODUCED_NAME</code>,
+    exactly one backing <code>HAS_STANDARD_NAME</code>, and the target's
+    <code>source_paths</code> mirror.</p>
+    <table>
+      <caption>Disposable-graph contract measures</caption>
+      <thead><tr><th>Case</th><th>Measure</th></tr></thead>
+      <tbody>
+        <tr><td>Preview</td><td><code>would_apply</code>, 1 admitted row</td></tr>
+        <tr><td>Apply</td><td><code>applied</code>, changed 1, receipt_rows 1</td></tr>
+        <tr><td>Replay</td><td><code>already_applied</code>, changed 0, persistent_writes 0</td></tr>
+        <tr><td>Refusals</td><td>already-bound source; compare-and-set drift; unit-dimensionality disagreement</td></tr>
+        <tr><td>Collateral</td><td>untouched <code>StandardName</code> and <code>StandardNameSource</code> rows byte-equivalent before and after</td></tr>
+      </tbody>
+    </table>
+    <p>One consequence worth carrying into the apply: three of the four admitted preview
+    rows are <em>attach an existing unbound source</em> and fit this shape directly, while
+    <code>parallel_neutral_momentum_diffusion_coefficient</code> was
+    <em>create and attach</em> &mdash; its <code>StandardNameSource</code> exists only
+    inside the rolled-back preview transaction, so it is outside a program that requires
+    an already-<code>extracted</code> source.</p>
+  </section>
 </main>
 </body>
 </html>
