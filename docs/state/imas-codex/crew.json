@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T11:09:35",
+  "updated": "2026-08-22T11:13:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -342,6 +342,13 @@
       },
       {
         "id": "impl-scalarfix",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
+      },
+      {
+        "id": "impl-schemashadow",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -14811,9 +14818,66 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T085611030199-unitpint",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a76b",
+        "node": "unitpint",
+        "role": "implement",
+        "member": "impl-unitpint",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:56:13Z",
+        "completed_at": "2026-08-22T09:08:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 756,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 756,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "427883beb28075d1ea270dc8c107dba0cd2d4d0d",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Not merged. The change makes units_agree compare by pint dimensionality, which is correct for the pairs it was asked about but wrong in general: measured on the worker's own tree, J now agrees with N.m, Hz with Bq, and Gy with Sv. Those are the classic dimensionally-identical but physically distinct pairs, and the repository already had a deliberate assertion against the first of them at tests/units/test_dd_unit_exceptions.py:48-51, test_energy_not_equated_with_torque_spelling, which the coordinator's instruction did not account for. The node behaved correctly throughout: it implemented the requested design, then reported the conflicting out-of-fence assertion in its follow_ons instead of deleting a test that stood in its way. The defect is in the instruction, not the work. Re-dispatching with an inverted design: dimensionality as a necessary condition plus an explicit distinctness registry for dimensionally-equal but semantically different pairs, retaining the DD-bug carve-outs.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T085611030199-unitpint/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a028af-54cf-7d52-b8cf-daddb64774be",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5280256,
+            "cached_input_tokens_cumulative": 5280256,
+            "input_tokens": 5439840,
+            "input_tokens_cumulative": 5439840,
+            "output_tokens": 18651,
+            "output_tokens_cumulative": 18651,
+            "reasoning_output_tokens": 8708,
+            "reasoning_output_tokens_cumulative": 8708
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 389
+    "_version": 391
   }
 }
