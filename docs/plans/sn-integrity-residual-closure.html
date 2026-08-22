@@ -1,7 +1,7 @@
-<meta name="plan-version" content="11">
-<meta name="plan-impl" content="0.85">
-<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,docs/evidence/sn-integrity-residual-closure/umbrella-supersede-apply.md,docs/evidence/sn-integrity-residual-closure/attachment-apply.md,tests/standard_names/test_unbound_source_attachment.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
-<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e,471e6717483a3edf65030d313cba43fb9934a3d2,1854c6d4d1f73c00f1a7a088942fdf0c7214c19f">
+<meta name="plan-version" content="12">
+<meta name="plan-impl" content="0.92">
+<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,docs/evidence/sn-integrity-residual-closure/umbrella-supersede-apply.md,docs/evidence/sn-integrity-residual-closure/attachment-apply.md,docs/evidence/sn-integrity-residual-closure/supersede-successor-recovery.md,tests/standard_names/test_unbound_source_attachment.py,tests/standard_names/test_supersede_successor_scalar.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
+<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e,471e6717483a3edf65030d313cba43fb9934a3d2,1854c6d4d1f73c00f1a7a088942fdf0c7214c19f,c4c9fabc9c22224d303e3ef5f05011437ce0ee6e">
 <meta name="plan-modified" content="2026-08-22">
 <!-- reckon plan -->
 <meta name="docs-project" content="imas-codex">
@@ -72,42 +72,23 @@
   </p>
 </section>
 
-<h2 id="s1">§1 — Finish the flux-surface umbrella retirement</h2>
-<p>
-  <strong>Ready. Nothing blocks this.</strong> The umbrella
-  <code>area_of_flux_surface</code> is a taxonomy node masquerading as a
-  quantity: its only producer is the synthetic <code>derived:</code> row the
-  reconcile mints for bare parents, its description names a category rather
-  than a physical quantity, and its children span three different units
-  (m^2, Wb^-1.m^2, m) so no physical parent relation can hold.
-</p>
-<p>
-  One of three invocations has applied: both flux-coordinate derivative
-  children now sit under
-  <code>poloidal_plane_cross_sectional_area_of_flux_surface</code>, which is
-  where the DD derivative relationship already put them —
-  <code>darea_dpsi</code> and <code>darea_drho_tor</code> differentiate
-  <code>profiles_1d/area</code>, one of that identity's 21 producers.
-</p>
-<p>
-  Two invocations remain, each single-mutation-kind because the loader
-  deliberately refuses mixed programs:
-</p>
-<ol>
-  <li>
-    <strong>Release</strong> <code>surface_area_of_flux_surface</code> to no
-    parent through the parent-release program landed at <code>e64f8b0d</code>.
-    It must <em>not</em> be reparented onto the poloidal identity, whose
-    description explicitly excludes the swept toroidal surface. It carries 20
-    producers and its lifecycle, validation state and every producer must
-    survive untouched.
-  </li>
-  <li>
-    <strong>Supersede</strong> <code>area_of_flux_surface</code> into
-    <code>poloidal_plane_cross_sectional_area_of_flux_surface</code>, attempted
-    only once the umbrella's live child count reads 0.
-  </li>
-</ol>
+<section id="s1" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-22</span>
+    <h2>&#167;1 &mdash; Finish the flux-surface umbrella retirement</h2></header>
+  <p class="landed-summary">
+    Both remaining invocations applied. The signed release left
+    <code>surface_area_of_flux_surface</code> parentless with all <strong>20 producers</strong>
+    and its lifecycle intact (child-plus-producer digest <code>ad9382c7</code> unchanged),
+    dropping the umbrella's live child count to <strong>0</strong>; the umbrella then
+    superseded into <code>poloidal_plane_cross_sectional_area_of_flux_surface</code>, whose
+    21 producers are unchanged. En route the generic supersede operator was found never to
+    write <code>superseded_by</code> &mdash; fixed and covered by <strong>12 supersede-contract
+    cases, 0 failed</strong> &mdash; and <strong>4/4 predecessors</strong> now record their
+    exact successor with write-free replays. Full record:
+    <a href="/imas-codex/evidence/archive/sn-integrity-residual-closure-landed#supersede-recovery">&#167;1 landed</a>
+    (commits <code>fb9b8bb4</code>, <code>1854c6d4</code>, <code>c4c9fabc</code>).
+  </p>
+</section>
 
 <h2 id="s2">§2 — Re-run integrated verification</h2>
 <p>
@@ -288,7 +269,10 @@
     <div class="r-comment-body">n-supersede2 committed a PARTIAL transition - commit c77144da; gate FAILED on exactly one measure. Passed: preview 1 admitted / 0 refused; apply outcome=applied changed=1 mutations=1 receipt_rows=1 persistent_writes=2 under manifest e8b3265a; same-hash replay already_applied with persistent_writes=0; umbrella pre-apply live child count 0; canonical target holding 21 producers before and 21 after. Unmet: area_of_flux_surface reads name_stage=superseded and status=superseded but superseded_by=null, because the generic supersede branch writes lifecycle state and never the canonical successor scalar, leaving the receipt's to_name equal to the predecessor. Coordinator measurement establishes this as systemic and pre-existing, not damage from this node: of 1639 superseded names, only 13 carry superseded_by, 1116 are null with lineage still in REFINED_FROM, and 510 are null with no successor edge at all. The distinction that makes it bite here is that a refine supersede leaves a REFINED_FROM edge so the scalar is a redundant mirror, whereas a supersede-into-a-different-identity leaves no edge and the scalar is the only successor record - exactly the operation this plan needs. This is also an instance of the plan's own section 7 warning: the done-when demanded a measure no code path emits, which is a coordinator authoring error rather than a worker failure. Folded as n-supersedescalar (fix the operator to sign and write the successor scalar) followed by a governed recovery for this row.</div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260822-supersedefix" data-who="reckon-ship" data-when="2026-08-22T21:31:00Z">
-    <div class="r-comment-body">n-supersedescalar landed - commit 1854c6d4; gate supersede-contract suites passed; measure 12 unique cases passed / 0 failed / 0 skipped across 11 disposable-graph cases, ruff check 0 findings and format 2/2 clean, 359 insertions across exactly the two declared paths. A distinct-identity supersede authority must now sign mutation.arguments.successor_id and declare BOTH predecessor and successor as StandardName participants so both are locked and re-hashed before apply; the apply atomically writes name_stage=superseded, status=superseded and superseded_by=<successor>, and the single StandardNameChange row records the real from_name/to_name pair instead of naming the predecessor twice; replay validates lifecycle, scalar AND receipt name pair before returning already_applied with persistent_writes=0, with collateral StandardNameSource, StandardName and PRODUCED_NAME rows byte-for-byte identical. Lifecycle-only supersede authorities carrying no signed successor argument keep their prior behaviour, so the 1116 refine-chain supersedes whose lineage already lives in REFINED_FROM are untouched. Folded onward as n-supersederecover, covering the committed area_of_flux_surface partial together with the three adjudicated identity supersedes.</div>
+    <div class="r-comment-body">n-supersedescalar landed - commit 1854c6d4; gate supersede-contract suites passed; measure 12 unique cases passed / 0 failed / 0 skipped across 11 disposable-graph cases, ruff check 0 findings and format 2/2 clean, 359 insertions across exactly the two declared paths. A distinct-identity supersede authority must now sign mutation.arguments.successor_id and declare BOTH predecessor and successor as StandardName participants so both are locked and re-hashed before apply; the apply atomically writes name_stage=superseded, status=superseded and superseded_by=<successor>, and the single StandardNameChange row records the real from_name/to_name pair instead of naming the predecessor twice; replay validates lifecycle, scalar AND receipt name pair before returning already_applied with persistent_writes=0, with collateral StandardNameSource, StandardName and PRODUCED_NAME rows byte-for-byte identical. Lifecycle-only supersede authorities carrying no signed successor argument keep their prior behaviour, so the 1116 refine-chain supersedes whose lineage already lives in REFINED_FROM are untouched. Folded onward as n-supersederecover, covering the committed area_of_flux_surface partial together with the three adjudicated identity supersedes.</successor></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260822-supersederecover" data-who="reckon-ship" data-when="2026-08-22T21:45:00Z">
+    <div class="r-comment-body">n-supersederecover landed - commit c4c9fabc; gate PASSED AGAINST AN AMENDED MEASURE. Measure: 4/4 signed one-row supersedes applied with 4/4 same-hash replays already_applied at changed=0 and persistent_writes=0, all four predecessors reading name_stage=superseded and status=superseded with superseded_by AND receipt to_name equal to their exact adjudicated successor, cohort unresolved-successor 4->0, StandardNameChange 7878->7882 for exactly one receipt per row, 44 evidence assertions passed. Pairs: area_of_flux_surface and cross_section_of_flux_surface -> poloidal_plane_cross_sectional_area_of_flux_surface; x_direction_unit_vector_of_sensor -> x_first_measurement_direction_unit_vector_of_strain_gauge; z_direction_unit_vector_of_sensor -> z_first_measurement_direction_unit_vector_of_strain_gauge. AMENDMENT: the original done-when required the global null-superseded_by count to fall by at least 4, which no code path can produce - only area_of_flux_surface was inside that population beforehand (cross_section was pending, both sensor names accepted), so superseding the other three ADDS a superseded row already carrying its scalar and leaves the null count untouched; the mathematically maximal decrease was 1 and it measured 1626->1625. The worker derived that explanation independently and correctly refused to force the number. Section 1 is complete: unsourced identities are now 6, down from 12 at session start.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822-extcensus" data-who="reckon-ship" data-when="2026-08-22T21:00:00Z">
     <div class="r-comment-body">n-extcensus landed - commit aa25a253; gate evidence-validation passed; measure 140 = 91 stale + 46 extracted + 3 failed with partition sum equal to the measured total, previous predicate source.status IN ['composed','attached'] re-run in the same invocation still returns 0, all 46 extracted rows classified definitional-difference and 0 damage (7 DD + 39 derived sources holding 47 terminal target records: 19 exhausted, 28 superseded), nonmutation proof StandardNameChange 7873-&gt;7873 and PRODUCED_NAME 5774-&gt;5774 both delta 0. Artifacts docs/evidence/sn-integrity-residual-closure/extracted-source-census.md and the run's live-census.json. Section 4's open question is answered: the difference from the previous zero is definitional; the class did not regrow.</div>

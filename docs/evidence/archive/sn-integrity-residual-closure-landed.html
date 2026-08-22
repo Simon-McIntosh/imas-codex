@@ -422,6 +422,39 @@
     &mdash; so the 1,116 refine-chain supersedes whose lineage already lives in
     <code>REFINED_FROM</code> are untouched by this.</p>
   </section>
+
+  <section id="supersede-recovery">
+    <h2>Four predecessors now record where they went</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>c4c9fabc</code>,
+    node <code>n-supersederecover</code>, gate <strong>passed against an amended
+    measure</strong>. Four signed one-row supersedes, four same-hash replays
+    <code>already_applied</code> at <code>changed=0 persistent_writes=0</code>, 44
+    evidence assertions, <code>StandardNameChange</code> 7,878 &rarr; 7,882 (+4, one
+    receipt per row).</p>
+    <table>
+      <caption>Predecessor to adjudicated successor, verified post-apply</caption>
+      <thead><tr><th>Predecessor</th><th><code>superseded_by</code> and receipt <code>to_name</code></th></tr></thead>
+      <tbody>
+        <tr><td><code>area_of_flux_surface</code></td><td><code>poloidal_plane_cross_sectional_area_of_flux_surface</code></td></tr>
+        <tr><td><code>cross_section_of_flux_surface</code></td><td><code>poloidal_plane_cross_sectional_area_of_flux_surface</code></td></tr>
+        <tr><td><code>x_direction_unit_vector_of_sensor</code></td><td><code>x_first_measurement_direction_unit_vector_of_strain_gauge</code></td></tr>
+        <tr><td><code>z_direction_unit_vector_of_sensor</code></td><td><code>z_first_measurement_direction_unit_vector_of_strain_gauge</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The gate was amended because the original one asked for a number the
+    machinery cannot produce.</strong> It required the global null-<code>superseded_by</code>
+    count to fall by at least 4. Only <code>area_of_flux_surface</code> was inside that
+    population beforehand &mdash; <code>cross_section_of_flux_surface</code> was
+    <code>pending</code> and both sensor names were <code>accepted</code> &mdash; so
+    superseding those three <em>adds</em> a superseded row that already carries its
+    scalar, leaving the null count untouched. The mathematically maximal decrease was 1,
+    and it measured 1,626 &rarr; 1,625. The correct measure is per-predecessor, and it
+    passes 4/4 with cohort unresolved-successor 4 &rarr; 0.</p>
+    <p>This is the second time in this execution that a coordinator-authored gate demanded
+    an aggregate the operator cannot move as assumed &mdash; the plan's &#167;7 warning is
+    evidently easier to restate than to obey. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/supersede-successor-recovery">supersede-successor-recovery.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>

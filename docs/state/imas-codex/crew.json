@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T23:30:43",
+  "updated": "2026-08-22T23:43:53",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16996,9 +16996,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T213100350941-n-supersederecover",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a71",
+        "node": "n-supersederecover",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-umbrellaretire",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:31:02Z",
+        "completed_at": "2026-08-22T21:43:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 765,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 765,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "08baaa715b7c1efcc04b056aed9b1349ba63384d",
+        "commits": [
+          "c4c9fabc9c22224d303e3ef5f05011437ce0ee6e"
+        ],
+        "changed_lines": {
+          "added": 117,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "4/4 signed one-row supersedes applied with 4/4 same-hash replays already_applied at changed=0 persistent_writes=0; all four predecessors read name_stage=superseded and status=superseded with superseded_by and receipt to_name equal to their exact adjudicated successor; cohort unresolved-successor 4->0; StandardNameChange 7878->7882 (+4); 44 evidence assertions passed. GATE AMENDED by the orchestrator: the original done-when required the global null-superseded_by count to fall by >=4, which the machinery cannot emit - only area_of_flux_surface was in that population beforehand (cross_section was pending, both sensor names accepted), so the mathematically maximal decrease was 1 and it measured 1626->1625. The per-predecessor measure is the correct gate and it passes 4/4",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T213100350941-n-supersederecover/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a029bf-b257-7cb0-9af8-0f1c9eb41f94",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5335808,
+            "cached_input_tokens_cumulative": 12519168,
+            "input_tokens": 5542284,
+            "input_tokens_cumulative": 12939674,
+            "output_tokens": 25484,
+            "output_tokens_cumulative": 50881,
+            "reasoning_output_tokens": 6676,
+            "reasoning_output_tokens_cumulative": 14604
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 455
+    "_version": 456
   }
 }
