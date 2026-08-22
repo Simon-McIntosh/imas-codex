@@ -230,11 +230,13 @@ class PoolHealth:
     def mark_progress(self) -> None:
         self.last_progress_at = time.time()
 
-    def mark_batch_started(self) -> int:
+    def mark_batch_started(self, *, started_at: float | None = None) -> int:
         """Record one claimed batch and return its completion identity."""
         batch_id = self._next_batch_id
         self._next_batch_id += 1
-        self._active_batch_started_at[batch_id] = time.time()
+        self._active_batch_started_at[batch_id] = (
+            time.time() if started_at is None else started_at
+        )
         self.in_flight = len(self._active_batch_started_at)
         return batch_id
 
@@ -242,6 +244,21 @@ class PoolHealth:
         """Release the active batch identified when its claim started."""
         del self._active_batch_started_at[batch_id]
         self.in_flight = len(self._active_batch_started_at)
+
+    def overdue_in_flight_age(
+        self,
+        *,
+        age_limit: float,
+        now: float | None = None,
+    ) -> float | None:
+        """Return the oldest active batch age once it reaches ``age_limit``."""
+        started_at = self.oldest_in_flight_at
+        if started_at is None and self.in_flight > 0:
+            started_at = self.last_progress_at
+        if started_at is None:
+            return None
+        age = (time.time() if now is None else now) - started_at
+        return age if age >= age_limit else None
 
     def is_wedged(self, *, poll_interval: float, now: float | None = None) -> bool:
         """A pool is wedged when it has pending work but hasn't progressed
@@ -695,13 +712,11 @@ async def _idle_exhaustion_watchdog(
             for p in pools:
                 if p.health.in_flight <= 0:
                     continue
-                started_at = (
-                    p.health.oldest_in_flight_at
-                    if p.health.oldest_in_flight_at is not None
-                    else p.health.last_progress_at
+                age = p.health.overdue_in_flight_age(
+                    age_limit=in_flight_age_limit,
+                    now=now,
                 )
-                age = now - started_at
-                if age >= in_flight_age_limit:
+                if age is not None:
                     overdue_in_flight[p.name] = age
             no_in_flight = all(p.health.in_flight == 0 for p in pools)
             should_stall = (
