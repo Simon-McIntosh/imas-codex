@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c,c9460262,ca993b9e,0baf8d09,bd34e963,eec3e20b">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py,tests/standard_names/test_error_sibling_reconcile_graph.py">
 <meta name="plan-impl" content="0.98">
@@ -312,10 +312,11 @@
     <pre class="r-fu-prompt">/reckon-ship sn-repair-operator-consolidation §4</pre>
     <p class="r-fu-outcome">Done. The characterisation landed as commit 42f56cd0 with all ten operators tabulated across authority shape, selection predicate, mutation set, guard set, receipt operation and test location, plus a separate expressivity audit recording 9 genuine extension points and 8 accidents. It corrected this plan's own premise - the ten do not share one signed-artifact contract, they partition into 4 external-authority-plus-preview, 3 preview-only and 3 deterministic self-heals - and it surfaced the missing-suite prerequisite that became section 8. Followup: f-sroc-002 now carries the chain, holding the peel-unit child-predicate adjudication that must settle before that operator migrates.</p>
     </article>
-<article class="r-fu" data-id="f-sroc-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship sn-repair-operator-consolidation §4" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sroc-002" data-status="resolved" data-written-by="reckon-ship" data-written-at="2026-08-21" data-recommends-skill="/reckon-ship sn-repair-operator-consolidation §4" data-resolved-at="2026-08-22T01:14:23+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Adjudicate the peel-unit child predicate before migrating that operator</h4>
     <div class="r-fu-body"><p>The behavioural suite for <code>repair_normalization_peel_parent_units</code> pins the live predicate, which examines <em>every</em> child, so a normalization child carrying a null unit is refused. The production docstring says <em>every unit-bearing child</em>, which would admit it. One of the two is wrong and the suite cannot tell you which: it records behaviour, not intent. Settle which reading is intended, correct the other, and only then migrate the operator onto the generic envelope - a migration that adopts the docstring's reading while the suite pins the code's would change which rows refuse, which section 5 rejects regardless of how much code it removes.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-repair-operator-consolidation §4</pre>
+    <p class="r-fu-outcome">Done. The adjudication landed as the peelunit node and the correction as peelunitfix (commit 89f84942), both gates passed. The live Cypher was the wrong side and the every-unit-bearing-child docstring was right, decided not by the two texts themselves but by a third witness: the shared authority consumers at graph_ops.py:3718-3724 and 4735-4741 already exclude null-unit children, so the operator was the outlier against its own substrate. The repair projects non-null unit_kids before the all-quantifier and changed exactly 1 of the 7 pinned cases, normalized_particle_mass at unit=None moving from admitting [] to admitting ['particle_mass'], with 6 unchanged; full standard_names 6,554 passed / 0 failed. repair_normalization_peel_parent_units may now migrate with that corrected seven-case suite as its equivalence baseline. Also folded in this session: authbuilder (commit 508e4e14) after two live nodes each lost both attempts to hand-rolled RepairAuthorityArtifact shapes, and three closed branch programs landed under the generic envelope, taking the registry from four mutation kinds to six. No followup: the seven remaining operator migrations are ordinary scope in this plan's own sections, not a handoff.</p>
     </article>
 </section>
 

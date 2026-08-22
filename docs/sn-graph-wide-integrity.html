@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-graph-wide-integrity">
   <meta name="plan-title" content="Graph-Wide Standard Name Semantic Integrity and Exact Recovery">
   <meta name="plan-summary" content="Repair the measured semantic-integrity worklist so every live name is fed only by sources that genuinely measure it: the WEST-blocking subset from §2 first, then the dual-bound sources, gated detaches, and proven mis-attachments surfaced by the 2026-08-11 recovery follow-on. Exact instruments, ordinary quorum, reversible transactions — no new manifest machinery.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -17,14 +17,14 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-22">
-<meta name="plan-version" content="242">
-<meta name="plan-impl" content="0.995">
+<meta name="plan-version" content="243">
+<meta name="plan-impl" content="1.0">
 <meta name="plan-sprint" content="S8">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html,docs/evidence/sn-graph-wide-integrity/orphan-release-partition.md,docs/evidence/sn-graph-wide-integrity/orphan-delete-adjudication.md,docs/evidence/sn-graph-wide-integrity/orphan-resourcing-search.md,docs/evidence/sn-graph-wide-integrity/orphan-uncertain-adjudication.md,docs/evidence/sn-graph-wide-integrity/orphan-negative-retention.md,docs/evidence/sn-graph-wide-integrity/orphan-attachment-candidates.md,docs/evidence/sn-graph-wide-integrity/orphan-attachment-apply.md,docs/evidence/sn-graph-wide-integrity/attachment-reuse-map.md,docs/evidence/sn-graph-wide-integrity/attachment-target-review.md,docs/evidence/sn-graph-wide-integrity/attachment-admission-defects.md,docs/evidence/sn-graph-wide-integrity/attachment-admission-staging.md,docs/evidence/sn-graph-wide-integrity/mach-number-axis-retarget.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-producer-search.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-disposition.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-rename.md,docs/evidence/sn-graph-wide-integrity/electron-source-rate-review.md,docs/evidence/sn-graph-wide-integrity/rc66-fresh-draw.md,docs/evidence/sn-graph-wide-integrity/closing-census.md,tests/graph/test_sn_integrity_ratchets.py,docs/evidence/sn-graph-wide-integrity/attachment-target-joint-review.md,docs/evidence/sn-graph-wide-integrity/dual-bound-residue-adjudication.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-residue-adjudication.md,docs/evidence/sn-graph-wide-integrity/compose-writer-mismatch.md,docs/evidence/sn-graph-wide-integrity/remaining-repair-reuse-map.md">
+<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-wide-integrity-landed.html,docs/evidence/sn-graph-wide-integrity/sprint-closing-census.md,docs/evidence/sn-graph-wide-integrity/final-merge-verification.md,docs/evidence/sn-graph-wide-integrity/remaining-repair-reuse-map.md,docs/evidence/sn-graph-wide-integrity/attachment-target-joint-review.md,docs/evidence/sn-graph-wide-integrity/score-consuming-transition.md,docs/evidence/sn-graph-wide-integrity/dual-bound-residue-adjudication.md,docs/evidence/sn-graph-wide-integrity/dual-bound-residue-apply.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-residue-adjudication.md,docs/evidence/sn-graph-wide-integrity/owner-geometry-residue-apply.md,docs/evidence/sn-graph-wide-integrity/remaining-attachment-apply.md,docs/evidence/sn-graph-wide-integrity/structural-source-revival-apply.md,docs/evidence/sn-graph-wide-integrity/bare-structural-census.md,docs/evidence/sn-graph-wide-integrity/parent-provenance-seed.md,docs/evidence/sn-graph-wide-integrity/scalar-mirror-reconcile.md,docs/evidence/sn-graph-wide-integrity/compose-writer-mismatch.md,docs/evidence/sn-graph-wide-integrity/attachment-admission-persist.md,docs/evidence/sn-graph-wide-integrity/rc66-fresh-draw.md,docs/evidence/sn-graph-wide-integrity/voltage-antenna-disposition.md,docs/evidence/sn-graph-wide-integrity/unsourced-name-adjudication.md,tests/graph/test_sn_integrity_ratchets.py,tests/standard_names/test_source_target_reconciliation.py,tests/standard_names/test_structural_source_revival.py,tests/standard_names/test_ordinary_source_migration.py,tests/standard_names/test_repair_authority_builder.py,tests/standard_names/test_geometry_base_projection.py,imas_codex/standard_names/repair_authority.py">
 <meta name="plan-blocks" content="mast-semantic-source-repair,33-cli-harmonization,sn-west-review-rehearsal">
-<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966,fe00ec3e,a5a83b20,df48be0f,aba3ce7b,25d8dd37,77bc45c2,07c33345,e7aa5872,cdb0c870,5c4a5c0f,714d49a6,46bb0c12,e60707c4,166ce552,153e7e00,2821d795,47d98c1b,d493e7f8,fbf5a3b1,0a9e66d7,587a61f6,283e0f52,4dd90939,6ccd0fd7,1ea2a645,2d000336,7a1ba143,bdd6a7a2,a9ad85b1,571de682,59e08949,3e9a1cdc,4187eeff,0539a4e5,c15c9816,3e878aa0,2e24cbe6,6b812ee5,f093f57c,25c4c35e,c7457d13,4f82f006">
+<meta name="plan-commits" content="60f5777a,fb821176,3e8df917,f378f4ed,249f00b4,fdd871f5,bf03f150,761afff4,be2e4ae9,8ceea23a,b9e8387c,c52524ef,4a318966,fe00ec3e,a5a83b20,df48be0f,aba3ce7b,25d8dd37,77bc45c2,07c33345,e7aa5872,cdb0c870,5c4a5c0f,714d49a6,46bb0c12,e60707c4,166ce552,153e7e00,2821d795,47d98c1b,d493e7f8,fbf5a3b1,0a9e66d7,587a61f6,283e0f52,4dd90939,6ccd0fd7,1ea2a645,2d000336,7a1ba143,bdd6a7a2,a9ad85b1,571de682,59e08949,3e9a1cdc,4187eeff,0539a4e5,c15c9816,3e878aa0,2e24cbe6,6b812ee5,f093f57c,25c4c35e,c7457d13,4f82f006,1d50f3f8,89f84942,508e4e14,57f12be9,764bb8ca,58d165f4,329ece5f,1440ac70,4a475d9b,4faf195f,2f4ec391,d82e0be6,5a74cbf8,f82f34c1">
 <meta name="plan-effort-hours" content="16.0">
 </head>
 <body>
@@ -35,133 +35,127 @@
       <p><strong>Known incompatible bindings:</strong> control-surface outline versus normal vector; conductor outline versus local circle arc; local arc radius versus global cylindrical radial coordinate; and unqualified conductor cross-section plane.</p>
     </section>
 
-    <section id="current-bounded-closure">
-      <h2>Current state — measured 2026-08-20</h2>
-      <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
-        <p><strong>Three of the six tracked defect classes are closed at zero and
-        the remainder has collapsed into one coupled interlock.</strong> Every
-        number below is a live graph measurement taken on 2026-08-20, not a
-        carried-forward estimate. Earlier counts in the sections below are the
-        historical record of how each class was found and must not be read as
-        current.</p>
-        <table>
-          <caption>Tracked defect classes, first measurement versus today</caption>
-          <thead><tr><th>Class</th><th>As found</th><th>2026-08-20</th><th>State</th></tr></thead>
-          <tbody>
-            <tr><td>Semantic sources with no live target</td><td>596</td><td><strong>0</strong></td><td>closed</td></tr>
-            <tr><td>Scalar mirror mismatches</td><td>144</td><td><strong>0</strong></td><td>closed</td></tr>
-            <tr><td>DD projection mismatches</td><td>2</td><td><strong>0</strong></td><td>closed</td></tr>
-            <tr><td>Dual-bound semantic sources</td><td>226</td><td><strong>87</strong></td><td>open — interlocked</td></tr>
-            <tr><td>Live names with no producing source</td><td>85</td><td><strong>36</strong></td><td>open — interlocked</td></tr>
-            <tr><td>Owner/geometry authority rows</td><td>49</td><td><strong>49</strong></td><td>adjudicated, unapplied</td></tr>
-            <tr><td>Accepted names failing the pinned grammar</td><td>2</td><td><strong>0</strong></td><td>closed</td></tr>
-          </tbody>
-        </table>
-        <p><strong>The remaining three rows are one problem, not three.</strong> A
-        dual binding cannot be cut until it is known whether the losing name keeps
-        a producing source; that is the last-binding closure guard refusing to
-        create orphans. So the 87 dual-bound sources, the 36 unsourced names and
-        the owner/geometry applies all resolve through a single question — which
-        identity survives, and what sources it retains. Resolve the orphan
-        disposition and the other two largely fall out.</p>
-        <p><strong>Prevention is landed and enforced at the write boundary.</strong>
-        The signed disposition instrument signs and compare-and-set locks each
-        removed target's complete global incoming <code>PRODUCED_NAME</code>
-        closure, re-hashes after locking, and fails closed on any removal that
-        would strip a name's final producing source. Stale sources are signed into
-        the closure but never counted as live producers.</p>
-        <p><strong>Grammar is current.</strong> The pinned dependency is ISN
-        <code>v0.8.0rc66</code>, which admits the <code>polarizer</code>,
-        <code>pellet_fragment</code>, <code>wave_diagnostic_channel</code> and
-        <code>active_spatial_resolution_zone</code> loci and refuses
-        <code>field_map_grid</code> as a discretization artifact. All 2,543
-        accepted names parse strictly under it.</p>
-        <figure>
-          <img src="/imas-codex/figures/sn-graph-wide-integrity/bounded-reconciliation.svg"
-               alt="Bounded reconciliation flow from one aggregate graph read through signed authority, dry-run, explicit apply, and one-query release census">
-          <figcaption>Finding volume is partitioned offline. Only an exact signed
-          manifest can cross the write boundary; ambiguous, stale, protected, and
-          open-lifecycle rows remain visible non-actions.</figcaption>
-        </figure>
-      </div>
+    <section id="current-bounded-closure" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-22</span>
+        <h2>Closing state — every tracked class measured live at close</h2>
+      </header>
+      <p class="landed-summary">
+        All seven tracked defect classes now read zero or carry recorded
+        fail-closed refusals, measured live on 2026-08-22 rather than carried
+        forward. The 36 unsourced identities are fully dispositioned at
+        <strong>17 remaining, 17 dispositioned, 0 undispositioned, 0 deleted on
+        no-measuring-path grounds</strong>. Full record:
+        <a href="/imas-codex/evidence/sn-graph-wide-integrity/sprint-closing-census">closing census</a>
+        and <a href="/imas-codex/evidence/sn-graph-wide-integrity/final-merge-verification">final verification</a>.
+      </p>
+      <table>
+        <caption>Tracked defect classes: as found, and live at close</caption>
+        <thead>
+          <tr><th>Class</th><th>As found</th><th>At close</th><th>State</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Semantic sources with no live target</td><td>596</td><td>0</td><td>closed</td></tr>
+          <tr><td>Scalar mirror mismatches</td><td>144</td><td>0</td><td>closed</td></tr>
+          <tr><td>DD projection mismatches</td><td>2</td><td>0</td><td>closed</td></tr>
+          <tr><td>Accepted names failing the pinned grammar</td><td>2</td><td>0 of 2,539</td><td>closed</td></tr>
+          <tr><td>Dual-bound semantic sources</td><td>226</td><td>4</td><td>recorded last-producer refusals</td></tr>
+          <tr><td>Owner/geometry rows on the old target</td><td>49</td><td>2</td><td>recorded policy and identity refusals</td></tr>
+          <tr><td>Live names with no producing source</td><td>85</td><td>17</td><td>all dispositioned</td></tr>
+          <tr><td>Structurally bare names</td><td>—</td><td>17 childless, 0 childful</td><td>each with a named reason</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>The unsourced disposition, which this plan twice got wrong before
+        measuring it properly:</strong> 9 attached, 4 held on named DD defects, 1
+        retired on physics, 3 below threshold awaiting ordinary review. Nothing
+        was deleted. The reverse dictionary search remains authoritative over the
+        forward regeneration result, so a rank-limited negative never became
+        removal authority.
+      </p>
+      <p>
+        <strong>Repair now runs through three closed programs under one signed
+        envelope, not new bespoke operators.</strong> The generic registry admits
+        six mutation kinds; source-target reconciliation, structural-source
+        revival and ordinary-source migration were each added as a closed branch
+        with its own disposable-graph suite. A builder emits schema-valid
+        authorities so callers no longer discover the closed literals one refusal
+        at a time, and all four previously committed authority artifacts still
+        load on their original bytes and pinned digests with nothing re-signed.
+      </p>
+      <p>
+        Grammar is current at ISN v0.8.0rc66, 22 segments and 956 tokens, with
+        all 2,539 accepted names parsing strictly. Prevention remains enforced at
+        the write boundary: the signed disposition instrument locks each removed
+        target's complete global incoming <code>PRODUCED_NAME</code> closure,
+        re-hashes after locking, and fails closed on any removal that would strip
+        a name's final producing source — which is precisely why the four
+        dual-bound and two owner/geometry rows remain unapplied.
+      </p>
     </section>
 
-    <section id="remaining-work">
-      <h2>Remaining executable work — restated 2026-08-20 at session close</h2>
-      <div class="card" style="border-left:4px solid #c80; padding-left:12px;">
-        <p><strong>Every mechanical class this plan opened with is now closed or
-        reduced to named refusals.</strong> What remains is one judgment queue, two
-        coupled single-name questions, and one adjudication. All figures below are
-        coordinator-measured at close, not carried forward.</p>
-        <table>
-          <caption>Tracked classes: as found, at the start of 2026-08-20, and at close</caption>
-          <thead><tr><th>Class</th><th>As found</th><th>Start of day</th><th>Close</th></tr></thead>
-          <tbody>
-            <tr><td>Dual-bound semantic sources</td><td>226</td><td>87</td><td><strong>23</strong></td></tr>
-            <tr><td>Stale sources holding a live binding</td><td>58</td><td>58</td><td><strong>3</strong> (all named)</td></tr>
-            <tr><td>Signed retirements outstanding</td><td>16</td><td>16</td><td><strong>0</strong></td></tr>
-            <tr><td>Owner/geometry rows on the old target</td><td>49</td><td>49</td><td><strong>27</strong></td></tr>
-            <tr><td><code>toroidal_angle_of_measurement_position</code> producers</td><td>61</td><td>61</td><td><strong>28</strong></td></tr>
-            <tr><td>Genuine orphans (unsourced, no live child)</td><td>85</td><td>36</td><td><strong>36</strong></td></tr>
-            <tr><td>Structural names left bare</td><td>—</td><td>—</td><td><strong>0</strong></td></tr>
-            <tr><td>Active graph grammar snapshot</td><td>—</td><td>rc65.dev2 (rc9 in fallback)</td><td><strong>rc66, 956 tokens</strong></td></tr>
-          </tbody>
-        </table>
-        <ol>
-          <li><strong>The 36 genuine orphans — the actual remaining blocker, and not
-          a machinery problem.</strong> 27 accepted, 4 reviewed, 4 drafted, 1
-          pending; the same count and split all day, because §3 forbids bulk action
-          and requires individual judgment on each. No instrument will move this
-          number. It belongs in the human review session
-          (<code>sn-west-review-rehearsal</code>), not in another operator.</li>
-          <li><strong>The voltage rename is circular and needs a decision.</strong>
-          <code>voltage_of_diagnostic_antenna</code>'s only producer
-          <code>dd:ece/channel/t_e_voltage</code> is stale, so migration to
-          <code>voltage_of_ece_channel</code> fails compare-and-set, while detaching
-          that source would strip its last producer — which is why it is also one of
-          the three standing detach refusals. It needs either a sanctioned
-          source-less rename transition or an authoritative live producer.</li>
-          <li><strong><code>electron_source_rate</code> is now unblocked but
-          unattempted.</strong> Its unit-versus-documentation contradiction still
-          needs ordinary review. Two of its sources were left at
-          <code>status='failed'</code> with <code>attempt_count=5</code> by the
-          pre-DSv4 attempt and must be reset first. The local compose seat is now
-          serving, so nothing external blocks it.</li>
-          <li><strong>Five identities below threshold or absent, plus the reflector
-          adjudication.</strong> Three position identities reviewed at 0.7625,
-          0.8375 and 0.8250 under their grammar-preferred <code>_at_</code>
-          spellings; <code>reflectometer_antenna</code> and
-          <code>shatter_cone</code> remain absent after one sanctioned compose
-          batch. Separately, <code>reflector/sphere_centre</code> needs its own
-          reviewed centre-of-curvature identity before the twelfth owner/geometry
-          row can bind. <em>All of these were scored or composed against the stale
-          rc9 vocabulary</em>, so a fresh draw against the corrected rc66 grammar is
-          the correct next attempt — one draw, earned, not retried until it
-          passes.</li>
-          <li><strong>Two closure re-adjudications.</strong>
-          <code>closest_wall_point/distance</code> has a changed signed closure, and
-          <code>electron_diffusivity</code> and <code>ion_diffusivity</code> are
-          structural names awaiting derived-provenance minting; remeasure them once
-          the reconcile settles.</li>
-        </ol>
-        <p><strong>Three measurement rules this wave established, binding on any
-        future census.</strong> Unsourced-structural is <em>transient</em>: the
-        reconcile mints <code>derived:</code> provenance for parents a release
-        leaves bare, so measure after it settles and always report the partition
-        rather than the bare total. A structural-legitimacy test must exclude
-        children themselves dispositioned to retire. And an apply node must
-        regenerate its preview and re-read its counters inside the applying
-        invocation, deriving its cohort rather than declaring a count — three fixed
-        cohorts were overtaken by authorized commits before that was adopted.</p>
-        <p><strong>Spend:</strong> $1.87 of the authorized $150, leaving $148.13.
-        Compose ran free on the local seat; only review cost money. The remaining
-        items are all cheap.</p>
-        <p><strong>Closing with recorded refusals remains legitimate.</strong>
-        <code>field_map_grid</code> is a policy refusal; the three detach holds each
-        protect a name's last producer; and two fold ancestors below threshold are a
-        result, not a bar to lower. A name is never accepted by any route other than
-        a fresh quorum score.</p>
-      </div>
+    <section id="remaining-work" class="section-landed">
+      <header>
+        <span class="badge badge-shipped">✓ landed 2026-08-22</span>
+        <h2>What remains, and who owns it</h2>
+      </header>
+      <p class="landed-summary">
+        No executable repair node remains in this plan. Everything still open is
+        either a recorded fail-closed refusal awaiting an external condition, or
+        ordinary review/refine work owned by the normal pipeline.
+      </p>
+      <table>
+        <caption>Remaining items and their owners</caption>
+        <thead><tr><th>Item</th><th>Why it is not executable here</th><th>Owner</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>4 dual-bound sources</td>
+            <td>Each cut would strip its target's last producing source; needs an authoritative replacement producer or a separately adjudicated identity disposition.</td>
+            <td>recorded refusal</td>
+          </tr>
+          <tr>
+            <td><code>field_map/grid/phi</code></td>
+            <td>The closed grammar rejects <code>field_map_grid</code> as a physics locus; a substitution would invent semantics DD does not carry.</td>
+            <td>recorded policy refusal</td>
+          </tr>
+          <tr>
+            <td><code>reflector/centre/phi</code></td>
+            <td>DD 4.1.1 makes <code>centre</code> the local-frame origin while <code>sphere_centre</code> is the centre of curvature that already owns the accepted identity; needs its own reviewed centre-of-curvature identity first.</td>
+            <td>ordinary review</td>
+          </tr>
+          <tr>
+            <td>3 identities below threshold</td>
+            <td><code>minimum_of_safety_factor</code>, <code>poloidal_neutral_internal_state_momentum_convected_velocity</code> and <code>toroidal_line_integrated_impurity_ion_velocity</code> each had their one earned draw; further progress belongs to review and refine authority, never to an attachment transaction.</td>
+            <td>ordinary pipeline</td>
+          </tr>
+          <tr>
+            <td>4 identities held on DD defects</td>
+            <td>The defects are in the Data Dictionary, not the naming: a declared unit contradicting its own prose, species-resolved candidates omitting essential semantics, and a unit-vector parent conflicting with its metre-valued children.</td>
+            <td>upstream DD clarification</td>
+          </tr>
+          <tr>
+            <td>17 childless structurally bare names</td>
+            <td>Each carries a named lifecycle, semantic, unit or last-producer reason; the childful nine were closed by the deterministic parent-provenance seed.</td>
+            <td>recorded holds</td>
+          </tr>
+          <tr>
+            <td><code>voltage_of_diagnostic_antenna</code></td>
+            <td>Both routes are shut by measurement: its only producer is stale so the rename fails compare-and-set, and detaching that source would strip its last producer.</td>
+            <td>standing recorded refusal</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>Spend across the whole plan stayed trivial because the mechanical
+        work is deterministic:</strong> this closing session added USD 1.57 of
+        reviewed quorum draws and USD 0.00 for every apply, seed, census and
+        reconcile. Compose ran free on the local seat throughout.
+      </p>
+      <p>
+        Closing on recorded refusals is legitimate and was the plan's own stated
+        position. A name is never accepted by any route other than a fresh quorum
+        score, and no threshold was lowered to clear a result.
+      </p>
     </section>
 
     <section id="execution-doctrine">
@@ -1227,10 +1221,11 @@ Done-when (ordered)
   8. Plan writeback: resolve this followup with the census numbers; collapse the evergreen; per-stage archive HTML with plan-evidence-for; update impl; commit+push; then sn-west-review-rehearsal f-swrr-020 and mast-semantic-source-repair unblock.</pre>
     <p class="r-fu-outcome">Partially executed and then superseded by the pre-WEST semantic-integrity programme. Reservation, claim, scope, family, docs-authority, and exact-reset improvements landed, while geometry pollution and recovery-authority defects proved the graph was not ready for closure or a broad funded drain.</p>
     </article>
-<article class="r-fu" data-id="f-graph-semantic-recovery" data-status="open" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-graph-semantic-recovery" data-status="resolved" data-written-by="reckon-edit" data-written-at="2026-08-10" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-22T01:14:54+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Census and repair graph-wide semantic membership after prevention lands</h4>
     <div class="r-fu-body"><p>Freeze a fresh quiet-window graph and forensic snapshot diff, enumerate incompatible memberships and mixed semantic signatures, then apply only independently reviewed exact source manifests through selective reset and ordinary quorum.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-graph-wide-integrity</pre>
+    <p class="r-fu-outcome">Done — no followup. This session executed exactly what the followup asked and closed it on measurement rather than on assertion. Every tracked defect class now reads zero or carries a recorded fail-closed refusal, measured live at close: semantic sources with no live target 0, scalar mirror mismatches 0, DD projection mismatches 0, accepted grammar failures 0 of 2,539 under rc66; dual-bound 4 and owner/geometry 2, each a named refusal; structurally bare 17 childless with 0 childful. The unsourced cohort is fully dispositioned at 17 derived / 17 dispositioned / 0 undispositioned / 0 deleted on no-measuring-path grounds, partitioned 9 attached, 4 held on named DD defects, 1 retired on physics, 3 below threshold. Repairs were applied only through independently reviewed exact signed manifests: 19 of 23 dual-bound rows, 3 of 3 owner/geometry migrations, 3 of 9 remaining attachments, 2 structural revivals and 1 scalar mirror, every one with receipt_rows equal to its StandardNameChange delta and a write-free replay. Three closed branch programs were added under the one signed envelope rather than new bespoke operators, taking the registry from four mutation kinds to six, and a builder now emits schema-valid authorities while all four previously committed artifacts still load unre-signed. The integrated tree is green at 6,570 passed / 0 failed with six focused suites at 0 skipped and the live ratchets 4 of 4. What remains is not executable repair: recorded refusals awaiting an authoritative replacement producer or upstream DD clarification, and three below-threshold identities owned by ordinary review authority, which is where this plan always said they belonged.</p>
     </article>
 <article class="r-fu" data-id="f-sgwi-west-blocking" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-written-by="session-review-2026-08-11" data-written-at="2026-08-11" data-recommends-skill="/reckon-ship sn-graph-wide-integrity" data-resolved-at="2026-08-16T22:04:40+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Execute the measured WEST-blocking subset, and only it, ahead of the rehearsal</h4>
