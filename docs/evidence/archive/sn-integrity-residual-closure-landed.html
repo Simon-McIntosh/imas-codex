@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-integrity-residual-closure-landed">
+  <meta name="plan-title" content="sn-integrity-residual-closure &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="sn-integrity-residual-closure">
+  <title>sn-integrity-residual-closure landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>sn-integrity-residual-closure &mdash; cumulative execution evidence</h1>
+  <p>One anchor per material landing.</p>
+
+  <section id="currency">
+    <h2>Currency audit &mdash; every plan figure holds at the execution HEAD</h2>
+    <p><strong>Measured 2026-08-22</strong> at commit <code>328a0816</code>, live graph,
+    read-only. The plan was written against a moving graph, so each of its tracked
+    counts was remeasured before any node was authored.</p>
+    <table>
+      <caption>Plan claim against live measurement</caption>
+      <thead><tr><th>Class</th><th>Plan</th><th>Measured</th></tr></thead>
+      <tbody>
+        <tr><td>Accepted names</td><td>2,538</td><td>2,538</td></tr>
+        <tr><td>Live names with no producing source</td><td>12</td><td>12</td></tr>
+        <tr><td>Dual-bound semantic sources</td><td>3</td><td>3</td></tr>
+        <tr><td>Sources whose every target is superseded or exhausted</td><td>140</td><td>140 &mdash; 91 stale, 46 extracted, 3 failed</td></tr>
+        <tr><td><code>surface_area_of_flux_surface</code> producers</td><td>20</td><td>20, <code>accepted</code>, <code>valid</code>, parent <code>area_of_flux_surface</code></td></tr>
+        <tr><td><code>area_of_flux_surface</code> live children</td><td>1 implied</td><td>1 &mdash; only <code>surface_area_of_flux_surface</code></td></tr>
+      </tbody>
+    </table>
+    <p>The twelve unsourced identities, with the plan section that owns each:
+    <code>capacitance_of_ion_cyclotron_heating_antenna</code>,
+    <code>cross_section_of_flux_surface</code>,
+    <code>neutron_flux_due_to_fusion</code>,
+    <code>parallel_neutral_momentum_diffusion_coefficient</code>,
+    <code>tendency_of_total_thermal_plasma_internal_energy</code>,
+    <code>toroidal_ion_charge_state_torque_density</code>,
+    <code>toroidal_line_averaged_plasma_velocity</code>,
+    <code>x_direction_unit_vector_of_sensor</code> and
+    <code>z_direction_unit_vector_of_sensor</code> are &#167;3 attachment candidates;
+    <code>fast_ion_charge_state_power_at_inside_flux_surface</code> waits on the Data
+    Dictionary issue in &#167;6;
+    <code>poloidal_neutral_internal_state_momentum_convected_velocity</code>
+    (<code>reviewer_score_name</code> 0.3625) is a &#167;5 below-threshold identity; and
+    <code>toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions</code>
+    is the &#167;3 physics refusal.</p>
+  </section>
+
+  <section id="reuse-map">
+    <h2>The reuse surface &mdash; four capabilities fit as they stand, two need extension</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>34b90e14</code>,
+    node <code>inv-reusemap</code>, gate <strong>passed</strong>. Six capability rows,
+    six repository paths, six invocable anchors, <strong>6 resolved / 0 unresolved</strong>
+    at revision <code>328a0816</code>. Artifact
+    <a href="/imas-codex/evidence/reuse-map-residual-closure">reuse-map-residual-closure.md</a>,
+    SHA-256 <code>1f4c7185&hellip;</code>, verified byte-identical on integration.</p>
+    <table>
+      <caption>Capability entry points and fitness verdicts</caption>
+      <thead><tr><th>Capability</th><th>Entry point</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Parent release</td><td><code>signed_manifest.py:488</code> &mdash; <code>_validate_structural_release_program</code></td><td>reuse-as-is</td></tr>
+        <tr><td>Identity supersede</td><td><code>signed_manifest.py:3944</code> &mdash; builder-emitted <code>supersede</code> row</td><td>reuse-as-is</td></tr>
+        <tr><td>Semantic-source attachment</td><td><code>graph_ops.py:10254</code> &mdash; <code>persist_claimed_attachments</code></td><td><strong>extend</strong></td></tr>
+        <tr><td>Unsourced-name census</td><td><code>ledger.py:96</code> &mdash; <code>find_provenance_orphans</code></td><td>reuse-as-is</td></tr>
+        <tr><td>Dual-bound census</td><td><code>provenance_lifecycle.py:1002</code> &mdash; <code>find_semantic_source_invariant_violations</code></td><td>reuse-as-is</td></tr>
+        <tr><td>Integrated verification</td><td>the recorded pytest plus dual-Ruff recipe</td><td><strong>extend</strong> &mdash; rerun at the new HEAD</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The material finding is the attachment gap.</strong>
+    <code>persist_claimed_attachments</code> writes the correct four mirrors &mdash; source
+    status and scalar, <code>PRODUCED_NAME</code>, backing <code>HAS_STANDARD_NAME</code>,
+    and the target's <code>source_paths</code> &mdash; but it is claim-fenced pipeline
+    persistence, not independently signed standalone authority. &#167;3 therefore repeats
+    the shape &#167;1 already hit: an apply blocked not on authority but on a missing closed
+    program in the signed envelope. Closing it means an unbound ordinary-source program
+    reusing that write shape and <code>guard_source_pairings</code>, with exact-set
+    admission, compare-and-set refusal on an already-bound or drifting source, immutable
+    receipt identity, and write-free replay.</p>
+  </section>
+</main>
+</body>
+</html>
