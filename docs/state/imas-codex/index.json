@@ -1,11 +1,11 @@
 {
-  "updated": "2026-08-21T17:37:41",
+  "updated": "2026-08-22T03:18:15",
   "project": "imas-codex",
   "doc": "index",
   "data": {
     "slug": "imas-codex",
     "name": "IMAS Codex",
-    "active_sprint_id": "S8",
+    "active_sprint_id": "S9",
     "sprints": [
       {
         "id": "S1",
@@ -169,12 +169,12 @@
       },
       {
         "id": "S8",
-        "status": "active",
+        "status": "done",
         "theme": "Pipeline robustness and semantic integrity",
         "starts": "2026-08-10",
         "ends": "2026-09-25",
         "description": "Finish the work that makes the pipeline trustworthy: complete the local DD-resolution channel, then repair the measured semantic-integrity worklist (the WEST-blocking subset first, then the dual-bound sources and gated detaches). The pipeline itself was restored and instrumented under sn-pipeline-recovery: attempt-budgeted refinement, write-boundary attachment guards, ISN locus typing, and typical-bill cost admission are live.",
-        "summary": "Four of five plans shipped (sn-pipeline-recovery, sn-dd-gaps, dd-version-resilient-resolution, and sn-repair-operator-consolidation's sprint clause); sn-graph-wide-integrity remains the sole open item. Three execution sessions have landed 34 nodes. The defining result is that this sprint's own orphan premise was overturned by measurement, twice, and both times a guard or a worker refusal is what made it visible. Forward regeneration genuinely cannot re-source the 36 orphans \u2014 compose re-emits parents and never proposes the children, established for $1.60 \u2014 but that negative was recorded as settling the general question, and reverse dictionary search finds measuring paths for 31 of the 36 with agreeing units. The all-delete cohort the earlier reading licensed would have destroyed correct vocabulary; nothing was deleted, because three independent guards had already refused on quarantine, relationship closure, and review-history permanence. The final partition is 31 attachable, 4 held on named DD defects, 1 retired on physics, and 0 deletable on no-measuring-path grounds. Applied against it: 15 exact attachments at untouched_changed=0 over 9,607 rows with a write-free replay, dropping genuine orphans 36 to 20; one axis retarget authorized by structural-child closure; electron_source_rate carried through ordinary review after its two blocking defects were fixed at their causes, turning two red graph integrity tests green; four of seven identities accepted on a single corrected-grammar draw; and the voltage identity closed as a standing recorded refusal with both routes shut by measurement. Four live-graph ratchets pass, grammar serves rc66 at 956 tokens, and accepted grammar failures are 0 of 2,532. Alongside, the repair-operator programme moved from one migrated operator to three, all three previously untestable operators gained disposable-graph suites written against live code before migration, and a false-positive audit-check defect was fixed with each check still failing a genuine violation. Measured spend across the sprint remains a few dollars of the authorized $150, because every mechanical repair is deterministic and compose runs free on the local seat.",
+        "summary": "CLOSED 2026-08-22. All five item clauses are satisfied and sn-graph-wide-integrity shipped, so the sprint's semantic-integrity mandate is discharged on live measurement rather than assertion. At close every tracked defect class reads zero or carries a recorded fail-closed refusal: semantic sources with no live target 0, scalar mirror mismatches 0, DD projection mismatches 0, accepted names failing the pinned rc66 grammar 0 of 2,539; dual-bound 4 and owner/geometry 2, each a named last-producer or policy refusal. The unsourced cohort is fully dispositioned at 17 derived / 17 dispositioned / 0 undispositioned / 0 deleted on no-measuring-path grounds, partitioned 9 attached, 4 held on named DD defects, 1 retired on physics, 3 below threshold and left to ordinary review. Applied through independently reviewed exact signed manifests only: 19 of 23 dual-bound rows, 3 of 3 owner/geometry migrations, 3 of 9 remaining attachments, 2 structural revivals, 1 scalar mirror, and 3 score-consuming lifecycle transitions, every one with receipt_rows equal to its StandardNameChange delta and a write-free replay. The defining results are three corrections the machinery forced rather than the repairs themselves. This sprint's orphan premise was overturned twice by measurement and nothing was deleted, because reverse dictionary search found measuring paths a rank-limited forward search had missed. A zero-write audit that counted receipts by operation name while they carry a run_id reported an already-committed transaction as refused, establishing the binding rule that absence of a mutation is proven by receipt run_id and manifest digest, never by an operation-name query or a bare counter total. And the structurally bare count read 29 against a carried figure of 2, where only the partition made it legible as 9 transient consequences of a successful reconcile plus 20 pre-existing holds; the nine were then closed deterministically at zero cost with every causal source's binding closure digest byte-identical. Alongside, sn-repair-operator-consolidation met its clause and went further: repair now runs through three closed branch programs under one signed envelope at six mutation kinds instead of new bespoke operators, a builder emits schema-valid authorities after two live nodes each lost both attempts to hand-rolled shapes, and all four previously committed authority artifacts still load on their original bytes and pinned digests with nothing re-signed. That plan stays active with seven operators unmigrated, which its own clause anticipated and which its sections track. The integrated tree is green at 6,570 passed / 0 failed / 0 errors with six focused disposable-graph suites at 0 skipped and the live-graph ratchets 4 of 4. Measured spend for the closing session was USD 1.57 of reviewed quorum draws and USD 0.00 for every apply, seed, census and reconcile, against the authorized USD 150.",
         "items": [
           {
             "slug": "sn-pipeline-recovery",
@@ -205,7 +205,7 @@
       },
       {
         "id": "S9",
-        "status": "planned",
+        "status": "active",
         "theme": "Quality before review",
         "starts": "2026-08-24",
         "ends": "2026-09-11",
@@ -371,6 +371,6 @@
       }
     ],
     "blockers": [],
-    "_version": 44
+    "_version": 47
   }
 }
