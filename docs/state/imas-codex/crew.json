@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T23:43:53",
+  "updated": "2026-08-23T00:00:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -17060,9 +17060,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T214543535626-n-verify",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a72",
+        "node": "n-verify",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "cx-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:45:46Z",
+        "completed_at": "2026-08-22T21:59:40Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 834,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 834,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "cd6b6e26e82a4c1f40c12ce302a7b93054b5b1df",
+        "commits": [
+          "ed59e05faa65386de8cfa2dcb83acdbb90a968be"
+        ],
+        "changed_lines": {
+          "added": 99,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Integrated verification PASS at HEAD cd6b6e26: 6,922 collected = 6,615 passed + 8 skipped + 299 deselected, 0 failed and 0 errors; new suites individually 3/3 parent-release, 8/8 unbound-source-attachment, 1/1 supersede-successor with 0 skipped; retained checks 3 and 7 passed; forced regeneration plus fresh import emitted 0 field-shadow warnings; 4/4 committed authority digests intact; ruff check 0 findings; ruff format --check 1,184 files clean and 0 needing reformatting",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T214543535626-n-verify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02b6f-df4f-7363-9152-e157fc545e8c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6403328,
+            "cached_input_tokens_cumulative": 6403328,
+            "input_tokens": 6592622,
+            "input_tokens_cumulative": 6592622,
+            "output_tokens": 24300,
+            "output_tokens_cumulative": 24300,
+            "reasoning_output_tokens": 8523,
+            "reasoning_output_tokens_cumulative": 8523
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 456
+    "_version": 457
   }
 }

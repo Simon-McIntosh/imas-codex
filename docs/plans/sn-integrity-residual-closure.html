@@ -1,8 +1,8 @@
-<meta name="plan-version" content="12">
-<meta name="plan-impl" content="0.92">
-<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,docs/evidence/sn-integrity-residual-closure/umbrella-supersede-apply.md,docs/evidence/sn-integrity-residual-closure/attachment-apply.md,docs/evidence/sn-integrity-residual-closure/supersede-successor-recovery.md,tests/standard_names/test_unbound_source_attachment.py,tests/standard_names/test_supersede_successor_scalar.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
-<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e,471e6717483a3edf65030d313cba43fb9934a3d2,1854c6d4d1f73c00f1a7a088942fdf0c7214c19f,c4c9fabc9c22224d303e3ef5f05011437ce0ee6e">
-<meta name="plan-modified" content="2026-08-22">
+<meta name="plan-version" content="13">
+<meta name="plan-impl" content="0.96">
+<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,docs/evidence/sn-integrity-residual-closure/umbrella-supersede-apply.md,docs/evidence/sn-integrity-residual-closure/attachment-apply.md,docs/evidence/sn-integrity-residual-closure/supersede-successor-recovery.md,docs/evidence/sn-integrity-residual-closure/integrated-verification.md,tests/standard_names/test_unbound_source_attachment.py,tests/standard_names/test_supersede_successor_scalar.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
+<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e,471e6717483a3edf65030d313cba43fb9934a3d2,1854c6d4d1f73c00f1a7a088942fdf0c7214c19f,c4c9fabc9c22224d303e3ef5f05011437ce0ee6e,ed59e05faa65386de8cfa2dcb83acdbb90a968be">
+<meta name="plan-modified" content="2026-08-23">
 <!-- reckon plan -->
 <meta name="docs-project" content="imas-codex">
 <meta name="reckon-type" content="plan">
@@ -90,19 +90,20 @@
   </p>
 </section>
 
-<h2 id="s2">§2 — Re-run integrated verification</h2>
-<p>
-  The last verification failed on exactly one gate: <code>ruff format
-  --check</code> on <code>signed_manifest.py</code>, a file owned at the time by
-  a concurrent node. Everything functional passed — 6,587 standard-name tests,
-  0 shadow warnings on a freshly generated model import, all four committed
-  authority digests intact, <code>ruff check</code> clean.
-</p>
-<p>
-  That file has since been formatted and the gate is clean locally, so this is a
-  re-run at the new HEAD rather than new work. It must confirm the same set plus
-  the parent-release suite.
-</p>
+<section id="s2" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-22</span>
+    <h2>&#167;2 &mdash; Re-run integrated verification</h2></header>
+  <p class="landed-summary">
+    PASS at HEAD <code>cd6b6e26</code>: <strong>6,922 collected = 6,615 passed, 8 skipped,
+    299 deselected, 0 failed and 0 errors</strong>; the three suites this closure added
+    pass individually at 3/3, 8/8 and 1/1; 0 generated-model shadow warnings after a forced
+    regeneration; 4/4 committed authority digests intact; <code>ruff check</code> 0 findings
+    and <code>ruff format --check</code> 1,184 files clean with <strong>0 needing
+    reformatting</strong> &mdash; the single gate the predecessor failed on. Full record:
+    <a href="/imas-codex/evidence/archive/sn-integrity-residual-closure-landed#integrated-verification">&#167;2 landed</a>
+    (commit <code>ed59e05f</code>).
+  </p>
+</section>
 
 <section id="s3" class="section-landed">
   <header><span class="badge badge-shipped">&#10003; landed 2026-08-22</span>
@@ -272,7 +273,7 @@
     <div class="r-comment-body">n-supersedescalar landed - commit 1854c6d4; gate supersede-contract suites passed; measure 12 unique cases passed / 0 failed / 0 skipped across 11 disposable-graph cases, ruff check 0 findings and format 2/2 clean, 359 insertions across exactly the two declared paths. A distinct-identity supersede authority must now sign mutation.arguments.successor_id and declare BOTH predecessor and successor as StandardName participants so both are locked and re-hashed before apply; the apply atomically writes name_stage=superseded, status=superseded and superseded_by=<successor>, and the single StandardNameChange row records the real from_name/to_name pair instead of naming the predecessor twice; replay validates lifecycle, scalar AND receipt name pair before returning already_applied with persistent_writes=0, with collateral StandardNameSource, StandardName and PRODUCED_NAME rows byte-for-byte identical. Lifecycle-only supersede authorities carrying no signed successor argument keep their prior behaviour, so the 1116 refine-chain supersedes whose lineage already lives in REFINED_FROM are untouched. Folded onward as n-supersederecover, covering the committed area_of_flux_surface partial together with the three adjudicated identity supersedes.</successor></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20260822-supersederecover" data-who="reckon-ship" data-when="2026-08-22T21:45:00Z">
-    <div class="r-comment-body">n-supersederecover landed - commit c4c9fabc; gate PASSED AGAINST AN AMENDED MEASURE. Measure: 4/4 signed one-row supersedes applied with 4/4 same-hash replays already_applied at changed=0 and persistent_writes=0, all four predecessors reading name_stage=superseded and status=superseded with superseded_by AND receipt to_name equal to their exact adjudicated successor, cohort unresolved-successor 4->0, StandardNameChange 7878->7882 for exactly one receipt per row, 44 evidence assertions passed. Pairs: area_of_flux_surface and cross_section_of_flux_surface -> poloidal_plane_cross_sectional_area_of_flux_surface; x_direction_unit_vector_of_sensor -> x_first_measurement_direction_unit_vector_of_strain_gauge; z_direction_unit_vector_of_sensor -> z_first_measurement_direction_unit_vector_of_strain_gauge. AMENDMENT: the original done-when required the global null-superseded_by count to fall by at least 4, which no code path can produce - only area_of_flux_surface was inside that population beforehand (cross_section was pending, both sensor names accepted), so superseding the other three ADDS a superseded row already carrying its scalar and leaves the null count untouched; the mathematically maximal decrease was 1 and it measured 1626->1625. The worker derived that explanation independently and correctly refused to force the number. Section 1 is complete: unsourced identities are now 6, down from 12 at session start.</div>
+    <div class="r-comment-body">n-supersederecover landed - commit c4c9fabc; gate PASSED AGAINST AN AMENDED MEASURE. Measure: 4/4 signed one-row supersedes applied with 4/4 same-hash replays already_applied at changed=0 and persistent_writes=0, all four predecessors reading name_stage=superseded and status=superseded with superseded_by AND receipt to_name equal to their exact adjudicated successor, cohort unresolved-successor 4-&gt;0, StandardNameChange 7878-&gt;7882 for exactly one receipt per row, 44 evidence assertions passed. Pairs: area_of_flux_surface and cross_section_of_flux_surface -&gt; poloidal_plane_cross_sectional_area_of_flux_surface; x_direction_unit_vector_of_sensor -&gt; x_first_measurement_direction_unit_vector_of_strain_gauge; z_direction_unit_vector_of_sensor -&gt; z_first_measurement_direction_unit_vector_of_strain_gauge. AMENDMENT: the original done-when required the global null-superseded_by count to fall by at least 4, which no code path can produce - only area_of_flux_surface was inside that population beforehand (cross_section was pending, both sensor names accepted), so superseding the other three ADDS a superseded row already carrying its scalar and leaves the null count untouched; the mathematically maximal decrease was 1 and it measured 1626-&gt;1625. The worker derived that explanation independently and correctly refused to force the number. Section 1 is complete: unsourced identities are now 6, down from 12 at session start.</div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20260822-extcensus" data-who="reckon-ship" data-when="2026-08-22T21:00:00Z">
     <div class="r-comment-body">n-extcensus landed - commit aa25a253; gate evidence-validation passed; measure 140 = 91 stale + 46 extracted + 3 failed with partition sum equal to the measured total, previous predicate source.status IN ['composed','attached'] re-run in the same invocation still returns 0, all 46 extracted rows classified definitional-difference and 0 damage (7 DD + 39 derived sources holding 47 terminal target records: 19 exhausted, 28 superseded), nonmutation proof StandardNameChange 7873-&gt;7873 and PRODUCED_NAME 5774-&gt;5774 both delta 0. Artifacts docs/evidence/sn-integrity-residual-closure/extracted-source-census.md and the run's live-census.json. Section 4's open question is answered: the difference from the previous zero is definitional; the class did not regrow.</div>
@@ -294,5 +295,8 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822-attachapply" data-who="reckon-ship" data-when="2026-08-22T21:30:00Z">
     <div class="r-comment-body">n-attachapply landed - commit 471e6717; gate signed-apply passed; measure preview outcome=would_apply authority_rows=3 admitted=3 refused=0, apply outcome=applied changed=3 receipt_rows=3 under manifest 08b5da22 with the exact run-id + manifest + operation receipt query returning 3 rows, replay already_applied with changed=0 and persistent_writes=0, every target reread holding one PRODUCED_NAME plus one backing HAS_STANDARD_NAME plus the attached scalar plus one source_paths occurrence; StandardNameChange 7875-&gt;7878, PRODUCED_NAME 5774-&gt;5777, GENUINE ORPHANS 12-&gt;9. Attached: capacitance_of_ion_cyclotron_heating_antenna &lt;- dd:ic_antennas/antenna/module/matching_element/capacitance; toroidal_ion_charge_state_torque_density &lt;- dd:plasma_sources/source/ggd/ion/state/momentum/phi; toroidal_line_averaged_plasma_velocity &lt;- dd:spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor. Deriving the cohort in-invocation changed the answer: the earlier preview admitted 4, the applying invocation admitted 3, because parallel_neutral_momentum_diffusion_coefficient's StandardNameSource only ever existed inside the rolled-back preview transaction. A carried cohort would have tried to attach a source that does not exist.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260822-verify" data-who="reckon-ship" data-when="2026-08-22T22:00:00Z">
+    <div class="r-comment-body">n-verify landed - commit ed59e05f; gate integrated-verification PASSED at tested HEAD cd6b6e26. Measure: standard-names plus units suite 6922 collected = 6615 passed, 8 skipped, 299 deselected, 0 failed and 0 errors; the three suites this closure added pass individually at 3/3 parent-release, 8/8 unbound-source-attachment and 1/1 supersede-successor with 0 skipped; retained focused checks 3 passed (field naming) and 7 passed (DD resolution window); forced build-models regeneration plus a fresh import emitted 0 field-shadow warnings; 4/4 committed authority SHA-256 digests intact; ruff check --no-cache 0 findings repository-wide; ruff format --check --no-cache 1184 files already formatted and 0 needing reformatting - the single gate the predecessor's verification failed on. 13/13 evidence assertions passed; graph contracts ran against a disposable Neo4j that was stopped cleanly; forced regeneration produced no tracked changes. Artifact docs/evidence/sn-integrity-residual-closure/integrated-verification.md.</div>
 </div>
 </section>

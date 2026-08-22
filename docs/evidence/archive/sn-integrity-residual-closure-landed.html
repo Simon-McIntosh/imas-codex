@@ -455,6 +455,35 @@
     evidently easier to restate than to obey. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/supersede-successor-recovery">supersede-successor-recovery.md</a>.</p>
   </section>
+
+  <section id="integrated-verification">
+    <h2>Integrated verification passes clean, including the three suites this plan added</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>ed59e05f</code>,
+    node <code>n-verify</code>, gate <strong>passed</strong>, tested HEAD
+    <code>cd6b6e26</code>. The predecessor's verification failed on exactly one gate,
+    <code>ruff format --check</code> on a file owned at the time by a concurrent node.
+    That gate is now clean, and the run covers three suites that did not exist when it
+    last ran.</p>
+    <table>
+      <caption>Verification measures</caption>
+      <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+      <tbody>
+        <tr><td>Standard-names and units suite</td><td><strong>6,922 collected = 6,615 passed + 8 skipped + 299 deselected; 0 failed, 0 errors</strong></td></tr>
+        <tr><td>Parent release</td><td>3/3 passed, 0 skipped</td></tr>
+        <tr><td>Unbound source attachment</td><td>8/8 passed, 0 skipped</td></tr>
+        <tr><td>Supersede successor</td><td>1/1 passed, 0 skipped</td></tr>
+        <tr><td>Retained focused checks</td><td>field naming 3 passed; DD resolution window 7 passed</td></tr>
+        <tr><td>Generated-model shadow warnings</td><td><strong>0</strong>, after a forced regeneration and a fresh import</td></tr>
+        <tr><td>Committed authority digests</td><td><strong>4/4 intact</strong></td></tr>
+        <tr><td><code>ruff check --no-cache .</code></td><td>0 findings</td></tr>
+        <tr><td><code>ruff format --check --no-cache .</code></td><td>1,184 files clean, <strong>0 needing reformatting</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The graph contracts ran against a disposable Neo4j on localhost, stopped cleanly
+    afterwards; forced regeneration produced no tracked changes, and the evidence commit
+    contains only its assigned path. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/integrated-verification">integrated-verification.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>
