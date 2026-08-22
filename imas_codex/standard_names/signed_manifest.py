@@ -20,7 +20,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Protocol
@@ -514,6 +514,26 @@ def _validate_model(model: type[Any], value: dict[str, Any], role: str) -> None:
         raise SignedManifestAuthorityError(f"invalid {role}: {exc}") from exc
 
 
+AUTHORITY_ARTIFACT_SCHEMA_WIRE_KEY = "schema"
+AUTHORITY_ARTIFACT_SCHEMA_FIELD = "schema_id"
+
+
+def authority_artifact_wire_projection(data: Mapping[str, Any]) -> dict[str, Any]:
+    """Adapt the ``schema`` wire key to the ``RepairAuthorityArtifact.schema_id`` field.
+
+    Committed authority bytes and every payload/file digest are always
+    computed against the original ``schema`` key; only this
+    validation-time projection is renamed, because the pydantic field is
+    named ``schema_id`` so it does not shadow ``ConfiguredBaseModel.schema``.
+    """
+    projection = dict(data)
+    if AUTHORITY_ARTIFACT_SCHEMA_WIRE_KEY in projection:
+        projection[AUTHORITY_ARTIFACT_SCHEMA_FIELD] = projection.pop(
+            AUTHORITY_ARTIFACT_SCHEMA_WIRE_KEY
+        )
+    return projection
+
+
 def _load_authority(
     path: str | Path,
     *,
@@ -752,7 +772,11 @@ def _load_authority(
         "repair_rows": sorted(seen_row_ids),
         "receipt_policy": str(receipt_policy["id"]),
     }
-    _validate_model(RepairAuthorityArtifact, artifact_projection, "repair authority")
+    _validate_model(
+        RepairAuthorityArtifact,
+        authority_artifact_wire_projection(artifact_projection),
+        "repair authority",
+    )
     return _Authority(
         data=data,
         operation_id=operation_id,

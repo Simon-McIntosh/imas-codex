@@ -18,7 +18,10 @@ from typing import Any
 from pydantic import ValidationError
 
 from imas_codex.graph.models import RepairAuthorityArtifact
-from imas_codex.standard_names.signed_manifest import signed_payload_sha256
+from imas_codex.standard_names.signed_manifest import (
+    authority_artifact_wire_projection,
+    signed_payload_sha256,
+)
 
 REPAIR_AUTHORITY_SCHEMA = "imas-codex.repair-authority.v1"
 ARTIFACT_ROWS_SELECTION = "artifact-rows"
@@ -196,7 +199,9 @@ def build_repair_authority(specification: Mapping[str, Any]) -> BuiltRepairAutho
         "receipt_policy": str(emitted["receipt_policy"]["id"]),
     }
     try:
-        artifact = RepairAuthorityArtifact.model_validate(schema_projection)
+        artifact = RepairAuthorityArtifact.model_validate(
+            authority_artifact_wire_projection(schema_projection)
+        )
     except ValidationError as exc:
         raise RepairAuthorityBuildError(f"invalid repair authority: {exc}") from exc
 

@@ -33,6 +33,7 @@ from imas_codex.graph.models import (
     RepairAuthorityRow,
     RepairMutationKind,
 )
+from imas_codex.standard_names.signed_manifest import authority_artifact_wire_projection
 
 _REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 _EVIDENCE_ROOT = _REPOSITORY_ROOT / "docs/evidence/sn-graph-wide-integrity"
@@ -63,9 +64,11 @@ def test_committed_authority_validates_without_resigning(
     original_bytes = path.read_bytes()
     original_data = json.loads(original_bytes)
 
-    validated = RepairAuthorityArtifact.model_validate(original_data)
+    validated = RepairAuthorityArtifact.model_validate(
+        authority_artifact_wire_projection(original_data)
+    )
 
-    assert validated.schema == original_data["schema"]
+    assert validated.schema_id == original_data["schema"]
     assert len(validated.rows) == len(original_data["rows"])
     assert original_data == json.loads(original_bytes)
     assert path.read_bytes() == original_bytes
