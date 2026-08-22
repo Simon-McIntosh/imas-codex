@@ -464,6 +464,8 @@ class LLMResult:
         cache_read_tokens: Tokens served from provider prompt cache (0 if
             the provider doesn't report caching or the prompt wasn't cached).
         cache_creation_tokens: Tokens written to the provider prompt cache.
+        raw_response_json: Complete validated structured response serialized
+            before callers can invoke fallible business methods on its members.
     """
 
     __slots__ = (
@@ -476,6 +478,7 @@ class LLMResult:
         "cache_creation_tokens",
         "response_count",
         "attempt_count",
+        "raw_response_json",
     )
 
     def __init__(
@@ -489,6 +492,7 @@ class LLMResult:
         output_tokens: int = 0,
         response_count: int = 1,
         attempt_count: int | None = None,
+        raw_response_json: str | None = None,
     ) -> None:
         self.parsed = parsed
         self.cost = cost
@@ -502,6 +506,7 @@ class LLMResult:
         self.cache_creation_tokens = cache_creation_tokens
         self.response_count = response_count
         self.attempt_count = response_count if attempt_count is None else attempt_count
+        self.raw_response_json = raw_response_json
 
     # Allow ``result, cost, tokens = call_llm_structured(...)``
     def __iter__(self):
@@ -2194,6 +2199,7 @@ def call_llm_structured(
                 input_tokens=total_input_tokens,
                 output_tokens=total_output_tokens,
                 response_count=response_count,
+                raw_response_json=parsed.model_dump_json(),
             )
 
         except Exception as e:
@@ -2420,6 +2426,7 @@ async def acall_llm_structured(
                     input_tokens=total_input_tokens,
                     output_tokens=total_output_tokens,
                     response_count=response_count,
+                    raw_response_json=parsed.model_dump_json(),
                 )
 
             except Exception as e:
@@ -2741,6 +2748,7 @@ def _call_frozen_structured_transport(
                 output_tokens=total_output_tokens,
                 response_count=response_count,
                 attempt_count=attempt_count,
+                raw_response_json=parsed.model_dump_json(),
             )
         except Exception as exc:
             last_error = exc
@@ -2866,6 +2874,7 @@ async def _acall_frozen_structured_transport(
                     output_tokens=total_output_tokens,
                     response_count=response_count,
                     attempt_count=attempt_count,
+                    raw_response_json=parsed.model_dump_json(),
                 )
             except Exception as exc:
                 last_error = exc
