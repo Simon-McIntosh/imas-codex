@@ -83,6 +83,41 @@
     admission, compare-and-set refusal on an already-bound or drifting source, immutable
     receipt identity, and write-free replay.</p>
   </section>
+
+  <section id="extracted-sources">
+    <h2>The 46 extracted sources are a definitional difference, not damage</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>aa25a253</code>,
+    node <code>n-extcensus</code>, gate <strong>passed</strong>. One read-only
+    production invocation at <code>328a0816</code>. Counter deltas
+    <code>StandardNameChange</code> 7,873 &rarr; 7,873 and <code>PRODUCED_NAME</code>
+    5,774 &rarr; 5,774, both <strong>0</strong>.</p>
+    <p><strong>The question the plan asked is answered in the negative.</strong>
+    The previous close's source predicate was, verbatim,
+    <code>source.status IN ['composed', 'attached']</code>. Re-running that complete
+    selection in this invocation still returns <strong>0</strong> &mdash; it matches the
+    previous close exactly. Every one of the 46 rows carries
+    <code>source.status = 'extracted'</code>, so none of them was ever inside the
+    predicate that produced the earlier zero. The class did not regrow; the wider
+    census simply counts a lifecycle the narrower one excluded.</p>
+    <table>
+      <caption>Sources whose every <code>PRODUCED_NAME</code> target is terminal</caption>
+      <thead><tr><th>Source status</th><th>Count</th><th>Classification</th></tr></thead>
+      <tbody>
+        <tr><td><code>stale</code></td><td>91</td><td>non-producers by policy</td></tr>
+        <tr><td><code>extracted</code></td><td><strong>46</strong></td><td><strong>46 definitional-difference, 0 damage</strong></td></tr>
+        <tr><td><code>failed</code></td><td>3</td><td>failed extraction, separate lifecycle</td></tr>
+        <tr><td>Total</td><td>140</td><td>partition sum equals the measured total</td></tr>
+      </tbody>
+    </table>
+    <p>The extracted cohort is <strong>7 DD sources and 39 derived sources</strong>
+    holding <strong>47 terminal target records &mdash; 19 exhausted and 28
+    superseded</strong> (47 rather than 46 because one source holds two terminal
+    targets). Their <code>PRODUCED_NAME</code> edges are retained history, which is
+    what the lifecycle question in the plan turned on: an <code>extracted</code> source
+    holding such an edge is a record of a target that has since been superseded or
+    exhausted, not a live producer. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/extracted-source-census">extracted-source-census.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>

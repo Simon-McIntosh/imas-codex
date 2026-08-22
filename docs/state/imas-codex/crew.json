@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T22:50:33",
+  "updated": "2026-08-22T22:56:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -162,7 +162,7 @@
         "id": "impl-closecensus2",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02b3b-873e-7be1-8d03-91769f684819",
         "created": "2026-08-22"
       },
       {
@@ -274,7 +274,7 @@
         "id": "impl-hintdraw",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02b3b-cd3a-7a72-b7dd-12e88ea5801b",
         "created": "2026-08-22"
       },
       {
@@ -463,7 +463,7 @@
         "id": "impl-sourcesearch",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02b3b-9870-7070-b963-3d601e13154a",
         "created": "2026-08-22"
       },
       {
@@ -16309,9 +16309,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T204834042192-n-extcensus",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a74",
+        "node": "n-extcensus",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-closecensus2",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T20:48:36Z",
+        "completed_at": "2026-08-22T20:55:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 431,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 431,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "328a0816bfbbb3ee48c7fb376c751726eac15d8c",
+        "commits": [
+          "aa25a253dac632a0dc83691825c46ee6be7aa446"
+        ],
+        "changed_lines": {
+          "added": 112,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "140 = 91 stale + 46 extracted + 3 failed; previous predicate source.status IN ['composed','attached'] still returns 0; all 46 extracted rows classified definitional-difference, 0 damage; counter deltas 0/0",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T204834042192-n-extcensus/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02b3b-873e-7be1-8d03-91769f684819",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3328000,
+            "cached_input_tokens_cumulative": 3328000,
+            "input_tokens": 3490154,
+            "input_tokens_cumulative": 3490154,
+            "output_tokens": 18389,
+            "output_tokens_cumulative": 18389,
+            "reasoning_output_tokens": 7112,
+            "reasoning_output_tokens_cumulative": 7112
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 441
+    "_version": 445
   }
 }

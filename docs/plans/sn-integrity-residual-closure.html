@@ -1,7 +1,7 @@
-<meta name="plan-version" content="1">
-<meta name="plan-impl" content="0.1">
-<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
-<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="0.2">
+<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
+<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446">
 <meta name="plan-modified" content="2026-08-22">
 <!-- reckon plan -->
 <meta name="docs-project" content="imas-codex">
@@ -151,32 +151,20 @@
   physics, not on a rank-limited miss.
 </p>
 
-<h2 id="s4">§4 — Census the extracted sources with no live target</h2>
-<p>
-  A live census found <strong>140</strong> sources whose every
-  <code>PRODUCED_NAME</code> target is superseded or exhausted, where the
-  previous close reported this class at 0. The partition is what makes it
-  actionable rather than alarming:
-</p>
-<table>
-  <caption>Sources whose every target is superseded or exhausted</caption>
-  <thead><tr><th>Source status</th><th>Count</th><th>Reading</th></tr></thead>
-  <tbody>
-    <tr><td><code>stale</code></td><td>91</td><td>Not live producers by policy; this plan's predecessor treats stale sources as non-producers throughout</td></tr>
-    <tr><td><code>failed</code></td><td>3</td><td>Failed extraction, separate lifecycle</td></tr>
-    <tr><td><code>extracted</code></td><td><strong>46</strong></td><td><strong>The real question</strong></td></tr>
-  </tbody>
-</table>
-<p>
-  The 46 need a read-only census before anyone acts. The open question is what an
-  <code>extracted</code>-status source is doing holding a
-  <code>PRODUCED_NAME</code> edge at all, given the declared lifecycle runs
-  <code>extracted → composed | attached | vocab_gap | failed | stale</code>.
-  <strong>The difference from the previous 0 is most likely definitional rather
-  than damage</strong> — the earlier census may have counted only
-  composed or attached sources — and that must be established before the number
-  is treated as a regression. Report the partition, never the bare total.
-</p>
+<section id="s4" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-22</span>
+    <h2>&#167;4 &mdash; Census the extracted sources with no live target</h2></header>
+  <p class="landed-summary">
+    Read-only census at <code>328a0816</code>: <strong>140 = 91 stale + 46 extracted +
+    3 failed</strong>, partition sum equal to the measured total. The previous close's
+    predicate <code>source.status IN ['composed', 'attached']</code> still returns
+    <strong>0</strong>, so all <strong>46 extracted rows are definitional-difference and
+    0 are damage</strong> &mdash; 7 DD plus 39 derived sources holding 47 terminal target
+    records (19 exhausted, 28 superseded). Counter deltas 0/0. Full record:
+    <a href="/imas-codex/evidence/archive/sn-integrity-residual-closure-landed#extracted-sources">&#167;4 landed</a>
+    (commit <code>aa25a253</code>).
+  </p>
+</section>
 
 <h2 id="s5">§5 — Standing refusals, and what would lift each</h2>
 <p>
@@ -303,5 +291,8 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-20260822-reusemap" data-who="reckon-ship" data-when="2026-08-22T20:55:00Z">
     <div class="r-comment-body">inv-reusemap landed - commit 34b90e14; gate anchor-resolution passed; measure 6/6 capability paths and 6/6 invocable anchors resolved at 328a0816, verdicts 4 reuse-as-is / 2 extend / 0 unfit-because; artifact docs/evidence/reuse-map-residual-closure.md (SHA-256 1f4c7185, verified byte-identical on integration). Material finding: section 3 attachment has NO closed program in the signed envelope - persist_claimed_attachments (graph_ops.py:10254) writes the right four mirrors but is claim-fenced pipeline persistence, not standalone signed authority, so an unbound ordinary-source program must land before any attachment apply. Currency audit at 328a0816 confirms every plan figure unchanged: accepted 2538, unsourced 12, dual-bound 3, no-live-target 140 = 91 stale + 46 extracted + 3 failed, surface_area_of_flux_surface 20 producers under the umbrella, umbrella live child count 1.</div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-20260822-extcensus" data-who="reckon-ship" data-when="2026-08-22T21:00:00Z">
+    <div class="r-comment-body">n-extcensus landed - commit aa25a253; gate evidence-validation passed; measure 140 = 91 stale + 46 extracted + 3 failed with partition sum equal to the measured total, previous predicate source.status IN ['composed','attached'] re-run in the same invocation still returns 0, all 46 extracted rows classified definitional-difference and 0 damage (7 DD + 39 derived sources holding 47 terminal target records: 19 exhausted, 28 superseded), nonmutation proof StandardNameChange 7873->7873 and PRODUCED_NAME 5774->5774 both delta 0. Artifacts docs/evidence/sn-integrity-residual-closure/extracted-source-census.md and the run's live-census.json. Section 4's open question is answered: the difference from the previous zero is definitional; the class did not regrow.</div>
 </div>
 </section>
