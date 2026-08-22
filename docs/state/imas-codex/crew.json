@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T23:28:59",
+  "updated": "2026-08-22T23:30:43",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16932,9 +16932,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T211836146128-n-supersedescalar",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a71",
+        "node": "n-supersedescalar",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-genericop",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:18:38Z",
+        "completed_at": "2026-08-22T21:30:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 699,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 699,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d53fa7c5ddb6da0f0ba1b437be88597f90a0f8b4",
+        "commits": [
+          "1854c6d4d1f73c00f1a7a088942fdf0c7214c19f"
+        ],
+        "changed_lines": {
+          "added": 359,
+          "removed": 7,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "Distinct-identity supersede authorities now sign mutation.arguments.successor_id and must declare both predecessor and successor as locked participants; apply atomically writes name_stage=superseded, status=superseded and superseded_by=<successor>, and the receipt records from_name/to_name as the real pair; replay validates both postconditions before returning already_applied with persistent_writes=0; collateral byte-equivalent. 12 unique supersede-contract cases passed, 0 failed, 0 skipped across 11 disposable-graph cases; ruff check 0 findings, format 2/2 clean. Lifecycle-only supersede authorities keep prior behaviour",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T211836146128-n-supersedescalar/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a023fc-bd11-7662-88d5-7824aca67282",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6683904,
+            "cached_input_tokens_cumulative": 28416000,
+            "input_tokens": 6895516,
+            "input_tokens_cumulative": 29451485,
+            "output_tokens": 21352,
+            "output_tokens_cumulative": 105853,
+            "reasoning_output_tokens": 5288,
+            "reasoning_output_tokens_cumulative": 33482
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 454
+    "_version": 455
   }
 }

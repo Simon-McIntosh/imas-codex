@@ -397,6 +397,31 @@
     would have tried to attach a source that does not exist. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/attachment-apply">attachment-apply.md</a>.</p>
   </section>
+
+  <section id="supersede-fix">
+    <h2>The supersede operator now signs and writes the successor</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>1854c6d4</code>,
+    node <code>n-supersedescalar</code>, gate <strong>passed</strong>.
+    <strong>12 unique supersede-contract cases passed, 0 failed, 0 skipped</strong> across
+    11 disposable-graph cases; <code>ruff check</code> 0 findings,
+    <code>ruff format --check</code> 2/2 clean.</p>
+    <p>A distinct-identity supersede authority must now sign
+    <code>mutation.arguments.successor_id</code> and declare <em>both</em> the predecessor
+    and that successor as <code>StandardName</code> participants, so both are locked and
+    re-hashed before apply. The apply then writes, atomically,
+    <code>name_stage=superseded</code>, <code>status=superseded</code> and
+    <code>superseded_by=&lt;successor&gt;</code>, and the single
+    <code>StandardNameChange</code> row records the real
+    <code>from_name</code>/<code>to_name</code> pair rather than naming the predecessor
+    twice. Replay validates the lifecycle, the scalar, <em>and</em> the receipt name pair
+    before returning <code>already_applied</code> with <code>persistent_writes</code> 0.</p>
+    <p>Two properties keep the change safe. Collateral <code>StandardNameSource</code>,
+    <code>StandardName</code> and <code>PRODUCED_NAME</code> rows are byte-for-byte
+    identical across both apply and replay. And existing <em>lifecycle-only</em> supersede
+    authorities, which carry no signed successor argument, retain their prior behaviour
+    &mdash; so the 1,116 refine-chain supersedes whose lineage already lives in
+    <code>REFINED_FROM</code> are untouched by this.</p>
+  </section>
 </main>
 </body>
 </html>
