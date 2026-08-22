@@ -8,8 +8,9 @@ applying transaction, locked, and re-hashed before any mutation.
 Only closed registries are interpreted here.  Authority artifacts never carry
 Cypher.  The mutation registry contains ``set_properties``, ``delete``,
 ``supersede``, ``detach``, and two closed relationship programs:
-``delete_relationship`` for source-target reconciliation and
-``add_relationship`` for structural-source revival.  The semantic guard
+``delete_relationship`` for source-target reconciliation,
+``add_relationship`` for structural-source revival, and their exact
+delete/add/set combination for ordinary-source migration.  The semantic guard
 registry contains last-producing-source, structural-legitimacy, and
 out-of-allowlist-immutability.
 """
@@ -174,7 +175,10 @@ def _validate_source_target_reconciliation_program(
         for mutation in mutations
         if mutation["kind"] == RepairMutationKind.delete_relationship.value
     ]
-    if not relationship_deletes:
+    if not relationship_deletes or any(
+        mutation["kind"] == RepairMutationKind.add_relationship.value
+        for mutation in mutations
+    ):
         return
 
     source_nodes = [
@@ -255,7 +259,10 @@ def _validate_structural_source_revival_program(
         for mutation in mutations
         if mutation["kind"] == RepairMutationKind.add_relationship.value
     ]
-    if not relationship_adds:
+    if not relationship_adds or any(
+        mutation["kind"] == RepairMutationKind.delete_relationship.value
+        for mutation in mutations
+    ):
         return
 
     source_id = identity.get("source_id")
@@ -320,6 +327,85 @@ def _validate_structural_source_revival_program(
     if not valid:
         raise SignedManifestAuthorityError(
             f"repair row {row_id!r} is not a closed structural-source revival program"
+        )
+
+
+def _validate_ordinary_source_migration_program(
+    row_id: str,
+    identity: dict[str, Any],
+    participants: list[dict[str, Any]],
+    mutations: list[dict[str, Any]],
+) -> None:
+    """Validate one exact edge, scalar, and backing-projection retarget."""
+    relationship_deletes = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.delete_relationship.value
+    ]
+    relationship_adds = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.add_relationship.value
+    ]
+    if not relationship_deletes or not relationship_adds:
+        return
+
+    source_id = identity.get("source_id")
+    target_id = identity.get("target_id")
+    source_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardNameSource"
+    ]
+    name_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardName"
+    ]
+    bindings = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.relationship.value
+        and participant["graph_label"] == "PRODUCED_NAME"
+    ]
+    property_updates = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.set_properties.value
+    ]
+    expected_relationship = {
+        "relationship_type": "PRODUCED_NAME",
+        "start_id": source_id,
+        "end_id": target_id,
+    }
+    valid = (
+        identity.get("kind") == "source"
+        and isinstance(source_id, str)
+        and bool(source_id)
+        and isinstance(target_id, str)
+        and bool(target_id)
+        and len(source_nodes) == 1
+        and str(source_nodes[0]["id"]) == source_id
+        and len(name_nodes) == 2
+        and target_id in {str(participant["id"]) for participant in name_nodes}
+        and len(bindings) == 1
+        and len(relationship_deletes) == 1
+        and str(relationship_deletes[0]["participant_id"]) == str(bindings[0]["id"])
+        and len(relationship_adds) == 1
+        and str(relationship_adds[0]["participant_id"]) == target_id
+        and relationship_adds[0].get("arguments") == expected_relationship
+        and len(property_updates) == 1
+        and str(property_updates[0]["participant_id"]) == source_id
+        and property_updates[0].get("arguments", {}).get("properties")
+        == {"produced_sn_id": target_id}
+        and len(mutations) == 3
+        and [int(mutation["order"]) for mutation in mutations] == [1, 2, 3]
+    )
+    if not valid:
+        raise SignedManifestAuthorityError(
+            f"repair row {row_id!r} is not a closed ordinary-source migration program"
         )
 
 
@@ -536,6 +622,9 @@ def _load_authority(
             row_id, identity, participants, mutations
         )
         _validate_structural_source_revival_program(
+            row_id, identity, participants, mutations
+        )
+        _validate_ordinary_source_migration_program(
             row_id, identity, participants, mutations
         )
 
@@ -1540,11 +1629,142 @@ def _guard_names(row: _LoadedRow) -> set[str]:
     return {str(guard["implementation"]) for guard in row.guards}
 
 
+def _is_ordinary_source_migration(row: _LoadedRow) -> bool:
+    kinds = {str(mutation["kind"]) for mutation in row.mutations}
+    return {
+        RepairMutationKind.delete_relationship.value,
+        RepairMutationKind.add_relationship.value,
+    } <= kinds
+
+
+def _ordinary_source_migration_refusal(
+    query: _Query, action: dict[str, Any]
+) -> str | None:
+    """Bind one ordinary retarget to its complete live provenance closure."""
+    row: _LoadedRow = action["row"]
+    if not _is_ordinary_source_migration(row):
+        return None
+    snapshots = action["participant_snapshots"]
+    source_id = str(row.identity["source_id"])
+    target_id = str(row.identity["target_id"])
+    source_snapshot = snapshots[source_id]
+    target_snapshot = snapshots[target_id]
+    binding_snapshot = next(
+        snapshot
+        for snapshot in snapshots.values()
+        if snapshot.get("relationship_type") == "PRODUCED_NAME"
+    )
+    old_target_id = str(binding_snapshot["end_id"])
+    source_properties = source_snapshot["properties"]
+    target_properties = target_snapshot["properties"]
+    if source_properties.get("status") == "stale":
+        return "ordinary source status changed to stale"
+    if (
+        source_properties.get("claimed_at") is not None
+        or source_properties.get("claim_token") is not None
+    ):
+        return "ordinary source has an active claim"
+    if (
+        source_properties.get("produced_sn_id") != old_target_id
+        or target_properties.get("name_stage") != "accepted"
+        or target_properties.get("validation_status") != "valid"
+        or target_properties.get("status") in {"deprecated", "superseded"}
+    ):
+        return "signed ordinary source lifecycle does not match migration authority"
+
+    closure_rows = query.query(
+        """
+        MATCH (source:StandardNameSource), (old:StandardName), (new:StandardName)
+        WHERE elementId(source) = $source_element_id
+          AND elementId(old) = $old_target_element_id
+          AND elementId(new) = $new_target_element_id
+        OPTIONAL MATCH (source)-[binding:PRODUCED_NAME]->(bound:StandardName)
+        WITH source, old, new,
+             [item IN collect(CASE WHEN binding IS NULL THEN null ELSE {
+               relationship_id: elementId(binding),
+               target_element_id: elementId(bound),
+               target_id: bound.id
+             } END) WHERE item IS NOT NULL] AS bindings
+        OPTIONAL MATCH (source)-[origin:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+        WITH source, old, new, bindings,
+             [item IN collect(CASE WHEN origin IS NULL THEN null ELSE {
+               origin_id: elementId(origin),
+               origin_type: type(origin),
+               backing_element_id: elementId(backing),
+               backing_id: backing.id,
+               backing_labels: labels(backing)
+             } END) WHERE item IS NOT NULL] AS backings
+        OPTIONAL MATCH (backing_node)-[projection:HAS_STANDARD_NAME]->
+                       (projected:StandardName)
+        WHERE elementId(backing_node) IN
+              [item IN backings | item.backing_element_id]
+        RETURN bindings, backings,
+               [item IN collect(CASE WHEN projection IS NULL THEN null ELSE {
+                 projection_id: elementId(projection),
+                 backing_element_id: elementId(backing_node),
+                 target_element_id: elementId(projected),
+                 target_id: projected.id
+               } END) WHERE item IS NOT NULL] AS projections,
+               old.source_paths AS old_source_paths,
+               new.source_paths AS new_source_paths
+        """,
+        source_element_id=source_snapshot["element_id"],
+        old_target_element_id=binding_snapshot["end_element_id"],
+        new_target_element_id=target_snapshot["element_id"],
+    )
+    closure = closure_rows[0] if closure_rows else {}
+    bindings = closure.get("bindings") or []
+    backings = closure.get("backings") or []
+    projections = closure.get("projections") or []
+    if (
+        bindings
+        != [
+            {
+                "relationship_id": binding_snapshot["element_id"],
+                "target_element_id": binding_snapshot["end_element_id"],
+                "target_id": old_target_id,
+            }
+        ]
+        or not backings
+        or len(projections) != len(backings)
+        or {item["backing_element_id"] for item in projections}
+        != {item["backing_element_id"] for item in backings}
+        or {item["target_id"] for item in projections} != {old_target_id}
+        or any(
+            item["target_element_id"] != binding_snapshot["end_element_id"]
+            for item in projections
+        )
+    ):
+        return "signed ordinary source closure does not match exact incumbent binding and projection"
+
+    from imas_codex.standard_names.attachment_audit import guard_source_pairings
+
+    guarded = guard_source_pairings(query, target_id, [source_id])
+    if guarded.rejected or guarded.accepted_source_ids != (source_id,):
+        detail = (
+            ", ".join(
+                f"{item.source_node_id}: {item.reason}" for item in guarded.rejected
+            )
+            or "pairing guard did not admit the exact source cohort"
+        )
+        return f"source migration attachment rejected: {detail}"
+    action["participant_digests"].append(
+        {
+            "participant_id": "ordinary-source-provenance-closure",
+            "sha256": _digest(closure),
+        }
+    )
+    action["ordinary_source_closure"] = closure
+    return None
+
+
 def _source_target_reconciliation_refusal(
     query: _Query, action: dict[str, Any]
 ) -> str | None:
     """Require one signed survivor over the complete live target closure."""
     row: _LoadedRow = action["row"]
+    if _is_ordinary_source_migration(row):
+        return None
     if not any(
         mutation["kind"] == RepairMutationKind.delete_relationship.value
         for mutation in row.mutations
@@ -1628,6 +1848,8 @@ def _structural_source_revival_refusal(
 ) -> str | None:
     """Require the complete signed bare-parent closure for explicit revival."""
     row: _LoadedRow = action["row"]
+    if _is_ordinary_source_migration(row):
+        return None
     if not any(
         mutation["kind"] == RepairMutationKind.add_relationship.value
         for mutation in row.mutations
@@ -2034,6 +2256,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
         if refusal is None:
             refusal = _orphan_guard_refusal(query, action)
         if refusal is None:
+            refusal = _ordinary_source_migration_refusal(query, action)
+        if refusal is None:
             refusal = _source_target_reconciliation_refusal(query, action)
         if refusal is None:
             refusal = _structural_source_revival_refusal(query, action)
@@ -2161,8 +2385,87 @@ def _receipt_rows(
     )
 
 
+def _verify_ordinary_source_migration_postcondition(
+    query: _Query,
+    row: _LoadedRow,
+    participant_snapshots: dict[str, dict[str, Any]] | None,
+) -> None:
+    source_id = str(row.identity["source_id"])
+    target_id = str(row.identity["target_id"])
+    old_target_id: str | None = None
+    if participant_snapshots is not None:
+        deleted_binding_id = next(
+            str(mutation["participant_id"])
+            for mutation in row.mutations
+            if mutation["kind"] == RepairMutationKind.delete_relationship.value
+        )
+        old_target_id = str(participant_snapshots[deleted_binding_id]["end_id"])
+    states = query.query(
+        """
+        MATCH (source:StandardNameSource {id: $source_id}),
+              (new:StandardName {id: $target_id})
+        OPTIONAL MATCH (old:StandardName {id: $old_target_id})
+        OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(bound:StandardName)
+        WITH source, old, new, collect(DISTINCT bound.id) AS bindings
+        OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+        OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(projected:StandardName)
+        WITH source, old, new, bindings,
+             collect(DISTINCT backing.id) AS backing_ids,
+             collect(DISTINCT projected.id) AS projected_ids
+        OPTIONAL MATCH (old_source:StandardNameSource)-[:PRODUCED_NAME]->(old)
+        OPTIONAL MATCH (old_source)-[:FROM_DD_PATH]->(old_dd:IMASNode)
+        OPTIONAL MATCH (old_source)-[:FROM_SIGNAL]->(old_signal:FacilitySignal)
+        WITH source, old, new, bindings, backing_ids, projected_ids,
+             collect(DISTINCT CASE
+               WHEN old_source IS NULL THEN null
+               WHEN old_dd IS NOT NULL THEN 'dd:' + old_dd.id
+               WHEN old_signal IS NOT NULL THEN old_signal.id
+               WHEN old_source.source_type = 'derived'
+                AND old_source.source_id STARTS WITH 'derived:'
+               THEN old_source.source_id ELSE old_source.id END) AS expected_old_paths
+        OPTIONAL MATCH (new_source:StandardNameSource)-[:PRODUCED_NAME]->(new)
+        OPTIONAL MATCH (new_source)-[:FROM_DD_PATH]->(new_dd:IMASNode)
+        OPTIONAL MATCH (new_source)-[:FROM_SIGNAL]->(new_signal:FacilitySignal)
+        RETURN source.produced_sn_id AS scalar, bindings, backing_ids, projected_ids,
+               old.source_paths AS old_paths,
+               new.source_paths AS new_paths,
+               expected_old_paths,
+               collect(DISTINCT CASE
+                 WHEN new_source IS NULL THEN null
+                 WHEN new_dd IS NOT NULL THEN 'dd:' + new_dd.id
+                 WHEN new_signal IS NOT NULL THEN new_signal.id
+                 WHEN new_source.source_type = 'derived'
+                  AND new_source.source_id STARTS WITH 'derived:'
+                 THEN new_source.source_id ELSE new_source.id END) AS expected_new_paths
+        """,
+        source_id=source_id,
+        old_target_id=old_target_id,
+        target_id=target_id,
+    )
+    state = states[0] if states else {}
+    if (
+        state.get("scalar") != target_id
+        or state.get("bindings") != [target_id]
+        or not state.get("backing_ids")
+        or state.get("projected_ids") != [target_id]
+        or (
+            old_target_id is not None
+            and sorted(state.get("old_paths") or [])
+            != sorted(item for item in state.get("expected_old_paths") or [] if item)
+        )
+        or sorted(state.get("new_paths") or [])
+        != sorted(item for item in state.get("expected_new_paths") or [] if item)
+    ):
+        raise SignedManifestConflict(
+            "recorded ordinary-source migration lost its postcondition"
+        )
+
+
 def _verify_postconditions(
-    query: _Query, authority: _Authority, row_ids: list[str]
+    query: _Query,
+    authority: _Authority,
+    row_ids: list[str],
+    actions: list[dict[str, Any]] | None = None,
 ) -> None:
     if authority.data.get("adapter") == _STALE_SOURCE_ADAPTER:
         signed_rows = list(authority.data["signed_rows"])
@@ -2233,8 +2536,17 @@ def _verify_postconditions(
         authority.data["target_post"] = target_post
         return
     by_id = {row.id: row for row in _runtime_authority_rows(authority)}
+    actions_by_id = {action["row"].id: action for action in actions or []}
     for row_id in row_ids:
         row = by_id[row_id]
+        if _is_ordinary_source_migration(row):
+            action = actions_by_id.get(row_id)
+            _verify_ordinary_source_migration_postcondition(
+                query,
+                row,
+                action["participant_snapshots"] if action is not None else None,
+            )
+            continue
         for mutation in row.mutations:
             participant = next(
                 item
@@ -2506,6 +2818,98 @@ def _added_relationship_ids(query: _Query, actions: list[dict[str, Any]]) -> lis
     return sorted(str(item) for item in (rows[0].get("ids") or []) if item)
 
 
+def _apply_ordinary_source_migration(query: _Query, action: dict[str, Any]) -> int:
+    """Atomically retarget the edge, scalar, backing projection, and paths."""
+    row: _LoadedRow = action["row"]
+    snapshots = action["participant_snapshots"]
+    source_id = str(row.identity["source_id"])
+    target_id = str(row.identity["target_id"])
+    source_snapshot = snapshots[source_id]
+    target_snapshot = snapshots[target_id]
+    binding_snapshot = next(
+        snapshot
+        for snapshot in snapshots.values()
+        if snapshot.get("relationship_type") == "PRODUCED_NAME"
+    )
+    closure = action["ordinary_source_closure"]
+    result = query.query(
+        """
+        MATCH (source:StandardNameSource), (old:StandardName), (new:StandardName)
+        WHERE elementId(source) = $source_element_id
+          AND elementId(old) = $old_target_element_id
+          AND elementId(new) = $new_target_element_id
+          AND source.status <> 'stale'
+          AND source.claimed_at IS NULL
+          AND source.claim_token IS NULL
+          AND source.produced_sn_id = old.id
+          AND COUNT { (source)-[:PRODUCED_NAME]->(:StandardName) } = 1
+        MATCH (source)-[prior:PRODUCED_NAME]->(old)
+        WHERE elementId(prior) = $binding_element_id
+        MATCH (source)-[origin:FROM_DD_PATH|FROM_SIGNAL]->(backing)
+        WHERE elementId(origin) IN $origin_element_ids
+          AND elementId(backing) IN $backing_element_ids
+        MATCH (backing)-[projection:HAS_STANDARD_NAME]->(old)
+        WHERE elementId(projection) IN $projection_element_ids
+        WITH source, old, new, prior,
+             collect(DISTINCT origin) AS origins,
+             collect(DISTINCT backing) AS backings,
+             collect(DISTINCT projection) AS projections
+        WHERE size(origins) = size($origin_element_ids)
+          AND size(backings) = size($backing_element_ids)
+          AND size(projections) = size($projection_element_ids)
+        DELETE prior
+        FOREACH (item IN projections | DELETE item)
+        CREATE (source)-[:PRODUCED_NAME]->(new)
+        SET source.produced_sn_id = new.id
+        FOREACH (item IN backings | MERGE (item)-[:HAS_STANDARD_NAME]->(new))
+        WITH DISTINCT source, old, new
+        OPTIONAL MATCH (remaining:StandardNameSource)-[:PRODUCED_NAME]->(old)
+        OPTIONAL MATCH (remaining)-[:FROM_DD_PATH]->(remaining_dd:IMASNode)
+        OPTIONAL MATCH (remaining)-[:FROM_SIGNAL]->
+                       (remaining_signal:FacilitySignal)
+        WITH source, old, new,
+             collect(DISTINCT CASE
+               WHEN remaining IS NULL THEN null
+               WHEN remaining_dd IS NOT NULL THEN 'dd:' + remaining_dd.id
+               WHEN remaining_signal IS NOT NULL THEN remaining_signal.id
+               WHEN remaining.source_type = 'derived'
+                AND remaining.source_id STARTS WITH 'derived:'
+               THEN remaining.source_id ELSE remaining.id END) AS old_paths
+        OPTIONAL MATCH (current:StandardNameSource)-[:PRODUCED_NAME]->(new)
+        OPTIONAL MATCH (current)-[:FROM_DD_PATH]->(current_dd:IMASNode)
+        OPTIONAL MATCH (current)-[:FROM_SIGNAL]->
+                       (current_signal:FacilitySignal)
+        WITH source, old, new, old_paths,
+             collect(DISTINCT CASE
+               WHEN current IS NULL THEN null
+               WHEN current_dd IS NOT NULL THEN 'dd:' + current_dd.id
+               WHEN current_signal IS NOT NULL THEN current_signal.id
+               WHEN current.source_type = 'derived'
+                AND current.source_id STARTS WITH 'derived:'
+               THEN current.source_id ELSE current.id END) AS new_paths
+        SET old.source_paths = [path IN old_paths WHERE path IS NOT NULL],
+            new.source_paths = [path IN new_paths WHERE path IS NOT NULL]
+        RETURN source.id AS source_id
+        """,
+        source_element_id=source_snapshot["element_id"],
+        old_target_element_id=binding_snapshot["end_element_id"],
+        new_target_element_id=target_snapshot["element_id"],
+        binding_element_id=binding_snapshot["element_id"],
+        origin_element_ids=[item["origin_id"] for item in closure["backings"]],
+        backing_element_ids=[
+            item["backing_element_id"] for item in closure["backings"]
+        ],
+        projection_element_ids=[
+            item["projection_id"] for item in closure["projections"]
+        ],
+    )
+    if len(result) != 1 or result[0].get("source_id") != source_id:
+        raise SignedManifestConflict(
+            f"ordinary-source migration compare-and-set changed for row {row.id}"
+        )
+    return len(row.mutations)
+
+
 def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
     if "stale_action" in action:
         expected = action["stale_action"]
@@ -2550,6 +2954,8 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
         return 1
     changed = 0
     row: _LoadedRow = action["row"]
+    if _is_ordinary_source_migration(row):
+        return _apply_ordinary_source_migration(query, action)
     snapshots = action["participant_snapshots"]
     for mutation in row.mutations:
         participant_id = str(mutation["participant_id"])
@@ -3156,6 +3562,7 @@ def apply_signed_manifest(
                     query,
                     authority,
                     [action["row"].id for action in locked_preview.admitted],
+                    locked_preview.admitted,
                 )
                 collateral_after = _collateral_snapshot(
                     query,
