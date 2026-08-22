@@ -118,6 +118,40 @@
     exhausted, not a live producer. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/extracted-source-census">extracted-source-census.md</a>.</p>
   </section>
+
+  <section id="below-threshold">
+    <h2>The three below-threshold refusals are now one</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>00b96b93</code>,
+    node <code>n-threshcensus</code>, gate <strong>passed</strong>, 144/144 rows listed
+    once with exact dispositions. Counter deltas <code>StandardNameChange</code>
+    7,873 &rarr; 7,873 and <code>PRODUCED_NAME</code> 5,774 &rarr; 5,774, both
+    <strong>0</strong>.</p>
+    <p><strong>Two of the plan's three recorded refusals dissolved without being
+    worked.</strong> <code>minimum_of_safety_factor</code> and
+    <code>toroidal_line_integrated_impurity_ion_velocity</code> are now
+    <code>superseded</code>, so neither is a live identity awaiting a redraw. Exactly
+    one remains: <code>poloidal_neutral_internal_state_momentum_convected_velocity</code>,
+    score <strong>0.3625</strong>, <strong>0</strong> producing sources,
+    <strong>0</strong> refine attempts &mdash; blocked precisely as the plan predicted,
+    on a producing source rather than on a draw.</p>
+    <table>
+      <caption>Live names scoring below the 0.85 review threshold</caption>
+      <thead><tr><th>Disposition</th><th>Count</th><th>Reading</th></tr></thead>
+      <tbody>
+        <tr><td>hint-steerable</td><td>75</td><td>holds a producing source, so <code>sn edit --hint</code> is available</td></tr>
+        <tr><td>blocked-on-source</td><td><strong>1</strong></td><td>this plan's remaining &#167;5 refusal, lifted by &#167;3</td></tr>
+        <tr><td>already-exhausted</td><td>68</td><td>terminal; recovery is <code>sn rescore</code>, not a reword</td></tr>
+        <tr><td>accepted, low score</td><td>14</td><td>reported separately &mdash; hint mode refuses an accepted name</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The 75 hint-steerable names are a wider class than this plan owns.</strong>
+    The plan's &#167;5 row scoped its refusal to identities inside the unsourced cohort;
+    the census measured every live name below threshold. That is documentation and
+    naming quality across the catalog, which belongs to the quality programme &mdash;
+    folding it here would widen the write scope with each layer rather than narrow it.
+    Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/below-threshold-census">below-threshold-census.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>

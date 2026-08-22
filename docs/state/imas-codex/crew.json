@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T22:56:14",
+  "updated": "2026-08-22T22:57:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16373,9 +16373,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T204851859123-n-threshcensus",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a75",
+        "node": "n-threshcensus",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-hintdraw",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T20:48:54Z",
+        "completed_at": "2026-08-22T20:56:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 453,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 453,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "328a0816bfbbb3ee48c7fb376c751726eac15d8c",
+        "commits": [
+          "00b96b933c48ef608ca17862fca89da69b6cb52e"
+        ],
+        "changed_lines": {
+          "added": 251,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "144 below-threshold rows: 76 non-terminal (75 hint-steerable, 1 blocked-on-source), 68 already-exhausted, 14 accepted reported separately; the plan's 3 refusals are now 1 (minimum_of_safety_factor and toroidal_line_integrated_impurity_ion_velocity are superseded); counter deltas 0/0",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T204851859123-n-threshcensus/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02b3b-cd3a-7a72-b7dd-12e88ea5801b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4500224,
+            "cached_input_tokens_cumulative": 4500224,
+            "input_tokens": 4671659,
+            "input_tokens_cumulative": 4671659,
+            "output_tokens": 18851,
+            "output_tokens_cumulative": 18851,
+            "reasoning_output_tokens": 7152,
+            "reasoning_output_tokens_cumulative": 7152
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 445
+    "_version": 446
   }
 }
