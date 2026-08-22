@@ -152,6 +152,50 @@
     Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/below-threshold-census">below-threshold-census.md</a>.</p>
   </section>
+
+  <section id="attachment-preview">
+    <h2>Four of twelve unsourced identities can be attached; five are path collisions</h2>
+    <p><strong>Landed 2026-08-22</strong> &mdash; commit <code>98a79710</code>,
+    node <code>n-attachprev</code>, gate <strong>passed</strong>, 12/12 cohort rows
+    asserted. Authority SHA-256 <code>fb3f33cc&hellip;</code>, preview manifest
+    <code>0a8c5d02&hellip;</code>, DD pinned at <strong>4.1.1</strong>. Counter deltas
+    <code>StandardNameChange</code> 7,873 &rarr; 7,873 and <code>PRODUCED_NAME</code>
+    5,774 &rarr; 5,774 &mdash; measured before, inside the open transaction, and after
+    rollback, all <strong>0</strong>.</p>
+    <p>The cohort was derived in-invocation rather than carried, which caught a real
+    omission: <code>toroidal_line_averaged_plasma_velocity</code> became live
+    <em>after</em> the reverse-search snapshot, and its path was recovered from the live
+    change steering that created the identity instead of being dropped for sitting
+    outside an older artifact's boundary.</p>
+    <table>
+      <caption>Live unsourced cohort by disposition</caption>
+      <thead><tr><th>Disposition</th><th>Count</th><th>Identities</th></tr></thead>
+      <tbody>
+        <tr><td><code>attach</code></td><td>6</td><td>capacitance of ICRH antenna; neutron flux due to fusion; parallel neutral momentum diffusion coefficient; poloidal neutral internal-state momentum convected velocity; toroidal ion charge-state torque density; toroidal line-averaged plasma velocity</td></tr>
+        <tr><td><code>adjudicate-collision</code></td><td>5</td><td>cross-section of flux surface; fast-ion charge-state power at inside flux surface; tendency of total thermal plasma internal energy; x- and z-direction unit vectors of sensor</td></tr>
+        <tr><td><code>no-candidate</code></td><td>1</td><td>toroidal trapped thermal ion charge-state torque density due to collisions</td></tr>
+      </tbody>
+    </table>
+    <p>The governed preview took only the six non-colliding rows and returned
+    <code>would_apply</code> with <strong>4 admitted, 2 refused, would_change 4</strong>:</p>
+    <ul>
+      <li><code>neutron_flux_due_to_fusion</code> &mdash; refused: the retarget would strip
+      the prior target's <em>last</em> producing source. Its <code>Hz</code> against the
+      path's <code>s^-1</code> is <em>not</em> the obstacle; the dimensional adjudicator
+      accepts them as one count-rate dimension, exactly as the plan expected.</li>
+      <li><code>poloidal_neutral_internal_state_momentum_convected_velocity</code> &mdash;
+      refused: <code>name_stage='reviewed'</code>, not accepted. This closes a loop with
+      &#167;5: it is the one remaining below-threshold refusal, it needs a source to be
+      hint-steered, and attachment needs it accepted first.</li>
+    </ul>
+    <p>The five collisions are held rather than forced. Attaching any of them would bind
+    a second live identity to a path a canonical name already holds &mdash; recreating
+    exactly the dual-bound defect this programme spent nineteen signed repairs removing.
+    The DD fast-versus-thermal recipient contradiction stays visible in
+    <code>fast_ion_charge_state_power_at_inside_flux_surface</code> rather than being
+    encoded by a second binding. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/attachment-preview">attachment-preview.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>
