@@ -9,10 +9,10 @@ Only closed registries are interpreted here.  Authority artifacts never carry
 Cypher.  The mutation registry contains ``set_properties``, ``delete``,
 ``supersede``, ``detach``, and two closed relationship programs:
 ``delete_relationship`` for source-target reconciliation,
-``add_relationship`` for structural-source revival, and their exact
-delete/add/set combination for ordinary-source migration.  The semantic guard
-registry contains last-producing-source, structural-legitimacy, and
-out-of-allowlist-immutability.
+``add_relationship`` for structural-source revival, their exact delete/add/set
+combination for ordinary-source migration, and ``recompute_projection`` for an
+exact structural reparent.  The semantic guard registry contains
+last-producing-source, structural-legitimacy, and out-of-allowlist-immutability.
 """
 
 from __future__ import annotations
@@ -59,7 +59,11 @@ _MUTATION_KINDS = frozenset(
         RepairMutationKind.delete_relationship.value,
     }
 )
-_GENERIC_MUTATION_KINDS = _MUTATION_KINDS | {RepairMutationKind.add_relationship.value}
+_STRUCTURAL_REPARENT = RepairMutationKind.recompute_projection.value
+_GENERIC_MUTATION_KINDS = _MUTATION_KINDS | {
+    RepairMutationKind.add_relationship.value
+}
+_SIGNED_MANIFEST_MUTATION_KINDS = _GENERIC_MUTATION_KINDS | {_STRUCTURAL_REPARENT}
 _LAST_PRODUCER = "last-producing-source"
 _STRUCTURAL_LEGITIMACY = "structural-legitimacy"
 _COLLATERAL_IMMUTABILITY = "out-of-allowlist-immutability"
@@ -409,6 +413,75 @@ def _validate_ordinary_source_migration_program(
         )
 
 
+def _validate_structural_reparent_program(
+    row_id: str,
+    identity: dict[str, Any],
+    participants: list[dict[str, Any]],
+    mutations: list[dict[str, Any]],
+) -> None:
+    """Validate one exact child-edge relocation between existing parents."""
+    reparent_mutations = [
+        mutation for mutation in mutations if mutation["kind"] == _STRUCTURAL_REPARENT
+    ]
+    if not reparent_mutations:
+        return
+
+    name_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardName"
+    ]
+    parent_relationships = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.relationship.value
+        and participant["graph_label"] == "HAS_PARENT"
+    ]
+    mutation = reparent_mutations[0] if len(reparent_mutations) == 1 else {}
+    arguments = mutation.get("arguments") or {}
+    child_id = str(identity.get("id") or "")
+    old_parent_id = arguments.get("old_end_id")
+    new_parent_id = arguments.get("new_end_id")
+    relationship_properties = arguments.get("properties")
+    node_ids = {str(participant["id"]) for participant in name_nodes}
+    valid = (
+        identity.get("kind") == "standard_name"
+        and child_id
+        and identity.get("target_id") == new_parent_id
+        and len(name_nodes) == 3
+        and len(node_ids) == 3
+        and child_id in node_ids
+        and isinstance(old_parent_id, str)
+        and bool(old_parent_id)
+        and old_parent_id in node_ids
+        and isinstance(new_parent_id, str)
+        and bool(new_parent_id)
+        and new_parent_id in node_ids
+        and old_parent_id != new_parent_id
+        and len(parent_relationships) == 1
+        and len(reparent_mutations) == 1
+        and len(mutations) == 1
+        and int(mutation.get("order", -1)) == 0
+        and str(mutation.get("participant_id")) == str(parent_relationships[0]["id"])
+        and set(arguments)
+        == {
+            "relationship_type",
+            "start_id",
+            "old_end_id",
+            "new_end_id",
+            "properties",
+        }
+        and arguments.get("relationship_type") == "HAS_PARENT"
+        and arguments.get("start_id") == child_id
+        and isinstance(relationship_properties, dict)
+    )
+    if not valid:
+        raise SignedManifestAuthorityError(
+            f"repair row {row_id!r} is not a closed structural reparent program"
+        )
+
+
 def _canonical_bytes(value: object) -> bytes:
     return json.dumps(
         value,
@@ -557,7 +630,7 @@ def _load_authority(
                 raise SignedManifestAuthorityError("repair mutation must be an object")
             _validate_model(RepairMutation, mutation, "repair mutation")
             kind = str(mutation["kind"])
-            if kind not in _GENERIC_MUTATION_KINDS:
+            if kind not in _SIGNED_MANIFEST_MUTATION_KINDS:
                 raise SignedManifestAuthorityError(
                     f"unsupported repair mutation kind: {kind}"
                 )
@@ -627,6 +700,7 @@ def _load_authority(
         _validate_ordinary_source_migration_program(
             row_id, identity, participants, mutations
         )
+        _validate_structural_reparent_program(row_id, identity, participants, mutations)
 
         projection = {
             **raw_row,
@@ -651,6 +725,16 @@ def _load_authority(
                 guards=tuple(dict(item) for item in guards),
                 orphan_policy=str(raw_row["orphan_policy"]),
             )
+        )
+
+    structural_reparent_rows = [
+        row
+        for row in loaded_rows
+        if any(mutation["kind"] == _STRUCTURAL_REPARENT for mutation in row.mutations)
+    ]
+    if structural_reparent_rows and len(structural_reparent_rows) != len(loaded_rows):
+        raise SignedManifestAuthorityError(
+            "structural reparent authority cannot mix mutation programs"
         )
 
     repair_rows = data.get("repair_rows")
@@ -1629,12 +1713,120 @@ def _guard_names(row: _LoadedRow) -> set[str]:
     return {str(guard["implementation"]) for guard in row.guards}
 
 
+def _is_structural_reparent(row: _LoadedRow) -> bool:
+    return (
+        len(row.mutations) == 1
+        and str(row.mutations[0]["kind"]) == _STRUCTURAL_REPARENT
+    )
+
+
+def _structural_reparent_authority(authority: _Authority) -> bool:
+    rows = _runtime_authority_rows(authority)
+    return bool(rows) and all(_is_structural_reparent(row) for row in rows)
+
+
+def _all_or_nothing(authority: _Authority) -> bool:
+    return bool(authority.data.get("all_or_nothing")) or (
+        _structural_reparent_authority(authority)
+    )
+
+
 def _is_ordinary_source_migration(row: _LoadedRow) -> bool:
     kinds = {str(mutation["kind"]) for mutation in row.mutations}
     return {
         RepairMutationKind.delete_relationship.value,
         RepairMutationKind.add_relationship.value,
     } <= kinds
+
+
+def _structural_reparent_refusal(query: _Query, action: dict[str, Any]) -> str | None:
+    """Require one exact live parent edge and preserve the child's authority."""
+    row: _LoadedRow = action["row"]
+    if not _is_structural_reparent(row):
+        return None
+    mutation = row.mutations[0]
+    arguments = dict(mutation["arguments"])
+    snapshots = action["participant_snapshots"]
+    child_snapshot = snapshots[str(arguments["start_id"])]
+    old_parent_snapshot = snapshots[str(arguments["old_end_id"])]
+    new_parent_snapshot = snapshots[str(arguments["new_end_id"])]
+    relationship_snapshot = snapshots[str(mutation["participant_id"])]
+    child_properties = child_snapshot["properties"]
+    if (
+        child_properties.get("name_stage") == "superseded"
+        or child_properties.get("status") in {"deprecated", "superseded"}
+        or old_parent_snapshot["properties"].get("name_stage") != "accepted"
+        or new_parent_snapshot["properties"].get("name_stage") != "accepted"
+        or old_parent_snapshot["properties"].get("status")
+        in {"deprecated", "superseded"}
+        or new_parent_snapshot["properties"].get("status")
+        in {"deprecated", "superseded"}
+    ):
+        return "signed structural reparent lifecycle is not live"
+
+    closure_rows = query.query(
+        """
+        MATCH (child:StandardName), (old:StandardName), (new:StandardName)
+        WHERE elementId(child) = $child_element_id
+          AND elementId(old) = $old_parent_element_id
+          AND elementId(new) = $new_parent_element_id
+        RETURN properties(child) AS child_properties,
+               [(child)-[parent:HAS_PARENT]->(current:StandardName) | {
+                 relationship_id: elementId(parent),
+                 relationship_properties: properties(parent),
+                 parent_element_id: elementId(current),
+                 parent_id: current.id
+               }] AS parents,
+               [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(child) | {
+                 source_element_id: elementId(source),
+                 source_id: source.id,
+                 source_properties: properties(source),
+                 binding_element_id: elementId(binding),
+                 binding_properties: properties(binding)
+               }] AS producers
+        """,
+        child_element_id=child_snapshot["element_id"],
+        old_parent_element_id=old_parent_snapshot["element_id"],
+        new_parent_element_id=new_parent_snapshot["element_id"],
+    )
+    closure = dict(closure_rows[0]) if closure_rows else {}
+    parents = sorted(
+        (dict(item) for item in closure.get("parents") or []),
+        key=lambda item: (str(item["parent_id"]), str(item["relationship_id"])),
+    )
+    producers = sorted(
+        (dict(item) for item in closure.get("producers") or []),
+        key=lambda item: (str(item["source_id"]), str(item["binding_element_id"])),
+    )
+    expected_parent = {
+        "relationship_id": relationship_snapshot["element_id"],
+        "relationship_properties": dict(arguments["properties"]),
+        "parent_element_id": old_parent_snapshot["element_id"],
+        "parent_id": str(arguments["old_end_id"]),
+    }
+    if (
+        relationship_snapshot.get("relationship_type") != "HAS_PARENT"
+        or relationship_snapshot.get("start_element_id") != child_snapshot["element_id"]
+        or relationship_snapshot.get("end_element_id")
+        != old_parent_snapshot["element_id"]
+        or relationship_snapshot.get("properties") != arguments["properties"]
+        or parents != [expected_parent]
+    ):
+        return (
+            "signed structural reparent closure does not match exact incumbent parent"
+        )
+    signed_child_state = {
+        "child_properties": closure.get("child_properties") or {},
+        "producers": producers,
+    }
+    action["participant_digests"].append(
+        {
+            "participant_id": "structural-reparent-child-authority",
+            "sha256": _digest(signed_child_state),
+        }
+    )
+    action["structural_reparent_child_state"] = signed_child_state
+    return None
 
 
 def _ordinary_source_migration_refusal(
@@ -2256,6 +2448,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
         if refusal is None:
             refusal = _orphan_guard_refusal(query, action)
         if refusal is None:
+            refusal = _structural_reparent_refusal(query, action)
+        if refusal is None:
             refusal = _ordinary_source_migration_refusal(query, action)
         if refusal is None:
             refusal = _source_target_reconciliation_refusal(query, action)
@@ -2383,6 +2577,66 @@ def _receipt_rows(
         operation=operation,
         manifest_sha256=manifest_sha256,
     )
+
+
+def _verify_structural_reparent_postcondition(
+    query: _Query,
+    row: _LoadedRow,
+    action: dict[str, Any] | None,
+) -> None:
+    mutation = row.mutations[0]
+    arguments = dict(mutation["arguments"])
+    states = query.query(
+        """
+        MATCH (child:StandardName {id: $child_id}),
+              (old:StandardName {id: $old_parent_id}),
+              (new:StandardName {id: $new_parent_id})
+        RETURN properties(child) AS child_properties,
+               [(child)-[parent:HAS_PARENT]->(current:StandardName) | {
+                 relationship_properties: properties(parent),
+                 parent_id: current.id
+               }] AS parents,
+               [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(child) | {
+                 source_element_id: elementId(source),
+                 source_id: source.id,
+                 source_properties: properties(source),
+                 binding_element_id: elementId(binding),
+                 binding_properties: properties(binding)
+               }] AS producers
+        """,
+        child_id=arguments["start_id"],
+        old_parent_id=arguments["old_end_id"],
+        new_parent_id=arguments["new_end_id"],
+    )
+    state = dict(states[0]) if states else {}
+    parents = sorted(
+        (dict(item) for item in state.get("parents") or []),
+        key=lambda item: str(item["parent_id"]),
+    )
+    expected_parents = [
+        {
+            "relationship_properties": dict(arguments["properties"]),
+            "parent_id": str(arguments["new_end_id"]),
+        }
+    ]
+    if parents != expected_parents:
+        raise SignedManifestConflict(
+            "recorded structural reparent lost its exact postcondition"
+        )
+    if action is None:
+        return
+    signed_child_state = action["structural_reparent_child_state"]
+    producers = sorted(
+        (dict(item) for item in state.get("producers") or []),
+        key=lambda item: (str(item["source_id"]), str(item["binding_element_id"])),
+    )
+    if {
+        "child_properties": state.get("child_properties") or {},
+        "producers": producers,
+    } != signed_child_state:
+        raise SignedManifestConflict(
+            "structural reparent changed child lifecycle or producing-source authority"
+        )
 
 
 def _verify_ordinary_source_migration_postcondition(
@@ -2539,6 +2793,11 @@ def _verify_postconditions(
     actions_by_id = {action["row"].id: action for action in actions or []}
     for row_id in row_ids:
         row = by_id[row_id]
+        if _is_structural_reparent(row):
+            _verify_structural_reparent_postcondition(
+                query, row, actions_by_id.get(row_id)
+            )
+            continue
         if _is_ordinary_source_migration(row):
             action = actions_by_id.get(row_id)
             _verify_ordinary_source_migration_postcondition(
@@ -2794,7 +3053,7 @@ def _lock_participants(query: _Query, preview: _Preview) -> None:
 
 
 def _added_relationship_ids(query: _Query, actions: list[dict[str, Any]]) -> list[str]:
-    pairs = [
+    source_pairs = [
         {
             "source_id": mutation["arguments"]["start_id"],
             "target_id": mutation["arguments"]["end_id"],
@@ -2803,19 +3062,80 @@ def _added_relationship_ids(query: _Query, actions: list[dict[str, Any]]) -> lis
         for mutation in action["row"].mutations
         if mutation["kind"] == RepairMutationKind.add_relationship.value
     ]
-    if not pairs:
-        return []
-    rows = query.query(
+    reparent_pairs = [
+        {
+            "child_id": mutation["arguments"]["start_id"],
+            "parent_id": mutation["arguments"]["new_end_id"],
+        }
+        for action in actions
+        for mutation in action["row"].mutations
+        if mutation["kind"] == _STRUCTURAL_REPARENT
+    ]
+    created_ids: list[str] = []
+    if source_pairs:
+        rows = query.query(
+            """
+            UNWIND $pairs AS pair
+            MATCH (:StandardNameSource {id: pair.source_id})
+                  -[binding:PRODUCED_NAME]->
+                  (:StandardName {id: pair.target_id})
+            RETURN collect(elementId(binding)) AS ids
+            """,
+            pairs=source_pairs,
+        )
+        created_ids.extend(str(item) for item in (rows[0].get("ids") or []) if item)
+    if reparent_pairs:
+        rows = query.query(
+            """
+            UNWIND $pairs AS pair
+            MATCH (:StandardName {id: pair.child_id})
+                  -[parent:HAS_PARENT]->
+                  (:StandardName {id: pair.parent_id})
+            RETURN collect(elementId(parent)) AS ids
+            """,
+            pairs=reparent_pairs,
+        )
+        created_ids.extend(str(item) for item in (rows[0].get("ids") or []) if item)
+    return sorted(created_ids)
+
+
+def _apply_structural_reparent(query: _Query, action: dict[str, Any]) -> int:
+    """Relocate one exact parent edge while retaining its full property map."""
+    row: _LoadedRow = action["row"]
+    mutation = row.mutations[0]
+    arguments = dict(mutation["arguments"])
+    snapshots = action["participant_snapshots"]
+    child_snapshot = snapshots[str(arguments["start_id"])]
+    old_parent_snapshot = snapshots[str(arguments["old_end_id"])]
+    new_parent_snapshot = snapshots[str(arguments["new_end_id"])]
+    relationship_snapshot = snapshots[str(mutation["participant_id"])]
+    changed = query.query(
         """
-        UNWIND $pairs AS pair
-        MATCH (:StandardNameSource {id: pair.source_id})
-              -[binding:PRODUCED_NAME]->
-              (:StandardName {id: pair.target_id})
-        RETURN collect(elementId(binding)) AS ids
+        MATCH (child:StandardName), (old:StandardName), (new:StandardName)
+        WHERE elementId(child) = $child_element_id
+          AND elementId(old) = $old_parent_element_id
+          AND elementId(new) = $new_parent_element_id
+          AND COUNT { (child)-[:HAS_PARENT]->(:StandardName) } = 1
+        MATCH (child)-[prior:HAS_PARENT]->(old)
+        WHERE elementId(prior) = $relationship_element_id
+          AND properties(prior) = $relationship_properties
+        DELETE prior
+        CREATE (child)-[replacement:HAS_PARENT]->(new)
+        SET replacement = $relationship_properties
+        RETURN child.id AS child_id, elementId(replacement) AS relationship_id
         """,
-        pairs=pairs,
+        child_element_id=child_snapshot["element_id"],
+        old_parent_element_id=old_parent_snapshot["element_id"],
+        new_parent_element_id=new_parent_snapshot["element_id"],
+        relationship_element_id=relationship_snapshot["element_id"],
+        relationship_properties=dict(arguments["properties"]),
     )
-    return sorted(str(item) for item in (rows[0].get("ids") or []) if item)
+    if len(changed) != 1 or changed[0].get("child_id") != arguments["start_id"]:
+        raise SignedManifestConflict(
+            f"structural reparent compare-and-set changed for row {row.id}"
+        )
+    action["created_relationship_id"] = str(changed[0]["relationship_id"])
+    return 1
 
 
 def _apply_ordinary_source_migration(query: _Query, action: dict[str, Any]) -> int:
@@ -2954,6 +3274,8 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
         return 1
     changed = 0
     row: _LoadedRow = action["row"]
+    if _is_structural_reparent(row):
+        return _apply_structural_reparent(query, action)
     if _is_ordinary_source_migration(row):
         return _apply_ordinary_source_migration(query, action)
     snapshots = action["participant_snapshots"]
@@ -3473,7 +3795,7 @@ def apply_signed_manifest(
                         "schema": SIGNED_MANIFEST_RECEIPT_SCHEMA,
                         "outcome": (
                             "refused"
-                            if authority.data.get("all_or_nothing") and preview.refusals
+                            if _all_or_nothing(authority) and preview.refusals
                             else "would_apply"
                             if preview.admitted
                             else "refused"
@@ -3481,7 +3803,7 @@ def apply_signed_manifest(
                         "changed": 0,
                         "would_change": (
                             0
-                            if authority.data.get("all_or_nothing") and preview.refusals
+                            if _all_or_nothing(authority) and preview.refusals
                             else len(preview.admitted)
                         ),
                         "counts": counts,
@@ -3511,7 +3833,7 @@ def apply_signed_manifest(
                         "manifest_sha256": preview.manifest_sha256,
                     }
                     return _project_receipt(authority, receipt)
-                if authority.data.get("all_or_nothing") and preview.refusals:
+                if _all_or_nothing(authority) and preview.refusals:
                     transaction.rollback()
                     return _project_receipt(
                         authority,
