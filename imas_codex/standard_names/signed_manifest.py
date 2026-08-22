@@ -643,6 +643,53 @@ def _validate_structural_release_program(
         )
 
 
+def _validate_supersede_successor_program(
+    row_id: str,
+    identity: dict[str, Any],
+    participants: list[dict[str, Any]],
+    mutations: list[dict[str, Any]],
+) -> None:
+    """Validate an explicitly signed successor for a supersede mutation."""
+    supersedes = [
+        mutation
+        for mutation in mutations
+        if mutation["kind"] == RepairMutationKind.supersede.value
+    ]
+    signed_supersedes = [
+        mutation for mutation in supersedes if mutation.get("arguments")
+    ]
+    if not signed_supersedes:
+        return
+
+    mutation = signed_supersedes[0] if len(signed_supersedes) == 1 else {}
+    arguments = mutation.get("arguments") or {}
+    predecessor_id = str(mutation.get("participant_id") or "")
+    successor_id = arguments.get("successor_id")
+    name_ids = {
+        str(participant["id"])
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardName"
+    }
+    valid = (
+        identity.get("kind") == "standard_name"
+        and identity.get("target_id") == predecessor_id
+        and len(supersedes) == 1
+        and len(signed_supersedes) == 1
+        and len(mutations) == 1
+        and set(arguments) == {"successor_id"}
+        and isinstance(successor_id, str)
+        and bool(successor_id)
+        and successor_id != predecessor_id
+        and predecessor_id in name_ids
+        and successor_id in name_ids
+    )
+    if not valid:
+        raise SignedManifestAuthorityError(
+            f"repair row {row_id!r} is not a closed signed-successor supersede program"
+        )
+
+
 def _canonical_bytes(value: object) -> bytes:
     return json.dumps(
         value,
@@ -886,6 +933,7 @@ def _load_authority(
         )
         _validate_structural_reparent_program(row_id, identity, participants, mutations)
         _validate_structural_release_program(row_id, identity, participants, mutations)
+        _validate_supersede_successor_program(row_id, identity, participants, mutations)
 
         projection = {
             **raw_row,
@@ -1923,6 +1971,25 @@ def _is_structural_release(row: _LoadedRow) -> bool:
         and "new_end_id" in (row.mutations[0].get("arguments") or {})
         and (row.mutations[0].get("arguments") or {}).get("new_end_id") is None
     )
+
+
+def _signed_supersede_successor(mutation: Mapping[str, Any]) -> str | None:
+    if str(mutation["kind"]) != RepairMutationKind.supersede.value:
+        return None
+    successor_id = (mutation.get("arguments") or {}).get("successor_id")
+    return str(successor_id) if successor_id is not None else None
+
+
+def _receipt_names(row: _LoadedRow) -> tuple[str, str]:
+    from_name = str(
+        row.identity.get("target_id") or row.identity.get("source_id") or row.id
+    )
+    successor_ids = [
+        successor_id
+        for mutation in row.mutations
+        if (successor_id := _signed_supersede_successor(mutation)) is not None
+    ]
+    return from_name, successor_ids[0] if successor_ids else from_name
 
 
 def _structural_reparent_authority(authority: _Authority) -> bool:
@@ -3405,17 +3472,21 @@ def _verify_postconditions(
                         "recorded signed-manifest repair lost its postcondition"
                     )
             else:
+                successor_id = _signed_supersede_successor(mutation)
                 state = query.query(
                     """
                     MATCH (node:StandardName {id: $id})
-                    RETURN node.name_stage AS name_stage, node.status AS status
+                    RETURN node.name_stage AS name_stage, node.status AS status,
+                           node.superseded_by AS superseded_by
                     """,
                     id=participant["id"],
                 )
-                if not state or state[0] != {
+                expected = {
                     "name_stage": "superseded",
                     "status": "superseded",
-                }:
+                    "superseded_by": successor_id,
+                }
+                if not state or state[0] != expected:
                     raise SignedManifestConflict(
                         "recorded signed-manifest repair lost its postcondition"
                     )
@@ -3520,6 +3591,9 @@ def _replay(
     properties = [dict(row["properties"]) for row in receipts]
     admitted_ids = sorted(properties[0].get("cohort_admitted_ids") or [])
     expected_ids = sorted(item.get("row_id") for item in properties)
+    receipt_names = {
+        row.id: _receipt_names(row) for row in _runtime_authority_rows(authority)
+    }
     if (
         not admitted_ids
         or expected_ids != admitted_ids
@@ -3528,6 +3602,11 @@ def _replay(
             sorted(item.get("cohort_admitted_ids") or []) != admitted_ids
             or item.get("authority_file_sha256") != authority.file_sha256
             or item.get("authority_payload_sha256") != authority.payload_sha256
+            or (
+                item.get("from_name"),
+                item.get("to_name"),
+            )
+            != receipt_names.get(str(item.get("row_id")))
             for item in properties
         )
     ):
@@ -4014,6 +4093,12 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                 if mutation.get("preserve_source_paths")
                 else "target.source_paths = [],"
             )
+            successor_id = _signed_supersede_successor(mutation)
+            successor_update = (
+                "target.superseded_by = $successor_id,"
+                if successor_id is not None
+                else ""
+            )
             result = query.query(
                 f"""
                 MATCH (target:StandardName)
@@ -4022,12 +4107,14 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
                       target.superseded_from_stage, target.name_stage),
                     target.name_stage = 'superseded',
                     target.status = 'superseded',
+                    {successor_update}
                     {source_path_update}
                     target.claimed_at = null,
                     target.claim_token = null
                 RETURN count(target) AS changed
                 """,  # noqa: S608 - the inserted fragment is selected locally
                 element_id=snapshot["element_id"],
+                successor_id=successor_id,
             )
         else:
             result = query.query(
@@ -4104,6 +4191,7 @@ def _write_receipts(
     rows: list[dict[str, Any]] = []
     for action in preview.admitted:
         row: _LoadedRow = action["row"]
+        from_name, to_name = _receipt_names(row)
         owner_element_id = next(
             (
                 snapshot["element_id"]
@@ -4121,9 +4209,8 @@ def _write_receipts(
             {
                 "change_id": _change_id(preview.manifest_sha256, row.id),
                 "row_id": row.id,
-                "from_name": row.identity.get("target_id")
-                or row.identity.get("source_id")
-                or row.id,
+                "from_name": from_name,
+                "to_name": to_name,
                 "owner_element_id": owner_element_id,
                 "mutation_kinds": [str(item["kind"]) for item in row.mutations],
             }
@@ -4134,7 +4221,7 @@ def _write_receipts(
         CREATE (change:StandardNameChange {
           id: row.change_id,
           from_name: row.from_name,
-          to_name: row.from_name,
+          to_name: row.to_name,
           operation: $operation,
           reason: $reason,
           origin: 'signed_manifest',
