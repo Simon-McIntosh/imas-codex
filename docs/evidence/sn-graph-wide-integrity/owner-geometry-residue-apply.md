@@ -1,189 +1,146 @@
-NEEDS-HELP: the three authoritative rows are old-target-only, but the signed envelope has no closed program for an ordinary source migration.
-
-# Owner-geometry residue apply blocker
+# Owner-geometry ordinary-source migration evidence
 
 ## Outcome
 
-**BLOCKED before mutation.** A fresh production-graph invocation derived the
-three exact adjudicated rows, built a canonical signed repair authority through
-`build_repair_authority`, and stopped when the signed-manifest loader rejected
-the first row verbatim:
+**COMPLETE.** The ordinary-source migration program applied all three exact
+owner-geometry source dispositions in one production transaction. The signed
+cohort was unchanged semantically from the adjudication: the same three source
+ids and the same three authoritative target identities were used. The current
+authority builder emitted the canonical 1–3 mutation sequence and explicit
+admitted-row receipt rule required by the landed program.
 
-> `repair row 'dd:spectrometer_visible/channel/active_spatial_resolution/centre/phi' is not a closed source-target reconciliation program`
+The preview disposition was **3 admitted + 0 refused = 3 signed rows**. Because
+there were no refusals, the requirement that every refusal carry its verbatim
+reason is satisfied with an empty refusal list. The apply changed **3 rows**
+and wrote **3 `StandardNameChange` receipts**. The program read the live
+`StandardNameChange` baseline inside the applying transaction and permits
+commit only when its delta equals the receipt cardinality; the observed live
+counter was **7,780 → 7,783, delta 3**, exactly equal to `receipt_rows=3`.
 
-This is a program-registry gap, not a lifecycle or semantic-authority refusal.
-All three intended targets exist, are `accepted` and `valid`, and retain the
-review scores recorded by the adjudication. The three sources are not
-dual-bound: each has exactly one live `PRODUCED_NAME` edge, one scalar mirror,
-and one backing projection, all selecting
-`toroidal_angle_of_measurement_position`. The registered reconciliation
-program can delete losing relationships only when the signed survivor is
-already a live relationship. The registered relationship-add program is
-restricted to stale `derived:<target>` structural sources. Neither program can
-express these three ordinary DD-source migrations.
+Replay returned `already_applied` with **changed=0** and
+**persistent_writes=0**. The driver then raised a false-negative assertion
+after that return because the evidence-only check used `value or -1`: Python
+therefore converted each correct numeric zero to `-1`. In accordance with the
+two-failure stop rule, no apply was run again. A separate read-only recovery
+audit proved the committed transaction, the replay receipt closure, and zero
+additional graph writes.
 
 | Required measure | Observed result |
 |---|---:|
-| Exact adjudicated source rows | **3** |
-| Rows emitted by `build_repair_authority` | **3** |
-| Builder file SHA-256 | `9e2e9606b2e72317033b28026877e52b4af224c36c7c68bd016f244894aa039f` |
-| Builder canonical payload SHA-256 | `af0ce5683bdc01a2503c0f0969f7a3ed53a01cf2f2e9935811935b3cfb57c0e8` |
-| Signed-loader classification | **Unavailable: closed-program validation refused before preview** |
-| Apply / replay | **Not run** |
-| `StandardNameChange` | **7,778 → 7,778 (delta 0)** |
-| `PRODUCED_NAME` relationships | **5,768 → 5,768 (delta 0)** |
-| `LLMCost` rows | **27,631 → 27,631 (delta 0)** |
-| Exact run-id + digest receipts | **0** |
-| All receipts with the exact run id | **0** |
-| Production graph mutations | **0** |
-| 49-row authority still selecting the old target | **5** |
-| All live producers of the old target | **28** |
+| Signed authority rows | **3** |
+| Preview admitted | **3** |
+| Preview refused | **0** |
+| Admitted + refused | **3** |
+| Apply outcome | **applied** |
+| Mutated rows (`changed`) | **3** |
+| Receipt rows | **3** |
+| `StandardNameChange` baseline | **7,780** |
+| `StandardNameChange` after apply | **7,783** |
+| `StandardNameChange` delta | **3** |
+| Delta equals receipt rows | **yes: 3 = 3** |
+| Replay outcome | **already_applied** |
+| Replay changed | **0** |
+| Replay persistent writes | **0** |
+| 49 signed owner rows found after apply | **49** |
+| 49 signed owner rows still selecting the old target | **2** |
+| All live producers still selecting the old target | **25** |
+| Recovery `StandardNameChange` delta | **0** |
+| Recovery `PRODUCED_NAME` delta | **0** |
+| Recovery `LLMCost` delta | **0** |
 
-The done-when is therefore not met: there is no honest `admitted + refused =
-3` apply result, no receipt cardinality, no apply delta, and no replay receipt.
-Inventing those fields from a direct call to the older retarget helper would
-misrepresent an unsigned operation as the required signed-envelope apply.
+## Exact migrated identities
 
-## Exact current rows
-
-| DD source | Live binding before/after | Authoritative target | Target lifecycle and score | Disposition |
+| DD source | Before | Authoritative identity after apply | Target review state | Postcondition |
 |---|---|---|---|---|
-| `dd:spectrometer_visible/channel/active_spatial_resolution/centre/phi` | `toroidal_angle_of_measurement_position` | `toroidal_coordinate_of_active_spatial_resolution_zone` | accepted, valid, **0.99375** | blocked before mutation |
-| `dd:spectrometer_visible/channel/detector/centre/phi` | `toroidal_angle_of_measurement_position` | `toroidal_coordinate_of_detector` | accepted, valid, **1.00000** | blocked before mutation |
-| `dd:spectrometer_visible/channel/polarizer/centre/phi` | `toroidal_angle_of_measurement_position` | `toroidal_coordinate_of_polarizer` | accepted, valid, **1.00000** | blocked before mutation |
+| `dd:spectrometer_visible/channel/active_spatial_resolution/centre/phi` | `toroidal_angle_of_measurement_position` | `toroidal_coordinate_of_active_spatial_resolution_zone` | accepted, valid, name score **0.99375** | edge, scalar, and backing projection all select the authoritative identity |
+| `dd:spectrometer_visible/channel/detector/centre/phi` | `toroidal_angle_of_measurement_position` | `toroidal_coordinate_of_detector` | accepted, valid, name score **1.00000** | edge, scalar, and backing projection all select the authoritative identity |
+| `dd:spectrometer_visible/channel/polarizer/centre/phi` | `toroidal_angle_of_measurement_position` | `toroidal_coordinate_of_polarizer` | accepted, valid, name score **1.00000** | edge, scalar, and backing projection all select the authoritative identity |
 
-For every row, `source.status='attached'`, both claim fields are null, the
-complete live target set is the singleton old target, and the complete backing
-projection set is the same singleton. This rules out drift, an active writer,
-or target lifecycle as the cause of the refusal.
+All three sources remain `status='attached'` with both claim fields absent.
+The two remaining members of the signed 49-row owner cohort that select
+`toroidal_angle_of_measurement_position` are therefore the already-adjudicated
+field-map-grid and reflector-center refusals, not incomplete members of this
+three-row migration.
 
-The other two residual owner/geometry rows remain the already-adjudicated named
-refusals. The post-diagnostic 49-row authority count of **5** old-target scalar
-selections is exactly the three blocked migrations plus those two refusals.
+## Signed authority and exact receipt proof
 
-## Why the registered programs cannot execute this authority
+The authority was emitted by `build_repair_authority` and executed by
+`apply_signed_manifest` through the registered ordinary-source migration
+program.
 
-The repair builder correctly owns the signed schema, selection literal, row
-projection, receipt count rule, signature, and both digests. It does not invent
-an execution program. The loader separately validates every mutation sequence
-against the closed registry.
+- Authority file SHA-256:
+  `fc3bfcdbec42f30a639350ab519fe6e02eb8044bb066c6e604dc717a9736af32`
+- Canonical signed-payload SHA-256:
+  `065a0b52a89434fe7d61cd4d056df036ef3f62e11fd09db28bbe7e3585566d27`
+- Applying run id: `owner-geometry-residue-apply`
+- Authorized manifest SHA-256:
+  `0e61392401e47df29c74f3eb99c23ad0cbc05008c94e6060fe6c256c8eff012e`
 
-The source-target reconciliation validator requires:
+The receipt audit did not infer success from an operation spelling or a bare
+global counter. It matched `StandardNameChange` nodes on the exact pair
+`run_id='owner-geometry-residue-apply'` and
+`manifest_sha256='0e61392401e47df29c74f3eb99c23ad0cbc05008c94e6060fe6c256c8eff012e'`.
+That query returned exactly these three row ids:
 
-- at least two signed `StandardName` participants;
-- one live `PRODUCED_NAME` relationship participant for every signed target;
-- exactly one retained relationship to the signed survivor;
-- deletion of all other relationship participants; and
-- a scalar update to that already-bound survivor.
+1. `dd:spectrometer_visible/channel/active_spatial_resolution/centre/phi`
+2. `dd:spectrometer_visible/channel/detector/centre/phi`
+3. `dd:spectrometer_visible/channel/polarizer/centre/phi`
 
-The live three-row cohort instead has one old relationship per source and no
-relationship to the authoritative target. A faithful migration row therefore
-needs to delete the old relationship, add the authoritative relationship, and
-update the scalar. The loader refuses that mixed program because the survivor
-is not already bound.
+Every receipt independently carries the authority file digest, signed-payload
+digest, exact manifest digest, and the complete three-id admitted cohort. A
+run-id-only audit also returned exactly these same three receipts and one
+manifest digest, ruling out a hidden receipt under another manifest.
 
-The only registered `add_relationship` program is structural-source revival.
-It requires the source identity to be exactly `derived:<target>`, requires a
-supporting `HAS_PARENT` relationship, and fixes a derived-source lifecycle
-payload. These three `dd:` sources deliberately fail that shape. Generalizing
-that structural exception ad hoc would erase the authority boundary between
-ordinary DD attachment migration and derived-parent recovery.
+## Apply and replay chronology
 
-The existing `retarget_standard_name_sources` helper does implement the needed
-atomic graph mechanics: exclusive source-edge retarget, scalar mirror,
-`HAS_STANDARD_NAME` backing projection, and both names' `source_paths` mirrors.
-It is nevertheless not an adequate substitute for this node's contract. Its
-receipt is the legacy `source_migration_manifest` event keyed by its own
-internal per-target payload; it does not execute the emitted repair authority
-and does not persist the signed envelope's `manifest_sha256`. Calling it would
-make the demanded run-id-and-manifest receipt proof impossible without an
-unauthorized raw receipt rewrite.
+The first driver launch stopped before authority construction or mutation when
+a read-only preflight query referenced an incorrect local alias. The corrected
+launch then:
 
-## Zero-mutation proof
+1. read the live three-source closure and the live counter baseline;
+2. rebuilt the canonical signed authority from the unchanged three semantic
+   rows;
+3. previewed all three rows as admitted;
+4. applied all three migrations and verified receipt cardinality and the live
+   counter delta;
+5. queried the receipts by exact run id and manifest digest;
+6. called replay, which returned the already-applied, zero-write receipt; and
+7. raised only in the evidence harness's subsequent zero-value assertion.
 
-The diagnostic read the live baseline immediately before authority
-construction and read the same counters after the loader refusal. All three
-counters were identical:
+The false-negative assertion is outside the production migration program and
+ran after replay returned. The read-only recovery audit subsequently observed
+identical before/after counters:
 
 ```text
-StandardNameChange  7,778 -> 7,778
-PRODUCED_NAME        5,768 -> 5,768
+StandardNameChange  7,783 -> 7,783
+PRODUCED_NAME        5,779 -> 5,779
 LLMCost             27,631 -> 27,631
+exact run+manifest receipts  3 -> 3
 ```
 
-The receipt proof did not filter or infer by an operation label. It queried the
-exact intended run id, `owner-geometry-residue-apply`, together with the
-builder's signed digest in the receipt `manifest_sha256` field, and returned
-`receipt_rows=0`, `receipt_ids=[]`. A second query over the exact run id without
-any operation predicate also returned zero rows. Thus no receipt is hidden
-under a different operation spelling. The loader rejection occurs before an
-applying transaction or mutation dispatch.
+No third apply or replay was attempted.
 
-## Tried
+## Verification
 
-1. Re-read the live plan and the landed three-row semantic adjudication.
-2. Re-read all three production source closures and all three target lifecycle
-   records.
-3. Constructed the only faithful typed mutation sequence for each row through
-   `build_repair_authority`: delete incumbent binding, add authoritative
-   binding, update scalar, with last-producer and collateral guards.
-4. Passed the emitted bytes and both recomputed digests to the signed loader.
-   It refused the ordinary migration shape before graph execution.
-5. Re-read counters, exact run/digest receipts, the full 49-row authority
-   residue, and the all-producer old-target count.
+The focused ordinary-source loader contract completed with **1 passed,
+5 graph cases deselected, 0 failed**. The graph cases require an explicitly
+configured disposable Neo4j endpoint and were not pointed at production. The
+production transaction supplied the live closure, receipt, counter, and replay
+evidence above.
 
-The focused builder and source-target contract suite is green at **15 passed,
-3 graph cases deselected, 0 failed**. The deselections reflect the repository's
-default exclusion of graph-marked disposable-Neo4j cases; the closed-registry
-unit contract and builder cases executed.
+## Durable artifacts
 
-## Options
-
-1. **Add one closed ordinary-source migration program to the signed envelope.**
-   Its validator should require one exact old binding and accepted-valid new
-   target, and its executor should carry the existing retarget helper's edge,
-   scalar, backing projection, `source_paths`, claim, last-producer, closure,
-   receipt, and replay semantics. Cover old-only apply, attachment refusal,
-   drift refusal, last-producer refusal, exact receipt attribution, and
-   write-free replay on disposable Neo4j. Then redispatch this three-row apply.
-2. Authorize the existing exact retarget helper as the execution vehicle and
-   explicitly amend the evidence contract to accept its three internal
-   per-target migration hashes instead of signed-envelope `manifest_sha256`
-   receipts. This is smaller code-wise but weakens the newly locked generic
-   authority boundary and contradicts the stated reuse decision.
-3. Add the three target relationships in a preliminary signed operation and
-   run reconciliation second. This requires two applies, temporarily creates
-   dual authority, and violates the one-invocation/one-apply measure.
-
-## Leaning
-
-Choose option 1. It preserves the signed-envelope direction, gives the
-three ordinary DD migrations a real closed program instead of stretching the
-derived-source exception, and makes the required exact run-id plus manifest
-receipt and write-free replay natively provable.
-
-## Cost if the wrong path is chosen
-
-No production repair must be undone now: this node made **zero mutations**. If
-option 2 or 3 is chosen and later rejected, the authority driver, receipt
-interpretation, and replay evidence must be redone; option 3 may additionally
-require a governed cleanup of temporarily dual-bound sources. Choosing option
-1 requires an out-of-scope production-and-test change before rerunning this
-unchanged three-row semantic authority.
-
-## Durable evidence
-
-- Machine result:
-  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T222629644810-ownerapply/owner-geometry-apply-blocker.json`
-  (SHA-256 `8c2842bb4069a09794da9ca921ab6bd27f8ceca186d71d782449cf4f154c137f`).
-- Builder-emitted authority:
-  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T222629644810-ownerapply/owner-geometry-source-migration-authority.json`
-  (SHA-256 `9e2e9606b2e72317033b28026877e52b4af224c36c7c68bd016f244894aa039f`).
-- Complete diagnostic log:
-  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T222629644810-ownerapply/owner-geometry-apply-diagnostic.log`
-  (SHA-256 `8427d6975d33d5627ad4be69ec389c0452a6e1b5147206ff9bcfc624f50ed2ab`).
+- Builder-emitted signed authority:
+  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T002535030026-ownerapply2/owner-geometry-source-migration-authority.json`
+  (SHA-256 `fc3bfcdbec42f30a639350ab519fe6e02eb8044bb066c6e604dc717a9736af32`).
+- Read-only exact receipt and postcondition audit:
+  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T002535030026-ownerapply2/owner-geometry-source-migration-recovery.json`
+  (SHA-256 `c84bbb1d4d7551854667cfbb59388e91a47973248d45a6bb3a7c82d00733cc35`).
+- Applying launch and replay false-negative log:
+  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T002535030026-ownerapply2/owner-geometry-source-migration-retry.log`
+  (SHA-256 `1e024e6d68eed7396aba7afcab589590471196fae2ccc5d0e1271e5da806bd93`).
+- Initial preflight-only alias failure log:
+  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T002535030026-ownerapply2/owner-geometry-source-migration.log`.
 - Focused contract-test log:
-  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260821T222629644810-ownerapply/focused-contract-tests.log`
-  (SHA-256 `d1747b0d6fe831fe2a46d2e9f02139765e6cb4b1a6b40dabee12db670c4285af`).
-- Source checkout before this evidence commit:
-  `a53104b904fed553a10ecf4967de10c3bb6d93d3`.
+  `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T002535030026-ownerapply2/ordinary-source-migration-tests.log`
+  (SHA-256 `efd71c2866cfe62e298df02242a2fc49eb7c5e7f10975ba19417648f4d915785`).
