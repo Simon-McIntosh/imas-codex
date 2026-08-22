@@ -1,0 +1,139 @@
+<!-- reckon plan -->
+<meta name="reckon-type" content="plan">
+<meta name="plan-slug" content="dd-defect-upstreaming">
+<meta name="plan-title" content="Upstreaming Measured Data Dictionary Defects">
+<meta name="plan-status" content="active">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort" content="M">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-informs" content="sn-graph-wide-integrity">
+<title>Upstreaming Measured DD Defects | imas-codex</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+
+<h1>Upstreaming Measured Data Dictionary Defects</h1>
+
+<section class="callout" id="scope">
+  <h2>Scope</h2>
+  <p>
+    Four Standard Name identities are held not because their names are wrong but
+    because the Data Dictionary contradicts itself. Each contradiction was
+    measured against a live graph with exact paths, quoted prose and unit
+    evidence during the semantic-integrity programme. This plan carries them
+    upstream as individual, reviewable contributions.
+  </p>
+  <p>
+    <strong>Nothing in this plan is submitted without explicit authorization.</strong>
+    Every issue and every pull request is drafted, shown in full, and approved
+    before it leaves this repository.
+  </p>
+</section>
+
+<h2 id="s1">§1 — The four measured defects</h2>
+<table>
+  <caption>Held identities and the DD contradiction behind each</caption>
+  <thead>
+    <tr><th>DD path</th><th>Contradiction</th><th>Held identity</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>waves/coherent_wave/profiles_1d/ion/state/power_inside_fast</code></td>
+      <td>The leaf is named <code>fast</code> and is charge-state resolved, but its prose describes deposition into the <em>thermal</em> population — and a distinct <code>power_inside_thermal</code> sibling carries the same thermal wording. The recipient population is therefore undetermined.</td>
+      <td><code>fast_ion_charge_state_power_at_inside_flux_surface</code></td>
+    </tr>
+    <tr>
+      <td><code>operational_instrumentation/sensor/direction/x</code></td>
+      <td>The parent declares a unit vector, whose components are dimensionless, while the child is metre-valued and coordinate-worded. A direction cosine has unit <code>1</code>.</td>
+      <td><code>x_direction_unit_vector_of_sensor</code></td>
+    </tr>
+    <tr>
+      <td><code>operational_instrumentation/sensor/direction/z</code></td>
+      <td>The identical dimensional contradiction on the <code>z</code> component.</td>
+      <td><code>z_direction_unit_vector_of_sensor</code></td>
+    </tr>
+    <tr>
+      <td>plasma-source <code>phi</code> torque leaf; distributions collisional-torque leaf</td>
+      <td>No single path carries all three required semantics. One is process-total and toroidal but only ion-species resolved; the other is charge-state resolved but restricted to collisional transfer to a thermal recipient. Neither incomplete path may be attached.</td>
+      <td><code>toroidal_ion_charge_state_torque_density</code></td>
+    </tr>
+  </tbody>
+</table>
+<p>
+  A fifth item is adjacent but distinct: <code>field_map/grid/phi</code> is blocked
+  by the ISN closed grammar rejecting <code>field_map_grid</code> as a physics
+  locus, not by a DD defect. It is tracked in §4 as a vocabulary question rather
+  than an upstream DD report.
+</p>
+
+<h2 id="s2">§2 — Submission protocol (binding)</h2>
+<p>
+  Each defect travels as its own independent contribution. No batching, and no
+  step is skipped because a previous item cleared it.
+</p>
+<ol>
+  <li>
+    <strong>Search first.</strong> Search the Data Dictionary repository
+    exhaustively for an existing issue or pull request covering the same path or
+    the same contradiction — open <em>and</em> closed. Record every search
+    performed and its result. A duplicate report is worse than none: it costs
+    maintainer attention and fragments the discussion.
+  </li>
+  <li>
+    <strong>Branch from the latest develop.</strong> Every change is crafted
+    against a freshly fetched upstream <code>develop</code>, never against a
+    stale local copy or a release tag.
+  </li>
+  <li>
+    <strong>Open a GitHub Issue.</strong> State the contradiction with the exact
+    path, the quoted prose, the declared unit, and the observed value semantics.
+    The issue is the durable record and stands on its own.
+  </li>
+  <li>
+    <strong>Open a pull request that closes that issue.</strong> One issue, one
+    PR, one defect. The PR body references the issue so merging closes it.
+  </li>
+  <li>
+    <strong>Show it here and wait.</strong> The full issue text and the full PR
+    text are presented in the session for review, individually. Submission
+    happens only after explicit approval of that specific item.
+  </li>
+</ol>
+<p>
+  <strong>No AI attribution anywhere.</strong> Issues, PR titles, PR bodies and
+  comments carry no generated-with footer, no co-author trailer, and no tool
+  self-credit. Authorship is the user's.
+</p>
+
+<h2 id="s3">§3 — Why these are upstream rather than local</h2>
+<p>
+  The semantic-integrity programme repaired every defect it could reach and
+  recorded fail-closed refusals for the rest. These four are refusals of the
+  second kind: the naming pipeline behaved correctly and the guard refused a
+  wrong attachment. Renaming the Standard Name would encode the DD's
+  contradiction into the vocabulary; attaching the near-miss path would bind
+  wrong physics. Neither is acceptable, so the contradiction must be resolved
+  where it lives.
+</p>
+<p>
+  The sensor-direction pair is the clearest case. A unit-vector component is
+  dimensionless by construction. Either the children should be dimensionless
+  direction cosines, or the parent should be redefined as a displacement — and
+  only DD authority can choose.
+</p>
+
+<h2 id="s4">§4 — Vocabulary question, tracked separately</h2>
+<p>
+  <code>field_map/grid/phi</code> has no Standard Name because the closed ISN
+  grammar rejects <code>field_map_grid</code> as a discretization artifact rather
+  than a physics locus. That refusal was recorded as permanent on the reasoning
+  that the vocabulary is fixed. <strong>That reasoning is withdrawn.</strong> ISN
+  and the Standard Names develop in lockstep, and a grammar refusal is a prompt
+  to ask whether the vocabulary should gain a token — not an automatic verdict
+  against the name.
+</p>
+<p>
+  The open question is whether the toroidal angle of an error-field-map grid
+  point has a physics identity worth naming, or is genuinely a storage artifact.
+  If the former, it is an ISN vocabulary rotation; if the latter, the existing
+  refusal stands on its merits rather than on assumed fixity.
+</p>
