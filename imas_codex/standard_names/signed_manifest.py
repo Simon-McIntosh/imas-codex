@@ -11,7 +11,7 @@ Cypher.  The mutation registry contains ``set_properties``, ``delete``,
 ``delete_relationship`` for source-target reconciliation,
 ``add_relationship`` for structural-source revival, their exact delete/add/set
 combination for ordinary-source migration, and ``recompute_projection`` for an
-exact structural reparent.  The semantic guard registry contains
+exact structural reparent or parent release.  The semantic guard registry contains
 last-producing-source, structural-legitimacy, and out-of-allowlist-immutability.
 """
 
@@ -60,9 +60,7 @@ _MUTATION_KINDS = frozenset(
     }
 )
 _STRUCTURAL_REPARENT = RepairMutationKind.recompute_projection.value
-_GENERIC_MUTATION_KINDS = _MUTATION_KINDS | {
-    RepairMutationKind.add_relationship.value
-}
+_GENERIC_MUTATION_KINDS = _MUTATION_KINDS | {RepairMutationKind.add_relationship.value}
 _SIGNED_MANIFEST_MUTATION_KINDS = _GENERIC_MUTATION_KINDS | {_STRUCTURAL_REPARENT}
 _LAST_PRODUCER = "last-producing-source"
 _STRUCTURAL_LEGITIMACY = "structural-legitimacy"
@@ -425,6 +423,11 @@ def _validate_structural_reparent_program(
     ]
     if not reparent_mutations:
         return
+    if all(
+        (mutation.get("arguments") or {}).get("new_end_id") is None
+        for mutation in reparent_mutations
+    ):
+        return
 
     name_nodes = [
         participant
@@ -479,6 +482,76 @@ def _validate_structural_reparent_program(
     if not valid:
         raise SignedManifestAuthorityError(
             f"repair row {row_id!r} is not a closed structural reparent program"
+        )
+
+
+def _validate_structural_release_program(
+    row_id: str,
+    identity: dict[str, Any],
+    participants: list[dict[str, Any]],
+    mutations: list[dict[str, Any]],
+) -> None:
+    """Validate one exact child-edge release without a replacement parent."""
+    release_mutations = [
+        mutation for mutation in mutations if mutation["kind"] == _STRUCTURAL_REPARENT
+    ]
+    if not release_mutations:
+        return
+    if any(
+        (mutation.get("arguments") or {}).get("new_end_id") is not None
+        for mutation in release_mutations
+    ):
+        return
+
+    name_nodes = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.node.value
+        and participant["graph_label"] == "StandardName"
+    ]
+    parent_relationships = [
+        participant
+        for participant in participants
+        if participant["kind"] == RepairParticipantKind.relationship.value
+        and participant["graph_label"] == "HAS_PARENT"
+    ]
+    mutation = release_mutations[0] if len(release_mutations) == 1 else {}
+    arguments = mutation.get("arguments") or {}
+    child_id = str(identity.get("id") or "")
+    old_parent_id = arguments.get("old_end_id")
+    relationship_properties = arguments.get("properties")
+    node_ids = {str(participant["id"]) for participant in name_nodes}
+    valid = (
+        identity.get("kind") == "standard_name"
+        and child_id
+        and identity.get("target_id") == child_id
+        and len(name_nodes) == 2
+        and len(node_ids) == 2
+        and child_id in node_ids
+        and isinstance(old_parent_id, str)
+        and bool(old_parent_id)
+        and old_parent_id in node_ids
+        and len(parent_relationships) == 1
+        and len(release_mutations) == 1
+        and len(mutations) == 1
+        and int(mutation.get("order", -1)) == 0
+        and str(mutation.get("participant_id")) == str(parent_relationships[0]["id"])
+        and set(arguments)
+        == {
+            "relationship_type",
+            "start_id",
+            "old_end_id",
+            "new_end_id",
+            "properties",
+        }
+        and arguments.get("relationship_type") == "HAS_PARENT"
+        and arguments.get("start_id") == child_id
+        and arguments.get("new_end_id") is None
+        and isinstance(relationship_properties, dict)
+    )
+    if not valid:
+        raise SignedManifestAuthorityError(
+            f"repair row {row_id!r} is not a closed structural release program"
         )
 
 
@@ -721,6 +794,7 @@ def _load_authority(
             row_id, identity, participants, mutations
         )
         _validate_structural_reparent_program(row_id, identity, participants, mutations)
+        _validate_structural_release_program(row_id, identity, participants, mutations)
 
         projection = {
             **raw_row,
@@ -748,13 +822,18 @@ def _load_authority(
         )
 
     structural_reparent_rows = [
-        row
-        for row in loaded_rows
-        if any(mutation["kind"] == _STRUCTURAL_REPARENT for mutation in row.mutations)
+        row for row in loaded_rows if _is_structural_reparent(row)
     ]
-    if structural_reparent_rows and len(structural_reparent_rows) != len(loaded_rows):
+    structural_release_rows = [
+        row for row in loaded_rows if _is_structural_release(row)
+    ]
+    structural_rows = structural_reparent_rows + structural_release_rows
+    if structural_rows and (
+        len(structural_rows) != len(loaded_rows)
+        or bool(structural_reparent_rows) == bool(structural_release_rows)
+    ):
         raise SignedManifestAuthorityError(
-            "structural reparent authority cannot mix mutation programs"
+            "structural authority cannot mix reparent and release programs"
         )
 
     repair_rows = data.get("repair_rows")
@@ -1741,6 +1820,17 @@ def _is_structural_reparent(row: _LoadedRow) -> bool:
     return (
         len(row.mutations) == 1
         and str(row.mutations[0]["kind"]) == _STRUCTURAL_REPARENT
+        and isinstance((row.mutations[0].get("arguments") or {}).get("new_end_id"), str)
+        and bool((row.mutations[0].get("arguments") or {}).get("new_end_id"))
+    )
+
+
+def _is_structural_release(row: _LoadedRow) -> bool:
+    return (
+        len(row.mutations) == 1
+        and str(row.mutations[0]["kind"]) == _STRUCTURAL_REPARENT
+        and "new_end_id" in (row.mutations[0].get("arguments") or {})
+        and (row.mutations[0].get("arguments") or {}).get("new_end_id") is None
     )
 
 
@@ -1749,9 +1839,15 @@ def _structural_reparent_authority(authority: _Authority) -> bool:
     return bool(rows) and all(_is_structural_reparent(row) for row in rows)
 
 
+def _structural_release_authority(authority: _Authority) -> bool:
+    rows = _runtime_authority_rows(authority)
+    return bool(rows) and all(_is_structural_release(row) for row in rows)
+
+
 def _all_or_nothing(authority: _Authority) -> bool:
     return bool(authority.data.get("all_or_nothing")) or (
         _structural_reparent_authority(authority)
+        or _structural_release_authority(authority)
     )
 
 
@@ -1850,6 +1946,93 @@ def _structural_reparent_refusal(query: _Query, action: dict[str, Any]) -> str |
         }
     )
     action["structural_reparent_child_state"] = signed_child_state
+    return None
+
+
+def _structural_release_refusal(query: _Query, action: dict[str, Any]) -> str | None:
+    """Require one exact parent edge and independent live child authority."""
+    row: _LoadedRow = action["row"]
+    if not _is_structural_release(row):
+        return None
+    mutation = row.mutations[0]
+    arguments = dict(mutation["arguments"])
+    snapshots = action["participant_snapshots"]
+    child_snapshot = snapshots[str(arguments["start_id"])]
+    old_parent_snapshot = snapshots[str(arguments["old_end_id"])]
+    relationship_snapshot = snapshots[str(mutation["participant_id"])]
+    child_properties = child_snapshot["properties"]
+    if (
+        child_properties.get("name_stage") != "accepted"
+        or child_properties.get("validation_status") != "valid"
+        or child_properties.get("status") in {"deprecated", "superseded"}
+        or old_parent_snapshot["properties"].get("name_stage") != "accepted"
+        or old_parent_snapshot["properties"].get("status")
+        in {"deprecated", "superseded"}
+    ):
+        return "signed structural release lifecycle is not independently live"
+
+    closure_rows = query.query(
+        """
+        MATCH (child:StandardName), (old:StandardName)
+        WHERE elementId(child) = $child_element_id
+          AND elementId(old) = $old_parent_element_id
+        RETURN properties(child) AS child_properties,
+               [(child)-[parent:HAS_PARENT]->(current:StandardName) | {
+                 relationship_id: elementId(parent),
+                 relationship_properties: properties(parent),
+                 parent_element_id: elementId(current),
+                 parent_id: current.id
+               }] AS parents,
+               [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(child) | {
+                 source_element_id: elementId(source),
+                 source_id: source.id,
+                 source_properties: properties(source),
+                 binding_element_id: elementId(binding),
+                 binding_properties: properties(binding)
+               }] AS producers
+        """,
+        child_element_id=child_snapshot["element_id"],
+        old_parent_element_id=old_parent_snapshot["element_id"],
+    )
+    closure = dict(closure_rows[0]) if closure_rows else {}
+    parents = sorted(
+        (dict(item) for item in closure.get("parents") or []),
+        key=lambda item: (str(item["parent_id"]), str(item["relationship_id"])),
+    )
+    producers = sorted(
+        (dict(item) for item in closure.get("producers") or []),
+        key=lambda item: (str(item["source_id"]), str(item["binding_element_id"])),
+    )
+    expected_parent = {
+        "relationship_id": relationship_snapshot["element_id"],
+        "relationship_properties": dict(arguments["properties"]),
+        "parent_element_id": old_parent_snapshot["element_id"],
+        "parent_id": str(arguments["old_end_id"]),
+    }
+    if (
+        relationship_snapshot.get("relationship_type") != "HAS_PARENT"
+        or relationship_snapshot.get("start_element_id") != child_snapshot["element_id"]
+        or relationship_snapshot.get("end_element_id")
+        != old_parent_snapshot["element_id"]
+        or relationship_snapshot.get("properties") != arguments["properties"]
+        or parents != [expected_parent]
+    ):
+        return "signed structural release closure does not match exact incumbent parent"
+    if not any(
+        producer["source_properties"].get("status") != "stale" for producer in producers
+    ):
+        return "signed structural release child has no live producing source"
+    signed_child_state = {
+        "child_properties": closure.get("child_properties") or {},
+        "producers": producers,
+    }
+    action["participant_digests"].append(
+        {
+            "participant_id": "structural-release-child-authority",
+            "sha256": _digest(signed_child_state),
+        }
+    )
+    action["structural_release_child_state"] = signed_child_state
     return None
 
 
@@ -2474,6 +2657,8 @@ def _build_preview(query: _Query, authority: _Authority, reason: str) -> _Previe
         if refusal is None:
             refusal = _structural_reparent_refusal(query, action)
         if refusal is None:
+            refusal = _structural_release_refusal(query, action)
+        if refusal is None:
             refusal = _ordinary_source_migration_refusal(query, action)
         if refusal is None:
             refusal = _source_target_reconciliation_refusal(query, action)
@@ -2663,6 +2848,54 @@ def _verify_structural_reparent_postcondition(
         )
 
 
+def _verify_structural_release_postcondition(
+    query: _Query,
+    row: _LoadedRow,
+    action: dict[str, Any] | None,
+) -> None:
+    mutation = row.mutations[0]
+    arguments = dict(mutation["arguments"])
+    states = query.query(
+        """
+        MATCH (child:StandardName {id: $child_id}),
+              (old:StandardName {id: $old_parent_id})
+        RETURN properties(child) AS child_properties,
+               [(child)-[parent:HAS_PARENT]->(current:StandardName) | {
+                 relationship_properties: properties(parent),
+                 parent_id: current.id
+               }] AS parents,
+               [(source:StandardNameSource)-[binding:PRODUCED_NAME]->(child) | {
+                 source_element_id: elementId(source),
+                 source_id: source.id,
+                 source_properties: properties(source),
+                 binding_element_id: elementId(binding),
+                 binding_properties: properties(binding)
+               }] AS producers
+        """,
+        child_id=arguments["start_id"],
+        old_parent_id=arguments["old_end_id"],
+    )
+    state = dict(states[0]) if states else {}
+    if not states or state.get("parents"):
+        raise SignedManifestConflict(
+            "recorded structural release lost its exact parentless postcondition"
+        )
+    if action is None:
+        return
+    signed_child_state = action["structural_release_child_state"]
+    producers = sorted(
+        (dict(item) for item in state.get("producers") or []),
+        key=lambda item: (str(item["source_id"]), str(item["binding_element_id"])),
+    )
+    if {
+        "child_properties": state.get("child_properties") or {},
+        "producers": producers,
+    } != signed_child_state:
+        raise SignedManifestConflict(
+            "structural release changed child lifecycle or producing-source authority"
+        )
+
+
 def _verify_ordinary_source_migration_postcondition(
     query: _Query,
     row: _LoadedRow,
@@ -2817,6 +3050,11 @@ def _verify_postconditions(
     actions_by_id = {action["row"].id: action for action in actions or []}
     for row_id in row_ids:
         row = by_id[row_id]
+        if _is_structural_release(row):
+            _verify_structural_release_postcondition(
+                query, row, actions_by_id.get(row_id)
+            )
+            continue
         if _is_structural_reparent(row):
             _verify_structural_reparent_postcondition(
                 query, row, actions_by_id.get(row_id)
@@ -3094,6 +3332,7 @@ def _added_relationship_ids(query: _Query, actions: list[dict[str, Any]]) -> lis
         for action in actions
         for mutation in action["row"].mutations
         if mutation["kind"] == _STRUCTURAL_REPARENT
+        and _is_structural_reparent(action["row"])
     ]
     created_ids: list[str] = []
     if source_pairs:
@@ -3159,6 +3398,39 @@ def _apply_structural_reparent(query: _Query, action: dict[str, Any]) -> int:
             f"structural reparent compare-and-set changed for row {row.id}"
         )
     action["created_relationship_id"] = str(changed[0]["relationship_id"])
+    return 1
+
+
+def _apply_structural_release(query: _Query, action: dict[str, Any]) -> int:
+    """Remove one exact parent edge without creating a replacement."""
+    row: _LoadedRow = action["row"]
+    mutation = row.mutations[0]
+    arguments = dict(mutation["arguments"])
+    snapshots = action["participant_snapshots"]
+    child_snapshot = snapshots[str(arguments["start_id"])]
+    old_parent_snapshot = snapshots[str(arguments["old_end_id"])]
+    relationship_snapshot = snapshots[str(mutation["participant_id"])]
+    changed = query.query(
+        """
+        MATCH (child:StandardName), (old:StandardName)
+        WHERE elementId(child) = $child_element_id
+          AND elementId(old) = $old_parent_element_id
+          AND COUNT { (child)-[:HAS_PARENT]->(:StandardName) } = 1
+        MATCH (child)-[prior:HAS_PARENT]->(old)
+        WHERE elementId(prior) = $relationship_element_id
+          AND properties(prior) = $relationship_properties
+        DELETE prior
+        RETURN child.id AS child_id
+        """,
+        child_element_id=child_snapshot["element_id"],
+        old_parent_element_id=old_parent_snapshot["element_id"],
+        relationship_element_id=relationship_snapshot["element_id"],
+        relationship_properties=dict(arguments["properties"]),
+    )
+    if len(changed) != 1 or changed[0].get("child_id") != arguments["start_id"]:
+        raise SignedManifestConflict(
+            f"structural release compare-and-set changed for row {row.id}"
+        )
     return 1
 
 
@@ -3298,6 +3570,8 @@ def _apply_mutation(query: _Query, action: dict[str, Any]) -> int:
         return 1
     changed = 0
     row: _LoadedRow = action["row"]
+    if _is_structural_release(row):
+        return _apply_structural_release(query, action)
     if _is_structural_reparent(row):
         return _apply_structural_reparent(query, action)
     if _is_ordinary_source_migration(row):
