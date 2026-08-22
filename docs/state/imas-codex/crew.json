@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T08:23:27",
+  "updated": "2026-08-22T11:09:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -411,6 +411,13 @@
         "created": "2026-08-16"
       },
       {
+        "id": "impl-supersede6",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a028af-2a54-7ba2-b04d-371f5860ec0d",
+        "created": "2026-08-22"
+      },
+      {
         "id": "impl-targetreview",
         "harness": "codex",
         "role": "implement",
@@ -444,6 +451,13 @@
         "role": "implement",
         "session_id": "01a02467-9180-7bb3-9c5c-a01469229272",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-unitpint",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-22"
       },
       {
         "id": "impl-voltadj",
@@ -14745,9 +14759,61 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T085559805386-supersede6",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a73c",
+        "node": "supersede6",
+        "role": "implement",
+        "member": "impl-supersede6",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T08:56:02Z",
+        "completed_at": "2026-08-22T09:07:19Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 677,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 677,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "427883beb28075d1ea270dc8c107dba0cd2d4d0d",
+        "commits": [
+          "d03ed045"
+        ],
+        "changed_lines": {
+          "added": 107,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T085559805386-supersede6/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a028af-2a54-7ba2-b04d-371f5860ec0d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 385
+    "_version": 389
   }
 }
