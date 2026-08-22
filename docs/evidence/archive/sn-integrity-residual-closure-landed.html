@@ -517,6 +517,61 @@
     refused. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/neutral-velocity-disposition">neutral-velocity-disposition.md</a>.</p>
   </section>
+
+  <section id="source-bootstrap">
+    <h2>Two more identities gain a source &mdash; orphans 6 &rarr; 4</h2>
+    <p><strong>Landed 2026-08-23</strong> &mdash; commit <code>9934cb55</code>,
+    node <code>n-sourcebootstrap</code>, gate <strong>passed</strong>. Authority file
+    SHA-256 <code>1202c229&hellip;</code>, manifest <code>19bcb8d9&hellip;</code>.
+    <strong>LLM cost USD 0.000000.</strong></p>
+    <p>Both identities were blocked on nothing more interesting than an unextracted
+    <code>StandardNameSource</code>. Ordinary extraction materialized
+    <strong>2/2</strong> DD 4.1.1 paths with 0 refusals, and the closed signed program
+    bound them: preview <code>would_apply</code> with 2 admitted / 0 refused, apply
+    <code>applied</code> with <code>changed=2 receipt_rows=2</code>, and a same-hash
+    replay <code>already_applied</code> at <code>persistent_writes=0</code> with the
+    global counters static at 7,900 / 5,779 / 27,909.</p>
+    <table>
+      <caption>Bootstrapped bindings</caption>
+      <thead><tr><th>Identity</th><th>Producing source</th></tr></thead>
+      <tbody>
+        <tr><td><code>parallel_neutral_momentum_diffusion_coefficient</code></td><td><code>plasma_transport/model/ggd/neutral/momentum/d_parallel</code></td></tr>
+        <tr><td><code>poloidal_neutral_internal_state_momentum_convection_velocity</code></td><td><code>plasma_transport/model/profiles_1d/neutral/state/momentum/v_pol</code></td></tr>
+      </tbody>
+    </table>
+    <p>Both targets read <code>accepted</code> and <code>valid</code> with exactly one
+    <code>PRODUCED_NAME</code>, one exact <code>HAS_STANDARD_NAME</code> projection, one
+    <code>source_paths</code> occurrence, the attached source scalar and a pinned DD
+    snapshot. Live unsourced census <strong>6 &rarr; 4</strong>, the difference equal to
+    the rows applied.</p>
+    <p><strong>The recovery is worth recording.</strong> The invocation was terminated
+    after its commit by a silent network poll. Rather than guess or re-apply, the node
+    proved completion from the exact receipts plus the retained authority hashes and a
+    write-free replay &mdash; which is exactly what the receipt discipline exists for.</p>
+  </section>
+
+  <section id="closing-state">
+    <h2>Closing state, and the four identities that legitimately have no source</h2>
+    <p><strong>Measured 2026-08-23</strong> against the live graph. Unsourced identities
+    fell <strong>12 &rarr; 4</strong> across the session; accepted names read
+    <strong>2,535</strong>; dual-bound semantic sources remain at <strong>3</strong>,
+    unchanged and refused for the recorded reason.</p>
+    <table>
+      <caption>The residue, with the external condition that would lift each</caption>
+      <thead><tr><th>Identity</th><th>Why it has no producer</th><th>What would lift it</th></tr></thead>
+      <tbody>
+        <tr><td><code>fast_ion_charge_state_power_at_inside_flux_surface</code></td><td>its candidate path is held by <code>ion_charge_state_power_at_inside_flux_surface</code>, and the DD's fast-versus-thermal recipient contradiction is unresolved</td><td>Data Dictionary issue 294 / PR 295, still open upstream</td></tr>
+        <tr><td><code>neutron_flux_due_to_fusion</code></td><td>the retarget would strip the prior target's last producing source</td><td>an authoritative replacement producer, or an adjudicated disposition for the predecessor</td></tr>
+        <tr><td><code>tendency_of_total_thermal_plasma_internal_energy</code></td><td>its only unit-agreeing path is held by the quarantined <code>plasma_internal_energy</code>; folding an explicit derivative identity into it would violate self-description</td><td>a reviewed distinct unowned path, or an adjudicated disposition for the incumbent</td></tr>
+        <tr><td><code>toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions</code></td><td>every unit-agreeing torque path makes <code>trapped</code> describe the source distribution while the name conflates it onto the recipient</td><td>nothing &mdash; a sound physics retirement, not a rank-limited miss</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Total LLM spend for this closure: USD 0.252514</strong>, one run
+    (<code>SNRun 9dd3cfb2</code>, <code>cost_is_exact=true</code>, stop reason
+    <code>no_eligible_work</code>) against an authorized ceiling of 150. Almost everything
+    the plan needed turned out to be signed graph operations and machinery rather than
+    model calls; the single genuinely model-shaped decision was the reviewed rename.</p>
+  </section>
 </main>
 </body>
 </html>

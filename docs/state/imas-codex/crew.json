@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T00:05:02",
+  "updated": "2026-08-23T00:26:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -17188,9 +17188,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T220555777674-n-sourcebootstrap",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a73",
+        "node": "n-sourcebootstrap",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-attachapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T22:05:58Z",
+        "completed_at": "2026-08-22T22:26:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1203,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1203,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "531737fc6f4caf7a58f02341ad32ad58f53cda67",
+        "commits": [
+          "9934cb551675be78c36efdb4f129ec35a7e82026"
+        ],
+        "changed_lines": {
+          "added": 149,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "2/2 DD paths materialized through ordinary extraction with 0 refusals; signed preview would_apply authority_rows=2 admitted=2 refused=0; apply outcome=applied changed=2 receipt_rows=2 under manifest 19bcb8d9 with the exact run-id+operation+manifest receipt query returning 2 rows; same-hash replay already_applied changed=0 persistent_writes=0 with global counters static at 7900/5779/27909; both targets accepted/valid holding exactly 1 PRODUCED_NAME, 1 HAS_STANDARD_NAME projection, 1 source_paths occurrence, attached scalar and pinned DD snapshot; live unsourced 6->4, difference equal to rows applied; LLM cost USD 0.000000. Recovered from a mid-run termination using exact receipts and a write-free replay rather than repeating the mutation",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T220555777674-n-sourcebootstrap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02485-ee50-72c3-9f2f-a3e723ebe135",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12171776,
+            "cached_input_tokens_cumulative": 36286720,
+            "input_tokens": 12381761,
+            "input_tokens_cumulative": 37714739,
+            "output_tokens": 33663,
+            "output_tokens_cumulative": 141358,
+            "reasoning_output_tokens": 8072,
+            "reasoning_output_tokens_cumulative": 40216
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 458
+    "_version": 459
   }
 }

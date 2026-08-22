@@ -1,14 +1,14 @@
-<meta name="plan-version" content="14">
-<meta name="plan-impl" content="0.96">
-<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,docs/evidence/sn-integrity-residual-closure/umbrella-supersede-apply.md,docs/evidence/sn-integrity-residual-closure/attachment-apply.md,docs/evidence/sn-integrity-residual-closure/supersede-successor-recovery.md,docs/evidence/sn-integrity-residual-closure/integrated-verification.md,docs/evidence/sn-integrity-residual-closure/neutral-velocity-disposition.md,tests/standard_names/test_unbound_source_attachment.py,tests/standard_names/test_supersede_successor_scalar.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
-<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e,471e6717483a3edf65030d313cba43fb9934a3d2,1854c6d4d1f73c00f1a7a088942fdf0c7214c19f,c4c9fabc9c22224d303e3ef5f05011437ce0ee6e,ed59e05faa65386de8cfa2dcb83acdbb90a968be,64317bddec20fc83417df77aba7893049f739696">
+<meta name="plan-version" content="15">
+<meta name="plan-impl" content="1.0">
+<meta name="plan-artifacts" content="docs/evidence/reuse-map-residual-closure.md,docs/evidence/sn-integrity-residual-closure/extracted-source-census.md,docs/evidence/sn-integrity-residual-closure/below-threshold-census.md,docs/evidence/sn-integrity-residual-closure/attachment-preview.md,docs/evidence/sn-integrity-residual-closure/parent-release-apply.md,docs/evidence/sn-integrity-residual-closure/field-map-locus-adjudication.md,docs/evidence/sn-integrity-residual-closure/attachment-residue-adjudication.md,docs/evidence/sn-integrity-residual-closure/umbrella-supersede-apply.md,docs/evidence/sn-integrity-residual-closure/attachment-apply.md,docs/evidence/sn-integrity-residual-closure/supersede-successor-recovery.md,docs/evidence/sn-integrity-residual-closure/integrated-verification.md,docs/evidence/sn-integrity-residual-closure/neutral-velocity-disposition.md,docs/evidence/sn-integrity-residual-closure/source-bootstrap-attach.md,tests/standard_names/test_unbound_source_attachment.py,tests/standard_names/test_supersede_successor_scalar.py,docs/evidence/archive/sn-integrity-residual-closure-landed.html">
+<meta name="plan-commits" content="34b90e14a45cffbaa62f3c3f0b537a1a1ba1c781,aa25a253dac632a0dc83691825c46ee6be7aa446,00b96b933c48ef608ca17862fca89da69b6cb52e,98a79710dae6682d68763319269f221869fbbb99,fb9b8bb40bf549ef2bfc5c52eb2077047942a835,6f2de78ce92bf1774cc186b6698c13b94f8a6fa2,c3dd16b4f3d101393a5e7d6b64093058f7ce02d0,478bcc858d7844011f031186b2a28ab1c53865c9,c77144daf5b0cd1ba2209e122a09656b05e0e65e,471e6717483a3edf65030d313cba43fb9934a3d2,1854c6d4d1f73c00f1a7a088942fdf0c7214c19f,c4c9fabc9c22224d303e3ef5f05011437ce0ee6e,ed59e05faa65386de8cfa2dcb83acdbb90a968be,64317bddec20fc83417df77aba7893049f739696,9934cb551675be78c36efdb4f129ec35a7e82026">
 <meta name="plan-modified" content="2026-08-23">
 <!-- reckon plan -->
 <meta name="docs-project" content="imas-codex">
 <meta name="reckon-type" content="plan">
 <meta name="plan-slug" content="sn-integrity-residual-closure">
 <meta name="plan-title" content="Closing the Residual Standard Name Integrity Classes">
-<meta name="plan-status" content="active">
+<meta name="plan-status" content="shipped">
 <meta name="plan-roi" content="high">
 <meta name="plan-effort" content="M">
 <meta name="plan-owner" content="Simon McIntosh">
@@ -137,81 +137,43 @@
   </p>
 </section>
 
-<h2 id="s5">§5 — Standing refusals, and what would lift each</h2>
-<p>
-  These are legitimate closures under the predecessor's own clause. Each is
-  listed with the external condition that would change it, so none is mistaken
-  for forgotten work.
-</p>
-<table>
-  <caption>Recorded refusals and their lifting conditions</caption>
-  <thead><tr><th>Item</th><th>Why it refuses</th><th>What would lift it</th></tr></thead>
-  <tbody>
-    <tr>
-      <td>3 dual-bound sources</td>
-      <td>Each cut would strip its target's last producing source</td>
-      <td>An authoritative replacement producer, or a separately adjudicated identity disposition</td>
-    </tr>
-    <tr>
-      <td><code>field_map/grid/phi</code></td>
-      <td>The closed grammar rejects <code>field_map_grid</code> as a discretization artifact rather than a physics locus</td>
-      <td><strong>An ISN vocabulary decision, not a permanent verdict.</strong> Recorded as permanent on reasoning since withdrawn — grammar refusals are prompts to consider a token, since ISN and the names develop in lockstep</td>
-    </tr>
-    <tr>
-      <td><code>voltage_of_diagnostic_antenna</code></td>
-      <td>Its only producer is stale so the rename fails compare-and-set, and detaching that source would strip its last producer</td>
-      <td>A sanctioned source-less rename transition — an operator capability that would serve exactly one name today</td>
-    </tr>
-    <tr>
-      <td><code>reflector/centre/phi</code></td>
-      <td>DD 4.1.1 makes <code>centre</code> the local-frame origin while <code>sphere_centre</code> is the centre of curvature that already owns the accepted identity</td>
-      <td>A reviewed centre-of-curvature identity of its own</td>
-    </tr>
-    <tr>
-      <td>3 identities below the 0.85 threshold</td>
-      <td>Each had its one earned draw; a blind redraw violates the one-draw rule</td>
-      <td>Steering through <code>sn edit --hint</code>, which needs a producing source first — so this follows §3</td>
-    </tr>
-  </tbody>
-</table>
+<section id="s5" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2>&#167;5 &mdash; Standing refusals, and what would lift each</h2></header>
+  <p class="landed-summary">
+    Two of the three recorded sub-threshold refusals dissolved (both superseded); the
+    third was lifted by an <strong>earned</strong> rename &mdash;
+    <code>..._momentum_convection_velocity</code> accepted through the ordinary quorum at
+    <strong>0.9625</strong> against 0.85 &mdash; then given a source, so it is no longer
+    a refusal at all. The <code>field_map/grid/phi</code> refusal is confirmed a
+    <strong>vocabulary gap, not a verdict</strong>: ISN rc67 carries 181 locus tokens,
+    <strong>0</strong> containing <code>grid</code> or <code>map</code>, blocking 3 DD
+    paths &mdash; verdict <em>propose-token</em>, owned by <code>imas-standard-names</code>.
+    The 3 dual-bound sources, <code>voltage_of_diagnostic_antenna</code> and
+    <code>reflector/centre/phi</code> stand refused unchanged. Full record:
+    <a href="/imas-codex/evidence/archive/sn-integrity-residual-closure-landed#closing-state">&#167;5 landed</a>
+    (commits <code>c3dd16b4</code>, <code>64317bdd</code>, <code>9934cb55</code>).
+  </p>
+</section>
 
-<h2 id="s6">§6 — Upstream and cross-repository follow-through</h2>
-<p>
-  <strong>Data Dictionary.</strong> Of four measured contradictions, the
-  duplicate search reduced the worklist to one: the sensor direction X and Z
-  pair were already fixed by merged upstream PR 242, and the ion-state torque
-  path already exists on develop, making that one ours to remeasure rather than
-  theirs to fix. The genuine defect is filed as
-  <a href="https://github.com/iterorganization/IMAS-Data-Dictionary/issues/294">issue 294</a>
-  with
-  <a href="https://github.com/iterorganization/IMAS-Data-Dictionary/pull/295">PR 295</a>
-  closing it. The PR notes that the species-level
-  <code>waves_coherent_wave_profiles_1d_ion</code> pair carries the identical
-  wording and offers its inclusion; awaiting the maintainer's preference.
-</p>
-<p>
-  <strong>Naming, under the self-describing rule.</strong>
-  <code>mass_density</code> states neither subject nor aggregation in its name
-  while its description claims a charged-species sum, so it is a name question
-  for ordinary review rather than a docs edit. The catalog already carries the
-  three-rung ladder <code>mass_density</code> →
-  <code>plasma_mass_density</code> → <code>total_plasma_mass_density</code>, and
-  ISN carries <code>total</code> as one of two aggregation tokens, so the
-  vocabulary supports the distinction. This generalises: every short spelling
-  whose meaning lives only in prose is now suspect, which is a catalog-wide
-  audit belonging to the documentation-quality programme rather than to binding
-  repair.
-</p>
-<p>
-  <strong>Reckon tooling.</strong> Four tool defects and three documentation gaps
-  were measured while running this work. They belong to the reckon repository,
-  not here, and need their own authorization: cross-backend session reuse
-  silently attempts to resume a foreign thread and fails indistinguishably from
-  quota exhaustion; <code>crew resume</code> returns success when it did not
-  launch; <code>crew complete</code> cannot be amended once a live pointer is
-  gone; and the observe classifier could separate quota exhaustion from a
-  session collision, since only the stream distinguishes them.
-</p>
+<section id="s6" class="section-landed">
+  <header><span class="badge badge-shipped">&#10003; landed 2026-08-23</span>
+    <h2>&#167;6 &mdash; Upstream and cross-repository follow-through</h2></header>
+  <p class="landed-summary">
+    All three strands are confirmed owned elsewhere and are not this plan's to close.
+    <strong>Data Dictionary:</strong> issue 294 and PR 295 are both still
+    <code>OPEN</code> upstream (checked 2026-08-22), which is exactly why
+    <code>fast_ion_charge_state_power_at_inside_flux_surface</code> stays refused rather
+    than encoding the contradiction. <strong>Naming:</strong> the
+    <code>mass_density</code> question generalises to a catalog-wide audit and belongs to
+    the documentation-quality programme &mdash; the below-threshold census sized that
+    class at <strong>75 hint-steerable names</strong>. <strong>Reckon tooling:</strong>
+    the cross-backend session-reuse defect reproduced verbatim during this execution
+    (<code>thread/resume failed: no rollout found</code>), costing one node a relaunch.
+    Full record:
+    <a href="/imas-codex/evidence/archive/sn-integrity-residual-closure-landed#closing-state">&#167;6 landed</a>.
+  </p>
+</section>
 
 <h2 id="s7">§7 — Execution notes learned the expensive way</h2>
 <p>
@@ -285,7 +247,7 @@
     <div class="r-comment-body">n-fieldmapvocab landed - commit c3dd16b4; gate artifact-assertion passed (10 assertions, 0 naming-scan hits); verdict PROPOSE-TOKEN. Measure: installed and graph-active ISN 0.8.0rc67 carries 181 locus tokens of which 0 contain 'grid' and 0 contain 'map'; strict public parsing rejects all three candidate spellings (major_radius_of_field_map_grid, vertical_coordinate_of_field_map_grid, toroidal_coordinate_of_field_map_grid); 3 current DD coordinate paths blocked (b_field_non_axisymmetric/time_slice/field_map/grid/{r,z,phi}) carrying 3 live StandardNameSource rows (2 extracted + 1 composed); phi remains bound only to toroidal_angle_of_measurement_position; nonmutation proof StandardNameChange 7873-&gt;7873 and PRODUCED_NAME 5774-&gt;5774. The load-bearing distinction: coordinate_system is NOT a substitute because it names the frame or basis a quantity is expressed in, whereas the DD declares a 3-D sampled support on which an error-field map is discretized. Recommendation is an entity locus field_map_grid with relation 'of'. Implementing it belongs to the imas-standard-names repository and its governed release/pin/sync rotation, so this row is disposed foreign-owner. The node was resumed once in its own session after a two-failure stop: the expected field_map_grid ParseError IS the measurement, not an error to work around.</div>
 </div>
 <div class="r-comment" data-section="s5" data-id="c-20260823-neutralvel" data-who="reckon-ship" data-when="2026-08-23T00:05:00Z">
-    <div class="r-comment-body">n-neutralvel landed - commit 64317bdd; gate live-evidence passed with 29 assertions; exact run cost USD 0.252514 of a 1.00 cap over 5 LLMCost events with cost_is_exact=true. The deadlock was real: poloidal_neutral_internal_state_momentum_convected_velocity sat at reviewed with reviewer_score_name 0.3625, 0 producing sources and 0 refine attempts, so attachment refused it for not being accepted while hint steering needed a source it did not have. The sanctioned exit is sn edit --rename, which reaches review without a source. Result: successor poloidal_neutral_internal_state_momentum_convection_velocity ACCEPTED through the ordinary review pool at reviewer_score_name=0.9625 against the 0.85 threshold, blind seats 0.9375 and 0.9875, resolution=quorum_consensus with null shortfall, docs accepted at 0.875; predecessor superseded; live unsourced count 6 before and after with one-for-one membership change. Nothing was direct-accepted - the replacement was graded independently and could have been rejected. The semantic correction is convected -> convection: the quantity is the velocity OF the convective transport, not a velocity that has been convected. The successor being accepted and valid reopens the signed attachment route its predecessor was refused, folded as n-sourcebootstrap.</div>
+    <div class="r-comment-body">n-neutralvel landed - commit 64317bdd; gate live-evidence passed with 29 assertions; exact run cost USD 0.252514 of a 1.00 cap over 5 LLMCost events with cost_is_exact=true. The deadlock was real: poloidal_neutral_internal_state_momentum_convected_velocity sat at reviewed with reviewer_score_name 0.3625, 0 producing sources and 0 refine attempts, so attachment refused it for not being accepted while hint steering needed a source it did not have. The sanctioned exit is sn edit --rename, which reaches review without a source. Result: successor poloidal_neutral_internal_state_momentum_convection_velocity ACCEPTED through the ordinary review pool at reviewer_score_name=0.9625 against the 0.85 threshold, blind seats 0.9375 and 0.9875, resolution=quorum_consensus with null shortfall, docs accepted at 0.875; predecessor superseded; live unsourced count 6 before and after with one-for-one membership change. Nothing was direct-accepted - the replacement was graded independently and could have been rejected. The semantic correction is convected -&gt; convection: the quantity is the velocity OF the convective transport, not a velocity that has been convected. The successor being accepted and valid reopens the signed attachment route its predecessor was refused, folded as n-sourcebootstrap.</div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260822-attachprev" data-who="reckon-ship" data-when="2026-08-22T21:12:00Z">
     <div class="r-comment-body">n-attachprev landed - commit 98a79710; gate evidence-assertion passed; measure 12/12 in-invocation cohort rows partitioned 6 attach + 5 adjudicate-collision + 1 no-candidate, governed rollback-only preview on the six attach rows returning outcome=would_apply with requested=6 admitted=4 refused=2 would_change=4; authority SHA-256 fb3f33cc, preview manifest 0a8c5d02, DD pinned 4.1.1; nonmutation proof StandardNameChange 7873-&gt;7873 and PRODUCED_NAME 5774-&gt;5774 measured before, inside the open transaction and after rollback, delta 0. Artifact docs/evidence/sn-integrity-residual-closure/attachment-preview.md. Deriving the cohort in-invocation caught a real omission: toroidal_line_averaged_plasma_velocity became live after the reverse-search snapshot and would have been dropped by a carried cohort. Two refusals: neutron_flux_due_to_fusion because the retarget would strip the prior target's last producing source (the Hz vs s^-1 pairing is NOT the obstacle - the dimensional adjudicator accepts them), and poloidal_neutral_internal_state_momentum_convected_velocity because name_stage is reviewed rather than accepted, which closes a loop with section 5's one remaining below-threshold refusal. The preview used guard_source_pairings under a rollback-only transaction adapter, NOT apply_signed_manifest, so the signed apply still depends on the closed unbound ordinary-source program being added.</div>
@@ -299,7 +261,21 @@
 <div class="r-comment" data-section="s3" data-id="c-20260822-attachapply" data-who="reckon-ship" data-when="2026-08-22T21:30:00Z">
     <div class="r-comment-body">n-attachapply landed - commit 471e6717; gate signed-apply passed; measure preview outcome=would_apply authority_rows=3 admitted=3 refused=0, apply outcome=applied changed=3 receipt_rows=3 under manifest 08b5da22 with the exact run-id + manifest + operation receipt query returning 3 rows, replay already_applied with changed=0 and persistent_writes=0, every target reread holding one PRODUCED_NAME plus one backing HAS_STANDARD_NAME plus the attached scalar plus one source_paths occurrence; StandardNameChange 7875-&gt;7878, PRODUCED_NAME 5774-&gt;5777, GENUINE ORPHANS 12-&gt;9. Attached: capacitance_of_ion_cyclotron_heating_antenna &lt;- dd:ic_antennas/antenna/module/matching_element/capacitance; toroidal_ion_charge_state_torque_density &lt;- dd:plasma_sources/source/ggd/ion/state/momentum/phi; toroidal_line_averaged_plasma_velocity &lt;- dd:spectrometer_x_ray_crystal/channel/profiles_line_integrated/velocity_tor. Deriving the cohort in-invocation changed the answer: the earlier preview admitted 4, the applying invocation admitted 3, because parallel_neutral_momentum_diffusion_coefficient's StandardNameSource only ever existed inside the rolled-back preview transaction. A carried cohort would have tried to attach a source that does not exist.</div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-20260823-sourcebootstrap" data-who="reckon-ship" data-when="2026-08-23T00:30:00Z">
+    <div class="r-comment-body">n-sourcebootstrap landed - commit 9934cb55; gate signed-apply passed; measure 2/2 DD 4.1.1 paths materialized through ordinary extraction with 0 refusals, signed preview outcome=would_apply authority_rows=2 admitted=2 refused=0, apply outcome=applied changed=2 receipt_rows=2 under manifest 19bcb8d9 with the exact run-id+operation+manifest receipt query returning 2 rows, same-hash replay already_applied changed=0 persistent_writes=0 with global counters static at 7900/5779/27909; both targets accepted and valid holding exactly one PRODUCED_NAME, one HAS_STANDARD_NAME projection, one source_paths occurrence, the attached source scalar and a pinned DD snapshot; LIVE UNSOURCED 6->4 with the difference equal to rows applied; LLM cost USD 0.000000. Bound: parallel_neutral_momentum_diffusion_coefficient <- plasma_transport/model/ggd/neutral/momentum/d_parallel; poloidal_neutral_internal_state_momentum_convection_velocity <- plasma_transport/model/profiles_1d/neutral/state/momentum/v_pol. The invocation was terminated after its commit by a silent network poll and proved completion from exact receipts plus retained authority hashes and a write-free replay rather than repeating the mutation.</div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-20260822-verify" data-who="reckon-ship" data-when="2026-08-22T22:00:00Z">
     <div class="r-comment-body">n-verify landed - commit ed59e05f; gate integrated-verification PASSED at tested HEAD cd6b6e26. Measure: standard-names plus units suite 6922 collected = 6615 passed, 8 skipped, 299 deselected, 0 failed and 0 errors; the three suites this closure added pass individually at 3/3 parent-release, 8/8 unbound-source-attachment and 1/1 supersede-successor with 0 skipped; retained focused checks 3 passed (field naming) and 7 passed (DD resolution window); forced build-models regeneration plus a fresh import emitted 0 field-shadow warnings; 4/4 committed authority SHA-256 digests intact; ruff check --no-cache 0 findings repository-wide; ruff format --check --no-cache 1184 files already formatted and 0 needing reformatting - the single gate the predecessor's verification failed on. 13/13 evidence assertions passed; graph contracts ran against a disposable Neo4j that was stopped cleanly; forced regeneration produced no tracked changes. Artifact docs/evidence/sn-integrity-residual-closure/integrated-verification.md.</div>
 </div>
+<div class="r-comment" data-section="scope" data-id="c-20260823-drainledger" data-who="reckon-ship" data-when="2026-08-23T00:35:00Z">
+    <div class="r-comment-body">DRAIN LEDGER - sn-integrity-residual-closure @ 2026-08-23T00:35:00Z. Rows: (1) finish flux-surface umbrella retirement -> folded -> n-release + n-supersede2 + n-supersedescalar + n-supersederecover. (2) re-run integrated verification -> folded -> n-verify. (3) attach the reverse-search candidates -> folded -> n-attachprev + n-attachprog + n-attachapply + n-sourcebootstrap. (4) census the extracted sources with no live target -> folded -> n-extcensus. (5) below-threshold identities -> folded -> n-threshcensus + n-neutralvel. (6) field_map/grid/phi grammar refusal -> folded (adjudicated) -> n-fieldmapvocab; the resulting propose-token implementation -> foreign-owner -> imas-standard-names locus registry and its governed release/pin/sync rotation. (7) attachment residue dispositions -> folded -> n-residueadj. (8) fast_ion_charge_state_power_at_inside_flux_surface -> foreign-owner -> IMAS-Data-Dictionary issue 294 / PR 295, both verified OPEN upstream 2026-08-22. (9) neutron_flux_due_to_fusion -> authority-required -> an authoritative replacement producer or a separately adjudicated disposition for the exhausted predecessor whose last producer would be stripped. (10) tendency_of_total_thermal_plasma_internal_energy -> authority-required -> a reviewed distinct unowned path, or an adjudicated disposition for the quarantined incumbent plasma_internal_energy that holds its only unit-agreeing path. (11) 3 dual-bound semantic sources -> authority-required -> each cut would strip its target's last producing source. (12) voltage_of_diagnostic_antenna -> authority-required -> a sanctioned source-less rename transition. (13) reflector/centre/phi -> authority-required -> a reviewed centre-of-curvature identity. (14) toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions -> no disposition needed, permanently retired on physics. (15) mass_density and the 75 hint-steerable below-threshold names -> foreign-owner -> sn-quality-parity, tracked as f-snirc-quality. (16) 510 superseded names with no successor recorded anywhere (1626 of 1639 null superseded_by, of which 1116 retain REFINED_FROM lineage) -> foreign-owner -> a successor plan; recovering them is archaeology across every historical supersede and widens rather than narrows with each layer. (17) four reckon tool defects and three documentation gaps, cross-backend session reuse reproduced verbatim this session -> foreign-owner -> the reckon repository. --- rows: 17, foldable-remaining: 0.</div>
+</div>
+</section>
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-snirc-quality" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-23" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Catalog-wide naming and documentation quality</h4>
+    <div class="r-fu-body">This closure measured the class while resolving its own: 75 live names hold a producing source and score below the 0.85 review threshold, so sn edit --hint steering is available to every one of them, and 14 more sit accepted with a low score where hint mode refuses. Separately, mass_density states neither subject nor aggregation in its name while its description claims a charged-species sum, and the catalog already carries the three-rung ladder mass_density to plasma_mass_density to total_plasma_mass_density. Both belong to the documentation-quality programme rather than to binding integrity repair. Evidence: docs/evidence/sn-integrity-residual-closure/below-threshold-census.md.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
+    </article>
 </section>
