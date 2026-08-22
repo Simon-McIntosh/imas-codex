@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T23:13:40",
+  "updated": "2026-08-22T23:18:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -16804,9 +16804,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260822T210631596956-n-supersede2",
+        "plan": "sn-integrity-residual-closure",
+        "section": "\u00a71",
+        "node": "n-supersede2",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-umbrellaretire",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-22T21:06:34Z",
+        "completed_at": "2026-08-22T21:17:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 648,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 648,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "c4f00f4a26cb9186c31e6b0102ac5cb7db17268f",
+        "commits": [
+          "c77144daf5b0cd1ba2209e122a09656b05e0e65e"
+        ],
+        "changed_lines": {
+          "added": 138,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Partial transition committed: preview 1 admitted/0 refused, apply outcome=applied changed=1 receipt_rows=1 persistent_writes=2 under manifest e8b3265a, replay already_applied with persistent_writes=0, umbrella pre-apply live child count 0, target producers 21 before and after. Unmet: area_of_flux_surface.superseded_by is null - the generic supersede branch writes lifecycle state but never the canonical successor scalar or mirror. Coordinator measurement shows this is systemic and pre-existing: 1626 of 1639 superseded names carry a null superseded_by (1116 with REFINED_FROM lineage, 510 with no successor edge), so the done-when demanded a measure the machinery does not emit.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260822T210631596956-n-supersede2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a029bf-b257-7cb0-9af8-0f1c9eb41f94",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7183360,
+            "cached_input_tokens_cumulative": 7183360,
+            "input_tokens": 7397390,
+            "input_tokens_cumulative": 7397390,
+            "output_tokens": 25397,
+            "output_tokens_cumulative": 25397,
+            "reasoning_output_tokens": 7928,
+            "reasoning_output_tokens_cumulative": 7928
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 452
+    "_version": 453
   }
 }

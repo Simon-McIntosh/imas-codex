@@ -320,6 +320,44 @@
     collision set resembles it. Full record:
     <a href="/imas-codex/evidence/sn-integrity-residual-closure/attachment-residue-adjudication">attachment-residue-adjudication.md</a>.</p>
   </section>
+
+  <section id="supersede-scalar">
+    <h2>The supersede operator never writes the successor it supersedes into</h2>
+    <p><strong>Partial transition committed 2026-08-22</strong> &mdash; commit
+    <code>c77144da</code>, node <code>n-supersede2</code>, gate <strong>failed</strong> on
+    exactly one measure. Everything else passed: preview 1 admitted / 0 refused, apply
+    <code>applied</code> changed 1 receipt_rows 1 persistent_writes 2 under manifest
+    <code>e8b3265a&hellip;</code>, same-hash replay <code>already_applied</code> with
+    <code>persistent_writes</code> 0, umbrella pre-apply live child count 0, and the
+    canonical target holding <strong>21 producers before and 21 after</strong>.</p>
+    <p><code>area_of_flux_surface</code> now reads
+    <code>name_stage=superseded</code>, <code>status=superseded</code> &mdash; and
+    <code>superseded_by=null</code>. The generic supersede branch writes lifecycle state
+    but never the canonical successor scalar, and its receipt writer leaves
+    <code>to_name</code> equal to the predecessor.</p>
+    <p><strong>The worker was right to stop, and the defect is not its own.</strong> A
+    coordinator measurement puts it in context:</p>
+    <table>
+      <caption>Superseded names by successor record</caption>
+      <thead><tr><th>Population</th><th>Rows</th><th>Reading</th></tr></thead>
+      <tbody>
+        <tr><td>All <code>name_stage=superseded</code></td><td>1,639</td><td>&mdash;</td></tr>
+        <tr><td><code>superseded_by</code> populated</td><td><strong>13</strong></td><td>the exception, not the rule</td></tr>
+        <tr><td><code>superseded_by</code> null, lineage in <code>REFINED_FROM</code></td><td>1,116</td><td>a mirror gap &mdash; the edge still carries the successor</td></tr>
+        <tr><td><code>superseded_by</code> null, <strong>no successor edge</strong></td><td><strong>510</strong></td><td>no successor recorded anywhere</td></tr>
+      </tbody>
+    </table>
+    <p>The distinction that makes this matter here: a <em>refine</em> supersede leaves a
+    <code>REFINED_FROM</code> edge, so the scalar is a redundant mirror. A
+    <em>supersede-into-a-different-identity</em> leaves no such edge, so the scalar is the
+    <strong>only</strong> place the successor is recorded &mdash; and it is exactly the
+    operation this plan needs. The umbrella has now joined the 510.</p>
+    <p>This is also a plain instance of the plan's own &#167;7 warning &mdash; check that
+    the machinery can produce a measure before making it a gate. The done-when demanded a
+    scalar no code path emits, which is a coordinator authoring error rather than a worker
+    failure. Full record:
+    <a href="/imas-codex/evidence/sn-integrity-residual-closure/umbrella-supersede-apply">umbrella-supersede-apply.md</a>.</p>
+  </section>
 </main>
 </body>
 </html>
