@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.9">
+  <meta name="plan-impl" content="0.92">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,9 +23,9 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="40">
-<meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44,2b607c58,7a9308ac,4c078678,723c90a9,7def7d10,c6cc10ac,5c1b14ab,4e4e8d26,08701281">
-<meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/doc_links.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,tests/standard_names/test_doc_links.py,docs/figures/sn-quality-parity/claim-disposition.svg">
+<meta name="plan-version" content="42">
+<meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44,2b607c58,7a9308ac,4c078678,723c90a9,7def7d10,c6cc10ac,5c1b14ab,4e4e8d26,08701281,888dc3e0,523a369e">
+<meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/doc_links.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,tests/standard_names/test_doc_links.py,docs/figures/sn-quality-parity/claim-disposition.svg,imas_codex/standard_names/AGENTS.md,~/.local/share/imas-codex/receipts/standard-names/snqp-physics-gates-reuse-map.md">
 </head>
 <body>
   <main class="plan-doc">
@@ -191,9 +191,36 @@
       <li><strong><code>sign_convention</code> made conditional on the COCOS transformation
       type.</strong> The gate checks canonical sentence form but cannot tell whether a sign
       convention was <em>required</em>, which is why absence had to be treated as permissible.
-      <code>HAS_COCOS</code> supplies the transformation type authoritatively — the same edge whose
-      relationship name was fixed earlier in this plan. Deliverable: required when the quantity is
-      COCOS-dependent, forbidden when it is not, with tests for both directions.</li>
+      <strong>Corrected 2026-08-23 by the prior-art scout:</strong> <code>HAS_COCOS</code> does
+      <em>not</em> supply the transformation type. That edge returns the convention node and its
+      parameters; the transformation class lives on <code>IMASNode.cocos_transformation_type</code>
+      and is copied to <code>StandardName.cocos_transformation_type</code>
+      (<code>sources/dd.py:359-385</code>, <code>workers.py:8499-8517</code>,
+      <code>schemas/standard_name.yaml:1098-1115</code>). The earlier wording conflated the edge
+      whose <em>name</em> was fixed in §2 with the property that answers this question, and an
+      implementer trusting it would have wired the gate to an edge that cannot answer it.
+      Deliverable unchanged: required when the quantity is COCOS-dependent, forbidden when it is
+      not, with tests for both directions — read from the property, not the edge.</li>
+      <li><strong>A third gate state is a prerequisite for both, not an extra.</strong> The scout's
+      sharpest finding: a boolean vector cannot distinguish <em>missing authority</em> from
+      <em>contradiction</em>. A gate returning <code>False</code> for "no declared unit to check
+      against" and <code>False</code> for "the stated relation contradicts its declared unit" has
+      merged an absence with a defect, and every mean computed over it becomes uninterpretable —
+      the same class of error as the lexical gates the <code>gate-role</code> decision deleted, and
+      it would be built in from the start. So <code>not_evaluable</code> lands with structured
+      physics context threaded through <code>DocumentationGateScore</code>,
+      <code>score_documentation</code>, holdout row scoring and aggregation. Blast radius measured:
+      <strong>14</strong> call sites, 2 runtime/evaluator and 12 tests.</li>
+      <li><strong>The comparator is a composition, not new machinery.</strong> No
+      LaTeX-relation-versus-declared-unit capability exists today, but nine pieces of one do, and
+      the scout named the order: <code>resolve_dd_unit</code> →
+      <code>normalize_unit_symbol</code>/<code>unit_registry</code> →
+      <code>ResolvedDDContext.unit</code> → <code>canonical_or_none</code> →
+      <code>_unit_dimensionality</code>/<code>_unit_dimensions</code> →
+      <code>_dimension_container</code> algebra → <code>_dimensions_overlap</code>. Only the
+      relation parser and the authoritative symbol-to-unit binding are genuinely new. Full map with
+      28 cited candidates (11 fit, 14 partial, 3 fail):
+      <code>~/.local/share/imas-codex/receipts/standard-names/snqp-physics-gates-reuse-map.md</code>.</li>
     </ul>
     <p><strong>Why these two and not a rewrite of the deleted four:</strong> <code>scope</code>,
     <code>physical_meaning</code> and <code>exclusions</code> have no authoritative counterpart in
@@ -452,6 +479,12 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260823-threshold-inside-noise" data-who="reckon-ship" data-when="2026-08-23T11:35:00+00:00">
     <div class="r-comment-body"><p><strong>The refresh condition cannot be evaluated as written — the 0.800 one-run scope threshold sits inside the measurement's noise.</strong> This is the finding that closes the session's open work, and it is a negative result about the gate rather than about the documentation.</p><p><strong>Sequence.</strong> Removing the length maximum lifted scope 0.660→0.774 for free (impl-capmeasure). Strengthening the scope obligation took it to <strong>0.792</strong> — <strong>0.0075 short</strong> of the curated 0.800, one passing row away, <code>catalog_threshold_reached=false</code> (impl-scopemeasure, commit <code>c6cc10ac</code>). The obvious move was another prompt iteration. Two details argued against it: scope's +1 row was <em>6 gained and 5 lost</em>, and <code>defining_equation</code> held at exactly its prior rate while churning 2 and 2.</p><p><strong>So the unchanged configuration was re-run on the identical sample</strong> — same model, zero diff in generation inputs, all 734 injected-candidate counts identical, evaluator verified as reproducing all 53 prior row vectors. <strong>Scope moved 0.792 → 0.868, a swing of 0.0755 — exactly ten times the shortfall</strong> — and the repeat landed <strong>0.068 above</strong> the threshold. <strong>14 of 53 rows flipped direction between two identical runs</strong> (9 fail→pass, 5 pass→fail). Nine-gate mean 0.9644→0.9748.</p><p>So the shortfall was never a deficit in the prose. A single-run 0.800 gate is neither evidence the documentation is short nor evidence it is adequate. Another prompt iteration would have been a coin flip dressed as engineering, and a lucky landing above 0.800 would have opened a paid cohort rewrite on a meaningless number. Qualification kept: two runs measure an observed difference, not a confidence interval — this bounds the noise at <em>at least</em> 0.075.</p><p><strong>The <code>west-refresh-sequencing</code> condition therefore needs re-specifying before it can gate anything</strong>, and that is a lead decision, surfaced rather than taken. The three candidates: aggregate over repeated runs, require a confidence bound, or replace the LLM-judged scope gate with a deterministic semantic evaluator. Until then <code>f-west-docs-refresh</code> stays closed — not because quality is insufficient, but because the trigger cannot be read.</p><p><strong>Where quality actually stands, nine gates, production-faithful, off-holdout:</strong> mean <strong>0.9748</strong> against the catalog reference 0.8876. Eight of nine gates at or above the curated standard; scope oscillates around it. Cumulative measured spend this session <strong>USD 1.72</strong> of a USD 200 ceiling.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260823-reusemap-corrects-plan" data-who="reckon-ship" data-when="2026-08-23T15:45:00+00:00">
+    <div class="r-comment-body"><p><strong>n-gatereusemap landed — gate reuse-map-validated PASSED; no commit (read-only investigation).</strong> Measure: 28 cited candidates, every row carrying a file:line citation and exactly one verdict — 11 fit, 14 partial, 3 fail; the embedded <code>score_documentation</code> census reproduces its 56-line transcript with no diff; call sites exactly <strong>14</strong>, split 2 runtime/evaluator and 12 tests. Artifact: <code>~/.local/share/imas-codex/receipts/standard-names/snqp-physics-gates-reuse-map.md</code>.</p><p><strong>It corrected this section before anyone implemented it, which is the whole reason the scout goes first.</strong> §5 asserted that <code>HAS_COCOS</code> supplies the transformation type authoritatively. It does not: that edge returns the convention node and its parameters, while the transformation class lives on <code>IMASNode.cocos_transformation_type</code> and is copied to <code>StandardName.cocos_transformation_type</code>. The wording conflated the edge whose <em>name</em> was fixed in §2 with the property that answers the question — a plausible-sounding error that would have sent an implementer to an edge that cannot answer it. Section text corrected in place with the scout's three citations.</p><p><strong>Two findings changed the shape of the work rather than confirming it.</strong> A tri-state gate is now a prerequisite rather than a refinement: a boolean vector cannot separate <em>missing authority</em> from <em>contradiction</em>, so a gate that returns <code>False</code> both for "no declared unit to check against" and for "the relation contradicts its declared unit" would bake in the same uninterpretability the <code>gate-role</code> decision just deleted four lexical gates for. And the dimensional comparator is a composition of nine existing symbols in a named order, not new machinery — only the relation parser and the symbol-to-unit binding are new. Both are folded into §5 as stated deliverables.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-20260823-keying-instruction" data-who="reckon-ship" data-when="2026-08-23T15:46:00+00:00">
+    <div class="r-comment-body"><p><strong>n-keyingdoc landed — commit <code>523a369e</code>, merged <code>9468164a</code>; gate schema-tests-green PASSED.</strong> Measure: schema-focused selection over <code>tests/standard_names/</code> exits 0 with 0 failures; the new section greps 5 <code>StandardName</code> references against a required 3; live census <strong>4,525 nodes, 4,525 carrying <code>id</code>, 0 carrying <code>name</code></strong>. Artifact: <code>imas_codex/standard_names/AGENTS.md</code>, 30 lines.</p><p><strong>The recurring defect this closes is a silent one, and it cost two sessions today.</strong> No class in the standard-names schema declares a <code>name</code> attribute — <code>StandardName.id</code> <em>is</em> the snake_case identity (<code>schemas/standard_name.yaml:868-892</code>), and <code>StandardNameSource.id</code> is <code>source_type:source_id</code> as <code>dd:&lt;path&gt;</code> or <code>signals:&lt;facility&gt;:&lt;signal-id&gt;</code> (<code>2795-2823</code>). So <code>MATCH (sn:StandardName {name: $x})</code> is valid Cypher that returns zero rows without erroring, because a missing property evaluates to null and a non-true predicate drops the row. A peer session joining the refine cohort on <code>s.name</code> got zero rows and nearly reported it as a clean no-overlap result; the real overlap was 20 identities. The section states both keys with citations, puts the correct and silent-null joins side by side, and carries a coverage query that fails closed — so a zero-row join has to be shown to be real before it is believed.</p></div>
 </div>
 </section>
 </main>

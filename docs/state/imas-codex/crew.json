@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T17:20:14",
+  "updated": "2026-08-23T18:12:09",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -52,6 +52,13 @@
         "role": "test",
         "session_id": "01a02da8-07c8-77c2-b63e-2417a7aed6fa",
         "created": "2026-08-22"
+      },
+      {
+        "id": "doc-graphkeys",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "doc-opchar",
@@ -276,6 +283,13 @@
         "role": "implement",
         "session_id": "01a02469-90ac-74a1-a26d-73ae362946fb",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-dimgate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-doclinks",
@@ -579,6 +593,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-predicatediff",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-pricerun",
         "harness": "codex",
         "role": "implement",
@@ -716,6 +737,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02e53-abde-70f0-9144-04a1d66cb959",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-signcond",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-23"
       },
       {
@@ -887,6 +915,13 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-westdocs",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-westreprice",
         "harness": "codex",
         "role": "implement",
@@ -940,6 +975,13 @@
         "harness": "codex",
         "role": "investigate",
         "session_id": "01a02d54-890d-7f20-867c-5c789ef72b04",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "inv-physicsgates",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a02f38-36b0-7452-8fab-dabd6b2a72fc",
         "created": "2026-08-23"
       },
       {
@@ -1010,6 +1052,13 @@
         "harness": "codex",
         "role": "investigate",
         "session_id": "01a02de3-4d1c-7c23-a632-3be583bb1c45",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "inv-westexclude",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a02f3b-85dc-7513-bf6d-90cb321a7511",
         "created": "2026-08-23"
       },
       {
@@ -21602,9 +21651,131 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T153403919629-n-keyingdoc",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-keyingdoc",
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-graphkeys",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:34:08Z",
+        "completed_at": "2026-08-23T15:40:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 401,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 401,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "24bc8f44faf74a3275c71b28ffc441dc08d96957",
+        "commits": [
+          "523a369e569d82141cea7915d3d5ca1b125e11e7"
+        ],
+        "changed_lines": {
+          "added": 30,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T153403919629-n-keyingdoc/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f41-fed1-74f2-b206-ee40b0538b8d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3488768,
+            "cached_input_tokens_cumulative": 3488768,
+            "input_tokens": 3626717,
+            "input_tokens_cumulative": 3626717,
+            "output_tokens": 13518,
+            "output_tokens_cumulative": 13518,
+            "reasoning_output_tokens": 6850,
+            "reasoning_output_tokens_cumulative": 6850
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T152323641214-n-gatereusemap",
+        "plan": "sn-quality-parity",
+        "section": "\u00a75",
+        "node": "n-gatereusemap",
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-physicsgates",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-23T15:23:27Z",
+        "completed_at": "2026-08-23T15:38:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 902,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 902,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "53e6e9ba85ea38269d8ea6cec166ee7a231322bd",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152323641214-n-gatereusemap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f38-36b0-7452-8fab-dabd6b2a72fc",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3910144,
+            "cached_input_tokens_cumulative": 3910144,
+            "input_tokens": 4240533,
+            "input_tokens_cumulative": 4240533,
+            "output_tokens": 28467,
+            "output_tokens_cumulative": 28467,
+            "reasoning_output_tokens": 9003,
+            "reasoning_output_tokens_cumulative": 9003
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 601
+    "_version": 612
   }
 }
