@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T14:11:15",
+  "updated": "2026-08-23T15:27:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -145,6 +145,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-boundband",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-bulksample",
         "harness": "codex",
         "role": "implement",
@@ -268,6 +275,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02e57-b999-7951-ad27-7de2b80b2a5d",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-drain",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-23"
       },
       {
@@ -21192,6 +21206,6 @@
       }
     ],
     "holds": [],
-    "_version": 588
+    "_version": 590
   }
 }
