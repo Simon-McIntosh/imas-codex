@@ -1996,6 +1996,18 @@ classes:
         inlined: false
         annotations:
           relationship_type: HAS_REVIEW
+      structural_authorities:
+        description: >-
+          Durable child-set authorities supporting an unscored structural
+          acceptance. Direction:
+          (StandardName)-[:HAS_STRUCTURAL_AUTHORITY]->(StructuralNameAuthority).
+          A reviewer-model marker is descriptive provenance and never replaces
+          this signed authority relationship.
+        multivalued: true
+        range: StructuralNameAuthority
+        inlined: false
+        annotations:
+          relationship_type: HAS_STRUCTURAL_AUTHORITY
       docs_revisions:
         description: >-
           Linked DocsRevision snapshot nodes in the docs refinement chain.
@@ -3961,6 +3973,7 @@ classes:
       signatures:
         range: RepairAuthorityDigest
         multivalued: true
+        required: true
       participants:
         range: RepairParticipant
         multivalued: true
@@ -3979,6 +3992,52 @@ classes:
       orphan_policy:
         range: RepairOrphanPolicy
         required: true
+
+  StructuralNameAuthority:
+    description: >-
+      Durable signed authority for accepting one derived StandardName without a
+      name-axis reviewer score. The inherited repair-authority row supplies the
+      canonical signatures, participant closure, selection, mutation, guard,
+      and orphan-policy machinery. This specialization records the accepted
+      name and the exact ordered child rows whose reviewed identities entail it.
+    class_uri: sn:StructuralNameAuthority
+    is_a: RepairAuthorityRow
+    attributes:
+      accepted_name_id:
+        required: true
+        description: Exact StandardName identity accepted under this authority.
+      child_ids:
+        multivalued: true
+        list_elements_ordered: true
+        required: true
+        description: >-
+          Exact ordered StandardName child identities used to derive the
+          accepted parent; order is part of the signed payload.
+      children:
+        multivalued: true
+        range: StandardName
+        inlined: false
+        required: true
+        description: >-
+          Child StandardName rows named by child_ids. Direction:
+          (StructuralNameAuthority)-[:ENTAILED_FROM_CHILD]->(StandardName).
+        annotations:
+          relationship_type: ENTAILED_FROM_CHILD
+      entailment_mechanism:
+        required: true
+        description: >-
+          Registered deterministic grammar-peel implementation that derived
+          the accepted name from the signed child set.
+      created_at:
+        range: datetime
+        required: true
+        description: Timestamp when the authority was signed and persisted.
+      code_identity:
+        required: true
+        description: Immutable code identity for the entailment implementation.
+      schema_identity:
+        required: true
+        description: Immutable schema identity used to validate the authority.
 
   RepairAuthorityArtifact:
     description: >-
