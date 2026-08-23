@@ -8,8 +8,8 @@ or a priority order. Every applicable content element is mandatory on its own,
 and satisfying one never compensates for omitting another. In particular,
 symbol definitions, supported scope, supported exclusions or distinctions, and
 supported essential relationships are four separate pass/fail obligations. If
-space is tight, compress the prose or combine compatible obligations in one
-paragraph; never remove one obligation to make room for another.
+several obligations are closely related, combine them in one clear paragraph;
+never remove an obligation to shorten the documentation.
 
 1. **Definition paragraph** — 1-3 sentences stating what the quantity *is* in physics terms. No equations. No diagnostic context. Just the concept.
 

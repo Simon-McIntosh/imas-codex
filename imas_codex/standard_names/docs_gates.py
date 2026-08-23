@@ -8,7 +8,6 @@ from dataclasses import dataclass
 from imas_codex.standard_names.audits import latex_def_check
 
 MIN_DOCUMENTATION_WORDS = 40
-MAX_DOCUMENTATION_WORDS = 160
 
 NORMATIVE_GATE_NAMES: tuple[str, ...] = (
     "physical_meaning",
@@ -24,7 +23,6 @@ DOCUMENTATION_GATE_NAMES: tuple[str, ...] = (
     *NORMATIVE_GATE_NAMES,
     "link_hygiene",
     "minimum_word_count",
-    "maximum_word_count",
 )
 
 _DISPLAY_MATH_RE = re.compile(r"\$\$(.+?)\$\$", re.DOTALL)
@@ -167,7 +165,6 @@ def score_documentation(documentation: str) -> DocumentationGateScore:
         "sign_convention": _valid_sign_convention(text),
         "link_hygiene": _links_are_hygienic(text),
         "minimum_word_count": words >= MIN_DOCUMENTATION_WORDS,
-        "maximum_word_count": words <= MAX_DOCUMENTATION_WORDS,
     }
     assert tuple(gates) == DOCUMENTATION_GATE_NAMES
     return DocumentationGateScore(
