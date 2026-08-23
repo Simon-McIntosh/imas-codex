@@ -77,6 +77,23 @@ def test_accept_and_authority_are_one_guarded_graph_statement() -> None:
     assert "reviewer_score_name" not in params["parent_updates"]
 
 
+def test_authority_write_result_is_unique_by_authority_not_source_row() -> None:
+    record = graph_ops._structural_authority_record(
+        _snapshot("parent", "child-a"), accepting=False
+    )
+    gc = MagicMock()
+    duplicate_receipt = {
+        "name_stage": "accepted",
+        "authority_id": record["id"],
+    }
+    gc.query.return_value = [duplicate_receipt, duplicate_receipt]
+
+    assert graph_ops._persist_structural_authority(gc, record)
+
+    cypher = gc.query.call_args.args[0]
+    assert "RETURN DISTINCT parent.name_stage" in cypher
+
+
 def test_backfill_names_every_write_and_second_run_writes_nothing(
     tmp_path: Path,
 ) -> None:

@@ -25305,7 +25305,8 @@ def _persist_structural_authority(
         FOREACH (_ IN CASE WHEN $description IS NULL OR source IS NULL
                            THEN [] ELSE [1] END |
           SET source.description = $description)
-        RETURN parent.name_stage AS name_stage, authority.id AS authority_id
+        RETURN DISTINCT parent.name_stage AS name_stage,
+                        authority.id AS authority_id
         """,
         parent_id=record["accepted_name_id"],
         child_ids=record["child_ids"],
@@ -25345,7 +25346,8 @@ def _persist_structural_authority(
         guards=record["guards"],
         description=(parent_updates or {}).get("description"),
     )
-    return len(rows) == 1 and rows[0].get("authority_id") == record["id"]
+    returned_authority_ids = {row.get("authority_id") for row in rows}
+    return returned_authority_ids == {record["id"]}
 
 
 @retry_on_deadlock()
