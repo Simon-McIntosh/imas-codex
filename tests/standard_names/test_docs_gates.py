@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import inspect
 import json
 import re
 from pathlib import Path
 
-from imas_codex.standard_names import docs_gates
 from imas_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
     MIN_DOCUMENTATION_WORDS,
@@ -31,7 +29,7 @@ def test_catalog_documentation_passes_every_content_gate() -> None:
     score = score_documentation(_catalog_documentation("poloidal_magnetic_flux"))
 
     assert score.gate_vector == dict.fromkeys(DOCUMENTATION_GATE_NAMES, True)
-    assert score.passed_count == score.total_count == 9
+    assert score.passed_count == score.total_count == 6
     assert score.word_count >= MIN_DOCUMENTATION_WORDS
 
 
@@ -39,20 +37,32 @@ def test_stub_fails_required_content() -> None:
     score = score_documentation("A plasma quantity.")
 
     for gate in (
-        "physical_meaning",
         "defining_equation",
-        "scope",
-        "exclusions_or_distinctions",
-        "relationship_link_or_phrase_witness",
+        "relationship_link",
         "minimum_word_count",
     ):
         assert score.gate_vector[gate] is False
     assert score.passed_count < score.total_count
 
 
-def test_gate_vocabulary_matches_normative_policy() -> None:
-    assert len(NORMATIVE_GATE_NAMES) == 7
-    assert set(NORMATIVE_GATE_NAMES) < set(DOCUMENTATION_GATE_NAMES)
+def test_documentation_gate_names_are_exact() -> None:
+    assert DOCUMENTATION_GATE_NAMES == (
+        "defining_equation",
+        "symbol_definitions",
+        "relationship_link",
+        "sign_convention",
+        "link_hygiene",
+        "minimum_word_count",
+    )
+    assert NORMATIVE_GATE_NAMES == DOCUMENTATION_GATE_NAMES[:4]
+
+
+def test_keyword_presence_gates_are_absent() -> None:
+    assert not {
+        "physical_meaning",
+        "scope",
+        "exclusions_or_distinctions",
+    } & set(DOCUMENTATION_GATE_NAMES)
     assert not {
         "typical_values",
         "measurement_methods",
@@ -64,30 +74,15 @@ def test_documentation_gate_list_has_no_maximum_word_count() -> None:
     assert "maximum_word_count" not in DOCUMENTATION_GATE_NAMES
 
 
-def test_relationship_gate_records_only_a_link_or_phrase_witness() -> None:
-    relationship_gate = next(
-        gate for gate in NORMATIVE_GATE_NAMES if "relationship" in gate
-    )
-    detector_doc = inspect.getdoc(docs_gates._has_relationship_link_or_phrase_witness)
-
-    assert relationship_gate == "relationship_link_or_phrase_witness"
-    assert detector_doc is not None
-    assert "witness" in detector_doc
-    assert "Markdown link" in detector_doc
-    assert "allow-listed relationship phrase" in detector_doc
-    assert "does not assess" in detector_doc
-
-
-def test_relationship_prose_without_a_lexical_witness_records_false() -> None:
-    documentation = (
-        "The safety factor is the number of toroidal circuits made by a magnetic "
-        "field line for each poloidal circuit."
+def test_relationship_gate_requires_a_resolving_name_link() -> None:
+    phrase_only = "This quantity depends on and is proportional to the magnetic field."
+    name_link = (
+        "This quantity depends on the "
+        "[poloidal magnetic field](name:poloidal_magnetic_field)."
     )
 
-    score = score_documentation(documentation)
-
-    assert "[" not in documentation
-    assert score.gate_vector["relationship_link_or_phrase_witness"] is False
+    assert score_documentation(phrase_only).gate_vector["relationship_link"] is False
+    assert score_documentation(name_link).gate_vector["relationship_link"] is True
 
 
 def test_malformed_name_link_fails_hygiene() -> None:
@@ -155,7 +150,7 @@ Within an axisymmetric equilibrium, contours of the quantity organize the nested
 
     assert score.word_count > 250
     assert score.gate_vector == dict.fromkeys(DOCUMENTATION_GATE_NAMES, True)
-    assert score.passed_count == score.total_count == 9
+    assert score.passed_count == score.total_count == 6
 
 
 def test_documentation_prompts_have_no_upper_word_bound() -> None:

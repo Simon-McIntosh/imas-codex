@@ -11,12 +11,9 @@ from imas_codex.standard_names.doc_links import find_name_references
 MIN_DOCUMENTATION_WORDS = 40
 
 NORMATIVE_GATE_NAMES: tuple[str, ...] = (
-    "physical_meaning",
     "defining_equation",
     "symbol_definitions",
-    "scope",
-    "exclusions_or_distinctions",
-    "relationship_link_or_phrase_witness",
+    "relationship_link",
     "sign_convention",
 )
 
@@ -31,29 +28,6 @@ _INLINE_MATH_RE = re.compile(r"(?<!\$)\$(?!\$)(.+?)(?<!\$)\$(?!\$)", re.DOTALL)
 _MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
 _WORD_RE = re.compile(r"[A-Za-z]+(?:[-'\N{RIGHT SINGLE QUOTATION MARK}][A-Za-z]+)*")
 
-_DEFINITION_RE = re.compile(
-    r"\b(?:is|are|denotes?|represents?|quantifies?|describes?|"
-    r"defined as|refers to|corresponds to)\b",
-    re.IGNORECASE,
-)
-_SCOPE_RE = re.compile(
-    r"\b(?:scope|context|within|inside|outside|between|relative to|"
-    r"with respect to|at the|on the|through|boundary|surface|region|domain|"
-    r"averaged over|integrated over|summed over)\b",
-    re.IGNORECASE,
-)
-_DISTINCTION_RE = re.compile(
-    r"\b(?:excludes?|excluding|does not include|distinct from|rather than|"
-    r"in contrast to|boundary|endpoint|normalization|reference|relative to|"
-    r"from .{1,80} to)\b",
-    re.IGNORECASE,
-)
-_RELATIONSHIP_RE = re.compile(
-    r"\b(?:relates? to|relationship|depends? on|proportional to|"
-    r"integral of|gradient of|derivative of|normalized by|defined from|"
-    r"obtained from)\b",
-    re.IGNORECASE,
-)
 _DEFINING_RELATION_RE = re.compile(r"=|\\equiv\b|\\propto\b|\\int\b")
 _VALID_SIGN_RE = re.compile(
     r"^Sign convention: Positive (?:when|for) .+\.$|"
@@ -65,6 +39,7 @@ _PLACEHOLDER_RE = re.compile(r"\[(?:condition|physical condition|quantity)\]", r
 _VALID_LINK_TARGET_RE = re.compile(
     r"(?:name:[a-z0-9_]+|#[a-z0-9_]+|dd:[a-z0-9_/]+|https?://\S+)$"
 )
+_NAME_LINK_TARGET_RE = re.compile(r"(?:name:|#)[a-z0-9_]+$")
 
 
 @dataclass(frozen=True)
@@ -88,14 +63,6 @@ def _word_count(text: str) -> int:
     return len(_WORD_RE.findall(_without_markup(text)))
 
 
-def _has_physical_meaning(text: str) -> bool:
-    paragraphs = [part.strip() for part in re.split(r"\n\s*\n", text) if part.strip()]
-    if not paragraphs:
-        return False
-    opening = _without_markup(paragraphs[0])
-    return len(_WORD_RE.findall(opening)) >= 8 and bool(_DEFINITION_RE.search(opening))
-
-
 def _has_defining_equation(text: str) -> bool:
     equations = [equation.strip() for equation in _DISPLAY_MATH_RE.findall(text)]
     return len(equations) == 1 and bool(_DEFINING_RELATION_RE.search(equations[0]))
@@ -105,14 +72,13 @@ def _symbols_are_defined(text: str) -> bool:
     return not latex_def_check({"documentation": text})
 
 
-def _has_relationship_link_or_phrase_witness(text: str) -> bool:
-    """Detect a Markdown link or allow-listed relationship phrase as a witness.
+def _has_relationship_link(text: str) -> bool:
+    """Return whether the documentation links to another standard name."""
 
-    This lexical witness does not assess whether prose states scientifically
-    meaningful relationship content.
-    """
-
-    return bool(_MARKDOWN_LINK_RE.search(text) or _RELATIONSHIP_RE.search(text))
+    return any(
+        _NAME_LINK_TARGET_RE.fullmatch(target.strip())
+        for _, target in _MARKDOWN_LINK_RE.findall(text)
+    )
 
 
 def _valid_sign_convention(text: str) -> bool:
@@ -153,18 +119,11 @@ def score_documentation(documentation: str) -> DocumentationGateScore:
 
     text = documentation.strip()
     words = _word_count(text)
-    scope_present = bool(_SCOPE_RE.search(_without_markup(text)))
-    distinction_present = bool(_DISTINCTION_RE.search(_without_markup(text)))
 
     gates = {
-        "physical_meaning": _has_physical_meaning(text),
         "defining_equation": _has_defining_equation(text),
         "symbol_definitions": _symbols_are_defined(text),
-        "scope": scope_present,
-        "exclusions_or_distinctions": distinction_present,
-        "relationship_link_or_phrase_witness": (
-            _has_relationship_link_or_phrase_witness(text)
-        ),
+        "relationship_link": _has_relationship_link(text),
         "sign_convention": _valid_sign_convention(text),
         "link_hygiene": _links_are_hygienic(text),
         "minimum_word_count": words >= MIN_DOCUMENTATION_WORDS,
