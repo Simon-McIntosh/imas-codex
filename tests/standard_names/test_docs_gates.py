@@ -107,6 +107,15 @@ def test_bare_name_brackets_fail_hygiene() -> None:
     assert score_documentation(text).gate_vector["link_hygiene"] is False
 
 
+def test_mathematical_brackets_do_not_fail_link_hygiene() -> None:
+    text = _catalog_documentation("poloidal_magnetic_flux").replace(
+        "The poloidal magnetic flux $\\psi$",
+        "The poloidal magnetic flux $\\psi = C[f_q]$",
+    )
+
+    assert score_documentation(text).gate_vector["link_hygiene"] is True
+
+
 def test_sign_convention_must_be_the_final_plain_paragraph() -> None:
     text = _catalog_documentation("poloidal_magnetic_flux").replace(
         "Sign convention: Positive", "**Sign convention:** Positive"
