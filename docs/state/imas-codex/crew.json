@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:32:03",
+  "updated": "2026-08-23T10:50:45",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -460,6 +460,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-recompare",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02dc8-8120-7bc0-8d4a-4b77f7d75c45",
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-reconcilefix",
         "harness": "codex",
         "role": "implement",
@@ -470,7 +477,7 @@
         "id": "impl-relgap",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02dbf-9cd2-75f2-9657-346502a68461",
         "created": "2026-08-23"
       },
       {
@@ -18259,9 +18266,131 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T083203927919-impl-relgap",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-relgap",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relgap",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:32:06Z",
+        "completed_at": "2026-08-23T08:41:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 547,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 547,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "7efb8a972e1804ba0334e6080af6aca491754817",
+        "commits": [
+          "9862ba440031d7341298c31d6f79f8b0ba59f4fc"
+        ],
+        "changed_lines": {
+          "added": 46,
+          "removed": 19,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Both measured-weak gates now instructed independently in generate_docs_system.md and the shared _docs_format.md. Targets came from the comparison receipt, not intuition: essential_relationships catalog 1.000000 vs generated 0.611765 (-0.388235), scope catalog 0.800000 vs generated 0.623529 (-0.176471). The relationship instruction demands the semantic or mathematical relation itself with an inline link and explicitly rejects substituting a measurement or computation recipe; the scope instruction requires the boundaries, physical population or region, and aggregation convention that the name or context already establishes, refusing implicit-source-prose as a licence to omit. Locked gate set unchanged - typical values remain forbidden, measurement stays limited to constitutive or discriminating content. pytest 69/69 across normative policy, prompt completeness and generate_docs. The worker also scrubbed stale non-load-bearing campaign labels found by the naming scan, retaining the PR-* rule identifiers under the load-bearing-cross-reference carve-out since tests assert them as strings.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T083203927919-impl-relgap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dbf-9cd2-75f2-9657-346502a68461",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2656000,
+            "cached_input_tokens_cumulative": 2656000,
+            "input_tokens": 2890219,
+            "input_tokens_cumulative": 2890219,
+            "output_tokens": 14817,
+            "output_tokens_cumulative": 14817,
+            "reasoning_output_tokens": 6602,
+            "reasoning_output_tokens_cumulative": 6602
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T084144703117-impl-recompare",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-recompare",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-recompare",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:41:49Z",
+        "completed_at": "2026-08-23T08:50:01Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 492,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 492,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "7457d44a421c06d5f772bc7fb31f4d6535ca036f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "ZERO-SUM TRADE - the targeted gates improved and paid for it exactly. Same 85-row holdout (sha256 3dbdc13c), source revision 7457d44a, actual USD 0.200587 of USD 1.50, 0 generation failures. Both targets moved up: scope 0.624 to 0.718 (+0.094, +8/85), essential_relationships 0.612 to 0.647 (+0.035, +3/85), plus sign_convention +0.024 and physical_meaning +0.012 - total gains +0.165. Offset almost exactly by symbol_definitions 1.000 to 0.894 (-0.106, -9/85), exclusions_or_distinctions 0.800 to 0.765 (-0.035) and maximum_word_count 1.000 to 0.976 (-0.024) - total losses -0.165. Sum of all ten changes = -0.000, so overall pass rate is unchanged at exactly 0.897647. FINDING: the word cap is the binding constraint. Docs are now pressing the ceiling (2 rows exceed it where none did), so added content requirements cannibalize existing gates instead of adding quality. Excluding the artifact gate the nine-gate comparison did flip from -0.001 behind to +0.001 ahead (generated 0.8889 vs catalog 0.8876), but essential_relationships remains 0.647 against a perfect catalog 1.000, so the f-west-docs-refresh trigger is still not genuinely met.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T084144703117-impl-recompare/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dc8-8120-7bc0-8d4a-4b77f7d75c45",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3346176,
+            "cached_input_tokens_cumulative": 3346176,
+            "input_tokens": 3486362,
+            "input_tokens_cumulative": 3486362,
+            "output_tokens": 9543,
+            "output_tokens_cumulative": 9543,
+            "reasoning_output_tokens": 2385,
+            "reasoning_output_tokens_cumulative": 2385
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 497
+    "_version": 502
   }
 }

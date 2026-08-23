@@ -246,6 +246,46 @@
     <p>Receipt: <code>comparison-result.json</code>; pricing receipt
     <code>comparison-price.json</code> (sha256 <code>ecd1ff45</code>).</p>
 
+
+    <h2 id="remeasure">Re-measurement &mdash; a zero-sum trade, and the constraint it exposes</h2>
+    <p>The evidence loop the plan asked for ran for the first time: instruct the two weak gates,
+    re-run the same holdout, report the signed change. The instructions worked on their targets and
+    the overall score did not move at all &mdash; because the gains were paid for elsewhere,
+    almost to the third decimal.</p>
+    <table>
+      <caption>Same 85-row holdout before and after the relationship and scope instructions</caption>
+      <thead><tr><th>Gate</th><th>Prior</th><th>New</th><th>Change</th><th>Catalog</th></tr></thead>
+      <tbody>
+        <tr><td>scope <em>(targeted)</em></td><td>0.624</td><td>0.718</td><td><strong>+0.094</strong></td><td>0.800</td></tr>
+        <tr><td>essential_relationships <em>(targeted)</em></td><td>0.612</td><td>0.647</td><td><strong>+0.035</strong></td><td>1.000</td></tr>
+        <tr><td>sign_convention</td><td>0.976</td><td>1.000</td><td>+0.024</td><td>1.000</td></tr>
+        <tr><td>physical_meaning</td><td>0.965</td><td>0.976</td><td>+0.012</td><td>0.718</td></tr>
+        <tr><td>defining_equation</td><td>1.000</td><td>1.000</td><td>0.000</td><td>0.929</td></tr>
+        <tr><td>link_hygiene</td><td>1.000</td><td>1.000</td><td>0.000</td><td>1.000</td></tr>
+        <tr><td>minimum_word_count</td><td>1.000</td><td>1.000</td><td>0.000</td><td>1.000</td></tr>
+        <tr><td>maximum_word_count</td><td>1.000</td><td>0.976</td><td>&minus;0.024</td><td>0.235</td></tr>
+        <tr><td>exclusions_or_distinctions</td><td>0.800</td><td>0.765</td><td>&minus;0.035</td><td>0.741</td></tr>
+        <tr><td>symbol_definitions</td><td>1.000</td><td>0.894</td><td><strong>&minus;0.106</strong></td><td>0.800</td></tr>
+        <tr><td><strong>sum of changes</strong></td><td></td><td></td><td><strong>&minus;0.000</strong></td><td></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The constraint is the word cap.</strong> Gains of +0.165 were offset by losses of
+    &minus;0.165. Documentation is now pressing the ceiling &mdash; two rows exceed the cap where
+    none did before &mdash; and to fit the newly required relationship and scope content the
+    generator dropped symbol definitions on nine rows and exclusions on three. Adding content
+    gates inside a fixed cap does not add quality; it reallocates it.</p>
+    <p>That reading is corroborated by the catalog itself, which passes the cap on only
+    <strong>23.5%</strong> of rows: the curated standard this plan is trying to match was written
+    substantially longer than the bound the generator is held to.</p>
+    <p><strong>What did move.</strong> Excluding the artifact gate, the nine-gate comparison flipped
+    from &minus;0.001 behind to <strong>+0.001 ahead</strong> (generated 0.8889, catalog 0.8876).
+    Real, in the right direction, and far too small to call parity achieved &mdash;
+    <code>essential_relationships</code> is still 0.647 against a perfect catalog 1.000, which is
+    the largest single quality gap remaining and sits on the most physics-relevant gate.</p>
+    <p>Actual spend USD 0.200587 of a USD 1.50 ceiling; cumulative measured spend across both
+    comparison runs <strong>USD 0.383</strong>. Receipt
+    <code>comparison-result-after-prompt.json</code>; holdout sha256 <code>3dbdc13c</code>.</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
