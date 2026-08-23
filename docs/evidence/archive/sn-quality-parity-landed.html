@@ -106,6 +106,47 @@
     <code>imas_codex/standard_names/benchmark_reference.py</code>,
     <code>tests/standard_names/test_docs_holdout_set.py</code>.</p>
 
+
+    <h2 id="gate-vector">An objective gate vector, and a holdout large enough to use it</h2>
+    <p>Documentation quality had only one measure: a reviewer's subjective score. That number
+    cannot say <em>which</em> content a template or context change improved, so no change could
+    be defended on evidence. Two nodes closed that gap in the same wave.</p>
+    <p><strong>The scorer discriminates.</strong> <code>imas_codex/standard_names/docs_gates.py</code>
+    returns an ordered ten-bit vector: the seven operative normative gates, link hygiene, and two
+    independent word bounds. Measured against the holdout, the
+    <code>poloidal_magnetic_flux</code> catalog row scores <strong>10/10</strong> and a
+    three-word stub scores <strong>4/10</strong>, failing six gates &mdash; so the vector
+    separates real documentation from filler rather than merely detecting non-emptiness, which is
+    all the previous content-gate test proved.</p>
+    <p>The excluded gates are pinned by a test, not by convention:
+    <code>NORMATIVE_GATE_NAMES</code> holds exactly seven entries and
+    <code>DOCUMENTATION_GATE_NAMES</code> is asserted to contain none of
+    <code>typical_values</code>, <code>measurement_methods</code> or
+    <code>general_measurement</code>. Sign convention is treated as conditionally satisfiable,
+    because COCOS applicability cannot be inferred from prose alone; where a convention <em>is</em>
+    emitted, its canonical final-paragraph form is checked.</p>
+    <p>Commit <code>7d4707a8</code>; 8 tests added.</p>
+    <table>
+      <caption>Holdout scale, after expansion &mdash; and the ceiling that bounds it</caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>holdout rows</td><td>7 &rarr; <strong>85</strong></td></tr>
+        <tr><td>contributing catalog identities</td><td>13</td></tr>
+        <tr><td>catalog entries at the pinned commit</td><td>42</td></tr>
+        <tr><td>identities resolving through a live binding</td><td>15</td></tr>
+        <tr><td>identities excluded as curated prompt examples</td><td>2</td></tr>
+        <tr><td>unique DD-path split keys</td><td>85/85</td></tr>
+        <tr><td>holdout &cap; curated, by identity and by split key</td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The row count is the achievable maximum, not a sampling choice: only fifteen catalog
+    identities resolve to DD paths at all, and two were surrendered wholesale to keep the prompt
+    examples disjoint. Disjointness is now enforced at both levels, so growth cannot quietly
+    reintroduce leakage.</p>
+    <p>Commit <code>dbb10f86</code>; artifacts
+    <code>tests/standard_names/eval_sets/docs_holdout.json</code>,
+    <code>imas_codex/standard_names/benchmark_reference.py</code>.</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded

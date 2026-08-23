@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T09:53:48",
+  "updated": "2026-08-23T10:07:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -59,6 +59,13 @@
         "role": "documentation",
         "session_id": "01a023dc-deff-70d2-8734-8a503c9c3d37",
         "created": "2026-08-21"
+      },
+      {
+        "id": "doc-qualityfig",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-admissionadj",
@@ -330,7 +337,7 @@
         "id": "impl-linkexport",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02d9d-c95f-7430-8b89-e9866777e832",
         "created": "2026-08-23"
       },
       {
@@ -17683,9 +17690,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T075412311805-impl-docgates",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "impl-docgates",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-linkexport",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T07:55:09Z",
+        "completed_at": "2026-08-23T08:05:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 623,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 623,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "18b655c9bacf6ef024b973e5108993e2ec3d758f",
+        "commits": [
+          "7d4707a8"
+        ],
+        "changed_lines": {
+          "added": 268,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 8,
+        "gate": "passed",
+        "outcome": "Objective content-gate scorer landed as imas_codex/standard_names/docs_gates.py: an ordered 10-bit vector over the 7 operative normative gates plus link hygiene and 2 independent word bounds. It discriminates - the poloidal_magnetic_flux catalog row from the holdout scores 10/10 while a three-word stub scores 4/10, failing 6 gates. NORMATIVE_GATE_NAMES has exactly 7 entries and a test asserts DOCUMENTATION_GATE_NAMES contains none of typical_values, measurement_methods or general_measurement, so the gates the docs-content-gates decision excluded cannot creep back in. Sign-convention absence is treated as conditionally valid because COCOS applicability cannot be inferred from prose alone, while an emitted convention is checked for canonical final-paragraph form. pytest 8 passed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T075412311805-impl-docgates/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02d9d-c95f-7430-8b89-e9866777e832",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4050688,
+            "cached_input_tokens_cumulative": 4050688,
+            "input_tokens": 4216155,
+            "input_tokens_cumulative": 4216155,
+            "output_tokens": 17607,
+            "output_tokens_cumulative": 17607,
+            "reasoning_output_tokens": 7771,
+            "reasoning_output_tokens_cumulative": 7771
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T075528608425-impl-holdoutgrow",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "impl-holdoutgrow",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-holdout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T07:55:48Z",
+        "completed_at": "2026-08-23T08:05:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 587,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 587,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "18b655c9bacf6ef024b973e5108993e2ec3d758f",
+        "commits": [
+          "dbb10f86026b6ff8d115c6f692ca26dd6abbb049"
+        ],
+        "changed_lines": {
+          "added": 770,
+          "removed": 44,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Holdout expanded 7 to 85 path-level rows, drawn from 13 catalog identities, still pinned to the single immutable catalog commit 1f3d7224 which is both sibling catalog HEAD and the imas-codex pinned dependency. Measured ceiling is honest: the catalog holds 42 entries, 15 identities resolve through live IMASNode HAS_STANDARD_NAME bindings, and the 2 identities used by curated prompt examples were excluded wholesale, leaving 13 that contributed all 85 rows. Assertions prove row count >= 30, exact seven-field schema on every row, 85/85 unique DD-path split keys, one 40-character immutable commit, and zero intersection with curated examples on BOTH catalog identity and DD-path split key. pytest 3 passed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T075528608425-impl-holdoutgrow/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02d67-2775-75a0-89d8-9109decada6b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6132992,
+            "cached_input_tokens_cumulative": 9834752,
+            "input_tokens": 6436877,
+            "input_tokens_cumulative": 10296798,
+            "output_tokens": 14788,
+            "output_tokens_cumulative": 32899,
+            "reasoning_output_tokens": 6341,
+            "reasoning_output_tokens_cumulative": 11562
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 476
+    "_version": 480
   }
 }
