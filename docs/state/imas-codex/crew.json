@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T13:28:27",
+  "updated": "2026-08-23T13:44:16",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -20949,9 +20949,114 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T111947451799-impl-scopemeasure",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-scopemeasure",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-capmeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:19:51Z",
+        "completed_at": "2026-08-23T11:29:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 603,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 603,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f3e2942ff22a30b2d4da42e894e3423b90c8045e",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "LOCKED CONDITION MISSED, and the miss is inside the noise. scope 42/53=0.792453 against catalog 0.800000, delta -0.007547, catalog_threshold_reached=FALSE - one more passing row (43/53=0.811321) would have cleared it. But the +1/53 is NOT a lift: the paired row result is 6 rows gained and 5 rows lost, i.e. churn. Representative gain vertical_coordinate_of_line_of_sight (camera_x_rays first_point/z), representative loss radial_coordinate_of_line_of_sight (bremsstrahlung_visible second_point/r), representative residual failure width_of_reflectometer_antenna. So a threshold 0.0075 away is being chased by a measurement whose row-level churn is plus or minus 5 rows, which makes 'reach 0.800' ill-posed at n=53. Elsewhere the prompt change worked well: nine-gate mean 0.951782 to 0.964361 (+0.012579), now +0.076779 over the catalog reference; exclusions 0.886792 to 0.981132 (+0.094340, 6 gains 1 loss); physical_meaning to 1.000000. defining_equation held exactly at 0.924528 but with 2 gains and 2 losses, more churn. symbol_definitions slipped 1.000000 to 0.981132. Mean length 166.2 to 177.7 words, range 96-250, no bound applied. Actual USD 0.2232 of USD 3.00, 53/53 admitted, 0 failures. Gate recorded failed because the node's condition was the 0.800 threshold and it was not reached. Caveat carried: catalog rates are the fixed 85-row holdout reference since the 53 graph identities have no paired catalog documentation, so the scope-versus-catalog comparison is cross-population.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T111947451799-impl-scopemeasure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e46-a447-7d31-9310-c930a67c400e",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T113040446174-impl-scopestability",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-scopestability",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-offholdout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:30:43Z",
+        "completed_at": "2026-08-23T11:43:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 795,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 795,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "b8362135c453f3194b478822b489fb008fae2cae",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "THE 0.800 ONE-RUN THRESHOLD IS INSIDE THE NOISE BAND - the shortfall was the instrument. Repeating the UNCHANGED configuration on the identical deterministic 53-row sample (model unchanged, zero diff in generation inputs, all 734 injected-candidate counts identical, evaluator reproduces all 53 preceding row vectors) moved scope from 42/53=0.792453 to 46/53=0.867925, an absolute swing of 0.075472 - EXACTLY TEN TIMES the 0.007547 shortfall it was supposed to be chasing, and the repeat lands 0.067925 ABOVE the threshold. 14 of 53 rows flipped direction (9 fail-to-pass, 5 pass-to-fail). Nine-gate mean moved 0.964361 to 0.974843 (+0.010482). Representative fail-to-pass width_of_reflectometer_antenna, pass-to-fail parallel_electron_velocity, unchanged failure breakdown_initial_time. Actual USD 0.1566 of USD 3.00, 0 failures. CONSEQUENCE: a single-run 0.800 scope gate cannot answer the question the locked refresh condition asks of it - it is neither evidence the docs are short nor evidence they are adequate. Deciding between repeated-run aggregation, a confidence bound, or a deterministic semantic scope evaluator is a lead decision, surfaced rather than taken. Qualification the worker correctly states: two runs measure an observed difference, not a confidence interval - this bounds the noise as at least 0.075, not exactly.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T113040446174-impl-scopestability/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e11-88ff-7e91-9e65-d1fe8e069d10",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4198400,
+            "cached_input_tokens_cumulative": 8870656,
+            "input_tokens": 4407113,
+            "input_tokens_cumulative": 9270458,
+            "output_tokens": 21045,
+            "output_tokens_cumulative": 40638,
+            "reasoning_output_tokens": 4602,
+            "reasoning_output_tokens_cumulative": 9560
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 583
+    "_version": 585
   }
 }

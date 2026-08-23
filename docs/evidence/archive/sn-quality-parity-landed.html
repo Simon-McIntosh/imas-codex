@@ -510,6 +510,46 @@
     <strong>USD 1.143</strong>, all of it inside a USD 200 ceiling. Receipt
     <code>bulk-sample-production-enriched.json</code>.</p>
 
+
+    <h2 id="threshold-noise">The scope threshold sits inside the measurement's noise</h2>
+    <p>Removing the length maximum lifted scope from 0.660 to 0.774 for free. Strengthening the
+    scope obligation then took it to 0.792 &mdash; <strong>0.0075 short</strong> of the curated
+    0.800 the refresh condition names, one passing row away. The obvious next move was another
+    prompt iteration. Two details argued against it: scope's +1 row was <em>6 gained and 5 lost</em>,
+    and <code>defining_equation</code> held at exactly its previous rate while churning 2 and 2. A
+    threshold that close, chased by an instrument with that much row-level movement, is worth
+    measuring before it is worth tuning.</p>
+    <p><strong>So the unchanged configuration was run again on the identical sample.</strong> Same
+    model, zero diff in generation inputs, all 734 injected-candidate counts identical, and the
+    evaluator verified as reproducing all 53 previous row vectors.</p>
+    <table>
+      <caption>Two runs, nothing changed between them</caption>
+      <thead><tr><th>Gate</th><th>Run A</th><th>Run B</th><th>|difference|</th></tr></thead>
+      <tbody>
+        <tr><td>scope</td><td>0.792</td><td><strong>0.868</strong></td><td><strong>0.0755</strong></td></tr>
+        <tr><td>physical_meaning</td><td>1.000</td><td>0.981</td><td>0.0189</td></tr>
+        <tr><td>symbol_definitions</td><td>0.981</td><td>1.000</td><td>0.0189</td></tr>
+        <tr><td>exclusions_or_distinctions</td><td>0.981</td><td>1.000</td><td>0.0189</td></tr>
+        <tr><td>defining_equation</td><td>0.925</td><td>0.925</td><td>0.000</td></tr>
+        <tr><td>relationship witness / sign / links / min words</td><td>1.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td><strong>nine-gate mean</strong></td><td>0.9644</td><td><strong>0.9748</strong></td><td>0.0105</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The run-to-run swing on scope is 0.0755 &mdash; exactly ten times the 0.0075
+    shortfall</strong>, and the repeat lands 0.068 <em>above</em> the threshold rather than below
+    it. Fourteen of fifty-three rows flipped direction between two identical runs (nine
+    fail&rarr;pass, five pass&rarr;fail).</p>
+    <p>So the shortfall was never a deficit in the documentation. A single-run 0.800 scope gate is
+    not evidence the prose is short and not evidence it is adequate &mdash; it cannot answer the
+    question the refresh condition asks of it. Another prompt iteration would have been a coin
+    flip dressed as engineering, and had it landed above 0.800 by luck it would have opened a
+    paid cohort rewrite on a number that means nothing.</p>
+    <p>One qualification kept from the worker: two runs measure an observed difference, not a
+    confidence interval. This bounds the noise at <em>at least</em> 0.075; it does not establish a
+    distribution.</p>
+    <p>Actual spend USD 0.157. Receipt <code>scope-stability.json</code> (sha256
+    <code>1f5531f2</code>).</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
