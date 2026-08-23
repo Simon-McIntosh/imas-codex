@@ -903,11 +903,16 @@ in `~/.agents/AGENTS.md`. The repo-specific facts:
   A local copy costs **69,826 filesystem entries and 1.76 GiB** on GPFS; a
   worker fleet building its own produced a 180,186-file storage alert on
   2026-08-17, 98% of it from three copies. The SN pipeline was not involved.
-- Generated models live in the environment's installed package, so a worktree
-  reusing the main `.venv` inherits them with no sync of its own. When a
-  worktree's work genuinely changes dependencies, land them in `pyproject.toml`
-  first, then drop `--no-sync` deliberately and say so, so an orchestrator can
-  serialize it against the other workers.
+- Generated-model freshness is checkout-specific. In a worktree,
+  `PYTHONPATH="$PWD"` ensures the worktree source shadows the package installed
+  in the shared `.venv`, and `build-models` regenerates models from that
+  worktree's current schemas. The main checkout keeps whatever generated files
+  it last built. If a worktree disagrees with the main checkout, the main
+  checkout is stale and behind; the worktree is not wrong. After integration,
+  refresh the main checkout with `uv run build-models --force`.
+- When a worktree genuinely changes dependencies, land them in
+  `pyproject.toml` first, then drop `--no-sync` deliberately and say so, so an
+  orchestrator can serialize it against the other workers.
 - One-shot worker checks should disable incremental caches (`ruff --no-cache`,
   `pytest -p no:cacheprovider`, `mypy --no-incremental`) rather than write
   `.mypy_cache` / `.ruff_cache` trees into a throwaway worktree.
