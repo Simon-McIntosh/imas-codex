@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.97">
+  <meta name="plan-impl" content="0.9">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="37">
 <meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44,2b607c58,7a9308ac,4c078678,723c90a9,7def7d10,c6cc10ac,5c1b14ab,4e4e8d26,08701281">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/doc_links.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,tests/standard_names/test_doc_links.py,docs/figures/sn-quality-parity/claim-disposition.svg">
 </head>
@@ -150,6 +150,36 @@
       the transport module's docstring already states its current two-step boundary. The only
       documentation debt this plan carried was its own stale prose, corrected 2026-08-23.</li>
     </ul>
+
+    <h2 id="s5">§5 — Turn the surviving presence checks into physics checks</h2>
+    <p>The <code>gate-role</code> decision deleted the four gates that tested for a word. Six
+    survive, and two of them are still only <em>presence</em> checks that a well-formed but wrong
+    document would pass. Both can be grounded in data the graph already holds authoritatively,
+    which is the property that separates a real check from a pattern match — the template is the
+    logarithmic-unit rule landed in the release-readiness plan: a contradiction between two
+    authoritative facts, deterministic, no judge, and unable to regress.</p>
+    <ul>
+      <li><strong>Dimensional consistency of the defining equation against the DD unit.</strong>
+      <code>defining_equation</code> currently passes on the presence of <code>=</code>,
+      <code>\int</code> or <code>\propto</code>. The DD-declared unit is authoritative and reaches
+      the item already; the equation's dimensions are computable. A document whose stated relation
+      cannot produce its own declared unit carries a real physics error that no amount of
+      well-formed prose hides. Deliverable: the gate fails such a document, with a test built from
+      a genuine unit/relation mismatch.</li>
+      <li><strong><code>sign_convention</code> made conditional on the COCOS transformation
+      type.</strong> The gate checks canonical sentence form but cannot tell whether a sign
+      convention was <em>required</em>, which is why absence had to be treated as permissible.
+      <code>HAS_COCOS</code> supplies the transformation type authoritatively — the same edge whose
+      relationship name was fixed earlier in this plan. Deliverable: required when the quantity is
+      COCOS-dependent, forbidden when it is not, with tests for both directions.</li>
+    </ul>
+    <p><strong>Why these two and not a rewrite of the deleted four:</strong> <code>scope</code>,
+    <code>physical_meaning</code> and <code>exclusions</code> have no authoritative counterpart in
+    the graph to check against, so any version of them remains a judgement about prose. These two
+    do. That is the whole distinction, and it is the criterion for admitting any future gate.</p>
+    <p><strong>Sequencing:</strong> independent of each other and of the cohort refresh, so either
+    order, and neither blocks §3. Both are additive to a gate set that is already green at
+    6,653 passing tests.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -288,6 +318,35 @@ MANIFEST follow_ons
                                                    n-sigfix dispatched there
   ====================
   rows: 9   foldable-remaining: 0</pre><p>Two rows are exempt and both name a concrete boundary. <code>f-west-docs-refresh</code> is <strong>authority-required</strong> twice over: its trigger is unreadable until the lead re-specifies it, and executing it mutates 210 catalog-authoritative documents bound for expert review. The parser cutover and the eleven signature failures are <strong>foreign-owner</strong> under a scope map agreed verbatim with the sn-release-readiness coordinator, who has accepted both. Nothing is disposed on inconvenience, worker capacity or ordinary unfinished work, and no row is marked folded without a dispatched node id.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-20260823-drain-ledger-final" data-who="reckon-ship" data-when="2026-08-23T14:00:00+00:00">
+    <div class="r-comment-body"><h3>Drain ledger — re-signed after the gate-role ruling</h3><p>The earlier ledger is superseded: implementing the ruling created new work and changed one row's disposition. Corrected here rather than left to drift.</p><pre>PLAN FOLLOWUPS
+  f-docs-quality-baseline          folded → resolved earlier
+  f-west-docs-refresh             authority-required → SPEND ONLY.
+                                  Its measurement gate is retired and the
+                                  quorum gate is satisfied by construction,
+                                  so nothing technical blocks it. 210 rows,
+                                  ~USD 2.37 generation + paid review/refine,
+                                  mutating catalog-authoritative docs.
+
+SAME-PLAN WORK DISCOVERED WHILE IMPLEMENTING THE RULING
+  dimensional consistency of the equation
+    against the DD-declared unit          folded → §5, authored as a section
+  sign_convention conditional on the
+    COCOS transformation type             folded → §5, authored as a section
+
+DEFECT IN THE PREVIOUS LEDGER, corrected
+  both upgrades were recorded in a decision rationale and a comment only —
+  prose, not executable state. A fresh session would not have found them as
+  work. Same-plan follow-on becomes a SECTION, never a note; §5 now carries
+  them with deliverables and tests named.
+
+FOREIGN-OWNER, unchanged and accepted by that coordinator
+  graph_ops normalizer cutover onto the shared parser
+  the signature failures and the independent accept-path assertion
+    (both since resolved there — suite green on both axes at 282aed83)
+  ====================
+  rows: 6   foldable-remaining: 0</pre><p><strong>The <code>f-west-docs-refresh</code> disposition changed:</strong> it was authority-required on <em>two</em> grounds — an unreadable trigger and the spend. The trigger ground is gone, so it is now spend-only, and a fresh session can execute it the moment the lead authorises the cost. Its stored body still describes the retired measurement condition; read this comment and the re-locked <code>west-refresh-sequencing</code> rationale as the current statement.</p><p><code>impl</code> steps back <strong>0.97 → 0.90</strong> because §5 adds two executable nodes to the denominator. A fraction that only ever rises is not a measurement.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823-cocos-holdout-landed" data-who="reckon-ship" data-when="2026-08-23T07:55:00+00:00">
     <div class="r-comment-body"><p><strong>impl-cocosedge landed — commit <code>b79f07b9</code>; gate docs-cocos-regression PASSED.</strong> Measure is a genuine pre/post pair: the new canonical-query regression FAILED 1/1 against the pre-fix <code>DDVersion-[:COCOS]-&gt;COCOS</code> traversal and the focused file PASSED 7/7 after the lookup moved to the schema-owned <code>HAS_COCOS</code> edge. Verified on main after merge: no bare <code>[:COCOS]</code> traversal remains anywhere in <code>imas_codex/</code>. The defect was silent by construction — live convention parameters could fail to arrive at documentation generation while mock-based prompt tests still passed. Artifacts: <code>imas_codex/standard_names/workers.py</code>, <code>tests/standard_names/test_docs_cocos_injection.py</code>.</p><p><strong>impl-holdoutset landed — commit <code>aabbe55f</code>; gate docs-holdout-disjointness PASSED, 3 tests added.</strong> Measure: 7 immutable DD-path/catalog-documentation pairs pinned to imas-standard-names commit <code>1f3d7224</code>; 7/7 rows carry <code>dd_path</code>, <code>catalog_name</code>, <code>catalog_description</code>, <code>catalog_documentation</code>, <code>catalog_source</code>, <code>catalog_commit</code> and <code>split_key</code>; <code>split_key == dd_path</code> on 7/7; curated prompt DD split keys 6, holdout-curated intersection <strong>0</strong> — disjointness proven rather than asserted, which closes C27. Bindings include <code>equilibrium/time_slice/profiles_1d/q</code> to <code>safety_factor</code> and <code>core_transport/model/profiles_1d/electrons/energy/flux</code> to <code>electron_heat_flux</code>. Artifacts: <code>tests/standard_names/eval_sets/docs_holdout.json</code>, <code>imas_codex/standard_names/benchmark_reference.py</code>, <code>tests/standard_names/test_docs_holdout_set.py</code>. At 7 rows the set is too thin to measure improvement, so expansion to every catalog entry with a resolvable DD path is folded into the DAG as impl-holdoutgrow rather than deferred.</p></div>
