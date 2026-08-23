@@ -293,6 +293,50 @@
     comparison runs <strong>USD 0.383</strong>. Receipt
     <code>comparison-result-after-prompt.json</code>; holdout sha256 <code>3dbdc13c</code>.</p>
 
+
+    <h2 id="independent-gates">Third measurement &mdash; the gates stop trading, and parity is exceeded</h2>
+    <p>The diagnosis predicted a specific outcome: if the trade was instruction competition rather
+    than length, then stating each obligation as independent should raise gates
+    <em>without</em> any offsetting loss. That is what happened.</p>
+    <table>
+      <caption>Same 85-row holdout after the obligations were restated as independent</caption>
+      <thead><tr><th>Gate</th><th>Prior run</th><th>New</th><th>Change</th><th>Catalog</th><th>vs catalog</th></tr></thead>
+      <tbody>
+        <tr><td>essential_relationships</td><td>0.647</td><td>0.941</td><td><strong>+0.294</strong></td><td>1.000</td><td>&minus;0.059</td></tr>
+        <tr><td>exclusions_or_distinctions</td><td>0.765</td><td>0.882</td><td><strong>+0.118</strong></td><td>0.741</td><td>+0.141</td></tr>
+        <tr><td>symbol_definitions</td><td>0.894</td><td>0.953</td><td>+0.059</td><td>0.800</td><td>+0.153</td></tr>
+        <tr><td>maximum_word_count</td><td>0.976</td><td>1.000</td><td>+0.024</td><td>0.235</td><td>+0.765</td></tr>
+        <tr><td>scope</td><td>0.718</td><td>0.741</td><td>+0.024</td><td>0.800</td><td>&minus;0.059</td></tr>
+        <tr><td>physical_meaning</td><td>0.976</td><td>0.976</td><td>0.000</td><td>0.718</td><td>+0.259</td></tr>
+        <tr><td>defining_equation</td><td>1.000</td><td>1.000</td><td>0.000</td><td>0.929</td><td>+0.071</td></tr>
+        <tr><td>sign_convention</td><td>1.000</td><td>1.000</td><td>0.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td>link_hygiene</td><td>1.000</td><td>1.000</td><td>0.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td>minimum_word_count</td><td>1.000</td><td>1.000</td><td>0.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td><strong>sum of changes</strong></td><td></td><td></td><td><strong>+0.518</strong></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+    <p><strong>No gate regressed.</strong> The sum of the ten changes is +0.518 where the previous
+    iteration summed to zero, which is the falsifiable prediction the diagnosis made and the reason
+    to trust the mechanism rather than the first plausible story. The largest single quality gap
+    &mdash; essential relationships, 25 additional rows &mdash; is nearly closed, and symbol
+    definitions recovered the loss that exposed the problem.</p>
+    <p><strong>The artifact-free verdict, across three runs:</strong></p>
+    <table>
+      <caption>Nine-gate comparison, excluding the word-cap artifact</caption>
+      <thead><tr><th>Run</th><th>Generated</th><th>Catalog</th><th>Delta</th></tr></thead>
+      <tbody>
+        <tr><td>1 &mdash; baseline template</td><td>0.8863</td><td>0.8876</td><td>&minus;0.001</td></tr>
+        <tr><td>2 &mdash; two gates instructed</td><td>0.8889</td><td>0.8876</td><td>+0.001</td></tr>
+        <tr><td>3 &mdash; obligations independent</td><td><strong>0.9438</strong></td><td>0.8876</td><td><strong>+0.056</strong></td></tr>
+      </tbody>
+    </table>
+    <p>Generated documentation now genuinely exceeds the curated catalog on an artifact-free basis,
+    where run 1's apparent +0.075 was one gate's illusion. Two gates still trail, both by exactly
+    0.059: scope (0.741 against 0.800) and essential relationships (0.941 against a perfect 1.000).</p>
+    <p>Actual spend USD 0.232130; <strong>cumulative measured spend across all three comparison
+    runs USD 0.616</strong>, against a USD 200 campaign ceiling. Receipt
+    <code>comparison-result-independent-gates.json</code>.</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded

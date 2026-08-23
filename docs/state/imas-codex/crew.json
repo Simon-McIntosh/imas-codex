@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:01:51",
+  "updated": "2026-08-23T11:09:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -18516,9 +18516,67 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T090203929695-impl-recompare2",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-recompare2",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-recompare",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:02:08Z",
+        "completed_at": "2026-08-23T09:08:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 388,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 388,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "8df176315ae88a4e7ee41fb0767859e153e3b5f0",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "THE FIX WORKED AND NOTHING REGRESSED. Third measurement, same 85-row holdout (sha256 3dbdc13c), source revision 8df17631, actual USD 0.232130 of USD 1.50, 0 generation failures. Overall 0.897647 to 0.949412 (+0.051765); sum of the ten gate differences +0.517647 with ZERO gates regressing - the gates stopped trading against each other, which is exactly what the instruction-competition diagnosis predicted. essential_relationships 0.647 to 0.941 (+0.294, +25/85), the largest single gap nearly closed; exclusions_or_distinctions 0.765 to 0.882 (+0.118); symbol_definitions 0.894 to 0.953 (+0.059), recovering the loss and now 0.153 above catalog; scope 0.718 to 0.741 (+0.024); maximum_word_count back to 1.000. ARTIFACT-FREE VERDICT: excluding the word-cap gate, generated 0.9438 vs catalog 0.8876 = +0.0562 genuinely ahead, versus the fake +0.075 of run 1 and the -0.001 tie of run 2. Only two gates remain below catalog and both by exactly 0.059: scope 0.741 vs 0.800 and essential_relationships 0.941 vs 1.000. Cumulative measured spend across three comparison runs USD 0.6156.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T090203929695-impl-recompare2/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dc8-8120-7bc0-8d4a-4b77f7d75c45",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4771328,
+            "cached_input_tokens_cumulative": 8117504,
+            "input_tokens": 4869861,
+            "input_tokens_cumulative": 8356223,
+            "output_tokens": 7555,
+            "output_tokens_cumulative": 17098,
+            "reasoning_output_tokens": 1564,
+            "reasoning_output_tokens_cumulative": 3949
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 504
+    "_version": 505
   }
 }

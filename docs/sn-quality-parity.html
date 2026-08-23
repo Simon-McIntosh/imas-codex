@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.92">
+  <meta name="plan-impl" content="0.95">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,8 +23,8 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="24">
-<meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44">
+<meta name="plan-version" content="25">
+<meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44,2b607c58">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,docs/figures/sn-quality-parity/claim-disposition.svg">
 </head>
 <body>
@@ -244,6 +244,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-20260823-constraint-corrected" data-who="reckon-ship" data-when="2026-08-23T08:55:00+00:00">
     <div class="r-comment-body"><p><strong>Correction to the comment above: the word cap is not the binding constraint.</strong> That reading was recorded before the per-row data was checked, and the per-row data contradicts it. <strong>All 9 rows that lost <code>symbol_definitions</code> were still within the word cap</strong>, with <strong>zero</strong> overlap against the 2 rows that exceeded it. Those nine had room to spare and dropped the content anyway, so a length ceiling cannot explain a nine-row loss.</p><p><strong>The actual mechanism is instruction competition.</strong> Adding two required elements to a list of required elements led the generator to treat that list as a budget to allocate rather than a set to satisfy. The fix is therefore prompt structure — every element stated as independently mandatory — not a larger cap. Testing the cap hypothesis before acting on it is what stopped the next iteration being spent relaxing a bound that was not binding, and it removes what would otherwise have been a normative decision affecting all ~2,800 names.</p><p>The cap difference remains a real observation in its own right: the catalog passes it on only 23.5% of rows, so the curated standard is substantially longer than the bound the generator is held to. On this evidence that is house style, not the cause of the trade. Folded as impl-gatecompete.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-20260823-independent-gates-parity" data-who="reckon-ship" data-when="2026-08-23T09:05:00+00:00">
+    <div class="r-comment-body"><p><strong>impl-gatecompete + impl-recompare2 landed — commit <code>2b607c58</code>; gate docs-parity-exceeded PASSED. The diagnosis made a falsifiable prediction and it held.</strong> If the trade was instruction competition rather than length, stating each obligation as independent should raise gates with no offsetting loss. <strong>Sum of the ten changes = +0.518, and no gate regressed</strong> — where the previous iteration summed to exactly zero.</p><p><code>essential_relationships</code> 0.647→0.941 (<strong>+0.294, +25/85</strong>), the largest single gap nearly closed; <code>exclusions_or_distinctions</code> 0.765→0.882 (+0.118); <code>symbol_definitions</code> 0.894→0.953 (+0.059), recovering the loss that exposed the problem and now 0.153 above catalog; <code>scope</code> 0.718→0.741; <code>maximum_word_count</code> back to 1.000. Overall 0.897647→0.949412.</p><p><strong>Artifact-free verdict across the three runs</strong> (nine gates, excluding the word-cap artifact): run 1 baseline <strong>−0.001</strong> → run 2 <strong>+0.001</strong> → run 3 <strong>+0.056</strong> (generated 0.9438 vs catalog 0.8876). Generated documentation now genuinely exceeds the curated catalog, where run 1's apparent +0.075 was one gate's illusion. Two gates still trail, both by exactly 0.059: <code>scope</code> 0.741 vs 0.800 and <code>essential_relationships</code> 0.941 vs a perfect 1.000.</p><p><strong>The <code>f-west-docs-refresh</code> trigger is now met</strong> — the holdout does show the template beating baseline on an artifact-free basis. Held for the lead rather than executed, because unlike the three measurement runs it mutates live accepted docs on catalog-authoritative rows bound for human expert review, and that review is itself blocked behind sn-graph-wide-integrity in S10, so nothing is lost by confirming first.</p><p>Cumulative measured spend across all three comparison runs: <strong>USD 0.616</strong> against a USD 200 ceiling.</p></div>
 </div>
 </section>
 </main>
