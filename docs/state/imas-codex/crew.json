@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T13:18:12",
+  "updated": "2026-08-23T13:28:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -267,7 +267,7 @@
         "id": "impl-doclinks",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02e57-b999-7951-ad27-7de2b80b2a5d",
         "created": "2026-08-23"
       },
       {
@@ -20566,9 +20566,392 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T111152829406-impl-scopegap",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-scopegap",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relgap",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:11:55Z",
+        "completed_at": "2026-08-23T11:19:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 448,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 448,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "65efcb65f43864cdbfc720911344c0b9e44c5774",
+        "commits": [
+          "c6cc10ac"
+        ],
+        "changed_lines": {
+          "added": 21,
+          "removed": 10,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Scope obligation strengthened in both prompts to close the measured 0.026 shortfall against the curated 0.800, stating the semantic boundary, physical population or region, and aggregation convention that the name and injected context already establish. The defining-equation and exclusions obligations were each verified still independently stated rather than absorbed, since both moved slightly negative in the previous measurement. No upper word bound reintroduced and no typical-values or general-measurement requirement added, so the locked length-bound and content-gate decisions both hold. pytest 83/83 across normative policy, prompt completeness, generate_docs and docs gates. The measured effect is unknown until re-measurement - this node changed the instruction, not the outcome.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T111152829406-impl-scopegap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dbf-9cd2-75f2-9657-346502a68461",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2936832,
+            "cached_input_tokens_cumulative": 10932992,
+            "input_tokens": 3321397,
+            "input_tokens_cumulative": 11746412,
+            "output_tokens": 8558,
+            "output_tokens_cumulative": 37956,
+            "reasoning_output_tokens": 1456,
+            "reasoning_output_tokens_cumulative": 12630
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T111828698386-doc-staleinversion",
+        "plan": "sn-quality-parity",
+        "section": "\u00a74",
+        "node": "doc-staleinversion",
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "doc-worktreesecrets",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:18:31Z",
+        "completed_at": "2026-08-23T11:22:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 232,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 232,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "882a43415f46205ceb6805baa704bdd80d6899e2",
+        "commits": [
+          "5c1b14abd9fbb28c50fb24067d13e40b3f9ac8d0"
+        ],
+        "changed_lines": {
+          "added": 10,
+          "removed": 5,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "AGENTS.md worktree guidance corrected to record the inversion measurement established: the MAIN checkout is what goes stale, not the worktree. A worktree on PYTHONPATH shadows the editable install and regenerates current models, while the main checkout keeps whatever it last built, so a worktree disagreeing with main means main is behind rather than the worktree being wrong. Recorded because it defeats the natural prior and because today it masked ten suite failures by leaving a schema-required field optional in main's generated model. Verified: required strings PYTHONPATH, build-models, stale and shadows all present; git diff --stat reports AGENTS.md as the only changed path; pre-stage naming and prose scans run.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T111828698386-doc-staleinversion/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e03-b7b5-7e60-a02e-fae61ca19101",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2037504,
+            "cached_input_tokens_cumulative": 3131392,
+            "input_tokens": 2224778,
+            "input_tokens_cumulative": 3413786,
+            "output_tokens": 7873,
+            "output_tokens_cumulative": 16636,
+            "reasoning_output_tokens": 1894,
+            "reasoning_output_tokens_cumulative": 5080
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T111812128961-impl-doclinks",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-doclinks",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-doclinks",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:18:15Z",
+        "completed_at": "2026-08-23T11:24:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 395,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 395,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "882a43415f46205ceb6805baa704bdd80d6899e2",
+        "commits": [
+          "4e4e8d26c4af2d393aa2bc63f8637eed80acb9cb"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "unresolvable_revision"
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "Neutral shared parser landed as imas_codex/standard_names/doc_links.py, owned by neither consumer, retiring the drifted bracket regex from the documentation gates. Contract honored exactly as negotiated with the concurrent plan: mathematical $$C[f_q]$$ and escaped display math both yield 0 references; one known bare bracket plus one inline name: reference yield exactly 2; known=None returns the bare candidate WITHOUT resolving so a caller with no identity access can still parse; and a resolver RuntimeError PROPAGATES rather than collapsing into resolved=False - the critical requirement, since an unreachable resolver reported as an unresolved reference would make could-not-check indistinguishable from does-not-exist and would bury a fail-open normalizer one layer deeper. Mathematics, code, images and Markdown labels are masked STRUCTURALLY rather than by blocklist, which is what makes it a parser rather than a third regex. Verified: docs_gates.py imports find_name_references and FORBIDDEN_BRACKET_REGEX_EXIT=1 proves neither legacy regex name survives; 24 passed across parser, docs-gate and existing accept-path bare-link coverage; ruff clean; commit contains only the 4 assigned paths. The graph_ops accept-normalizer cutover is the concurrent plan's half by agreement.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T111812128961-impl-doclinks/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e57-b999-7951-ad27-7de2b80b2a5d",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3500288,
+            "cached_input_tokens_cumulative": 3500288,
+            "input_tokens": 3650956,
+            "input_tokens_cumulative": 3650956,
+            "output_tokens": 14279,
+            "output_tokens_cumulative": 14279,
+            "reasoning_output_tokens": 5816,
+            "reasoning_output_tokens_cumulative": 5816
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T110942912276-n-staleguard",
+        "plan": "sn-release-readiness",
+        "section": "\u00a74a",
+        "node": "n-staleguard",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-staleguard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:09:45Z",
+        "completed_at": "2026-08-23T11:15:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 350,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 350,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "76ba6b205ab02dc53f488d3a466c6cec8b791cdf",
+        "commits": [
+          "2888ce2e71ee945826ea84dc98365b90bdcf8151"
+        ],
+        "changed_lines": {
+          "added": 114,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T110942912276-n-staleguard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e4f-f1fb-7c80-992d-6dbefc1791fd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2918912,
+            "cached_input_tokens_cumulative": 2918912,
+            "input_tokens": 3056329,
+            "input_tokens_cumulative": 3056329,
+            "output_tokens": 11677,
+            "output_tokens_cumulative": 11677,
+            "reasoning_output_tokens": 5166,
+            "reasoning_output_tokens_cumulative": 5166
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T111136977317-n-cohortstage",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72a",
+        "node": "n-cohortstage",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-cohortstage",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:11:39Z",
+        "completed_at": "2026-08-23T11:24:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 785,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 785,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "65efcb65f43864cdbfc720911344c0b9e44c5774",
+        "commits": [
+          "75e70636"
+        ],
+        "changed_lines": {
+          "added": 785,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 6,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T111136977317-n-cohortstage/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e51-aeda-7900-a282-b9d4d27d6f7b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6096128,
+            "cached_input_tokens_cumulative": 6096128,
+            "input_tokens": 6280522,
+            "input_tokens_cumulative": 6280522,
+            "output_tokens": 27969,
+            "output_tokens_cumulative": 27969,
+            "reasoning_output_tokens": 10978,
+            "reasoning_output_tokens_cumulative": 10978
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T111346772314-n-sigfix",
+        "plan": "sn-release-readiness",
+        "section": "\u00a74a",
+        "node": "n-sigfix",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-sigfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:13:50Z",
+        "completed_at": "2026-08-23T11:26:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 758,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 758,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "65efcb65f43864cdbfc720911344c0b9e44c5774",
+        "commits": [
+          "b52283fac2cd94ad6a775f7cc1089ace92bd50ad"
+        ],
+        "changed_lines": {
+          "added": 16,
+          "removed": 2,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Met the gate as re-scoped mid-flight to the ten signature failures: the ten went 0/10 to 10/10 against a freshly regenerated model, and the invariant was proven rather than asserted - an unsigned authority was REFUSED at both load and apply, 2 refused 0 admitted. Full suite 6638 passed, 8 skipped, 1 failed, the single failure being the independent eleventh now owned by n-persistquery. Resolution was the two-phase route I permitted, with the loader enforcing signing: RepairAuthorityRow is the PRE-signing semantic row type for canonical files because build_repair_authority assembles rows before computing and attaching the envelope signature, while StructuralNameAuthority remains a durable graph specialization retaining its own required digest relationship, and _load_authority now demands expected file digest, expected canonical payload digest, canonicalization json-sort-keys-v1 and a matching envelope signature before validating or loading any row.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T111346772314-n-sigfix/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e53-abde-70f0-9144-04a1d66cb959",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8504320,
+            "cached_input_tokens_cumulative": 8504320,
+            "input_tokens": 8703753,
+            "input_tokens_cumulative": 8703753,
+            "output_tokens": 21871,
+            "output_tokens_cumulative": 21871,
+            "reasoning_output_tokens": 8953,
+            "reasoning_output_tokens_cumulative": 8953
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 576
+    "_version": 583
   }
 }
