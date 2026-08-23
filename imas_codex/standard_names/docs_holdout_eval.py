@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import math
 import time
 from asyncio import Semaphore, gather
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Any
 
 from imas_codex.llm.prompt_loader import render_prompt
@@ -60,6 +63,8 @@ class HoldoutRowScore:
     dd_path: str
     catalog_name: str
     physics_context: DocumentationPhysicsContext
+    generated_documentation: str | None
+    catalog_documentation: str
     arm_gates: dict[str, DocumentationGateResult]
     catalog_gates: dict[str, DocumentationGateResult]
 
@@ -91,6 +96,7 @@ class DocsHoldoutReport:
     row_count: int
     projected_call_count: int
     projected_cost_usd: float
+    actual_call_count: int
     actual_cost_usd: float
     scored_row_count: int
     zero_candidate_row_count: int
@@ -100,6 +106,46 @@ class DocsHoldoutReport:
     overall_pass_rate: float | None
     catalog_overall_pass_rate: float | None
     overall_pass_rate_delta: float | None
+
+
+def write_docs_holdout_receipt(
+    report: DocsHoldoutReport,
+    receipt_path: Path,
+) -> None:
+    """Atomically persist a complete holdout report, including scored prose."""
+
+    path = receipt_path.expanduser()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    generated_documentation_row_count = sum(
+        bool(row.generated_documentation and row.generated_documentation.strip())
+        for row in report.row_scores
+    )
+    payload = {
+        "schema_version": 1,
+        "generated_documentation_row_count": generated_documentation_row_count,
+        **asdict(report),
+    }
+    with NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        dir=path.parent,
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+        delete=False,
+    ) as temporary:
+        temporary.write(json.dumps(payload, ensure_ascii=False, indent=2, default=str))
+        temporary.write("\n")
+        temporary_path = Path(temporary.name)
+    temporary_path.replace(path)
+
+
+def _persist_if_requested(
+    report: DocsHoldoutReport,
+    receipt_path: Path | None,
+) -> DocsHoldoutReport:
+    if receipt_path is not None:
+        write_docs_holdout_receipt(report, receipt_path)
+    return report
 
 
 def _candidate_for(row: DocsHoldoutRow) -> dict[str, Any]:
@@ -351,6 +397,7 @@ async def evaluate_docs_holdout(
     dry_run: bool = False,
     cost_ceiling: float | None = None,
     rows: Sequence[DocsHoldoutRow] | None = None,
+    receipt_path: Path | None = None,
 ) -> DocsHoldoutReport:
     """Evaluate a named generated arm against catalog documentation.
 
@@ -395,22 +442,26 @@ async def evaluate_docs_holdout(
         )
 
     if dry_run:
-        return DocsHoldoutReport(
-            arm=arm,
-            model=model,
-            dry_run=True,
-            row_count=len(holdout),
-            projected_call_count=projected_calls,
-            projected_cost_usd=projected_cost,
-            actual_cost_usd=0.0,
-            scored_row_count=0,
-            zero_candidate_row_count=zero_candidate_rows,
-            context_counts=context_counts,
-            per_gate_table=(),
-            row_scores=(),
-            overall_pass_rate=None,
-            catalog_overall_pass_rate=None,
-            overall_pass_rate_delta=None,
+        return _persist_if_requested(
+            DocsHoldoutReport(
+                arm=arm,
+                model=model,
+                dry_run=True,
+                row_count=len(holdout),
+                projected_call_count=projected_calls,
+                projected_cost_usd=projected_cost,
+                actual_call_count=0,
+                actual_cost_usd=0.0,
+                scored_row_count=0,
+                zero_candidate_row_count=zero_candidate_rows,
+                context_counts=context_counts,
+                per_gate_table=(),
+                row_scores=(),
+                overall_pass_rate=None,
+                catalog_overall_pass_rate=None,
+                overall_pass_rate_delta=None,
+            ),
+            receipt_path,
         )
 
     actual_cost = 0.0
@@ -423,22 +474,26 @@ async def evaluate_docs_holdout(
         scored_rows = [holdout[request.row_index] for request in requests]
 
     if not scored_rows:
-        return DocsHoldoutReport(
-            arm=arm,
-            model=model,
-            dry_run=False,
-            row_count=len(holdout),
-            projected_call_count=projected_calls,
-            projected_cost_usd=projected_cost,
-            actual_cost_usd=actual_cost,
-            scored_row_count=0,
-            zero_candidate_row_count=zero_candidate_rows,
-            context_counts=context_counts,
-            per_gate_table=(),
-            row_scores=(),
-            overall_pass_rate=None,
-            catalog_overall_pass_rate=None,
-            overall_pass_rate_delta=None,
+        return _persist_if_requested(
+            DocsHoldoutReport(
+                arm=arm,
+                model=model,
+                dry_run=False,
+                row_count=len(holdout),
+                projected_call_count=projected_calls,
+                projected_cost_usd=projected_cost,
+                actual_call_count=0,
+                actual_cost_usd=actual_cost,
+                scored_row_count=0,
+                zero_candidate_row_count=zero_candidate_rows,
+                context_counts=context_counts,
+                per_gate_table=(),
+                row_scores=(),
+                overall_pass_rate=None,
+                catalog_overall_pass_rate=None,
+                overall_pass_rate_delta=None,
+            ),
+            receipt_path,
         )
 
     physics_contexts = [_physics_context_for(row) for row in scored_rows]
@@ -474,33 +529,40 @@ async def evaluate_docs_holdout(
             dd_path=row["dd_path"],
             catalog_name=row["catalog_name"],
             physics_context=physics_context,
+            generated_documentation=(documentation if model is not None else None),
+            catalog_documentation=row["catalog_documentation"],
             arm_gates=dict(arm_score.gate_vector),
             catalog_gates=dict(catalog_score.gate_vector),
         )
-        for row, arm_score, catalog_score, physics_context in zip(
+        for row, documentation, arm_score, catalog_score, physics_context in zip(
             scored_rows,
+            arm_documents,
             arm_scores,
             catalog_scores,
             physics_contexts,
             strict=True,
         )
     )
-    return DocsHoldoutReport(
-        arm=arm,
-        model=model,
-        dry_run=False,
-        row_count=len(holdout),
-        projected_call_count=projected_calls,
-        projected_cost_usd=projected_cost,
-        actual_cost_usd=actual_cost,
-        scored_row_count=len(scored_rows),
-        zero_candidate_row_count=zero_candidate_rows,
-        context_counts=context_counts,
-        per_gate_table=table,
-        row_scores=row_scores,
-        overall_pass_rate=arm_overall,
-        catalog_overall_pass_rate=catalog_overall,
-        overall_pass_rate_delta=overall_delta,
+    return _persist_if_requested(
+        DocsHoldoutReport(
+            arm=arm,
+            model=model,
+            dry_run=False,
+            row_count=len(holdout),
+            projected_call_count=projected_calls,
+            projected_cost_usd=projected_cost,
+            actual_call_count=(len(arm_documents) if model is not None else 0),
+            actual_cost_usd=actual_cost,
+            scored_row_count=len(scored_rows),
+            zero_candidate_row_count=zero_candidate_rows,
+            context_counts=context_counts,
+            per_gate_table=table,
+            row_scores=row_scores,
+            overall_pass_rate=arm_overall,
+            catalog_overall_pass_rate=catalog_overall,
+            overall_pass_rate_delta=overall_delta,
+        ),
+        receipt_path,
     )
 
 
@@ -511,4 +573,5 @@ __all__ = [
     "HoldoutCostCeilingExceeded",
     "HoldoutRowScore",
     "evaluate_docs_holdout",
+    "write_docs_holdout_receipt",
 ]
