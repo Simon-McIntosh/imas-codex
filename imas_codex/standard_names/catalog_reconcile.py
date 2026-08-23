@@ -28,7 +28,11 @@ from typing import Any
 
 import yaml
 
-from imas_codex.standard_names.catalog_import import _normalize_field
+from imas_codex.standard_names.catalog_import import (
+    _normalize_field,
+    guard_catalog_write_payloads,
+)
+from imas_codex.standard_names.protection import PipelineAuthorityError
 from imas_codex.standard_names.provenance_rebuild import (
     bind_recovery_sources,
     recovery_sources_from_entries,
@@ -46,10 +50,25 @@ _SCALAR_FIELDS: tuple[str, ...] = ("description", "documentation", "unit")
 _FETCH_SCALAR_STATE = """
     UNWIND $ids AS id
     OPTIONAL MATCH (sn:StandardName {id: id})
+    CALL (sn) {
+        OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+        RETURN collect(DISTINCT review.id) AS reviews
+    }
+    CALL (sn) {
+        OPTIONAL MATCH
+            (sn)-[:HAS_STRUCTURAL_AUTHORITY]->(authority:StructuralNameAuthority)
+        RETURN collect(DISTINCT authority.id) AS structural_authorities
+    }
     RETURN sn.id AS id,
            sn.description AS description,
            sn.documentation AS documentation,
-           sn.unit AS unit
+           sn.unit AS unit,
+           sn.reviewer_score_name AS reviewer_score_name,
+           sn.reviewer_model_name AS reviewer_model_name,
+           sn.reviewer_score_docs AS reviewer_score_docs,
+           sn.reviewer_model_docs AS reviewer_model_docs,
+           reviews,
+           structural_authorities
 """
 
 #: Apply scalar deltas by id.  MATCH (never MERGE) — a missing node is not in
@@ -170,7 +189,15 @@ def reconcile_catalog(
     gc = gc or GraphClient()
     try:
         ids = [e["name"] for e in entries]
-        state = _fetch_scalar_state(gc, ids)
+        try:
+            state = _fetch_scalar_state(gc, ids)
+        except Exception as exc:
+            raise PipelineAuthorityError(
+                "Refused catalog reconcile because pipeline-authoritative "
+                "graph state could not be read"
+            ) from exc
+
+        entries = guard_catalog_write_payloads(entries, current_by_id=state)
 
         matched_names: set[str] = set()
         write_batch: list[dict[str, Any]] = []
