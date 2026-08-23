@@ -6064,14 +6064,9 @@ def update_review_aggregates(
 ) -> int:
     """Recompute per-StandardName aggregates from attached StandardNameReview nodes.
 
-    **Winning-group selection**: identifies the most recent review group
-    whose ``resolution_method`` is one of ``quorum_consensus``,
-    ``authoritative_escalation``, or ``single_review`` (excluding
-    ``retry_item`` and ``max_cycles_reached``). Mirrors that group's
-    final scores onto the SN aggregates.
-
-    Also sets ``review_count``, ``review_mean_score``, and
-    ``review_disagreement`` across all attached StandardNameReview nodes.
+    Sets ``review_count``, ``review_mean_score``, and ``review_disagreement``
+    across all attached StandardNameReview nodes. Axis-specific score and
+    resolution-method mirrors are owned by their dedicated write paths.
 
     Returns the number of StandardName nodes updated.
     """
@@ -6094,6 +6089,171 @@ def update_review_aggregates(
             threshold=float(threshold),
         )
         return len(list(rows or []))
+
+
+@functools.lru_cache(maxsize=1)
+def _winning_review_resolution_methods(
+    schema_path: Path | None = None,
+) -> frozenset[str]:
+    """Return the review methods the LinkML schema marks as winning.
+
+    The enum description is deliberately the admission authority: newly added
+    enum values remain excluded until the schema explicitly names them as
+    eligible for winning-group slot mirroring.
+    """
+    import yaml
+
+    if schema_path is None:
+        schema_path = Path(__file__).parents[1] / "schemas" / "standard_name.yaml"
+    schema = yaml.safe_load(schema_path.read_text(encoding="utf-8"))
+    enum = schema["enums"]["ReviewResolutionMethod"]
+    permissible = frozenset(enum["permissible_values"])
+    eligibility_text, marker, _ = str(enum.get("description") or "").partition(
+        "are eligible as winning groups"
+    )
+    if not marker:
+        raise RuntimeError(
+            "ReviewResolutionMethod schema does not declare winning-group eligibility"
+        )
+    referenced = frozenset(re.findall(r"``([a-z][a-z0-9_]*)``", eligibility_text))
+    winning = permissible & referenced
+    if not winning:
+        raise RuntimeError(
+            "ReviewResolutionMethod schema declares no winning resolution methods"
+        )
+    return winning
+
+
+@functools.lru_cache(maxsize=1)
+def _non_winning_review_resolution_methods() -> frozenset[str]:
+    """Return schema enum values not admitted as winning methods."""
+    import yaml
+
+    schema_path = Path(__file__).parents[1] / "schemas" / "standard_name.yaml"
+    schema = yaml.safe_load(schema_path.read_text(encoding="utf-8"))
+    permissible = frozenset(
+        schema["enums"]["ReviewResolutionMethod"]["permissible_values"]
+    )
+    return permissible - _winning_review_resolution_methods()
+
+
+@retry_on_deadlock()
+def project_docs_review_resolution_methods() -> list[dict[str, str]]:
+    """Mirror winning docs-review methods onto already accepted names.
+
+    Only accepted names with accepted documentation and a null mirror are
+    candidates. Review groups are docs-axis scoped. A group containing the
+    canonical reviewer is preferred; recency and stable ids break ties. The
+    write is compare-and-set on the null mirror, making replay idempotent.
+
+    Returns one receipt row per mutation with the Standard Name id, source
+    review group, source review id, and mirrored resolution method.
+    """
+    winning_methods = sorted(_winning_review_resolution_methods())
+    non_winning_methods = sorted(_non_winning_review_resolution_methods())
+    with GraphClient() as gc:
+        candidates = list(
+            gc.query(
+                """
+                MATCH (sn:StandardName)-[:HAS_REVIEW]->(review:StandardNameReview)
+                WHERE sn.name_stage = 'accepted'
+                  AND sn.docs_stage = 'accepted'
+                  AND sn.docs_review_resolution_method IS NULL
+                  AND review.review_axis = 'docs'
+                  AND review.review_group_id IS NOT NULL
+                  AND NOT EXISTS {
+                      MATCH (sn)-[:HAS_REVIEW]->(non_winner:StandardNameReview)
+                      WHERE non_winner.review_axis = 'docs'
+                        AND non_winner.resolution_method IN $non_winning_methods
+                  }
+                WITH sn, review.review_group_id AS review_group_id,
+                     max(CASE WHEN coalesce(review.is_canonical, false)
+                         THEN 1 ELSE 0 END) AS canonical_group,
+                     max(review.reviewed_at) AS group_reviewed_at,
+                     [item IN collect({
+                         review_id: review.id,
+                         reviewed_at: review.reviewed_at,
+                         resolution_method: review.resolution_method
+                     }) WHERE item.resolution_method IN $winning_methods]
+                         AS winning_records
+                WHERE size(winning_records) > 0
+                UNWIND winning_records AS winning_record
+                WITH sn, review_group_id, canonical_group, group_reviewed_at,
+                     winning_record
+                ORDER BY sn.id, canonical_group DESC, group_reviewed_at DESC,
+                         review_group_id DESC, winning_record.reviewed_at DESC,
+                         winning_record.review_id DESC
+                WITH sn, collect({
+                    review_group_id: review_group_id,
+                    review_id: winning_record.review_id,
+                    resolution_method: winning_record.resolution_method
+                })[0] AS winner
+                RETURN sn.id AS standard_name_id,
+                       winner.review_group_id AS review_group_id,
+                       winner.review_id AS review_id,
+                       winner.resolution_method AS resolution_method
+                ORDER BY standard_name_id
+                """,
+                winning_methods=winning_methods,
+                non_winning_methods=non_winning_methods,
+            )
+            or []
+        )
+        if not candidates:
+            return []
+        rows = gc.query(
+            """
+            UNWIND $candidates AS candidate
+            MATCH (sn:StandardName {id: candidate.standard_name_id})
+            WHERE sn.name_stage = 'accepted'
+              AND sn.docs_stage = 'accepted'
+              AND sn.docs_review_resolution_method IS NULL
+            SET sn.docs_review_resolution_method = candidate.resolution_method
+            RETURN sn.id AS standard_name_id,
+                   candidate.review_group_id AS review_group_id,
+                   candidate.review_id AS review_id,
+                   candidate.resolution_method AS resolution_method
+            ORDER BY standard_name_id
+            """,
+            candidates=candidates,
+        )
+    return [dict(row) for row in rows or []]
+
+
+@retry_on_deadlock()
+def clear_non_winning_docs_review_resolution_methods(
+    standard_name_ids: list[str],
+) -> list[dict[str, str]]:
+    """Clear mirrors for named rows carrying a reachable non-winning method.
+
+    This is a compare-and-set repair owned by the same module as the mirror.
+    It never changes review history, scores, timestamps, or lifecycle stages.
+    """
+    if not standard_name_ids:
+        return []
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            UNWIND $standard_name_ids AS standard_name_id
+            MATCH (sn:StandardName {id: standard_name_id})
+            WHERE sn.name_stage = 'accepted'
+              AND sn.docs_stage = 'accepted'
+              AND sn.docs_review_resolution_method IS NOT NULL
+              AND EXISTS {
+                  MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+                  WHERE review.review_axis = 'docs'
+                    AND review.resolution_method IN $non_winning_methods
+              }
+            WITH sn, sn.docs_review_resolution_method AS cleared_method
+            SET sn.docs_review_resolution_method = null
+            RETURN sn.id AS standard_name_id,
+                   cleared_method AS cleared_method
+            ORDER BY standard_name_id
+            """,
+            standard_name_ids=standard_name_ids,
+            non_winning_methods=sorted(_non_winning_review_resolution_methods()),
+        )
+    return [dict(row) for row in rows or []]
 
 
 def write_name_review_results(
