@@ -12,6 +12,11 @@ geometric quantities.
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+from typing import Any, TypedDict
+
+import yaml
 from imas_standard_names.grammar import (
     Component,
     Object,
@@ -22,6 +27,29 @@ from imas_standard_names.grammar import (
     compose_standard_name,
 )
 from imas_standard_names.grammar.model_types import Region
+
+
+class DocsHoldoutRow(TypedDict):
+    """A DD path paired with an immutable catalog documentation snapshot."""
+
+    split_key: str
+    dd_path: str
+    catalog_name: str
+    catalog_description: str
+    catalog_documentation: str
+    catalog_source: str
+    catalog_commit: str
+
+
+DOCS_HOLDOUT_PATH = (
+    Path(__file__).parents[2]
+    / "tests"
+    / "standard_names"
+    / "eval_sets"
+    / "docs_holdout.json"
+)
+CURATED_EXAMPLES_PATH = Path(__file__).with_name("examples_curated.yaml")
+_DOCS_HOLDOUT_FIELDS = frozenset(DocsHoldoutRow.__required_keys__)
 
 # ---------------------------------------------------------------------------
 # Helper: build a reference entry from grammar fields
@@ -246,3 +274,58 @@ REFERENCE_NAMES: dict[str, dict] = {
 
 Each entry is a known-good standard name that passes grammar round-trip.
 """
+
+
+def load_docs_holdout(
+    path: Path = DOCS_HOLDOUT_PATH,
+) -> list[DocsHoldoutRow]:
+    """Load and validate the tracked catalog-documentation holdout."""
+    payload: Any = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, list):
+        raise ValueError("Documentation holdout must be a JSON array")
+
+    rows: list[DocsHoldoutRow] = []
+    for index, raw_row in enumerate(payload):
+        if not isinstance(raw_row, dict):
+            raise ValueError(f"Documentation holdout row {index} must be an object")
+        missing = _DOCS_HOLDOUT_FIELDS - raw_row.keys()
+        if missing:
+            fields = ", ".join(sorted(missing))
+            raise ValueError(f"Documentation holdout row {index} lacks: {fields}")
+        for field in _DOCS_HOLDOUT_FIELDS:
+            value = raw_row[field]
+            if not isinstance(value, str) or not value.strip():
+                raise ValueError(f"Documentation holdout row {index} has empty {field}")
+        if raw_row["split_key"] != raw_row["dd_path"]:
+            raise ValueError(
+                f"Documentation holdout row {index} split key is not its DD path"
+            )
+        rows.append(raw_row)
+    return rows
+
+
+def curated_example_split_keys(
+    path: Path = CURATED_EXAMPLES_PATH,
+) -> frozenset[str]:
+    """Return DD-path split keys represented by curated prompt examples.
+
+    Curated examples are keyed by standard-name identity. A single identity may
+    correspond to more than one DD source, so the reference map expands every
+    matching example to all of its known DD paths before split comparison.
+    """
+    payload: Any = yaml.safe_load(path.read_text(encoding="utf-8"))
+    if not isinstance(payload, dict):
+        raise ValueError("Curated examples must be grouped by quality tier")
+
+    curated_names = {
+        row["id"]
+        for tier_rows in payload.values()
+        if isinstance(tier_rows, list)
+        for row in tier_rows
+        if isinstance(row, dict) and isinstance(row.get("id"), str)
+    }
+    return frozenset(
+        dd_path
+        for dd_path, reference in REFERENCE_NAMES.items()
+        if reference["name"] in curated_names
+    )
