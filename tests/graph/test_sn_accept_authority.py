@@ -118,10 +118,10 @@ def test_structural_authority_contract_is_schema_declared(schema: GraphSchema) -
     assert child_ids.list_elements_ordered
 
 
-def test_accepted_names_have_review_or_structural_authority(
+def test_bare_structural_markers_have_authority_or_no_live_children(
     graph_client: Any, schema: GraphSchema
 ) -> None:
-    """Every accepted name has its own score or a child-set authority record."""
+    """Every childful bare structural marker has a child-set authority."""
     stage_property = _property_with_range(
         schema, _STANDARD_NAME, "NameStage", "name_stage"
     )
@@ -152,7 +152,12 @@ def test_accepted_names_have_review_or_structural_authority(
         WHERE sn.{stage_property} = $accepted
         OPTIONAL MATCH (sn)-[:{authority_relationship}]->
                        (authority:{_STRUCTURAL_AUTHORITY})
-        WITH sn, count(authority) > 0 AS has_structural_authority
+        WITH sn, count(authority) > 0 AS has_structural_authority,
+             EXISTS {{
+               MATCH (live_child:{_STANDARD_NAME})-[:HAS_PARENT]->(sn)
+               WHERE NOT (coalesce(live_child.{stage_property}, '') IN
+                 ['superseded', 'exhausted', 'contested'])
+             }} AS has_live_children
         RETURN count(sn) AS accepted,
                sum(CASE WHEN sn.{score_property} IS NOT NULL
                         THEN 1 ELSE 0 END) AS scored,
@@ -164,35 +169,63 @@ def test_accepted_names_have_review_or_structural_authority(
                sum(CASE WHEN sn.{score_property} IS NULL
                           AND sn.{reviewer_property} = $structural_marker
                           AND NOT has_structural_authority
-                        THEN 1 ELSE 0 END) AS bare_marker_only
+                        THEN 1 ELSE 0 END) AS bare_marker_only,
+               sum(CASE WHEN sn.{score_property} IS NULL
+                          AND sn.{reviewer_property} = $structural_marker
+                          AND NOT has_structural_authority
+                          AND has_live_children
+                        THEN 1 ELSE 0 END) AS childful_bare_marker,
+               sum(CASE WHEN sn.{score_property} IS NULL
+                          AND sn.{reviewer_property} = $structural_marker
+                          AND NOT has_structural_authority
+                          AND NOT has_live_children
+                        THEN 1 ELSE 0 END) AS childless_bare_marker
         """,
         accepted="accepted",
         structural_marker=_STRUCTURAL_MARKER,
     )
     summary = rows[0]
 
-    residual_rows = graph_client.query(
+    childless_marker_rows = graph_client.query(
         f"""
         MATCH (sn:{_STANDARD_NAME})
         WHERE sn.{stage_property} = $accepted
           AND sn.{score_property} IS NULL
+          AND sn.{reviewer_property} = $structural_marker
           AND NOT (sn)-[:{authority_relationship}]->
                   (:{_STRUCTURAL_AUTHORITY})
-        RETURN sn.id AS id, sn.{reviewer_property} AS reviewer_marker
+          AND NOT EXISTS {{
+            MATCH (live_child:{_STANDARD_NAME})-[:HAS_PARENT]->(sn)
+            WHERE NOT (coalesce(live_child.{stage_property}, '') IN
+              ['superseded', 'exhausted', 'contested'])
+          }}
+        RETURN sn.id AS id
         ORDER BY id
-        LIMIT 25
         """,
         accepted="accepted",
+        structural_marker=_STRUCTURAL_MARKER,
     )
 
-    assert summary["residual"] == 0, (
-        "Accepted-name authority invariant failed: "
+    metrics = (
         f"accepted={summary['accepted']}, scored={summary['scored']}, "
         f"structurally_authorized={summary['structurally_authorized']}, "
-        f"residual={summary['residual']}. "
-        f"Bare {_STRUCTURAL_MARKER!r} markers without authority="
-        f"{summary['bare_marker_only']}; this is the structural-authority "
-        "backfill size. First residual identities: "
-        + ", ".join(row["id"] for row in residual_rows)
+        f"residual={summary['residual']}, "
+        f"bare_marker_only={summary['bare_marker_only']}, "
+        f"childful_bare_marker={summary['childful_bare_marker']}, "
+        f"childless_bare_marker={summary['childless_bare_marker']}. "
+        "Childless identities: "
+        + ", ".join(row["id"] for row in childless_marker_rows)
         + f". Schema name-review axis property: {_REVIEW}.{review_axis_property}."
+    )
+    assert summary["structurally_authorized"] > 0, (
+        "No structural authorities are present. " + metrics
+    )
+    assert summary["childful_bare_marker"] == 0, (
+        "A bare structural marker still has live children. " + metrics
+    )
+    assert summary["bare_marker_only"] == summary["childless_bare_marker"], (
+        "Not every remaining bare structural marker is childless. " + metrics
+    )
+    assert summary["childless_bare_marker"] == len(childless_marker_rows) == 5, (
+        "The graph-derived childless structural-marker exemption changed. " + metrics
     )
