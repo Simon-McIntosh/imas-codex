@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:28:15",
+  "updated": "2026-08-23T10:32:03",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -435,7 +435,7 @@
         "id": "impl-paidcompare",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02db8-8657-7fb3-9ead-df6744f54674",
         "created": "2026-08-23"
       },
       {
@@ -465,6 +465,13 @@
         "role": "implement",
         "session_id": "01a023e9-431b-77e1-a420-9c2d8010cd1d",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-relgap",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-reparentprog",
@@ -18194,9 +18201,67 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T082419392373-impl-paidcompare",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-paidcompare",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-paidcompare",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:24:22Z",
+        "completed_at": "2026-08-23T08:31:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 409,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 409,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "aae9b6b6447db8526efe5ce2ea3cf6ace75d105c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "QUALIFIED RESULT - the headline is an artifact. Generated arm 0.897647 vs catalog baseline 0.822353, signed delta +0.075294 over 10 gates, 85 rows, 0 generation failures. Actual spend USD 0.182897 against the USD 1.50 ceiling and well under the USD 0.912663 projection. BUT the entire aggregate gain comes from one gate: maximum_word_count, where the catalog scores 0.235 because 76.5 percent of curated rows exceed the codex word cap they were never written against. Excluding that single gate, the mean delta over the remaining nine gates is -0.001307 - a dead tie. Two material regressions are masked by the aggregate: essential_relationships 0.612 generated vs 1.000 catalog (-0.388) and scope 0.624 vs 0.800 (-0.176), plus sign_convention -0.024. Wins are real on physical_meaning +0.247, symbol_definitions +0.200, defining_equation +0.071 and exclusions +0.059; link_hygiene and minimum_word_count tie at 1.000. CONSEQUENCE: the f-west-docs-refresh trigger, which requires the holdout to show the template beating baseline, has NOT been met on this evidence. That gate stays closed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T082419392373-impl-paidcompare/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02db8-8657-7fb3-9ead-df6744f54674",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3374080,
+            "cached_input_tokens_cumulative": 3374080,
+            "input_tokens": 3518184,
+            "input_tokens_cumulative": 3518184,
+            "output_tokens": 10296,
+            "output_tokens_cumulative": 10296,
+            "reasoning_output_tokens": 4216,
+            "reasoning_output_tokens_cumulative": 4216
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 494
+    "_version": 497
   }
 }

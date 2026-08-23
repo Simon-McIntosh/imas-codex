@@ -201,6 +201,51 @@
     <p>Commit <code>e42bd468</code>; 3 tests added; artifact
     <code>imas_codex/standard_names/docs_holdout_eval.py</code>.</p>
 
+
+    <h2 id="comparison">The measured comparison &mdash; and why its headline is an artifact</h2>
+    <p>The plan's central question, finally answerable: does generated documentation reach catalog
+    parity? The full 85-row holdout was generated through the production seat
+    (<code>openrouter/openai/gpt-5.6-luna</code>, high effort) and scored gate by gate against its
+    catalog counterpart. Zero generation failures. Actual spend <strong>USD 0.183</strong> against
+    a USD 1.50 ceiling and well under the USD 0.913 projection.</p>
+    <p>The aggregate reads <strong>0.898 generated vs 0.822 catalog, +0.075</strong>. Reported that
+    way it would be wrong, because <em>the entire gain comes from one gate</em>.</p>
+    <table>
+      <caption>Per-gate comparison, generated arm against catalog counterpart</caption>
+      <thead><tr><th>Gate</th><th>Generated</th><th>Catalog</th><th>Delta</th></tr></thead>
+      <tbody>
+        <tr><td>maximum_word_count</td><td>1.000</td><td>0.235</td><td><strong>+0.765</strong></td></tr>
+        <tr><td>physical_meaning</td><td>0.965</td><td>0.718</td><td>+0.247</td></tr>
+        <tr><td>symbol_definitions</td><td>1.000</td><td>0.800</td><td>+0.200</td></tr>
+        <tr><td>defining_equation</td><td>1.000</td><td>0.929</td><td>+0.071</td></tr>
+        <tr><td>exclusions_or_distinctions</td><td>0.800</td><td>0.741</td><td>+0.059</td></tr>
+        <tr><td>link_hygiene</td><td>1.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td>minimum_word_count</td><td>1.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td>sign_convention</td><td>0.976</td><td>1.000</td><td>&minus;0.024</td></tr>
+        <tr><td>scope</td><td>0.624</td><td>0.800</td><td><strong>&minus;0.176</strong></td></tr>
+        <tr><td>essential_relationships</td><td>0.612</td><td>1.000</td><td><strong>&minus;0.388</strong></td></tr>
+      </tbody>
+    </table>
+    <p><strong>The artifact.</strong> Only <strong>23.5%</strong> of curated catalog rows fit the
+    codex word cap &mdash; a bound the catalog was never written against. That gate therefore
+    measures conformance to a local convention, not documentation quality, and it alone carries
+    +0.765 of a +0.753 total signed delta. <strong>Excluding it, the mean delta over the remaining
+    nine gates is &minus;0.001</strong>: a dead tie.</p>
+    <p><strong>What the aggregate was hiding.</strong> Generated documentation is materially worse
+    than curated prose on exactly the two gates that carry a physicist's context:
+    <strong>essential relationships</strong> (0.612 against a perfect catalog 1.000) and
+    <strong>scope</strong> (0.624 against 0.800). The genuine wins &mdash; physical meaning,
+    symbol definitions, defining equation, exclusions &mdash; are real and worth keeping, but they
+    do not offset those two.</p>
+    <p><strong>Consequence for the WEST cohort.</strong> The <code>f-west-docs-refresh</code>
+    trigger requires the holdout to show the template beating baseline before the cohort is
+    refreshed ahead of human review. On this evidence it does not. That gate stays closed, and
+    refreshing the reviewer packet now would spend paid seats to regenerate prose that is weaker
+    on relationships and scope than what it replaces. The negative result stands on the page
+    rather than being tuned around.</p>
+    <p>Receipt: <code>comparison-result.json</code>; pricing receipt
+    <code>comparison-price.json</code> (sha256 <code>ecd1ff45</code>).</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
