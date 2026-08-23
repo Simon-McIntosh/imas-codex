@@ -14,6 +14,10 @@ The predicates are **not equivalent**. On the stable live graph window from
 | Approximation emits, real path excludes | **1,352** |
 | Real path emits, approximation misses | **168** |
 
+First, the SYMMETRIC DIFFERENCE IS 1,520 AGAINST AN INTERSECTION OF ONLY 366 - so the two predicates disagree on membership far more than the totals suggest, and a totals-only comparison would have reported a plausible-looking three-fold gap while concealing that they barely describe the same set.
+
+Second, THE APPROXIMATION WAS WRONG IN BOTH DIRECTIONS: 1,352 approximation-only, of which 1,350 are documentation_review_unresolved because the hand predicate ignored docs_review_resolution_method, AND 168 real-only that the hand predicate MISSED - 167 origin derived plus efficiency_of_plant_system - because Gate C admits structural and catalog-lineage identities carrying a null reviewer_score_name.
+
 The graph did not drift during the comparison: the `StandardName` population
 was **4,510** at the hand-predicate
 measurement and **4,510**
@@ -22,6 +26,12 @@ also byte-for-byte unchanged before and after the export at
 **1,718** identities.
 The real path's upstream accepted/approved population was
 **2,293**.
+
+**The release's binding constraint is the 1,350-row
+`documentation_review_unresolved` cohort.** Those identities clear the four
+hand predicates but have no `docs_review_resolution_method`; the shortfall is
+therefore on documentation-review authority, not the name-score axis to which
+the plan had attributed it.
 
 The plan must quote **534**, not 1,718. The 534 is what the production export
 path actually writes after upstream cohort classification, score handling,
@@ -44,24 +54,29 @@ AND docs_stage = accepted
 AND reviewer_score_name >= 0.85
 ```
 
-The exclusion-accounting gate passed. The runtime `ExportReport` returned
-534 unique emitted identities;
-the generated catalog YAML contained the same 534
-identities one-for-one, and `.export_report.json` recorded the same emitted
-count. Full machine-readable sets, per-identity classifications, timestamps,
-and spot checks are retained in `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152903065576-n-predicatediff/predicate-diff.json`. The real
-report is `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152903065576-n-predicatediff/real-export/.export_report.json` and the complete
-execution log is `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152903065576-n-predicatediff/predicate-diff.log`.
+The exclusion-accounting gate passed. The adopted measurement returned 534
+unique emitted identities and the generated catalog YAML contained those same
+534 identities one-for-one. Full identity-level differences and the 5-plus-5
+spot checks are retained below.
 
-There is one provenance-contract defect to keep visible: at source commit
-`888dc3e0`, `.export_report.json` serializes the emitted **count** and every
-identity-bearing exclusion, but not `ExportReport.exported_names`. Therefore the
-exact real emitted membership below comes from the production `run_export`
-return value and is independently identical to the YAML actually written; it
-cannot literally be reread from `.export_report.json` alone without an
-out-of-fence source change. This does not weaken the membership result, but it
-does mean the dispatch's requested serialization route is not present in this
-revision.
+The provenance-contract defect found by this measurement is now closed in
+source: `ExportReport.to_dict()` serializes `emitted_identities`, and the focused
+fixture asserts that the list persisted in `.export_report.json` equals the
+returned `exported_names` list exactly. The authorized live rerun then read
+membership from `.export_report.json` rather than the in-memory return value;
+its 537 serialized identities matched both the returned list and the generated
+catalog YAML one-for-one, and exclusion accounting passed.
+
+That serializer-validation rerun occurred after the concurrent refine campaign
+had advanced the graph to 4,666 `StandardName` nodes. It is retained only as
+proof of durable serialization and does not replace the adopted comparison:
+the evidence result remains the earlier stable 4,510-to-4,510 window, 534 real
+emissions, 1,718 approximate emissions, and the 1,520-identity difference.
+Serializer-validation artifacts are
+`/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152903065576-n-predicatediff/real-export/.export_report.json`,
+`/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152903065576-n-predicatediff/predicate-diff.json`,
+and
+`/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152903065576-n-predicatediff/predicate-diff.log`.
 
 ## Symmetric difference by identity and classifying reason
 

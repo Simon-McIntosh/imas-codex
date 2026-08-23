@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from unittest.mock import patch
 
@@ -82,11 +83,17 @@ def test_export_ledger_closes_over_fixture_population(tmp_path: Path) -> None:
 
     report = _run_fixture_export(tmp_path, population)
     payload = report.to_dict()
+    persisted_payload = json.loads(
+        (tmp_path / ".export_report.json").read_text(encoding="utf-8")
+    )
     rows = {row["reason"]: row for row in payload["exclusion_ledger"]}
 
     assert report.all_gates_passed
     assert report.total_candidates == 4
     assert report.exported_count == 1
+    assert report.exported_names == ["emitted_name"]
+    assert payload["emitted_identities"] == report.exported_names
+    assert persisted_payload["emitted_identities"] == report.exported_names
     assert {reason: row["count"] for reason, row in rows.items()} == {
         "documentation_not_accepted": 1,
         "invalid_validation_status": 1,
