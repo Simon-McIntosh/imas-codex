@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="40">
 <meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44,2b607c58,7a9308ac,4c078678,723c90a9,7def7d10,c6cc10ac,5c1b14ab,4e4e8d26,08701281">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/doc_links.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,tests/standard_names/test_doc_links.py,docs/figures/sn-quality-parity/claim-disposition.svg">
 </head>
@@ -96,13 +96,23 @@
       no bare <code>[:COCOS]</code> traversal remains in <code>imas_codex/</code>. Commit
       <code>b79f07b9</code>.
       <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#cocos-edge">Record</a>.</li>
-      <li><strong>Open — holdout scale.</strong> Seven rows cannot support a claim that one
-      template beats another. Expand to every catalog entry whose DD path resolves, keeping the
-      single-immutable-commit and empty-intersection contracts.</li>
-      <li><strong>Open — objective gate vector.</strong> Score one documentation string against
-      the seven live normative gates plus link hygiene and word-count bounds, returning a
-      per-gate result rather than a single subjective number. The gate set is fixed by the
-      <code>docs-content-gates</code> decision.</li>
+      <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>Holdout
+      scale.</strong> Expanded 7 → <strong>85</strong> path-level rows from 13 catalog
+      identities, still on the single immutable commit <code>1f3d7224</code>. The ceiling is
+      measured, not assumed: 42 catalog entries, 15 resolving through live bindings, the 2 used
+      by curated prompt examples excluded wholesale. 85/85 split keys unique; disjointness holds
+      at both identity and split-key level. Commit <code>dbb10f86</code>.
+      <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#holdout">Record</a>.</li>
+      <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>Objective gate
+      vector.</strong> <code>docs_gates.py</code> returns a per-gate boolean vector, and it
+      discriminates: a catalog row scored 10/10 against a three-word stub at 4/10 on the original
+      vector. Commit <code>7d4707a8</code>. Subsequently reduced to <strong>six</strong> gates by
+      the <code>gate-role</code> decision, which deleted the four lexical checks and retired
+      their patterns so they cannot return: <code>defining_equation</code>,
+      <code>symbol_definitions</code>, <code>relationship_link</code>,
+      <code>sign_convention</code>, <code>link_hygiene</code>,
+      <code>minimum_word_count</code>. Commit <code>08701281</code>.
+      <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#gate-deletion">Record</a>.</li>
     </ul>
 
     <h2 id="s3">§3 — Proving an improvement</h2>
@@ -120,13 +130,25 @@
       <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>Example
       disjointness.</strong> Curated prompt examples now carry DD split keys and are proven
       disjoint from the holdout, so a showcase example cannot leak into the evaluation set.</li>
-      <li><strong>Open — phase-by-phase comparison.</strong> The tracked A/B set still has blank
-      goldens and its harness declares itself scaffolding, so no phase has ever been compared
-      against a baseline. Wire it to the holdout and the gate vector so a template or context
-      change reports a measured delta.</li>
-      <li><strong>Open — bulk validation sample.</strong> After the loop closes, run one
-      bulk-generation sample against catalog baselines to check the gain survives outside the
-      holdout.</li>
+      <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>Phase-by-phase
+      comparison.</strong> The evidence loop closed and then ran five times. It earned its keep by
+      being wrong twice and saying so: an apparent +0.075 was one gate's artifact (nine-gate delta
+      −0.001, a dead tie); a prompt iteration then summed to <em>exactly zero</em>, +0.165 of gains
+      paid for by −0.165 of losses, which diagnosed instruction competition rather than a length
+      ceiling; stating each obligation independently confirmed the diagnosis with +0.518 and no
+      gate regressing. Production-faithful standing figure: enriched 0.9621 against catalog 0.8876.
+      Commits <code>e42bd468</code>, <code>9862ba44</code>, <code>2b607c58</code>,
+      <code>4c078678</code>, <code>7a9308ac</code>.
+      <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#comparison">Record</a>.</li>
+      <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>Bulk validation
+      sample.</strong> 53 accepted identities across all 18 eligible domains, deterministic seed,
+      every holdout identity and split key excluded first. This is the phase that stopped a
+      mistake: its first run failed at 0.860 against 0.944 and the failure was traced to the
+      harness bypassing production enrichment, not to the documentation. Re-run production-faithful
+      it passes at 0.9434 off-holdout against catalog 0.8876, and the relationship collapse
+      (14/53 → 53/53) vanished with it. Without this phase a holdout-only result would have
+      authorised rewriting 210 live accepted docs on a number that did not generalise.
+      <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#generalization">Record</a>.</li>
       <li><strong>Not required.</strong> The link lifecycle's schema fields, bounded retries and
       terminal <code>failed</code> state are live, and unresolved links already cannot reach
       published output. A separate <code>unresolved_links</code> field would duplicate the
@@ -180,6 +202,47 @@
     <p><strong>Sequencing:</strong> independent of each other and of the cohort refresh, so either
     order, and neither blocks §3. Both are additive to a gate set that is already green at
     6,653 passing tests.</p>
+
+    <h2 id="s6">§6 — The WEST cohort documentation refresh</h2>
+    <p>This section owns the work <code>f-west-docs-refresh</code> describes, which is now
+    executable rather than held. Two things changed. The <code>west-refresh-sequencing</code>
+    decision was re-locked away from the unreadable <code>scope</code> threshold and onto the
+    existing <code>generate_docs → review_docs → refine_docs</code> quorum — the same bar every
+    currently-accepted doc already passed — with <code>DocsRevision</code> snapshots as the
+    reversible net. And the spend it needs is authorised at <strong>USD 150</strong>, against a
+    production-enriched generation projection of USD 2.37 for the rewrite subset plus paid review
+    and refine. This is the sole bulk regeneration <code>docs-regen-scope</code> permits.</p>
+    <ul>
+      <li><strong>The cohort splits, and the split is not cosmetic.</strong> A concurrent
+      <code>refine_name</code> campaign on the release-readiness plan is mid-flight over 273
+      below-bar identities, and it mints a new identity per success while superseding the
+      predecessor. Documentation generated against a predecessor is attached to a name about to
+      be superseded — paid work with a guaranteed zero lifetime. The overlap is real: a
+      cross-session intersection returned at least 20 shared identities, among them
+      <code>energy_confinement_time</code>, <code>neutral_pressure</code> and
+      <code>current_of_poloidal_field_coil</code>. So the remainder refreshes now and the
+      overlap set refreshes afterwards, on the successor identities.</li>
+      <li><strong>The join key is the finding, not a detail.</strong> The refine receipt keys on
+      <code>StandardName.id</code>; the <code>name</code> property is null on those nodes, so a
+      join on <code>name</code> returns zero rows and reads as a clean no-overlap all-clear. Any
+      census here must report the row count both keys return and state which is sound. An
+      exclusion set that is silently empty is worse than no exclusion set, because it looks like
+      an answer.</li>
+      <li><strong>Two campaigns, one graph.</strong> Every <code>sn run</code> issued from this
+      section passes <code>--skip-global-maintenance</code>: the concurrent campaign is already
+      doing startup reconcile, and two reconcilers racing on shared state is an avoidable
+      hazard.</li>
+      <li><strong>Size off the first tranche, not the projection.</strong> The cost projector
+      over-estimates roughly threefold on real cohorts — measured independently on both the names
+      and documentation axes. That is a prior for reading a projection, never for setting a cap:
+      the campaign reports actual against its ceiling per tranche and stops to remeasure between
+      them, per <code>recovery-budget</code>.</li>
+      <li><strong>The authority is the human packet.</strong> Refreshed documentation becomes
+      accepted only by clearing the ordinary quorum; a failure follows the ordinary refine path.
+      The six surviving structural gates exist to avoid wasting expert attention, not to certify
+      quality — physicists reading the packet remain the only signal in this system that measures
+      physics rather than form.</li>
+    </ul>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
