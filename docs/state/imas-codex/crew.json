@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:23:37",
+  "updated": "2026-08-23T11:33:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -292,6 +292,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-gatehonesty",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-genericop",
         "harness": "codex",
         "role": "implement",
@@ -464,6 +471,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02db1-92b2-7950-b285-46be6a3f62d6",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-prodenrich",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-23"
       },
       {
@@ -757,7 +771,7 @@
         "id": "inv-relcollapse",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
+        "session_id": "01a02dec-ba7a-71f3-8ad7-da97d9fb24ec",
         "created": "2026-08-23"
       },
       {
@@ -18739,9 +18753,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T092120584012-inv-relcollapse",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "inv-relcollapse",
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-relcollapse",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:21:23Z",
+        "completed_at": "2026-08-23T09:31:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 612,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 612,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "f244991bc70212f283a03a19b4d78a608ef54085",
+        "commits": [
+          "0789097f11ce4f60a4e3e6c7e66517a01fb16724"
+        ],
+        "changed_lines": {
+          "added": 92,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "VERDICT: the gate definition is at fault, not the injected context - and the harness bypasses production enrichment, which qualifies every comparison run in this plan. (1) essential_relationships is a lexical presence proxy: it passes on any Markdown link or one of nine broad phrases. Off-holdout, all 14 passes carry a link, only 2 also carry a phrase, all 39 failures carry neither. vertical_coordinate_of_antenna_strap is a representative FALSE NEGATIVE - it states the relationship in prose (works together with the other cylindrical coordinates) and fails only for lacking a link or allow-listed phrase. (2) The holdout flattered the gate: it repeats 13 identities across 85 paths while the off-holdout sample has 53 unique identities, so name-family composition rather than documentation quality controls incidental lexical-witness emission, inflating the 80/85. The -0.677 is therefore substantially a property of the gate and the sampling, not a real quality collapse. (3) THE BIG ONE: both receipts used the benchmark docs generator, which reconstructs a minimal prompt item and BYPASSES production graph enrichment - verified, all 138 prompts across both populations carried ZERO candidate-specific parent/component/base/derivative/peer/related/sibling blocks. So none of the three comparison runs measured production documentation generation, and the +0.056 artifact-free parity claim is retracted as a statement about production docs. 23 local citations resolve.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T092120584012-inv-relcollapse/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dec-ba7a-71f3-8ad7-da97d9fb24ec",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7460096,
+            "cached_input_tokens_cumulative": 7460096,
+            "input_tokens": 7690428,
+            "input_tokens_cumulative": 7690428,
+            "output_tokens": 21897,
+            "output_tokens_cumulative": 21897,
+            "reasoning_output_tokens": 7956,
+            "reasoning_output_tokens_cumulative": 7956
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T092514516955-n-stublineage",
+        "plan": "sn-release-readiness",
+        "section": "\u00a74",
+        "node": "n-stublineage",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "inv-stublineage",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:25:17Z",
+        "completed_at": "2026-08-23T09:32:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 445,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 445,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "27f28bc773f1012e8e3e228f36ba1e05870311d3",
+        "commits": [
+          "11aa1ba07ce25ecd2fdaae1f104f1291ddabe36a"
+        ],
+        "changed_lines": {
+          "added": 130,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T092514516955-n-stublineage/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02df0-4ae7-7551-8415-616637a62526",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2891008,
+            "cached_input_tokens_cumulative": 2891008,
+            "input_tokens": 3032578,
+            "input_tokens_cumulative": 3032578,
+            "output_tokens": 14064,
+            "output_tokens_cumulative": 14064,
+            "reasoning_output_tokens": 6484,
+            "reasoning_output_tokens_cumulative": 6484
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 516
+    "_version": 521
   }
 }
