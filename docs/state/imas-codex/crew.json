@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T18:18:34",
+  "updated": "2026-08-23T18:28:45",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -108,6 +108,13 @@
         "role": "implement",
         "session_id": "01a024f6-7916-71c1-8d24-efe803fd5c5d",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-applylanded",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-attachapply",
@@ -411,6 +418,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-holdoutauth",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-identitybatch",
         "harness": "codex",
         "role": "implement",
@@ -708,7 +722,7 @@
         "id": "impl-revalidate",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02f6b-d759-7db1-8f80-1039b1cd1908",
         "created": "2026-08-23"
       },
       {
@@ -21916,9 +21930,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T161403640986-n-tristate",
+        "plan": "sn-quality-parity",
+        "section": "\u00a75",
+        "node": "n-tristate",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-tristate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T16:14:06Z",
+        "completed_at": "2026-08-23T16:24:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 644,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 644,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "2f867abd6157fc3aeb15966985e3192ff4facc9b",
+        "commits": [
+          "d128f0d478adead0d37570e2d9ff1c8d9d6752d1"
+        ],
+        "changed_lines": {
+          "added": 421,
+          "removed": 41,
+          "files": 4
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T161403640986-n-tristate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f66-9505-7af3-8155-6b70ecffdc13",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5667584,
+            "cached_input_tokens_cumulative": 5667584,
+            "input_tokens": 5841015,
+            "input_tokens_cumulative": 5841015,
+            "output_tokens": 24279,
+            "output_tokens_cumulative": 24279,
+            "reasoning_output_tokens": 8610,
+            "reasoning_output_tokens_cumulative": 8610
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T161557933409-n-westcensus",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-westcensus",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-westcensus",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T16:16:01Z",
+        "completed_at": "2026-08-23T16:24:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 488,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 488,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "2f867abd6157fc3aeb15966985e3192ff4facc9b",
+        "commits": [
+          "b431b571e5bf9ec4e2b13669c89191b252f9d2fd"
+        ],
+        "changed_lines": {
+          "added": 2468,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T161557933409-n-westcensus/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f68-53c0-7211-bfb2-8817bc0f3c2c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3759616,
+            "cached_input_tokens_cumulative": 3759616,
+            "input_tokens": 3933207,
+            "input_tokens_cumulative": 3933207,
+            "output_tokens": 18861,
+            "output_tokens_cumulative": 18861,
+            "reasoning_output_tokens": 6953,
+            "reasoning_output_tokens_cumulative": 6953
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 617
+    "_version": 622
   }
 }
