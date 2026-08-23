@@ -24516,13 +24516,31 @@ def reset_standard_name_docs(
                  (sn.documentation IS NOT NULL AND sn.documentation <> '')
                  AS has_docs
 
+            // The chain counter can lag stored history after an authority
+            // import. Derive the append position from both sources so an
+            // existing deterministic id is never reused.
+            OPTIONAL MATCH (prior:DocsRevision)
+            WHERE has_docs
+              AND prior.id STARTS WITH sn.id + '#rev-'
+            WITH sn, cur_chain, has_docs,
+                 max(toInteger(split(prior.id, '#rev-')[1]))
+                 AS latest_revision
+            WITH sn, cur_chain, has_docs,
+                 CASE
+                   WHEN latest_revision IS NULL OR cur_chain > latest_revision
+                   THEN cur_chain
+                   ELSE latest_revision + 1
+                 END AS revision_number
+
             // Snapshot current docs (when present) exactly like a refine
             // pass would, so the pre-harmonization text stays recoverable.
             FOREACH (_ IN CASE WHEN has_docs THEN [1] ELSE [] END |
-              MERGE (rev:DocsRevision {id: sn.id + '#rev-' + toString(cur_chain)})
-              ON CREATE SET
+              CREATE (rev:DocsRevision {
+                id: sn.id + '#rev-' + toString(revision_number)
+              })
+              SET
                 rev.sn_id                          = sn.id,
-                rev.revision_number                = cur_chain,
+                rev.revision_number                = revision_number,
                 rev.description                    = coalesce(sn.description, ''),
                 rev.documentation                  = coalesce(sn.documentation, ''),
                 rev.model                          = sn.docs_model,
@@ -24536,7 +24554,7 @@ def reset_standard_name_docs(
 
             SET sn.docs_stage        = 'pending',
                 sn.docs_chain_length =
-                    CASE WHEN has_docs THEN cur_chain + 1 ELSE cur_chain END,
+                    CASE WHEN has_docs THEN revision_number + 1 ELSE cur_chain END,
                 sn.docs_model        = null,
                 sn.docs_generated_at = null,
                 sn.claim_token       = null,
