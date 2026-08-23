@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T13:15:36",
+  "updated": "2026-08-23T13:18:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -262,6 +262,13 @@
         "role": "implement",
         "session_id": "01a02469-90ac-74a1-a26d-73ae362946fb",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-doclinks",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-dualapplyrun",
@@ -537,6 +544,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-persistquery",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-pricerun",
         "harness": "codex",
         "role": "implement",
@@ -659,7 +673,7 @@
         "id": "impl-sigfix",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02e53-abde-70f0-9144-04a1d66cb959",
         "created": "2026-08-23"
       },
       {
@@ -20555,6 +20569,6 @@
       }
     ],
     "holds": [],
-    "_version": 573
+    "_version": 576
   }
 }
