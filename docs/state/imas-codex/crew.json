@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:21:20",
+  "updated": "2026-08-23T11:23:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -467,6 +467,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-quarcensus",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-recompare",
         "harness": "codex",
         "role": "implement",
@@ -605,6 +612,13 @@
         "role": "implement",
         "session_id": "01a028af-2a54-7ba2-b04d-371f5860ec0d",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-tailcensus",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-targetreview",
@@ -754,6 +768,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "inv-reusemap-rel",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "inv-stall",
         "harness": "codex",
         "role": "investigate",
@@ -773,6 +794,13 @@
         "role": "investigate",
         "session_id": null,
         "created": "2026-08-18"
+      },
+      {
+        "id": "inv-stublineage",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "inv-stubs",
@@ -18714,6 +18742,6 @@
       }
     ],
     "holds": [],
-    "_version": 512
+    "_version": 516
   }
 }
