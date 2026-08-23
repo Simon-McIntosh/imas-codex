@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 from imas_codex.standard_names.docs_gates import (
@@ -57,6 +58,7 @@ def test_catalog_documentation_passes_every_content_gate() -> None:
         physics_context=DocumentationPhysicsContext(
             dd_path="core_sources/source/profiles_1d/grid/psi",
             declared_unit="Wb",
+            cocos_transformation_type="psi_like",
         ),
     )
 
@@ -256,19 +258,93 @@ def test_sign_convention_must_be_the_final_plain_paragraph() -> None:
     )
 
     assert (
-        score_documentation(text).gate_vector["sign_convention"].outcome
+        score_documentation(
+            text,
+            physics_context=DocumentationPhysicsContext(
+                cocos_transformation_type="psi_like"
+            ),
+        )
+        .gate_vector["sign_convention"]
+        .outcome
         is DocumentationGateOutcome.FAIL
     )
 
 
-def test_absent_sign_convention_is_conditionally_valid() -> None:
+def test_sensitive_quantity_requires_a_sign_convention() -> None:
     text = _catalog_documentation("electron_temperature")
 
     assert "Sign convention:" not in text
-    assert (
-        score_documentation(text).gate_vector["sign_convention"].outcome
-        is DocumentationGateOutcome.PASS
+    result = score_documentation(
+        text,
+        physics_context=DocumentationPhysicsContext(
+            cocos_transformation_type="psi_like"
+        ),
+    ).gate_vector["sign_convention"]
+
+    assert result.outcome is DocumentationGateOutcome.FAIL
+    assert result.reason == "COCOS-sensitive quantity omits a sign convention"
+
+
+def test_invariant_quantity_forbids_a_sign_convention() -> None:
+    result = score_documentation(
+        "Sign convention: Positive when the measured value is above zero.",
+        physics_context=DocumentationPhysicsContext(
+            cocos_transformation_type="one_like"
+        ),
+    ).gate_vector["sign_convention"]
+
+    assert result.outcome is DocumentationGateOutcome.FAIL
+    assert result.reason == "COCOS-invariant quantity states a sign convention"
+
+
+def test_sign_convention_is_not_evaluable_without_a_transformation_class() -> None:
+    result = score_documentation(
+        _catalog_documentation("electron_temperature"),
+        physics_context=DocumentationPhysicsContext(cocos_transformation_type=None),
+    ).gate_vector["sign_convention"]
+
+    assert result.outcome is DocumentationGateOutcome.NOT_EVALUABLE
+    assert result.reason == "COCOS transformation class is unavailable"
+
+
+def test_catalog_text_must_not_expose_cocos_metadata() -> None:
+    for metadata in ("COCOS 17", "psi_like"):
+        result = score_documentation(
+            f"This quantity follows {metadata}.",
+            physics_context=DocumentationPhysicsContext(
+                cocos_transformation_type="psi_like"
+            ),
+        ).gate_vector["sign_convention"]
+
+        assert result.outcome is DocumentationGateOutcome.FAIL
+        assert result.reason == "documentation exposes catalog-internal COCOS metadata"
+
+
+def test_holdout_sign_gate_outcome_distribution_is_complete() -> None:
+    rows = json.loads(HOLDOUT_PATH.read_text(encoding="utf-8"))
+    outcomes = Counter(
+        score_documentation(
+            row["catalog_documentation"],
+            physics_context=DocumentationPhysicsContext(
+                dd_path=row["dd_path"],
+                declared_unit=row["declared_unit"],
+                cocos_transformation_type=row["cocos_transformation_type"],
+            ),
+        )
+        .gate_vector["sign_convention"]
+        .outcome
+        for row in rows
     )
+    one_like_count = sum(row["cocos_transformation_type"] == "one_like" for row in rows)
+
+    assert len(rows) == 85
+    assert one_like_count == 2
+    assert outcomes == {
+        DocumentationGateOutcome.PASS: 22,
+        DocumentationGateOutcome.FAIL: 2,
+        DocumentationGateOutcome.NOT_EVALUABLE: 61,
+    }
+    assert sum(outcomes.values()) == len(rows)
 
 
 def test_minimum_word_floor_is_enforced() -> None:
@@ -301,6 +377,7 @@ Within an axisymmetric equilibrium, contours of the quantity organize the nested
         physics_context=DocumentationPhysicsContext(
             dd_path="core_sources/source/profiles_1d/grid/psi",
             declared_unit="Wb",
+            cocos_transformation_type="psi_like",
         ),
     )
 
