@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="43">
+<meta name="plan-version" content="44">
 <meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44,2b607c58,7a9308ac,4c078678,723c90a9,7def7d10,c6cc10ac,5c1b14ab,4e4e8d26,08701281,888dc3e0,523a369e,d128f0d4,b431b571">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/doc_links.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,tests/standard_names/test_doc_links.py,docs/figures/sn-quality-parity/claim-disposition.svg,imas_codex/standard_names/AGENTS.md,docs/evidence/sn-quality-parity/west-docs-eligible.json,docs/evidence/sn-quality-parity/west-docs-eligible.md,~/.local/share/imas-codex/receipts/standard-names/snqp-physics-gates-reuse-map.md">
 </head>
@@ -200,7 +200,25 @@
       whose <em>name</em> was fixed in §2 with the property that answers this question, and an
       implementer trusting it would have wired the gate to an edge that cannot answer it.
       Deliverable unchanged: required when the quantity is COCOS-dependent, forbidden when it is
-      not, with tests for both directions — read from the property, not the edge.</li>
+      not, with tests for both directions — read from the property, not the edge.
+      <strong>Lead ruling, 2026-08-23, and it makes "COCOS-dependent" measurable:</strong> the
+      Standard Names COCOS is <em>uniformly 17</em>, following DDv4, so the convention number is a
+      property of the dictionary version rather than of any individual name and there is nothing
+      per-name for a document to state. The transformation class
+      (<code>psi_like</code>, <code>ip_like</code>, …) is <strong>graph metadata only</strong> — it
+      must never surface in a catalog entry. The <code>HAS_COCOS</code> edge itself is endorsed:
+      explicit beats implicit, and the scout's correction is about which of the two answers "what
+      transform applies", not a criticism of the edge. Measured against the live graph the ruling
+      resolves the gate condition exactly: of 981 names carrying a transformation type,
+      <strong>957 are <code>one_like</code></strong> — COCOS-invariant, so a sign convention is
+      <em>forbidden</em> — and only <strong>24</strong> are sensitive (<code>dodpsi_like</code> 6,
+      <code>ip_like</code> 5, <code>psi_like</code> 5, <code>b0_like</code> 5,
+      <code>pol_angle_like</code> 2, <code>q_like</code> 1), which is the same 24 the holdout
+      pinned. The gate therefore keys on <em>not-null and not <code>one_like</code></em>, never on
+      the mere presence of an edge, and it additionally pins the metadata boundary as an invariant:
+      no accepted documentation may name a COCOS number or a transform label. That currently holds
+      at <strong>0 of 2,748</strong> accepted documents, so the check preserves a property rather
+      than repairing a breach.</li>
       <li><strong>A third gate state is a prerequisite for both, not an extra.</strong> The scout's
       sharpest finding: a boolean vector cannot distinguish <em>missing authority</em> from
       <em>contradiction</em>. A gate returning <code>False</code> for "no declared unit to check
