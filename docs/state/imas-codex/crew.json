@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T12:02:03",
+  "updated": "2026-08-23T12:10:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -785,7 +785,7 @@
         "id": "impl-westreprice",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02e12-033c-7280-9f8a-4ac46928a4a3",
         "created": "2026-08-23"
       },
       {
@@ -19701,9 +19701,131 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T100204229654-impl-westreprice",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-westreprice",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-westreprice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:02:07Z",
+        "completed_at": "2026-08-23T10:09:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 456,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 456,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "afde1095d682d527c79b49ea8f41a87894988155",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "WEST cohort re-priced on the production path at ZERO spend, and the result CORRECTS my own predicted factor. Live rewrite subset 210 rows re-extracted (cohort digest c75cfaa4, rewrite digest 4e3f2a2e, 234 attributed names from all 355 manifest paths), mean 13.21 injected candidates per row (range 2-30, zero-context rows 0, every row got at least 2). Production-enriched projection USD 2.3733 against the earlier context-starved USD 2.3036 - ratio 1.0302, or +3.02%, NOT the 1.79 I predicted from the comparison runs. Zero model calls, enforced by replacing the docs model function with a counter that raises if invoked. RECONCILIATION: 1.789 was an actual-to-actual ratio on the 85-row holdout at mean 18.95 candidates; this is projection-to-projection at mean 13.21. The projector's estimate is dominated by fixed token allowances so it is largely insensitive to enrichment - its projections differ by 3% while realized costs differed by 79% (context-starved actual was 20.0% of projection, production actual 33.1%). Consequence: the projector OVER-estimates in both regimes and is a conservative admission bound, and a cross-path multiplier must not be applied on top of it. Correction sent to the release-readiness coordinator, who had recorded the 1.79 as a transferable general form. Sizing only - excludes paid review, refine and escalation; not apply authority.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T100204229654-impl-westreprice/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e12-033c-7280-9f8a-4ac46928a4a3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4868864,
+            "cached_input_tokens_cumulative": 4868864,
+            "input_tokens": 5047018,
+            "input_tokens_cumulative": 5047018,
+            "output_tokens": 14323,
+            "output_tokens_cumulative": 14323,
+            "reasoning_output_tokens": 4952,
+            "reasoning_output_tokens_cumulative": 4952
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T100008826512-n-orderingcycle",
+        "plan": "sn-release-readiness",
+        "section": "\u00a73",
+        "node": "n-orderingcycle",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-ordercycle",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:00:11Z",
+        "completed_at": "2026-08-23T10:06:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 390,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 390,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "afde1095d682d527c79b49ea8f41a87894988155",
+        "commits": [
+          "0d42df3403fac82996013988262f2bd28920701f"
+        ],
+        "changed_lines": {
+          "added": 102,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T100008826512-n-orderingcycle/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e10-409e-7e22-8e7f-829f29165c78",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2443776,
+            "cached_input_tokens_cumulative": 2443776,
+            "input_tokens": 2572899,
+            "input_tokens_cumulative": 2572899,
+            "output_tokens": 14935,
+            "output_tokens_cumulative": 14935,
+            "reasoning_output_tokens": 7293,
+            "reasoning_output_tokens_cumulative": 7293
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 547
+    "_version": 550
   }
 }
