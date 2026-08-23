@@ -34,6 +34,29 @@ logger = logging.getLogger(__name__)
 COMPUTED_FIELDS: frozenset[str] = frozenset({"arguments", "error_variants"})
 
 
+def guard_catalog_write_payloads(
+    entries: list[dict[str, Any]],
+    *,
+    current_by_id: dict[str, dict[str, Any]] | None,
+) -> list[dict[str, Any]]:
+    """Refuse catalog entries that would overwrite pipeline review authority.
+
+    This is the catalog-shape adapter for the symmetric ownership guard.
+    Catalog entries identify a row with ``name`` while graph write batches use
+    ``id``; the ownership vocabulary and comparison remain centralized in
+    :mod:`imas_codex.standard_names.protection`.
+    """
+    from imas_codex.standard_names.protection import (
+        refuse_pipeline_authority_loss,
+    )
+
+    return refuse_pipeline_authority_loss(
+        entries,
+        current_by_id=current_by_id,
+        identity_key="name",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
