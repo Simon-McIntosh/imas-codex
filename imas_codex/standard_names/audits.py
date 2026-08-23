@@ -110,6 +110,57 @@ def _isn_locus_relations() -> frozenset[str]:
     return frozenset()
 
 
+@lru_cache(maxsize=1)
+def _isn_logarithm_prefix_tokens() -> frozenset[str]:
+    """Return ISN unary-prefix operators that explicitly apply a logarithm.
+
+    Operator tokens live outside the segment vocabulary, so the installed
+    grammar context is the authority for both membership and attachment kind.
+    The lexical predicate identifies the mathematical operation while the
+    registry lookup prevents codex from carrying a second operator list.  An
+    empty result is an API drift signal rather than permission to disable the
+    audit silently.
+    """
+    from imas_standard_names import get_grammar_context
+
+    operators = get_grammar_context()["grammar"]["vocabularies"]["operators"]
+    tokens = frozenset(
+        str(token)
+        for token, definition in operators.items()
+        if isinstance(definition, Mapping)
+        and definition.get("kind") == "unary_prefix"
+        and "logarithm" in str(token).split("_")
+    )
+    if not tokens:
+        raise RuntimeError(
+            "ISN grammar exposes no logarithm unary-prefix operator; "
+            "update the audit for the authoritative operator semantics"
+        )
+    return tokens
+
+
+@lru_cache(maxsize=1)
+def _logarithmic_unit_symbols() -> frozenset[str]:
+    """Return canonical symbols backed by logarithmic Pint converters.
+
+    Dimensionality cannot identify these units because a logarithmic level is
+    commonly dimensionless.  Pint's converter metadata is the unit authority
+    that distinguishes logarithmic units from multiplicative and offset units.
+    """
+    from imas_codex.units import unit_registry
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+    symbols: set[str] = set()
+    for spelling, definition in unit_registry._units.items():
+        converter = getattr(definition, "converter", None)
+        if not converter or not getattr(converter, "is_logarithmic", False):
+            continue
+        canonical = canonical_or_none(str(spelling))
+        if canonical is not None:
+            symbols.add(canonical)
+    return frozenset(symbols)
+
+
 #: Parse fields that prove field-evaluation structure on their own: a species,
 #: population or orbit class only qualifies a quantity that is evaluated
 #: somewhere.
@@ -186,6 +237,7 @@ CRITICAL_CHECKS = frozenset(
         "canonical_locus_check",
         "description_notation_check",
         "derived_parent_structure_check",
+        "logarithmic_unit_prefix_check",
     }
 )
 
@@ -1873,6 +1925,43 @@ def american_spelling_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+def logarithmic_unit_prefix_check(candidate: dict[str, Any]) -> list[str]:
+    """Reject applying a logarithm operator to an already logarithmic unit.
+
+    A logarithmic unit encodes a logarithm of a reference ratio in its value.
+    Applying a logarithm unary prefix to that value therefore composes a second
+    logarithm rather than naming the measured quantity represented by the unit.
+    """
+    name = str(candidate.get("id") or candidate.get("name") or "").strip()
+    unit = str(candidate.get("unit") or "").strip()
+    if not name or not unit:
+        return []
+
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+    canonical_unit = canonical_or_none(unit)
+    if canonical_unit not in _logarithmic_unit_symbols():
+        return []
+
+    try:
+        operators = list(getattr(_parse_audit_ir(name), "operators", ()) or ())
+    except (TypeError, ValueError):
+        return []
+    logarithm_prefixes = _isn_logarithm_prefix_tokens()
+    for operator in operators:
+        if _operator_kind(operator) != "unary_prefix":
+            continue
+        if str(getattr(operator, "op", "") or "") not in logarithm_prefixes:
+            continue
+        return [
+            "audit:logarithmic_unit_prefix_check: "
+            f"name '{name}' applies a logarithm unary prefix to logarithmic "
+            f"unit '{canonical_unit}'; the unit already encodes a logarithm "
+            "of its reference ratio"
+        ]
+    return []
+
+
 def name_description_consistency_check(candidate: dict[str, Any]) -> list[str]:
     """Flag names whose description asserts a different concept than the name.
 
@@ -3298,6 +3387,7 @@ def run_audits(
     all_issues.extend(spectral_suffix_check(candidate))
     all_issues.extend(abbreviation_check(candidate))
     all_issues.extend(american_spelling_check(candidate))
+    all_issues.extend(logarithmic_unit_prefix_check(candidate))
     all_issues.extend(name_description_consistency_check(candidate))
     all_issues.extend(description_verb_drift_check(candidate))
     all_issues.extend(structural_dim_tag_check(candidate))
