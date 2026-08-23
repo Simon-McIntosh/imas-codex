@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T13:09:42",
+  "updated": "2026-08-23T13:15:36",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -169,7 +169,7 @@
         "id": "impl-capmeasure",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02e46-a447-7d31-9310-c930a67c400e",
         "created": "2026-08-23"
       },
       {
@@ -219,6 +219,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02d66-d9e2-7be0-857c-25079e35a9db",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-cohortstage",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-23"
       },
       {
@@ -647,6 +654,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-sigfix",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-snauthschema",
@@ -20358,9 +20372,189 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T105439984397-n-rescorepilot",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72",
+        "node": "n-rescorepilot",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-rescorepilot",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:54:42Z",
+        "completed_at": "2026-08-23T11:10:17Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 935,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 935,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "6d0000116c9a2c99abac1e8950a1117b65e5e7a7",
+        "commits": [
+          "93025f5a"
+        ],
+        "changed_lines": {
+          "added": 175,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "The campaign did not open and USD 0.00 of the USD 75 cap was spent with 0 model calls, so no per-name cost, accept rate or refine rate was measured and the three prior estimates stand unsuperseded. The node's real deliverable is a negative finding: NO SANCTIONED OPERATOR EXISTS to move an accepted-but-unscored name into REVIEW_NAME as a cohort. sn rescore refuses accepted rows and is single-name; exact-name sn run only stamps run scope; sn review --stage accepted --unreviewed writes scores without lifecycle adjudication; and a generic accepted reset strips HAS_STANDARD_NAME, HAS_UNIT and HAS_COCOS bindings. The --include-accepted authority was acknowledged but not exercised because no safe operator consumes it. Live cohort reproduced at 1,181 and 1,179 after archive exclusions, and no identity was staged or stranded.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T105439984397-n-rescorepilot/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e42-2acd-7852-a92d-c9dbd7e9f917",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8955136,
+            "cached_input_tokens_cumulative": 8955136,
+            "input_tokens": 9275279,
+            "input_tokens_cumulative": 9275279,
+            "output_tokens": 28536,
+            "output_tokens_cumulative": 28536,
+            "reasoning_output_tokens": 12471,
+            "reasoning_output_tokens_cumulative": 12471
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T105932764031-impl-capmeasure",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-capmeasure",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-capmeasure",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:59:36Z",
+        "completed_at": "2026-08-23T11:09:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 617,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 617,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "011fdcda648cfee378f55c72659c39025c84cb53",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "CAP REMOVAL LIFTED SCOPE ON ITS OWN, vindicating the reallocation argument - but not to threshold. Same deterministic 53-row off-holdout sample, 0/85 split-key and 0/13 identity overlap, 53 admitted, 0 zero-candidate exclusions, actual USD 0.2200 of USD 3.00, 0 failures. scope 0.660377 to 0.773585 (+0.113208, +6/53) with NO scope-targeted prompt change - a binding cap really was reallocating content rather than truncating it. But catalog_threshold_reached=false: it stopped 0.026415 short of the locked catalog 0.800, so the lead's scope node is still required, now against a small gap rather than a large one. Nine-gate mean 0.943396 to 0.951782 (+0.008386), and +0.064200 over the catalog reference 0.887582. Mean documentation length rose 133.4 to 166.2 words, observed range 79-255, upper_word_bound_applied=false - so docs got longer AND better, which is the direct refutation of brevity-as-quality for this corpus. Two gates moved slightly negative and are worth watching: defining_equation -0.037736 and exclusions -0.018868. CAVEAT CARRIED: catalog rates are the fixed 85-row holdout reference because the 53 graph identities have no paired catalog documentation, so the scope-versus-catalog comparison is cross-population.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T105932764031-impl-capmeasure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e46-a447-7d31-9310-c930a67c400e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4249856,
+            "cached_input_tokens_cumulative": 4249856,
+            "input_tokens": 4414320,
+            "input_tokens_cumulative": 4414320,
+            "output_tokens": 18059,
+            "output_tokens_cumulative": 18059,
+            "reasoning_output_tokens": 3960,
+            "reasoning_output_tokens_cumulative": 3960
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T110713252598-test-failattrib",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "test-failattrib",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "cx-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T11:07:17Z",
+        "completed_at": "2026-08-23T11:14:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 432,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 432,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "011fdcda648cfee378f55c72659c39025c84cb53",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "VERDICT: real-regression, established by the decisive half of the experiment, and it SPLITS the failures 10+1. Main checkout with its STALE generated model (signatures present but Optional[list[str]]=None): 10 passed, 1 failed. Same worktree after explicit build-models --force producing signatures as a REQUIRED list[str]: 0 passed, 11 failed. So ten failures are missing-required-signatures, masked in main by the stale Optional field, while test_enrich_parents.py::test_persist_accepts_structurally fails in BOTH environments on a captured-query assertion and is therefore an INDEPENDENT failure, not part of the same cause. The node self-reported blocked because main advanced from 011fdcda to 76ba6b20 mid-diagnostic (campaign-pricing-only commits; the named tests, repair-authority implementation and schema were unchanged), so the literal same-revision main run was not produced - it correctly refused to reset or check out to manufacture it. Promoted as passed because the regeneration experiment is the decisive evidence and the verdict does not depend on the unmet literal condition. Coordinator archaeology adds the provenance the node was not asked for: RepairAuthorityRow.signatures became required at 4f801bbe, 2026-08-23 11:53, in the concurrent plan's own structural-authority commit, verified by a class-scoped parse at five revisions rather than by file mtime.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T110713252598-test-failattrib/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02da8-07c8-77c2-b63e-2417a7aed6fa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3632128,
+            "cached_input_tokens_cumulative": 9790208,
+            "input_tokens": 3928124,
+            "input_tokens_cumulative": 10348267,
+            "output_tokens": 12722,
+            "output_tokens_cumulative": 22529,
+            "reasoning_output_tokens": 4466,
+            "reasoning_output_tokens_cumulative": 7421
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 567
+    "_version": 573
   }
 }
