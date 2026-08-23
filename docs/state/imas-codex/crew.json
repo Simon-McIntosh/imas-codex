@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:38:07",
+  "updated": "2026-08-23T11:57:00",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -65,6 +65,13 @@
         "harness": "codex",
         "role": "documentation",
         "session_id": "01a02da5-3a01-7d21-86aa-5a416ea7ca0e",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "doc-worktreesecrets",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": "01a02e03-b7b5-7e60-a02e-fae61ca19101",
         "created": "2026-08-23"
       },
       {
@@ -142,6 +149,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02de3-8e55-7853-a2f5-57c2da625e6a",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-camprice",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-23"
       },
       {
@@ -262,6 +276,13 @@
         "role": "implement",
         "session_id": "01a02428-2549-7000-b426-8034ffe598d0",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-exclledger",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-fieldshadow",
@@ -474,7 +495,21 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-prodcompare",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02dfd-911a-7ce0-8f9a-21aa74ac053e",
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-prodenrich",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02df7-5798-7d01-8daa-3c404bb4dc07",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-provguard",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -563,6 +598,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-snauthschema",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-sourcesearch",
@@ -19073,9 +19115,509 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T093254536049-impl-prodenrich",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-prodenrich",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-prodenrich",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:32:59Z",
+        "completed_at": "2026-08-23T09:39:05Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 366,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 366,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "8b0478b4bdc601af66c63a9ea3c38a5b0a6027ab",
+        "commits": [
+          "4c078678fe925fae9c309962a2fa6cc810cdcef5"
+        ],
+        "changed_lines": {
+          "added": 274,
+          "removed": 28,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "The evaluation harness is now production-faithful. Items pass through workers._enrich_for_docs_gen and workers._nearby_names_for_docs_gen before production prompt rendering and cost projection, and candidate-specific related, parent, child-component and nearest-peer entries are counted per row. Proven without network: a rendered prompt fixture carries 1 candidate-specific Related Physics Quantities block where all 138 prompts of the earlier runs carried zero. Critically, zero-candidate rows are NOT silently scored - the zero-context fixture reports candidate_count=0, zero_candidate_row_count=1, scored_row_count=0, 0 model calls and 0 row scores, so an empty context can no longer masquerade as a low-quality document. Catalog-only baseline scoring unchanged; the production seat retains its sn-docs reasoning effort, standard-names service tag, two attempts and concurrency eight. Imports from workers.py without modifying it, so no contention with the concurrent release-readiness wave. pytest 5/5.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T093254536049-impl-prodenrich/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02df7-5798-7d01-8daa-3c404bb4dc07",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2773504,
+            "cached_input_tokens_cumulative": 2773504,
+            "input_tokens": 2915062,
+            "input_tokens_cumulative": 2915062,
+            "output_tokens": 12803,
+            "output_tokens_cumulative": 12803,
+            "reasoning_output_tokens": 4000,
+            "reasoning_output_tokens_cumulative": 4000
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T092453383925-n-reusemap",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72a",
+        "node": "n-reusemap",
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "inv-reusemap-rel",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-23T09:24:55Z",
+        "completed_at": "2026-08-23T09:40:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 923,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 923,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "27f28bc773f1012e8e3e228f36ba1e05870311d3",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T092453383925-n-reusemap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02def-f7a2-71b1-bc9a-2be49da69284",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6274560,
+            "cached_input_tokens_cumulative": 6274560,
+            "input_tokens": 6607511,
+            "input_tokens_cumulative": 6607511,
+            "output_tokens": 28885,
+            "output_tokens_cumulative": 28885,
+            "reasoning_output_tokens": 10461,
+            "reasoning_output_tokens_cumulative": 10461
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T093958207100-test-prodmerge",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "test-prodmerge",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "cx-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:40:01Z",
+        "completed_at": "2026-08-23T09:45:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 346,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 346,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "1905526ce3a7bfa466d91765e8180dffb8e7ed04",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Integration gate PASSED after the gate rename (7a9308ac) and the production-enrichment routing (4c078678) merged: full tests/standard_names suite 6607 passed, 8 skipped, 0 failed, 0 errors, exit 0, no failing node ids. Confirms the essential_relationships to relationship_link_or_phrase_witness rename broke no consumer, which the pre-merge check had predicted from the literal appearing only in docs_gates.py and its own test.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T093958207100-test-prodmerge/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02da8-07c8-77c2-b63e-2417a7aed6fa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6158080,
+            "cached_input_tokens_cumulative": 6158080,
+            "input_tokens": 6420143,
+            "input_tokens_cumulative": 6420143,
+            "output_tokens": 9807,
+            "output_tokens_cumulative": 9807,
+            "reasoning_output_tokens": 2955,
+            "reasoning_output_tokens_cumulative": 2955
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T094624805041-doc-worktreesecrets",
+        "plan": "sn-quality-parity",
+        "section": "\u00a74",
+        "node": "doc-worktreesecrets",
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "doc-worktreesecrets",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:46:30Z",
+        "completed_at": "2026-08-23T09:50:18Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 228,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 228,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "f7f28675deb512480b90b39ff6831284d7018eb1",
+        "commits": [
+          "723c90a958391aab4bc7742e50ed40a822cb3257"
+        ],
+        "changed_lines": {
+          "added": 13,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "AGENTS.md worktree guidance now covers credentials, not just the Python environment. Verified: required-string grep found all 3/3 of .env, Unauthorized and ln -sfn, exit 0; git diff --stat reports AGENTS.md as the only changed path; pre-stage naming and prose scans run. Motivated by a node lost today to exactly this - a detached worktree has no gitignored .env, so GraphClient found no NEO4J_PASSWORD and Neo4j rejected it before pricing, which presents as a credential fault rather than a missing file. The recorded remedy is a symlink rather than a copy so the secret is never duplicated on disk.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T094624805041-doc-worktreesecrets/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e03-b7b5-7e60-a02e-fae61ca19101",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1093888,
+            "cached_input_tokens_cumulative": 1093888,
+            "input_tokens": 1189008,
+            "input_tokens_cumulative": 1189008,
+            "output_tokens": 8763,
+            "output_tokens_cumulative": 8763,
+            "reasoning_output_tokens": 3186,
+            "reasoning_output_tokens_cumulative": 3186
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T094203858496-n-provguard",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72a",
+        "node": "n-provguard",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-provguard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:42:06Z",
+        "completed_at": "2026-08-23T09:53:27Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 681,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 681,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f7f28675deb512480b90b39ff6831284d7018eb1",
+        "commits": [
+          "40966ff037ccbe509c182b69ebf40d774108ac72"
+        ],
+        "changed_lines": {
+          "added": 370,
+          "removed": 4,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T094203858496-n-provguard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dff-b13a-7192-9f2b-aa474b92d574",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6362368,
+            "cached_input_tokens_cumulative": 6362368,
+            "input_tokens": 6546442,
+            "input_tokens_cumulative": 6546442,
+            "output_tokens": 22646,
+            "output_tokens_cumulative": 22646,
+            "reasoning_output_tokens": 9880,
+            "reasoning_output_tokens_cumulative": 9880
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T094238707502-n-snauthschema",
+        "plan": "sn-release-readiness",
+        "section": "\u00a74a",
+        "node": "n-snauthschema",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-snauthschema",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:42:41Z",
+        "completed_at": "2026-08-23T09:54:09Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 688,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 688,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f7f28675deb512480b90b39ff6831284d7018eb1",
+        "commits": [
+          "4f801bbefb673fe0d261bdcace3c7d87bafff079"
+        ],
+        "changed_lines": {
+          "added": 257,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T094238707502-n-snauthschema/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e00-3a19-7e21-b91b-b07bed7dd217",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5634048,
+            "cached_input_tokens_cumulative": 5634048,
+            "input_tokens": 5809588,
+            "input_tokens_cumulative": 5809588,
+            "output_tokens": 22291,
+            "output_tokens_cumulative": 22291,
+            "reasoning_output_tokens": 10433,
+            "reasoning_output_tokens_cumulative": 10433
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T094256082382-n-camprice",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72",
+        "node": "n-camprice",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-camprice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:42:59Z",
+        "completed_at": "2026-08-23T09:55:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 769,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 769,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f7f28675deb512480b90b39ff6831284d7018eb1",
+        "commits": [
+          "5befad4715adfc0ea5884b8fbda0a243ebdf91b9"
+        ],
+        "changed_lines": {
+          "added": 710,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T094256082382-n-camprice/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e00-7f47-7ab1-87e9-d758bd1aae67",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5627392,
+            "cached_input_tokens_cumulative": 5627392,
+            "input_tokens": 5809403,
+            "input_tokens_cumulative": 5809403,
+            "output_tokens": 25757,
+            "output_tokens_cumulative": 25757,
+            "reasoning_output_tokens": 8434,
+            "reasoning_output_tokens_cumulative": 8434
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T094215201942-n-exclledger",
+        "plan": "sn-release-readiness",
+        "section": "\u00a73",
+        "node": "n-exclledger",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-exclledger",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:42:18Z",
+        "completed_at": "2026-08-23T09:53:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 646,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 646,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f7f28675deb512480b90b39ff6831284d7018eb1",
+        "commits": [
+          "f767c35327d584f37efe08391d534b8805e1fb6e"
+        ],
+        "changed_lines": {
+          "added": 439,
+          "removed": 25,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Ledger code and refusal path landed and are green: 70 export tests pass and the closure fixture measures 4 accepted = 1 emitted + 3 named exclusions, with a deliberately missing row refusing manifest emission. The LIVE closure measure could not be produced: the read-only dry run connected and validated the live cohort, then catalog ordering raised OrderingError on a HAS_PARENT/HAS_ERROR cycle between spectral_signal_to_noise_ratio_of_spectrometer_channel and its logarithm_of_ form, both outside this node's write fence. The live emitted and per-reason counts remain unmeasured pending that repair.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T094215201942-n-exclledger/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dff-dec6-7240-8534-2a0ef9f8a2da",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4373760,
+            "cached_input_tokens_cumulative": 4373760,
+            "input_tokens": 4535860,
+            "input_tokens_cumulative": 4535860,
+            "output_tokens": 21817,
+            "output_tokens_cumulative": 21817,
+            "reasoning_output_tokens": 8783,
+            "reasoning_output_tokens_cumulative": 8783
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 525
+    "_version": 542
   }
 }
