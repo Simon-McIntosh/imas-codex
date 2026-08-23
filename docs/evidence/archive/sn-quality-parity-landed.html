@@ -567,6 +567,60 @@
     equation, variable definitions in prose, semantic scope and exclusions, essential
     relationships, sign convention where COCOS applies, and inline <code>name:</code>
     cross-references.</p>
+
+    <h2 id="gate-role">Keep the instrument, delete the gate</h2>
+    <p>The blunt question, asked by the lead through the concurrent plan's coordinator: are we
+    holding ourselves to regex gates that neither improve nor guarantee quality? Largely yes, and
+    the evidence for it was already sitting in this record.</p>
+    <p><code>docs_gates.py</code> imports <code>re</code>, a dataclass, one LaTeX audit and the link
+    parser. <strong>Zero model calls.</strong> Four of the nine gates tested for a word rather than
+    for content:</p>
+    <table>
+      <caption>What the deleted gates actually tested</caption>
+      <thead><tr><th>Gate</th><th>Passed on</th></tr></thead>
+      <tbody>
+        <tr><td><code>scope</code></td><td><code>at the</code> | <code>on the</code> | 16 more</td></tr>
+        <tr><td><code>physical_meaning</code></td><td><code>is</code> | <code>denotes</code> | <code>represents</code></td></tr>
+        <tr><td><code>exclusions_or_distinctions</code></td><td><code>boundary</code> | <code>relative to</code></td></tr>
+        <tr><td>relationship <em>phrase</em> half</td><td>any of nine phrases, no link required</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Every gate that moved between two identical runs was one of those four. Every
+    structural check held at exactly its prior value.</strong> That is not a property of this
+    corpus; it is the difference between measuring the text and measuring the model's phrasing
+    luck.</p>
+    <p>Which reframes this record's own headline. A metric on which <em>curated human prose scores
+    0.888 and our generator scores 0.975</em> is not evidence the generator writes better physics.
+    Curators wrote physics; they did not write to a token list. That gap is closer to a measure of
+    our generator matching our own prompt vocabulary &mdash; a self-agreement score wearing a
+    quality score's clothes. <strong>Every nine-gate mean recorded above is therefore history, not
+    evidence.</strong> It is retained because it is how we found out, not because it certifies
+    anything.</p>
+    <h3>What the vector did earn</h3>
+    <p>Twice, and both times as a <em>diagnostic</em> rather than a bar. It caught the
+    instruction-competition trade &mdash; <strong>+0.165 of gains against &minus;0.165 of
+    losses</strong>, a net zero that any aggregate score would have reported as "no change" while
+    symbol definitions were quietly traded away. And it exposed the length bound as mis-set, by
+    scoring curated prose at 0.235 against a cap it had never agreed to.</p>
+    <h3>What survives</h3>
+    <p>Six gates, each comparing the documentation against something authoritative:
+    <code>defining_equation</code> (a relation is present), <code>symbol_definitions</code> (the
+    relation's symbols are defined in prose), <code>relationship_link</code> (at least one link
+    <em>resolving</em> against a live identity &mdash; a phrase no longer suffices),
+    <code>sign_convention</code> (canonical form), <code>link_hygiene</code> (references parse and
+    resolve), <code>minimum_word_count</code> (a floor). The four retired patterns are gone from the
+    module, with a grep asserting it, so they cannot return.</p>
+    <p>The refresh is re-gated on the mechanism that already decides documentation quality &mdash;
+    the existing generate/review/refine quorum, the same bar every accepted document passed &mdash;
+    with revision snapshots as the reversible net. The human expert-review packet is the ultimate
+    authority: physicists reading 210 documents is the only signal in this system that measures
+    physics rather than form, and the six survivors exist to avoid wasting that attention rather
+    than to certify quality.</p>
+    <p>Recorded as the next increment rather than bundled into a deletion: dimensional consistency
+    of the equation against the DD-declared unit, and <code>sign_convention</code> made conditional
+    on the COCOS transformation type. Both convert a presence check into a physics check.</p>
+    <p>Commit <code>08701281</code>; 6 gates verified live on main; retired-pattern grep 0 matches.</p>
+
   </main>
 </body>
 </html>

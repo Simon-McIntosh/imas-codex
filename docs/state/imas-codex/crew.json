@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T15:42:06",
+  "updated": "2026-08-23T15:46:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -428,7 +428,7 @@
         "id": "impl-lexicalgates",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02eda-6236-7ef2-9801-9bcfe484362c",
         "created": "2026-08-23"
       },
       {
@@ -21281,9 +21281,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T134053596530-impl-lexicalgates",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "impl-lexicalgates",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-lexicalgates",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:40:58Z",
+        "completed_at": "2026-08-23T13:45:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 291,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 291,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "ee02e6346f41432617e6cc629ad6115c29a0d02b",
+        "commits": [
+          "08701281799df22708f02d6013dd98fbedc38c07"
+        ],
+        "changed_lines": {
+          "added": 37,
+          "removed": 83,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Keyword gates deleted per the lead's gate-role ruling: keep the instrument, delete the gate. Emitted gate tuple is now exactly (defining_equation, symbol_definitions, relationship_link, sign_convention, link_hygiene, minimum_word_count) - six gates, verified live on main by importing the module. Removed: physical_meaning, scope, exclusions_or_distinctions, and the phrase-based half of the relationship witness. relationship_link now passes ONLY for a Markdown link targeting name:<identity> or #<identity>; an allow-listed phrase alone fails, proven by test. Retired-patterns grep returns 0 matches for _SCOPE_RE, _DISTINCTION_RE, _RELATIONSHIP_RE and _DEFINITION_RE so they cannot creep back. 30/30 on the named evidence suite. Commit sha verified against the worktree HEAD before merging, after an earlier node's manifest reported a wrong full sha whose short prefix matched. Consequence recorded in the plan: every nine-gate mean earlier in this plan is history rather than evidence, having been computed over a set containing four keyword checks.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T134053596530-impl-lexicalgates/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02eda-6236-7ef2-9801-9bcfe484362c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2112256,
+            "cached_input_tokens_cumulative": 2112256,
+            "input_tokens": 2252935,
+            "input_tokens_cumulative": 2252935,
+            "output_tokens": 10056,
+            "output_tokens_cumulative": 10056,
+            "reasoning_output_tokens": 3708,
+            "reasoning_output_tokens_cumulative": 3708
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 594
+    "_version": 596
   }
 }
