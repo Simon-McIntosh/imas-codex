@@ -132,9 +132,51 @@ def _persist_gc(name_stage_returned: str | None):
     gc = MagicMock()
     gc.__enter__ = MagicMock(return_value=gc)
     gc.__exit__ = MagicMock(return_value=False)
-    rows = [{"name_stage": name_stage_returned}] if name_stage_returned else []
-    # call 1: the SET; call 2: the source-mirror write (only if call 1 matched)
-    gc.query = MagicMock(side_effect=[rows, []])
+    snapshot_rows = (
+        [
+            {
+                "parent_id": "magnetic_field",
+                "parent_element_id": "parent-element",
+                "name_stage": "drafted",
+                "origin": "derived",
+                "claim_token": "tok",
+                "reviewed_name_at": None,
+                "docs_stage": "pending",
+                "validation_status": "valid",
+                "embedded_at": None,
+                "chain_length": 0,
+                "authority_ids": [],
+                "children": [
+                    {
+                        "id": "radial_magnetic_field",
+                        "element_id": "child-element",
+                        "name_stage": "accepted",
+                        "reviewer_score_name": 0.95,
+                        "reviewer_model_name": "test/reviewer",
+                    }
+                ],
+            }
+        ]
+        if name_stage_returned
+        else []
+    )
+    query_count = 0
+
+    def _query(_cypher, **params):
+        nonlocal query_count
+        query_count += 1
+        if query_count == 1:
+            return snapshot_rows
+        if query_count == 2 and name_stage_returned:
+            return [
+                {
+                    "name_stage": name_stage_returned,
+                    "authority_id": params["authority_properties"]["id"],
+                }
+            ]
+        raise AssertionError(f"unexpected persistence query {query_count}")
+
+    gc.query = MagicMock(side_effect=_query)
     return gc
 
 
@@ -154,23 +196,31 @@ def test_persist_accepts_structurally():
             model="test/model",
         )
     assert stage == "accepted"
-    set_cypher, set_params = (
+    assert gc.query.call_count == 2
+    snapshot_cypher, snapshot_params = (
         gc.query.call_args_list[0][0][0],
         gc.query.call_args_list[0][1],
     )
-    # Accepted directly (no review routing), marked structural, NO name score.
-    assert "sn.name_stage = 'accepted'" in set_cypher
-    assert "structural-inheritance" in set_cypher
-    # No fabricated name score is SET (the comment may mention the field).
-    assert "sn.reviewer_score_name =" not in set_cypher
-    assert "name_stage = CASE" not in set_cypher
-    assert set_params["embedding"] == [0.1, 0.2, 0.3]
+    set_cypher, set_params = (
+        gc.query.call_args_list[1][0][0],
+        gc.query.call_args_list[1][1],
+    )
+    assert "RETURN parent.id AS parent_id" in snapshot_cypher
+    assert snapshot_params["id"] == "magnetic_field"
+    # The second query atomically records authority and accepts the parent.
+    assert "SET parent += $parent_updates" in set_cypher
+    assert "CREATE (authority:StructuralNameAuthority)" in set_cypher
+    parent_updates = set_params["parent_updates"]
+    assert parent_updates["name_stage"] == "accepted"
+    assert parent_updates["reviewer_model_name"] == "structural-inheritance"
+    assert "reviewer_score_name" not in parent_updates
+    assert parent_updates["embedding"] == [0.1, 0.2, 0.3]
 
 
 def test_persist_noop_when_node_unmatched():
     import imas_codex.standard_names.graph_ops as g
 
-    gc = _persist_gc(None)  # SET matched nothing
+    gc = _persist_gc(None)  # The child-closure snapshot matched nothing.
     with patch.object(g, "GraphClient", return_value=gc):
         stage = g.persist_enriched_parent(
             sn_id="ghost",
