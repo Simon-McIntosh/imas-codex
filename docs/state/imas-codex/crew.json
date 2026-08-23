@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T08:56:10",
+  "updated": "2026-08-23T09:53:48",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -169,7 +169,7 @@
         "id": "impl-cocosedge",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02d66-d9e2-7be0-857c-25079e35a9db",
         "created": "2026-08-23"
       },
       {
@@ -288,7 +288,7 @@
         "id": "impl-holdout",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02d67-2775-75a0-89d8-9109decada6b",
         "created": "2026-08-23"
       },
       {
@@ -17555,9 +17555,137 @@
           "previous_run_id": "r-20260823T063456585218-inv-currency",
           "root_run_id": "r-20260823T063456585218-inv-currency"
         }
+      },
+      {
+        "run_id": "r-20260823T065507090937-impl-cocosedge",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "impl-cocosedge",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-cocosedge",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T06:55:09Z",
+        "completed_at": "2026-08-23T07:01:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 361,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 361,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "9106552d2d144a215376384056710a7fb67e8555",
+        "commits": [
+          "b79f07b9"
+        ],
+        "changed_lines": {
+          "added": 15,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "The documentation worker's COCOS convention-parameter lookup now follows the schema-owned HAS_COCOS edge. Evidence is a genuine pre/post pair: the new canonical-query regression FAILED 1/1 against the pre-fix DDVersion-[:COCOS]->COCOS traversal and the focused file PASSED 7/7 after correction. Verified on main after merge: no bare [:COCOS] traversal remains anywhere in imas_codex/. Consequence of the defect was silent - live convention parameters could fail to reach docs generation while mock-based prompt tests still passed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T065507090937-impl-cocosedge/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02d66-d9e2-7be0-857c-25079e35a9db",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3467776,
+            "cached_input_tokens_cumulative": 3467776,
+            "input_tokens": 3599090,
+            "input_tokens_cumulative": 3599090,
+            "output_tokens": 10699,
+            "output_tokens_cumulative": 10699,
+            "reasoning_output_tokens": 3368,
+            "reasoning_output_tokens_cumulative": 3368
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T065523626663-impl-holdoutset",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "impl-holdoutset",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-holdout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T06:55:29Z",
+        "completed_at": "2026-08-23T07:04:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 547,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 547,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "9106552d2d144a215376384056710a7fb67e8555",
+        "commits": [
+          "aabbe55f4a5af55cf146f66779ae701e0cc1c4ac"
+        ],
+        "changed_lines": {
+          "added": 184,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Tracked documentation-quality holdout landed: 7 immutable DD-path/catalog-documentation pairs pinned to imas-standard-names commit 1f3d7224, each row carrying dd_path, catalog_name, catalog_description, catalog_documentation, catalog_source, catalog_commit and split_key. Disjointness is proven, not asserted: curated prompt DD split keys = 6, holdout-curated intersection = 0, split_key equals dd_path on 7/7. pytest 3 passed. Bindings include equilibrium/time_slice/profiles_1d/q to safety_factor and core_transport/model/profiles_1d/electrons/energy/flux to electron_heat_flux. At 7 rows the set is thin for measuring improvement - expansion to all catalog entries with resolvable DD paths is folded into the DAG.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T065523626663-impl-holdoutset/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02d67-2775-75a0-89d8-9109decada6b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3701760,
+            "cached_input_tokens_cumulative": 3701760,
+            "input_tokens": 3859921,
+            "input_tokens_cumulative": 3859921,
+            "output_tokens": 18111,
+            "output_tokens_cumulative": 18111,
+            "reasoning_output_tokens": 5221,
+            "reasoning_output_tokens_cumulative": 5221
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 472
+    "_version": 476
   }
 }

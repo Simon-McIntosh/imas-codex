@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-quality-parity-landed">
+  <meta name="plan-title" content="Standard Name Documentation Quality — Execution Record">
+  <meta name="plan-summary" content="Cumulative execution record for the documentation-quality plan: the currency reconnaissance that found the plan body substantially stale, the COCOS relationship defect and its pre/post regression, and the catalog documentation holdout with proven disjointness.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-evidence-for" content="sn-quality-parity">
+  <meta name="plan-verifies" content="sn-quality-parity#s2">
+  <title>SN Documentation Quality — Execution Record | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h1>Standard Name Documentation Quality — Execution Record</h1>
+    <p>Cumulative execution evidence for <a href="/imas-codex/plans/sn-quality-parity">sn-quality-parity</a>.
+    One anchored section per material result, newest work appended as it lands.</p>
+
+    <h2 id="reconnaissance">Currency reconnaissance — the plan body was substantially stale</h2>
+    <p>Two read-only scouts audited the plan against tree <code>90c73937</code> before any
+    implementation node was authored. Both delivered a validator-checked artifact.</p>
+    <table>
+      <caption>Currency audit — 43 technical claims, one file:line citation per row</caption>
+      <thead><tr><th>Verdict</th><th>Claims</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>ALREADY-LANDED</td><td>22</td><td>the capability exists in the live tree</td></tr>
+        <tr><td>SUPERSEDED</td><td>7</td><td>the need is met through a materially different interface</td></tr>
+        <tr><td>WRONG</td><td>9</td><td>the live tree contradicts the claim</td></tr>
+        <tr><td>STILL-OPEN</td><td>5</td><td>a coherent unimplemented deliverable remains</td></tr>
+      </tbody>
+    </table>
+    <p>The reuse map inventoried 43 candidates across five capability areas — 24
+    reusable-as-is, 11 extendable, 8 unfit — with every citation resolving. Together they
+    reduced a nine-item plan to five open claims plus one confirmed code defect.</p>
+    <p><strong>Already live, contrary to the plan:</strong> rich DD path, coordinate, related-path
+    and structure context into compose through the library layer; COCOS sign-convention
+    injection with a mandated standalone paragraph; the content-gated template, which
+    replaced the old 200–500 character target with 40–160 words under schema-enforced
+    physics, equation, scope, relationship and sign content; curated full examples; the link
+    lifecycle with bounded retries and a terminal <code>failed</code> state; accept-time
+    bare-link normalization; and export-time filtering that keeps unresolved internal links
+    out of published output.</p>
+    <p><strong>Superseded by a different interface:</strong> the targeted <code>--paths</code>
+    route exists as <code>sn run --focus</code>; physics-domain grouping belongs to
+    <code>export.py</code> because <code>publish.py</code> is deliberately transport-only; and
+    the public <code>sn resolve-links</code> verb is intentionally absent, resolution running
+    as internal post-drain maintenance.</p>
+    <p><strong>Two runs were lost to a coordinator-side fence defect first.</strong> The initial
+    dispatch fenced each report to a path outside the read-only sandbox roots, and a read-only
+    worktree additionally cannot bootstrap the gitignored generated models module that pytest
+    imports on collection. Both scouts stopped correctly rather than working around the fence,
+    and both carried their partial findings in the manifest, so no investigation was repeated
+    when they were redispatched with a writable worktree. Recorded in the ledger with a failed
+    gate and marked scope-changed so neither distorts effort calibration.</p>
+
+    <h2 id="cocos-edge">COCOS convention parameters reached documentation through an undefined edge</h2>
+    <p>The documentation worker looked up COCOS convention parameters with
+    <code>MATCH (dv:DDVersion {id: $ver})-[:COCOS]-&gt;(c:COCOS)</code>. The schema defines the
+    relationship as <code>HAS_COCOS</code> (<code>imas_codex/schemas/imas_dd.yaml:439</code>,
+    written by <code>imas_codex/graph/build_dd.py:3027</code>), so the traversal matched nothing
+    and returned no parameters. The failure was silent by construction: sign-convention guidance
+    could render without its concrete parameters while mock-based prompt tests still passed,
+    because the mocks recognised projected values without asserting the query shape.</p>
+    <p><strong>Measure — a genuine pre/post pair.</strong> The new canonical-query regression
+    FAILED 1/1 against the pre-fix traversal and the focused file PASSED 7/7 after the lookup
+    moved to <code>HAS_COCOS</code>. Verified on <code>main</code> after merge: no bare
+    <code>[:COCOS]</code> traversal remains anywhere under <code>imas_codex/</code>.</p>
+    <p>Commit <code>b79f07b9</code>; 1 test added; artifacts
+    <code>imas_codex/standard_names/workers.py</code>,
+    <code>tests/standard_names/test_docs_cocos_injection.py</code>.</p>
+
+    <h2 id="holdout">Catalog documentation holdout, with disjointness proven rather than asserted</h2>
+    <p>The tracked benchmark was a <em>naming</em> benchmark; nothing paired DD paths with real
+    catalog documentation to measure documentation quality against. The holdout now does, pinned
+    to an immutable imas-standard-names commit so the baseline cannot drift underneath a
+    comparison.</p>
+    <table>
+      <caption>Holdout contract, as asserted by <code>tests/standard_names/test_docs_holdout_set.py</code></caption>
+      <thead><tr><th>Property</th><th>Measured</th></tr></thead>
+      <tbody>
+        <tr><td>rows</td><td>7</td></tr>
+        <tr><td>rows carrying all seven required fields</td><td>7/7</td></tr>
+        <tr><td><code>split_key == dd_path</code></td><td>7/7</td></tr>
+        <tr><td>catalog commit</td><td><code>1f3d7224</code> (single, immutable)</td></tr>
+        <tr><td>curated prompt DD split keys</td><td>6</td></tr>
+        <tr><td>holdout ∩ curated</td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>The empty intersection is what closes the plan's disjointness requirement: leakage from
+    prompt examples into the evaluation set now fails a test rather than passing unnoticed.
+    Representative bindings include <code>equilibrium/time_slice/profiles_1d/q</code> to
+    <code>safety_factor</code>, <code>core_profiles/profiles_1d/electrons/temperature</code> to
+    <code>electron_temperature</code>, and
+    <code>core_transport/model/profiles_1d/electrons/energy/flux</code> to
+    <code>electron_heat_flux</code>.</p>
+    <p><strong>Known limitation, folded not deferred.</strong> Seven rows cannot support a claim
+    that one template beats another; expansion to every catalog entry with a resolvable DD path
+    was added to the live DAG in the same beat.</p>
+    <p>Commit <code>aabbe55f</code>; 3 tests added; artifacts
+    <code>tests/standard_names/eval_sets/docs_holdout.json</code>,
+    <code>imas_codex/standard_names/benchmark_reference.py</code>,
+    <code>tests/standard_names/test_docs_holdout_set.py</code>.</p>
+
+    <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
+    <p>The plan required mandatory typical values and a general measurement or calculation
+    section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
+    filler, and permits measurement content only where it is constitutive or discriminating —
+    enforced by <code>test_normative_documentation_policy.py</code> and a dedicated
+    prose-adjudicator seat. Both scouts flagged the conflict independently; the currency audit
+    ruled the plan claims wrong.</p>
+    <p>Locked 2026-08-23 in favour of the live policy. The reasoning that decided it: the policy
+    is a refinement of the plan's intent rather than a rejection of it, since it already admits
+    measurement content exactly where it carries physics. The rejected alternatives both cost
+    more than they returned — a grounded-only synthesis needs a per-path value source the DD does
+    not carry for most paths, so its gate would degrade into the very filler the ban exists to
+    stop, while inverting the policy outright would make roughly 2,400 doubly-accepted names
+    non-conformant on two gates. The operative gate set is therefore definition, governing
+    equation, variable definitions in prose, semantic scope and exclusions, essential
+    relationships, sign convention where COCOS applies, and inline <code>name:</code>
+    cross-references.</p>
+  </main>
+</body>
+</html>

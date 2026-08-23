@@ -7,9 +7,9 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="sn-quality-parity">
   <meta name="plan-title" content="Standard Name Documentation Quality">
-  <meta name="plan-summary" content="Bring generated Standard Name documentation to catalog quality: a measurable holdout benchmark, richer DD/COCOS context into compose, a content-gated documentation template (definition, governing equation, significance, measurement, typical values, sign convention, cross-references), curated full examples, and an asynchronous link-resolution lifecycle with publish-time safety.">
-  <meta name="plan-status" content="pending">
-  <meta name="plan-impl" content="0.12">
+  <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-impl" content="0.25">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,49 +23,110 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="17">
+<meta name="plan-commits" content="b79f07b9,aabbe55f">
+<meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_cocos_injection.py">
 </head>
 <body>
   <main class="plan-doc">
     <section class="callout" id="current-scope">
-      <h2>Current scope: catalog-quality documentation, measured against a holdout</h2>
-      <p>This plan owns the documentation half of the project goal — names whose
-      docs carry the definition, governing equation, significance, measurement
-      basis, typical values, sign convention where COCOS applies, and working
-      cross-references a physicist actually needs. Every phase proves itself
-      against the Phase 0 holdout benchmark; nothing regenerates sound content
-      wholesale. The 2026-08-10 evidence-recovery overlay was removed in the
-      2026-08-11 portfolio review — advisory triage and rescores live in
-      sn-benchmark-evolution; the backlog drain already ran under
-      sn-pipeline-recovery §4.</p>
+      <h2>Current scope: make documentation quality measurable, then improve it on evidence</h2>
+      <p>This plan owns the documentation half of the project goal — names whose docs carry the
+      definition, governing equation, variable definitions, semantic scope and exclusions,
+      essential relationships, sign convention where COCOS applies, and the working
+      cross-references a physicist actually needs. Typical values and general measurement
+      recipes are deliberately excluded: ungrounded ranges are worse than none, and the live
+      faithfulness policy admits measurement content only where it is constitutive or
+      discriminating (<code>docs-content-gates</code>, locked 2026-08-23).</p>
+      <p>Every change proves itself against the holdout; nothing regenerates sound content
+      wholesale. Most of the original programme had already shipped by the time this plan was
+      executed — the 2026-08-23 currency audit reclassified 43 claims and left five open, all of
+      them about evidence rather than capability. The 2026-08-10 evidence-recovery overlay was
+      removed in the 2026-08-11 portfolio review: advisory triage and rescores live in
+      sn-benchmark-evolution, and the backlog drain already ran under sn-pipeline-recovery §4.</p>
     </section>
-    <h2 id="s1">§1 — Problem and current baseline</h2>
-    <p>Plan 23 remains a low-implementation, high-value backlog item: the survey pegs it at <strong>0.12</strong> because only one narrow fix is actually resolved today. Everything else is still a roadmap for bringing generated StandardNames up to catalog quality in content, links, and validation discipline.</p>
-    <figure>
-      <img src="/imas-codex/figures/sn-plan-migration/sn-quality-parity.svg" alt="Status diagram for plan 23 showing phases 0 to 5 largely open, with only unit persistence resolved.">
-      <figcaption>Plan 23 status: only the old unit-persistence concern is closed; benchmarking, enrichment, prompt hardening, link resolution, and validation are still open.</figcaption>
-    </figure>
+    <h2 id="s1">§1 — Measured baseline, 2026-08-23</h2>
+    <p>The old <strong>0.12</strong> reading was an artifact of stale prose, not a measurement.
+    A currency audit of all 43 technical claims in this plan against the live tree returned
+    <strong>22 already landed, 7 superseded by a different interface, 9 contradicted outright,
+    and 5 genuinely open</strong> — every row carrying a <code>file:line</code> citation. Most of
+    what the body below asked for had already shipped under other plans. Full record:
+    <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#reconnaissance">currency
+    reconnaissance</a>.</p>
     <ul>
-      <li><strong>Resolved already:</strong> the old GAP-3 unit-persistence concern is closed. Units now persist as <code>unit</code> plus <code>HAS_UNIT</code>, so Phase 1A no longer requires code changes.</li>
-      <li><strong>Still open:</strong> the benchmark harness, targeted-path CLI, publish/tag cleanup, DD context amplification, COCOS-aware docs guidance, full documentation template rewrite, asynchronous link resolution, and A/B validation loop.</li>
-      <li><strong>Critical framing from the markdown source:</strong> quality parity is not a prompt-only problem. It depends on measurable benchmarking, better graph context, richer examples, and a link-resolution lifecycle that the catalog can trust.</li>
+      <li><strong>Already live:</strong> rich DD path, coordinate, related-path and structure
+      context into compose through the library layer; COCOS sign-convention injection with a
+      mandated standalone paragraph; the content-gated template, which replaced the old
+      200–500 character target with 40–160 words under schema-enforced physics, equation, scope,
+      relationship and sign content; curated full examples; the link lifecycle with bounded
+      retries and a terminal <code>failed</code> state; accept-time bare-link normalization; and
+      export-time filtering that keeps unresolved internal links out of published output.</li>
+      <li><strong>Superseded, not missing:</strong> the targeted-path route exists as
+      <code>sn run --focus</code>; physics-domain grouping belongs to <code>export.py</code>
+      because <code>publish.py</code> is deliberately transport-only; and the public
+      <code>sn resolve-links</code> verb is intentionally absent, resolution running as internal
+      post-drain maintenance.</li>
+      <li><strong>The framing that survives:</strong> documentation quality is not a prompt-only
+      problem — it needs a measurable holdout with real catalog counterparts before any template
+      or context change may claim an improvement. That claim was never testable here, and making
+      it testable is what remains.</li>
     </ul>
 
-    <h2 id="s2">§2 — Open implementation work in Phases 0–2</h2>
+    <h2 id="s2">§2 — The measurable baseline</h2>
+    <p>This section now owns one deliverable: a documentation-quality holdout that makes
+    "better docs" a testable claim. Everything else originally listed here has landed or been
+    superseded — see §1.</p>
     <ul>
-      <li><strong>Phase 0 — benchmark harness.</strong> Define a holdout set of DD paths with catalog counterparts, score generated output on length/equations/sign conventions/typical values/measurement sections/link hygiene/tags/validation/reviewer score, and keep the results in a repeatable script or tracked evaluation workflow. This is the required baseline before any other phase can claim improvement.</li>
-      <li><strong>Phase 1B — targeted <code>--paths</code> mode.</strong> Add a targeted-path route to the SN generator so specific DD paths can be processed without going through the full extract query, classifier, or already-named filters.</li>
-      <li><strong>Phase 1C — publish/tag migration.</strong> Update <code>publish.py</code> to group by <code>physics_domain</code> before stripping primary tags, then run the graph migration that prefixes bare links with <code>name:</code> and removes primary tags from existing names.</li>
-      <li><strong>Phase 2A — rich DD context.</strong> Extend the DD extraction query so compose gets fuller path documentation, COCOS behaviour, coordinates, related paths, and structure context via the library layer rather than a chat-formatted MCP surface.</li>
-      <li><strong>Phase 2B — COCOS injection.</strong> When a path is COCOS-dependent, the generated documentation must carry an explicit sign-convention paragraph rather than relying on the reviewer to infer it later.</li>
+      <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>Holdout dataset.</strong>
+      7 immutable DD-path/catalog-documentation pairs pinned to imas-standard-names
+      <code>1f3d7224</code>; all seven required fields present on 7/7 rows;
+      <code>split_key == dd_path</code> on 7/7; holdout ∩ curated prompt examples =
+      <strong>0</strong>, so evaluation leakage now fails a test instead of passing unnoticed.
+      Commit <code>aabbe55f</code>, 3 tests.
+      <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#holdout">Record</a>.</li>
+      <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>COCOS lookup
+      defect.</strong> The documentation worker read convention parameters through a
+      relationship type the schema does not define, so parameters silently never arrived while
+      mock-based prompt tests passed. Regression FAILED 1/1 pre-fix, file PASSED 7/7 post-fix;
+      no bare <code>[:COCOS]</code> traversal remains in <code>imas_codex/</code>. Commit
+      <code>b79f07b9</code>.
+      <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#cocos-edge">Record</a>.</li>
+      <li><strong>Open — holdout scale.</strong> Seven rows cannot support a claim that one
+      template beats another. Expand to every catalog entry whose DD path resolves, keeping the
+      single-immutable-commit and empty-intersection contracts.</li>
+      <li><strong>Open — objective gate vector.</strong> Score one documentation string against
+      the seven live normative gates plus link hygiene and word-count bounds, returning a
+      per-gate result rather than a single subjective number. The gate set is fixed by the
+      <code>docs-content-gates</code> decision.</li>
     </ul>
 
-    <h2 id="s3">§3 — Open implementation work in Phases 3–5</h2>
+    <h2 id="s3">§3 — Proving an improvement</h2>
+    <p>The template, the examples and the link lifecycle are all live. What was never built is
+    the evidence loop that would let a change to any of them claim a gain.</p>
     <ul>
-      <li><strong>Phase 3A — documentation template rewrite.</strong> Replace the short 200–500 character target with required content sections: definition, governing equation, variable definitions, significance, measurement/calculation, typical values, sign convention when needed, and cross-references. The source explicitly treats content gates as more important than a hard minimum character count.</li>
-      <li><strong>Phase 3B — full curated examples.</strong> Promote a small showcase set of complete catalog-quality examples while keeping a larger abbreviated vocabulary set for coverage. These examples must not overlap the holdout paths from Phase 0.</li>
-      <li><strong>Phase 4A–4C — async link resolution.</strong> Add schema fields for <code>link_status</code>, <code>link_checked_at</code>, <code>unresolved_links</code>, and <code>link_retry_count</code>; let compose emit plausible <code>name:</code> links beyond the known-list constraint; and add a separate <code>sn resolve-links</code> worker with retry/failure semantics and publish-time filtering of unresolved entries.</li>
-      <li><strong>Phase 5 — A/B validation.</strong> Re-run the holdout set after each major phase, then run a bulk generation sample (for example equilibrium) to compare the final quality profile against catalog baselines.</li>
+      <li><span class="badge badge-shipped">✓ settled 2026-08-23</span> <strong>Content gates.</strong>
+      The template already gates on content rather than length. Its seven operative gates are
+      definition, governing equation, variable definitions in prose, semantic scope and
+      exclusions, essential relationships, sign convention where COCOS applies, and inline
+      <code>name:</code> cross-references. Mandatory typical values and general measurement
+      recipes are deliberately <em>excluded</em> — see the <code>docs-content-gates</code>
+      decision and its
+      <a href="/imas-codex/evidence/archive/sn-quality-parity-landed#docs-content-gates">rationale</a>.</li>
+      <li><span class="badge badge-shipped">✓ landed 2026-08-23</span> <strong>Example
+      disjointness.</strong> Curated prompt examples now carry DD split keys and are proven
+      disjoint from the holdout, so a showcase example cannot leak into the evaluation set.</li>
+      <li><strong>Open — phase-by-phase comparison.</strong> The tracked A/B set still has blank
+      goldens and its harness declares itself scaffolding, so no phase has ever been compared
+      against a baseline. Wire it to the holdout and the gate vector so a template or context
+      change reports a measured delta.</li>
+      <li><strong>Open — bulk validation sample.</strong> After the loop closes, run one
+      bulk-generation sample against catalog baselines to check the gain survives outside the
+      holdout.</li>
+      <li><strong>Not required.</strong> The link lifecycle's schema fields, bounded retries and
+      terminal <code>failed</code> state are live, and unresolved links already cannot reach
+      published output. A separate <code>unresolved_links</code> field would duplicate the
+      existing encoding, guessed <code>name:</code> links are forbidden because they fail
+      validation, and the public resolver verb is intentionally absent.</li>
     </ul>
 
     <h2 id="s4">§4 — Constraints, dependencies, and documentation fallout</h2>
@@ -73,8 +134,16 @@
       <li><strong>Library-first context.</strong> The source explicitly rejects using the MCP server formatting layer for DD context enrichment; the implementation should call the shared library/query layer directly.</li>
       <li><strong>Link resolution needs a terminal failure state.</strong> The plan is explicit that unresolved links cannot silently loop forever; <code>failed</code> is part of the intended lifecycle.</li>
       <li><strong>Publish/export safety matters as much as generation quality.</strong> Unresolved links must not appear in published output.</li>
-      <li><strong>This plan still feeds later benchmark work.</strong> Plan 34 and the state-of-the-nation research already depend on Phase 0’s benchmark-harness concept, so the migration should preserve that relationship rather than bury it.</li>
-      <li><strong>Documentation updates remain open.</strong> AGENTS guidance, the research quality-gap analysis, schema references, and <code>publish.py</code> docstrings all need to move when this work lands.</li>
+      <li><strong>The benchmark relationship runs the other way.</strong> This plan informs only
+      <code>sn-west-review-rehearsal</code>; <code>sn-benchmark-evolution</code> informs
+      <em>this</em> plan. No state-of-the-nation resource exists in the live tree, so nothing is
+      owed to one.</li>
+      <li><strong>Documentation fallout is already discharged.</strong> Repo guidance already
+      documents the seven-pool docs generation, review and refine loop, COCOS injection, link
+      hygiene and family harmonization; the link lifecycle and unit authority are already in the
+      LinkML source; the schema reference is generated output, not a hand-maintained target; and
+      the transport module's docstring already states its current two-step boundary. The only
+      documentation debt this plan carried was its own stale prose, corrected 2026-08-23.</li>
     </ul>
 
     <section data-reckon="followups" id="followups" class="r-followups">
@@ -126,6 +195,16 @@
       </p>
     <p class="r-dec-rat">Locked by the lead 2026-08-12: graph-wide regeneration is too expensive. The WEST cohort (~350 names, ~$50-80 through existing pools) is refreshed before its review so human attention lands on the best attainable docs; everything else improves at its next natural generation.</p>
     </div>
+<div class="r-dec" data-key="docs-content-gates" data-choice="live-faithfulness-policy-wins" data-by="Simon McIntosh" data-when="2026-08-23T07:40:00+00:00">
+    <p class="r-dec-q">The plan&#x27;s §3A requires mandatory typical values and a general measurement/calculation section; the live faithfulness policy forbids both. Which authority wins?</p>
+    <p class="r-dec-ctx">generate_docs_system.md:176-182 bans typical values, experiment ranges and device examples to prevent plausible but ungrounded filler, and 172-182 permits measurement or computation only where it is constitutive or discriminating. The ban is enforced by test_normative_documentation_policy.py and a dedicated sn-prose-adjudicator seat. Both reconnaissance scouts flagged the conflict independently and the currency audit ruled the plan claims WRONG (C21, C22).</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="live-faithfulness-policy-wins">Keep the live policy and correct the plan prose.</button>
+      <button class="r-opt" data-value="grounded-only-synthesis">Require both sections but only where DD-grounded, rewriting prompts, prose policy and the normative tests.</button>
+      <button class="r-opt" data-value="plan-wins-in-full">Make both sections unconditionally mandatory and invert the policy.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-23. The live policy is a refinement of §3A&#x27;s intent rather than a rejection of it: it already admits measurement content exactly where it is constitutive or discriminating, and bans only the generic form. Ungrounded typical values are a real generation failure mode, and the WEST expert-review packet is better carrying none than carrying invented ranges. The alternatives were rejected on cost and risk: the grounded-only synthesis needs a per-path value source the DD does not carry for most paths, so its gate would degrade into exactly the filler the ban exists to stop; inverting the policy outright would make roughly 2,400 doubly-accepted names non-conformant on two gates and would strip the adjudicator seat of its purpose. The operative gate set is therefore definition, governing equation, variable definitions in prose, semantic scope and exclusions, essential relationships, sign convention where COCOS applies, and inline name: cross-references.</p>
+    </div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="wave-review-defer-20260811" data-who="session-review-2026-08-11" data-when="2026-08-11">
@@ -139,6 +218,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260823-currency-reconnaissance" data-who="reckon-ship" data-when="2026-08-23T07:00:00+00:00">
     <div class="r-comment-body"><p><strong>Reconnaissance landed — the plan body is substantially stale and the open core is far narrower than 0.12 suggests.</strong> Two read-only scouts audited every technical claim against tree <code>90c73937</code>. Currency audit (commit <code>0e35b8e8</code>, validator PASS on 43/43 rows with a file:line citation each): <strong>22 ALREADY-LANDED, 5 STILL-OPEN, 7 SUPERSEDED, 9 WRONG</strong>. Reuse map (commit <code>6264748c</code>, validator PASS, every citation resolving): 43 candidates across 5 capability areas — 24 reusable-as-is, 11 extendable, 8 unfit.</p><p><strong>Already live, contrary to the plan:</strong> rich DD path/coordinate/related/structure context into compose via the library layer (workers.py:8499-8829, 2106-2152); COCOS sign-convention injection with a mandated standalone paragraph (generate_docs_system.md:45-59); the content-gated template — the 200-500 character target is gone, replaced by 40-160 words with schema-enforced physics/equation/scope/relationship/sign content (generate_docs_system.md:193-199, models.py:1812-1847); curated full examples (examples_curated.yaml:5-53); the full link lifecycle with bounded retries and a terminal failed state (schema 1414-1429, graph_ops.py:8673-8818); accept-time bare-link normalization (graph_ops.py:15609-15627); and export-time filtering that prevents any unresolved internal link reaching published output (export.py:386-412, 939-969).</p><p><strong>Superseded by a different interface:</strong> Phase 1B's <code>--paths</code> route is <code>sn run --focus</code> (cli/sn.py:1263-1277); Phase 1C's domain grouping belongs to <code>export.py</code> since <code>publish.py</code> is deliberately transport-only (export.py:1527-1548, publish.py:1-14); Phase 4C's public <code>sn resolve-links</code> verb is intentionally absent and runs as internal post-drain maintenance (loop.py:2283-2304).</p><p><strong>The genuinely open core is five claims:</strong> a documentation-specific holdout with catalog counterparts and an objective content-gate vector (the tracked benchmark is a naming benchmark, eval_sets/benchmark.json); phase-by-phase A/B evidence — the <code>prompt_ab.json</code> goldens are still blank and <code>scripts/prompt_ab.py</code> declares itself scaffolding; curated-example disjointness from the holdout, for which no DD-path split key or overlap assertion exists; and a bulk-generation validation sample. One confirmed code defect sits alongside them: the documentation worker's COCOS convention-parameter lookup queries a nonexistent <code>COCOS</code> relationship instead of schema-owned <code>HAS_COCOS</code> (workers.py:9079 against imas_dd.yaml:439), so live convention parameters can silently fail to reach docs generation while mock-based prompt tests still pass.</p><p><strong>One decision is outstanding and blocks §3A.</strong> The plan requires mandatory typical values and a general measurement/calculation section; the live faithfulness policy explicitly forbids both, to prevent plausible-but-ungrounded filler (generate_docs_system.md:172-182, generate_docs_user.md:326-333, enforced by test_normative_documentation_policy.py and the sn-prose-adjudicator seat). Both scouts flag the conflict; the currency audit rules the plan claims WRONG. Raised to the lead rather than resolved unilaterally, because it defines the documentation standard the WEST expert-review packet will carry.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823-cocos-holdout-landed" data-who="reckon-ship" data-when="2026-08-23T07:55:00+00:00">
+    <div class="r-comment-body"><p><strong>impl-cocosedge landed — commit <code>b79f07b9</code>; gate docs-cocos-regression PASSED.</strong> Measure is a genuine pre/post pair: the new canonical-query regression FAILED 1/1 against the pre-fix <code>DDVersion-[:COCOS]-&gt;COCOS</code> traversal and the focused file PASSED 7/7 after the lookup moved to the schema-owned <code>HAS_COCOS</code> edge. Verified on main after merge: no bare <code>[:COCOS]</code> traversal remains anywhere in <code>imas_codex/</code>. The defect was silent by construction — live convention parameters could fail to arrive at documentation generation while mock-based prompt tests still passed. Artifacts: <code>imas_codex/standard_names/workers.py</code>, <code>tests/standard_names/test_docs_cocos_injection.py</code>.</p><p><strong>impl-holdoutset landed — commit <code>aabbe55f</code>; gate docs-holdout-disjointness PASSED, 3 tests added.</strong> Measure: 7 immutable DD-path/catalog-documentation pairs pinned to imas-standard-names commit <code>1f3d7224</code>; 7/7 rows carry <code>dd_path</code>, <code>catalog_name</code>, <code>catalog_description</code>, <code>catalog_documentation</code>, <code>catalog_source</code>, <code>catalog_commit</code> and <code>split_key</code>; <code>split_key == dd_path</code> on 7/7; curated prompt DD split keys 6, holdout-curated intersection <strong>0</strong> — disjointness proven rather than asserted, which closes C27. Bindings include <code>equilibrium/time_slice/profiles_1d/q</code> to <code>safety_factor</code> and <code>core_transport/model/profiles_1d/electrons/energy/flux</code> to <code>electron_heat_flux</code>. Artifacts: <code>tests/standard_names/eval_sets/docs_holdout.json</code>, <code>imas_codex/standard_names/benchmark_reference.py</code>, <code>tests/standard_names/test_docs_holdout_set.py</code>. At 7 rows the set is too thin to measure improvement, so expansion to every catalog entry with a resolvable DD path is folded into the DAG as impl-holdoutgrow rather than deferred.</p></div>
 </div>
 </section>
 </main>
