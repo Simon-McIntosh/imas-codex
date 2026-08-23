@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T12:15:59",
+  "updated": "2026-08-23T12:19:08",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -205,6 +205,13 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a02d66-d9e2-7be0-857c-25079e35a9db",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-dbrule",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-23"
       },
       {
@@ -19945,9 +19952,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T101117494677-n-cyclerepair",
+        "plan": "sn-release-readiness",
+        "section": "\u00a73",
+        "node": "n-cyclerepair",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-ordercycle",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:11:22Z",
+        "completed_at": "2026-08-23T10:18:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 445,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 445,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "d37a598a71d70bfbc9e462def24e20068cd70d88",
+        "commits": [
+          "74ae1146f681fac16709d6977a712c3fe7cea606"
+        ],
+        "changed_lines": {
+          "added": 103,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T101117494677-n-cyclerepair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e1a-7e61-7dc2-9e10-068bee6e7df4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3890688,
+            "cached_input_tokens_cumulative": 3890688,
+            "input_tokens": 4049656,
+            "input_tokens_cumulative": 4049656,
+            "output_tokens": 14891,
+            "output_tokens_cumulative": 14891,
+            "reasoning_output_tokens": 5198,
+            "reasoning_output_tokens_cumulative": 5198
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 553
+    "_version": 555
   }
 }
