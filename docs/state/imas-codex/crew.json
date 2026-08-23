@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:11:06",
+  "updated": "2026-08-23T10:12:50",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -50,7 +50,7 @@
         "id": "cx-verify",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
+        "session_id": "01a02da8-07c8-77c2-b63e-2417a7aed6fa",
         "created": "2026-08-22"
       },
       {
@@ -17889,9 +17889,56 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T080612991245-test-docsquality",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "test-docsquality",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "cx-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:06:20Z",
+        "completed_at": "2026-08-23T08:12:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 389,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 389,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "2b03cf7f3e0baa411f39165486193e80a8756811",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Integration gate PASSED on clean detached revision 2b03cf7f, which carries all four merged documentation-quality commits (b79f07b9 COCOS relationship, aabbe55f holdout, 7d4707a8 gate vector, dbb10f86 holdout expansion). Full tests/standard_names suite: 6608 collected outcomes, 6600 passed, 8 skipped, 0 failed, 0 errors, exit 0; no failing node ids. Transcript at ~/.local/share/imas-codex/receipts/standard-names/sn-quality-parity/suite.log. The merges broke nothing.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T080612991245-test-docsquality/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02da8-07c8-77c2-b63e-2417a7aed6fa",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 483
+    "_version": 485
   }
 }

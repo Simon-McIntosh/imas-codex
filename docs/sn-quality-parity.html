@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.5">
+  <meta name="plan-impl" content="0.62">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,8 +23,8 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="19">
-<meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86">
+<meta name="plan-version" content="20">
+<meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_cocos_injection.py">
 </head>
 <body>
@@ -229,6 +229,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823-gates-holdoutgrow-landed" data-who="reckon-ship" data-when="2026-08-23T08:10:00+00:00">
     <div class="r-comment-body"><p><strong>impl-docgates landed — commit <code>7d4707a8</code>; gate docs-gate-discrimination PASSED, 8 tests added.</strong> Documentation quality was previously only a reviewer's subjective number, so a template or context change could not report <em>which</em> content it improved. <code>imas_codex/standard_names/docs_gates.py</code> now returns an ordered 10-bit vector over the 7 operative normative gates plus link hygiene and 2 independent word bounds. Measure — it discriminates: the <code>poloidal_magnetic_flux</code> catalog row from the holdout scores <strong>10/10</strong>, a three-word stub scores <strong>4/10</strong>. <code>NORMATIVE_GATE_NAMES</code> holds exactly 7 entries, and a test asserts <code>DOCUMENTATION_GATE_NAMES</code> contains none of <code>typical_values</code>, <code>measurement_methods</code> or <code>general_measurement</code> — so the two gates the <code>docs-content-gates</code> decision excluded cannot creep back in silently. Sign-convention absence is conditionally valid, because COCOS applicability cannot be inferred from prose alone; an emitted convention is checked for canonical final-paragraph form.</p><p><strong>impl-holdoutgrow landed — commit <code>dbb10f86</code>; gate docs-holdout-scale PASSED.</strong> Holdout expanded <strong>7 → 85</strong> path-level rows from 13 catalog identities, still on the single immutable commit <code>1f3d7224</code>. The ceiling is measured, not assumed: the catalog holds 42 entries, 15 identities resolve through live <code>HAS_STANDARD_NAME</code> bindings, and the 2 used by curated prompt examples were excluded wholesale, leaving 13 to contribute all 85 rows. Disjointness now holds at both levels — zero intersection on catalog identity <em>and</em> on DD-path split key — so a showcase example cannot leak in as the set grows. 85/85 split keys unique; seven-field schema on every row. pytest 3 passed.</p><p>Integration verification of both merges against <code>main</code> is dispatched as test-docsquality rather than assumed.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823-integration-green" data-who="reckon-ship" data-when="2026-08-23T08:15:00+00:00">
+    <div class="r-comment-body"><p><strong>test-docsquality landed — integration gate PASSED.</strong> Measured on clean detached revision <code>2b03cf7f</code>, carrying all four merged documentation-quality commits: full <code>tests/standard_names</code> suite <strong>6,600 passed, 8 skipped, 0 failed, 0 errors</strong> across 6,608 collected outcomes, exit 0, no failing node ids. Transcript: <code>~/.local/share/imas-codex/receipts/standard-names/sn-quality-parity/suite.log</code>. The merges broke nothing — verified by running the suite, not inferred from the per-node focused runs.</p><p><strong>doc-qualityfig landed — commit <code>db0c3d95</code>.</strong> The plan's status diagram asserted phases 0–5 largely open with only unit persistence resolved, which is the inverse of what the audit measured; a figure contradicting its own plan is worse than none. Replaced by a self-contained theme-aware SVG encoding all 43 claims as 22/7/9/5 (summing to 43) beside the four named open stages. Validated three ways: <code>xml.etree</code> contract check PASS, an actual <code>rsvg-convert</code> render PASS, and a docs-wide grep returning 0 references to the old path before deleting it.</p></div>
 </div>
 </section>
 </main>

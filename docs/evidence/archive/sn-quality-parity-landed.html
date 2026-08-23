@@ -147,6 +147,25 @@
     <code>tests/standard_names/eval_sets/docs_holdout.json</code>,
     <code>imas_codex/standard_names/benchmark_reference.py</code>.</p>
 
+
+    <h2 id="integration">Integration verdict &mdash; the merges broke nothing</h2>
+    <p>Each node ran its own focused tests, which proves the node and not the tree. The full
+    standard-names suite was run once against the clean detached integrated revision
+    <code>2b03cf7f</code>, carrying all four merged commits.</p>
+    <table>
+      <caption>Full <code>tests/standard_names</code> suite on integrated main</caption>
+      <thead><tr><th>Outcome</th><th>Count</th></tr></thead>
+      <tbody>
+        <tr><td>passed</td><td>6,600</td></tr>
+        <tr><td>skipped</td><td>8</td></tr>
+        <tr><td>failed</td><td><strong>0</strong></td></tr>
+        <tr><td>errors</td><td><strong>0</strong></td></tr>
+        <tr><td>collected outcomes</td><td>6,608</td></tr>
+      </tbody>
+    </table>
+    <p>Exit 0, no failing node ids. Transcript:
+    <code>~/.local/share/imas-codex/receipts/standard-names/sn-quality-parity/suite.log</code>.</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
