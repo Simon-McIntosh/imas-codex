@@ -37,8 +37,28 @@ def _result(outcome: DocumentationGateOutcome, reason: str) -> DocumentationGate
     return DocumentationGateResult(outcome=outcome, reason=reason)
 
 
+def _electron_pressure_relation(*, include_boltzmann_constant: bool) -> str:
+    product = "n_e k_B T_e" if include_boltzmann_constant else "n_e T_e"
+    constant_definition = (
+        ", $k_B$ is the Boltzmann constant in J/K,"
+        if include_boltzmann_constant
+        else ""
+    )
+    return f"""Electron pressure $p_e$ is related to particle density and temperature by the ideal-gas relation.
+
+$$p_e = {product}$$
+
+where $n_e$ is the electron density in m$^{{-3}}${constant_definition} and $T_e$ is the thermodynamic temperature in K. The relation distinguishes pressure from density and temperature individually. See [electron_density](name:electron_density) for the related particle quantity."""
+
+
 def test_catalog_documentation_passes_every_content_gate() -> None:
-    score = score_documentation(_catalog_documentation("poloidal_magnetic_flux"))
+    score = score_documentation(
+        _catalog_documentation("poloidal_magnetic_flux"),
+        physics_context=DocumentationPhysicsContext(
+            dd_path="core_sources/source/profiles_1d/grid/psi",
+            declared_unit="Wb",
+        ),
+    )
 
     assert _outcomes(score) == dict.fromkeys(
         DOCUMENTATION_GATE_NAMES, DocumentationGateOutcome.PASS
@@ -49,8 +69,58 @@ def test_catalog_documentation_passes_every_content_gate() -> None:
     assert score.word_count >= MIN_DOCUMENTATION_WORDS
 
 
+def test_defining_relation_fails_a_genuine_unit_mismatch() -> None:
+    score = score_documentation(
+        _electron_pressure_relation(include_boltzmann_constant=False),
+        physics_context=DocumentationPhysicsContext(
+            dd_path="equilibrium/time_slice/profiles_1d/electrons/pressure",
+            declared_unit="Pa",
+        ),
+    )
+
+    result = score.gate_vector["defining_equation"]
+    assert result.outcome is DocumentationGateOutcome.FAIL
+    assert (
+        result.reason == "defining relation dimensions contradict the DD-declared unit"
+    )
+
+
+def test_defining_relation_passes_when_dimensions_match_declared_unit() -> None:
+    score = score_documentation(
+        _electron_pressure_relation(include_boltzmann_constant=True),
+        physics_context=DocumentationPhysicsContext(
+            dd_path="equilibrium/time_slice/profiles_1d/electrons/pressure",
+            declared_unit="Pa",
+        ),
+    )
+
+    result = score.gate_vector["defining_equation"]
+    assert result.outcome is DocumentationGateOutcome.PASS
+    assert result.reason == "defining relation reproduces the DD-declared unit"
+
+
+def test_defining_relation_is_not_evaluable_without_a_declared_unit() -> None:
+    score = score_documentation(
+        _electron_pressure_relation(include_boltzmann_constant=True),
+        physics_context=DocumentationPhysicsContext(
+            dd_path="equilibrium/time_slice/profiles_1d/electrons/pressure",
+            declared_unit=None,
+        ),
+    )
+
+    result = score.gate_vector["defining_equation"]
+    assert result.outcome is DocumentationGateOutcome.NOT_EVALUABLE
+    assert result.reason == "DD-declared unit is unavailable"
+
+
 def test_stub_fails_required_content() -> None:
-    score = score_documentation("A plasma quantity.")
+    score = score_documentation(
+        "A plasma quantity.",
+        physics_context=DocumentationPhysicsContext(
+            dd_path="equilibrium/time_slice/profiles_1d/q",
+            declared_unit="1",
+        ),
+    )
 
     for gate in (
         "defining_equation",
@@ -226,7 +296,13 @@ Within an axisymmetric equilibrium, contours of the quantity organize the nested
         f"\n\n{additional_context}\n\nSign convention:",
     )
 
-    score = score_documentation(documentation)
+    score = score_documentation(
+        documentation,
+        physics_context=DocumentationPhysicsContext(
+            dd_path="core_sources/source/profiles_1d/grid/psi",
+            declared_unit="Wb",
+        ),
+    )
 
     assert score.word_count > 250
     assert _outcomes(score) == dict.fromkeys(
