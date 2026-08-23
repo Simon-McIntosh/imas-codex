@@ -44,6 +44,15 @@ def _make_gc(*, cocos_label: str | None = None) -> MagicMock:
 # ── Tests ───────────────────────────────────────────────────────────────
 
 
+def test_cocos_parameter_lookup_uses_schema_relationship():
+    """Convention parameters are read through the schema-owned relationship."""
+    from imas_codex.standard_names.workers import _DOCS_GEN_COCOS_PARAMS_QUERY
+
+    query = " ".join(_DOCS_GEN_COCOS_PARAMS_QUERY.split())
+    assert "(dv:DDVersion {id: $ver})-[:HAS_COCOS]->(c:COCOS)" in query
+    assert "-[:COCOS]->" not in query
+
+
 def test_cocos_label_injected():
     """When SN has cocos_transformation_type, it appears on item."""
     from imas_codex.standard_names.workers import _enrich_for_docs_gen
