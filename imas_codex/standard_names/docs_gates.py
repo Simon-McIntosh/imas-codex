@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
+from imas_codex.graph.models import COCOSLabelTransformation
 from imas_codex.standard_names.audits import (
     _dimension_container,
     _dimensions_overlap,
@@ -45,7 +46,14 @@ _VALID_SIGN_RE = re.compile(
     r"^Sign convention: Positive [A-Za-z$\\].+\.$",
     re.DOTALL,
 )
-_COCOS_NUMBER_RE = re.compile(r"\bCOCOS(?:[- ]?\d+)\b", re.IGNORECASE)
+_COCOS_NUMBER_RE = re.compile(
+    r"\bCOCOS(?:[- ]*(?:convention|number|version))?[- ]*#?\d+\b",
+    re.IGNORECASE,
+)
+_COCOS_TRANSFORMATION_LABEL_RE = re.compile(
+    rf"(?<![A-Za-z0-9_])(?:{'|'.join(re.escape(label.value) for label in COCOSLabelTransformation)})(?![A-Za-z0-9_])",
+    re.IGNORECASE,
+)
 _PLACEHOLDER_RE = re.compile(r"\[(?:condition|physical condition|quantity)\]", re.I)
 _VALID_LINK_TARGET_RE = re.compile(
     r"(?:name:[a-z0-9_]+|#[a-z0-9_]+|dd:[a-z0-9_/]+|https?://\S+)$"
@@ -418,18 +426,57 @@ def _has_relationship_link(text: str) -> bool:
     )
 
 
-def _valid_sign_convention(text: str) -> bool:
+def _sign_convention_result(
+    text: str,
+    physics_context: DocumentationPhysicsContext | None,
+) -> DocumentationGateResult:
+    """Require sign prose exactly when authoritative COCOS metadata does."""
+
+    transformation_type = (
+        physics_context.cocos_transformation_type
+        if physics_context is not None
+        else None
+    )
+    leaked_label = _COCOS_TRANSFORMATION_LABEL_RE.search(text)
+    leaked_authoritative_label = transformation_type and re.search(
+        rf"(?<![A-Za-z0-9_]){re.escape(transformation_type)}(?![A-Za-z0-9_])",
+        text,
+        re.IGNORECASE,
+    )
+    if _COCOS_NUMBER_RE.search(text) or leaked_label or leaked_authoritative_label:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="documentation exposes catalog-internal COCOS metadata",
+        )
+    if not transformation_type:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.NOT_EVALUABLE,
+            reason="COCOS transformation class is unavailable",
+        )
+
     paragraphs = [part.strip() for part in re.split(r"\n\s*\n", text) if part.strip()]
     sign_paragraphs = [part for part in paragraphs if "sign convention" in part.lower()]
+    if transformation_type == COCOSLabelTransformation.one_like.value:
+        return _predicate_result(
+            not sign_paragraphs,
+            pass_reason="COCOS-invariant quantity omits sign-convention prose",
+            fail_reason="COCOS-invariant quantity states a sign convention",
+        )
     if not sign_paragraphs:
-        return True
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="COCOS-sensitive quantity omits a sign convention",
+        )
     if len(sign_paragraphs) != 1 or sign_paragraphs[0] != paragraphs[-1]:
-        return False
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="sign-convention prose has noncanonical placement or form",
+        )
     sign = sign_paragraphs[0]
-    return bool(
-        _VALID_SIGN_RE.fullmatch(sign)
-        and not _COCOS_NUMBER_RE.search(sign)
-        and not _PLACEHOLDER_RE.search(sign)
+    return _predicate_result(
+        bool(_VALID_SIGN_RE.fullmatch(sign) and not _PLACEHOLDER_RE.search(sign)),
+        pass_reason="COCOS-sensitive quantity has canonical sign-convention prose",
+        fail_reason="sign-convention prose has noncanonical placement or form",
     )
 
 
@@ -470,9 +517,9 @@ def score_documentation(
     """Score one documentation body against the live deterministic gates.
 
     Equation and symbol gates describe observable content. Sign conventions
-    are conditional: absence passes because applicability requires structured
-    quantity metadata, while any convention present must use the canonical
-    standalone final paragraph.
+    are required for COCOS-sensitive transformation classes, forbidden for the
+    invariant class, and unevaluable when the transformation class is absent.
+    Catalog-visible text must not expose COCOS numbers or transformation labels.
     """
 
     text = documentation.strip()
@@ -481,11 +528,9 @@ def score_documentation(
     predicates = {
         "symbol_definitions": _symbols_are_defined(text),
         "relationship_link": _has_relationship_link(text),
-        "sign_convention": _valid_sign_convention(text),
         "link_hygiene": _links_are_hygienic(text),
         "minimum_word_count": words >= MIN_DOCUMENTATION_WORDS,
     }
-    assert ("defining_equation", *predicates) == DOCUMENTATION_GATE_NAMES
     reasons = {
         "symbol_definitions": (
             "every mathematical symbol has a prose definition",
@@ -494,10 +539,6 @@ def score_documentation(
         "relationship_link": (
             "documentation contains a standard-name relationship link",
             "documentation contains no standard-name relationship link",
-        ),
-        "sign_convention": (
-            "sign-convention prose is absent or has canonical placement and form",
-            "sign-convention prose has noncanonical placement or form",
         ),
         "link_hygiene": (
             "all links resolve through supported target syntax",
@@ -510,15 +551,29 @@ def score_documentation(
     }
     gates = {
         "defining_equation": _defining_equation_result(text, physics_context),
-        **{
-            gate: _predicate_result(
-                passed,
-                pass_reason=reasons[gate][0],
-                fail_reason=reasons[gate][1],
-            )
-            for gate, passed in predicates.items()
-        },
+        "symbol_definitions": _predicate_result(
+            predicates["symbol_definitions"],
+            pass_reason=reasons["symbol_definitions"][0],
+            fail_reason=reasons["symbol_definitions"][1],
+        ),
+        "relationship_link": _predicate_result(
+            predicates["relationship_link"],
+            pass_reason=reasons["relationship_link"][0],
+            fail_reason=reasons["relationship_link"][1],
+        ),
+        "sign_convention": _sign_convention_result(text, physics_context),
+        "link_hygiene": _predicate_result(
+            predicates["link_hygiene"],
+            pass_reason=reasons["link_hygiene"][0],
+            fail_reason=reasons["link_hygiene"][1],
+        ),
+        "minimum_word_count": _predicate_result(
+            predicates["minimum_word_count"],
+            pass_reason=reasons["minimum_word_count"][0],
+            fail_reason=reasons["minimum_word_count"][1],
+        ),
     }
+    assert tuple(gates) == DOCUMENTATION_GATE_NAMES
     return DocumentationGateScore(
         gate_vector=gates,
         word_count=words,
