@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+import inspect
 import json
 from pathlib import Path
 
+from imas_codex.standard_names import docs_gates
 from imas_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
     MAX_DOCUMENTATION_WORDS,
@@ -39,7 +41,7 @@ def test_stub_fails_required_content() -> None:
         "defining_equation",
         "scope",
         "exclusions_or_distinctions",
-        "essential_relationships",
+        "relationship_link_or_phrase_witness",
         "minimum_word_count",
     ):
         assert score.gate_vector[gate] is False
@@ -54,6 +56,32 @@ def test_gate_vocabulary_matches_normative_policy() -> None:
         "measurement_methods",
         "general_measurement",
     } & set(DOCUMENTATION_GATE_NAMES)
+
+
+def test_relationship_gate_records_only_a_link_or_phrase_witness() -> None:
+    relationship_gate = next(
+        gate for gate in NORMATIVE_GATE_NAMES if "relationship" in gate
+    )
+    detector_doc = inspect.getdoc(docs_gates._has_relationship_link_or_phrase_witness)
+
+    assert relationship_gate == "relationship_link_or_phrase_witness"
+    assert detector_doc is not None
+    assert "witness" in detector_doc
+    assert "Markdown link" in detector_doc
+    assert "allow-listed relationship phrase" in detector_doc
+    assert "does not assess" in detector_doc
+
+
+def test_relationship_prose_without_a_lexical_witness_records_false() -> None:
+    documentation = (
+        "The safety factor is the number of toroidal circuits made by a magnetic "
+        "field line for each poloidal circuit."
+    )
+
+    score = score_documentation(documentation)
+
+    assert "[" not in documentation
+    assert score.gate_vector["relationship_link_or_phrase_witness"] is False
 
 
 def test_malformed_name_link_fails_hygiene() -> None:
