@@ -47,6 +47,7 @@ from imas_codex.graph.models import (
 
 SIGNED_MANIFEST_SCHEMA = "imas-codex.signed-repair-manifest.v1"
 SIGNED_MANIFEST_RECEIPT_SCHEMA = "imas-codex.signed-repair-receipt.v1"
+SIGNED_AUTHORITY_CANONICALIZATION = "json-sort-keys-v1"
 
 _SHA256_RE = re.compile(r"[0-9a-f]{64}")
 _NODE_LABELS = frozenset({"StandardName", "StandardNameSource"})
@@ -766,7 +767,11 @@ def _load_authority(
     if payload_sha256 != expected_payload_sha256:
         raise SignedManifestAuthorityError("canonical signed-payload SHA-256 mismatch")
     signature = data.get("signature")
-    if not isinstance(signature, dict) or signature.get("sha256") != payload_sha256:
+    if (
+        not isinstance(signature, dict)
+        or signature.get("canonicalization") != SIGNED_AUTHORITY_CANONICALIZATION
+        or signature.get("sha256") != payload_sha256
+    ):
         raise SignedManifestAuthorityError(
             "authority signature does not match canonical signed payload"
         )

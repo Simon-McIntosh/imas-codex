@@ -3973,7 +3973,10 @@ classes:
       signatures:
         range: RepairAuthorityDigest
         multivalued: true
-        required: true
+        description: >-
+          Per-row digests retained when this row is persisted as durable graph
+          authority. Canonical file authorities may omit this projection because
+          their verified envelope signature covers the complete ordered row set.
       participants:
         range: RepairParticipant
         multivalued: true
@@ -4003,6 +4006,12 @@ classes:
     class_uri: sn:StructuralNameAuthority
     is_a: RepairAuthorityRow
     attributes:
+      signatures:
+        range: RepairAuthorityDigest
+        multivalued: true
+        required: true
+        description: >-
+          Required per-row digest relationship for durable graph authority.
       accepted_name_id:
         required: true
         description: Exact StandardName identity accepted under this authority.
