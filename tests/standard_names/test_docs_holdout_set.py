@@ -1,10 +1,13 @@
 """Integrity checks for the catalog-documentation evaluation holdout."""
 
+import pytest
+
 from imas_codex.standard_names.benchmark_reference import (
     DOCS_HOLDOUT_FIELDS,
     curated_example_names,
     curated_example_split_keys,
     load_docs_holdout,
+    load_docs_holdout_authority,
 )
 
 
@@ -32,6 +35,20 @@ def test_docs_holdout_pairs_dd_paths_with_catalog_documentation() -> None:
     catalog_commit = next(iter(catalog_commits))
     assert len(catalog_commit) == 40
     assert all(character in "0123456789abcdef" for character in catalog_commit)
+
+
+@pytest.mark.requires_graph
+def test_docs_holdout_physics_authority_matches_dd_path_bindings() -> None:
+    rows = load_docs_holdout()
+    authority = load_docs_holdout_authority(row["dd_path"] for row in rows)
+
+    assert set(authority) == {row["dd_path"] for row in rows}
+    assert sum(row["declared_unit"] is not None for row in rows) == 85
+    assert sum(row["cocos_transformation_type"] is not None for row in rows) == 24
+    for row in rows:
+        bound = authority[row["dd_path"]]
+        assert row["declared_unit"] == bound["declared_unit"]
+        assert row["cocos_transformation_type"] == bound["cocos_transformation_type"]
 
 
 def test_docs_holdout_is_disjoint_from_curated_prompt_examples() -> None:

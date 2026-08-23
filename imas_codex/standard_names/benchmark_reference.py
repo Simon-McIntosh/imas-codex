@@ -13,6 +13,7 @@ geometric quantities.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any, TypedDict
 
@@ -34,11 +35,20 @@ class DocsHoldoutRow(TypedDict):
 
     split_key: str
     dd_path: str
+    declared_unit: str | None
+    cocos_transformation_type: str | None
     catalog_name: str
     catalog_description: str
     catalog_documentation: str
     catalog_source: str
     catalog_commit: str
+
+
+class DocsHoldoutAuthority(TypedDict):
+    """Unit and COCOS authority bound to one DD path in the graph."""
+
+    declared_unit: str | None
+    cocos_transformation_type: str | None
 
 
 DOCS_HOLDOUT_PATH = (
@@ -50,6 +60,19 @@ DOCS_HOLDOUT_PATH = (
 )
 CURATED_EXAMPLES_PATH = Path(__file__).with_name("examples_curated.yaml")
 DOCS_HOLDOUT_FIELDS = frozenset(DocsHoldoutRow.__required_keys__)
+DOCS_HOLDOUT_NULLABLE_FIELDS = frozenset({"declared_unit", "cocos_transformation_type"})
+
+_DOCS_HOLDOUT_AUTHORITY_QUERY = """
+UNWIND $dd_paths AS dd_path
+OPTIONAL MATCH (node:IMASNode {id: dd_path})
+OPTIONAL MATCH (node)-[:HAS_UNIT]->(unit:Unit)
+RETURN dd_path,
+       count(DISTINCT node) AS node_count,
+       collect(DISTINCT unit.id) AS unit_ids,
+       collect(DISTINCT node.unit) AS scalar_units,
+       collect(DISTINCT node.cocos_transformation_type) AS cocos_types
+ORDER BY dd_path
+"""
 
 # ---------------------------------------------------------------------------
 # Helper: build a reference entry from grammar fields
@@ -300,6 +323,14 @@ def load_docs_holdout(
             )
         for field in DOCS_HOLDOUT_FIELDS:
             value = raw_row[field]
+            if field in DOCS_HOLDOUT_NULLABLE_FIELDS:
+                if value is not None and (
+                    not isinstance(value, str) or not value.strip()
+                ):
+                    raise ValueError(
+                        f"Documentation holdout row {index} has invalid {field}"
+                    )
+                continue
             if not isinstance(value, str) or not value.strip():
                 raise ValueError(f"Documentation holdout row {index} has empty {field}")
         if raw_row["split_key"] != raw_row["dd_path"]:
@@ -308,6 +339,69 @@ def load_docs_holdout(
             )
         rows.append(raw_row)
     return rows
+
+
+def load_docs_holdout_authority(
+    dd_paths: Iterable[str],
+) -> dict[str, DocsHoldoutAuthority]:
+    """Read each holdout path's unit and COCOS authority from the graph.
+
+    Unit authority is fail-closed: each path must bind exactly one IMAS node,
+    exactly one ``HAS_UNIT`` target, and the target must agree with the node's
+    scalar mirror. A null COCOS transformation property is retained as the
+    authoritative declaration that the path is not COCOS-sensitive.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    paths = tuple(dict.fromkeys(dd_paths))
+    if not paths:
+        return {}
+    if any(not isinstance(path, str) or not path.strip() for path in paths):
+        raise ValueError("Documentation holdout DD paths must be non-empty strings")
+
+    with GraphClient() as client:
+        graph_rows = list(client.query(_DOCS_HOLDOUT_AUTHORITY_QUERY, dd_paths=paths))
+
+    authority: dict[str, DocsHoldoutAuthority] = {}
+    for graph_row in graph_rows:
+        row: Mapping[str, Any] = graph_row
+        dd_path = row["dd_path"]
+        if row["node_count"] != 1:
+            raise ValueError(
+                f"Documentation holdout path {dd_path!r} binds "
+                f"{row['node_count']} IMAS nodes"
+            )
+
+        unit_ids = row["unit_ids"] or []
+        scalar_units = row["scalar_units"] or []
+        if len(unit_ids) != 1:
+            raise ValueError(
+                f"Documentation holdout path {dd_path!r} has "
+                f"{len(unit_ids)} HAS_UNIT authorities"
+            )
+        if scalar_units != unit_ids:
+            raise ValueError(
+                f"Documentation holdout path {dd_path!r} has inconsistent "
+                "unit scalar and HAS_UNIT authority"
+            )
+
+        cocos_types = row["cocos_types"] or []
+        if len(cocos_types) > 1:
+            raise ValueError(
+                f"Documentation holdout path {dd_path!r} has multiple COCOS types"
+            )
+        authority[dd_path] = {
+            "declared_unit": unit_ids[0],
+            "cocos_transformation_type": cocos_types[0] if cocos_types else None,
+        }
+
+    missing = set(paths) - authority.keys()
+    if missing:
+        raise ValueError(
+            "Documentation holdout graph query omitted paths: "
+            + ", ".join(sorted(missing))
+        )
+    return authority
 
 
 def curated_example_names(
