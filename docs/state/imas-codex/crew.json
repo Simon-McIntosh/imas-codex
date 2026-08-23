@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:36:27",
+  "updated": "2026-08-23T11:38:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -295,7 +295,7 @@
         "id": "impl-gatehonesty",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02df7-9b56-78b1-ae3e-93c5916ef5c4",
         "created": "2026-08-23"
       },
       {
@@ -18945,9 +18945,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T092508549408-n-quarcensus",
+        "plan": "sn-release-readiness",
+        "section": "\u00a75",
+        "node": "n-quarcensus",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-quarcensus",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:25:11Z",
+        "completed_at": "2026-08-23T09:37:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 731,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 731,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "27f28bc773f1012e8e3e228f36ba1e05870311d3",
+        "commits": [
+          "c9b8b28042132bfd4d0d188503e91a18979d62d2"
+        ],
+        "changed_lines": {
+          "added": 235,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T092508549408-n-quarcensus/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02df0-33f2-74f3-a572-9cc79121dfc9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8741376,
+            "cached_input_tokens_cumulative": 8741376,
+            "input_tokens": 8970097,
+            "input_tokens_cumulative": 8970097,
+            "output_tokens": 25971,
+            "output_tokens_cumulative": 25971,
+            "reasoning_output_tokens": 9451,
+            "reasoning_output_tokens_cumulative": 9451
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T093313761135-impl-gatehonesty",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "impl-gatehonesty",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-gatehonesty",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:33:16Z",
+        "completed_at": "2026-08-23T09:37:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 247,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 247,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "8b0478b4bdc601af66c63a9ea3c38a5b0a6027ab",
+        "commits": [
+          "7a9308ac"
+        ],
+        "changed_lines": {
+          "added": 40,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "The relationships gate now names what it detects: emitted key renamed essential_relationships to relationship_link_or_phrase_witness, with a docstring stating explicitly that it accepts a Markdown link or allow-listed relationship phrase and does NOT assess scientifically meaningful relationship content. The detector algorithm is deliberately unchanged, so all historical per-gate rates remain comparable and only the overclaiming name is fixed. The measured false negative is preserved as a regression: a safety-factor description stating its relationship in prose, carrying no Markdown link and no allow-listed phrase, records false. Verified no cross-file coupling - the literal key appeared only in docs_gates.py and its own test, both inside this commit's scope, while docs_holdout_eval.py iterates gates generically. pytest 10/10 passed.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T093313761135-impl-gatehonesty/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02df7-9b56-78b1-ae3e-93c5916ef5c4",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1560320,
+            "cached_input_tokens_cumulative": 1560320,
+            "input_tokens": 1650361,
+            "input_tokens_cumulative": 1650361,
+            "output_tokens": 7845,
+            "output_tokens_cumulative": 7845,
+            "reasoning_output_tokens": 3535,
+            "reasoning_output_tokens_cumulative": 3535
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 522
+    "_version": 525
   }
 }
