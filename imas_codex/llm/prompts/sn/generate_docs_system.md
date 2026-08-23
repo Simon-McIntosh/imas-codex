@@ -52,10 +52,14 @@ supported essential relationships to make room for another element.
    preferring an inline `name:` link when the symbol is a catalog quantity. An
    equation does not satisfy this obligation while any of its symbols remains
    undefined.
-4. **Scope** — explicitly state every semantic boundary, physical population
-   or region, and aggregation convention supported by the supplied name or
-   context. Do not omit scope that is already encoded by the name or provided
-   context merely because the source documentation leaves it implicit.
+4. **Scope** — explicitly state each scope fact that the supplied name or
+   context establishes: **(a)** the semantic boundary that separates this
+   quantity from a broader or narrower one, **(b)** the physical population or
+   region to which it applies, and **(c)** its aggregation convention. Treat
+   the name and injected context as positive evidence for these facts even when
+   the source documentation leaves them implicit. This obligation fails if any
+   established boundary, population or region, or aggregation convention is
+   left for the reader to infer.
 5. **Exclusions and distinctions** — explicitly state every supported
    exclusion or distinction needed to prevent confusion with a nearby
    quantity. Scope alone does not satisfy this separate obligation.
@@ -231,7 +235,10 @@ excuses a failure on another.
 2. **No circular definitions** — ❌ "The electron temperature is the temperature of electrons." ✅ "Kinetic energy per degree of freedom of the electron population, expressed in energy units."
 3. **LaTeX in documentation** — for any quantity with a defining equation, include exactly **one** centred display equation in `$$...$$` (the principal/defining one) per the canonical format above. Secondary relations stay inline as `$...$`. The display equation must have the `$$` delimiters on their own lines with blank lines before and after the block.
 4. **Symbol definitions** — define every symbol used in an equation or inline relation by physical identity; no symbol may be dropped to make room for other content.
-5. **Scope** — carry every supported semantic boundary, population, region, and aggregation convention from the supplied name and context into the documentation.
+5. **Scope** — check the established semantic boundary, physical population or
+   region, and aggregation convention separately; state each one explicitly.
+   None may be left implicit merely because it is already encoded in the name
+   or injected context.
 6. **Exclusions and distinctions** — carry every supported exclusion or distinction into the documentation; scope does not substitute for this check.
 7. **Essential relationships** — state the supported semantic or mathematical
    relationship to the nearest relevant quantity; a link alone does not explain
