@@ -6,6 +6,7 @@ import re
 from dataclasses import dataclass
 
 from imas_codex.standard_names.audits import latex_def_check
+from imas_codex.standard_names.doc_links import find_name_references
 
 MIN_DOCUMENTATION_WORDS = 40
 
@@ -28,7 +29,6 @@ DOCUMENTATION_GATE_NAMES: tuple[str, ...] = (
 _DISPLAY_MATH_RE = re.compile(r"\$\$(.+?)\$\$", re.DOTALL)
 _INLINE_MATH_RE = re.compile(r"(?<!\$)\$(?!\$)(.+?)(?<!\$)\$(?!\$)", re.DOTALL)
 _MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\(([^)]+)\)")
-_BARE_NAME_BRACKET_RE = re.compile(r"(?<!\\)\[([a-z][a-z0-9_]+)\](?!\()")
 _WORD_RE = re.compile(r"[A-Za-z]+(?:[-'\N{RIGHT SINGLE QUOTATION MARK}][A-Za-z]+)*")
 
 _DEFINITION_RE = re.compile(
@@ -136,7 +136,10 @@ def _links_are_hygienic(text: str) -> bool:
         if not label.strip() or not _VALID_LINK_TARGET_RE.fullmatch(target.strip()):
             return False
     without_links = _MARKDOWN_LINK_RE.sub("", text)
-    return not _BARE_NAME_BRACKET_RE.search(without_links)
+    return not any(
+        reference.syntax == "bare_bracket"
+        for reference in find_name_references(without_links)
+    )
 
 
 def score_documentation(documentation: str) -> DocumentationGateScore:
