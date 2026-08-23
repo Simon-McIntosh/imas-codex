@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:09:28",
+  "updated": "2026-08-23T11:21:20",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -136,6 +136,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-bulksample",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02de3-8e55-7853-a2f5-57c2da625e6a",
+        "created": "2026-08-23"
       },
       {
         "id": "impl-canonform",
@@ -733,6 +740,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "inv-relcollapse",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "inv-repairreuse",
         "harness": "codex",
         "role": "investigate",
@@ -773,6 +787,13 @@
         "role": "investigate",
         "session_id": "01a00b77-49b1-7230-8705-4f587cc2d769",
         "created": "2026-08-16"
+      },
+      {
+        "id": "inv-westcohort",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a02de3-4d1c-7c23-a632-3be583bb1c45",
+        "created": "2026-08-23"
       },
       {
         "id": "rev-a",
@@ -18574,9 +18595,125 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T091102634572-inv-westcohort",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "inv-westcohort",
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "inv-westcohort",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:11:05Z",
+        "completed_at": "2026-08-23T09:20:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 557,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 557,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "f935a732fb757952197e5af77f886d0dfdeb5d72",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Live WEST cohort re-extracted at zero spend, superseding the 7-day-old census. 234 distinct attributed names from 355 manifest paths via exact StandardNameSource ids over PRODUCED_NAME, zero missing source nodes, 13 unbound paths. docs_stage split: accepted=197, pending=24, drafted=6, reviewed=6, exhausted=1. The production reset predicate selects a 210-name rewrite subset (cohort sha256 c75cfaa4, subset sha256 4e3f2a2e). Priced dry run on the configured sn-docs seat: 210 projected calls, projected USD 2.3036, actual USD 0.00, model_calls_issued exactly 0 by a guarded counter. Note the 2026-08-16 figure of 28 was the docs-drain subset, not the cohort, and the decision's USD 50-80 band is well above the measured generation projection. Sizing is generation-only: it excludes paid review, refine and escalation plus 18 natural pending-doc generations, and is explicitly not apply authority - re-extract and re-price before any mutation.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T091102634572-inv-westcohort/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02de3-4d1c-7c23-a632-3be583bb1c45",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5964544,
+            "cached_input_tokens_cumulative": 5964544,
+            "input_tokens": 6187739,
+            "input_tokens_cumulative": 6187739,
+            "output_tokens": 18057,
+            "output_tokens_cumulative": 18057,
+            "reasoning_output_tokens": 7587,
+            "reasoning_output_tokens_cumulative": 7587
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T091119994396-impl-bulksample",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-bulksample",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-bulksample",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:11:22Z",
+        "completed_at": "2026-08-23T09:20:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 556,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 556,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "f935a732fb757952197e5af77f886d0dfdeb5d72",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "GENERALIZATION NOT HELD - the holdout gain does not survive outside the holdout, and this is the phase working as intended. 53 unique accepted identities across all 18 eligible physics domains, deterministic seed, 0 holdout split-key or identity overlaps, 0 failures, actual USD 0.1449 of a USD 1.50 ceiling. Artifact-free sample 0.8595 vs holdout 0.9438, delta -0.0843; all-gate 0.8736 vs 0.9494. The entire divergence is ONE gate: essential_relationships 0.264151 (14/53) off-holdout versus 0.941176 (80/85) on holdout, a -0.677 gap. Every other gate is within 0.04: physical_meaning +0.024, defining_equation -0.038, symbol_definitions -0.028, scope -0.024, exclusions -0.014, and sign_convention, link_hygiene and both word bounds identical. CONSEQUENCE: the +0.294 essential_relationships gain measured on the holdout is holdout-specific, so the f-west-docs-refresh trigger is NOT met and that gate stays closed. Gate recorded as failed because the node's purpose was to confirm the gain survives and it does not.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T091119994396-impl-bulksample/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02de3-8e55-7853-a2f5-57c2da625e6a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3798272,
+            "cached_input_tokens_cumulative": 3798272,
+            "input_tokens": 3961539,
+            "input_tokens_cumulative": 3961539,
+            "output_tokens": 17172,
+            "output_tokens_cumulative": 17172,
+            "reasoning_output_tokens": 6395,
+            "reasoning_output_tokens_cumulative": 6395
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 505
+    "_version": 512
   }
 }

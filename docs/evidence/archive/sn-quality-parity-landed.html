@@ -337,6 +337,48 @@
     runs USD 0.616</strong>, against a USD 200 campaign ceiling. Receipt
     <code>comparison-result-independent-gates.json</code>.</p>
 
+
+    <h2 id="generalization">Generalization check &mdash; the gain does not survive outside the holdout</h2>
+    <p>A gain measured only on the set it was tuned against is not yet a gain. Fifty-three accepted
+    identities were sampled across all eighteen eligible physics domains under a deterministic seed,
+    with every holdout split key and identity excluded first, then generated and scored on the same
+    gate vector. Zero overlaps, zero failures, USD 0.145 spent.</p>
+    <p><strong>It did not hold.</strong> Artifact-free, the sample scores <strong>0.860</strong>
+    against the holdout's <strong>0.944</strong> &mdash; a gap of &minus;0.084. And the entire
+    divergence is one gate.</p>
+    <table>
+      <caption>Off-holdout sample against the holdout arm, per gate</caption>
+      <thead><tr><th>Gate</th><th>Sample</th><th>Holdout</th><th>Difference</th></tr></thead>
+      <tbody>
+        <tr><td>essential_relationships</td><td>0.264</td><td>0.941</td><td><strong>&minus;0.677</strong></td></tr>
+        <tr><td>defining_equation</td><td>0.962</td><td>1.000</td><td>&minus;0.038</td></tr>
+        <tr><td>symbol_definitions</td><td>0.925</td><td>0.953</td><td>&minus;0.028</td></tr>
+        <tr><td>scope</td><td>0.717</td><td>0.741</td><td>&minus;0.024</td></tr>
+        <tr><td>exclusions_or_distinctions</td><td>0.868</td><td>0.882</td><td>&minus;0.014</td></tr>
+        <tr><td>physical_meaning</td><td>1.000</td><td>0.976</td><td>+0.024</td></tr>
+        <tr><td>sign_convention</td><td>1.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td>link_hygiene</td><td>1.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td>minimum_word_count</td><td>1.000</td><td>1.000</td><td>0.000</td></tr>
+        <tr><td>maximum_word_count</td><td>1.000</td><td>1.000</td><td>0.000</td></tr>
+      </tbody>
+    </table>
+    <p>Eight of ten gates are within four hundredths, and one is slightly better off-holdout.
+    <strong>Essential relationships passes 14 of 53 rows outside the holdout against 80 of 85
+    inside it.</strong> So the +0.294 that looked like the session's best result is
+    holdout-specific, and the honest reading is that the prompt change fixed the gate on rows that
+    resemble the catalog and left it broken everywhere else.</p>
+    <p><strong>This is the phase doing its job.</strong> The plan asked for a bulk sample precisely
+    to check whether a gain survives outside the set it was measured on. Without it, the
+    holdout-only result would have been carried forward as authority to rewrite a live cohort, and
+    the rewrite would have shipped weaker relationship content to expert reviewers under the belief
+    that it was stronger.</p>
+    <p><strong>Consequence:</strong> the <code>f-west-docs-refresh</code> trigger is <em>not</em>
+    met. It requires the holdout to show the template beating baseline as evidence the cohort will
+    improve, and the generalization check says the holdout does not predict off-holdout behaviour
+    for the gate that mattered most. That gate stays closed pending the mechanism.</p>
+    <p>Receipt <code>bulk-sample.json</code>; seed
+    <code>documentation-generalization-20260823</code>; n=53, three per domain where available.</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
