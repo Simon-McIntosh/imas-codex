@@ -8511,6 +8511,11 @@ RETURN sn.source_paths AS source_paths,
        }) AS dd_nodes
 """
 
+_DOCS_GEN_COCOS_PARAMS_QUERY = """
+MATCH (dv:DDVersion {id: $ver})-[:HAS_COCOS]->(c:COCOS)
+RETURN properties(c) AS cocos_params
+"""
+
 # Children grounding for a derived-parent docs item. A derived parent is an
 # abstraction over these concrete instances; generate_docs must GENERALISE over
 # them (describe the shared quantity), not over-specialise to any one child.
@@ -9075,10 +9080,7 @@ async def process_generate_docs_batch(
                     dd_version = get_dd_version()
                     cocos_rows = list(
                         gc.query(
-                            """
-                            MATCH (dv:DDVersion {id: $ver})-[:COCOS]->(c:COCOS)
-                            RETURN properties(c) AS cocos_params
-                            """,
+                            _DOCS_GEN_COCOS_PARAMS_QUERY,
                             ver=dd_version,
                         )
                     )
