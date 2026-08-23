@@ -10,6 +10,10 @@ from imas_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
     MIN_DOCUMENTATION_WORDS,
     NORMATIVE_GATE_NAMES,
+    DocumentationGateOutcome,
+    DocumentationGateResult,
+    DocumentationGateScore,
+    DocumentationPhysicsContext,
     score_documentation,
 )
 
@@ -25,11 +29,23 @@ def _catalog_documentation(name: str) -> str:
     )
 
 
+def _outcomes(score: DocumentationGateScore) -> dict[str, DocumentationGateOutcome]:
+    return {gate: result.outcome for gate, result in score.gate_vector.items()}
+
+
+def _result(outcome: DocumentationGateOutcome, reason: str) -> DocumentationGateResult:
+    return DocumentationGateResult(outcome=outcome, reason=reason)
+
+
 def test_catalog_documentation_passes_every_content_gate() -> None:
     score = score_documentation(_catalog_documentation("poloidal_magnetic_flux"))
 
-    assert score.gate_vector == dict.fromkeys(DOCUMENTATION_GATE_NAMES, True)
+    assert _outcomes(score) == dict.fromkeys(
+        DOCUMENTATION_GATE_NAMES, DocumentationGateOutcome.PASS
+    )
     assert score.passed_count == score.total_count == 6
+    assert score.failed_count == score.not_evaluable_count == 0
+    assert score.evaluable_count == 6
     assert score.word_count >= MIN_DOCUMENTATION_WORDS
 
 
@@ -41,8 +57,46 @@ def test_stub_fails_required_content() -> None:
         "relationship_link",
         "minimum_word_count",
     ):
-        assert score.gate_vector[gate] is False
+        assert score.gate_vector[gate].outcome is DocumentationGateOutcome.FAIL
     assert score.passed_count < score.total_count
+
+
+def test_not_evaluable_is_distinct_from_a_failed_gate() -> None:
+    outcomes = {
+        gate: _result(DocumentationGateOutcome.PASS, "authoritative check passed")
+        for gate in DOCUMENTATION_GATE_NAMES
+    }
+    outcomes["defining_equation"] = _result(
+        DocumentationGateOutcome.NOT_EVALUABLE,
+        "declared unit is unavailable",
+    )
+
+    score = DocumentationGateScore(gate_vector=outcomes, word_count=48)
+
+    assert score.gate_vector["defining_equation"].outcome == "not_evaluable"
+    assert score.gate_vector["defining_equation"].reason == (
+        "declared unit is unavailable"
+    )
+    assert score.passed_count == 5
+    assert score.failed_count == 0
+    assert score.not_evaluable_count == 1
+    assert score.evaluable_count == 5
+    assert score.total_count == 6
+
+
+def test_physics_context_is_retained_by_the_scorer() -> None:
+    context = DocumentationPhysicsContext(
+        dd_path="equilibrium/time_slice/profiles_1d/q",
+        declared_unit="1",
+        cocos_transformation_type=None,
+    )
+
+    score = score_documentation(
+        _catalog_documentation("safety_factor"),
+        physics_context=context,
+    )
+
+    assert score.physics_context is context
 
 
 def test_documentation_gate_names_are_exact() -> None:
@@ -81,8 +135,14 @@ def test_relationship_gate_requires_a_resolving_name_link() -> None:
         "[poloidal magnetic field](name:poloidal_magnetic_field)."
     )
 
-    assert score_documentation(phrase_only).gate_vector["relationship_link"] is False
-    assert score_documentation(name_link).gate_vector["relationship_link"] is True
+    assert (
+        score_documentation(phrase_only).gate_vector["relationship_link"].outcome
+        is DocumentationGateOutcome.FAIL
+    )
+    assert (
+        score_documentation(name_link).gate_vector["relationship_link"].outcome
+        is DocumentationGateOutcome.PASS
+    )
 
 
 def test_malformed_name_link_fails_hygiene() -> None:
@@ -91,7 +151,10 @@ def test_malformed_name_link_fails_hygiene() -> None:
         "[poloidal_magnetic_field](poloidal_magnetic_field)",
     )
 
-    assert score_documentation(text).gate_vector["link_hygiene"] is False
+    assert (
+        score_documentation(text).gate_vector["link_hygiene"].outcome
+        is DocumentationGateOutcome.FAIL
+    )
 
 
 def test_bare_name_brackets_fail_hygiene() -> None:
@@ -99,7 +162,10 @@ def test_bare_name_brackets_fail_hygiene() -> None:
         "[flux_loop_voltage](#flux_loop_voltage)", "[flux_loop_voltage]"
     )
 
-    assert score_documentation(text).gate_vector["link_hygiene"] is False
+    assert (
+        score_documentation(text).gate_vector["link_hygiene"].outcome
+        is DocumentationGateOutcome.FAIL
+    )
 
 
 def test_mathematical_brackets_do_not_fail_link_hygiene() -> None:
@@ -108,7 +174,10 @@ def test_mathematical_brackets_do_not_fail_link_hygiene() -> None:
         "The poloidal magnetic flux $\\psi = C[f_q]$",
     )
 
-    assert score_documentation(text).gate_vector["link_hygiene"] is True
+    assert (
+        score_documentation(text).gate_vector["link_hygiene"].outcome
+        is DocumentationGateOutcome.PASS
+    )
 
 
 def test_sign_convention_must_be_the_final_plain_paragraph() -> None:
@@ -116,22 +185,33 @@ def test_sign_convention_must_be_the_final_plain_paragraph() -> None:
         "Sign convention: Positive", "**Sign convention:** Positive"
     )
 
-    assert score_documentation(text).gate_vector["sign_convention"] is False
+    assert (
+        score_documentation(text).gate_vector["sign_convention"].outcome
+        is DocumentationGateOutcome.FAIL
+    )
 
 
 def test_absent_sign_convention_is_conditionally_valid() -> None:
     text = _catalog_documentation("electron_temperature")
 
     assert "Sign convention:" not in text
-    assert score_documentation(text).gate_vector["sign_convention"] is True
+    assert (
+        score_documentation(text).gate_vector["sign_convention"].outcome
+        is DocumentationGateOutcome.PASS
+    )
 
 
 def test_minimum_word_floor_is_enforced() -> None:
     below = score_documentation("plasma " * (MIN_DOCUMENTATION_WORDS - 1))
     at_floor = score_documentation("plasma " * MIN_DOCUMENTATION_WORDS)
 
-    assert below.gate_vector["minimum_word_count"] is False
-    assert at_floor.gate_vector["minimum_word_count"] is True
+    assert (
+        below.gate_vector["minimum_word_count"].outcome is DocumentationGateOutcome.FAIL
+    )
+    assert (
+        at_floor.gate_vector["minimum_word_count"].outcome
+        is DocumentationGateOutcome.PASS
+    )
 
 
 def test_long_content_dense_documentation_passes_every_remaining_gate() -> None:
@@ -149,7 +229,9 @@ Within an axisymmetric equilibrium, contours of the quantity organize the nested
     score = score_documentation(documentation)
 
     assert score.word_count > 250
-    assert score.gate_vector == dict.fromkeys(DOCUMENTATION_GATE_NAMES, True)
+    assert _outcomes(score) == dict.fromkeys(
+        DOCUMENTATION_GATE_NAMES, DocumentationGateOutcome.PASS
+    )
     assert score.passed_count == score.total_count == 6
 
 

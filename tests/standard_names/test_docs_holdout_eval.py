@@ -6,7 +6,12 @@ import pytest
 
 from imas_codex.standard_names import docs_holdout_eval
 from imas_codex.standard_names.benchmark_reference import load_docs_holdout
-from imas_codex.standard_names.docs_gates import DOCUMENTATION_GATE_NAMES
+from imas_codex.standard_names.docs_gates import (
+    DOCUMENTATION_GATE_NAMES,
+    DocumentationGateOutcome,
+    DocumentationGateResult,
+    DocumentationGateScore,
+)
 from imas_codex.standard_names.docs_holdout_eval import (
     HoldoutCostCeilingExceeded,
     evaluate_docs_holdout,
@@ -32,12 +37,88 @@ async def test_catalog_arm_reports_numeric_per_gate_baseline(
         DOCUMENTATION_GATE_NAMES
     )
     assert all(isinstance(row.arm_pass_rate, float) for row in report.per_gate_table)
+    assert all(row.arm_not_evaluable_count == 0 for row in report.per_gate_table)
+    assert all(row.arm_evaluable_count == 85 for row in report.per_gate_table)
     assert all(row.pass_rate_delta == 0.0 for row in report.per_gate_table)
     assert isinstance(report.overall_pass_rate, float)
     assert 0.0 <= report.overall_pass_rate <= 1.0
     assert report.overall_pass_rate == report.catalog_overall_pass_rate
     assert report.projected_call_count == 0
     assert report.actual_cost_usd == 0.0
+    assert report.row_scores[0].physics_context.dd_path == report.row_scores[0].dd_path
+
+
+def _gate_results(
+    defining_equation: DocumentationGateOutcome,
+) -> dict[str, DocumentationGateResult]:
+    results = {
+        gate: DocumentationGateResult(
+            outcome=DocumentationGateOutcome.PASS,
+            reason="authoritative check passed",
+        )
+        for gate in DOCUMENTATION_GATE_NAMES
+    }
+    reason_by_outcome = {
+        DocumentationGateOutcome.PASS: "equation dimensions match the declared unit",
+        DocumentationGateOutcome.FAIL: (
+            "equation dimensions contradict the declared unit"
+        ),
+        DocumentationGateOutcome.NOT_EVALUABLE: "declared unit is unavailable",
+    }
+    results["defining_equation"] = DocumentationGateResult(
+        outcome=defining_equation,
+        reason=reason_by_outcome[defining_equation],
+    )
+    return results
+
+
+def test_not_evaluable_rows_are_excluded_from_aggregate_denominators() -> None:
+    all_pass = _gate_results(DocumentationGateOutcome.PASS)
+    missing_authority = _gate_results(DocumentationGateOutcome.NOT_EVALUABLE)
+    contradiction = _gate_results(DocumentationGateOutcome.FAIL)
+    catalog_scores = [
+        DocumentationGateScore(gate_vector=dict(all_pass), word_count=50),
+        DocumentationGateScore(gate_vector=dict(all_pass), word_count=50),
+    ]
+
+    not_evaluable_table, not_evaluable_overall, _, _ = (
+        docs_holdout_eval._aggregate_scores(
+            [
+                DocumentationGateScore(gate_vector=dict(all_pass), word_count=50),
+                DocumentationGateScore(
+                    gate_vector=missing_authority,
+                    word_count=50,
+                ),
+            ],
+            catalog_scores,
+        )
+    )
+    false_scored_table, false_scored_overall, _, _ = (
+        docs_holdout_eval._aggregate_scores(
+            [
+                DocumentationGateScore(gate_vector=dict(all_pass), word_count=50),
+                DocumentationGateScore(
+                    gate_vector=contradiction,
+                    word_count=50,
+                ),
+            ],
+            catalog_scores,
+        )
+    )
+
+    print(
+        f"not_evaluable aggregate={not_evaluable_overall:.6f}; "
+        f"scored_false aggregate={false_scored_overall:.6f}"
+    )
+    assert not_evaluable_overall == 1.0
+    assert false_scored_overall == pytest.approx(11 / 12)
+    assert not_evaluable_overall != false_scored_overall
+    assert not_evaluable_table[0].arm_not_evaluable_count == 1
+    assert not_evaluable_table[0].arm_contradiction_count == 0
+    assert not_evaluable_table[0].arm_evaluable_count == 1
+    assert false_scored_table[0].arm_not_evaluable_count == 0
+    assert false_scored_table[0].arm_contradiction_count == 1
+    assert false_scored_table[0].arm_evaluable_count == 2
 
 
 async def test_priced_dry_run_projects_calls_and_cost_without_model_calls(
