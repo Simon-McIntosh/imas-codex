@@ -49,7 +49,7 @@ DOCS_HOLDOUT_PATH = (
     / "docs_holdout.json"
 )
 CURATED_EXAMPLES_PATH = Path(__file__).with_name("examples_curated.yaml")
-_DOCS_HOLDOUT_FIELDS = frozenset(DocsHoldoutRow.__required_keys__)
+DOCS_HOLDOUT_FIELDS = frozenset(DocsHoldoutRow.__required_keys__)
 
 # ---------------------------------------------------------------------------
 # Helper: build a reference entry from grammar fields
@@ -288,11 +288,17 @@ def load_docs_holdout(
     for index, raw_row in enumerate(payload):
         if not isinstance(raw_row, dict):
             raise ValueError(f"Documentation holdout row {index} must be an object")
-        missing = _DOCS_HOLDOUT_FIELDS - raw_row.keys()
+        missing = DOCS_HOLDOUT_FIELDS - raw_row.keys()
         if missing:
             fields = ", ".join(sorted(missing))
             raise ValueError(f"Documentation holdout row {index} lacks: {fields}")
-        for field in _DOCS_HOLDOUT_FIELDS:
+        unexpected = raw_row.keys() - DOCS_HOLDOUT_FIELDS
+        if unexpected:
+            fields = ", ".join(sorted(unexpected))
+            raise ValueError(
+                f"Documentation holdout row {index} has unexpected fields: {fields}"
+            )
+        for field in DOCS_HOLDOUT_FIELDS:
             value = raw_row[field]
             if not isinstance(value, str) or not value.strip():
                 raise ValueError(f"Documentation holdout row {index} has empty {field}")
@@ -304,26 +310,34 @@ def load_docs_holdout(
     return rows
 
 
-def curated_example_split_keys(
+def curated_example_names(
     path: Path = CURATED_EXAMPLES_PATH,
 ) -> frozenset[str]:
-    """Return DD-path split keys represented by curated prompt examples.
-
-    Curated examples are keyed by standard-name identity. A single identity may
-    correspond to more than one DD source, so the reference map expands every
-    matching example to all of its known DD paths before split comparison.
-    """
+    """Return the standard-name identities present in the prompt examples."""
     payload: Any = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
         raise ValueError("Curated examples must be grouped by quality tier")
 
-    curated_names = {
+    return frozenset(
         row["id"]
         for tier_rows in payload.values()
         if isinstance(tier_rows, list)
         for row in tier_rows
         if isinstance(row, dict) and isinstance(row.get("id"), str)
-    }
+    )
+
+
+def curated_example_split_keys(
+    path: Path = CURATED_EXAMPLES_PATH,
+) -> frozenset[str]:
+    """Return known DD-path split keys represented by prompt examples.
+
+    A single identity may correspond to more than one DD source, so the
+    reference map expands every matching example to all known DD paths. The
+    holdout also excludes curated identities wholesale, covering DD paths that
+    are added to the reference map later.
+    """
+    curated_names = curated_example_names(path)
     return frozenset(
         dd_path
         for dd_path, reference in REFERENCE_NAMES.items()
