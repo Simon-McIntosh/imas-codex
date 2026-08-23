@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T13:44:16",
+  "updated": "2026-08-23T13:57:21",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -580,6 +580,13 @@
       },
       {
         "id": "impl-quarcensus",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-quorumvar",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
@@ -21057,6 +21064,6 @@
       }
     ],
     "holds": [],
-    "_version": 585
+    "_version": 586
   }
 }
