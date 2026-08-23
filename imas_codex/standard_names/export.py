@@ -42,6 +42,13 @@ logger = logging.getLogger(__name__)
 # Default COCOS convention for the catalog manifest
 _DEFAULT_COCOS_CONVENTION = 17
 
+# A score-based exclusion is attributable only while the score reproduces.
+# One adjacent review-cycle pair in five crossed the acceptance bound, and the
+# measured median absolute swing was 0.05625.  Keep the default named and
+# caller-configurable so a repeated measurement can replace it.  Evidence:
+# docs/evidence/sn-release-readiness/quorum-self-agreement.md
+DEFAULT_BOUND_ADJACENT_HALF_WIDTH = 0.05625
+
 # ``generated_at`` is required by the ISN manifest model. Low-level callers
 # that intentionally provide no provenance receive this conspicuous, stable
 # value; the public export path sets ``require_provenance=True`` and refuses to
@@ -175,7 +182,7 @@ class ExportReport:
         self.exclusion_records.extend(records)
         reasons = [record.reason for record in self.exclusion_records]
         self.excluded_below_score = sum(
-            reason in {"below_name_score", "below_description_score"}
+            reason in {"below_name_score", "below_description_score", "bound_adjacent"}
             for reason in reasons
         )
         self.excluded_unreviewed = reasons.count("unreviewed_name")
@@ -580,12 +587,16 @@ def _run_gate_c(
     min_score: float,
     include_unreviewed: bool,
     min_description_score: float | None,
+    bound_adjacent_half_width: float = DEFAULT_BOUND_ADJACENT_HALF_WIDTH,
 ) -> tuple[GateResult, list[dict[str, Any]], int, int]:
     """Gate C: Score thresholds — filter candidates.
 
     Returns (gate_result, filtered_candidates, excluded_below_score,
     excluded_unreviewed).
     """
+    if not 0.0 <= bound_adjacent_half_width <= 1.0:
+        raise ValueError("bound_adjacent_half_width must be between 0 and 1")
+
     issues: list[dict[str, Any]] = []
     filtered: list[dict[str, Any]] = []
     excluded_below_score = 0
@@ -668,6 +679,23 @@ def _run_gate_c(
 
         # Score threshold
         if score < min_score:
+            distance_below_bound = min_score - score
+            if distance_below_bound <= bound_adjacent_half_width:
+                excluded_below_score += 1
+                issues.append(
+                    {
+                        "type": "bound_adjacent",
+                        "name": cand["id"],
+                        "score": score,
+                        "threshold": min_score,
+                        "half_width": bound_adjacent_half_width,
+                        "detail": (
+                            f"score is {distance_below_bound:.6g} below the "
+                            "acceptance bound, within the measured review swing"
+                        ),
+                    }
+                )
+                continue
             excluded_below_score += 1
             issues.append(
                 {
@@ -707,6 +735,7 @@ def _run_gate_c(
 def _gate_c_exclusion_records(gate_result: GateResult) -> list[ExclusionRecord]:
     """Normalize Gate C's reason-bearing issues into exclusion records."""
     exclusion_types = {
+        "bound_adjacent",
         "below_description_score",
         "below_name_score",
         "deterministic_parent_description_placeholder",
@@ -1553,6 +1582,7 @@ def run_export(
     staging_dir: str | Path,
     *,
     min_score: float = 0.65,
+    bound_adjacent_half_width: float = DEFAULT_BOUND_ADJACENT_HALF_WIDTH,
     include_unreviewed: bool = False,
     min_description_score: float | None = None,
     domain: str | None = None,
@@ -1575,6 +1605,9 @@ def run_export(
         Path to the staging directory. Created if it doesn't exist.
     min_score:
         Minimum ``reviewer_score_name`` for inclusion (default 0.65).
+    bound_adjacent_half_width:
+        Scores below ``min_score`` by no more than this measured review swing
+        are excluded as ``bound_adjacent`` rather than ``below_name_score``.
     include_unreviewed:
         Include names without a ``reviewer_score_name``.
     min_description_score:
@@ -1656,7 +1689,11 @@ def run_export(
 
         # Gate C: Score thresholds (filter candidates)
         gate_c, candidates, _, _ = _run_gate_c(
-            candidates, min_score, include_unreviewed, min_description_score
+            candidates,
+            min_score,
+            include_unreviewed,
+            min_description_score,
+            bound_adjacent_half_width,
         )
         report.gate_results.append(gate_c)
         report.record_exclusions(_gate_c_exclusion_records(gate_c))
@@ -1744,7 +1781,11 @@ def run_export(
     else:
         # Gate C still runs for filtering even when gates skipped
         gate_c, candidates, _, _ = _run_gate_c(
-            candidates, min_score, include_unreviewed, min_description_score
+            candidates,
+            min_score,
+            include_unreviewed,
+            min_description_score,
+            bound_adjacent_half_width,
         )
         report.record_exclusions(_gate_c_exclusion_records(gate_c))
 
