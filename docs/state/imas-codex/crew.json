@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T15:27:05",
+  "updated": "2026-08-23T15:42:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -122,6 +122,13 @@
         "role": "implement",
         "session_id": "01a024e7-8cd6-7923-9c9a-517808ed65b8",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-auditfp",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02edb-10fd-7b90-aed6-c4684ae73f88",
+        "created": "2026-08-23"
       },
       {
         "id": "impl-authbuilder",
@@ -416,6 +423,13 @@
         "role": "implement",
         "session_id": "01a01ee6-4099-71c0-991b-4ea213ed0d53",
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-lexicalgates",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-linkaudit",
@@ -21203,9 +21217,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T132746565510-n-boundband",
+        "plan": "sn-release-readiness",
+        "section": "\u00a73",
+        "node": "n-boundband",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-boundband",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:27:49Z",
+        "completed_at": "2026-08-23T13:40:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 764,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 764,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "ee02e6346f41432617e6cc629ad6115c29a0d02b",
+        "commits": [
+          "f28cf415363e37822763c3dc3865da36061c63fc"
+        ],
+        "changed_lines": {
+          "added": 157,
+          "removed": 3,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T132746565510-n-boundband/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02ece-5951-72a1-913a-ff366073e66a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7723008,
+            "cached_input_tokens_cumulative": 7723008,
+            "input_tokens": 7920537,
+            "input_tokens_cumulative": 7920537,
+            "output_tokens": 21480,
+            "output_tokens_cumulative": 21480,
+            "reasoning_output_tokens": 8300,
+            "reasoning_output_tokens_cumulative": 8300
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 590
+    "_version": 594
   }
 }
