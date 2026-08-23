@@ -25047,6 +25047,307 @@ def fetch_derived_parent_children(
     return {r["parent_id"]: list(r["children"]) for r in rows}
 
 
+_STRUCTURAL_AUTHORITY_MECHANISM = "deterministic-grammar-peel"
+_STRUCTURAL_AUTHORITY_SCHEMA = "StructuralNameAuthority"
+_STRUCTURAL_AUTHORITY_CANONICALIZATION = "json-sort-keys"
+
+
+class StructuralAuthorityConflict(RuntimeError):
+    """A structural accept no longer matches its exact live child closure."""
+
+
+def _structural_authority_identities() -> tuple[str, str]:
+    """Return immutable identities for the executing code and schema bytes."""
+    code_identity = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    schema_path = Path(__file__).parents[1] / "schemas" / "standard_name.yaml"
+    schema_identity = hashlib.sha256(schema_path.read_bytes()).hexdigest()
+    return code_identity, schema_identity
+
+
+def _structural_authority_snapshot(gc: Any, sn_id: str) -> dict[str, Any] | None:
+    """Read one parent and its exact ordered live child rows."""
+    rows = gc.query(
+        """
+        MATCH (parent:StandardName {id: $id})
+        OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(parent)
+        WHERE child IS NULL OR NOT coalesce(child.name_stage, '') IN
+          ['superseded', 'exhausted', 'contested']
+        WITH parent, child ORDER BY child.id
+        RETURN parent.id AS parent_id,
+               elementId(parent) AS parent_element_id,
+               parent.name_stage AS name_stage,
+               parent.origin AS origin,
+               parent.claim_token AS claim_token,
+               parent.reviewed_name_at AS reviewed_name_at,
+               parent.docs_stage AS docs_stage,
+               parent.validation_status AS validation_status,
+               parent.embedded_at AS embedded_at,
+               parent.chain_length AS chain_length,
+               [(parent)-[:HAS_STRUCTURAL_AUTHORITY]->(existing)
+                 | existing.id] AS authority_ids,
+               [item IN collect(CASE WHEN child IS NULL THEN null ELSE {
+                 id: child.id,
+                 element_id: elementId(child),
+                 name_stage: child.name_stage,
+                 reviewer_score_name: child.reviewer_score_name,
+                 reviewer_model_name: child.reviewer_model_name
+               } END) WHERE item IS NOT NULL] AS children
+        """,
+        id=sn_id,
+    )
+    return dict(rows[0]) if rows else None
+
+
+def _structural_authority_record(
+    snapshot: dict[str, Any], *, accepting: bool
+) -> dict[str, Any]:
+    """Build a content-addressed signed authority from a live child snapshot."""
+    child_rows = list(snapshot.get("children") or [])
+    if not child_rows:
+        raise StructuralAuthorityConflict(
+            f"derived parent {snapshot.get('parent_id')!r} has no live children"
+        )
+    child_ids = [str(child["id"]) for child in child_rows]
+    if child_ids != sorted(child_ids) or len(child_ids) != len(set(child_ids)):
+        raise StructuralAuthorityConflict(
+            "structural authority requires unique children in canonical id order"
+        )
+
+    parent_id = str(snapshot["parent_id"])
+    created_at_value = datetime.now(UTC)
+    created_at = created_at_value.isoformat()
+    code_identity, schema_identity = _structural_authority_identities()
+    signed_payload = {
+        "accepted_name_id": parent_id,
+        "child_rows": child_rows,
+        "code_identity": code_identity,
+        "created_at": created_at_value,
+        "entailment_mechanism": _STRUCTURAL_AUTHORITY_MECHANISM,
+        "operation": "accept-and-authorize"
+        if accepting
+        else "authorize-existing-accept",
+        "schema_identity": schema_identity,
+    }
+    payload_sha256 = _authority_payload_hash(signed_payload)
+    authority_id = f"structural-authority:{payload_sha256}"
+    prefix = authority_id + ":"
+    participants = [
+        {
+            "id": prefix + "participant:parent",
+            "kind": "node",
+            "graph_label": "StandardName",
+            "signature_sha256": _authority_payload_hash(
+                {
+                    "id": parent_id,
+                    "element_id": snapshot.get("parent_element_id"),
+                    "name_stage": snapshot.get("name_stage"),
+                }
+            ),
+        },
+        *[
+            {
+                "id": prefix + f"participant:child:{index}",
+                "kind": "node",
+                "graph_label": "StandardName",
+                "signature_sha256": _authority_payload_hash(child),
+            }
+            for index, child in enumerate(child_rows)
+        ],
+    ]
+    mutations = [
+        {
+            "id": prefix + "mutation:authority",
+            "order": 0,
+            "kind": "add_relationship",
+            "participant_id": participants[0]["id"],
+            "arguments": json.dumps(
+                {
+                    "relationship": "HAS_STRUCTURAL_AUTHORITY",
+                    "child_relationship": "ENTAILED_FROM_CHILD",
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+        }
+    ]
+    if accepting:
+        mutations.append(
+            {
+                "id": prefix + "mutation:accept",
+                "order": 1,
+                "kind": "set_properties",
+                "participant_id": participants[0]["id"],
+                "arguments": json.dumps(
+                    {"name_stage": "accepted"},
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+            }
+        )
+    guards = [
+        {
+            "id": prefix + "guard:participants",
+            "kind": "participant_lock",
+            "implementation": "lock-exact-parent-and-live-children",
+            "participant_ids": [participant["id"] for participant in participants],
+            "expected": len(participants),
+        },
+        {
+            "id": prefix + "guard:children",
+            "kind": "closure_digest",
+            "implementation": "ordered-live-child-row-digest",
+            "participant_ids": [participant["id"] for participant in participants[1:]],
+            "expected": payload_sha256,
+        },
+        {
+            "id": prefix + "guard:replay",
+            "kind": "replay_postcondition",
+            "implementation": "one-structural-authority-per-accept",
+            "participant_ids": [participants[0]["id"]],
+            "expected": 1,
+        },
+    ]
+    return {
+        "id": authority_id,
+        "child_rows": child_rows,
+        "expected_name_stage": snapshot.get("name_stage"),
+        "expected_claim_token": snapshot.get("claim_token"),
+        "identity": {
+            "id": prefix + "identity",
+            "kind": "standard_name",
+            "target_id": parent_id,
+        },
+        "signature": {
+            "id": prefix + "signature",
+            "profile": "each_row",
+            "sha256": payload_sha256,
+            "canonicalization": _STRUCTURAL_AUTHORITY_CANONICALIZATION,
+        },
+        "participants": participants,
+        "selection": {
+            "id": prefix + "selection",
+            "mode": "exact_caller_set",
+            "predicate": "exact-live-derived-parent-child-set",
+        },
+        "mutations": mutations,
+        "guards": guards,
+        "orphan_policy": "refuse",
+        "accepted_name_id": parent_id,
+        "child_ids": child_ids,
+        "children": child_ids,
+        "entailment_mechanism": _STRUCTURAL_AUTHORITY_MECHANISM,
+        "created_at": created_at,
+        "code_identity": code_identity,
+        "schema_identity": schema_identity,
+        "payload_sha256": payload_sha256,
+    }
+
+
+def _persist_structural_authority(
+    gc: Any,
+    record: dict[str, Any],
+    *,
+    parent_updates: dict[str, Any] | None = None,
+    require_derived: bool = True,
+) -> bool:
+    """Persist one authority and optional accept transition in one statement."""
+    rows = gc.query(
+        """
+        MATCH (parent:StandardName {id: $parent_id})
+        WHERE ($require_derived = false OR parent.origin = 'derived')
+          AND parent.name_stage = $expected_name_stage
+          AND (parent.claim_token = $expected_claim_token
+               OR (parent.claim_token IS NULL AND $expected_claim_token IS NULL))
+          AND NOT (parent)-[:HAS_STRUCTURAL_AUTHORITY]->(:StructuralNameAuthority)
+        OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(parent)
+        WHERE child IS NULL OR NOT coalesce(child.name_stage, '') IN
+          ['superseded', 'exhausted', 'contested']
+        WITH parent, child ORDER BY child.id
+        WITH parent, [c IN collect(child) WHERE c IS NOT NULL] AS children
+        WHERE [c IN children | c.id] = $child_ids
+          AND [c IN children | elementId(c)] = $child_element_ids
+          AND size(children) > 0
+        SET parent += $parent_updates,
+            parent._structural_authority_lock = true
+        REMOVE parent._structural_authority_lock
+        CREATE (authority:StructuralNameAuthority)
+        SET authority = $authority_properties
+        CREATE (parent)-[:HAS_STRUCTURAL_AUTHORITY]->(authority)
+        CREATE (identity:RepairRowIdentity)
+        SET identity = $identity
+        CREATE (authority)-[:IDENTITY]->(identity)
+        CREATE (signature:RepairAuthorityDigest)
+        SET signature = $signature
+        CREATE (authority)-[:SIGNATURES]->(signature)
+        CREATE (selection:RepairSelection)
+        SET selection = $selection
+        CREATE (authority)-[:SELECTION]->(selection)
+        WITH parent, authority, children
+        UNWIND $participants AS participant_data
+        CREATE (participant:RepairParticipant)
+        SET participant = participant_data
+        CREATE (authority)-[:PARTICIPANTS]->(participant)
+        WITH DISTINCT parent, authority, children
+        UNWIND $mutations AS mutation_data
+        CREATE (mutation:RepairMutation)
+        SET mutation = mutation_data
+        CREATE (authority)-[:MUTATIONS]->(mutation)
+        WITH DISTINCT parent, authority, children
+        UNWIND $guards AS guard_data
+        CREATE (guard:RepairGuard)
+        SET guard = guard_data
+        CREATE (authority)-[:GUARDS]->(guard)
+        WITH DISTINCT parent, authority, children
+        UNWIND children AS entailing_child
+        CREATE (authority)-[:ENTAILED_FROM_CHILD]->(entailing_child)
+        WITH DISTINCT parent, authority
+        OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(parent)
+        FOREACH (_ IN CASE WHEN $description IS NULL OR source IS NULL
+                           THEN [] ELSE [1] END |
+          SET source.description = $description)
+        RETURN parent.name_stage AS name_stage, authority.id AS authority_id
+        """,
+        parent_id=record["accepted_name_id"],
+        child_ids=record["child_ids"],
+        child_element_ids=[child["element_id"] for child in record["child_rows"]],
+        child_rows=record["child_rows"],
+        expected_name_stage=record["expected_name_stage"],
+        expected_claim_token=record["expected_claim_token"],
+        require_derived=require_derived,
+        parent_updates=parent_updates or {},
+        authority_properties={
+            key: record[key]
+            for key in (
+                "id",
+                "orphan_policy",
+                "accepted_name_id",
+                "child_ids",
+                "children",
+                "entailment_mechanism",
+                "created_at",
+                "code_identity",
+                "schema_identity",
+            )
+        }
+        | {
+            "identity": record["identity"]["id"],
+            "signatures": [record["signature"]["id"]],
+            "participants": [item["id"] for item in record["participants"]],
+            "selection": record["selection"]["id"],
+            "mutations": [item["id"] for item in record["mutations"]],
+            "guards": [item["id"] for item in record["guards"]],
+        },
+        identity=record["identity"],
+        signature=record["signature"],
+        selection=record["selection"],
+        participants=record["participants"],
+        mutations=record["mutations"],
+        guards=record["guards"],
+        description=(parent_updates or {}).get("description"),
+    )
+    return len(rows) == 1 and rows[0].get("authority_id") == record["id"]
+
+
 @retry_on_deadlock()
 def persist_enriched_parent(
     *,
@@ -25090,59 +25391,51 @@ def persist_enriched_parent(
     """
     description = _sanitize_doc_text(description)
     with GraphClient() as gc:
-        rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
-            WHERE (sn.claim_token = $token OR sn.claim_token IS NULL)
-              AND sn.origin = 'derived'
-            SET sn.description        = $description,
-                sn.embedding          = $embedding,
-                sn.embedded_at        = CASE WHEN $embedding IS NULL
-                                             THEN sn.embedded_at
-                                             ELSE datetime() END,
-                sn.parent_enriched_at = datetime(),
-                sn.parent_enrich_model = $model,
-                // Structural acceptance — skip REVIEW_NAME (see docstring). The
-                // name is a deterministic grammar peel of the children, never
-                // reviewed/refined, so it carries NO reviewer_score_name (scoring
-                // a name we never change is meaningless). ``reviewed_name_at`` is
-                // the "name finalised, docs may proceed" signal; the docs gates
-                // admit derived parents via origin, not a score.
-                sn.name_stage = 'accepted',
-                sn.reviewer_model_name = 'structural-inheritance',
-                sn.reviewed_name_at = coalesce(sn.reviewed_name_at, datetime()),
-                sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
-                sn.validation_status = coalesce(sn.validation_status, 'valid'),
-                sn.needs_composition = null,
-                sn.claim_token        = null,
-                sn.claimed_at         = null
-            RETURN sn.name_stage AS name_stage
-            """,
-            id=sn_id,
-            token=claim_token,
-            description=description,
-            embedding=embedding,
-            model=model,
-        )
-        if not rows:
+        snapshot = _structural_authority_snapshot(gc, sn_id)
+        if snapshot and "parent_id" not in snapshot:
+            return str(snapshot.get("name_stage") or "")
+        if (
+            snapshot is None
+            or snapshot.get("origin") != "derived"
+            or snapshot.get("claim_token") not in (claim_token, None)
+            or not snapshot.get("children")
+            or snapshot.get("authority_ids")
+        ):
             logger.debug(
                 "persist_enriched_parent: %s no longer matched (concurrent "
-                "winner or not a derived parent) — no-op",
+                "winner, missing child authority, or not a derived parent) — no-op",
                 sn_id,
             )
             return ""
-        # Mirror onto the parent's source row so consolidation/export agree.
-        gc.query(
-            """
-            MATCH (sns:StandardNameSource)-[:PRODUCED_NAME]->(
-                sn:StandardName {id: $id})
-            SET sns.description = $description
-            """,
-            id=sn_id,
-            description=description,
+        record = _structural_authority_record(snapshot, accepting=True)
+        now = datetime.now(UTC)
+        applied = _persist_structural_authority(
+            gc,
+            record,
+            parent_updates={
+                "description": description,
+                "embedding": embedding,
+                "embedded_at": (
+                    now if embedding is not None else snapshot.get("embedded_at")
+                ),
+                "parent_enriched_at": now,
+                "parent_enrich_model": model,
+                "name_stage": "accepted",
+                "reviewer_model_name": "structural-inheritance",
+                "reviewed_name_at": snapshot.get("reviewed_name_at") or now,
+                "docs_stage": snapshot.get("docs_stage") or "pending",
+                "validation_status": snapshot.get("validation_status") or "valid",
+                "needs_composition": None,
+                "claim_token": None,
+                "claimed_at": None,
+            },
         )
+        if not applied:
+            raise StructuralAuthorityConflict(
+                f"derived parent {sn_id!r} changed before atomic acceptance"
+            )
 
-    new_stage: str = rows[0]["name_stage"]
+    new_stage = "accepted"
     logger.info(
         "\033[32menrich_parents\033[0m: %s → name_stage=%s — %s",
         sn_id,
@@ -25196,18 +25489,37 @@ def structural_accept_derived_parents(gc: Any | None = None) -> int:
               AND sn.name_stage IN ['drafted', 'reviewed', 'exhausted', 'refining']
               AND sn.description IS NOT NULL
               AND sn.description <> $ph
-            SET sn.name_stage = 'accepted',
-                sn.reviewer_model_name = 'structural-inheritance',
-                sn.reviewed_name_at = coalesce(sn.reviewed_name_at, datetime()),
-                sn.docs_stage = coalesce(sn.docs_stage, 'pending'),
-                sn.chain_length = coalesce(sn.chain_length, 0),
-                sn.claim_token = null,
-                sn.claimed_at = null
-            RETURN count(sn) AS promoted
+              AND NOT (sn)-[:HAS_STRUCTURAL_AUTHORITY]->(
+                :StructuralNameAuthority)
+            RETURN sn.id AS id
+            ORDER BY sn.id
             """,
             ph=DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         )
-        promoted: int = rows[0]["promoted"] if rows else 0
+        promoted = 0
+        for row in rows:
+            snapshot = _structural_authority_snapshot(gc, str(row["id"]))
+            if snapshot is None or not snapshot.get("children"):
+                continue
+            record = _structural_authority_record(snapshot, accepting=True)
+            now = datetime.now(UTC)
+            if not _persist_structural_authority(
+                gc,
+                record,
+                parent_updates={
+                    "name_stage": "accepted",
+                    "reviewer_model_name": "structural-inheritance",
+                    "reviewed_name_at": snapshot.get("reviewed_name_at") or now,
+                    "docs_stage": snapshot.get("docs_stage") or "pending",
+                    "chain_length": snapshot.get("chain_length") or 0,
+                    "claim_token": None,
+                    "claimed_at": None,
+                },
+            ):
+                raise StructuralAuthorityConflict(
+                    f"derived parent {row['id']!r} changed before atomic acceptance"
+                )
+            promoted += 1
         if promoted:
             logger.info(
                 "structural_accept_derived_parents: promoted %d derived parent(s) "
@@ -25218,6 +25530,101 @@ def structural_accept_derived_parents(gc: Any | None = None) -> int:
     finally:
         if _own_gc:
             gc.__exit__(None, None, None)
+
+
+@retry_on_deadlock()
+def backfill_structural_name_authorities(
+    *, receipt_path: Path | None = None, gc: Any | None = None
+) -> dict[str, Any]:
+    """Authorize every childful bare structural accept, exactly once.
+
+    The marker selects the historical cohort but grants no authority. Each
+    written record is instead signed from the exact ordered live child rows.
+    Childless parents remain unscoped and are reported without mutation.
+    """
+    own = gc is None
+    client = GraphClient() if own else gc
+    try:
+        candidate_rows = client.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.name_stage = 'accepted'
+              AND sn.reviewer_score_name IS NULL
+              AND sn.reviewer_model_name = 'structural-inheritance'
+              AND NOT (sn)-[:HAS_STRUCTURAL_AUTHORITY]->(
+                :StructuralNameAuthority)
+            RETURN sn.id AS id
+            ORDER BY sn.id
+            """
+        )
+        lacking_before = len(candidate_rows)
+        written: list[dict[str, Any]] = []
+        skipped: list[dict[str, str]] = []
+        refused: list[dict[str, str]] = []
+        for candidate in candidate_rows:
+            sn_id = str(candidate["id"])
+            snapshot = _structural_authority_snapshot(client, sn_id)
+            if snapshot is None:
+                refused.append({"id": sn_id, "reason": "parent disappeared"})
+                continue
+            if snapshot.get("authority_ids"):
+                refused.append(
+                    {"id": sn_id, "reason": "authority appeared during selection"}
+                )
+                continue
+            if not snapshot.get("children"):
+                skipped.append({"id": sn_id, "reason": "no live children"})
+                continue
+            record = _structural_authority_record(snapshot, accepting=False)
+            if not _persist_structural_authority(
+                client, record, parent_updates={}, require_derived=False
+            ):
+                refused.append(
+                    {"id": sn_id, "reason": "authority guard refused changed row"}
+                )
+                continue
+            written.append(
+                {
+                    "id": sn_id,
+                    "authority_id": record["id"],
+                    "child_ids": record["child_ids"],
+                    "payload_sha256": record["payload_sha256"],
+                }
+            )
+
+        eligible_before = lacking_before - len(skipped)
+        if refused:
+            raise StructuralAuthorityConflict(
+                "structural authority backfill refused rows: "
+                + "; ".join(f"{row['id']}: {row['reason']}" for row in refused)
+            )
+        if len(written) != eligible_before:
+            raise StructuralAuthorityConflict(
+                "structural authority receipt cardinality mismatch: "
+                f"eligible={eligible_before}, written={len(written)}"
+            )
+        receipt = {
+            "schema": "imas-codex.structural-authority-backfill-receipt",
+            "created_at": datetime.now(UTC).isoformat(),
+            "lacking_authority_before": lacking_before,
+            "eligible_before": eligible_before,
+            "written_count": len(written),
+            "written": written,
+            "skipped_count": len(skipped),
+            "skipped": skipped,
+            "refused_count": len(refused),
+            "refused": refused,
+        }
+        if receipt_path is not None:
+            receipt_path.parent.mkdir(parents=True, exist_ok=True)
+            receipt_path.write_text(
+                json.dumps(receipt, sort_keys=True, indent=2) + "\n",
+                encoding="utf-8",
+            )
+        return receipt
+    finally:
+        if own:
+            client.close()
 
 
 def find_orphan_parent_source_candidates(
