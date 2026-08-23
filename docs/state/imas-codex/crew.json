@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:15:18",
+  "updated": "2026-08-23T10:28:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -432,6 +432,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-paidcompare",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-parentseed",
         "harness": "codex",
         "role": "implement",
@@ -444,6 +451,13 @@
         "role": "implement",
         "session_id": "01a02491-cd8f-7a42-93e1-f0291c47de3d",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-pricerun",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02db1-92b2-7950-b285-46be6a3f62d6",
+        "created": "2026-08-23"
       },
       {
         "id": "impl-reconcilefix",
@@ -785,7 +799,7 @@
         "id": "test-mergeverify",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
+        "session_id": "01a02daf-eff1-7e41-9189-2639a85127ec",
         "created": "2026-08-21"
       },
       {
@@ -18000,9 +18014,189 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T081457354964-test-abmerge",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "test-abmerge",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-mergeverify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:14:59Z",
+        "completed_at": "2026-08-23T08:20:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 352,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 352,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "ee29dc8514ca5d7ce7052cc794f75f5d3a787e4a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Integration gate PASSED on detached main ee29dc85 after merging the holdout evaluation harness: full tests/standard_names suite 6611 outcomes, 6603 passed, 8 skipped, 0 failed, 0 errors, exit 0, no failing node ids. Suite invoked exactly once. Transcript at ~/.local/share/imas-codex/receipts/standard-names/sn-quality-parity/suite-after-eval.log.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T081457354964-test-abmerge/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02daf-eff1-7e41-9189-2639a85127ec",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1623296,
+            "cached_input_tokens_cumulative": 1623296,
+            "input_tokens": 1705189,
+            "input_tokens_cumulative": 1705189,
+            "output_tokens": 5267,
+            "output_tokens_cumulative": 5267,
+            "reasoning_output_tokens": 2161,
+            "reasoning_output_tokens_cumulative": 2161
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T081644090311-impl-pricerun",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-pricerun",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-pricerun",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:16:46Z",
+        "completed_at": "2026-08-23T08:23:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 415,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 415,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "aae9b6b6447db8526efe5ce2ea3cf6ace75d105c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Priced the full generated-documentation arm at ZERO spend: 85/85 holdout rows priced, 85 projected calls, projected USD 0.912662750400 (per-call range 0.0107352-0.0107395, mean 0.0107372), actual USD 0, model_calls_issued 0. Production sn-docs seat resolved from config to openrouter/openai/gpt-5.6-luna at high reasoning effort. Receipt integrity independently checked: 85 unique call indices, 85 unique split keys, two priced provider attempts per row, per-call prices sum to the aggregate, zero-call assertion true. Receipt sha256 ecd1ff45. This satisfies the locked render-price-admit protocol - the paid run now carries a real figure at 0.5 percent of the USD 200 campaign ceiling.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T081644090311-impl-pricerun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02db1-92b2-7950-b285-46be6a3f62d6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1977600,
+            "cached_input_tokens_cumulative": 1977600,
+            "input_tokens": 2107430,
+            "input_tokens_cumulative": 2107430,
+            "output_tokens": 16734,
+            "output_tokens_cumulative": 16734,
+            "reasoning_output_tokens": 6589,
+            "reasoning_output_tokens_cumulative": 6589
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T075959454523-n-unscoredpaths",
+        "plan": "sn-release-readiness",
+        "section": "\u00a74a",
+        "node": "n-unscoredpaths",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-targetreview",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:00:14Z",
+        "completed_at": "2026-08-23T08:26:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1589,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1589,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "72bc7b49c7568a9e1e23fd2c6ac95bf7f3e26095",
+        "commits": [
+          "89e4ba97"
+        ],
+        "changed_lines": {
+          "added": 182,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Complete partition, residual 0: 1,469 name-axis = 1,181 historical catalog imports + 221 structural-inheritance + 65 placeholder derived-parent materializations + 2 null scalar projections; structural splits 130 with parent_enriched_at / 91 without. Docs axis 441 rows (129 inside the release-eligible pool) = 434 without docs review history + 7 with, ALL sharing created_at 2026-07-04T21:20:38.632Z, so one bulk import event. The 2 null-scalar rows hold 13 and 23 real reviews at max score 1.0, so they are a projection defect recoverable without re-review. Counter deltas 0/0. Worker recommends an invariant with no catalog or structural exemption, which conflicts with the locked structural exemption",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T075959454523-n-unscoredpaths/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a024d3-62d3-7ae1-ae00-ff1c4ee8599c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 12855552,
+            "cached_input_tokens_cumulative": 42276352,
+            "input_tokens": 13493537,
+            "input_tokens_cumulative": 44202084,
+            "output_tokens": 35507,
+            "output_tokens_cumulative": 120992,
+            "reasoning_output_tokens": 8662,
+            "reasoning_output_tokens_cumulative": 34884
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 487
+    "_version": 494
   }
 }
