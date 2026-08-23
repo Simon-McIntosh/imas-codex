@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 import time
 from asyncio import Semaphore, gather
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -18,7 +18,10 @@ from imas_codex.standard_names.budget import model_provider_exposure
 from imas_codex.standard_names.context import build_compose_context
 from imas_codex.standard_names.docs_gates import (
     DOCUMENTATION_GATE_NAMES,
+    DocumentationGateOutcome,
+    DocumentationGateResult,
     DocumentationGateScore,
+    DocumentationPhysicsContext,
     score_documentation,
 )
 from imas_codex.standard_names.models import GeneratedDocs
@@ -36,11 +39,17 @@ class GateComparison:
 
     gate: str
     arm_pass_count: int
+    arm_contradiction_count: int
+    arm_not_evaluable_count: int
+    arm_evaluable_count: int
     catalog_pass_count: int
+    catalog_contradiction_count: int
+    catalog_not_evaluable_count: int
+    catalog_evaluable_count: int
     total_count: int
-    arm_pass_rate: float
-    catalog_pass_rate: float
-    pass_rate_delta: float
+    arm_pass_rate: float | None
+    catalog_pass_rate: float | None
+    pass_rate_delta: float | None
 
 
 @dataclass(frozen=True)
@@ -50,8 +59,9 @@ class HoldoutRowScore:
     split_key: str
     dd_path: str
     catalog_name: str
-    arm_gates: dict[str, bool]
-    catalog_gates: dict[str, bool]
+    physics_context: DocumentationPhysicsContext
+    arm_gates: dict[str, DocumentationGateResult]
+    catalog_gates: dict[str, DocumentationGateResult]
 
 
 @dataclass(frozen=True)
@@ -103,6 +113,17 @@ def _candidate_for(row: DocsHoldoutRow) -> dict[str, Any]:
         "physics_domain": "",
         "source_paths": [row["dd_path"]],
     }
+
+
+def _physics_context_for(row: DocsHoldoutRow) -> DocumentationPhysicsContext:
+    """Retain the pinned authority fields supplied by a holdout row."""
+    row_data: Mapping[str, Any] = row
+    return DocumentationPhysicsContext(
+        dd_path=row["dd_path"],
+        declared_unit=row_data.get("declared_unit"),
+        cocos_transformation_type=row_data.get("cocos_transformation_type"),
+        cocos_params=row_data.get("cocos_params"),
+    )
 
 
 def _generation_item(candidate: dict[str, Any]) -> dict[str, Any]:
@@ -254,35 +275,73 @@ async def _generate_requests(
 def _aggregate_scores(
     arm_scores: Sequence[DocumentationGateScore],
     catalog_scores: Sequence[DocumentationGateScore],
-) -> tuple[tuple[GateComparison, ...], float, float, float]:
+) -> tuple[
+    tuple[GateComparison, ...],
+    float | None,
+    float | None,
+    float | None,
+]:
     total_rows = len(arm_scores)
     if total_rows == 0 or len(catalog_scores) != total_rows:
         raise ValueError("Holdout evaluation requires paired, non-empty scores")
 
     table: list[GateComparison] = []
     for gate in DOCUMENTATION_GATE_NAMES:
-        arm_passes = sum(score.gate_vector[gate] for score in arm_scores)
-        catalog_passes = sum(score.gate_vector[gate] for score in catalog_scores)
-        arm_rate = arm_passes / total_rows
-        catalog_rate = catalog_passes / total_rows
+        arm_outcomes = [score.gate_vector[gate].outcome for score in arm_scores]
+        catalog_outcomes = [score.gate_vector[gate].outcome for score in catalog_scores]
+        arm_passes = arm_outcomes.count(DocumentationGateOutcome.PASS)
+        arm_failures = arm_outcomes.count(DocumentationGateOutcome.FAIL)
+        arm_not_evaluable = arm_outcomes.count(DocumentationGateOutcome.NOT_EVALUABLE)
+        catalog_passes = catalog_outcomes.count(DocumentationGateOutcome.PASS)
+        catalog_failures = catalog_outcomes.count(DocumentationGateOutcome.FAIL)
+        catalog_not_evaluable = catalog_outcomes.count(
+            DocumentationGateOutcome.NOT_EVALUABLE
+        )
+        arm_evaluable = arm_passes + arm_failures
+        catalog_evaluable = catalog_passes + catalog_failures
+        arm_rate = arm_passes / arm_evaluable if arm_evaluable else None
+        catalog_rate = catalog_passes / catalog_evaluable if catalog_evaluable else None
+        rate_delta = (
+            arm_rate - catalog_rate
+            if arm_rate is not None and catalog_rate is not None
+            else None
+        )
         table.append(
             GateComparison(
                 gate=gate,
                 arm_pass_count=arm_passes,
+                arm_contradiction_count=arm_failures,
+                arm_not_evaluable_count=arm_not_evaluable,
+                arm_evaluable_count=arm_evaluable,
                 catalog_pass_count=catalog_passes,
+                catalog_contradiction_count=catalog_failures,
+                catalog_not_evaluable_count=catalog_not_evaluable,
+                catalog_evaluable_count=catalog_evaluable,
                 total_count=total_rows,
                 arm_pass_rate=arm_rate,
                 catalog_pass_rate=catalog_rate,
-                pass_rate_delta=arm_rate - catalog_rate,
+                pass_rate_delta=rate_delta,
             )
         )
 
-    gate_instances = total_rows * len(DOCUMENTATION_GATE_NAMES)
-    arm_overall = sum(score.passed_count for score in arm_scores) / gate_instances
-    catalog_overall = (
-        sum(score.passed_count for score in catalog_scores) / gate_instances
+    arm_evaluable = sum(score.evaluable_count for score in arm_scores)
+    catalog_evaluable = sum(score.evaluable_count for score in catalog_scores)
+    arm_overall = (
+        sum(score.passed_count for score in arm_scores) / arm_evaluable
+        if arm_evaluable
+        else None
     )
-    return tuple(table), arm_overall, catalog_overall, arm_overall - catalog_overall
+    catalog_overall = (
+        sum(score.passed_count for score in catalog_scores) / catalog_evaluable
+        if catalog_evaluable
+        else None
+    )
+    overall_delta = (
+        arm_overall - catalog_overall
+        if arm_overall is not None and catalog_overall is not None
+        else None
+    )
+    return tuple(table), arm_overall, catalog_overall, overall_delta
 
 
 async def evaluate_docs_holdout(
@@ -382,10 +441,29 @@ async def evaluate_docs_holdout(
             overall_pass_rate_delta=None,
         )
 
+    physics_contexts = [_physics_context_for(row) for row in scored_rows]
     catalog_scores = [
-        score_documentation(row["catalog_documentation"]) for row in scored_rows
+        score_documentation(
+            row["catalog_documentation"],
+            physics_context=physics_context,
+        )
+        for row, physics_context in zip(
+            scored_rows,
+            physics_contexts,
+            strict=True,
+        )
     ]
-    arm_scores = [score_documentation(documentation) for documentation in arm_documents]
+    arm_scores = [
+        score_documentation(
+            documentation,
+            physics_context=physics_context,
+        )
+        for documentation, physics_context in zip(
+            arm_documents,
+            physics_contexts,
+            strict=True,
+        )
+    ]
     table, arm_overall, catalog_overall, overall_delta = _aggregate_scores(
         arm_scores,
         catalog_scores,
@@ -395,13 +473,15 @@ async def evaluate_docs_holdout(
             split_key=row["split_key"],
             dd_path=row["dd_path"],
             catalog_name=row["catalog_name"],
+            physics_context=physics_context,
             arm_gates=dict(arm_score.gate_vector),
             catalog_gates=dict(catalog_score.gate_vector),
         )
-        for row, arm_score, catalog_score in zip(
+        for row, arm_score, catalog_score, physics_context in zip(
             scored_rows,
             arm_scores,
             catalog_scores,
+            physics_contexts,
             strict=True,
         )
     )
