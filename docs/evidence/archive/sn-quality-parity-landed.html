@@ -269,14 +269,21 @@
         <tr><td><strong>sum of changes</strong></td><td></td><td></td><td><strong>&minus;0.000</strong></td><td></td></tr>
       </tbody>
     </table>
-    <p><strong>The constraint is the word cap.</strong> Gains of +0.165 were offset by losses of
-    &minus;0.165. Documentation is now pressing the ceiling &mdash; two rows exceed the cap where
-    none did before &mdash; and to fit the newly required relationship and scope content the
-    generator dropped symbol definitions on nine rows and exclusions on three. Adding content
-    gates inside a fixed cap does not add quality; it reallocates it.</p>
-    <p>That reading is corroborated by the catalog itself, which passes the cap on only
-    <strong>23.5%</strong> of rows: the curated standard this plan is trying to match was written
-    substantially longer than the bound the generator is held to.</p>
+    <p><strong>The gates compete; the word cap is not what binds them.</strong> Gains of +0.165
+    were offset by losses of &minus;0.165. The obvious explanation &mdash; documentation hitting a
+    length ceiling and shedding content to fit &mdash; is contradicted by the per-row data:
+    <strong>all nine rows that lost symbol definitions were still within the word cap</strong>,
+    with zero overlap against the two rows that exceeded it. Those nine had room to spare and
+    dropped the content anyway.</p>
+    <p>So the mechanism is instruction competition, not length pressure. Adding two required
+    elements to a list of required elements caused the generator to treat the list as a budget to
+    allocate rather than a set to satisfy. The fix is prompt structure &mdash; every element stated
+    as independently mandatory &mdash; not a larger cap, and testing the cap hypothesis first is
+    what kept this plan from spending the next iteration relaxing a bound that was not binding.</p>
+    <p>The cap is worth noting separately: the catalog passes it on only <strong>23.5%</strong> of
+    rows, so the curated standard is substantially longer than the bound the generator is held to.
+    That is a real difference in house style, and on this evidence it is not what caused the
+    trade.</p>
     <p><strong>What did move.</strong> Excluding the artifact gate, the nine-gate comparison flipped
     from &minus;0.001 behind to <strong>+0.001 ahead</strong> (generated 0.8889, catalog 0.8876).
     Real, in the right direction, and far too small to call parity achieved &mdash;
