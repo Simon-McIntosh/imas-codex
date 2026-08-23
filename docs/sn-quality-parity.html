@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-commits" content="b79f07b9,aabbe55f,7d4707a8,dbb10f86,db0c3d95,e42bd468,9862ba44,2b607c58,7a9308ac,4c078678,723c90a9">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/benchmark_reference.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,docs/figures/sn-quality-parity/claim-disposition.svg">
 </head>
@@ -209,6 +209,26 @@
       <button class="r-opt" data-value="plan-wins-in-full">Make both sections unconditionally mandatory and invert the policy.</button>
       </p>
     <p class="r-dec-rat">Locked by the lead 2026-08-23. The live policy is a refinement of §3A&#x27;s intent rather than a rejection of it: it already admits measurement content exactly where it is constitutive or discriminating, and bans only the generic form. Ungrounded typical values are a real generation failure mode, and the WEST expert-review packet is better carrying none than carrying invented ranges. The alternatives were rejected on cost and risk: the grounded-only synthesis needs a per-path value source the DD does not carry for most paths, so its gate would degrade into exactly the filler the ban exists to stop; inverting the policy outright would make roughly 2,400 doubly-accepted names non-conformant on two gates and would strip the adjudicator seat of its purpose. The operative gate set is therefore definition, governing equation, variable definitions in prose, semantic scope and exclusions, essential relationships, sign convention where COCOS applies, and inline name: cross-references.</p>
+    </div>
+<div class="r-dec" data-key="documentation-length-bound" data-choice="remove-hard-maximum" data-by="Simon McIntosh" data-when="2026-08-23T10:45:00+00:00">
+    <p class="r-dec-q">Should generated documentation carry a hard maximum length?</p>
+    <p class="r-dec-ctx">Production documentation with real injected context exceeds the 250-word hard bound on 22.4% of holdout rows (19/85) and 15.1% off-holdout (8/53) — consistent across populations, so it is a property of richly-contexted generation rather than one sample. The curated catalog this plan is trying to match exceeds the same bound on 76.5% of its own rows. A binding cap reallocates content rather than truncating it: an earlier iteration measurably traded symbol definitions away to fit newly required content.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="remove-hard-maximum">Remove the hard maximum; let the required content gates bound length.</button>
+      <button class="r-opt" data-value="keep-as-house-style">Keep the cap as a deliberate brevity constraint.</button>
+      <button class="r-opt" data-value="investigate-first">Measure whether over-cap documents are dense or padded before deciding.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-23: a hard word cap is an anti-pattern; remove it. This extends an already-established principle rather than introducing a preference — the naming rule holds that a name is as short as possible while fully retaining semantic meaning with no arbitrary character cap, and records the former length soft cap as an anti-pattern already removed. The evidence supports it: the cap only stopped binding when documents had no content to state (100% conformance on the context-starved arm, 77.6% once real context arrived), and the reference standard sits mostly above it. Retained deliberately: the minimum word floor, so a document must still say something, and the separate one-sentence description character limit, which governs a different field. Consequence for measurement — the gate set drops from ten to nine, and those nine are exactly what has been reported as artifact-free, so that ceases to be a caveat and becomes the headline; all-gate figures recorded earlier are historical and any comparison spanning the change must state which gate set it used. Surfaced by the release-readiness coordinator escalating it as a question about all accepted names rather than working around it per-cohort.</p>
+    </div>
+<div class="r-dec" data-key="west-refresh-sequencing" data-choice="fix-scope-then-refresh" data-by="Simon McIntosh" data-when="2026-08-23T10:45:00+00:00">
+    <p class="r-dec-q">Do both open gates authorise running the WEST cohort refresh now?</p>
+    <p class="r-dec-ctx">Both gates on f-west-docs-refresh are open: the symmetric import guard landed at 40966ff0, and production-faithful measurement on the off-holdout population puts generated documentation at 0.9434 artifact-free against catalog 0.8876. Re-priced on the production path at USD 2.37 generation for 210 rows plus paid review and refine. But scope remains the one gate below curated prose, at 0.660 off-holdout against 0.800 catalog, and it degrades off-holdout.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="fix-scope-then-refresh">Close the scope gap, re-measure, then refresh only if scope reaches the curated standard.</button>
+      <button class="r-opt" data-value="refresh-now">Refresh on the aggregate gain and accept the scope regression.</button>
+      <button class="r-opt" data-value="hold-followup">Leave the followup closed for a later session.</button>
+      </p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-23. Refreshing now would spend paid seats to replace curated scope statements with weaker ones on roughly a third of rows, and aggregate-better-with-one-gate-worse is the exact shape this plan learned to distrust when a single word-cap gate manufactured an apparent +0.075. There is no schedule pressure: the review this packet feeds is blocked behind sn-graph-wide-integrity in S10. Sequencing note added during execution — the hard-maximum removal runs FIRST and is re-measured before any scope-targeted change, because a binding cap reallocates content rather than truncating it, so removing it may lift scope on its own and tuning scope against a constraint being removed would measure a transient state. The refresh proceeds only when scope reaches the curated 0.800.</p>
     </div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
