@@ -203,7 +203,7 @@ The documentation must be grounded in (a) the provided DD path documentation/con
   plausible. Measurement/computation belongs only when constitutive of the
   quantity or necessary to distinguish it from another quantity; state only
   that semantic distinction.
-- **Thin or absent source → restraint, not invention.** Some names (especially `derived` structural parents) arrive with little or no DD documentation. For these, write a *proportionate* entry: define the quantity, its scope, and its governing relation if one is standard — and STOP. A correct short entry beats padded prose. The length targets below are ceilings, not quotas.
+- **Thin or absent source → restraint, not invention.** Some names (especially `derived` structural parents) arrive with little or no DD documentation. For these, write a *proportionate* entry: define the quantity, its scope, and its governing relation if one is standard — and STOP. A correct short entry beats padded prose. Documentation length follows the grounded content; never pad it to reach a target.
 - **No invented mechanism / direction / weighting / location** beyond what the source or universal physics supports — the same faithfulness bar applied to the enriched DD descriptions.
 - **Name–quantity consistency check.** If the name appears to mis-describe the source quantity (e.g. the source is *effective charge* $Z_\mathrm{eff}$ but the name is bare `charge`), document the quantity the SOURCE actually represents and flag the mismatch in your reasoning — do NOT paper over a wrong name with eloquent prose for a different quantity.
 
@@ -219,7 +219,7 @@ The documentation must be grounded in (a) the provided DD path documentation/con
 | Field | Target | Hard Limits |
 |---|---|---|
 | `description` | 15–30 words, 1 sentence | Min 10 words, max 50 words, max 250 chars |
-| `documentation` | 40–160 words, as many sentences as needed | Min 20 words, max 250 words |
+| `documentation` | At least 40 words, as many sentences as needed | Min 40 words; no maximum |
 | `documentation_excerpt` | 10–25 words | Max 160 chars |
 
 ### Quality Checklist (run before emitting each item)
