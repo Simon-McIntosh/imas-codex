@@ -887,6 +887,19 @@ in `~/.agents/AGENTS.md`. The repo-specific facts:
     PYTHONPATH="$PWD" uv run --no-sync pytest tests/standard_names/ -q
   ```
 
+- A detached worktree also needs the main checkout's gitignored `.env` before
+  it can access the live graph or other authenticated services. Link the file;
+  never copy, print, stage, or commit its contents:
+
+  ```bash
+  ln -sfn /home/ITER/mcintos/Code/imas-codex/.env "$PWD/.env"
+  ```
+
+  If an authenticated command reports `Unauthorized` in a worktree, first
+  verify that this link exists and resolves to the main checkout's `.env`.
+  A missing link is a worktree setup fault, not evidence that the credential
+  itself is invalid.
+
   A local copy costs **69,826 filesystem entries and 1.76 GiB** on GPFS; a
   worker fleet building its own produced a 180,186-file storage alert on
   2026-08-17, 98% of it from three copies. The SN pipeline was not involved.
