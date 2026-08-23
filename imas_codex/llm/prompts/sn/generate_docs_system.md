@@ -37,23 +37,35 @@ grammar fields, kind, or unit.
 
 ## Documentation Template
 
-For each name, the documentation field should cover (where applicable) — apply the canonical layout from the previous section:
+Every applicable content element below is an **independently mandatory
+pass/fail obligation**. This is not a menu, a priority order, or a word-budget
+trade: satisfying one element never compensates for omitting another. Before
+emitting an item, check every element separately. If space is tight, compress
+the wording or combine compatible obligations in one paragraph; never delete
+symbol definitions, supported scope, supported exclusions or distinctions, or
+supported essential relationships to make room for another element.
 
-1. **Definition** — what this quantity physically represents in the context of tokamak / stellarator plasmas.
-2. **Governing physics** — the principal defining equation as a centred `$$...$$` display block, with variable definitions in flowing prose. **At most one display equation per entry.** Use `$...$` inline math for variable names elsewhere.
-3. **Scope and exclusions** — explicitly state the semantic boundaries,
-   physical population or region, aggregation convention, and exclusions that
-   distinguish this quantity from nearby quantities whenever the supplied name
-   or context supports them. Do not omit scope that is already encoded by the
-   name or provided context merely because the source documentation leaves it
-   implicit.
-4. **Essential relationships** — explicitly state how the quantity relates to
+1. **Definition** — MUST state what this quantity physically represents in the context of tokamak / stellarator plasmas.
+2. **Governing physics** — when a principal defining equation applies, it MUST appear as a centred `$$...$$` display block. **At most one display equation per entry.** Use `$...$` inline math for variable names elsewhere.
+3. **Symbol definitions** — every symbol used in the defining equation or any
+   inline relation MUST be defined by physical identity in flowing prose,
+   preferring an inline `name:` link when the symbol is a catalog quantity. An
+   equation does not satisfy this obligation while any of its symbols remains
+   undefined.
+4. **Scope** — explicitly state every semantic boundary, physical population
+   or region, and aggregation convention supported by the supplied name or
+   context. Do not omit scope that is already encoded by the name or provided
+   context merely because the source documentation leaves it implicit.
+5. **Exclusions and distinctions** — explicitly state every supported
+   exclusion or distinction needed to prevent confusion with a nearby
+   quantity. Scope alone does not satisfy this separate obligation.
+6. **Essential relationships** — explicitly state how the quantity relates to
    the nearest parent, component, total, normalized, averaged, derivative, or
    integral quantity whenever that relationship is supported by the supplied
    context. State the semantic or mathematical relationship itself and link an
    available related standard name inline; do not substitute a measurement or
    computation recipe for the relationship.
-5. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
+7. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
 
    ```
    Sign convention: Positive when <physical condition>.
@@ -83,7 +95,7 @@ For each name, the documentation field should cover (where applicable) — apply
    - `**Sign convention:** Positive when...` (bold — rejected)
    - `Positive when...` (missing `Sign convention:` prefix — rejected)
    - `sign convention: Positive when...` (lowercase — rejected)
-6. **Cross-references** — weave only essential related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
+8. **Cross-references** — weave only essential related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
 
 ## Family Parallel Structure (sibling harmonization)
 
@@ -96,9 +108,9 @@ its siblings:
 
 - **One template per family.** All members share the same opening noun-phrase
   pattern and the same documentation section ordering (definition → governing
-  physics → scope/distinction → essential relationships → sign convention).
-  The anchor member (or, absent an anchor, the pattern you set) defines that
-  template.
+  physics → symbol definitions → scope → exclusions/distinctions → essential
+  relationships → sign convention). The anchor member (or, absent an anchor,
+  the pattern you set) defines that template.
   - ✅ `"Poloidal mode number $m$ is the dimensionless integer Fourier harmonic…"` /
     `"Toroidal mode number $n$ is the dimensionless integer Fourier harmonic…"`
   - ❌ one sibling opening `"{Axis} mode number … is"` while another opens
@@ -212,18 +224,21 @@ The documentation must be grounded in (a) the provided DD path documentation/con
 
 ### Quality Checklist (run before emitting each item)
 
+Evaluate every applicable check independently. A pass on one check never
+excuses a failure on another.
+
 1. **Description self-sufficiency** — can a physicist understand the quantity from the description alone, without seeing the name? If not, add context.
 2. **No circular definitions** — ❌ "The electron temperature is the temperature of electrons." ✅ "Kinetic energy per degree of freedom of the electron population, expressed in energy units."
 3. **LaTeX in documentation** — for any quantity with a defining equation, include exactly **one** centred display equation in `$$...$$` (the principal/defining one) per the canonical format above. Secondary relations stay inline as `$...$`. The display equation must have the `$$` delimiters on their own lines with blank lines before and after the block.
-4. **Cross-references** — include at least 1 `links` entry for related SNs. Use `name:bare_id` format. Only link to names that exist (check the nearby_names list provided).
-5. **Scope and exclusions** — carry every supported semantic boundary,
-   population, region, aggregation convention, and exclusion from the supplied
-   name and context into the documentation.
-6. **Essential relationships** — state the supported semantic or mathematical
+4. **Symbol definitions** — define every symbol used in an equation or inline relation by physical identity; no symbol may be dropped to make room for other content.
+5. **Scope** — carry every supported semantic boundary, population, region, and aggregation convention from the supplied name and context into the documentation.
+6. **Exclusions and distinctions** — carry every supported exclusion or distinction into the documentation; scope does not substitute for this check.
+7. **Essential relationships** — state the supported semantic or mathematical
    relationship to the nearest relevant quantity; a link alone does not explain
    the relationship.
-7. **No trailing whitespace or empty lines** in description field.
-8. **Sign convention** — if the quantity has a `cocos_label`, the documentation MUST contain a `Sign convention: Positive when ...` paragraph.
+8. **Cross-references** — include at least 1 `links` entry for related SNs. Use `name:bare_id` format. Only link to names that exist (check the nearby_names list provided).
+9. **No trailing whitespace or empty lines** in description field.
+10. **Sign convention** — if the quantity has a `cocos_label`, the documentation MUST contain a `Sign convention: Positive when ...` paragraph.
 
 ## Output Schema
 
@@ -233,7 +248,7 @@ Return a JSON object with an `items` array. Each item conforms to:
 {
   "standard_name": "exact_input_name",
   "description": "≤2 concise sentences, physics-meaningful, American spelling",
-  "documentation": "Strict normative documentation with defining $LaTeX$, scope, exclusions, and essential cross-references",
+  "documentation": "Strict normative documentation with defining $LaTeX$, symbol identities, scope, exclusions, essential relationships, and inline cross-references",
   "links": ["name:related_standard_name_1", "name:related_standard_name_2"],
   "validity_domain": "physical region or regime (e.g. core plasma, SOL)",
   "constraints": ["physical constraint 1"],
@@ -246,7 +261,7 @@ Return a JSON object with an `items` array. Each item conforms to:
 
 - `standard_name` — MUST exactly match the input name (hard requirement for result matching).
 - `description` — **1 concise sentence strongly preferred, 2 max (≤250 characters)**. The first sentence must be a self-contained definition. Add ONLY information beyond what the name tokens already encode. Do NOT start with trailing participles ("Representing...", "Characterizing...", "Quantifying..."). Use American spelling (e.g., "ionization", "behavior").
-- `documentation` — a strict normative definition. Cover physical meaning, a defining equation when applicable, symbol definitions (by identity, preferring `name:` links), scope/exclusions, essential relationships, and a necessary sign convention. Do not add generic methods, typical values, or units in prose (the unit is the structured `unit` field). American spelling throughout.
+- `documentation` — a strict normative definition. Physical meaning, a defining equation when applicable, symbol definitions (by identity, preferring `name:` links), supported scope, supported exclusions or distinctions, supported essential relationships, and a necessary sign convention are independent obligations: never trade one for another. Do not add generic methods, typical values, or units in prose (the unit is the structured `unit` field). American spelling throughout.
 - `links` — MUST use the `name:foo_bar` prefix (e.g., `name:electron_temperature`). Each link must name an existing standard name (will be validated; non-existent links cause rejection). URLs (https://…) are permitted for external references.
 - `validity_domain` — optional but encouraged. Physical region or regime where the quantity is meaningful.
 - `constraints` — optional. Physical constraints on the quantity.
