@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T12:10:59",
+  "updated": "2026-08-23T12:12:57",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -449,7 +449,7 @@
         "id": "impl-offholdout",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02e11-88ff-7e91-9e65-d1fe8e069d10",
         "created": "2026-08-23"
       },
       {
@@ -19823,9 +19823,67 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T100132621990-impl-offholdout",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-offholdout",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-offholdout",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:01:35Z",
+        "completed_at": "2026-08-23T10:12:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 648,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 648,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "afde1095d682d527c79b49ea8f41a87894988155",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "GENERALIZATION HOLDS under production enrichment - the earlier failure was the harness, not the docs. Same deterministic 53-row sample (seed documentation-generalization-20260823, all 53 selection ranks reproduced, identity digest ec422365, 0/85 split-key and 0/13 identity overlap), 53 admitted, 0 zero-candidate exclusions, 734 injected candidates at mean 13.85/row (range 6-53), projected USD 0.6275, actual USD 0.2003 of USD 3.00, 0 failures. Artifact-free: production off-holdout 0.943396 vs production holdout 0.962092 vs original context-starved off-holdout 0.859539 - enrichment raises off-holdout by +0.0839 and it now sits only -0.0187 below the holdout, and +0.0558 ABOVE catalog 0.887582. THE RELATIONSHIP COLLAPSE IS ELIMINATED: relationship_link_or_phrase_witness 14/53=0.264 to 53/53=1.000, confirming the -0.677 was the context-starved generator injecting zero candidates rather than a quality collapse. Qualification preserved: that gate is a lexical witness detector and this is NOT semantic relationship-quality evidence. RESIDUAL CONTENT GAP: scope 0.660377 off-holdout vs 0.764706 holdout vs 0.800 catalog - the only gate where production docs sit materially below curated prose, and it is worse off-holdout. Word-cap exceedance is consistent across populations at 8/53 (15.1%) off-holdout and 19/85 (22.4%) holdout, against a catalog that exceeds the same cap on 76.5% of its own rows.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T100132621990-impl-offholdout/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e11-88ff-7e91-9e65-d1fe8e069d10",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4672256,
+            "cached_input_tokens_cumulative": 4672256,
+            "input_tokens": 4863345,
+            "input_tokens_cumulative": 4863345,
+            "output_tokens": 19593,
+            "output_tokens_cumulative": 19593,
+            "reasoning_output_tokens": 4958,
+            "reasoning_output_tokens_cumulative": 4958
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 550
+    "_version": 552
   }
 }

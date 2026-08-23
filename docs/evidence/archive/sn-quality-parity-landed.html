@@ -469,6 +469,47 @@
     <p>Actual spend USD 0.327; cumulative measured spend across all four generating runs
     <strong>USD 0.943</strong>. Receipt <code>comparison-production-enriched.json</code>.</p>
 
+
+    <h2 id="generalization-production">Generalization holds &mdash; the failure was the harness, not the documentation</h2>
+    <p>The off-holdout check had reported a &minus;0.677 collapse on the relationship gate. It was
+    re-run on the identical deterministic sample through the production-enriched harness. Same seed,
+    all 53 selection ranks reproduced, identity digest verified, zero overlap against the holdout on
+    both split key and identity. 53 admitted, none excluded, 734 injected candidates at a mean of
+    13.85 per row.</p>
+    <table>
+      <caption>Artifact-free means &mdash; the same sample, two harnesses</caption>
+      <thead><tr><th>Arm</th><th>Artifact-free mean</th><th>vs catalog</th></tr></thead>
+      <tbody>
+        <tr><td>production-enriched, off-holdout</td><td><strong>0.9434</strong></td><td>+0.0558</td></tr>
+        <tr><td>production-enriched, holdout</td><td>0.9621</td><td>+0.0745</td></tr>
+        <tr><td>catalog</td><td>0.8876</td><td>&mdash;</td></tr>
+        <tr><td>context-starved, off-holdout</td><td>0.8595</td><td>&minus;0.0281</td></tr>
+      </tbody>
+    </table>
+    <p><strong>The collapse is eliminated:</strong> the relationship witness goes from
+    <strong>14/53 to 53/53</strong>. So the &minus;0.677 was the context-starved generator injecting
+    zero candidates, not documentation quality falling off a cliff outside the holdout. Enrichment
+    raises the off-holdout mean by <strong>+0.0839</strong>, leaving it only &minus;0.0187 below the
+    holdout &mdash; close enough that the holdout is now a fair proxy for the wider population, which
+    it demonstrably was not before.</p>
+    <p>The qualification survives the good news: that gate detects a link or an allow-listed phrase,
+    so 53/53 is markup presence and not evidence of semantic relationship quality.</p>
+    <h3>The residual gap is scope, and it is worse off-holdout</h3>
+    <p>One gate has production documentation materially below curated prose:
+    <strong>scope, 0.660 off-holdout against 0.765 on the holdout and 0.800 in the catalog.</strong>
+    Every other content gate ties or beats. That is the honest remaining quality deficit and it is
+    the one a cohort refresh would carry into an expert-review packet.</p>
+    <h3>The word cap is consistent across populations</h3>
+    <p>Production documents exceed the cap on <strong>15.1%</strong> off-holdout (8/53) and
+    <strong>22.4%</strong> on the holdout (19/85) &mdash; the same order, so it is a property of
+    richly-contexted generation rather than of one sample. Against a curated catalog that exceeds
+    the same cap on <strong>76.5%</strong> of its own rows, the cap now looks mis-set relative to
+    the standard this plan is trying to match, which makes it a question about all accepted names
+    rather than a per-cohort nuisance.</p>
+    <p>Actual spend USD 0.200; cumulative measured spend across five generating runs
+    <strong>USD 1.143</strong>, all of it inside a USD 200 ceiling. Receipt
+    <code>bulk-sample-production-enriched.json</code>.</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
