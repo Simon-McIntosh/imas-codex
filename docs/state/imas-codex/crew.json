@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T18:12:09",
+  "updated": "2026-08-23T18:18:34",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -705,6 +705,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-revalidate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-scalar",
         "harness": "codex",
         "role": "implement",
@@ -850,6 +857,13 @@
         "role": "implement",
         "session_id": "01a02407-bebc-74d3-b4ae-2519a49e8249",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-tristate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-umbrellamove",
@@ -1102,6 +1116,13 @@
         "role": "test",
         "session_id": "01a02daf-eff1-7e41-9189-2639a85127ec",
         "created": "2026-08-21"
+      },
+      {
+        "id": "test-westcensus",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "verify-a",
@@ -21773,9 +21794,131 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T152659389331-n-westexclude",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-westexclude",
+        "role": "investigate",
+        "spec_level": "guided",
+        "member": "inv-westexclude",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-23T15:27:03Z",
+        "completed_at": "2026-08-23T15:41:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 867,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 867,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "888dc3e0f54b8264268643faddaabfc184d6400f",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Role mismatch, not a worker failure: investigate is execution_capable=false with a read-only sandbox, so the node could never open a bolt socket - the connect failed with Operation not permitted on both loopback addresses. It delivered the entire file-only half correctly (273 below-bar / 273 distinct ids, 231 WEST / 231 distinct ids, 20-id intersection cross-checked against a peer's independent derivation) and diagnosed the worktree generated-model import problem precisely. The live half is re-dispatched as n-westcensus under an execution-capable role.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T152659389331-n-westexclude/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f3b-85dc-7513-bf6d-90cb321a7511",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3923712,
+            "cached_input_tokens_cumulative": 3923712,
+            "input_tokens": 4195667,
+            "input_tokens_cumulative": 4195667,
+            "output_tokens": 28203,
+            "output_tokens_cumulative": 28203,
+            "reasoning_output_tokens": 11042,
+            "reasoning_output_tokens_cumulative": 11042
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T151925667216-n-refineband",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72",
+        "node": "n-refineband",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-refineband",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T15:19:29Z",
+        "completed_at": "2026-08-23T16:11:37Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3128,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3128,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "d32ee1d059a34206aa074edd25aaabf8ef1d8792",
+        "commits": [
+          "a12ae50d"
+        ],
+        "changed_lines": {
+          "added": 306,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "The refine campaign delivered its measure but not a completed pass: the 42-minute campaign guard expired with four review items and one refine item pending, the 55-minute node fence prohibited launching a continuation, and one cancelled name claim remained live, so the requested zero-pending evidence is not yet true. Delivered: 269 of 273 roots legally entered refine, 158 roots minted 270 successors, 111 parked without successors, terminal successor states 74 accepted / 82 exhausted / 1 reviewed / 1 drafted, terminal stop reasons 34 attempts_exhausted / 24 grammar_invalid / 23 successor_collision / 1 vocabulary_gap, StandardName 4,395 to 4,665 with 270 new REFINED_FROM edges, USD 77.026394 of 120 at 0.286343 per entered name and 4.342 calls per name, max single call 0.674182. The four non-quorate roots were correctly preserved under the no-rescore rule rather than redrawn. Continuation dispatched as n-refinefinish.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T151925667216-n-refineband/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02f34-948d-7f63-9a47-fd3e1f21f8ac",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19666944,
+            "cached_input_tokens_cumulative": 19666944,
+            "input_tokens": 20045645,
+            "input_tokens_cumulative": 20045645,
+            "output_tokens": 26630,
+            "output_tokens_cumulative": 26630,
+            "reasoning_output_tokens": 8639,
+            "reasoning_output_tokens_cumulative": 8639
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 612
+    "_version": 617
   }
 }
