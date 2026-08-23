@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T11:57:00",
+  "updated": "2026-08-23T12:02:03",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -425,6 +425,13 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-metagaps",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-mirrorrepair",
         "harness": "codex",
         "role": "implement",
@@ -437,6 +444,20 @@
         "role": "implement",
         "session_id": "01a02471-21e5-7381-be65-68c8a4bcc1d5",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-offholdout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-ordercycle",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-orphan",
@@ -759,6 +780,13 @@
         "role": "implement",
         "session_id": "01a028cd-119e-7e23-a72d-dd36ac452797",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-westreprice",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-wrapperfix",
@@ -19615,9 +19643,67 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T093943373599-impl-prodcompare",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-prodcompare",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-prodcompare",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:39:47Z",
+        "completed_at": "2026-08-23T10:01:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1279,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1279,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "1905526ce3a7bfa466d91765e8180dffb8e7ed04",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "FIRST PRODUCTION-FAITHFUL COMPARISON. 85/85 rows admitted, 0 excluded as zero-candidate, mean 18.95 injected candidates per row (range 7-27) where all 138 prompts of the earlier runs carried ZERO. Projected USD 0.9876, actual USD 0.3271 of a USD 3.00 ceiling, 0 generation failures. ARTIFACT-FREE: production-enriched 0.962092 vs catalog 0.887582 = +0.074510, and +0.018301 over the context-starved arm. Per gate, production vs catalog: physical_meaning 1.000/0.718, defining_equation 1.000/0.929, symbol_definitions 0.976/0.800, exclusions 0.941/0.741, sign_convention 1.000/1.000, link_hygiene 1.000/1.000, minimum_word_count 1.000/1.000, maximum_word_count 0.776/0.235, scope 0.765/0.800, relationship_link_or_phrase_witness 0.976/1.000. Only TWO gates trail catalog and both narrowly: scope -0.035 and the relationship witness -0.024. NEW REAL SIGNAL: maximum_word_count fell to 0.776 under production enrichment from 1.000 context-starved, so 19 of 85 production docs now exceed the word cap because they have real context to state - the all-gate figure sits 0.0059 below the context-starved arm entirely on that gate. This resurrects the word-cap question in a legitimate form, distinct from the earlier hypothesis that was correctly rejected when all 9 symbol-definition losses proved to be within the cap. Full 85-row admission means no shrunken-population qualification applies.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T093943373599-impl-prodcompare/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dfd-911a-7ce0-8f9a-21aa74ac053e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7071488,
+            "cached_input_tokens_cumulative": 7071488,
+            "input_tokens": 7360307,
+            "input_tokens_cumulative": 7360307,
+            "output_tokens": 24670,
+            "output_tokens_cumulative": 24670,
+            "reasoning_output_tokens": 8577,
+            "reasoning_output_tokens_cumulative": 8577
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 542
+    "_version": 547
   }
 }

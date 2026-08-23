@@ -422,6 +422,53 @@
     that earlier rejected the word-cap explanation. Receipt
     <code>relationship-collapse.md</code>, 23 resolving citations.</p>
 
+
+    <h2 id="production-faithful">Production-faithful comparison &mdash; the verdict, earned this time</h2>
+    <p>With the harness routed through production enrichment, the quality question was asked again
+    under production conditions. The result restores the retracted verdict on stronger evidence
+    rather than re-asserting the same one.</p>
+    <table>
+      <caption>Production-enriched arm against catalog and against the context-starved arm, n=85</caption>
+      <thead><tr><th>Gate</th><th>Production</th><th>Catalog</th><th>Context-starved</th></tr></thead>
+      <tbody>
+        <tr><td>physical_meaning</td><td>1.000</td><td>0.718</td><td>0.976</td></tr>
+        <tr><td>defining_equation</td><td>1.000</td><td>0.929</td><td>1.000</td></tr>
+        <tr><td>symbol_definitions</td><td>0.976</td><td>0.800</td><td>0.953</td></tr>
+        <tr><td>exclusions_or_distinctions</td><td>0.941</td><td>0.741</td><td>0.882</td></tr>
+        <tr><td>sign_convention</td><td>1.000</td><td>1.000</td><td>1.000</td></tr>
+        <tr><td>link_hygiene</td><td>1.000</td><td>1.000</td><td>1.000</td></tr>
+        <tr><td>minimum_word_count</td><td>1.000</td><td>1.000</td><td>1.000</td></tr>
+        <tr><td>relationship_link_or_phrase_witness</td><td>0.976</td><td>1.000</td><td>0.941</td></tr>
+        <tr><td>scope</td><td>0.765</td><td>0.800</td><td>0.741</td></tr>
+        <tr><td>maximum_word_count</td><td>0.776</td><td>0.235</td><td>1.000</td></tr>
+        <tr><td><strong>artifact-free mean</strong></td><td><strong>0.9621</strong></td><td>0.8876</td><td>0.9438</td></tr>
+      </tbody>
+    </table>
+    <p><strong>85/85 rows admitted, none excluded as zero-candidate, mean 18.95 injected candidates
+    per row</strong> (range 7&ndash;27) &mdash; against zero across all 138 prompts of the earlier
+    runs. Projected USD 0.9876, actual USD 0.3271 of a USD 3.00 ceiling, no generation failures.
+    Artifact-free the production arm is <strong>+0.0745 over catalog</strong> and +0.0183 over the
+    context-starved arm, with only two gates trailing and both narrowly: scope &minus;0.035 and the
+    relationship witness &minus;0.024.</p>
+    <p>Read that witness figure as markup presence, not physics &mdash; the gate is now named for
+    what it detects.</p>
+    <h3>The word cap returns, legitimately this time</h3>
+    <p><code>maximum_word_count</code> fell to <strong>0.776</strong> under production enrichment
+    from 1.000 context-starved: 19 of 85 production documents exceed the cap now that they have
+    real context to state, and that single gate is why the all-gate figure sits 0.0059 below the
+    context-starved arm. This is a <em>different</em> claim from the earlier word-cap hypothesis,
+    which was rejected because all nine symbol-definition losses proved to be inside the cap and
+    stays rejected. Same question, new evidence, and worth separating so a later reader does not
+    read one as vindicating the other.</p>
+    <h3>What the two arms together establish</h3>
+    <p>The context-starved arm was not merely a weaker measurement &mdash; it was a different
+    experiment. Comparing the two isolates what production enrichment contributes: exclusions
+    +0.059, symbol definitions +0.024, physical meaning +0.024, the relationship witness +0.035,
+    scope +0.024, and a 0.224 drop in word-cap conformance as the price. Enrichment buys content on
+    five gates and spends length.</p>
+    <p>Actual spend USD 0.327; cumulative measured spend across all four generating runs
+    <strong>USD 0.943</strong>. Receipt <code>comparison-production-enriched.json</code>.</p>
+
     <h2 id="docs-content-gates">The documentation content gates, and why two were dropped</h2>
     <p>The plan required mandatory typical values and a general measurement or calculation
     section. The live faithfulness policy forbids both, to prevent plausible but ungrounded
