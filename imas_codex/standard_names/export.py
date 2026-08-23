@@ -53,6 +53,7 @@ GATE_A = "graph_tests"
 GATE_B = "cross_field_consistency"
 GATE_C = "score_thresholds"
 GATE_D = "divergence_detection"
+GATE_EXCLUSION_ACCOUNTING = "exclusion_accounting"
 
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
@@ -118,6 +119,24 @@ class DivergenceEntry:
         }
 
 
+@dataclass(frozen=True)
+class ExclusionRecord:
+    """One accepted-population identity excluded for one terminal reason."""
+
+    standard_name_id: str
+    stage: str
+    reason: str
+    detail: str = ""
+
+    def to_dict(self) -> dict[str, str]:
+        return {
+            "standard_name_id": self.standard_name_id,
+            "stage": self.stage,
+            "reason": self.reason,
+            "detail": self.detail,
+        }
+
+
 @dataclass
 class ExportReport:
     """Full report from an export run."""
@@ -149,11 +168,51 @@ class ExportReport:
     # (never in the CLOSED catalog manifest) so a release can report how many
     # renames the published catalog now carries a breaking-change trail for.
     deprecated_stub_count: int = 0
+    exclusion_records: list[ExclusionRecord] = field(default_factory=list)
+
+    def record_exclusions(self, records: list[ExclusionRecord]) -> None:
+        """Append identity-bearing exclusions and refresh compatibility counts."""
+        self.exclusion_records.extend(records)
+        reasons = [record.reason for record in self.exclusion_records]
+        self.excluded_below_score = sum(
+            reason in {"below_name_score", "below_description_score"}
+            for reason in reasons
+        )
+        self.excluded_unreviewed = reasons.count("unreviewed_name")
+        self.excluded_by_domain = reasons.count("outside_requested_domain")
+        self.excluded_placeholder = reasons.count(
+            "deterministic_parent_description_placeholder"
+        )
+        self.parse_failures = reasons.count("grammar_parse_failure")
+        self.validation_failures = reasons.count("invalid_catalog_entry")
+
+    def _exclusion_rows(self) -> list[dict[str, Any]]:
+        identities_by_reason: dict[str, list[str]] = {}
+        for record in self.exclusion_records:
+            identities_by_reason.setdefault(record.reason, []).append(
+                record.standard_name_id
+            )
+        return [
+            {
+                "reason": reason,
+                "count": len(identities),
+                "identities": sorted(identities),
+            }
+            for reason, identities in sorted(identities_by_reason.items())
+        ]
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "gates": [g.to_dict() for g in self.gate_results],
             "divergence": [d.to_dict() for d in self.divergence_entries],
+            "exclusion_ledger": self._exclusion_rows(),
+            "exclusion_records": [
+                record.to_dict()
+                for record in sorted(
+                    self.exclusion_records,
+                    key=lambda record: (record.reason, record.standard_name_id),
+                )
+            ],
             "counts": {
                 "total_candidates": self.total_candidates,
                 "exported": self.exported_count,
@@ -259,6 +318,110 @@ def _fetch_candidates(
         rows = gc.query(cypher, **params)
 
     return [r["record"] for r in (rows or [])]
+
+
+def _fetch_export_population(
+    *,
+    batch: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Fetch the identity universe before export eligibility filters are applied.
+
+    A normal export starts with every accepted or approved identity. A review
+    export starts with its exact additive cohort: approved identities plus the
+    requested batch. Domain, validation, quorum, and documentation predicates
+    are deliberately absent because their rejected identities belong in the
+    exclusion ledger.
+    """
+    from imas_codex.graph.client import GraphClient
+
+    params: dict[str, Any] = {}
+    if batch is None:
+        name_predicate = "sn.name_stage IN ['accepted', 'approved']"
+    else:
+        name_predicate = "(sn.name_stage = 'approved' OR sn.id IN $batch)"
+        params["batch"] = batch
+
+    cypher = f"""
+    MATCH (sn:StandardName)
+    WHERE {name_predicate}
+    OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
+    OPTIONAL MATCH (sn)-[:HAS_COCOS]->(c:COCOS)
+    RETURN sn {{
+        .*,
+        unit: coalesce(u.id, sn.unit),
+        cocos: c.convention
+    }} AS record
+    ORDER BY sn.id
+    """
+    with GraphClient() as gc:
+        rows = gc.query(cypher, **params)
+
+    population_by_id: dict[str, dict[str, Any]] = {}
+    for row in rows or []:
+        record = row["record"]
+        population_by_id.setdefault(record["id"], record)
+    return [population_by_id[name] for name in sorted(population_by_id)]
+
+
+def _classify_export_population(
+    population: list[dict[str, Any]],
+    *,
+    domain: str | None,
+    names_only: bool,
+) -> tuple[list[dict[str, Any]], list[ExclusionRecord]]:
+    """Partition the upstream population into eligible rows and one-reason drops."""
+    eligible: list[dict[str, Any]] = []
+    excluded: list[ExclusionRecord] = []
+
+    for candidate in population:
+        # Some low-level callers provide a projection already returned by the
+        # historical eligibility query rather than a full graph node. The live
+        # upstream query always includes name_stage; retain compatibility with
+        # those explicitly pre-filtered projections.
+        if "name_stage" not in candidate:
+            eligible.append(candidate)
+            continue
+        candidate_id = candidate["id"]
+        candidate_domains = candidate.get("physics_domain") or []
+        if isinstance(candidate_domains, str):
+            candidate_domains = [candidate_domains]
+
+        reason: str | None = None
+        detail = ""
+        if domain is not None and domain not in candidate_domains:
+            reason = "outside_requested_domain"
+            detail = f"physics_domain does not contain {domain!r}"
+        elif candidate.get("validation_status") != "valid":
+            reason = "invalid_validation_status"
+            detail = f"validation_status={candidate.get('validation_status')!r}"
+        elif candidate.get("review_quorum_shortfall") is not None:
+            reason = "name_review_quorum_shortfall"
+            detail = "name review quorum shortfall remains recorded"
+        elif not names_only and candidate.get("docs_stage") != "accepted":
+            reason = "documentation_not_accepted"
+            detail = f"docs_stage={candidate.get('docs_stage')!r}"
+        elif not names_only and candidate.get("docs_review_resolution_method") is None:
+            reason = "documentation_review_unresolved"
+            detail = "docs review resolution method is missing"
+        elif (
+            not names_only and candidate.get("docs_review_quorum_shortfall") is not None
+        ):
+            reason = "documentation_review_quorum_shortfall"
+            detail = "documentation review quorum shortfall remains recorded"
+
+        if reason is None:
+            eligible.append(candidate)
+        else:
+            excluded.append(
+                ExclusionRecord(
+                    standard_name_id=candidate_id,
+                    stage="eligibility",
+                    reason=reason,
+                    detail=detail,
+                )
+            )
+
+    return eligible, excluded
 
 
 # =============================================================================
@@ -491,6 +654,13 @@ def _run_gate_c(
         if score is None:
             if not include_unreviewed:
                 excluded_unreviewed += 1
+                issues.append(
+                    {
+                        "type": "unreviewed_name",
+                        "name": cand["id"],
+                        "detail": "reviewer_score_name is missing",
+                    }
+                )
                 continue
             # Include unreviewed — skip score threshold
             filtered.append(cand)
@@ -499,6 +669,14 @@ def _run_gate_c(
         # Score threshold
         if score < min_score:
             excluded_below_score += 1
+            issues.append(
+                {
+                    "type": "below_name_score",
+                    "name": cand["id"],
+                    "score": score,
+                    "threshold": min_score,
+                }
+            )
             continue
 
         # Description score threshold (optional)
@@ -523,6 +701,82 @@ def _run_gate_c(
         filtered,
         excluded_below_score,
         excluded_unreviewed,
+    )
+
+
+def _gate_c_exclusion_records(gate_result: GateResult) -> list[ExclusionRecord]:
+    """Normalize Gate C's reason-bearing issues into exclusion records."""
+    exclusion_types = {
+        "below_description_score",
+        "below_name_score",
+        "deterministic_parent_description_placeholder",
+        "unreviewed_name",
+    }
+    return [
+        ExclusionRecord(
+            standard_name_id=issue["name"],
+            stage="score_thresholds",
+            reason=issue["type"],
+            detail=issue.get("detail", ""),
+        )
+        for issue in gate_result.issues
+        if issue.get("type") in exclusion_types
+    ]
+
+
+def _run_exclusion_accounting_gate(
+    report: ExportReport,
+    population_ids: list[str],
+) -> GateResult:
+    """Require exactly one terminal emitted-or-excluded outcome per identity."""
+    issues: list[dict[str, Any]] = []
+    population_set = set(population_ids)
+    emitted_ids = report.exported_names
+    emitted_set = set(emitted_ids)
+    excluded_ids = [record.standard_name_id for record in report.exclusion_records]
+    excluded_set = set(excluded_ids)
+
+    duplicate_population = sorted(
+        name for name in population_set if population_ids.count(name) > 1
+    )
+    duplicate_emitted = sorted(
+        name for name in emitted_set if emitted_ids.count(name) > 1
+    )
+    duplicate_exclusions = sorted(
+        name for name in excluded_set if excluded_ids.count(name) > 1
+    )
+    overlap = sorted(emitted_set & excluded_set)
+    missing = sorted(population_set - emitted_set - excluded_set)
+    outside_population = sorted((emitted_set | excluded_set) - population_set)
+    arithmetic_total = len(emitted_ids) + len(excluded_ids)
+
+    checks = (
+        (duplicate_population, "duplicate_population_identity"),
+        (duplicate_emitted, "duplicate_emitted_identity"),
+        (duplicate_exclusions, "multiple_exclusion_reasons"),
+        (overlap, "emitted_and_excluded"),
+        (missing, "unattributed_identity"),
+        (outside_population, "outcome_outside_population"),
+    )
+    for identities, issue_type in checks:
+        if identities:
+            issues.append({"type": issue_type, "identities": identities})
+
+    if arithmetic_total != len(population_ids):
+        issues.append(
+            {
+                "type": "exclusion_accounting_mismatch",
+                "accepted_population": len(population_ids),
+                "emitted": len(emitted_ids),
+                "excluded": len(excluded_ids),
+                "accounted_total": arithmetic_total,
+            }
+        )
+
+    return GateResult(
+        gate=GATE_EXCLUSION_ACCOUNTING,
+        passed=not issues,
+        issues=issues,
     )
 
 
@@ -1361,16 +1615,23 @@ def run_export(
     staging_path = Path(staging_dir)
     report = ExportReport()
 
-    # ── 1. Fetch candidates from graph ──────────────────────────
-    logger.info("Fetching candidates from graph...")
-    candidates = _fetch_candidates(
-        include_unreviewed=include_unreviewed,
+    # ── 1. Fetch the upstream population and classify eligibility ──
+    logger.info("Fetching accepted export population from graph...")
+    population = _fetch_export_population(batch=review_batch)
+    candidates, eligibility_exclusions = _classify_export_population(
+        population,
         domain=domain,
         names_only=names_only,
-        batch=review_batch,
     )
-    report.total_candidates = len(candidates)
-    logger.info("Found %d candidate(s)", len(candidates))
+    population_ids = [candidate["id"] for candidate in population]
+    report.total_candidates = len(population_ids)
+    report.record_exclusions(eligibility_exclusions)
+    logger.info(
+        "Found %d population identity(ies): %d eligible, %d excluded before gates",
+        len(population_ids),
+        len(candidates),
+        len(eligibility_exclusions),
+    )
 
     # ── 2. Run gates ────────────────────────────────────────────
     if not skip_gate:
@@ -1394,17 +1655,11 @@ def run_export(
         report.gate_results.append(gate_a)
 
         # Gate C: Score thresholds (filter candidates)
-        gate_c, candidates, excluded_below, excluded_unrev = _run_gate_c(
+        gate_c, candidates, _, _ = _run_gate_c(
             candidates, min_score, include_unreviewed, min_description_score
         )
         report.gate_results.append(gate_c)
-        report.excluded_below_score = excluded_below
-        report.excluded_unreviewed = excluded_unrev
-        report.excluded_placeholder = sum(
-            1
-            for i in gate_c.issues
-            if i["type"] == "deterministic_parent_description_placeholder"
-        )
+        report.record_exclusions(_gate_c_exclusion_records(gate_c))
 
         # Gate B: Cross-field consistency (on filtered candidates)
         gate_b = _run_gate_b(candidates, cocos_convention, final=final)
@@ -1418,7 +1673,17 @@ def run_export(
             }
             if parse_failures:
                 candidates = [c for c in candidates if c["id"] not in parse_failures]
-                report.parse_failures = len(parse_failures)
+                report.record_exclusions(
+                    [
+                        ExclusionRecord(
+                            standard_name_id=name,
+                            stage="cross_field_consistency",
+                            reason="grammar_parse_failure",
+                            detail="name failed the strict ISN grammar parse gate",
+                        )
+                        for name in sorted(parse_failures)
+                    ]
+                )
                 logger.warning(
                     "Gate B: excluded %d names with grammar parse failures "
                     "(RC mode): %s",
@@ -1478,16 +1743,10 @@ def run_export(
             return report
     else:
         # Gate C still runs for filtering even when gates skipped
-        gate_c, candidates, excluded_below, excluded_unrev = _run_gate_c(
+        gate_c, candidates, _, _ = _run_gate_c(
             candidates, min_score, include_unreviewed, min_description_score
         )
-        report.excluded_below_score = excluded_below
-        report.excluded_unreviewed = excluded_unrev
-        report.excluded_placeholder = sum(
-            1
-            for i in gate_c.issues
-            if i["type"] == "deterministic_parent_description_placeholder"
-        )
+        report.record_exclusions(_gate_c_exclusion_records(gate_c))
 
     # ── 3. Gate-only mode: report and exit ──────────────────────
     if gate_only:
@@ -1514,6 +1773,7 @@ def run_export(
     domain_entries: dict[str, list[dict[str, Any]]] = defaultdict(list)
     exported_names: list[str] = []
     validation_failures = 0
+    invalid_candidate_ids: list[str] = []
     all_candidate_names = {c["id"] for c in candidates}
 
     with GraphClient() as gc:
@@ -1540,6 +1800,7 @@ def run_export(
             validated = _validate_entry(entry_dict)
             if validated is None:
                 validation_failures += 1
+                invalid_candidate_ids.append(cand["id"])
                 continue
             entry_dict = validated
 
@@ -1698,7 +1959,33 @@ def run_export(
     exported_names = deduped
     report.exported_count = len(exported_names)
     report.exported_names = exported_names
-    report.validation_failures = validation_failures
+    report.record_exclusions(
+        [
+            ExclusionRecord(
+                standard_name_id=name,
+                stage="catalog_validation",
+                reason="invalid_catalog_entry",
+                detail="entry failed validation against the ISN catalog model",
+            )
+            for name in invalid_candidate_ids
+        ]
+    )
+
+    accounting_gate = _run_exclusion_accounting_gate(report, population_ids)
+    report.gate_results.append(accounting_gate)
+    report.all_gates_passed = all(
+        gate.passed or gate.skipped for gate in report.gate_results
+    )
+    report.gate_failures = sum(
+        1 for gate in report.gate_results if not gate.passed and not gate.skipped
+    )
+    if not accounting_gate.passed:
+        logger.error(
+            "Export blocked: exclusion accounting does not close over the "
+            "accepted population"
+        )
+        _write_export_report(staging_path, report)
+        return report
 
     # ── 6. Write manifest ───────────────────────────────────────
     all_domains = sorted(domain_entries.keys())
