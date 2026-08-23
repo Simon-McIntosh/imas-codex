@@ -23,12 +23,21 @@ this paragraph structure, separated by **blank lines** (literal `\n\n`):
    - Define every symbol by its **identity** — the physical quantity it denotes — preferring an inline `[label](name:bare_id)` link when the symbol is itself a catalog quantity (e.g. `where $B_p$ is the [poloidal magnetic-field magnitude](name:poloidal_magnetic_field)`). **Never state a unit in the documentation.** A unit describes a symbol's dimension, not which quantity it is; the quantity's unit is the authoritative structured `unit` field and a linked quantity carries its own unit via its link. Write the identity, never `where $B_p$ is in T` or `with unit $\mathrm{T}$`.
    - **At most one display equation per documentation entry** — the *defining* one. Secondary relations stay inline.
 
-3. **Scope / distinction paragraph** (only when needed) — state an exclusion,
-   boundary, aggregation convention, or essential relationship that prevents the
-   quantity being confused with a nearby quantity. This paragraph is semantic,
-   not practical guidance.
+3. **Scope / distinction paragraph** — explicitly state every semantic scope or
+   exclusion supported by the supplied name and context, including the relevant
+   physical population or region, boundary, and aggregation convention. Do not
+   omit scope that the name or context already establishes merely because the
+   source prose leaves it implicit. This paragraph is semantic, not practical
+   guidance; never invent an unsupported restriction.
 
-4. **Sign convention paragraph** (only for COCOS-dependent / signed quantities) — the LAST paragraph, in this exact format:
+4. **Essential-relationships paragraph** — explicitly state every essential
+   semantic or mathematical relationship supported by the supplied context,
+   such as a parent/component distinction, total, normalization, average,
+   derivative, or integral. When the related standard name is available, link
+   it inline and explain the relationship in prose; a bare link does not satisfy
+   this requirement. This is not a measurement or computation recipe.
+
+5. **Sign convention paragraph** (only for COCOS-dependent / signed quantities) — the LAST paragraph, in this exact format:
 
    ```
    Sign convention: Positive when <condition>.
@@ -113,4 +122,4 @@ Sign convention: Positive when $B_Z$ on the integration disk points in the $+Z$ 
 
 ### When equations are not applicable
 
-For quantities without a single defining equation (e.g. shape parameters, count fields, identifiers, integer indices), omit the governing-equation paragraph entirely. Definition → scope/distinction → sign convention (if applicable) is valid. Definition alone is acceptable for indices and metadata SNs.
+For quantities without a single defining equation (e.g. shape parameters, count fields, identifiers, integer indices), omit the governing-equation paragraph entirely. Definition → scope/distinction → essential relationships → sign convention (if applicable) is valid. Definition alone is acceptable for indices and metadata SNs only when the supplied context establishes no scope, exclusion, or essential relationship to carry.
