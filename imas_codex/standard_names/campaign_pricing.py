@@ -17,8 +17,10 @@ from __future__ import annotations
 
 import json
 import math
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from imas_codex.llm.prompt_loader import load_prompt_config, render_prompt
@@ -119,12 +121,197 @@ class CampaignProjection:
 
 
 @dataclass(frozen=True)
+class CampaignProjectionScenario:
+    """One ceiling decision with normalized per-call and per-name exposure."""
+
+    projection: CampaignProjection
+    cost_ceiling_usd: float
+    projected_cost_per_call_usd: float
+    projected_cost_per_name_usd: float
+    admitted: bool
+
+
+@dataclass(frozen=True)
+class CampaignProjectionRange:
+    """Minimum-escalation and bounded worst-case decisions for one cohort."""
+
+    minimum_escalation: CampaignProjectionScenario
+    worst_case: CampaignProjectionScenario
+
+
+@dataclass(frozen=True)
+class ExactCampaignCohorts:
+    """Live exact identities and the read-only counter proof around resolution."""
+
+    catalog_import_candidates: int
+    catalog_import_recovered_ids: tuple[str, ...]
+    catalog_import_rescore: tuple[dict[str, Any], ...]
+    redraw: tuple[dict[str, Any], ...]
+    standard_name_count_before: int
+    standard_name_count_after: int
+
+
+@dataclass(frozen=True)
 class _PreparedNameRequest:
     """One fully rendered production review request and its enriched item."""
 
     item: dict[str, Any]
     base_messages: list[dict[str, Any]]
     escalation_messages: list[dict[str, Any]]
+
+
+_ARCHIVE_RECOVERED_CATALOG_IDS = frozenset(
+    {"normalized_collisionality", "thermal_ion_density"}
+)
+
+_COHORT_RETURN = """
+RETURN sn.id AS id,
+       sn.name AS name,
+       sn.description AS description,
+       sn.documentation AS documentation,
+       sn.kind AS kind,
+       sn.unit AS unit,
+       sn.tags AS tags,
+       sn.physics_domain AS physics_domain,
+       coalesce(sn.chain_length, 0) AS chain_length,
+       sn.name_stage AS name_stage,
+       sn.origin AS origin,
+       sn.edit_mode AS edit_mode,
+       sn.name_hint AS name_hint,
+       sn.docs_hint AS docs_hint,
+       sn.edit_reason AS edit_reason,
+       sn.edit_origin AS edit_origin,
+       sn.physical_base AS physical_base,
+       sn.geometry AS geometry,
+       sn.grammar_parse_version AS grammar_parse_version,
+       sn.source_paths AS source_paths,
+       [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {
+           id: source.id,
+           source_type: source.source_type,
+           source_id: source.source_id,
+           status: source.status,
+           description: source.description,
+           physics_domain: source.physics_domain,
+           compose_hint: source.compose_hint,
+           compose_hint_reason: source.compose_hint_reason,
+           dd_path: source.dd_path,
+           dd_version: source.dd_version,
+           dd_documentation: source.dd_documentation,
+           dd_snapshot_pinned: source.dd_snapshot_pinned,
+           dd_parent_path: source.dd_parent_path,
+           dd_parent_documentation: source.dd_parent_documentation,
+           dd_data_type: source.dd_data_type,
+           dd_unit: source.dd_unit,
+           dd_coordinates: source.dd_coordinates,
+           dd_lifecycle_status: source.dd_lifecycle_status,
+           enhanced_description: source.enhanced_description
+       }] AS source_bindings
+ORDER BY sn.id
+"""
+
+
+def redraw_identities_from_census(census_path: str | Path) -> tuple[str, ...]:
+    """Read the complete redraw-eligible identity table from its evidence file."""
+    text = Path(census_path).read_text(encoding="utf-8")
+    match = re.search(
+        r"^### redraw-eligible \((\d+)\)\s*$\n(?P<table>.*?)(?=^### )",
+        text,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    if match is None:
+        raise CampaignPricingUnknown("redraw-eligible census section is absent")
+    identities = tuple(
+        row_match.group(1)
+        for row in match.group("table").splitlines()
+        if (row_match := re.match(r"^\| `([^`]+)` \|", row)) is not None
+    )
+    expected_count = int(match.group(1))
+    if len(identities) != expected_count or len(set(identities)) != expected_count:
+        raise CampaignPricingUnknown(
+            "redraw-eligible census identities do not match its declared count"
+        )
+    return identities
+
+
+def resolve_exact_campaign_cohorts(
+    redraw_census_path: str | Path,
+) -> ExactCampaignCohorts:
+    """Resolve both review cohorts live while proving the graph count unchanged."""
+    from imas_codex.graph.client import GraphClient
+
+    redraw_ids = redraw_identities_from_census(redraw_census_path)
+    with GraphClient() as gc:
+        before_rows = gc.query(
+            "MATCH (sn:StandardName) RETURN count(sn) AS standard_name_count"
+        )
+        catalog_rows = list(
+            gc.query(
+                """
+                MATCH (sn:StandardName)
+                WHERE sn.name_stage = 'accepted'
+                  AND sn.validation_status = 'valid'
+                  AND sn.docs_stage = 'accepted'
+                  AND sn.origin = 'catalog_edit'
+                  AND sn.reviewer_model_name IS NULL
+                  AND NOT EXISTS {
+                    MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+                    WHERE review.review_axis = 'names'
+                  }
+                """
+                + _COHORT_RETURN
+            )
+        )
+        redraw_rows = list(
+            gc.query(
+                "MATCH (sn:StandardName) WHERE sn.id IN $identities\n" + _COHORT_RETURN,
+                identities=list(redraw_ids),
+            )
+        )
+        after_rows = gc.query(
+            "MATCH (sn:StandardName) RETURN count(sn) AS standard_name_count"
+        )
+
+    if not before_rows or not after_rows:
+        raise CampaignPricingUnknown("StandardName counter query returned no row")
+    before = int(before_rows[0]["standard_name_count"])
+    after = int(after_rows[0]["standard_name_count"])
+    if before != after:
+        raise CampaignPricingUnknown(
+            f"StandardName count changed during cohort resolution: {before} -> {after}"
+        )
+
+    catalog_by_id = {str(row["id"]): row for row in catalog_rows}
+    if len(catalog_by_id) != len(catalog_rows):
+        raise CampaignPricingUnknown(
+            "catalog-import cohort contains duplicate identities"
+        )
+    recovered_present = tuple(
+        sorted(_ARCHIVE_RECOVERED_CATALOG_IDS.intersection(catalog_by_id))
+    )
+    catalog_rescore = tuple(
+        catalog_by_id[identity]
+        for identity in sorted(catalog_by_id)
+        if identity not in _ARCHIVE_RECOVERED_CATALOG_IDS
+    )
+
+    redraw_by_id = {str(row["id"]): row for row in redraw_rows}
+    missing_redraw = sorted(set(redraw_ids).difference(redraw_by_id))
+    if missing_redraw:
+        raise CampaignPricingUnknown(
+            "redraw census identities missing from the live graph: "
+            + ", ".join(missing_redraw)
+        )
+    if set(catalog_by_id).intersection(redraw_by_id):
+        raise CampaignPricingUnknown("catalog-import and redraw cohorts overlap")
+
+    return ExactCampaignCohorts(
+        catalog_import_candidates=len(catalog_rows),
+        catalog_import_recovered_ids=recovered_present,
+        catalog_import_rescore=catalog_rescore,
+        redraw=tuple(redraw_by_id[identity] for identity in redraw_ids),
+        standard_name_count_before=before,
+        standard_name_count_after=after,
+    )
 
 
 def _load_review_context(item: dict[str, Any]) -> tuple[dict[str, Any], list[Any]]:
@@ -458,6 +645,59 @@ def project_name_review_campaign(
             f"${cost_ceiling_usd:.6f} ceiling"
         )
     return projection
+
+
+def _scenario(
+    projection: CampaignProjection,
+    *,
+    cost_ceiling_usd: float,
+) -> CampaignProjectionScenario:
+    return CampaignProjectionScenario(
+        projection=projection,
+        cost_ceiling_usd=cost_ceiling_usd,
+        projected_cost_per_call_usd=(
+            projection.projected_cost_usd / projection.projected_call_count
+        ),
+        projected_cost_per_name_usd=(
+            projection.projected_cost_usd / projection.cohort_size
+        ),
+        admitted=projection.projected_cost_usd <= cost_ceiling_usd,
+    )
+
+
+def project_name_review_campaign_range(
+    cohort: Sequence[dict[str, Any]],
+    *,
+    cost_ceiling_usd: float,
+    policy: CampaignPricingPolicy | None = None,
+) -> CampaignProjectionRange:
+    """Price minimum escalation and bounded worst case from one exact render.
+
+    Minimum escalation includes every configured reviewer seat but no refine or
+    refine fan-out calls.  With the production three-seat chain this is three
+    calls per name.  Worst case includes the full bounded refinement exposure.
+    """
+    if not math.isfinite(cost_ceiling_usd) or cost_ceiling_usd < 0:
+        raise ValueError("cost ceiling must be finite and non-negative")
+    worst = project_name_review_campaign(cohort, policy=policy)
+    review_lines = worst.lines[:2]
+    minimum_calls = sum(line.call_count for line in review_lines)
+    minimum_cost = sum(line.projected_cost_usd for line in review_lines)
+    minimum = CampaignProjection(
+        cohort_size=worst.cohort_size,
+        projected_call_count=minimum_calls,
+        projected_cost_usd=minimum_cost,
+        mandatory_call_count=worst.mandatory_call_count,
+        mandatory_cost_usd=worst.mandatory_cost_usd,
+        conditional_call_count=review_lines[1].call_count,
+        conditional_cost_usd=review_lines[1].projected_cost_usd,
+        refinement_name_bound=0,
+        lines=review_lines,
+    )
+    return CampaignProjectionRange(
+        minimum_escalation=_scenario(minimum, cost_ceiling_usd=cost_ceiling_usd),
+        worst_case=_scenario(worst, cost_ceiling_usd=cost_ceiling_usd),
+    )
 
 
 def projection_as_json(projection: CampaignProjection) -> str:
