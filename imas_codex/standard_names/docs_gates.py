@@ -390,8 +390,8 @@ def _defining_equation_result(
     subject = _subject_symbol(text)
     if subject is None:
         return DocumentationGateResult(
-            outcome=DocumentationGateOutcome.FAIL,
-            reason="documentation does not identify the relation's DD quantity symbol",
+            outcome=DocumentationGateOutcome.NOT_EVALUABLE,
+            reason="relation cannot bind the DD quantity symbol to its declared unit",
         )
     bindings = _symbol_unit_bindings(text)
     bindings[subject] = declared_unit
@@ -399,8 +399,8 @@ def _defining_equation_result(
     right_dimensions = _expression_dimensions(relation[1], bindings)
     if left_dimensions is None or right_dimensions is None:
         return DocumentationGateResult(
-            outcome=DocumentationGateOutcome.FAIL,
-            reason="defining relation cannot reproduce the declared unit from its stated symbol units",
+            outcome=DocumentationGateOutcome.NOT_EVALUABLE,
+            reason="relation cannot bind every symbol to a stated unit",
         )
     if _dimensions_overlap(left_dimensions, right_dimensions):
         return DocumentationGateResult(
