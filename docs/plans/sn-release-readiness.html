@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="6">
-<meta name="plan-commits" content="89e4ba97316d74372a2f4e0691c6d17bc60ec2e3">
-<meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/unscored-entry-paths.md">
-<meta name="plan-impl" content="0.12">
+<meta name="plan-version" content="7">
+<meta name="plan-commits" content="89e4ba97316d74372a2f4e0691c6d17bc60ec2e3,e103fb440bef0317878fcb5e6ba8f0612e79518d">
+<meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/unscored-entry-paths.md,docs/evidence/sn-release-readiness/archive-score-recovery.md">
+<meta name="plan-impl" content="0.2">
 </head>
 <body>
 <main class="plan-doc">
@@ -422,6 +422,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-20260823-recoverability" data-who="reckon-ship" data-when="2026-08-23T10:55:00Z">
     <div class="r-comment-body">IN-GRAPH RECOVERABILITY MEASURED 2026-08-23, and it is mostly negative. Of the 1,181 catalog-import rows, ZERO carry a name-axis StandardNameReview - not one. Their name scores are not recoverable from the live graph. Docs axis: of the 441 docs-accepted rows with a null docs score, only 7 hold a canonical docs review and 434 hold no docs review at all. The two null-scalar rows are the exception and are fully recoverable: iron_density_at_plasma_boundary carries 3 names-axis reviews (1 canonical) plus 10 docs (4 canonical), and toroidal_deuterium_tritium_velocity_at_plasma_boundary carries 5 names (2 canonical) plus 18 docs (7 canonical), so those two are a pure projection defect fixable at zero cost. CORRECTION TO AN EARLIER COORDINATOR MEASUREMENT: an unfiltered max(rv.score) query reported 1,054 of the 1,181 as recoverable. That was wrong - it counted docs-axis reviews as if they were name scores. The axis value is 'names', not 'name', and filtering correctly returns 0. Any recovery rule must select on review_axis and prefer is_canonical, never max(score) across axes, which would both cross axes and inflate. This makes the archive the only remaining recovery route for the 1,181, and sharpens the decisive question: did the 2026-07-04 import DELETE name-axis reviews that existed before it, or were these catalog identities never name-reviewed? The first is recoverable, the second means rescoring.</div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20260823-archiververdict" data-who="reckon-ship" data-when="2026-08-23T11:10:00Z">
+    <div class="r-comment-body">n-archiverecovery landed - commit e103fb44; gate passed; production read-only with StandardNameChange 7,900 and PRODUCED_NAME 5,779 unchanged; scratch SLURM job 1253200 completed and removed. ARCHIVE RECOVERY IS EXHAUSTED. The closest pre-import archive, imas-codex-graph-dev-c40162c.tar.gz dated 2026-04-24T15:59:14Z, predates the import by 71 days. Of the 1,181 live catalog-import identities only 10 existed there by exact id, ZERO carried a names-axis StandardNameReview, and just 2 carried a non-null reviewer_score_name: normalized_collisionality at 0.4375 and thermal_ion_density at 0.99375. So recovery yields 2 rows, and one of those is below the 0.85 bar anyway, meaning projecting it does not produce a passing name. Verdict: 1,179 must be rescored, which is the fallback the lead pre-authorised. Honest limit on the claim: the 71-day gap means absence in the archive does not prove the identities were never reviewed in their lifetime - they could have been created and reviewed between 24 April and 4 July, a window with no checkpoint at all. That backup gap is itself a finding: the graph was actively mutating across 71 days with no recoverable state. No nearer candidate exists; local archives jump 24 April to 22 July (post-import) and the newest dated GHCR tag is 8 April. Measured rescore cost from the live ledger: the review_name pool has run 4,038 calls at USD 146.39 (0.03625 per call), and per distinct names-axis name the figure is USD 0.1038 across 2,447 names and 7,367 reviews, roughly three reviews per name. So 1,179 names is about USD 122 before refine, inside the USD 200 authorisation but NOT safely so, because sn run --cost-limit is a soft cap measured to overshoot 1.7 to 2.7 times and below-bar names route to refine at extra cost. The drain therefore runs as sized batches with measured actuals rather than one capped campaign.</div>
 </div>
 </section>
 </main>

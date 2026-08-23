@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:50:45",
+  "updated": "2026-08-23T11:01:51",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -18388,9 +18388,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T084542747458-n-archiverecovery",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72",
+        "node": "n-archiverecovery",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-census",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:45:45Z",
+        "completed_at": "2026-08-23T09:01:35Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 950,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 950,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "84c85049daa9179f6ced2695f01bc803780c6930",
+        "commits": [
+          "e103fb440bef0317878fcb5e6ba8f0612e79518d"
+        ],
+        "changed_lines": {
+          "added": 161,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Archive recovery exhausted. Closest pre-import archive c40162c dated 2026-04-24T15:59:14Z, 71 days before the import. Of 1,181 live identities only 10 existed there by exact id, 0 carried a names-axis StandardNameReview, and 2 carried a non-null reviewer_score_name (normalized_collisionality 0.4375, thermal_ion_density 0.99375). Verdict: 2 recoverable-by-projection, 1,179 with no archived score. The 71-day gap means absence does not prove never-reviewed. Production read-only, counter deltas 0/0; scratch SLURM job 1253200 completed and its directory removed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T084542747458-n-archiverecovery/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a01880-5c67-70c3-bef4-e30cb2267b48",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8867072,
+            "cached_input_tokens_cumulative": 40747264,
+            "input_tokens": 9081719,
+            "input_tokens_cumulative": 42564108,
+            "output_tokens": 33617,
+            "output_tokens_cumulative": 145957,
+            "reasoning_output_tokens": 14155,
+            "reasoning_output_tokens_cumulative": 51269
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T085248688779-impl-gatecompete",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-gatecompete",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-relgap",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:52:51Z",
+        "completed_at": "2026-08-23T09:01:42Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 531,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 531,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "18adcec69527bc6e6601189d5782e4dd28ccab15",
+        "commits": [
+          "2b607c586ffaee716393f050b5527d8870696fd9"
+        ],
+        "changed_lines": {
+          "added": 77,
+          "removed": 36,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Content obligations restated as independent rather than tradeable, in both generate_docs_system.md and shared _docs_format.md. The worker independently reproduced the diagnostic: all 9 rows that lost symbol_definitions still passed maximum_word_count (9/9, 100%), rejecting the word-cap explanation and confirming competition among prompt requirements. It named the affected bindings (poloidal_magnetic_flux at equilibrium/time_slice/profiles_2d/psi and four other psi paths, poloidal/radial/toroidal/vertical magnetic field paths). Added instructions state that each element is an independently mandatory pass/fail obligation, that satisfying one never compensates for omitting another, and that tight space means compressing wording rather than deleting symbol definitions, scope, exclusions or relationships; symbol definitions and exclusions each gained a dedicated obligation. Locked gate set unchanged - typical values still forbidden, measurement still limited to constitutive or discriminating content. pytest 69/69 across normative policy, prompt completeness and generate_docs.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T085248688779-impl-gatecompete/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02dbf-9cd2-75f2-9657-346502a68461",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5340160,
+            "cached_input_tokens_cumulative": 7996160,
+            "input_tokens": 5534796,
+            "input_tokens_cumulative": 8425015,
+            "output_tokens": 14581,
+            "output_tokens_cumulative": 29398,
+            "reasoning_output_tokens": 4572,
+            "reasoning_output_tokens_cumulative": 11174
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 502
+    "_version": 504
   }
 }
