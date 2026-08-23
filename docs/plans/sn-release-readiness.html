@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-23">
-<meta name="plan-version" content="2">
+<meta name="plan-version" content="3">
 </head>
 <body>
 <main class="plan-doc">
@@ -75,24 +75,56 @@
   so is the opposite reading, which this plan originally took.
 </p>
 <p>
-  <strong>None of the 1,469 is legitimately unscored.</strong> The 1,181
-  <code>origin='catalog_edit'</code> rows are old <code>sn edit</code> output that
-  entered the graph without passing through review, and the 221
-  <code>reviewer_model_name='structural-inheritance'</code> rows inherited a score
-  they never earned. Every name and every documentation string must flow through
-  the pipeline and be reviewed; an accepted name with no score of its own is an
-  accepted name nobody assessed. The decision is locked below.
+  <strong>One of the five is legitimately unscored; the other four are not.</strong>
+  The complete partition has no residual, and the discriminator that matters is not
+  <code>origin</code> but the reviewer marker.
+</p>
+<table>
+  <caption>The 1,469 unscored export-eligible names, complete partition</caption>
+  <thead><tr><th>Population</th><th>Count</th><th>Verdict</th></tr></thead>
+  <tbody>
+    <tr><td><code>catalog_edit</code>, no reviewer</td><td><strong>1,181</strong></td><td><strong>defect</strong> &mdash; old <code>sn edit</code> output that never entered review</td></tr>
+    <tr><td><code>derived</code>, <code>structural-inheritance</code></td><td>129</td><td><strong>legitimate exception</strong></td></tr>
+    <tr><td><code>catalog_edit</code>, <code>structural-inheritance</code></td><td>92</td><td><strong>legitimate exception</strong> &mdash; the same population after an export/import round trip flipped its origin</td></tr>
+    <tr><td><code>derived</code>, no reviewer, never enriched</td><td><strong>65</strong></td><td><strong>untraced</strong> &mdash; reached accepted through neither review nor the sanctioned structural accept</td></tr>
+    <tr><td><code>catalog_edit</code>, reviewer recorded, score null</td><td><strong>2</strong></td><td><strong>write defect</strong> &mdash; a reviewer ran and the score was not stored</td></tr>
+  </tbody>
+</table>
+<p>
+  <strong>A derived parent is genuinely an exception, and scoring it would be
+  theatre.</strong> The structural accept in <code>graph_ops.py</code> says so in
+  terms, and the reasoning holds: the name is a deterministic grammar peel of
+  children that are already reviewed, it is never reviewed or refined, so a score
+  would grade a mechanical consequence rather than a choice. The quorum is worse than
+  useless here &mdash; it marks an abstraction down for being less specific than its
+  own children, measured at roughly two thirds below 0.85 &mdash; so routing these
+  221 through it would spend budget to manufacture exhausted parents. Quality is
+  gated on the docs axis instead, which is where the writing actually happens.
 </p>
 <p>
-  This has a consequence worth stating before the work starts. The structural accept
-  exists because the name quorum systematically penalises a derived parent for being
-  less specific than its own children &mdash; measured at roughly two thirds scoring
-  below 0.85. Routing those 221 through the ordinary name quorum unchanged should
-  therefore be expected to exhaust a large fraction of them, which is a pipeline
-  problem to fix rather than a reason to keep the exemption. The parent-aware review
-  path already used on the docs axis is the obvious candidate, and sizing that is the
-  first thing &#167;4a does &mdash; measure the failure rate on a sample before
-  spending the budget on all 221.
+  What is wrong is not that they lack a score but that <em>a missing score is
+  indistinguishable from never having been assessed</em>. The fix is to make the
+  exemption legible rather than to abolish it. The invariant is therefore
+  <strong>every accepted name carries either its own reviewer score or a recorded
+  structural-accept marker</strong>, and the exclusion ledger reports the structural
+  population as a named category rather than a silent null. That admits the 221 and
+  still catches all 1,248 rows that are genuinely unassessed.
+</p>
+<p>
+  Two of those populations were not traced until this partition was taken, which is
+  worth stating plainly rather than presenting the analysis as complete: the 92 are
+  the structural population wearing a different <code>origin</code> after a catalog
+  round trip, so <code>origin='derived'</code> is not a safe discriminator anywhere in
+  this plan; and the 65 &mdash; 84 across the whole graph, every one of them with live
+  children and <strong>none</strong> carrying <code>parent_enriched_at</code> &mdash;
+  never went through <code>enrich_parents</code> at all. Those 84 are a real hole, and
+  the right repair is the sanctioned structural path rather than the name quorum,
+  which also means they cost description synthesis rather than review budget.
+</p>
+<p>
+  The documentation side is nearly the same rows seen from the other axis: of the 129
+  export-eligible names with no <code>reviewer_score_docs</code>, <strong>128 are also
+  name-unscored</strong>. Fixing the names carries almost all of it.
 </p>
 
 <h2 id="s3">&#167;3 &mdash; An exclusion ledger, so a release cannot be quietly short</h2>
@@ -341,14 +373,14 @@
 
 <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="unreviewed-in-first-release" data-choice="all-reviewed" data-by="Simon McIntosh" data-when="2026-08-23T07:32:22+00:00">
+<div class="r-dec" data-key="unreviewed-in-first-release" data-choice="include-structural-only" data-by="Simon McIntosh" data-when="2026-08-23T08:08:39+00:00">
     <p class="r-dec-q">What happens to the 1,469 export-eligible names that carry no reviewer score — 1,181 old sn edit rows and 221 structural-inheritance accepts?</p>
     <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="all-reviewed">Every name and documentation string flows through the pipeline and is reviewed; no unscored exemption survives</button>
-      <button class="r-opt" data-value="include-structural-only">Keep the structural accept for derived parents; review only the 1,181 catalog edits</button>
+      <button class="r-opt" data-value="all-reviewed">Every name and documentation string flows through the pipeline and is reviewed; no unscored exemption survives</button>
+      <button class="r-opt chosen" data-value="include-structural-only">Keep the structural accept for derived parents; review only the 1,181 catalog edits</button>
       <button class="r-opt" data-value="scored-only">Leave them unscored and release only the 813 already-scored names</button>
       </p>
-    <p class="r-dec-rat">No name is unscored by design. The 1,181 catalog_edit rows are old sn edit output that entered the graph without review, and the 221 structural-inheritance accepts inherited a score they never earned. All names and all documentation flow through the pipeline and are reviewed. USD 200 authorised for the drain. Consequence to manage rather than ignore: the structural accept exists because the name quorum penalises a derived parent for being less specific than its children, measured at roughly two thirds below 0.85, so a sample sizes the derived-parent failure rate before the bulk spend and the parent-aware review path is the candidate fix.</p>
+    <p class="r-dec-rat">REVISED from all-reviewed on the lead&#x27;s challenge, and the code settles it. A derived parent&#x27;s name is a deterministic grammar peel of already-reviewed children, never reviewed or refined, so graph_ops.py deliberately writes no reviewer_score_name - scoring a name we never change grades a mechanical consequence, not a choice. The quorum actively penalises the abstraction for being less specific than its own children, roughly two thirds below 0.85, so routing the 221 through it would spend budget manufacturing exhausted parents. Quality stays gated on the docs axis. The discriminator is the reviewer marker, NOT origin: the structural population is 129 derived plus 92 catalog_edit that flipped origin in an export/import round trip, so origin=&#x27;derived&#x27; is unsafe anywhere in this plan. Invariant: every accepted name carries either its own reviewer score or a recorded structural-accept marker, and the ledger reports the structural population as a named category rather than a silent null. Drain scope is therefore 1,181 catalog_edit rows plus 2 score-write defects, not 1,469. Separately untraced until this partition: 65 in-pool (84 graph-wide) derived names with live children, no reviewer and no parent_enriched_at, which reached accepted through neither review nor the sanctioned structural accept - repair through enrich_parents, which costs description synthesis rather than review budget. USD 200 authorised.</p>
     </div>
 <div class="r-dec" data-key="successorless-supersede-disposition" data-choice="internal-record-only" data-by="Simon McIntosh" data-when="2026-08-23T07:32:22+00:00">
     <p class="r-dec-q">What does a release do with the 509 superseded names that record no successor anywhere?</p>
