@@ -212,6 +212,7 @@ class ExportReport:
         return {
             "gates": [g.to_dict() for g in self.gate_results],
             "divergence": [d.to_dict() for d in self.divergence_entries],
+            "emitted_identities": list(self.exported_names),
             "exclusion_ledger": self._exclusion_rows(),
             "exclusion_records": [
                 record.to_dict()
