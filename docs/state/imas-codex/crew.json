@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:12:50",
+  "updated": "2026-08-23T10:15:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -71,7 +71,7 @@
         "id": "impl-abharness",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a02daa-5b02-7713-aa9e-c1d80ad2d545",
         "created": "2026-08-23"
       },
       {
@@ -17936,9 +17936,73 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T080849557972-impl-abharness",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-abharness",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-abharness",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:08:53Z",
+        "completed_at": "2026-08-23T08:14:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 351,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 351,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "b051c916e06292471b1ccab30040943176f63f52",
+        "commits": [
+          "e42bd4683ae84dba180929b832dbefe7e73cb0dc"
+        ],
+        "changed_lines": {
+          "added": 392,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "Holdout evaluation harness landed as imas_codex/standard_names/docs_holdout_eval.py: named-arm report with a 10-row per-gate table and paired catalog deltas. Two measured results. BASELINE CALIBRATION: scoring the catalog documentation itself as an arm gives 85 rows, 699/850 gate instances passed, overall_pass_rate = 0.822353 - so the reference bar is 0.822, NOT 1.0, and generated output must be compared against that figure. PRICED ADMISSION: the dry-run fixture projects 2 calls and USD 0.50 while issuing 0 model calls, and the admission fixture refuses a projected USD 0.50 run against a USD 0.49 ceiling before generation, also with 0 model calls - which makes the locked render-price-admit budget rule executable rather than aspirational. pytest 3/3 passed, network-free.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T080849557972-impl-abharness/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02daa-5b02-7713-aa9e-c1d80ad2d545",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2706432,
+            "cached_input_tokens_cumulative": 2706432,
+            "input_tokens": 2840383,
+            "input_tokens_cumulative": 2840383,
+            "output_tokens": 13357,
+            "output_tokens_cumulative": 13357,
+            "reasoning_output_tokens": 4381,
+            "reasoning_output_tokens_cumulative": 4381
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 485
+    "_version": 487
   }
 }
