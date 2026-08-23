@@ -1,0 +1,1897 @@
+{
+  "schema_version": 1,
+  "observed_at_utc": "2026-08-23T16:21:57.759Z",
+  "graph": "codex",
+  "read_only": true,
+  "standard_name_total": 4665,
+  "name_property_node_count": 0,
+  "inputs": {
+    "below_bar_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T142524040287-n-drainfinish/final-receipt.json",
+    "below_bar_receipt_sha256": "e54b31cf9c581839c4898a7503a1e05889518ce98ba8240f2d29cafc1d7238a2",
+    "below_bar_threshold": 0.85,
+    "below_bar_identity_count": 273,
+    "west_manifest": "/home/ITER/mcintos/.local/share/imas-codex/receipts/standard-names/portfolio-census-2026-08-16/west-gate-manifest.json",
+    "west_manifest_sha256": "a613ecb74bae12b8f576769994e1b7df37e68a0c90a0168c6441d62dbb35d000",
+    "west_identity_count": 231
+  },
+  "joins": {
+    "standard_name_id_row_count": 231,
+    "standard_name_name_row_count": 0,
+    "sound_key": "StandardName.id",
+    "reason": "StandardName.id is the snake_case identity. The class has no name property, so a StandardName.name predicate evaluates to null and silently returns zero rows."
+  },
+  "excluded_identity_count": 20,
+  "excluded_identities": [
+    "current_of_poloidal_field_coil",
+    "energy_confinement_time",
+    "gap_of_antenna_strap",
+    "hot_neutral_temperature",
+    "ion_atomic_number",
+    "length_of_plasma_boundary",
+    "lower_photon_energy",
+    "neutral_pressure",
+    "power_due_to_ohmic_dissipation",
+    "power_of_ion_cyclotron_heating_antenna",
+    "radiative_temperature",
+    "spectral_radiance_of_soft_xray_detector",
+    "surface_temperature",
+    "thermal_energy_of_plant_component_port",
+    "thermal_power_of_plant_component_port",
+    "toroidal_angle_of_magnetic_field_probe",
+    "toroidal_width_of_antenna_strap",
+    "vertical_coordinate_of_plasma_boundary",
+    "vertical_outline_of_wall_material",
+    "voltage_amplitude"
+  ],
+  "resolved_west_identity_count": 231,
+  "resolved_docs_stage_counts": {
+    "accepted": 195,
+    "drafted": 4,
+    "exhausted": 1,
+    "pending": 25,
+    "reviewed": 6
+  },
+  "resolved_west_identities": [
+    {
+      "id": "accumulated_deposited_energy_of_plasma_facing_component",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "accumulated_total_particle_count_due_to_gas_injection",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "area_of_diagnostic_aperture",
+      "name_stage": "accepted",
+      "docs_stage": "drafted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "area_of_poloidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "area_of_toroidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "atomic_count_of_ion_state",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "atomic_mass",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "breakdown_initial_time",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "capacitance",
+      "name_stage": "superseded",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "cold_neutral_fraction",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "cold_neutral_temperature",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "coolant_temperature_at_inlet",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "coolant_temperature_at_outlet",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "coolant_transit_time_of_plant_component_port",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "current_of_passive_loop",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "current_of_poloidal_field_coil",
+      "name_stage": "exhausted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "derivative_with_respect_to_normalized_poloidal_flux_coordinate_of_area_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "reviewed",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_volume_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "effective_charge",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "effective_turn_count_of_coil_conductor_element",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "effective_turn_count_of_passive_loop",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "electron_density_at_divertor_target",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "electron_density_at_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "electron_density_at_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "electron_temperature",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "electron_temperature_at_divertor_target",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "electron_temperature_at_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "elongation_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "elongation_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "energy_confinement_enhancement_factor",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "energy_confinement_time",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "equilibrium_weight_of_flux_loop",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "equilibrium_weight_of_interferometer_beam",
+      "name_stage": "accepted",
+      "docs_stage": "drafted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "equilibrium_weight_of_poloidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "etendue_of_hard_xray_detector",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "etendue_of_spectrometer_channel",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "faraday_angle",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_inverse_of_major_radius",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_inverse_of_square_of_major_radius",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_magnetic_field_magnitude",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_major_radius",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_square_of_magnetic_field_magnitude",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
+      "name_stage": "accepted",
+      "docs_stage": "reviewed",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "forward_power_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "frequency_of_diagnostic_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "frequency_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "gap_at_outboard_midplane",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "gap_at_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "gap_of_antenna_strap",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "gas_flow",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "hard_xray_brightness",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "hard_xray_emissivity",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "height_of_poloidal_field_coil",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "hot_neutral_fraction",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "hot_neutral_temperature",
+      "name_stage": "reviewed",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "initial_polarization_ellipticity_of_polarimeter_beam",
+      "name_stage": "accepted",
+      "docs_stage": "exhausted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width",
+      "name_stage": "drafted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "ion_atomic_number",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "ion_current_of_mass_spectrometer_channel",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "launched_power_of_lower_hybrid_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "length_of_interferometer_beam",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "length_of_plasma_boundary",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "length_of_poloidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "length_of_toroidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "reviewed",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "line_averaged_effective_charge",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "line_averaged_electron_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "line_integrated_electron_number_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "line_integrated_spectral_wave_opacity_at_ece_channel_emission_position",
+      "name_stage": "drafted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "loop_voltage_at_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "lower_bound_hard_xray_peak_width",
+      "name_stage": "superseded",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "lower_photon_energy",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "lower_triangularity_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "lower_triangularity_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "lower_wavelength_of_filter",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "magnetic_shear_at_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "maximum_magnetic_field_magnitude",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "maximum_of_energy_flux_at_divertor_target",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "mhd_energy",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "minimum_magnetic_field",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "minimum_safety_factor",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "minor_radius_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "neutral_pressure",
+      "name_stage": "exhausted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "neutron_flux",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_plasma_internal_inductance",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_poloidal_flux_coordinate",
+      "name_stage": "reviewed",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_toroidal_flux_coordinate",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_toroidal_flux_coordinate_at_measurement_position",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_toroidal_flux_coordinate_at_minimum_safety_factor",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_toroidal_hard_xray_peak_lower_bound_width",
+      "name_stage": "exhausted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "normalized_toroidal_plasma_beta",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "parallel_flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
+      "name_stage": "accepted",
+      "docs_stage": "reviewed",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "photon_radiance_at_spectral_line",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "plasma_beta",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "plasma_breakdown_time",
+      "name_stage": "exhausted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "plasma_current",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "plasma_pressure",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_angle_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_angle_of_measurement_position",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_angle_of_toroidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_beta",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_cross_sectional_area_of_flux_surface",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_cross_sectional_area_of_plasma_boundary",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_magnetic_field",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_magnetic_field_at_constraint_position",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_magnetic_flux_at_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_magnetic_flux_at_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_magnetic_flux_at_measurement_position",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_magnetic_flux_at_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "poloidal_magnetic_flux_of_flux_loop",
+      "name_stage": "accepted",
+      "docs_stage": "drafted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "power_due_to_ion_cyclotron_heating",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "power_due_to_ohmic_dissipation",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "power_of_ion_cyclotron_heating_antenna",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "power_of_soft_xray_detector",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "pressure_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "product_of_poloidal_current_function_and_derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_poloidal_current_function",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "pulse_duration",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_at_inboard_midplane",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_at_outboard_midplane",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_camera",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_conductor_cross_section",
+      "name_stage": "accepted",
+      "docs_stage": "reviewed",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_detector_pixel",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_flux_loop",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_geometric_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_line_of_sight",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_measurement_position",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_poloidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_strike_point",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_coordinate_of_x_point",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_derivative_of_poloidal_magnetic_flux",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_outline_of_antenna_strap",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_outline_of_limiter_tile",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_outline_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radial_outline_of_wall",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radiated_power_over_core_region",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "radiative_temperature",
+      "name_stage": "exhausted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "radiative_temperature_at_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "ratio_of_coolant_mass_to_time",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "ratio_of_line_averaged_electron_density_to_greenwald_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "reference_major_radius",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "reflected_phase_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "reflected_power_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "safety_factor",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "safety_factor_at_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "spectral_bremsstrahlung_radiance",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "spectral_calibration_factor_at_line_of_sight",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "spectral_flux_of_spectrometer_channel",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "spectral_radiance",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "spectral_radiance_of_soft_xray_detector",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "spectral_signal_to_noise_ratio_of_spectrometer_channel",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "spectral_wavelength_of_optical_element",
+      "name_stage": "accepted",
+      "docs_stage": "reviewed",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "surface_area_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "surface_temperature",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "temperature_of_soft_xray_detector",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "thermal_electron_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "thermal_electron_pressure_at_post_sawtooth_crash",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "thermal_energy_of_plant_component_port",
+      "name_stage": "exhausted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "thermal_power_of_plant_component_port",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "thickness_of_filter",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_angle_of_antenna_strap",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_angle_of_magnetic_field_probe",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "toroidal_angle_of_measurement_position",
+      "name_stage": "accepted",
+      "docs_stage": "drafted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_angle_of_toroidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_angular_width_of_limiter_tile",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_coordinate_of_detector_pixel",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_coordinate_of_line_of_sight",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_flux_coordinate",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_flux_coordinate_gradient_magnitude",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_flux_surface_averaged_current_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_magnetic_field",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_magnetic_field_at_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_magnetic_flux",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_vacuum_magnetic_field",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "toroidal_width_of_antenna_strap",
+      "name_stage": "exhausted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "total_electron_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "total_electron_pressure",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "total_external_heating_power",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "total_neutral_source_rate_due_to_gas_injection",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "total_plasma_radiated_power",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "total_power_at_separatrix",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "total_power_due_to_ion_cyclotron_heating",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "triangularity_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "turn_count_of_poloidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "turn_count_of_toroidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "upper_photon_energy",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "upper_triangularity_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "upper_triangularity_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "upper_wavelength_of_filter",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vacuum_poloidal_current_function",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_camera",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_conductor_cross_section",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_detector_pixel",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_flux_loop",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_geometric_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_line_of_sight",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_magnetic_axis",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_measurement_position",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_plasma_boundary",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "vertical_coordinate_of_poloidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_primary_x_point",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_strike_point",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_coordinate_of_toroidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_outline_of_antenna_strap",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_outline_of_limiter_tile",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "vertical_outline_of_wall_material",
+      "name_stage": "superseded",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "voltage_amplitude",
+      "name_stage": "exhausted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": true,
+      "docs_eligible_after_exclusion": false
+    },
+    {
+      "id": "voltage_of_mass_spectrometer_channel",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "voltage_of_poloidal_magnetic_field_probe",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "volume_averaged_electron_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "volume_integrated_total_electron_density",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "volume_of_flux_surface",
+      "name_stage": "accepted",
+      "docs_stage": "pending",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "volume_of_plasma_boundary",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "wave_current_of_antenna_strap_amplitude",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "wave_phase_of_antenna_strap",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "wave_phase_of_ion_cyclotron_heating_antenna",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "wave_phase_of_wave_beam",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "wavelength_of_spectral_line",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "wavelength_of_wave_beam",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    },
+    {
+      "id": "width_of_poloidal_field_coil",
+      "name_stage": "accepted",
+      "docs_stage": "accepted",
+      "excluded_from_concurrent_refine": false,
+      "docs_eligible_after_exclusion": true
+    }
+  ],
+  "docs_eligible_definition": "Resolved WEST identities after removing the exact 20-identity intersection with the concurrent below-bar refine cohort; no additional lifecycle-stage filter is applied by this census.",
+  "docs_eligible_identity_count": 211,
+  "docs_eligible_docs_stage_counts": {
+    "accepted": 175,
+    "drafted": 4,
+    "exhausted": 1,
+    "pending": 25,
+    "reviewed": 6
+  },
+  "docs_eligible_identity_ids": [
+    "accumulated_deposited_energy_of_plasma_facing_component",
+    "accumulated_total_particle_count_due_to_gas_injection",
+    "area_of_diagnostic_aperture",
+    "area_of_poloidal_magnetic_field_probe",
+    "area_of_toroidal_magnetic_field_probe",
+    "atomic_count_of_ion_state",
+    "atomic_mass",
+    "breakdown_initial_time",
+    "capacitance",
+    "cold_neutral_fraction",
+    "cold_neutral_temperature",
+    "coolant_temperature_at_inlet",
+    "coolant_temperature_at_outlet",
+    "coolant_transit_time_of_plant_component_port",
+    "current_of_passive_loop",
+    "derivative_with_respect_to_normalized_poloidal_flux_coordinate_of_area_of_flux_surface",
+    "derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_volume_of_flux_surface",
+    "derivative_with_respect_to_toroidal_flux_coordinate_of_area_of_flux_surface",
+    "derivative_with_respect_to_toroidal_flux_coordinate_of_volume_of_flux_surface",
+    "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy",
+    "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+    "effective_charge",
+    "effective_turn_count_of_coil_conductor_element",
+    "effective_turn_count_of_passive_loop",
+    "electron_density_at_divertor_target",
+    "electron_density_at_magnetic_axis",
+    "electron_density_at_plasma_boundary",
+    "electron_temperature",
+    "electron_temperature_at_divertor_target",
+    "electron_temperature_at_magnetic_axis",
+    "elongation_of_flux_surface",
+    "elongation_of_plasma_boundary",
+    "energy_confinement_enhancement_factor",
+    "equilibrium_weight_of_flux_loop",
+    "equilibrium_weight_of_interferometer_beam",
+    "equilibrium_weight_of_poloidal_magnetic_field_probe",
+    "etendue_of_hard_xray_detector",
+    "etendue_of_spectrometer_channel",
+    "faraday_angle",
+    "flux_surface_averaged_inverse_of_major_radius",
+    "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+    "flux_surface_averaged_inverse_of_square_of_major_radius",
+    "flux_surface_averaged_magnetic_field_magnitude",
+    "flux_surface_averaged_major_radius",
+    "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude",
+    "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+    "flux_surface_averaged_square_of_magnetic_field_magnitude",
+    "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude",
+    "forward_power_of_ion_cyclotron_heating_antenna",
+    "frequency_of_diagnostic_antenna",
+    "frequency_of_ion_cyclotron_heating_antenna",
+    "gap_at_outboard_midplane",
+    "gap_at_plasma_boundary",
+    "gas_flow",
+    "hard_xray_brightness",
+    "hard_xray_emissivity",
+    "height_of_poloidal_field_coil",
+    "hot_neutral_fraction",
+    "initial_polarization_ellipticity_of_polarimeter_beam",
+    "inner_normalized_toroidal_flux_coordinate_hard_xray_emissivity_peak_half_width",
+    "ion_current_of_mass_spectrometer_channel",
+    "launched_power_of_lower_hybrid_antenna",
+    "length_of_interferometer_beam",
+    "length_of_poloidal_magnetic_field_probe",
+    "length_of_toroidal_magnetic_field_probe",
+    "line_averaged_effective_charge",
+    "line_averaged_electron_density",
+    "line_integrated_electron_number_density",
+    "line_integrated_spectral_wave_opacity_at_ece_channel_emission_position",
+    "loop_voltage_at_plasma_boundary",
+    "lower_bound_hard_xray_peak_width",
+    "lower_triangularity_of_flux_surface",
+    "lower_triangularity_of_plasma_boundary",
+    "lower_wavelength_of_filter",
+    "magnetic_shear_at_flux_surface",
+    "maximum_magnetic_field_magnitude",
+    "maximum_of_energy_flux_at_divertor_target",
+    "mhd_energy",
+    "minimum_magnetic_field",
+    "minimum_safety_factor",
+    "minor_radius_of_plasma_boundary",
+    "neutron_flux",
+    "normalized_plasma_internal_inductance",
+    "normalized_poloidal_flux_coordinate",
+    "normalized_poloidal_flux_coordinate_of_plasma_boundary",
+    "normalized_toroidal_flux_coordinate",
+    "normalized_toroidal_flux_coordinate_at_measurement_position",
+    "normalized_toroidal_flux_coordinate_at_minimum_safety_factor",
+    "normalized_toroidal_hard_xray_peak_lower_bound_width",
+    "normalized_toroidal_plasma_beta",
+    "parallel_flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
+    "photon_radiance_at_spectral_line",
+    "plasma_beta",
+    "plasma_breakdown_time",
+    "plasma_current",
+    "plasma_pressure",
+    "poloidal_angle_of_flux_surface",
+    "poloidal_angle_of_measurement_position",
+    "poloidal_angle_of_toroidal_magnetic_field_probe",
+    "poloidal_beta",
+    "poloidal_cross_sectional_area_of_flux_surface",
+    "poloidal_cross_sectional_area_of_plasma_boundary",
+    "poloidal_magnetic_field",
+    "poloidal_magnetic_field_at_constraint_position",
+    "poloidal_magnetic_flux_at_flux_surface",
+    "poloidal_magnetic_flux_at_magnetic_axis",
+    "poloidal_magnetic_flux_at_measurement_position",
+    "poloidal_magnetic_flux_at_plasma_boundary",
+    "poloidal_magnetic_flux_of_flux_loop",
+    "power_due_to_ion_cyclotron_heating",
+    "power_of_soft_xray_detector",
+    "pressure_of_ion_cyclotron_heating_antenna",
+    "product_of_poloidal_current_function_and_derivative_with_respect_to_poloidal_magnetic_flux_coordinate_of_poloidal_current_function",
+    "pulse_duration",
+    "radial_coordinate_at_inboard_midplane",
+    "radial_coordinate_at_outboard_midplane",
+    "radial_coordinate_of_camera",
+    "radial_coordinate_of_conductor_cross_section",
+    "radial_coordinate_of_detector_pixel",
+    "radial_coordinate_of_flux_loop",
+    "radial_coordinate_of_geometric_axis",
+    "radial_coordinate_of_line_of_sight",
+    "radial_coordinate_of_magnetic_axis",
+    "radial_coordinate_of_measurement_position",
+    "radial_coordinate_of_poloidal_magnetic_field_probe",
+    "radial_coordinate_of_strike_point",
+    "radial_coordinate_of_x_point",
+    "radial_derivative_of_poloidal_magnetic_flux",
+    "radial_outline_of_antenna_strap",
+    "radial_outline_of_limiter_tile",
+    "radial_outline_of_plasma_boundary",
+    "radial_outline_of_wall",
+    "radiated_power_over_core_region",
+    "radiative_temperature_at_magnetic_axis",
+    "ratio_of_coolant_mass_to_time",
+    "ratio_of_line_averaged_electron_density_to_greenwald_density",
+    "ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density",
+    "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope",
+    "reference_major_radius",
+    "reflected_phase_of_ion_cyclotron_heating_antenna",
+    "reflected_power_of_ion_cyclotron_heating_antenna",
+    "safety_factor",
+    "safety_factor_at_magnetic_axis",
+    "safety_factor_at_normalized_poloidal_magnetic_flux_equal_to_0_95",
+    "spectral_bremsstrahlung_radiance",
+    "spectral_calibration_factor_at_line_of_sight",
+    "spectral_flux_of_spectrometer_channel",
+    "spectral_radiance",
+    "spectral_signal_to_noise_ratio_of_spectrometer_channel",
+    "spectral_wavelength_of_optical_element",
+    "surface_area_of_flux_surface",
+    "temperature_of_soft_xray_detector",
+    "thermal_electron_density",
+    "thermal_electron_pressure_at_post_sawtooth_crash",
+    "thickness_of_filter",
+    "toroidal_angle_of_antenna_strap",
+    "toroidal_angle_of_measurement_position",
+    "toroidal_angle_of_toroidal_magnetic_field_probe",
+    "toroidal_angular_width_of_limiter_tile",
+    "toroidal_coordinate_of_detector_pixel",
+    "toroidal_coordinate_of_line_of_sight",
+    "toroidal_flux_coordinate",
+    "toroidal_flux_coordinate_gradient_magnitude",
+    "toroidal_flux_surface_averaged_current_density",
+    "toroidal_magnetic_field",
+    "toroidal_magnetic_field_at_magnetic_axis",
+    "toroidal_magnetic_flux",
+    "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+    "toroidal_vacuum_magnetic_field",
+    "total_electron_density",
+    "total_electron_pressure",
+    "total_external_heating_power",
+    "total_neutral_source_rate_due_to_gas_injection",
+    "total_plasma_radiated_power",
+    "total_power_at_separatrix",
+    "total_power_due_to_ion_cyclotron_heating",
+    "triangularity_of_plasma_boundary",
+    "turn_count_of_poloidal_magnetic_field_probe",
+    "turn_count_of_toroidal_magnetic_field_probe",
+    "upper_photon_energy",
+    "upper_triangularity_of_flux_surface",
+    "upper_triangularity_of_plasma_boundary",
+    "upper_wavelength_of_filter",
+    "vacuum_poloidal_current_function",
+    "vertical_coordinate_of_camera",
+    "vertical_coordinate_of_conductor_cross_section",
+    "vertical_coordinate_of_detector_pixel",
+    "vertical_coordinate_of_flux_loop",
+    "vertical_coordinate_of_geometric_axis",
+    "vertical_coordinate_of_line_of_sight",
+    "vertical_coordinate_of_magnetic_axis",
+    "vertical_coordinate_of_measurement_position",
+    "vertical_coordinate_of_poloidal_magnetic_field_probe",
+    "vertical_coordinate_of_primary_x_point",
+    "vertical_coordinate_of_strike_point",
+    "vertical_coordinate_of_toroidal_magnetic_field_probe",
+    "vertical_outline_of_antenna_strap",
+    "vertical_outline_of_limiter_tile",
+    "voltage_of_mass_spectrometer_channel",
+    "voltage_of_poloidal_magnetic_field_probe",
+    "volume_averaged_electron_density",
+    "volume_integrated_total_electron_density",
+    "volume_of_flux_surface",
+    "volume_of_plasma_boundary",
+    "wave_current_of_antenna_strap_amplitude",
+    "wave_phase_of_antenna_strap",
+    "wave_phase_of_ion_cyclotron_heating_antenna",
+    "wave_phase_of_wave_beam",
+    "wavelength_of_spectral_line",
+    "wavelength_of_wave_beam",
+    "width_of_poloidal_field_coil"
+  ],
+  "docs_eligible_excluded_overlap_count": 0
+}
+
