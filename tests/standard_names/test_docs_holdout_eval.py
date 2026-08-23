@@ -21,7 +21,7 @@ async def test_catalog_arm_reports_numeric_per_gate_baseline(
 
     monkeypatch.setattr(
         docs_holdout_eval,
-        "generate_docs_for_candidates",
+        "_call_docs_model",
         _network_call,
     )
 
@@ -52,8 +52,13 @@ async def test_priced_dry_run_projects_calls_and_cost_without_model_calls(
 
     monkeypatch.setattr(
         docs_holdout_eval,
-        "generate_docs_for_candidates",
+        "_call_docs_model",
         _network_call,
+    )
+    monkeypatch.setattr(
+        docs_holdout_eval,
+        "_production_enrich_items",
+        _add_peer_context,
     )
     monkeypatch.setattr(
         docs_holdout_eval,
@@ -87,8 +92,13 @@ async def test_projected_cost_above_ceiling_refuses_before_model_call(
 
     monkeypatch.setattr(
         docs_holdout_eval,
-        "generate_docs_for_candidates",
+        "_call_docs_model",
         _network_call,
+    )
+    monkeypatch.setattr(
+        docs_holdout_eval,
+        "_production_enrich_items",
+        _add_peer_context,
     )
     monkeypatch.setattr(
         docs_holdout_eval,
@@ -104,4 +114,91 @@ async def test_projected_cost_above_ceiling_refuses_before_model_call(
             rows=load_docs_holdout()[:2],
         )
 
+    assert model_calls == 0
+
+
+def _add_peer_context(items: list[dict]) -> list[dict]:
+    for item in items:
+        item["nearest_peers"] = [
+            {
+                "tag": "name:related_quantity",
+                "unit": "1",
+                "physics_domain": "equilibrium",
+                "doc_short": "A related physical quantity.",
+                "cocos_label": "",
+            }
+        ]
+    return []
+
+
+def test_rendered_evaluation_prompt_uses_production_relationship_context(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    row = load_docs_holdout()[0]
+
+    def _add_related_context(items: list[dict]) -> list[dict]:
+        items[0]["related_neighbours"] = [
+            {
+                "path": "equilibrium/time_slice/global_quantities/ip",
+                "ids": "equilibrium",
+                "relationship_type": "shared coordinate",
+                "via": "time",
+                "physics_domain": "equilibrium",
+                "doc": "Plasma current related to this quantity.",
+            }
+        ]
+        return []
+
+    monkeypatch.setattr(
+        docs_holdout_eval,
+        "_production_enrich_items",
+        _add_related_context,
+    )
+    context = docs_holdout_eval.build_compose_context()
+    context["compose_scored_examples"] = []
+
+    requests, counts = docs_holdout_eval._prepare_generation_requests(
+        [docs_holdout_eval._candidate_for(row)],
+        context=context,
+    )
+
+    assert counts[0].candidate_count == 1
+    assert len(requests) == 1
+    rendered_user_prompt = requests[0].messages[1]["content"]
+    assert "## Related Physics Quantities" in rendered_user_prompt
+    assert "equilibrium/time_slice/global_quantities/ip" in rendered_user_prompt
+
+
+async def test_zero_context_candidates_are_reported_and_not_scored(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model_calls = 0
+
+    def _no_context(items: list[dict]) -> list[dict]:
+        return []
+
+    async def _network_call(*args, **kwargs):
+        nonlocal model_calls
+        model_calls += 1
+        raise AssertionError("a row without context candidates must not call a model")
+
+    monkeypatch.setattr(
+        docs_holdout_eval,
+        "_production_enrich_items",
+        _no_context,
+    )
+    monkeypatch.setattr(docs_holdout_eval, "_call_docs_model", _network_call)
+
+    report = await evaluate_docs_holdout(
+        "candidate",
+        model="priced-model",
+        rows=load_docs_holdout()[:1],
+    )
+
+    assert report.row_count == 1
+    assert report.scored_row_count == 0
+    assert report.zero_candidate_row_count == 1
+    assert report.context_counts[0].candidate_count == 0
+    assert report.row_scores == ()
+    assert report.per_gate_table == ()
     assert model_calls == 0

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 import math
+import time
+from asyncio import Semaphore, gather
 from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
 from imas_codex.llm.prompt_loader import render_prompt
-from imas_codex.standard_names.benchmark import generate_docs_for_candidates
 from imas_codex.standard_names.benchmark_reference import (
     DocsHoldoutRow,
     load_docs_holdout,
@@ -54,6 +55,23 @@ class HoldoutRowScore:
 
 
 @dataclass(frozen=True)
+class HoldoutContextCount:
+    """Production relationship-context candidates available for one row."""
+
+    split_key: str
+    dd_path: str
+    candidate_count: int
+
+
+@dataclass(frozen=True)
+class _PreparedDocsRequest:
+    """A production-enriched, fully rendered holdout request."""
+
+    row_index: int
+    messages: list[dict[str, Any]]
+
+
+@dataclass(frozen=True)
 class DocsHoldoutReport:
     """Evaluation receipt for a named documentation arm."""
 
@@ -64,6 +82,9 @@ class DocsHoldoutReport:
     projected_call_count: int
     projected_cost_usd: float
     actual_cost_usd: float
+    scored_row_count: int
+    zero_candidate_row_count: int
+    context_counts: tuple[HoldoutContextCount, ...]
     per_gate_table: tuple[GateComparison, ...]
     row_scores: tuple[HoldoutRowScore, ...]
     overall_pass_rate: float | None
@@ -73,6 +94,7 @@ class DocsHoldoutReport:
 
 def _candidate_for(row: DocsHoldoutRow) -> dict[str, Any]:
     return {
+        "split_key": row["split_key"],
         "standard_name": row["catalog_name"],
         "source_id": row["dd_path"],
         "description": row["catalog_description"],
@@ -85,7 +107,9 @@ def _candidate_for(row: DocsHoldoutRow) -> dict[str, Any]:
 
 def _generation_item(candidate: dict[str, Any]) -> dict[str, Any]:
     return {
+        "id": candidate["standard_name"],
         "name": candidate["standard_name"],
+        "standard_name": candidate["standard_name"],
         "unit": candidate.get("unit", ""),
         "kind": candidate.get("kind", "scalar"),
         "physics_domain": candidate.get("physics_domain", ""),
@@ -109,27 +133,122 @@ def _project_request_cost(
     )
 
 
-def _price_generation(
+def _production_enrich_items(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Run the same graph enrichment used by the production docs worker."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.settings import get_dd_version
+    from imas_codex.standard_names.workers import (
+        _DOCS_GEN_COCOS_PARAMS_QUERY,
+        _enrich_for_docs_gen,
+        _nearby_names_for_docs_gen,
+    )
+
+    with GraphClient() as gc:
+        cocos_rows = list(gc.query(_DOCS_GEN_COCOS_PARAMS_QUERY, ver=get_dd_version()))
+        cocos_params = cocos_rows[0]["cocos_params"] if cocos_rows else None
+        _enrich_for_docs_gen(gc, items, cocos_params=cocos_params)
+        return _nearby_names_for_docs_gen(gc, items)
+
+
+def _relationship_context_candidate_count(item: dict[str, Any]) -> int:
+    """Count candidate-specific related, parent, component, and peer context."""
+    return (
+        len(item.get("related_neighbours") or [])
+        + len(item.get("nearest_peers") or [])
+        + len(item.get("child_components") or [])
+        + int(bool(item.get("parent_sn")))
+    )
+
+
+def _prepare_generation_requests(
     candidates: Sequence[dict[str, Any]],
     *,
-    model: str,
     context: dict[str, Any],
-) -> float:
-    """Price every rendered benchmark request before any call can execute."""
-    system_prompt = render_prompt("sn/generate_docs_system", context)
-    projected_cost = 0.0
-    for candidate in candidates:
-        item = _generation_item(candidate)
+) -> tuple[list[_PreparedDocsRequest], tuple[HoldoutContextCount, ...]]:
+    """Enrich and render eligible rows through the production docs path."""
+    from imas_codex.standard_names.context import locus_context_for
+
+    items = [_generation_item(candidate) for candidate in candidates]
+    nearby_existing_names = _production_enrich_items(items)
+    requests: list[_PreparedDocsRequest] = []
+    counts: list[HoldoutContextCount] = []
+    for row_index, (candidate, item) in enumerate(zip(candidates, items, strict=True)):
+        candidate_count = _relationship_context_candidate_count(item)
+        counts.append(
+            HoldoutContextCount(
+                split_key=candidate["split_key"],
+                dd_path=candidate["source_id"],
+                candidate_count=candidate_count,
+            )
+        )
+        if candidate_count == 0:
+            continue
+        prompt_context = {
+            **context,
+            "item": item,
+            "chain_history": item.get("chain_history") or [],
+            "nearby_existing_names": nearby_existing_names,
+            "locus_context": locus_context_for(item["id"]),
+        }
         user_prompt = render_prompt(
             "sn/generate_docs_user",
-            {**context, "item": item},
+            prompt_context,
         )
-        messages = [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ]
-        projected_cost += _project_request_cost(model, messages)
-    return projected_cost
+        system_prompt = render_prompt("sn/generate_docs_system", prompt_context)
+        requests.append(
+            _PreparedDocsRequest(
+                row_index=row_index,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+            )
+        )
+    return requests, tuple(counts)
+
+
+def _price_generation(requests: Sequence[_PreparedDocsRequest], *, model: str) -> float:
+    """Price every production-rendered request before any call can execute."""
+    return sum(_project_request_cost(model, request.messages) for request in requests)
+
+
+async def _call_docs_model(
+    model: str, messages: list[dict[str, Any]]
+) -> tuple[GeneratedDocs, float]:
+    """Call the configured docs model with production generation settings."""
+    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.settings import get_reasoning_effort
+
+    result, cost, _tokens = await acall_llm_structured(
+        model=model,
+        messages=messages,
+        response_model=GeneratedDocs,
+        temperature=None if "gpt-5" in model else 0.0,
+        service="standard-names",
+        reasoning_effort=get_reasoning_effort("sn-docs"),
+        max_retries=_GENERATION_ATTEMPTS,
+    )
+    return result, cost
+
+
+async def _generate_requests(
+    requests: Sequence[_PreparedDocsRequest], model: str
+) -> tuple[list[str], float, float]:
+    """Generate enriched requests concurrently and retain their row order."""
+    started = time.monotonic()
+    semaphore = Semaphore(8)
+
+    async def _one(request: _PreparedDocsRequest) -> tuple[str, float]:
+        async with semaphore:
+            result, cost = await _call_docs_model(model, request.messages)
+        return result.documentation, cost
+
+    outputs = await gather(*(_one(request) for request in requests))
+    return (
+        [documentation for documentation, _cost in outputs],
+        sum(cost for _documentation, cost in outputs),
+        time.monotonic() - started,
+    )
 
 
 def _aggregate_scores(
@@ -195,13 +314,20 @@ async def evaluate_docs_holdout(
 
     candidates = [_candidate_for(row) for row in holdout]
     context: dict[str, Any] | None = None
+    requests: list[_PreparedDocsRequest] = []
+    context_counts: tuple[HoldoutContextCount, ...] = ()
     projected_calls = 0
     projected_cost = 0.0
     if model is not None:
         context = build_compose_context()
         context["compose_scored_examples"] = []
-        projected_calls = len(candidates)
-        projected_cost = _price_generation(candidates, model=model, context=context)
+        requests, context_counts = _prepare_generation_requests(
+            candidates, context=context
+        )
+        projected_calls = len(requests)
+        projected_cost = _price_generation(requests, model=model)
+
+    zero_candidate_rows = sum(count.candidate_count == 0 for count in context_counts)
 
     if cost_ceiling is not None and projected_cost > cost_ceiling:
         raise HoldoutCostCeilingExceeded(
@@ -218,6 +344,9 @@ async def evaluate_docs_holdout(
             projected_call_count=projected_calls,
             projected_cost_usd=projected_cost,
             actual_cost_usd=0.0,
+            scored_row_count=0,
+            zero_candidate_row_count=zero_candidate_rows,
+            context_counts=context_counts,
             per_gate_table=(),
             row_scores=(),
             overall_pass_rate=None,
@@ -228,17 +357,33 @@ async def evaluate_docs_holdout(
     actual_cost = 0.0
     if model is None:
         arm_documents = [row["catalog_documentation"] for row in holdout]
+        scored_rows = holdout
     else:
         assert context is not None
-        generated, actual_cost, _elapsed = await generate_docs_for_candidates(
-            candidates,
-            model,
-            context,
+        arm_documents, actual_cost, _elapsed = await _generate_requests(requests, model)
+        scored_rows = [holdout[request.row_index] for request in requests]
+
+    if not scored_rows:
+        return DocsHoldoutReport(
+            arm=arm,
+            model=model,
+            dry_run=False,
+            row_count=len(holdout),
+            projected_call_count=projected_calls,
+            projected_cost_usd=projected_cost,
+            actual_cost_usd=actual_cost,
+            scored_row_count=0,
+            zero_candidate_row_count=zero_candidate_rows,
+            context_counts=context_counts,
+            per_gate_table=(),
+            row_scores=(),
+            overall_pass_rate=None,
+            catalog_overall_pass_rate=None,
+            overall_pass_rate_delta=None,
         )
-        arm_documents = [candidate.get("documentation", "") for candidate in generated]
 
     catalog_scores = [
-        score_documentation(row["catalog_documentation"]) for row in holdout
+        score_documentation(row["catalog_documentation"]) for row in scored_rows
     ]
     arm_scores = [score_documentation(documentation) for documentation in arm_documents]
     table, arm_overall, catalog_overall, overall_delta = _aggregate_scores(
@@ -254,7 +399,7 @@ async def evaluate_docs_holdout(
             catalog_gates=dict(catalog_score.gate_vector),
         )
         for row, arm_score, catalog_score in zip(
-            holdout,
+            scored_rows,
             arm_scores,
             catalog_scores,
             strict=True,
@@ -268,6 +413,9 @@ async def evaluate_docs_holdout(
         projected_call_count=projected_calls,
         projected_cost_usd=projected_cost,
         actual_cost_usd=actual_cost,
+        scored_row_count=len(scored_rows),
+        zero_candidate_row_count=zero_candidate_rows,
+        context_counts=context_counts,
         per_gate_table=table,
         row_scores=row_scores,
         overall_pass_rate=arm_overall,
@@ -279,6 +427,7 @@ async def evaluate_docs_holdout(
 __all__ = [
     "DocsHoldoutReport",
     "GateComparison",
+    "HoldoutContextCount",
     "HoldoutCostCeilingExceeded",
     "HoldoutRowScore",
     "evaluate_docs_holdout",
