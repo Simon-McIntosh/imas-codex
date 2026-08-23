@@ -41,8 +41,19 @@ For each name, the documentation field should cover (where applicable) — apply
 
 1. **Definition** — what this quantity physically represents in the context of tokamak / stellarator plasmas.
 2. **Governing physics** — the principal defining equation as a centred `$$...$$` display block, with variable definitions in flowing prose. **At most one display equation per entry.** Use `$...$` inline math for variable names elsewhere.
-3. **Scope and exclusions** — only the semantic boundaries, aggregation conventions, and essential relationships needed to distinguish this quantity from nearby quantities.
-4. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
+3. **Scope and exclusions** — explicitly state the semantic boundaries,
+   physical population or region, aggregation convention, and exclusions that
+   distinguish this quantity from nearby quantities whenever the supplied name
+   or context supports them. Do not omit scope that is already encoded by the
+   name or provided context merely because the source documentation leaves it
+   implicit.
+4. **Essential relationships** — explicitly state how the quantity relates to
+   the nearest parent, component, total, normalized, averaged, derivative, or
+   integral quantity whenever that relationship is supported by the supplied
+   context. State the semantic or mathematical relationship itself and link an
+   available related standard name inline; do not substitute a measurement or
+   computation recipe for the relationship.
+5. **Sign conventions** — for COCOS-dependent quantities, the documentation MUST contain a sign-convention statement using this exact format:
 
    ```
    Sign convention: Positive when <physical condition>.
@@ -72,7 +83,7 @@ For each name, the documentation field should cover (where applicable) — apply
    - `**Sign convention:** Positive when...` (bold — rejected)
    - `Positive when...` (missing `Sign convention:` prefix — rejected)
    - `sign convention: Positive when...` (lowercase — rejected)
-5. **Cross-references** — weave only essential related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
+6. **Cross-references** — weave only essential related standard names into the prose using inline `[label](name:bare_id)` links. Do NOT append a `See also:` / `See related:` block at the end of the documentation — see PR-3 below.
 
 ## Family Parallel Structure (sibling harmonization)
 
@@ -85,8 +96,9 @@ its siblings:
 
 - **One template per family.** All members share the same opening noun-phrase
   pattern and the same documentation section ordering (definition → governing
-  physics → measurement → sign convention). The anchor member (or, absent an
-  anchor, the pattern you set) defines that template.
+  physics → scope/distinction → essential relationships → sign convention).
+  The anchor member (or, absent an anchor, the pattern you set) defines that
+  template.
   - ✅ `"Poloidal mode number $m$ is the dimensionless integer Fourier harmonic…"` /
     `"Toroidal mode number $n$ is the dimensionless integer Fourier harmonic…"`
   - ❌ one sibling opening `"{Axis} mode number … is"` while another opens
@@ -204,8 +216,14 @@ The documentation must be grounded in (a) the provided DD path documentation/con
 2. **No circular definitions** — ❌ "The electron temperature is the temperature of electrons." ✅ "Kinetic energy per degree of freedom of the electron population, expressed in energy units."
 3. **LaTeX in documentation** — for any quantity with a defining equation, include exactly **one** centred display equation in `$$...$$` (the principal/defining one) per the canonical format above. Secondary relations stay inline as `$...$`. The display equation must have the `$$` delimiters on their own lines with blank lines before and after the block.
 4. **Cross-references** — include at least 1 `links` entry for related SNs. Use `name:bare_id` format. Only link to names that exist (check the nearby_names list provided).
-5. **No trailing whitespace or empty lines** in description field.
-6. **Sign convention** — if the quantity has a `cocos_label`, the documentation MUST contain a `Sign convention: Positive when ...` paragraph.
+5. **Scope and exclusions** — carry every supported semantic boundary,
+   population, region, aggregation convention, and exclusion from the supplied
+   name and context into the documentation.
+6. **Essential relationships** — state the supported semantic or mathematical
+   relationship to the nearest relevant quantity; a link alone does not explain
+   the relationship.
+7. **No trailing whitespace or empty lines** in description field.
+8. **Sign convention** — if the quantity has a `cocos_label`, the documentation MUST contain a `Sign convention: Positive when ...` paragraph.
 
 ## Output Schema
 
@@ -235,7 +253,7 @@ Return a JSON object with an `items` array. Each item conforms to:
 - `cross_reference_rationale` — optional. Brief note explaining why the linked names were chosen.
 - `documentation_excerpt` — ≤160 characters. One-line summary suitable for tables and list views.
 
-## Documentation Quality Rules (D5 review)
+## Documentation Quality Rules
 
 ### Spectrum integration rule
 If the name ends in `_spectrum`, the documentation MUST state which
@@ -274,10 +292,10 @@ flag any non-empty DD unit as a known DD inconsistency. Boilerplate:
 > "Dimensionless integer index. (DD declares unit `m` for this quantity but the field is
 > an integer index — this is a known DD inconsistency.)"
 
-### PR-7 Uncertainty-index description template (W9B persistent outlier)
-`uncertainty_index_of_*` SNs have scored 0.65–0.72 across all domains in W7B and W9B
-docs review. The PR-1 boilerplate is too thin. Use the **exact fill-in template** below —
-do not paraphrase it. Length MUST be between 30 and 60 words.
+### PR-7 Uncertainty-index description template
+The PR-1 boilerplate alone is too thin to define the index's semantic role.
+Use the **exact fill-in template** below — do not paraphrase it. Length MUST
+be between 30 and 60 words.
 
 **Mandatory template** (fill in `<X>`):
 
