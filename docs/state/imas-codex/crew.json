@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T12:54:39",
+  "updated": "2026-08-23T13:09:42",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -166,10 +166,17 @@
         "created": "2026-08-21"
       },
       {
-        "id": "impl-capremove",
+        "id": "impl-capmeasure",
         "harness": "codex",
         "role": "implement",
         "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-capremove",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a02e3d-e99c-7762-ac60-86634ad660ac",
         "created": "2026-08-23"
       },
       {
@@ -675,6 +682,13 @@
         "role": "implement",
         "session_id": "01a023fc-7a5e-7f72-8e4b-18d59ffe172f",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-staleguard",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-stall",
@@ -20158,9 +20172,195 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T104958325024-impl-capremove",
+        "plan": "sn-quality-parity",
+        "section": "\u00a73",
+        "node": "impl-capremove",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-capremove",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:50:04Z",
+        "completed_at": "2026-08-23T10:58:38Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 514,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 514,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "c9971c8f4fbac061d05871fe0fcf43d38ef8ad20",
+        "commits": [
+          "7def7d10d2a075c5bc4cb45654db28976dbf2efa"
+        ],
+        "changed_lines": {
+          "added": 55,
+          "removed": 15,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "Hard maximum removed per the lead's locked documentation-length-bound decision. Emitted gate_count=9, maximum_word_count_present=False, MAX_DOCUMENTATION_WORDS deleted; minimum floor retained at 40 words. A 313-word content-dense documentation body passes 9/9 remaining gates - the direct demonstration that length is now bounded by content rather than by a count. Grep evidence RG_EXIT=1: zero upper-word-bound matches across both prompt sources. The shared format additionally forbids dropping content to shorten prose, closing the reallocation path that made an earlier iteration trade symbol definitions away. The separate description constraint is untouched and now regression-tested at 1 sentence and 250 characters, confirming the 500-character Pydantic limit on that different field was correctly left alone. 83/83 across gates, normative policy, prompt completeness and generate_docs. No spend, no graph mutation. Consequence for measurement: the 9 remaining gates are exactly what has been reported as artifact-free, so that ceases to be a caveat and becomes the plain number.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T104958325024-impl-capremove/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e3d-e99c-7762-ac60-86634ad660ac",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4991488,
+            "cached_input_tokens_cumulative": 4991488,
+            "input_tokens": 5152731,
+            "input_tokens_cumulative": 5152731,
+            "output_tokens": 17384,
+            "output_tokens_cumulative": 17384,
+            "reasoning_output_tokens": 6825,
+            "reasoning_output_tokens_cumulative": 6825
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T105948749636-test-capmerge",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "test-capmerge",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-mergeverify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T10:59:52Z",
+        "completed_at": "2026-08-23T11:06:02Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 370,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 370,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "011fdcda648cfee378f55c72659c39025c84cb53",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Suite RED at integrated main 011fdcda: 6625 passed, 8 skipped, 11 FAILED, 0 errors (was 6603 passed / 0 failed at ee29dc85). Non-breakage of the documentation length-maximum removal is therefore NOT established by this run. However none of the 11 failures is plausibly mine: my commit 7def7d10 touches exactly generate_docs_system.md, _docs_format.md, docs_gates.py and test_docs_gates.py, and no failing test imports any of them or names documentation length. Ten of eleven report RepairAuthorityRow.signatures missing during signed-manifest loading; the eleventh asserts persistence Cypher directly sets structural acceptance. All eleven sit in the concurrent release-readiness plan's declared column (structural authority, signed manifests, repair authority, catalog source migration), flagged to that coordinator rather than touched. Leading hypothesis is an environment artifact: RepairAuthorityRow lives in the auto-generated gitignored imas_codex/graph/models.py, the main checkout's copy is current with signatures at line 9980 against a schema declaring it at standard_name.yaml:3973, the package is installed editable, but dispatched workers run PYTHONPATH pointing at their detached worktree which shadows the editable install and may carry a model generated before the schema moved. test-failattrib dispatched to settle it decisively.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T105948749636-test-capmerge/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02daf-eff1-7e41-9189-2639a85127ec",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2710528,
+            "cached_input_tokens_cumulative": 4333824,
+            "input_tokens": 2844329,
+            "input_tokens_cumulative": 4549518,
+            "output_tokens": 5871,
+            "output_tokens_cumulative": 11138,
+            "reasoning_output_tokens": 2284,
+            "reasoning_output_tokens_cumulative": 4445
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T095949926516-n-cohortprice",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72",
+        "node": "n-cohortprice",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-camprice",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T09:59:53Z",
+        "completed_at": "2026-08-23T10:51:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": null,
+        "worker_seconds_source": "stalled",
+        "wall_seconds": 3070,
+        "stalled": true,
+        "time_budget": "25m",
+        "base_sha": "afde1095d682d527c79b49ea8f41a87894988155",
+        "commits": [
+          "9a90b96df00bc257701e872622aeb5d08833510d"
+        ],
+        "changed_lines": {
+          "added": 372,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 7,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T095949926516-n-cohortprice/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02e0f-f842-75c3-9364-69f4b79bbcc9",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 30827264,
+            "cached_input_tokens_cumulative": 30827264,
+            "input_tokens": 31321354,
+            "input_tokens_cumulative": 31321354,
+            "output_tokens": 50783,
+            "output_tokens_cumulative": 50783,
+            "reasoning_output_tokens": 15344,
+            "reasoning_output_tokens_cumulative": 15344
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 561
+    "_version": 567
   }
 }
