@@ -2,14 +2,22 @@
 
 from __future__ import annotations
 
+import ast
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
-from imas_codex.standard_names.audits import latex_def_check
+from imas_codex.standard_names.audits import (
+    _dimension_container,
+    _dimensions_overlap,
+    _unit_dimensions,
+    latex_def_check,
+)
 from imas_codex.standard_names.doc_links import find_name_references
+from imas_codex.units import resolve_dd_unit
+from imas_codex.units.dd_unit_exceptions import canonical_or_none
 
 MIN_DOCUMENTATION_WORDS = 40
 
@@ -43,6 +51,16 @@ _VALID_LINK_TARGET_RE = re.compile(
     r"(?:name:[a-z0-9_]+|#[a-z0-9_]+|dd:[a-z0-9_/]+|https?://\S+)$"
 )
 _NAME_LINK_TARGET_RE = re.compile(r"(?:name:|#)[a-z0-9_]+$")
+_LATEX_EXPONENT_RE = re.compile(r"\$\^\{?(-?\d+)\}?\$")
+_UNIT_AFTER_IN_RE = re.compile(
+    r"\b(?:in|measured in|unit(?:s)? of)\s+"
+    r"([A-Za-z\N{GREEK CAPITAL LETTER OMEGA}]+(?:[./^*-][A-Za-z0-9\N{GREEK CAPITAL LETTER OMEGA}+^.-]+)*)",
+    re.IGNORECASE,
+)
+_UNIT_AFTER_VALUE_RE = re.compile(
+    r"(?:\d+(?:\.\d+)?(?:\s*\\times\s*10\^\{?-?\d+\}?)?\s+)"
+    r"([A-Za-z\N{GREEK CAPITAL LETTER OMEGA}]+(?:[./^*-][A-Za-z0-9\N{GREEK CAPITAL LETTER OMEGA}+^.-]+)*)"
+)
 
 
 class DocumentationGateOutcome(StrEnum):
@@ -146,9 +164,245 @@ def _word_count(text: str) -> int:
     return len(_WORD_RE.findall(_without_markup(text)))
 
 
-def _has_defining_equation(text: str) -> bool:
+def _braced_group(text: str, start: int) -> tuple[str, int] | None:
+    """Return one balanced LaTeX braced group and its exclusive end."""
+
+    if start >= len(text) or text[start] != "{":
+        return None
+    depth = 0
+    for index in range(start, len(text)):
+        if text[index] == "{":
+            depth += 1
+        elif text[index] == "}":
+            depth -= 1
+            if depth == 0:
+                return text[start + 1 : index], index + 1
+    return None
+
+
+def _expand_latex_fractions(expression: str) -> str | None:
+    """Translate balanced ``\\frac`` forms into ordinary division."""
+
+    output: list[str] = []
+    position = 0
+    while position < len(expression):
+        if not expression.startswith(r"\frac", position):
+            output.append(expression[position])
+            position += 1
+            continue
+        numerator = _braced_group(expression, position + len(r"\frac"))
+        if numerator is None:
+            return None
+        denominator = _braced_group(expression, numerator[1])
+        if denominator is None:
+            return None
+        expanded_numerator = _expand_latex_fractions(numerator[0])
+        expanded_denominator = _expand_latex_fractions(denominator[0])
+        if expanded_numerator is None or expanded_denominator is None:
+            return None
+        output.append(f"(({expanded_numerator})/({expanded_denominator}))")
+        position = denominator[1]
+    return "".join(output)
+
+
+def _unit_from_definition(clause: str) -> str | None:
+    """Extract one explicitly stated symbol unit from its prose clause."""
+
+    normalized = _LATEX_EXPONENT_RE.sub(r"^\1", clause)
+    lowered = normalized.lower()
+    if "dimensionless" in lowered or "unit vector" in lowered:
+        return "1"
+    candidates = [
+        *(match.group(1) for match in _UNIT_AFTER_IN_RE.finditer(normalized)),
+        *(match.group(1) for match in _UNIT_AFTER_VALUE_RE.finditer(normalized)),
+    ]
+    for candidate in candidates:
+        canonical = canonical_or_none(candidate.rstrip(".,;:"))
+        if canonical is not None:
+            return canonical
+    return None
+
+
+def _symbol_unit_bindings(text: str) -> dict[str, str]:
+    """Bind LaTeX symbols to units explicitly stated beside their definitions."""
+
+    text = _LATEX_EXPONENT_RE.sub(r"^\1", text)
+    matches = list(_INLINE_MATH_RE.finditer(text))
+    bindings: dict[str, str] = {}
+    for index, match in enumerate(matches):
+        symbol = match.group(1).strip()
+        if not symbol or any(marker in symbol for marker in ("=", r"\propto")):
+            continue
+        clause_end = (
+            matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        )
+        clause = text[match.end() : clause_end]
+        clause = re.split(r"[.\n]", clause, maxsplit=1)[0]
+        unit = _unit_from_definition(clause)
+        if unit is not None:
+            bindings[symbol] = unit
+    return bindings
+
+
+def _subject_symbol(text: str) -> str | None:
+    """Return the quantity symbol introduced by the opening prose."""
+
+    for symbol in _INLINE_MATH_RE.findall(text):
+        symbol = symbol.strip()
+        if re.search(r"[A-Za-z\\]", symbol) and not any(
+            marker in symbol for marker in ("=", r"\propto", r"\times")
+        ):
+            return symbol
+    return None
+
+
+def _latex_expression_tree(
+    expression: str,
+    bindings: Mapping[str, str],
+) -> tuple[ast.Expression, dict[str, str]] | None:
+    """Translate a conservative multiplicative LaTeX expression to Python AST."""
+
+    expanded = _expand_latex_fractions(expression)
+    if expanded is None:
+        return None
+    placeholders: dict[str, str] = {}
+    for index, (symbol, unit) in enumerate(
+        sorted(bindings.items(), key=lambda item: len(item[0]), reverse=True)
+    ):
+        if symbol not in expanded:
+            continue
+        placeholder = f"unit_symbol_{index}"
+        expanded = expanded.replace(symbol, placeholder)
+        placeholders[placeholder] = unit
+    expanded = re.sub(r"\\(?:int|oint)\b", "", expanded)
+    expanded = expanded.replace(r"\times", "*").replace(r"\cdot", "*")
+    expanded = expanded.replace(r"\left", "").replace(r"\right", "")
+    expanded = expanded.replace(r"\,", " ").replace(r"\;", " ")
+    expanded = expanded.replace(r"\!", " ").replace(r"\pi", "1")
+    expanded = expanded.replace("{", "(").replace("}", ")")
+    expanded = re.sub(r"(?<=\w)\s+(?=\w)", "*", expanded)
+    expanded = re.sub(r"\s+", "", expanded)
+    expanded = re.sub(r"(?<=\))(?=\()", "*", expanded)
+    expanded = re.sub(r"(?<=\d)(?=unit_symbol_)", "*", expanded)
+    expanded = re.sub(r"(?<=\))(?=unit_symbol_)", "*", expanded)
+    expanded = re.sub(r"(?<=unit_symbol_\d)(?=\()", "*", expanded)
+    if not expanded or re.search(
+        r"\\|[A-Za-z_]", re.sub(r"unit_symbol_\d+", "", expanded)
+    ):
+        return None
+    try:
+        tree = ast.parse(expanded, mode="eval")
+    except SyntaxError:
+        return None
+    return tree, placeholders
+
+
+def _evaluate_dimension_tree(
+    node: ast.AST,
+    placeholders: Mapping[str, str],
+) -> Any | None:
+    """Evaluate the dimensional algebra of a restricted expression AST."""
+
+    if isinstance(node, ast.Expression):
+        return _evaluate_dimension_tree(node.body, placeholders)
+    if isinstance(node, ast.Constant) and isinstance(node.value, int | float):
+        return _dimension_container("dimensionless")
+    if isinstance(node, ast.Name) and node.id in placeholders:
+        dimensions = _unit_dimensions({placeholders[node.id]})
+        if dimensions is None or len(dimensions) != 1:
+            return None
+        return _dimension_container(next(iter(dimensions)))
+    if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.UAdd | ast.USub):
+        return _evaluate_dimension_tree(node.operand, placeholders)
+    if not isinstance(node, ast.BinOp):
+        return None
+    left = _evaluate_dimension_tree(node.left, placeholders)
+    right = _evaluate_dimension_tree(node.right, placeholders)
+    if left is None or right is None:
+        return None
+    if isinstance(node.op, ast.Mult):
+        return left * right
+    if isinstance(node.op, ast.Div):
+        return left / right
+    if isinstance(node.op, ast.Add | ast.Sub):
+        return left if left == right else None
+    if isinstance(node.op, ast.Pow) and isinstance(node.right, ast.Constant):
+        if isinstance(node.right.value, int | float):
+            return left**node.right.value
+    return None
+
+
+def _expression_dimensions(
+    expression: str,
+    bindings: Mapping[str, str],
+) -> set[str] | None:
+    parsed = _latex_expression_tree(expression, bindings)
+    if parsed is None:
+        return None
+    dimensions = _evaluate_dimension_tree(parsed[0], parsed[1])
+    return {str(dimensions)} if dimensions is not None else None
+
+
+def _defining_equation_result(
+    text: str,
+    physics_context: DocumentationPhysicsContext | None,
+) -> DocumentationGateResult:
+    """Compare one stated defining relation with the DD-declared unit."""
+
+    if physics_context is None or not physics_context.declared_unit:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.NOT_EVALUABLE,
+            reason="DD-declared unit is unavailable",
+        )
+    declared_unit = resolve_dd_unit(
+        physics_context.dd_path or "",
+        physics_context.declared_unit,
+    )
+    declared_dimensions = (
+        _unit_dimensions({declared_unit}) if declared_unit is not None else None
+    )
+    if declared_dimensions is None:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.NOT_EVALUABLE,
+            reason="DD-declared unit has no resolvable dimensionality",
+        )
+
     equations = [equation.strip() for equation in _DISPLAY_MATH_RE.findall(text)]
-    return len(equations) == 1 and bool(_DEFINING_RELATION_RE.search(equations[0]))
+    if len(equations) != 1 or not _DEFINING_RELATION_RE.search(equations[0]):
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="documentation lacks exactly one dimensionally checkable defining relation",
+        )
+    relation = re.split(r"=|\\equiv\b", equations[0], maxsplit=1)
+    if len(relation) != 2:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="defining relation does not state a dimensional equality",
+        )
+    subject = _subject_symbol(text)
+    if subject is None:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="documentation does not identify the relation's DD quantity symbol",
+        )
+    bindings = _symbol_unit_bindings(text)
+    bindings[subject] = declared_unit
+    left_dimensions = _expression_dimensions(relation[0], bindings)
+    right_dimensions = _expression_dimensions(relation[1], bindings)
+    if left_dimensions is None or right_dimensions is None:
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.FAIL,
+            reason="defining relation cannot reproduce the declared unit from its stated symbol units",
+        )
+    if _dimensions_overlap(left_dimensions, right_dimensions):
+        return DocumentationGateResult(
+            outcome=DocumentationGateOutcome.PASS,
+            reason="defining relation reproduces the DD-declared unit",
+        )
+    return DocumentationGateResult(
+        outcome=DocumentationGateOutcome.FAIL,
+        reason="defining relation dimensions contradict the DD-declared unit",
+    )
 
 
 def _symbols_are_defined(text: str) -> bool:
@@ -225,19 +479,14 @@ def score_documentation(
     words = _word_count(text)
 
     predicates = {
-        "defining_equation": _has_defining_equation(text),
         "symbol_definitions": _symbols_are_defined(text),
         "relationship_link": _has_relationship_link(text),
         "sign_convention": _valid_sign_convention(text),
         "link_hygiene": _links_are_hygienic(text),
         "minimum_word_count": words >= MIN_DOCUMENTATION_WORDS,
     }
-    assert tuple(predicates) == DOCUMENTATION_GATE_NAMES
+    assert ("defining_equation", *predicates) == DOCUMENTATION_GATE_NAMES
     reasons = {
-        "defining_equation": (
-            "exactly one display equation contains a defining relation",
-            "documentation lacks exactly one display equation with a defining relation",
-        ),
         "symbol_definitions": (
             "every mathematical symbol has a prose definition",
             "at least one mathematical symbol lacks a prose definition",
@@ -260,12 +509,15 @@ def score_documentation(
         ),
     }
     gates = {
-        gate: _predicate_result(
-            passed,
-            pass_reason=reasons[gate][0],
-            fail_reason=reasons[gate][1],
-        )
-        for gate, passed in predicates.items()
+        "defining_equation": _defining_equation_result(text, physics_context),
+        **{
+            gate: _predicate_result(
+                passed,
+                pass_reason=reasons[gate][0],
+                fail_reason=reasons[gate][1],
+            )
+            for gate, passed in predicates.items()
+        },
     }
     return DocumentationGateScore(
         gate_vector=gates,
