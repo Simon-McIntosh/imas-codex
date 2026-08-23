@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T15:46:59",
+  "updated": "2026-08-23T15:54:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -21345,9 +21345,67 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T134639754720-test-gatedeletion",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "test-gatedeletion",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "cx-verify",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:46:43Z",
+        "completed_at": "2026-08-23T13:54:14Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 451,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 451,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "282aed834d177b9381e71aa0c8128859c7f08b9c",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Integration gate PASSED at 282aed83: full tests/standard_names suite 6653 passed, 8 skipped, 0 failed, 0 errors, exit 0. Deleting physical_meaning, scope, exclusions_or_distinctions and the relationship phrase alternative broke nothing, and with zero failures no test name or assertion references any retired gate. Additionally the eleven structural-authority failures observed earlier at 011fdcda are no longer present, so the concurrent plan's signature regression has landed its fix - the suite is green on both axes.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T134639754720-test-gatedeletion/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02da8-07c8-77c2-b63e-2417a7aed6fa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4876032,
+            "cached_input_tokens_cumulative": 14666240,
+            "input_tokens": 5044613,
+            "input_tokens_cumulative": 15392880,
+            "output_tokens": 7966,
+            "output_tokens_cumulative": 30495,
+            "reasoning_output_tokens": 2864,
+            "reasoning_output_tokens_cumulative": 10285
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 596
+    "_version": 597
   }
 }
