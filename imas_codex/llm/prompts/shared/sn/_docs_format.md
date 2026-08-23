@@ -3,6 +3,14 @@
 Every `documentation` field MUST be a **strict normative definition** and follow
 this paragraph structure, separated by **blank lines** (literal `\n\n`):
 
+**Independent content obligations (HARD).** The structure below is not a menu
+or a priority order. Every applicable content element is mandatory on its own,
+and satisfying one never compensates for omitting another. In particular,
+symbol definitions, supported scope, supported exclusions or distinctions, and
+supported essential relationships are four separate pass/fail obligations. If
+space is tight, compress the prose or combine compatible obligations in one
+paragraph; never remove one obligation to make room for another.
+
 1. **Definition paragraph** — 1-3 sentences stating what the quantity *is* in physics terms. No equations. No diagnostic context. Just the concept.
 
 2. **Governing equation paragraph** (when applicable) — introduce the principal defining equation as **display math** on its own line:
@@ -20,24 +28,42 @@ this paragraph structure, separated by **blank lines** (literal `\n\n`):
    - Use `$$...$$` (display math) for the principal equation — MkDocs Material renders it centred on its own line.
    - The `$$` opening and closing delimiters must each be on their own line, with a blank line before and after the equation block.
    - Use `$...$` (inline math) only for variable names and small expressions in flowing prose.
-   - Define every symbol by its **identity** — the physical quantity it denotes — preferring an inline `[label](name:bare_id)` link when the symbol is itself a catalog quantity (e.g. `where $B_p$ is the [poloidal magnetic-field magnitude](name:poloidal_magnetic_field)`). **Never state a unit in the documentation.** A unit describes a symbol's dimension, not which quantity it is; the quantity's unit is the authoritative structured `unit` field and a linked quantity carries its own unit via its link. Write the identity, never `where $B_p$ is in T` or `with unit $\mathrm{T}$`.
    - **At most one display equation per documentation entry** — the *defining* one. Secondary relations stay inline.
 
-3. **Scope / distinction paragraph** — explicitly state every semantic scope or
-   exclusion supported by the supplied name and context, including the relevant
-   physical population or region, boundary, and aggregation convention. Do not
-   omit scope that the name or context already establishes merely because the
-   source prose leaves it implicit. This paragraph is semantic, not practical
-   guidance; never invent an unsupported restriction.
+3. **Symbol-definitions obligation** (whenever any symbol appears) — Define every symbol by its
+   **identity** — the physical quantity it denotes —
+   preferring an inline `[label](name:bare_id)` link when the symbol is itself a
+   catalog quantity (e.g. `where $B_p$ is the [poloidal magnetic-field
+   magnitude](name:poloidal_magnetic_field)`). An equation or relation with an
+   undefined symbol fails this obligation even if every other content element
+   is present. **Never state a unit in the documentation.** A unit describes a
+   symbol's dimension, not which quantity it is; the quantity's unit is the
+   authoritative structured `unit` field and a linked quantity carries its own
+   unit via its link. Write the identity, never `where $B_p$ is in T` or `with
+   unit $\mathrm{T}$`.
 
-4. **Essential-relationships paragraph** — explicitly state every essential
+4. **Scope / distinction paragraph — scope obligation** — explicitly state
+   every semantic scope supported by the supplied name and context, including
+   the relevant physical population or region, boundary, and aggregation
+   convention. Do not omit scope that the name or context already establishes
+   merely because the source prose leaves it implicit. This content is
+   semantic, not practical guidance; never invent an unsupported restriction.
+
+5. **Exclusions / distinctions obligation** — explicitly state every exclusion
+   or distinction supported by the supplied name and context that prevents the
+   quantity being confused with a nearby quantity. A scope statement does not
+   satisfy this obligation, and an exclusion must not be dropped to make room
+   for a relationship or equation. It may share the scope paragraph when that
+   is the clearest concise form.
+
+6. **Essential-relationships paragraph** — explicitly state every essential
    semantic or mathematical relationship supported by the supplied context,
    such as a parent/component distinction, total, normalization, average,
    derivative, or integral. When the related standard name is available, link
    it inline and explain the relationship in prose; a bare link does not satisfy
    this requirement. This is not a measurement or computation recipe.
 
-5. **Sign convention paragraph** (only for COCOS-dependent / signed quantities) — the LAST paragraph, in this exact format:
+7. **Sign convention paragraph** (only for COCOS-dependent / signed quantities) — the LAST paragraph, in this exact format:
 
    ```
    Sign convention: Positive when <condition>.
@@ -122,4 +148,4 @@ Sign convention: Positive when $B_Z$ on the integration disk points in the $+Z$ 
 
 ### When equations are not applicable
 
-For quantities without a single defining equation (e.g. shape parameters, count fields, identifiers, integer indices), omit the governing-equation paragraph entirely. Definition → scope/distinction → essential relationships → sign convention (if applicable) is valid. Definition alone is acceptable for indices and metadata SNs only when the supplied context establishes no scope, exclusion, or essential relationship to carry.
+For quantities without a single defining equation (e.g. shape parameters, count fields, identifiers, integer indices), omit the governing-equation paragraph entirely. Definition → scope → exclusions/distinctions → essential relationships → sign convention (if applicable) is valid. Definition alone is acceptable for indices and metadata SNs only when the supplied context establishes no symbol, scope, exclusion, or essential relationship to carry.
