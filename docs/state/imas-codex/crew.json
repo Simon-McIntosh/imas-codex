@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T08:44:20",
+  "updated": "2026-08-23T08:56:10",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -166,6 +166,13 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-cocosedge",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-ddres",
         "harness": "codex",
         "role": "implement",
@@ -278,6 +285,13 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-holdout",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
         "id": "impl-identitybatch",
         "harness": "codex",
         "role": "implement",
@@ -304,6 +318,27 @@
         "role": "implement",
         "session_id": "01a01ee6-4099-71c0-991b-4ea213ed0d53",
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-linkaudit",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-linkexport",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-linkfence",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-lintdebt",
@@ -17382,9 +17417,147 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T064530461378-inv-reuse",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "inv-reuse",
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "inv-docsreuse",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T06:45:33Z",
+        "completed_at": "2026-08-23T06:51:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 386,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 386,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "90c73937d264995fb3a12399c43c75346552004b",
+        "commits": [
+          "6264748c"
+        ],
+        "changed_lines": {
+          "added": 83,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Reuse map delivered: 43 line-cited candidates across all 5 capability areas (24 reusable-as-is, 11 extendable, 8 unfit), validator PASS with every citation resolving. Names the exact defect sites: workers.py:9079 queries a nonexistent COCOS relationship instead of schema-owned HAS_COCOS; export.py:179 gates publish on accepted docs but not link_status; claim_unresolved_links/resolve_links_batch lack claim-token fencing; schema has no unresolved_links field; curated exemplar overlaps the benchmark reference corpus. Also surfaces a plan-versus-shipped-policy conflict: the docs prompts, prose_policy and test_normative_documentation_policy deliberately forbid the typical-values and measurement content the plan requires.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T064530461378-inv-reuse/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02d54-890d-7f20-867c-5c789ef72b04",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1848320,
+            "cached_input_tokens_cumulative": 5153024,
+            "input_tokens": 1984643,
+            "input_tokens_cumulative": 5519667,
+            "output_tokens": 13158,
+            "output_tokens_cumulative": 30142,
+            "reasoning_output_tokens": 2812,
+            "reasoning_output_tokens_cumulative": 9733
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260823T063506682061-inv-reuse",
+          "root_run_id": "r-20260823T063506682061-inv-reuse"
+        }
+      },
+      {
+        "run_id": "r-20260823T064543317244-inv-currency",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "inv-currency",
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "inv-docscurrency",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T06:45:46Z",
+        "completed_at": "2026-08-23T06:53:57Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 491,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 491,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "90c73937d264995fb3a12399c43c75346552004b",
+        "commits": [
+          "0e35b8e8"
+        ],
+        "changed_lines": {
+          "added": 55,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Currency audit delivered: 43 plan claims classified with file:line evidence per row \u2014 22 ALREADY-LANDED, 5 STILL-OPEN, 7 SUPERSEDED, 9 WRONG; validator PASS on all 43 rows. The open core is far narrower than the plan states: a documentation-specific holdout with catalog counterparts (C04), phase-by-phase A/B evidence whose goldens are still blank (C05, C34), curated-example disjointness with no split key or overlap assertion (C27), and a bulk validation sample (C35). Rich DD context, COCOS injection, scoped --focus routing, the normative content template, the link lifecycle with terminal failed state, and export-time link filtering are all already live. Nine claims are contradicted by the tree, including the plan's demands for mandatory typical values (C22) and general measurement recipes (C21), which the live faithfulness policy forbids to prevent ungrounded filler.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T064543317244-inv-currency/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02d54-6171-7741-8e3b-145fa2bfe41a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3322112,
+            "cached_input_tokens_cumulative": 10810624,
+            "input_tokens": 3497458,
+            "input_tokens_cumulative": 11249249,
+            "output_tokens": 14496,
+            "output_tokens_cumulative": 30578,
+            "reasoning_output_tokens": 3063,
+            "reasoning_output_tokens_cumulative": 9030
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": {
+          "attempt": 2,
+          "kind": "redispatch",
+          "previous_run_id": "r-20260823T063456585218-inv-currency",
+          "root_run_id": "r-20260823T063456585218-inv-currency"
+        }
       }
     ],
     "holds": [],
-    "_version": 465
+    "_version": 472
   }
 }
