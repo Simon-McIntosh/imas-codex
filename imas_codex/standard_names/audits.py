@@ -275,6 +275,35 @@ def _operator_kind(operator: Any) -> str:
     return str(getattr(kind, "value", kind))
 
 
+@lru_cache(maxsize=1)
+def _temporal_change_operators() -> frozenset[str]:
+    """Return operators whose public ISN semantics divide a quantity by time."""
+    from imas_standard_names import get_grammar_context
+
+    operators = get_grammar_context()["grammar"]["vocabularies"]["operators"]
+    tokens = frozenset(
+        str(token)
+        for token, definition in operators.items()
+        if isinstance(definition, Mapping)
+        and "temporal_change" in (definition.get("semantic_effects") or ())
+    )
+    if not tokens:
+        raise RuntimeError(
+            "ISN grammar exposes no operator with temporal_change semantics; "
+            "unit inference cannot preserve time-derivative dimensions"
+        )
+    return tokens
+
+
+@lru_cache(maxsize=1)
+def _registered_operator_tokens() -> frozenset[str]:
+    """Return the complete public ISN operator-token vocabulary."""
+    from imas_standard_names import get_grammar_context
+
+    operators = get_grammar_context()["grammar"]["vocabularies"]["operators"]
+    return frozenset(str(token) for token in operators)
+
+
 def _ir_physical_quantity_signature(ir: Any) -> tuple[Any, ...] | None:
     """Return the public IR identity that determines a quantity's dimensions.
 
@@ -495,7 +524,7 @@ def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
                 if dimensions is None:
                     return None, False
             transformed = True
-        elif kind == "unary_prefix" and op == "time_derivative":
+        elif kind == "unary_prefix" and op in _temporal_change_operators():
             if dimensions is None:
                 return None, False
             dimensions = _per_time_dimensions(dimensions)
@@ -508,18 +537,29 @@ def _ir_unit_dimensions(ir: Any) -> tuple[set[str] | None, bool]:
 
 
 def _structured_unit_consistency_issues(name: str, unit: str) -> list[str] | None:
-    """Audit dimensions implied by a losslessly parsed operator expression.
+    """Audit dimensions implied by a losslessly parsed physical expression.
 
-    ``None`` means the expression is simple, failed to parse, or contains an
-    operator whose unit semantics are not encoded here; callers then preserve
-    the established lexical behavior.
+    ``None`` means the name failed to parse, so callers preserve the legacy
+    lexical behavior for old non-canonical identities.  A parsed expression
+    whose physical base or operator has no encoded dimensional semantics makes
+    no claim: the audit cannot turn a modifier word into a dimensional head.
     """
     try:
-        dimensions, transformed = _ir_unit_dimensions(_parse_audit_ir(name))
+        ir = _parse_audit_ir(name)
+        dimensions, transformed = _ir_unit_dimensions(ir)
     except (TypeError, ValueError):
         return None
-    if not transformed or dimensions is None:
+    if not transformed:
+        if list(getattr(ir, "operators", ()) or ()):
+            return None
+        if dimensions is None:
+            return []
+        # Simple dimensional heads retain the stricter spelling-aware legacy
+        # policy: Pint correctly treats angles as dimensionless, but bare
+        # ``1`` is not an accepted declaration for an angle identity.
         return None
+    if dimensions is None:
+        return []
     if not dimensions:
         return [
             "audit:name_unit_consistency_check: binary operator operands "
@@ -530,8 +570,9 @@ def _structured_unit_consistency_issues(name: str, unit: str) -> list[str] | Non
         return None
     if _dimensions_overlap(candidate_dimensions, dimensions):
         return []
+    subject = "operator expression" if transformed else "physical base"
     return [
-        "audit:name_unit_consistency_check: operator expression "
+        f"audit:name_unit_consistency_check: {subject} "
         f"in name '{name}' implies dimensionality {sorted(dimensions)} "
         f"but unit='{unit}' has dimensionality {sorted(candidate_dimensions)}"
     ]
@@ -1477,12 +1518,15 @@ def multi_subject_check(candidate: dict[str, Any]) -> list[str]:
     try:
         from imas_standard_names.grammar import parse_standard_name
 
-        # Intentional flat projection: this audit inspects only the legacy
-        # binary-operator field and does not establish validity.
+        # The public parser assigns every token to one semantic role and
+        # rejects two primary subjects.  A successful parse therefore proves
+        # that subject-looking text in another role (for example a locus
+        # owner) is not a second subject.
         parsed = parse_standard_name(name)
         # Binary operator implies two operands — this is legitimate
         if hasattr(parsed, "binary_operator") and parsed.binary_operator is not None:
             return issues
+        return issues
     except Exception:
         # Parse failure (incl. ISN ≥rc35 stacking / non-canonical-order
         # rejections) does NOT exempt the name from this audit — the greedy
@@ -1842,6 +1886,50 @@ _SPECTRAL_NAME_MARKERS = (
 )
 
 
+def _has_structured_decomposition(candidate: dict[str, Any], name: str) -> bool:
+    """Return whether ISN structure or graph family structure encodes a split.
+
+    Postfix operators are the public grammar representation of a derived view
+    of an underlying quantity.  For a structural parent, a live child carrying
+    such an operator proves that the parent names the decomposition family.
+    The child identities come from graph ``HAS_PARENT`` relationships collected
+    by the validation query, rather than inferred from spelling.
+    """
+
+    try:
+        ir = _parse_audit_ir(name)
+    except (TypeError, ValueError):
+        return any(marker in name for marker in _SPECTRAL_NAME_MARKERS)
+
+    if any(
+        _operator_kind(operator) == "unary_postfix"
+        for operator in list(getattr(ir, "operators", ()) or ())
+    ):
+        return True
+
+    # The public parser's flat-prefix compatibility can project a registered
+    # operator into the qualifier list.  Its membership in the authoritative
+    # operator registry still proves the identity transforms its base rather
+    # than naming only the unmodified quantity.
+    if any(
+        str(getattr(qualifier, "token", "") or "") in _registered_operator_tokens()
+        for qualifier in list(getattr(ir, "qualifiers", ()) or ())
+    ):
+        return True
+
+    for child_name in candidate.get("children") or ():
+        try:
+            child_ir = _parse_audit_ir(str(child_name))
+        except (TypeError, ValueError):
+            continue
+        if any(
+            _operator_kind(operator) == "unary_postfix"
+            for operator in list(getattr(child_ir, "operators", ()) or ())
+        ):
+            return True
+    return False
+
+
 def _build_uk_to_us_mapping() -> dict[str, str]:
     """Build UK→US spelling map from breame's dictionary.
 
@@ -1979,8 +2067,8 @@ def name_description_consistency_check(candidate: dict[str, Any]) -> list[str]:
     # Only flag when description strongly implies a decomposition
     if not any(pat in description for pat in _SPECTRAL_DESC_PATTERNS):
         return []
-    # But the name carries no decomposition marker
-    if any(marker in name for marker in _SPECTRAL_NAME_MARKERS):
+    # The name or its authoritative structural family carries a decomposition.
+    if _has_structured_decomposition(candidate, name):
         return []
     return [
         f"audit:name_description_consistency_check: description of '{name}' "
