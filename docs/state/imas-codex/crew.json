@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T10:07:07",
+  "updated": "2026-08-23T10:11:06",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -64,6 +64,13 @@
         "id": "doc-qualityfig",
         "harness": "codex",
         "role": "documentation",
+        "session_id": "01a02da5-3a01-7d21-86aa-5a416ea7ca0e",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "impl-abharness",
+        "harness": "codex",
+        "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
       },
@@ -17818,9 +17825,73 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T080237114009-doc-qualityfig",
+        "plan": "sn-quality-parity",
+        "section": "\u00a71",
+        "node": "doc-qualityfig",
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-qualityfig",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T08:03:17Z",
+        "completed_at": "2026-08-23T08:10:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 435,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 435,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "d2feb5333f9558af1e4a26e181978fe4f85b8599",
+        "commits": [
+          "db0c3d950b150309b4bb8b1ddda3857db9a51ee9"
+        ],
+        "changed_lines": {
+          "added": 122,
+          "removed": 35,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "Claim-disposition figure landed and wired into the plan. The old status diagram asserted phases 0-5 largely open with only unit persistence resolved, which the audit measured as the opposite, so the figure had become a claim contradicting its own plan. The replacement is a self-contained theme-aware SVG encoding all 43 claims as 22 already-landed / 7 superseded / 9 wrong / 5 still-open, summing to 43, alongside the four named open stages holdout, gate vector, comparison and bulk sample. Validated three ways: xml.etree contract check PASS, an actual rsvg-convert render PASS, and a docs-wide grep returning 0 references to the deleted path before deletion.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T080237114009-doc-qualityfig/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02da5-3a01-7d21-86aa-5a416ea7ca0e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2555648,
+            "cached_input_tokens_cumulative": 2555648,
+            "input_tokens": 2676352,
+            "input_tokens_cumulative": 2676352,
+            "output_tokens": 14081,
+            "output_tokens_cumulative": 14081,
+            "reasoning_output_tokens": 6318,
+            "reasoning_output_tokens_cumulative": 6318
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 480
+    "_version": 483
   }
 }
