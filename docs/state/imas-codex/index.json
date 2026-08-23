@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-22T21:35:11",
+  "updated": "2026-08-23T08:44:55",
   "project": "imas-codex",
   "doc": "index",
   "data": {
@@ -226,6 +226,11 @@
             "slug": "sn-benchmark-evolution",
             "why_now": "A discriminating panel benchmark plus the free advisory census pre-screens the WEST rows for defects and ranks the exhausted-tail rescores before any human looks.",
             "done_when": "Panel-judged benchmark with domain-balanced anchors passes its locked gates; the zero-mutation census has flagged WEST rows and ranked the parked tail."
+          },
+          {
+            "slug": "sn-release-readiness",
+            "why_now": "The first catalog release has never run, so every export gate is untested; the exclusion ledger has to exist before the WEST packet is frozen in S10, or that release ships whatever survives the filters with no statement of what it dropped.",
+            "done_when": "Export emits an exclusion ledger where emitted + sum(exclusions by reason) = N with identities recoverable per reason; the deprecation-stub query falls back to superseded_by when no REFINED_FROM edge exists; the three open decisions are locked; and the docs, validity and metadata backlogs are drained or dispositioned against the locked decisions."
           }
         ]
       },
@@ -376,6 +381,6 @@
       }
     ],
     "blockers": [],
-    "_version": 49
+    "_version": 50
   }
 }
