@@ -5,6 +5,36 @@ architecture, lifecycle axes, pool semantics and CLI flags live in the repo root
 `AGENTS.md` and `docs/architecture/standard-names.md` — this file holds only what
 you need when *editing these files*.
 
+## Graph identity and joins
+
+`StandardName` is keyed by `id`, whose value is the snake-case standard-name
+identity; the LinkML class marks that slot as the required identifier
+(`imas_codex/schemas/standard_name.yaml:868-892`). `StandardNameSource` is keyed
+separately by its required `id`, formed as `source_type + ":" + source_id`: DD
+sources are `dd:<path>`, while facility signals are
+`signals:<facility>:<signal-id>`
+(`imas_codex/schemas/standard_name.yaml:2795-2823`). Do not substitute a
+plausible property name for either schema-owned key.
+
+| Correct: join a `StandardName` on its identifier | Incorrect: join on an undeclared property |
+|---|---|
+| `MATCH (sn:StandardName {id: $standard_name_id})`<br>`RETURN sn.id` | `MATCH (sn:StandardName {name: $standard_name_id})`<br>`RETURN sn.id` |
+
+The incorrect query is especially dangerous because it is valid Cypher. Access
+to a missing property evaluates to `null`, and a filtering predicate that is not
+`true` removes the row, so the query returns an empty result instead of an error
+([Neo4j Cypher Manual: working with null](https://neo4j.com/docs/cypher-manual/current/values-and-types/working-with-null/)).
+Before accepting a zero-row join as a real no-overlap result, report both the
+candidate-node count and key coverage in the same query, and fail closed when
+the proposed key covers no candidates:
+
+```cypher
+MATCH (sn:StandardName)
+RETURN count(sn) AS candidates,
+       count(sn.id) AS candidates_with_id,
+       count(sn.name) AS candidates_with_name
+```
+
 ## Naming-hygiene keep-list (calibration)
 
 `~/.agents/AGENTS.md` mandates a pre-stage check for plan/stage/bug labels and
