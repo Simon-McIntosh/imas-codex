@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T12:49:44",
+  "updated": "2026-08-23T12:54:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -584,6 +584,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-rescorepilot",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-23"
       },
       {
         "id": "impl-residue",
@@ -20154,6 +20161,6 @@
       }
     ],
     "holds": [],
-    "_version": 560
+    "_version": 561
   }
 }
