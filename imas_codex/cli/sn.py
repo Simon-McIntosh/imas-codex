@@ -7444,6 +7444,71 @@ def sn_rescore(
         )
 
 
+@sn.command("restage-accepted")
+@click.argument("standard_names", nargs=-1, required=True)
+@click.option(
+    "--include-accepted",
+    is_flag=True,
+    help=(
+        "Required data-safety acknowledgement: the selected accepted names "
+        "leave export eligibility until the ordinary name quorum accepts them again."
+    ),
+)
+@click.option(
+    "--apply",
+    is_flag=True,
+    help=(
+        "Apply the atomic accepted-to-drafted transition. The default is a "
+        "zero-write dry run."
+    ),
+)
+@click.option(
+    "--run-id",
+    help=(
+        "Exact review scope stamp. By default a deterministic value is derived "
+        "from the sorted identities, making replay idempotent."
+    ),
+)
+def sn_restage_accepted(
+    standard_names: tuple[str, ...],
+    include_accepted: bool,
+    apply: bool,
+    run_id: str | None,
+) -> None:
+    """Restage an exact accepted-unscored cohort for ordinary name review.
+
+    Every identity must be accepted, valid, name-unscored, and claim-free. The
+    cohort is refused atomically if any row fails those predicates. Applying
+    changes only the lifecycle stage and review scope: identity, review fields,
+    DD source bindings, units, COCOS, lineage, and every other relationship are
+    preserved and verified before commit. No score is written and no name is
+    directly accepted.
+
+    Applying this operator removes the selected names from export eligibility
+    until ``REVIEW_NAME`` adjudicates the unchanged identities and they earn
+    acceptance again. ``--include-accepted`` is therefore mandatory, including
+    for the default dry-run preview.
+
+    \b
+    Example:
+      imas-codex sn restage-accepted name_a name_b --include-accepted
+      imas-codex sn restage-accepted name_a name_b --include-accepted --apply
+    """
+    import json
+
+    from imas_codex.standard_names.edit import restage_accepted_names_for_review
+
+    receipt = restage_accepted_names_for_review(
+        standard_names,
+        include_accepted=include_accepted,
+        dry_run=not apply,
+        run_id=run_id,
+    )
+    click.echo(json.dumps(receipt, sort_keys=True, separators=(",", ":")))
+    if receipt.get("outcome") == "refused":
+        raise SystemExit(3)
+
+
 @sn.command("reclassify")
 @click.argument("standard_name")
 @click.option(

@@ -75,6 +75,7 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
+from collections.abc import Iterable
 from contextlib import suppress
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -2987,6 +2988,411 @@ def rescore_name(
         results=results,
     )
     return result
+
+
+_ACCEPTED_REVIEW_RESTAGE_SNAPSHOT_QUERY = """
+// ACCEPTED_REVIEW_RESTAGE_SNAPSHOT
+UNWIND $name_ids AS requested_id
+OPTIONAL MATCH (sn:StandardName {id: requested_id})
+WITH requested_id, collect(sn) AS matches
+RETURN requested_id,
+       [sn IN matches | {
+           element_id: elementId(sn),
+           properties: properties(sn),
+           outgoing: [(sn)-[relationship]->(other) | {
+               element_id: elementId(relationship),
+               relationship_type: type(relationship),
+               properties: properties(relationship),
+               other_element_id: elementId(other),
+               other_id: other.id,
+               other_labels: labels(other)
+           }],
+           incoming: [(other)-[relationship]->(sn) | {
+               element_id: elementId(relationship),
+               relationship_type: type(relationship),
+               properties: properties(relationship),
+               other_element_id: elementId(other),
+               other_id: other.id,
+               other_labels: labels(other)
+           }]
+       }] AS matches
+ORDER BY requested_id
+"""
+
+_ACCEPTED_REVIEW_RESTAGE_LOCK_QUERY = """
+// ACCEPTED_REVIEW_RESTAGE_LOCK
+UNWIND $targets AS target
+MATCH (sn:StandardName)
+WHERE elementId(sn) = target.element_id AND sn.id = target.id
+SET sn.id = sn.id
+RETURN collect(sn.id) AS locked_ids
+"""
+
+_ACCEPTED_REVIEW_RESTAGE_MUTATION_QUERY = """
+// ACCEPTED_REVIEW_RESTAGE_MUTATION
+UNWIND $targets AS target
+MATCH (sn:StandardName)
+WHERE elementId(sn) = target.element_id
+  AND sn.id = target.id
+  AND sn.name_stage = 'accepted'
+  AND sn.validation_status = 'valid'
+  AND sn.reviewer_score_name IS NULL
+  AND sn.claim_token IS NULL
+  AND sn.claimed_at IS NULL
+  AND sn.drain_scope_id IS NULL
+  AND sn.drain_scope_claimed_at IS NULL
+  AND sn.drain_claim_scope_id IS NULL
+SET sn.name_stage = 'drafted', sn.run_id = $run_id
+RETURN collect(sn.id) AS staged_ids
+"""
+
+_ACCEPTED_REVIEW_BINDING_TYPES = (
+    "HAS_STANDARD_NAME",
+    "HAS_UNIT",
+    "HAS_COCOS",
+)
+
+
+def _accepted_review_run_id(name_ids: list[str]) -> str:
+    encoded = json.dumps(name_ids, separators=(",", ":")).encode()
+    return f"sn-review-restage-{hashlib.sha256(encoded).hexdigest()[:20]}"
+
+
+def _accepted_review_refusal(
+    name_ids: list[str],
+    reason: str,
+    *,
+    run_id: str | None = None,
+    dry_run: bool = True,
+) -> dict[str, Any]:
+    return {
+        "schema": "imas-codex.accepted-review-restage-receipt",
+        "schema_version": 1,
+        "outcome": "refused",
+        "dry_run": dry_run,
+        "run_id": run_id,
+        "requested": len(name_ids),
+        "would_stage": 0,
+        "staged": 0,
+        "rows": [],
+        "reason": reason,
+    }
+
+
+def _accepted_review_snapshot(
+    transaction: Any, name_ids: list[str]
+) -> dict[str, dict[str, Any]]:
+    rows = list(
+        transaction.run(
+            _ACCEPTED_REVIEW_RESTAGE_SNAPSHOT_QUERY,
+            name_ids=name_ids,
+        )
+    )
+    snapshots: dict[str, dict[str, Any]] = {}
+    for raw_row in rows:
+        row = dict(raw_row)
+        requested_id = str(row["requested_id"])
+        snapshots[requested_id] = {
+            "requested_id": requested_id,
+            "matches": _fold_normalize(row.get("matches") or []),
+        }
+    return snapshots
+
+
+def _accepted_review_relationship_state(
+    snapshots: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    state: dict[str, Any] = {}
+    for name_id, snapshot in snapshots.items():
+        matches = snapshot.get("matches") or []
+        if len(matches) != 1:
+            continue
+        match = matches[0]
+        state[name_id] = {
+            "outgoing": match.get("outgoing") or [],
+            "incoming": match.get("incoming") or [],
+        }
+    return _fold_normalize(state)
+
+
+def _accepted_review_relationship_counts(
+    snapshots: dict[str, dict[str, Any]],
+) -> dict[str, int]:
+    counts = dict.fromkeys(_ACCEPTED_REVIEW_BINDING_TYPES, 0)
+    for relationship_state in _accepted_review_relationship_state(snapshots).values():
+        for direction in ("outgoing", "incoming"):
+            for relationship in relationship_state[direction]:
+                relationship_type = relationship.get("relationship_type")
+                if relationship_type in counts:
+                    counts[relationship_type] += 1
+    return counts
+
+
+def _accepted_review_expected_post(
+    snapshots: dict[str, dict[str, Any]],
+    staged_ids: set[str],
+    run_id: str,
+) -> dict[str, dict[str, Any]]:
+    expected = deepcopy(snapshots)
+    for name_id in staged_ids:
+        properties = expected[name_id]["matches"][0]["properties"]
+        properties["name_stage"] = "drafted"
+        properties["run_id"] = run_id
+    return _fold_normalize(expected)
+
+
+@retry_on_deadlock()
+def restage_accepted_names_for_review(
+    name_ids: Iterable[str],
+    *,
+    include_accepted: bool = False,
+    dry_run: bool = True,
+    run_id: str | None = None,
+    gc: GraphClient | None = None,
+) -> dict[str, Any]:
+    """Atomically move an exact accepted-unscored cohort to name review.
+
+    Every requested identity must be accepted, valid, name-unscored, and free
+    of worker and drain claims. The only applied property changes are
+    ``name_stage='drafted'`` and one deterministic cohort ``run_id``; the
+    spelling, review fields, DD authority, and every relationship are preserved.
+    The ordinary ``REVIEW_NAME`` pool then decides whether each unchanged
+    identity earns acceptance again.
+
+    ``include_accepted=True`` is mandatory because applying this transition
+    temporarily removes the names from export eligibility until the quorum
+    accepts them again. The default is a zero-write dry run. Replaying the same
+    exact cohort after a successful apply is idempotent and stages nothing.
+    """
+    normalized_ids = sorted(str(name_id).strip() for name_id in name_ids)
+    if not normalized_ids or any(not name_id for name_id in normalized_ids):
+        return _accepted_review_refusal(
+            normalized_ids,
+            "at least one non-empty StandardName identity is required",
+            dry_run=dry_run,
+        )
+    if len(set(normalized_ids)) != len(normalized_ids):
+        return _accepted_review_refusal(
+            normalized_ids,
+            "duplicate StandardName identities are not permitted",
+            dry_run=dry_run,
+        )
+    resolved_run_id = (run_id or "").strip() or _accepted_review_run_id(normalized_ids)
+    if not include_accepted:
+        return _accepted_review_refusal(
+            normalized_ids,
+            "accepted-name restaging requires --include-accepted",
+            run_id=resolved_run_id,
+            dry_run=dry_run,
+        )
+
+    owns_gc = gc is None
+    graph = gc or GraphClient()
+    try:
+        with graph.session() as session:
+            transaction = session.begin_transaction()
+            try:
+                before = _accepted_review_snapshot(transaction, normalized_ids)
+                if set(before) != set(normalized_ids):
+                    transaction.rollback()
+                    missing = sorted(set(normalized_ids).difference(before))
+                    return _accepted_review_refusal(
+                        normalized_ids,
+                        "snapshot omitted requested identities: " + ", ".join(missing),
+                        run_id=resolved_run_id,
+                        dry_run=dry_run,
+                    )
+
+                eligible_ids: set[str] = set()
+                idempotent_ids: set[str] = set()
+                refusals: list[dict[str, str]] = []
+                targets: list[dict[str, str]] = []
+                for name_id in normalized_ids:
+                    matches = before[name_id]["matches"]
+                    if len(matches) != 1:
+                        reason = (
+                            "missing StandardName"
+                            if not matches
+                            else "ambiguous StandardName identity"
+                        )
+                        refusals.append({"id": name_id, "reason": reason})
+                        continue
+                    match = matches[0]
+                    properties = match["properties"]
+                    is_claim_free = all(
+                        properties.get(field) is None
+                        for field in (
+                            "claim_token",
+                            "claimed_at",
+                            "drain_scope_id",
+                            "drain_scope_claimed_at",
+                            "drain_claim_scope_id",
+                        )
+                    )
+                    is_eligible = (
+                        properties.get("name_stage") == "accepted"
+                        and properties.get("validation_status") == "valid"
+                        and properties.get("reviewer_score_name") is None
+                        and is_claim_free
+                    )
+                    is_idempotent = (
+                        properties.get("name_stage") == "drafted"
+                        and properties.get("validation_status") == "valid"
+                        and properties.get("reviewer_score_name") is None
+                        and properties.get("run_id") == resolved_run_id
+                        and is_claim_free
+                    )
+                    if is_eligible:
+                        eligible_ids.add(name_id)
+                        targets.append(
+                            {"id": name_id, "element_id": match["element_id"]}
+                        )
+                    elif is_idempotent:
+                        idempotent_ids.add(name_id)
+                    else:
+                        refusals.append(
+                            {
+                                "id": name_id,
+                                "reason": (
+                                    "row is not accepted-valid-null-score and "
+                                    "claim-free"
+                                ),
+                            }
+                        )
+
+                if refusals:
+                    transaction.rollback()
+                    receipt = _accepted_review_refusal(
+                        normalized_ids,
+                        "one or more rows failed the exact restage precondition",
+                        run_id=resolved_run_id,
+                        dry_run=dry_run,
+                    )
+                    receipt["refused_rows"] = refusals
+                    return receipt
+
+                relationship_state_before = _accepted_review_relationship_state(before)
+                binding_counts_before = _accepted_review_relationship_counts(before)
+                rows = [
+                    {
+                        "id": name_id,
+                        "before_stage": before[name_id]["matches"][0]["properties"].get(
+                            "name_stage"
+                        ),
+                        "after_stage": "drafted",
+                        "changed": name_id in eligible_ids,
+                    }
+                    for name_id in normalized_ids
+                ]
+                base_receipt: dict[str, Any] = {
+                    "schema": "imas-codex.accepted-review-restage-receipt",
+                    "schema_version": 1,
+                    "dry_run": dry_run,
+                    "run_id": resolved_run_id,
+                    "requested": len(normalized_ids),
+                    "would_stage": len(eligible_ids),
+                    "staged": 0,
+                    "idempotent": len(idempotent_ids),
+                    "rows": rows,
+                    "binding_counts_before": binding_counts_before,
+                    "binding_counts_after": binding_counts_before,
+                    "relationship_count_before": sum(
+                        len(state[direction])
+                        for state in relationship_state_before.values()
+                        for direction in ("outgoing", "incoming")
+                    ),
+                    "relationship_count_after": sum(
+                        len(state[direction])
+                        for state in relationship_state_before.values()
+                        for direction in ("outgoing", "incoming")
+                    ),
+                    "relationship_signature_before": _fold_cas_signature(
+                        relationship_state_before
+                    ),
+                    "relationship_signature_after": _fold_cas_signature(
+                        relationship_state_before
+                    ),
+                    "reviewer_scores_written": 0,
+                }
+                if dry_run:
+                    transaction.rollback()
+                    base_receipt["outcome"] = (
+                        "idempotent" if not eligible_ids else "would_apply"
+                    )
+                    return base_receipt
+                if not eligible_ids:
+                    transaction.rollback()
+                    base_receipt["outcome"] = "idempotent"
+                    return base_receipt
+
+                lock_rows = list(
+                    transaction.run(
+                        _ACCEPTED_REVIEW_RESTAGE_LOCK_QUERY,
+                        targets=targets,
+                    )
+                )
+                locked_ids = (
+                    sorted(dict(lock_rows[0]).get("locked_ids") or [])
+                    if len(lock_rows) == 1
+                    else []
+                )
+                if locked_ids != sorted(eligible_ids):
+                    raise RuntimeError("accepted restage lock cardinality changed")
+                locked = _accepted_review_snapshot(transaction, normalized_ids)
+                if _fold_cas_signature(locked) != _fold_cas_signature(before):
+                    raise RuntimeError("accepted restage cohort drifted after locking")
+
+                mutation_rows = list(
+                    transaction.run(
+                        _ACCEPTED_REVIEW_RESTAGE_MUTATION_QUERY,
+                        targets=targets,
+                        run_id=resolved_run_id,
+                    )
+                )
+                staged_ids = (
+                    sorted(dict(mutation_rows[0]).get("staged_ids") or [])
+                    if len(mutation_rows) == 1
+                    else []
+                )
+                if staged_ids != sorted(eligible_ids):
+                    raise RuntimeError("accepted restage compare-and-set refused a row")
+
+                after = _accepted_review_snapshot(transaction, normalized_ids)
+                expected_after = _accepted_review_expected_post(
+                    before, eligible_ids, resolved_run_id
+                )
+                if _fold_normalize(after) != expected_after:
+                    raise RuntimeError("accepted restage post-state proof failed")
+                relationship_state_after = _accepted_review_relationship_state(after)
+                binding_counts_after = _accepted_review_relationship_counts(after)
+                if relationship_state_after != relationship_state_before:
+                    raise RuntimeError(
+                        "accepted restage changed an identity relationship"
+                    )
+                if binding_counts_after != binding_counts_before:
+                    raise RuntimeError(
+                        "accepted restage changed authority binding counts"
+                    )
+
+                transaction.commit()
+                base_receipt.update(
+                    {
+                        "outcome": "applied",
+                        "staged": len(staged_ids),
+                        "binding_counts_after": binding_counts_after,
+                        "relationship_signature_after": _fold_cas_signature(
+                            relationship_state_after
+                        ),
+                    }
+                )
+                return base_receipt
+            except BaseException:
+                with suppress(Exception):
+                    transaction.rollback()
+                raise
+    finally:
+        if owns_gc:
+            graph.close()
 
 
 def _run_rescore_validation(sn_id: str) -> dict[str, Any]:
