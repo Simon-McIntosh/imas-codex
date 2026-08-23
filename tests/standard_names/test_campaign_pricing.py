@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -11,6 +12,7 @@ from imas_codex.standard_names.campaign_pricing import (
     CampaignCostCeilingExceeded,
     CampaignPricingPolicy,
     project_name_review_campaign,
+    project_name_review_campaign_range,
 )
 
 _MODEL_COSTS = {
@@ -106,6 +108,43 @@ def test_projection_issues_exactly_zero_model_calls(
     assert projection.mandatory_cost_usd == pytest.approx(35.37)
     assert projection.conditional_call_count == 8_253
     assert projection.conditional_cost_usd == pytest.approx(235.80)
+    assert model_calls == 0
+
+
+def test_exact_range_reports_minimum_and_worst_case_without_model_calls(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    model_calls = 0
+
+    async def _guarded_model_call(*args: Any, **kwargs: Any) -> None:
+        nonlocal model_calls
+        model_calls += 1
+        raise AssertionError("campaign projection must not call a model")
+
+    from imas_codex.discovery.base import llm
+
+    monkeypatch.setattr(llm, "acall_llm_structured", _guarded_model_call)
+    _install_projection_fakes(monkeypatch)
+
+    projection_range = project_name_review_campaign_range(
+        _cohort(1_179),
+        cost_ceiling_usd=250.0,
+        policy=_policy(1_179),
+    )
+
+    minimum = projection_range.minimum_escalation
+    assert minimum.projection.projected_call_count == 3_537
+    assert minimum.projection.projected_cost_usd == pytest.approx(70.74)
+    assert minimum.projected_cost_per_call_usd == pytest.approx(0.02)
+    assert minimum.projected_cost_per_name_usd == pytest.approx(0.06)
+    assert minimum.admitted is True
+
+    worst = projection_range.worst_case
+    assert worst.projection.projected_call_count == 10_611
+    assert worst.projection.projected_cost_usd == pytest.approx(271.17)
+    assert worst.projected_cost_per_call_usd == pytest.approx(271.17 / 10_611)
+    assert worst.projected_cost_per_name_usd == pytest.approx(271.17 / 1_179)
+    assert worst.admitted is False
     assert model_calls == 0
 
 
@@ -229,3 +268,96 @@ def test_unpriced_route_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
 
     with pytest.raises(campaign_pricing.CampaignPricingUnknown, match="missing price"):
         project_name_review_campaign(_cohort(1), policy=_policy(1))
+
+
+def test_redraw_identity_census_requires_complete_unique_table(tmp_path: Path) -> None:
+    census = tmp_path / "census.md"
+    census.write_text(
+        """### redraw-eligible (2)
+
+| Identity | Stage |
+|---|---|
+| `alpha` | reviewed |
+| `beta` | drafted |
+
+### needs-steering (1)
+""",
+        encoding="utf-8",
+    )
+
+    assert campaign_pricing.redraw_identities_from_census(census) == (
+        "alpha",
+        "beta",
+    )
+
+    census.write_text(census.read_text().replace("`beta`", "`alpha`"))
+    with pytest.raises(
+        campaign_pricing.CampaignPricingUnknown,
+        match="do not match its declared count",
+    ):
+        campaign_pricing.redraw_identities_from_census(census)
+
+
+def test_exact_cohort_resolution_is_read_only_and_uses_live_identities(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    census = tmp_path / "census.md"
+    census.write_text(
+        """### redraw-eligible (2)
+
+| Identity | Stage |
+|---|---|
+| `redraw_beta` | reviewed |
+| `redraw_alpha` | drafted |
+
+### needs-steering (0)
+""",
+        encoding="utf-8",
+    )
+    queries: list[str] = []
+
+    class _Graph:
+        def __enter__(self) -> _Graph:
+            return self
+
+        def __exit__(self, *args: object) -> None:
+            return None
+
+        def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
+            queries.append(cypher)
+            if "count(sn) AS standard_name_count" in cypher:
+                return [{"standard_name_count": 4_395}]
+            if "sn.origin = 'catalog_edit'" in cypher:
+                return [
+                    {"id": "rescore_alpha"},
+                    {"id": "normalized_collisionality"},
+                    {"id": "thermal_ion_density"},
+                ]
+            assert params["identities"] == ["redraw_beta", "redraw_alpha"]
+            return [{"id": "redraw_alpha"}, {"id": "redraw_beta"}]
+
+    from imas_codex.graph import client
+
+    monkeypatch.setattr(client, "GraphClient", _Graph)
+    cohorts = campaign_pricing.resolve_exact_campaign_cohorts(census)
+
+    assert cohorts.catalog_import_candidates == 3
+    assert cohorts.catalog_import_recovered_ids == (
+        "normalized_collisionality",
+        "thermal_ion_density",
+    )
+    assert [row["id"] for row in cohorts.catalog_import_rescore] == ["rescore_alpha"]
+    assert [row["id"] for row in cohorts.redraw] == [
+        "redraw_beta",
+        "redraw_alpha",
+    ]
+    assert cohorts.standard_name_count_before == 4_395
+    assert cohorts.standard_name_count_after == 4_395
+    assert all(
+        not any(
+            token in query.upper()
+            for token in (" SET ", " CREATE ", " MERGE ", " DELETE ", " REMOVE ")
+        )
+        for query in queries
+    )
