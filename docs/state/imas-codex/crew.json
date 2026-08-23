@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T15:54:18",
+  "updated": "2026-08-23T16:24:55",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -21403,9 +21403,137 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T134140104306-n-auditfp",
+        "plan": "sn-release-readiness",
+        "section": "\u00a75",
+        "node": "n-auditfp",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-auditfp",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:41:43Z",
+        "completed_at": "2026-08-23T13:59:30Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1067,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1067,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "18bb3009fbf71851130612273e992f06ab02add0",
+        "commits": [
+          "88ab0cd9d99be40f88cc04c9997c7f0c42823ae1"
+        ],
+        "changed_lines": {
+          "added": 237,
+          "removed": 12,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T134140104306-n-auditfp/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02edb-10fd-7b90-aed6-c4684ae73f88",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10539008,
+            "cached_input_tokens_cumulative": 10539008,
+            "input_tokens": 10766615,
+            "input_tokens_cumulative": 10766615,
+            "output_tokens": 31081,
+            "output_tokens_cumulative": 31081,
+            "reasoning_output_tokens": 11124,
+            "reasoning_output_tokens_cumulative": 11124
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T132802001348-n-drain",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72",
+        "node": "n-drain",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-drain",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-23T13:28:04Z",
+        "completed_at": "2026-08-23T14:23:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 3355,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 3355,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "ee02e6346f41432617e6cc629ad6115c29a0d02b",
+        "commits": [
+          "7948b1bf788d79c8f111dff8da43663a3b996a5d"
+        ],
+        "changed_lines": {
+          "added": 146,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "The campaign ran and its measure is complete, but the mandated zero-stranded condition was not met: the 55-minute fence arrived with 14 of 1,179 identities still drafted and claimed, so 14 real names currently sit outside export eligibility. Everything else delivered: 1,179 restaged with zero score writes and conserved relationships, 1,165 terminal, 896 accepted, 268 reviewed below the bar, 1 acceptance-blocked, 108 inside the bound-adjacent band, actual USD 60.452013 of a 220 cap with zero overshoot, 2,596 calls, USD 0.0513 per name and 2.20 calls per name, StandardName 4,395 unchanged. Corrective is a resume of the same deterministic scope run_id after the 14 claims expire, without restaging the 1,165 terminal rows.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T132802001348-n-drain/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a02ece-9455-7783-aff1-b2ac057a95e8",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 26235904,
+            "cached_input_tokens_cumulative": 26235904,
+            "input_tokens": 26536349,
+            "input_tokens_cumulative": 26536349,
+            "output_tokens": 33834,
+            "output_tokens_cumulative": 33834,
+            "reasoning_output_tokens": 8557,
+            "reasoning_output_tokens_cumulative": 8557
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 597
+    "_version": 599
   }
 }
