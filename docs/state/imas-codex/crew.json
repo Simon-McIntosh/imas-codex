@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-23T00:26:35",
+  "updated": "2026-08-23T08:44:20",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -640,6 +640,20 @@
         "role": "investigate",
         "session_id": "01a01005-9c47-77b3-9923-03a92c9b48b4",
         "created": "2026-08-17"
+      },
+      {
+        "id": "inv-docscurrency",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a02d54-6171-7741-8e3b-145fa2bfe41a",
+        "created": "2026-08-23"
+      },
+      {
+        "id": "inv-docsreuse",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": "01a02d54-890d-7f20-867c-5c789ef72b04",
+        "created": "2026-08-23"
       },
       {
         "id": "inv-repairreuse",
@@ -17252,9 +17266,125 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260823T063506682061-inv-reuse",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "inv-reuse",
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "inv-docsreuse",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-23T06:35:09Z",
+        "completed_at": "2026-08-23T06:42:31Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 442,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 442,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "c8a0f9f9738515f86f37cc69a82c2f1066f4f00b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Blocked by a coordinator-side fence defect: the fenced receipt path lay outside the read-only sandbox roots, so the reuse map could not be written. Substance was still delivered in the manifest: 47 fixed reference DD paths but no catalog-doc holdout labels; rich DD compose extraction already present; docs COCOS lookup uses :COCOS instead of schema-owned :HAS_COCOS; live docs policy forbids the generic typical-values and measurement content the plan demands; link resolver machinery dormant without claim-token verification, caller or unresolved_links, and export prunes dangling links but not unresolved or failed entries.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T063506682061-inv-reuse/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a02d54-890d-7f20-867c-5c789ef72b04",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3304704,
+            "cached_input_tokens_cumulative": 3304704,
+            "input_tokens": 3535024,
+            "input_tokens_cumulative": 3535024,
+            "output_tokens": 16984,
+            "output_tokens_cumulative": 16984,
+            "reasoning_output_tokens": 6921,
+            "reasoning_output_tokens_cumulative": 6921
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260823T063456585218-inv-currency",
+        "plan": "sn-quality-parity",
+        "section": "\u00a72",
+        "node": "inv-currency",
+        "role": "investigate",
+        "spec_level": "exact",
+        "member": "inv-docscurrency",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-23T06:34:59Z",
+        "completed_at": "2026-08-23T06:42:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 477,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 477,
+        "stalled": false,
+        "time_budget": "20m",
+        "base_sha": "c8a0f9f9738515f86f37cc69a82c2f1066f4f00b",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Blocked by the same out-of-sandbox receipt fence plus a read-only worktree that cannot bootstrap the gitignored imas_codex/graph/models.py pytest imports. Partial currency verdicts delivered in the manifest: unit+HAS_UNIT current; benchmark machinery exists but is not the content-gated holdout; --paths superseded by sn run --focus; publish.py now transport-only with export.py owning domain grouping and link pruning; rich DD context and COCOS injection landed; docs policy now forbids generic typical values and measurement prose; curated exemplar electron_temperature overlaps the benchmark reference set; link status, retry, failed state, resolvers and export pruning landed while the sn resolve-links verb is deliberately rejected; no evidence of per-phase holdout reruns.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260823T063456585218-inv-currency/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a02d54-6171-7741-8e3b-145fa2bfe41a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 7488512,
+            "cached_input_tokens_cumulative": 7488512,
+            "input_tokens": 7751791,
+            "input_tokens_cumulative": 7751791,
+            "output_tokens": 16082,
+            "output_tokens_cumulative": 16082,
+            "reasoning_output_tokens": 5967,
+            "reasoning_output_tokens_cumulative": 5967
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 459
+    "_version": 465
   }
 }
