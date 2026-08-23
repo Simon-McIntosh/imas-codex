@@ -43,11 +43,15 @@ never remove an obligation to shorten the documentation.
    unit $\mathrm{T}$`.
 
 4. **Scope / distinction paragraph — scope obligation** — explicitly state
-   every semantic scope supported by the supplied name and context, including
-   the relevant physical population or region, boundary, and aggregation
-   convention. Do not omit scope that the name or context already establishes
-   merely because the source prose leaves it implicit. This content is
-   semantic, not practical guidance; never invent an unsupported restriction.
+   each scope fact that the supplied name or context establishes: **(a)** the
+   semantic boundary separating this quantity from a broader or narrower one,
+   **(b)** the physical population or region to which it applies, and **(c)**
+   its aggregation convention. Treat the name and injected context as positive
+   evidence for these facts even when the source prose leaves them implicit.
+   The scope obligation fails if any established boundary, population or
+   region, or aggregation convention is left for the reader to infer. This
+   content is semantic, not practical guidance; never invent an unsupported
+   restriction.
 
 5. **Exclusions / distinctions obligation** — explicitly state every exclusion
    or distinction supported by the supplied name and context that prevents the
