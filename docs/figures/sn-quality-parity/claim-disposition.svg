@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1160" height="440" viewBox="0 0 1160 440"
+     role="img" aria-labelledby="title desc">
+  <title id="title">Documentation-quality claim disposition and open evidence loop</title>
+  <desc id="desc">Of 43 audited claims, 22 are already-landed, 7 are superseded, 9 are wrong, and 5 are still-open. The remaining evidence loop runs through holdout, gate vector, comparison, and bulk sample.</desc>
+  <defs>
+    <clipPath id="bar-clip">
+      <rect x="40" y="152" width="516" height="68" rx="10"/>
+    </clipPath>
+    <marker id="arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth">
+      <path class="arrowhead" d="M0 0 L9 4.5 L0 9 Z"/>
+    </marker>
+    <style>
+      :root {
+        color-scheme: light dark;
+      }
+      .canvas { fill: #ffffff; }
+      .ink { fill: #172033; }
+      .muted { fill: #526173; }
+      .rule { stroke: #a1adba; }
+      .flow { fill: none; stroke: #667486; stroke-width: 2; marker-end: url(#arrow); }
+      .arrowhead { fill: #667486; }
+      .landed-fill { fill: #d7f0e1; }
+      .landed-text { fill: #14532d; }
+      .superseded-fill { fill: #e9e5f5; }
+      .superseded-text { fill: #49396f; }
+      .wrong-fill { fill: #f8dedf; }
+      .wrong-text { fill: #7f1d1d; }
+      .open-fill { fill: #ffedb5; }
+      .open-text { fill: #713f12; }
+      .loop-node { fill: #ffedb5; stroke: #8a5b12; stroke-width: 2; }
+      text { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+      .headline { font-size: 22px; font-weight: 700; }
+      .section { font-size: 16px; font-weight: 700; }
+      .subhead { font-size: 14px; }
+      .count { font-size: 23px; font-weight: 750; font-variant-numeric: tabular-nums; }
+      .bar-label { font-size: 11px; font-weight: 700; }
+      .stage { font-size: 14px; font-weight: 700; }
+      .detail { font-size: 12px; }
+      @media (prefers-color-scheme: dark) {
+        .canvas { fill: #0f172a; }
+        .ink { fill: #f3f6fb; }
+        .muted { fill: #c7d0db; }
+        .rule { stroke: #738194; }
+        .flow { stroke: #a8b4c3; }
+        .arrowhead { fill: #a8b4c3; }
+        .landed-fill { fill: #164e31; }
+        .landed-text { fill: #ddfbe8; }
+        .superseded-fill { fill: #40356d; }
+        .superseded-text { fill: #f0ecff; }
+        .wrong-fill { fill: #68252b; }
+        .wrong-text { fill: #ffe5e7; }
+        .open-fill { fill: #704d12; }
+        .open-text { fill: #fff1c7; }
+        .loop-node { fill: #704d12; stroke: #f1c75b; }
+      }
+    </style>
+  </defs>
+
+  <rect class="canvas" width="1160" height="440"/>
+
+  <text class="headline ink" x="40" y="42">What the audit measured — and what remains to prove</text>
+  <text class="subhead muted" x="40" y="68">The stale status map overstated missing capability; the unresolved work is an evidence loop.</text>
+
+  <text class="section ink" x="40" y="116">Audited disposition</text>
+  <text class="subhead muted" x="556" y="116" text-anchor="end">43 claims · live-tree citations on every row</text>
+
+  <g clip-path="url(#bar-clip)">
+    <rect class="landed-fill" x="40" y="152" width="264" height="68"/>
+    <rect class="superseded-fill" x="304" y="152" width="84" height="68"/>
+    <rect class="wrong-fill" x="388" y="152" width="108" height="68"/>
+    <rect class="open-fill" x="496" y="152" width="60" height="68"/>
+  </g>
+  <line x1="304" y1="152" x2="304" y2="220" stroke="#ffffff" stroke-opacity="0.75"/>
+  <line x1="388" y1="152" x2="388" y2="220" stroke="#ffffff" stroke-opacity="0.75"/>
+  <line x1="496" y1="152" x2="496" y2="220" stroke="#ffffff" stroke-opacity="0.75"/>
+
+  <text class="count landed-text" x="172" y="181" text-anchor="middle">22</text>
+  <text class="bar-label landed-text" x="172" y="202" text-anchor="middle">already-landed</text>
+  <text class="count superseded-text" x="346" y="181" text-anchor="middle">7</text>
+  <text class="bar-label superseded-text" x="346" y="202" text-anchor="middle">superseded</text>
+  <text class="count wrong-text" x="442" y="181" text-anchor="middle">9</text>
+  <text class="bar-label wrong-text" x="442" y="202" text-anchor="middle">wrong</text>
+  <text class="count open-text" x="526" y="181" text-anchor="middle">5</text>
+  <text class="bar-label open-text" x="526" y="202" text-anchor="middle">still-open</text>
+
+  <text class="detail muted" x="40" y="250">Most requested machinery already exists or was intentionally replaced.</text>
+  <text class="detail ink" x="40" y="272">Only measured proof remains open.</text>
+
+  <line class="rule" x1="610" y1="98" x2="610" y2="344"/>
+  <path class="flow" d="M556 186 H614 Q636 186 651 166"/>
+
+  <text class="section ink" x="662" y="116">Evidence loop still open</text>
+  <text class="subhead muted" x="662" y="140">A documentation change earns “better” only after all four stages close.</text>
+
+  <path class="flow" d="M780 190 H995"/>
+  <path class="flow" d="M1014 208 V284"/>
+  <path class="flow" d="M995 302 H780"/>
+  <path class="flow" d="M761 284 V208"/>
+
+  <circle class="loop-node" cx="761" cy="190" r="10"/>
+  <circle class="loop-node" cx="1014" cy="190" r="10"/>
+  <circle class="loop-node" cx="1014" cy="302" r="10"/>
+  <circle class="loop-node" cx="761" cy="302" r="10"/>
+
+  <text class="stage ink" x="761" y="174" text-anchor="middle">holdout</text>
+  <text class="detail muted" x="761" y="224" text-anchor="middle">catalog counterparts</text>
+
+  <text class="stage ink" x="1014" y="174" text-anchor="middle">gate vector</text>
+  <text class="detail muted" x="1014" y="224" text-anchor="middle">seven gates + hygiene</text>
+
+  <text class="stage ink" x="1014" y="332" text-anchor="middle">comparison</text>
+  <text class="detail muted" x="1014" y="352" text-anchor="middle">phase-by-phase delta</text>
+
+  <text class="stage ink" x="761" y="332" text-anchor="middle">bulk sample</text>
+  <text class="detail muted" x="761" y="352" text-anchor="middle">out-of-holdout check</text>
+
+  <text class="section open-text" x="888" y="251" text-anchor="middle">proof pending</text>
+  <text class="detail muted" x="888" y="271" text-anchor="middle">no unmeasured gain claim</text>
+
+  <line class="rule" x1="40" y1="382" x2="1120" y2="382"/>
+  <text class="subhead ink" x="40" y="410">Measured baseline: 38 claims are closed by disposition; 5 claims keep the evidence loop open.</text>
+</svg>
