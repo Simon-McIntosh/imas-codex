@@ -16,7 +16,7 @@ NORMATIVE_GATE_NAMES: tuple[str, ...] = (
     "symbol_definitions",
     "scope",
     "exclusions_or_distinctions",
-    "essential_relationships",
+    "relationship_link_or_phrase_witness",
     "sign_convention",
 )
 
@@ -107,7 +107,13 @@ def _symbols_are_defined(text: str) -> bool:
     return not latex_def_check({"documentation": text})
 
 
-def _has_essential_relationship(text: str) -> bool:
+def _has_relationship_link_or_phrase_witness(text: str) -> bool:
+    """Detect a Markdown link or allow-listed relationship phrase as a witness.
+
+    This lexical witness does not assess whether prose states scientifically
+    meaningful relationship content.
+    """
+
     return bool(_MARKDOWN_LINK_RE.search(text) or _RELATIONSHIP_RE.search(text))
 
 
@@ -155,7 +161,9 @@ def score_documentation(documentation: str) -> DocumentationGateScore:
         "symbol_definitions": _symbols_are_defined(text),
         "scope": scope_present,
         "exclusions_or_distinctions": distinction_present,
-        "essential_relationships": _has_essential_relationship(text),
+        "relationship_link_or_phrase_witness": (
+            _has_relationship_link_or_phrase_witness(text)
+        ),
         "sign_convention": _valid_sign_convention(text),
         "link_hygiene": _links_are_hygienic(text),
         "minimum_word_count": words >= MIN_DOCUMENTATION_WORDS,
