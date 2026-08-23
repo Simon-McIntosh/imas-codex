@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" width="760" height="340"
+     font-family="system-ui, -apple-system, Segoe UI, sans-serif">
+  <style>
+    .lbl  { font-size: 13px; fill: #1a1a1a; }
+    .num  { font-size: 13px; fill: #1a1a1a; font-variant-numeric: tabular-nums; }
+    .big  { font-size: 15px; fill: #1a1a1a; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .drop { font-size: 12px; fill: #6b2d2d; font-variant-numeric: tabular-nums; }
+    .cap  { font-size: 12px; fill: #444; }
+    .bar  { fill: #ffffff; stroke: #1a1a1a; stroke-width: 1; }
+    .acc  { fill: #fdf3e3; stroke: #b8860b; stroke-width: 1; }
+    .rule { stroke: #cccccc; stroke-width: 1; }
+  </style>
+
+  <text class="lbl" x="0" y="14" font-weight="600">Names surviving each export gate</text>
+
+  <!-- stage 1 -->
+  <text class="lbl" x="0" y="46">name_stage accepted</text>
+  <rect class="bar" x="170" y="34" width="600" height="16" transform="translate(-10,0)"/>
+  <text class="big" x="596" y="46" text-anchor="end">2,535</text>
+
+  <!-- stage 2 -->
+  <text class="lbl" x="0" y="80">validation_status valid</text>
+  <rect class="bar" x="160" y="68" width="589" height="16"/>
+  <text class="big" x="596" y="80" text-anchor="end">2,488</text>
+  <text class="drop" x="612" y="80">&#8722;47 quarantined</text>
+
+  <!-- stage 3 -->
+  <text class="lbl" x="0" y="114">docs_stage accepted</text>
+  <rect class="bar" x="160" y="102" width="543" height="16"/>
+  <text class="big" x="596" y="114" text-anchor="end">2,296</text>
+  <text class="drop" x="612" y="114">&#8722;192 docs not accepted</text>
+
+  <line class="rule" x1="0" y1="142" x2="760" y2="142"/>
+
+  <!-- terminal split -->
+  <text class="lbl" x="0" y="170" font-weight="600">How those 2,296 meet the score gate</text>
+  <rect class="bar" x="160" y="186" width="192" height="22"/>
+  <rect class="acc" x="352" y="186" width="348" height="22"/>
+  <rect class="bar" x="700" y="186" width="3" height="22"/>
+
+  <text class="num" x="256" y="201" text-anchor="middle">813</text>
+  <text class="num" x="526" y="201" text-anchor="middle">1,469</text>
+
+  <text class="lbl" x="256" y="228" text-anchor="middle">scored &#8805; 0.85</text>
+  <text class="lbl" x="526" y="228" text-anchor="middle">no reviewer_score_name at all</text>
+  <text class="lbl" x="703" y="228" text-anchor="start">14 scored &lt; 0.85</text>
+
+  <!-- composition of the unscored -->
+  <line class="rule" x1="352" y1="244" x2="700" y2="244"/>
+  <text class="lbl" x="352" y="264">1,181 catalog_edit, never LLM-reviewed by design</text>
+  <text class="lbl" x="352" y="282">221 structural-inheritance (derived parents)</text>
+  <text class="lbl" x="352" y="300">65 derived, no reviewer recorded</text>
+  <text class="lbl" x="352" y="318">2 reviewer recorded but score null</text>
+
+  <text class="cap" x="0" y="336">Gate C admits the amber block only when include_unreviewed is set. Unscored is not the same as low-scoring: just 14 names actually fail the bar.</text>
+</svg>

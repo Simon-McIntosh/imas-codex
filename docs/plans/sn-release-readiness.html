@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-release-readiness">
+  <meta name="plan-title" content="What the First Catalog Release Would Silently Drop">
+  <meta name="plan-summary" content="Make every export exclusion counted and named before the first Standard Name release, and close the unclaimed graph classes that would otherwise leave a published catalog with missing entries and dangling supersede lineage.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="12.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S9">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-depends-on" content="sn-integrity-residual-closure">
+  <meta name="plan-blocks" content="sn-west-catalog-release">
+  <title>What the First Catalog Release Would Silently Drop | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-23">
+<meta name="plan-version" content="1">
+</head>
+<body>
+<main class="plan-doc">
+
+<h2 id="s1">&#167;1 &mdash; Why this plan exists</h2>
+<p>
+  No Standard Name has ever been published. Every superseded name in the graph
+  carries a null <code>catalog_approved_at</code>, which means none of the release
+  machinery has run against real published state even once. That is the good news
+  and the whole problem: every release gate in
+  <code>imas_codex/standard_names/export.py</code> is <em>latent</em>, and the first
+  release is when each one is tested for the first time, in public, against the
+  live catalog.
+</p>
+<p>
+  The export path does not fail loudly when something is wrong with a name. It
+  <strong>filters</strong>. <code>_fetch_candidates</code> selects on
+  <code>name_stage</code>, <code>validation_status</code> and
+  <code>docs_stage</code>; Gate C then filters again on score. A name that fails any
+  of these is not reported as a defect &mdash; it simply is not in the output. The
+  release ships whatever survives, and nothing in the pipeline asserts that the
+  number that survived is the number anyone intended to ship.
+</p>
+<p>
+  This plan is not a cleanup list. Its spine is a single structural claim:
+  <strong>exclusion must become visible before the first release, and the classes
+  that exclusion is currently hiding must be dispositioned rather than discovered
+  afterwards.</strong> Every figure below is a live measurement taken on
+  2026-08-23, not carried forward.
+</p>
+
+<h2 id="s2">&#167;2 &mdash; The funnel, and the filter that is not a quality signal</h2>
+<p>
+  Applying the export predicates in order to the live graph gives the shape of what
+  a release would actually contain.
+</p>
+<p>
+  <img src="/imas-codex/figures/sn-release-readiness/export-funnel.svg"
+       alt="Export funnel: 2,535 accepted names fall to 2,488 after the validity gate and 2,296 after the docs gate; of those 2,296, 813 are scored at or above 0.85, 1,469 carry no name score at all, and 14 are scored below 0.85."
+       style="max-width:100%;height:auto">
+</p>
+<p>
+  The two upper drops are ordinary backlog and are dealt with in &#167;5. The
+  interesting number is the terminal split, because it is routinely misread.
+  <strong>1,469 of the 2,296 export-eligible names carry no
+  <code>reviewer_score_name</code> at all, while only 14 are genuinely scored below
+  the 0.85 bar.</strong> A naive
+  <code>coalesce(reviewer_score_name, 0) &gt;= 0.85</code> counts all 1,483 as
+  failures and concludes the catalog is 32% releasable. That conclusion is wrong,
+  and this plan exists partly to stop anyone reaching it.
+</p>
+<p>
+  The unscored population is mostly unscored <em>by design</em>: 1,181 are
+  <code>origin='catalog_edit'</code> with no reviewer recorded &mdash; names that
+  came from human catalog editing and were never routed through the LLM review pool
+  &mdash; and 221 carry <code>reviewer_model_name='structural-inheritance'</code>,
+  the sanctioned structural accept that derived parents receive because the name
+  quorum systematically penalises an abstraction for being less specific than its
+  own children. Neither group is defective. The remaining 67 are less comfortable:
+  65 derived names with no reviewer recorded at all, and 2 that record a reviewer
+  but no score.
+</p>
+<p>
+  Whether the first release ships the amber block turns entirely on Gate C's
+  <code>include_unreviewed</code> flag, and that is a lead decision about what
+  "reviewed" means in a published catalog, not something the pipeline should settle
+  by default. It is locked in the decisions section below.
+</p>
+
+<h2 id="s3">&#167;3 &mdash; An exclusion ledger, so a release cannot be quietly short</h2>
+<p>
+  The deliverable that makes the rest of this plan durable is a gate that counts
+  what did <em>not</em> ship. Gates A, B and C already exist:
+  <code>_run_gate_a</code> runs the graph suites, <code>_run_gate_b</code> checks
+  cross-field consistency including COCOS and the grammar version, and
+  <code>_run_gate_c</code> applies the score thresholds and returns
+  <code>excluded_below_score</code> and <code>excluded_unreviewed</code> counts.
+  Gate C therefore already knows two of its own exclusions. Nothing aggregates
+  them, nothing accounts for the exclusions that happen earlier in
+  <code>_fetch_candidates</code>, and nothing asserts a total.
+</p>
+<p>
+  The work is to make every drop between the accepted population and the emitted
+  catalog attributable to exactly one named reason, and to fail the release when
+  the arithmetic does not close. Concretely: for a run over N accepted names, the
+  ledger must satisfy <em>emitted + sum(exclusions by reason) = N</em>, with a row
+  per reason and the identities recoverable for each. A release that drops a name
+  for an unnamed reason is a bug in the ledger, which is the point &mdash; the
+  ledger is what converts a silent filter into a reviewable statement.
+</p>
+<p>
+  This extends the existing gate structure rather than adding a parallel preflight.
+  A second command that "checks readiness" beside a release path that filters
+  independently would drift within one sprint.
+</p>
+
+<h2 id="s4">&#167;4 &mdash; Supersede lineage the exporter structurally cannot see</h2>
+<p>
+  When a published name is retired, the catalog is supposed to keep a
+  <code>status: deprecated</code> tombstone pointing at its live successor, so a
+  consumer who held the old name is told where it went.
+  <code>_fetch_deprecation_stubs</code> builds those, and its docstring is explicit
+  that a predecessor whose successor cannot be resolved is skipped, because "a stub
+  with an unresolvable successor would be a dangling breaking-change pointer."
+</p>
+<p>
+  <strong>It resolves the successor along <code>REFINED_FROM*1..</code> and nothing
+  else.</strong> It never reads <code>superseded_by</code>. That is fine for a
+  refine chain, which always leaves the edge, and wrong for a
+  supersede-into-a-different-identity, which leaves no edge at all and records the
+  successor only in the scalar.
+</p>
+<table>
+  <caption>Superseded names by how their successor is recorded (live, 2026-08-23)</caption>
+  <thead>
+    <tr><th>Class</th><th>Count</th><th>Visible to the stub query?</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>REFINED_FROM</code> chain reaches a successor</td><td>1,131</td><td>yes</td></tr>
+    <tr><td>No <code>REFINED_FROM</code> successor, and no scalar either</td><td><strong>509</strong></td><td>no &mdash; and there is nothing to point at</td></tr>
+    <tr><td>No <code>REFINED_FROM</code> successor, but <code>superseded_by</code> is set</td><td><strong>3</strong></td><td>no &mdash; although the answer is recorded</td></tr>
+    <tr><td>Total superseded</td><td>1,643</td><td>&mdash;</td></tr>
+  </tbody>
+</table>
+<p>
+  The three-row class is small and it is the tractable half: the successor is known,
+  correct, and simply read from the wrong place. <code>area_of_flux_surface</code>
+  is a live instance &mdash; superseded into
+  <code>poloidal_plane_cross_sectional_area_of_flux_surface</code> with the scalar
+  written and zero <code>REFINED_FROM</code> successors. Teaching the stub query to
+  fall back to <code>superseded_by</code> when the edge is absent closes it, and the
+  operator that writes that scalar landed at <code>1854c6d4</code>, so the class
+  will grow with every future identity supersede rather than staying at three.
+</p>
+<p>
+  The 509 are the hard half and they are not a coding problem. They have no
+  successor edge, no scalar, and no receipt to read back &mdash; the information was
+  never recorded, and recovering it means reconstructing intent across the whole
+  history of the pipeline. This plan does not assume they can be recovered. It
+  requires that they be <em>dispositioned</em>, which is the decision below.
+</p>
+<p>
+  One mitigating fact keeps this from being an emergency: the stub query also
+  requires <code>catalog_approved_at IS NOT NULL</code>, and no name in the graph has
+  it. <strong>Zero of the 512 would be skipped today, because none of them was ever
+  published.</strong> The defect is entirely latent, and the first release is what
+  arms it.
+</p>
+
+<h2 id="s5">&#167;5 &mdash; The docs and validity backlog behind the upper two drops</h2>
+<p>
+  197 of the 2,535 accepted names do not have accepted documentation: 82
+  <code>pending</code>, 56 <code>drafted</code>, 47 <code>reviewed</code>, and 12
+  <code>exhausted</code>. Because the export gate is
+  <code>docs_stage = 'accepted'</code>, all of them are excluded from a full release
+  without appearing anywhere as a problem. The 12 exhausted are the sharp end: an
+  accepted name whose documentation reached the refine cap and gave up, so it will
+  never clear the gate on its own and needs either a rescore or an explicit
+  disposition.
+</p>
+<p>
+  Separately, 47 accepted names are <code>validation_status='quarantined'</code> and
+  4 live names carry a null validation status. Quarantine is a working state that
+  the compose worker sets; carrying it on an <em>accepted</em> name is a
+  contradiction worth resolving before a release rather than after.
+</p>
+<p>
+  <strong>The boundary with the documentation-quality programme matters here.</strong>
+  <a href="/imas-codex/sn-quality-parity">sn-quality-parity</a> owns the
+  <em>bar</em> &mdash; the holdout benchmark, the content-gated template, richer
+  DD and COCOS context into compose, and the link-resolution lifecycle. This plan
+  owns only the <em>drain</em>: getting the existing backlog to a terminal state
+  under whatever bar that plan sets, and refusing to let a release quietly omit
+  what has not drained. If the two are worked in the wrong order the drain is done
+  twice, so the drain node must cite the bar in force when it runs.
+</p>
+
+<h2 id="s6">&#167;6 &mdash; Sources whose physics never reaches a published name</h2>
+<p>
+  145 live names never reached <code>accepted</code> &mdash; 119 <code>reviewed</code>,
+  21 <code>drafted</code>, 5 <code>pending</code> &mdash; and a further 72 are
+  <code>exhausted</code>, between them holding 121 producing sources. Every one of
+  those sources represents a Data Dictionary path or facility signal whose physics
+  has no name a consumer can cite.
+</p>
+<p>
+  These are not all recoverable and this plan should not pretend otherwise.
+  <code>exhausted</code> is explicitly a recoverable state &mdash; <code>sn rescore</code>
+  reverts a name to <code>drafted</code> and resubmits the <em>same</em> name for a
+  fresh quorum draw, and a structurally sound name whose siblings accept at 0.96
+  typically clears on a redraw. But repeated exhaustion of sound names is a signal
+  to fix the pipeline, not something to grind through by rescoring in a loop. The
+  node here is a census that partitions the 217 into <em>redraw-eligible</em>,
+  <em>needs steering</em>, and <em>correctly abandoned</em>, with the count for each,
+  before any budget is spent.
+</p>
+<p>
+  The 119 <code>reviewed</code> names overlap the below-threshold class handed to
+  <a href="/imas-codex/sn-quality-parity">sn-quality-parity</a> in the closure that
+  preceded this plan. The split is by question, not by row: <em>how do we make this
+  name good</em> is that plan's; <em>what does a release do with a name that never
+  became good</em> is this one's.
+</p>
+
+<h2 id="s7">&#167;7 &mdash; Metadata gaps that would ship into the catalog</h2>
+<p>
+  Small, cheap, and embarrassing in public. Among the 2,535 accepted names: 21 carry
+  no <code>physics_domain</code>, and 1 has no <code>documentation</code> string at
+  all. Every accepted name has a unit, a description and an embedding, so those axes
+  are already clean and need no work.
+</p>
+<p>
+  Two further items. 855 accepted names carry a null catalog <code>status</code>
+  while 1,680 read <code>draft</code>; since the exporter writes
+  <code>status: active</code> at publish time this may be harmless, but a null where
+  a vocabulary value is expected should be confirmed harmless rather than assumed so.
+  And 2 accepted documentation strings still contain a bare <code>[name]</code>
+  bracket despite the accept path normalising links at source &mdash; a small leak,
+  but it means the normalisation has a hole worth finding while only two rows show it.
+</p>
+
+<h2 id="s8">&#167;8 &mdash; Residue carried in from the integrity closure</h2>
+<p>
+  <a href="/imas-codex/plans/sn-integrity-residual-closure">sn-integrity-residual-closure</a>
+  shipped with four identities holding no producing source and three dual-bound
+  semantic sources, each refused for a recorded reason rather than left unexamined.
+  Two of those refusals are owned elsewhere and stay there: the fast-ion power
+  identity waits on Data Dictionary issue 294 and PR 295, and the field-map grid
+  locus waits on an <code>imas-standard-names</code> vocabulary decision.
+</p>
+<p>
+  The rest need an authority this plan can carry, because each is a question about
+  what a release does with an identity that cannot be given a producer:
+  <code>neutron_flux_due_to_fusion</code>, whose retarget would strip its
+  predecessor's last producing source; <code>tendency_of_total_thermal_plasma_internal_energy</code>,
+  whose only unit-agreeing path is held by the quarantined
+  <code>plasma_internal_energy</code>; the three dual-bound sources, where every cut
+  strips a last producer; <code>voltage_of_diagnostic_antenna</code>, which needs a
+  sanctioned source-less rename transition; and <code>reflector/centre/phi</code>,
+  which needs a reviewed centre-of-curvature identity of its own. A name with no
+  source is not automatically unpublishable &mdash; but shipping one should be a
+  decision on the record, not an accident of which filter it happened to survive.
+</p>
+
+<h2 id="s9">&#167;9 &mdash; What this plan does not own</h2>
+<p>
+  Stated explicitly so the boundaries survive a handoff to a session that did not
+  measure any of this.
+</p>
+<table>
+  <caption>Adjacent work and its owner</caption>
+  <thead><tr><th>Work</th><th>Owner</th><th>Why not here</th></tr></thead>
+  <tbody>
+    <tr><td>Documentation content quality: template, holdout benchmark, DD/COCOS context, link lifecycle</td><td><a href="/imas-codex/sn-quality-parity">sn-quality-parity</a></td><td>that plan sets the bar; this one only drains to it</td></tr>
+    <tr><td>Steering the 75 below-threshold names that hold a producing source</td><td><a href="/imas-codex/sn-quality-parity">sn-quality-parity</a></td><td>handed over at the close of the preceding plan</td></tr>
+    <tr><td>WEST cohort review, publication and graph fold-back</td><td><a href="/imas-codex/plans/sn-west-catalog-release">sn-west-catalog-release</a></td><td>cohort-scoped release mechanics; this plan is catalog-wide readiness and blocks it</td></tr>
+    <tr><td>MAST source manifest repair</td><td><a href="/imas-codex/plans/mast-semantic-source-repair">mast-semantic-source-repair</a></td><td>facility-scoped source work</td></tr>
+    <tr><td>The <code>field_map_grid</code> locus token</td><td><code>imas-standard-names</code></td><td>ISN owns all grammar vocabulary; codex may never redefine it</td></tr>
+    <tr><td>Data Dictionary issue 294 / PR 295</td><td>IMAS-Data-Dictionary maintainers</td><td>filed and open upstream</td></tr>
+    <tr><td>Reckon tool defects surfaced during the closure</td><td>the reckon repository</td><td>different repository, needs its own authorization</td></tr>
+  </tbody>
+</table>
+
+<section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="unreviewed-in-first-release" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the first release ship the 1,469 export-eligible names that carry no reviewer score? 1,181 are human catalog edits never routed through the review pool and 221 are the sanctioned structural accept for derived parents; only 14 names in the pool are genuinely scored below the bar.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="include-all-unreviewed">Ship all unscored — treat catalog_edit and structural-inheritance as reviewed by their own route</button>
+      <button class="r-opt" data-value="include-structural-only">Ship structural-inheritance only — route the 1,181 catalog edits through review first</button>
+      <button class="r-opt" data-value="scored-only">Ship only the 813 scored names — smallest, most defensible first release</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="successorless-supersede-disposition" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What does a release do with the 509 superseded names that record no successor anywhere — no edge, no scalar, no receipt? They cannot emit a deprecation stub because there is nothing to point at.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="tombstone-without-pointer">Emit a deprecated entry with no successor pointer, so the retirement is at least visible</button>
+      <button class="r-opt" data-value="silent-retire">Retire silently — accept that pre-publication history has no public trace</button>
+      <button class="r-opt" data-value="reconstruct-first">Attempt reconstruction from ledger and receipt history before deciding</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="docs-backlog-blocks-release" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the first release wait for the 197-name documentation backlog to drain, or publish the docs-accepted subset and follow with an increment?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="drain-first">Drain first — one complete release</button>
+      <button class="r-opt" data-value="ship-subset">Ship the subset, with the exclusion ledger published alongside it</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+<section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-snrr-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-23" data-recommends-skill="/reckon-ship sn-release-readiness" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the exclusion ledger before draining anything</h4>
+    <div class="r-fu-body">Start at section 3, not at the largest number. The ledger is what makes every other section verifiable: until a release can state emitted + sum(exclusions by reason) = N with the identities recoverable per reason, every drain below it is unmeasurable and every count in this plan has to be re-derived by hand. Gate C already returns excluded_below_score and excluded_unreviewed, so two reasons exist and are unaggregated; the earlier exclusions in _fetch_candidates have none. Two of the three open decisions (unreviewed-in-first-release, docs-backlog-blocks-release) change what the ledger must report, so lock those with the lead before the drain nodes in sections 5 and 6 are authored. The section 4 scalar fallback is independent of all three and can land first if a quick win is wanted.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-release-readiness</pre>
+    </article>
+</section>
+
+</main>
+</body>
+</html>
