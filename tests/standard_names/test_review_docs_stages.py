@@ -177,23 +177,29 @@ class TestClaimSkipsPendingDocs:
 
 def test_docs_shortfall_blocks_refine_claim() -> None:
     """An unresolved aggregate score cannot spend a docs refinement rotation."""
-    captured: list[str] = []
+    captured: list[tuple[str, dict[str, Any]]] = []
 
-    def _fake_claim_sn_atomic(*, eligibility_where: str, **_kwargs: Any) -> list:
-        captured.append(eligibility_where)
+    def _fake_claim_sn_atomic(
+        *, eligibility_where: str, query_params: dict[str, Any], **_kwargs: Any
+    ) -> list:
+        captured.append((eligibility_where, query_params))
         return []
 
     with patch(
         "imas_codex.standard_names.graph_ops._claim_sn_atomic",
         side_effect=_fake_claim_sn_atomic,
     ):
-        from imas_codex.standard_names.graph_ops import claim_refine_docs_batch
+        from imas_codex.standard_names import graph_ops
 
-        claim_refine_docs_batch()
+        graph_ops.claim_refine_docs_batch()
 
     assert captured
-    assert "sn.docs_review_resolution_method IS NOT NULL" in captured[0]
-    assert "sn.docs_review_quorum_shortfall IS NULL" in captured[0]
+    eligibility_where, query_params = captured[0]
+    assert graph_ops.docs_review_eligibility_where() in eligibility_where
+    assert "sn.docs_review_resolution_method IS NOT NULL" not in eligibility_where
+    assert "sn.docs_review_quorum_shortfall IS NULL" in eligibility_where
+    for key, value in graph_ops.docs_review_eligibility_params().items():
+        assert query_params[key] == value
 
 
 # =============================================================================
