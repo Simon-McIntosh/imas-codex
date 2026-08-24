@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T17:48:07",
+  "updated": "2026-08-24T17:52:15",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -708,7 +708,7 @@
         "id": "impl-quiescence",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03470-755c-7201-b0e0-a5f0d48c1ede",
         "created": "2026-08-24"
       },
       {
@@ -1212,7 +1212,7 @@
         "id": "scout-identity",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
+        "session_id": "01a03471-3bec-75e1-b7a7-d610850a9efa",
         "created": "2026-08-24"
       },
       {
@@ -1245,6 +1245,13 @@
       },
       {
         "id": "test-parity",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
+        "id": "test-quiescence",
         "harness": "codex",
         "role": "test",
         "session_id": null,
@@ -23840,9 +23847,158 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260824T154258065802-n-quiescencerepair",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a78",
+        "node": "n-quiescencerepair",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-quiescence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:43:00Z",
+        "completed_at": "2026-08-24T15:50:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 428,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 428,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "5dbad32f60e9b1bc44ae1ade4301a10046e7b715",
+        "commits": [
+          "f26e610af0e75bd2078a372c8e4214ad300ecd3f"
+        ],
+        "changed_lines": {
+          "added": 53,
+          "removed": 20,
+          "files": 4
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Six quiescence-baseline failures closed as test-expectation debt against the shared eligibility determination; 6 failed 62 passed to 68 passed with no production change",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154258065802-n-quiescencerepair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03470-755c-7201-b0e0-a5f0d48c1ede",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3083520,
+            "cached_input_tokens_cumulative": 3083520,
+            "input_tokens": 3242381,
+            "input_tokens_cumulative": 3242381,
+            "output_tokens": 15700,
+            "output_tokens_cumulative": 15700,
+            "reasoning_output_tokens": 5870,
+            "reasoning_output_tokens_cumulative": 5870
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "watch_override": {
+          "arming_line": "reckon crew watch --project imas-codex",
+          "requested": true,
+          "watcher_live": false
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest over",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260824T154348692191-n-identityreusemap",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a77",
+        "node": "n-identityreusemap",
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "scout-identity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-24T15:43:50Z",
+        "completed_at": "2026-08-24T15:51:29Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 459,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 459,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "5dbad32f60e9b1bc44ae1ade4301a10046e7b715",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Reuse map delivered and self-validated at 15 candidates (5 per change, 7 fit 7 partial 1 fail); the assigned out-of-project receipt path was refused by the sandbox so the orchestrator landed the validated draft under docs/evidence",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154348692191-n-identityreusemap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03471-3bec-75e1-b7a7-d610850a9efa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2872064,
+            "cached_input_tokens_cumulative": 2872064,
+            "input_tokens": 3086210,
+            "input_tokens_cumulative": 3086210,
+            "output_tokens": 17873,
+            "output_tokens_cumulative": 17873,
+            "reasoning_output_tokens": 6525,
+            "reasoning_output_tokens_cumulative": 6525
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 674
+    "_version": 679
   }
 }

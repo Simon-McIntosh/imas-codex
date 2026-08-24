@@ -23,8 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="8">
-<meta name="plan-impl" content="0.2">
+<meta name="plan-version" content="9">
+<meta name="plan-impl" content="0.33">
+<meta name="plan-commits" content="81b2e435,f26e610a,f19eecee">
+<meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-identity-convention-landed.html,docs/evidence/sn-graph-identity-convention/reuse-map.md,docs/evidence/sn-graph-identity-convention/baseline-green.md">
 </head>
 <body>
   <main class="plan-doc">
@@ -387,6 +389,12 @@
 </div>
 <div class="r-comment" data-section="§8" data-id="c-20260824T1550-ddresschema" data-who="reckon-ship" data-when="2026-08-24T15:50:00+00:00">
     <div class="r-comment-body">n-ddresolutionschema landed — commit 81b2e435, merged at d02d7bb6; gate §8-quiescence-baseline passed for this test file; measure tests/graph/test_dd_resolution_schema.py 1 failed 4 passed to 5 passed (verbatim: '1 failed, 4 passed in 2.79s' then '5 passed in 1.38s'); artifacts pytest-pre-change.log and pytest-post-change.log in the run directory. The test expectation was the defect, not the schema: DDResolutionStateChange was removed by 1edaa0de when the resolution authority moved into the graph, and tests/standard_names/test_dd_resolution_graph.py:52 already asserted that class must be absent — so two suites contradicted each other and one had to be red. imas_codex/schemas/standard_name.yaml was not touched. Executable-node ledger for this plan: 2 of 12 complete (Change D, landed before this session, plus this repair); the computed fraction 0.167 sits below the recorded 0.20, so impl holds at its monotonic floor rather than moving.</div>
+</div>
+<div class="r-comment" data-section="§8" data-id="c-20260824T1552-quiescencerepair" data-who="reckon-ship" data-when="2026-08-24T15:52:00+00:00">
+    <div class="r-comment-body">n-quiescencerepair landed — commit f26e610a, merged at 954b7d84; gate §8-quiescence-baseline passed for the four named files; measure 6 failed 62 passed to 68 passed (verbatim: '6 failed, 62 passed in 11.66s' then '68 passed in 9.59s'); artifacts pre-change-four-files.log, post-change-six-regressions.log, post-change-four-files.log. The finding is that NO production path needed changing: all six failures were tests still asserting the storage shape the shared eligibility determination replaced — 'sn.docs_review_resolution_method IS NOT NULL' as the docs-authority gate, the pre-centralization winner parameters, and an inlined removed-lifecycle literal that had moved into _standard_name_source_upstream_present_cypher. So Change D landed correctly and only its coverage lagged. The replacements are two-sided rather than relaxed: each asserts the shared graph-derived predicate IS present AND that the retired mirror gate is NOT, so a silent return to the denormalised copy now fails. Audited against vacuity: docs_review_eligibility_where() returns 1,546 characters and docs_review_eligibility_params() three populated lists, so the containment assertions are substantive.</div>
+</div>
+<div class="r-comment" data-section="§7" data-id="c-20260824T1552-reusemap" data-who="reckon-ship" data-when="2026-08-24T15:53:00+00:00">
+    <div class="r-comment-body">n-identityreusemap landed — commit f19eecee; gate reuse-map-completeness passed; measure 15 candidates against a floor of 12, split 5 axis-spelling / 5 static-Cypher-property / 5 foreign-key against a floor of 3 each, verdicts 7 fit / 7 partial / 1 fail, every row carrying a file:line citation; artifact docs/evidence/sn-graph-identity-convention/reuse-map.md. Named seams the specification nodes must cite: GraphSchema.get_all_slots (schema.py:354) as the declared-property universe, graph_search fail-closed validation (query_builder.py:68) with its misspelled-property test (test_query_builder.py:58), docs_review_property_coverage (graph_ops.py:6195) as an already-live single-query form of the runtime coverage layer, refresh_renamed_source_mirrors (provenance_lifecycle.py:961) as the migration shape that already traverses HAS_REVIEW and DOCS_REVISION_OF, and record_llm_cost (graph_ops.py:13782) where the sn_ids list rename must preserve the size() cost divisor. One fail verdict is load-bearing: test_schema_compliance.py checks graph-to-schema drift over a 100-node sample, the reverse direction, and must not be substituted for the static source checker. The dispatch named an out-of-project receipt path the worker sandbox refused, so the validated draft was landed under docs/evidence by the orchestrator — which is also the better home, since a per-user receipts directory reproduces the findability failure this plan exists to fix.</div>
 </div>
 </section>
 </main>

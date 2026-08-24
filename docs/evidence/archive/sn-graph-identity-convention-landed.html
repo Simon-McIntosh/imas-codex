@@ -55,6 +55,69 @@
     <p>Artifacts: <code>pytest-pre-change.log</code>, <code>pytest-post-change.log</code>
     under the run directory
     <code>r-20260824T154313125010-n-ddresolutionschema</code>.</p>
+
+    <h3 id="quiescence-mirror">The other six failures were coverage lagging behind the shared eligibility determination</h3>
+    <p><strong>Landed 2026-08-24</strong> &mdash; node <code>n-quiescencerepair</code>,
+    commit <code>f26e610a</code>, merged at <code>954b7d84</code>.</p>
+    <table>
+      <caption>Four test files, verbatim pytest summaries</caption>
+      <thead><tr><th>Point</th><th>Summary line</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-change</td><td><code>6 failed, 62 passed in 11.66s</code></td></tr>
+        <tr><td>Post-change</td><td><code>68 passed in 9.59s</code></td></tr>
+      </tbody>
+    </table>
+    <p><strong>No production path changed</strong>, and that is the finding rather than a
+    caveat. All six tests were still asserting the storage shape that Change D&rsquo;s shared
+    eligibility determination replaced: <code>sn.docs_review_resolution_method IS NOT
+    NULL</code> as the docs-authority gate, the pre-centralisation winner parameters, and an
+    inlined <code>lifecycle_status = 'removed'</code> literal that had moved into
+    <code>_standard_name_source_upstream_present_cypher</code>. Change D landed correctly;
+    only its coverage lagged.</p>
+    <p>The replacements are two-sided rather than relaxed. Each now asserts that the shared
+    graph-derived predicate <em>is</em> present <em>and</em> that the retired mirror gate is
+    <em>not</em>, so a silent return to the denormalised copy fails instead of passing. The
+    DD reconcile test asserts the upstream-presence helper is reused by both the stale and
+    the revive step and that the helper itself carries the removed guard.</p>
+    <p>Audited against the vacuity risk these containment assertions carry &mdash; a
+    <code>"" in cypher</code> is always true &mdash;
+    <code>docs_review_eligibility_where()</code> returns 1,546 characters and
+    <code>docs_review_eligibility_params()</code> three populated method lists, so the
+    assertions are substantive.</p>
+  </section>
+
+  <section id="reuse-map">
+    <h2>The reuse map the rename nodes must cite</h2>
+    <p><strong>Landed 2026-08-24</strong> &mdash; node <code>n-identityreusemap</code>,
+    commit <code>f19eecee</code>. Fifteen candidates against a floor of twelve, five per
+    change against a floor of three each, verdicts seven <code>fit</code>, seven
+    <code>partial</code>, one <code>fail</code>, every row carrying a
+    <code>file:line</code> citation. Full map:
+    <code>docs/evidence/sn-graph-identity-convention/reuse-map.md</code>.</p>
+    <table>
+      <caption>Primary seams, by change</caption>
+      <thead><tr><th>Change</th><th>Seam</th><th>Why it is the seam</th></tr></thead>
+      <tbody>
+        <tr><td>Static check</td><td><code>GraphSchema.get_all_slots</code> (schema.py:354)</td>
+          <td>the declared-property universe, inherited slots included</td></tr>
+        <tr><td>Static check</td><td><code>graph_search</code> validation (query_builder.py:68)</td>
+          <td>already fails closed on an unknown property, with the diagnostic to copy</td></tr>
+        <tr><td>Static check</td><td><code>docs_review_property_coverage</code> (graph_ops.py:6195)</td>
+          <td>a live single-query form of the runtime coverage layer, to generalise</td></tr>
+        <tr><td>Foreign key</td><td><code>refresh_renamed_source_mirrors</code> (provenance_lifecycle.py:961)</td>
+          <td>already traverses <code>HAS_REVIEW</code> and <code>DOCS_REVISION_OF</code> transactionally</td></tr>
+        <tr><td>Foreign key</td><td><code>record_llm_cost</code> (graph_ops.py:13782)</td>
+          <td>owns <code>sn_ids</code>; the rename must preserve the <code>size()</code> cost divisor</td></tr>
+      </tbody>
+    </table>
+    <p>The single <code>fail</code> verdict is load-bearing:
+    <code>tests/graph/test_schema_compliance.py</code> checks graph-to-schema drift over a
+    100-node sample, which is the reverse direction, and must not be substituted for a
+    static checker over repository Cypher literals.</p>
+    <p>The dispatch named an out-of-project receipt path that the worker sandbox refused, so
+    the validated draft was landed under <code>docs/evidence</code> by the orchestrator.
+    That is also the better home: a per-user receipts directory reproduces exactly the
+    findability failure this plan exists to fix.</p>
   </section>
 </main>
 </body>
