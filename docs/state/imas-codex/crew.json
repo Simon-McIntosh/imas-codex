@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T08:50:28",
+  "updated": "2026-08-24T17:48:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -290,6 +290,13 @@
         "role": "implement",
         "session_id": "01a029c0-17e9-7223-a921-5f06dbd06113",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-ddresschema",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03470-af41-7a11-baa6-55c32d602ead",
+        "created": "2026-08-24"
       },
       {
         "id": "impl-ddsubmit",
@@ -696,6 +703,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-quiescence",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "impl-quorumvar",
@@ -1188,6 +1202,20 @@
         "created": "2026-08-21"
       },
       {
+        "id": "scout-bench",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
+        "id": "scout-identity",
+        "harness": "codex",
+        "role": "investigate",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
         "id": "spec-propcheck",
         "harness": "codex",
         "role": "implement",
@@ -1214,6 +1242,20 @@
         "role": "test",
         "session_id": "01a02daf-eff1-7e41-9189-2639a85127ec",
         "created": "2026-08-21"
+      },
+      {
+        "id": "test-parity",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
+        "id": "test-readiness",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "test-sixgate",
@@ -23723,9 +23765,84 @@
           "utilisation_pct": null
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T154313125010-n-ddresolutionschema",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a78",
+        "node": "n-ddresolutionschema",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-ddresschema",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:43:14Z",
+        "completed_at": "2026-08-24T15:47:33Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 259,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 259,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "5dbad32f60e9b1bc44ae1ade4301a10046e7b715",
+        "commits": [
+          "81b2e435fa2484866f3f70bb580468e560262eeb"
+        ],
+        "changed_lines": {
+          "added": 16,
+          "removed": 5,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Realigned the resolution-schema regression to the live contract after the retired receipt class; 1 failed 4 passed to 5 passed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154313125010-n-ddresolutionschema/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03470-af41-7a11-baa6-55c32d602ead",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2022400,
+            "cached_input_tokens_cumulative": 2022400,
+            "input_tokens": 2140688,
+            "input_tokens_cumulative": 2140688,
+            "output_tokens": 8330,
+            "output_tokens_cumulative": 8330,
+            "reasoning_output_tokens": 3551,
+            "reasoning_output_tokens_cumulative": 3551
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/graph/test_dd_resolution_schema.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 666
+    "_version": 674
   }
 }

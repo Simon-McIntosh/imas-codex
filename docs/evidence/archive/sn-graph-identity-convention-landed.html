@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-graph-identity-convention-landed">
+  <meta name="plan-title" content="sn-graph-identity-convention &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="sn-graph-identity-convention">
+  <title>sn-graph-identity-convention landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>sn-graph-identity-convention &mdash; cumulative execution evidence</h1>
+  <p>One anchor per material landing. The plan&rsquo;s own §8 makes a green suite the
+  precondition for every rename node, so the record opens with the repair of the red
+  baseline rather than with a change to the convention.</p>
+
+  <section id="quiescence">
+    <h2>The quiescence gate was red, and the failures were two unrelated defects</h2>
+    <p><strong>Recorded baseline, 2026-08-24 at <code>b794924b</code>:</strong>
+    <code>7 failed, 7207 passed, 8 skipped, 654 deselected</code> over
+    <code>tests/standard_names/ tests/graph/</code>. §8 refuses to start a rename against
+    that head, so the seven failures are the gate&rsquo;s work, not a note beside it. They
+    split cleanly: six sit in the standard-names docs-resolution and export area the
+    concurrent eligibility change rewrote, one is a schema regression in
+    <code>tests/graph/</code> that nothing in the ordinary selection had been asserting.</p>
+
+    <h3 id="quiescence-schema">The resolution-schema regression asserted a class that was deliberately removed</h3>
+    <p><strong>Landed 2026-08-24</strong> &mdash; node <code>n-ddresolutionschema</code>,
+    commit <code>81b2e435</code>, merged at <code>d02d7bb6</code>.</p>
+    <table>
+      <caption>tests/graph/test_dd_resolution_schema.py, verbatim pytest summaries</caption>
+      <thead><tr><th>Point</th><th>Summary line</th></tr></thead>
+      <tbody>
+        <tr><td>Pre-change</td><td><code>1 failed, 4 passed in 2.79s</code></td></tr>
+        <tr><td>Post-change</td><td><code>5 passed in 1.38s</code></td></tr>
+      </tbody>
+    </table>
+    <p>The test expectation was the defect and the schema was right.
+    <code>DDResolutionStateChange</code> was removed by <code>1edaa0de</code> when the
+    resolution authority moved into the graph; the regression still read
+    <code>classes["DDResolutionStateChange"]["attributes"]</code> and required four fields
+    on it. The decisive evidence is that a sibling test,
+    <code>tests/standard_names/test_dd_resolution_graph.py:52</code>, already asserts
+    <code>"DDResolutionStateChange" not in schema["classes"]</code> &mdash; so the two
+    suites contradicted each other and one of them had to be red whatever the schema said.
+    Realigned to the live contract: typed status, a required content-addressed identifier,
+    required provenance, and the absence of the retired receipt.
+    <code>imas_codex/schemas/standard_name.yaml</code> was not touched, which is what makes
+    this a test repair rather than a weakened assertion.</p>
+    <p>Artifacts: <code>pytest-pre-change.log</code>, <code>pytest-post-change.log</code>
+    under the run directory
+    <code>r-20260824T154313125010-n-ddresolutionschema</code>.</p>
+  </section>
+</main>
+</body>
+</html>
