@@ -1,0 +1,80 @@
+[
+  {
+    "type": "project",
+    "id": "project",
+    "path": "state/imas-codex/project.json",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S1",
+    "path": "sprints/S1.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S10",
+    "path": "sprints/S10.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S11",
+    "path": "sprints/S11.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S2",
+    "path": "sprints/S2.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S3",
+    "path": "sprints/S3.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S4",
+    "path": "sprints/S4.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S5",
+    "path": "sprints/S5.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S6",
+    "path": "sprints/S6.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S7",
+    "path": "sprints/S7.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S8",
+    "path": "sprints/S8.html",
+    "existed": false
+  },
+  {
+    "type": "sprint",
+    "id": "S9",
+    "path": "sprints/S9.html",
+    "existed": false
+  },
+  {
+    "type": "timeline",
+    "id": "timeline",
+    "path": "state/imas-codex/timeline.html",
+    "existed": false
+  }
+]

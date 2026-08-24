@@ -1,0 +1,106 @@
+{
+  "format": "distributed",
+  "status": "complete",
+  "project": "imas-codex",
+  "source": "state/imas-codex/index.json",
+  "source_sha256": "b9fc8216ed3b80d8f95bb64d6803f8141df1051b9651f47e0a1d7e892d189872",
+  "source_version": 50,
+  "snapshot": ".reckon/snapshots/project-state/b9fc8216ed3b80d8f95bb64d6803f8141df1051b9651f47e0a1d7e892d189872/index.json",
+  "snapshot_sha256": "b9fc8216ed3b80d8f95bb64d6803f8141df1051b9651f47e0a1d7e892d189872",
+  "destination_snapshot_manifest": ".reckon/snapshots/project-state/b9fc8216ed3b80d8f95bb64d6803f8141df1051b9651f47e0a1d7e892d189872/destinations.json",
+  "parity_sha256": "46b93fe68018ddb6fae1bb7fcfb806bc44774e763cccfb97d449a1d7135fa01d",
+  "resources": [
+    {
+      "type": "project",
+      "id": "project",
+      "path": "state/imas-codex/project.json",
+      "sha256": "d5deda63946d8f5bdedb4d60bf5acd6511a4bbf8f120aad1eb66b60785031131",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S1",
+      "path": "sprints/S1.html",
+      "sha256": "fa6e3567ca326ed357484357b8b8573b56fed926f7ea90f1d7bbdfe7e6e6bf60",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S10",
+      "path": "sprints/S10.html",
+      "sha256": "279af006f242132ec1115173ec603a63a2a47c64af5aafc8cdcd6a1c1294913a",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S11",
+      "path": "sprints/S11.html",
+      "sha256": "0d0083729880bec93631fda33b63d4de47ce08c27ab11be2aa3a5d26e7c03fcb",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S2",
+      "path": "sprints/S2.html",
+      "sha256": "c7b1316c9322a181f2da807cfe7bc6ddfe07f756db10f24dd350194fc89bd900",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S3",
+      "path": "sprints/S3.html",
+      "sha256": "bd20cf2d99c64f2e6b94919a48798360540ac331549dce3db9747e7bf6277bed",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S4",
+      "path": "sprints/S4.html",
+      "sha256": "649aae516235b1b3f044540ec7c4ef6d3a7f1702afe2403492ce4c61195c45f2",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S5",
+      "path": "sprints/S5.html",
+      "sha256": "8a36e2dee692ffe5926b9a7d976ca854da13a7d1dfabb4791e2960d1c650f065",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S6",
+      "path": "sprints/S6.html",
+      "sha256": "93c18caea71404f8c6fc75a9d6faf9b9be521080534271b9a32ee86e9daf60b9",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S7",
+      "path": "sprints/S7.html",
+      "sha256": "b744057ad1926105a5a208f9f2b233f041d3b3792a24cb2d92098c6dc1402e77",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S8",
+      "path": "sprints/S8.html",
+      "sha256": "abc9aac428fcc6ddba2d6b0e2e35741730b14b8b9469faede2e7ff891b441f14",
+      "version": 0
+    },
+    {
+      "type": "sprint",
+      "id": "S9",
+      "path": "sprints/S9.html",
+      "sha256": "6b4d0be52c25cd6d8647e9cb0f96491c6d220632bdbfaf424c9585c47237d170",
+      "version": 0
+    },
+    {
+      "type": "timeline",
+      "id": "timeline",
+      "path": "state/imas-codex/timeline.html",
+      "sha256": "b5dd9f7bbb898075101dc028050c14ba5a335e7de5b28ce6357aec4f476b560a",
+      "version": 0
+    }
+  ],
+  "completed_at": "2026-08-24T08:05:56+00:00"
+}

@@ -1,0 +1,386 @@
+{
+  "updated": "2026-08-23T08:44:55",
+  "project": "imas-codex",
+  "doc": "index",
+  "data": {
+    "slug": "imas-codex",
+    "name": "IMAS Codex",
+    "active_sprint_id": "S8",
+    "sprints": [
+      {
+        "id": "S1",
+        "theme": "SN foundation unblockers",
+        "description": "Close the highest-ROI grammar, bootstrap, and vocabulary blockers before wider search, benchmark, and catalog work.",
+        "summary": "Completed first sprint. This wave established the stable SN foundation: the architectural pivot is closed with a bounded drain proof and explicit grammar-as-graph carve-out, bootstrap hard blockers on the current release line are cleared, and the closed physical-base rollout was confirmed to already be present upstream in rc31.",
+        "starts": "2026-06-05",
+        "ends": "2026-06-12",
+        "status": "done",
+        "items": [
+          {
+            "slug": "sn-architectural-pivot",
+            "why_now": "Highest-ROI upstream blocker; it explicitly blocks sn-quality-bootstrap-v2 and sets the grammar/graph architecture for the rest of the SN roadmap.",
+            "done_when": "Generate/enrich split and lifecycle pivot are landed, bounded drain proof is recorded, and the grammar-as-graph tail is explicitly carved out of S1 closure.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "sn-quality-bootstrap-v2",
+            "why_now": "Follows directly from sn-architectural-pivot and gates downstream compose, search, and quality work.",
+            "done_when": "Bootstrap hard blockers on the current release line are cleared, the three governance decisions are locked, and export hard failures are gone with only advisory link/divergence/score tails deferred.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "sn-closed-physical-base",
+            "why_now": "Stabilizes the grammar and vocabulary before broader export, parity, and search work.",
+            "done_when": "The upstream closed physical-base redesign is confirmed present in rc31, codex-side audit/graph drift blockers are cleared, and preview/render grouping validation is explicitly handed to later quality work rather than blocking S1.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ]
+      },
+      {
+        "id": "S2",
+        "theme": "Search and compose enablement",
+        "description": "Land the search surface and fan-out execution path once the foundation sprint settles.",
+        "summary": "Retired 2026-07-29: the June search/fan-out era ended; its plans were superseded by the July SN campaign line (model-selection-and-global-refine, canonical-qualifier-order, the WEST rehearsal). Closed for state hygiene, not completion.",
+        "starts": "2026-06-12",
+        "ends": "2026-06-19",
+        "status": "done",
+        "items": [
+          {
+            "slug": "sn-search-facility",
+            "why_now": "Already more than half landed and it explicitly blocks sn-structured-fanout.",
+            "done_when": "Phase 4 call-site migration is complete, temporary aliases are removed on schedule, and the seven-tool surface is backed by unified functions.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "sn-structured-fanout",
+            "why_now": "Depends on sn-quality-bootstrap-v2, sn-search-facility, and sn-extraction-prompt-overhaul; it should start only after those surfaces stabilize.",
+            "done_when": "Phase 0 helper extraction plus Phase 1 refine-name fan-out, telemetry, and tests all land while preserving the baseline no-op fallback.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ]
+      },
+      {
+        "id": "S3",
+        "theme": "Quality gates and catalog ship path",
+        "description": "Close benchmark, catalog, and parity loops after the grammar and search foundations are in place.",
+        "summary": "Retired 2026-07-29: benchmark/catalog-quality goals were absorbed by model-selection-and-global-refine (shipped) and catalog-expert-review-remediation (shipped). Closed for state hygiene.",
+        "starts": "2026-06-19",
+        "ends": "2026-06-26",
+        "status": "done",
+        "items": [
+          {
+            "slug": "sn-benchmark-v1",
+            "why_now": "Should follow sn-benchmark-evolution so the benchmark set and pass/fail gates are aligned with the actual reviewer stack.",
+            "done_when": "The full 50-positive and 20-negative set exists, consensus policy is resolved, and the gates are meaningful on production runs.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          },
+          {
+            "slug": "sn-catalog-quality-refactor",
+            "why_now": "High-ROI release blocker; derived-parent lifecycle, validation loop, and export safety remain open.",
+            "done_when": "Phase 4 validation runs on live graph data, derived-parent delete/rewire exists for real, and export/publish invariants are green.",
+            "capability": {
+              "version": "1.0",
+              "class": "orchestrator",
+              "requirements": {}
+            }
+          }
+        ]
+      },
+      {
+        "id": "S4",
+        "theme": "CLI and docs hygiene tail",
+        "description": "Finalize command-surface cleanup and documentation refresh after the core SN roadmap is stable.",
+        "summary": "Retired 2026-07-29: the CLI/docs hygiene tail was overtaken by the converged sn CLI surface and the SN campaign docs. Closed for state hygiene.",
+        "starts": "2026-06-26",
+        "ends": "2026-07-03",
+        "status": "done",
+        "items": [
+          {
+            "slug": "docs-refresh",
+            "why_now": "This work is safest after the code and plan migration dust settles.",
+            "done_when": "README inventory, stale CLI/API references, service-port errors, and historical-doc disposition are all corrected.",
+            "capability": {
+              "version": "1.0",
+              "class": "general",
+              "requirements": {}
+            }
+          }
+        ]
+      },
+      {
+        "id": "S5",
+        "status": "done",
+        "theme": "Retired WEST RC dress rehearsal",
+        "items": [],
+        "starts": "2026-08-12",
+        "ends": "2026-08-10",
+        "description": "Retired before execution when graph-wide context and geometry defects invalidated the historic review packet as release authority.",
+        "summary": "Closed without a WEST release. Human review and catalog publication were separated into a later two-plan sprint after complete context, DD-resolution, grammar, pipeline, graph, evidence and operator hardening."
+      },
+      {
+        "id": "S6",
+        "status": "done",
+        "theme": "SN pipeline stability tail",
+        "items": [
+          {
+            "slug": "sn-naming-loop-robustness",
+            "why_now": "Owns the loop's remaining stability work: the pipeline mechanics (failed-retry instrument, pooled compose-model threading, pending scoping, edit reachability, status mirrors), the grammar/prompt truth pass from the ISN sweep, the rung-5 vocabulary rotation from the 159-token triaged list, and the rung-6 design landing including chained operators.",
+            "done_when": "f-nlr-003 and f-nlr-004 resolved with numbers; the 159 adjudicated add/fold/reject; adds in an ISN RC with the codex pin bumped; rung-6 prerequisites green; all five gates re-measured HOLDS at the post-rotation pin with the WEST batch parse-check green (the sprint exit)."
+          }
+        ],
+        "starts": "2026-07-29",
+        "ends": "2026-08-12",
+        "description": "Stability and correctness BEFORE the release (lead decision 2026-07-29: 'I value stability and correctness over a rushed release'). All grammar-moving and validation work lands here so the batch the human reviews is the stable one: the vocabulary rotation, the grammar/prompt truth pass, unit authority, the deletion-ledger invariant, the pipeline mechanics, and the DD-gaps foundation. EXIT CRITERIA (hard, so the RC does not recede again): all five convergence gates re-measured HOLDS at the post-rotation pin, the WEST batch parse-check green at that pin, suites green, and a fresh gate-ledger row recorded.",
+        "summary": "S6 closed on 2026-08-01 at ISN v0.8.0rc64. The 159-token rotation is fully dispositioned (18 add, 27 fold, 114 reject) with an atomic receipt; ordered strict operator trees, grammar/prompt truth, exact dependency pinning, pipeline retry/scoping mechanics, unit authority, deletion-ledger repair, DDGap foundation, and the WEST semantic-source repair landed. Final gates are HOLD/HOLD/HOLD/HOLD/HOLD. Gate 2 was 0/1 then 0/1 actionable gaps; exact WEST is 339 accepted + 10 documented non-nameable + 5 instrumented in-flight + 1 quarantined residual, zero unexplained, zero duplicate accepted identities, zero authoritative unit conflicts, and zero source-invariant violations. Codex SN suite: 5,692 passed; ISN grammar suite: 1,076 passed. Global non-WEST debt is explicitly carried to S7; the review rehearsal remains planned in S5."
+      },
+      {
+        "id": "S7",
+        "status": "done",
+        "theme": "Graph-wide integrity investigation and containment",
+        "items": [],
+        "starts": "2026-08-04",
+        "ends": "2026-08-10",
+        "description": "Investigated graph-wide provenance, claims, families, cost admission and documentation authority; landed substantial enabling repairs while preserving exact authority boundaries.",
+        "summary": "Closed honestly as investigation and containment, not a finished delivery. The sprint exposed systemic context pollution, geometry folding defects, stale/incomplete review evidence and misleading budget presentation. Unresolved work moved into the active pre-WEST semantic-integrity sprint; no WEST release-readiness claim is carried forward."
+      },
+      {
+        "id": "S8",
+        "status": "active",
+        "theme": "Pipeline robustness and semantic integrity",
+        "starts": "2026-08-10",
+        "ends": "2026-09-25",
+        "description": "Finish the work that makes the pipeline trustworthy: complete the local DD-resolution channel, then repair the measured semantic-integrity worklist (the WEST-blocking subset first, then the dual-bound sources and gated detaches). The pipeline itself was restored and instrumented under sn-pipeline-recovery: attempt-budgeted refinement, write-boundary attachment guards, ISN locus typing, and typical-bill cost admission are live.",
+        "summary": "CLOSED 2026-08-22. All five item clauses are satisfied and sn-graph-wide-integrity shipped, so the sprint's semantic-integrity mandate is discharged on live measurement rather than assertion. At close every tracked defect class reads zero or carries a recorded fail-closed refusal: semantic sources with no live target 0, scalar mirror mismatches 0, DD projection mismatches 0, accepted names failing the pinned rc66 grammar 0 of 2,539; dual-bound 4 and owner/geometry 2, each a named last-producer or policy refusal. The unsourced cohort is fully dispositioned at 17 derived / 17 dispositioned / 0 undispositioned / 0 deleted on no-measuring-path grounds, partitioned 9 attached, 4 held on named DD defects, 1 retired on physics, 3 below threshold and left to ordinary review. Applied through independently reviewed exact signed manifests only: 19 of 23 dual-bound rows, 3 of 3 owner/geometry migrations, 3 of 9 remaining attachments, 2 structural revivals, 1 scalar mirror, and 3 score-consuming lifecycle transitions, every one with receipt_rows equal to its StandardNameChange delta and a write-free replay. The defining results are three corrections the machinery forced rather than the repairs themselves. This sprint's orphan premise was overturned twice by measurement and nothing was deleted, because reverse dictionary search found measuring paths a rank-limited forward search had missed. A zero-write audit that counted receipts by operation name while they carry a run_id reported an already-committed transaction as refused, establishing the binding rule that absence of a mutation is proven by receipt run_id and manifest digest, never by an operation-name query or a bare counter total. And the structurally bare count read 29 against a carried figure of 2, where only the partition made it legible as 9 transient consequences of a successful reconcile plus 20 pre-existing holds; the nine were then closed deterministically at zero cost with every causal source's binding closure digest byte-identical. Alongside, sn-repair-operator-consolidation met its clause and went further: repair now runs through three closed branch programs under one signed envelope at six mutation kinds instead of new bespoke operators, a builder emits schema-valid authorities after two live nodes each lost both attempts to hand-rolled shapes, and all four previously committed authority artifacts still load on their original bytes and pinned digests with nothing re-signed. That plan stays active with seven operators unmigrated, which its own clause anticipated and which its sections track. The integrated tree is green at 6,570 passed / 0 failed / 0 errors with six focused disposable-graph suites at 0 skipped and the live-graph ratchets 4 of 4. Measured spend for the closing session was USD 1.57 of reviewed quorum draws and USD 0.00 for every apply, seed, census and reconcile, against the authorized USD 150.",
+        "items": [
+          {
+            "slug": "sn-pipeline-recovery",
+            "why_now": "Shipped: restored operability, triaged the wave machinery, drained the backlog to convergence.",
+            "done_when": "Done \u2014 suite green, proof-of-life and four drain tranches recorded, attempt budget and attachment guards live."
+          },
+          {
+            "slug": "sn-dd-gaps",
+            "why_now": "Shipped: known DD defects needed reviewed repo-local resolutions so names stay properly sourced while upstream DD pull requests are pending.",
+            "done_when": "Done \u2014 approved exact path/version resolutions flow through every Standard Names consumer, fail closed on ambiguity, and retire automatically when upstream DD converges."
+          },
+          {
+            "slug": "sn-graph-wide-integrity",
+            "why_now": "The measured repair pass. Its orphan disposition was overturned twice by measurement, and the closing census was then reopened when the self-describing-name and universal-source principles were made binding.",
+            "done_when": "Substantially complete at 96.5 percent. Every mechanical class reads zero or carries a recorded fail-closed refusal, the unsourced cohort is dispositioned with none deleted on no-measuring-path grounds, and prevention is enforced at the write boundary. The residue it reopened is carried by sn-integrity-residual-closure rather than by further work here."
+          },
+          {
+            "slug": "dd-version-resilient-resolution",
+            "why_now": "Shipped: a dictionary label mismatch had already halted a scoped run, and 8,680 sources still carried a label older than the graph's snapshot.",
+            "done_when": "Done \u2014 resolution compares content rather than labels, refusal is scoped to the changed leaf, and no bulk re-stamp was performed."
+          },
+          {
+            "slug": "sn-repair-operator-consolidation",
+            "why_now": "Its own stated trigger fired: the landed retirement operator supersedes, so deletion was either an eleventh signed operator or a mutation-kind parameter on a generic one.",
+            "done_when": "Done for this sprint \u2014 the ten signed-artifact operators are characterised in one table, a generic signed-manifest operator implements the eight-step envelope reading its preview and counters inside the applying invocation, and the registry now admits eight closed mutation kinds after this session added source-target reconciliation, structural revival, ordinary-source migration, structural reparent and parent release. Each migrated operator's bespoke function was deleted as its migration landed. The plan returned to unscheduled backlog with seven operators unmigrated."
+          },
+          {
+            "slug": "sn-integrity-residual-closure",
+            "why_now": "sn-graph-wide-integrity reopened when the self-describing-name and universal-source principles were made binding, turning its closing disposition of 17 unsourced identities back into a live worklist. Eight closed mutation programs now exist under one signed envelope, including the parent-release program landed this session, so the residue is application rather than construction. The umbrella retirement is one invocation from done and nothing blocks it.",
+            "done_when": "The flux-surface umbrella is retired: surface_area_of_flux_surface released to no parent with all 20 producers and its lifecycle intact, then area_of_flux_surface superseded once its live child count reads 0. Integrated verification re-runs green at the new HEAD across the full standard_names suite, tests/units, the parent-release suite, zero shadow warnings on a freshly generated model import, all four committed authority digests, and both ruff gates. The nine clean reverse-search candidates are attached through exact signed manifests, with neutron_flux_due_to_fusion included now that dimensional agreement holds, and fast_ion_charge_state_power_at_inside_flux_surface held on its filed DD issue. The 46 extracted sources whose only targets are superseded or exhausted are censused read-only and partitioned, establishing whether the difference from the previous zero is definitional or real before any action. Every remaining item is either applied or carries a recorded refusal naming the external condition that would lift it: the 3 dual-bound last-producer holds, field_map_grid as an ISN vocabulary question rather than a permanent verdict, voltage_of_diagnostic_antenna pending a source-less rename capability, reflector/centre/phi pending a reviewed centre-of-curvature identity, and the 3 below-threshold identities pending a producing source before sn edit steering. Closing on recorded refusals remains legitimate."
+          }
+        ]
+      },
+      {
+        "id": "S9",
+        "status": "planned",
+        "theme": "Quality before review",
+        "starts": "2026-08-24",
+        "ends": "2026-09-11",
+        "description": "Raise quality where it multiplies the value of the human review, without graph-wide regeneration (lead decision 2026-08-12: too expensive). The docs template, DD/COCOS context, and holdout benchmark land first so every future generation is born at the new standard and the ~350-name WEST cohort gets the one authorized scoped refresh before experts see it. The discriminating benchmark and free DSv4 advisory census pre-screen the WEST rows and rank the exhausted-tail rescores.",
+        "summary": "Planned ahead of the WEST review at the lead's direction: reviewer attention is the scarcest resource, so the packet must carry the best attainable docs. Regeneration stays scoped \u2014 WEST cohort plus census-flagged holdout failures only.",
+        "items": [
+          {
+            "slug": "sn-quality-parity",
+            "why_now": "The docs standard must exist before the WEST packet is frozen \u2014 template-first means the pending backlog is generated at the new standard for free, and the WEST cohort gets its one authorized scoped refresh.",
+            "done_when": "Holdout benchmark baselined; DD/COCOS context reaches compose; content-gated template and curated examples live; the WEST-cohort docs refresh passes quorum under a hard cap; link lifecycle lands with publish-time safety."
+          },
+          {
+            "slug": "sn-benchmark-evolution",
+            "why_now": "A discriminating panel benchmark plus the free advisory census pre-screens the WEST rows for defects and ranks the exhausted-tail rescores before any human looks.",
+            "done_when": "Panel-judged benchmark with domain-balanced anchors passes its locked gates; the zero-mutation census has flagged WEST rows and ranked the parked tail."
+          },
+          {
+            "slug": "sn-release-readiness",
+            "why_now": "The first catalog release has never run, so every export gate is untested; the exclusion ledger has to exist before the WEST packet is frozen in S10, or that release ships whatever survives the filters with no statement of what it dropped.",
+            "done_when": "Export emits an exclusion ledger where emitted + sum(exclusions by reason) = N with identities recoverable per reason; the deprecation-stub query falls back to superseded_by when no REFINED_FROM edge exists; the three open decisions are locked; and the docs, validity and metadata backlogs are drained or dispositioned against the locked decisions."
+          }
+        ]
+      },
+      {
+        "id": "S10",
+        "status": "planned",
+        "theme": "WEST expert review and catalog release",
+        "items": [
+          {
+            "slug": "sn-west-review-rehearsal",
+            "why_now": "Human experts review the refreshed cohort at the new docs standard; the census pre-screen and 14-source residual close first.",
+            "done_when": "Every WEST row has an explicit human accept/change/hold disposition with complete current name, source, description, and review evidence; requested changes pass the ordinary pipeline."
+          },
+          {
+            "slug": "sn-west-catalog-release",
+            "why_now": "Publication and graph fold-back are a separate authority class after human disposition.",
+            "done_when": "The reviewed catalog change is merged and tagged, graph/catalog/source parity is exact, and the undo rehearsal restores the pre-release state while retaining audit history."
+          }
+        ],
+        "starts": "2026-09-14",
+        "ends": "2026-10-02",
+        "description": "The visible milestone, now consuming the S9 quality standard: freeze the reviewer packet from the refreshed WEST cohort, close the 14-source residual, conduct human accept/change/hold review, then publish exactly those dispositions, fold the reviewed state back into the graph, and prove the undo path.",
+        "summary": "Planned behind S9 at the lead's direction (2026-08-12): quality lands before human review so reviewer attention is never spent on docs the pipeline was about to improve."
+      },
+      {
+        "id": "S11",
+        "status": "planned",
+        "theme": "Facility breadth",
+        "items": [
+          {
+            "slug": "mast-semantic-source-repair",
+            "why_now": "Facility breadth after the release pattern is proven on WEST; consumes graph-wide integrity's hardened mechanisms.",
+            "done_when": "The refreshed MAST manifest has exact DD/local-resolution/ISN authority, guarded dry-runs, and any separately authorized applies with stable-id parity and zero collateral."
+          }
+        ],
+        "starts": "2026-10-05",
+        "ends": "2026-10-23",
+        "description": "Extend properly-sourced coverage beyond WEST: MAST parity consumes the hardened generic mechanisms, piloting the facility-signal provenance layer alongside exact DD sources.",
+        "summary": "Planned. MAST kept out of the release chain \u2014 it depends on graph integrity, not on the WEST review, and adds no value ahead of it."
+      }
+    ],
+    "milestones": [],
+    "timeline": [
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "S1-S4 sprint plan authored from the migrated reckon HTML plan inventory and explicit dependency graph."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "Legacy derived-parent lifecycle repair landed on main, the invalid bare-base parent `inductance` was removed from the live graph after review, and `tests/graph/test_sn_graph.py` returned green. Sprint S1 remains active because the remaining work is evidence/rollout closure rather than core code repair."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "A clean `sn run --flush -c 10 -t 20` completed with `no_eligible_work` after 8m 13s at $9.7013 / $10.00, enriching 54 names, reviewing 73, regenerating 68, and lifting docs-accepted coverage from 154 to 215 while keeping the SN graph suite green."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "Sprint S1 closed after the final export cleanup: invented secondary boundary/contour names were removed, legitimate secondary_separatrix mappings were restored, startup normalization gained accepted-derived cleanup, export hard blockers fell to zero, and no new IMAS-Standard-Names RC was needed because rc31 already contained the redesign."
+      },
+      {
+        "when": "2026-06-05",
+        "who": "gpt-5.4",
+        "what": "Sprint S2 launched after a full live-plan review. The sprint is now active with sn-search-facility leading and sn-structured-fanout queued behind its remaining migration work and the already-landed bootstrap/extraction prerequisites."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "Simon McIntosh",
+        "what": "June sprint set (S2-S4) retired as superseded; S5 (WEST RC dress rehearsal) started with S6 (stability tail: vocabulary rotation, unit authority, DD-gaps foundation) and S7 (graph-wide integrity) queued behind it. Basis: all five D-release-standard convergence gates measured HOLDS on 2026-07-29."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "Simon McIntosh",
+        "what": "Sprint order inverted by the lead: stability and correctness before the release. S6 is now active and S5 (WEST RC) follows, entering only on the S6 exit criteria: all five gates re-measured HOLDS at the post-rotation pin with the batch parse-check green. The deletion-ledger invariant pulled forward into S6. Rationale: S6 deliberately moves the grammar, so cutting first would rename the reviewed batch under the reviewer, and the reviewer-facing ISN docs carry wrong guidance until the truth pass lands."
+      },
+      {
+        "when": "2026-07-29",
+        "who": "reckon-ship",
+        "what": "S6 canonical cleanup used IMAS-DD metadata to reverse the proposed rho_tor alias direction: toroidal_flux_coordinate stays canonical in v0.8.0rc60. Fifteen exact canonical transitions earned review acceptance; all 2,158 accepted graph names parse canonically; the full SN suite exited zero; exact campaign spend was $2.539308. The graph-wide unit-authority S6 item is now closed. S6 remains active for the vocabulary rotation, grammar/prompt truth tail, gate replay, and DDGap storage decision."
+      },
+      {
+        "when": "2026-07-30",
+        "who": "reckon-ship",
+        "what": "S6 toroidal-flux correction closed: IMAS-DD metadata established coordinate semantics; ISN v0.8.0rc61 removed the radius alias and renamed the gradient base; Codex pinned the release, fresh quorum accepted gm2/gm3/gm7, and sanctioned provenance cleanup removed all nine radius-named graph nodes while preserving audit events. Full SN suite: 5,167 passed; incremental review spend $0.526032."
+      },
+      {
+        "when": "2026-08-01",
+        "who": "reckon-ship",
+        "what": "S6 closed at the exact ISN rc64 pin. The 159-token adjudication, strict ordered grammar and prompt truth, pipeline stability mechanics, unit/deletion-ledger work, DDGap foundation, and scoped WEST provenance repair are complete. Final five-gate matrix HOLD/HOLD/HOLD/HOLD/HOLD; WEST 355 partitions with zero unexplained and zero source-invariant violations. S5 remains planned for the human review rehearsal; global and DDGap policy debt moves explicitly to S7."
+      },
+      {
+        "when": "2026-08-04",
+        "who": "reckon-ship",
+        "what": "S7 handoff recorded at main cb6ca67f. Landed graph-integrity machinery and validation remain green; exact attributable spend is $5.310418/$200. A fresh completion audit found global flush terminality and hard-budget proof gaps, and the single attempted aggregate census stopped safely on a compile error with zero writes and no retry. Five ordered restart tasks are now recorded in the graph and MAST plans; no paid generation or MAST mutation/publication occurred."
+      },
+      {
+        "when": "2026-08-08",
+        "who": "Simon McIntosh",
+        "what": "WEST batch de-protection locked (west-batch-repair-scope): the unreleased WEST review batch folds into best-effort graph-wide repair scope through the normal quorum pipeline; only the published ISN catalog and test fixtures retain protected status. S7 scope text updated; f-sgwi-007 queued to lift the structural_closure zero-intersection gate and census-overlay protection."
+      },
+      {
+        "when": "2026-08-10",
+        "who": "Simon McIntosh",
+        "what": "S7 closed honestly as investigation and containment. S8 started as the hard pre-WEST semantic-integrity sprint with typed context, repo-local DD resolution authority, external ISN plane/arc grammar, semantic pipeline hardening, DSv4 advisory benchmarking, exact graph/evidence recovery, MAST parity and an eight-intent CLI. S9 now owns later WEST expert review and catalog release; WEST is not protected."
+      },
+      {
+        "when": "2026-08-11",
+        "who": "Simon McIntosh",
+        "what": "SN plan-portfolio review: llm-context-integrity, 33-cli-harmonization, and the sn-pipeline-hardening overlay retired as unexecuted authority ceremony (the June hardening programme stays archived as a completed record); sn-quality-parity rewritten to its original documentation-quality scope; sn-benchmark-evolution de-gated and pointed at the exhausted-tail triage. S8 refocused on sn-dd-gaps plus sn-graph-wide-integrity, S9 trimmed to the two WEST release plans, S10 created for quality depth and MAST breadth."
+      },
+      {
+        "when": "2026-08-12",
+        "who": "Simon McIntosh",
+        "what": "Sprint order revised at the lead's direction: quality lands before the WEST human review (S9 = docs quality + benchmark/census, S10 = WEST review + release, S11 = MAST breadth). Graph-wide docs regeneration is locked out as too expensive \u2014 the scoped-only decision on sn-quality-parity authorizes exactly the WEST-cohort refresh plus census-flagged holdout failures."
+      },
+      {
+        "when": "2026-08-16",
+        "who": "reckon-ship",
+        "what": "Portfolio deep-scan ahead of the WEST RC. Fresh live census recorded in both S8 gate plans: the WEST residual is 49 exact RC-blocking rows (not the stale 14-source claim; gm1/gm5/gm6 already accepted). Codex investigation workers root-caused the 2026-08-11 run stalls (pending-counter predicate drift plus an in-flight watchdog gap), diagnosed the 297 lifecycle-less name stubs (bare-endpoint MERGE in the edge writers; 57 materialize / 237 delete / 3 rebind disposition), and produced the 586-row WEST gate manifest. Codex prototype workers demonstrated the stall and stub fixes with TDD evidence in isolated worktrees; landing stays with S8 execution. plan-lifecycle-hygiene archived; f-west-residual-14 resolved as superseded; the 28-row WEST docs drain folded into the S9 refresh."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 restated against measurement after two execution sessions. Dual-bound 226 to 23, stale-with-binding 58 to 3, signed retirements 16 to 0, measurement-position producers 61 to 28, 11 identities accepted, spend $3.47 of $150. Regeneration was tried as the locked family-topology-repair decision prescribes and disproved for the orphans at a cost of $1.60: compose re-emits parents and never proposes the orphan children, so their disposition is retirement rather than re-sourcing. Root-caused and fixed a stale grammar snapshot serving rc9 under a string-ordered version fallback while rc66 was pinned, with ISN's graph spec omitting 175 public physical_base tokens. Landed live-graph ratchets for three previously unasserted invariant classes. Captured execution doctrine in the plan and raised sn-repair-operator-consolidation and dd-version-resilient-resolution as separate plans."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "Simon McIntosh",
+        "what": "Two authority decisions. Names never approved through a catalog pull request are DELETED rather than retired when they lose their home, since retirement exists to preserve a published identity and superseding an unreleased name leaves residue in a catalog it never entered; of the 36 orphans only 3 carry catalog-edit origin, so the great majority simply go. And dd-version-resilient-resolution joins S8 rather than sitting in backlog, because a dictionary label mismatch already halted a scoped run and 8,680 sources still carry an older label, so every future bump repeats the stop until resolution compares content instead of labels."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "Simon McIntosh",
+        "what": "Delete authority narrowly bounded after the lead flagged that the delete-not-retire wording read broadly enough to licence deleting most of the graph, since only a few hundred of 2,538 accepted names are released. Deletion now requires all four of no producing source, no live structural child, no catalog release provenance, and membership in an exact signed manifest whose row count the operator refuses on excess; and it may never be triggered by a parse failure, grammar mismatch, quarantine, validation error or resolution fault. The stale rc9 grammar defect is the cautionary case: had deletion been reachable from a parse failure, it would have manufactured justification for destroying correct names. Separately sn-repair-operator-consolidation moved from backlog into S8 after its own trigger fired via the delete mutation kind, and after correction showed the target is ten signed-artifact operators migrated one at a time rather than 22 behind an all-or-nothing switch."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 session landed 15 nodes with 3 fail-closed refusals and zero unintended writes. dd-version-resilient-resolution SHIPPED: the fix was deleting four lines, because the convergence primitive already sat in the same module behind a pre-emptive label guard, and the larger half made batch refusal per-leaf across all 7 call sites, one of which paired rows to results positionally and would have misassociated them silently. sn-repair-operator-consolidation met its done_when and stays active with 9 operators unmigrated: one authority schema validates all 4 committed artifacts from original bytes at pinned digests, apply_signed_manifest carries the eight-step envelope with 9 of 9 disposable-graph proofs and exact refusal strings, and the first bespoke operator is deleted with zero remaining references while its suite ran unchanged. All four sn-graph-wide-integrity ratchets now pass: reconciliation no longer rebinds stale sources, the 2 rebound edges were detached with 9,614 untouched-row digests unchanged, and the interrupted momentum-flux run reached a decided exhausted lifecycle for $0.66. But that plan's done_when is NOT met, because the lead overturned the orphan disposition: asked whether the 36 unsourced names could be re-sourced by reverse dictionary search before removal, the answer is 25 RECOVERABLE, 3 genuine negatives, 8 needing physics judgement, with j_ohmic 0.94, grid/area 0.92 and q_min/value 0.89 all unit-matching. The all-delete cohort would have destroyed 25 valuable names whose only defect was a lost binding. The earlier negative result had tested composition FORWARD only, where compose re-emits parents and never proposes these children; a negative in one direction was read as a negative in every direction. Nothing was deleted - three independent guards had already refused on quarantine, on relationship closure, and on review/chain-history permanence. Also landed: a composer that could not spell canonically now normalizes to the parser's canonical order, admitting 55 segment combinations beyond the one that surfaced it; the manifest digest the ledger already wrote is declared; pre-existing lint debt cleared. Spend $0.66 of $150."
+      },
+      {
+        "when": "2026-08-21",
+        "who": "reckon-ship",
+        "what": "S8 session landed 19 nodes with 4 recorded fail-closed or not-run refusals and zero unintended writes, and its central result is that this sprint's own done_when was wrong. Reverse dictionary search recovers 31 of the 36 unsourced names with agreeing units, including the last 3 that had survived a negative search: those were false negatives from a query ranking only its top eight paths, while each response had already returned the cluster holding the missed family. So zero of the 36 is deletable on no-measuring-path grounds, and the sprint clause instructing deletion was corrected in place. A governed transaction then attached 15 of 31 candidates at untouched_changed=0 over 9,607 rows with a write-free replay, dropping genuine orphans 36 to 20; unit guards agreed on all 31 and were never the binding constraint, as target lifecycle refused 9 of the 16. electron_source_rate went through ordinary review at $0.197 once its two blocking defects were fixed at their causes rather than retried, turning two red graph integrity tests green. One axis retarget applied under a structural-child closure the coordinator authorized after the worker correctly refused to widen its own guard. Four of seven identities accepted on a single corrected-grammar draw at $0.56, three of them grammar-preferred spellings that had scored 0.76 to 0.84 against the stale vocabulary. The voltage identity closed as a standing recorded refusal with both sanctioned routes shut by measurement. Alongside, the repair-operator programme went from one migrated operator to three, all three previously untestable operators gained disposable-graph suites written against live code before migration, and four codex audit checks that were quarantining legitimate names were given precision while each still fails a genuine violation. The reusable lesson is about negatives: a negative result must state which direction it tested and how far down it looked, and the plan's cheap-experiment doctrine now carries that qualification."
+      }
+    ],
+    "blockers": [],
+    "_version": 50
+  }
+}
