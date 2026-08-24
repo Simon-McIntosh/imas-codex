@@ -8,9 +8,9 @@
   <meta name="plan-slug" content="sn-graph-identity-convention">
   <meta name="plan-title" content="One Way to Name an Identity in the Graph">
   <meta name="plan-summary" content="Four silent-zero query failures in one session traced to one schema carrying three foreign-key spellings and two spellings of one axis. Unify the convention, make a misspelled property fail closed instead of returning a plausible empty result, and replace the five duplicated presence tests with one shared eligibility determination — each change specified test-first.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
-  <meta name="plan-effort-hours" content="15.0">
+  <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="7">
 <meta name="plan-impl" content="0.2">
 </head>
 <body>
@@ -220,7 +220,17 @@
     itself against the un-renamed tree — but the rename is materially safer than when this
     plan was written.</p>
 
-    <h2 id="s6b">§6b — Change E: the one path that actively strips a scalar</h2>
+    <h2 id="s6b">§6b — Change E: the strip path, dissolved by the deletion decision</h2>
+
+    <p><strong>Superseded by the <code>resolution-method-survival</code> lock, 2026-08-24 —
+    this is no longer separate work.</strong> The active strip path lives inside the
+    maintenance machinery for a field the lead has now decided to delete. Removing the field
+    removes the path, so the six affected rows need no repair: there is nothing left to strip
+    them. Change C's deletion node therefore absorbs this scope, and its done-when must assert
+    that the clearing function is gone rather than merely unused. The analysis below is
+    retained as the reason the deletion is safe, and as the record of a bug that was closed by
+    subtraction rather than by fixing it.</p>
+
 
     <p>Surfaced by the same session's root-cause work and unclosed. A 96-row population of
     accepted names holding a scored review with a null mirrored scalar partitions as:
@@ -290,32 +300,75 @@
     non-zero coverage on the target property immediately after writing, and refuses rather
     than reporting success on a zero.</p>
 
+    <h2 id="s9">§9 — Change F: the guidance is rewritten last, from the landed state</h2>
+
+    <p><strong>This stage runs after every other change is merged and every test is
+    green — never before.</strong> The reason is the plan's own subject: agent guidance that
+    describes a convention the code does not have is another silently-wrong artifact, and the
+    reader has no way to tell. Documentation written mid-migration is guaranteed to be wrong
+    for whichever half has not landed yet, and wrong in the most expensive direction, because
+    the whole point of writing it down is that people act on it without re-deriving it.</p>
+
+    <p><strong>What must be true before this stage starts:</strong> the axis enum is singular,
+    the foreign key is <code>standard_name_id</code>/<code>standard_name_ids</code> on every
+    declared class, <code>docs_review_resolution_method</code> is gone, the static property
+    check reports zero violations, and the full suite is green at that head. Then, and only
+    then, the guidance is rewritten to describe exactly what exists.</p>
+
+    <p><strong>Three files, and each has a different job.</strong> Root
+    <code>AGENTS.md</code> carries the short binding rule where an agent about to write Cypher
+    will meet it — one convention, the fail-closed coverage query, and a pointer.
+    <code>agents/graph.md</code> carries the working idiom for anyone querying the graph.
+    <code>imas_codex/standard_names/AGENTS.md</code> carries the reference tables: relationship
+    directions with LinkML citations and the per-class foreign key. A future agent should reach
+    the rule without searching and the detail without guessing.</p>
+
+    <p><strong>An interim version already exists, and it is deliberately provisional.</strong>
+    The rule and the current-state tables were written on 2026-08-24 (commit
+    <code>e403e050</code>) before this stage was scheduled — premature, and noted as such. It
+    is accurate for the pre-change tree and says so explicitly, naming the three spellings as
+    <em>not uniform yet</em> and pointing at this plan. That is why it is retained rather than
+    reverted: it is a correct warning during exactly the window in which people are touching
+    these keys, and removing it would leave that window undocumented. This stage replaces
+    every part of it that the migration makes false.</p>
+
+    <p><strong>Done when</strong> no file under <code>AGENTS.md</code>,
+    <code>agents/</code>, or <code>imas_codex/**/AGENTS.md</code> names a spelling the schema
+    no longer declares — asserted by a test that reads the declared slot and enum names from
+    LinkML and greps the guidance for retired spellings, so the documentation cannot drift
+    from the schema again without failing.</p>
+
+    <p><strong>Terminal gate:</strong> this plan does not reach <code>shipped</code> while any
+    guidance file describes the pre-change convention. The whole exercise is about a
+    convention nobody can discover by reading; finishing the code and leaving the guidance
+    stale would reproduce the defect in the one artifact meant to prevent it.</p>
+
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="axis-spelling-direction" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="axis-spelling-direction" data-choice="enum-to-singular" data-by="Simon McIntosh" data-when="2026-08-24">
     <p class="r-dec-q">Which side of the axis mismatch moves — the enum values or the slot suffixes?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="enum-to-singular">Enum becomes name/docs, matching the 28 slot suffixes</button>
+      <button class="r-opt chosen" data-value="enum-to-singular">Enum becomes name/docs, matching the 28 slot suffixes</button>
       <button class="r-opt" data-value="slots-to-plural">Slots become _names/_docs, matching the enum</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-24. The mismatch is not singular-versus-plural of one word: &#x27;docs&#x27; is always &#x27;docs&#x27;, never &#x27;doc&#x27;, so only the name axis carries two spellings. Moving the enum costs 1 permissible value and 10,720 stored review_axis values; moving the slots costs 16 renamed properties across 4,666 nodes and 16 times the readers. The decisive argument is derivability rather than cost: after the change slot == prefix + axis_value holds for every pair (reviewer_score_{axis}, reviewed_{axis}_at, reviewer_model_{axis}), so the invariant is testable from the schema instead of from a hardcoded list. Today reviewer_score_names does not exist, so every derivation breaks and every test must hardcode - which is the thing the specification contract forbids.</p>
     </div>
-<div class="r-dec" data-key="foreign-key-shape" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="foreign-key-shape" data-choice="unify-spelling" data-by="Simon McIntosh" data-when="2026-08-24">
     <p class="r-dec-q">Unify the foreign-key spelling, or traverse the authoritative edge and delete the denormalised copies?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="unify-spelling">Unify to one spelling; keep the copies</button>
+      <button class="r-opt chosen" data-value="unify-spelling">Unify to one spelling; keep the copies</button>
       <button class="r-opt" data-value="traverse-and-delete">Traverse the edge; delete the copies</button>
       <button class="r-opt" data-value="unify-now-traverse-later">Unify now, and record traversal as a separate later question</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-24, settled by a fact rather than a preference: LLMCost has NO edge to StandardName - its only relationship is FOR_RUN to SNRun across 32,373 rows - so sn_ids is not a denormalisation but the only link from a cost row to the names it charged, and the divisor in llm_cost / size(sn_ids). Traverse-and-delete is therefore impossible for one of the three labels, and a convention holding for two of three is the inconsistency being removed. Survivor is standard_name_id / standard_name_ids: the explicit unambiguous form, already used by the largest label at 24,789 rows. Noted so it is not discovered later: DocsRevision.id is composed as {sn_id}#rev-{n}, so the old value stays embedded in identifier strings after the rename - acceptable because ids are opaque, but the rename does not erase the old spelling from the data.</p>
     </div>
-<div class="r-dec" data-key="resolution-method-survival" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="resolution-method-survival" data-choice="delete-derive-from-edge" data-by="Simon McIntosh" data-when="2026-08-24">
     <p class="r-dec-q">Does docs_review_resolution_method survive Change D at all?</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="delete-derive-from-edge">Delete it; all five sites derive from the edge</button>
+      <button class="r-opt chosen" data-value="delete-derive-from-edge">Delete it; all five sites derive from the edge</button>
       <button class="r-opt" data-value="keep-derived-at-write">Keep it, but derived at review time with an invariant test</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Locked by the lead 2026-08-24. The field now has zero readers: all 12 remaining references are 11 in graph_ops.py (the machinery that maintains it, plus two writers) and 1 in a volatile-fields set in workers.py. export.py and cli/sn.py reference it not at all, for value or for presence, because the shared eligibility determination traverses to the winning review. So it is written, maintained, migrated, and consumed by nothing. Deleting it also deletes Change E as work: the active strip path that writes a null over an earned value lives inside that maintenance machinery, so removing the field removes the bug rather than repairing six instances of it. Keep-derived-at-write was rejected on the evidence that the field agreed with the graph 2,053 times and disagreed 0 - it never once carried information - and still produced 1,402 false negatives while gating work in two subsystems.</p>
     </div>
 </section>
 
