@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T23:19:24",
+  "updated": "2026-08-24T23:28:49",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -540,7 +540,7 @@
         "id": "impl-inventorydrift",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a035a5-6631-7a90-a07a-ee711c04649d",
         "created": "2026-08-24"
       },
       {
@@ -25427,9 +25427,73 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260824T212018157592-n-inventorydrift",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a710",
+        "node": "n-inventorydrift",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-inventorydrift",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T21:20:26Z",
+        "completed_at": "2026-08-24T21:28:47Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 501,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 501,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "9a81a9560d00372be67bfbf8e5804a1d782e2475",
+        "commits": [
+          "3b281efc8307669dede53a1068dfb0f20b75c951"
+        ],
+        "changed_lines": {
+          "added": 96,
+          "removed": 14,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T212018157592-n-inventorydrift/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a035a5-6631-7a90-a07a-ee711c04649d",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/graph/test_cypher_property_check.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 737
+    "_version": 739
   }
 }
