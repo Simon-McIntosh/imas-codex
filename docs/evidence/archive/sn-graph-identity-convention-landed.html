@@ -119,6 +119,34 @@
     That is also the better home: a per-user receipts directory reproduces exactly the
     findability failure this plan exists to fix.</p>
   </section>
+
+  <section id="gate-open">
+    <h2>The gate is open, and every clause was checked separately</h2>
+    <p><strong>Landed 2026-08-24</strong> &mdash; node <code>n-quiescenceverify</code>,
+    commit <code>3c1eb690</code>, merged at <code>be4a8099</code>. Record:
+    <code>docs/evidence/sn-graph-identity-convention/quiescence-baseline.md</code>.</p>
+    <table>
+      <caption><code>uv run --no-sync pytest tests/standard_names/ tests/graph/</code></caption>
+      <thead><tr><th>Head</th><th>Verbatim summary</th></tr></thead>
+      <tbody>
+        <tr><td><code>b794924b</code> (recorded baseline)</td>
+          <td><code>7 failed, 7207 passed, 8 skipped, 654 deselected, 34 warnings in 213.64s</code></td></tr>
+        <tr><td><code>f19eecee</code> (integrated head)</td>
+          <td><code>7214 passed, 8 skipped, 654 deselected, 34 warnings in 307.28s (0:05:07)</code></td></tr>
+      </tbody>
+    </table>
+    <p>&sect;8 states three clauses, and each was established independently rather than
+    inferred from the green suite: no concurrent session holds live campaigns;
+    <strong>0 of 9</strong> registered worktrees held uncommitted
+    <code>graph_ops.py</code> edits; and the tested head is reachable from
+    <code>origin/main</code>, with every commit between it and then-current
+    <code>origin/main</code> touching documentation or crew state only &mdash; so the
+    green result is not stale in any way that could matter to the rename.</p>
+    <p>Sequencing from here follows &sect;8 rather than convenience. The three specification
+    nodes run in parallel because each writes only a new test file; the implementations
+    land in order, detector first, so the static property check proves its own value against
+    the un-renamed tree before either rename can hide behind it.</p>
+  </section>
 </main>
 </body>
 </html>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T17:57:35",
+  "updated": "2026-08-24T18:03:52",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -192,6 +192,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-benchrunner",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "impl-boundband",
@@ -612,6 +619,13 @@
         "role": "implement",
         "session_id": "01a02471-21e5-7381-be65-68c8a4bcc1d5",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-normalizer",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "impl-offholdout",
@@ -1303,14 +1317,14 @@
         "id": "test-parity",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
+        "session_id": "01a03471-a0b7-7f91-b148-090da0d3324b",
         "created": "2026-08-24"
       },
       {
         "id": "test-quiescence",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
+        "session_id": "01a03479-1937-7b00-ae8c-c4edb856db69",
         "created": "2026-08-24"
       },
       {
@@ -1318,6 +1332,13 @@
         "harness": "codex",
         "role": "test",
         "session_id": "01a03471-8801-74f2-93f0-9e23429403fa",
+        "created": "2026-08-24"
+      },
+      {
+        "id": "test-residue",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
         "created": "2026-08-24"
       },
       {
@@ -24196,9 +24217,164 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T154413387599-n-parityclosure",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-parityclosure",
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-parity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:44:16Z",
+        "completed_at": "2026-08-24T15:55:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 695,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 695,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "5dbad32f60e9b1bc44ae1ade4301a10046e7b715",
+        "commits": [
+          "22cf6c3d"
+        ],
+        "changed_lines": {
+          "added": 90,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Quality-parity closure audit: 4 deliverable rows, 3 landed, 1 outstanding (WEST refresh); sign gate 100/281/2346, dimensional gate 10/143/2574, COCOS leaks 0 of 2727",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154413387599-n-parityclosure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03471-a0b7-7f91-b148-090da0d3324b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5944320,
+            "cached_input_tokens_cumulative": 5944320,
+            "input_tokens": 6146254,
+            "input_tokens_cumulative": 6146254,
+            "output_tokens": 24050,
+            "output_tokens_cumulative": 24050,
+            "reasoning_output_tokens": 9790,
+            "reasoning_output_tokens_cumulative": 9790
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T155224525263-n-quiescenceverify",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a78",
+        "node": "n-quiescenceverify",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-quiescence",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:52:26Z",
+        "completed_at": "2026-08-24T16:02:07Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 581,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 581,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "f19eeceee4ea9622639311a627f4f2b9dace05c2",
+        "commits": [
+          "3c1eb690b8ea9cb52a7b28f7998411c6de097850"
+        ],
+        "changed_lines": {
+          "added": 42,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Quiescence gate open: 7214 passed 0 failed at f19eecee against the prior 7 failed 7207 passed",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T155224525263-n-quiescenceverify/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03479-1937-7b00-ae8c-c4edb856db69",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3411456,
+            "cached_input_tokens_cumulative": 3411456,
+            "input_tokens": 3530656,
+            "input_tokens_cumulative": 3530656,
+            "output_tokens": 9410,
+            "output_tokens_cumulative": 9410,
+            "reasoning_output_tokens": 3668,
+            "reasoning_output_tokens_cumulative": 3668
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "watch_override": {
+          "arming_line": "reckon crew watch --project imas-codex",
+          "requested": true,
+          "watcher_live": false
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest summary",
+          "override": false,
+          "role": "test",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 691
+    "_version": 701
   }
 }
