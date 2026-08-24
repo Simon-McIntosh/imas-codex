@@ -748,7 +748,7 @@ def _init_repl() -> dict[str, Any]:
             "WHERE NOT k ENDS WITH 'embedding' | [k, node[k]]] "
             "AS properties, labels(node) AS labels, score, "
             "p.title AS page_title, p.url AS page_url, "
-            "wa.id AS document_id, wa.title AS document_title, wa.url AS document_url "
+            "wa.id AS document_id, wa.filename AS document_title, wa.url AS document_url "
             "ORDER BY score DESC",
             k=k,
             embedding=embedding,

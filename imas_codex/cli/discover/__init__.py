@@ -349,8 +349,8 @@ def discover_inspect(facility: str, scanned: int, scored: int, as_json: bool) ->
                 RETURN p.path AS path, p.total_files AS total_files,
                        p.total_dirs AS total_dirs, p.has_readme AS has_readme,
                        p.has_makefile AS has_makefile, p.has_git AS has_git,
-                       p.depth AS depth, p.scanned_at AS scanned_at
-                ORDER BY p.scanned_at DESC
+                       p.depth AS depth, p.listed_at AS scanned_at
+                ORDER BY p.listed_at DESC
                 LIMIT $limit
                 """,
                 facility=facility,

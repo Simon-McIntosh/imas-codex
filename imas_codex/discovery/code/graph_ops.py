@@ -160,7 +160,7 @@ def claim_paths_for_file_scan(
             """
             MATCH (p:FacilityPath {facility_id: $facility, files_claim_token: $token})
             RETURN p.id AS id, p.path AS path, p.score_composite AS score,
-                   p.purpose AS purpose,
+                   p.path_purpose AS purpose,
                    coalesce(p.files_scanned, 0) AS files_scanned
             """,
             facility=facility,

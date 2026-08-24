@@ -162,8 +162,8 @@ class BranchExecutor:
     interfere with each other by claiming branches before scanning.
 
     Strategy:
-        1. Query graph for unclaimed branches (paths with status=discovered
-           and expand_to > depth, not yet claimed by another session)
+        1. Query graph for unclaimed branches (new paths or paths selected for
+           expansion that have not yet been expanded)
         2. Claim a branch atomically via graph transaction
         3. Scan all paths within that branch
         4. Release the claim when done
@@ -270,7 +270,7 @@ class BranchExecutor:
         """Get paths that can be claimed for parallel processing.
 
         Only returns paths that:
-        1. Have status='discovered' or expand_to > depth
+        1. Have status='discovered' or are selected for uncompleted expansion
         2. Are not claimed by another session
         3. Are at sufficient depth to allow parallel processing
 
@@ -283,7 +283,8 @@ class BranchExecutor:
             result = gc.query(
                 """
                 MATCH (p:FacilityPath)-[:AT_FACILITY]->(f:Facility {id: $facility})
-                WHERE (p.status = 'discovered' OR (p.expand_to IS NOT NULL AND p.expand_to > p.depth))
+                WHERE (p.status = 'discovered'
+                       OR (p.should_expand = true AND p.expanded_at IS NULL))
                   AND (p.claimed_by IS NULL OR p.claimed_by = $session_id)
                 RETURN p.path AS path, p.depth AS depth
                 ORDER BY p.depth ASC, p.path ASC

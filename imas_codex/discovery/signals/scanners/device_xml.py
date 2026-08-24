@@ -100,6 +100,54 @@ SECTION_METADATA: dict[str, dict[str, Any]] = {
 }
 
 
+def _geometry_coordinates(node: dict[str, Any]) -> tuple[float, float] | None:
+    """Return finite-enough R/Z coordinates from a signal-node property map."""
+    try:
+        return float(node["r"]), float(node["z"])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _link_signal_nodes_by_geometry(
+    gc: GraphClient,
+    *,
+    left_nodes: list[dict[str, Any]],
+    right_nodes: list[dict[str, Any]],
+    tolerance: float,
+) -> int:
+    """Link signals from two sources when their stored geometry agrees."""
+    pairs: list[dict[str, str]] = []
+    for left in left_nodes:
+        left_position = _geometry_coordinates(left)
+        if left_position is None:
+            continue
+        for right in right_nodes:
+            right_position = _geometry_coordinates(right)
+            if right_position is None:
+                continue
+            if all(
+                abs(left_value - right_value) < tolerance
+                for left_value, right_value in zip(
+                    left_position, right_position, strict=True
+                )
+            ):
+                pairs.append({"left_id": left["id"], "right_id": right["id"]})
+
+    if not pairs:
+        return 0
+    result = gc.query(
+        """
+        UNWIND $pairs AS pair
+        MATCH (left:SignalNode {id: pair.left_id})
+        MATCH (right:SignalNode {id: pair.right_id})
+        MERGE (left)-[:MATCHES_SENSOR]->(right)
+        RETURN count(*) AS linked
+        """,
+        pairs=pairs,
+    )
+    return int(result[0]["linked"] if result else 0)
+
+
 def _make_signal_name(section: str, instance_id: str, field: str) -> str:
     """Create a normalized signal name from section/instance/field."""
     section_labels = {
@@ -1520,20 +1568,37 @@ def _persist_mcfg_nodes(
 
         # 4. Cross-reference MCFG ↔ JEC2020 sensors by R,Z proximity
         if coils:
-            gc.query(
-                """
-                MATCH (mcfg:SignalNode)
-                WHERE mcfg.data_source_name = $mcfg_source AND mcfg.facility_id = $facility
-                MATCH (jec:SignalNode)
-                WHERE jec.data_source_name = $jec_source AND jec.facility_id = $facility
-                  AND jec.system = 'MP'
-                  AND abs(mcfg.r - jec.r) < 0.001
-                  AND abs(mcfg.z - jec.z) < 0.001
-                MERGE (mcfg)-[:MATCHES_SENSOR]->(jec)
-                """,
-                mcfg_source=source_name,
-                jec_source="jec2020_geometry",
-                facility=facility,
+            mcfg_nodes = [
+                dict(row["node"])
+                for row in gc.query(
+                    """
+                    MATCH (mcfg:SignalNode)
+                    WHERE mcfg.data_source_name = $source_name
+                      AND mcfg.facility_id = $facility
+                    RETURN properties(mcfg) AS node
+                    """,
+                    source_name=source_name,
+                    facility=facility,
+                )
+            ]
+            jec_nodes = [
+                dict(row["node"])
+                for row in gc.query(
+                    """
+                    MATCH (jec:SignalNode)
+                    WHERE jec.data_source_name = 'jec2020_geometry'
+                      AND jec.facility_id = $facility
+                      AND jec.system = 'MP'
+                    RETURN properties(jec) AS node
+                    """,
+                    facility=facility,
+                )
+            ]
+            _link_signal_nodes_by_geometry(
+                gc,
+                left_nodes=mcfg_nodes,
+                right_nodes=jec_nodes,
+                tolerance=0.001,
             )
 
         # 5. Calibration epochs (store as properties on DataSource)
@@ -2090,42 +2155,73 @@ def _persist_magnetics_config_nodes(
 
         # 6. Cross-reference magnetics_config sensors ↔ JEC2020 probes by R,Z
         # Only for the latest config epoch (2002_01) which overlaps with JEC2020
-        gc.query(
-            """
-            MATCH (mc:SignalNode)
-            WHERE mc.data_source_name = $mc_source
-              AND mc.facility_id = $facility
-              AND mc.sensor_type = 'BPOL'
-            MATCH (jec:SignalNode)
-            WHERE jec.data_source_name = $jec_source
-              AND jec.facility_id = $facility
-              AND jec.system = 'MP'
-              AND abs(mc.r - jec.r) < 0.01
-              AND abs(mc.z - jec.z) < 0.01
-            MERGE (mc)-[:MATCHES_SENSOR]->(jec)
-            """,
-            mc_source=source_name,
-            jec_source="jec2020_geometry",
-            facility=facility,
+        magnetics_nodes = [
+            dict(row["node"])
+            for row in gc.query(
+                """
+                MATCH (mc:SignalNode)
+                WHERE mc.data_source_name = $source_name
+                  AND mc.facility_id = $facility
+                  AND mc.sensor_type = 'BPOL'
+                RETURN properties(mc) AS node
+                """,
+                source_name=source_name,
+                facility=facility,
+            )
+        ]
+        jec_nodes = [
+            dict(row["node"])
+            for row in gc.query(
+                """
+                MATCH (jec:SignalNode)
+                WHERE jec.data_source_name = 'jec2020_geometry'
+                  AND jec.facility_id = $facility
+                  AND jec.system = 'MP'
+                RETURN properties(jec) AS node
+                """,
+                facility=facility,
+            )
+        ]
+        _link_signal_nodes_by_geometry(
+            gc,
+            left_nodes=magnetics_nodes,
+            right_nodes=jec_nodes,
+            tolerance=0.01,
         )
 
         # 7. Cross-reference magnetics_config ↔ device_xml probes by R,Z
-        gc.query(
-            """
-            MATCH (mc:SignalNode)
-            WHERE mc.data_source_name = $mc_source
-              AND mc.facility_id = $facility
-              AND mc.sensor_type = 'BPOL'
-            MATCH (dx:SignalNode)
-            WHERE dx.data_source_name = 'device_xml'
-              AND dx.facility_id = $facility
-              AND dx.system = 'MP'
-              AND abs(mc.r - dx.r) < 0.01
-              AND abs(mc.z - dx.z) < 0.01
-            MERGE (mc)-[:MATCHES_SENSOR]->(dx)
-            """,
-            mc_source=source_name,
-            facility=facility,
+        device_magnetics_nodes = [
+            dict(row["node"])
+            for row in gc.query(
+                """
+                MATCH (mc:SignalNode)
+                WHERE mc.data_source_name = $source_name
+                  AND mc.facility_id = $facility
+                  AND mc.sensor_type = 'BPOL'
+                RETURN properties(mc) AS node
+                """,
+                source_name=source_name,
+                facility=facility,
+            )
+        ]
+        device_nodes = [
+            dict(row["node"])
+            for row in gc.query(
+                """
+                MATCH (dx:SignalNode)
+                WHERE dx.data_source_name = 'device_xml'
+                  AND dx.facility_id = $facility
+                  AND dx.system = 'MP'
+                RETURN properties(dx) AS node
+                """,
+                facility=facility,
+            )
+        ]
+        _link_signal_nodes_by_geometry(
+            gc,
+            left_nodes=device_magnetics_nodes,
+            right_nodes=device_nodes,
+            tolerance=0.01,
         )
 
     return stats
@@ -2798,11 +2894,13 @@ class DeviceXMLScanner:
                 rows = gc.query(
                     """
                     MATCH (dn:SignalNode {id: $path})
-                    RETURN dn.r AS r, dn.z AS z, dn.path AS path
+                    RETURN properties(dn) AS node
                     """,
                     path=dn_path,
                 )
-                if rows:
+                row = rows[0] if rows else {}
+                node = dict(row.get("node", row))
+                if _geometry_coordinates(node) is not None:
                     results.append(
                         {
                             "signal_id": signal.id,
@@ -2816,7 +2914,7 @@ class DeviceXMLScanner:
                         {
                             "signal_id": signal.id,
                             "valid": False,
-                            "error": f"SignalNode not found: {dn_path}",
+                            "error": f"SignalNode geometry not found: {dn_path}",
                         }
                     )
 
