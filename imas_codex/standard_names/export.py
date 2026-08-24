@@ -80,6 +80,37 @@ _GRAPH_ONLY_RENDERED_FIELDS = frozenset(
     {"physics_domain", "validity_domain", "sources"}
 )
 
+# These identity-specific holds take precedence over generic lifecycle gates.
+# Each reason names the unresolved authority condition so the exclusion ledger
+# stays reviewable and a hold is removed only when that condition is resolved.
+_RELEASE_IDENTITY_HOLDS: dict[str, tuple[str, str]] = {
+    "fast_ion_charge_state_power_at_inside_flux_surface": (
+        "release_hold_dd_recipient_unresolved",
+        "the active Data Dictionary does not resolve fast- versus thermal-ion "
+        "deposition",
+    ),
+    "toroidal_coordinate_of_field_map_grid": (
+        "release_hold_field_map_grid_vocabulary_unresolved",
+        "the closed grammar has no governed field-map-grid locus authority",
+    ),
+    "neutron_flux_due_to_fusion": (
+        "release_hold_documentation_not_accepted",
+        "documentation has not earned ordinary review acceptance",
+    ),
+    "radial_neutral_internal_state_momentum_flux": (
+        "release_hold_dual_bound_source_conflict",
+        "the shared source is explicitly assigned to the canonical shorter identity",
+    ),
+    "voltage_of_diagnostic_antenna": (
+        "release_hold_exhausted_antenna_identity",
+        "the exhausted predecessor has no sanctioned successor transition",
+    ),
+    "voltage_of_ece_channel": (
+        "release_hold_missing_reviewed_successor",
+        "the intended successor has not been created and accepted through review",
+    ),
+}
+
 
 # =============================================================================
 # Report models
@@ -397,6 +428,20 @@ def _classify_export_population(
     excluded: list[ExclusionRecord] = []
 
     for candidate in population:
+        candidate_id = candidate["id"]
+        release_hold = _RELEASE_IDENTITY_HOLDS.get(candidate_id)
+        if release_hold is not None:
+            reason, detail = release_hold
+            excluded.append(
+                ExclusionRecord(
+                    standard_name_id=candidate_id,
+                    stage="release_authority",
+                    reason=reason,
+                    detail=detail,
+                )
+            )
+            continue
+
         # Some low-level callers provide a projection already returned by the
         # historical eligibility query rather than a full graph node. The live
         # upstream query always includes name_stage; retain compatibility with
@@ -404,7 +449,6 @@ def _classify_export_population(
         if "name_stage" not in candidate:
             eligible.append(candidate)
             continue
-        candidate_id = candidate["id"]
         candidate_domains = candidate.get("physics_domain") or []
         if isinstance(candidate_domains, str):
             candidate_domains = [candidate_domains]
