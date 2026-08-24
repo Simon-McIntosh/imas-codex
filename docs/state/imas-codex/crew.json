@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T17:52:15",
+  "updated": "2026-08-24T17:57:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -59,6 +59,13 @@
         "role": "documentation",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "doc-identityguidance",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "doc-keysdirections",
@@ -173,6 +180,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-axisspell",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
         "id": "impl-barecensus",
         "harness": "codex",
         "role": "implement",
@@ -269,6 +283,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-cypherprop",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "impl-dbrule",
@@ -416,6 +437,13 @@
         "role": "implement",
         "session_id": "01a029bf-e648-7c62-97e7-efcd177fee51",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-fkeyconv",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "impl-flushrun",
@@ -908,6 +936,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-stubremoval",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
         "id": "impl-stubs",
         "harness": "codex",
         "role": "implement",
@@ -1205,7 +1240,7 @@
         "id": "scout-bench",
         "harness": "codex",
         "role": "investigate",
-        "session_id": null,
+        "session_id": "01a03471-4f2e-7882-998c-5cd0270f050e",
         "created": "2026-08-24"
       },
       {
@@ -1213,6 +1248,27 @@
         "harness": "codex",
         "role": "investigate",
         "session_id": "01a03471-3bec-75e1-b7a7-d610850a9efa",
+        "created": "2026-08-24"
+      },
+      {
+        "id": "spec-axisspell",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
+        "id": "spec-cypherprop",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
+        "id": "spec-fkeyconv",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
         "created": "2026-08-24"
       },
       {
@@ -1261,7 +1317,7 @@
         "id": "test-readiness",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
+        "session_id": "01a03471-8801-74f2-93f0-9e23429403fa",
         "created": "2026-08-24"
       },
       {
@@ -23996,9 +24052,153 @@
           "role": "investigate",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T154353698374-n-benchreusemap",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a72",
+        "node": "n-benchreusemap",
+        "role": "investigate",
+        "spec_level": "open",
+        "member": "scout-bench",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "read-only"
+        },
+        "dispatched_at": "2026-08-24T15:43:55Z",
+        "completed_at": "2026-08-24T15:55:06Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 671,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 671,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "5dbad32f60e9b1bc44ae1ade4301a10046e7b715",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Benchmark and census reuse map delivered and self-validated at 28 candidates (13 benchmark, 15 census, 0 verdict or citation failures); out-of-project receipt path refused by the sandbox so the orchestrator landed the payload under docs/evidence",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154353698374-n-benchreusemap/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03471-4f2e-7882-998c-5cd0270f050e",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4204288,
+            "cached_input_tokens_cumulative": 4204288,
+            "input_tokens": 4488489,
+            "input_tokens_cumulative": 4488489,
+            "output_tokens": 21402,
+            "output_tokens_cumulative": 21402,
+            "reasoning_output_tokens": 5392,
+            "reasoning_output_tokens_cumulative": 5392
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": false,
+          "matched_measure": null,
+          "override": false,
+          "role": "investigate",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T154408227025-n-readinessclosure",
+        "plan": "sn-release-readiness",
+        "section": "\u00a79",
+        "node": "n-readinessclosure",
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-readiness",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T15:44:10Z",
+        "completed_at": "2026-08-24T15:55:56Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 706,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 706,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "5dbad32f60e9b1bc44ae1ade4301a10046e7b715",
+        "commits": [
+          "7638824a"
+        ],
+        "changed_lines": {
+          "added": 143,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "Closure audit: 7 sections, 2 landed (3 and 6), 5 outstanding (2, 4, 5, 7, 8); export accounting closes at 2030+305=2335",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T154408227025-n-readinessclosure/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03471-8801-74f2-93f0-9e23429403fa",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9069824,
+            "cached_input_tokens_cumulative": 9069824,
+            "input_tokens": 9320530,
+            "input_tokens_cumulative": 9320530,
+            "output_tokens": 25759,
+            "output_tokens_cumulative": 25759,
+            "reasoning_output_tokens": 9777,
+            "reasoning_output_tokens_cumulative": 9777
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 679
+    "_version": 691
   }
 }
