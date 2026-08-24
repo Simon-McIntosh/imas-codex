@@ -36,10 +36,32 @@ async def test_catalog_arm_reports_numeric_per_gate_baseline(
     assert tuple(row.gate for row in report.per_gate_table) == (
         DOCUMENTATION_GATE_NAMES
     )
-    assert all(isinstance(row.arm_pass_rate, float) for row in report.per_gate_table)
-    assert all(row.arm_not_evaluable_count == 0 for row in report.per_gate_table)
-    assert all(row.arm_evaluable_count == 85 for row in report.per_gate_table)
+    assert all(
+        row.arm_pass_count + row.arm_contradiction_count + row.arm_not_evaluable_count
+        == 85
+        for row in report.per_gate_table
+    )
+    assert all(
+        row.catalog_pass_count
+        + row.catalog_contradiction_count
+        + row.catalog_not_evaluable_count
+        == 85
+        for row in report.per_gate_table
+    )
     assert all(row.pass_rate_delta == 0.0 for row in report.per_gate_table)
+    defining_equation = next(
+        row for row in report.per_gate_table if row.gate == "defining_equation"
+    )
+    assert (
+        defining_equation.arm_pass_count,
+        defining_equation.arm_contradiction_count,
+        defining_equation.arm_not_evaluable_count,
+    ) == (47, 6, 32)
+    assert (
+        defining_equation.catalog_pass_count,
+        defining_equation.catalog_contradiction_count,
+        defining_equation.catalog_not_evaluable_count,
+    ) == (47, 6, 32)
     assert isinstance(report.overall_pass_rate, float)
     assert 0.0 <= report.overall_pass_rate <= 1.0
     assert report.overall_pass_rate == report.catalog_overall_pass_rate

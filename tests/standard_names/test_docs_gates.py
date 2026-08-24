@@ -115,6 +115,27 @@ def test_defining_relation_is_not_evaluable_without_a_declared_unit() -> None:
     assert result.reason == "DD-declared unit is unavailable"
 
 
+def test_defining_relation_is_not_evaluable_with_an_unbound_symbol() -> None:
+    documentation = _electron_pressure_relation(
+        include_boltzmann_constant=True
+    ).replace(
+        ", $k_B$ is the Boltzmann constant in J/K,",
+        ", $k_B$ is the Boltzmann constant,",
+    )
+
+    score = score_documentation(
+        documentation,
+        physics_context=DocumentationPhysicsContext(
+            dd_path="equilibrium/time_slice/profiles_1d/electrons/pressure",
+            declared_unit="Pa",
+        ),
+    )
+
+    result = score.gate_vector["defining_equation"]
+    assert result.outcome is DocumentationGateOutcome.NOT_EVALUABLE
+    assert result.reason == "relation cannot bind every symbol to a stated unit"
+
+
 def test_stub_fails_required_content() -> None:
     score = score_documentation(
         "A plasma quantity.",
