@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T23:28:49",
+  "updated": "2026-08-24T23:38:14",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1121,7 +1121,7 @@
         "id": "impl-westrefresh",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03592-2fcb-7d12-8b26-d624b84af16a",
         "created": "2026-08-24"
       },
       {
@@ -25491,9 +25491,84 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260824T205922249982-n-westrefreshtranche",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-westrefreshtranche",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-westrefresh",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T20:59:27Z",
+        "completed_at": "2026-08-24T21:38:00Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2313,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2313,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "79c31525a8caace334a84badf06e7a44f70136da",
+        "commits": [
+          "59efdfc08dfd141fa6e1d24863eb4cb3352fe108"
+        ],
+        "changed_lines": {
+          "added": 172,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T205922249982-n-westrefreshtranche/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03592-2fcb-7d12-8b26-d624b84af16a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 19829504,
+            "cached_input_tokens_cumulative": 19829504,
+            "input_tokens": 20284008,
+            "input_tokens_cumulative": 20284008,
+            "output_tokens": 44384,
+            "output_tokens_cumulative": 44384,
+            "reasoning_output_tokens": 13126,
+            "reasoning_output_tokens_cumulative": 13126
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 739
+    "_version": 741
   }
 }
