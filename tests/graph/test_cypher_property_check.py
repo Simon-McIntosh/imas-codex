@@ -7,10 +7,30 @@ from pathlib import Path
 from types import ModuleType
 from typing import Any
 
+import yaml
+
 from imas_codex.graph.schema import GraphSchema
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 STANDARD_NAME_SCHEMA = REPO_ROOT / "imas_codex" / "schemas" / "standard_name.yaml"
+
+
+def _graph_schema_paths() -> tuple[Path, ...]:
+    """Return LinkML schemas that declare graph-node identifiers."""
+    paths: list[Path] = []
+    for path in sorted((REPO_ROOT / "imas_codex" / "schemas").glob("*.yaml")):
+        document = yaml.safe_load(path.read_text(encoding="utf-8"))
+        classes = document.get("classes", {}) if isinstance(document, dict) else {}
+        declares_node = any(
+            isinstance(class_definition, dict)
+            and isinstance(class_definition.get("attributes"), dict)
+            and isinstance(class_definition["attributes"].get("id"), dict)
+            and class_definition["attributes"]["id"].get("identifier") is True
+            for class_definition in classes.values()
+        )
+        if declares_node:
+            paths.append(path)
+    return tuple(paths)
 
 
 def _checker_module() -> ModuleType:
@@ -88,10 +108,7 @@ def test_misspelled_property_literal_is_reported_from_linkml(
 
 def test_repository_cypher_literals_have_declared_properties() -> None:
     checker = _checker_module()
-    schemas = tuple(
-        GraphSchema(schema_path)
-        for schema_path in sorted((REPO_ROOT / "imas_codex" / "schemas").glob("*.yaml"))
-    )
+    schemas = tuple(GraphSchema(schema_path) for schema_path in _graph_schema_paths())
     assert schemas
     assert any(schema.node_labels for schema in schemas), (
         "the LinkML class universe must be populated before a zero-violation result "
