@@ -22,10 +22,10 @@
   <title>One Way to Name an Identity in the Graph | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="26">
-<meta name="plan-impl" content="0.83">
-<meta name="plan-commits" content="81b2e435,f26e610a,f19eecee,3c1eb690,5d40dde9,619521b1,6c1344c3,5323146c">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="28">
+<meta name="plan-impl" content="0.87">
+<meta name="plan-commits" content="81b2e435,f26e610a,f19eecee,3c1eb690,5d40dde9,619521b1,6c1344c3,5323146c,3b281efc,de0733cf,66382bcf,8e6516be">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-identity-convention-landed.html,docs/evidence/sn-graph-identity-convention/reuse-map.md,docs/evidence/sn-graph-identity-convention/baseline-green.md">
 </head>
 <body>
@@ -458,6 +458,9 @@
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260824T160355863360-n-axisspellspec" data-who="spec-axisspell" data-when="2026-08-24T16:09:54Z">
     <div class="r-comment-body"><p>One schema-derived specification test red on names versus _name</p></div>
 </div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260824T215226704547-n-axisspellimpl" data-who="impl-axisimpl" data-when="2026-08-24T23:06:31Z">
+    <div class="r-comment-body"><p>Axis enum singular; specification passes unmodified; 10,720 rows migrated with old to 0 and new to 10,720, coverage held at 25,098; SN suite 6,733 passed</p></div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260824T160410388941-n-fkeyconvspec" data-who="spec-fkeyconv" data-when="2026-08-24T16:11:16Z">
     <div class="r-comment-body"><p>One schema-derived specification test red on three foreign-key spellings plus the retired field still declared</p></div>
 </div>
@@ -481,6 +484,9 @@
 </div>
 <div class="r-comment" data-section="§10" data-id="c-20260824T2150-snrepair" data-who="reckon-ship" data-when="2026-08-24T21:50:00+00:00">
     <div class="r-comment-body">n-nameproprepair2 landed — commit 66382bcf; gate §10-zero-scoped-defects passed as a QUALIFIED PASS; measure the scoped audit moved from 'checked=6905 violations=0 defect=25 allowlisted=2089' to 'checked=6902 violations=0 defect=0 allowlisted=2064', with 0 ambiguous sites, and the suite at '1 failed, 6732 passed, 8 skipped in 195.48s'. Every corrected property was checked for live coverage rather than for compilation: StandardName.id 4,666/4,666, name_stage 4,666/4,666, reviewer_score_name 3,743/4,666, source_paths 3,673/4,666, COCOS.id 16/16, FacilitySignal.unit 2,806/46,872, IMASNode.unit and name 61,366/61,366, StandardNameSource.dd_unit 8,919/9,639, DDVersion.id 35/35, StandardNameChange.id 8,463/8,463, and the IMASNodeChange change_type, old_value and new_value fields at 94,928/94,928 with both required relationships. The single excluded failure is an ORCHESTRATION MISS OF MINE, not a defect in this repair: the prompt-condition node at a8742e64 changed generate_docs_user.md without refreshing its golden capture, and its done-when should have required that refresh. A separate node owning only the capture is closing it. Combined with the graph and tools node, 41 of the 79 adjudicated defects are now closed — 25 here, 14 repaired and 2 re-adjudicated there — and the discovery, ids, ingestion, llm and cli slice is still running.</div>
+</div>
+<div class="r-comment" data-section="§3" data-id="c-20260825T0000-axisimpl" data-who="reckon-ship" data-when="2026-08-25T00:00:00+00:00">
+    <div class="r-comment-body">n-axisspellimpl landed — commit 8e6516be; gate §3-one-axis-one-spelling passed; measure the specification test reports '1 passed in 0.82s' WITHOUT having been modified, and the full Standard Names suite is green at '6733 passed, 8 skipped, 299 deselected in 188.13s'. That the specification was untouched is the whole evidentiary point of §7: it is the only thing distinguishing a rename that preserved behaviour from a rename whose tests were updated to match it. THE MIGRATION WAS MEASURED ON BOTH SIDES because a mis-set key on this many rows fails silently: 10,720 rows moved, the old value went 10,720 → 0, the new value went 0 → 10,720, the docs axis was untouched at 14,378, and total review_axis coverage held at 25,098 — so nothing was dropped rather than merely renamed. The inverse migration was written into the manifest BEFORE the forward mutation ran, as §8 requires. Four stale plural snapshot assertions surfaced in a focused 283-test selection and were corrected as behaviour rather than as goalposts. Generated models were regenerated and confirmed carrying the singular value, and correctly not staged. Scope-changed and excluded from calibration: my original fence named 7 files when the axis token reaches 23, which is my error rather than a reason to narrow the change. One fold remains open: tests/graph/test_sn_accept_authority.py still asserts the retired plural value.</div>
 </div>
 </section>
 </main>
