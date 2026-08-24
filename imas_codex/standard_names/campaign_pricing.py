@@ -255,7 +255,7 @@ def resolve_exact_campaign_cohorts(
                   AND sn.reviewer_model_name IS NULL
                   AND NOT EXISTS {
                     MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
-                    WHERE review.review_axis = 'names'
+                    WHERE review.review_axis = 'name'
                   }
                 """
                 + _COHORT_RETURN

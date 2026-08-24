@@ -33,7 +33,7 @@ def _make_record(
 
     group_id = str(uuid.uuid4())
     reviewed_at = datetime.now(UTC).isoformat()
-    rid = f"{sn_id}:names:{group_id}:0"
+    rid = f"{sn_id}:name:{group_id}:0"
     return {
         "id": rid,
         "standard_name_id": sn_id,
@@ -48,7 +48,7 @@ def _make_record(
         "comments": comments,
         "comments_per_dim_json": None,
         "reviewed_at": reviewed_at,
-        "review_axis": "names",
+        "review_axis": "name",
         "cycle_index": 0,
         "review_group_id": group_id,
         "resolution_role": "primary",

@@ -56,7 +56,7 @@ def _record(
     }
 
 
-@pytest.mark.parametrize("axis", ["names", "docs"])
+@pytest.mark.parametrize("axis", ["name", "docs"])
 def test_write_reviews_converts_iso_parameters_to_neo4j_datetimes(axis: str) -> None:
     reviewed_at = "2026-08-03T21:10:35.157740+00:00"
     record = _record(
@@ -117,7 +117,7 @@ def test_name_and_docs_reviews_persist_as_ordered_datetimes(
     records = [
         _record(
             standard_name_ids[0],
-            axis="names",
+            axis="name",
             cycle_index=0,
             reviewed_at="2026-08-03T21:10:34.157740+00:00",
         ),
@@ -162,7 +162,7 @@ def test_name_and_docs_reviews_persist_as_ordered_datetimes(
             ids=standard_name_ids,
         )
 
-        assert [row["axis"] for row in rows] == ["names", "docs"]
+        assert [row["axis"] for row in rows] == ["name", "docs"]
         assert [row["id"] for row in rows] == review_ids
         assert all(row["reviewed_at_type"] == "ZONED DATETIME NOT NULL" for row in rows)
         assert all(row["llm_at_type"] == "ZONED DATETIME NOT NULL" for row in rows)

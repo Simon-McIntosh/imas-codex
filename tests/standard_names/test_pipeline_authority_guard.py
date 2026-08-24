@@ -66,7 +66,7 @@ def test_reconcile_refuses_score_and_model_clear_on_scored_name(
             "unit": "1",
             "reviewer_score_name": 0.96,
             "reviewer_model_name": "openrouter/reviewer",
-            "reviews": [f"{name}:names:review"],
+            "reviews": [f"{name}:name:review"],
             "structural_authorities": [],
         }
     )
@@ -101,7 +101,7 @@ def test_guard_refuses_same_axis_scalar_replacement(
 @pytest.mark.parametrize(
     ("field", "existing"),
     [
-        ("reviews", ["plasma_current:names:terminal"]),
+        ("reviews", ["plasma_current:name:terminal"]),
         ("structural_authorities", ["plasma_current:children:digest"]),
     ],
 )
@@ -126,7 +126,7 @@ def test_guard_is_non_mutating_and_allows_omitted_authority() -> None:
             "plasma_current": {
                 "reviewer_score_name": 0.95,
                 "reviewer_model_name": "names-reviewer",
-                "reviews": ["plasma_current:names:terminal"],
+                "reviews": ["plasma_current:name:terminal"],
                 "structural_authorities": [],
             }
         },
@@ -154,7 +154,7 @@ def test_catalog_adapter_uses_central_authority_registry() -> None:
         guard_catalog_write_payloads(
             [{"name": "plasma_current", "reviews": []}],
             current_by_id={
-                "plasma_current": {"reviews": ["plasma_current:names:terminal"]}
+                "plasma_current": {"reviews": ["plasma_current:name:terminal"]}
             },
         )
 
@@ -201,7 +201,7 @@ def test_reconcile_positive_allow_list_excludes_authority_fields(
             "reviewer_model_name": "names-reviewer",
             "reviewer_score_docs": 0.93,
             "reviewer_model_docs": "docs-reviewer",
-            "reviews": [f"{name}:names:terminal", f"{name}:docs:terminal"],
+            "reviews": [f"{name}:name:terminal", f"{name}:docs:terminal"],
             "structural_authorities": [],
         }
     )

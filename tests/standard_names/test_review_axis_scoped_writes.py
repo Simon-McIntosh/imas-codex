@@ -216,7 +216,7 @@ class TestPerNameReviewCost:
         mock_gc, cm = _mock_graph_client()
         records = [
             {
-                "id": "sn:test:names:g1:0",
+                "id": "sn:test:name:g1:0",
                 "standard_name_id": "sn:test",
                 "model": "test-model",
                 "model_family": "test",
@@ -246,7 +246,7 @@ class TestPerNameReviewCost:
         mock_gc, cm = _mock_graph_client()
         records = [
             {
-                "id": "sn:test:names:g1:0",
+                "id": "sn:test:name:g1:0",
                 "standard_name_id": "sn:test",
                 "model": "test-model",
                 "model_family": "test",
@@ -255,7 +255,7 @@ class TestPerNameReviewCost:
                 "scores_json": "{}",
                 "tier": "good",
                 "reviewed_at": "2026-04-25T00:00:00Z",
-                "review_axis": "names",
+                "review_axis": "name",
                 "llm_cost": 0.005,
             },
         ]

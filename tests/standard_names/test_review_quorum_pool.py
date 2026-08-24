@@ -79,17 +79,17 @@ def _patch_common(
 
     persist_target = (
         "imas_codex.standard_names.graph_ops.persist_reviewed_name"
-        if review_axis == "names"
+        if review_axis == "name"
         else "imas_codex.standard_names.graph_ops.persist_reviewed_docs"
     )
     release_target = (
         "imas_codex.standard_names.graph_ops.release_review_names_failed_claims"
-        if review_axis == "names"
+        if review_axis == "name"
         else "imas_codex.standard_names.graph_ops.release_review_docs_failed_claims"
     )
     models_getter = (
         "imas_codex.settings.get_sn_review_names_models"
-        if review_axis == "names"
+        if review_axis == "name"
         else "imas_codex.settings.get_sn_review_docs_models"
     )
 
@@ -172,7 +172,7 @@ async def test_names_two_models_agreement_writes_two_cycles() -> None:
         captured=captured,
         llm_mock=llm,
         models=["model-a", "model-b"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()
@@ -213,7 +213,7 @@ async def test_names_two_models_disagreement_no_escalator_marks_max_cycles() -> 
         captured=captured,
         llm_mock=llm,
         models=["model-a", "model-b"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()
@@ -249,7 +249,7 @@ async def test_names_three_models_disagreement_runs_escalator() -> None:
         captured=captured,
         llm_mock=llm,
         models=["model-a", "model-b", "model-c"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()
@@ -291,7 +291,7 @@ async def test_names_three_models_agreement_skips_cycle_two() -> None:
         captured=captured,
         llm_mock=llm,
         models=["model-a", "model-b", "model-c"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()
@@ -333,7 +333,7 @@ async def test_names_batch_response_is_unwrapped() -> None:
         captured=captured,
         llm_mock=llm,
         models=["only-model"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()
@@ -375,7 +375,7 @@ async def test_names_empty_reviews_batch_is_a_failed_cycle() -> None:
         captured=captured,
         llm_mock=llm,
         models=["only-model"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()
@@ -408,7 +408,7 @@ async def test_names_single_model_chain_uses_single_review() -> None:
         captured=captured,
         llm_mock=llm,
         models=["only-model"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()
@@ -444,7 +444,7 @@ async def test_names_quarantined_item_skips_llm() -> None:
         captured=captured,
         llm_mock=llm,
         models=["model-a", "model-b", "model-c"],
-        review_axis="names",
+        review_axis="name",
     )
     for p in patches:
         p.start()

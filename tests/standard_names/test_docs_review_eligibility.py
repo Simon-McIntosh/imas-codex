@@ -207,7 +207,7 @@ def test_property_coverage_requires_plural_axis_and_every_filtered_property() ->
     with patch.object(graph_ops, "GraphClient", return_value=graph):
         assert graph_ops.docs_review_property_coverage() == complete
     query = graph.calls[0][0]
-    assert "['names', 'docs']" in query
+    assert "['name', 'docs']" in query
     assert "review.review_axis = 'docs'" in query
 
     missing_method = {**complete, "method_covered": 0}

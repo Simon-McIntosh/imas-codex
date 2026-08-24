@@ -1108,7 +1108,7 @@ class TestPersistWritesReviewNode:
         assert len(records) == 1
         rec = records[0]
         assert rec["standard_name_id"] == "electron_temperature"
-        assert rec["review_axis"] == "names"
+        assert rec["review_axis"] == "name"
         assert rec["cycle_index"] == 0
         assert rec["resolution_role"] == "primary"
         assert rec["is_canonical"] is True
@@ -1120,7 +1120,7 @@ class TestPersistWritesReviewNode:
         assert rec["llm_tokens_cached_read"] == 900
         assert rec["llm_tokens_cached_write"] == 300
         # Composite id format
-        assert rec["id"].startswith("electron_temperature:names:")
+        assert rec["id"].startswith("electron_temperature:name:")
         assert rec["id"].endswith(":0")
 
     def test_persist_reviewed_docs_calls_write_reviews(self):

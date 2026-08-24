@@ -8328,7 +8328,7 @@ async def process_review_name_batch(
         try:
             quorum = await _run_rd_quorum_cycles(
                 sn_id=sn_id,
-                review_axis="names",
+                review_axis="name",
                 response_model=StandardNameQualityReviewNameOnlyBatch,
                 user_prompt=user_prompt,
                 system_prompt=system_prompt,

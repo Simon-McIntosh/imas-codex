@@ -29,7 +29,7 @@ def test_write_reviews_coalesces_none_cost_to_zero() -> None:
 
     records = [
         {
-            "id": "test_name:names:abc:0",
+            "id": "test_name:name:abc:0",
             "standard_name_id": "test_name",
             "model": "test-model",
             "reviewer_model": "test-model",
@@ -40,7 +40,7 @@ def test_write_reviews_coalesces_none_cost_to_zero() -> None:
             "tier": "inadequate",
             "comments": "",
             "reviewed_at": "2026-01-01T00:00:00+00:00",
-            "review_axis": "names",
+            "review_axis": "name",
             "cycle_index": 0,
             "review_group_id": "abc",
             "resolution_role": "primary",
@@ -74,7 +74,7 @@ def test_write_reviews_preserves_zero_cost() -> None:
 
     records = [
         {
-            "id": "cached_name:names:def:0",
+            "id": "cached_name:name:def:0",
             "standard_name_id": "cached_name",
             "model": "test-model",
             "reviewer_model": "test-model",
@@ -85,7 +85,7 @@ def test_write_reviews_preserves_zero_cost() -> None:
             "tier": "outstanding",
             "comments": "cache hit",
             "reviewed_at": "2026-01-01T00:00:00+00:00",
-            "review_axis": "names",
+            "review_axis": "name",
             "cycle_index": 0,
             "review_group_id": "def",
             "resolution_role": "primary",
@@ -214,7 +214,7 @@ def test_escalation_review_carries_cost() -> None:
 
     records = [
         {
-            "id": "test_name:names:ghi:2",
+            "id": "test_name:name:ghi:2",
             "standard_name_id": "test_name",
             "model": "openrouter/anthropic/claude-opus-4.6",
             "reviewer_model": "openrouter/anthropic/claude-opus-4.6",
@@ -225,7 +225,7 @@ def test_escalation_review_carries_cost() -> None:
             "tier": "good",
             "comments": "escalation review",
             "reviewed_at": "2026-01-01T00:00:00+00:00",
-            "review_axis": "names",
+            "review_axis": "name",
             "cycle_index": 2,
             "review_group_id": "ghi",
             "resolution_role": "escalator",

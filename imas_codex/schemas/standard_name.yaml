@@ -434,7 +434,7 @@ enums:
     description: >-
       Which LLM review rubric produced the most recent axis-specific
       score (``reviewer_score_name`` or ``reviewer_score_docs``).
-      ``names`` uses four dimensions (grammar, semantic, convention,
+      ``name`` uses four dimensions (grammar, semantic, convention,
       completeness) normalised over 80 points and is used for names
       generated without rich descriptions, typically during
       ``sn run --target names`` turns.
@@ -442,11 +442,11 @@ enums:
       completeness, physics_accuracy) normalised over 80 points and evaluates
       a docs-generation cycle (``sn run --target docs``) without
       re-scoring the name itself.
-      Fidelity rank: ``names`` < ``docs``. A lower-fidelity
+      Fidelity rank: ``name`` < ``docs``. A lower-fidelity
       run must not overwrite a prior higher-fidelity review unless
       ``--force`` is given.
     permissible_values:
-      names:
+      name:
         description: Four dimensions scored — grammar, semantic, convention, completeness.
       docs:
         description: >-
@@ -3614,7 +3614,7 @@ classes:
         required: true
       review_axis:
         description: >-
-          Which review rubric produced this StandardNameReview — ``names``
+          Which review rubric produced this StandardNameReview — ``name``
           (4-dim name scoring) or ``docs`` (4-dim documentation scoring).
         range: StandardNameReviewMode
         required: true
