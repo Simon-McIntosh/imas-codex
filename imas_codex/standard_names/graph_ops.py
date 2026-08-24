@@ -31,6 +31,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
 )
+from imas_codex.standard_names.doc_links import find_name_references
 from imas_codex.standard_names.ledger import reattach_produced_name_edges
 from imas_codex.standard_names.provenance_lifecycle import (
     deletion_change_cypher,
@@ -9077,11 +9078,6 @@ def resolve_links_batch(
 
 
 _NAME_LINK_RE = re.compile(r"\(name:([^)]+)\)")
-# Bare ``[snake_case_name]`` brackets with NO ``(name:...)`` target — the LLM
-# frequently writes these for related-name mentions; Markdown renders them as
-# broken literal text. ``(?<!\!)`` skips image syntax; ``(?!\()`` skips
-# already-formed ``[label](...)`` links.
-_BARE_DOC_LINK_RE = re.compile(r"(?<!\!)\[([a-z][a-z0-9_]{3,})\](?!\()")
 
 # When the LLM emits LaTeX with single backslashes inside its JSON output
 # (e.g. ``$\theta$``, ``$\rho$``, ``\frac``), a lenient JSON decoder turns the
@@ -9107,6 +9103,7 @@ def _sanitize_doc_text(text: str | None) -> str | None:
 
 
 _DOC_LINK_RE = re.compile(r"\[([^\]]+)\]\(name:([a-z0-9_]+)\)")
+_DOC_TEXT_UNSET = object()
 
 
 def _doc_link_mismatches(gc: Any, documentation: str | None) -> list[str]:
@@ -9139,7 +9136,11 @@ def _doc_link_mismatches(gc: Any, documentation: str | None) -> list[str]:
     ]
 
 
-def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
+def _normalize_bare_doc_links(
+    gc: Any,
+    sn_id: str | None = None,
+    documentation: str | None | object = _DOC_TEXT_UNSET,
+) -> int:
     """Convert bare ``[name]`` brackets in documentation to proper links or text.
 
     For every StandardName documentation containing ``[``: each bare
@@ -9151,9 +9152,17 @@ def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
     accept-path variant — see :func:`persist_reviewed_docs`): only the tokens
     present in that one doc are checked for liveness, so no full-catalogue scan
     is performed.  When *sn_id* is ``None`` (the post-drain reconcile) it scans
-    every doc and resolves token liveness against the whole catalogue.
+    every doc and resolves token liveness against the whole catalogue. The
+    accept path passes its already-read *documentation* so docs without bare
+    candidates need no second graph read.
     """
-    if sn_id is not None:
+    if documentation is not _DOC_TEXT_UNSET:
+        if sn_id is None:
+            raise ValueError("documentation requires a scoped standard name id")
+        if not documentation or "[" not in documentation:
+            return 0
+        rows = [{"id": sn_id, "docs": documentation}]
+    elif sn_id is not None:
         rows = list(
             gc.query(
                 "MATCH (sn:StandardName {id: $id}) "
@@ -9172,6 +9181,14 @@ def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
         )
     if not rows:
         return 0
+    bare_references = {
+        row["id"]: tuple(
+            reference
+            for reference in find_name_references(row["docs"], known=None)
+            if reference.syntax == "bare_bracket"
+        )
+        for row in rows
+    }
     # Only link to a NON-dead standard name (drafted/reviewed/accepted); a bare
     # token that is superseded/exhausted or not a name at all → strip brackets.
     if sn_id is not None:
@@ -9179,7 +9196,9 @@ def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
         # actually appear in this one doc — avoids a full-catalogue scan on
         # every accept.
         candidate_tokens = {
-            m.group(1) for r in rows for m in _BARE_DOC_LINK_RE.finditer(r["docs"])
+            reference.name
+            for references in bare_references.values()
+            for reference in references
         }
         names = (
             {
@@ -9205,13 +9224,16 @@ def _normalize_bare_doc_links(gc: Any, sn_id: str | None = None) -> int:
             )
         }
 
-    def _repl(m: re.Match[str]) -> str:
-        tok = m.group(1)
-        return f"[{tok}](name:{tok})" if tok in names else tok
-
     updates = []
     for r in rows:
-        new = _BARE_DOC_LINK_RE.sub(_repl, r["docs"])
+        new = r["docs"]
+        for reference in reversed(bare_references[r["id"]]):
+            replacement = (
+                f"[{reference.name}](name:{reference.name})"
+                if reference.name in names
+                else reference.name
+            )
+            new = new[: reference.start] + replacement + new[reference.end :]
         if new != r["docs"]:
             updates.append({"id": r["id"], "doc": new})
     for i in range(0, len(updates), 200):
@@ -15774,6 +15796,18 @@ def persist_reviewed_docs(
                 len(mismatches),
             )
 
+    # Normalize bare references before the accepting write. The shared parser
+    # excludes mathematical notation, code, images, and formed Markdown links.
+    # Graph/parser failures propagate so unavailable reference authority cannot
+    # promote a document whose references were not normalized.
+    if target_stage == "accepted":
+        with GraphClient() as gc:
+            _normalize_bare_doc_links(
+                gc,
+                sn_id=sn_id,
+                documentation=rows[0].get("documentation"),
+            )
+
     # ── Edit lifecycle decision (docs axis) ────────────────────────────
     # Computed after the link-mismatch demotion above so a demoted
     # 'accepted' → 'reviewed' correctly keeps the edit 'open' rather than
@@ -15854,27 +15888,6 @@ def persist_reviewed_docs(
         resolution_method,
         quorum_shortfall,
     )
-
-    # ── Normalize bare [name] brackets AT acceptance (source-of-truth fix) ──
-    # A doc written by a late in-flight generate/refine task can finalize with
-    # a bare ``[name]`` bracket after the per-rotation reconcile has already
-    # run. Normalizing the node here — the moment it promotes to accepted —
-    # guarantees no accepted doc ever carries a bare bracket, regardless of
-    # when it was written, so the published catalogue stays clean without the
-    # operator's per-cycle manual ``resolve_doc_links`` sweep. Scoped to this
-    # one node (no full-catalogue scan). The post-drain reconcile remains as a
-    # belt-and-suspenders net for cross-references to names accepted later.
-    if target_stage == "accepted":
-        try:
-            with GraphClient() as gc:
-                _normalize_bare_doc_links(gc, sn_id=sn_id)
-        except Exception:
-            logger.debug(
-                "persist_reviewed_docs: bare-link normalize failed for %s "
-                "(non-fatal; post-drain reconcile will catch it)",
-                sn_id,
-                exc_info=True,
-            )
 
     # ── Write StandardNameReview node + HAS_REVIEW edge (Finding 1 fix) ──
     # When ``skip_review_node`` is True the caller (pool RD-quorum
