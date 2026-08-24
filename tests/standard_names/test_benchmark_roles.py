@@ -121,8 +121,10 @@ class _FakeGC:
     def __init__(self, rows):
         self._rows = rows
         self.closed = False
+        self.calls = []
 
     def query(self, cypher, **kwargs):
+        self.calls.append((cypher, kwargs))
         return self._rows
 
     def close(self):
@@ -167,10 +169,12 @@ class TestLoaders:
                 "documentation": "doc",
             }
         ]
-        out = br.load_breaker_corpus(5, seed=1, axis="names", gc=_FakeGC(rows))
+        gc = _FakeGC(rows)
+        out = br.load_breaker_corpus(5, seed=1, axis="names", gc=gc)
         assert len(out) == 1
         assert out[0]["pair_scores"] == {"qwen": 0.8, "minimax": 0.6}
         assert out[0]["final_accepted"] is True
+        assert gc.calls[0][1]["axis"] == "name"
 
     def test_docs_sample_shape(self):
         rows = [

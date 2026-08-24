@@ -713,19 +713,19 @@ class TestReviewNodeMetadata:
 
         # Add quorum metadata as pipeline does
         group_id = str(uuid.uuid4())
-        rec["id"] = f"electron_temperature:names:{group_id}:0"
-        rec["review_axis"] = "names"
+        rec["id"] = f"electron_temperature:name:{group_id}:0"
+        rec["review_axis"] = "name"
         rec["cycle_index"] = 0
         rec["review_group_id"] = group_id
         rec["resolution_role"] = "primary"
         rec["resolution_method"] = None
 
-        assert rec["review_axis"] == "names"
+        assert rec["review_axis"] == "name"
         assert rec["cycle_index"] == 0
         assert rec["review_group_id"] == group_id
         assert rec["resolution_role"] == "primary"
         assert rec["resolution_method"] is None
-        assert ":names:" in rec["id"]
+        assert ":name:" in rec["id"]
         assert ":0" == rec["id"][-2:]
 
 

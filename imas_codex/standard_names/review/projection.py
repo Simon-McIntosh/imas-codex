@@ -1,6 +1,6 @@
 """Canonical-review projection helper.
 
-Given a StandardName ID and review axis (``"names"`` or ``"docs"``),
+Given a StandardName ID and review axis (``"name"`` or ``"docs"``),
 derives the single authoritative :class:`CanonicalReview` record from the
 ``StandardNameReview`` nodes attached to that SN in the graph — regardless of how many
 review cycles ran or how many review groups exist.
@@ -165,7 +165,7 @@ ORDER BY r.review_group_id DESC, r.cycle_index ASC
 
 def project_canonical_review(
     sn_id: str,
-    axis: Literal["names", "docs"],
+    axis: Literal["name", "docs"],
     gc: GraphClient,
 ) -> CanonicalReview | None:
     """Project the canonical :class:`CanonicalReview` for *sn_id* on *axis*.
@@ -175,7 +175,7 @@ def project_canonical_review(
     sn_id:
         The ``StandardName.id`` to project.
     axis:
-        Review axis — ``"names"`` or ``"docs"``.
+        Review axis — ``"name"`` or ``"docs"``.
     gc:
         An open :class:`~imas_codex.graph.client.GraphClient` instance.
 

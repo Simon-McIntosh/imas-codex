@@ -5865,7 +5865,7 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
     - ``reviewed_at`` (str ISO 8601)
 
     RD-quorum fields (required for new-style reviews):
-    - ``review_axis`` (str) — "names" or "docs"
+    - ``review_axis`` (str) — "name" or "docs"
     - ``cycle_index`` (int) — 0, 1, or 2
     - ``review_group_id`` (str) — UUID
     - ``resolution_role`` (str) — "primary", "secondary", or "escalator"
@@ -6021,7 +6021,7 @@ def write_reviews(records: list[dict[str, Any]], *, skip_cost: bool = False) -> 
                 sn_id = r.get("standard_name_id")
                 cost = r.get("llm_cost")
                 if sn_id and cost:
-                    axis = r.get("review_axis", "names")
+                    axis = r.get("review_axis", "name")
                     if axis == "docs":
                         docs_cost_map[sn_id] = docs_cost_map.get(sn_id, 0.0) + cost
                     else:
@@ -6239,7 +6239,7 @@ def docs_review_property_coverage(gc: Any | None = None) -> dict[str, int]:
 
     Cypher silently returns zero for a missing property. The coverage row makes
     a misspelled or removed slot a hard failure before the eligibility result is
-    trusted, and also verifies the plural ``names``/``docs`` axis vocabulary.
+    trusted, and also verifies the ``name``/``docs`` axis vocabulary.
     """
     query = """
         MATCH (review:StandardNameReview)
@@ -6247,7 +6247,7 @@ def docs_review_property_coverage(gc: Any | None = None) -> dict[str, int]:
                count(review.review_axis) AS axis_covered,
                count(review.review_group_id) AS group_covered,
                count(review.resolution_method) AS method_covered,
-               count(CASE WHEN review.review_axis IN ['names', 'docs']
+               count(CASE WHEN review.review_axis IN ['name', 'docs']
                      THEN 1 END) AS known_axis,
                count(CASE WHEN review.review_axis = 'docs'
                      THEN 1 END) AS docs_axis
@@ -13346,7 +13346,7 @@ def export_review_comments(
     * ``score`` — numeric score (0–1)
     * ``comments_per_dim`` — parsed dict of per-dimension comments
     * ``comments`` — full free-text comment string
-    * ``review_axis`` — "names" or "docs"
+    * ``review_axis`` — "name" or "docs"
     * ``generated_at`` — ``StandardName.generated_at`` ISO string
     * ``reviewed_at`` — ``StandardNameReview.reviewed_at`` ISO string
 
@@ -15511,7 +15511,7 @@ def persist_reviewed_name(
 
             _now_iso = llm_at or _dt.now(UTC).isoformat()
             _group_id = str(_uuid.uuid4())
-            _review_id = f"{sn_id}:names:{_group_id}:0"
+            _review_id = f"{sn_id}:name:{_group_id}:0"
             # Map normalised score (0-1) to tier name per the rubric.
             if score >= 0.85:
                 _tier = "outstanding"
@@ -15538,7 +15538,7 @@ def persist_reviewed_name(
                         "suggested_name": "",
                         "suggestion_justification": "",
                         "reviewed_at": _now_iso,
-                        "review_axis": "names",
+                        "review_axis": "name",
                         "cycle_index": 0,
                         "review_group_id": _group_id,
                         "resolution_role": "primary",

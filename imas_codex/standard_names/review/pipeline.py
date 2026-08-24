@@ -937,7 +937,7 @@ async def review_review_worker(state: StandardNameReviewState, **_kwargs: Any) -
         review_axis = "docs"
     else:
         models = state.review_models or get_sn_review_names_models()
-        review_axis = "names"
+        review_axis = "name"
 
     max_cycles = get_sn_review_max_cycles()
     tolerance = get_sn_review_disagreement_threshold()
@@ -2435,7 +2435,7 @@ async def _review_batch_core(
         review_axis = "docs"
     else:
         models = get_sn_review_names_models()
-        review_axis = "names"
+        review_axis = "name"
 
     if not models:
         logger.warning("Pool review_%s: no models configured", target)
@@ -2625,7 +2625,7 @@ async def process_review_names_batch(
     """Pool-mode review-names batch processor.
 
     Takes pre-claimed StandardName items and runs name+grammar review
-    (axis ``"names"``).  Independently claimable from docs review.
+    (stored axis ``"name"``).  Independently claimable from docs review.
 
     Returns count of items successfully reviewed.
     """

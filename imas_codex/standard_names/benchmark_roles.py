@@ -382,7 +382,7 @@ def load_breaker_corpus(
     """
     from imas_codex.graph.client import GraphClient
 
-    review_axis = "names" if axis == "names" else "docs"
+    review_axis = "name" if axis == "names" else "docs"
     cypher = """
         MATCH (r:StandardNameReview {review_axis: $axis})
         WHERE r.reviewer_model IN $pair AND r.score IS NOT NULL

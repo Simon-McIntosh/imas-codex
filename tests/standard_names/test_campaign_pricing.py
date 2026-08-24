@@ -354,6 +354,7 @@ def test_exact_cohort_resolution_is_read_only_and_uses_live_identities(
     ]
     assert cohorts.standard_name_count_before == 4_395
     assert cohorts.standard_name_count_after == 4_395
+    assert any("review.review_axis = 'name'" in query for query in queries)
     assert all(
         not any(
             token in query.upper()

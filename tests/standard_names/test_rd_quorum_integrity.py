@@ -122,7 +122,7 @@ def _run(
     *,
     models: list[str],
     responses: list[dict | None],
-    review_axis: str = "names",
+    review_axis: str = "name",
     rubric_dims: tuple[str, ...] = tuple(_NAMES_DIMS),
     run_id: str = "run-x",
 ):
@@ -220,7 +220,7 @@ class TestQuorumCompletenessGuard:
                 responses=[{"score": 0.8, "dims": _NAMES_DIMS}, None],
             )
         assert result is None  # deferred, NOT accepted on a single review
-        assert quorum_incomplete_snapshot("run-x") == {"names": 1}
+        assert quorum_incomplete_snapshot("run-x") == {"name": 1}
         assert "incomplete" in caplog.text
         reset_quorum_incomplete("run-x")
 
@@ -260,7 +260,7 @@ class TestQuorumCompletenessGuard:
             responses=[{"score": 0.8, "dims": _NAMES_DIMS}, None],
         )
         assert result is None
-        assert quorum_incomplete_snapshot("run-x") == {"names": 1}
+        assert quorum_incomplete_snapshot("run-x") == {"name": 1}
         reset_quorum_incomplete("run-x")
 
     def test_explicit_single_model_profile_returns_single_review(self):
@@ -291,7 +291,7 @@ class TestQuorumCompletenessGuard:
         )
         assert result is None
         assert calls["n"] == 1  # only the primary was attempted
-        assert quorum_incomplete_snapshot("run-x") == {"names": 1}
+        assert quorum_incomplete_snapshot("run-x") == {"name": 1}
         reset_quorum_incomplete("run-x")
 
 
@@ -321,7 +321,7 @@ class TestUnfundedSeatIsAttributed:
             result = asyncio.run(
                 _run_rd_quorum_cycles(
                     sn_id="poloidal_electric_field",
-                    review_axis="names",
+                    review_axis="name",
                     response_model=None,
                     user_prompt="u",
                     system_prompt="s",
@@ -341,7 +341,7 @@ class TestUnfundedSeatIsAttributed:
         assert "budget refused" in caplog.text
         assert "m0" in caplog.text
         assert "0.2773" in caplog.text
-        assert quorum_incomplete_snapshot("run-x") == {"names": 1}
+        assert quorum_incomplete_snapshot("run-x") == {"name": 1}
         reset_quorum_incomplete("run-x")
 
 

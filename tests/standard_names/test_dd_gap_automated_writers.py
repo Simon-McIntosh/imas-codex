@@ -252,7 +252,7 @@ async def test_review_quorum_collects_evidence_without_changing_score() -> None:
 
     result = await _run_rd_quorum_cycles(
         sn_id="electron_temperature",
-        review_axis="names",
+        review_axis="name",
         response_model=object,
         user_prompt="review",
         system_prompt="system",

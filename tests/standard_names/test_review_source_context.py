@@ -572,7 +572,7 @@ async def test_authoritative_escalation_alone_receives_both_critiques() -> None:
 
     result = await _run_rd_quorum_cycles(
         sn_id=ISOTOPE_RATIO,
-        review_axis="names",
+        review_axis="name",
         response_model=object,
         user_prompt="blind prompt",
         system_prompt="static system prompt",

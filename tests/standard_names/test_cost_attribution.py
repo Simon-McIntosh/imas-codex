@@ -1,12 +1,12 @@
 """Tests for per-pool cost attribution.
 
 Validates that:
-1. ``write_standard_names`` accumulates ``llm_cost_generate_name`` with ``+=``
-2. Repeated writes (regeneration) accumulate, not overwrite
-3. ``write_reviews`` propagates ``llm_cost_review_name`` / ``llm_cost_review_docs``
-4. ``llm_cost`` aggregate tracks the sum of per-pool costs
-5. ``sn clear`` (DETACH DELETE) wipes all cost fields
-6. ``write_reviews`` passes ``llm_tokens_cached_read/write`` through
+- ``write_standard_names`` accumulates ``llm_cost_generate_name`` with ``+=``
+- Repeated writes (regeneration) accumulate, not overwrite
+- ``write_reviews`` propagates ``llm_cost_review_name`` / ``llm_cost_review_docs``
+- ``llm_cost`` aggregate tracks the sum of per-pool costs
+- ``sn clear`` (DETACH DELETE) wipes all cost fields
+- ``write_reviews`` passes ``llm_tokens_cached_read/write`` through
 """
 
 from __future__ import annotations
@@ -166,7 +166,7 @@ class TestReviewCostPropagation:
 
         records = [
             {
-                "id": "electron_temperature:names:grp1:0",
+                "id": "electron_temperature:name:grp1:0",
                 "standard_name_id": "electron_temperature",
                 "model": "test/model",
                 "model_family": "test",
@@ -175,7 +175,7 @@ class TestReviewCostPropagation:
                 "scores_json": "{}",
                 "tier": "good",
                 "reviewed_at": "2024-01-01T00:00:00Z",
-                "review_axis": "names",
+                "review_axis": "name",
                 "cycle_index": 0,
                 "review_group_id": "grp1",
                 "resolution_role": "primary",
@@ -211,7 +211,7 @@ class TestReviewCostPropagation:
 
         records = [
             {
-                "id": "electron_temperature:names:grp1:0",
+                "id": "electron_temperature:name:grp1:0",
                 "standard_name_id": "electron_temperature",
                 "model": "test/model",
                 "model_family": "test",
@@ -220,7 +220,7 @@ class TestReviewCostPropagation:
                 "scores_json": "{}",
                 "tier": "good",
                 "reviewed_at": "2024-01-01T00:00:00Z",
-                "review_axis": "names",
+                "review_axis": "name",
                 "cycle_index": 0,
                 "review_group_id": "grp1",
                 "resolution_role": "primary",
