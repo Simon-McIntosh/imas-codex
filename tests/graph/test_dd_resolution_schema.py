@@ -37,11 +37,22 @@ def test_resolution_schema_has_typed_lifecycle_and_immutable_receipt() -> None:
         "lifecycle_status",
         "lifecycle_version",
     }
-    receipt = classes["DDResolutionStateChange"]["attributes"]
-    assert receipt["id"]["identifier"] is True
-    assert receipt["expected_manifest_digest"]["required"] is True
-    assert receipt["expected_evidence_token"]["required"] is True
-    assert receipt["graph_snapshot_token"]["required"] is True
+    assert "DDResolutionStateChange" not in classes
+
+    resolution = classes["DDResolution"]["attributes"]
+    assert resolution["id"]["identifier"] is True
+    assert resolution["id"]["required"] is True
+    assert "Content-addressed identity" in resolution["id"]["description"]
+    assert resolution["status"] == {
+        "required": True,
+        "range": "DDResolutionStatus",
+    }
+    for provenance_field in (
+        "recorded_by",
+        "recorded_at",
+        "source_manifest_digest",
+    ):
+        assert resolution[provenance_field]["required"] is True
 
 
 def test_resolution_graph_record_carries_bridge_provenance() -> None:
