@@ -170,11 +170,6 @@ class ExportReport:
     all_gates_passed: bool = True
     exported_names: list[str] = field(default_factory=list)
     validation_failures: int = 0
-    # Deprecation stubs emitted for accepted names retired via supersession —
-    # status:deprecated entries pointing at their live successor. Tracked here
-    # (never in the CLOSED catalog manifest) so a release can report how many
-    # renames the published catalog now carries a breaking-change trail for.
-    deprecated_stub_count: int = 0
     exclusion_records: list[ExclusionRecord] = field(default_factory=list)
 
     def record_exclusions(self, records: list[ExclusionRecord]) -> None:
@@ -232,7 +227,6 @@ class ExportReport:
                 "pruned_links": self.pruned_links,
                 "gate_failures": self.gate_failures,
                 "validation_failures": self.validation_failures,
-                "deprecated_stubs": self.deprecated_stub_count,
             },
             "all_gates_passed": self.all_gates_passed,
         }
@@ -908,17 +902,11 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
         "unit": node.get("unit") or "",
         # Every candidate reaching this function has passed the accepted /
         # docs-accepted / valid export gate, so it is published as 'active'.
-        # 'draft' therefore never appears in the published status vocabulary;
-        # 'deprecated' is reserved for the supersession stubs built below.
+        # 'draft' and 'deprecated' therefore never appear in the released
+        # status vocabulary.
         "status": "active",
         "links": list(node.get("links") or []),
     }
-
-    # Optional lifecycle fields
-    if node.get("deprecates"):
-        entry["deprecates"] = node["deprecates"]
-    if node.get("superseded_by"):
-        entry["superseded_by"] = node["superseded_by"]
 
     # Provenance (ISN grammatical provenance, NOT pipeline provenance)
     # This is optional — only set for derived/composite names
@@ -928,95 +916,15 @@ def _graph_node_to_entry_dict(node: dict[str, Any]) -> dict[str, Any]:
 
 
 # =============================================================================
-# Deprecation stubs (accepted names retired by supersession)
+# Internal supersession lineage
 # =============================================================================
 
 
 def _fetch_deprecation_stubs(
     published_names: set[str],
 ) -> list[dict[str, Any]]:
-    """Fetch predecessor nodes needing a deprecation stub in the catalog.
-
-    A stub is warranted for every ``StandardName`` that:
-
-    - is ``name_stage = 'superseded'`` (retired from the live catalog), AND
-    - carries durable catalog approval metadata — LLM acceptance or RC
-      appearance alone never creates public deprecation history, AND
-    - has a *live* approved successor reachable along the incoming
-      ``REFINED_FROM`` chain that is itself in *published_names*.
-
-    Refinement chains collapse.  For ``A → B → C`` (edges ``B-REFINED_FROM→A``,
-    ``C-REFINED_FROM→B``; A, B superseded, C accepted) the successor predicate
-    ``succ.name_stage = 'accepted'`` binds only ``C``, so A's stub points
-    straight at the live name ``C``.  A superseded intermediate ``B`` that was
-    itself published emits its own stub, also collapsed onto ``C``.
-
-    Returns predecessor node dicts, each annotated with the resolved live
-    successor under the ``_successor`` key.  A predecessor whose only
-    successors are unpublished (below-score / rejected / renamed out of the
-    export set) is skipped — a stub with an unresolvable successor would be a
-    dangling breaking-change pointer.
-    """
-    from imas_codex.graph.client import GraphClient
-
-    cypher = """
-    MATCH (old:StandardName)
-    WHERE coalesce(old.name_stage, '') = 'superseded'
-      AND old.catalog_approved_at IS NOT NULL
-    MATCH (succ:StandardName)-[:REFINED_FROM*1..]->(old)
-    WHERE succ.name_stage = 'approved'
-    OPTIONAL MATCH (old)-[:HAS_UNIT]->(u:Unit)
-    RETURN old {
-        .*,
-        unit: coalesce(u.id, old.unit)
-    } AS record,
-    collect(DISTINCT succ.id) AS successors
-    ORDER BY record.id
-    """
-    with GraphClient() as gc:
-        rows = gc.query(cypher)
-
-    stubs: list[dict[str, Any]] = []
-    for row in rows or []:
-        node = dict(row["record"])
-        successors = [s for s in (row.get("successors") or []) if s in published_names]
-        if not successors:
-            continue
-        # Deterministic collapse when a predecessor has more than one live
-        # accepted successor (branching refinement): the lexicographically
-        # first published successor wins.
-        node["_successor"] = sorted(successors)[0]
-        stubs.append(node)
-    return stubs
-
-
-def _build_stub_entry(node: dict[str, Any]) -> dict[str, Any]:
-    """Build a ``status: deprecated`` catalog entry dict for a superseded name.
-
-    Copies ``kind``/``unit`` from the predecessor and points ``superseded_by``
-    (and a front-and-centre internal link) at the live successor.
-    """
-    old_name = node["id"]
-    successor = node["_successor"]
-    kind = node.get("kind") or "scalar"
-    entry: dict[str, Any] = {
-        "name": old_name,
-        "kind": kind,
-        "status": "deprecated",
-        "superseded_by": successor,
-        "description": f"Deprecated: renamed to {successor}.",
-        "documentation": (
-            f"`{old_name}` has been renamed. Use `{successor}` instead — it "
-            f"is the live standard name for this quantity. This deprecated "
-            f"entry is retained so downstream consumers referencing the old "
-            f"name can resolve the successor."
-        ),
-        "links": [f"name:{successor}"],
-    }
-    # Metadata entries carry no unit; every other kind requires one.
-    if kind != "metadata":
-        entry["unit"] = node.get("unit") or "1"
-    return entry
+    """Return no entries because supersession lineage is graph-internal."""
+    return []
 
 
 def _validate_entry(entry_dict: dict[str, Any]) -> dict[str, Any] | None:
@@ -1326,8 +1234,8 @@ def _write_domain_yaml(
     Each entry is re-validated against the ISN model in its FINAL, written
     shape — after canonicalisation, unsupported-field stripping, and link
     pruning. Entries are validated once when first built, but the augmentation
-    steps between then and here (deprecation stubs, dangling-link pruning,
-    computed-ref derivation, canonicalise) can in principle break a
+    steps between then and here (dangling-link pruning, computed-ref
+    derivation, canonicalise) can in principle break a
     previously-valid entry; validating the emitted dict makes any such
     regression fail the export loudly instead of shipping a malformed catalog.
 
@@ -1361,8 +1269,8 @@ def _write_domain_yaml(
         ordered = reorder_entry_dict(clean)
         # Final-shape validation gate: the dict about to be written must still
         # satisfy the ISN model. A failure here is a defect in the augmentation
-        # pipeline (deprecation stubs, dangling-link pruning, computed-ref
-        # derivation, canonicalise), not bad input — fail the export rather than
+        # pipeline (dangling-link pruning, computed-ref derivation,
+        # canonicalise), not bad input — fail the export rather than
         # emit it. Strip the graph-only rendered fields first: they are stamped
         # on after build-time validation and the strict model rejects them,
         # though the catalog loader accepts them in the emitted YAML.
@@ -1922,55 +1830,12 @@ def run_export(
                 domain_entries[primary].append(entry_dict)
             exported_names.append(cand["id"])
 
-        # ── 5a2. Resolve links/computed refs against the final set ──
+        # ── 5a. Resolve links/computed refs against the final set ──
         # The published set is now known. Drop internal (name:) doc links
         # whose target isn't published (renamed, dropped below score, or
         # rejected by ISN validation after gate time); external http(s)
         # links are left untouched. This runs before writing so the emitted
         # catalog carries no dangling internal links.
-        published_names = {
-            e.get("name")
-            for entries in domain_entries.values()
-            for e in entries
-            if e.get("name")
-        }
-
-        # ── 5a1. Deprecation stubs for retired accepted names ───────
-        # Accepted names retired by a rename vanish from the live set above;
-        # emit a status:deprecated stub pointing at the live successor so the
-        # rename is a discoverable, resolvable trail rather than a silent
-        # breaking change. Stubs are validated by the ISN model like any other
-        # entry and routed to the predecessor's primary domain.
-        stub_count = 0
-        for stub_node in _fetch_deprecation_stubs(published_names):
-            if stub_node["id"] in published_names:
-                # A live accepted name reclaimed this id — no stub needed.
-                continue
-            validated_stub = _validate_entry(_build_stub_entry(stub_node))
-            if validated_stub is None:
-                validation_failures += 1
-                continue
-            stub_domain_list = stub_node.get("physics_domain") or []
-            if isinstance(stub_domain_list, str):
-                stub_domain_list = [stub_domain_list]
-            stub_primary = (
-                pick_primary_domain(stub_domain_list)
-                if stub_domain_list
-                else "unscoped"
-            )
-            validated_stub["physics_domain"] = (
-                stub_primary if stub_primary != "unscoped" else ""
-            )
-            if not any(
-                e.get("name") == validated_stub.get("name")
-                for e in domain_entries[stub_primary]
-            ):
-                domain_entries[stub_primary].append(validated_stub)
-                stub_count += 1
-        report.deprecated_stub_count = stub_count
-        # Recompute the published set so stub ids (and their successors) are
-        # known to link pruning — a doc link to a now-deprecated old name
-        # resolves to its stub instead of being pruned.
         published_names = {
             e.get("name")
             for entries in domain_entries.values()
