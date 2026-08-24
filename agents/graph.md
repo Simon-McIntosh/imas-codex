@@ -4,6 +4,27 @@ Knowledge graph management with Neo4j - queries, schema evolution, and releases.
 
 This agent builds on the core rules in [AGENTS.md](../AGENTS.md). The main file covers graph backup, token optimization, and schema enforcement. This file covers graph-specific details.
 
+## Before you believe a zero
+
+A missing property evaluates to `null`, so a wrongly-named property yields an empty
+result rather than an error. Every query whose conclusion depends on a low or zero
+count reports its own key coverage in the same breath:
+
+```python
+repl("print(query('MATCH (n:StandardName) RETURN count(n) AS candidates, count(n.id) AS with_key'))")
+```
+
+If `with_key` is 0 while `candidates` is not, the key is wrong. Identity property
+names are **not uniform across labels** — `StandardName.id`,
+`StandardNameReview.standard_name_id`, `DocsRevision.sn_id`, `LLMCost.sn_ids` — and no
+standard-name class has a `name` property at all. Traversal direction likewise comes
+from the LinkML slot, not from the English relationship name: it is
+`(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)`, not the reverse. The full
+per-label and per-relationship tables are in
+[`imas_codex/standard_names/AGENTS.md`](../imas_codex/standard_names/AGENTS.md#graph-identity-and-joins),
+and the repo-wide rule with its incident record is in
+[AGENTS.md](../AGENTS.md#a-wrong-property-name-returns-zero-rows-not-an-error-binding).
+
 ## MCP Tools (Primary Interface)
 
 When the Codex MCP server is running, use `repl()` REPL:

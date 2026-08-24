@@ -390,6 +390,46 @@ When a command times out, **persist the constraint immediately** via `update_inf
 
 **Schema verification:** Before writing Cypher queries, verify property names against `agents/schema-reference.md` (auto-generated) or call `get_graph_schema()`. Common pitfall: WikiChunk/CodeChunk text content is stored in the `text` property.
 
+### A wrong property name returns zero rows, not an error (binding)
+
+Cypher evaluates a missing property to `null` and drops any row whose predicate is
+not `true`. So a misspelled or wrongly-guessed property name produces a **clean,
+plausible, empty result** — indistinguishable from a real empty set. Four such
+failures happened in one session on 2026-08-23, two of them after the rule was
+written down and one by its own author; every one was caught by a second agent, none
+by the author. **Do not trust a zero until you have proven the key exists.**
+
+```cypher
+-- Run this BEFORE believing any zero, and fail closed if with_prop is 0
+MATCH (n:<Label>) RETURN count(n) AS candidates, count(n.<prop>) AS with_prop
+```
+
+`candidates > 0` with `with_prop = 0` means the property name is wrong, not the set
+empty. The same applies to `count(DISTINCT n.<prop>)`, which returns 0 over a
+non-existent property without complaint.
+
+**Identity keys are NOT uniform yet — check, never guess.** How a node names the
+standard name it belongs to varies by label:
+
+| Class | Property | Note |
+|---|---|---|
+| `StandardName` | `id` | the identifier itself; there is **no** `name` property on any SN class |
+| `StandardNameSource` | `id` | `dd:<path>` or `signals:<facility>:<signal-id>` |
+| `StandardNameReview` | `standard_name_id` | back-reference; authoritative link is `HAS_REVIEW` |
+| `DocsRevision` | `sn_id` | authoritative link is `DOCS_REVISION_OF` |
+| `LLMCost` | `sn_ids` | multivalued, and the **only** link — `LLMCost` has no edge to `StandardName` |
+
+Axis tokens are also inconsistent: `StandardNameReview.review_axis` takes
+**`names`**/`docs` while the paired scalars are suffixed **`_name`**/`_docs`
+(`reviewer_score_name` vs `reviewer_score_docs`). Filtering `review_axis = 'name'`
+returns zero rows and reads as "the names axis was never reviewed".
+
+Full tables — all 53 relationship directions with LinkML citations, and all 12
+foreign-key classes — are in
+[`imas_codex/standard_names/AGENTS.md`](imas_codex/standard_names/AGENTS.md#graph-identity-and-joins).
+Unification is planned in `docs/plans/sn-graph-identity-convention.html`; until it
+lands, the table above is the current truth.
+
 ### Cypher Compatibility — Neo4j 2026
 
 We run **Neo4j 2026.01.x** with `db.query.default_language: CYPHER_5`. The only breaking syntax change that affects this codebase: `x NOT IN [list]` is removed — write `NOT (x IN [list])` instead. `CASE WHEN` is fully supported — use it freely. For "keep old value if new is empty," prefer `SET s.f = coalesce(nullIf(new, ''), old)` over `CASE WHEN`. Test new Cypher against the live graph before committing.
