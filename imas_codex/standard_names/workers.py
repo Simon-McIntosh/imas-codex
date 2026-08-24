@@ -8490,7 +8490,7 @@ WITH n, clusters, parent,
 RETURN n.keywords AS keywords,
        n.documentation AS dd_documentation,
        n.description AS dd_description,
-       n.units AS dd_units,
+       n.unit AS dd_units,
        parent.description AS parent_description,
        clusters,
        changes
@@ -8506,7 +8506,7 @@ RETURN sn.source_paths AS source_paths,
            id: imas.id,
            documentation: coalesce(imas.documentation, ''),
            description: coalesce(imas.description, ''),
-           alias: imas.alias,
+           alias: imas.name,
            unit: coalesce(imas.unit, '')
        }) AS dd_nodes
 """
@@ -9569,7 +9569,7 @@ def _load_docs_review_source_item(sn_id: str) -> dict[str, Any]:
             OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
             OPTIONAL MATCH (sn)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
             RETURN sn.id AS id,
-                   sn.name AS name,
+                   sn.id AS name,
                    sn.description AS description,
                    sn.documentation AS documentation,
                    sn.kind AS kind,

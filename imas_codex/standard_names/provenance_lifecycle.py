@@ -1053,11 +1053,16 @@ WITH source,
         stage: target.name_stage,
         validation_status: target.validation_status
       })
-      WHERE item.id IS NOT NULL] AS targets
+      WHERE item.id IS NOT NULL] AS targets,
+     [id IN collect(DISTINCT CASE
+        WHEN target.id IS NOT NULL
+         AND NOT (target.name_stage IN ['superseded', 'exhausted'])
+        THEN target.id ELSE null END)
+      WHERE id IS NOT NULL] AS live_targets
 OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
-WITH source, targets, collect(DISTINCT dd.id) AS dd_backings
+WITH source, targets, live_targets, collect(DISTINCT dd.id) AS dd_backings
 OPTIONAL MATCH (source)-[:FROM_SIGNAL]->(signal:FacilitySignal)
-WITH source, targets, dd_backings,
+WITH source, targets, live_targets, dd_backings,
      collect(DISTINCT signal.id) AS signal_backings
 OPTIONAL MATCH (source)-[:FROM_DD_PATH|FROM_SIGNAL]->(backing)
 OPTIONAL MATCH (backing)-[:HAS_STANDARD_NAME]->(mapped:StandardName)
@@ -1069,9 +1074,7 @@ RETURN source.id AS source_id,
        source.produced_sn_id AS produced_sn_id,
        [target IN targets | target.id] AS produced_targets,
        targets AS target_states,
-       [target IN targets
-        WHERE NOT target.stage IN ['superseded', 'exhausted'] |
-        target.id] AS live_targets,
+       live_targets,
        dd_backings,
        signal_backings,
        collect(DISTINCT mapped.id) AS mapped_ids,

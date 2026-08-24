@@ -39,8 +39,7 @@ def name_chain_history(sn_id: str, *, limit: int = 5) -> list[dict]:
         RETURN
           ancestor.id                               AS name,
           ancestor.model                            AS model,
-          coalesce(ancestor.reviewer_score_name,
-                   ancestor.reviewer_score)         AS reviewer_score,
+          ancestor.reviewer_score_name               AS reviewer_score,
           ancestor.reviewer_comments_per_dim_name   AS reviewer_comments_per_dim,
           ancestor.generated_at                     AS generated_at
     """
