@@ -100,7 +100,18 @@ class TestReconcileSourcesGate:
         from imas_codex.standard_names import graph_ops
 
         src = inspect.getsource(graph_ops.reconcile_standard_name_sources)
-        assert "lifecycle_status = 'removed'" in src, "stale step must gate on removed"
+        upstream_present = graph_ops._standard_name_source_upstream_present_cypher(
+            "sns"
+        )
+        assert '_standard_name_source_upstream_present_cypher("sns")' in src
+        assert "OR NOT (" in src, "stale step must negate upstream presence"
+        assert src.count("+ upstream_present") >= 2, (
+            "stale and revive steps must share the upstream predicate"
+        )
+        assert "MATCH (upstream:IMASNode {id: sns.source_id})" in upstream_present
+        assert "coalesce(upstream.lifecycle_status, '') <> 'removed'" in (
+            upstream_present
+        )
         assert "coalesce(imas.lifecycle_status, '') <> 'removed'" in src, (
             "revive step must exclude removed nodes"
         )

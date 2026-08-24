@@ -19,6 +19,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names import graph_ops
 from imas_codex.standard_names.export import _fetch_candidates
 
 # ---------------------------------------------------------------------------
@@ -338,12 +339,14 @@ class TestQuorumShortfallIsNotExportable:
 
     def test_full_export_requires_docs_quorum_authority(self) -> None:
         cypher = self._capture_cypher()
-        assert "sn.docs_review_resolution_method IS NOT NULL" in cypher
+        assert graph_ops.docs_review_eligibility_where() in cypher
+        assert "sn.docs_review_resolution_method IS NOT NULL" not in cypher
         assert "sn.docs_review_quorum_shortfall IS NULL" in cypher
 
     def test_batch_export_requires_docs_quorum_authority(self) -> None:
         cypher = self._capture_cypher(batch=["sn_a"])
-        assert "sn.docs_review_resolution_method IS NOT NULL" in cypher
+        assert graph_ops.docs_review_eligibility_where() in cypher
+        assert "sn.docs_review_resolution_method IS NOT NULL" not in cypher
         assert "sn.docs_review_quorum_shortfall IS NULL" in cypher
 
     def test_names_only_export_is_independent_of_docs_authority(self) -> None:

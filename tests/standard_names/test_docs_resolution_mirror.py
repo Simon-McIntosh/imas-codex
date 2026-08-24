@@ -96,26 +96,34 @@ def test_projection_is_docs_scoped_canonical_and_idempotent() -> None:
     selection_cypher, selection_params = client.calls[0]
     assert "review.review_axis = 'docs'" in selection_cypher
     assert "canonical_group DESC" in selection_cypher
-    assert "review.resolution_method IN $winning_methods" not in selection_cypher
-    assert "item.resolution_method IN $winning_methods" in selection_cypher
-    assert selection_params["winning_methods"] == [
+    assert graph_ops._docs_review_winner_query_body() in selection_cypher
+    assert (
+        "review.resolution_method IN $docs_review_winning_methods"
+        not in selection_cypher
+    )
+    assert "item.resolution_method IN $docs_review_winning_methods" in selection_cypher
+    assert selection_params["docs_review_winning_methods"] == [
         "authoritative_escalation",
         "quorum_consensus",
         "single_review",
     ]
-    assert selection_params["non_winning_methods"] == [
+    assert selection_params["docs_review_non_winning_methods"] == [
         "max_cycles_reached",
         "retry_item",
     ]
     assert "non_winner.review_axis = 'docs'" in selection_cypher
-    assert "max_cycles_reached" not in selection_params["winning_methods"]
-    assert "retry_item" not in selection_params["winning_methods"]
+    assert selection_params == graph_ops.docs_review_eligibility_params()
 
     mutation_cypher, mutation_params = client.calls[1]
-    assert "sn.docs_review_resolution_method IS NULL" in mutation_cypher
+    assert graph_ops._docs_review_winner_query_body() in mutation_cypher
+    assert "coalesce(sn.docs_review_resolution_method, '')" in mutation_cypher
+    assert "<> candidate.resolution_method" in mutation_cypher
     assert "sn.name_stage = 'accepted'" in mutation_cypher
     assert "sn.docs_stage = 'accepted'" in mutation_cypher
-    assert mutation_params == {"candidates": [candidate]}
+    assert mutation_params == {
+        "candidates": [candidate],
+        **graph_ops.docs_review_eligibility_params(),
+    }
 
 
 def test_non_winning_repair_is_exact_and_axis_scoped() -> None:
@@ -133,9 +141,14 @@ def test_non_winning_repair_is_exact_and_axis_scoped() -> None:
     assert result == [cleared]
     cypher, params = client.calls[0]
     assert "review.review_axis = 'docs'" in cypher
-    assert "sn.docs_review_resolution_method IS NOT NULL" in cypher
+    assert graph_ops.docs_review_eligibility_where() in cypher
+    assert "AND NOT (EXISTS" in cypher
+    assert (
+        "sn.docs_review_resolution_method\n"
+        "                  IN $docs_review_resolution_methods" in cypher
+    )
     assert "SET sn.docs_review_resolution_method = null" in cypher
     assert params == {
         "standard_name_ids": ["tritium_density"],
-        "non_winning_methods": ["max_cycles_reached", "retry_item"],
+        **graph_ops.docs_review_eligibility_params(),
     }
