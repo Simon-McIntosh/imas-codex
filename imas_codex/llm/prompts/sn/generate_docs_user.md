@@ -137,10 +137,15 @@ Rewrite the description from the Physics Reference Material and the name itself;
 {{ item.description }}
 {% endif %}
 
-{% if item.cocos_label %}
+{% set cocos_transformation_type = item.cocos_transformation_type | default(none, true) %}
+{% if cocos_transformation_type is none %}
+{% set cocos_transformation_type = item.cocos_label | default(none, true) %}
+{% endif %}
+{% set cocos_sensitive = cocos_transformation_type is not none and cocos_transformation_type != "one_like" %}
+{% if cocos_sensitive %}
 ## COCOS Sign Convention
 
-This quantity has COCOS transformation type **{{ item.cocos_label }}**.
+This quantity has COCOS transformation type **{{ cocos_transformation_type }}**.
 {% if item.cocos_guidance %}
 
 {{ item.cocos_guidance }}
@@ -332,6 +337,6 @@ Return a JSON object with exactly these two fields:
 - Mention measurement/computation only when constitutive of the quantity or
   necessary to distinguish it from another quantity
 - Cross-references to related standard names use `[label](name:bare_id)` inline links only
-- {% if item.cocos_label %}Sign convention is REQUIRED for this quantity (see COCOS section above): use exactly `Sign convention: Positive when …` as a standalone paragraph (blank line before and after, plain text — no markdown headings, no bold){% else %}Sign convention (if COCOS-dependent): use exactly `Sign convention: Positive when …` as a standalone paragraph (blank line before and after, plain text — no markdown headings, no bold); omit if sign-invariant{% endif %}
+- {% if cocos_sensitive %}Sign convention is REQUIRED for this quantity (see COCOS section above): use exactly `Sign convention: Positive when …` as a standalone paragraph (blank line before and after, plain text — no markdown headings, no bold){% else %}Sign convention (if COCOS-dependent): use exactly `Sign convention: Positive when …` as a standalone paragraph (blank line before and after, plain text — no markdown headings, no bold); omit if sign-invariant{% endif %}
 - American spelling throughout
 - Minimum 20 characters
