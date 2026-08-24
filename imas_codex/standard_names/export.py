@@ -268,8 +268,8 @@ def _fetch_candidates(
       marker, so an accepted node still carrying one arrived by a path that
       did not consult it, and publishing it would ship exactly what the
       quorum gate withheld.
-    - explicit docs resolution metadata with no docs quorum shortfall —
-      excludes unresolved and historical score-only decisions from full
+    - a reachable winning docs-axis review group with no docs quorum shortfall
+      — excludes unresolved and historical score-only decisions from full
       exports. Names-only export remains independent of docs state and docs
       review authority.
 
@@ -283,6 +283,10 @@ def _fetch_candidates(
     approved corpus is fetched (the normal RC export).
     """
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import (
+        docs_review_eligibility_params,
+        docs_review_eligibility_where,
+    )
 
     params: dict[str, Any] = {}
     if batch is not None:
@@ -301,9 +305,10 @@ def _fetch_candidates(
       AND sn.review_quorum_shortfall IS NULL
     """
     if not names_only:
+        params.update(docs_review_eligibility_params())
         cypher += (
             "  AND sn.docs_stage = 'accepted'\n"
-            "  AND sn.docs_review_resolution_method IS NOT NULL\n"
+            f"  AND {docs_review_eligibility_where()}\n"
             "  AND sn.docs_review_quorum_shortfall IS NULL\n"
         )
 
@@ -331,6 +336,7 @@ def _fetch_candidates(
 def _fetch_export_population(
     *,
     batch: list[str] | None = None,
+    require_docs_review: bool = True,
 ) -> list[dict[str, Any]]:
     """Fetch the identity universe before export eligibility filters are applied.
 
@@ -341,8 +347,13 @@ def _fetch_export_population(
     exclusion ledger.
     """
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_ops import (
+        docs_review_eligibility_params,
+        docs_review_eligibility_where,
+        docs_review_property_coverage,
+    )
 
-    params: dict[str, Any] = {}
+    params: dict[str, Any] = docs_review_eligibility_params()
     if batch is None:
         name_predicate = "sn.name_stage IN ['accepted', 'approved']"
     else:
@@ -352,16 +363,26 @@ def _fetch_export_population(
     cypher = f"""
     MATCH (sn:StandardName)
     WHERE {name_predicate}
+    WITH sn,
+         EXISTS {{
+             MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+             WHERE review.review_axis = 'docs'
+         }} AS has_docs_review,
+         {docs_review_eligibility_where()} AS has_winning_docs_review
     OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
     OPTIONAL MATCH (sn)-[:HAS_COCOS]->(c:COCOS)
     RETURN sn {{
         .*,
         unit: coalesce(u.id, sn.unit),
-        cocos: c.convention
+        cocos: c.convention,
+        _has_docs_review: has_docs_review,
+        _has_winning_docs_review: has_winning_docs_review
     }} AS record
     ORDER BY sn.id
     """
     with GraphClient() as gc:
+        if require_docs_review:
+            docs_review_property_coverage(gc)
         rows = gc.query(cypher, **params)
 
     population_by_id: dict[str, dict[str, Any]] = {}
@@ -408,9 +429,14 @@ def _classify_export_population(
         elif not names_only and candidate.get("docs_stage") != "accepted":
             reason = "documentation_not_accepted"
             detail = f"docs_stage={candidate.get('docs_stage')!r}"
-        elif not names_only and candidate.get("docs_review_resolution_method") is None:
-            reason = "documentation_review_unresolved"
-            detail = "docs review resolution method is missing"
+        elif not names_only and candidate.get("_has_docs_review", True) is False:
+            reason = "never_reviewed"
+            detail = "no docs-axis review is reachable"
+        elif (
+            not names_only and candidate.get("_has_winning_docs_review", True) is False
+        ):
+            reason = "resolution_unrecorded"
+            detail = "docs-axis reviews exist but no winning group records a method"
         elif (
             not names_only and candidate.get("docs_review_quorum_shortfall") is not None
         ):
@@ -1651,7 +1677,10 @@ def run_export(
 
     # ── 1. Fetch the upstream population and classify eligibility ──
     logger.info("Fetching accepted export population from graph...")
-    population = _fetch_export_population(batch=review_batch)
+    population = _fetch_export_population(
+        batch=review_batch,
+        require_docs_review=not names_only,
+    )
     candidates, eligibility_exclusions = _classify_export_population(
         population,
         domain=domain,

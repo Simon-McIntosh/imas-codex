@@ -6137,77 +6137,165 @@ def _non_winning_review_resolution_methods() -> frozenset[str]:
     return permissible - _winning_review_resolution_methods()
 
 
+def docs_review_eligibility_params() -> dict[str, list[str]]:
+    """Return schema-derived parameters for docs-review eligibility."""
+    winning = _winning_review_resolution_methods()
+    non_winning = _non_winning_review_resolution_methods()
+    return {
+        "docs_review_winning_methods": sorted(winning),
+        "docs_review_non_winning_methods": sorted(non_winning),
+        "docs_review_resolution_methods": sorted(winning | non_winning),
+    }
+
+
+def _docs_review_winner_query_body(name_variable: str = "sn") -> str:
+    """Return the single graph traversal that selects a winning docs group."""
+    if name_variable != "sn":
+        raise ValueError("docs-review eligibility requires the StandardName alias 'sn'")
+    return """
+        MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
+        WHERE review.review_axis = 'docs'
+          AND review.review_group_id IS NOT NULL
+          AND NOT EXISTS {
+              MATCH (sn)-[:HAS_REVIEW]->(non_winner:StandardNameReview)
+              WHERE non_winner.review_axis = 'docs'
+                AND non_winner.resolution_method
+                    IN $docs_review_non_winning_methods
+          }
+        WITH review.review_group_id AS review_group_id,
+             max(CASE WHEN coalesce(review.is_canonical, false)
+                 THEN 1 ELSE 0 END) AS canonical_group,
+             max(review.reviewed_at) AS group_reviewed_at,
+             [item IN collect({
+                 review_id: review.id,
+                 reviewed_at: review.reviewed_at,
+                 resolution_method: review.resolution_method
+             }) WHERE item.resolution_method IN $docs_review_winning_methods]
+                 AS winning_records
+        WHERE size(winning_records) > 0
+        UNWIND winning_records AS winning_record
+        WITH review_group_id, canonical_group, group_reviewed_at, winning_record
+        ORDER BY canonical_group DESC, group_reviewed_at DESC,
+                 review_group_id DESC, winning_record.reviewed_at DESC,
+                 winning_record.review_id DESC
+        WITH collect({
+            review_group_id: review_group_id,
+            review_id: winning_record.review_id,
+            resolution_method: winning_record.resolution_method
+        })[0] AS winner
+        RETURN winner
+    """
+
+
+def docs_review_eligibility_where() -> str:
+    """Return the shared predicate for a reachable winning docs review."""
+    return f"EXISTS {{{_docs_review_winner_query_body()}}}"
+
+
+def docs_review_property_coverage(gc: Any | None = None) -> dict[str, int]:
+    """Assert that every review property used by eligibility has live coverage.
+
+    Cypher silently returns zero for a missing property. The coverage row makes
+    a misspelled or removed slot a hard failure before the eligibility result is
+    trusted, and also verifies the plural ``names``/``docs`` axis vocabulary.
+    """
+    query = """
+        MATCH (review:StandardNameReview)
+        RETURN count(review) AS reviews,
+               count(review.review_axis) AS axis_covered,
+               count(review.review_group_id) AS group_covered,
+               count(review.resolution_method) AS method_covered,
+               count(CASE WHEN review.review_axis IN ['names', 'docs']
+                     THEN 1 END) AS known_axis,
+               count(CASE WHEN review.review_axis = 'docs'
+                     THEN 1 END) AS docs_axis
+        """
+    if gc is None:
+        with GraphClient() as graph:
+            rows = graph.query(query)
+    else:
+        rows = gc.query(query)
+    if not rows:
+        return {
+            "reviews": 0,
+            "axis_covered": 0,
+            "group_covered": 0,
+            "method_covered": 0,
+            "known_axis": 0,
+            "docs_axis": 0,
+        }
+    coverage = {key: int(value or 0) for key, value in dict(rows[0]).items()}
+    reviews = coverage["reviews"]
+    missing = [
+        key
+        for key in ("axis_covered", "group_covered", "method_covered")
+        if reviews and coverage[key] == 0
+    ]
+    if coverage["axis_covered"] != coverage["known_axis"]:
+        missing.append("known_axis")
+    if reviews and coverage["docs_axis"] == 0:
+        missing.append("docs_axis")
+    if missing:
+        raise RuntimeError(
+            "docs-review eligibility property coverage failed: "
+            + ", ".join(sorted(set(missing)))
+        )
+    return coverage
+
+
 @retry_on_deadlock()
 def project_docs_review_resolution_methods() -> list[dict[str, str]]:
     """Mirror winning docs-review methods onto already accepted names.
 
-    Only accepted names with accepted documentation and a null mirror are
-    candidates. Review groups are docs-axis scoped. A group containing the
-    canonical reviewer is preferred; recency and stable ids break ties. The
-    write is compare-and-set on the null mirror, making replay idempotent.
+    Only accepted names with accepted documentation and a reachable winning
+    docs review are candidates. A group containing the canonical reviewer is
+    preferred; recency and stable ids break ties. The write revalidates graph
+    eligibility and changes the mirror only when its selected value differs,
+    making replay idempotent.
 
     Returns one receipt row per mutation with the Standard Name id, source
     review group, source review id, and mirrored resolution method.
     """
-    winning_methods = sorted(_winning_review_resolution_methods())
-    non_winning_methods = sorted(_non_winning_review_resolution_methods())
+    eligibility_params = docs_review_eligibility_params()
+    winner_query = _docs_review_winner_query_body()
     with GraphClient() as gc:
         candidates = list(
             gc.query(
-                """
-                MATCH (sn:StandardName)-[:HAS_REVIEW]->(review:StandardNameReview)
+                f"""
+                MATCH (sn:StandardName)
                 WHERE sn.name_stage = 'accepted'
                   AND sn.docs_stage = 'accepted'
-                  AND sn.docs_review_resolution_method IS NULL
-                  AND review.review_axis = 'docs'
-                  AND review.review_group_id IS NOT NULL
-                  AND NOT EXISTS {
-                      MATCH (sn)-[:HAS_REVIEW]->(non_winner:StandardNameReview)
-                      WHERE non_winner.review_axis = 'docs'
-                        AND non_winner.resolution_method IN $non_winning_methods
-                  }
-                WITH sn, review.review_group_id AS review_group_id,
-                     max(CASE WHEN coalesce(review.is_canonical, false)
-                         THEN 1 ELSE 0 END) AS canonical_group,
-                     max(review.reviewed_at) AS group_reviewed_at,
-                     [item IN collect({
-                         review_id: review.id,
-                         reviewed_at: review.reviewed_at,
-                         resolution_method: review.resolution_method
-                     }) WHERE item.resolution_method IN $winning_methods]
-                         AS winning_records
-                WHERE size(winning_records) > 0
-                UNWIND winning_records AS winning_record
-                WITH sn, review_group_id, canonical_group, group_reviewed_at,
-                     winning_record
-                ORDER BY sn.id, canonical_group DESC, group_reviewed_at DESC,
-                         review_group_id DESC, winning_record.reviewed_at DESC,
-                         winning_record.review_id DESC
-                WITH sn, collect({
-                    review_group_id: review_group_id,
-                    review_id: winning_record.review_id,
-                    resolution_method: winning_record.resolution_method
-                })[0] AS winner
+                CALL {{
+                    WITH sn
+                    {winner_query}
+                }}
                 RETURN sn.id AS standard_name_id,
                        winner.review_group_id AS review_group_id,
                        winner.review_id AS review_id,
                        winner.resolution_method AS resolution_method
                 ORDER BY standard_name_id
                 """,
-                winning_methods=winning_methods,
-                non_winning_methods=non_winning_methods,
+                **eligibility_params,
             )
             or []
         )
         if not candidates:
             return []
         rows = gc.query(
-            """
+            f"""
             UNWIND $candidates AS candidate
-            MATCH (sn:StandardName {id: candidate.standard_name_id})
+            MATCH (sn:StandardName {{id: candidate.standard_name_id}})
             WHERE sn.name_stage = 'accepted'
               AND sn.docs_stage = 'accepted'
-              AND sn.docs_review_resolution_method IS NULL
+            CALL {{
+                WITH sn
+                {winner_query}
+            }}
+            WITH sn, candidate, winner
+            WHERE winner.review_group_id = candidate.review_group_id
+              AND winner.review_id = candidate.review_id
+              AND coalesce(sn.docs_review_resolution_method, '')
+                  <> candidate.resolution_method
             SET sn.docs_review_resolution_method = candidate.resolution_method
             RETURN sn.id AS standard_name_id,
                    candidate.review_group_id AS review_group_id,
@@ -6216,6 +6304,7 @@ def project_docs_review_resolution_methods() -> list[dict[str, str]]:
             ORDER BY standard_name_id
             """,
             candidates=candidates,
+            **eligibility_params,
         )
     return [dict(row) for row in rows or []]
 
@@ -6233,17 +6322,14 @@ def clear_non_winning_docs_review_resolution_methods(
         return []
     with GraphClient() as gc:
         rows = gc.query(
-            """
+            f"""
             UNWIND $standard_name_ids AS standard_name_id
-            MATCH (sn:StandardName {id: standard_name_id})
+            MATCH (sn:StandardName {{id: standard_name_id}})
             WHERE sn.name_stage = 'accepted'
               AND sn.docs_stage = 'accepted'
-              AND sn.docs_review_resolution_method IS NOT NULL
-              AND EXISTS {
-                  MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
-                  WHERE review.review_axis = 'docs'
-                    AND review.resolution_method IN $non_winning_methods
-              }
+              AND NOT ({docs_review_eligibility_where()})
+              AND sn.docs_review_resolution_method
+                  IN $docs_review_resolution_methods
             WITH sn, sn.docs_review_resolution_method AS cleared_method
             SET sn.docs_review_resolution_method = null
             RETURN sn.id AS standard_name_id,
@@ -6251,7 +6337,7 @@ def clear_non_winning_docs_review_resolution_methods(
             ORDER BY standard_name_id
             """,
             standard_name_ids=standard_name_ids,
-            non_winning_methods=sorted(_non_winning_review_resolution_methods()),
+            **docs_review_eligibility_params(),
         )
     return [dict(row) for row in rows or []]
 
@@ -11530,7 +11616,7 @@ PROMOTE_STRANDED_DOCS_WHERE = (
     "AND sn.reviewer_score_docs >= $min_score "
     "AND sn.name_stage = 'accepted' "
     "AND coalesce(sn.validation_status, '') <> 'quarantined' "
-    "AND sn.docs_review_resolution_method IS NOT NULL "
+    f"AND {docs_review_eligibility_where()} "
     "AND sn.docs_review_quorum_shortfall IS NULL"
 )
 """Canonical graph predicate for docs-axis stranded promotion."""
@@ -11578,6 +11664,7 @@ def promote_stranded_reviewed(
     name_where = PROMOTE_STRANDED_NAME_WHERE
     docs_where = PROMOTE_STRANDED_DOCS_WHERE
     with GraphClient() as gc:
+        eligibility_params = docs_review_eligibility_params()
         if dry_run:
             n_name = gc.query(
                 f"MATCH (sn:StandardName) WHERE {name_where} RETURN count(sn) AS n",
@@ -11586,6 +11673,7 @@ def promote_stranded_reviewed(
             n_docs = gc.query(
                 f"MATCH (sn:StandardName) WHERE {docs_where} RETURN count(sn) AS n",
                 min_score=min_score,
+                **eligibility_params,
             )
             return {
                 "name": n_name[0]["n"] if n_name else 0,
@@ -11610,6 +11698,7 @@ def promote_stranded_reviewed(
             RETURN count(sn) AS n
             """,
             min_score=min_score,
+            **eligibility_params,
         )
     promoted = {
         "name": r_name[0]["n"] if r_name else 0,
@@ -24243,12 +24332,17 @@ def claim_refine_docs_batch(
         " AND sn.reviewer_score_docs < $min_score"
         " AND coalesce(sn.docs_chain_length, 0) < $rotation_cap"
         " AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])"
-        " AND sn.docs_review_resolution_method IS NOT NULL"
+        f" AND {docs_review_eligibility_where()}"
         " AND sn.docs_review_quorum_shortfall IS NULL" + score_gate
     )
+    query_params: dict[str, Any] = {
+        "min_score": min_score,
+        "rotation_cap": rotation_cap,
+        **docs_review_eligibility_params(),
+    }
     items = _claim_sn_atomic(
         eligibility_where=where,
-        query_params={"min_score": min_score, "rotation_cap": rotation_cap},
+        query_params=query_params,
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,
         extra_return_fields=(
