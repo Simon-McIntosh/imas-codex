@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T22:45:02",
+  "updated": "2026-08-24T23:00:04",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -295,7 +295,7 @@
         "id": "impl-cypherprop",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03586-4c02-7ca3-9856-3bcb668f959a",
         "created": "2026-08-24"
       },
       {
@@ -493,6 +493,13 @@
         "role": "implement",
         "session_id": "01a02b3b-cd3a-7a72-b7dd-12e88ea5801b",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-holdenforce",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03586-b3a6-7d33-9627-273679219d0a",
+        "created": "2026-08-24"
       },
       {
         "id": "impl-holdout",
@@ -1076,6 +1083,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-westrefresh",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
         "id": "impl-westreprice",
         "harness": "codex",
         "role": "implement",
@@ -1339,6 +1353,13 @@
         "harness": "codex",
         "role": "test",
         "session_id": "01a03481-89b5-73c1-8dda-7554b20e2241",
+        "created": "2026-08-24"
+      },
+      {
+        "id": "test-signdiag",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
         "created": "2026-08-24"
       },
       {
@@ -24897,9 +24918,84 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260824T204652252507-n-holdenforcement",
+        "plan": "sn-release-readiness",
+        "section": "\u00a73",
+        "node": "n-holdenforcement",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-holdenforce",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T20:46:55Z",
+        "completed_at": "2026-08-24T20:59:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 773,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 773,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "79c31525a8caace334a84badf06e7a44f70136da",
+        "commits": [
+          "2fbbc6e629c5708495f3170cc9e12f8494bf9f0c"
+        ],
+        "changed_lines": {
+          "added": 194,
+          "removed": 1,
+          "files": 2
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T204652252507-n-holdenforcement/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03586-b3a6-7d33-9627-273679219d0a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9349376,
+            "cached_input_tokens_cumulative": 9349376,
+            "input_tokens": 9563408,
+            "input_tokens_cumulative": 9563408,
+            "output_tokens": 19935,
+            "output_tokens_cumulative": 19935,
+            "reasoning_output_tokens": 7037,
+            "reasoning_output_tokens_cumulative": 7037
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_export_release_holds.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 715
+    "_version": 721
   }
 }
