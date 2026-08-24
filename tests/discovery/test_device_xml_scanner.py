@@ -1938,7 +1938,7 @@ MOCK_MCFG_PARSED = {
 class TestMCFGPersist:
     """Test _persist_mcfg_nodes with mock graph."""
 
-    def _run_persist(self, parsed=None):
+    def _run_persist(self, parsed=None, *, geometry_rows=False):
         """Run persist with mocked GraphClient and return captured data."""
         if parsed is None:
             parsed = MOCK_MCFG_PARSED
@@ -1953,6 +1953,12 @@ class TestMCFGPersist:
 
             def capture_query(cypher, **kwargs):
                 query_calls.append((cypher, kwargs))
+                if geometry_rows and "RETURN properties(mcfg) AS node" in cypher:
+                    return [{"node": {"id": "mcfg:probe", "r": 4.292, "z": 0.604}}]
+                if geometry_rows and "RETURN properties(jec) AS node" in cypher:
+                    return [{"node": {"id": "jec:probe", "r": 4.292, "z": 0.604}}]
+                if geometry_rows and "RETURN count(*) AS linked" in cypher:
+                    return [{"linked": 1}]
                 return []
 
             mock_gc.query.side_effect = capture_query
@@ -2021,14 +2027,29 @@ class TestMCFGPersist:
 
     def test_persist_creates_matches_sensor_crossref(self):
         """MATCHES_SENSOR relationships link MCFG → JEC2020 by R,Z proximity."""
-        _, _, queries = self._run_persist()
+        _, _, queries = self._run_persist(geometry_rows=True)
+        mcfg_queries = [
+            (q, kw) for q, kw in queries if "RETURN properties(mcfg) AS node" in q
+        ]
+        jec_queries = [
+            (q, kw) for q, kw in queries if "RETURN properties(jec) AS node" in q
+        ]
         xref_queries = [(q, kw) for q, kw in queries if "MATCHES_SENSOR" in q]
+
+        assert len(mcfg_queries) == 1
+        assert "mcfg.data_source_name = $source_name" in mcfg_queries[0][0]
+        assert "mcfg.facility_id = $facility" in mcfg_queries[0][0]
+        assert mcfg_queries[0][1]["source_name"] == "sensor_calibration"
+        assert len(jec_queries) == 1
+        assert "jec.data_source_name = 'jec2020_geometry'" in jec_queries[0][0]
+        assert "jec.facility_id = $facility" in jec_queries[0][0]
+        assert "jec.system = 'MP'" in jec_queries[0][0]
         assert len(xref_queries) == 1
-        # Verify it matches on R,Z tolerance < 0.001m
-        assert "abs(mcfg.r - jec.r) < 0.001" in xref_queries[0][0]
-        assert "abs(mcfg.z - jec.z) < 0.001" in xref_queries[0][0]
-        assert xref_queries[0][1]["mcfg_source"] == "sensor_calibration"
-        assert xref_queries[0][1]["jec_source"] == "jec2020_geometry"
+        assert "MATCH (left:SignalNode {id: pair.left_id})" in xref_queries[0][0]
+        assert "MATCH (right:SignalNode {id: pair.right_id})" in xref_queries[0][0]
+        assert xref_queries[0][1]["pairs"] == [
+            {"left_id": "mcfg:probe", "right_id": "jec:probe"}
+        ]
 
     def test_persist_stores_calibration_epochs(self):
         """Calibration epochs update DataSource with epoch count and shot range."""

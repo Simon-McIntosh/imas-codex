@@ -470,6 +470,7 @@ def get_code_discovery_stats(
             RETURN count(cc) AS total,
                    count(cc.embedding) AS embedded,
                    count(CASE WHEN cc.embedding IS NULL
+                              AND cc.embed_failed_at IS NULL
                               AND cc.text IS NOT NULL
                               AND trim(cc.text) <> ''
                          THEN 1 END) AS pending

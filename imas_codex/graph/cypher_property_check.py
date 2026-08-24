@@ -45,6 +45,8 @@ _ADJUDICATION_REASONS = {
 # inventory, while repeated entries preserve the maximum occurrence count for a
 # path, label, and property. Line movement is harmless, repaired defects may
 # shrink that count, and any excess occurrence still fails the audit.
+# CodeChunk.related_ids in ingestion/graph.py is a runtime-property allowance:
+# live coverage is 4,826/271,460, while declared CodeExample.related_ids is 0/69,746.
 _ADJUDICATED_OCCURRENCES = """
 [defect]
 imas_codex/cli/discover/__init__.py|FacilityPath|scanned_at|352,353
@@ -63,7 +65,6 @@ imas_codex/graph/dd_search.py|IMASNode|units|433
 imas_codex/graph/schema_context.py|IMASNode|units|75
 imas_codex/graph/sn_link_guardrail.py|StandardName|name|78
 imas_codex/ids/graph_ops.py|SignalNode|sort_key|217,233,270
-imas_codex/ingestion/graph.py|CodeChunk|related_ids|85,86,96,97
 imas_codex/llm/search_tools.py|Document|file_type|1051
 imas_codex/llm/search_tools.py|Document|title|1033,1033,1033,1051,1051
 imas_codex/llm/search_tools.py|IMASCoordinateSpec|coordinate_type|1211
@@ -165,6 +166,7 @@ imas_codex/ids/metadata.py|IMASMapping|code_metadata|497
 imas_codex/ids/metadata.py|IMASMapping|ids_properties_metadata|496
 imas_codex/ids/metadata.py|IMASMapping|library_metadata|498
 imas_codex/ids/metadata.py|IMASMapping|metadata_populated|499
+imas_codex/ingestion/graph.py|CodeChunk|related_ids|85,86,96,97
 imas_codex/ingestion/pipeline.py|FacilityPath|last_ingested_at|447
 imas_codex/llm/server.py|FacilityPath|triage_composite|2265,2267,2287,2290
 imas_codex/mdsplus/batch_discovery.py|SignalEpoch|boundary_refined|791
