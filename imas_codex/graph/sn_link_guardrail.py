@@ -75,7 +75,7 @@ MATCH (s)-[:FROM_DD_PATH]->(dd:IMASNode)
 WHERE dd.node_category IN $categories
   AND NOT (dd)-[:HAS_STANDARD_NAME]->(sn)
 OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
-RETURN DISTINCT dd.id AS dd_path, sn.name AS name, sn.unit AS sn_unit,
+RETURN DISTINCT dd.id AS dd_path, sn.id AS name, sn.unit AS sn_unit,
        du.id AS dd_unit
 """
 

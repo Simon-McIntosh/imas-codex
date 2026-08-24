@@ -838,7 +838,7 @@ def gather_classification_context(
          collect(DISTINCT split(sibling.id, '/')[-1])[..15] AS siblings
     RETURN n.id AS id,
            n.description AS description,
-           n.units AS units,
+           n.unit AS units,
            parent.id AS parent_path,
            parent.description AS parent_description,
            siblings,
@@ -890,7 +890,7 @@ def _gather_expanded_context(
          collect(DISTINCT {path: peer.id, domain: peer.physics_domain})[..5] AS cluster_peers
     RETURN n.id AS id,
            n.description AS description,
-           n.units AS units,
+           n.unit AS units,
            parent.id AS parent_path,
            parent.description AS parent_description,
            siblings,
@@ -1034,7 +1034,7 @@ def _query_unclassified_paths(
       {needs_clause}
       {ids_clause}
     RETURN n.id AS id, n.node_category AS node_category,
-           n.description AS description, n.units AS units
+           n.description AS description, n.unit AS units
     """
     return gc.query(cypher, **params)
 

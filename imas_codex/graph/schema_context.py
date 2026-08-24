@@ -72,7 +72,7 @@ _EXAMPLE_PATTERNS: dict[str, list[str]] = {
             "  LIMIT $k\n"
             ") SCORE AS score\n"
             "WHERE NOT (node)-[:DEPRECATED_IN]->(:DDVersion)\n"
-            "RETURN node.id, node.documentation, node.units, score\n"
+            "RETURN node.id, node.documentation, node.unit AS units, score\n"
             "ORDER BY score DESC"
         ),
         (

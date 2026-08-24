@@ -2179,7 +2179,7 @@ class GraphStructureTool:
             RETURN p.id AS path,
                    p.documentation AS documentation,
                    p.data_type AS data_type,
-                   p.units AS units,
+                   p.unit AS units,
                    u.id AS unit_id,
                    p.physics_domain AS physics_domain,
                    p.lifecycle_status AS lifecycle_status,
@@ -2242,7 +2242,7 @@ class GraphStructureTool:
                    p.ids AS ids,
                    p.documentation AS documentation,
                    p.data_type AS data_type,
-                   p.units AS units,
+                   p.unit AS units,
                    u.id AS unit_id
             ORDER BY p.ids, p.id
             """,

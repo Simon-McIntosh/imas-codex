@@ -855,8 +855,8 @@ class GraphClient:
             {where_clause}
             WITH imas, collect(DISTINCT m.facility_id) as facilities
             WHERE size(facilities) > 1
-            RETURN imas.path as path, imas.ids as ids, facilities
-            ORDER BY size(facilities) DESC, imas.path
+            RETURN imas.id as path, imas.ids as ids, facilities
+            ORDER BY size(facilities) DESC, imas.id
         """
         params = {"facility_ids": facility_ids} if facility_ids else {}
         with self.session() as sess:

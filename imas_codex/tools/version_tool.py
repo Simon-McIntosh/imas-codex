@@ -341,8 +341,8 @@ class VersionTool:
           AND ($from_version IS NULL OR change.version > $from_version)
           AND ($to_version IS NULL OR change.version <= $to_version)
         WITH p, count(change) AS change_count,
-             count(DISTINCT change.semantic_change_type) AS type_variety,
-             collect(DISTINCT change.semantic_change_type) AS change_types
+             count(DISTINCT change.semantic_type) AS type_variety,
+             collect(DISTINCT change.semantic_type) AS change_types
         OPTIONAL MATCH (p)-[:RENAMED_TO]->()
         WITH p, change_count, type_variety, change_types,
              CASE WHEN EXISTS { (p)-[:RENAMED_TO]->() } THEN 1 ELSE 0 END AS was_renamed

@@ -430,7 +430,7 @@ def hybrid_dd_search(
                 id: child.id,
                 name: child.name,
                 data_type: child.data_type,
-                units: child.units
+                units: child.unit
             }})[..10] AS children, count(child) AS total
             RETURN parent_id, children, total
             """,
@@ -492,7 +492,7 @@ class RelatedPathHit:
     coordinate spec, unit, identifier schema, or COCOS transformation with
     the query path.
 
-    Design note (J3 extraction):
+    Design note:
         ``SearchHit`` carries 30+ fields for scored search results.
         Relationship hits are fundamentally different: they are
         un-scored structural connections with a relationship *type*
