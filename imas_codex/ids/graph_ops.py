@@ -214,7 +214,7 @@ def select_nodes(
                 MATCH (se:SignalEpoch {{id: $epoch_id}})
                       -[:{select_via}]->(d:SignalNode)
                 RETURN d
-                ORDER BY d.sort_key, d.id
+                ORDER BY toInteger(last(split(d.path, ':'))), d.id
                 """,
                 epoch_id=epoch_id,
             )
@@ -230,7 +230,7 @@ def select_nodes(
             }})
             WHERE d.{epoch_field} = $epoch_id
             RETURN d
-            ORDER BY d.sort_key, d.id
+            ORDER BY toInteger(last(split(d.path, ':'))), d.id
             """,
             facility=facility,
             data_source=data_source,
@@ -267,7 +267,7 @@ def select_enrichment_nodes(
                 system: $system
             })
             RETURN d
-            ORDER BY d.sort_key, d.id
+            ORDER BY toInteger(last(split(d.path, ':'))), d.id
             """,
             facility=facility,
             data_source=data_source,

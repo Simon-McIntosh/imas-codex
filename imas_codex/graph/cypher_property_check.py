@@ -45,12 +45,15 @@ _ADJUDICATION_REASONS = {
 # inventory, while repeated entries preserve the maximum occurrence count for a
 # path, label, and property. Line movement is harmless, repaired defects may
 # shrink that count, and any excess occurrence still fails the audit.
+# CodeChunk.related_ids in ingestion/graph.py is a runtime-property allowance:
+# live coverage is 4,826/271,460, while declared CodeExample.related_ids is 0/69,746.
+# CodeChunk.embed_failed_at in discovery/code/parallel.py is also runtime-only:
+# live coverage is 1,649/271,460, and the canonical embed worker writes and filters it.
 _ADJUDICATED_OCCURRENCES = """
 [defect]
 imas_codex/cli/discover/__init__.py|FacilityPath|scanned_at|352,353
 imas_codex/discovery/base/executor.py|FacilityPath|expand_to|286,286
 imas_codex/discovery/code/graph_ops.py|FacilityPath|purpose|163
-imas_codex/discovery/code/parallel.py|CodeChunk|embed_failed_at|473
 imas_codex/discovery/paths/parallel.py|FacilityPath|accessible|1136
 imas_codex/discovery/paths/parallel.py|FacilityPath|patterns_detected|629
 imas_codex/discovery/signals/parallel.py|CodeChunk|chunk_type|3520
@@ -63,7 +66,6 @@ imas_codex/graph/dd_search.py|IMASNode|units|433
 imas_codex/graph/schema_context.py|IMASNode|units|75
 imas_codex/graph/sn_link_guardrail.py|StandardName|name|78
 imas_codex/ids/graph_ops.py|SignalNode|sort_key|217,233,270
-imas_codex/ingestion/graph.py|CodeChunk|related_ids|85,86,96,97
 imas_codex/llm/search_tools.py|Document|file_type|1051
 imas_codex/llm/search_tools.py|Document|title|1033,1033,1033,1051,1051
 imas_codex/llm/search_tools.py|IMASCoordinateSpec|coordinate_type|1211
@@ -99,6 +101,7 @@ imas_codex/discovery/base/grouping.py|SignalSource|claimed_at|128,210,260
 imas_codex/discovery/code/graph_ops.py|FacilityPath|files_claim_token|149
 imas_codex/discovery/code/graph_ops.py|FacilityPath|files_claimed_at|134,135,149,212,230,231
 imas_codex/discovery/code/graph_ops.py|FacilityPath|last_file_scan_at|143,145,192,555,557
+imas_codex/discovery/code/parallel.py|CodeChunk|embed_failed_at|473
 imas_codex/discovery/code/scanner.py|FacilityPath|evidence_linked|627
 imas_codex/discovery/code/scanner.py|FacilityPath|last_file_scan_at|366,626
 imas_codex/discovery/mdsplus/graph_ops.py|SignalNode|category|807,1041,1132,1535
@@ -165,6 +168,7 @@ imas_codex/ids/metadata.py|IMASMapping|code_metadata|497
 imas_codex/ids/metadata.py|IMASMapping|ids_properties_metadata|496
 imas_codex/ids/metadata.py|IMASMapping|library_metadata|498
 imas_codex/ids/metadata.py|IMASMapping|metadata_populated|499
+imas_codex/ingestion/graph.py|CodeChunk|related_ids|85,86,96,97
 imas_codex/ingestion/pipeline.py|FacilityPath|last_ingested_at|447
 imas_codex/llm/server.py|FacilityPath|triage_composite|2265,2267,2287,2290
 imas_codex/mdsplus/batch_discovery.py|SignalEpoch|boundary_refined|791

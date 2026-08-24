@@ -1033,14 +1033,13 @@ def _fetch_wiki_document(gc: GraphClient, resource: str) -> str | None:
         "MATCH (a:Document)-[:HAS_CHUNK]->(c:WikiChunk) "
         "WHERE a.id = $resource OR a.url = $resource "
         "   OR toLower(a.filename) CONTAINS toLower($resource) "
-        "   OR toLower(a.title) CONTAINS toLower($resource) "
         "RETURN 'document' AS source_type, "
-        "a.title AS title, a.url AS url, a.id AS source_id, "
+        "a.filename AS title, a.url AS url, a.id AS source_id, "
         "c.section AS section, c.text AS text, "
         "c.chunk_index AS chunk_index, "
         "c.mdsplus_paths_mentioned AS mdsplus_paths, "
         "c.imas_paths_mentioned AS imas_paths "
-        "ORDER BY a.title, c.chunk_index",
+        "ORDER BY a.filename, c.chunk_index",
         resource=resource,
     )
     if chunks:
@@ -1051,9 +1050,8 @@ def _fetch_wiki_document(gc: GraphClient, resource: str) -> str | None:
         "MATCH (a:Document) "
         "WHERE a.id = $resource OR a.url = $resource "
         "   OR toLower(a.filename) CONTAINS toLower($resource) "
-        "   OR toLower(a.title) CONTAINS toLower($resource) "
-        "RETURN a.id AS id, a.title AS title, a.url AS url, "
-        "a.filename AS filename, a.file_type AS file_type, "
+        "RETURN a.id AS id, a.filename AS title, a.url AS url, "
+        "a.filename AS filename, a.document_type AS file_type, "
         "a.description AS description "
         "LIMIT 1",
         resource=resource,
@@ -1208,7 +1206,10 @@ def _fetch_imas_path(gc: GraphClient, resource: str) -> str | None:
                p.path_doc AS structure_reference,
                u.symbol AS unit, u.name AS unit_name,
                collect(DISTINCT cl.label) AS clusters,
-               collect(DISTINCT {id: coord.id, type: coord.coordinate_type}) AS coordinates,
+               collect(DISTINCT {
+                   id: coord.id,
+                   type: CASE WHEN coord.is_bounded THEN 'bounded' ELSE 'unbounded' END
+               }) AS coordinates,
                intro.id AS introduced_in,
                dep.id AS deprecated_in
         ORDER BY size(p.id) ASC

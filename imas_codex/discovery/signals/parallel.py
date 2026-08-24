@@ -3517,7 +3517,7 @@ async def enrich_worker(
                     WHERE src.facility_id = $facility
                     RETURN node.text AS text,
                            src.path AS source_path,
-                           node.chunk_type AS chunk_type,
+                           node.language AS language,
                            score
                     ORDER BY score DESC
                     """,
@@ -3534,7 +3534,7 @@ async def enrich_worker(
                         {
                             "text": text,
                             "source_path": row.get("source_path", ""),
-                            "chunk_type": row.get("chunk_type", ""),
+                            "language": row.get("language", ""),
                         }
                     )
                 code_context_cache[group_key] = chunks
@@ -3770,8 +3770,8 @@ async def enrich_worker(
                 user_lines.append("\n**Relevant source code:**")
                 for chunk in code_chunks:
                     path = chunk.get("source_path", "unknown")
-                    ctype = chunk.get("chunk_type", "")
-                    label = f"{path} ({ctype})" if ctype else path
+                    language = chunk.get("language", "")
+                    label = f"{path} ({language})" if language else path
                     user_lines.append(f"\n```python  # {label}")
                     user_lines.append(chunk["text"])
                     user_lines.append("```")
@@ -4966,10 +4966,9 @@ async def run_parallel_data_discovery(
     """
     start_time = time.time()
 
-    # Pre-fetch all shared data in a background thread so the event loop
-    # stays free for display ticking.  Every worker used to call
-    # get_facility() + graph count queries synchronously at startup,
-    # blocking the event loop for 30-60 s on remote Neo4j.
+    # Pre-fetch all shared data in a background thread because synchronous
+    # facility and graph-count queries can block display ticking for 30-60 s
+    # on remote Neo4j.
     def _preflight(
         _facility: str, _ssh_host: str | None, _scanner_types: list[str] | None
     ) -> tuple[dict, str | None, list[str], dict, dict, dict[str, dict[str, str]]]:

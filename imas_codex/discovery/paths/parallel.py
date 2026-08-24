@@ -626,7 +626,7 @@ def claim_paths_for_triaging(
                    p.has_git AS has_git, p.git_remote_url AS git_remote_url,
                    p.vcs_type AS vcs_type, p.vcs_remote_url AS vcs_remote_url,
                    p.vcs_remote_accessible AS vcs_remote_accessible,
-                   p.patterns_detected AS patterns_detected,
+                   p.patterns_found AS patterns_detected,
                    p.child_names AS child_names,
                    p.tree_context AS tree_context,
                    p.numeric_dir_ratio AS numeric_dir_ratio
@@ -1127,13 +1127,13 @@ def _find_clone_groups(
                      id: p.id,
                      path: p.path,
                      depth: coalesce(p.depth, 99),
-                     accessible: coalesce(p.vcs_remote_accessible, false),
+                     vcs_remote_accessible: coalesce(p.vcs_remote_accessible, false),
                      has_remote: CASE WHEN p.vcs_remote_url IS NOT NULL THEN 1 ELSE 0 END,
                      discovered_at: coalesce(toString(p.discovered_at), "")
                  }) AS active_paths
             WHERE size(active_paths) > 1
                OR (size(active_paths) = 1
-                   AND size([p IN active_paths WHERE p.accessible]) > 0)
+                   AND size([p IN active_paths WHERE p.vcs_remote_accessible]) > 0)
             RETURN r.id AS repo_id,
                    coalesce(r.name, split(r.id, "/")[-1]) AS repo_name,
                    active_paths
