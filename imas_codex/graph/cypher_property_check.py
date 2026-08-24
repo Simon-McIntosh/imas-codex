@@ -86,10 +86,10 @@ imas_codex/standard_names/signed_manifest.py|StandardNameChange|row_id|3074,4249
 imas_codex/standard_names/workers.py|IMASNode|alias|8509
 imas_codex/standard_names/workers.py|IMASNode|units|8493
 imas_codex/standard_names/workers.py|StandardName|name|9572
-imas_codex/tools/graph_search.py|CodeChunk|related_ids|2559,2560
 imas_codex/tools/graph_search.py|IMASNode|units|2182,2245
 imas_codex/tools/version_tool.py|IMASNodeChange|semantic_change_type|344,345
 [runtime]
+imas_codex/tools/graph_search.py|CodeChunk|related_ids|2559,2560
 imas_codex/cli/sn.py|StandardName|review_resubmit_count|443
 imas_codex/cli/sn.py|StandardNameSource|run_id|2312,2312,2379
 imas_codex/discovery/base/executor.py|FacilityPath|claimed_at|222,254
