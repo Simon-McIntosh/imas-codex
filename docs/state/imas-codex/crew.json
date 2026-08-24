@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T07:52:56",
+  "updated": "2026-08-24T08:50:28",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -677,6 +677,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-propcheck",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
         "id": "impl-provguard",
         "harness": "codex",
         "role": "implement",
@@ -1179,6 +1186,20 @@
         "role": "implement",
         "session_id": "01a023e9-a537-7aa0-a603-2b8f7a9ea38d",
         "created": "2026-08-21"
+      },
+      {
+        "id": "spec-propcheck",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
+      },
+      {
+        "id": "test-baseline",
+        "harness": "codex",
+        "role": "test",
+        "session_id": "01a0326c-403c-7901-b3a7-c43cf7b9d3cf",
+        "created": "2026-08-24"
       },
       {
         "id": "test-dimcalib",
@@ -23655,9 +23676,56 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T061908191750-n-baselinegreen",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a78",
+        "node": "n-baselinegreen",
+        "role": "test",
+        "spec_level": "exact",
+        "member": "test-baseline",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T06:19:09Z",
+        "completed_at": "2026-08-24T06:28:36Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 567,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 567,
+        "stalled": false,
+        "time_budget": "30m",
+        "base_sha": "b794924bd572cb66ff09045b941c42d3ac73efe4",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Stopped by the lead's pause directive before it produced a manifest. It was the quiescence-gate baseline, not plan work: a fresh session running this plan should re-run the green baseline at whatever HEAD it starts from, since head has moved since. No spend, no writes, nothing to recover.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T061908191750-n-baselinegreen/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0326c-403c-7901-b3a7-c43cf7b9d3cf",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 661
+    "_version": 666
   }
 }
