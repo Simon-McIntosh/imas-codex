@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T23:45:38",
+  "updated": "2026-08-24T23:50:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -505,7 +505,7 @@
         "id": "impl-goldenrefresh",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a035bb-ceac-7480-8e75-5ba2f4c12d9c",
         "created": "2026-08-24"
       },
       {
@@ -25723,9 +25723,84 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260824T214445551052-n-goldenrefresh",
+        "plan": "sn-quality-parity",
+        "section": "\u00a75",
+        "node": "n-goldenrefresh",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-goldenrefresh",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T21:44:55Z",
+        "completed_at": "2026-08-24T21:50:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 344,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 344,
+        "stalled": false,
+        "time_budget": "25m",
+        "base_sha": "5d9c834f519dd7aec978ce209f91c1c985b357ff",
+        "commits": [
+          "a241b0aaa3198eda42dddc5c0f8e7883c34582db"
+        ],
+        "changed_lines": {
+          "added": 5,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T214445551052-n-goldenrefresh/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a035bb-ceac-7480-8e75-5ba2f4c12d9c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4596224,
+            "cached_input_tokens_cumulative": 4596224,
+            "input_tokens": 4747942,
+            "input_tokens_cumulative": 4747942,
+            "output_tokens": 10402,
+            "output_tokens_cumulative": 10402,
+            "reasoning_output_tokens": 4485,
+            "reasoning_output_tokens_cumulative": 4485
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/standard_names/test_edit_prompt_injection.py",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 744
+    "_version": 746
   }
 }

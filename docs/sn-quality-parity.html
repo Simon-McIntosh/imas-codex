@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.9">
+  <meta name="plan-impl" content="0.92">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,8 +23,8 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="53">
-<meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0">
+<meta name="plan-version" content="55">
+<meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa">
 <meta name="plan-artifacts" content="tests/standard_names/eval_sets/docs_holdout.json,imas_codex/standard_names/docs_gates.py,imas_codex/standard_names/docs_holdout_eval.py,imas_codex/standard_names/doc_links.py,imas_codex/standard_names/benchmark_reference.py,imas_codex/standard_names/graph_ops.py,imas_codex/standard_names/AGENTS.md,tests/standard_names/test_docs_gates.py,tests/standard_names/test_docs_holdout_eval.py,tests/standard_names/test_docs_holdout_set.py,tests/standard_names/test_docs_revision_snapshots.py,tests/standard_names/test_doc_links.py,docs/evidence/sn-quality-parity/west-docs-eligible.md,docs/evidence/sn-quality-parity/west-docs-tranche-completion.md,docs/evidence/sn-quality-parity/west-docs-tranche-refresh.md,docs/evidence/sn-quality-parity/dimensional-gate-calibration.md,docs/evidence/sn-quality-parity/paired-arm-current-gates.md,docs/evidence/sn-quality-parity/integration-check-final.md,docs/figures/sn-quality-parity/claim-disposition.svg">
 </head>
 <body>
@@ -516,6 +516,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260824T210210315303-n-cocospromptcondition" data-who="impl-cocosprompt" data-when="2026-08-24T21:09:48Z">
     <div class="r-comment-body"><p>Docs prompts gate the sign requirement on explicit COCOS sensitivity; one_like renders 0 of 2 markers, b0_like retains 2 of 2, all 3 templates clean</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260824T214445551052-n-goldenrefresh" data-who="impl-goldenrefresh" data-when="2026-08-24T21:50:39Z">
+    <div class="r-comment-body"><p>Golden capture refreshed; 1 failed 9 passed to 10 passed; diff exactly 5 additions 0 deletions, all blank lines in the COCOS conditional region</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-20260823-keying-instruction" data-who="reckon-ship" data-when="2026-08-23T15:46:00+00:00">
     <div class="r-comment-body"><p><strong>n-keyingdoc landed — commit <code>523a369e</code>, merged <code>9468164a</code>; gate schema-tests-green PASSED.</strong> Measure: schema-focused selection over <code>tests/standard_names/</code> exits 0 with 0 failures; the new section greps 5 <code>StandardName</code> references against a required 3; live census <strong>4,525 nodes, 4,525 carrying <code>id</code>, 0 carrying <code>name</code></strong>. Artifact: <code>imas_codex/standard_names/AGENTS.md</code>, 30 lines.</p><p><strong>The recurring defect this closes is a silent one, and it cost two sessions today.</strong> No class in the standard-names schema declares a <code>name</code> attribute — <code>StandardName.id</code> <em>is</em> the snake_case identity (<code>schemas/standard_name.yaml:868-892</code>), and <code>StandardNameSource.id</code> is <code>source_type:source_id</code> as <code>dd:&lt;path&gt;</code> or <code>signals:&lt;facility&gt;:&lt;signal-id&gt;</code> (<code>2795-2823</code>). So <code>MATCH (sn:StandardName {name: $x})</code> is valid Cypher that returns zero rows without erroring, because a missing property evaluates to null and a non-true predicate drops the row. A peer session joining the refine cohort on <code>s.name</code> got zero rows and nearly reported it as a clean no-overlap result; the real overlap was 20 identities. The section states both keys with citations, puts the correct and silent-null joins side by side, and carries a coverage query that fails closed — so a zero-row join has to be shown to be real before it is believed.</p></div>
 </div>
@@ -542,6 +545,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 </div>
 <div class="r-comment" data-section="§5" data-id="c-20260824T2115-cocosprompt" data-who="reckon-ship" data-when="2026-08-24T21:15:00+00:00">
     <div class="r-comment-body">n-cocospromptcondition landed — commit a8742e64; gate sign-requirement-gated-on-sensitivity passed; measure rendered one_like carries 0 of 2 mandatory sign-instruction markers and no COCOS section while rendered b0_like retains 2 of 2 and the section, with all 3 documentation-user prompt templates scanning clean for blocks gated on bare COCOS-label truthiness; '3 passed, 1 warning in 9.57s', 1 prompt file changed. The first of the diagnosis's two producing causes is closed at source: one shared explicit sensitivity condition now controls both the COCOS context block and the sign-paragraph instruction, so a COCOS-invariant quantity is no longer instructed to state a convention it cannot have. The template-wide scan matters more than the single fix — it means the pattern cannot return through a sibling prompt, which is how the original defect reached 227 documents. Still open on this axis: the coalesce persistence that prevents an authoritative null clearing a stale cocos_transformation_type (35 rows), which needs graph_ops.py and waits on the detector releasing it, and then the governed 281-row repair of the existing stock.</div>
+</div>
+<div class="r-comment" data-section="§5" data-id="c-20260824T2155-goldenrefresh" data-who="reckon-ship" data-when="2026-08-24T21:55:00+00:00">
+    <div class="r-comment-body">n-goldenrefresh landed — commit a241b0aa; gate golden-matches-template passed; measure '1 failed, 9 passed in 11.11s' becomes '10 passed in 7.08s', with the capture diff exactly 5 additions and 0 deletions across 1 scoped file. All five are blank rendered lines inside the COCOS sensitivity conditional region immediately before the output schema, so no instruction content moved — which is the check that distinguishes refreshing a stale capture from quietly re-recording a changed prompt. This closes an orchestration miss rather than a code defect: the prompt-condition node's done-when should have required the golden refresh in the same beat, and because it did not, the stale capture surfaced as an unrelated failure inside a concurrent repair node and cost that node a NEEDS-HELP round trip.</div>
 </div>
 </section>
 </main>
