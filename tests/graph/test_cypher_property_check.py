@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib
+from collections import Counter
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -133,3 +134,66 @@ def test_repository_cypher_literals_have_declared_properties() -> None:
         "every statically unresolved Cypher property needs a path, line, and reason: "
         f"{incomplete_allowlist}"
     )
+
+
+def test_inventory_allows_repairs_and_line_shifts_but_rejects_growth(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    checker = _checker_module()
+    schema = GraphSchema(STANDARD_NAME_SCHEMA)
+    source_root = tmp_path / "imas_codex"
+    source_root.mkdir()
+    fixture = source_root / "query_fixture.py"
+    relative_path = "imas_codex/query_fixture.py"
+    label = "StandardNameReview"
+    undeclared_property = "inventory_only_property"
+
+    monkeypatch.setattr(checker, "_REPO_ROOT", tmp_path)
+
+    def set_inventory(category: str) -> None:
+        inventory = {name: Counter() for name in checker._ADJUDICATION_REASONS}
+        inventory[category][(relative_path, 3, label, undeclared_property)] = 1
+        monkeypatch.setattr(checker, "_ADJUDICATIONS", inventory)
+
+    set_inventory("defect")
+    fixture.write_text(
+        f"QUERY = 'MATCH (review:{label}) RETURN review.id'\n",
+        encoding="utf-8",
+    )
+    repaired = _audit(checker, source_root, schemas=(schema,))
+    assert repaired.checked_properties == 1
+    assert not repaired.violations
+    assert not [entry for entry in repaired.allowlisted if entry.category == "defect"]
+
+    set_inventory("runtime")
+    fixture.write_text(
+        "QUERY = '''\n\n\n"
+        f"MATCH (review:{label})\n"
+        f"WHERE review.{undeclared_property} = true\n"
+        "RETURN review\n"
+        "'''\n",
+        encoding="utf-8",
+    )
+    shifted = _audit(checker, source_root, schemas=(schema,))
+    shifted_entries = [
+        entry for entry in shifted.allowlisted if entry.category == "runtime"
+    ]
+    assert not shifted.violations
+    assert len(shifted_entries) == 1
+    assert shifted_entries[0].line != 3
+
+    fixture.write_text(
+        "QUERY = '''\n"
+        f"MATCH (review:{label})\n"
+        f"WHERE review.{undeclared_property} = true\n"
+        f"RETURN review.{undeclared_property}\n"
+        "'''\n",
+        encoding="utf-8",
+    )
+    grown = _audit(checker, source_root, schemas=(schema,))
+    assert (
+        len([entry for entry in grown.allowlisted if entry.category == "runtime"]) == 1
+    )
+    assert len(grown.violations) == 1
+    assert grown.violations[0].property_name == undeclared_property

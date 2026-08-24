@@ -41,9 +41,10 @@ _ADJUDICATION_REASONS = {
     ),
 }
 
-# Each row is path|label|property|source-lines. Repeated line numbers preserve
-# multiple occurrences on one source line. Moving or adding an occurrence makes
-# the audit fail until that exact reference is adjudicated.
+# Each row is path|label|property|source-lines. Source lines locate the frozen
+# inventory, while repeated entries preserve the maximum occurrence count for a
+# path, label, and property. Line movement is harmless, repaired defects may
+# shrink that count, and any excess occurrence still fails the audit.
 _ADJUDICATED_OCCURRENCES = """
 [defect]
 imas_codex/cli/discover/__init__.py|FacilityPath|scanned_at|352,353
@@ -262,6 +263,27 @@ def _adjudication_key(
     return (relative_path.as_posix(), line, label, property_name)
 
 
+def _matching_adjudication(
+    key: tuple[str, int, str, str] | None,
+    remaining: dict[str, Counter[tuple[str, int, str, str]]],
+) -> tuple[str, tuple[str, int, str, str]] | None:
+    """Match one inventory occurrence without making source lines semantic."""
+    if key is None:
+        return None
+    path, _, label, property_name = key
+    for category, occurrences in remaining.items():
+        for inventory_key, count in occurrences.items():
+            inventory_path, _, inventory_label, inventory_property = inventory_key
+            if (
+                count > 0
+                and inventory_path == path
+                and inventory_label == label
+                and inventory_property == property_name
+            ):
+                return category, inventory_key
+    return None
+
+
 def _string_value(node: ast.AST) -> str | None:
     """Return the static portion of a Python string expression."""
     if isinstance(node, ast.Constant) and isinstance(node.value, str):
@@ -455,16 +477,10 @@ def audit_cypher_properties(
                     continue
                 label = next(iter(known_labels))
                 key = _adjudication_key(path, line, label, property_name)
-                adjudication = next(
-                    (
-                        category
-                        for category, occurrences in remaining_adjudications.items()
-                        if key is not None and occurrences[key] > 0
-                    ),
-                    None,
-                )
+                adjudication = _matching_adjudication(key, remaining_adjudications)
                 if adjudication is not None:
-                    remaining_adjudications[adjudication][key] -= 1
+                    category, inventory_key = adjudication
+                    remaining_adjudications[category][inventory_key] -= 1
                     allowlisted.append(
                         CypherPropertyFinding(
                             path=path,
@@ -472,8 +488,8 @@ def audit_cypher_properties(
                             alias=alias,
                             label=label,
                             property_name=property_name,
-                            reason=_ADJUDICATION_REASONS[adjudication],
-                            category=adjudication,
+                            reason=_ADJUDICATION_REASONS[category],
+                            category=category,
                         )
                     )
                     continue
@@ -491,6 +507,8 @@ def audit_cypher_properties(
 
     if source_root.resolve() == (_REPO_ROOT / "imas_codex").resolve():
         for category, occurrences in remaining_adjudications.items():
+            if category == "defect":
+                continue
             for (relative_path, line, label, property_name), count in sorted(
                 occurrences.items()
             ):
