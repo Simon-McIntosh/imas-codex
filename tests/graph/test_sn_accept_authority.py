@@ -134,7 +134,7 @@ def test_bare_structural_markers_have_authority_or_no_live_children(
     review_axis_property = _property_with_range(
         schema, _REVIEW, "StandardNameReviewMode", "review_axis"
     )
-    assert "names" in schema.get_enums()["StandardNameReviewMode"]
+    assert "name" in schema.get_enums()["StandardNameReviewMode"]
 
     authority_slot = _slot_name(schema, _STANDARD_NAME, _STRUCTURAL_AUTHORITY)
     authority_relationship = _relationship_type(schema, _STANDARD_NAME, authority_slot)
