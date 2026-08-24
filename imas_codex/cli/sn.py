@@ -402,9 +402,14 @@ def _compute_pool_progress(
         )
     )
 
-    from imas_codex.standard_names.graph_ops import REFINE_NAME_ATTEMPTS_SPENT
+    from imas_codex.standard_names.graph_ops import (
+        REFINE_NAME_ATTEMPTS_SPENT,
+        docs_review_eligibility_params,
+        docs_review_eligibility_where,
+    )
 
     refine_attempts_spent = REFINE_NAME_ATTEMPTS_SPENT
+    docs_review_eligible = docs_review_eligibility_where()
 
     query = f"""
     CALL {{
@@ -468,7 +473,7 @@ def _compute_pool_progress(
         AND sn.reviewer_score_docs < $min_score
         AND coalesce(sn.docs_chain_length, 0) < $rotation_cap
         AND NOT (sn.name_stage IN ['superseded', 'exhausted', 'contested'])
-        AND sn.docs_review_resolution_method IS NOT NULL
+        AND {docs_review_eligible}
         AND sn.docs_review_quorum_shortfall IS NULL
         {docs_score_gate}
         {domain_filter_sn}
@@ -551,6 +556,7 @@ def _compute_pool_progress(
         "min_score": min_score,
         "parent_desc_placeholder": DETERMINISTIC_PARENT_DESCRIPTION_PLACEHOLDER,
         "drain_scope_id": drain_scope_id,
+        **docs_review_eligibility_params(),
     }
     from imas_codex.standard_names.graph_ops import _MAX_COMPOSE_CLAIM_ATTEMPTS
 
