@@ -27,6 +27,7 @@ from typing import Any
 from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import NameStage, RefineStopReason
+from imas_codex.graph.schema import GraphSchema
 from imas_codex.standard_names.defaults import (
     DEFAULT_MIN_SCORE,
     DEFAULT_REFINE_ROTATIONS,
@@ -6191,6 +6192,46 @@ def _docs_review_winner_query_body(name_variable: str = "sn") -> str:
 def docs_review_eligibility_where() -> str:
     """Return the shared predicate for a reachable winning docs review."""
     return f"EXISTS {{{_docs_review_winner_query_body()}}}"
+
+
+def property_coverage(
+    *,
+    label: str,
+    properties: tuple[str, ...],
+    schema: GraphSchema,
+    gc: Any | None = None,
+) -> dict[str, int]:
+    """Return candidate and property counts, failing closed on zero coverage."""
+    declared = schema.get_all_slots(label)
+    for property_name in properties:
+        if property_name not in declared:
+            raise ValueError(f"Unknown property '{property_name}' on {label}")
+    if not properties:
+        raise ValueError("At least one property is required for coverage")
+
+    projections = ["count(node) AS candidates"]
+    projections.extend(
+        f"count(node.{property_name}) AS {property_name}_covered"
+        for property_name in properties
+    )
+    query = f"MATCH (node:{label})\nRETURN " + ",\n       ".join(projections)
+    if gc is None:
+        with GraphClient() as graph:
+            rows = graph.query(query)
+    else:
+        rows = gc.query(query)
+
+    keys = ["candidates", *(f"{name}_covered" for name in properties)]
+    coverage = {key: int((dict(rows[0]).get(key) if rows else 0) or 0) for key in keys}
+    candidates = coverage["candidates"]
+    for property_name in properties:
+        coverage_key = f"{property_name}_covered"
+        if candidates > 0 and coverage[coverage_key] == 0:
+            raise RuntimeError(
+                f"Property coverage failed for {label}.{property_name}: "
+                f"candidates={candidates}, {coverage_key}=0"
+            )
+    return coverage
 
 
 def docs_review_property_coverage(gc: Any | None = None) -> dict[str, int]:
