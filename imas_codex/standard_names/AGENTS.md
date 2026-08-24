@@ -35,6 +35,113 @@ RETURN count(sn) AS candidates,
        count(sn.name) AS candidates_with_name
 ```
 
+The LinkML slot owns relationship direction. Read every row below as
+`(source)-[:TYPE]->(target)`; do not infer direction from the English relationship
+name, a nearby back-reference property, or whichever endpoint a query starts
+from. A zero live count does not override the declaration. For self-relationships
+such as `StandardName` to `StandardName`, an authored-direction census and the
+same traversal reversed necessarily report the same count because both endpoint
+labels are identical; the schema slot remains the only directional authority.
+
+| Source slot | Authored traversal | LinkML declaration |
+|---|---|---|
+| `StandardName.unit` | `(StandardName)-[:HAS_UNIT]->(Unit)` | `imas_codex/schemas/standard_name.yaml:899` |
+| `StandardName.physics_domain` | `(StandardName)-[:HAS_PHYSICS_DOMAIN]->(PhysicsDomain)` | `imas_codex/schemas/standard_name.yaml:1045` |
+| `StandardName.cocos` | `(StandardName)-[:HAS_COCOS]->(COCOS)` | `imas_codex/schemas/standard_name.yaml:1115` |
+| `StandardName.internal_changes` | `(StandardName)-[:HAS_INTERNAL_CHANGE]->(StandardNameChange)` | `imas_codex/schemas/standard_name.yaml:1530` |
+| `StandardName.grammar_tokens` | `(StandardName)-[:HAS_SEGMENT]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1594` |
+| `StandardName.grammar_physical_base_token` | `(StandardName)-[:HAS_PHYSICAL_BASE]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1604` |
+| `StandardName.grammar_subject_token` | `(StandardName)-[:HAS_SUBJECT]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1611` |
+| `StandardName.grammar_transformation_token` | `(StandardName)-[:HAS_TRANSFORMATION]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1618` |
+| `StandardName.grammar_component_token` | `(StandardName)-[:HAS_COMPONENT]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1625` |
+| `StandardName.grammar_coordinate_token` | `(StandardName)-[:HAS_COORDINATE]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1632` |
+| `StandardName.grammar_process_token` | `(StandardName)-[:HAS_PROCESS]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1639` |
+| `StandardName.grammar_position_token` | `(StandardName)-[:HAS_POSITION]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1646` |
+| `StandardName.grammar_region_token` | `(StandardName)-[:HAS_REGION]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1653` |
+| `StandardName.grammar_device_token` | `(StandardName)-[:HAS_DEVICE]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1660` |
+| `StandardName.grammar_geometric_base_token` | `(StandardName)-[:HAS_GEOMETRIC_BASE]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1667` |
+| `StandardName.grammar_aggregation_token` | `(StandardName)-[:HAS_AGGREGATION]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1674` |
+| `StandardName.grammar_orbit_token` | `(StandardName)-[:HAS_ORBIT]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1681` |
+| `StandardName.grammar_population_token` | `(StandardName)-[:HAS_POPULATION]->(GrammarToken)` | `imas_codex/schemas/standard_name.yaml:1688` |
+| `StandardName.references` | `(StandardName)-[:REFERENCES]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:1914` |
+| `StandardName.parents` | `(StandardName)-[:HAS_PARENT]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:1935` |
+| `StandardName.magnitudes` | `(StandardName)-[:MAGNITUDE_OF]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:1951` |
+| `StandardName.error_siblings` | `(StandardName)-[:HAS_ERROR]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:1962` |
+| `StandardName.predecessor` | `(StandardName)-[:HAS_PREDECESSOR]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:1971` |
+| `StandardName.successor` | `(StandardName)-[:HAS_SUCCESSOR]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:1980` |
+| `StandardName.primary_cluster_ref` | `(StandardName)-[:IN_CLUSTER]->(IMASSemanticCluster)` | `imas_codex/schemas/standard_name.yaml:1988` |
+| `StandardName.reviews` | `(StandardName)-[:HAS_REVIEW]->(StandardNameReview)` | `imas_codex/schemas/standard_name.yaml:1998` |
+| `StandardName.structural_authorities` | `(StandardName)-[:HAS_STRUCTURAL_AUTHORITY]->(StructuralNameAuthority)` | `imas_codex/schemas/standard_name.yaml:2010` |
+| `StandardName.docs_revisions` | `(StandardName)-[:DOCS_REVISION_OF]->(DocsRevision)` | `imas_codex/schemas/standard_name.yaml:2020` |
+| `StandardName.docs_review_admission` | `(StandardName)-[:HAS_DOCS_REVIEW_ADMISSION]->(DocsReviewAdmission)` | `imas_codex/schemas/standard_name.yaml:2029` |
+| `StandardName.refined_from` | `(StandardName)-[:REFINED_FROM]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:2039` |
+| `StandardName.loci` | `(StandardName)-[:HAS_LOCUS]->(Locus)` | `imas_codex/schemas/standard_name.yaml:2053` |
+| `DocsReviewAdmission.created_reviews` | `(DocsReviewAdmission)-[:CREATED_REVIEW]->(StandardNameReview)` | `imas_codex/schemas/standard_name.yaml:2218` |
+| `VocabGap.evidence` | `(VocabGap)-[:HAS_EVIDENCE]->(VocabGapEvidence)` | `imas_codex/schemas/standard_name.yaml:2464` |
+| `DDResolution.evidence` | `(DDResolution)-[:EVIDENCED_BY]->(DDGap)` | `imas_codex/schemas/standard_name.yaml:2692` |
+| `DDResolution.for_dd_version` | `(DDResolution)-[:FOR_DD_VERSION]->(DDVersion)` | `imas_codex/schemas/standard_name.yaml:2698` |
+| `DDGap.observations` | `(DDGap)-[:HAS_OBSERVATION]->(DDGapObservation)` | `imas_codex/schemas/standard_name.yaml:2782` |
+| `DDGap.state_changes` | `(DDGap)-[:HAS_STATE_CHANGE]->(DDGapStateChange)` | `imas_codex/schemas/standard_name.yaml:2788` |
+| `DDGap.identity_changes` | `(DDGap)-[:HAS_IDENTITY_CHANGE]->(DDGapIdentityChange)` | `imas_codex/schemas/standard_name.yaml:2794` |
+| `StandardNameSource.retry_events` | `(StandardNameSource)-[:HAS_RETRY_EVENT]->(StandardNameSourceRetry)` | `imas_codex/schemas/standard_name.yaml:2904` |
+| `StandardNameSource.snapshot_changes` | `(StandardNameSource)-[:HAS_SNAPSHOT_CHANGE]->(StandardNameSourceSnapshotChange)` | `imas_codex/schemas/standard_name.yaml:2914` |
+| `StandardNameSource.identity_repairs` | `(StandardNameSource)-[:HAS_IDENTITY_REPAIR]->(StandardNameSourceIdentityRepair)` | `imas_codex/schemas/standard_name.yaml:2924` |
+| `StandardNameSource.snapshot_adoptions` | `(StandardNameSource)-[:HAS_SNAPSHOT_ADOPTION]->(StandardNameSourceSnapshotAdoption)` | `imas_codex/schemas/standard_name.yaml:2933` |
+| `StandardNameSource.unit_cache_corrections` | `(StandardNameSource)-[:HAS_UNIT_CACHE_CORRECTION]->(StandardNameSourceUnitCacheCorrection)` | `imas_codex/schemas/standard_name.yaml:2944` |
+| `StandardNameSource.snapshot_admissions` | `(StandardNameSource)-[:HAS_SNAPSHOT_ADMISSION]->(StandardNameSourceSnapshotAdmission)` | `imas_codex/schemas/standard_name.yaml:2953` |
+| `StandardNameSource.identity_folds` | `(StandardNameSource)-[:HAS_IDENTITY_FOLD]->(StandardNameSourceIdentityFold)` | `imas_codex/schemas/standard_name.yaml:2963` |
+| `StandardNameSource.authority_retirements` | `(StandardNameSource)-[:HAS_AUTHORITY_RETIREMENT]->(StandardNameSourceAuthorityRetirement)` | `imas_codex/schemas/standard_name.yaml:2972` |
+| `StandardNameSource.dd_path` | `(StandardNameSource)-[:FROM_DD_PATH]->(IMASNode)` | `imas_codex/schemas/standard_name.yaml:2986` |
+| `StandardNameSource.signal` | `(StandardNameSource)-[:FROM_SIGNAL]->(FacilitySignal)` | `imas_codex/schemas/standard_name.yaml:2993` |
+| `StandardNameSource.standard_name` | `(StandardNameSource)-[:PRODUCED_NAME]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:2999` |
+| `StandardNameSource.vocab_gaps` | `(StandardNameSource)-[:HAS_STANDARD_NAME_VOCAB_GAP]->(VocabGap)` | `imas_codex/schemas/standard_name.yaml:3013` |
+| `LLMCost.for_run` | `(LLMCost)-[:FOR_RUN]->(SNRun)` | `imas_codex/schemas/standard_name.yaml:3587` |
+| `PromotionCandidate.evidences` | `(PromotionCandidate)-[:EVIDENCED_BY]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:3790` |
+| `StructuralNameAuthority.children` | `(StructuralNameAuthority)-[:ENTAILED_FROM_CHILD]->(StandardName)` | `imas_codex/schemas/standard_name.yaml:4034` |
+
+Relationship slots are foreign-key properties too: the property value names the
+target node, while the generated graph carries the edge in the direction above.
+The table below also includes scalar mirrors and explicit back-references whose
+schema prose identifies a `StandardName`. It deliberately excludes free-form
+replacement suggestions and generic repair-envelope targets, which need not
+identify an existing `StandardName`.
+
+| Class | Property or properties that reference `StandardName` | LinkML declaration |
+|---|---|---|
+| `StandardName` | `deprecates`, `superseded_by`; `links`; `refine_collision_name`; `references`, `parents`, `magnitudes`, `error_siblings`, `predecessor`, `successor`, `refined_from` | `imas_codex/schemas/standard_name.yaml:916-923`, `imas_codex/schemas/standard_name.yaml:1017-1020`, `imas_codex/schemas/standard_name.yaml:1297-1303`, `imas_codex/schemas/standard_name.yaml:1905-1980`, `imas_codex/schemas/standard_name.yaml:2030-2039` |
+| `DocsReviewAdmission` | `target_id` | `imas_codex/schemas/standard_name.yaml:2165-2167` |
+| `DocsRevision` | `sn_id` | `imas_codex/schemas/standard_name.yaml:2257-2260` |
+| `StandardNameChange` | `to_name` when it is the linked name rather than another changed value | `imas_codex/schemas/standard_name.yaml:2310-2313` |
+| `StandardNameSource` | `standard_name` (relationship slot), `produced_sn_id` (scalar mirror) | `imas_codex/schemas/standard_name.yaml:2995-2999`, `imas_codex/schemas/standard_name.yaml:3014-3021` |
+| `StandardNameSourceAuthorityRetirement` | `removed_target_ids` | `imas_codex/schemas/standard_name.yaml:3290-3300` |
+| `StandardNameSourceRetry` | `terminal_sn_id` | `imas_codex/schemas/standard_name.yaml:3346-3349` |
+| `LLMCost` | `sn_ids` | `imas_codex/schemas/standard_name.yaml:3565-3567` |
+| `StandardNameReview` | `standard_name_id` | `imas_codex/schemas/standard_name.yaml:3612-3614` |
+| `PromotionCandidate` | `evidences` | `imas_codex/schemas/standard_name.yaml:3781-3790` |
+| `RepairRowIdentity` | `target_id` when `kind` selects a StandardName target | `imas_codex/schemas/standard_name.yaml:3825-3831` |
+| `StructuralNameAuthority` | `accepted_name_id`, `child_ids`, `children` | `imas_codex/schemas/standard_name.yaml:4015-4034` |
+
+Aggregation has the same silent-null trap as filtering. `count(property)` and
+`count(DISTINCT property)` ignore `null`, so an undeclared or misremembered
+property produces zero rather than an error. `DocsRevision` is the worked
+example: its back-reference property is `sn_id`, and the authored edge runs
+from `StandardName` to `DocsRevision`, not the reverse
+(`imas_codex/schemas/standard_name.yaml:2011-2020`,
+`imas_codex/schemas/standard_name.yaml:2244-2260`).
+
+```cypher
+MATCH (sn:StandardName)-[:DOCS_REVISION_OF]->(rev:DocsRevision)
+RETURN count(rev) AS revisions,
+       count(DISTINCT rev.sn_id) AS revisions_with_the_schema_key,
+       count(DISTINCT rev.standard_name_id) AS silently_zero_wrong_key
+```
+
+Before trusting any traversal or foreign-key aggregate, confirm both the slot
+name and the authored direction in LinkML, then report the authored and reversed
+counts together. The live verification census must cover every row in the
+relationship table, including zero-count declarations; omitting empty rows
+turns schema drift into apparent success.
+
 ## Naming-hygiene keep-list (calibration)
 
 `~/.agents/AGENTS.md` mandates a pre-stage check for plan/stage/bug labels and
