@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T18:03:52",
+  "updated": "2026-08-24T22:45:02",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -197,7 +197,7 @@
         "id": "impl-benchrunner",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03484-6290-7302-92d6-bab698299d30",
         "created": "2026-08-24"
       },
       {
@@ -624,7 +624,7 @@
         "id": "impl-normalizer",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03480-c922-7e10-9f55-62deb34a7ea0",
         "created": "2026-08-24"
       },
       {
@@ -953,7 +953,7 @@
         "id": "impl-stubremoval",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03480-2122-7fc1-8f57-08ef7670deea",
         "created": "2026-08-24"
       },
       {
@@ -1268,21 +1268,21 @@
         "id": "spec-axisspell",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03483-ac8b-76a0-ab7f-ad7cfb624d65",
         "created": "2026-08-24"
       },
       {
         "id": "spec-cypherprop",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03483-53f1-7c63-8fed-529dd40f7ba6",
         "created": "2026-08-24"
       },
       {
         "id": "spec-fkeyconv",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03483-e284-7300-8916-ddf566f4c97c",
         "created": "2026-08-24"
       },
       {
@@ -1338,7 +1338,7 @@
         "id": "test-residue",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
+        "session_id": "01a03481-89b5-73c1-8dda-7554b20e2241",
         "created": "2026-08-24"
       },
       {
@@ -24372,9 +24372,534 @@
           "role": "test",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260824T160005246003-n-stubremoval",
+        "plan": "sn-release-readiness",
+        "section": "\u00a74",
+        "node": "n-stubremoval",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-stubremoval",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:00:06Z",
+        "completed_at": "2026-08-24T16:12:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 742,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 742,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "875af5c7115a593b91cd90e175379ad60d8110fe",
+        "commits": [
+          "8a345b5bc2e6edf390534fa885ee136fe7d3fee6"
+        ],
+        "changed_lines": {
+          "added": 111,
+          "removed": 443,
+          "files": 2
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160005246003-n-stubremoval/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03480-2122-7fc1-8f57-08ef7670deea",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8064768,
+            "cached_input_tokens_cumulative": 8064768,
+            "input_tokens": 8282077,
+            "input_tokens_cumulative": 8282077,
+            "output_tokens": 23035,
+            "output_tokens_cumulative": 23035,
+            "reasoning_output_tokens": 9980,
+            "reasoning_output_tokens_cumulative": 9980
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest summary",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260824T160047996814-n-normalizerfailclosed",
+        "plan": "sn-release-readiness",
+        "section": "\u00a77",
+        "node": "n-normalizerfailclosed",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-normalizer",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:00:49Z",
+        "completed_at": "2026-08-24T16:12:15Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 686,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 686,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "875af5c7115a593b91cd90e175379ad60d8110fe",
+        "commits": [
+          "8401c55deee4c9875bdba88f0683320d48fd34d3"
+        ],
+        "changed_lines": {
+          "added": 147,
+          "removed": 35,
+          "files": 2
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160047996814-n-normalizerfailclosed/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03480-c922-7e10-9f55-62deb34a7ea0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5424896,
+            "cached_input_tokens_cumulative": 5424896,
+            "input_tokens": 5604805,
+            "input_tokens_cumulative": 5604805,
+            "output_tokens": 19480,
+            "output_tokens_cumulative": 19480,
+            "reasoning_output_tokens": 8446,
+            "reasoning_output_tokens_cumulative": 8446
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest summary",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
+      },
+      {
+        "run_id": "r-20260824T160137188136-n-residuedisposition",
+        "plan": "sn-release-readiness",
+        "section": "\u00a78",
+        "node": "n-residuedisposition",
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-residue",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:01:39Z",
+        "completed_at": "2026-08-24T16:13:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 725,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 725,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "875af5c7115a593b91cd90e175379ad60d8110fe",
+        "commits": [
+          "eac130a9e82b8d61ad15be26665bebfab9c5e85a"
+        ],
+        "changed_lines": {
+          "added": 196,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160137188136-n-residuedisposition/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03481-89b5-73c1-8dda-7554b20e2241",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6446848,
+            "cached_input_tokens_cumulative": 6446848,
+            "input_tokens": 6652348,
+            "input_tokens_cumulative": 6652348,
+            "output_tokens": 29471,
+            "output_tokens_cumulative": 29471,
+            "reasoning_output_tokens": 9921,
+            "reasoning_output_tokens_cumulative": 9921
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T160333401841-n-cypherpropspec",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a74",
+        "node": "n-cypherpropspec",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "spec-cypherprop",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:03:36Z",
+        "completed_at": "2026-08-24T16:11:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 495,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 495,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "be4a8099c8a24d4bcb004b89ac45742707f7fb5e",
+        "commits": [
+          "5d40dde9d4fcd50f1402c963b58f79c505eaa554"
+        ],
+        "changed_lines": {
+          "added": 237,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160333401841-n-cypherpropspec/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03483-53f1-7c63-8fed-529dd40f7ba6",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2778880,
+            "cached_input_tokens_cumulative": 2778880,
+            "input_tokens": 2916676,
+            "input_tokens_cumulative": 2916676,
+            "output_tokens": 17513,
+            "output_tokens_cumulative": 17513,
+            "reasoning_output_tokens": 8556,
+            "reasoning_output_tokens_cumulative": 8556
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T160355863360-n-axisspellspec",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a73",
+        "node": "n-axisspellspec",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "spec-axisspell",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:03:58Z",
+        "completed_at": "2026-08-24T16:09:54Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 356,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 356,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "be4a8099c8a24d4bcb004b89ac45742707f7fb5e",
+        "commits": [
+          "619521b153f6d3fad02bc7384ab882f352655fd0"
+        ],
+        "changed_lines": {
+          "added": 105,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160355863360-n-axisspellspec/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03483-ac8b-76a0-ab7f-ad7cfb624d65",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2332928,
+            "cached_input_tokens_cumulative": 2332928,
+            "input_tokens": 2448802,
+            "input_tokens_cumulative": 2448802,
+            "output_tokens": 12411,
+            "output_tokens_cumulative": 12411,
+            "reasoning_output_tokens": 6002,
+            "reasoning_output_tokens_cumulative": 6002
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T160410388941-n-fkeyconvspec",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a75",
+        "node": "n-fkeyconvspec",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "spec-fkeyconv",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:04:13Z",
+        "completed_at": "2026-08-24T16:11:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 423,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 423,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "be4a8099c8a24d4bcb004b89ac45742707f7fb5e",
+        "commits": [
+          "6c1344c3e19379f96b9bf732cd8d63415b01b37c"
+        ],
+        "changed_lines": {
+          "added": 81,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160410388941-n-fkeyconvspec/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03483-e284-7300-8916-ddf566f4c97c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2610432,
+            "cached_input_tokens_cumulative": 2610432,
+            "input_tokens": 2744777,
+            "input_tokens_cumulative": 2744777,
+            "output_tokens": 12733,
+            "output_tokens_cumulative": 12733,
+            "reasoning_output_tokens": 6297,
+            "reasoning_output_tokens_cumulative": 6297
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260824T160441192684-n-benchpaneladapter",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a72",
+        "node": "n-benchpaneladapter",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-benchrunner",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T16:04:45Z",
+        "completed_at": "2026-08-24T16:13:24Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 519,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 519,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "be4a8099c8a24d4bcb004b89ac45742707f7fb5e",
+        "commits": [
+          "aa553671b81005d22ec28fbbea9400b2116ea3d9"
+        ],
+        "changed_lines": {
+          "added": 431,
+          "removed": 0,
+          "files": 2
+        },
+        "tests_added": 5,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T160441192684-n-benchpaneladapter/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03484-6290-7302-92d6-bab698299d30",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3277056,
+            "cached_input_tokens_cumulative": 3277056,
+            "input_tokens": 3405303,
+            "input_tokens_cumulative": 3405303,
+            "output_tokens": 17786,
+            "output_tokens_cumulative": 17786,
+            "reasoning_output_tokens": 6796,
+            "reasoning_output_tokens_cumulative": 6796
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest summary",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 701
+    "_version": 715
   }
 }
