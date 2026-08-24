@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-graph-identity-convention">
+  <meta name="plan-title" content="One Way to Name an Identity in the Graph">
+  <meta name="plan-summary" content="Four silent-zero query failures in one session traced to one schema carrying three foreign-key spellings and two spellings of one axis. Unify the convention, make a misspelled property fail closed instead of returning a plausible empty result, and replace the five duplicated presence tests with one shared eligibility determination — each change specified test-first.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="15.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-context" content="extended">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="elevated">
+  <meta name="plan-sprint" content="S9">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <title>One Way to Name an Identity in the Graph | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-version" content="1">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">§1 — The defect, and why it keeps winning</h2>
+
+    <p>One schema uses <strong>three different property names</strong> for the same
+    relationship — a node referencing a <code>StandardName</code> — and <strong>two
+    different spellings</strong> of one axis. Neither inconsistency is visible at the point
+    of use, and both fail <em>silently</em>: Cypher evaluates a missing property to
+    <code>null</code>, a non-true predicate drops the row, and the query returns a clean,
+    plausible, empty result instead of an error.</p>
+
+    <table>
+      <thead><tr><th>Class</th><th>Property referencing a standard name</th><th>Live rows</th></tr></thead>
+      <tbody>
+        <tr><td><code>StandardName</code></td><td><code>id</code> <em>(the identifier itself)</em></td><td>4,666</td></tr>
+        <tr><td><code>DocsRevision</code></td><td><code>sn_id</code></td><td>3,068</td></tr>
+        <tr><td><code>StandardNameReview</code></td><td><code>standard_name_id</code></td><td>24,789</td></tr>
+        <tr><td><code>LLMCost</code></td><td><code>sn_ids</code> <em>(multivalued)</em></td><td>32,373</td></tr>
+      </tbody>
+    </table>
+
+    <p>And the axis. The <code>StandardNameReviewMode</code> enum admits
+    <code>names</code> and <code>docs</code>; the paired scalars on
+    <code>StandardName</code> are suffixed <code>_name</code> and <code>_docs</code> —
+    <code>reviewer_score_name</code> beside <code>reviewer_score_docs</code>,
+    <code>reviewed_name_at</code> beside <code>reviewed_docs_at</code>. Sixteen singular
+    slots, twelve plural-matching ones, one axis, two spellings.</p>
+
+    <h3>The four incidents, all on 2026-08-23, all silent</h3>
+
+    <table>
+      <thead><tr><th>#</th><th>Query</th><th>Returned</th><th>Truth</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>join a refine cohort on <code>s.name</code></td><td>0 overlap</td><td>20 identities</td></tr>
+        <tr><td>2</td><td>join a receipt guessing <code>id</code>/<code>sn_id</code>/<code>name</code></td><td>0 overlap</td><td>90 rows</td></tr>
+        <tr><td>3</td><td><code>(:DocsRevision)-[:DOCS_REVISION_OF]-&gt;(s)</code> with <code>d.standard_name_id</code></td><td>0 revised</td><td>1,989 names</td></tr>
+        <tr><td>4</td><td><code>rv.review_axis = 'name'</code></td><td>0 scored reviews</td><td>3,897</td></tr>
+      </tbody>
+    </table>
+
+    <p>Incident 4 is the instructive one. A zero there asserts <em>the entire names axis
+    has never been reviewed</em> — a claim large enough that it should provoke disbelief,
+    and instead it renders as a tidy empty result. Incident 3 would have concluded that no
+    document in the graph had ever been revised, hours after forty snapshots were written
+    and reported. In both cases the number was not merely wrong; it was wrong in the
+    direction of <em>nothing to do here</em>.</p>
+
+    <p><strong>Documentation has already been tried and measured.</strong> A keying section
+    was added to <code>imas_codex/standard_names/AGENTS.md</code> naming the two identifier
+    properties and the silent-null mechanism. Incidents 3 and 4 happened <em>after</em> it
+    landed, one of them committed by its own author. The section was then extended to all
+    53 relationship directions and all 12 foreign-key classes. That is worth having, and it
+    is a mitigation: it makes the answer findable. It does not make the question occur to
+    anyone at the moment they are writing a filter. This plan exists because the mitigation
+    has been shown insufficient by measurement rather than by argument.</p>
+
+    <h2 id="s2">§2 — The same class already gates work, not only reporting</h2>
+
+    <p>Chasing whether <code>docs_review_resolution_method</code> should exist at all
+    revealed the cost ceiling of this defect class. That field is a pure denormalisation:
+    across every row where both the scalar and a reachable review method exist, they
+    <strong>agree 2,053 times and disagree 0 times</strong>. It carries no information the
+    graph does not already hold. Yet it is presence-tested at five sites in three
+    subsystems:</p>
+
+    <table>
+      <thead><tr><th>Site</th><th>What the test decides</th><th>Gates work?</th></tr></thead>
+      <tbody>
+        <tr><td><code>cli/sn.py:471</code></td><td>refine_docs pending count</td><td>reporting</td></tr>
+        <tr><td><code>export.py:306</code></td><td>export eligibility</td><td>release</td></tr>
+        <tr><td><code>export.py:411</code></td><td>exclusion reason assignment</td><td>reporting</td></tr>
+        <tr><td><code>graph_ops.py:11533</code></td><td><code>PROMOTE_STRANDED_DOCS_WHERE</code></td><td><strong>yes — promotion</strong></td></tr>
+        <tr><td><code>graph_ops.py:24246</code></td><td><code>_claim_sn_atomic</code> eligibility</td><td><strong>yes — refine claim</strong></td></tr>
+      </tbody>
+    </table>
+
+    <p>So an <em>unwritten</em> denormalisation did not merely withhold names from the
+    release. A name with a null method <strong>cannot be claimed for docs refinement</strong>
+    and <strong>cannot be promoted</strong> from <code>reviewed</code> to
+    <code>accepted</code>. It sits in <code>docs_stage='reviewed'</code> indefinitely: the
+    refine pool cannot see it, the promoter cannot lift it, and the pending counter reports
+    it absent rather than stuck. Nothing errors. The 1,402 rows repaired by a backfill
+    campaign were not only unpublishable — a subset were <em>unrepairable and unpromotable
+    by construction</em>.</p>
+
+    <p>That is why the five duplicated predicates are inside this plan's scope rather than
+    left as a tidy-up. Renaming identity properties while five copies of one eligibility
+    test live in three files is how a rename becomes an outage.</p>
+
+    <p><strong>A finding that shapes §5.</strong> The schema describes both foreign-key
+    scalars as conveniences over an authoritative edge, in its own words:
+    <code>DocsRevision.sn_id</code> is <em>"denormalised for query convenience; the
+    authoritative link is the DOCS_REVISION_OF edge"</em>, and
+    <code>StandardNameReview.standard_name_id</code> is <em>"back-reference; edge owned by
+    StandardName via HAS_REVIEW"</em>. They are the same shape as
+    <code>docs_review_resolution_method</code>: a copy that became load-bearing. That opens
+    a genuine question about whether unifying the spelling is the right fix or whether the
+    copies should go — recorded as a decision rather than settled here.</p>
+
+    <h2 id="s3">§3 — Change A: one spelling for the axis</h2>
+
+    <p>Cheapest of the three, and the one that produced the worst incident. The mismatch is
+    between an enum's permissible values (<code>names</code>, <code>docs</code>) and a slot-name
+    suffix convention (<code>_name</code>, <code>_docs</code>). Reconciling from the enum side
+    touches two permissible values and their readers; reconciling from the slot side touches
+    28 declared slots plus every reader of each. The enum is the cheap end.</p>
+
+    <p><strong>Deliverable:</strong> one spelling, chosen by the axis-spelling decision, applied
+    in the LinkML source with models regenerated, all readers updated, and a graph migration for
+    stored enum values if the enum side moves. <strong>Done when</strong> a test asserts that no
+    axis token appears in two spellings anywhere in <code>imas_codex/</code>, derived from the
+    schema rather than a hardcoded list, so a future axis cannot reintroduce the split.</p>
+
+    <h2 id="s4">§4 — Change B: a misspelled property must fail closed</h2>
+
+    <p>This is the change that would have caught all four incidents, and it is the only one
+    that protects against the <em>next</em> inconsistency rather than the current one. The
+    principle: <strong>a count or filter over a property name that does not exist must not
+    return a plausible empty result.</strong></p>
+
+    <p>Two layers, both required, because neither alone is sufficient:</p>
+
+    <ul>
+      <li><strong>A coverage helper used at the point of query.</strong> Before a zero is
+      believed, the candidate count and the property-coverage count are reported together:
+      a result of <code>candidates &gt; 0</code> with <code>with_prop = 0</code> means the
+      property name is wrong, not the set empty. This is the one-line habit both sessions
+      arrived at independently; the deliverable is to make it a callable rather than a habit.</li>
+      <li><strong>A static check over Cypher literals in the repository.</strong> Every
+      property name appearing in a Cypher string is validated against the LinkML-declared
+      slots for the label it is filtered on. A name the schema does not declare is a
+      failure. This is what makes the rule survive people who have not read the AGENTS
+      section — including its author, twice.</li>
+    </ul>
+
+    <p><strong>Done when</strong> the static check runs in the ordinary test selection, fails
+    on a deliberately misspelled property in a fixture, and reports zero violations across
+    the current tree — or an explicit, itemised allowlist of the cases it cannot resolve
+    statically, each with a reason.</p>
+
+    <h2 id="s5">§5 — Change C: one foreign-key convention</h2>
+
+    <p>Unify how a node names the standard name it belongs to. Blast radius, measured
+    rather than estimated: <strong>142</strong> Cypher-context <code>sn_id</code> references
+    and <strong>18</strong> for <code>standard_name_id</code>; <strong>258</strong> for
+    <code>sn_ids</code>. The raw identifier appears 1,494 times but most are Python locals
+    and dict keys; the graph-touching set concentrates in
+    <code>graph_ops.py</code> (222 occurrences), <code>workers.py</code> (181) and
+    <code>attachment_audit.py</code> (96), plus their tests. Data migration covers
+    <strong>60,230</strong> nodes across the three labels.</p>
+
+    <p>Two credible shapes, and the choice is the lead's:</p>
+    <ul>
+      <li><strong>Unify the spelling.</strong> Mechanical, reversible, keeps the query
+      convenience the scalars exist for, and leaves three denormalised copies in place.</li>
+      <li><strong>Traverse and delete.</strong> Callers read through the authoritative edge;
+      the scalars go. Removes the drift class permanently, costs a hop per row, and is a
+      larger change to hot paths including an atomic claim.</li>
+    </ul>
+
+    <p><strong>Done when</strong> one convention holds for every declared foreign key, the
+    migration is verified by non-zero coverage on every renamed property before and after,
+    and Change B's static check passes with no allowlist entry for these labels.</p>
+
+    <h2 id="s6">§6 — Change D: one eligibility determination, not five</h2>
+
+    <p>Replace the five duplicated presence tests of §2 with a single shared determination
+    consumed by all five call sites. The export gate's real question is <em>does a winning
+    review exist for this name</em>, which is answerable from the authoritative edge and
+    cannot drift. Two constraints the implementation must respect:</p>
+
+    <ul>
+      <li><strong>The exclusion reason splits.</strong> Of 2,748 accepted documents, 2,303
+      have a winning docs review and 445 do not — and <strong>435 of those have no docs
+      review at all</strong>. "Never reviewed" and "resolution unrecorded" are different
+      facts about a name and must not share one bucket.</li>
+      <li><strong>A predicate correct in a projection is not automatically correct inside an
+      atomic claim.</strong> Site <code>graph_ops.py:24246</code> sits in
+      <code>_claim_sn_atomic</code>; whatever replaces the presence test must be evaluable
+      there and must not change claim semantics under concurrency.</li>
+    </ul>
+
+    <p><strong>Done when</strong> one implementation is called by all five sites, a test
+    proves the five agree on a fixture population where the scalar and the edge disagree,
+    and the two work-gating sites have concurrency coverage.</p>
+
+    <h2 id="s7">§7 — Test-first is the contract, not the preference</h2>
+
+    <p>Every change above lands as <strong>a failing test before an implementation</strong>,
+    and each worker's manifest reports the pre-change and post-change counts so the sequence
+    is auditable rather than asserted. This is not ceremony here: three of the four changes
+    are refactors with no user-visible behaviour, so a test written afterwards can only
+    describe what the code now does. A test written first is the only artifact that
+    distinguishes "the rename preserved behaviour" from "the rename changed behaviour and
+    the tests were updated to match".</p>
+
+    <p>Each change therefore has two nodes. The <strong>specification node</strong> writes
+    tests that fail against the current tree, and its done-when is that they fail <em>for the
+    stated reason</em> — a test failing on an import error or a typo proves nothing. The
+    <strong>implementation node</strong> makes them pass without editing them; if it must
+    change a specification test, that is a signal the specification was wrong and it stops
+    and reports rather than editing the goalposts.</p>
+
+    <p>Two invariants every specification node must encode, because they are what the four
+    incidents have in common:</p>
+    <ul>
+      <li><strong>A zero is not evidence until coverage is proven.</strong> Any assertion
+      whose expected value is zero must be accompanied by an assertion that the property or
+      relationship being counted exists and is populated somewhere.</li>
+      <li><strong>Derive the universe from the schema, never a literal list.</strong> A test
+      enumerating relationships, axis tokens, or foreign-key properties reads them from
+      LinkML at runtime, so a future addition fails loudly instead of being silently
+      untested.</li>
+    </ul>
+
+    <h2 id="s8">§8 — Sequencing, quiescence, and the way back</h2>
+
+    <p><strong>Nothing starts until the graph and the tree are quiescent.</strong> The
+    concurrent release-readiness session holds live campaigns and heavy edits in
+    <code>graph_ops.py</code>, which Change C touches most. Its nodes are being allowed to
+    finish rather than killed — stopping a paid campaign mid-run leaves live claims and
+    unattributable spend — and the gate for starting here is: that session reports quiescent,
+    <code>graph_ops.py</code> is committed and pushed with no worktree holding edits, and the
+    suite is green at that head.</p>
+
+    <p><strong>Order, and the reasoning for it.</strong> Change B first, because it is the
+    detector: with the static check in place, Changes A and C cannot introduce a silent
+    inconsistency, and the check's own value is proven by running it against the tree
+    <em>before</em> anything is renamed. Then Change A, smallest and independent. Then
+    Change D, because it removes the five-way duplication that would otherwise multiply
+    Change C's risk. Change C last, when a detector exists, the duplication is gone, and the
+    tree is otherwise stable.</p>
+
+    <p><strong>Rollback.</strong> Every step is a migration with an inverse, and each
+    migration node states its inverse before applying. The failure mode this plan is
+    guarding against is the one it is fixing: a mis-set key on 60,230 nodes fails
+    <em>silently</em> and stops work rather than reporting. So every migration verifies
+    non-zero coverage on the target property immediately after writing, and refuses rather
+    than reporting success on a zero.</p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="axis-spelling-direction" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which side of the axis mismatch moves — the enum values or the slot suffixes?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="enum-to-singular">Enum becomes name/docs, matching the 28 slot suffixes</button>
+      <button class="r-opt" data-value="slots-to-plural">Slots become _names/_docs, matching the enum</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="foreign-key-shape" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Unify the foreign-key spelling, or traverse the authoritative edge and delete the denormalised copies?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="unify-spelling">Unify to one spelling; keep the copies</button>
+      <button class="r-opt" data-value="traverse-and-delete">Traverse the edge; delete the copies</button>
+      <button class="r-opt" data-value="unify-now-traverse-later">Unify now, and record traversal as a separate later question</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="resolution-method-survival" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does docs_review_resolution_method survive Change D at all?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="delete-derive-from-edge">Delete it; all five sites derive from the edge</button>
+      <button class="r-opt" data-value="keep-derived-at-write">Keep it, but derived at review time with an invariant test</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sgic-001" data-status="open" data-written-by="reckon-create" data-written-at="2026-08-24" data-recommends-skill="/reckon-ship sn-graph-identity-convention" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Close the silent-null footgun test-first, detector before rename</h4>
+    <div class="r-fu-body"><p>Run the four changes in the order §8 fixes: the static Cypher-property check first so its value is proven against the un-renamed tree, then the axis spelling, then the single eligibility determination, then the foreign-key convention. Every change is a specification node writing failing tests before an implementation node makes them pass. No node starts until the concurrent release-readiness session reports quiescent with <code>graph_ops.py</code> committed and the suite green at that head.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-graph-identity-convention</pre>
+    </article>
+</section>
+
+  </main>
+</body>
+</html>
