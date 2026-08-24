@@ -23,7 +23,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-impl" content="0.75">
 <meta name="plan-commits" content="81b2e435,f26e610a,f19eecee,3c1eb690,5d40dde9,619521b1,6c1344c3,5323146c">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-identity-convention-landed.html,docs/evidence/sn-graph-identity-convention/reuse-map.md,docs/evidence/sn-graph-identity-convention/baseline-green.md">
@@ -344,6 +344,44 @@
     guidance file describes the pre-change convention. The whole exercise is about a
     convention nobody can discover by reading; finishing the code and leaving the guidance
     stale would reproduce the defect in the one artifact meant to prevent it.</p>
+
+    </section>
+
+  <section>
+    <h2>§10 — Seventy-nine live silent zeros, found by the detector this plan built</h2>
+
+    <p>Change B was justified on the argument that a detector protects against the
+    <em>next</em> inconsistency rather than the current one. Run once against the un-renamed
+    tree it found seventy-nine instances of the current one, in production code, and that
+    changes this plan's scope from three renames to three renames plus a repair.</p>
+
+    <p><strong>The adjudication is what makes the number trustworthy.</strong> The raw audit
+    reports 379 schema-resolved findings over 13,517 property occurrences. Those partition
+    into <strong>79 genuine defects</strong> — a label that is declared, filtered on a
+    property it does not declare — <strong>299 properties written at runtime</strong> and
+    never declared in LinkML, which are legitimate and permanently allowlisted, and
+    <strong>1 label-resolution limitation</strong> where an untyped alias precedes its later
+    binding. A finding is not admitted to the allowlist by being numerous; each entry names
+    what it is and why, and every occurrence is frozen by path, line, label, property and
+    count, so a new, moved, stale or excess reference fails.</p>
+
+    <p><strong>Seven of the 79 filter <code>StandardName.name</code></strong>, a property no
+    standard-name class declares. That is not an analogous defect — it is the same defect as
+    incident 1 in §1, still live, in six modules, silently returning empty results today.
+    Roughly ten more read <code>IMASNode.units</code> where the schema declares
+    <code>unit</code>.</p>
+
+    <p><strong>Repair is split by subsystem, not by property</strong>, because the two
+    largest property groups both touch <code>graph_ops.py</code> and no two workers may write
+    one file. Three nodes cover the whole inventory: the standard-names subsystem, the graph
+    and tools subsystems, and the discovery, ids, ingestion, llm and cli subsystems.</p>
+
+    <p><strong>Done when</strong> the audit reports zero remaining defect-category findings
+    against the frozen inventory in every subsystem, each corrected filter is shown to have
+    non-zero property coverage rather than merely to compile, and every site whose intended
+    label or property cannot be determined from its surrounding query is left unchanged and
+    named with its reason. Guessing a property is the defect wearing a fix, so an ambiguous
+    site is reported rather than repaired.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
