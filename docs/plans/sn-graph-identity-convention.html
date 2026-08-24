@@ -23,7 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-24">
-<meta name="plan-version" content="1">
+<meta name="plan-version" content="4">
+<meta name="plan-impl" content="0.2">
 </head>
 <body>
   <main class="plan-doc">
@@ -103,13 +104,19 @@
     </table>
 
     <p>So an <em>unwritten</em> denormalisation did not merely withhold names from the
-    release. A name with a null method <strong>cannot be claimed for docs refinement</strong>
-    and <strong>cannot be promoted</strong> from <code>reviewed</code> to
-    <code>accepted</code>. It sits in <code>docs_stage='reviewed'</code> indefinitely: the
-    refine pool cannot see it, the promoter cannot lift it, and the pending counter reports
-    it absent rather than stuck. Nothing errors. The 1,402 rows repaired by a backfill
-    campaign were not only unpublishable — a subset were <em>unrepairable and unpromotable
-    by construction</em>.</p>
+    release. A name with a null method could not be claimed for docs refinement and could not
+    be promoted from <code>reviewed</code> to <code>accepted</code>: it sat in
+    <code>docs_stage='reviewed'</code> indefinitely, invisible to the refine pool, unliftable
+    by the promoter, and reported absent rather than stuck. Nothing errored.</p>
+
+    <p><strong>Measured, the harm was six rows — and the mechanism still mattered.</strong>
+    A census run as part of the repair split the null-scalar population by whether it sat
+    above or below the accept bar: <strong>zero</strong> above, <strong>six</strong> below.
+    So six names were genuinely unclaimable for refinement and none were unpromotable.
+    Smaller than either session feared, and the correction belongs on the page: the earlier
+    phrasing here implied a large unrepairable subset and the number is six. What justifies
+    the plan is not the count but the failure mode — a work-gating predicate that excludes
+    silently, where the same defect over a sparser field or a hotter path has no bound.</p>
 
     <p>That is why the five duplicated predicates are inside this plan's scope rather than
     left as a tidy-up. Renaming identity properties while five copies of one eligibility
@@ -190,27 +197,44 @@
     migration is verified by non-zero coverage on every renamed property before and after,
     and Change B's static check passes with no allowlist entry for these labels.</p>
 
-    <h2 id="s6">§6 — Change D: one eligibility determination, not five</h2>
+    <h2 id="s6">§6 — Change D: one eligibility determination, not five <span class="badge badge-shipped">✓ landed 2026-08-24</span></h2>
 
-    <p>Replace the five duplicated presence tests of §2 with a single shared determination
-    consumed by all five call sites. The export gate's real question is <em>does a winning
-    review exist for this name</em>, which is answerable from the authoritative edge and
-    cannot drift. Two constraints the implementation must respect:</p>
+    <p><strong>Already done, by the concurrent release-readiness session, before this plan
+    was authored.</strong> Verified in the tree rather than taken on report:
+    <code>docs_review_resolution_method IS NOT NULL</code> now appears at
+    <strong>zero</strong> sites. One shared determination replaced all five, and it derives
+    the winning and non-winning method sets from the schema
+    (<code>graph_ops.py:6095-6147</code>) rather than hardcoding them — so a future enum
+    change cannot silently re-admit a non-winning state. The exclusion reason split landed
+    with it: never-reviewed and resolution-unrecorded are now separate facts.</p>
 
-    <ul>
-      <li><strong>The exclusion reason splits.</strong> Of 2,748 accepted documents, 2,303
-      have a winning docs review and 445 do not — and <strong>435 of those have no docs
-      review at all</strong>. "Never reviewed" and "resolution unrecorded" are different
-      facts about a name and must not share one bucket.</li>
-      <li><strong>A predicate correct in a projection is not automatically correct inside an
-      atomic claim.</strong> Site <code>graph_ops.py:24246</code> sits in
-      <code>_claim_sn_atomic</code>; whatever replaces the presence test must be evaluable
-      there and must not change claim semantics under concurrency.</li>
-    </ul>
+    <p>Its census is the source of the corrected numbers in §2: docs accepted 2,727, winners
+    by traversal 2,383, never reviewed 329, resolution unrecorded 15; emitted moved 1,964 →
+    2,030 with identity conservation closing at 2,030 + 305 = 2,335.</p>
 
-    <p><strong>Done when</strong> one implementation is called by all five sites, a test
-    proves the five agree on a fixture population where the scalar and the edge disagree,
-    and the two work-gating sites have concurrency coverage.</p>
+    <p><strong>This section is retained rather than deleted because it changes the risk
+    calculus for Change C.</strong> The original argument for renaming last was that five
+    duplicated predicates across three files would multiply a rename's blast radius. That
+    duplication is gone, so the rename now lands on one determination instead of five copies.
+    Sequencing in §8 is unchanged for the other reason it gave — the detector should prove
+    itself against the un-renamed tree — but the rename is materially safer than when this
+    plan was written.</p>
+
+    <h2 id="s6b">§6b — Change E: the one path that actively strips a scalar</h2>
+
+    <p>Surfaced by the same session's root-cause work and unclosed. A 96-row population of
+    accepted names holding a scored review with a null mirrored scalar partitions as:
+    <strong>82</strong> whose winning review was never projected, <strong>8</strong>
+    correctly null with no winner at all, and <strong>6</strong> reached by an
+    <em>active strip path</em> — code that clears a scalar that should have survived.</p>
+
+    <p>The 82 are the same never-written class as everything else here. The 6 are different
+    and worse: something writes a null over a value that was earned. A rename that moves
+    these properties while a strip path is live would relocate the defect rather than fix it,
+    and the strip would then be attributed to the migration. <strong>Done when</strong> the
+    writing site is identified by test — a regression that reproduces the strip on a fixture
+    before any repair — the clearing condition is corrected, and the six rows are re-projected
+    from their surviving winning reviews with coverage asserted non-zero after.</p>
 
     <h2 id="s7">§7 — Test-first is the contract, not the preference</h2>
 
@@ -304,6 +328,11 @@
     </article>
 </section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s6" data-id="c-20260824-changed-already-landed" data-who="reckon-create" data-when="2026-08-24T05:10:00+00:00">
+    <div class="r-comment-body"><p><strong>This plan was stale within minutes of being authored, and the correction is the same discipline it exists to enforce.</strong> §6 specified replacing five duplicated presence tests. The concurrent session's <code>n-gateeligibility</code> node completed <em>before</em> the pause directive reached it and its changes were already merged, so the tree had moved before the ink dried. Verified directly rather than accepted on report: <code>docs_review_resolution_method IS NOT NULL</code> matches zero sites in <code>imas_codex/</code>, and the shared determination at <code>graph_ops.py:6095-6147</code> derives its winning set from the schema.</p><p>Recorded because the failure shape is the one this plan is about. A plan authored from a tree read minutes earlier is exactly the currency defect corrected in <code>sn-quality-parity</code> this morning, where four sections claimed open work that had already landed. Two lessons hold: check the tree at authoring time, not at reading time; and a peer's "already done" is a claim to verify, not a claim to accept — it happened to be exactly right here, which is not the same as being safe to assume.</p><p><strong>Remaining scope is three changes plus one new one.</strong> Change D is landed. Change E (§6b) was added from the same session's root-cause partition: 6 of 96 rows reached by an active strip path that writes a null over an earned value, which must be closed <em>before</em> a rename relocates it.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
