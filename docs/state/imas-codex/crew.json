@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T23:38:14",
+  "updated": "2026-08-24T23:43:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -500,6 +500,13 @@
         "role": "implement",
         "session_id": "01a023fc-bd11-7662-88d5-7824aca67282",
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-goldenrefresh",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "impl-hintdraw",
@@ -25566,9 +25573,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260824T212952181742-n-graphproprepair2",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a710",
+        "node": "n-graphproprepair2",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-unitsprop",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T21:30:00Z",
+        "completed_at": "2026-08-24T21:42:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 771,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 771,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "25b0b0b30d4086dabc97c8a1ca238f0f60139308",
+        "commits": [
+          "de0733cf872c2da39728d7459ec6914e5ddd2e3f"
+        ],
+        "changed_lines": {
+          "added": 20,
+          "removed": 20,
+          "files": 8
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T212952181742-n-graphproprepair2/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0359e-bfdd-7e22-b5b6-de0685e74860",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9609728,
+            "cached_input_tokens_cumulative": 9609728,
+            "input_tokens": 10192182,
+            "input_tokens_cumulative": 10192182,
+            "output_tokens": 35272,
+            "output_tokens_cumulative": 35272,
+            "reasoning_output_tokens": 13194,
+            "reasoning_output_tokens_cumulative": 13194
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest tests/graph/",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 741
+    "_version": 743
   }
 }
