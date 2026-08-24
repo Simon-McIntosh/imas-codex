@@ -294,7 +294,7 @@ _SELECT_QUERY = """
 MATCH (sn:StandardName)
 WHERE sn.name_stage = 'accepted'
 RETURN sn.id AS id,
-       coalesce(sn.name, sn.id) AS name,
+       sn.id AS name,
        sn.description AS description,
        sn.documentation AS documentation,
        sn.validation_issues AS validation_issues,
@@ -674,7 +674,7 @@ _REFRESH_QUERY = """
 UNWIND $ids AS sid
 MATCH (sn:StandardName {id: sid})
 RETURN sn.id AS id,
-       coalesce(sn.name, sn.id) AS name,
+       sn.id AS name,
        sn.name_stage AS name_stage,
        sn.docs_stage AS docs_stage,
        sn.description AS description,

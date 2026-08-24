@@ -347,7 +347,7 @@ def _fetch_candidates(
     RETURN sn {
         .*,
         unit: coalesce(u.id, sn.unit),
-        cocos: c.convention
+        cocos: c.id
     } AS record
     ORDER BY sn.id
     """
@@ -399,7 +399,7 @@ def _fetch_export_population(
     RETURN sn {{
         .*,
         unit: coalesce(u.id, sn.unit),
-        cocos: c.convention,
+        cocos: c.id,
         _has_docs_review: has_docs_review,
         _has_winning_docs_review: has_winning_docs_review
     }} AS record

@@ -296,7 +296,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
                        sn.embedding AS embedding,
                        sn.review_tier AS review_tier,
                        sn.source_types AS source_types,
-                       sn.source_id AS source_id,
+                       sn.id AS source_id,
                        sn.generated_at AS generated_at,
                        sn.reviewed_name_at AS reviewed_name_at,
                        sn.reviewed_docs_at AS reviewed_docs_at,

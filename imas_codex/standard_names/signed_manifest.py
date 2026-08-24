@@ -3071,7 +3071,7 @@ def _receipt_rows(
           manifest_sha256: $manifest_sha256
         })
         RETURN properties(change) AS properties
-        ORDER BY change.row_id
+        ORDER BY change.id
         """,
         operation=operation,
         manifest_sha256=manifest_sha256,
@@ -4246,7 +4246,7 @@ def _write_receipts(
         FOREACH (_ IN CASE WHEN owner IS NULL THEN [] ELSE [1] END |
           MERGE (owner)-[:HAS_INTERNAL_CHANGE]->(change))
         RETURN change.id AS change_id
-        ORDER BY change.row_id
+        ORDER BY change.id
         """,
         rows=rows,
         operation=authority.receipt_policy["operation"],

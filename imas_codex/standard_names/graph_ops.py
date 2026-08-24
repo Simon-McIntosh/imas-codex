@@ -735,7 +735,7 @@ def get_extraction_candidates_signals(
             OPTIONAL MATCH (s)-[:MAPS_TO]->(m:IMASNode)
             RETURN s.id AS signal_id, s.description AS description,
                    s.physics_domain AS physics_domain,
-                   s.units AS units,
+                   s.unit AS units,
                    m.id AS imas_path
             ORDER BY s.id
             LIMIT $limit
@@ -4655,7 +4655,7 @@ CALL (stub) {
     binding_targets: [target IN binding_targets WHERE target.id IS NOT NULL |
                       target],
     dd_path: dd.id,
-    unit: coalesce(dd.units, dd.unit, source.unit)
+    unit: coalesce(dd.unit, source.dd_unit)
   } END) AS dd_sources
 }
 CALL (stub) {
@@ -12527,7 +12527,7 @@ def revive_unit_skipped_sources(gc: Any | None = None) -> dict[str, int]:
                        sns.source_id AS source_id,
                        CASE WHEN size(unit_rels) = 1 THEN unit_rels[0]
                             WHEN size(unit_rels) > 1
-                            THEN coalesce(n.units, unit_rels[0])
+                            THEN coalesce(n.unit, unit_rels[0])
                             ELSE null END AS unit_from_rel,
                        n.unit AS node_unit
                 """,
@@ -13129,7 +13129,7 @@ def reconcile_standard_name_dd_edges(gc: Any | None = None) -> dict[str, int]:
               AND NOT (dd)-[:HAS_STANDARD_NAME]->(sn)
             OPTIONAL MATCH (dd)-[:HAS_UNIT]->(du:Unit)
             OPTIONAL MATCH (bound:IMASNode)-[:HAS_STANDARD_NAME]->(sn)
-            RETURN DISTINCT dd.id AS dd_path, sn.id AS sn_id, sn.name AS name,
+            RETURN DISTINCT dd.id AS dd_path, sn.id AS sn_id, sn.id AS name,
                    sn.unit AS sn_unit, du.id AS dd_unit,
                    collect(DISTINCT bound.id) AS existing_dd_paths
             """,

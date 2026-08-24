@@ -681,7 +681,7 @@ def fetch_review_neighbours(
                           AND coalesce(sn.name_stage, '') = 'accepted'
                         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
                         RETURN sn.id AS id,
-                               sn.name AS name,
+                               sn.id AS name,
                                sn.description AS description,
                                sn.kind AS kind,
                                coalesce(u.id, sn.unit) AS unit
@@ -711,7 +711,7 @@ def fetch_review_neighbours(
                           AND ANY(p IN sn.source_paths WHERE p STARTS WITH $prefix)
                         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
                         RETURN sn.id AS id,
-                               sn.name AS name,
+                               sn.id AS name,
                                sn.description AS description,
                                sn.kind AS kind,
                                coalesce(u.id, sn.unit) AS unit

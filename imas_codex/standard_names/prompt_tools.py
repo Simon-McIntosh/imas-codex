@@ -114,9 +114,9 @@ def fetch_cluster_siblings(cluster_id: str, limit: int = 10) -> list[dict[str, A
     cypher = """
         MATCH (c:IMASSemanticCluster {id: $cluster_id})<-[:IN_CLUSTER]-(n:IMASNode)
         MATCH (n)-[:HAS_STANDARD_NAME]->(sn:StandardName)
-        WHERE sn.name IS NOT NULL
+        WHERE sn.id IS NOT NULL
         RETURN n.id AS path,
-               sn.name AS standard_name,
+               sn.id AS standard_name,
                sn.name_stage AS name_stage
         LIMIT $limit
     """
@@ -143,7 +143,7 @@ def fetch_reference_exemplar(concept: str) -> list[dict[str, Any]]:
         CALL db.index.vector.queryNodes('standardname_vec', 5, $vec)
         YIELD node, score
         WHERE node.name_stage IN ['accepted', 'approved']
-        RETURN node.name AS standard_name,
+        RETURN node.id AS standard_name,
                node.description AS description,
                score
         ORDER BY score DESC
@@ -158,12 +158,13 @@ def fetch_version_history(path: str) -> list[dict[str, Any]]:
     from imas_codex.graph.client import GraphClient
 
     cypher = """
-        MATCH (ch:IMASNodeChange {node_id: $path})
+        MATCH (ch:IMASNodeChange)-[:FOR_IMAS_PATH]->(:IMASNode {id: $path})
+        MATCH (ch)-[:IN_VERSION]->(version:DDVersion)
         RETURN ch.change_type AS change_type,
-               ch.from_version AS from_version,
-               ch.to_version AS to_version,
-               ch.detail AS detail
-        ORDER BY ch.to_version DESC
+               version.id AS version,
+               ch.old_value AS old_value,
+               ch.new_value AS new_value
+        ORDER BY version.id DESC
     """
     with GraphClient() as gc:
         return list(gc.query(cypher, path=path))
