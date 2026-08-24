@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-24T05:57:13",
+  "updated": "2026-08-24T07:52:56",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -59,6 +59,13 @@
         "role": "documentation",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "doc-keysdirections",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "doc-opchar",
@@ -425,6 +432,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-gatetraverse",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03216-2732-73e2-88ed-8d546e6f804c",
+        "created": "2026-08-24"
+      },
+      {
         "id": "impl-genericop",
         "harness": "codex",
         "role": "implement",
@@ -773,6 +787,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-scoreloss",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-24"
       },
       {
         "id": "impl-sectionplane",
@@ -23267,9 +23288,376 @@
           "detail": "backend reports token usage but no headroom"
         },
         "lineage": null
+      },
+      {
+        "run_id": "r-20260824T034744814645-n-docs107",
+        "plan": "sn-release-readiness",
+        "section": "\u00a75",
+        "node": "n-docs107",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-docs107",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T03:47:48Z",
+        "completed_at": "2026-08-24T03:54:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 411,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 411,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "1946c2834d4f99e1b0b6c3425a292c1426f8a843",
+        "commits": [
+          "d21782a92665579830521e391ce432e499009819"
+        ],
+        "changed_lines": {
+          "added": 107,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Zero-write blocked preflight, USD 0.00 spent, and the refusal is correct. The dispatch specified a 107-row cohort under a no-docs-axis-review predicate, but that live predicate returns 106: the 107th row HAS real review authority, so the node refused both to silently exclude it and to needlessly rescore a row that was already reviewed. That distinction is exactly the one the coordinator had drawn during reconciliation and then encoded wrongly as 107 in the dispatch. Cohorts now partition cleanly: 106 never docs-reviewed, requiring a genuine first review, and 1 reviewed-with-a-missing-scalar, requiring a projection rather than a rescore.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T034744814645-n-docs107/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a031e1-ad2a-73e1-b13b-4f0ac7272c85",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4636928,
+            "cached_input_tokens_cumulative": 4636928,
+            "input_tokens": 4839860,
+            "input_tokens_cumulative": 4839860,
+            "output_tokens": 15521,
+            "output_tokens_cumulative": 15521,
+            "reasoning_output_tokens": 6006,
+            "reasoning_output_tokens_cumulative": 6006
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260824T043555415848-n-keyingdirections",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-keyingdirections",
+        "role": "documentation",
+        "spec_level": "guided",
+        "member": "doc-keysdirections",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T04:35:57Z",
+        "completed_at": "2026-08-24T04:46:03Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 606,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 606,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "12833fc7680b8656eb0e43523590a9edc18564f0",
+        "commits": [
+          "fb0e38e05a298752cec54d3d306d97793cf310de"
+        ],
+        "changed_lines": {
+          "added": 107,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T043555415848-n-keyingdirections/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0320d-c4d3-7100-bdbf-c0665c4d3edd",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5895936,
+            "cached_input_tokens_cumulative": 5895936,
+            "input_tokens": 6114746,
+            "input_tokens_cumulative": 6114746,
+            "output_tokens": 24459,
+            "output_tokens_cumulative": 24459,
+            "reasoning_output_tokens": 10503,
+            "reasoning_output_tokens_cumulative": 10503
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260824T044505466470-n-gatetraverse",
+        "plan": "sn-release-readiness",
+        "section": "\u00a73",
+        "node": "n-gatetraverse",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-gatetraverse",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T04:45:07Z",
+        "completed_at": "2026-08-24T04:47:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 156,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 156,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "200c92dae3dded660efae6ff0f790346bf2190a8",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "Stopped by the coordinator 34 seconds in, before any code was touched, because the scope was wrong. The dispatch named two presence-test sites on docs_review_resolution_method; there are EIGHT, and two of them gate work rather than reporting: graph_ops.py:11533 is the canonical docs-axis stranded-promotion predicate and graph_ops.py:24246 sits inside _claim_sn_atomic as the refine_docs claim eligibility. Landing a traversal in export.py alone would have guaranteed divergence across the other seven, two of which decide whether a name can be repaired or promoted at all. Re-dispatched with the full site list and a single shared eligibility determination.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T044505466470-n-gatetraverse/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03216-2732-73e2-88ed-8d546e6f804c",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260824T044819667709-n-gateeligibility",
+        "plan": "sn-release-readiness",
+        "section": "\u00a73",
+        "node": "n-gateeligibility",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-gatetraverse",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T04:48:21Z",
+        "completed_at": "2026-08-24T05:13:49Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1528,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1528,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "829196d978615e118d9359eb078fd6a658d14013",
+        "commits": [
+          "be29b8c5807fbd79f3f672a1088ed1a03adf38a7"
+        ],
+        "changed_lines": {
+          "added": 555,
+          "removed": 66,
+          "files": 5
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T044819667709-n-gateeligibility/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03216-2732-73e2-88ed-8d546e6f804c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 13258496,
+            "cached_input_tokens_cumulative": 13258496,
+            "input_tokens": 13669528,
+            "input_tokens_cumulative": 13669528,
+            "output_tokens": 44019,
+            "output_tokens_cumulative": 44019,
+            "reasoning_output_tokens": 16244,
+            "reasoning_output_tokens_cumulative": 16244
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260824T043348336779-n-scoreloss",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72a",
+        "node": "n-scoreloss",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-scoreloss",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T04:33:51Z",
+        "completed_at": "2026-08-24T04:48:34Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 883,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 883,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "12833fc7680b8656eb0e43523590a9edc18564f0",
+        "commits": [
+          "543995c69f89843525e63af4bb1a692b94fa4b7b"
+        ],
+        "changed_lines": {
+          "added": 190,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T043348336779-n-scoreloss/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0320b-d91b-7930-92f6-88faf4fd3cb0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8779008,
+            "cached_input_tokens_cumulative": 8779008,
+            "input_tokens": 9072669,
+            "input_tokens_cumulative": 9072669,
+            "output_tokens": 32527,
+            "output_tokens_cumulative": 32527,
+            "reasoning_output_tokens": 12812,
+            "reasoning_output_tokens_cumulative": 12812
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
+      },
+      {
+        "run_id": "r-20260824T044334897102-n-docs106",
+        "plan": "sn-release-readiness",
+        "section": "\u00a75",
+        "node": "n-docs106",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-docs107",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-24T04:43:38Z",
+        "completed_at": "2026-08-24T05:04:48Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1270,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1270,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "200c92dae3dded660efae6ff0f790346bf2190a8",
+        "commits": [
+          "9ea2ae2558bebee197142dfe9d592eb68a25e690"
+        ],
+        "changed_lines": {
+          "added": 189,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "Campaign executed and delivered 85 of 106 identities to docs-accepted with a resolution method, moving the real export 1,948 to 2,033, but saturated its cap at USD 39.980907 of 40 and did not complete the cohort: 5 landed below the bar, 16 remain drafted, 9 never completed review, zero live claims. Measured cost is USD 0.377178 per identity, THREE TIMES the 0.123 sibling figure used to size it - their rows were mid-loop completions while these were full first reviews, so the per-identity figure did not transfer across cohort shape. The 16 drafted rows are recorded as release exclusions rather than silently dropped; they were previously docs_stage accepted without ever having been reviewed, so the state is now more honest and no new harm reaches the release. A continuation is NOT dispatched, per the lead directive to pause and land.",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260824T044334897102-n-docs106/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03214-ca9e-76f1-b532-fd43ee0adfc2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15828480,
+            "cached_input_tokens_cumulative": 15828480,
+            "input_tokens": 16116155,
+            "input_tokens_cumulative": 16116155,
+            "output_tokens": 30136,
+            "output_tokens_cumulative": 30136,
+            "reasoning_output_tokens": 9881,
+            "reasoning_output_tokens_cumulative": 9881
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null
       }
     ],
     "holds": [],
-    "_version": 651
+    "_version": 661
   }
 }
