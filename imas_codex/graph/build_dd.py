@@ -760,7 +760,7 @@ def update_path_embeddings(
         texts_to_embed, resolved_model, batch_size, use_rich=use_rich
     )
 
-    # Step 4: Store embeddings in graph in batches with progress tracking
+    # Step 5: Store embeddings in graph in batches with progress tracking
     store_batch_size = 100
     total_store_batches = (
         len(paths_to_update) + store_batch_size - 1
@@ -2289,11 +2289,11 @@ def _reclassify_relational(client: GraphClient) -> int:
         if new_cat and new_cat != row["current"]:
             updates[node_id] = new_cat
 
-    # R5: Dimensionless signal-signature promotion — structural
+    # Promote dimensionless signal signatures misclassified as structural.
     # STRUCTURE/STRUCT_ARRAY nodes carrying the explicit dimensionless unit "1"
     # that own a direct `data` leaf child are dimensionless physical signals
-    # (Z_eff, optical depth, a fraction), demoted by Pass 1 Rule 12 because the
-    # dimensionless unit is unresolved at build time. Promote them to quantity.
+    # (Z_eff, optical depth, a fraction), demoted during attribute-only
+    # classification because the dimensionless unit is unresolved at build time.
     signal_rows = client.query(
         """
         MATCH (n:IMASNode)
@@ -2320,7 +2320,7 @@ def _reclassify_relational(client: GraphClient) -> int:
         if new_cat and new_cat != row["current"]:
             updates[node_id] = new_cat
 
-    # R4: Fit-child promotion — quantity leaves under *_fit parents
+    # Promote quantity leaves under fit parents.
     fit_rows = client.query(
         """
         MATCH (n:IMASNode)-[:HAS_PARENT]->(parent:IMASNode)
@@ -2483,7 +2483,7 @@ def phase_embed(
     WHERE p.embedding IS NULL
       AND p.node_category IN $categories
     RETURN p.id AS id, p.name AS name, p.documentation AS documentation,
-           p.data_type AS data_type, p.ids AS ids, p.units AS units,
+           p.data_type AS data_type, p.ids AS ids, p.unit AS units,
            p.description AS description, p.keywords AS keywords,
            p.cocos_transformation_type AS cocos_transformation_type,
            p.physics_domain AS physics_domain,
@@ -2622,7 +2622,7 @@ def phase_embed_stale(
       AND p.embedding_hash IS NOT NULL
       AND p.enrichment_source IS NOT NULL
     RETURN p.id AS id, p.name AS name, p.documentation AS documentation,
-           p.data_type AS data_type, p.ids AS ids, p.units AS units,
+           p.data_type AS data_type, p.ids AS ids, p.unit AS units,
            p.description AS description, p.keywords AS keywords,
            p.cocos_transformation_type AS cocos_transformation_type,
            p.physics_domain AS physics_domain,
