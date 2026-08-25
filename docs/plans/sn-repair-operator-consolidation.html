@@ -23,10 +23,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-commits" content="42f56cd0,30ee0249,2bf92e4f,a17e6bbc,013e4033,5e3d691c,c9460262,ca993b9e,0baf8d09,bd34e963,eec3e20b,43a23b1f,469ec5a8,2afcccec,53d185e6">
 <meta name="plan-artifacts" content="docs/evidence/sn-repair-operator-consolidation/operator-characterisation.md,docs/evidence/sn-repair-operator-consolidation/migration-reuse-map.md,docs/evidence/sn-repair-operator-consolidation/dual-authority-migration.md,docs/evidence/archive/sn-repair-operator-consolidation-landed.html,docs/evidence/archive/integrity-and-operator-closure-verification.md,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_signed_manifest_operator.py,tests/standard_names/test_error_sibling_reconcile_graph.py">
-<meta name="plan-impl" content="0.5">
+<meta name="plan-impl" content="0.625">
 </head>
 <body>
   <main class="plan-doc">
@@ -293,14 +293,14 @@
       </p>
     <p class="r-dec-rat">Recorded from the plan&#x27;s own constraint rather than chosen afresh: §4 item 2 already requires that existing committed artifacts be readable under the new schema or convertible without re-signing, because re-signing would produce identical rows with new digests and no review lineage. Adjudication provenance is the expensive part of every one of these artifacts, so the generic operator adapts to their shapes. Lossless conversion with retained original digests stays available as a fallback for a specific artifact that cannot be read in place; re-signing is rejected.</p>
     </div>
-<div class="r-dec" data-key="serialization-retirement" data-choice="" data-by="" data-when="">
+<div class="r-dec" data-key="serialization-retirement" data-choice="keep-strict-serialization" data-by="Simon McIntosh" data-when="2026-08-25T08:43:28+00:00">
     <p class="r-dec-q">Should the generic operator aim to retire the one-mutator-at-a-time constraint?</p>
     <p class="r-dec-ctx">Repair throughput is currently capped by the rule that concurrent mutators invalidate each other&#x27;s out-of-allowlist immutability proofs. A per-row-scoped collateral proof could permit disjoint concurrent applies, but it weakens the strongest evidence the programme relies on.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="keep-serial">Keep strict serialization; consolidation targets code volume only</button>
       <button class="r-opt" data-value="prove-disjoint">Prove disjoint-row-set concurrency safe and lift the constraint</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Lead decision 2026-08-25: keep strict serialization. Consolidation targets code volume only, the disjoint-collateral proof becomes unnecessary, and this deliverable row closes as a decided &#x27;no&#x27; rather than being deferred. The decisive argument is that the constraint was never the bottleneck. Five nodes ran concurrently in this session with no conflict; what actually queued the work was the shared-source-file conflict, since all seven migrations edit both graph_ops.py and signed_manifest.py, and lifting the mutator constraint does not touch that by one minute. The apply lane is measurably cheap: this plan&#x27;s own record shows USD 0.00 for every apply, seed, census and reconcile against USD 1.57 of quorum draws, and wall-clock is dominated by GraphClient connect, measured at 54.8 s and peaking at 196.9 s, plus adjudication. Even the 78-pair rewire reconciliation is seconds of transaction time, so transaction concurrency would optimise the cheapest step. Against that, three findings in this session all show the hazard is precisely what concurrency multiplies, namely state changing between preview and apply: the orphan-parent guard had to repeat its predicates atomically at write time because a selection-only check would have read correct and left the hole open; the dual-authority migration refused a row verbatim for having acquired a live HAS_PARENT child between signing and applying; and the plan doctrine records three fixed cohorts overtaken by intervening authorized transactions before the lesson stuck. Section 6 already forbids weakening any guard, and the out-of-allowlist immutability proof is the strongest evidence this programme holds. RECORDED REOPEN CONDITION: measured evidence that apply-transaction time is a real constraint, such as a cohort in the thousands of rows or a wall-clock in which applies dominate rather than connect and adjudication.</p>
     </div>
 </section>
 
@@ -380,6 +380,9 @@
 </div>
 <div class="r-comment" data-section="§1" data-id="c-20260825T0532-closureverify" data-who="reckon-ship" data-when="2026-08-25T05:32:00+00:00">
     <div class="r-comment-body">Closure verification landed — commit ee35347e, artifact docs/evidence/archive/integrity-and-operator-closure-verification.md; gate is-this-plan-actually-complete FAILED. 4 of 8 declared deliverables are outstanding and SEVEN OF TEN class-by-class migrations remain, along with their bespoke deletions, their equivalence gates, the disjoint-collateral proof and an open serialization decision. The focused operator-contract selection is green at 21 passed and the live integrity ratchets at 4 passed, so what exists works — there is simply much less of it than the number implied. THE NUMBER WAS THE PROBLEM: impl 0.98 was a DISCHARGED SPRINT-CLAUSE MARKER, not remaining-work arithmetic, so it read as two percent left when the truth is seven of ten migrations. Corrected to 0.5 for 4 of 8 deliverables. A plan whose title promises one signed operator instead of twenty-two cannot be near-complete with seven consolidations unstarted, and this plan had no open followups either, so nothing in its own state contradicted the misleading fraction.</div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-20260825T0840-serializationlocked" data-who="reckon-ship" data-when="2026-08-25T08:40:00+00:00">
+    <div class="r-comment-body">Serialization decision LOCKED as keep-strict-serialization, closing the fourth outstanding deliverable row — 'prove disjoint generic invocations cannot corrupt each other's collateral proof, then settle serialization'. Settling it as a decided no makes the proof unnecessary, so the row CLOSES rather than deferring. impl advances 0.5 → 0.625, five of eight rows, and this movement is arithmetic over closed rows rather than a sprint-clause marker. The three migration-linked rows stay open at 5 of 10 operators migrated. WHAT THE SESSION MEASURED, and it is why the answer is no rather than not-yet: the serialization constraint was never what limited throughput here. Five nodes ran concurrently with zero conflicts; the actual queue was the shared-source-file conflict, because every one of the seven migrations edits both graph_ops.py and signed_manifest.py. Lifting the mutator constraint would have bought nothing measurable. Meanwhile each apply costs USD 0.00 and its wall-clock is dominated by a GraphClient connect measured between 54.8 s and 196.9 s, so concurrent transactions would be optimising the cheapest step in the chain. The counter-argument was real and is recorded rather than dismissed: section 7 notes the proof is cheapest to gather while refusal semantics are fresh, which argued for gathering the evidence and leaving enforcement on. It lost because it adds a proof obligation to the safety layer with five migrations still to run, several of which need named closed-registry extensions, and it would leave an unused capability to maintain.</div>
 </div>
 </section>
 </main>
