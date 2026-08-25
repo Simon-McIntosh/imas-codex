@@ -31,6 +31,7 @@ helper functions so it is unit-testable without a live graph or LLM.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import logging
 import random
@@ -893,12 +894,33 @@ async def run_breaker_bench(
 # production rubric penalises; a reviewer that cannot separate these from the
 # accepted original is not fit for the seat.
 _DISCRIM_DEFECTS = ("banned_prose", "vacuous", "unit_contradiction")
+_NAME_DISCRIM_DEFECTS = ("semantic_mismatch", "vacuous", "noncanonical_order")
 
 _VACUOUS_DOC = (
     "This quantity represents an important physical property of the plasma "
     "that is relevant to the analysis and can be used in various calculations "
     "as appropriate for the scenario under consideration."
 )
+
+_ADVISORY_CORPUS_QUERY = """
+    MATCH (sn:StandardName {
+        name_stage: 'accepted', validation_status: 'valid'
+    })
+    WHERE sn.description IS NOT NULL
+      AND sn.documentation IS NOT NULL
+      AND size(sn.documentation) > 40
+      AND sn.unit IS NOT NULL
+      AND size(coalesce(sn.source_paths, [])) > 0
+    RETURN
+      sn.id             AS name,
+      sn.description    AS description,
+      sn.documentation  AS documentation,
+      sn.unit           AS unit,
+      sn.kind           AS kind,
+      sn.physics_domain AS physics_domain,
+      sn.source_paths   AS source_paths
+    ORDER BY sn.id
+"""
 
 
 def _seed_bad_documentation(good_doc: str, defect: str, unit: str) -> str:
@@ -935,16 +957,152 @@ def _seed_bad_name(good_name: str, defect: str, foreign_name: str) -> str:
     """
     toks = [t for t in good_name.split("_") if t]
     if defect == "vacuous":
-        # Strip to a bare, underspecified base — drops every qualifier, so the
-        # name no longer captures the specific quantity its description names
-        # (completeness / semantic failure).
-        return "_".join(toks[-2:]) if len(toks) >= 2 else good_name
-    if defect == "unit_contradiction":
+        # Strip the leading semantic carrier.  Keeping the remaining tail makes
+        # the corruption specific to its source while still losing information
+        # required by the description.  A two-token name therefore becomes one
+        # token instead of reproducing the accepted identity unchanged.
+        if len(toks) > 1:
+            return "_".join(toks[1:])
+        return good_name
+    if defect == "noncanonical_order":
         # Reverse the token order — a non-canonical, convention-violating name.
         return "_".join(reversed(toks)) if len(toks) > 1 else good_name
-    # banned_prose → SEMANTIC MISMATCH: an unrelated accepted name paired with
-    # this item's real description (the name describes a different quantity).
+    # Semantic mismatch: an unrelated accepted name paired with this item's
+    # real description (the name describes a different quantity).
     return foreign_name or good_name
+
+
+def _canonical_rows_hash(rows: list[dict]) -> str:
+    """Return the content hash used to freeze an ordered corpus."""
+    encoded = json.dumps(
+        rows,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+        allow_nan=False,
+    ).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def build_advisory_paired_corpus(
+    rows: list[dict], sample: int, seed: int
+) -> list[dict]:
+    """Build an exact, deterministic good/bad corpus for advisory name review.
+
+    Candidates must already satisfy the graph eligibility predicate encoded in
+    :data:`_ADVISORY_CORPUS_QUERY`.  Every emitted row retains its DD path,
+    source identity, unit, domain, and deterministic selection provenance.
+    Corruptions fail closed if they leave the accepted identity unchanged or
+    collide with any other resolved row identity.
+    """
+    if isinstance(sample, bool) or not isinstance(sample, int) or sample <= 0:
+        raise ValueError("sample must be a positive integer")
+
+    candidates: list[dict] = []
+    candidate_names: set[str] = set()
+    for raw in sorted((dict(row) for row in rows), key=lambda row: row.get("name", "")):
+        name = str(raw.get("name") or "")
+        unit = str(raw.get("unit") or "")
+        source_paths = sorted(
+            {str(path) for path in (raw.get("source_paths") or []) if path}
+        )
+        if not name or not unit or not source_paths:
+            raise ValueError(
+                "advisory corpus candidates require name, unit, and source_paths"
+            )
+        if name in candidate_names:
+            raise ValueError(f"duplicate candidate identity: {name}")
+        candidate_names.add(name)
+        raw["name"] = name
+        raw["unit"] = unit
+        raw["source_paths"] = source_paths
+        candidates.append(raw)
+
+    goods = _stratified_sample(candidates, sample, seed)
+    if len(goods) != sample:
+        raise ValueError(
+            f"advisory corpus requires exactly {sample} good rows; got {len(goods)}"
+        )
+
+    good_names = {row["name"] for row in goods}
+    foreign_names = sorted(candidate_names - good_names)
+    random.Random(seed).shuffle(foreign_names)
+    used_identities = set(good_names)
+    corpus: list[dict] = []
+
+    for pair_index, row in enumerate(goods):
+        source_paths = row["source_paths"]
+        source_id = source_paths[0]
+        source_path = source_id.removeprefix("dd:")
+        good_name = row["name"]
+        defect = _NAME_DISCRIM_DEFECTS[pair_index % len(_NAME_DISCRIM_DEFECTS)]
+        provenance = {
+            "candidate_identity": good_name,
+            "pair_index": pair_index,
+            "seed": seed,
+            "selection": "accepted-valid-documented-unit-source-bound",
+            "source_path": source_path,
+        }
+        base = {
+            "path": source_path,
+            "source_id": source_id,
+            "unit": row["unit"],
+            "kind": row.get("kind") or "scalar",
+            "data_type": row.get("kind") or "scalar",
+            "physics_domain": row.get("physics_domain") or "",
+            "source_paths": source_paths,
+        }
+        good_desc = row.get("description") or ""
+        good_doc = row.get("documentation") or ""
+        corpus.append(
+            {
+                **base,
+                "name": good_name,
+                "standard_name": good_name,
+                "id": good_name,
+                "label": 1,
+                "defect": "",
+                "description": good_desc,
+                "documentation": good_doc,
+                "provenance": {**provenance, "row_role": "good"},
+            }
+        )
+
+        foreign_name = ""
+        if defect == "semantic_mismatch":
+            while foreign_names and not foreign_name:
+                candidate = foreign_names.pop()
+                if candidate not in used_identities:
+                    foreign_name = candidate
+        bad_name = _seed_bad_name(good_name, defect, foreign_name)
+        if bad_name == good_name:
+            raise ValueError(
+                f"corruption left identity unchanged: {good_name} ({defect})"
+            )
+        if not bad_name:
+            raise ValueError(f"corruption produced an empty identity: {good_name}")
+        if bad_name in used_identities:
+            raise ValueError(f"corruption produced duplicate identity: {bad_name}")
+        used_identities.add(bad_name)
+        corpus.append(
+            {
+                **base,
+                "name": bad_name,
+                "standard_name": bad_name,
+                "id": bad_name,
+                "label": 0,
+                "defect": defect,
+                "description": good_desc,
+                "documentation": good_doc,
+                "provenance": {
+                    **provenance,
+                    "corruption": defect,
+                    "row_role": "bad",
+                },
+            }
+        )
+
+    return corpus
 
 
 def load_discrimination_corpus(
@@ -958,31 +1116,20 @@ def load_discrimination_corpus(
     score GOOD high and BAD low; the gap is the discrimination signal.
 
     ``axis='docs'`` corrupts the documentation text; ``axis='names'`` corrupts
-    the description (with a foreign-description swap standing in for a semantic
-    mismatch).  Graph read-only.
+    the identity while retaining the accepted description.  Graph read-only.
     """
     from imas_codex.graph.client import GraphClient
 
-    cypher = """
-        MATCH (sn:StandardName {name_stage: 'accepted'})
-        WHERE sn.description IS NOT NULL AND sn.documentation IS NOT NULL
-              AND size(sn.documentation) > 40
-        RETURN
-          sn.id             AS name,
-          sn.description    AS description,
-          sn.documentation  AS documentation,
-          sn.unit           AS unit,
-          sn.kind           AS kind,
-          sn.physics_domain AS physics_domain,
-          sn.source_paths   AS source_paths
-    """
     owns = gc is None
     gc = gc or GraphClient()
     try:
-        rows = gc.query(cypher)
+        rows = gc.query(_ADVISORY_CORPUS_QUERY)
     finally:
         if owns:
             gc.close()
+
+    if axis == "names":
+        return build_advisory_paired_corpus([dict(row) for row in rows], sample, seed)
 
     goods = _stratified_sample([dict(r) for r in rows], sample, seed)
     rng = random.Random(seed)
