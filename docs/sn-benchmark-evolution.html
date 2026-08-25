@@ -9,7 +9,7 @@
   <meta name="plan-title" content="DSv4 Advisory Review Benchmark and Recovery Triage">
   <meta name="plan-summary" content="Make the review benchmark discriminate: production reviewer panel as the benchmark judge, domain-balanced calibration anchors, grammar sub-dimension scoring. Then benchmark the free local DSv4 model and, once its gates pass, run a zero-mutation graph-wide advisory census whose flags prioritize the exhausted-tail rescores and quality triage — advisory only, never authority.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.4">
+  <meta name="plan-impl" content="0.6">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -19,12 +19,12 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-sprint" content="S9">
-<meta name="plan-modified" content="2026-08-24">
+<meta name="plan-modified" content="2026-08-25">
 <meta name="plan-depends-on" content="sn-pipeline-recovery">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="10">
-<meta name="plan-commits" content="1519e1c5,aa553671">
+<meta name="plan-version" content="12">
+<meta name="plan-commits" content="1519e1c5,aa553671,edb57f02">
 <meta name="plan-artifacts" content="docs/evidence/sn-benchmark-evolution/reuse-map.md,imas_codex/standard_names/advisory_panel.py,tests/standard_names/test_advisory_panel.py">
 </head>
 <body>
@@ -131,8 +131,14 @@
 <div class="r-comment" data-section="§2" data-id="c-20260824T1619-paneladapter" data-who="reckon-ship" data-when="2026-08-24T16:19:00+00:00">
     <div class="r-comment-body">n-benchpaneladapter landed — commit aa553671; gate panel-adapter-non-persisting passed; measure 'ate5 passed, 1 warning in 7.74s' with 5 new tests over 2 frozen rows and 3 seats; artifact imas_codex/standard_names/advisory_panel.py. This is Phase A's mechanism and the one piece the reuse map marked genuinely new: the review pipeline's merge helper averages seat scores, and an arithmetic mean discards precisely the disagreement a benchmark exists to surface, so the adapter retains all three raw seat judgments and derives per-row median, spread and contested status beside them. Four properties are pinned by test rather than asserted in prose — raw seats retained, statistics correct on the frozen batch, default-profile resolution explicit, and fail-closed on partial or non-three-seat evidence — plus an import check proving the module reaches neither graph mutation infrastructure nor the persistence-owning review engine, which is the constraint the whole advisory design rests on. The panel-size and equivalence-scope decisions were already locked; this node implements them rather than reopening them.</div>
 </div>
+<div class="r-comment" data-section="§2" data-id="c-20260825T0240-benchrunner" data-who="reckon-ship" data-when="2026-08-25T02:40:00+00:00">
+    <div class="r-comment-body">n-frozenbatchrunner landed — commit edb57f02; gate frozen-batch-runner-is-advisory passed; measure '7 passed, 1 warning in 7.84s' with 7 new tests. Phase A now has both of its mechanisms. The runner deep-copies one fixed-seed domain-stratified batch, scores the candidate through the existing production-context reviewer, and adjudicates through the non-persisting three-seat panel, preserving raw ordered judgments rather than an average. THREE DISTINCT HASHES — population, ordered inputs, ordered results — are the design point rather than bookkeeping: a later census cannot silently redefine what was measured, which is the failure mode that makes longitudinal benchmark comparison worthless. The atomic report carries caller-supplied source provenance, DD and ISN dictionary versions and the codex commit, and its costs are artifact-local and provider-returned rather than settled through the graph-backed budget manager. The advisory contract is enforced BY STRUCTURE rather than by intention: static dependency tests prove the module imports no graph client, no graph-ops, no review-persistence and no budget manager, so a future edit that reaches for persistence fails a test instead of quietly acquiring authority. What remains on this plan is a benchmark RUN whose gates decide whether the zero-mutation census may proceed, per the locked 6A decision — the runner existing is not the same as its gates passing.</div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260824T160441192684-n-benchpaneladapter" data-who="impl-benchrunner" data-when="2026-08-24T16:13:24Z">
     <div class="r-comment-body"><p>Non-persisting three-seat panel adapter; 5 passed, raw seat scores retained with median/spread/contested, no persistence or mutation imports</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260825T022246789314-n-frozenbatchrunner" data-who="impl-benchrun" data-when="2026-08-25T02:30:28Z">
+    <div class="r-comment-body"><p>Frozen-batch advisory runner: deterministic batch, three distinct hashes, atomic provenance-carrying report, artifact-local cost, no graph or persistence imports; 7 passed</p></div>
 </div>
 </section>
 </main>
