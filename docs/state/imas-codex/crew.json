@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T19:36:44",
+  "updated": "2026-08-25T19:47:27",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -666,9 +666,11 @@
         "id": "impl-gatescope",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03a00-d601-7550-a423-d39afc123e0f",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03a00-d601-7550-a423-d39afc123e0f"
+        },
         "created": "2026-08-25"
       },
       {
@@ -830,9 +832,11 @@
         "id": "impl-locusreadj",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03a00-d5fe-7a03-b698-46a1e030876a",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03a00-d5fe-7a03-b698-46a1e030876a"
+        },
         "created": "2026-08-25"
       },
       {
@@ -33210,9 +33214,101 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T173738947501-n-locusreadj",
+        "plan": "isn-locus-vocabulary-rotation",
+        "section": "\u00a72",
+        "node": "n-locusreadj",
+        "node_definition": {
+          "done_when": "The first adjudication recommended adding the token using get_grammar_context() at runtime, which serves tokens and definitions but NOT the governing comments in imas_standard_names/grammar/vocabularies/locus_registry.yml. Read that file's curation policy directly and weigh the token against it: tokens must describe physics-meaningful loci and not DD structural artifacts, discretization framework tokens are not physics positions, and atomic tokens are preferred over long compounds. Report which bullets the token satisfies and which it violates, quoting each bullet verbatim rather than paraphrasing. Test the precedent question by measurement: enumerate every entity-typed token whose definition denotes a non-material abstraction rather than hardware, a plant object, or a physical location, and state how many there are, because a single precedent supports a token far more weakly than a class of them. Establish whether ANY token naming a grid, mesh, ggd structure, or field map exists anywhere in the registry, and read a bare absence as possible deliberate exclusion rather than an accidental gap. Then recommend between exactly two live options, since the base spelling is already settled and only the owner half is in question: admit field_map_grid despite the policy, or make the three DD coordinate paths a settled permanent refusal on the ground that discretization structure belongs in DD provenance rather than in a Standard Name identity. Whichever you recommend, state the strongest argument AGAINST your own recommendation and why it loses. Read-only with respect to the vocabulary: make no ISN change, no dependency pin bump, no graph mutation, and no new StandardName.",
+          "estimated_hours": 0.8,
+          "goal": "Re-adjudicate the field-map-grid locus against the vocabulary registry's own curation policy, which the first adjudication never read.",
+          "id": "n-locusreadj",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173738947501-n-locusreadj/manifest.md",
+          "plan": "isn-locus-vocabulary-rotation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/isn-locus-vocabulary-rotation/curation-policy-readjudication.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-locusreadj",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T17:38:44Z",
+        "completed_at": "2026-08-25T17:46:39Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 475,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 475,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "5db6f2e9f3d3a348a58053c58766538e7ec9da74",
+        "commits": [
+          "31ee3e95b5906d338cc6a7a838cee2db6bb805de"
+        ],
+        "changed_lines": {
+          "added": 143,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173738947501-n-locusreadj/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03a00-d5fe-7a03-b698-46a1e030876a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2484736,
+            "cached_input_tokens_cumulative": 2484736,
+            "input_tokens": 2594411,
+            "input_tokens_cumulative": 2594411,
+            "output_tokens": 13282,
+            "output_tokens_cumulative": 13282,
+            "reasoning_output_tokens": 3696,
+            "reasoning_output_tokens_cumulative": 3696
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 933
+    "_version": 936
   }
 }
