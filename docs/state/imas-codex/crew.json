@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T20:26:12",
+  "updated": "2026-08-25T21:30:37",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1330,6 +1330,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-stalestamp",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03a45-3be1-77b1-9d54-e888ee7f39ad",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03a45-3be1-77b1-9d54-e888ee7f39ad"
+        },
+        "created": "2026-08-25"
       },
       {
         "id": "impl-stall",
@@ -33673,9 +33684,134 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T185317161763-n-stalestamp",
+        "plan": "sn-embedding-coverage-gate",
+        "section": "\u00a73",
+        "node": "n-stalestamp",
+        "node_definition": {
+          "done_when": "Twenty-six StandardName rows carry embedded_at while holding neither a description nor an embedding, because the now-repaired run_embedding_preflight credited candidates it considered rather than vectors it wrote. The lead's decision is to clear the LIVE rows only: the 8 drafted and 4 pending, whose stamp is both false and blocks correct embedding eligibility once they gain descriptions. The 14 superseded rows are deliberately EXCLUDED, because historical lineage is left unmutated by convention elsewhere in this programme and a false stamp on a dead row costs nothing. FIRST re-measure the population rather than trusting these figures: report the current count of rows with embedded_at set, description null and embedding null, split by name_stage, each with the schema sanity count proving it real rather than a plausible zero from a wrong property name; if the split is no longer 14/8/4 report what it actually is and proceed on the measurement, not on this brief. Then clear embedded_at on exactly the drafted and pending rows through a sanctioned write path; if no sanctioned operator exists for clearing that field, STOP and report rather than hand-writing a Cypher SET, because bypassing the sanctioned path is what this programme forbids. Prove precision, not just effect: report the exact mutated count, confirm it equals the live-row count, confirm the superseded count is UNCHANGED before and after, and confirm no description, embedding, name_stage, docs_stage or StandardName identity changed - quoting StandardNameChange and PRODUCED_NAME counts before and after. Re-run the scoped graph coverage assertion afterward and quote its verbatim summary; it must still pass, and if it changes behaviour explain why. Graph tests need '-m graph' because this repository's addopts carry '-m not slow and not graph' and a bare invocation silently selects nothing; capture each run to a file once and read the file rather than piping. Generate no descriptions and embed nothing.",
+          "estimated_hours": 0.7,
+          "goal": "Clear the false embedded_at stamps from the twelve live rows that were never embedded, leaving historical lineage untouched.",
+          "id": "n-stalestamp",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T185317161763-n-stalestamp/manifest.md",
+          "plan": "sn-embedding-coverage-gate",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "exact",
+          "time_budget": "35m",
+          "write_paths": [
+            "docs/evidence/sn-embedding-coverage-gate/stale-stamp-repair.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-stalestamp",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T18:53:30Z",
+        "completed_at": "2026-08-25T19:29:53Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2183,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2183,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "3fdcab6036d4b7136bcaeb8643b441f3199c0e72",
+        "commits": [
+          "564daaed9b42319c6fbe2b8e7e9332e49a07bb4c"
+        ],
+        "changed_lines": {
+          "added": 92,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T185317161763-n-stalestamp/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03a45-3be1-77b1-9d54-e888ee7f39ad",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6880768,
+            "cached_input_tokens_cumulative": 6880768,
+            "input_tokens": 7093147,
+            "input_tokens_cumulative": 7093147,
+            "output_tokens": 14639,
+            "output_tokens_cumulative": 14639,
+            "reasoning_output_tokens": 2668,
+            "reasoning_output_tokens_cumulative": 2668
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": true,
+              "budget_overrun_seconds": 2320,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 4420,
+              "log_age_seconds": 3430,
+              "log_fresh": false,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 3453,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 943
+    "_version": 946
   }
 }

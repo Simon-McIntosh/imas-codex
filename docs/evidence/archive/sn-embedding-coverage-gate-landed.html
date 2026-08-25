@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-embedding-coverage-gate-landed">
+  <meta name="plan-title" content="sn-embedding-coverage-gate &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="sn-embedding-coverage-gate">
+  <title>sn-embedding-coverage-gate landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>sn-embedding-coverage-gate &mdash; cumulative execution evidence</h1>
+  <p>The plan asked what to do about a failing release gate: fix the coverage, relax the bar,
+  or withhold identities. All three options assumed the gate measured what it said it
+  measured. It did not, and that is the result worth keeping.</p>
+
+  <section id="measurement">
+    <h2>The shortfall was almost nothing, and none of it was shipped</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-coveragemeasure</code>,
+    commit <code>3261c40e</code>. Record:
+    <a href="/imas-codex/evidence/sn-embedding-coverage-gate/coverage-shortfall">coverage-shortfall</a>.</p>
+    <table>
+      <caption>Description-embedding coverage, measured with schema sanity counts behind each figure</caption>
+      <thead><tr><th>Population</th><th>Coverage</th><th>Embedding gaps</th><th>Description gaps</th></tr></thead>
+      <tbody>
+        <tr><td>WEST export survivors</td><td>363/363</td><td>0</td><td>0</td></tr>
+        <tr><td>Current WEST cohort</td><td>385/385</td><td>0</td><td>0</td></tr>
+        <tr><td>Whole accepted corpus</td><td>2301/2302</td><td>1</td><td>0</td></tr>
+        <tr><td>Gate A&rsquo;s own failure count</td><td>&mdash;</td><td>0</td><td>26</td></tr>
+      </tbody>
+    </table>
+    <p>Zero affected identities lay inside the 369-name survivor set. Schema sanity: 4,658
+    candidates, 4,658/4,658 ids, 4,632 descriptions, 4,631 embeddings, 4,656
+    <code>embedded_at</code>. The gate was also found to assert an exact zero rather than a
+    percentage, recovered from the export run rather than reconstructed.</p>
+    <p>One trap is recorded because a peer session walked into it: the literal
+    <code>0.95</code> in <code>tests/graph/test_sn_graph.py</code> counts
+    <strong>descriptions</strong>, not embeddings, and is not the historical embedding
+    threshold. It sits in the test suite rather than in production source because
+    <code>GATE_A = "graph_tests"</code> shells out to pytest, so every threshold the gate
+    enforces lives in the tests it runs.</p>
+  </section>
+
+  <section id="free-gap">
+    <h2>The one real accepted gap closed for nothing</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-reembedgap</code>,
+    commit <code>a3b71563</code>. Record:
+    <a href="/imas-codex/evidence/sn-embedding-coverage-gate/embedding-gap-closure">embedding-gap-closure</a>.</p>
+    <p><code>ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude</code> carried a real
+    description and a null embedding, so it was re-embedded through the sanctioned path
+    (<code>claim_embed_batch</code>, <code>process_embed_batch</code>,
+    <code>persist_embed_batch</code>) at <strong>USD 0.000000</strong> with zero
+    <code>LLMCost</code> rows. Accepted coverage 2301/2302 &rarr; <strong>2302/2302</strong>.
+    Only <code>embedding</code> and <code>embedded_at</code> moved, each by exactly one, so
+    precisely one identity changed; the description is verbatim unmodified. This was folded
+    rather than handed over because it was free, deterministic, and correct under every
+    disposition the gate could take.</p>
+  </section>
+
+  <section id="premise">
+    <h2>The gate&rsquo;s premise was inverted &mdash; it was never finding corruption</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-gatescope</code>,
+    commit <code>2c9d3bb0</code>. Record:
+    <a href="/imas-codex/evidence/sn-embedding-coverage-gate/gate-scope-change">gate-scope-change</a>.</p>
+    <p>The failing assertion&rsquo;s own message reads <em>&ldquo;Embeddings were written then
+    lost &mdash; possible data corruption.&rdquo;</em> But all 26 failing rows carried
+    <code>embedded_at</code> with <strong>neither a description nor an embedding</strong>.
+    Nothing had ever attempted to embed them, so nothing was written and nothing was lost.
+    Their lifecycle split was <strong>14 superseded, 8 drafted, 4 pending, 0 accepted</strong>
+    &mdash; every one a name still in flight.</p>
+    <p>So the gate was failing releases on unfinished work, and would keep doing so as new
+    drafts arrived, which is what made downgrading it expedient rather than chosen. The
+    assertion now adds <code>name_stage = 'accepted'</code> <em>only</em> where
+    <code>name_stage</code> is a declared schema slot for that label, so labels without a
+    lifecycle keep the original graph-wide predicate and no unguarded property reference was
+    introduced. Verbatim before <code>1 failed, 1 warning in 19.08s</code>; after
+    <code>1 passed, 1 warning in 9.19s</code>; all labels <code>8 passed, 5 skipped, 1 warning
+    in 9.96s</code>.</p>
+    <p>The node was required to state plainly that the 26 became unasserted rather than
+    repaired, so a green suite could not be mistaken for a fixed corpus.</p>
+  </section>
+
+  <section id="producer">
+    <h2>The producer was crediting candidates it skipped</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-embedstamp</code>,
+    commit <code>6bb1f9fa</code>. Record:
+    <a href="/imas-codex/evidence/sn-embedding-coverage-gate/preflight-stamping-repair">preflight-stamping-repair</a>.</p>
+    <p><code>run_embedding_preflight</code> in
+    <code>imas_codex/standard_names/review/audits.py</code> appended null-description rows to
+    <code>needs_embed</code>, persisted <code>item.get("embedding")</code> even when null,
+    unconditionally stamped <code>sn.embedded_at = datetime()</code>, and reported
+    <code>refreshed_count</code> as <code>len(needs_embed)</code>. That is the root cause of
+    every one of the 26. Persistence and refreshed accounting now require a non-null vector.</p>
+    <p>The regression test was proved honest by counterfactual rather than asserted: a
+    two-candidate fixture gives <code>1 failed, 1 warning in 26.60s</code> against the
+    unguarded producer and <code>1 passed, 1 warning in 15.00s</code> repaired, writing and
+    counting exactly one real vector while leaving the null-description candidate unstamped.
+    Existing review-pipeline suite <code>22 passed, 1 warning in 34.11s</code>. This matters
+    more than the rescope: without it the stamping would keep minting rows that look embedded
+    and are not, now beneath a gate that no longer looks at them.</p>
+  </section>
+
+  <section id="stale-stamps">
+    <h2>The false stamps were cleared on live rows only, and the operator refused first</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-stalestamp</code>,
+    commit <code>564daaed</code> (blocked-attempt record at <code>31e782f3</code>). Record:
+    <a href="/imas-codex/evidence/sn-embedding-coverage-gate/stale-stamp-repair">stale-stamp-repair</a>.</p>
+    <p>Scope was deliberately asymmetric: clear the 12 live rows, whose stamp is both false and
+    blocks correct eligibility once they gain descriptions, and leave the 14 superseded, since
+    historical lineage is left unmutated by convention elsewhere in this programme and a false
+    stamp on a dead row costs nothing.</p>
+    <table>
+      <caption>Precision, not just effect</caption>
+      <thead><tr><th>Measure</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td>False-stamp split</td><td>14 superseded / 8 drafted / 4 pending</td><td>14 / 0 / 0</td></tr>
+        <tr><td><code>embedded_at</code> present</td><td>4,657</td><td>4,645 (exactly &minus;12)</td></tr>
+        <tr><td>Superseded retained</td><td>14</td><td>14, unchanged</td></tr>
+        <tr><td><code>StandardNameChange</code></td><td>8,597</td><td>8,609, one per mutation</td></tr>
+        <tr><td><code>clear_false_embedding_stamp</code> receipts</td><td>0</td><td>12</td></tr>
+        <tr><td>PRODUCED_NAME / identities / descriptions / embeddings / name_stage / docs_stage</td><td colspan="2">5,309 / 4,658 / 4,632 / 4,631 / 4,658 / 4,654 &mdash; all unchanged</td></tr>
+      </tbody>
+    </table>
+    <p>Applied manifest SHA-256 <code>778974c3</code>, 12 mutations and 12 receipt rows.
+    Post-mutation scoped assertion passes unchanged, verbatim <code>8 passed, 5 skipped, 1
+    warning in 76.90s</code>.</p>
+    <h3 id="refusal">Two rollbacks, and a refusal that was upheld</h3>
+    <p>The node first blocked twice inside
+    <code>signed_manifest._collateral_snapshot</code> and <strong>refused to substitute raw
+    Cypher</strong>, which was correct and was upheld. Both transactions rolled back
+    completely &mdash; 0 mutated, <code>StandardNameChange</code> and
+    <code>PRODUCED_NAME</code> identical before and after, 0 receipts &mdash; so nothing was
+    left half-applied. The operator was slow rather than hung: it materializes every tracked
+    node and relationship with full property maps and hashes them client-side, twice per
+    apply. Its cost is recorded as a separate shared-module defect rather than fixed inside a
+    data-repair fence.</p>
+    <p>The authority was <strong>re-derived inside the applying invocation</strong> rather than
+    replayed from the blocked attempt&rsquo;s saved file, and its payload digest
+    <code>afa7af26</code> came back identical. That is a useful negative result: the population
+    had not drifted in the interval, and it is now measured rather than assumed.</p>
+  </section>
+</main>
+</body>
+</html>

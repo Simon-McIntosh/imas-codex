@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="9">
-<meta name="plan-commits" content="3261c40e,a3b71563,2c9d3bb0,6bb1f9fa">
-<meta name="plan-artifacts" content="docs/evidence/sn-embedding-coverage-gate/coverage-shortfall.md,docs/evidence/sn-embedding-coverage-gate/embedding-gap-closure.md,docs/evidence/sn-embedding-coverage-gate/gate-scope-change.md,docs/evidence/sn-embedding-coverage-gate/preflight-stamping-repair.md">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-version" content="13">
+<meta name="plan-commits" content="3261c40e,a3b71563,2c9d3bb0,6bb1f9fa,564daaed">
+<meta name="plan-artifacts" content="docs/evidence/sn-embedding-coverage-gate/coverage-shortfall.md,docs/evidence/sn-embedding-coverage-gate/embedding-gap-closure.md,docs/evidence/sn-embedding-coverage-gate/gate-scope-change.md,docs/evidence/sn-embedding-coverage-gate/preflight-stamping-repair.md,docs/evidence/sn-embedding-coverage-gate/stale-stamp-repair.md,docs/evidence/archive/sn-embedding-coverage-gate-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -97,6 +97,17 @@
     </p>
 
     <h2 id="s2">&sect;2 &mdash; Establish the number before arguing about the threshold</h2>
+    <p class="landed-summary">
+      <span class="badge badge-shipped">&#10003; landed 2026-08-25</span>
+      Measured, and the number was almost nothing: WEST survivors <strong>363/363</strong>,
+      current WEST cohort <strong>385/385</strong>, both with zero gaps of either kind, and the
+      whole accepted corpus at 2301/2302 &mdash; a single embedding gap on a real description,
+      re-embedded deterministically for <strong>USD 0.000000</strong> to reach
+      <strong>2302/2302</strong> (<code>3261c40e</code>, <code>a3b71563</code>). Gate A&rsquo;s
+      own 26 failures were <em>all</em> description gaps, <em>all</em> non-accepted, with zero
+      inside the 369-name survivor set. Full record:
+      <a href="/imas-codex/evidence/archive/sn-embedding-coverage-gate-landed#measurement">measurement</a>.
+    </p>
     <p>
       The downgrade is recorded; the shortfall is not. Before any decision:
     </p>
@@ -122,6 +133,21 @@
     </p>
 
     <h2 id="s3">&sect;3 &mdash; The three honest outcomes</h2>
+    <p class="landed-summary">
+      <span class="badge badge-shipped">&#10003; landed 2026-08-25</span>
+      <strong>A fourth outcome was the right one, because all three below assumed the gate
+      measured what it claimed.</strong> Its message says &ldquo;written then lost &mdash;
+      possible data corruption&rdquo;, yet all 26 rows carried <code>embedded_at</code> with
+      neither description nor vector: nothing ever tried to embed them. So the gate was aimed
+      at work in flight, and the cause was <code>run_embedding_preflight</code> crediting
+      candidates it skipped. Rescoped to accepted names, <code>1 failed</code> &rarr;
+      <code>1 passed</code> (<code>2c9d3bb0</code>); producer repaired with a counterfactual
+      test, <code>1 failed</code> unguarded &rarr; <code>1 passed</code> guarded
+      (<code>6bb1f9fa</code>); the 12 live false stamps cleared and 14 superseded retained,
+      <code>embedded_at</code> 4,657 &rarr; 4,645 with 12 receipts (<code>564daaed</code>).
+      Full record:
+      <a href="/imas-codex/evidence/archive/sn-embedding-coverage-gate-landed#premise">inverted premise</a>.
+    </p>
     <p>
       Only three endings are legitimate, and all of them are better than an unexamined
       advisory:
@@ -153,14 +179,15 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-secg-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-embedding-coverage-gate" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-secg-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-embedding-coverage-gate" data-resolved-at="2026-08-25T19:32:36+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Measure the coverage shortfall, split embedding gaps from description gaps, then decide the gate</h4>
     <div class="r-fu-body"><p>FIRST establish what actually failed and under which name, because Gate A is <code>graph_tests</code> and asserts nothing about embeddings. Then measure the coverage shortfall over the release set and the whole accepted corpus with sanity counts proving each figure, separate missing embeddings on real descriptions (deterministic and free to fix) from missing descriptions (generation plus review), and count how many affected identities are inside the WEST set. Use <code>radial_coordinate_of_reflector</code> as the entry case. Invent no threshold: if none was ever set, say so and propose one explicitly.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-embedding-coverage-gate</pre>
+    <p class="r-fu-outcome">Measured, decided, and acted on - and the measurement inverted the question. The shortfall was almost nothing: WEST survivors 363/363 and the current WEST cohort 385/385 with zero gaps of either kind, and one real accepted embedding gap in the whole corpus, closed deterministically for USD 0.000000 to reach 2302/2302. Gate A's own 26 failures were all description gaps on non-accepted rows with zero inside the 369-name survivor set, and its threshold was recovered as an exact zero rather than a percentage. The decisive finding is that the gate was not measuring what it said: its assertion announces embeddings written then lost, but all 26 rows carried embedded_at with neither description nor vector, so nothing had ever attempted to embed them. Root cause was run_embedding_preflight crediting every candidate it considered rather than every vector it wrote. Acted on all three fronts: the assertion is scoped to accepted identities keeping its exact zero and passes honestly (1 failed to 1 passed, all labels 8 passed 5 skipped); the producer requires a non-null vector before stamping, proved by a counterfactual regression that fails against the unguarded code and passes guarded; and the 12 live false stamps are cleared with the 14 superseded deliberately retained, embedded_at 4657 to 4645 with 12 receipts and every other property count provably unchanged. The 296 dangling links remain owned by sn-release-readiness, which this plan's own text names as owning what a release silently drops. Continuation is f-secg-002, a pointer to the shared collateral-snapshot cost surfaced while doing this work.</p>
     </article>
 <article class="r-fu" data-id="f-secg-002" data-status="open" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-embedding-coverage-gate" data-resolved-at="" data-resolved-by="">
     <h4 class="r-fu-title">The signed-repair collateral snapshot costs more than the repairs it protects</h4>
-    <div class="r-fu-body"><p>Pointer to a shared-module performance defect, surfaced while applying an unrelated repair and deliberately NOT fixed inside that repair's fence. <code>signed_manifest._collateral_snapshot</code> matches every node carrying any tracked label and every relationship of any tracked type, returns full <code>properties()</code> maps for each, ships them over bolt, and SHA-256s them client-side &mdash; then repeats for the after-snapshot. Against the current graph that is tens of thousands of rows with full property payloads, twice per apply, and it drove a twelve-row repair past a five-minute boundary twice before completing.</p><p>Two shapes of fix are visible and both need measuring rather than assuming: digest server-side in Cypher so full property maps never cross the wire, or narrow the snapshot to the dimensions an operation actually owns. The second has precedent worth reading &mdash; the relocation-retirement apply proved collateral on external non-cohort <code>HAS_PARENT</code> alone, 1,411 rows, and its plan argued that a digest covering an axis another session is writing measures their work rather than the repair. A graph-wide snapshot is therefore not just slow but arguably measuring the wrong thing.</p><p>This is shared repair-authority machinery every future signed repair depends on, so it wants its own scope, a before/after timing measurement, and its guard tests intact. Owner is a lead decision: extend this plan, or open one for the repair-authority operator.</p></div>
+    <div class="r-fu-body"><p>Pointer to a shared-module performance defect, surfaced while applying an unrelated repair and deliberately NOT fixed inside that repair's fence. <code>signed_manifest._collateral_snapshot</code> matches every node carrying any tracked label and every relationship of any tracked type, returns full <code>properties()</code> maps for each, ships them over bolt, and SHA-256s them client-side — then repeats for the after-snapshot. Against the current graph that is tens of thousands of rows with full property payloads, twice per apply, and it drove a twelve-row repair past a five-minute boundary twice before completing.</p><p>Two shapes of fix are visible and both need measuring rather than assuming: digest server-side in Cypher so full property maps never cross the wire, or narrow the snapshot to the dimensions an operation actually owns. The second has precedent worth reading — the relocation-retirement apply proved collateral on external non-cohort <code>HAS_PARENT</code> alone, 1,411 rows, and its plan argued that a digest covering an axis another session is writing measures their work rather than the repair. A graph-wide snapshot is therefore not just slow but arguably measuring the wrong thing.</p><p>This is shared repair-authority machinery every future signed repair depends on, so it wants its own scope, a before/after timing measurement, and its guard tests intact. Owner is a lead decision: extend this plan, or open one for the repair-authority operator.</p></div>
     <pre class="r-fu-prompt">/reckon-ship sn-embedding-coverage-gate</pre>
     </article>
 </section>
@@ -183,6 +210,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-gate-closure-20260825" data-who="reckon-ship" data-when="2026-08-25T18:30:00Z">
     <div class="r-comment-body"><p><strong>The gate's premise was wrong in a way worth recording, because it inverts what the plan set out to do.</strong> The plan opened on a failing coverage gate and asked whether to fix the coverage, relax the bar, or withhold identities. All three assumed the gate was measuring what it claimed. It was not.</p><p><code>GATE_A = "graph_tests"</code> shells out to the graph suite, and the assertion that failed reads <em>"Embeddings were written then lost — possible data corruption"</em>. But all 26 failing rows carry <code>embedded_at</code> with <strong>neither a description nor an embedding</strong>, which is not written-then-lost — nothing ever attempted to embed them. The cause is <code>run_embedding_preflight</code> stamping every candidate it considered rather than every vector it wrote. So the gate was never detecting corruption; it was detecting a producer bug, and every one of its failures was a name still in flight (14 superseded, 8 drafted, 4 pending, 0 accepted).</p><p>That is why the disposition is a rescope rather than a repair or a relaxation, and why the producer fix matters more than the rescope: without it the stamping would keep minting rows that look embedded and are not, now below a gate that no longer looks at them. One real accepted gap existed and closed deterministically for USD 0.000000, taking the accepted corpus to 2302/2302.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T185317161763-n-stalestamp" data-who="impl-stalestamp" data-when="2026-08-25T19:29:53Z">
+    <div class="r-comment-body"><p>Exactly the 12 live false stamps cleared, exactly the 14 superseded retained. After split 14 superseded / 0 drafted / 0 pending; embedded_at 4657 to 4645, a delta of precisely -12; superseded count identical 14 before and after. Ledger cost is one entry per mutation and nothing more: StandardNameChange 8597 to 8609 with clear_false_embedding_stamp receipts 0 to 12, applied manifest sha256 778974c3, 12 mutations and 12 receipt rows. Everything else provably untouched - PRODUCED_NAME 5309, identities 4658, descriptions 4632, embeddings 4631, name_stage 4658, docs_stage 4654, all unchanged, with every selected identity/content/stage snapshot equal apart from the embedded_at clearing. Authority was RE-DERIVED inside the applying invocation rather than replayed, and its payload digest afa7af26 came back identical to the earlier attempt, which is the useful negative result: the population had not drifted in the interval, and that is now measured instead of assumed. Post-mutation scoped coverage assertion passes unchanged, verbatim '8 passed, 5 skipped, 1 warning in 76.90s'. The node had first blocked twice inside signed_manifest._collateral_snapshot and correctly refused to substitute raw Cypher; both earlier transactions rolled back completely, and the operator's cost is recorded as a separate shared-module defect rather than fixed inside this fence.</p></div>
 </div>
 </section>
 </main>
