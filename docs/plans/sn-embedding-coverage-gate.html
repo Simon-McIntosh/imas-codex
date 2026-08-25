@@ -6,8 +6,8 @@
   <meta name="docs-project"   content="imas-codex">
   <meta name="reckon-type"    content="plan">
   <meta name="plan-slug"      content="sn-embedding-coverage-gate">
-  <meta name="plan-title"     content="A Release Gate That Failed And Was Made Advisory">
-  <meta name="plan-summary"   content="Gate A, description-embedding coverage, failed at export and was downgraded to advisory rather than fixed. Decide that deliberately before an RC.">
+  <meta name="plan-title"     content="Identities That Ship Invisible To Search">
+  <meta name="plan-summary"   content="At least one accepted identity is withheld for having no description or embedding. Establish what the release actually gates on before deciding anything.">
   <meta name="plan-status"    content="draft">
   <meta name="plan-roi"       content="high">
   <meta name="plan-effort-hours" content="2.0">
@@ -24,41 +24,43 @@
 <body>
   <main class="plan-doc">
 
-    <h2 id="s1">&sect;1 &mdash; A gate that fails and is downgraded has stopped being a gate</h2>
+    <h2 id="s1">&sect;1 &mdash; A corrected premise, and why the subject survives it</h2>
+    <div class="card" style="border-left:4px solid #c33; padding-left:12px;">
+      <p>
+        <strong>This plan was first authored on a claim that does not hold, and the
+        correction is recorded here rather than quietly applied.</strong> It stated that
+        &ldquo;Gate A, description-embedding coverage, failed at final-set export and was
+        downgraded to advisory&rdquo;. That framing came to this session second-hand and
+        was never checked against the code. Checked now:
+      </p>
+      <ul>
+        <li><code>GATE_A = "graph_tests"</code> at
+          <code>export.py</code> &mdash; Gate A is the <em>graph test-suite</em> gate.</li>
+        <li><code>_run_gate_a()</code> is a stub that shells out to
+          <code>pytest -m "graph or corpus_health"</code> and returns pass/fail on the
+          return code. It asserts nothing about embeddings and exposes no threshold.</li>
+        <li>There is no <code>0.95</code> literal anywhere in
+          <code>imas_codex/standard_names/</code>, so any reconstruction that substitutes
+          one as &ldquo;the historical embedding threshold&rdquo; is inventing it.</li>
+      </ul>
+      <p>
+        So no gate named Gate A ever asserted embedding coverage, and the first task is
+        not to fix a threshold but to find out <strong>what actually failed and under
+        which name</strong>.
+      </p>
+    </div>
     <p>
-      At final-set export of the WEST packet, <strong>Gate A &mdash; description-embedding
-      coverage &mdash; FAILED and was downgraded to advisory</strong>, alongside 296
-      dangling links pruned and 295 Gate B advisories. The export completed on that basis.
-    </p>
-    <p>
-      Downgrading a failing gate to let a run finish is sometimes correct and sometimes
-      the moment a release stops meaning anything, and the difference is whether the
-      downgrade was <em>decided</em> or merely <em>expedient</em>. This plan exists to make
-      it a decision, because the next thing that consumes this export is a release
-      candidate, and a gate nobody chose to relax is a gate nobody is enforcing.
-    </p>
-    <p>
-      The gate is not decorative. Description embeddings are what semantic search over
-      standard names resolves against, so an identity shipping without one is present in
-      the catalog and invisible to the search that is meant to find it.
-    </p>
-    <p>
-      <strong>The provenance is a real export run, not a report about one.</strong> Gate A
-      was logged failing on <code>StandardName</code> description-embedding coverage
-      during the WEST export and downgraded there, alongside 295 Gate B dangling-link
-      advisories and 296 dangling links pruned at final set. Start from those run
-      artifacts rather than re-deriving the shortfall from scratch, and treat
-      <a href="/imas-codex/plans/sn-release-readiness">sn-release-readiness</a> as the
-      plan that owns the wider question of what a release silently drops.
-    </p>
-    <p>
-      <strong>There is already a concrete failing case, and it is the shortest path in.</strong>
+      <strong>The subject survives the correction, on one verified case.</strong>
       <code>radial_coordinate_of_reflector</code> is withheld from release for having no
-      description and no embedding <em>at all</em> &mdash; not because it failed a semantic
-      check, but because there was nothing to check. That makes the coverage gap more than
-      an export-gate statistic: it blocks individual identities from progressing through
-      the ordinary pipeline. One name is cheaper to diagnose than a corpus, and whatever
-      explains it probably explains the class.
+      description and no embedding at all &mdash; not because it failed a semantic check,
+      but because there was nothing to check. That is a real identity blocked by a real
+      coverage gap, independent of what any gate is called.
+    </p>
+    <p>
+      Description embeddings are what semantic search over standard names resolves
+      against, so an identity shipping without one is present in the catalog and invisible
+      to the search meant to find it. That is worth a plan. What is not worth anything is
+      a plan that repairs a threshold nobody set.
     </p>
 
     <h2 id="s2">&sect;2 &mdash; Establish the number before arguing about the threshold</h2>
@@ -106,9 +108,9 @@
     <section data-reckon="decisions" id="decisions" class="r-decisions">
       <h2><span class="sec">&sect;</span> Decisions</h2>
       <div class="r-dec" data-key="gate-a-disposition" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What happens to Gate A before a release candidate?</p>
+        <p class="r-dec-q">What happens to the coverage shortfall before a release candidate, once the real gate is identified?</p>
         <p class="r-dec-opts">
-          <button class="r-opt" data-value="fix-and-enforce">Fix the coverage and restore it to enforcing</button>
+          <button class="r-opt" data-value="fix-and-enforce">Fix the coverage and make the real gate enforcing</button>
           <button class="r-opt" data-value="relax-deliberately">Relax it to a written threshold with a recorded reason</button>
           <button class="r-opt" data-value="withhold-affected">Withhold the affected identities with named reasons</button>
         </p>
@@ -120,7 +122,7 @@
       <h2><span class="sec">&sect;</span> Followups</h2>
       <article class="r-fu" data-id="f-secg-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-embedding-coverage-gate">
         <h4 class="r-fu-title">Measure the coverage shortfall, split embedding gaps from description gaps, then decide the gate</h4>
-        <div class="r-fu-body"><p>Measure over the release set and the whole accepted corpus with sanity counts proving each figure. Split missing embeddings on real descriptions (deterministic, free to fix) from missing descriptions (generation plus review). Recover what Gate A asserted and against what threshold. Count how many affected identities are inside the WEST set, and measure the 296 pruned dangling links at their source rather than at export.</p></div>
+        <div class="r-fu-body"><p>FIRST establish what actually failed and under which name, because Gate A is <code>graph_tests</code> and asserts nothing about embeddings. Then measure the coverage shortfall over the release set and the whole accepted corpus with sanity counts proving each figure, separate missing embeddings on real descriptions (deterministic and free to fix) from missing descriptions (generation plus review), and count how many affected identities are inside the WEST set. Use <code>radial_coordinate_of_reflector</code> as the entry case. Invent no threshold: if none was ever set, say so and propose one explicitly.</p></div>
         <pre class="r-fu-prompt">/reckon-ship sn-embedding-coverage-gate</pre>
       </article>
     </section>
