@@ -556,8 +556,7 @@ def override_approve_contested(
             MATCH (sn:StandardName {id: $name, name_stage: 'contested'})
             SET sn.name_stage = 'approved',
                 sn.contested_resolution = $reason,
-                sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime()),
-                sn.origin = 'catalog_edit'
+                sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime())
             RETURN sn.id AS id
             """,
             name=name,
@@ -985,8 +984,7 @@ def mark_catalog_name_approved(
             sn.catalog_pr_number = $pr_number,
             sn.catalog_pr_url = $pr_url,
             sn.catalog_merge_commit_sha = $merge_commit,
-            sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime()),
-            sn.origin = 'catalog_edit'
+            sn.catalog_approved_at = coalesce(sn.catalog_approved_at, datetime())
         RETURN sn.id AS id
         """,
         name=name,
