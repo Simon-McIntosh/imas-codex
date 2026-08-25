@@ -237,10 +237,14 @@ def test_apply_requires_preview_hash_and_excludes_regeneration_identity() -> Non
 
 
 def test_apply_is_atomic_audited_and_zero_model_cost() -> None:
-    state = _state("document_only", "metadata_clear")
+    state = _state("document_only", "metadata_clear", "already_clean")
+    state["already_clean"]["documentation"] = (
+        "already_clean is a deterministic quantity.\n\n"
+        "Its definition and relationships remain unchanged."
+    )
     client = _Client(state)
     kwargs = {
-        "name_ids": ["document_only", "metadata_clear"],
+        "name_ids": ["document_only", "metadata_clear", "already_clean"],
         "metadata_clear_ids": ["metadata_clear"],
         "excluded_regeneration_ids": ["magnetic_field"],
         "reason": "remove unsupported convention prose",
@@ -257,6 +261,7 @@ def test_apply_is_atomic_audited_and_zero_model_cost() -> None:
 
     assert applied["outcome"] == "applied"
     assert applied["changed"] == 2
+    assert applied["counts"]["already_clean"] == 1
     assert applied["counts"]["model_spend_usd"] == 0.0
     assert client.transaction.committed
     assert "sign convention" not in state["document_only"]["documentation"].lower()

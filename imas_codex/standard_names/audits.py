@@ -4272,7 +4272,9 @@ def repair_invariant_sign_convention_documents(
                     """,
                     rows=actions,
                 )
-                if sorted(updated[0].get("ids") or []) != requested:
+                if sorted(updated[0].get("ids") or []) != sorted(
+                    action["id"] for action in actions
+                ):
                     raise SignConventionRepairConflict(
                         "documentation compare-and-set changed"
                     )
