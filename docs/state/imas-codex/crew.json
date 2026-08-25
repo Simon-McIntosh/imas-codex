@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T06:26:10",
+  "updated": "2026-08-25T06:39:35",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -449,7 +449,7 @@
         "id": "impl-docsremainder",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a0371e-ff91-7e60-b116-6fe11e37196b",
         "created": "2026-08-25"
       },
       {
@@ -1468,6 +1468,13 @@
         "created": "2026-08-24"
       },
       {
+        "id": "test-benchcorpus",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
         "id": "test-dimcalib",
         "harness": "codex",
         "role": "test",
@@ -1515,6 +1522,13 @@
         "role": "test",
         "session_id": "01a03481-89b5-73c1-8dda-7554b20e2241",
         "created": "2026-08-24"
+      },
+      {
+        "id": "test-s8closure",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "test-signdiag",
@@ -27117,9 +27131,84 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T041244178646-n-docsremainderdrain",
+        "plan": "sn-release-readiness",
+        "section": "\u00a75",
+        "node": "n-docsremainderdrain",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-docsremainder",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T04:12:53Z",
+        "completed_at": "2026-08-25T04:39:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1589,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1589,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "efd8436ec33d0b502c5b7303de475fcaa6c2fca8",
+        "commits": [
+          "52f9fe2c8a82deadf0d54b49a3462cfa5196ca7b"
+        ],
+        "changed_lines": {
+          "added": 221,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T041244178646-n-docsremainderdrain/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0371e-ff91-7e60-b116-6fe11e37196b",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 18983680,
+            "cached_input_tokens_cumulative": 18983680,
+            "input_tokens": 19278492,
+            "input_tokens_cumulative": 19278492,
+            "output_tokens": 33698,
+            "output_tokens_cumulative": 33698,
+            "reasoning_output_tokens": 11672,
+            "reasoning_output_tokens_cumulative": 11672
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 794
+    "_version": 798
   }
 }
