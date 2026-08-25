@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:34:21",
+  "updated": "2026-08-25T10:44:07",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1336,6 +1336,15 @@
         "role": "implement",
         "session_id": "01a03592-2fcb-7d12-8b26-d624b84af16a",
         "created": "2026-08-24"
+      },
+      {
+        "id": "impl-westremint",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
       },
       {
         "id": "impl-westreprice",
@@ -29652,9 +29661,104 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T083217828180-n-rewireauthguard",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-rewireauthguard",
+        "node_definition": {
+          "done_when": "graph_ops._rewire_has_parent_off_superseded refuses to MERGE a successor HAS_PARENT whose resulting tip is not authorized by current derive_edges output, at its four-field compatibility predicate and again at the successor MERGE; a new disposable-Neo4j test reproduces the six-hop REFINED_FROM relocation of spectral_signal_to_noise_ratio_of_spectrometer_channel onto the logarithm tip against the unguarded path and shows it refused after the guard, and separately proves a LEGITIMATE unary_prefix rewire still succeeds so the guard is not a blanket block; every pre-existing test touching _rewire_has_parent_off_superseded stays green byte-unchanged; tests/graph/test_cypher_property_check.py stays green; docs/evidence/sn-graph-wide-integrity/rewire-authorization-guard.md records the refusal reason and the count of the 78 measured pairs that the guard would refuse versus admit, with no production graph contacted",
+          "estimated_hours": null,
+          "goal": "A structural-derivation authorization guard on successor rewire so it cannot relocate a HAS_PARENT edge onto a tip the current derivation would not produce",
+          "id": "n-rewireauthguard",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T083217828180-n-rewireauthguard/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_rewire_authorization_guard.py",
+            "docs/evidence/sn-graph-wide-integrity/rewire-authorization-guard.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-structapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:32:26Z",
+        "completed_at": "2026-08-25T08:43:43Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 677,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 677,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "625a90cf05a461a7c52564b28301d665a457ddfc",
+        "commits": [
+          "b926b8dd",
+          "b16526df"
+        ],
+        "changed_lines": {
+          "added": 349,
+          "removed": 10,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T083217828180-n-rewireauthguard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0380c-a290-7660-a4e9-6811111b16e3",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 8226048,
+            "cached_input_tokens_cumulative": 8226048,
+            "input_tokens": 8467376,
+            "input_tokens_cumulative": 8467376,
+            "output_tokens": 20329,
+            "output_tokens_cumulative": 20329,
+            "reasoning_output_tokens": 6579,
+            "reasoning_output_tokens_cumulative": 6579
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 865
+    "_version": 867
   }
 }
