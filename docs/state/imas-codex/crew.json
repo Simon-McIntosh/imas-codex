@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T02:46:27",
+  "updated": "2026-08-25T02:56:26",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -66,6 +66,13 @@
         "role": "documentation",
         "session_id": null,
         "created": "2026-08-24"
+      },
+      {
+        "id": "doc-identityguidance2",
+        "harness": "codex",
+        "role": "documentation",
+        "session_id": "01a03663-76f8-7270-bddb-feb9e7dd9dd0",
+        "created": "2026-08-25"
       },
       {
         "id": "doc-keysdirections",
@@ -297,6 +304,13 @@
         "role": "implement",
         "session_id": "01a02b3b-873e-7be1-8d03-91769f684819",
         "created": "2026-08-22"
+      },
+      {
+        "id": "impl-cocosclear",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "impl-cocosedge",
@@ -1167,6 +1181,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-westtranche2",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-wrapperfix",
         "harness": "codex",
         "role": "implement",
@@ -1389,6 +1410,13 @@
         "role": "test",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "test-fullsuite",
+        "harness": "codex",
+        "role": "test",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "test-mergeverify",
@@ -26126,9 +26154,84 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T004753897739-n-landedguidance",
+        "plan": "sn-graph-identity-convention",
+        "section": "\u00a79",
+        "node": "n-landedguidance",
+        "role": "documentation",
+        "spec_level": "exact",
+        "member": "doc-identityguidance2",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T00:48:02Z",
+        "completed_at": "2026-08-25T00:56:04Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 482,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 482,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "1d6cca57e241cc1326072277e1f9e7aaa816ad89",
+        "commits": [
+          "926b84018bfaa87836c6739e97e933c0604caa09"
+        ],
+        "changed_lines": {
+          "added": 191,
+          "removed": 24,
+          "files": 4
+        },
+        "tests_added": 2,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T004753897739-n-landedguidance/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03663-76f8-7270-bddb-feb9e7dd9dd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3654144,
+            "cached_input_tokens_cumulative": 3654144,
+            "input_tokens": 3817907,
+            "input_tokens_cumulative": 3817907,
+            "output_tokens": 18827,
+            "output_tokens_cumulative": 18827,
+            "reasoning_output_tokens": 7830,
+            "reasoning_output_tokens_cumulative": 7830
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest over",
+          "override": false,
+          "role": "documentation",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 757
+    "_version": 763
   }
 }

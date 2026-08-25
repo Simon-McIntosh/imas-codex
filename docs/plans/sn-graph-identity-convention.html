@@ -23,8 +23,8 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="33">
-<meta name="plan-impl" content="0.92">
+<meta name="plan-version" content="35">
+<meta name="plan-impl" content="0.96">
 <meta name="plan-commits" content="81b2e435,f26e610a,f19eecee,3c1eb690,5d40dde9,619521b1,6c1344c3,5323146c,3b281efc,de0733cf,66382bcf,8e6516be,1e665160,efcba091,23c4b55a">
 <meta name="plan-artifacts" content="docs/evidence/archive/sn-graph-identity-convention-landed.html,docs/evidence/sn-graph-identity-convention/reuse-map.md,docs/evidence/sn-graph-identity-convention/baseline-green.md">
 </head>
@@ -502,6 +502,12 @@
 </div>
 <div class="r-comment" data-section="§5" data-id="c-20260825T0030-fkeyimpl" data-who="reckon-ship" data-when="2026-08-25T00:30:00+00:00">
     <div class="r-comment-body">n-fkeyconvimpl landed — commit 23c4b55a; gate §5-one-foreign-key-convention passed; measure the specification test reports '1 passed in 0.87s' WITHOUT having been modified, and the whole tests/standard_names plus tests/graph selection is green at '7218 passed, 8 skipped, 654 deselected in 211.12s'. MIGRATION RECEIPT, ATOMIC AND PER LABEL: DocsRevision 3,200 rows and LLMCost 32,834 rows moved to the canonical spelling, StandardNameReview 0 rows because all 25,098 already used it, and coverage held at 25,098 of 25,098 before and after — so no row was dropped rather than renamed. THE RETIRED FIELD IS REMOVED RATHER THAN RENAMED, per the lock that found it had zero readers and had agreed with the graph 2,053 times while disagreeing 0: docs_review_resolution_method coverage went 2,151 → 0, and the schema slot, the projector, the clearing function, both writers, the rescore clear and the worker volatile-field entry are all gone from product code. That is what dissolves §6b as work — the active strip path that wrote a null over an earned value lived inside that machinery, so the six affected rows are fixed by subtraction rather than by six repairs. The static property detector passes after the rename, which is the proof that no reader of an old spelling survives in Python source and is exactly why §8 ordered the detector first. Also landed: n-acceptauthorityaxis, commit efcba091, one assertion from the retired plural to the singular, '1 failed, 1 passed' → '2 passed'. OPERATIONAL NOTE THAT GATES WHAT COMES NEXT: the live graph now uses the new keys, so the managed service must reload before any graph-writing campaign resumes. Only §9, the guidance rewrite, remains.</div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20260825T004753897739-n-landedguidance" data-who="doc-identityguidance2" data-when="2026-08-25T00:56:04Z">
+    <div class="r-comment-body"><p>Guidance rewritten from the landed state; 10 retired spellings removed across 3 files, 0 remaining across a 9-file LinkML-derived scan, negative fixture proves the check fails on reintroduction</p></div>
+</div>
+<div class="r-comment" data-section="§9" data-id="c-20260825T0110-guidance" data-who="reckon-ship" data-when="2026-08-25T01:10:00+00:00">
+    <div class="r-comment-body">n-landedguidance landed — commit 926b8401; gate §9-terminal-no-stale-guidance passed; measure retired spelling occurrences 0 across 9 guidance files, with 10 removed — 4 in AGENTS.md, 2 in agents/graph.md, 4 in imas_codex/standard_names/AGENTS.md — and '2 passed in 1.02s'. Written last and from the landed state exactly as the section demanded, because guidance describing a convention the code does not have is another silently-wrong artifact and the reader has no way to tell it apart from a correct one. The guidance now states StandardName.id, the canonical scalar standard_name_id, the canonical multivalued standard_name_ids, and the review_axis values name and docs. THE TEST IS THE PART THAT LASTS: it reads the declared StandardName foreign-key slots and the enum backing review_axis from LinkML AT RUNTIME rather than from a written list, and derives retired aliases from that, so the documentation cannot drift from the schema again without failing. A deliberately reintroduced retired key proved the assertion fails in that direction too, which is what separates a check from a comment. The mandatory naming scans returned 0 path-name and 0 changelog-prose violations; the 4 label-word and 7 uppercase-id hits are pre-existing instruction text and documented keep-list entries. The plan's terminal gate is therefore satisfied — no guidance file describes the pre-change convention.</div>
 </div>
 </section>
 </main>
