@@ -4,63 +4,93 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-embedding-coverage-gate">
-  <meta name="plan-title"     content="Identities That Ship Invisible To Search">
-  <meta name="plan-summary"   content="At least one accepted identity is withheld for having no description or embedding. Establish what the release actually gates on before deciding anything.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-embedding-coverage-gate">
+  <meta name="plan-title"     content="A Gate Aimed At Work Still In Flight">
+  <meta name="plan-summary"   content="The coverage assertion demands an exact zero across all names including drafted ones, so it fails on work in flight and is downgraded every run.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S12">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-informs"   content="sn-release-readiness">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-informs" content="sn-release-readiness">
   <title>Embedding Coverage Gate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="1">
 </head>
 <body>
   <main class="plan-doc">
 
-    <h2 id="s1">&sect;1 &mdash; A corrected premise, and why the subject survives it</h2>
-    <div class="card" style="border-left:4px solid #c33; padding-left:12px;">
+    <h2 id="s1">&sect;1 &mdash; Under-specified, not false: where the threshold actually lives</h2>
+    <div class="card" style="border-left:4px solid #0a7; padding-left:12px;">
       <p>
-        <strong>This plan was first authored on a claim that does not hold, and the
-        correction is recorded here rather than quietly applied.</strong> It stated that
-        &ldquo;Gate A, description-embedding coverage, failed at final-set export and was
-        downgraded to advisory&rdquo;. That framing came to this session second-hand and
-        was never checked against the code. Checked now:
+        This section was twice wrong before it was right, and both corrections are kept
+        because the second one matters more than the first.
+      </p>
+      <p>
+        <strong>First reading, relayed and unverified:</strong> &ldquo;Gate A,
+        description-embedding coverage, failed at export and was downgraded to
+        advisory.&rdquo; <strong>Second reading, over-corrected:</strong> that the premise
+        was false, because <code>GATE_A = "graph_tests"</code> and
+        <code>_run_gate_a()</code> merely shells out to
+        <code>pytest -m "graph or corpus_health"</code> with no threshold of its own, and
+        no <code>0.95</code> exists in <code>imas_codex/standard_names/</code>.
+      </p>
+      <p>
+        <strong>Both of those findings are true and together they locate the
+        threshold.</strong> Gate A owns no threshold precisely <em>because</em> it is a
+        suite runner &mdash; so every bar it enforces lives in the tests it selects, and
+        both of these carry <code>pytestmark = pytest.mark.graph</code>:
       </p>
       <ul>
-        <li><code>GATE_A = "graph_tests"</code> at
-          <code>export.py</code> &mdash; Gate A is the <em>graph test-suite</em> gate.</li>
-        <li><code>_run_gate_a()</code> is a stub that shells out to
-          <code>pytest -m "graph or corpus_health"</code> and returns pass/fail on the
-          return code. It asserts nothing about embeddings and exposes no threshold.</li>
-        <li>There is no <code>0.95</code> literal anywhere in
-          <code>imas_codex/standard_names/</code>, so any reconstruction that substitutes
-          one as &ldquo;the historical embedding threshold&rdquo; is inventing it.</li>
+        <li><code>tests/graph/test_sn_graph.py:159</code> &mdash;
+          <code>assert coverage &gt;= 0.95</code>, counting <strong>descriptions</strong>
+          on accepted names. This is the <code>0.95</code>; it is not an embedding bar and
+          must never be substituted for one.</li>
+        <li><code>tests/graph/test_data_quality.py:210</code> &mdash;
+          <code>assert corrupted == 0</code> for nodes carrying <code>embedded_at</code>
+          with no embedding vector. <strong>This is the assertion that actually
+          failed</strong>, reproduced at <strong>26</strong>, and it is an exact zero
+          rather than a percentage.</li>
       </ul>
       <p>
-        So no gate named Gate A ever asserted embedding coverage, and the first task is
-        not to fix a threshold but to find out <strong>what actually failed and under
-        which name</strong>.
+        So the sentence that reached this session compressed a real chain rather than
+        inventing one. The lesson is not that it was fabricated but that a grep over
+        production source cannot find a bar enforced by a test suite &mdash; the
+        instrument was pointed at the wrong tree.
       </p>
     </div>
+
+    <h2 id="s1b">&sect;1b &mdash; The measured position, and it is not a release risk</h2>
+    <table>
+      <caption>Coverage measured live 2026-08-25 after the afternoon's repairs</caption>
+      <thead><tr><th>Population</th><th>Description gaps</th><th>Embedding gaps</th></tr></thead>
+      <tbody>
+        <tr><td>WEST export survivor set (accepted)</td><td>0 of 363</td><td>0</td></tr>
+        <tr><td>Current WEST cohort</td><td>0 of 385</td><td>0</td></tr>
+        <tr><td>Whole accepted corpus</td><td>&mdash;</td><td><strong>1</strong> of 2,302</td></tr>
+      </tbody>
+    </table>
     <p>
-      <strong>The subject survives the correction, on one verified case.</strong>
-      <code>radial_coordinate_of_reflector</code> is withheld from release for having no
-      description and no embedding at all &mdash; not because it failed a semantic check,
-      but because there was nothing to check. That is a real identity blocked by a real
-      coverage gap, independent of what any gate is called.
+      The single accepted embedding gap is
+      <code>ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude</code> &mdash; a real
+      description with a null vector, so a <strong>free deterministic re-embed</strong>, no
+      provider cost and no review.
     </p>
     <p>
-      Description embeddings are what semantic search over standard names resolves
-      against, so an identity shipping without one is present in the catalog and invisible
-      to the search meant to find it. That is worth a plan. What is not worth anything is
-      a plan that repairs a threshold nobody set.
+      <strong>And Gate A's 26 failures are all description gaps on NON-accepted rows, with
+      zero affected accepted identities inside the WEST survivor set.</strong> That
+      reframes the question entirely. It is not &ldquo;is the bar too high&rdquo; but
+      <strong>&ldquo;is it pointed at the right cohort&rdquo;</strong>: the assertion
+      demands an exact zero across <em>all</em> <code>StandardName</code> nodes including
+      drafted work still mid-pipeline, and every one of its failures is exactly that.
+      A gate that fails on work-in-flight will be downgraded every time it runs, which is
+      how a real assertion becomes a permanent advisory.
     </p>
 
     <h2 id="s2">&sect;2 &mdash; Establish the number before arguing about the threshold</h2>
@@ -106,27 +136,32 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="gate-a-disposition" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What happens to the coverage shortfall before a release candidate, once the real gate is identified?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="fix-and-enforce">Fix the coverage and make the real gate enforcing</button>
-          <button class="r-opt" data-value="relax-deliberately">Relax it to a written threshold with a recorded reason</button>
-          <button class="r-opt" data-value="withhold-affected">Withhold the affected identities with named reasons</button>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="gate-a-disposition" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Should the coverage assertion be scoped to accepted identities rather than all StandardName nodes?</p>
+    <p class="r-dec-opts">
+          <button class="r-opt" data-value="scope-to-accepted">Scope it to accepted identities and keep the exact zero</button>
+          <button class="r-opt" data-value="keep-and-fix">Keep the scope and clear all 26 mid-pipeline gaps</button>
+          <button class="r-opt" data-value="relax-threshold">Relax to a percentage across all nodes</button>
         </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-secg-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-embedding-coverage-gate">
-        <h4 class="r-fu-title">Measure the coverage shortfall, split embedding gaps from description gaps, then decide the gate</h4>
-        <div class="r-fu-body"><p>FIRST establish what actually failed and under which name, because Gate A is <code>graph_tests</code> and asserts nothing about embeddings. Then measure the coverage shortfall over the release set and the whole accepted corpus with sanity counts proving each figure, separate missing embeddings on real descriptions (deterministic and free to fix) from missing descriptions (generation plus review), and count how many affected identities are inside the WEST set. Use <code>radial_coordinate_of_reflector</code> as the entry case. Invent no threshold: if none was ever set, say so and propose one explicitly.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship sn-embedding-coverage-gate</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-secg-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-embedding-coverage-gate" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Measure the coverage shortfall, split embedding gaps from description gaps, then decide the gate</h4>
+    <div class="r-fu-body"><p>FIRST establish what actually failed and under which name, because Gate A is <code>graph_tests</code> and asserts nothing about embeddings. Then measure the coverage shortfall over the release set and the whole accepted corpus with sanity counts proving each figure, separate missing embeddings on real descriptions (deterministic and free to fix) from missing descriptions (generation plus review), and count how many affected identities are inside the WEST set. Use <code>radial_coordinate_of_reflector</code> as the entry case. Invent no threshold: if none was ever set, say so and propose one explicitly.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-embedding-coverage-gate</pre>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260825T141822953561-n-coveragemeasure" data-who="impl-coverage" data-when="2026-08-25T14:33:06Z">
+    <div class="r-comment-body"><p>Shortfall measured and the gate&#x27;s real assertion recovered. WEST export survivor accepted coverage 363/363 with 0 embedding gaps and 0 description gaps; current WEST cohort 385/385 with 0 and 0; whole accepted corpus 2301/2302 embedded - exactly 1 embedding gap (ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude, real description, null embedding) and 0 description gaps. Gate A asserts embedded_at non-null with embedding-null count equal to zero, an exact threshold not a percentage; its named result was 26, split 0 embedding gaps and 26 description gaps, all on non-accepted rows. ZERO affected accepted identities lie in the 369 WEST survivor set. radial_coordinate_of_reflector is drafted/docs-pending with no description or embedding despite embedded_at; it exemplifies the 26-row description-gap class but NOT the accepted embedding-only gap. Dangling links 296 at export against 292 in the current exact-set graph source across 211 source identities, with a firing positive control. Schema sanity 4658 candidates, 4658/4658 ids, 4632 description, 4630 embedding, 4656 embedded_at, 3054 links.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
