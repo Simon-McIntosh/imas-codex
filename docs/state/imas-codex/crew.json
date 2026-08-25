@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T09:47:14",
+  "updated": "2026-08-25T09:48:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -225,8 +225,12 @@
         "id": "impl-benchcalib",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "created": "2026-08-25"
+        "session_id": "01a037be-874e-7513-9f1b-bae62adc7a4c",
+        "created": "2026-08-25",
+        "sessions": {
+          "gpt-5.6-sol": "01a037be-874e-7513-9f1b-bae62adc7a4c"
+        },
+        "session_model": "gpt-5.6-sol"
       },
       {
         "id": "impl-benchgates",
@@ -28347,9 +28351,89 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T070656329808-n-benchmarkcalibration",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a72",
+        "node": "n-benchmarkcalibration",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-benchcalib",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:07:07Z",
+        "completed_at": "2026-08-25T07:47:51Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2444,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2444,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "bbd9b6718e7343506dc76874b4e4ae99b3306077",
+        "commits": [
+          "0ebbf13391b21800d3c2dc017093a5321b2abe5e"
+        ],
+        "changed_lines": {
+          "added": 89,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "failed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T070656329808-n-benchmarkcalibration/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037be-874e-7513-9f1b-bae62adc7a4c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11665664,
+            "cached_input_tokens_cumulative": 11665664,
+            "input_tokens": 11974635,
+            "input_tokens_cumulative": 11974635,
+            "output_tokens": 26821,
+            "output_tokens_cumulative": 26821,
+            "reasoning_output_tokens": 6074,
+            "reasoning_output_tokens_cumulative": 6074
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "watch_override": {
+          "arming_line": "reckon crew watch --project imas-codex",
+          "requested": true,
+          "watcher_live": false
+        },
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 837
+    "_version": 839
   }
 }
