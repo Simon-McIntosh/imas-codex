@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T03:13:51",
+  "updated": "2026-08-25T04:20:47",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -964,6 +964,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-signrepair",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0367b-ebad-7ab0-bbe6-f810151e7bda",
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-snapsafe",
         "harness": "codex",
         "role": "implement",
@@ -1135,7 +1142,7 @@
         "id": "impl-unmarkedgraph",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a03674-63a3-7e91-ba8d-30a274807f59",
         "created": "2026-08-25"
       },
       {
@@ -26461,9 +26468,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T011436076292-n-signstockrepair",
+        "plan": "sn-quality-parity",
+        "section": "\u00a75",
+        "node": "n-signstockrepair",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-signrepair",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T01:14:45Z",
+        "completed_at": "2026-08-25T01:39:23Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1478,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1478,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a1a368a69d918b2df649485f1befc4265cb18ff9",
+        "commits": [
+          "e953001230b50c94303741b778e4b5b7d550fec6"
+        ],
+        "changed_lines": {
+          "added": 1014,
+          "removed": 0,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T011436076292-n-signstockrepair/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0367b-ebad-7ab0-bbe6-f810151e7bda",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15696384,
+            "cached_input_tokens_cumulative": 15696384,
+            "input_tokens": 15992025,
+            "input_tokens_cumulative": 15992025,
+            "output_tokens": 44967,
+            "output_tokens_cumulative": 44967,
+            "reasoning_output_tokens": 13270,
+            "reasoning_output_tokens_cumulative": 13270
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 770
+    "_version": 774
   }
 }

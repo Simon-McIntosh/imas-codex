@@ -9,7 +9,7 @@
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.96">
+  <meta name="plan-impl" content="0.98">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,8 +23,8 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="59">
-<meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa,3d0bb831,a1b4b1f8">
+<meta name="plan-version" content="61">
+<meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa,3d0bb831,a1b4b1f8,e9530012">
 <meta name="plan-artifacts" content="docs/evidence/sn-quality-parity/closure-audit.md,docs/evidence/sn-quality-parity/sign-convention-diagnosis.md,docs/evidence/sn-quality-parity/west-docs-resumed-refresh.md,docs/evidence/sn-quality-parity/west-docs-second-tranche.md">
 </head>
 <body>
@@ -522,6 +522,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 <div class="r-comment" data-section="s5" data-id="c-run-r-20260825T004843133372-n-cocosmetadataclear" data-who="impl-cocosclear" data-when="2026-08-25T01:05:25Z">
     <div class="r-comment-body"><p>An authoritative null now clears the stale transformation type and its edge; 35 of 35 diagnosed rows would clear on recompute; 2 failed to 2 passed, suite 6,729 passed</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20260825T011436076292-n-signstockrepair" data-who="impl-signrepair" data-when="2026-08-25T01:39:23Z">
+    <div class="r-comment-body"><p>279 documents repaired at USD 0.00 and 0 model calls; 226 document-only, 53 metadata-cleared; rescore 227 pass 0 fail 53 not_evaluable; every delta bounded and hash-verified</p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-20260823-keying-instruction" data-who="reckon-ship" data-when="2026-08-23T15:46:00+00:00">
     <div class="r-comment-body"><p><strong>n-keyingdoc landed — commit <code>523a369e</code>, merged <code>9468164a</code>; gate schema-tests-green PASSED.</strong> Measure: schema-focused selection over <code>tests/standard_names/</code> exits 0 with 0 failures; the new section greps 5 <code>StandardName</code> references against a required 3; live census <strong>4,525 nodes, 4,525 carrying <code>id</code>, 0 carrying <code>name</code></strong>. Artifact: <code>imas_codex/standard_names/AGENTS.md</code>, 30 lines.</p><p><strong>The recurring defect this closes is a silent one, and it cost two sessions today.</strong> No class in the standard-names schema declares a <code>name</code> attribute — <code>StandardName.id</code> <em>is</em> the snake_case identity (<code>schemas/standard_name.yaml:868-892</code>), and <code>StandardNameSource.id</code> is <code>source_type:source_id</code> as <code>dd:&lt;path&gt;</code> or <code>signals:&lt;facility&gt;:&lt;signal-id&gt;</code> (<code>2795-2823</code>). So <code>MATCH (sn:StandardName {name: $x})</code> is valid Cypher that returns zero rows without erroring, because a missing property evaluates to null and a non-true predicate drops the row. A peer session joining the refine cohort on <code>s.name</code> got zero rows and nearly reported it as a clean no-overlap result; the real overlap was 20 identities. The section states both keys with citations, puts the correct and silent-null joins side by side, and carries a coverage query that fails closed — so a zero-row join has to be shown to be real before it is believed.</p></div>
 </div>
@@ -560,6 +563,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 </div>
 <div class="r-comment" data-section="§5" data-id="c-20260825T0130-cocosclear" data-who="reckon-ship" data-when="2026-08-25T01:30:00+00:00">
     <div class="r-comment-body">n-cocosmetadataclear landed — commit 3d0bb831; gate metadata-can-retract passed; measure the regression goes '2 failed in 9.94s' → '2 passed in 6.35s' and the standard-names suite is green at '6729 passed, 8 skipped, 299 deselected'. This closes the SECOND of the two producing causes the sign diagnosis found. An authoritative null was being swallowed by coalesce, so a structural authority that recomputed to nothing left the previous transformation class standing — metadata that could assert but never retract. Both persistence paths now assign the recomputed value directly, and a null clears the scalar mirror AND every HAS_COCOS edge atomically in the same statement, while a non-null recomputation still writes and leaves the convention metadata intact. Live impact measured before any stock repair: all 35 diagnosed stale rows still recompute to null, still hold stale transformation metadata, and all 35 still carry a HAS_COCOS edge, so the corrected persistence clears exactly the 35 the diagnosis predicted. The Cypher was EXPLAIN-validated against the live graph in both single-row and batched form without mutating anything, which is the right way to check a clearing statement before letting it near 35 real rows. With both producers closed, the 281-row stock repair can run without regenerating the defect behind itself.</div>
+</div>
+<div class="r-comment" data-section="§5" data-id="c-20260825T0200-signrepair" data-who="reckon-ship" data-when="2026-08-25T02:00:00+00:00">
+    <div class="r-comment-body">n-signstockrepair landed — commits ed4e27e0, 1795bdd2, e9530012; gate deterministic-repair-at-zero-cost passed; measure RUN-SCOPED SPEND USD 0.00 ACROSS 0 MODEL CALLS, which settles the question the lead raised: this was a deterministic edit, not a regeneration, and the earlier framing of it as paid work was simply wrong. 279 documents changed under one signed manifest applied atomically — 226 whose only change is removal of the forbidden final paragraph, 53 whose transformation property, scalar COCOS value and HAS_COCOS edge were also cleared — with plasma_beta a signed already-clean no-op because it had become clean concurrently. Post-apply rescore over all 280 frozen diagnosis identities: 227 pass, 0 fail, 53 not_evaluable. EVERY DELTA WAS BOUNDED RATHER THAN TRUSTED, which is what makes a bulk text edit auditable: each change is exactly a paragraph separator plus the removed final paragraph, at most 545 characters and 43,542 in total, every prefix unchanged, and all 279 current document hashes equal the signed after-state. Metadata postconditions 53 of 53 cleared and 226 of 226 preserved. Durable change id sn-change:sign-convention-document-repair:0bd850b4. Coverage was proven before the zeros were believed: 2,740 candidates with 2,740 ids and 2,740 documentation values. Graph-wide after-gate 325 pass / 4 fail / 2,411 not_evaluable, and the 4 are accounted for rather than residual — magnetic_field, excluded by design because it alone recomputes to b0_like and needs a CORRECT sign paragraph rather than none, plus three identities that became accepted outside the frozen cohort and therefore need their own freshly signed authority.</div>
 </div>
 </section>
 </main>
