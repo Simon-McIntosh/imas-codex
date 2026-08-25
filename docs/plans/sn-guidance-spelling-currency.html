@@ -6,8 +6,8 @@
   <meta name="docs-project"   content="imas-codex">
   <meta name="reckon-type"    content="plan">
   <meta name="plan-slug"      content="sn-guidance-spelling-currency">
-  <meta name="plan-title"     content="Guidance That Names Keys The Schema No Longer Declares">
-  <meta name="plan-summary"   content="The foreign-key migration left prose and pointers behind: the schema's own description names a retired key, three cited line anchors resolve to unrelated slots, and two evidence records describe a deleted field as a live mirror. Correct them, and replace line-number pointers with greppable class-and-slot references.">
+  <meta name="plan-title"     content="Pointers That No Longer Resolve After The Key Migration">
+  <meta name="plan-summary"   content="The foreign-key migration left pointers behind rather than spellings: three cited line anchors now resolve to unrelated slots, the schema's own prose still names a retired key, and two evidence records describe a deleted field as a live mirror. Correct them, and cite class and slot instead of line numbers.">
   <meta name="plan-status"    content="draft">
   <meta name="plan-roi"       content="mid">
   <meta name="plan-effort-hours" content="1.0">
@@ -24,26 +24,38 @@
 <body>
   <main class="plan-doc">
 
-    <h2 id="s1">&sect;1 &mdash; A shipped plan's last clause is still false</h2>
+    <h2 id="s1">&sect;1 &mdash; A pointer is not a spelling, and only one of them was measured</h2>
     <p>
-      <code>sn-graph-identity-convention</code> shipped at <code>impl</code> 1.0 with a
-      three-part done-when. Its final clause reads: <em>no guidance file names a
-      spelling the schema no longer declares.</em> Measured 2026-08-25 at commit
-      <code>53d185e6</code>, that clause is false &mdash; including in the schema itself
-      and in the guidance file for this very subject.
+      The foreign-key migration <code>23c4b55a</code> left two kinds of residue behind,
+      and they are easy to conflate. One is a <strong>spelling</strong> &mdash; a name
+      the schema no longer declares. The other is a <strong>pointer</strong> &mdash; a
+      reference to a location that has since moved. They rot for different reasons and
+      no single check finds both.
     </p>
     <p>
-      <strong>This is not a criticism of that plan's detector; it is a statement of what
-      a property detector structurally cannot see.</strong> The static Cypher-property
-      check compares queried property names against LinkML declarations, and it is green.
-      Prose in a description, and a line-number pointer into a file that has since
-      shifted, are not property references. They are invisible to it by construction,
-      which is why the clause passed review while remaining untrue.
+      <strong>The spellings are clean, and this plan does not claim otherwise.</strong>
+      <code>sn-graph-identity-convention</code> shipped with the clause <em>no file under
+      AGENTS.md, agents/, or imas_codex/**/AGENTS.md names a spelling the schema no
+      longer declares</em>, and that clause holds: those files are free of
+      <code>sn_id</code>, <code>sn_ids</code>, <code>docs_review_resolution_method</code>
+      and the plural axis token. Where they name <code>produced_sn_id</code> and
+      <code>terminal_sn_id</code> they are correct, because both are still declared.
     </p>
     <p>
-      A new plan rather than a reopen: that plan's verdict on the migration itself is
-      sound and its detector genuinely works. Flipping it back would erase the signal
-      that the schema-wide rename closed.
+      <strong>What rotted is three line-number anchors, and a spelling grep cannot see a
+      line number by construction.</strong> That is a coverage boundary, not a false
+      claim and not a failed detector. The defect is that the measure was narrower than
+      the standing rule it served: guidance already requires that whenever a doc cites an
+      anchor you open it and confirm it exists, because a pointer to something moved is
+      worse than no pointer &mdash; the reader cannot grep for it and cannot tell whether
+      they are missing context or chasing a ghost. The measure tested spellings and never
+      tested anchors.
+    </p>
+    <p>
+      One further item sits outside that plan's scanned set entirely: the schema's own
+      prose. <code>standard_name.yaml</code> is neither an <code>AGENTS.md</code> nor
+      under <code>agents/</code>, so nothing scanned it &mdash; and it is the authority
+      every other file cites.
     </p>
 
     <h2 id="s2">&sect;2 &mdash; The canonical rule, and the renames that are NOT stale</h2>
@@ -90,7 +102,7 @@
         <tr>
           <td><code>imas_codex/schemas/standard_name.yaml:2247</code></td>
           <td><code>DocsRevision.id</code> described as <code>Composite key (sn_id#rev-N)</code></td>
-          <td>The schema's own prose names the key the same file retired eight lines below, where it now declares <code>standard_name_id</code>.</td>
+          <td>A genuine retired spelling: the parenthetical is a template placeholder naming the field, not a literal substring of the id, which is <code>&lt;name&gt;#rev-N</code>. The locked decision lets old values stay embedded in identifier STRINGS; it does not license the schema's prose to keep naming the retired field eight lines above where it declares <code>standard_name_id</code>.</td>
         </tr>
         <tr>
           <td><code>imas_codex/standard_names/AGENTS.md</code></td>
