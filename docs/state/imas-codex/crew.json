@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T05:38:18",
+  "updated": "2026-08-25T05:47:18",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -187,6 +187,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-authresidual",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-authschema",
         "harness": "codex",
         "role": "implement",
@@ -213,6 +220,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-21"
+      },
+      {
+        "id": "impl-benchgates",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a03700-a30e-7043-89f0-c9d943a5a994",
+        "created": "2026-08-25"
       },
       {
         "id": "impl-benchrun",
@@ -26864,9 +26878,84 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T033934039486-n-benchmarkgaterun",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a72",
+        "node": "n-benchmarkgaterun",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-benchgates",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T03:39:43Z",
+        "completed_at": "2026-08-25T03:46:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 435,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 435,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "95930c027757858cd0a149c10e43aa7a5af6907b",
+        "commits": [
+          "a1f98d21f8029cf6d7cb95ce887324a222c46f79"
+        ],
+        "changed_lines": {
+          "added": 80,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T033934039486-n-benchmarkgaterun/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03700-a30e-7043-89f0-c9d943a5a994",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5203968,
+            "cached_input_tokens_cumulative": 5203968,
+            "input_tokens": 5392953,
+            "input_tokens_cumulative": 5392953,
+            "output_tokens": 16130,
+            "output_tokens_cumulative": 16130,
+            "reasoning_output_tokens": 6053,
+            "reasoning_output_tokens_cumulative": 6053
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 784
+    "_version": 788
   }
 }

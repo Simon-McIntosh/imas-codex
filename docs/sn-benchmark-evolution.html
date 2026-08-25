@@ -9,7 +9,7 @@
   <meta name="plan-title" content="DSv4 Advisory Review Benchmark and Recovery Triage">
   <meta name="plan-summary" content="Make the review benchmark discriminate: production reviewer panel as the benchmark judge, domain-balanced calibration anchors, grammar sub-dimension scoring. Then benchmark the free local DSv4 model and, once its gates pass, run a zero-mutation graph-wide advisory census whose flags prioritize the exhausted-tail rescores and quality triage — advisory only, never authority.">
   <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.6">
+  <meta name="plan-impl" content="0.65">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="L">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,9 +23,9 @@
 <meta name="plan-depends-on" content="sn-pipeline-recovery">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="12">
-<meta name="plan-commits" content="1519e1c5,aa553671,edb57f02">
-<meta name="plan-artifacts" content="docs/evidence/sn-benchmark-evolution/reuse-map.md,imas_codex/standard_names/advisory_panel.py,tests/standard_names/test_advisory_panel.py">
+<meta name="plan-version" content="14">
+<meta name="plan-commits" content="1519e1c5,aa553671,edb57f02,a1f98d21">
+<meta name="plan-artifacts" content="docs/evidence/sn-benchmark-evolution/reuse-map.md,docs/evidence/sn-benchmark-evolution/benchmark-gate-run.md,imas_codex/standard_names/advisory_panel.py,imas_codex/standard_names/advisory_benchmark.py">
 </head>
 <body>
   <main class="plan-doc">
@@ -139,6 +139,12 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260825T022246789314-n-frozenbatchrunner" data-who="impl-benchrun" data-when="2026-08-25T02:30:28Z">
     <div class="r-comment-body"><p>Frozen-batch advisory runner: deterministic batch, three distinct hashes, atomic provenance-carrying report, artifact-local cost, no graph or persistence imports; 7 passed</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260825T033934039486-n-benchmarkgaterun" data-who="impl-benchgates" data-when="2026-08-25T03:46:58Z">
+    <div class="r-comment-body"><p>Refused to run: no admissible frozen population (31 of 51 slots TODO) and no numeric thresholds for any of the five measures; USD 0.00 spent, census NOT authorized</p></div>
+</div>
+<div class="r-comment" data-section="§3" data-id="c-20260825T0400-benchgate" data-who="reckon-ship" data-when="2026-08-25T04:00:00+00:00">
+    <div class="r-comment-body">n-benchmarkgaterun landed as a REFUSAL — commit a1f98d21; gate benchmark-gates NOT-RUN; measure USD 0.000000 of a USD 25 ceiling with no provider call made; artifact docs/evidence/sn-benchmark-evolution/benchmark-gate-run.md. THE REFUSAL IS THE RESULT AND IT IS THE RIGHT ONE. Two exact conditions are unmet at this revision. First, there is no committed admissible frozen advisory population: the legacy inventory holds 51 positive slots of which only 20 are populated and 31 are still TODO, plus 20 negatives, and the reuse map explicitly rejects it as the frozen batch. Second, no numeric threshold exists for ANY of the five measures the plan names — critical-defect recall, clean-name false-positive rate, calibration, repeatability, hosted-quorum agreement — and the runner defines no gate calculation or within-run repeatability protocol. Gates with no numbers cannot pass or fail. Running anyway would have manufactured the very authority the locked 6A decision makes the census conditional on, so the worker declined and the census is recorded as NOT AUTHORIZED rather than left ambiguous. This is where the plan actually stops, and it stops on a decision rather than on effort: choosing those thresholds decides what quality bar permits a zero-mutation sweep of the whole graph, which is the lead's call. The runner and the panel adapter are built, tested and waiting; what they lack is a bar to measure against and a population to measure.</div>
 </div>
 </section>
 </main>
