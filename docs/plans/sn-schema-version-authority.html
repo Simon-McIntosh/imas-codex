@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="docs-project" content="imas-codex">
+<meta name="plan-slug" content="sn-schema-version-authority">
+<meta name="reckon-type" content="plan">
+<title>sn-schema-version-authority</title>
+<link rel="stylesheet" href="/_shared/foundation.css">
+<link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-title" content="The Schema Is the One Authority the Graph Does Not Record">
+<meta name="plan-summary" content="The graph records which version of every external authority it was built from - 35 DDVersion nodes, 110 ISNGrammarVersion nodes - except the LinkML schema, which has no such node and no digest anywhere. So a long-lived MCP server that loaded the schema before a migration keeps serving against a graph built after it, and the mismatch is undetectable from either side. Found by a peer session after 21 stdio servers were observed still running pre-rename key spellings.">
+<meta name="plan-status" content="draft">
+<meta name="plan-roi" content="high">
+<meta name="plan-effort" content="M">
+<meta name="plan-sprint" content="S10">
+<meta name="plan-owner" content="Simon McIntosh">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-informs" content="sn-graph-identity-convention">
+<meta name="plan-impl" content="0.0">
+<meta name="plan-version" content="2">
+</head>
+<body>
+<main class="plan-doc">
+
+  <section>
+    <h2>§1 — How this was found, and why it is not a permissions problem</h2>
+    <p>A schema migration on 2026-08-25 unified the foreign-key and axis spellings and
+    migrated 60,230 nodes. Afterwards, 21 long-lived stdio MCP servers were still running,
+    every one started between 19 and 24 August, each holding the pre-rename schema against a
+    post-rename graph. None had any way to know.</p>
+    <p>The first fix proposed was to make those servers read-only. That was wrong twice over.
+    This repository's own guidance makes the write tools the primary interface &mdash;
+    <code>update_facility_config()</code> is mandated over direct file editing,
+    <code>add_to_graph()</code> is the documented persistence path, <code>repl()</code> is the
+    documented route for raw Cypher &mdash; and its serve-mode table lists a bare
+    <code>serve</code> as the development configuration. More importantly, read-only would have
+    removed the <em>write</em> half of the drift and left the <em>read</em> half untouched: a
+    stale server returning a clean empty result is not a lesser problem, it is exactly the
+    silent-zero defect <code>sn-graph-identity-convention</code> was written to eliminate.</p>
+  </section>
+
+  <section>
+    <h2>§2 — The gap is in an existing pattern, not a missing feature</h2>
+    <p>This graph already records the version of every external authority it was built
+    against. There are 35 <code>DDVersion</code> nodes and 110
+    <code>ISNGrammarVersion</code> nodes, and code consults them rather than trusting that
+    whoever is connected loaded the right thing.</p>
+    <p>The LinkML schema is the one authority with no such node and no digest anywhere.
+    <code>imas_codex/graph/schema_context_data.py</code> is 2,303 lines generated
+    deterministically from the schema sources and carries neither a version nor a hash. So the
+    thing most likely to drift underneath a running process is the only thing the graph cannot
+    state a version for.</p>
+    <p>That reframes the work. It is not new machinery justified on its own; it is the
+    missing third member of a set of two that already exist and already work.</p>
+  </section>
+
+  <section>
+    <h2>§3 — Digest the source, never the contents</h2>
+    <p>This is the design decision the rest depends on, and getting it backwards produces
+    something worse than nothing. The digest must cover the <strong>LinkML source the server
+    loaded</strong> against the <strong>LinkML source the graph was built from</strong>.</p>
+    <p>A digest over graph contents fails in both directions at once: it churns on every
+    ordinary write, so it would be ignored within a day, and it would not have caught this
+    break at all, because what drifted was slot and enum <em>spellings</em> in the schema while
+    the data underneath was migrated to match. A content hash would have reported agreement
+    throughout.</p>
+  </section>
+
+  <section>
+    <h2>§4 — Fail closed, because the alternatives rely on memory</h2>
+    <p>Three shapes were considered. A migration that <em>announces</em> that attached servers
+    must reconnect is a rule someone has to carry, and the incident that produced this plan is
+    what happens when a rule is carried by 21 processes and no one. A session-start check is
+    better but advisory. A server that <strong>refuses to serve</strong> when its loaded schema
+    digest differs from the one the graph records needs nobody to remember anything.</p>
+    <p>That is the same shape as every repair that held during the migration itself: the
+    property detector, the shrink-tolerant adjudication inventory, and the guidance test that
+    reads retired spellings from LinkML at runtime. Each replaced a rule a person carries with
+    an authority the code consults. This applies that pattern to process lifetime.</p>
+  </section>
+
+  <section>
+    <h2>§5 — What done looks like</h2>
+    <p>A schema digest is written as a node when the schema is applied, in the same shape as
+    <code>DDVersion</code>, so nothing novel needs justifying. A server compares its loaded
+    digest against that node on connect and refuses rather than serving a mismatch. Done is
+    demonstrated the way the rest of this family is: a deliberately mismatched digest must
+    produce a refusal in a test, and a matching one must serve &mdash; a check that only ever
+    passes proves nothing.</p>
+    <p>Attribution: found and diagnosed by the <code>imas-codex-09</code> session, including
+    the source-versus-contents distinction and the observation that the graph already carries
+    this pattern for its other two authorities.</p>
+  </section>
+
+
+</main>
+</body>
+</html>
