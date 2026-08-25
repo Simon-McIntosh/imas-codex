@@ -1,4 +1,6 @@
-"""Unit tests for the SN↔DD unit-mismatch exception loader (no graph)."""
+"""Tests for the SN↔DD unit-mismatch exception loader."""
+
+import pytest
 
 from imas_codex.standard_names.dd_resolutions import load_dd_resolution_manifest
 from imas_codex.units.dd_unit_exceptions import (
@@ -50,11 +52,13 @@ class TestUnitsAgree:
         # energy SN is never silently equated with a torque path.
         assert not units_agree("J", "N.m", "any/path")
 
+    @pytest.mark.graph
     def test_dd_side_bug_charge_number(self):
         # charge NUMBER: SN dimensionless, DD tags elementary charge
         assert units_agree("1", "e", "core_profiles/profiles_1d/ion/z_ion")
         assert units_agree("1", "e", "nbi/unit/species/z_n")
 
+    @pytest.mark.graph
     def test_dd_side_bug_unit_vector(self):
         camera_path = "camera_ir/channel/camera/direction/x"
         assert units_agree(
@@ -75,11 +79,13 @@ class TestUnitsAgree:
         # unit-vector-component bug — the direction globs must not match it.
         assert not units_agree("1", "m", "thomson_scattering/channel/position/z")
 
+    @pytest.mark.graph
     def test_dd_side_bug_charge_state_bundle_bounds(self):
         # The bundle bounds are charge NUMBERS; the DD tags them `e`.
         assert units_agree("1", "e", "core_profiles/profiles_1d/ion/state/z_max")
         assert units_agree("1", "e", "waves/coherent_wave/profiles_2d/ion/state/z_min")
 
+    @pytest.mark.graph
     def test_dd_side_bug_ggd_value_copies(self):
         # The ggd `/values` copies carry the same defect as their scalar twins.
         assert units_agree("1", "e", "edge_profiles/ggd/ion/state/z_average/values")
@@ -87,6 +93,7 @@ class TestUnitsAgree:
             "1", "e", "plasma_profiles/ggd/ion/state/z_square_average/values"
         )
 
+    @pytest.mark.graph
     def test_dd_side_bug_wave_vector_tagged_as_electric_field(self):
         assert units_agree(
             "m^-1", "V.m^-1", "waves/coherent_wave/profiles_1d/k_perpendicular"
@@ -95,6 +102,7 @@ class TestUnitsAgree:
             "m^-1", "V.m^-1", "waves/coherent_wave/full_wave/k_perpendicular/values"
         )
 
+    @pytest.mark.graph
     def test_dd_side_bug_gas_flow_rate(self):
         assert units_agree(
             "Pa.m^3.s^-1", "s^-1", "spi/injector/fragmentation_gas/flow_rate"
@@ -124,6 +132,7 @@ class TestUnitsAgree:
 class TestGraphUnitCorrection:
     """Only self-contradicting DD declarations are rewritten at build time."""
 
+    @pytest.mark.graph
     def test_legacy_reconstructed_constraint_sentinels_are_rewritten(self):
         # Each constraint carries `measured` and `reconstructed` copies of ONE
         # quantity; the reconstructed twins declare a dimensionless sentinel.
@@ -148,6 +157,7 @@ class TestGraphUnitCorrection:
             is None
         )
 
+    @pytest.mark.graph
     def test_poloidal_angle_sentinel_is_rewritten(self):
         assert (
             graph_unit_correction(
@@ -156,6 +166,7 @@ class TestGraphUnitCorrection:
             == "rad"
         )
 
+    @pytest.mark.graph
     def test_phase_space_source_dimensionality_is_rewritten(self):
         assert (
             graph_unit_correction(
@@ -175,6 +186,7 @@ class TestGraphUnitCorrection:
             graph_unit_correction("camera_ir/channel/camera/direction/x", "m") is None
         )
 
+    @pytest.mark.graph
     def test_active_manifest_retires_matching_graph_and_comparator_authority(self):
         path = "equilibrium/time_slice/constraints/pressure/reconstructed"
         active = load_dd_resolution_manifest()
@@ -191,6 +203,7 @@ class TestGraphUnitCorrection:
         )
         assert not units_agree("Pa", "1", path, dd_version="4.1.1", manifest=active)
 
+    @pytest.mark.graph
     def test_nonresolved_legacy_rule_keeps_exact_behavior(self):
         manifest = load_dd_resolution_manifest()
         path = "gyrokinetics_local/linear/wavevector/eigenmode/angle_pol"
