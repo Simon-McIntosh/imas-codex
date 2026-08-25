@@ -11,6 +11,7 @@ from __future__ import annotations
 import fnmatch
 import hashlib
 import json
+import logging
 from collections import Counter
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
@@ -27,6 +28,8 @@ from imas_codex.graph.models import (
     DDResolutionValueKind,
 )
 from imas_codex.units.dd_unit_exceptions import canonical_or_none, load_exceptions
+
+logger = logging.getLogger(__name__)
 
 
 class DDGapTransitionConflict(RuntimeError):
@@ -136,6 +139,28 @@ def _observation_time(value: Any) -> str:
     if parsed.tzinfo is None:
         raise ValueError("DD-gap observed_at must include a UTC offset")
     return text
+
+
+def _normalize_evidence_rule(
+    value: Any,
+    *,
+    reason: str,
+) -> tuple[str | None, str]:
+    """Separate declared predicates from free-text manual evidence."""
+    evidence_rule = _optional_text(value)
+    if not evidence_rule:
+        return None, reason
+    try:
+        return DDGapEvidenceRule(evidence_rule).value, reason
+    except ValueError:
+        manual_evidence = f"Unstructured evidence rule: {evidence_rule}"
+        if manual_evidence not in reason:
+            reason = f"{reason} {manual_evidence}"
+        logger.warning(
+            "DD-gap evidence rule %r is not declared; persisted as manual evidence",
+            evidence_rule,
+        )
+        return None, reason
 
 
 def _gap_id(path: str, kind: str) -> str:
@@ -263,9 +288,10 @@ def _prepare_reports(reports: list[dict[str, Any]]) -> list[dict[str, Any]]:
         kind = _enum_value(str(report.get("kind") or ""), DDGapKind)
         source_path = _optional_text(report.get("source_path")) or path
         reporter = _optional_text(report.get("reporter")) or "automated"
-        evidence_rule = _optional_text(report.get("evidence_rule"))
-        if evidence_rule:
-            evidence_rule = _enum_value(evidence_rule, DDGapEvidenceRule)
+        evidence_rule, reason = _normalize_evidence_rule(
+            report.get("evidence_rule"),
+            reason=reason,
+        )
         reference_path = _optional_text(report.get("reference_path"))
         reference_value = _optional_text(report.get("reference_value"))
         if bool(reference_path) != bool(reference_value):
