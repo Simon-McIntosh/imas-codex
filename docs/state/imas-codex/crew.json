@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:11:21",
+  "updated": "2026-08-25T10:15:26",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1618,9 +1618,11 @@
         "id": "test-repeatability",
         "harness": "codex",
         "role": "test",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a037e8-8c41-72b1-879a-3690f2e3725b",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a037e8-8c41-72b1-879a-3690f2e3725b"
+        },
         "created": "2026-08-25"
       },
       {
@@ -28787,9 +28789,90 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T075252703270-n-repeatabilitydiagnosis",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a73",
+        "node": "n-repeatabilitydiagnosis",
+        "node_definition": {
+          "done_when": "the diagnosis at the named write path reports the per-row disagreement count across the recorded repeat passes over the frozen 40-row corpus, states how many rows were unstable and whether instability concentrates in the good rows or the corrupted ones, identifies at least one mechanical candidate cause with the evidence for and against it, and states the measured repeatability figure it would have to reach against the 0.900 threshold, and the manifest reports the unstable-row count out of 40",
+          "estimated_hours": 0.8,
+          "goal": "Establish what makes the candidate model give different answers to the same frozen row, since repeatability rather than accuracy is what closed the census",
+          "id": "n-repeatabilitydiagnosis",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T075252703270-n-repeatabilitydiagnosis/manifest.md",
+          "plan": "sn-benchmark-evolution",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-benchmark-evolution/repeatability-diagnosis.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-repeatability",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T07:53:01Z",
+        "completed_at": "2026-08-25T08:15:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1332,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1332,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ac21fcb22ed954a72576155a86adec406b742111",
+        "commits": [
+          "a28cdeb6f3de166c74070bb5fe6ca9fd4cded42d"
+        ],
+        "changed_lines": {
+          "added": 201,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T075252703270-n-repeatabilitydiagnosis/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037e8-8c41-72b1-879a-3690f2e3725b",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 849
+    "_version": 851
   }
 }
