@@ -142,6 +142,56 @@
     and the fix was a provisioning recipe another node had already proven in the same
     session, not a design change.</p>
   </section>
+
+  <section id="class-by-class-migrations">
+    <h2>The seven remaining operators migrate one at a time, each deleting its own body</h2>
+    <p>
+      A prior-art scout mapped all seven remaining bespoke entry points at commit
+      <code>86cf6bb2</code> before the first migration node was authored: 7/7 carry an
+      authority shape, mutation program, guard set and an <em>existing</em>
+      disposable-Neo4j suite, across 6 suite files. That last number discharges the
+      §8 prerequisite — the three operators recorded as having no suite now have one,
+      so no migration is gated on writing a baseline first. Record:
+      <a href="/imas-codex/evidence/sn-repair-operator-consolidation/migration-reuse-map">migration reuse map</a>.
+    </p>
+    <p>
+      Two constraints follow from the map and both bind every remaining node.
+      <strong>The migration lane is one deep:</strong> every migration edits both
+      <code>graph_ops.py</code> and <code>signed_manifest.py</code>, so no two may run
+      concurrently. And the closed registries are extended <strong>by name</strong> —
+      never by broadening an existing program ambiguously and never by admitting
+      caller-supplied Cypher — for <code>HAS_STANDARD_NAME</code>,
+      <code>HAS_UNIT</code>, <code>HAS_ERROR</code>/<code>HAS_LOCUS</code>, authority
+      joins, permitted orphan hand-off, and branching mutation programs.
+    </p>
+    <table>
+      <caption>Class-by-class migration progress; each row lands only when its bespoke <code>def</code> is gone</caption>
+      <thead>
+        <tr><th>Operator</th><th>Equivalence measure</th><th>Commit</th><th>State</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>retire_signed_dual_authority_targets</code></td>
+          <td>Suite 5/5 byte-unchanged. Clean cohort 19 sources, 20 binding/projection
+              pairs, 16 identities, 0 refusals, 16 receipts. Out-of-authority: 18 retained,
+              exactly 1 refused, 0 writes. Acquired-child: 19 retained, exactly 1 refused
+              with the verbatim reason <em>target has acquired a live HAS_PARENT child</em>,
+              0 writes. Replay <code>changed=0 persistent_writes=0 ledger_rows=16</code>
+              on a byte-identical snapshot.</td>
+          <td><code>43a23b1f</code></td>
+          <td>migrated, bespoke body deleted</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Both committed authorities were read on their original bytes and nothing was
+      re-signed, which is the locked <em>read-existing</em> decision holding under
+      execution rather than merely being asserted. Net shape of the first migration:
+      388 lines out of <code>graph_ops.py</code>, 409 into <code>signed_manifest.py</code>.
+      Full record:
+      <a href="/imas-codex/evidence/sn-repair-operator-consolidation/dual-authority-migration">dual-authority migration</a>.
+    </p>
+  </section>
 </main>
 </body>
 </html>
