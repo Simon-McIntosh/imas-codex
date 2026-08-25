@@ -21,7 +21,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-commits" content="3261c40e,a3b71563">
 <meta name="plan-artifacts" content="docs/evidence/sn-embedding-coverage-gate/coverage-shortfall.md,docs/evidence/sn-embedding-coverage-gate/embedding-gap-closure.md">
 <meta name="plan-impl" content="0.75">
@@ -169,6 +169,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260825T163230354600-n-reembedgap" data-who="impl-reembedgap" data-when="2026-08-25T16:38:09Z">
     <div class="r-comment-body"><p>The accepted corpus embedding gap is closed: 2301/2302 to 2302/2302, through the sanctioned path only (claim_embed_batch, process_embed_batch, persist_embed_batch), no hand-written vector. Schema sanity before 4658 candidates / 4658 id / 4632 description / 4630 embedding / 4656 embedded_at; after, only embedding and embedded_at rose by exactly one to 4631 and 4657, so precisely one identity changed. Description unmodified, verbatim: 'Signed ratio of the charge-state-averaged toroidal ion bulk velocity to the local magnetic-field magnitude, retaining the toroidal flow contribution.' Provider cost USD 0.000000 with 0 LLMCost rows, confirming the local path ran. Six non-target claims in the same scope were released unprocessed. The named graph check still FAILS at 26 because that population is the non-accepted description-gap class, deliberately outside this node - the failure is the honest state of the unscoped gate, not a regression.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T173738947054-n-gatescope" data-who="impl-gatescope" data-when="2026-08-25T17:53:10Z">
+    <div class="r-comment-body"><p>Gate rescoped and the producer defect named rather than buried. Verbatim before &#x27;1 failed, 1 warning in 19.08s&#x27;; after &#x27;1 passed, 1 warning in 9.19s&#x27;; all labels after &#x27;8 passed, 5 skipped, 1 warning in 9.96s&#x27;. Implementation adds name_stage=&#x27;accepted&#x27; ONLY where name_stage is a declared schema slot for that label, so labels without a lifecycle keep the original graph-wide predicate and no unguarded property reference was introduced. Accepted scope 2302 candidates with 2302/2302 on id, name_stage, description, embedded_at and embedding, 0 affected; full-label sanity 4658/4658/4658 with embedded_at 4657, description 4632, embedding 4631, positive control 4631 retained vectors. The 26 are characterized rather than hidden: ALL 26 have null description AND null embedding AND embedded_at set, 0 are accepted, lifecycle split 14 superseded / 8 drafted / 4 pending. ROOT CAUSE confirmed at source: run_embedding_preflight in imas_codex/standard_names/review/audits.py appends null-description rows to needs_embed, persists item.get(&#x27;embedding&#x27;) when null, unconditionally stamps sn.embedded_at, and reports refreshed_count as len(needs_embed) - so the gate was never detecting corruption, it was detecting a stamping bug. The node states plainly that the 26 are now unasserted by this gate and tracked as that defect.</p></div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T19:47:27",
+  "updated": "2026-08-25T19:59:29",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -572,6 +572,15 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-embedstamp",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-envfix",
         "harness": "codex",
         "role": "implement",
@@ -992,6 +1001,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-phisource",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
       },
       {
         "id": "impl-predicatediff",
@@ -33306,9 +33324,102 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T173738947054-n-gatescope",
+        "plan": "sn-embedding-coverage-gate",
+        "section": "\u00a73",
+        "node": "n-gatescope",
+        "node_definition": {
+          "done_when": "The locked disposition is scope-to-accepted keeping the exact zero, so implement that for the population that has a lifecycle. BUT FIRST answer a question the disposition does not settle, because scoping without it would bury a producer defect rather than fix it: the assertion's own failure text reads 'Embeddings were written then lost - possible data corruption', yet the twenty-six failing StandardName rows carry embedded_at with NO description and NO embedding, which is not written-then-lost. Establish from measurement how many of the twenty-six have a null description, and determine whether some producer stamps embedded_at on nodes it skipped for having nothing to embed; name the code path that writes embedded_at and state whether it can be reached without an embedding attempt. Report that as a defect or exonerate it, with the file and symbol either way. Then make the assertion express what it means: it is parametrized across every description-embeddable label, so the change must stay correct for labels that have no lifecycle field rather than special-casing one label with an unguarded property reference. Prove the outcome by running the named graph test before and after, quoting both verbatim summary lines, and report the exact accepted-scope count with the schema sanity count proving it real. A green test whose greenness comes from no longer looking at the twenty-six is a FAILED outcome for this node unless the report states plainly that they are now unasserted and where that population is tracked instead. Do not generate any description, do not embed anything, and do not touch export.py's gate wiring.",
+          "estimated_hours": 0.8,
+          "goal": "Aim the description-embedding coverage assertion at the population a release ships, without hiding why the twenty-six rows fire.",
+          "id": "n-gatescope",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173738947054-n-gatescope/manifest.md",
+          "plan": "sn-embedding-coverage-gate",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "tests/graph/test_data_quality.py",
+            "docs/evidence/sn-embedding-coverage-gate/gate-scope-change.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-gatescope",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T17:38:44Z",
+        "completed_at": "2026-08-25T17:53:10Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 866,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 866,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "5db6f2e9f3d3a348a58053c58766538e7ec9da74",
+        "commits": [
+          "2c9d3bb0"
+        ],
+        "changed_lines": {
+          "added": 102,
+          "removed": 4,
+          "files": 2
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173738947054-n-gatescope/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03a00-d601-7550-a423-d39afc123e0f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 2272512,
+            "cached_input_tokens_cumulative": 2272512,
+            "input_tokens": 2391895,
+            "input_tokens_cumulative": 2391895,
+            "output_tokens": 11564,
+            "output_tokens_cumulative": 11564,
+            "reasoning_output_tokens": 2358,
+            "reasoning_output_tokens_cumulative": 2358
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 936
+    "_version": 939
   }
 }
