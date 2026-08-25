@@ -110,30 +110,37 @@ identify an existing `StandardName`.
 |---|---|---|
 | `StandardName` | `deprecates`, `superseded_by`; `links`; `refine_collision_name`; `references`, `parents`, `magnitudes`, `error_siblings`, `predecessor`, `successor`, `refined_from` | `imas_codex/schemas/standard_name.yaml:916-923`, `imas_codex/schemas/standard_name.yaml:1017-1020`, `imas_codex/schemas/standard_name.yaml:1297-1303`, `imas_codex/schemas/standard_name.yaml:1905-1980`, `imas_codex/schemas/standard_name.yaml:2030-2039` |
 | `DocsReviewAdmission` | `target_id` | `imas_codex/schemas/standard_name.yaml:2165-2167` |
-| `DocsRevision` | `sn_id` | `imas_codex/schemas/standard_name.yaml:2257-2260` |
+| `DocsRevision` | `standard_name_id` | `imas_codex/schemas/standard_name.yaml:2249-2253` |
 | `StandardNameChange` | `to_name` when it is the linked name rather than another changed value | `imas_codex/schemas/standard_name.yaml:2310-2313` |
 | `StandardNameSource` | `standard_name` (relationship slot), `produced_sn_id` (scalar mirror) | `imas_codex/schemas/standard_name.yaml:2995-2999`, `imas_codex/schemas/standard_name.yaml:3014-3021` |
 | `StandardNameSourceAuthorityRetirement` | `removed_target_ids` | `imas_codex/schemas/standard_name.yaml:3290-3300` |
 | `StandardNameSourceRetry` | `terminal_sn_id` | `imas_codex/schemas/standard_name.yaml:3346-3349` |
-| `LLMCost` | `sn_ids` | `imas_codex/schemas/standard_name.yaml:3565-3567` |
-| `StandardNameReview` | `standard_name_id` | `imas_codex/schemas/standard_name.yaml:3612-3614` |
+| `LLMCost` | `standard_name_ids` | `imas_codex/schemas/standard_name.yaml:3557-3559` |
+| `StandardNameReview` | `standard_name_id` | `imas_codex/schemas/standard_name.yaml:3604-3608` |
 | `PromotionCandidate` | `evidences` | `imas_codex/schemas/standard_name.yaml:3781-3790` |
 | `RepairRowIdentity` | `target_id` when `kind` selects a StandardName target | `imas_codex/schemas/standard_name.yaml:3825-3831` |
 | `StructuralNameAuthority` | `accepted_name_id`, `child_ids`, `children` | `imas_codex/schemas/standard_name.yaml:4015-4034` |
 
+The generic back-reference convention is `standard_name_id` for a scalar and
+`standard_name_ids` for a multivalued property. `StandardName` itself remains
+keyed by `id`; relationship slots with more specific semantics retain the names
+declared in the table. The review axis follows the same schema-to-reader rule:
+`StandardNameReview.review_axis` uses `name` and `docs`, exactly matching the
+paired `_name` and `_docs` slot suffixes.
+
 Aggregation has the same silent-null trap as filtering. `count(property)` and
 `count(DISTINCT property)` ignore `null`, so an undeclared or misremembered
 property produces zero rather than an error. `DocsRevision` is the worked
-example: its back-reference property is `sn_id`, and the authored edge runs
-from `StandardName` to `DocsRevision`, not the reverse
+example: its back-reference property is `standard_name_id`, and the authored
+edge runs from `StandardName` to `DocsRevision`, not the reverse
 (`imas_codex/schemas/standard_name.yaml:2011-2020`,
-`imas_codex/schemas/standard_name.yaml:2244-2260`).
+`imas_codex/schemas/standard_name.yaml:2244-2253`).
 
 ```cypher
 MATCH (sn:StandardName)-[:DOCS_REVISION_OF]->(rev:DocsRevision)
 RETURN count(rev) AS revisions,
-       count(DISTINCT rev.sn_id) AS revisions_with_the_schema_key,
-       count(DISTINCT rev.standard_name_id) AS silently_zero_wrong_key
+       count(DISTINCT rev.standard_name_id) AS revisions_with_the_schema_key,
+       count(DISTINCT rev.name) AS silently_zero_wrong_key
 ```
 
 Before trusting any traversal or foreign-key aggregate, confirm both the slot

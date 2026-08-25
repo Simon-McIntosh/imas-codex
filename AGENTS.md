@@ -408,27 +408,28 @@ MATCH (n:<Label>) RETURN count(n) AS candidates, count(n.<prop>) AS with_prop
 empty. The same applies to `count(DISTINCT n.<prop>)`, which returns 0 over a
 non-existent property without complaint.
 
-**Identity keys are NOT uniform yet — check, never guess.** How a node names the
-standard name it belongs to varies by label:
+**Standard Name identity keys follow one convention — still check, never
+guess.** A `StandardName` uses `id` because it is the identity itself. Every
+declared generic foreign key to a `StandardName` uses `standard_name_id` when
+scalar and `standard_name_ids` when multivalued:
 
 | Class | Property | Note |
 |---|---|---|
 | `StandardName` | `id` | the identifier itself; there is **no** `name` property on any SN class |
 | `StandardNameSource` | `id` | `dd:<path>` or `signals:<facility>:<signal-id>` |
 | `StandardNameReview` | `standard_name_id` | back-reference; authoritative link is `HAS_REVIEW` |
-| `DocsRevision` | `sn_id` | authoritative link is `DOCS_REVISION_OF` |
-| `LLMCost` | `sn_ids` | multivalued, and the **only** link — `LLMCost` has no edge to `StandardName` |
+| `DocsRevision` | `standard_name_id` | authoritative link is `DOCS_REVISION_OF` |
+| `LLMCost` | `standard_name_ids` | multivalued, and the **only** link — `LLMCost` has no edge to `StandardName` |
 
-Axis tokens are also inconsistent: `StandardNameReview.review_axis` takes
-**`names`**/`docs` while the paired scalars are suffixed **`_name`**/`_docs`
-(`reviewer_score_name` vs `reviewer_score_docs`). Filtering `review_axis = 'name'`
-returns zero rows and reads as "the names axis was never reviewed".
+`StandardNameReview.review_axis` likewise uses `name`/`docs`, matching the
+paired `_name`/`_docs` scalar suffixes (`reviewer_score_name` beside
+`reviewer_score_docs`).
 
 Full tables — all 53 relationship directions with LinkML citations, and all 12
 foreign-key classes — are in
 [`imas_codex/standard_names/AGENTS.md`](imas_codex/standard_names/AGENTS.md#graph-identity-and-joins).
-Unification is planned in `docs/plans/sn-graph-identity-convention.html`; until it
-lands, the table above is the current truth.
+The LinkML declarations remain authoritative when a class uses a semantically
+specific relationship slot instead of a generic foreign key.
 
 ### Cypher Compatibility — Neo4j 2026
 
@@ -446,7 +447,7 @@ Run migrations as inline Cypher via `imas-codex graph shell` or the MCP `repl()`
 
 ### LLMCost Node Properties
 
-`LLMCost` nodes track per-call LLM spend. **All `LLMOperation`-mixin fields are prefixed with `llm_`** — never use bare `cost`, `model`, or `service`. Full property list is in `agents/schema-reference.md`; key fields: `llm_cost`, `llm_model`, `llm_service`, `llm_tokens_{in,out,cached_read,cached_write}`, grouping (`run_id`, `phase`, `pool`, `batch_id`, `for_run`), and `sn_ids`.
+`LLMCost` nodes track per-call LLM spend. **All `LLMOperation`-mixin fields are prefixed with `llm_`** — never use bare `cost`, `model`, or `service`. Full property list is in `agents/schema-reference.md`; key fields: `llm_cost`, `llm_model`, `llm_service`, `llm_tokens_{in,out,cached_read,cached_write}`, grouping (`run_id`, `phase`, `pool`, `batch_id`, `for_run`), and `standard_name_ids`.
 
 **Canonical cost queries:**
 
