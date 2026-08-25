@@ -4,22 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-origin-provenance-backfill">
-  <meta name="plan-title"     content="An Import Wiped Provenance, And The Evidence To Rebuild It Survived">
-  <meta name="plan-summary"   content="A catalog import cleared origin on 1,091 identities and relabelled others. Recover it from surviving generation evidence, then close the path that allowed it.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-origin-provenance-backfill">
+  <meta name="plan-title" content="An Import Wiped Provenance, And The Evidence To Rebuild It Survived">
+  <meta name="plan-summary" content="A catalog import cleared origin on 1,091 identities and relabelled others. Recover it from surviving generation evidence, then close the path that allowed it.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="4.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S12">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Origin Provenance Recovery | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="2">
 </head>
 <body>
   <main class="plan-doc">
@@ -140,35 +142,43 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="derivation-evidence" data-choice="generation-evidence-not-import-markers" data-by="Simon McIntosh" data-when="2026-08-25">
-        <p class="r-dec-q">What evidence should origin be recovered from?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="generation-evidence-not-import-markers">Surviving generation evidence</button>
-          <button class="r-opt" data-value="import-markers">Catalog-import markers</button>
-          <button class="r-opt" data-value="human-adjudication">Per-identity human adjudication</button>
-        </p>
-        <p class="r-dec-rat">Generation evidence. Import markers already failed their positive control at 5 of 426, and the five counterexamples share one imported_at and one catalog_commit_sha — so the marker records that an import occurred, never what the identity was beforehand, and cannot be an inverse of editorial origin. Generation evidence survived the import at 0.98 across three independent markers in the affected cohort, is untouched by the 2026-07-04 event, and carries a one-directional guarantee the markers lack: an LLMCost row is proof of generation and never of authorship. Human adjudication is rejected as unnecessary for identities that still carry their own generative fingerprint.</p>
-      </div>
-      <div class="r-dec" data-key="import-write-authority" data-choice="import-may-not-touch-editorial-axis" data-by="Simon McIntosh" data-when="2026-08-25">
-        <p class="r-dec-q">What may a catalog import write on an existing identity?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="import-may-not-touch-editorial-axis">Import provenance only; never origin or status</button>
-          <button class="r-opt" data-value="import-may-set-origin">Import may set origin as it does today</button>
-        </p>
-        <p class="r-dec-rat">Import provenance only. A catalog round-trip is entitled to record that it happened via imported_at and catalog_commit_sha, and entitled to nothing on the editorial axis. The current path cleared origin and status on 1,091 identities and left five generated names carrying catalog markers, which is data loss rather than recovery. Recovery without this guard buys one clean measurement before the next import undoes it — the same lesson the HAS_PARENT rewire taught today, where the guard held and the second deletion would not have.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="derivation-evidence" data-choice="generation-evidence-not-import-markers" data-by="Simon McIntosh" data-when="2026-08-25">
+    <p class="r-dec-q">What evidence should origin be recovered from?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="generation-evidence-not-import-markers">Surviving generation evidence</button>
+      <button class="r-opt" data-value="import-markers">Catalog-import markers</button>
+      <button class="r-opt" data-value="human-adjudication">Per-identity human adjudication</button>
+      </p>
+    <p class="r-dec-rat">Generation evidence. Import markers already failed their positive control at 5 of 426, and the five counterexamples share one imported_at and one catalog_commit_sha — so the marker records that an import occurred, never what the identity was beforehand, and cannot be an inverse of editorial origin. Generation evidence survived the import at 0.98 across three independent markers in the affected cohort, is untouched by the 2026-07-04 event, and carries a one-directional guarantee the markers lack: an LLMCost row is proof of generation and never of authorship. Human adjudication is rejected as unnecessary for identities that still carry their own generative fingerprint.</p>
+    </div>
+<div class="r-dec" data-key="import-write-authority" data-choice="import-may-not-touch-editorial-axis" data-by="Simon McIntosh" data-when="2026-08-25">
+    <p class="r-dec-q">What may a catalog import write on an existing identity?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="import-may-not-touch-editorial-axis">Import provenance only; never origin or status</button>
+      <button class="r-opt" data-value="import-may-set-origin">Import may set origin as it does today</button>
+      </p>
+    <p class="r-dec-rat">Import provenance only. A catalog round-trip is entitled to record that it happened via imported_at and catalog_commit_sha, and entitled to nothing on the editorial axis. The current path cleared origin and status on 1,091 identities and left five generated names carrying catalog markers, which is data loss rather than recovery. Recovery without this guard buys one clean measurement before the next import undoes it — the same lesson the HAS_PARENT rewire taught today, where the guard held and the second deletion would not have.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-sopb-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-origin-provenance-backfill">
-        <h4 class="r-fu-title">Recover origin and status from generation evidence, then close the import write path</h4>
-        <div class="r-fu-body"><p>Derive from generation evidence, prove zero misclassifications on the 1,798 accepted controls before touching anything undeclared, and measure how many <code>catalog_edit</code> identities carry a generative fingerprint so the human-curated figure stops being quoted unmeasured. Then remove the import path's ability to clear or overwrite <code>origin</code> and <code>status</code>, with a test that fails if it can.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship sn-origin-provenance-backfill</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sopb-002" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-origin-provenance-backfill" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Recover origin and status from generation evidence, then close the import write path</h4>
+    <div class="r-fu-body"><p>Derive from generation evidence, prove zero misclassifications on the 1,798 accepted controls before touching anything undeclared, and measure how many <code>catalog_edit</code> identities carry a generative fingerprint so the human-curated figure stops being quoted unmeasured. Then remove the import path's ability to clear or overwrite <code>origin</code> and <code>status</code>, with a test that fails if it can.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-origin-provenance-backfill</pre>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T145736650094-n-originrecovery" data-who="test-residue" data-when="2026-08-25T15:09:32Z">
+    <div class="r-comment-body"><p>REFUSAL on evidence: generation-evidence rule misclassified 1372 of 1798 controls because all 1372 accepted catalog_edit identities also carry generation evidence; withdraws the relabelled-cohort reading; five counterexamples explained 5/5; no origin or status written; graph writes 0</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20260825T151803141135-n-mergewriteguard" data-who="impl-provguard" data-when="2026-08-25T15:22:59Z">
+    <div class="r-comment-body"><p>Both catalog-approval sites guarded: 0 sn.origin assignments at merge.py:554-560 and :978-988; catalog provenance still recorded; generated origin=pipeline, model, generated_at, chain_length=3 survive both paths; 89 to 91 passed via 2 new regressions; cypher property check green</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

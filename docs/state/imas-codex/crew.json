@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T17:05:06",
+  "updated": "2026-08-25T17:58:01",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -32026,9 +32026,256 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T145736650094-n-originrecovery",
+        "plan": "sn-origin-provenance-backfill",
+        "section": "\u00a73",
+        "node": "n-originrecovery",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-origin-provenance-backfill/origin-recovery.md states the exact misclassification count of a generation-evidence rule against all 1,798 accepted controls with zero required, the count of accepted origin=catalog_edit identities carrying any surviving generation evidence (model, generated_at, chain_length, or an LLMCost row linking them by standard_name_ids) which measures how much of the 2,096 human-curated figure is pipeline output relabelled, whether the five counterexamples sharing imported_at 2026-07-04T21:21:17.079Z are explained by the rule, and the derived origin and status the rule projects for the 278 accepted and 1,091 total null identities without writing any of them; every reported zero carries its schema sanity count and the report carries a positive control naming what it controlled for; read-only, no graph mutation",
+          "estimated_hours": null,
+          "goal": "A generation-evidence origin rule proved on the held answers, and the measured size of the supposed human-curated cohort",
+          "id": "n-originrecovery",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T145736650094-n-originrecovery/manifest.md",
+          "plan": "sn-origin-provenance-backfill",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/sn-origin-provenance-backfill/origin-recovery.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-residue",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T14:57:44Z",
+        "completed_at": "2026-08-25T15:09:32Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 708,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 708,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "0575f4e6acad284d5d44d32f4eef90a83bc8da40",
+        "commits": [
+          "a7483d13"
+        ],
+        "changed_lines": {
+          "added": 181,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T145736650094-n-originrecovery/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037ea-ac01-7933-a15d-2b9d06ea4bd0",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 0,
+            "cached_input_tokens_cumulative": 3148032,
+            "input_tokens": 0,
+            "input_tokens_cumulative": 3469785,
+            "output_tokens": 0,
+            "output_tokens_cumulative": 25041,
+            "reasoning_output_tokens": 98,
+            "reasoning_output_tokens_cumulative": 6852
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T151803141135-n-mergewriteguard",
+        "plan": "sn-origin-provenance-backfill",
+        "section": "\u00a74",
+        "node": "n-mergewriteguard",
+        "node_definition": {
+          "done_when": "imas_codex/standard_names/merge.py no longer sets sn.origin at either of its two catalog-approval write sites while still recording catalog provenance via catalog_pr_number, catalog_merge_commit_sha and catalog_approved_at; a new test reproduces the damage shape by asserting a generated identity retains origin='pipeline' and its model, generated_at and chain_length across a catalog approval, and fails against the unguarded path; every pre-existing test touching merge.py stays green byte-unchanged; tests/graph/test_cypher_property_check.py stays green; docs/evidence/sn-origin-provenance-backfill/merge-write-guard.md records the two guarded sites by line, the refused write, and before-and-after test counts; no production graph is contacted",
+          "estimated_hours": null,
+          "goal": "The catalog merge path loses the ability to overwrite origin on an existing StandardName",
+          "id": "n-mergewriteguard",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T151803141135-n-mergewriteguard/manifest.md",
+          "plan": "sn-origin-provenance-backfill",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/merge.py",
+            "tests/standard_names/test_merge_origin_guard.py",
+            "docs/evidence/sn-origin-provenance-backfill/merge-write-guard.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-provguard",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T15:18:10Z",
+        "completed_at": "2026-08-25T15:22:59Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 289,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 289,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "deab9ac951c8ff7808a39752d32cda6e81ee7240",
+        "commits": [
+          "8545a717"
+        ],
+        "changed_lines": {
+          "added": 146,
+          "removed": 4,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T151803141135-n-mergewriteguard/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03980-180b-7d30-b27a-dabc6e2c7212",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1567744,
+            "cached_input_tokens_cumulative": 1567744,
+            "input_tokens": 1666830,
+            "input_tokens_cumulative": 1666830,
+            "output_tokens": 7993,
+            "output_tokens_cumulative": 7993,
+            "reasoning_output_tokens": 1868,
+            "reasoning_output_tokens_cumulative": 1868
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2400,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1224,
+              "log_age_seconds": 516,
+              "log_fresh": true,
+              "manifest_commits": [
+                "a7483d13071a47fa4ccdd76c5dd7ee5436023b17"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T145736650094-n-originrecovery/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T145736650094-n-originrecovery --gate <verdict> --commit a7483d13071a47fa4ccdd76c5dd7ee5436023b17",
+              "node": "n-originrecovery",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T145736650094-n-originrecovery",
+              "terminal_age_seconds": 538,
+              "terminal_at": "2026-08-25T15:09:10Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-originrecovery"
+            },
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 842,
+              "log_age_seconds": 390,
+              "log_fresh": true,
+              "manifest_commits": [
+                "faaa985f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T150357556109-n-basetoken/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T150357556109-n-basetoken --gate <verdict> --commit faaa985f",
+              "node": "n-basetoken",
+              "phase": "starting",
+              "plan": "isn-locus-vocabulary-rotation",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T150357556109-n-basetoken",
+              "terminal_age_seconds": 408,
+              "terminal_at": "2026-08-25T15:11:19Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12-20260825b/n-basetoken"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 918
+    "_version": 920
   }
 }
