@@ -421,6 +421,76 @@
       </p>
     </div>
 
+    <h2 id="s8">§8 — Governed repairs that do not hold, and the producer behind them</h2>
+    <p>
+      <strong>Reopened 2026-08-25.</strong> This plan closed on 2026-08-22 recording
+      every tracked class at zero or as an explicit refusal. Two of those exact-zero
+      invariants had regrown by 2026-08-25 without any plan writeback, which is not a
+      new defect class so much as evidence that some repairs in this programme are
+      being undone.
+    </p>
+    <p>
+      <strong>First, the regrown set is far smaller than it first reads, and the
+      difference is this plan's own doctrine catching a measurement taken against it.</strong>
+      A live census at <code>2026-08-25T07:38:54Z</code> — schema sanity 4,656/4,656
+      <code>name_stage</code> and 9,668/9,668 <code>status</code>, so each reported zero
+      is a proven zero — partitions the 42 rows as <strong>36 derived rows in the
+      expected transient state</strong> that the liveness settlement clears,
+      <strong>3 genuine DD residues</strong>
+      (<code>dd:ntms/time_slice/mode</code>, <code>dd:summary/pedestal_fits</code>,
+      <code>dd:waves/coherent_wave</code>), and <strong>3 genuine scalar-mirror
+      regressions</strong>. Six genuine rows, not 42. The residual census went stale
+      partly by counting the transient class without its partition — exactly the trap
+      §Execution doctrine records as <em>measure classes with their partition, after the
+      reconcile settles</em>.
+    </p>
+    <p>
+      <strong>Second, and the reason this section exists rather than a repair node:
+      something re-asserts what a governed repair removed.</strong> Two independent
+      routes reached the same shape within twenty minutes. The regression diagnosis
+      surfaced, unprompted, that
+      <code>reconcile_orphan_parent_sources</code> can regrow a terminal predecessor
+      through a migrated derived source. Separately, the catalog export aborted on a
+      two-node <code>HAS_PARENT</code> cycle whose defective edge —
+      <code>spectral_signal_to_noise_ratio_of_spectrometer_channel</code> →
+      <code>logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel</code>,
+      <code>operator_kind: qualifier</code> — <strong>is already recorded as deleted by a
+      prior governed reversibility receipt, and is live again</strong>. The proof that it
+      is the defective direction is semantic rather than preferential: peeling a
+      <code>spectral</code> qualifier cannot introduce a <code>logarithm_of_</code>
+      prefix, because a qualifier peel removes a qualifier and cannot add a unary prefix.
+      The opposing edge, the grammar peel from <code>logarithm_of_X</code> to
+      <code>X</code>, is legitimate and must survive.
+    </p>
+    <p>
+      <strong>So a second deletion is the wrong move and is not being made.</strong> An
+      edge that a signed repair already removed once, and that is live again, makes the
+      producer the subject; deleting it again would treat the symptom and would need a
+      governed authority artifact this programme does not hold for it. There is no
+      schedule pressure to do so: the export mechanism now isolates strongly connected
+      components and completes at 367 emitted and 49 withheld where the identical run
+      previously produced zero, so the release is unblocked without the data fix.
+    </p>
+    <p>
+      Work: name the producer for all six genuine rows and this edge, establish whether
+      one producer explains more than one class, and only then repair — one fix if the
+      classes share a cause, three cohorts if they do not. Six rows plus one edge is a
+      small enough set that the single-producer hypothesis is cheap to falsify.
+    </p>
+    <p>
+      <strong>One hypothesis to test rather than assume, because it would collapse the
+      partition above.</strong> If the producer is the orphan-parent reconcile, then the
+      36 transient rows and the 6 genuine ones may not be separable at all: a reconcile
+      that legitimately clears 36 and illegitimately re-asserts 6 is <em>one mechanism
+      with a discrimination bug</em>, not two mechanisms with unrelated outcomes. Under
+      that reading the transient class is not innocent background — it is the same code
+      path succeeding, and the genuine rows are where its admission test is wrong. The
+      practical consequence is that the fix would be a discrimination rule inside the
+      reconcile rather than a repair cohort applied to six rows, and repairing the six
+      without it would simply let them regrow. Test it; do not adopt it, and do not
+      adopt the two-mechanism reading either.
+    </p>
+
     <h2 id="s4">§4 — The provenance ledger, and one invariant question</h2>
     <p>
       <code>find_semantic_source_invariant_violations</code> is wired as a
