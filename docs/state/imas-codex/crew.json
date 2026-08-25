@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T11:46:55",
+  "updated": "2026-08-25T12:02:25",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -878,6 +878,15 @@
         "created": "2026-08-22"
       },
       {
+        "id": "impl-pathsweep",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-peelunitsuite",
         "harness": "codex",
         "role": "implement",
@@ -1116,7 +1125,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a036c2-844a-7f83-a223-2f62ea655b25",
-        "created": "2026-08-25"
+        "created": "2026-08-25",
+        "sessions": {
+          "gpt-5.6-sol": "01a03855-7ef5-79c0-b600-48604c226a24"
+        }
       },
       {
         "id": "impl-snapsafe",
@@ -30720,9 +30732,277 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T093137986685-n-brierstability",
+        "plan": "sn-benchmark-evolution",
+        "section": "",
+        "node": "n-brierstability",
+        "node_definition": {
+          "done_when": "The identical pinned frozen batch is run 3 independent times with candidate decoding held at its pinned temperature and seed and the candidate rendered-message hashes proved byte-identical across all 3 passes, so the only free variable is the hosted judge; each pass reports its own Brier score, and the report states the min, max, mean and spread; the 0.1038 threshold is then classified as INSIDE or OUTSIDE the observed band, with the verdict stated as one of 'calibration gate genuinely fails' (threshold above the max), 'calibration gate genuinely passes' (threshold above every observed value) or 'gate is unresolvable at this sample size because the threshold lies inside the run-to-run band' - and in that third case the report states the number of repeats that would be needed to separate them rather than declaring a pass or a fail; recall and clean false-positive rate are re-reported per pass to confirm they did not move; and actual USD spent is reported against the 9.04 remaining of this plan's recorded 10.00 ceiling. Do not change any threshold, prompt, model or gate definition - this node measures only.",
+          "estimated_hours": 1.0,
+          "goal": "Determine whether the calibration gate miss (Brier 0.1055 against a threshold of 0.1038) is a real regression or judge sampling noise, by repeating the already-pinned frozen-batch run and measuring the spread.",
+          "id": "n-brierstability",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T093137986685-n-brierstability/manifest.md",
+          "plan": "sn-benchmark-evolution",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-benchmark-evolution/brier-stability.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-benchrerun",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:31:45Z",
+        "completed_at": "2026-08-25T09:49:28Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1063,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1063,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "a8af5730c75ccb69413a8ca424e61dd1dd561157",
+        "commits": [
+          "f545ee5bbf29ff40808d35c55065d1f81d5559b0"
+        ],
+        "changed_lines": {
+          "added": 128,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T093137986685-n-brierstability/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0380c-b097-7152-ba61-ad8451491948",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3323136,
+            "cached_input_tokens_cumulative": 10720256,
+            "input_tokens": 3480736,
+            "input_tokens_cumulative": 11047470,
+            "output_tokens": 878,
+            "output_tokens_cumulative": 21001,
+            "reasoning_output_tokens": 1836,
+            "reasoning_output_tokens_cumulative": 5020
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T092543930216-n-westnamegate",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-westnamegate",
+        "node_definition": {
+          "done_when": "An exact ledger names all 28 name-gated family-only identities with name_stage, docs_stage, validation, refine_attempts and current name score BEFORE and AFTER; each is routed by its measured state - ordinary refine where refine_attempts remain under the cap, sn rescore (same-name resubmission, never a reword) where a structurally sound name exhausted on quorum variance, and explicit withhold otherwise; every acceptance carries at least two fresh StandardNameReview rows dated after this run's start with a final aggregate at or above the configured minimum, and the count of hand-accepted identities is reported and is zero; the count of family-only non-accepted documentation is re-censused keyed on StandardName.id and reported before and after against the 28 baseline; every still-withheld identity carries a named lifecycle reason; and actual USD spent is reported against the 40 ceiling with the running authorised total against 150, currently 71.22 spent.",
+          "estimated_hours": 1.5,
+          "goal": "Disposition the 28 WEST family-only identities whose documentation is blocked behind a non-accepted NAME lifecycle, moving every recoverable one to an accepted name through sanctioned routes only, and naming the reason for every one that remains withheld.",
+          "id": "n-westnamegate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T092543930216-n-westnamegate/manifest.md",
+          "plan": "sn-quality-parity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/evidence/sn-quality-parity/west-name-gate.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-westremint",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:25:51Z",
+        "completed_at": "2026-08-25T10:01:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2159,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2159,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "a243342bfdfda414f3ffb9578b9951c22717b3a2",
+        "commits": [
+          "c9a143e4"
+        ],
+        "changed_lines": {
+          "added": 97,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T092543930216-n-westnamegate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03817-a48e-7f20-b139-4b755f77d041",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T095155506755-n-rewirereconcileprogram",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-rewirereconcileprogram",
+        "node_definition": {
+          "done_when": "a new closed repair program is registered in imas_codex/standard_names/signed_manifest.py and reachable through apply_signed_manifest with an authority built by build_repair_authority, which removes a HAS_PARENT edge only when its tip is unauthorized by current derive_edges output; tests/standard_names/test_rewire_relocation_retire.py proves on a disposable Neo4j that it admits the six-hop spectral relocation, REFUSES a legitimate unary_prefix edge, refuses an edge whose removal would leave a live name with no parent path where one is derivable, emits one receipt per removed edge, and replays write-free at changed=0; NO production graph is mutated and the evidence says so explicitly; docs/evidence/sn-graph-wide-integrity/rewire-reconcile-program.md records admitted and refused counts with verbatim reasons and states how many of the 78 measured pairs the program would admit versus refuse",
+          "estimated_hours": null,
+          "goal": "A closed signed program able to retire the unauthorized HAS_PARENT relocations, proven on a disposable graph without touching production",
+          "id": "n-rewirereconcileprogram",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T095155506755-n-rewirereconcileprogram/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/signed_manifest.py",
+            "tests/standard_names/test_rewire_relocation_retire.py",
+            "docs/evidence/sn-graph-wide-integrity/rewire-reconcile-program.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-signresidual",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:52:01Z",
+        "completed_at": "2026-08-25T10:02:16Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 615,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 615,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f68d130a07a7c3e708b58fda7c0852b4d149b5d6",
+        "commits": [
+          "a495fb07",
+          "82e4d7ad"
+        ],
+        "changed_lines": {
+          "added": 634,
+          "removed": 1,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T095155506755-n-rewirereconcileprogram/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03855-7ef5-79c0-b600-48604c226a24",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 6540032,
+            "cached_input_tokens_cumulative": 6540032,
+            "input_tokens": 6785331,
+            "input_tokens_cumulative": 6785331,
+            "output_tokens": 23587,
+            "output_tokens_cumulative": 23587,
+            "reasoning_output_tokens": 4786,
+            "reasoning_output_tokens_cumulative": 4786
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 885
+    "_version": 890
   }
 }
