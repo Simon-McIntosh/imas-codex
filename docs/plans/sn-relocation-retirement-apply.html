@@ -4,22 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="sn-relocation-retirement-apply">
-  <meta name="plan-title"     content="Seventy-Eight Edges The Derivation Never Asked For">
-  <meta name="plan-summary"   content="Apply the proved signed program retiring unauthorized HAS_PARENT relocations. Prevention has landed; the 78 predate it and still break the export.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-relocation-retirement-apply">
+  <meta name="plan-title"     content="Edges The Derivation Never Asked For">
+  <meta name="plan-summary" content="Apply the proved signed program retiring unauthorized HAS_PARENT relocations. Prevention has landed; the 78 predate it and still break the export.">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="elevated">
-  <meta name="plan-sprint"    content="S12">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Relocation Retirement Apply | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="a495fb07,b926b8dd,b7820f7c">
+<meta name="plan-artifacts" content="docs/evidence/sn-graph-wide-integrity/rewire-reconcile-program.md,docs/evidence/sn-relocation-retirement-apply/production-apply.md,docs/evidence/archive/sn-relocation-retirement-apply-landed.html,imas_codex/standard_names/signed_manifest.py,tests/standard_names/test_rewire_relocation_retire.py">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -93,26 +98,35 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="apply-scope" data-choice="whole-measured-class" data-by="reckon-ship" data-when="2026-08-25">
-        <p class="r-dec-q">Apply to the whole unauthorized class, or only the two export-blocking rows?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="whole-measured-class">The whole class the fresh preview admits</button>
-          <button class="r-opt" data-value="export-blockers-only">Only the two rows blocking the export</button>
-        </p>
-        <p class="r-dec-rat">The whole class. The two export-blocking rows are not special — they are the two members of the class that happened to form a cycle an exporter noticed. Repairing only those leaves 76 edges the current derivation does not authorize, each of which can surface later as another cycle, another withheld identity, or another wrong parent in a released catalog. The guard makes retirement durable, and the same signed apply costs the same whether it carries 2 rows or 78.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="apply-scope" data-choice="whole-measured-class" data-by="reckon-ship" data-when="2026-08-25">
+    <p class="r-dec-q">Apply to the whole unauthorized class, or only the two export-blocking rows?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="whole-measured-class">The whole class the fresh preview admits</button>
+      <button class="r-opt" data-value="export-blockers-only">Only the two rows blocking the export</button>
+      </p>
+    <p class="r-dec-rat">The whole class. The two export-blocking rows are not special — they are the two members of the class that happened to form a cycle an exporter noticed. Repairing only those leaves 76 edges the current derivation does not authorize, each of which can surface later as another cycle, another withheld identity, or another wrong parent in a released catalog. The guard makes retirement durable, and the same signed apply costs the same whether it carries 2 rows or 78.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-srra-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-relocation-retirement-apply">
-        <h4 class="r-fu-title">Preview, apply and replay the retirement in production under fresh same-invocation authority</h4>
-        <div class="r-fu-body"><p>Derive and hash the manifest inside the applying invocation rather than reusing the projection. Record admitted and refused counts with verbatim reasons, recover receipts by <code>run_id</code> plus digest, replay write-free, and re-measure the unauthorized class afterwards with the schema sanity counts that prove the zero. Confirm the two export-cycle identities are released.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship sn-relocation-retirement-apply</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-srra-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship sn-relocation-retirement-apply" data-resolved-at="2026-08-25T15:20:13+00:00" data-resolved-by="">
+    <h4 class="r-fu-title">Preview, apply and replay the retirement in production under fresh same-invocation authority</h4>
+    <div class="r-fu-body"><p>Derive and hash the manifest inside the applying invocation rather than reusing the projection. Record admitted and refused counts with verbatim reasons, recover receipts by <code>run_id</code> plus digest, replay write-free, and re-measure the unauthorized class afterwards with the schema sanity counts that prove the zero. Confirm the two export-cycle identities are released.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship sn-relocation-retirement-apply</pre>
+    <p class="r-fu-outcome">done — no followup. Applied in production 2026-08-25 at commit b7820f7c under authority built and hashed inside the applying invocation. Fresh derivation found 73 live unauthorized rows, NOT the projected 78, which is the plan's own warning holding: the 78 was a projection over a prior census and the apply was required to derive its own. 72 admitted, 1 refused verbatim — ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude on 'signed successor-rewire closure does not match exact incumbent parent', left live by design. 72 receipts recovered by run_id plus manifest digest dc82dfb3 only, never by operation name. Stale qualifier pairs 52 to 0 of 711; external non-cohort HAS_PARENT collateral 1,411 rows at digest ea87d5dc unchanged before, after and after replay; replay already_applied at changed 0 and persistent_writes 0. Post-apply class reads 1, the refusal, with schema sanity 4,658/4,658 on id and name_stage and 1,485/1,485 on HAS_PARENT triples. The chain closes here: the export ordering-cycle participant set went from the two spectral SNR identities to EMPTY, releasing both from the WEST withheld set, so this plan's downstream barrier is down and nothing awaits another plan.</p>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T141822953482-n-retireapply" data-who="impl-retireapply" data-when="2026-08-25T14:35:30Z">
+    <div class="r-comment-body"><p>Production apply landed under authority derived inside the applying invocation. Fresh derivation found 73 live unauthorized successor-relocation rows, not the projected 78 - the projection was stale exactly as the plan warned. Partition 72 admitted, 1 refused; verbatim refusal for ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude -&gt; parallel_bulk_ion_velocity (replacement parallel_ion_velocity): signed successor-rewire closure does not match exact incumbent parent. Manifest SHA-256 dc82dfb3 under this run_id; 72 receipts recovered ONLY by exact run_id plus manifest digest. Collateral held: external non-cohort HAS_PARENT stayed 1411 rows at SHA-256 ea87d5dc before, after, and after replay. Replay already_applied, changed 0, persistent_writes 0. Post-apply unauthorized non-self class 1 (the refusal), with schema sanity StandardName.id 4658/4658, name_stage 4658/4658, HAS_PARENT source/target/operator_kind 1485/1485 each. Stale qualifier pairs 52 -&gt; 0 of 711 live qualifier edges. The global ordering-cycle participant set went from exactly the two spectral SNR identities to EMPTY: both released from the export withheld set.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-20260825T1520-shipped" data-who="reckon-ship" data-when="2026-08-25T15:20:00+00:00">
+    <div class="r-comment-body">SHIPPED at impl 1.0. This plan was sitting at draft and impl 0 while its work was complete and verified in production — exactly the state that gets finished work re-planned, and the reason this beat is being written now rather than at some later tidy-up. THE PLAN'S OWN WARNING IS THE RESULT WORTH KEEPING: it recorded the 78-row figure as a projection over a prior census with retained per-row maps, explicitly NOT a production preview, and required the apply to build and hash fresh authority inside the applying invocation. Fresh derivation found 73. Five of the projected rows were no longer there, so an apply that trusted the projection would have carried five stale rows into a signed transaction. Measure: 72 admitted / 1 refused, 72 receipts recovered by run_id plus digest dc82dfb3, stale qualifier pairs 52 to 0 of 711, collateral 1,411 external HAS_PARENT rows at digest ea87d5dc unchanged across apply and replay, replay write-free. The refusal is recorded and left live rather than forced: ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude, on 'signed successor-rewire closure does not match exact incumbent parent'. AND IT CLEARED A RELEASE BARRIER: the two spectral SNR identities that aborted the WEST catalog export on a hierarchy cycle were members of this class, and the ordering-cycle participant set is now empty with both released from the withheld set. Durable because prevention landed first at b926b8dd — an earlier governed deletion of that same edge had been undone by the rewire, and the guard is what makes this retirement hold.</div>
+</div>
+</section>
+</main>
 </body>
 </html>

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="sn-relocation-retirement-apply-landed">
+  <meta name="plan-title" content="Unauthorized Relocations Retired — Landed">
+  <meta name="plan-evidence-for" content="sn-relocation-retirement-apply">
+  <title>Relocation Retirement Landed | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <section id="applied">
+      <h2>Seventy-three live rows, seventy-two retired, one refused by name</h2>
+      <p>
+        Applied to the production graph 2026-08-25, commit <code>b7820f7c</code>, through
+        <code>retire_unauthorized_has_parent_relocations</code> under authority built and
+        hashed inside the applying invocation.
+      </p>
+      <table>
+        <caption>Apply result, manifest SHA-256 <code>dc82dfb3</code></caption>
+        <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Live unauthorized rows on fresh derivation</td><td><strong>73</strong> — not the projected 78</td></tr>
+          <tr><td>Admitted / refused</td><td><strong>72 / 1</strong></td></tr>
+          <tr><td>Receipts, recovered by run_id + digest only</td><td>72</td></tr>
+          <tr><td>Stale qualifier pairs</td><td><strong>52 → 0</strong> of 711 live qualifier edges</tr>
+          <tr><td>Export ordering-cycle participants</td><td><strong>2 → empty</strong></td></tr>
+          <tr><td>External non-cohort <code>HAS_PARENT</code> collateral</td><td>1,411 rows, digest <code>ea87d5dc</code> unchanged before, after and after replay</td></tr>
+          <tr><td>Replay</td><td><code>already_applied</code>, changed 0, persistent_writes 0</td></tr>
+        </tbody>
+      </table>
+      <p>
+        <strong>The projection was stale and the plan said it would be.</strong> It
+        recorded 78 as a projection over a prior census with retained per-row maps,
+        explicitly not a production preview, and required the apply to derive fresh
+        authority inside the invocation. Fresh derivation found 73. Had the apply trusted
+        the projection it would have carried five rows that were no longer there.
+      </p>
+      <p>
+        <strong>The single refusal is recorded rather than worked around:</strong>
+        <code>ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude</code> &rarr;
+        <code>parallel_bulk_ion_velocity</code>, refused verbatim on <em>signed
+        successor-rewire closure does not match exact incumbent parent</em>. Left live by
+        design.
+      </p>
+      <p>
+        Post-apply the unauthorized non-self class reads 1 — that refusal — with schema
+        sanity <code>id</code> 4,658/4,658, <code>name_stage</code> 4,658/4,658 and
+        <code>HAS_PARENT</code> source, target and <code>operator_kind</code> 1,485/1,485
+        each.
+      </p>
+      <p>
+        <strong>This cleared a release barrier, not only a hygiene class.</strong> The two
+        spectral SNR identities that aborted the WEST catalog export on a hierarchy cycle
+        were members of this class; the ordering-cycle participant set is now empty and
+        both are released from the withheld set. Prevention landed first at
+        <code>b926b8dd</code>, which is why the retirement is durable where an earlier
+        governed deletion of the same edge was undone by the rewire.
+      </p>
+    </section>
+  </main>
+</body>
+</html>
