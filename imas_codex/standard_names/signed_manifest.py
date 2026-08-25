@@ -113,6 +113,16 @@ _ERROR_SIBLING_GUARDS = (
     _COLLATERAL_IMMUTABILITY,
 )
 
+_DUAL_AUTHORITY_ADAPTER = "dual-authority-retirement"
+_DUAL_AUTHORITY_MUTATION = "release-and-supersede"
+_AUTHORITY_JOIN = "authority-join"
+_DUAL_AUTHORITY_GUARDS = (
+    _AUTHORITY_JOIN,
+    _SIGNED_LIFECYCLE,
+    _NO_LIVE_STRUCTURAL_CHILD,
+    _COLLATERAL_IMMUTABILITY,
+)
+
 
 class SignedManifestAuthorityError(ValueError):
     """The authority bytes or typed repair program are invalid."""
@@ -4370,6 +4380,383 @@ def _project_receipt(authority: _Authority, receipt: dict[str, Any]) -> dict[str
     )
 
 
+def _apply_dual_authority_retirement(
+    source_adjudication: dict[str, Any],
+    retirement_authority: dict[str, Any],
+    *,
+    retirement_authority_sha256: str | None,
+    mutation_kind: str | None,
+    guard_set: tuple[str, ...] | None,
+    reason: str,
+    apply: bool,
+    manifest_sha256: str | None,
+    run_id: str | None,
+    gc: Any | None,
+) -> dict[str, Any]:
+    """Run the closed source-release and target-supersession program."""
+    from imas_codex.standard_names.graph_ops import (
+        SIGNED_DUAL_AUTHORITY_RETIREMENT_RECEIPT_SCHEMA,
+        SignedDualAuthorityRetirementConflict,
+        SignedSourceDispositionConflict,
+        _authority_payload_hash,
+        _lock_signed_source_disposition_authority,
+        _signed_dual_authority_change_id,
+        _signed_dual_authority_retirement_manifest,
+        _validate_signed_dual_authority_retirement,
+    )
+
+    if mutation_kind != _DUAL_AUTHORITY_MUTATION:
+        raise SignedManifestAuthorityError(
+            "dual-authority retirement requires its exact compound mutation"
+        )
+    if guard_set != _DUAL_AUTHORITY_GUARDS:
+        raise SignedManifestAuthorityError(
+            "dual-authority retirement requires its exact signed guard set"
+        )
+    if retirement_authority_sha256 is None:
+        raise SignedManifestAuthorityError(
+            "dual-authority retirement requires retirement_authority_sha256"
+        )
+    if not reason.strip():
+        raise ValueError("dual-authority retirement requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("apply requires manifest_sha256")
+    if manifest_sha256 is not None:
+        _require_sha256(manifest_sha256, "manifest_sha256")
+
+    source_sha256, source_rows_sha256, source_rows, retirement_rows = (
+        _validate_signed_dual_authority_retirement(
+            source_adjudication,
+            retirement_authority,
+            retirement_authority_sha256,
+        )
+    )
+    target_ids = [row["name"] for row in retirement_rows]
+    signed_pairs = sorted(
+        (binding["source_id"], row["name"])
+        for row in retirement_rows
+        for binding in row["current_removed_bindings"]
+    )
+    own_client = gc is None
+    client: Any = GraphClient() if own_client else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query = _TransactionQuery(transaction)
+            try:
+                if apply:
+                    replay_rows = query.query(
+                        """
+                        UNWIND $targets AS expected
+                        OPTIONAL MATCH (target:StandardName {id: expected.target_id})
+                        OPTIONAL MATCH (target)-[:HAS_INTERNAL_CHANGE]->
+                          (change:StandardNameChange {
+                            id: expected.event_id,
+                            operation: 'retire_signed_dual_authority_target',
+                            manifest_sha256: $manifest_sha256
+                          })
+                        RETURN collect({target_id: expected.target_id,
+                          stage: target.name_stage,
+                          status: target.status,
+                          live_sources: COUNT {
+                            (source:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                            WHERE coalesce(source.status, '') <> 'stale'
+                          },
+                          live_children: COUNT {
+                            (child:StandardName)-[:HAS_PARENT]->(target)
+                            WHERE child.name_stage <> 'superseded'
+                              AND NOT (coalesce(child.status, '') IN
+                                ['deprecated', 'superseded'])
+                          }, change_id: change.id}) AS rows
+                        """,
+                        targets=[
+                            {
+                                "target_id": target_id,
+                                "event_id": _signed_dual_authority_change_id(
+                                    str(manifest_sha256), target_id
+                                ),
+                            }
+                            for target_id in target_ids
+                        ],
+                        manifest_sha256=manifest_sha256,
+                    )
+                    replay = replay_rows[0].get("rows") if replay_rows else []
+                    present = [row for row in replay if row.get("change_id")]
+                    if present:
+                        remaining_rows = query.query(
+                            """
+                            UNWIND $pairs AS expected
+                            OPTIONAL MATCH (:StandardNameSource {id: expected.source_id})
+                              -[binding:PRODUCED_NAME]->
+                              (:StandardName {id: expected.target_id})
+                            RETURN count(binding) AS remaining
+                            """,
+                            pairs=[
+                                {"source_id": source_id, "target_id": target_id}
+                                for source_id, target_id in signed_pairs
+                            ],
+                        )
+                        remaining = int(remaining_rows[0].get("remaining") or 0)
+                        if (
+                            len(present) != len(target_ids)
+                            or len(replay) != len(target_ids)
+                            or remaining != 0
+                            or any(
+                                row.get("stage") != "superseded"
+                                or row.get("status") != "superseded"
+                                or int(row.get("live_sources") or 0) != 0
+                                or int(row.get("live_children") or 0) != 0
+                                for row in replay
+                            )
+                        ):
+                            raise SignedDualAuthorityRetirementConflict(
+                                "recorded retirement has lost its postcondition"
+                            )
+                        transaction.rollback()
+                        return {
+                            "schema": SIGNED_DUAL_AUTHORITY_RETIREMENT_RECEIPT_SCHEMA,
+                            "outcome": "already_applied",
+                            "dry_run": False,
+                            "changed": 0,
+                            "persistent_writes": 0,
+                            "sources_reconciled": len(source_rows),
+                            "bindings_released": len(signed_pairs),
+                            "superseded": len(target_ids),
+                            "ledger_rows": len(present),
+                            "manifest_sha256": manifest_sha256,
+                        }
+
+                manifest, actions, refusals = (
+                    _signed_dual_authority_retirement_manifest(
+                        query,
+                        source_rows,
+                        retirement_rows,
+                        source_sha256=source_sha256,
+                        source_row_set_sha256=source_rows_sha256,
+                        retirement_authority_sha256=retirement_authority_sha256,
+                        reason=reason,
+                    )
+                )
+                computed_hash = _authority_payload_hash(manifest)
+                counts = {
+                    "sources": len(source_rows),
+                    "bindings": len(signed_pairs),
+                    "targets": len(target_ids),
+                    "admitted_sources": len(actions),
+                    "refusals": len(refusals),
+                }
+                if apply and computed_hash != manifest_sha256:
+                    raise SignedDualAuthorityRetirementConflict(
+                        "fresh dual-authority manifest does not match signed hash"
+                    )
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_DUAL_AUTHORITY_RETIREMENT_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "dry_run": not apply,
+                        "changed": 0,
+                        "would_change": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": SIGNED_DUAL_AUTHORITY_RETIREMENT_RECEIPT_SCHEMA,
+                        "outcome": "would_apply",
+                        "dry_run": True,
+                        "changed": 0,
+                        "would_change": len(target_ids),
+                        "counts": counts,
+                        "refusals": [],
+                        "manifest": manifest,
+                        "manifest_sha256": computed_hash,
+                    }
+
+                try:
+                    _lock_signed_source_disposition_authority(query, manifest)
+                except SignedSourceDispositionConflict as exc:
+                    raise SignedDualAuthorityRetirementConflict(str(exc)) from exc
+                locked_manifest, locked_actions, locked_refusals = (
+                    _signed_dual_authority_retirement_manifest(
+                        query,
+                        source_rows,
+                        retirement_rows,
+                        source_sha256=source_sha256,
+                        source_row_set_sha256=source_rows_sha256,
+                        retirement_authority_sha256=retirement_authority_sha256,
+                        reason=reason,
+                    )
+                )
+                if (
+                    locked_refusals
+                    or _authority_payload_hash(locked_manifest) != computed_hash
+                ):
+                    raise SignedDualAuthorityRetirementConflict(
+                        "dual authority changed while acquiring locks"
+                    )
+
+                scalar_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        "source_element_id": action["source_element_id"],
+                        "prior_scalar_target": action["prior_scalar_target"],
+                        "keep_target_id": action["keep_target_id"],
+                    }
+                    for action in locked_actions
+                ]
+                scalar_updates = query.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (source:StandardNameSource {id: expected.source_id})
+                    WHERE elementId(source) = expected.source_element_id
+                      AND ((source.produced_sn_id IS NULL
+                            AND expected.prior_scalar_target IS NULL)
+                           OR source.produced_sn_id = expected.prior_scalar_target)
+                      AND source.claimed_at IS NULL
+                      AND source.claim_token IS NULL
+                    SET source.produced_sn_id = expected.keep_target_id
+                    RETURN collect(source.id) AS ids
+                    """,
+                    rows=scalar_rows,
+                )
+                if sorted(scalar_updates[0].get("ids") or []) != sorted(
+                    row["source_id"] for row in source_rows
+                ):
+                    raise SignedDualAuthorityRetirementConflict(
+                        "source scalar compare-and-set changed"
+                    )
+
+                mutation_rows = [
+                    {
+                        "source_id": action["source_id"],
+                        "keep_target_id": action["keep_target_id"],
+                        "remove_target_id": removal["target_id"],
+                        "binding_element_id": removal["binding_element_id"],
+                        "projection_element_id": removal["projection_element_id"],
+                        "backing_element_id": removal["backing_element_id"],
+                    }
+                    for action in locked_actions
+                    for removal in action["removals"]
+                ]
+                released = query.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (source:StandardNameSource {id: expected.source_id})
+                    MATCH (source)-[binding:PRODUCED_NAME]->
+                      (target:StandardName {id: expected.remove_target_id})
+                    WHERE elementId(binding) = expected.binding_element_id
+                      AND source.produced_sn_id = expected.keep_target_id
+                      AND EXISTS {
+                        (source)-[:PRODUCED_NAME]->
+                          (:StandardName {id: expected.keep_target_id})
+                      }
+                    MATCH (backing)-[projection:HAS_STANDARD_NAME]->(target)
+                    WHERE elementId(backing) = expected.backing_element_id
+                      AND elementId(projection) = expected.projection_element_id
+                    DELETE binding, projection
+                    RETURN collect(expected.source_id + '|' + expected.remove_target_id)
+                      AS pairs
+                    """,
+                    rows=mutation_rows,
+                )
+                if len(released[0].get("pairs") or []) != len(signed_pairs):
+                    raise SignedDualAuthorityRetirementConflict(
+                        "signed binding closure changed during release"
+                    )
+
+                lifecycle_rows = [
+                    {
+                        "name_id": row["name"],
+                        "prior_name_stage": row["name_stage"],
+                        "event_id": _signed_dual_authority_change_id(
+                            computed_hash, row["name"]
+                        ),
+                    }
+                    for row in retirement_rows
+                ]
+                retired = query.query(
+                    """
+                    UNWIND $rows AS expected
+                    MATCH (target:StandardName {id: expected.name_id})
+                    WHERE target.name_stage = expected.prior_name_stage
+                      AND target.claimed_at IS NULL
+                      AND target.claim_token IS NULL
+                      AND NOT EXISTS {
+                        (source:StandardNameSource)-[:PRODUCED_NAME]->(target)
+                        WHERE coalesce(source.status, '') <> 'stale'
+                      }
+                      AND NOT EXISTS {
+                        (child:StandardName)-[:HAS_PARENT]->(target)
+                        WHERE child.name_stage <> 'superseded'
+                          AND NOT (coalesce(child.status, '') IN
+                            ['deprecated', 'superseded'])
+                      }
+                    SET target.superseded_from_stage = coalesce(
+                          target.superseded_from_stage, target.name_stage),
+                        target.name_stage = 'superseded',
+                        target.status = 'superseded',
+                        target.source_paths = [],
+                        target.claimed_at = null,
+                        target.claim_token = null
+                    CREATE (change:StandardNameChange {
+                      id: expected.event_id,
+                      from_name: expected.name_id,
+                      to_name: expected.name_id,
+                      operation: 'retire_signed_dual_authority_target',
+                      reason: $reason,
+                      origin: 'semantic_source_reconciliation',
+                      run_id: $run_id,
+                      changed_at: datetime(),
+                      internal: true,
+                      source_authority_sha256: $source_authority_sha256,
+                      retirement_authority_sha256: $retirement_authority_sha256,
+                      manifest_sha256: $manifest_sha256
+                    })
+                    CREATE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN target.id AS name_id, change.id AS change_id
+                    ORDER BY name_id
+                    """,
+                    rows=lifecycle_rows,
+                    reason=reason,
+                    run_id=run_id,
+                    source_authority_sha256=source_sha256,
+                    retirement_authority_sha256=retirement_authority_sha256,
+                    manifest_sha256=computed_hash,
+                )
+                if [row["name_id"] for row in retired] != target_ids:
+                    raise SignedDualAuthorityRetirementConflict(
+                        "lifecycle compare-and-set changed during retirement"
+                    )
+                transaction.commit()
+                return {
+                    "schema": SIGNED_DUAL_AUTHORITY_RETIREMENT_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "dry_run": False,
+                    "changed": len(retired),
+                    "persistent_writes": len(signed_pairs) * 3 + len(retired) * 4,
+                    "sources_reconciled": len(source_rows),
+                    "bindings_released": len(signed_pairs),
+                    "projections_released": len(signed_pairs),
+                    "superseded": len(retired),
+                    "ledger_rows": len(retired),
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_hash,
+                    "change_ids": [row["change_id"] for row in retired],
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own_client:
+            client.close()
+
+
 @retry_on_deadlock()
 def apply_signed_manifest(
     authority_path: str | Path | dict[str, Any],
@@ -4377,6 +4764,7 @@ def apply_signed_manifest(
     authority_file_sha256: str | None = None,
     authority_payload_sha256: str | None = None,
     authority_sha256: str | None = None,
+    retirement_authority_sha256: str | None = None,
     authority_adapter: str | None = None,
     mutation_kind: str | None = None,
     guard_set: tuple[str, ...] | None = None,
@@ -4394,6 +4782,27 @@ def apply_signed_manifest(
     authorizes only the hash: participant closure, collateral rows, and counter
     baselines are always read again inside this invocation.
     """
+    if authority_adapter == _DUAL_AUTHORITY_ADAPTER:
+        if len(legacy_args) != 1 or not isinstance(legacy_args[0], dict):
+            raise SignedManifestAuthorityError(
+                "dual-authority retirement requires both signed authorities"
+            )
+        if not isinstance(authority_path, dict):
+            raise SignedManifestAuthorityError(
+                "dual-authority retirement requires a source authority object"
+            )
+        return _apply_dual_authority_retirement(
+            authority_path,
+            legacy_args[0],
+            retirement_authority_sha256=retirement_authority_sha256,
+            mutation_kind=mutation_kind,
+            guard_set=guard_set,
+            reason=reason,
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+            run_id=run_id,
+            gc=gc,
+        )
     if not reason.strip():
         message = (
             "stale-source detach requires a non-empty reason"
