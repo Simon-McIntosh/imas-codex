@@ -4,22 +4,25 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="typed-resource-path-contract">
-  <meta name="plan-title"     content="Restore the Typed-Resource Path Contract">
-  <meta name="plan-summary"   content="Flatten the 34 research documents nested one directory too deep so read_plan stops failing for every plan in the project, and add the guard that stops the layout regressing.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="high">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="typed-resource-path-contract">
+  <meta name="plan-title" content="Restore the Typed-Resource Path Contract">
+  <meta name="plan-summary" content="Flatten the 34 research documents nested one directory too deep so read_plan stops failing for every plan in the project, and add the guard that stops the layout regressing.">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="2.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-capability-risk" content="moderate">
-  <meta name="plan-sprint"    content="S9">
-  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-sprint" content="S9">
+  <meta name="plan-owner" content="Simon McIntosh">
   <title>Restore the Typed-Resource Path Contract | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="2">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -113,27 +116,33 @@ must be &lt;root&gt;/&lt;slug&gt;.html or &lt;root&gt;/archive/&lt;slug&gt;.html
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="nested-research-disposition" data-choice="flatten-in-place" data-by="reckon-ship" data-when="2026-08-25">
-        <p class="r-dec-q">How should the 34 nested research documents be brought back under the contract?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="flatten-in-place">Flatten into docs/research/ and rewrite references</button>
-          <button class="r-opt" data-value="strip-typing">Remove reckon-type so they stop being typed resources</button>
-          <button class="r-opt" data-value="widen-contract">Change reckon to permit nested typed paths</button>
-        </p>
-        <p class="r-dec-rat">Flatten. The basenames are already collision-free against docs/research/, so flattening preserves every slug identity and every plan-informs edge while needing no renaming scheme. Stripping reckon-type would silence the error by deleting 31 documents' graph identity, trading a visible outage for invisible loss. Widening the contract is a change to shared tooling to accommodate one repository's layout, and the contract is doing useful work everywhere else.</p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="nested-research-disposition" data-choice="flatten-in-place" data-by="reckon-ship" data-when="2026-08-25">
+    <p class="r-dec-q">How should the 34 nested research documents be brought back under the contract?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="flatten-in-place">Flatten into docs/research/ and rewrite references</button>
+      <button class="r-opt" data-value="strip-typing">Remove reckon-type so they stop being typed resources</button>
+      <button class="r-opt" data-value="widen-contract">Change reckon to permit nested typed paths</button>
+      </p>
+    <p class="r-dec-rat">Flatten. The basenames are already collision-free against docs/research/, so flattening preserves every slug identity and every plan-informs edge while needing no renaming scheme. Stripping reckon-type would silence the error by deleting 31 documents&#x27; graph identity, trading a visible outage for invisible loss. Widening the contract is a change to shared tooling to accommodate one repository&#x27;s layout, and the contract is doing useful work everywhere else.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-trpc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25">
-        <h4 class="r-fu-title">Flatten the 34 nested research documents and add the layout guard</h4>
-        <div class="r-fu-body"><p>Move all 34 with <code>git mv</code>, rewrite the 106 references across 43 files including archived ones, and add the tree-walking test that imports reckon's own <code>TYPE_ROOTS</code>. The gate is that <code>read_plan</code> returns a plan, the <code>plan-informs</code> edge count is unchanged, and no reference resolves to a missing file.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship typed-resource-path-contract</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-trpc-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="2026-08-25T12:24:31+00:00" data-resolved-by="">
+    <h4 class="r-fu-title">Flatten the 34 nested research documents and add the layout guard</h4>
+    <div class="r-fu-body"><p>Move all 34 with <code>git mv</code>, rewrite the 106 references across 43 files including archived ones, and add the tree-walking test that imports reckon's own <code>TYPE_ROOTS</code>. The gate is that <code>read_plan</code> returns a plan, the <code>plan-informs</code> edge count is unchanged, and no reference resolves to a missing file.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship typed-resource-path-contract</pre>
+    <p class="r-fu-outcome">Landed 2026-08-25 at 651d2367 and ce2e7678, merged 05b8c9b2. All 34 nested research documents flattened into docs/research/ with basenames unchanged, and read_plan returns real plans again - 3 of 3, verified from the main checkout after merge, where it had failed for every caller on every plan. 106 references rewritten across 43 files including archived and evidence referrers; one absent historical JSON artifact recorded as an explicit non-path disposition rather than quietly rewritten to something that resolves. The gate held on the term that mattered: the plan-informs set compared ELEMENT BY ELEMENT, 58 edges over 31 documents, identical at SHA-256 a1328051 with cmp exit 0, because a cardinality check would have accepted a dropped edge paired with a spurious one. The guard imports reckon's own TYPE_ROOTS rather than restating them and is proved to FAIL on a deliberately nested fixture while accepting a legal evidence/archive path. The sweep also exposed an older fault it did not cause - three archived landing records shadowing the live dd-graph-hygiene plan identity - now evidence with unique identities and a back-reference, leaving exactly one declaration of that slug. Evidence: docs/evidence/archive/typed-resource-path-contract-landed.html. Done - no followup; the layout rule is now enforced by a test rather than by attention.</p>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-run-r-20260825T100331224609-n-typedpathsweep" data-who="impl-pathsweep" data-when="2026-08-25T12:21:49Z">
+    <div class="r-comment-body"><p>read_plan restored: 3 of 3 requested plans return with titles and versions after failing project-wide. 34 files flattened, 106 references rewritten across 43 files with zero missing paths, plan-informs set identical element-wise at 58 edges over 31 documents (SHA-256 a1328051, cmp exit 0), guard proved to fail on a deliberately nested fixture. Exposed and fixed a second older fault: three archived records shadowing the live dd-graph-hygiene plan identity</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

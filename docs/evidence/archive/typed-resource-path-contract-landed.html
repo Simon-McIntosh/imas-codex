@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="typed-resource-path-contract-landed">
+  <meta name="plan-title" content="typed-resource-path-contract &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="typed-resource-path-contract">
+  <title>typed-resource-path-contract landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>typed-resource-path-contract &mdash; cumulative execution evidence</h1>
+  <p>One anchor per material landing.</p>
+
+  <section id="read-plan-restored">
+    <h2>read_plan restored across the project</h2>
+    <p>Every <code>read_plan</code> call in this project failed, whatever plan it asked
+    for, on a path that was not the caller's plan. Resource resolution walks the whole
+    documentation tree and raises on the first contract violation, so a layout fault in
+    one research directory presented as a total read outage. Two concurrent sessions
+    worked around it for a full day by reading each plan's <code>plan-version</code>
+    meta tag directly.</p>
+    <p>After the sweep, <strong>3 of 3</strong> requested plans return with titles,
+    versions, statuses and content digests: <code>typed-resource-path-contract</code>,
+    <code>sn-graph-identity-convention</code> (v43, shipped) and
+    <code>sn-repair-operator-consolidation</code> (v37, shipped). Verified independently
+    from the main checkout after merge, because the docs server reads the main working
+    tree and the fix existed only in a worktree until then.</p>
+    <p>Commits <code>651d2367</code>, <code>ce2e7678</code>, merged <code>05b8c9b2</code>.</p>
+  </section>
+
+  <section id="provenance-graph-survived">
+    <h2>The provenance graph survived the move, proved element-wise</h2>
+    <p>The gate was never that the files moved. 31 of the 34 documents carry
+    <code>plan-informs</code> edges, so the risk was trading a visible read outage for
+    invisible missing provenance.</p>
+    <p><strong>58 edges over 31 documents, identical before and after, SHA-256
+    <code>a1328051c026f0ec689db383a511c27c2de7781b461cdb8596a2286dc3862c2b</code>,
+    <code>cmp</code> exit 0.</strong> The comparison is element by element rather than by
+    cardinality: an unchanged total can hide a dropped edge paired with a spuriously
+    added one, so a count would have passed a corrupted set.</p>
+  </section>
+
+  <section id="references-rewritten">
+    <h2>106 references rewritten, none left dangling</h2>
+    <p>106 rewrites across 43 files, including referrers under <code>docs/archive/</code>
+    and <code>docs/evidence/</code>. A dead link in a historical document is still a dead
+    link. 105 canonical path references resolve; the remaining one is an absent
+    historical JSON artifact, recorded as an explicit non-path disposition rather than
+    quietly rewritten to something that resolves. Zero missing paths, zero legacy
+    references.</p>
+    <p>Scoping the sweep to skip a subdirectory was tested and rejected: a single
+    referrer in the candidate exclusion
+    (<code>docs/evidence/sn-quality-parity/final-closure-verification.md</code>) would
+    have been left dangling while the sweep reported clean.</p>
+  </section>
+
+  <section id="guard-fails-closed">
+    <h2>The guard is proved to fail, not merely to pass</h2>
+    <p>34 files accumulated under a rule that already existed, because the rule only
+    fired at read time deep inside an unrelated call. The replacement walks the tree
+    applying reckon's <em>imported</em> <code>TYPE_ROOTS</code> rather than a local
+    restatement of them &mdash; a second transcription of that list is exactly the drift
+    that once produced an 87-versus-34 miscount, since <code>archive</code> is not a
+    typed root.</p>
+    <p>The test passes on two cases: it <strong>fails on a deliberately nested
+    fixture</strong>, naming the offending path, and it accepts a legal
+    <code>evidence/archive/</code> path at two segments. A guard that has only ever seen
+    a clean tree cannot be distinguished from a guard that cannot see, and it would be
+    the thirty-fifth file that found out.</p>
+  </section>
+
+  <section id="shadowed-plan-identity">
+    <h2>A second, older fault the move exposed but did not cause</h2>
+    <p>With the nested-path error cleared, <code>read_plan</code> failed next on
+    duplicate identities: three archived landing records under
+    <code>docs/archive/</code> each declared <code>plan-slug=dd-graph-hygiene</code>,
+    the same slug as the live plan <code>docs/dd-graph-hygiene.html</code>. Four files
+    claimed one identity and the three archives shadowed a real plan.</p>
+    <p>The worker stopped and asked rather than choosing a disposition the plan did not
+    settle. They are section landing records, not three independently executable plans,
+    so they are now <code>reckon-type=evidence</code> with identities derived from their
+    already-unique basenames and a <code>plan-evidence-for</code> back-reference. They
+    were not moved &mdash; <code>docs/archive/</code> is not a typed root, so their paths
+    were always legal &mdash; and not renamed, because the sprint-label fragments in
+    their basenames are artifacts, which the naming rule exempts. Exactly one
+    declaration of that slug now exists.</p>
+    <p>The instruction to stop again on a fourth distinct pre-existing defect was not
+    triggered. A fail-closed contract exposing a queue of latent identity faults is
+    itself a finding; a worker quietly draining it converts a measurable queue into an
+    invisible one.</p>
+  </section>
+</main>
+</body>
+</html>
