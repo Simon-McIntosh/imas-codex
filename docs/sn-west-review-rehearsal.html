@@ -16,9 +16,9 @@
   <title>WEST Review Rehearsal | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-modified" content="2026-08-16">
-<meta name="plan-version" content="30">
-<meta name="plan-impl" content="0.65">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="32">
+<meta name="plan-impl" content="0.75">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
 <meta name="plan-sprint" content="S10">
@@ -2253,6 +2253,12 @@ Done-when
 </div>
 <div class="r-comment" data-section="_top" data-id="c-20260816-gate-manifest-landed" data-who="reckon-ship" data-when="2026-08-16T17:36:00+00:00">
     <div class="r-comment-body"><p><strong>Exact release-gate disposition manifest landed (read-only node, gate passed).</strong> All 586 rows (355 sources + 231 names) classified, zero unclassified: <strong>49 rows block the RC cut</strong> — 2 compose claims (dd:hard_x_rays/emissivity_profile_1d/half_width_external, dd:camera_x_rays/camera/camera_dimensions), 2 dual-binding repairs (half_width_internal, summary/time_breakdown/value), 5 skipped sources with NO recorded refusal reason, 28 docs drains (19 pending incl. the one dead-link doc, 8 reviewed, 1 exhausted), 9 sn-edit repairs (7 accepted-quarantined: canonical_locus _of_ to _at_ rewrites, cumulative integrated_ prefix, outline-entity and energy-unit issues; 2 drafted-quarantined), 2 sn rescore, 1 quorum review (normalized_poloidal_flux_coordinate). gm1/gm5/gm6 are composed onto accepted docs-accepted names — no longer at the attempt cap. Fully clean names: 191 (the census 198 included the 7 quarantined). Execution split: the 21 non-docs rows are S8 work under sn-graph-wide-integrity f-sgwi-west-blocking; the 28 docs drains fold into the S9 WEST docs refresh (sn-quality-parity f-west-docs-refresh) so the packet carries the new docs standard. Manifest: ~/.local/share/imas-codex/receipts/standard-names/portfolio-census-2026-08-16/west-gate-manifest.json (sha a613ecb7). Re-extract before any RC decision.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20260825T070724966717-n-westrcstatus" data-who="test-westrc" data-when="2026-08-25T07:24:46Z">
+    <div class="r-comment-body"><p>WEST packet NOT stable and NOT releasable: cohort 416, 178 changed stage in 12h, 47 withheld under 5 reasons, and the real export failed on a two-name hierarchy cycle producing 0 packets</p></div>
+</div>
+<div class="r-comment" data-section="§1" data-id="c-20260825T0730-packetreadiness" data-who="reckon-ship" data-when="2026-08-25T07:30:00+00:00">
+    <div class="r-comment-body">n-westrcstatus landed — commit 3b7a6f56; gate packet-is-a-stable-releasable-batch FAILED on all three of its clauses; artifact docs/evidence/sn-west-review-rehearsal/packet-readiness.md. Measured against the LIVE GRAPH rather than campaign reports, which matters because every figure previously carried for this packet came from a campaign's own account of itself. Cohort 416 StandardName.id identities — 218 directly source-bound plus 198 pulled in by production family closure, so the packet is roughly twice the size the WEST refresh campaigns were sized against. Name-accepted or approved 379, docs-accepted 381, all three axes clean on 368; 355 of 355 source rows present but only 328 with a live target and 27 unmatched. NOT STABLE: 178 of 416 changed stage in the twelve hours to 07:20Z. Forty-three percent churn is not a packet a physicist can be asked to review whatever the counts say, and it is the direct consequence of running three graph-writing campaigns against the cohort overnight. NOT RELEASABLE, and for a harder reason than the filters: the production export retained 369 and withheld 47 under documentation_not_accepted 18, name_review_quorum_shortfall 14, invalid_validation_status 11, invalid_catalog_entry 2 and resolution_unrecorded 2 — then FAILED with an OrderingError on a two-identity hierarchy cycle between logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel and spectral_signal_to_noise_ratio_of_spectrometer_channel, after pruning 296 dangling internal links. No catalog.yml and no export report were written, so THE COMPLETE EXPORTED PACKET IS 0, not 369. This is the first catalog release failing in exactly the way sn-release-readiness §1 predicted every gate would — latent until the day it runs, in public, against real state. Finding it here rather than there is the entire value of the rehearsal.</div>
 </div>
 </section>
 </main>
