@@ -8,8 +8,8 @@
   <meta name="plan-slug" content="sn-quality-parity">
   <meta name="plan-title" content="Standard Name Documentation Quality">
   <meta name="plan-summary" content="Make &quot;better Standard Name documentation&quot; a testable claim. The template, rich DD/COCOS context, curated examples and link lifecycle are already live; what was missing is the evidence loop — a holdout of DD paths paired with real catalog documentation, an objective per-gate content scorer over the seven operative gates, and a phase-by-phase comparison so no template or context change can claim an improvement it has not measured.">
-  <meta name="plan-status" content="active">
-  <meta name="plan-impl" content="0.99">
+  <meta name="plan-status" content="shipped">
+  <meta name="plan-impl" content="1.0">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort" content="XL">
   <meta name="plan-owner" content="Simon McIntosh">
@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="77">
+<meta name="plan-version" content="78">
 <meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa,3d0bb831,a1b4b1f8,e9530012,3946bd26,18fc3c10,d947a875,4c1542ba">
 <meta name="plan-artifacts" content="docs/evidence/sn-quality-parity/closure-audit.md,docs/evidence/sn-quality-parity/sign-convention-diagnosis.md,docs/evidence/sn-quality-parity/west-docs-resumed-refresh.md,docs/evidence/sn-quality-parity/west-docs-second-tranche.md">
 </head>
@@ -315,10 +315,16 @@
     <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
     <p class="r-fu-outcome">Dispositioned 2026-08-25 by n-westnamegate at commit c9a143e4. All 28 family-only name-gated identities are ledgered: 7 accepted through ordinary quorum at 0.8875 to 1.0000 with two or three fresh reviews each, 21 withheld with named lifecycle reasons, and 0 hand-accepted. Twenty-three were same-name restaged through sanctioned sn rescore. USD 2.46 of the 40 ceiling; running authorised USD 73.68 of 150. Two findings outlive the count. First, ten names scored ABOVE the bar and still did not accept because the sanctioned path refused them on accepted-descendant cascade conflicts - the guard working, not a shortfall, and forcing them would have required an implicit include_accepted. Second, the family documentation figure depends on which baseline is asked: on a FIXED baseline it is unmoved at 28, while a fresh re-mint reads 22 over 410 identities because six terminal predecessors left the family closure. Only the first is repair; the second partly reflects identities leaving the set. Continues as f-wqp-sevendocs.</p>
     </article>
-<article class="r-fu" data-id="f-wqp-sevendocs" data-status="open" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-wqp-sevendocs" data-status="resolved" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="2026-08-25T14:22:16+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Carry the seven newly accepted names through the documentation quorum</h4>
     <div class="r-fu-body">The seven identities accepted by n-westnamegate cleared the NAME axis only. Under the documented cross-gate, GENERATE_DOCS fires only after a name is accepted, so each now has a documentation lifecycle that is pending and none is shippable until it clears the ordinary docs quorum. The names are electron_density, normalized_toroidal_flux_coordinate_of_line_of_sight, normalized_toroidal_flux_coordinate_of_measurement_position, radial_coordinate_of_electron_cyclotron_launcher_mirror, ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude, toroidal_beta and turn_count_of_correction_coil. Drive them through the ordinary documentation pools; never hand-accept and never hand-edit the text. Report the family documentation census on BOTH bases - fixed baseline and fresh re-mint - because the two disagree by construction and reporting only the improving one overstates the result. Ceiling USD 25 against the authorised 150, of which 73.68 is spent. This node must not run while another node holds docs/evidence/sn-quality-parity/.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-quality-parity</pre>
+    <p class="r-fu-outcome">Landed 2026-08-25 at fe25015a. All seven identities went pending to accepted through the ordinary documentation quorum, scores 0.8875 to 0.9500 with two to five fresh reviews each, zero hand-accepts and no documentation text hand-edited. toroidal_beta is the instructive one: it reviewed at 0.6500, took one ordinary refinement and then accepted at 0.9500 over five reviews, so the quorum did reject and the refine path did the work rather than the bar being lowered. ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude accepted at 0.8875 via authoritative escalation. USD 2.09 of the 25 ceiling; running authorised USD 75.77 of 150. The dual-basis census was reported as required and the two bases move together this time: fixed baseline 28 to 22 non-accepted, fresh re-mint 22 to 16 over 410 identities. Note that seven promotions move either census by only SIX, because the ratio successor belongs to neither family-only basis - the kind of arithmetic that looks like a lost row unless it is stated. WEST is now materially closer to RC: the name-axis and docs-axis arcs for the family cohort are both dispositioned, and the remaining barriers are the embedding-coverage gate and the relocation retirement, both owned in S12. Done - no followup for this plan; the residue below is recorded as a new followup because it is newly surfaced rather than left over.</p>
+    </article>
+<article class="r-fu" data-id="f-wqp-sourceresidue" data-status="open" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Six live names whose sources are unrecoverable or absent from the current DD</h4>
+    <div class="r-fu-body">NEWLY SURFACED by the scoped documentation run at fe25015a, outside that node's write scope and deliberately not mutated by it. The run emitted graph-wide warnings for FOUR live StandardName nodes with no recoverable producing source, and TWO live names fed by DD paths that are absent from the current Data Dictionary version. Both classes matter for a catalog release: a live name with no producing source cannot be traced back to the physics it names, and a name bound to a DD path that no longer exists will not survive a DD version bump. Enumerate all six by id, classify each as recoverable, retargetable or genuinely retired, and disposition them through the governed path rather than by deletion. This belongs with sn-release-readiness, which owns the question of what a release would silently drop, rather than with the documentation-quality plan that happened to surface it. Related: the docs reviewer proposed three DD-gap paths for the ratio identity which the scoped pool correctly rejected as outside its claimed batch - those proposals should be re-offered to the DD-gap path rather than lost.</div>
+    <pre class="r-fu-prompt">/reckon-ship sn-release-readiness</pre>
     </article>
 </section>
   <section data-reckon="decisions" id="decisions" class="r-decisions">

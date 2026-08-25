@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-release-readiness">
   <meta name="plan-title" content="What the First Catalog Release Would Silently Drop">
   <meta name="plan-summary" content="Make every export exclusion counted and named before the first Standard Name release, and close the unclaimed graph classes that would otherwise leave a published catalog with missing entries and dangling supersede lineage.">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="12.0">
   <meta name="plan-wall-clock-hours" content="4.0">
@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="70">
+<meta name="plan-version" content="71">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c,15f47960,f7185baa">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/closure-audit.md,docs/evidence/sn-release-readiness/residue-disposition.md">
-<meta name="plan-impl" content="0.96">
+<meta name="plan-impl" content="0.97">
 </head>
 <body>
 <main class="plan-doc">
@@ -508,10 +508,11 @@
     <pre class="r-fu-prompt">/reckon-ship sn-graph-identity-convention</pre>
     <p class="r-fu-outcome">The plan this pointed at, sn-graph-identity-convention, shipped at impl 1.0. All three inputs this plan contributed were consumed. The six-row strip path was dissolved rather than repaired: the retired docs_review_resolution_method field was deleted with its clearing function, so the bug that wrote a null over an earned value no longer has machinery to run in. The eight-site presence-test inventory and its shared eligibility determination were confirmed already landed, and the stale-plan warning was right, because the specification tests written against the old shape were exactly the six failures that made the quiescence baseline red. The four silent-zero incidents became reproduction cases for a static detector that then found 79 more of the same class in production code, seven of them filtering StandardName.name, which is incident 1 still running in six modules. Whatever remains is a schema-ownership question tracked on sn-schema-ownership-residue, not here.</p>
     </article>
-<article class="r-fu" data-id="f-snrr-parseradjudicate" data-status="open" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-snrr-parseradjudicate" data-status="resolved" data-written-by="orchestrator" data-written-at="2026-08-25" data-recommends-skill="" data-resolved-at="2026-08-25T14:23:03+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Adjudicate the surviving local link regex against the shared parser</h4>
     <div class="r-fu-body">CURRENCY CORRECTION, measured 2026-08-25. This plan records that the neutral shared parser landed at 87a78b34 and that the graph_ops half was never cut over. That is no longer true: graph_ops.py imports find_name_references from imas_codex.standard_names.doc_links and calls it. The plan also cites graph_ops.py:15609-15628 for the accept-time normalizer; that line range now holds the documentation-review persist query in a file grown to 24,528 lines, so the anchor has rotted and must not be used to locate anything. WHAT REMAINS GENUINELY OPEN is narrower than the plan claims and needs adjudication rather than a cutover: a local _DOC_LINK_RE at graph_ops.py compiles its own bracket pattern for resolved links of the form label plus name-target. That may be a legitimately distinct concern - parsing an already-resolved link's label and target is not the same job as finding references to resolve - or it may be the residual half of the duplicate-authority problem 87a78b34 set out to end. Determine which by reading the surrounding logic. If it is residual, fold it into doc_links so one module owns the rule; if it is distinct, say so explicitly at the definition and leave it. Do not assume from the name. Scope is imas_codex/standard_names/ only; this node must not run while another node holds graph_ops.py.</div>
     <pre class="r-fu-prompt">/reckon-ship sn-release-readiness</pre>
+    <p class="r-fu-outcome">ADJUDICATED 2026-08-25 at ffabcdec. Verdict DISTINCT, behaviour deliberately unchanged, and the ownership boundary now recorded at the definition so the question is not reopened. _DOC_LINK_RE parses an already-formed Markdown link into BOTH visible label and name target, feeding _doc_link_mismatches, whose one production caller is persist_reviewed_docs on the accept path. find_name_references discovers reference identities and returns only identity, span and syntax, deliberately masking Markdown labels as bare candidates. They are not two authorities on one rule; they answer different questions about the same text. Call sites: _DOC_LINK_RE one, find_name_references two. The differing inputs are named rather than asserted: a resolved link yields a label-and-target pair locally but only the target identity from the shared parser, while a bare bracket or a free name reference is found by the shared parser and is not a resolved-link pair at all - which is exactly why the accept-path mismatch check cannot be built on the shared parser. 14 of 14 focused tests pass with no behavioural change. This closes the currency correction recorded earlier: the plan's claim that the graph_ops half was never cut over was already stale, and what looked like a residual duplicate is a genuine second concern.</p>
     </article>
 </section>
 
