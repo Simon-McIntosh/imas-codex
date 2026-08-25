@@ -16,6 +16,7 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-sprint"    content="S12">
   <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-informs"   content="sn-release-readiness">
   <title>Embedding Coverage Gate | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
@@ -39,10 +40,25 @@
     <p>
       The gate is not decorative. Description embeddings are what semantic search over
       standard names resolves against, so an identity shipping without one is present in
-      the catalog and invisible to the search that is meant to find it. This programme has
-      already met one instance by name: <code>radial_coordinate_of_reflector</code>
-      withholds from release for having no description and no embedding at all &mdash; not
-      because it failed a semantic check, but because there was nothing to check.
+      the catalog and invisible to the search that is meant to find it.
+    </p>
+    <p>
+      <strong>The provenance is a real export run, not a report about one.</strong> Gate A
+      was logged failing on <code>StandardName</code> description-embedding coverage
+      during the WEST export and downgraded there, alongside 295 Gate B dangling-link
+      advisories and 296 dangling links pruned at final set. Start from those run
+      artifacts rather than re-deriving the shortfall from scratch, and treat
+      <a href="/imas-codex/plans/sn-release-readiness">sn-release-readiness</a> as the
+      plan that owns the wider question of what a release silently drops.
+    </p>
+    <p>
+      <strong>There is already a concrete failing case, and it is the shortest path in.</strong>
+      <code>radial_coordinate_of_reflector</code> is withheld from release for having no
+      description and no embedding <em>at all</em> &mdash; not because it failed a semantic
+      check, but because there was nothing to check. That makes the coverage gap more than
+      an export-gate statistic: it blocks individual identities from progressing through
+      the ordinary pipeline. One name is cheaper to diagnose than a corpus, and whatever
+      explains it probably explains the class.
     </p>
 
     <h2 id="s2">&sect;2 &mdash; Establish the number before arguing about the threshold</h2>
