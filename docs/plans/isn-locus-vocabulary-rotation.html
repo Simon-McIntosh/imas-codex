@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="isn-locus-vocabulary-rotation">
   <meta name="plan-title" content="A Locus The Grammar Will Not Spell">
   <meta name="plan-summary" content="One owner/geometry row cannot be repaired here: its replacement identity fails strict grammar because the locus token does not exist in ISN.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="shipped">
   <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="3.0">
   <meta name="plan-capability-version" content="1.0">
@@ -21,10 +21,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="8">
-<meta name="plan-commits" content="2ec2f04e,faaa985f,31ee3e95">
-<meta name="plan-artifacts" content="docs/evidence/isn-locus-vocabulary-rotation/locus-adjudication.md,docs/evidence/isn-locus-vocabulary-rotation/coordinate-base-convention.md,docs/evidence/isn-locus-vocabulary-rotation/curation-policy-readjudication.md">
-<meta name="plan-impl" content="0.67">
+<meta name="plan-version" content="12">
+<meta name="plan-commits" content="2ec2f04e,faaa985f,31ee3e95,7613f3c1">
+<meta name="plan-artifacts" content="docs/evidence/isn-locus-vocabulary-rotation/locus-adjudication.md,docs/evidence/isn-locus-vocabulary-rotation/coordinate-base-convention.md,docs/evidence/isn-locus-vocabulary-rotation/curation-policy-readjudication.md,docs/evidence/isn-locus-vocabulary-rotation/refusal-disposition.md,docs/evidence/archive/isn-locus-vocabulary-rotation-landed.html">
+<meta name="plan-impl" content="1.0">
 </head>
 <body>
   <main class="plan-doc">
@@ -49,6 +49,18 @@
     </p>
 
     <h2 id="s2">&sect;2 &mdash; Establish that the token is warranted before adding it</h2>
+    <p class="landed-summary">
+      <span class="badge badge-shipped">&#10003; landed 2026-08-25</span>
+      Adjudicated twice, with opposite answers. The first pass (<code>2ec2f04e</code>) measured
+      a real family &mdash; <strong>3</strong> DD coordinate paths, not the one row that
+      motivated the plan &mdash; and recommended adding the token from the runtime grammar
+      view. Reading <code>locus_registry.yml</code> itself (<code>31ee3e95</code>) reversed it:
+      the token violates <strong>three of four</strong> curation bullets, and among
+      <strong>181</strong> tokens the keys <code>grid</code>, <code>mesh</code>,
+      <code>ggd</code> and <code>field_map</code> all measure <strong>0</strong> &mdash; a
+      boundary, not a gap. Full record:
+      <a href="/imas-codex/evidence/archive/isn-locus-vocabulary-rotation-landed#readjudication">re-adjudication</a>.
+    </p>
     <p>
       A closed vocabulary stays useful only if additions are justified rather than
       convenient, and this project has recorded the opposite error too &mdash; valid
@@ -76,6 +88,18 @@
     </p>
 
     <h2 id="s3">&sect;3 &mdash; The rotation, and the two places the pin lives</h2>
+    <p class="landed-summary">
+      <span class="badge badge-shipped">&#10003; landed 2026-08-25</span>
+      <strong>The rotation did not happen &mdash; it was refused.</strong> Neither pin moved and
+      nothing was added to the shared vocabulary. Instead all three field-map-grid sources are
+      now <code>vocab_gap</code> and <code>phi</code>&rsquo;s incorrect
+      <code>toroidal_angle_of_measurement_position</code> binding is released
+      (<code>7613f3c1</code>), through sanctioned operators only. Ledger cost: one governed
+      detach entry and one <code>PRODUCED_NAME</code> removal. The base spelling was settled
+      separately (<code>faaa985f</code>) as <code>radial_coordinate</code>, after
+      <code>major_radius</code> proved not to be a registered base at all. Full record:
+      <a href="/imas-codex/evidence/archive/isn-locus-vocabulary-rotation-landed#disposition">refusal disposition</a>.
+    </p>
     <p>
       If warranted, the mechanical path is known and documented: add the token on the ISN
       fork, cut a release candidate, and bump the dependency in this repository &mdash;
@@ -112,10 +136,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-ilvr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship isn-locus-vocabulary-rotation" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-ilvr-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship isn-locus-vocabulary-rotation" data-resolved-at="2026-08-25T18:24:44+00:00" data-resolved-by="">
     <h4 class="r-fu-title">Adjudicate whether the locus is warranted, then rotate if it is</h4>
     <div class="r-fu-body"><p>Adjudication first, derived from <code>get_grammar_context()</code> rather than memory, covering whether the locus is real, how many identities need it, and why each near-miss token fails. Only if warranted: add on the ISN fork, cut an RC, bump BOTH pin occurrences in <code>pyproject.toml</code>, and verify the graph grammar snapshot actually carries the token rather than assuming the dependency bump synced it.</p></div>
     <pre class="r-fu-prompt">/reckon-ship isn-locus-vocabulary-rotation</pre>
+    <p class="r-fu-outcome">Adjudicated, then re-adjudicated, and the rotation was refused rather than performed - so the followup closes on a negative result. The first adjudication recommended adding the token on runtime evidence, and the base spelling it proposed for the r leaf was separately overturned when major_radius turned out not to be a registered base at all. Reading locus_registry.yml directly then reversed the recommendation: the token violates three of the registry's four curation bullets, no key naming a grid, mesh, ggd structure or field map exists among 181 tokens, and the two non-material abstractions present are a reference frame and an ion state rather than a discretization. The lead locked permanent-refusal. Applied through sanctioned operators only: all three field-map-grid coordinate sources are now vocab_gap, phi's incorrect toroidal_angle_of_measurement_position binding is released, ledger cost was one governed detach entry and one PRODUCED_NAME removal, and the vocabulary request is recorded as a typed reject rather than left pending so it cannot be reopened by drift. Nothing was added to the shared closed vocabulary and no dependency pin moved. The concrete improvement is that phi no longer asserts a measurement position the Data Dictionary never carried: an honest gap replaced a confident error. done - no followup.</p>
     </article>
 </section>
 
@@ -128,6 +153,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20260825T150357556109-n-basetoken" data-who="impl-basetoken" data-when="2026-08-25T15:11:37Z">
     <div class="r-comment-body"><p>Base settled as radial_coordinate, overturning the adjudication's major_radius proposal for the r leaf. Accepted census 29 radial_coordinate_of_* against 0 major_radius_of_*, behind schema sanity 2302/2302/2302 and a controlled zero: 6 major_radius_of_* rows exist under the same prefix scan but all are superseded or quarantined. Decisive finding: major_radius is not a registered base at all - ISN 0.8.0rc67 carries 175 physical and 35 geometric bases, radial_coordinate is geometric, radius is physical, major_radius is in neither - so the adjudication's own strict-parse rejection for 'no matching physical base or geometry carrier' was reporting the missing BASE, not the missing locus. No conflation risk: accepted radial_coordinate_of_electron_cyclotron_launcher_mirror describes a major-radius coordinate in cylindrical R/phi/Z and binds dd:ec_launchers/mirror/geometry/sphere_centre/r, while normalized minor-radius and flux-coordinate tokens carry the other meanings explicitly. DD target row is exactly 1, text 'Major radius (R) coordinate of grid.', HAS_UNIT m. Family symmetry wins the spelling with no semantic loss. Final three: radial_coordinate_of_field_map_grid, vertical_coordinate_of_field_map_grid, toroidal_coordinate_of_field_map_grid. Real runtime 442s against a 35m budget; the reported overrun is an artifact of late observation, not a slow run.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20260825T180951950958-n-phisource" data-who="impl-phisource" data-when="2026-08-25T18:22:58Z">
+    <div class="r-comment-body"><p>The three field-map-grid coordinate sources are settled refusals and phi's wrong binding is released. Terminal state chosen from the schema, not assumed: StandardNameSourceStatus declares 'vocab_gap: Composition blocked by missing grammar vocabulary', quoted from the declaration. Before: r extracted with no produced name, z extracted with no produced name, phi composed onto toroidal_angle_of_measurement_position. After: all three vocab_gap with produced_sn_id null and no PRODUCED_NAME edge. Ledger deltas are exactly what a release should cost - StandardNameChange 8596 to 8597, a single governed detach entry, and PRODUCED_NAME 5310 to 5309, the one exact phi release. Zero StandardName nodes exist for any of the three intended identities, so nothing was created to hold the refusal. Schema sanity 9668 StandardNameSource candidates with 9668 ids and 9668 statuses, plus an exact 1/1/1 control per path. All writes went through sanctioned operators: detach_one_attachment, write_vocab_gaps, write_skipped_sources, apply_vocab_gap_adjudications - no hand-written Cypher. The vocabulary request itself is recorded as a TYPED REJECT (vocab_gap:object:field_map_grid, editorial_disposition=reject) under grammar 0.8.0rc67 rather than left pending, so the refusal is closed rather than reopenable by drift. No ISN vocabulary or dependency change.</p></div>
 </div>
 </section>
 </main>

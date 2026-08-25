@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T19:59:29",
+  "updated": "2026-08-25T20:26:12",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -575,9 +575,11 @@
         "id": "impl-embedstamp",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03a1f-03cc-7060-bd64-fb81a652bd1c",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03a1f-03cc-7060-bd64-fb81a652bd1c"
+        },
         "created": "2026-08-25"
       },
       {
@@ -1006,9 +1008,11 @@
         "id": "impl-phisource",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03a1f-0495-7c90-a212-d5a92f9b1581",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03a1f-0495-7c90-a212-d5a92f9b1581"
+        },
         "created": "2026-08-25"
       },
       {
@@ -33417,9 +33421,261 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T180951950958-n-phisource",
+        "plan": "isn-locus-vocabulary-rotation",
+        "section": "\u00a73",
+        "node": "n-phisource",
+        "node_definition": {
+          "done_when": "The lead has locked locus-warranted to permanent-refusal: field_map_grid is NOT being added to the closed ISN vocabulary, so the three DD coordinate paths under b_field_non_axisymmetric/time_slice/field_map/grid - r, z and phi - cannot be named and must say so durably in the graph. FIRST establish the correct terminal state from the schema rather than assuming one: read StandardNameSource's declared status enum in imas_codex/schemas/standard_name.yaml and report which value expresses 'this source cannot be named because the vocabulary does not admit its locus', quoting the declaration. The phi source currently binds to toroidal_angle_of_measurement_position, an identity that asserts a measurement position the Data Dictionary does not carry; r and z are extracted with no produced name. Report each of the three sources' current status and produced name BEFORE any change, with the schema sanity count proving each figure real. Then move them to that terminal state with the refusal reason recorded, releasing phi's incorrect binding rather than replacing it with another name. Use the sanctioned write path for source status; if the only available route would be a hand-written Cypher SET of graph text, STOP and report that instead, because bypassing the sanctioned path is what this programme forbids. Re-measure after and confirm no StandardName was created, renamed, or accepted, quoting StandardNameChange and PRODUCED_NAME counts before and after. Do not touch the r/z/phi coordinate BASE spelling, which is separately settled, and do not add anything to any vocabulary.",
+          "estimated_hours": 0.7,
+          "goal": "Record the three field-map-grid DD coordinate paths as settled vocabulary refusals and release the one wrong binding.",
+          "id": "n-phisource",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T180951950958-n-phisource/manifest.md",
+          "plan": "isn-locus-vocabulary-rotation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "35m",
+          "write_paths": [
+            "docs/evidence/isn-locus-vocabulary-rotation/refusal-disposition.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-phisource",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T18:11:41Z",
+        "completed_at": "2026-08-25T18:22:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 677,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 677,
+        "stalled": false,
+        "time_budget": "35m",
+        "base_sha": "bfb6657707b7bbe27f9ed087e56174eea9538458",
+        "commits": [
+          "7613f3c1cbcd1781915d6a8994affb9de0102946"
+        ],
+        "changed_lines": {
+          "added": 112,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T180951950958-n-phisource/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03a1f-0495-7c90-a212-d5a92f9b1581",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3971328,
+            "cached_input_tokens_cumulative": 3971328,
+            "input_tokens": 4142987,
+            "input_tokens_cumulative": 4142987,
+            "output_tokens": 14775,
+            "output_tokens_cumulative": 14775,
+            "reasoning_output_tokens": 3918,
+            "reasoning_output_tokens_cumulative": 3918
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1887,
+              "log_age_seconds": 897,
+              "log_fresh": true,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 919,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T180951950774-n-embedstamp",
+        "plan": "sn-embedding-coverage-gate",
+        "section": "\u00a73",
+        "node": "n-embedstamp",
+        "node_definition": {
+          "done_when": "run_embedding_preflight in imas_codex/standard_names/review/audits.py appends null-description rows to needs_embed, persists item.get('embedding') when that value is null, unconditionally sets sn.embedded_at = datetime(), and reports refreshed_count as len(needs_embed). That is the root cause of all 26 rows carrying embedded_at with neither description nor embedding, and it is why a gate whose message reads 'written then lost - possible data corruption' was firing on rows nothing had ever attempted to embed. Make embedded_at and the refreshed accounting require a non-null vector, so a row with no description is never claimed as embedded and refreshed_count reports vectors actually written rather than candidates considered. Add regression coverage that FAILS against the current behaviour and passes after: assert that a null-description candidate leaves embedded_at unset and is excluded from refreshed_count, and prove the test is honest by confirming it fails when your guard is reverted, quoting both verbatim pytest summary lines. Run the affected suites and quote their verbatim summaries. Graph tests need '-m graph' because this repository's addopts carry '-m not slow and not graph' and a bare invocation silently selects nothing; capture every run to a file once and read the file rather than piping. This node repairs the producer only: do NOT generate descriptions, do NOT embed anything, do NOT retroactively clear embedded_at on the existing 26 rows, and do NOT touch the coverage assertion in tests/graph/test_data_quality.py, which another node just settled. If the existing 26 need a separate data-repair decision, say so and leave them.",
+          "estimated_hours": 0.8,
+          "goal": "Stop the embedding preflight stamping embedded_at on rows it never embedded.",
+          "id": "n-embedstamp",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T180951950774-n-embedstamp/manifest.md",
+          "plan": "sn-embedding-coverage-gate",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a73",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/review/audits.py",
+            "tests/standard_names/test_embedding_preflight_stamping.py",
+            "docs/evidence/sn-embedding-coverage-gate/preflight-stamping-repair.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-embedstamp",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T18:11:41Z",
+        "completed_at": "2026-08-25T18:24:45Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 784,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 784,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "bfb6657707b7bbe27f9ed087e56174eea9538458",
+        "commits": [
+          "6bb1f9fafaea3c30d8f8cf8675bae15158c279a2"
+        ],
+        "changed_lines": {
+          "added": 178,
+          "removed": 19,
+          "files": 3
+        },
+        "tests_added": 1,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T180951950774-n-embedstamp/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03a1f-03cc-7060-bd64-fb81a652bd1c",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5549056,
+            "cached_input_tokens_cumulative": 5549056,
+            "input_tokens": 5699687,
+            "input_tokens_cumulative": 5699687,
+            "output_tokens": 14895,
+            "output_tokens_cumulative": 14895,
+            "reasoning_output_tokens": 2974,
+            "reasoning_output_tokens_cumulative": 2974
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": {
+          "grace": "5m",
+          "requested": true,
+          "waived_runs": [
+            {
+              "budget_overrun": false,
+              "budget_overrun_seconds": 0,
+              "budget_seconds": 2100,
+              "classification": "completed_unpromoted",
+              "detail": "the worker manifest reports completion and the run is still a pointer; promoting it moves the delivered record into the repository ledger",
+              "elapsed_seconds": 1887,
+              "log_age_seconds": 897,
+              "log_fresh": true,
+              "manifest_commits": [
+                "9b29ae70a3134c91b9b50cf339e7ca071344116f"
+              ],
+              "manifest_file_present": true,
+              "manifest_fresh": true,
+              "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T173907453065-n-protectionexposure/manifest.md",
+              "manifest_present": true,
+              "manifest_status": "complete",
+              "next_action": "reckon crew complete --run r-20260825T173907453065-n-protectionexposure --gate <verdict> --commit 9b29ae70a3134c91b9b50cf339e7ca071344116f",
+              "node": "n-protectionexposure",
+              "phase": "starting",
+              "plan": "sn-origin-provenance-backfill",
+              "process_alive": false,
+              "project": "imas-codex",
+              "run_id": "r-20260825T173907453065-n-protectionexposure",
+              "terminal_age_seconds": 919,
+              "terminal_at": "2026-08-25T17:55:54Z",
+              "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/s12hyg-20260825a/n-protectionexposure"
+            }
+          ]
+        },
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest summary",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 939
+    "_version": 943
   }
 }

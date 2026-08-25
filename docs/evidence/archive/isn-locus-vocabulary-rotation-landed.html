@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="evidence">
+  <meta name="plan-slug" content="isn-locus-vocabulary-rotation-landed">
+  <meta name="plan-title" content="isn-locus-vocabulary-rotation &mdash; cumulative execution evidence">
+  <meta name="plan-evidence-for" content="isn-locus-vocabulary-rotation">
+  <title>isn-locus-vocabulary-rotation landed evidence | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+<main class="plan-doc">
+  <h1>isn-locus-vocabulary-rotation &mdash; cumulative execution evidence</h1>
+  <p>The plan asked whether a missing locus token was warranted, and expected to rotate the
+  vocabulary if it was. It did not rotate. The answer is a settled refusal, and the record
+  is kept because a negative result reached through two contradicting adjudications is worth
+  more than the token would have been.</p>
+
+  <section id="adjudication">
+    <h2>The first adjudication recommended adding the token</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-locusadjudicate</code>,
+    commit <code>2ec2f04e</code>. Record:
+    <a href="/imas-codex/evidence/isn-locus-vocabulary-rotation/locus-adjudication">locus-adjudication</a>.</p>
+    <p>It measured a real family rather than the single row that motivated the plan:
+    <strong>3</strong> DD coordinate paths under
+    <code>b_field_non_axisymmetric/time_slice/field_map/grid</code> &mdash; <code>r</code>,
+    <code>z</code>, <code>phi</code> &mdash; two of them beyond the target, behind a schema
+    sanity count of 61,366/61,366/61,366 with a firing positive control. It found no
+    <code>grid</code> or <code>map</code> token among the runtime loci and confirmed the
+    strict parser rejected all three intended identities. On that evidence it recommended
+    <em>warranted</em>, and the disposition was locked accordingly.</p>
+  </section>
+
+  <section id="base">
+    <h2>The coordinate base was settled separately, and survives the reversal</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-basetoken</code>,
+    commit <code>faaa985f</code>. Record:
+    <a href="/imas-codex/evidence/isn-locus-vocabulary-rotation/coordinate-base-convention">coordinate-base-convention</a>.</p>
+    <p>The adjudication had proposed <code>major_radius</code> for the <code>r</code> leaf
+    while using <code>vertical_coordinate</code> and <code>toroidal_coordinate</code> for
+    <code>z</code> and <code>phi</code>. Measured against the corpus: <strong>29</strong>
+    accepted <code>radial_coordinate_of_*</code> identities against <strong>0</strong>
+    accepted <code>major_radius_of_*</code>, the zero controlled by six rows found under the
+    same prefix scan, all superseded or quarantined, behind schema sanity 2,302/2,302/2,302.</p>
+    <p>The decisive fact was stronger than the census: <strong><code>major_radius</code> is
+    not a registered base at all.</strong> ISN 0.8.0rc67 carries 175 physical and 35
+    geometric bases; <code>radial_coordinate</code> is geometric, <code>radius</code> is
+    physical, <code>major_radius</code> is in neither. The first adjudication's own
+    strict-parse rejection &mdash; <em>no matching physical base or geometry carrier</em>
+    &mdash; had been reporting the missing base all along, and was read as a missing locus.
+    No conflation risk was introduced: accepted
+    <code>radial_coordinate_of_electron_cyclotron_launcher_mirror</code> already describes a
+    major-radius coordinate in cylindrical R, &phi;, Z, while normalized minor-radius and
+    flux-coordinate tokens carry the other meanings explicitly.</p>
+  </section>
+
+  <section id="readjudication">
+    <h2>Reading the registry source reversed the recommendation</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-locusreadj</code>,
+    commit <code>31ee3e95</code>. Record:
+    <a href="/imas-codex/evidence/isn-locus-vocabulary-rotation/curation-policy-readjudication">curation-policy-readjudication</a>.</p>
+    <p>The first adjudication derived its evidence from <code>get_grammar_context()</code>,
+    which serves tokens and definitions but not the governing curation-policy comments in
+    <code>locus_registry.yml</code>. Read directly, the policy decides the question:</p>
+    <table>
+      <caption>The token against the registry's four curation bullets</caption>
+      <thead><tr><th>Bullet</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Tokens must describe physics-meaningful loci, not DD structural artifacts</td><td><strong>violates</strong></td></tr>
+        <tr><td>Discretization framework tokens are not physics positions</td><td><strong>violates</strong>, in mechanism</td></tr>
+        <tr><td>Prefer atomic tokens composable via qualifiers over long compounds</td><td><strong>violates</strong></td></tr>
+        <tr><td>Ordinal point labels belong in DD metadata</td><td>satisfies</td></tr>
+      </tbody>
+    </table>
+    <p>Census: <strong>181</strong> registry tokens, <strong>105</strong> entity-typed, with
+    token-key matches of <code>grid</code> 0, <code>mesh</code> 0, <code>ggd</code> 0 and
+    <code>field_map</code> 0. A registry-wide zero that broad reads as a boundary someone
+    drew, not a gap nobody noticed. Exactly <strong>two</strong> tokens are explicit
+    non-material abstractions, <code>coordinate_system</code> and <code>ion_state</code>, and
+    neither is a discretization precedent.</p>
+    <p>The instrument was checked rather than trusted: the installed 0.8.0rc67 package and
+    the ISN checkout registry are <strong>byte-identical</strong> at SHA-256
+    <code>d54a8d8a</code>. So the first adjudication's blind spot was where it looked, not
+    version skew. An interim coordinator census of 160 tokens and 89 entities, quoted in an
+    earlier plan revision, was an undercount from a strict-shape regex and is superseded by
+    these figures.</p>
+    <p>Asked for the strongest case against its own recommendation, it gave one: a coherent
+    three-path family, no available substitute, and two abstract entity precedents. It loses
+    to an explicit discretization boundary and a registry-wide zero.</p>
+  </section>
+
+  <section id="disposition">
+    <h2>The refusal was applied through sanctioned operators, and closed rather than parked</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-phisource</code>,
+    commit <code>7613f3c1</code>. Record:
+    <a href="/imas-codex/evidence/isn-locus-vocabulary-rotation/refusal-disposition">refusal-disposition</a>.</p>
+    <p>The terminal state was read from the schema rather than assumed.
+    <code>StandardNameSourceStatus</code> declares
+    <em>&ldquo;vocab_gap: Composition blocked by missing grammar vocabulary&rdquo;</em>, which
+    is exactly this condition.</p>
+    <table>
+      <caption>The three sources, before and after</caption>
+      <thead><tr><th>DD path</th><th>Before</th><th>After</th></tr></thead>
+      <tbody>
+        <tr><td><code>&hellip;/field_map/grid/r</code></td><td>extracted, no produced name</td><td><code>vocab_gap</code></td></tr>
+        <tr><td><code>&hellip;/field_map/grid/z</code></td><td>extracted, no produced name</td><td><code>vocab_gap</code></td></tr>
+        <tr><td><code>&hellip;/field_map/grid/phi</code></td><td>composed &rarr; <code>toroidal_angle_of_measurement_position</code></td><td><code>vocab_gap</code>, binding released</td></tr>
+      </tbody>
+    </table>
+    <p>Ledger deltas are exactly what one release should cost:
+    <code>StandardNameChange</code> 8,596 &rarr; 8,597, a single governed detach entry, and
+    <code>PRODUCED_NAME</code> 5,310 &rarr; 5,309, the one exact <code>phi</code> release.
+    Zero <code>StandardName</code> nodes exist for any of the three intended identities, so
+    nothing was minted to hold a refusal. Schema sanity: 9,668 <code>StandardNameSource</code>
+    candidates with 9,668 ids and 9,668 statuses, plus an exact 1/1/1 control per path.</p>
+    <p>Every write went through a sanctioned operator &mdash;
+    <code>detach_one_attachment</code>, <code>write_vocab_gaps</code>,
+    <code>write_skipped_sources</code>, <code>apply_vocab_gap_adjudications</code> &mdash; and
+    no hand-written Cypher touched graph text. The vocabulary request is recorded as a
+    <strong>typed reject</strong> (<code>vocab_gap:object:field_map_grid</code>,
+    <code>editorial_disposition=reject</code>) under grammar 0.8.0rc67 rather than left
+    pending, so the refusal is closed rather than reopenable by drift.</p>
+    <p><strong>Nothing was added to the shared closed vocabulary and no dependency pin
+    moved.</strong> The <code>phi</code> row no longer asserts a measurement position the
+    Data Dictionary never carried, which is the concrete improvement: an honest gap replaced
+    a confident error.</p>
+  </section>
+</main>
+</body>
+</html>
