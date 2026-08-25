@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:31:39",
+  "updated": "2026-08-25T10:32:59",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -237,6 +237,15 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a03700-a30e-7043-89f0-c9d943a5a994",
+        "created": "2026-08-25"
+      },
+      {
+        "id": "impl-benchrerun",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-08-25"
       },
       {
@@ -29454,9 +29463,104 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T082012674341-n-ddresidueprogram",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-ddresidueprogram",
+        "node_definition": {
+          "done_when": "a new closed repair program is registered in imas_codex/standard_names/signed_manifest.py and reachable through apply_signed_manifest with an authority built by build_repair_authority; tests/standard_names/test_dd_residue_release.py proves on a disposable Neo4j that the program admits exactly the three legacy residues dd:ntms/time_slice/mode dd:summary/pedestal_fits dd:waves/coherent_wave, refuses a source that still has a live target, refuses a source whose release would strip a name's last producing source, emits one receipt per released row, and replays write-free at changed=0; NO production graph is mutated by this node and the evidence says so explicitly; docs/evidence/sn-graph-wide-integrity/dd-residue-program.md records the admitted and refused counts with verbatim reasons",
+          "estimated_hours": null,
+          "goal": "A closed signed lifecycle-release program able to release the three legacy DD no-live-target residues, proven on a disposable graph without touching production",
+          "id": "n-ddresidueprogram",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T082012674341-n-ddresidueprogram/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/signed_manifest.py",
+            "tests/standard_names/test_dd_residue_release.py",
+            "docs/evidence/sn-graph-wide-integrity/dd-residue-program.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-signrepair",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:20:25Z",
+        "completed_at": "2026-08-25T08:32:44Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 739,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 739,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "1697b38d45e020a452113ae20db6cc2dcd5e6884",
+        "commits": [
+          "c06dd776",
+          "0dd6ba83"
+        ],
+        "changed_lines": {
+          "added": 570,
+          "removed": 1,
+          "files": 3
+        },
+        "tests_added": 3,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T082012674341-n-ddresidueprogram/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03801-a160-7d92-bd99-95cff39bc9b1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9989376,
+            "cached_input_tokens_cumulative": 9989376,
+            "input_tokens": 10223517,
+            "input_tokens_cumulative": 10223517,
+            "output_tokens": 25810,
+            "output_tokens_cumulative": 25810,
+            "reasoning_output_tokens": 7015,
+            "reasoning_output_tokens_cumulative": 7015
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 861
+    "_version": 863
   }
 }
