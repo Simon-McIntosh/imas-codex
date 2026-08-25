@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="sn-guidance-spelling-currency">
+  <meta name="plan-title"     content="Guidance That Names Keys The Schema No Longer Declares">
+  <meta name="plan-summary"   content="The foreign-key migration left prose and pointers behind: the schema's own description names a retired key, three cited line anchors resolve to unrelated slots, and two evidence records describe a deleted field as a live mirror. Correct them, and replace line-number pointers with greppable class-and-slot references.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="mid">
+  <meta name="plan-effort-hours" content="1.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint"    content="S9">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <meta name="plan-informs"   content="sn-graph-identity-convention">
+  <title>Guidance Spelling Currency | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&sect;1 &mdash; A shipped plan's last clause is still false</h2>
+    <p>
+      <code>sn-graph-identity-convention</code> shipped at <code>impl</code> 1.0 with a
+      three-part done-when. Its final clause reads: <em>no guidance file names a
+      spelling the schema no longer declares.</em> Measured 2026-08-25 at commit
+      <code>53d185e6</code>, that clause is false &mdash; including in the schema itself
+      and in the guidance file for this very subject.
+    </p>
+    <p>
+      <strong>This is not a criticism of that plan's detector; it is a statement of what
+      a property detector structurally cannot see.</strong> The static Cypher-property
+      check compares queried property names against LinkML declarations, and it is green.
+      Prose in a description, and a line-number pointer into a file that has since
+      shifted, are not property references. They are invisible to it by construction,
+      which is why the clause passed review while remaining untrue.
+    </p>
+    <p>
+      A new plan rather than a reopen: that plan's verdict on the migration itself is
+      sound and its detector genuinely works. Flipping it back would erase the signal
+      that the schema-wide rename closed.
+    </p>
+
+    <h2 id="s2">&sect;2 &mdash; The canonical rule, and the renames that are NOT stale</h2>
+    <p>
+      Authority is <code>imas_codex/schemas/standard_name.yaml</code>. Migration
+      <code>23c4b55a</code> renamed the <strong>declared generic foreign keys</strong> to
+      <code>StandardName</code> by cardinality, and <code>8e6516be</code> singularized the
+      review axis:
+    </p>
+    <table>
+      <caption>Canonical spellings after the migration</caption>
+      <thead><tr><th>Class</th><th>Retired</th><th>Canonical</th></tr></thead>
+      <tbody>
+        <tr><td><code>DocsRevision</code></td><td><code>sn_id</code></td><td><code>standard_name_id</code></td></tr>
+        <tr><td><code>LLMCost</code></td><td><code>sn_ids</code></td><td><code>standard_name_ids</code></td></tr>
+        <tr><td><code>StandardName</code></td><td><code>docs_review_resolution_method</code></td><td>deleted, no replacement</td></tr>
+        <tr><td><code>StandardNameReview</code></td><td><code>review_axis</code> = <code>names</code></td><td><code>name</code> singular in the graph; the public target stays plural</td></tr>
+      </tbody>
+    </table>
+    <p>
+      <strong>The most valuable thing to record here is what must NOT be touched, because
+      a careless sweep would be far more damaging than the defect.</strong> The rule
+      applies to <em>declared generic foreign keys</em> only. Semantically specific slots
+      keep their names and are correct: <code>StandardNameSource.produced_sn_id</code> is
+      the scalar mirror of <code>PRODUCED_NAME</code>, and
+      <code>StandardNameSourceRetry.terminal_sn_id</code> names a terminal identity. Both
+      remain declared in the schema.
+    </p>
+    <p>
+      Separately, <code>graph_ops.py</code> alone contains <strong>318</strong> occurrences
+      of a bare <code>sn_id</code> or <code>sn_ids</code> token, and
+      <code>workers.py</code> another 190. These are Python parameter names, local
+      variables, dataclass fields and UNWIND row keys &mdash; a different namespace from
+      graph properties, and <strong>not</strong> in scope. Renaming them would be a large
+      diff that changes no graph behaviour while risking the writers this programme
+      depends on.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; The stale references, measured</h2>
+    <table>
+      <caption>Found 2026-08-25; each verified against the current schema</caption>
+      <thead><tr><th>Location</th><th>What it says</th><th>Why it is wrong</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><code>imas_codex/schemas/standard_name.yaml:2247</code></td>
+          <td><code>DocsRevision.id</code> described as <code>Composite key (sn_id#rev-N)</code></td>
+          <td>The schema's own prose names the key the same file retired eight lines below, where it now declares <code>standard_name_id</code>.</td>
+        </tr>
+        <tr>
+          <td><code>imas_codex/standard_names/AGENTS.md</code></td>
+          <td>Three cited schema line anchors</td>
+          <td><code>3014-3021</code> for <code>produced_sn_id</code> resolves to <code>provenance</code>; <code>3346-3349</code> for <code>terminal_sn_id</code> resolves to <code>before_closure_hash</code>; <code>2995-2999</code> resolves to unrelated <code>vocab_gap</code> prose. The rename shifted the file under the pointers.</td>
+        </tr>
+        <tr>
+          <td><code>docs/evidence/sn-release-readiness/gate-eligibility.md</code></td>
+          <td><code>docs_review_resolution_method</code> &ldquo;remains a compatibility mirror&rdquo;</td>
+          <td>The field is deleted from the schema. Owned by another plan &mdash; flag, do not edit here.</td>
+        </tr>
+        <tr>
+          <td><code>docs/evidence/sn-release-readiness/docs-mirror-projection.md</code></td>
+          <td><code>project_docs_review_resolution_methods</code> is &ldquo;the sanctioned writer&rdquo;</td>
+          <td>That symbol is absent from <code>imas_codex/</code> entirely. Owned by another plan &mdash; flag, do not edit here.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      Historical measurement records that cite the retired field in the past tense are
+      <strong>correct as records</strong> and are explicitly out of scope; only prose
+      asserting present-tense behaviour is wrong.
+    </p>
+
+    <h2 id="s4">&sect;4 &mdash; Fix the pointer style, not just the numbers</h2>
+    <p>
+      Re-pinning three line numbers into a 3,600-line schema would restore the pointers
+      and guarantee they rot again on the next slot insertion &mdash; this migration moved
+      them by roughly twenty lines. The durable repair is to cite <strong>class and slot
+      name</strong>, which a reader can grep and which survives any edit that does not
+      rename the slot itself. That is also the form the surrounding guidance already uses
+      for every other reference.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">&sect;</span> Decisions</h2>
+      <div class="r-dec" data-key="pointer-style" data-choice="class-and-slot" data-by="reckon-ship" data-when="2026-08-25">
+        <p class="r-dec-q">How should guidance reference a schema slot?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="class-and-slot">Class and slot name, greppable</button>
+          <button class="r-opt" data-value="repin-lines">Re-pin the line numbers</button>
+        </p>
+        <p class="r-dec-rat">Class and slot. The line anchors rotted within hours of a single rename that shifted them about twenty lines, and a pointer a reader cannot grep is worse than no pointer because they cannot tell whether they are missing context or chasing a ghost. Re-pinning restores the pointers and schedules the same failure.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">&sect;</span> Followups</h2>
+      <article class="r-fu" data-id="f-gsc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25">
+        <h4 class="r-fu-title">Correct the schema description and replace the rotted anchors with class-and-slot references</h4>
+        <div class="r-fu-body"><p>Fix <code>standard_name.yaml:2247</code> and the three rotted anchors in <code>imas_codex/standard_names/AGENTS.md</code>. Leave every <code>produced_sn_id</code>, <code>terminal_sn_id</code>, and Python-namespace <code>sn_id</code> untouched. The gate is that no cited anchor fails to resolve and the schema declares no retired spelling in its own prose.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship sn-guidance-spelling-currency</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>

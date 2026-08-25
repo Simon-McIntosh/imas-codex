@@ -5,7 +5,7 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="sprint">
   <meta name="reckon-id" content="S9">
-  <meta name="reckon-version" content="2">
+  <meta name="reckon-version" content="3">
   <title>Quality before review | sprint</title>
 </head>
 <body>
@@ -16,6 +16,7 @@
   <li data-slug="sn-release-readiness" data-item="{&quot;done_when&quot;: &quot;Export emits an exclusion ledger where emitted + sum(exclusions by reason) = N with identities recoverable per reason; the deprecation-stub query falls back to superseded_by when no REFINED_FROM edge exists; the three open decisions are locked; and the docs, validity and metadata backlogs are drained or dispositioned against the locked decisions.&quot;, &quot;slug&quot;: &quot;sn-release-readiness&quot;, &quot;why_now&quot;: &quot;The first catalog release has never run, so every export gate is untested; the exclusion ledger has to exist before the WEST packet is frozen in S10, or that release ships whatever survives the filters with no statement of what it dropped.&quot;}">sn-release-readiness</li>
   <li data-slug="sn-graph-identity-convention" data-item="{&quot;done_when&quot;: &quot;One axis spelling and one foreign-key spelling hold schema-wide with each migration verified by non-zero coverage before and after; a static Cypher-property check runs in the ordinary test selection, fails on a deliberately misspelled property, and reports zero violations or an itemised allowlist; and no guidance file names a spelling the schema no longer declares.&quot;, &quot;slug&quot;: &quot;sn-graph-identity-convention&quot;, &quot;why_now&quot;: &quot;Four silent-zero query failures in one session traced to this schema, and every downstream census, exclusion ledger and coverage figure in this sprint is a count that can read zero for the wrong reason until the detector exists.&quot;}">sn-graph-identity-convention</li>
   <li data-slug="typed-resource-path-contract" data-item="{&quot;done_when&quot;: &quot;read_plan returns a plan for every slug in the project; the plan-informs edge count over the 34 moved documents is unchanged before and after; no reference resolves to a missing file; and a tree-walking test that imports reckon&#x27;s own TYPE_ROOTS reports zero violations and fails on a deliberately nested fixture.&quot;, &quot;slug&quot;: &quot;typed-resource-path-contract&quot;, &quot;why_now&quot;: &quot;read_plan is currently broken for every plan in the project, and two concurrent sessions are working around it by reading expected_version out of plan HTML meta tags \u2014 a workaround that silently bypasses the version-safety the endpoint exists to provide.&quot;}">typed-resource-path-contract</li>
+  <li data-slug="sn-guidance-spelling-currency" data-item="{&quot;slug&quot;: &quot;sn-guidance-spelling-currency&quot;, &quot;done_when&quot;: &quot;The schema declares no retired spelling in its own prose; every schema anchor cited by imas_codex/standard_names/AGENTS.md resolves to the slot it names; produced_sn_id, terminal_sn_id and every Python-namespace sn_id token are unchanged.&quot;, &quot;why_now&quot;: &quot;The shipped identity-convention plan&#x27;s final done-when clause - no guidance file names a spelling the schema no longer declares - is measurably false, including inside the schema itself and inside the guidance file for that very subject.&quot;}">sn-guidance-spelling-currency</li>
   </ol>
   <script type="application/json" id="reckon-resource-state">{
   "description": "Raise quality where it multiplies the value of the human review, without graph-wide regeneration (lead decision 2026-08-12: too expensive). The docs template, DD/COCOS context, and holdout benchmark land first so every future generation is born at the new standard and the ~350-name WEST cohort gets the one authorized scoped refresh before experts see it. The discriminating benchmark and free DSv4 advisory census pre-screen the WEST rows and rank the exhausted-tail rescores.",
@@ -46,6 +47,11 @@
       "slug": "typed-resource-path-contract",
       "done_when": "read_plan returns a plan for every slug in the project; the plan-informs edge count over the 34 moved documents is unchanged before and after; no reference resolves to a missing file; and a tree-walking test that imports reckon's own TYPE_ROOTS reports zero violations and fails on a deliberately nested fixture.",
       "why_now": "read_plan is currently broken for every plan in the project, and two concurrent sessions are working around it by reading expected_version out of plan HTML meta tags - a workaround that silently bypasses the version safety the endpoint exists to provide."
+    },
+    {
+      "slug": "sn-guidance-spelling-currency",
+      "done_when": "The schema declares no retired spelling in its own prose; every schema anchor cited by imas_codex/standard_names/AGENTS.md resolves to the slot it names; produced_sn_id, terminal_sn_id and every Python-namespace sn_id token are unchanged.",
+      "why_now": "The shipped identity-convention plan's final done-when clause - no guidance file names a spelling the schema no longer declares - is measurably false, including inside the schema itself and inside the guidance file for that very subject."
     }
   ],
   "starts": "2026-08-24",
@@ -53,7 +59,7 @@
   "summary": "Planned ahead of the WEST review at the lead's direction: reviewer attention is the scarcest resource, so the packet must carry the best attainable docs. Regeneration stays scoped \u2014 WEST cohort plus census-flagged holdout failures only.",
   "theme": "Quality before review",
   "type": "sprint",
-  "version": 2
+  "version": 3
 }</script>
 </main>
 </body>
