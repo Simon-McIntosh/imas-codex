@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T11:15:45",
+  "updated": "2026-08-25T11:26:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1200,7 +1200,10 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a03480-2122-7fc1-8f57-08ef7670deea",
-        "created": "2026-08-24"
+        "created": "2026-08-24",
+        "sessions": {
+          "gpt-5.6-sol": "01a0382c-dd06-79b0-86ba-8a7337a5843a"
+        }
       },
       {
         "id": "impl-stubs",
@@ -1346,9 +1349,11 @@
         "id": "impl-westremint",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
-        "session_model": null,
-        "sessions": {},
+        "session_id": "01a03817-a48e-7f20-b139-4b755f77d041",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a03817-a48e-7f20-b139-4b755f77d041"
+        },
         "created": "2026-08-25"
       },
       {
@@ -30334,9 +30339,194 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T084423107172-n-westfamilyremint",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-westfamilyremint",
+        "node_definition": {
+          "done_when": "an exact direct-plus-family disposition ledger names every one of the 416 identities with its lifecycle state, the count lacking accepted documentation is reported before and after from a census keyed on StandardName.id, every reset accepted document is snapshotted before rewrite, every promotion clears ordinary quorum with none hand-accepted, every withheld identity carries a named lifecycle reason, and the record states actual USD spent against the 50 ceiling and the running total against the authorised 150, and the manifest repeats the before and after non-accepted counts and the spend",
+          "estimated_hours": 1.2,
+          "goal": "Bring the real 416-identity production packet to a dispositioned state under a hard USD 50 ceiling, so the cohort that ships is the cohort that was refreshed",
+          "id": "n-westfamilyremint",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T084423107172-n-westfamilyremint/manifest.md",
+          "plan": "sn-quality-parity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "docs/evidence/sn-quality-parity/west-family-remint.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-westremint",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:44:28Z",
+        "completed_at": "2026-08-25T09:19:58Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 2130,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 2130,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "36199a908f48e7d9aa0acd58a551181e4a239ce7",
+        "commits": [
+          "c826cd98d0f8d3bf6e9e72448f60d5d2ca8f6f35"
+        ],
+        "changed_lines": {
+          "available": false,
+          "reason": "unresolvable_revision"
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T084423107172-n-westfamilyremint/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03817-a48e-7f20-b139-4b755f77d041",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 15389440,
+            "cached_input_tokens_cumulative": 15389440,
+            "input_tokens": 15645918,
+            "input_tokens_cumulative": 15645918,
+            "output_tokens": 36269,
+            "output_tokens_cumulative": 36269,
+            "reasoning_output_tokens": 5630,
+            "reasoning_output_tokens_cumulative": 5630
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T090731714825-n-lifecyclelessmigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "n-lifecyclelessmigrate",
+        "node_definition": {
+          "done_when": "tests/standard_names/test_reconcile_lifecycleless_stubs.py passes byte-unchanged against the migrated operator showing identical admitted and refused identities, verbatim refusal reasons, identical per-branch receipt cardinality and write-free replay, including the rollback and both late-CAS-race cases; the four branches materialize-derived-parent, delete-dead-link-stub, rebind-source and refused are each registered as NAMED closed programs so arbitrary deletion and arbitrary Cypher remain unreachable, and any single refusal still rejects the COMPLETE cohort; the string 'def reconcile_lifecycleless_standard_name_stubs' is absent from imas_codex/standard_names/graph_ops.py; tests/graph/test_cypher_property_check.py stays green; docs/evidence/sn-repair-operator-consolidation/lifecycleless-migration.md records per-branch admitted and refused counts plus a byte-equivalence proof of the relocated transaction core",
+          "estimated_hours": null,
+          "goal": "reconcile_lifecycleless_standard_name_stubs running as a fixed partial of apply_signed_manifest with its bespoke body deleted",
+          "id": "n-lifecyclelessmigrate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T090731714825-n-lifecyclelessmigrate/manifest.md",
+          "plan": "sn-repair-operator-consolidation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "55m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/standard_names/signed_manifest.py",
+            "docs/evidence/sn-repair-operator-consolidation/lifecycleless-migration.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-stubremoval",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T09:07:38Z",
+        "completed_at": "2026-08-25T09:26:13Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1115,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1115,
+        "stalled": false,
+        "time_budget": "55m",
+        "base_sha": "778e2f15a1a72168e574a29b9bea3bceb5bb11e3",
+        "commits": [
+          "0e058a4c"
+        ],
+        "changed_lines": {
+          "added": 408,
+          "removed": 258,
+          "files": 3
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T090731714825-n-lifecyclelessmigrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0382c-dd06-79b0-86ba-8a7337a5843a",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 11160576,
+            "cached_input_tokens_cumulative": 11160576,
+            "input_tokens": 11415555,
+            "input_tokens_cumulative": 11415555,
+            "output_tokens": 32177,
+            "output_tokens_cumulative": 32177,
+            "reasoning_output_tokens": 9562,
+            "reasoning_output_tokens_cumulative": 9562
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 877
+    "_version": 881
   }
 }
