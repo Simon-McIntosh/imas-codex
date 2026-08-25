@@ -643,6 +643,52 @@
       <a href="/imas-codex/evidence/sn-graph-wide-integrity/transient-clearance">transient clearance</a>.
     </p>
   </section>
+
+  <section id="closing-verdict-2026-08-25">
+    <h2>Seven of nine closed on live measurement; two blocked on authority this plan does not hold</h2>
+    <table>
+      <caption>Per-row verdict, measured live 2026-08-25 against the nine declared deliverables</caption>
+      <thead><tr><th>Declared row</th><th>Live measure</th><th>Verdict</th></tr></thead>
+      <tbody>
+        <tr><td>Every composed/attached source has a live target</td><td>0 of 5,054</td><td>closed</td></tr>
+        <tr><td><code>produced_sn_id</code> mirrors the sole live target</td><td>0</td><td>closed</td></tr>
+        <tr><td>Upstream projection mirrors the sole live target</td><td>0</td><td>closed</td></tr>
+        <tr><td>Accepted identities strictly parse and round-trip</td><td>0 failures of 2,295 under rc67</td><td>closed</td></tr>
+        <tr><td>Unsourced names carry an exclusive disposition</td><td>4 of 4 dispositioned</td><td>closed, qualified</td></tr>
+        <tr><td>Structurally bare names have a named reason</td><td>0 childful, 4 childless</td><td>closed, qualified</td></tr>
+        <tr><td>Repairs run under the shared signed envelope</td><td>36 of 36 receipt rows, 14 of 14 builder tests</td><td>closed</td></tr>
+        <tr><td>Dual-bound sources eliminated or refused by name</td><td>1 remaining</td><td><strong>outstanding</strong></td></tr>
+        <tr><td>Owner/geometry rows moved or refused by name</td><td>2 remaining</td><td><strong>outstanding</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      Schema sanity behind every figure: <code>StandardName</code> 4,656/4,656 id and
+      <code>name_stage</code>; <code>StandardNameSource</code> 9,668/9,668 id, status and
+      source type; authored <code>PRODUCED_NAME</code> 5,315/5,315 with 0 reverse edges;
+      <code>IMASNode</code> 61,366/61,366; <code>FacilitySignal</code> 46,872/46,872.
+    </p>
+    <p>
+      <strong>The two remaining rows were re-verified rather than carried forward, and
+      each is blocked on semantic authority rather than on effort.</strong> The dual-bound
+      source <code>dd:plasma_transport/model/ggd/neutral/state/momentum/flux/radial</code>
+      still feeds two live targets, and the losing one still has <em>exactly one</em>
+      producer — this source — so the recorded last-producer refusal is current rather
+      than stale. Of the owner/geometry pair,
+      <code>toroidal_coordinate_of_field_map_grid</code> is both absent and fails strict
+      rc67 grammar, so it needs an ISN vocabulary outcome; and the reflector row needs an
+      ordinary-reviewed split between a surface identity and a local-centre one, which
+      does not exist. The census's own conclusion is the correct one: no current row is
+      safe to mutate from a census.
+    </p>
+    <p>
+      The census also declined to query any docs field, <code>docs_stage</code>,
+      <code>DocsRevision</code> or docs-axis digest, because a concurrent session was
+      writing that axis. Measuring it would have recorded a peer's writes as this plan's
+      state — the same discipline that made the transient-clearance collateral proof hold.
+      Record:
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/closing-census-final">closing census</a>.
+    </p>
+  </section>
 </main>
 </body>
 </html>
