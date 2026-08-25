@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:13:37",
+  "updated": "2026-08-25T08:30:26",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -376,6 +376,13 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-ddgapfix",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a0379c-a01a-7c10-8a70-18039d5eeff2",
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-ddgaprule",
         "harness": "codex",
         "role": "implement",
@@ -698,6 +705,13 @@
         "created": "2026-08-21"
       },
       {
+        "id": "impl-lockadjudicate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-locus",
         "harness": "codex",
         "role": "implement",
@@ -892,6 +906,13 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-readinessresidual",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "created": "2026-08-25"
       },
       {
         "id": "impl-recompare",
@@ -27621,9 +27642,67 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T062957185067-n-ddgapevidencerule",
+        "plan": "sn-release-readiness",
+        "section": "\u00a77",
+        "node": "n-ddgapevidencerule",
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-ddgapfix",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T06:30:06Z",
+        "completed_at": "2026-08-25T06:30:22Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 16,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 16,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "a3eb8e859993b6f0c4a076ae754934d53d3d430a",
+        "commits": [],
+        "changed_lines": null,
+        "tests_added": null,
+        "gate": "not-run",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T062957185067-n-ddgapevidencerule/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a0379c-a01a-7c10-8a70-18039d5eeff2",
+        "budget": {
+          "cost_usd": null,
+          "detail": "",
+          "headroom": "unknown",
+          "rate_limit_period_minutes": null,
+          "rate_limit_type": null,
+          "resets_at": null,
+          "surpassed_threshold": null,
+          "threshold_status": null,
+          "tokens": null,
+          "utilisation_pct": null
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest over",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 813
+    "_version": 818
   }
 }

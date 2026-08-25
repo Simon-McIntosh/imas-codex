@@ -25,7 +25,7 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="60">
+<meta name="plan-version" content="61">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/closure-audit.md,docs/evidence/sn-release-readiness/residue-disposition.md">
 <meta name="plan-impl" content="0.9">
@@ -681,6 +681,9 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20260824T160047996814-n-normalizerfailclosed" data-who="impl-normalizer" data-when="2026-08-24T16:12:15Z">
     <div class="r-comment-body"><p>Accept-time bare-reference normalizer routed through the shared parser and fails closed; 2 new regressions red then green, 37 of 37 across the related suites</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20260825T062957185067-n-ddgapevidencerule" data-who="impl-ddgapfix" data-when="2026-08-25T06:30:22Z">
+    <div class="r-comment-body"><p>Stopped seconds after dispatch: I omitted the production path from its write scope, so it could write a failing regression but never fix it</p></div>
 </div>
 <div class="r-comment" data-section="§9" data-id="c-20260824T1600-closureaudit" data-who="reckon-ship" data-when="2026-08-24T16:00:00+00:00">
     <div class="r-comment-body">n-readinessclosure landed — commit 7638824a, merged at 41a3405b; gate closure-audit-completeness passed; measure 7 section rows, 2 landed, 5 outstanding, 7 live Cypher citations; artifact docs/evidence/sn-release-readiness/closure-audit.md. The audit contradicts the recorded impl of 0.99 and the correction is downward, not a rounding: LANDED are §3, whose export accounting closes exactly at 2,030 emitted + 305 excluded = 2,335 accepted with every emitted identity serialized and the gate reporting zero issues, and §6, whose pre-spend tail census closes at 144 + 72 + 1 = 217 with residual 0 over 431 stranded sources. OUTSTANDING are §2 (accepted 2,335, scored 1,894, structural authority 250, overlap 0, residual 191 — 96 catalog edits with no reviewer, 84 derived rows with no reviewer, 5 bare structural markers, 6 with a named reviewer but no score), §4 (_build_stub_entry still emits status deprecated with superseded_by and a successor link against the internal-record-only lock; dormant only because catalog_approved is 0 of 1,914 superseded, of which 509 have no successor by either route), §5 (270 of 2,335 accepted lack accepted docs — 138 pending, 68 drafted, 52 reviewed, 12 exhausted — plus 19 quarantined), §7 (missing physics_domain is 0, but missing documentation is 75, and the accept-time normalizer still uses its own _BARE_DOC_LINK_RE and swallows normalization failure instead of refusing acceptance), and §8 (2 accepted source-less identities, 1 live dual-bound source, no voltage_of_ece_channel successor, reflector/centre/phi still on the incumbent target). impl is corrected to 3 of 8 executable nodes. Every zero was taken only after proving property coverage — 4,666 StandardName with full name_stage, 24,789 StandardNameReview with full review_axis, 250 HAS_STRUCTURAL_AUTHORITY edges with complete records — which is the discipline sn-graph-identity-convention exists to make mechanical.</div>
