@@ -6,63 +6,82 @@
   <meta name="docs-project" content="imas-codex">
   <meta name="reckon-type" content="evidence">
   <meta name="plan-slug" content="sn-relocation-retirement-apply-landed">
-  <meta name="plan-title" content="Unauthorized Relocations Retired — Landed">
+  <meta name="plan-title" content="sn-relocation-retirement-apply &mdash; cumulative execution evidence">
   <meta name="plan-evidence-for" content="sn-relocation-retirement-apply">
-  <title>Relocation Retirement Landed | imas-codex</title>
+  <title>sn-relocation-retirement-apply landed evidence | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 </head>
 <body>
-  <main class="plan-doc">
-    <section id="applied">
-      <h2>Seventy-three live rows, seventy-two retired, one refused by name</h2>
-      <p>
-        Applied to the production graph 2026-08-25, commit <code>b7820f7c</code>, through
-        <code>retire_unauthorized_has_parent_relocations</code> under authority built and
-        hashed inside the applying invocation.
-      </p>
-      <table>
-        <caption>Apply result, manifest SHA-256 <code>dc82dfb3</code></caption>
-        <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
-        <tbody>
-          <tr><td>Live unauthorized rows on fresh derivation</td><td><strong>73</strong> — not the projected 78</td></tr>
-          <tr><td>Admitted / refused</td><td><strong>72 / 1</strong></td></tr>
-          <tr><td>Receipts, recovered by run_id + digest only</td><td>72</td></tr>
-          <tr><td>Stale qualifier pairs</td><td><strong>52 → 0</strong> of 711 live qualifier edges</tr>
-          <tr><td>Export ordering-cycle participants</td><td><strong>2 → empty</strong></td></tr>
-          <tr><td>External non-cohort <code>HAS_PARENT</code> collateral</td><td>1,411 rows, digest <code>ea87d5dc</code> unchanged before, after and after replay</td></tr>
-          <tr><td>Replay</td><td><code>already_applied</code>, changed 0, persistent_writes 0</td></tr>
-        </tbody>
-      </table>
-      <p>
-        <strong>The projection was stale and the plan said it would be.</strong> It
-        recorded 78 as a projection over a prior census with retained per-row maps,
-        explicitly not a production preview, and required the apply to derive fresh
-        authority inside the invocation. Fresh derivation found 73. Had the apply trusted
-        the projection it would have carried five rows that were no longer there.
-      </p>
-      <p>
-        <strong>The single refusal is recorded rather than worked around:</strong>
-        <code>ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude</code> &rarr;
-        <code>parallel_bulk_ion_velocity</code>, refused verbatim on <em>signed
-        successor-rewire closure does not match exact incumbent parent</em>. Left live by
-        design.
-      </p>
-      <p>
-        Post-apply the unauthorized non-self class reads 1 — that refusal — with schema
-        sanity <code>id</code> 4,658/4,658, <code>name_stage</code> 4,658/4,658 and
-        <code>HAS_PARENT</code> source, target and <code>operator_kind</code> 1,485/1,485
-        each.
-      </p>
-      <p>
-        <strong>This cleared a release barrier, not only a hygiene class.</strong> The two
-        spectral SNR identities that aborted the WEST catalog export on a hierarchy cycle
-        were members of this class; the ordering-cycle participant set is now empty and
-        both are released from the withheld set. Prevention landed first at
-        <code>b926b8dd</code>, which is why the retirement is durable where an earlier
-        governed deletion of the same edge was undone by the rewire.
-      </p>
-    </section>
-  </main>
+<main class="plan-doc">
+  <h1>sn-relocation-retirement-apply &mdash; cumulative execution evidence</h1>
+  <p>One node, one landing. The plan carried a proved program and asked only that it be
+  applied under authority derived inside the applying invocation. That constraint was the
+  whole plan, and it earned itself immediately: the projection the plan had been reasoning
+  about was already stale when the apply ran.</p>
+
+  <section id="production-apply">
+    <h2>The apply, and the figure that proves same-invocation authority was not ceremony</h2>
+    <p><strong>Landed 2026-08-25</strong> &mdash; node <code>n-retireapply</code>,
+    commit <code>b7820f7c</code>, merged at <code>03f02447</code>&ndash;lineage on
+    <code>main</code>. Source tree <code>d2edae90</code>. Detail record:
+    <a href="/imas-codex/evidence/sn-relocation-retirement-apply/production-apply">production-apply</a>.</p>
+
+    <p>The plan named the class as <strong>78</strong> non-self MERGE pairs, a projection over
+    a prior read-only census. The applying invocation derived the class again from live state
+    &mdash; 2,470 live names, 2,118 raw derived-parent rows, 1,503 production-admitted rows
+    &mdash; and found <strong>73</strong>. Five rows had gone between census and apply. Had
+    the apply trusted the projection it would have carried five identities the current
+    derivation no longer describes, which is the precise failure the plan's rule existed to
+    prevent and the third time this programme has been overtaken that way.</p>
+
+    <table>
+      <caption>Signed apply under manifest SHA-256 <code>dc82dfb3</code>, run
+      <code>r-20260825T141822953482-n-retireapply</code></caption>
+      <thead><tr><th>Measure</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Rows derived fresh, in-invocation</td><td>73</td></tr>
+        <tr><td>Admitted</td><td>72</td></tr>
+        <tr><td>Refused</td><td>1</td></tr>
+        <tr><td>Mutations / receipt rows / persistent writes</td><td>72 / 72 / 144</td></tr>
+        <tr><td>Receipts recovered by exact <code>run_id</code> + manifest digest</td><td>72</td></tr>
+        <tr><td>Replay outcome</td><td><code>already_applied</code>, changed 0, persistent_writes 0</td></tr>
+        <tr><td>Post-apply unauthorized non-self class</td><td>1 &mdash; the refusal itself</td></tr>
+        <tr><td>Stale qualifier pairs, of 711 live qualifier edges</td><td>52 &rarr; 0</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="collateral">Collateral was proved on a dimension this node owned</h3>
+    <p>A digest covering an axis another session is writing measures their work, not this
+    repair. The proof was narrowed to external non-cohort <code>HAS_PARENT</code>:
+    <strong>1,411 rows at SHA-256 <code>ea87d5dc</code></strong>, identical before the apply,
+    after the apply, and after the write-free replay.</p>
+
+    <h3 id="sanity">The zero is instrumented</h3>
+    <p>A wrong property name returns a clean, plausible zero, so the post-apply count carries
+    its schema sanity counts: <code>StandardName.id</code> 4,658/4,658,
+    <code>name_stage</code> 4,658/4,658, and <code>HAS_PARENT</code> source id, target id and
+    <code>operator_kind</code> at 1,485/1,485 each.</p>
+
+    <h3 id="release-barrier">The release barrier is down</h3>
+    <p>This is what the plan was for. The global ordering-cycle participant set moved from
+    exactly two identities &mdash;
+    <code>spectral_signal_to_noise_ratio_of_spectrometer_channel</code> and
+    <code>logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel</code> &mdash;
+    to <strong>empty</strong>. Both are released from the export withheld set, where they had
+    been isolated rather than repaired.</p>
+
+    <h3 id="refusal">The one refusal is an outcome, and it is left alone</h3>
+    <p>The program declined
+    <code>ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude</code> &rarr;
+    <code>parallel_bulk_ion_velocity</code>, replacement
+    <code>parallel_ion_velocity</code>, with the verbatim reason <em>signed successor-rewire
+    closure does not match exact incumbent parent</em>. The plan's own rule is that a
+    declined row is recorded and left alone, so it is. It remains live, it is the entirety of
+    the residual class, and the exact-closure question it raises has no owning plan yet
+    &mdash; tracked as a pointer followup rather than resolved inside a shipped plan. Never
+    bypass the refusal to make a later apply pass.</p>
+  </section>
+</main>
 </body>
 </html>
