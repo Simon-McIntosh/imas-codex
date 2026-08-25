@@ -27,7 +27,7 @@ from unittest.mock import patch
 
 import pytest
 
-from imas_codex.standard_names.merge import (
+from imas_codex.standard_names.promote import (
     CONTRACT_MARKER,
     FoldBackTagReport,
     MergeReport,
@@ -43,7 +43,7 @@ from imas_codex.standard_names.merge import (
     tag_fold_back,
 )
 
-MERGE = "imas_codex.standard_names.merge"
+MERGE = "imas_codex.standard_names.promote"
 
 
 def _git(args: list[str], cwd: Path) -> str:
@@ -423,7 +423,7 @@ class TestTagFoldBack:
 
 class TestMergeCliTag:
     def _resolved(self, merged_repo):
-        from imas_codex.standard_names.merge import ResolvedPr
+        from imas_codex.standard_names.promote import ResolvedPr
 
         return ResolvedPr(
             number=7,
@@ -500,7 +500,7 @@ class TestMergeCliTag:
         from click.testing import CliRunner
 
         from imas_codex.cli.sn import sn
-        from imas_codex.standard_names.merge import UndoReport
+        from imas_codex.standard_names.promote import UndoReport
 
         work, rc, merge_commit = (
             merged_repo["work"],
@@ -602,7 +602,7 @@ class TestLabelledVersionReceipt:
         assert rc in _git(["ls-remote", "--tags", "origin"], work)
 
     def test_undo_deletes_the_labelled_receipt_tag(self, labelled_merged_repo):
-        from imas_codex.standard_names.merge import delete_fold_back_tag
+        from imas_codex.standard_names.promote import delete_fold_back_tag
 
         work, merge_commit, rc = (
             labelled_merged_repo["work"],
@@ -632,7 +632,7 @@ class TestMergeCliLabelledVersion:
     """The CLI must resolve a labelled batch RC end-to-end from the branch name."""
 
     def _resolved(self, repo):
-        from imas_codex.standard_names.merge import ResolvedPr
+        from imas_codex.standard_names.promote import ResolvedPr
 
         return ResolvedPr(
             number=7,

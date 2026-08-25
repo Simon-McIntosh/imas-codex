@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names.merge import mark_catalog_name_approved, run_merge
+from imas_codex.standard_names.promote import mark_catalog_name_approved, run_merge
 from imas_codex.standard_names.provenance_lifecycle import (
     bind_sources_exclusively,
     compact_unapproved_superseded,
