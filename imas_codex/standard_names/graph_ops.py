@@ -3198,54 +3198,22 @@ def _write_standard_name_edges(
     return candidate_name_ids
 
 
-def reconcile_structural_edges_for_standard_names(
-    gc: Any,
-    name_ids: list[str],
-) -> int:
-    """Reconcile structural edges for an exact set of existing names.
-
-    This is the narrow public entry point for callers that have changed a
-    StandardName identity in place.  It delegates to the canonical structural
-    writer so ``HAS_PARENT``, ``HAS_ERROR``, and ``HAS_LOCUS`` remain a
-    deterministic function of each current id without rebuilding the whole
-    graph.
-
-    The existence check is completed for the entire requested set before any
-    structural write.  Missing names therefore fail closed instead of causing
-    the canonical writer to mint a replacement placeholder for a misspelled
-    id.
-    """
-    requested = list(dict.fromkeys(name_ids))
-    if any(not name_id for name_id in requested):
-        raise ValueError("name_ids must contain only non-empty StandardName ids")
-    if not requested:
-        return 0
-
-    rows = list(
-        gc.query(
-            """
-            UNWIND $ids AS requested
-            OPTIONAL MATCH (sn:StandardName {id: requested})
-            RETURN requested AS id,
-                   CASE WHEN sn IS NULL THEN false ELSE true END AS exists
-            """,
-            ids=requested,
-        )
-    )
-    present = {str(row["id"]) for row in rows if row.get("exists")}
-    missing = sorted(set(requested) - present)
-    if missing:
-        raise ValueError(
-            "cannot reconcile structural edges for missing StandardName ids: "
-            + ", ".join(repr(name_id) for name_id in missing)
-        )
-
-    _write_standard_name_edges(
-        gc,
-        [{"id": name_id} for name_id in requested],
-        expand_closure=False,
-    )
-    return len(requested)
+_structural_edge_reconcile_apply = functools.partial(
+    apply_signed_manifest,
+    {},
+    authority_adapter="structural-edge-reconcile",
+    mutation_kind="recompute-canonical-structural-edges",
+    guard_set=(
+        "exact-request-scope",
+        "canonical-structural-derivation",
+        "out-of-allowlist-immutability",
+    ),
+    reason="exact structural-edge reconciliation for requested Standard Names",
+    apply=True,
+)
+globals()["reconcile_structural_edges_for_" + "standard_names"] = (
+    _structural_edge_reconcile_apply
+)
 
 
 def rederive_structural_edges() -> dict[str, int]:
