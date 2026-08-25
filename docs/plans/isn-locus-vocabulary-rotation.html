@@ -4,22 +4,27 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="docs-project"   content="imas-codex">
-  <meta name="reckon-type"    content="plan">
-  <meta name="plan-slug"      content="isn-locus-vocabulary-rotation">
-  <meta name="plan-title"     content="A Locus The Grammar Will Not Spell">
-  <meta name="plan-summary"   content="One owner/geometry row cannot be repaired here: its replacement identity fails strict grammar because the locus token does not exist in ISN.">
-  <meta name="plan-status"    content="draft">
-  <meta name="plan-roi"       content="mid">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="isn-locus-vocabulary-rotation">
+  <meta name="plan-title" content="A Locus The Grammar Will Not Spell">
+  <meta name="plan-summary" content="One owner/geometry row cannot be repaired here: its replacement identity fails strict grammar because the locus token does not exist in ISN.">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="3.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
   <meta name="plan-capability-verification" content="strict">
-  <meta name="plan-sprint"    content="S12">
-  <meta name="plan-owner"     content="Simon McIntosh">
-  <meta name="plan-blocks"    content="sn-identity-adjudication-residue">
+  <meta name="plan-sprint" content="S12">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-blocks" content="sn-identity-adjudication-residue">
   <title>ISN Locus Vocabulary Rotation | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-modified" content="2026-08-25">
+<meta name="plan-version" content="2">
+<meta name="plan-commits" content="2ec2f04e">
+<meta name="plan-artifacts" content="docs/evidence/isn-locus-vocabulary-rotation/locus-adjudication.md">
+<meta name="plan-impl" content="0.33">
 </head>
 <body>
   <main class="plan-doc">
@@ -93,27 +98,32 @@
     </p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">&sect;</span> Decisions</h2>
-      <div class="r-dec" data-key="locus-warranted" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Is a field-map-grid locus token warranted in the closed ISN vocabulary?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="add-token">Warranted — add it and rotate</button>
-          <button class="r-opt" data-value="different-identity">Not a locus — the correct identity names something else</button>
-          <button class="r-opt" data-value="permanent-refusal">Not warranted — the row stays a settled refusal</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="locus-warranted" data-choice="add-token" data-by="Simon McIntosh" data-when="2026-08-25">
+    <p class="r-dec-q">Is a field-map-grid locus token warranted in the closed ISN vocabulary?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="add-token">Warranted — add it and rotate</button>
+      <button class="r-opt" data-value="different-identity">Not a locus — the correct identity names something else</button>
+      <button class="r-opt" data-value="permanent-refusal">Not warranted — the row stays a settled refusal</button>
+      </p>
+    <p class="r-dec-rat">Warranted, locked by the lead on the adjudication evidence. The field-map grid is a computational sampling structure rather than a measurement place, but ISN&#x27;s locus registry also carries entity owners, so of_field_map_grid expresses the DD ownership relation without misclassifying the coordinates as measurement positions. The token resolves a measured family of three DD coordinate paths (r, z, phi under .../field_map/grid), not a single row: family_count 3 and beyond_target 2 behind a schema sanity count of 61,366/61,366/61,366 with a firing positive control on the phi path, and the only other grid structure, tf/field_map/grid, contributes 0 coordinate children. None of the 181 runtime locus tokens under ISN 0.8.0rc67 contains grid or map, and all ten swept near misses denote a different object: probes and coils are hardware, pedestal positions are plasma locations, coordinate_system is the reference frame rather than the discrete support, and measurement_position asserts an observation that never occurred. The strict parser independently rejected all three intended identities, and its nearest candidates for the toroidal one were toroidal_flux_coordinate and its gradient, which would substitute a magnetic-flux coordinate for a geometric axis and change the physics. The alternative to rotating is leaving r and z unnamed and phi asserting a measurement position the Data Dictionary does not carry. The physical-base spelling for the r leaf is NOT settled by this decision: the lead has questioned major_radius_of_field_map_grid against radial_coordinate_of_field_map_grid on family-symmetry grounds, and the base token is being measured against established corpus convention before anything is added to ISN.</p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">&sect;</span> Followups</h2>
-      <article class="r-fu" data-id="f-ilvr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship isn-locus-vocabulary-rotation">
-        <h4 class="r-fu-title">Adjudicate whether the locus is warranted, then rotate if it is</h4>
-        <div class="r-fu-body"><p>Adjudication first, derived from <code>get_grammar_context()</code> rather than memory, covering whether the locus is real, how many identities need it, and why each near-miss token fails. Only if warranted: add on the ISN fork, cut an RC, bump BOTH pin occurrences in <code>pyproject.toml</code>, and verify the graph grammar snapshot actually carries the token rather than assuming the dependency bump synced it.</p></div>
-        <pre class="r-fu-prompt">/reckon-ship isn-locus-vocabulary-rotation</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-ilvr-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25" data-recommends-skill="/reckon-ship isn-locus-vocabulary-rotation" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Adjudicate whether the locus is warranted, then rotate if it is</h4>
+    <div class="r-fu-body"><p>Adjudication first, derived from <code>get_grammar_context()</code> rather than memory, covering whether the locus is real, how many identities need it, and why each near-miss token fails. Only if warranted: add on the ISN fork, cut an RC, bump BOTH pin occurrences in <code>pyproject.toml</code>, and verify the graph grammar snapshot actually carries the token rather than assuming the dependency bump synced it.</p></div>
+    <pre class="r-fu-prompt">/reckon-ship isn-locus-vocabulary-rotation</pre>
+    </article>
+</section>
 
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260825T141822953635-n-locusadjudicate" data-who="impl-locusadj" data-when="2026-08-25T14:26:46Z">
+    <div class="r-comment-body"><p>Adjudication delivered: recommends WARRANTED. Field-map grid is a computational representation rather than a measurement place, but is a distinct entity owner suitable for of_field_map_grid. Family is 3 DD coordinate paths (r, z, phi), 2 beyond the target row, schema sanity 61366/61366/61366 with exact phi positive control 1. Runtime get_grammar_context under ISN 0.8.0rc67 returned 181 loci with field_map_grid absent, zero grid/map tokens, and 10 semantic near misses all non-equivalent; strict parsing rejected all 3 intended identities. No graph mutation: StandardNameChange 8524 and PRODUCED_NAME 5315 unchanged before and after.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
