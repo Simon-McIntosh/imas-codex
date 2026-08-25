@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T19:32:13",
+  "updated": "2026-08-25T19:36:44",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -663,6 +663,15 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-gatescope",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-gatetraverse",
         "harness": "codex",
         "role": "implement",
@@ -815,6 +824,15 @@
         "sessions": {
           "gpt-5.6-sol": "01a03949-9901-7861-b532-713fee2caa20"
         },
+        "created": "2026-08-25"
+      },
+      {
+        "id": "impl-locusreadj",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
         "created": "2026-08-25"
       },
       {
@@ -33195,6 +33213,6 @@
       }
     ],
     "holds": [],
-    "_version": 931
+    "_version": 933
   }
 }
