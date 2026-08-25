@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project"   content="imas-codex">
+  <meta name="reckon-type"    content="plan">
+  <meta name="plan-slug"      content="typed-resource-path-contract">
+  <meta name="plan-title"     content="Restore the Typed-Resource Path Contract">
+  <meta name="plan-summary"   content="Flatten the 34 research documents nested one directory too deep so read_plan stops failing for every plan in the project, and add the guard that stops the layout regressing.">
+  <meta name="plan-status"    content="draft">
+  <meta name="plan-roi"       content="high">
+  <meta name="plan-effort-hours" content="2.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-capability-risk" content="moderate">
+  <meta name="plan-sprint"    content="S9">
+  <meta name="plan-owner"     content="Simon McIntosh">
+  <title>Restore the Typed-Resource Path Contract | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+
+    <h2 id="s1">&sect;1 &mdash; One misplaced directory disables read_plan for the whole project</h2>
+    <p>
+      Every <code>read_plan</code> call in this project currently fails, whatever plan
+      it asks for, with:
+    </p>
+    <pre>research/standard-names/01-current-state-standard-names.html: typed resource path
+must be &lt;root&gt;/&lt;slug&gt;.html or &lt;root&gt;/archive/&lt;slug&gt;.html</pre>
+    <p>
+      The named file is not the caller's plan and has nothing to do with it. Resource
+      resolution walks the whole documentation tree and raises on the first path that
+      violates the contract, so a layout fault in one research directory presents as a
+      total read outage. Discovered 2026-08-25 during sprint S8 execution, independently
+      hit by a second concurrent session the same morning.
+    </p>
+    <p>
+      <strong>The blast radius is narrower than the symptom suggests, and that matters
+      for how this is fixed.</strong> <code>edit_plan</code> and <code>roadmap</code>
+      are unaffected &mdash; only the typed-resource read path raises. Both sessions
+      worked around it by taking <code>expected_version</code> from each plan's own
+      <code>plan-version</code> meta tag, which is why S8 continued to land work
+      throughout. This is a real defect with a real workaround, not an emergency.
+    </p>
+
+    <h2 id="s2">&sect;2 &mdash; What the contract actually is</h2>
+    <p>
+      Authority is <code>reckon/resources.py</code>: <code>TYPE_ROOTS</code> declares
+      six typed roots &mdash; <code>plans</code>, <code>research</code>,
+      <code>evidence</code>, <code>sprints</code>, <code>milestones</code>,
+      <code>blockers</code> &mdash; and <code>_path_context</code> raises
+      <code>ResourceCollision</code> when a path whose <em>first</em> segment is one of
+      those roots is not exactly <code>&lt;root&gt;/&lt;slug&gt;.html</code> or
+      <code>&lt;root&gt;/archive/&lt;slug&gt;.html</code>.
+    </p>
+    <p>
+      <strong>A guessed version of this rule over-counts by 2.5&times;, so measure with
+      the real one.</strong> An initial sweep against an invented root list reported 87
+      violations across six directories. The true figure is <strong>34</strong>, all in
+      one directory. The difference is that <code>archive</code> is <em>not</em> a typed
+      root, so <code>docs/archive/**</code> is never checked at all &mdash; and
+      <code>sprints/*.html</code> is two segments deep, which is legal. Neither was a
+      defect.
+    </p>
+    <table>
+      <caption>Live measurement, 2026-08-25, at commit <code>05642861</code></caption>
+      <thead><tr><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody>
+        <tr><td>Typed resources violating the contract</td><td><strong>34</strong>, all under <code>docs/research/standard-names/</code></td></tr>
+        <tr><td>Legal typed resources elsewhere</td><td>103, unaffected</td></tr>
+        <tr><td>Declared type of all 34</td><td><code>research</code></td></tr>
+        <tr><td>Of those carrying <code>plan-informs</code> edges</td><td><strong>31</strong> &mdash; real graph edges, not orphans</td></tr>
+        <tr><td>Cross-references to move</td><td>106 occurrences in 43 files (21 live, 22 archived)</td></tr>
+        <tr><td>Slug collisions if flattened into <code>docs/research/</code></td><td><strong>0</strong></td></tr>
+      </tbody>
+    </table>
+    <p>
+      The zero-collision result is what makes the repair a rename rather than a
+      renaming <em>scheme</em>: every one of the 34 basenames is already unique against
+      the live <code>docs/research/</code> contents, so no prefix needs inventing and no
+      slug identity changes.
+    </p>
+
+    <h2 id="s3">&sect;3 &mdash; The repair, and the one thing that must not be lost</h2>
+    <p>
+      Move all 34 to <code>docs/research/&lt;slug&gt;.html</code> with <code>git mv</code>,
+      then rewrite the 106 references. <strong>31 of the 34 carry
+      <code>plan-informs</code> edges</strong>, so the graph relationships those files
+      feed are the asset at risk: a move that silently drops an edge trades a read
+      outage for missing provenance, which is strictly worse because it is invisible.
+      The edge count before and after is therefore the gate, not the fact that the
+      files moved.
+    </p>
+    <p>
+      Archived referrers under <code>docs/archive/</code> are rewritten too. They are
+      historical documents, but a dead link in a historical document is still a dead
+      link, and the same pass fixes them at no extra cost.
+    </p>
+
+    <h2 id="s4">&sect;4 &mdash; The guard, without which this returns</h2>
+    <p>
+      A layout rule that only fails at read time, deep inside an unrelated call, is a
+      rule with no check &mdash; which is how 34 files accumulated in one directory
+      without anyone noticing. Add a test that walks the documentation tree, applies
+      <code>reckon</code>'s own <code>TYPE_ROOTS</code> rather than a local copy of it,
+      and fails closed listing every offending path. Importing the authority instead of
+      restating it is the point: a second transcription of the root list is exactly the
+      drift that produced the 87-versus-34 discrepancy above.
+    </p>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">&sect;</span> Decisions</h2>
+      <div class="r-dec" data-key="nested-research-disposition" data-choice="flatten-in-place" data-by="reckon-ship" data-when="2026-08-25">
+        <p class="r-dec-q">How should the 34 nested research documents be brought back under the contract?</p>
+        <p class="r-dec-opts">
+          <button class="r-opt" data-value="flatten-in-place">Flatten into docs/research/ and rewrite references</button>
+          <button class="r-opt" data-value="strip-typing">Remove reckon-type so they stop being typed resources</button>
+          <button class="r-opt" data-value="widen-contract">Change reckon to permit nested typed paths</button>
+        </p>
+        <p class="r-dec-rat">Flatten. The basenames are already collision-free against docs/research/, so flattening preserves every slug identity and every plan-informs edge while needing no renaming scheme. Stripping reckon-type would silence the error by deleting 31 documents' graph identity, trading a visible outage for invisible loss. Widening the contract is a change to shared tooling to accommodate one repository's layout, and the contract is doing useful work everywhere else.</p>
+      </div>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">&sect;</span> Followups</h2>
+      <article class="r-fu" data-id="f-trpc-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-ship" data-written-at="2026-08-25">
+        <h4 class="r-fu-title">Flatten the 34 nested research documents and add the layout guard</h4>
+        <div class="r-fu-body"><p>Move all 34 with <code>git mv</code>, rewrite the 106 references across 43 files including archived ones, and add the tree-walking test that imports reckon's own <code>TYPE_ROOTS</code>. The gate is that <code>read_plan</code> returns a plan, the <code>plan-informs</code> edge count is unchanged, and no reference resolves to a missing file.</p></div>
+        <pre class="r-fu-prompt">/reckon-ship typed-resource-path-contract</pre>
+      </article>
+    </section>
+
+  </main>
+</body>
+</html>
