@@ -1,14 +1,6 @@
-NEEDS-HELP: The exact 12-row signed repair is prepared, but the sanctioned operator's graph-wide collateral snapshot exceeded the five-minute hang boundary twice; both transactions rolled back and no graph row changed.
-
-tried: Re-measured the live graph, generated a canonical signed repair authority for the exact drafted and pending cohort, previewed it, and attempted the authorized apply. The first invocation spent 120 seconds in worktree model regeneration and was stopped at five minutes before preview completed. After the models were current, the corrected retry completed preview and entered apply, but blocked in `_collateral_snapshot` until the same five-minute boundary. An independent query after each stop found the original 14/8/4 split and zero `clear_false_embedding_stamp` receipts, proving neither attempt committed.
-
-options: (1) Run this already-signed authority in an operational lane whose allowed command duration accommodates both graph-wide collateral snapshots. (2) Optimize or bound the sanctioned operator's collateral snapshot, then preview and apply the same exact authority again. (3) Add a dedicated governed stale-embedding-stamp operator with equivalent exact-cohort, compare-and-set, receipt, and collateral guarantees. Raw Cypher is not an option under the governing constraint.
-
-leaning: Option 1. The existing signed operator already expresses the intended exact mutation, participant locks, replay protection, receipt cardinality, and collateral immutability; the observed failure is execution duration, not missing authority or a semantic ambiguity.
-
-cost-if-wrong: If the operational lane still cannot complete the collateral proof, no mutation commits and only execution time is lost. Replacing the operator or weakening its proof would require new implementation and review and could invalidate the programme's sanctioned-write guarantee.
-
 # Stale embedding-stamp repair evidence
+
+The signed repair completed through the repository's sanctioned authority path. It cleared `embedded_at` on exactly the 12 freshly measured live false-stamp rows, retained all 14 superseded rows, wrote 12 internal change receipts, and changed no identity, description, embedding, lifecycle stage, documentation stage, or producing-source relationship.
 
 ## Live population before either attempt
 
@@ -49,21 +41,31 @@ The repository's generic signed-repair operator is the sanctioned mutation path.
 - file SHA-256: `bbc5827bf7f62bb0f40fbb0ef45d00ac80b929fc28cd13b2311782bb99f2a537`
 - signed payload SHA-256: `afa7af2646251e54bebb8d0735957119913a56c43defc1fd969d392c953a47d9`
 
-The first invocation was stopped at the five-minute hang boundary after its generated-model freshness check timed out at 120 seconds. The corrected retry reached the apply transaction, then remained in `signed_manifest._collateral_snapshot` until the same boundary. Its interrupt traceback also exposed a Neo4j driver rollback-buffer `BufferError`, so graph state was verified independently rather than inferred from process exit.
+The applying invocation re-measured the live cohort and rebuilt the authority immediately before preview and apply. The fresh authority digest matched the earlier prepared value by derivation, not reuse. Preview admitted all 12 rows with zero refusals and produced manifest SHA-256 `778974c30f9d15050af52b608c14e4728ed4bbdfd9117b2732e68feb2bc1bf86`.
 
-## Verified rollback state
+The operator's quiet multi-minute intervals were its two full collateral snapshots. A 30-second log heartbeat proved process liveness while those snapshots completed; no operator code or proof scope was changed.
 
-After both attempts, the false-stamp population remains exactly 14 superseded / 8 drafted / 4 pending, and the receipt query returns zero `StandardNameChange` nodes with operation `clear_false_embedding_stamp`. Thus:
+## Applied state and precision proof
 
-- exact mutated count: **0**, not the required 12;
+The signed receipt records `outcome='applied'`, 12 admitted rows, 12 mutations, 12 receipt rows, and 24 total persistent writes. Before/after state is:
+
+- exact mutated count: **12**, equal to the **12** freshly measured live rows;
 - live-row count: **12**;
 - superseded count: **14 before and 14 after**;
-- `StandardNameChange`: **8,597 before and 8,597 after**;
+- remaining false-stamp split: **14 superseded / 0 drafted / 0 pending**;
+- populated `embedded_at`: **4,657 before and 4,645 after**, the exact 12-row decrease;
+- `StandardNameChange`: **8,597 before and 8,609 after**, exactly 12 sanctioned receipts;
+- `clear_false_embedding_stamp` receipts: **0 before and 12 after**;
 - `PRODUCED_NAME`: **5,309 before and 5,309 after**;
-- StandardName identities, descriptions, embeddings, `name_stage`, and `docs_stage`: unchanged;
+- StandardName identities: **4,658 before and 4,658 after**;
+- populated descriptions: **4,632 before and 4,632 after**;
+- populated embeddings: **4,631 before and 4,631 after**;
+- populated `name_stage`: **4,658 before and 4,658 after**;
+- populated `docs_stage`: **4,654 before and 4,654 after**;
+- all 12 selected identity values, descriptions, embeddings, `name_stage`, and `docs_stage` compare equal before and after;
 - no description was generated and no embedding was computed.
 
-The node is therefore blocked, not complete. Claiming completion would conflate a valid authority and passing preview with a committed graph mutation.
+The superseded historical cohort was not included in the authority and remained untouched. The generic operator's participant fingerprints and out-of-allowlist collateral comparison additionally proved that the committed transaction changed only its admitted targets and receipts.
 
 ## Named graph assertion
 
@@ -76,13 +78,15 @@ UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH="$PWD
 Verbatim summary:
 
 ```text
-8 passed, 5 skipped, 1 warning in 73.80s (0:01:13)
+8 passed, 5 skipped, 1 warning in 76.90s (0:01:16)
 ```
 
-The assertion still passes because `StandardName` coverage is intentionally scoped to accepted identities; the 26 false stamps are all non-accepted and remain outside that release gate. This pass demonstrates no regression but does not satisfy the 12-row repair done-when.
+The assertion still passes because `StandardName` coverage is intentionally scoped to accepted identities. Clearing false timestamps from non-accepted work changes no accepted embedding coverage and therefore correctly leaves the assertion's behavior unchanged.
 
 Logs:
 
 - `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T185317161763-n-stalestamp/logs/stale-stamp-repair.log`
 - `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T185317161763-n-stalestamp/logs/stale-stamp-repair-retry.log`
 - `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T185317161763-n-stalestamp/logs/scoped-coverage-assertion.log`
+- `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T185317161763-n-stalestamp/logs/stale-stamp-repair-authorized.log`
+- `/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T185317161763-n-stalestamp/logs/scoped-coverage-assertion-after.log`
