@@ -25,10 +25,10 @@
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
 <meta name="plan-modified" content="2026-08-25">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="63">
 <meta name="plan-commits" content="7638824a,8a345b5b,8401c55d,eac130a9,2fbbc6e6,595a03ee,dd80ad6f,b46487f6,52f9fe2c">
 <meta name="plan-artifacts" content="docs/evidence/sn-release-readiness/closure-audit.md,docs/evidence/sn-release-readiness/residue-disposition.md">
-<meta name="plan-impl" content="0.9">
+<meta name="plan-impl" content="0.92">
 </head>
 <body>
 <main class="plan-doc">
@@ -559,6 +559,9 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20260825T041225705936-n-structuralreplay" data-who="impl-structreplay" data-when="2026-08-25T04:25:54Z">
     <div class="r-comment-body"><p>Authority residual 79 to 9: 70 parents replayed with signed child-naming authorities, 4 refused for no accepted children; idempotent second replay wrote 0</p></div>
 </div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20260825T062938941061-n-readinessresidualclose" data-who="impl-readinessresidual" data-when="2026-08-25T06:38:11Z">
+    <div class="r-comment-body"><p>All 9 residual identities named and dispositioned with lifting conditions; 0 acquired authority because no sanctioned route exists for any of them today; 0 undispositioned, no graph mutation</p></div>
+</div>
 <div class="r-comment" data-section="s2a" data-id="c-20260823-costcap" data-who="reckon-ship" data-when="2026-08-23T11:25:00Z">
     <div class="r-comment-body">BUDGET OVERRUN WARNING RETIRED - it was real and is now fixed, so the batching caution this plan carried is removed. Re-measured across all 510 capped SNRuns on 2026-08-23: 99 overran historically with a worst ratio of 6.06, but the distribution is decisive. The 1.3-1.6x era is July (11 Jul 1.63, 15 Jul 1.41, 17 Jul 1.36, 13 Jul 1.32). Every August run that actually reached its cap came in at or under it: 75.04 against 75.00, 49.88 against 50.00, 59.69 against 60.00 - accurate to a single call. The surviving 6.06 outlier is a 0.01 USD cap, smaller than one call, which any per-call charger exceeds; that is a degenerate cap, not a systemic overshoot. Treat --cost-limit as hard to within one call and size caps above one call's cost. The stale memory claiming a standing 1.7-2.7x overshoot has been corrected so it stops misleading future sessions. Consequence for this plan: the 1,179-name rescore runs as a single capped campaign rather than hand-sized batches. Measured cost is 0.1038 USD per name over 2,447 names and 7,367 reviews, so roughly 122 USD before refine, against the 250 USD now authorised.</div>
 </div>
@@ -714,6 +717,9 @@
 </div>
 <div class="r-comment" data-section="§2" data-id="c-20260825T0450-structreplay" data-who="reckon-ship" data-when="2026-08-25T04:50:00+00:00">
     <div class="r-comment-body">n-structuralreplay landed — commit b46487f6; gate residual-falls-by-parents-replayed passed; measure the accepted-authority residual fell 79 → 9 while structural authority rose 248 → 318, with accepted at 2,295, scored at 1,968 and overlap at 0 all UNMOVED — so the fall is exactly the 70 replayed parents and nothing shifted underneath it; '5 passed, 1 warning in 6.17s'. THE DEFECT WAS AN EXCLUSION BY MERIT: a derived parent that already carries a real description is, for exactly that reason, ineligible for placeholder enrichment, so the property that made these 74 correct was the property that withheld their authority. 70 had accepted-child grounding and received signed StructuralNameAuthority records; 4 were refused for having no accepted children and are NAMED rather than counted — current_density_due_to_collisions, effective_thermal_ion_charge_state_energy_velocity_due_to_convection, neutral_particle_convection_velocity, tritium_velocity. TWO PROPERTIES MAKE THE RECORD A TRAIL RATHER THAN A MARKER, which is what the relocked decision demanded: every new authority has child_ids exactly equal to its ENTAILED_FROM_CHILD edges with at least one accepted child, and an immediate second replay wrote 0, so the operation is idempotent rather than merely successful once. Graph-wide coverage is 331 of 331 on authority id, accepted_name_id and child_ids. The residual of 9 is the 4 childless parents plus the 5 previously measured quarantined rows, all still release HOLD. One observation recorded but not folded: four older authorities dated 2026-08-23 have since lost a recorded child edge, none of them among the new 70.</div>
+</div>
+<div class="r-comment" data-section="§2" data-id="c-20260825T0650-residualclose" data-who="reckon-ship" data-when="2026-08-25T06:50:00+00:00">
+    <div class="r-comment-body">n-readinessresidualclose landed — commit 15f47960; gate residual-named-and-dispositioned passed; measure accepted-authority residual 9 before and 9 AFTER, with 0 sanctioned authorities acquired, 9 named first-release HOLD dispositions and 0 undispositioned; live coverage proven at StandardName id and name_stage 4,656 of 4,656 and StructuralNameAuthority id, accepted_name_id and child_ids 331 of 331; partition accepted 2,295, scored 1,968, structural 318, overlap 0. THE ZERO IS THE CORRECT ANSWER, NOT A FAILURE TO TRY. None of the nine can acquire authority through a sanctioned route today: four are derived parents with NO accepted child to be entailed from, so a structural authority would have nothing to name, and five are quarantined, so validation blocks both ordinary review and structural replay. The only way to move this number would have been to grant authority by hand, which this project bans outright and which would have converted a visible hold into an invisible one. NAMED RATHER THAN COUNTED, so the first release is short by identities a reader can look up: the childless parents are current_density_due_to_collisions, effective_thermal_ion_charge_state_energy_velocity_due_to_convection, neutral_particle_convection_velocity and tritium_velocity; the quarantined are gyrocenter_pressure, perturbed_gyrocenter_pressure, perturbed_particle_pressure, plasma_internal_energy and thermal_plasma_internal_energy. Each carries its own lifting condition. No graph mutation occurred. §2's arc across this session: 194 → 79 → 9, and the last nine are held deliberately.</div>
 </div>
 </section>
 </main>

@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T08:34:44",
+  "updated": "2026-08-25T08:38:19",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -911,7 +911,7 @@
         "id": "impl-readinessresidual",
         "harness": "codex",
         "role": "implement",
-        "session_id": null,
+        "session_id": "01a0379c-5682-7fc0-9e32-1fe8f9576f91",
         "created": "2026-08-25"
       },
       {
@@ -27780,9 +27780,84 @@
           "role": "implement",
           "status": "compatible"
         }
+      },
+      {
+        "run_id": "r-20260825T062938941061-n-readinessresidualclose",
+        "plan": "sn-release-readiness",
+        "section": "\u00a72",
+        "node": "n-readinessresidualclose",
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-readinessresidual",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T06:29:47Z",
+        "completed_at": "2026-08-25T06:38:11Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 504,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 504,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "a3eb8e859993b6f0c4a076ae754934d53d3d430a",
+        "commits": [
+          "15f4796012be02ec1b1b708ab213fc40e61283ed"
+        ],
+        "changed_lines": {
+          "added": 127,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T062938941061-n-readinessresidualclose/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a0379c-5682-7fc0-9e32-1fe8f9576f91",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 3161856,
+            "cached_input_tokens_cumulative": 3161856,
+            "input_tokens": 3317784,
+            "input_tokens_cumulative": 3317784,
+            "output_tokens": 16722,
+            "output_tokens_cumulative": 16722,
+            "reasoning_output_tokens": 5840,
+            "reasoning_output_tokens_cumulative": 5840
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 820
+    "_version": 822
   }
 }
