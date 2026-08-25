@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:09:03",
+  "updated": "2026-08-25T10:09:38",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -1064,6 +1064,15 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-23"
+      },
+      {
+        "id": "impl-signfinal",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": null,
+        "session_model": null,
+        "sessions": {},
+        "created": "2026-08-25"
       },
       {
         "id": "impl-signrepair",
@@ -28688,6 +28697,6 @@
       }
     ],
     "holds": [],
-    "_version": 847
+    "_version": 848
   }
 }
