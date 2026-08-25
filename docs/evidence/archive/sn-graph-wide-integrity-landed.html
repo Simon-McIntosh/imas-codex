@@ -514,7 +514,7 @@
         <tr><td>Scalar mirror mismatches</td><td>3</td><td><strong>0</strong></td><td>signed repair, production, commit <code>6136a25e</code></td></tr>
         <tr><td>Terminal-predecessor regrowth</td><td>reproducible</td><td><strong>refused</strong></td><td>guard, commit <code>99a91692</code></td></tr>
         <tr><td>Legacy DD residues</td><td>3</td><td>3</td><td>closed release program in progress</td></tr>
-        <tr><td>Qualifier edge</td><td>1</td><td>1</td><td>parse verdict pending; edge deletion is futile</td></tr>
+        <tr><td>Qualifier relocations</td><td>1 known</td><td><strong>78 measured</strong></td><td>rewire guard needed; 0 of 78 tips authorized by current derivation</td></tr>
       </tbody>
     </table>
     <p>
@@ -553,6 +553,49 @@
       <a href="/imas-codex/evidence/sn-graph-wide-integrity/recurring-producer-diagnosis">producer diagnosis</a>,
       <a href="/imas-codex/evidence/sn-graph-wide-integrity/scalar-mirror-repair">scalar mirror repair</a>,
       <a href="/imas-codex/evidence/sn-graph-wide-integrity/orphan-parent-guard">orphan-parent guard</a>.
+    </p>
+  </section>
+
+  <section id="the-scale-was-not-one-edge">
+    <h2>Not one edge: 78 relocations, none of them authorized</h2>
+    <p>
+      <strong>A correction first, because this plan recorded the mechanism wrongly before
+      it recorded it rightly.</strong> The producer diagnosis concluded that structural
+      re-derivation directly emits the <code>logarithm_of_*</code> target, so the edge
+      recurred &ldquo;because the parse still desires it&rdquo;. A dedicated verdict
+      measured that claim false. The parser is <em>lossless</em>: it emits
+      <code>spectral_signal_to_noise_ratio_of_spectrometer_channel</code> to the plain
+      ratio with <code>operator_kind=qualifier</code>, and never proposes the logarithm
+      tip. What relocates the edge is
+      <code>graph_ops._rewire_has_parent_off_superseded</code>, walking it through a
+      six-hop <code>REFINED_FROM</code> chain onto that tip.
+    </p>
+    <p>
+      The practical consequence is large: prevention belongs at that rewire's four-field
+      compatibility predicate and successor MERGE. A fix aimed where the first reading
+      pointed would have changed <em>correct</em> parser code and left the defect running.
+      Deleting the edge stays futile either way — the rewire re-establishes it — so the
+      conclusion survived while its reason did not.
+    </p>
+    <p>
+      <strong>And asking how many OTHER pairs a fix would touch, before proposing the fix,
+      turned a one-row curiosity into the wave's largest finding.</strong> The live census
+      returns <strong>52 stale qualifier pairs</strong> — the subject plus 51 others — and
+      an admission-aware forward simulation measures <strong>78 non-self MERGE pairs</strong>,
+      of which <strong>0 of 78</strong> tips are authorized by current
+      <code>derive_edges</code> output. Not one relocation is something the current
+      derivation would produce, which makes this a systematic rewire defect rather than a
+      damaged row, and makes the repair a guard plus a governed reconciliation rather than
+      78 edge deletions.
+    </p>
+    <p>
+      Sanity for every figure above: <code>StandardName.id</code> 4,656/4,656 and
+      <code>name_stage</code> 4,656/4,656; <code>HAS_PARENT</code> source id, target id and
+      <code>operator_kind</code> 1,485/1,485; <code>REFINED_FROM</code> 1,561; exactly one
+      bidirectional <code>HAS_PARENT</code> pair and zero others. The legitimate opposing
+      edge <code>logarithm_of_*</code> → <code>spectral_*</code> carries
+      <code>operator_kind=unary_prefix</code> and is untouched. Record:
+      <a href="/imas-codex/evidence/sn-graph-wide-integrity/qualifier-parse-verdict">qualifier parse verdict</a>.
     </p>
   </section>
 </main>

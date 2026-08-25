@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:25:05",
+  "updated": "2026-08-25T10:31:39",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -29267,9 +29267,196 @@
           "role": "test",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T081325891468-n-qualifierparse",
+        "plan": "sn-graph-wide-integrity",
+        "section": "\u00a78",
+        "node": "n-qualifierparse",
+        "node_definition": {
+          "done_when": "docs/evidence/sn-graph-wide-integrity/qualifier-parse-verdict.md states, with the parse output that produces it, why the structural derivation emits a HAS_PARENT from spectral_signal_to_noise_ratio_of_spectrometer_channel to logarithm_of_spectral_signal_to_noise_ratio_of_spectrometer_channel carrying operator_kind=qualifier, whether that edge is a parse defect or a legitimate derivation, and which code location would have to change to stop _write_standard_name_edges re-MERGEing it; it must also state whether any OTHER live name pair would be affected by that change, counted exactly, and prove each reported zero with a schema sanity count",
+          "estimated_hours": null,
+          "goal": "A verdict on whether the spectral qualifier peel that structural re-derivation keeps desiring is a parse defect or a legitimate derivation",
+          "id": "n-qualifierparse",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T081325891468-n-qualifierparse/manifest.md",
+          "plan": "sn-graph-wide-integrity",
+          "requires_decisions": [],
+          "role": "test",
+          "section": "\u00a78",
+          "spec_level": "guided",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/sn-graph-wide-integrity/qualifier-parse-verdict.md"
+          ]
+        },
+        "role": "test",
+        "spec_level": "guided",
+        "member": "test-parity",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "high",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:13:39Z",
+        "completed_at": "2026-08-25T08:30:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 989,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 989,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "b225f99a1c7c67da6d2176213414e3175709746d",
+        "commits": [
+          "b51bf6d9",
+          "81b91894"
+        ],
+        "changed_lines": {
+          "added": 173,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": null,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T081325891468-n-qualifierparse/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a037fb-70a3-72c0-85ac-ca3a17972ac2",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10418176,
+            "cached_input_tokens_cumulative": 10418176,
+            "input_tokens": 10697973,
+            "input_tokens_cumulative": 10697973,
+            "output_tokens": 30478,
+            "output_tokens_cumulative": 30478,
+            "reasoning_output_tokens": 11643,
+            "reasoning_output_tokens_cumulative": 11643
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "test",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T081626155662-n-decodingpolicypin",
+        "plan": "sn-benchmark-evolution",
+        "section": "\u00a72",
+        "node": "n-decodingpolicypin",
+        "node_definition": {
+          "done_when": "a new regression proves the candidate request carries an explicit temperature and seed and that two passes over the same frozen row render byte-identical messages by hash, the existing GPT-5.x temperature clamp at discovery/base/llm.py is left intact so hosted panel seats are unaffected, checkpoints record rendered-message hashes rather than only raw rows, uv run --no-sync pytest over the advisory benchmark and panel suites reports 0 failed, and the manifest quotes the verbatim pytest summary line together with the pinned temperature and seed values",
+          "estimated_hours": 1.0,
+          "goal": "Make the advisory benchmark pin its candidate decoding policy and checkpoint rendered-message hashes, so a repeatability figure measures the model rather than the sampler",
+          "id": "n-decodingpolicypin",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T081626155662-n-decodingpolicypin/manifest.md",
+          "plan": "sn-benchmark-evolution",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a72",
+          "spec_level": "exact",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/advisory_benchmark.py",
+            "imas_codex/standard_names/benchmark.py",
+            "tests/standard_names/test_advisory_benchmark.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-decodingpin",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:16:40Z",
+        "completed_at": "2026-08-25T08:31:26Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 886,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 886,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "1d8e3e45b9afee5c86fcb5f8c1b254560ad8c273",
+        "commits": [
+          "3990b9c6"
+        ],
+        "changed_lines": {
+          "added": 143,
+          "removed": 5,
+          "files": 3
+        },
+        "tests_added": 4,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T081626155662-n-decodingpolicypin/manifest.md",
+        "scope_changed": true,
+        "session_id": "01a037fe-32e0-7a13-b94a-fdf6ddd496c1",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 5428992,
+            "cached_input_tokens_cumulative": 5428992,
+            "input_tokens": 5612415,
+            "input_tokens_cumulative": 5612415,
+            "output_tokens": 21354,
+            "output_tokens_cumulative": 21354,
+            "reasoning_output_tokens": 7821,
+            "reasoning_output_tokens_cumulative": 7821
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 2,
+        "attempt_kind": "resume",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": "pytest over",
+          "override": false,
+          "role": "implement",
+          "status": "compatible"
+        }
       }
     ],
     "holds": [],
-    "_version": 859
+    "_version": 861
   }
 }

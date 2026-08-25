@@ -1,3 +1,20 @@
+> **CORRECTION (2026-08-25, superseding measurement).** The claim below that
+> structural re-derivation directly emits the `logarithm_of_*` target is FALSE.
+> A dedicated parse verdict (`qualifier-parse-verdict.md`, commit `b51bf6d9`)
+> measured the parser as lossless: it emits
+> `spectral_signal_to_noise_ratio_of_spectrometer_channel` ->
+> `signal_to_noise_ratio_of_spectrometer_channel` with `operator_kind=qualifier`,
+> and never proposes the logarithm tip. What relocates the edge is
+> `graph_ops._rewire_has_parent_off_superseded`, which walks it through a
+> six-hop `REFINED_FROM` chain onto that tip. Prevention therefore belongs at
+> that rewire's four-field compatibility predicate and successor MERGE, NOT in
+> the qualifier parser and NOT in `_write_standard_name_edges`. The scale is
+> also larger than one edge: 52 live stale qualifier pairs, and an
+> admission-aware forward impact of 78 non-self MERGE pairs, with 0 of 78 tips
+> authorized by current `derive_edges` output. The rest of this record — the
+> orphan-parent regrowth mechanism and the DD-residue attribution — stands
+> unchanged and was independently confirmed.
+
 # Recurring graph-producer diagnosis
 
 ## Outcome
