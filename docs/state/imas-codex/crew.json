@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T10:51:54",
+  "updated": "2026-08-25T10:54:05",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -29949,9 +29949,104 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T084519111501-n-ineligibleretiremigrate",
+        "plan": "sn-repair-operator-consolidation",
+        "section": "\u00a74",
+        "node": "n-ineligibleretiremigrate",
+        "node_definition": {
+          "done_when": "tests/standard_names/test_dual_binding_dedup.py passes byte-unchanged against the migrated operator showing identical admitted and refused identities, verbatim refusal reasons, identical receipt cardinality and write-free replay; the orphan-reporting case still REPORTS newly orphaned names rather than refusing, because permitted orphan hand-off is intentional for this operator and no last-producing-source guard may be added; the string 'def retire_ineligible_standard_name_sources' is absent from imas_codex/standard_names/graph_ops.py; tests/graph/test_cypher_property_check.py stays green; docs/evidence/sn-repair-operator-consolidation/ineligible-retirement-migration.md records the exact admitted, refused and orphan-reported counts plus a byte-equivalence proof of the relocated transaction core",
+          "estimated_hours": null,
+          "goal": "retire_ineligible_standard_name_sources running as a fixed partial of apply_signed_manifest with its bespoke body deleted",
+          "id": "n-ineligibleretiremigrate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T084519111501-n-ineligibleretiremigrate/manifest.md",
+          "plan": "sn-repair-operator-consolidation",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a74",
+          "spec_level": "guided",
+          "time_budget": "50m",
+          "write_paths": [
+            "imas_codex/standard_names/graph_ops.py",
+            "imas_codex/standard_names/signed_manifest.py",
+            "docs/evidence/sn-repair-operator-consolidation/ineligible-retirement-migration.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "guided",
+        "member": "impl-orphanapply",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T08:45:28Z",
+        "completed_at": "2026-08-25T08:53:50Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 502,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 502,
+        "stalled": false,
+        "time_budget": "50m",
+        "base_sha": "f06f99e4555ae9a37510a4cc1510d09305923499",
+        "commits": [
+          "68c609d4",
+          "69d7c2f0"
+        ],
+        "changed_lines": {
+          "added": 657,
+          "removed": 526,
+          "files": 3
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T084519111501-n-ineligibleretiremigrate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a03818-91a6-71b0-9975-6257f78929ee",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 4888064,
+            "cached_input_tokens_cumulative": 4888064,
+            "input_tokens": 5071591,
+            "input_tokens_cumulative": 5071591,
+            "output_tokens": 15902,
+            "output_tokens_cumulative": 15902,
+            "reasoning_output_tokens": 3645,
+            "reasoning_output_tokens_cumulative": 3645
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 872
+    "_version": 873
   }
 }

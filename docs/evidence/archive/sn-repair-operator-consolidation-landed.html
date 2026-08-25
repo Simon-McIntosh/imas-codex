@@ -171,6 +171,29 @@
       </thead>
       <tbody>
         <tr>
+          <td><code>apply_adjudicated_source_dispositions</code></td>
+          <td>Suite 17/17 byte-unchanged across BOTH selection modes. Complete cohort 3
+              admitted, 3 bindings and 3 projections removed, 2 scalar changes, 1 receipt,
+              0 refusals. Admitted-subset 1 admitted from a signed parent of 1 admitted /
+              1 refused, the exclusion carrying <em>removal would leave target with zero
+              live producing sources</em>. Replay <code>changed=0</code>, byte-identical.
+              Relocation proved: 18,878-byte core identical, SHA-256 <code>7a55ecba</code>.</td>
+          <td><code>2afcccec</code></td>
+          <td>migrated, bespoke body deleted</td>
+        </tr>
+        <tr>
+          <td><code>retire_ineligible_standard_name_sources</code></td>
+          <td>Suite 12/12 byte-unchanged. Ineligible cohort 1 admitted, 2 bindings and 2
+              projections detached, 0 refused, and exactly 2 orphan identities
+              <strong>reported rather than refused</strong>, 1 receipt. Eligible cohort 0
+              admitted, 1 refused verbatim on <em>backing DD node category 'quantity' is
+              SN-eligible</em>, 0 writes. Replay returns the same 2 orphan identities on a
+              byte-identical snapshot. Core identical at 17,200 bytes, SHA-256
+              <code>9b067995</code>.</td>
+          <td><code>68c609d4</code></td>
+          <td>migrated, bespoke body deleted</td>
+        </tr>
+        <tr>
           <td><code>retire_signed_dual_authority_targets</code></td>
           <td>Suite 5/5 byte-unchanged. Clean cohort 19 sources, 20 binding/projection
               pairs, 16 identities, 0 refusals, 16 receipts. Out-of-authority: 18 retained,
@@ -184,10 +207,32 @@
       </tbody>
     </table>
     <p>
-      Both committed authorities were read on their original bytes and nothing was
+      Committed authorities were read on their original bytes throughout and nothing was
       re-signed, which is the locked <em>read-existing</em> decision holding under
-      execution rather than merely being asserted. Net shape of the first migration:
-      388 lines out of <code>graph_ops.py</code>, 409 into <code>signed_manifest.py</code>.
+      execution rather than merely being asserted.
+    </p>
+    <p>
+      <strong>The ineligible-source row is the one worth studying, because there a
+      <em>helpful</em> guard would have been a regression.</strong> Every other operator
+      here refuses a release that would strip a target's last producing source. This one
+      is designed to orphan names and hand them to a separate workflow, so its fixed guard
+      set carries permitted-orphan-hand-off and deliberately omits last-producing-source.
+      A migration that reused the neighbouring guard tuple would have read as safer,
+      passed a superficial review, and refused the very rows the operator exists to
+      process. That hazard was named in the node's measure rather than left for the
+      migration to notice.
+    </p>
+    <p>
+      <strong>Serialization is settled and will not be retired.</strong> Locked
+      2026-08-25: consolidation targets code volume only, so the disjoint-collateral proof
+      is unnecessary and that deliverable closes as a decided no. The measurement behind
+      it: five nodes ran concurrently in one session with no conflict, and what actually
+      queued the work was the shared-source-file conflict across
+      <code>graph_ops.py</code> and <code>signed_manifest.py</code> — which the mutator
+      constraint does not touch. Applies cost nothing and are dominated by a
+      <code>GraphClient</code> connect measured between 54.8 s and 196.9 s, so concurrent
+      transactions would optimise the cheapest step, while the session's own findings
+      showed the live hazard is state changing between preview and apply.
       Full record:
       <a href="/imas-codex/evidence/sn-repair-operator-consolidation/dual-authority-migration">dual-authority migration</a>.
     </p>
