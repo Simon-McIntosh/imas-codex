@@ -3312,9 +3312,10 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
     to its predecessor. We walk the chain to find the live tip (the SN
     at the head whose ``name_stage`` is not ``superseded``) and migrate
     each inbound ``HAS_PARENT`` edge to that tip, preserving edge
-    properties. If no live tip exists (every node on the chain is
-    superseded — should not happen in practice), the edge is left
-    alone so manual review can investigate.
+    properties. The child's current ``derive_edges`` result must authorize
+    both the tip identity and the complete edge-property map; refinement
+    lineage cannot change grammar topology by itself. If no authorized live
+    tip exists, the edge is left alone so manual review can investigate.
 
     Self-loop guard: if a refine step renamed the *child* into the same
     name as its (now-superseded) parent — e.g. ``minimum_magnetic_field``
@@ -3331,6 +3332,39 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
     only self-loops are reported under ``deleted_self_loops`` in the
     logger but excluded from the migrated count).
     """
+    from imas_codex.standard_names.derivation import derive_edges
+
+    child_rows = list(
+        gc.query(
+            """
+            MATCH (child:StandardName)-[:HAS_PARENT]->(old:StandardName)
+            WHERE old.name_stage = 'superseded'
+            RETURN DISTINCT child.id AS child_id
+            """
+        )
+    )
+    authorized_parent_edges: list[dict[str, Any]] = []
+    for row in child_rows:
+        child_id = row.get("child_id")
+        if not child_id:
+            continue
+        for edge in derive_edges(str(child_id)):
+            if edge.edge_type != "HAS_PARENT":
+                continue
+            authorized_parent_edges.append(
+                {
+                    "child_id": edge.from_name,
+                    "parent_id": edge.to_name,
+                    "edge_properties": {
+                        key: value
+                        for key, value in edge.props.items()
+                        if value is not None
+                    },
+                }
+            )
+    if not authorized_parent_edges:
+        return 0
+
     # The live successor is the chain-head: the node reachable from
     # ``old`` by following ``<-[:REFINED_FROM]-`` zero or more times,
     # whose own ``name_stage`` is not 'superseded'. Cypher's variable-
@@ -3339,9 +3373,8 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
     result = list(
         gc.query(
             """
-            MATCH (old:StandardName)
+            MATCH (child:StandardName)-[c:HAS_PARENT]->(old:StandardName)
             WHERE old.name_stage = 'superseded'
-              AND EXISTS { (child)-[:HAS_PARENT]->(old) }
             MATCH path = (tip:StandardName)-[:REFINED_FROM*1..]->(old)
             WHERE tip.name_stage <> 'superseded'
               // Migrate ONLY to a true rename of `old` — a successor with the
@@ -3360,22 +3393,33 @@ def _rewire_has_parent_off_superseded(gc: Any) -> int:
               AND coalesce(tip.geometric_base, '') = coalesce(old.geometric_base, '')
               AND coalesce(tip.subject, '')        = coalesce(old.subject, '')
               AND coalesce(tip.component, '')       = coalesce(old.component, '')
-            WITH old, tip, length(path) AS hops
+              AND any(authorized IN $authorized_parent_edges
+                      WHERE authorized.child_id = child.id
+                        AND authorized.parent_id = tip.id
+                        AND authorized.edge_properties = properties(c))
+            WITH old, child, c, properties(c) AS props, tip,
+                 length(path) AS hops
             ORDER BY hops DESC
-            WITH old, head(collect(tip)) AS tip
+            WITH old, child, c, props, head(collect(tip)) AS tip
             WHERE tip IS NOT NULL
-            MATCH (child)-[c:HAS_PARENT]->(old)
-            WITH tip, child, properties(c) AS props, c
             DELETE c
             // Drop the edge if migration would produce a self-loop;
             // any legitimate structural parent for `child` will be
             // re-emitted by the next derive_edges pass.
             WITH tip, child, props
             WHERE tip.id <> child.id
+              // Re-assert current derivation authority at the mutation
+              // boundary. Refinement lineage alone never authorizes moving a
+              // grammar edge onto a target the child does not derive.
+              AND any(authorized IN $authorized_parent_edges
+                      WHERE authorized.child_id = child.id
+                        AND authorized.parent_id = tip.id
+                        AND authorized.edge_properties = props)
             MERGE (child)-[c_new:HAS_PARENT]->(tip)
             SET c_new = props
             RETURN count(c_new) AS migrated
-            """
+            """,
+            authorized_parent_edges=authorized_parent_edges,
         )
     )
     if not result:
