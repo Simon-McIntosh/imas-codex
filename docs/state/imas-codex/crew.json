@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-25T14:23:16",
+  "updated": "2026-08-25T16:11:22",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -237,6 +237,17 @@
         "harness": "codex",
         "role": "implement",
         "session_id": "01a03700-a30e-7043-89f0-c9d943a5a994",
+        "created": "2026-08-25"
+      },
+      {
+        "id": "impl-benchnondet",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a038ec-45cc-7ad3-9467-8025741c5d56",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a038ec-45cc-7ad3-9467-8025741c5d56"
+        },
         "created": "2026-08-25"
       },
       {
@@ -721,6 +732,17 @@
         "created": "2026-08-23"
       },
       {
+        "id": "impl-linkadjudicate",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a038eb-42a7-7e61-ab14-6af402b5ad52",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a038eb-42a7-7e61-ab14-6af402b5ad52"
+        },
+        "created": "2026-08-25"
+      },
+      {
         "id": "impl-linkaudit",
         "harness": "codex",
         "role": "implement",
@@ -1089,6 +1111,17 @@
         "role": "implement",
         "session_id": null,
         "created": "2026-08-19"
+      },
+      {
+        "id": "impl-sevendocs",
+        "harness": "codex",
+        "role": "implement",
+        "session_id": "01a038ea-ede8-7780-a3c1-0f0add670d8f",
+        "session_model": "gpt-5.6-sol",
+        "sessions": {
+          "gpt-5.6-sol": "01a038ea-ede8-7780-a3c1-0f0add670d8f"
+        },
+        "created": "2026-08-25"
       },
       {
         "id": "impl-sigfix",
@@ -31099,9 +31132,287 @@
           "role": "implement",
           "status": "no-execution-measure"
         }
+      },
+      {
+        "run_id": "r-20260825T123506736412-n-sevendocs",
+        "plan": "sn-quality-parity",
+        "section": "\u00a76",
+        "node": "n-sevendocs",
+        "node_definition": {
+          "done_when": "Each of the seven identities - electron_density, normalized_toroidal_flux_coordinate_of_line_of_sight, normalized_toroidal_flux_coordinate_of_measurement_position, radial_coordinate_of_electron_cyclotron_launcher_mirror, ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude, toroidal_beta and turn_count_of_correction_coil - is reported with its documentation lifecycle before and after, keyed on StandardName.id; every promotion clears the ordinary documentation quorum with at least two fresh StandardNameReview rows dated after this run's start and a final aggregate at or above the configured minimum, and the count of hand-accepted identities is reported and is zero; no documentation text is hand-edited; the family documentation census is reported on BOTH bases, the fixed 28-identity baseline and a fresh re-mint, because the two disagree by construction and quoting only the improving figure overstates repair with attrition; any identity that does not reach accepted carries a named lifecycle reason; and actual USD spent is reported against the 25 ceiling with the running authorised total against 150, currently 73.68.",
+          "estimated_hours": 1.0,
+          "goal": "Carry the seven WEST identities accepted on the name axis through the ordinary documentation quorum so they become shippable, and name the lifecycle reason for any that do not clear.",
+          "id": "n-sevendocs",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T123506736412-n-sevendocs/manifest.md",
+          "plan": "sn-quality-parity",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "\u00a76",
+          "spec_level": "exact",
+          "time_budget": "45m",
+          "write_paths": [
+            "docs/evidence/sn-quality-parity/seven-name-docs.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-sevendocs",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T12:35:14Z",
+        "completed_at": "2026-08-25T12:55:41Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1227,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1227,
+        "stalled": false,
+        "time_budget": "45m",
+        "base_sha": "ee8eb94b382e0457c676377de5fa08475feb1b6e",
+        "commits": [
+          "fe25015a6d87a48d1a339341218737f338efe8c1"
+        ],
+        "changed_lines": {
+          "added": 51,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T123506736412-n-sevendocs/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a038ea-ede8-7780-a3c1-0f0add670d8f",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 10348032,
+            "cached_input_tokens_cumulative": 10348032,
+            "input_tokens": 10572945,
+            "input_tokens_cumulative": 10572945,
+            "output_tokens": 20985,
+            "output_tokens_cumulative": 20985,
+            "reasoning_output_tokens": 4564,
+            "reasoning_output_tokens_cumulative": 4564
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T123527207481-n-linkadjudicate",
+        "plan": "sn-release-readiness",
+        "section": "",
+        "node": "n-linkadjudicate",
+        "node_definition": {
+          "done_when": "Read the surrounding logic of the local _DOC_LINK_RE in imas_codex/standard_names/graph_ops.py and of find_name_references in doc_links.py, and state which of two conclusions holds, with the reasoning: RESIDUAL, meaning both decide what counts as a standard-name reference and the rule is duplicated, in which case fold the local pattern into doc_links so exactly one module owns it and prove behaviour is unchanged by a test that exercises the previously-divergent inputs; or DISTINCT, meaning parsing an already-resolved link's label and target is a different job from finding references to resolve, in which case leave the pattern in place and document that distinction AT ITS DEFINITION so the next reader does not re-open the question. Do not decide from the name alone. Whichever holds, the report states how many call sites use each, and if any input is handled differently by the two, that input is named. Report the finding even if it is DISTINCT and no code changes - a documented non-change is the deliverable in that case. Do not touch signed_manifest.py or the repair-authority path.",
+          "estimated_hours": 1.0,
+          "goal": "Determine whether the local bracket regex in graph_ops is a residual second authority on what counts as a documentation name reference, or a genuinely distinct concern, and act on the answer.",
+          "id": "n-linkadjudicate",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T123527207481-n-linkadjudicate/manifest.md",
+          "plan": "sn-release-readiness",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "imas_codex/standard_names/doc_links.py",
+            "imas_codex/standard_names/graph_ops.py",
+            "tests/standard_names/test_doc_links.py"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-linkadjudicate",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T12:35:36Z",
+        "completed_at": "2026-08-25T12:40:21Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 285,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 285,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "fe3ec0809335d2870cab4a7da0b80e86957555f8",
+        "commits": [
+          "ffabcdec67d3a165943fa8aec962924d6d62a040"
+        ],
+        "changed_lines": {
+          "added": 4,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T123527207481-n-linkadjudicate/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a038eb-42a7-7e61-ab14-6af402b5ad52",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 1727744,
+            "cached_input_tokens_cumulative": 1727744,
+            "input_tokens": 1836876,
+            "input_tokens_cumulative": 1836876,
+            "output_tokens": 9132,
+            "output_tokens_cumulative": 9132,
+            "reasoning_output_tokens": 2967,
+            "reasoning_output_tokens_cumulative": 2967
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
+      },
+      {
+        "run_id": "r-20260825T123634593665-n-benchnondet",
+        "plan": "sn-benchmark-evolution",
+        "section": "",
+        "node": "n-benchnondet",
+        "node_definition": {
+          "done_when": "Establish which of three causes accounts for the observed variance, with evidence rather than assertion: provider-side sampling that ignores the seed; a non-frozen element still entering the candidate request despite the four rendered-message hashes being byte-identical; or ordering or concurrency inside the runner itself. The measured baseline is three passes at temperature 0.0 and seed 20260825 giving Brier 0.121516, 0.071531 and 0.098832, a band of 0.049984, against a threshold of 0.103764 that sits inside it. Distinguish the causes by direct measurement - for example, whether repeated identical single-row requests to the same endpoint return identical completions, and whether row ordering or concurrency changes results for a fixed input set. State explicitly whether the residue is REMOVABLE and at what cost, because the alternative purchase is 57 further repeats for mean separation and if the cause is removable those repeats are the wrong buy. This node measures and diagnoses only: do not change any threshold, gate definition, model, prompt or seat, and do not run the 57 repeats. Cap total spend at USD 6 against the 6.39 remaining on this plan's ceiling and report actual spend.",
+          "estimated_hours": 1.0,
+          "goal": "Locate why three benchmark passes with a provably identical outgoing request produced different responses, so the benchmark's gates can be read against a value rather than a distribution.",
+          "id": "n-benchnondet",
+          "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T123634593665-n-benchnondet/manifest.md",
+          "plan": "sn-benchmark-evolution",
+          "requires_decisions": [],
+          "role": "implement",
+          "section": "",
+          "spec_level": "exact",
+          "time_budget": "40m",
+          "write_paths": [
+            "docs/evidence/sn-benchmark-evolution/candidate-nondeterminism.md"
+          ]
+        },
+        "role": "implement",
+        "spec_level": "exact",
+        "member": "impl-benchnondet",
+        "backend": "codex",
+        "agent": {
+          "backend": "codex",
+          "effort": "medium",
+          "launch": "cli",
+          "model": "gpt-5.6-sol",
+          "sandbox": "worktree-full"
+        },
+        "dispatched_at": "2026-08-25T12:36:43Z",
+        "completed_at": "2026-08-25T12:58:08Z",
+        "completed_at_source": "stream_mtime",
+        "worker_seconds": 1285,
+        "worker_seconds_source": "wall_fallback",
+        "wall_seconds": 1285,
+        "stalled": false,
+        "time_budget": "40m",
+        "base_sha": "c03f849229eea4789fe0c206ea9490e807563e9e",
+        "commits": [
+          "adc2291c614ae84c8a35603872cd734327478d4a"
+        ],
+        "changed_lines": {
+          "added": 179,
+          "removed": 0,
+          "files": 1
+        },
+        "tests_added": 0,
+        "gate": "passed",
+        "outcome": "",
+        "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20260825T123634593665-n-benchnondet/manifest.md",
+        "scope_changed": false,
+        "session_id": "01a038ec-45cc-7ad3-9467-8025741c5d56",
+        "budget": {
+          "headroom": "unknown",
+          "utilisation_pct": null,
+          "rate_limit_type": null,
+          "rate_limit_period_minutes": null,
+          "resets_at": null,
+          "threshold_status": null,
+          "surpassed_threshold": null,
+          "tokens": {
+            "cache_write_input_tokens": 0,
+            "cache_write_input_tokens_cumulative": 0,
+            "cached_input_tokens": 9259520,
+            "cached_input_tokens_cumulative": 9259520,
+            "input_tokens": 9472848,
+            "input_tokens_cumulative": 9472848,
+            "output_tokens": 21550,
+            "output_tokens_cumulative": 21550,
+            "reasoning_output_tokens": 5324,
+            "reasoning_output_tokens_cumulative": 5324
+          },
+          "cost_usd": null,
+          "detail": "backend reports token usage but no headroom"
+        },
+        "lineage": null,
+        "shadow_patch": "",
+        "unreconciled_override": null,
+        "attempt": 1,
+        "attempt_kind": "dispatch",
+        "execution_fit": {
+          "allowed": true,
+          "execution_capable": true,
+          "matched_measure": null,
+          "override": false,
+          "role": "implement",
+          "status": "no-execution-measure"
+        }
       }
     ],
     "holds": [],
-    "_version": 892
+    "_version": 901
   }
 }

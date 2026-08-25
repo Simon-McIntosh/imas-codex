@@ -23,7 +23,7 @@
 <meta name="plan-blocks" content="">
 <meta name="plan-capability-version" content="1.0">
 <meta name="plan-capability-class" content="orchestrator">
-<meta name="plan-version" content="76">
+<meta name="plan-version" content="77">
 <meta name="plan-commits" content="22cf6c3d,d742b6c5,a8742e64,59efdfc0,a241b0aa,3d0bb831,a1b4b1f8,e9530012,3946bd26,18fc3c10,d947a875,4c1542ba">
 <meta name="plan-artifacts" content="docs/evidence/sn-quality-parity/closure-audit.md,docs/evidence/sn-quality-parity/sign-convention-diagnosis.md,docs/evidence/sn-quality-parity/west-docs-resumed-refresh.md,docs/evidence/sn-quality-parity/west-docs-second-tranche.md">
 </head>
@@ -575,6 +575,9 @@ FOREIGN-OWNER, unchanged and accepted by that coordinator
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20260825T092543930216-n-westnamegate" data-who="impl-westremint" data-when="2026-08-25T10:01:50Z">
     <div class="r-comment-body"><p>28-row name-axis ledger: 7 accepted through ordinary quorum at 0.8875-1.0000 with 2-3 fresh reviews each, 21 named withholds, 0 hand-accepted; 10 above-bar names correctly refused on accepted-descendant cascade conflicts; fixed-baseline family docs 28 to 28 while fresh-remint reads 22 of 410; USD 2.46 of 40, running 73.68 of 150</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20260825T123506736412-n-sevendocs" data-who="impl-sevendocs" data-when="2026-08-25T12:55:41Z">
+    <div class="r-comment-body"><p>7/7 WEST identities docs pending to accepted through the ordinary quorum; aggregates 0.8875-0.9500 all &gt;= 0.85 min; 2-5 fresh reviews each; 0 hand accepts, 0 hand edits; toroidal_beta refined once 0.65-&gt;0.95; spend USD 2.094188/25, campaign 75.769458/150; fixed family census 28-&gt;22 nonaccepted, fresh remint 22-&gt;16 over 410 identities</p></div>
 </div>
 <div class="r-comment" data-section="§6" data-id="c-20260824T1600-parityclosure" data-who="reckon-ship" data-when="2026-08-24T16:02:00+00:00">
     <div class="r-comment-body">n-parityclosure landed — commit 22cf6c3d, merged at 875af5c7; gate closure-audit-completeness passed; measure 4 deliverable rows, 3 landed, 1 outstanding, with focused suites at 31 passed 0 failed; artifact docs/evidence/sn-quality-parity/closure-audit.md. LANDED: both §5 physics gates and the not_evaluable tri-state, but as QUALIFIED diagnostics, and the qualification is the result rather than a caveat. Scored over live accepted documents the conditional sign gate reads 100 pass / 281 fail / 2,346 not_evaluable, and every one of the 281 failures is an invariant quantity whose document states a convention it should not carry — a real defect population the gate found rather than a gate error. The dimensional gate reads 10 pass / 143 fail / 2,574 not_evaluable, which vindicates the tri-state: a boolean vector would have scored those 2,574 abstentions as failures and made every mean over the gate uninterpretable. The metadata boundary holds at 0 COCOS-number and 0 transform-label leaks across 2,727 accepted documents. OUTSTANDING: §6, the WEST cohort refresh, measured on exact identities rather than on the campaign's own report — 175 of 175 original accepted rows live but only 44 carrying a post-start revision and 131 without, the mid-loop cohort still 22 accepted / 6 reviewed / 7 pending / 1 exhausted, and 13 of the 20 concurrent-refinement exclusions now holding lineage successors that are all docs-pending with only 6 successor names accepted. impl corrected from 0.98 to 4 of 5 executable nodes; the two qualified findings are graph-wide remediation work this node was fenced out of.</div>
